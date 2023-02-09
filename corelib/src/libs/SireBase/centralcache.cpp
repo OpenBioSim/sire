@@ -32,22 +32,24 @@
 using namespace SireBase;
 
 CachedData::CachedData() : boost::noncopyable(), num_bytes(0)
-{}
+{
+}
 
 CachedData::~CachedData()
-{}
+{
+}
 
 bool CachedData::isEmpty() const
 {
     return d.isNull();
 }
 
-QMutex* CachedData::mutex()
+QMutex *CachedData::mutex()
 {
     return &m;
 }
 
-const QVariant& CachedData::data() const
+const QVariant &CachedData::data() const
 {
     return d;
 }
@@ -69,8 +71,7 @@ void CachedData::setData(const QVariant &data, int n)
 CentralCache CentralCache::global_cache;
 
 // Construct, setting the initial cache size to 512 MB
-CentralCache::CentralCache()
-             : last_clean_time(-1), max_cache_size(512*1024*1024)
+CentralCache::CentralCache() : last_clean_time(-1), max_cache_size(512 * 1024 * 1024)
 {
     // reserve space to cut down on mallocs
     const int reserve_size = 4097;
@@ -80,7 +81,8 @@ CentralCache::CentralCache()
 }
 
 CentralCache::~CentralCache()
-{}
+{
+}
 
 void CentralCache::setMaxCacheSize(qint64 v)
 {

@@ -29,50 +29,44 @@
 
 using namespace SireCAS;
 
-const char* unregistered_expression::typeName()
+const char *unregistered_expression::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<unregistered_expression>() );
+    return QMetaType::typeName(qMetaTypeId<unregistered_expression>());
 }
 
-const char* unavailable_differential::typeName()
+const char *unavailable_differential::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<unavailable_differential>() );
+    return QMetaType::typeName(qMetaTypeId<unavailable_differential>());
 }
 
-const char* unavailable_integral::typeName()
+const char *unavailable_integral::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<unavailable_integral>() );
+    return QMetaType::typeName(qMetaTypeId<unavailable_integral>());
 }
 
-const char* rearrangement_error::typeName()
+const char *rearrangement_error::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<rearrangement_error>() );
+    return QMetaType::typeName(qMetaTypeId<rearrangement_error>());
 }
 
-const char* invalid_symbol::typeName()
+const char *invalid_symbol::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<invalid_symbol>() );
+    return QMetaType::typeName(qMetaTypeId<invalid_symbol>());
 }
 
-const char* missing_symbol::typeName()
+const char *missing_symbol::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<missing_symbol>() );
+    return QMetaType::typeName(qMetaTypeId<missing_symbol>());
 }
 
-static const
-RegisterMetaType<unregistered_expression> r_unreg;
+static const RegisterMetaType<unregistered_expression> r_unreg;
 
-static const
-RegisterMetaType<unavailable_differential> r_diff;
+static const RegisterMetaType<unavailable_differential> r_diff;
 
-static const
-RegisterMetaType<unavailable_integral> r_int;
+static const RegisterMetaType<unavailable_integral> r_int;
 
-static const
-RegisterMetaType<rearrangement_error> r_rearrange;
+static const RegisterMetaType<rearrangement_error> r_rearrange;
 
-static const
-RegisterMetaType<invalid_symbol> r_invalid_symbol;
+static const RegisterMetaType<invalid_symbol> r_invalid_symbol;
 
-static const
-RegisterMetaType<missing_symbol> r_missing_symbol;
+static const RegisterMetaType<missing_symbol> r_missing_symbol;

@@ -37,127 +37,125 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Exp;
-class Ln;
-}
+    class Exp;
+    class Ln;
+} // namespace SireCAS
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Exp&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Exp&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Exp &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Exp &);
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Ln&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Ln&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Ln &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Ln &);
 
 namespace SireCAS
 {
 
-/**
-This is the exponential function, e^x
+    /**
+    This is the exponential function, e^x
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT Exp : public PowerFunction
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Exp&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Exp&);
-
-public:
-    Exp();
-    Exp(const Expression &power);
-
-    Exp(const Exp &other);
-
-    ~Exp();
-
-    bool operator==(const ExBase &other) const;
-
-    uint hash() const;
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Exp : public PowerFunction
     {
-        return Exp::typeName();
-    }
 
-    Exp* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Exp &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Exp &);
 
-    QString toString() const;
+    public:
+        Exp();
+        Exp(const Expression &power);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+        Exp(const Exp &other);
 
-    Expression differentiate(const Symbol &symbol) const;
-    Expression integrate(const Symbol &symbol) const;
+        ~Exp();
 
-    Expression core() const;
-    Expression power() const;
+        bool operator==(const ExBase &other) const;
 
-private:
+        uint hash() const;
 
-    /** The expression to which 'e' is raised to */
-    Expression pwr;
-};
+        static const char *typeName();
 
-/** This is the natural logarithm (ln) function
+        const char *what() const
+        {
+            return Exp::typeName();
+        }
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT Ln : public SingleFunc
-{
+        Exp *clone() const;
 
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Ln&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Ln&);
+        QString toString() const;
 
-public:
-    Ln();
-    Ln(const Expression &expression);
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
 
-    Ln(const Ln &other);
-    ~Ln();
+        Expression differentiate(const Symbol &symbol) const;
+        Expression integrate(const Symbol &symbol) const;
 
-    bool operator==(const ExBase &other) const;
+        Expression core() const;
+        Expression power() const;
 
-    static const char* typeName();
+    private:
+        /** The expression to which 'e' is raised to */
+        Expression pwr;
+    };
 
-    const char* what() const
+    /** This is the natural logarithm (ln) function
+
+    @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Ln : public SingleFunc
     {
-        return Ln::typeName();
-    }
 
-    Ln* clone() const;
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Ln &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Ln &);
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+    public:
+        Ln();
+        Ln(const Expression &expression);
 
-protected:
+        Ln(const Ln &other);
+        ~Ln();
 
-    Expression functionOf(const Expression &arg) const
-    {
-        if (arg == argument())
-            return Expression(*this);
-        else
-            return Expression(Ln(arg));
-    }
+        bool operator==(const ExBase &other) const;
 
-    QString stringRep() const
-    {
-        return "ln";
-    }
+        static const char *typeName();
 
-    uint magic() const;
+        const char *what() const
+        {
+            return Ln::typeName();
+        }
 
-    Expression diff() const;
-    Expression integ() const;
-};
+        Ln *clone() const;
 
-}
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+    protected:
+        Expression functionOf(const Expression &arg) const
+        {
+            if (arg == argument())
+                return Expression(*this);
+            else
+                return Expression(Ln(arg));
+        }
+
+        QString stringRep() const
+        {
+            return "ln";
+        }
+
+        uint magic() const;
+
+        Expression diff() const;
+        Expression integ() const;
+    };
+
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Exp)
 Q_DECLARE_METATYPE(SireCAS::Ln)
 
-SIRE_EXPOSE_CLASS( SireCAS::Exp )
-SIRE_EXPOSE_CLASS( SireCAS::Ln )
+SIRE_EXPOSE_CLASS(SireCAS::Exp)
+SIRE_EXPOSE_CLASS(SireCAS::Ln)
 
 SIRE_END_HEADER
 

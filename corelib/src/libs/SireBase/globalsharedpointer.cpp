@@ -31,26 +31,28 @@
 
 using namespace SireBase;
 
-Q_GLOBAL_STATIC( QMutex, globalPointerMutex );
+Q_GLOBAL_STATIC(QMutex, globalPointerMutex);
 
 /** The registry of all global shared pointers */
-static QHash< QString,QSet<const void*> > *global_pointers(0);
+static QHash<QString, QSet<const void *>> *global_pointers(0);
 
 GlobalSharedPointerBase::GlobalSharedPointerBase()
-{}
+{
+}
 
 GlobalSharedPointerBase::~GlobalSharedPointerBase()
-{}
+{
+}
 
-QMutex* GlobalSharedPointerBase::registryMutex()
+QMutex *GlobalSharedPointerBase::registryMutex()
 {
     return globalPointerMutex();
 }
 
-QSet<const void*>& GlobalSharedPointerBase::getRegistry(const char *typname)
+QSet<const void *> &GlobalSharedPointerBase::getRegistry(const char *typname)
 {
     if (not global_pointers)
-        global_pointers = new QHash< QString,QSet<const void*> >();
+        global_pointers = new QHash<QString, QSet<const void *>>();
 
-    return (*global_pointers)[ QLatin1String(typname) ];
+    return (*global_pointers)[QLatin1String(typname)];
 }

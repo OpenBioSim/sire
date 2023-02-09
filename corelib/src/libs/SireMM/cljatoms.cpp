@@ -31,15 +31,15 @@
 
 #include "atomljs.h"
 
-#include "SireMol/atomcoords.h"
+#include "SireMol/atom.h"
 #include "SireMol/atomcharges.h"
+#include "SireMol/atomcoords.h"
+#include "SireMol/molecule.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molecules.h"
-#include "SireMol/molecule.h"
+#include "SireMol/molidx.h"
 #include "SireMol/partialmolecule.h"
 #include "SireMol/selector.hpp"
-#include "SireMol/atom.h"
-#include "SireMol/molidx.h"
 
 #include "SireID/index.h"
 
@@ -64,9 +64,7 @@ QDataStream &operator<<(QDataStream &ds, const CLJAtom &cljatom)
 {
     writeHeader(ds, r_cljatom, 1);
 
-    ds << cljatom.x << cljatom.y << cljatom.z
-       << cljatom.chg << cljatom.sig << cljatom.eps
-       << cljatom.idnum;
+    ds << cljatom.x << cljatom.y << cljatom.z << cljatom.chg << cljatom.sig << cljatom.eps << cljatom.idnum;
 
     return ds;
 }
@@ -77,9 +75,7 @@ QDataStream &operator>>(QDataStream &ds, CLJAtom &cljatom)
 
     if (v == 1)
     {
-        ds >> cljatom.x >> cljatom.y >> cljatom.z
-           >> cljatom.chg >> cljatom.sig >> cljatom.eps
-           >> cljatom.idnum;
+        ds >> cljatom.x >> cljatom.y >> cljatom.z >> cljatom.chg >> cljatom.sig >> cljatom.eps >> cljatom.idnum;
     }
     else
         throw version_error(v, "1", r_cljatom, CODELOC);
@@ -89,7 +85,8 @@ QDataStream &operator>>(QDataStream &ds, CLJAtom &cljatom)
 
 /** Null constructor */
 CLJAtom::CLJAtom() : x(0), y(0), z(0), chg(0), sig(0), eps(0), idnum(0)
-{}
+{
+}
 
 /** Return whether or not this is a dummy atom (has no ID number) */
 bool CLJAtom::isDummy() const
@@ -100,29 +97,29 @@ bool CLJAtom::isDummy() const
 /** Return whether or not this atom is null (no information) */
 bool CLJAtom::isNull() const
 {
-    return this->operator==( CLJAtom() );
+    return this->operator==(CLJAtom());
 }
 
 /** Construct from the passed coordinates, charge and LJ parameters */
 CLJAtom::CLJAtom(Vector coords, Charge charge, LJParameter ljparam, qint32 atomid)
-        : x(coords.x()), y(coords.y()), z(coords.z()),
-          chg( charge.value() * std::sqrt(SireUnits::one_over_four_pi_eps0) ),
-          sig( sqrt(ljparam.sigma()) ), eps( sqrt(4.0 * ljparam.epsilon()) ),
-          idnum(atomid)
-{}
+    : x(coords.x()), y(coords.y()), z(coords.z()), chg(charge.value() * std::sqrt(SireUnits::one_over_four_pi_eps0)),
+      sig(sqrt(ljparam.sigma())), eps(sqrt(4.0 * ljparam.epsilon())), idnum(atomid)
+{
+}
 
 /** Copy constructor */
 CLJAtom::CLJAtom(const CLJAtom &other)
-        : x(other.x), y(other.y), z(other.z), chg(other.chg),
-          sig(other.sig), eps(other.eps), idnum(other.idnum)
-{}
+    : x(other.x), y(other.y), z(other.z), chg(other.chg), sig(other.sig), eps(other.eps), idnum(other.idnum)
+{
+}
 
 /** Destructor */
 CLJAtom::~CLJAtom()
-{}
+{
+}
 
 /** Copy assignment operator */
-CLJAtom& CLJAtom::operator=(const CLJAtom &other)
+CLJAtom &CLJAtom::operator=(const CLJAtom &other)
 {
     if (this != &other)
     {
@@ -141,13 +138,8 @@ CLJAtom& CLJAtom::operator=(const CLJAtom &other)
 /** Comparison operator */
 bool CLJAtom::operator==(const CLJAtom &other) const
 {
-    return x == other.x and
-           y == other.y and
-           z == other.z and
-           chg == other.chg and
-           sig == other.sig and
-           eps == other.eps and
-           idnum == other.idnum;
+    return x == other.x and y == other.y and z == other.z and chg == other.chg and sig == other.sig and
+           eps == other.eps and idnum == other.idnum;
 }
 
 /** Comparison operator */
@@ -159,18 +151,18 @@ bool CLJAtom::operator!=(const CLJAtom &other) const
 QString CLJAtom::toString() const
 {
     return QObject::tr("CLJAtom( %1, %2, %3, %4 )")
-           .arg(coordinates().toString())
-           .arg(charge().toString())
-           .arg(ljParameter().toString())
-           .arg(ID());
+        .arg(coordinates().toString())
+        .arg(charge().toString())
+        .arg(ljParameter().toString())
+        .arg(ID());
 }
 
-const char* CLJAtom::typeName()
+const char *CLJAtom::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CLJAtom>() );
+    return QMetaType::typeName(qMetaTypeId<CLJAtom>());
 }
 
-const char* CLJAtom::what() const
+const char *CLJAtom::what() const
 {
     return CLJAtom::typeName();
 }
@@ -178,8 +170,8 @@ const char* CLJAtom::what() const
 /** Construct an array of CLJAtom atoms from the passed molecule view */
 QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const PropertyMap &map)
 {
-    //QElapsedTimer t;
-    //t.start();
+    // QElapsedTimer t;
+    // t.start();
 
     const PropertyName coords_property = map["coordinates"];
     const PropertyName chg_property = map["charge"];
@@ -196,7 +188,7 @@ QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const Property
         if (nats == 0)
             return QVector<CLJAtom>();
 
-        //reserve space for the data
+        // reserve space for the data
         cljatoms = QVector<CLJAtom>(nats);
         CLJAtom *cljatms = cljatoms.data();
 
@@ -205,11 +197,11 @@ QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const Property
         const AtomLJs &ljs = mol.property(lj_property).asA<AtomLJs>();
 
         const quint32 molid = mol.number().value();
-        const qint32 s_molid = *(reinterpret_cast<const qint32*>(&molid));
+        const qint32 s_molid = *(reinterpret_cast<const qint32 *>(&molid));
 
         int idx = 0;
 
-        for (int i=0; i<coords.nCutGroups(); ++i)
+        for (int i = 0; i < coords.nCutGroups(); ++i)
         {
             const CGIdx cgidx(i);
 
@@ -217,7 +209,7 @@ QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const Property
             const Charge *ichg = chgs.constData(cgidx);
             const LJParameter *ilj = ljs.constData(cgidx);
 
-            for (int j=0; j<coords.nAtoms(cgidx); ++j)
+            for (int j = 0; j < coords.nAtoms(cgidx); ++j)
             {
                 CLJAtom &cljatm = cljatms[idx];
 
@@ -244,34 +236,33 @@ QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const Property
         QList<Charge> chgs = atoms.property<Charge>(chg_property);
         QList<LJParameter> ljs = atoms.property<LJParameter>(lj_property);
 
-        if (coords.count() != chgs.count() or
-            coords.count() != ljs.count())
+        if (coords.count() != chgs.count() or coords.count() != ljs.count())
         {
-            throw SireError::program_bug( QObject::tr(
-                    "It should not be possible for the number of coordinates (%1) "
-                    "to be different to the number of charges (%2) or LJs (%3) "
-                    "for molecule %4.")
-                        .arg(coords.count())
-                        .arg(chgs.count())
-                        .arg(ljs.count())
-                        .arg(atoms.molecule().toString()), CODELOC );
+            throw SireError::program_bug(QObject::tr("It should not be possible for the number of coordinates (%1) "
+                                                     "to be different to the number of charges (%2) or LJs (%3) "
+                                                     "for molecule %4.")
+                                             .arg(coords.count())
+                                             .arg(chgs.count())
+                                             .arg(ljs.count())
+                                             .arg(atoms.molecule().toString()),
+                                         CODELOC);
         }
 
         const quint32 molid = atoms.data().number().value();
-        const qint32 s_molid = *(reinterpret_cast<const qint32*>(&molid));
+        const qint32 s_molid = *(reinterpret_cast<const qint32 *>(&molid));
 
         const int nats = coords.count();
 
         if (nats == 0)
             return QVector<CLJAtom>();
 
-        //reserve space for the data
+        // reserve space for the data
         cljatoms = QVector<CLJAtom>(nats);
         CLJAtom *cljatms = cljatoms.data();
 
         int idx = 0;
 
-        for (int i=0; i<nats; ++i)
+        for (int i = 0; i < nats; ++i)
         {
             CLJAtom &cljatm = cljatms[idx];
 
@@ -290,10 +281,10 @@ QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const Property
         }
     }
 
-    //quint64 ns = t.nsecsElapsed();
+    // quint64 ns = t.nsecsElapsed();
 
-    //qDebug() << "Converting" << cljatoms.count() << "atoms took"
-    //         << (0.000001*ns) << "ms";
+    // qDebug() << "Converting" << cljatoms.count() << "atoms took"
+    //          << (0.000001*ns) << "ms";
 
     return cljatoms;
 }
@@ -301,13 +292,13 @@ QVector<CLJAtom> CLJAtom::buildFrom(const MoleculeView &molecule, const Property
 /** Return the coordinates of the atom */
 Vector CLJAtom::coordinates() const
 {
-    return Vector(x,y,z);
+    return Vector(x, y, z);
 }
 
 /** Return the partial charge of the atom */
 Charge CLJAtom::charge() const
 {
-    return Charge(chg / std::sqrt(SireUnits::one_over_four_pi_eps0) );
+    return Charge(chg / std::sqrt(SireUnits::one_over_four_pi_eps0));
 }
 
 /** Return the LJ parameters of the atom */
@@ -317,7 +308,7 @@ LJParameter CLJAtom::ljParameter() const
     double e = eps * eps;
     e /= 4.0;
 
-    return LJParameter( SireUnits::Dimension::Length(s), SireUnits::Dimension::MolarEnergy(e) );
+    return LJParameter(SireUnits::Dimension::Length(s), SireUnits::Dimension::MolarEnergy(e));
 }
 
 /** Return the ID number for the atom */
@@ -382,29 +373,30 @@ MultiInt CLJAtoms::idOfDummy()
 
 /** Null constructor */
 CLJAtoms::CLJAtoms()
-{}
+{
+}
 
 /** Constructor allowing implicit conversion from a single CLJAtom */
 CLJAtoms::CLJAtoms(const CLJAtom &cljatom)
 {
     if (cljatom.isNull())
         return;
-/*
-            xa[idx] = atm.x;
-            ya[idx] = atm.y;
-            za[idx] = atm.z;
-            ca[idx] = atm.chg;
-            sa[idx] = atm.sig;
-            ea[idx] = atm.eps;
-            ida[idx] = atm.idnum;
-*/
-    _x = MultiFloat::fromArray( &(cljatom.x), 1 );
-    _y = MultiFloat::fromArray( &(cljatom.y), 1 );
-    _z = MultiFloat::fromArray( &(cljatom.z), 1 );
-    _q = MultiFloat::fromArray( &(cljatom.chg), 1 );
-    _sig = MultiFloat::fromArray( &(cljatom.sig), 1 );
-    _eps = MultiFloat::fromArray( &(cljatom.eps), 1 );
-    _id = MultiInt::fromArray( &(cljatom.idnum), 1 );
+    /*
+                xa[idx] = atm.x;
+                ya[idx] = atm.y;
+                za[idx] = atm.z;
+                ca[idx] = atm.chg;
+                sa[idx] = atm.sig;
+                ea[idx] = atm.eps;
+                ida[idx] = atm.idnum;
+    */
+    _x = MultiFloat::fromArray(&(cljatom.x), 1);
+    _y = MultiFloat::fromArray(&(cljatom.y), 1);
+    _z = MultiFloat::fromArray(&(cljatom.z), 1);
+    _q = MultiFloat::fromArray(&(cljatom.chg), 1);
+    _sig = MultiFloat::fromArray(&(cljatom.sig), 1);
+    _eps = MultiFloat::fromArray(&(cljatom.eps), 1);
+    _id = MultiInt::fromArray(&(cljatom.idnum), 1);
 }
 
 /** Construct from the passed array of CLJAtom atoms */
@@ -415,14 +407,14 @@ CLJAtoms::CLJAtoms(const QVector<CLJAtom> &atoms)
 
     else if (atoms.count() == 1)
     {
-        this->operator=( CLJAtoms(atoms.at(0)) );
+        this->operator=(CLJAtoms(atoms.at(0)));
         return;
     }
 
     /*QElapsedTimer t;
     t.start();*/
 
-    //vectorise all of the parameters
+    // vectorise all of the parameters
     QVector<float> xf(atoms.count());
     QVector<float> yf(atoms.count());
     QVector<float> zf(atoms.count());
@@ -447,7 +439,7 @@ CLJAtoms::CLJAtoms(const QVector<CLJAtom> &atoms)
 
     int idx = 0;
 
-    for (int i=0; i<atoms.count(); ++i)
+    for (int i = 0; i < atoms.count(); ++i)
     {
         const CLJAtom &atm = atms[i];
 
@@ -492,14 +484,14 @@ CLJAtoms::CLJAtoms(const CLJAtom *atoms, int natoms)
 
     else if (natoms == 1)
     {
-        this->operator=( CLJAtoms(atoms[0]) );
+        this->operator=(CLJAtoms(atoms[0]));
         return;
     }
 
     /*QElapsedTimer t;
     t.start();*/
 
-    //vectorise all of the parameters
+    // vectorise all of the parameters
     QVector<float> xf(natoms);
     QVector<float> yf(natoms);
     QVector<float> zf(natoms);
@@ -522,7 +514,7 @@ CLJAtoms::CLJAtoms(const CLJAtom *atoms, int natoms)
 
     int idx = 0;
 
-    for (int i=0; i<natoms; ++i)
+    for (int i = 0; i < natoms; ++i)
     {
         const CLJAtom &atm = atoms[i];
 
@@ -568,7 +560,7 @@ CLJAtoms::CLJAtoms(const QList<CLJAtom> &atoms)
     /*QElapsedTimer t;
     t.start();*/
 
-    //vectorise all of the parameters
+    // vectorise all of the parameters
     QVector<float> xf(atoms.count());
     QVector<float> yf(atoms.count());
     QVector<float> zf(atoms.count());
@@ -591,7 +583,7 @@ CLJAtoms::CLJAtoms(const QList<CLJAtom> &atoms)
 
     int idx = 0;
 
-    for (int i=0; i<atoms.count(); ++i)
+    for (int i = 0; i < atoms.count(); ++i)
     {
         const CLJAtom &atm = atoms.at(i);
 
@@ -630,24 +622,22 @@ CLJAtoms::CLJAtoms(const QList<CLJAtom> &atoms)
 
 /** Construct from the passed set of coordinates, partial charges and LJ parameters.
     Each atom is assumed to be part of the same molecule, with atom ID 'atomid' */
-CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
-                   const QVector<Charge> &charges,
-                   const QVector<LJParameter> &ljparams,
-                   qint32 atomid)
+CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates, const QVector<Charge> &charges,
+                   const QVector<LJParameter> &ljparams, qint32 atomid)
 {
-    if (coordinates.count() != charges.count() or
-        coordinates.count() != ljparams.count())
+    if (coordinates.count() != charges.count() or coordinates.count() != ljparams.count())
     {
-        throw SireError::incompatible_error( QObject::tr(
-                "You cannot construct a set of CLJAtoms where the number of coordinates "
-                "(%1), charges (%2) and Lennard Jones parameters (%3) are different!")
-                    .arg(coordinates.count())
-                    .arg(charges.count())
-                    .arg(ljparams.count()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("You cannot construct a set of CLJAtoms where the number of coordinates "
+                        "(%1), charges (%2) and Lennard Jones parameters (%3) are different!")
+                .arg(coordinates.count())
+                .arg(charges.count())
+                .arg(ljparams.count()),
+            CODELOC);
     }
 
-    //vectorise the parameters, and convert to float as we can control
-    //precision in the energy calculation
+    // vectorise the parameters, and convert to float as we can control
+    // precision in the energy calculation
     {
         QVector<float> xf(coordinates.count());
         QVector<float> yf(coordinates.count());
@@ -675,7 +665,7 @@ CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
 
         int idx = 0;
 
-        for (int i=0; i<coordinates.count(); ++i)
+        for (int i = 0; i < coordinates.count(); ++i)
         {
             if (chgs[i].value() != 0 or (not ljs[i].isDummy()))
             {
@@ -712,10 +702,10 @@ CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
     MultiFloat *e = _eps.data();
 
     const MultiFloat four(4.0);
-    const MultiFloat one_over_4_pi_eps_0( std::sqrt(SireUnits::one_over_four_pi_eps0) );
+    const MultiFloat one_over_4_pi_eps_0(std::sqrt(SireUnits::one_over_four_pi_eps0));
 
-    //now reduce the charge, sigma and epsilon parameters
-    for (int i=0; i<_q.count(); ++i)
+    // now reduce the charge, sigma and epsilon parameters
+    for (int i = 0; i < _q.count(); ++i)
     {
         q[i] = q[i] * one_over_4_pi_eps_0;
         s[i] = s[i].sqrt();
@@ -725,30 +715,28 @@ CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
 
 /** Construct from the passed set of coordinates, partial charges, LJ parameters
     and atom IDs */
-CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
-                   const QVector<Charge> &charges,
-                   const QVector<LJParameter> &ljparams,
-                   const QVector<qint32> &atomids)
+CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates, const QVector<Charge> &charges,
+                   const QVector<LJParameter> &ljparams, const QVector<qint32> &atomids)
 {
-    //QElapsedTimer t;
-    //t.start();
+    // QElapsedTimer t;
+    // t.start();
 
-    if (coordinates.count() != charges.count() or
-        coordinates.count() != ljparams.count() or
+    if (coordinates.count() != charges.count() or coordinates.count() != ljparams.count() or
         coordinates.count() != atomids.count())
     {
-        throw SireError::incompatible_error( QObject::tr(
-                "You cannot construct a set of CLJAtoms where the number of coordinates "
-                "(%1), charges (%2), Lennard Jones parameters (%3) or "
-                "atom IDs (%4) are different!")
-                    .arg(coordinates.count())
-                    .arg(charges.count())
-                    .arg(ljparams.count())
-                    .arg(atomids.count()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("You cannot construct a set of CLJAtoms where the number of coordinates "
+                        "(%1), charges (%2), Lennard Jones parameters (%3) or "
+                        "atom IDs (%4) are different!")
+                .arg(coordinates.count())
+                .arg(charges.count())
+                .arg(ljparams.count())
+                .arg(atomids.count()),
+            CODELOC);
     }
 
-    //vectorise the parameters, and convert to float as we can control
-    //precision in the energy calculation
+    // vectorise the parameters, and convert to float as we can control
+    // precision in the energy calculation
     {
         QVector<float> xf(coordinates.count());
         QVector<float> yf(coordinates.count());
@@ -777,7 +765,7 @@ CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
 
         int idx = 0;
 
-        for (int i=0; i<coordinates.count(); ++i)
+        for (int i = 0; i < coordinates.count(); ++i)
         {
             if (chgs[i].value() != 0 or (not ljs[i].isDummy()))
             {
@@ -814,33 +802,32 @@ CLJAtoms::CLJAtoms(const QVector<Vector> &coordinates,
     MultiFloat *e = _eps.data();
 
     const MultiFloat four(4.0);
-    const MultiFloat one_over_4_pi_eps_0( std::sqrt(SireUnits::one_over_four_pi_eps0) );
+    const MultiFloat one_over_4_pi_eps_0(std::sqrt(SireUnits::one_over_four_pi_eps0));
 
-    //now reduce the charge, sigma and epsilon parameters
-    for (int i=0; i<_q.count(); ++i)
+    // now reduce the charge, sigma and epsilon parameters
+    for (int i = 0; i < _q.count(); ++i)
     {
         q[i] = q[i] * one_over_4_pi_eps_0;
         s[i] = s[i].sqrt();
         e[i] = (e[i] * four).sqrt();
     }
 
-    //quint64 ns = t.nsecsElapsed();
+    // quint64 ns = t.nsecsElapsed();
 
-    //qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
-    //         << (0.000001*ns) << "ms";
+    // qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
+    //          << (0.000001*ns) << "ms";
 }
 
 /** Construct from the passed MoleculeView */
-void CLJAtoms::constructFrom(const MoleculeView &molecule,
-                             const ID_SOURCE id_source, const PropertyMap &map)
+void CLJAtoms::constructFrom(const MoleculeView &molecule, const ID_SOURCE id_source, const PropertyMap &map)
 {
     if (molecule.isEmpty())
         return;
 
-    //QElapsedTimer t;
-    //t.start();
+    // QElapsedTimer t;
+    // t.start();
 
-    //extract all of the data from the passed molecules
+    // extract all of the data from the passed molecules
     {
         const PropertyName coords_property = map["coordinates"];
         const PropertyName chg_property = map["charge"];
@@ -855,7 +842,7 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
             if (nats == 0)
                 return;
 
-            //reserve space for the data
+            // reserve space for the data
             QVector<float> xf(nats);
             QVector<float> yf(nats);
             QVector<float> zf(nats);
@@ -886,7 +873,7 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
 
             const MoleculeInfoData &molinfo = mol.data().info();
 
-            for (int i=0; i<coords.nCutGroups(); ++i)
+            for (int i = 0; i < coords.nCutGroups(); ++i)
             {
                 const CGIdx cgidx(i);
 
@@ -894,7 +881,7 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
                 const Charge *ichg = chgs.constData(cgidx);
                 const LJParameter *ilj = ljs.constData(cgidx);
 
-                for (int j=0; j<coords.nAtoms(cgidx); ++j)
+                for (int j = 0; j < coords.nAtoms(cgidx); ++j)
                 {
                     if (ichg[j].value() != 0 or (not ilj[j].isDummy()))
                     {
@@ -913,14 +900,13 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
                         }
                         else if (id_source == USE_ATOMIDX)
                         {
-                            const AtomIdx atomidx = molinfo.atomIdx( CGAtomIdx(CGIdx(i),Index(j)) );
+                            const AtomIdx atomidx = molinfo.atomIdx(CGAtomIdx(CGIdx(i), Index(j)));
                             ida[idx] = atomidx.value() + 1;
                         }
                         else
                         {
-                            throw SireError::program_bug( QObject::tr(
-                                    "Unknown source used for ID (%1)")
-                                        .arg(id_source), CODELOC );
+                            throw SireError::program_bug(QObject::tr("Unknown source used for ID (%1)").arg(id_source),
+                                                         CODELOC);
                         }
 
                         idx += 1;
@@ -947,17 +933,16 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
             QList<Charge> chgs = atoms.property<Charge>(chg_property);
             QList<LJParameter> ljs = atoms.property<LJParameter>(lj_property);
 
-            if (coords.count() != chgs.count() or
-                coords.count() != ljs.count())
+            if (coords.count() != chgs.count() or coords.count() != ljs.count())
             {
-                throw SireError::program_bug( QObject::tr(
-                        "It should not be possible for the number of coordinates (%1) "
-                        "to be different to the number of charges (%2) or LJs (%3) "
-                        "for molecule %4.")
-                            .arg(coords.count())
-                            .arg(chgs.count())
-                            .arg(ljs.count())
-                            .arg(atoms.molecule().toString()), CODELOC );
+                throw SireError::program_bug(QObject::tr("It should not be possible for the number of coordinates (%1) "
+                                                         "to be different to the number of charges (%2) or LJs (%3) "
+                                                         "for molecule %4.")
+                                                 .arg(coords.count())
+                                                 .arg(chgs.count())
+                                                 .arg(ljs.count())
+                                                 .arg(atoms.molecule().toString()),
+                                             CODELOC);
             }
 
             const qint32 s_molid = atoms.data().number().value();
@@ -967,7 +952,7 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
             if (nats == 0)
                 return;
 
-            //reserve space for the data
+            // reserve space for the data
             QVector<float> xf(nats);
             QVector<float> yf(nats);
             QVector<float> zf(nats);
@@ -990,7 +975,7 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
 
             int idx = 0;
 
-            for (int i=0; i<nats; ++i)
+            for (int i = 0; i < nats; ++i)
             {
                 if (chgs[i].value() != 0 or (not ljs[i].isDummy()))
                 {
@@ -1013,9 +998,8 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
                     }
                     else
                     {
-                        throw SireError::program_bug( QObject::tr(
-                                "Unknown source used for ID (%1)")
-                                    .arg(id_source), CODELOC );
+                        throw SireError::program_bug(QObject::tr("Unknown source used for ID (%1)").arg(id_source),
+                                                     CODELOC);
                     }
 
                     idx += 1;
@@ -1040,20 +1024,20 @@ void CLJAtoms::constructFrom(const MoleculeView &molecule,
     MultiFloat *e = _eps.data();
 
     const MultiFloat four(4.0);
-    const MultiFloat one_over_4_pi_eps_0( std::sqrt(SireUnits::one_over_four_pi_eps0) );
+    const MultiFloat one_over_4_pi_eps_0(std::sqrt(SireUnits::one_over_four_pi_eps0));
 
-    //now reduce the charge, sigma and epsilon parameters
-    for (int i=0; i<_q.count(); ++i)
+    // now reduce the charge, sigma and epsilon parameters
+    for (int i = 0; i < _q.count(); ++i)
     {
         q[i] = q[i] * one_over_4_pi_eps_0;
         s[i] = s[i].sqrt();
         e[i] = (e[i] * four).sqrt();
     }
 
-    //quint64 ns = t.nsecsElapsed();
+    // quint64 ns = t.nsecsElapsed();
 
-    //qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
-    //         << (0.000001*ns) << "ms";
+    // qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
+    //          << (0.000001*ns) << "ms";
 }
 
 void CLJAtoms::reconstruct(const MoleculeView &molecule, const PropertyMap &map)
@@ -1061,39 +1045,35 @@ void CLJAtoms::reconstruct(const MoleculeView &molecule, const PropertyMap &map)
     this->constructFrom(molecule, USE_MOLNUM, map);
 }
 
-void CLJAtoms::reconstruct(const MoleculeView &molecule, ID_SOURCE source,
-                           const PropertyMap &map)
+void CLJAtoms::reconstruct(const MoleculeView &molecule, ID_SOURCE source, const PropertyMap &map)
 {
     this->constructFrom(molecule, source, map);
 }
 
 /** Construct from the parameters in the passed set of Molecules */
-void CLJAtoms::constructFrom(const Molecules &molecules,
-                             ID_SOURCE id_source, const PropertyMap &map)
+void CLJAtoms::constructFrom(const Molecules &molecules, ID_SOURCE id_source, const PropertyMap &map)
 {
     if (molecules.isEmpty())
         return;
 
-    //QElapsedTimer t;
-    //t.start();
+    // QElapsedTimer t;
+    // t.start();
 
-    //extract all of the data from the passed molecules
+    // extract all of the data from the passed molecules
     {
         const PropertyName coords_property = map["coordinates"];
         const PropertyName chg_property = map["charge"];
         const PropertyName lj_property = map["LJ"];
 
-        //calculate the number of atoms...
+        // calculate the number of atoms...
         int nats = 0;
 
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             nats += it.value().selection().nSelected();
         }
 
-        //reserve space for the data
+        // reserve space for the data
         QVector<float> xf(nats);
         QVector<float> yf(nats);
         QVector<float> zf(nats);
@@ -1116,9 +1096,7 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
 
         int idx = 0;
 
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             if (it.value().selectedAll())
             {
@@ -1131,7 +1109,7 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
                 const qint32 s_molid = it.key().value();
                 const MoleculeInfoData &molinfo = mol.data().info();
 
-                for (int i=0; i<coords.nCutGroups(); ++i)
+                for (int i = 0; i < coords.nCutGroups(); ++i)
                 {
                     const CGIdx cgidx(i);
 
@@ -1139,7 +1117,7 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
                     const Charge *ichg = chgs.constData(cgidx);
                     const LJParameter *ilj = ljs.constData(cgidx);
 
-                    for (int j=0; j<coords.nAtoms(cgidx); ++j)
+                    for (int j = 0; j < coords.nAtoms(cgidx); ++j)
                     {
                         if (ichg[j].value() != 0 or (not ilj[j].isDummy()))
                         {
@@ -1158,16 +1136,14 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
                             }
                             else if (id_source == USE_ATOMIDX)
                             {
-                                const AtomIdx atomidx
-                                                = molinfo.atomIdx( CGAtomIdx(CGIdx(i),Index(j)) );
+                                const AtomIdx atomidx = molinfo.atomIdx(CGAtomIdx(CGIdx(i), Index(j)));
 
                                 ida[idx] = atomidx.value() + 1;
                             }
                             else
                             {
-                                throw SireError::program_bug( QObject::tr(
-                                        "Unknown source used for ID (%1)")
-                                            .arg(id_source), CODELOC );
+                                throw SireError::program_bug(
+                                    QObject::tr("Unknown source used for ID (%1)").arg(id_source), CODELOC);
                             }
 
                             idx += 1;
@@ -1183,22 +1159,22 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
                 QList<Charge> chgs = atoms.property<Charge>(chg_property);
                 QList<LJParameter> ljs = atoms.property<LJParameter>(lj_property);
 
-                if (coords.count() != chgs.count() or
-                    coords.count() != ljs.count())
+                if (coords.count() != chgs.count() or coords.count() != ljs.count())
                 {
-                    throw SireError::program_bug( QObject::tr(
-                            "It should not be possible for the number of coordinates (%1) "
-                            "to be different to the number of charges (%2) or LJs (%3) "
-                            "for molecule %4.")
-                                .arg(coords.count())
-                                .arg(chgs.count())
-                                .arg(ljs.count())
-                                .arg(atoms.molecule().toString()), CODELOC );
+                    throw SireError::program_bug(
+                        QObject::tr("It should not be possible for the number of coordinates (%1) "
+                                    "to be different to the number of charges (%2) or LJs (%3) "
+                                    "for molecule %4.")
+                            .arg(coords.count())
+                            .arg(chgs.count())
+                            .arg(ljs.count())
+                            .arg(atoms.molecule().toString()),
+                        CODELOC);
                 }
 
                 const qint32 s_molid = it.key().value();
 
-                for (int i=0; i<coords.count(); ++i)
+                for (int i = 0; i < coords.count(); ++i)
                 {
                     if (chgs[i].value() != 0 or (not ljs[i].isDummy()))
                     {
@@ -1220,9 +1196,8 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
                         }
                         else
                         {
-                            throw SireError::program_bug( QObject::tr(
-                                    "Unknown source used for ID (%1)")
-                                        .arg(id_source), CODELOC );
+                            throw SireError::program_bug(QObject::tr("Unknown source used for ID (%1)").arg(id_source),
+                                                         CODELOC);
                         }
 
                         idx += 1;
@@ -1248,49 +1223,46 @@ void CLJAtoms::constructFrom(const Molecules &molecules,
     MultiFloat *e = _eps.data();
 
     const MultiFloat four(4.0);
-    const MultiFloat one_over_4_pi_eps_0( std::sqrt(SireUnits::one_over_four_pi_eps0) );
+    const MultiFloat one_over_4_pi_eps_0(std::sqrt(SireUnits::one_over_four_pi_eps0));
 
-    //now reduce the charge, sigma and epsilon parameters
-    for (int i=0; i<_q.count(); ++i)
+    // now reduce the charge, sigma and epsilon parameters
+    for (int i = 0; i < _q.count(); ++i)
     {
         q[i] = q[i] * one_over_4_pi_eps_0;
         s[i] = s[i].sqrt();
         e[i] = (e[i] * four).sqrt();
     }
 
-    //quint64 ns = t.nsecsElapsed();
+    // quint64 ns = t.nsecsElapsed();
 
-    //qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
-    //         << (0.000001*ns) << "ms";
+    // qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
+    //          << (0.000001*ns) << "ms";
 }
 
 /** Construct from the parameters in the passed set of Molecules */
-void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
-                             ID_SOURCE id_source, const PropertyMap &map)
+void CLJAtoms::constructFrom(const MoleculeGroup &molecules, ID_SOURCE id_source, const PropertyMap &map)
 {
     if (molecules.isEmpty())
         return;
 
-    //QElapsedTimer t;
-    //t.start();
+    // QElapsedTimer t;
+    // t.start();
 
-    //extract all of the data from the passed molecules
+    // extract all of the data from the passed molecules
     {
         const PropertyName coords_property = map["coordinates"];
         const PropertyName chg_property = map["charge"];
         const PropertyName lj_property = map["LJ"];
 
-        //calculate the number of atoms...
+        // calculate the number of atoms...
         int nats = 0;
 
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
         {
             nats += it.value().selection().nSelected();
         }
 
-        //reserve space for the data
+        // reserve space for the data
         QVector<float> xf(nats);
         QVector<float> yf(nats);
         QVector<float> zf(nats);
@@ -1313,7 +1285,7 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
 
         int idx = 0;
 
-        for (int i=0; i<molecules.nMolecules(); ++i)
+        for (int i = 0; i < molecules.nMolecules(); ++i)
         {
             const MoleculeView &view = molecules[MolIdx(i)];
 
@@ -1328,7 +1300,7 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
                 const qint32 s_molid = mol.number();
                 const MoleculeInfoData &molinfo = mol.data().info();
 
-                for (int i=0; i<coords.nCutGroups(); ++i)
+                for (int i = 0; i < coords.nCutGroups(); ++i)
                 {
                     const CGIdx cgidx(i);
 
@@ -1336,7 +1308,7 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
                     const Charge *ichg = chgs.constData(cgidx);
                     const LJParameter *ilj = ljs.constData(cgidx);
 
-                    for (int j=0; j<coords.nAtoms(cgidx); ++j)
+                    for (int j = 0; j < coords.nAtoms(cgidx); ++j)
                     {
                         if (ichg[j].value() != 0 or (not ilj[j].isDummy()))
                         {
@@ -1355,16 +1327,14 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
                             }
                             else if (id_source == USE_ATOMIDX)
                             {
-                                const AtomIdx atomidx
-                                                = molinfo.atomIdx( CGAtomIdx(CGIdx(i),Index(j)) );
+                                const AtomIdx atomidx = molinfo.atomIdx(CGAtomIdx(CGIdx(i), Index(j)));
 
                                 ida[idx] = atomidx.value() + 1;
                             }
                             else
                             {
-                                throw SireError::program_bug( QObject::tr(
-                                        "Unknown source used for ID (%1)")
-                                            .arg(id_source), CODELOC );
+                                throw SireError::program_bug(
+                                    QObject::tr("Unknown source used for ID (%1)").arg(id_source), CODELOC);
                             }
 
                             idx += 1;
@@ -1380,22 +1350,22 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
                 QList<Charge> chgs = atoms.property<Charge>(chg_property);
                 QList<LJParameter> ljs = atoms.property<LJParameter>(lj_property);
 
-                if (coords.count() != chgs.count() or
-                    coords.count() != ljs.count())
+                if (coords.count() != chgs.count() or coords.count() != ljs.count())
                 {
-                    throw SireError::program_bug( QObject::tr(
-                            "It should not be possible for the number of coordinates (%1) "
-                            "to be different to the number of charges (%2) or LJs (%3) "
-                            "for molecule %4.")
-                                .arg(coords.count())
-                                .arg(chgs.count())
-                                .arg(ljs.count())
-                                .arg(atoms.molecule().toString()), CODELOC );
+                    throw SireError::program_bug(
+                        QObject::tr("It should not be possible for the number of coordinates (%1) "
+                                    "to be different to the number of charges (%2) or LJs (%3) "
+                                    "for molecule %4.")
+                            .arg(coords.count())
+                            .arg(chgs.count())
+                            .arg(ljs.count())
+                            .arg(atoms.molecule().toString()),
+                        CODELOC);
                 }
 
                 const qint32 s_molid = view.data().number();
 
-                for (int i=0; i<coords.count(); ++i)
+                for (int i = 0; i < coords.count(); ++i)
                 {
                     if (chgs[i].value() != 0 or (not ljs[i].isDummy()))
                     {
@@ -1417,9 +1387,8 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
                         }
                         else
                         {
-                            throw SireError::program_bug( QObject::tr(
-                                    "Unknown source used for ID (%1)")
-                                        .arg(id_source), CODELOC );
+                            throw SireError::program_bug(QObject::tr("Unknown source used for ID (%1)").arg(id_source),
+                                                         CODELOC);
                         }
 
                         idx += 1;
@@ -1445,20 +1414,20 @@ void CLJAtoms::constructFrom(const MoleculeGroup &molecules,
     MultiFloat *e = _eps.data();
 
     const MultiFloat four(4.0);
-    const MultiFloat one_over_4_pi_eps_0( std::sqrt(SireUnits::one_over_four_pi_eps0) );
+    const MultiFloat one_over_4_pi_eps_0(std::sqrt(SireUnits::one_over_four_pi_eps0));
 
-    //now reduce the charge, sigma and epsilon parameters
-    for (int i=0; i<_q.count(); ++i)
+    // now reduce the charge, sigma and epsilon parameters
+    for (int i = 0; i < _q.count(); ++i)
     {
         q[i] = q[i] * one_over_4_pi_eps_0;
         s[i] = s[i].sqrt();
         e[i] = (e[i] * four).sqrt();
     }
 
-    //quint64 ns = t.nsecsElapsed();
+    // quint64 ns = t.nsecsElapsed();
 
-    //qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
-    //         << (0.000001*ns) << "ms";
+    // qDebug() << "Converting" << (_q.count() * MultiFloat::count()) << "atoms took"
+    //          << (0.000001*ns) << "ms";
 }
 
 /** Construct from the parameters in the passed molecule view */
@@ -1502,17 +1471,17 @@ CLJAtoms::CLJAtoms(const MoleculeGroup &molecules, ID_SOURCE id_source, const Pr
 
 /** Copy constructor */
 CLJAtoms::CLJAtoms(const CLJAtoms &other)
-         : _x(other._x), _y(other._y), _z(other._z),
-           _q(other._q), _sig(other._sig), _eps(other._eps),
-           _id(other._id)
-{}
+    : _x(other._x), _y(other._y), _z(other._z), _q(other._q), _sig(other._sig), _eps(other._eps), _id(other._id)
+{
+}
 
 /** Destructor */
 CLJAtoms::~CLJAtoms()
-{}
+{
+}
 
 /** Copy assignment operator */
-CLJAtoms& CLJAtoms::operator=(const CLJAtoms &other)
+CLJAtoms &CLJAtoms::operator=(const CLJAtoms &other)
 {
     if (this != &other)
     {
@@ -1531,10 +1500,8 @@ CLJAtoms& CLJAtoms::operator=(const CLJAtoms &other)
 /** Comparison operator */
 bool CLJAtoms::operator==(const CLJAtoms &other) const
 {
-    return this == &other or
-           (_x == other._x and _y == other._y and _z == other._z and
-            _q == other._q and _sig == other._sig and _eps == other._eps and
-            _id == other._id);
+    return this == &other or (_x == other._x and _y == other._y and _z == other._z and _q == other._q and
+                              _sig == other._sig and _eps == other._eps and _id == other._id);
 }
 
 /** Comparison operator */
@@ -1543,29 +1510,29 @@ bool CLJAtoms::operator!=(const CLJAtoms &other) const
     return not operator==(other);
 }
 
-const char* CLJAtoms::typeName()
+const char *CLJAtoms::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CLJAtoms>() );
+    return QMetaType::typeName(qMetaTypeId<CLJAtoms>());
 }
 
-const char* CLJAtoms::what() const
+const char *CLJAtoms::what() const
 {
     return CLJAtoms::typeName();
 }
 
 /** Append the passed atom onto this array. Note that this is not space
     efficient as the passed atom will be padded up to the size of the vector */
-CLJAtoms& CLJAtoms::operator+=(const CLJAtom &atom)
+CLJAtoms &CLJAtoms::operator+=(const CLJAtom &atom)
 {
     const int idx = _x.count() * MultiFloat::count();
 
-    _x.append( MultiFloat(0) );
-    _y.append( MultiFloat(0) );
-    _z.append( MultiFloat(0) );
-    _q.append( MultiFloat(0) );
-    _sig.append( MultiFloat(0) );
-    _eps.append( MultiFloat(0) );
-    _id.append( MultiFloat(0) );
+    _x.append(MultiFloat(0));
+    _y.append(MultiFloat(0));
+    _z.append(MultiFloat(0));
+    _q.append(MultiFloat(0));
+    _sig.append(MultiFloat(0));
+    _eps.append(MultiFloat(0));
+    _id.append(MultiFloat(0));
 
     if (not atom.isDummy())
     {
@@ -1576,7 +1543,7 @@ CLJAtoms& CLJAtoms::operator+=(const CLJAtom &atom)
 }
 
 /** Append the passed array of CLJAtoms onto this array */
-CLJAtoms& CLJAtoms::operator+=(const CLJAtoms &other)
+CLJAtoms &CLJAtoms::operator+=(const CLJAtoms &other)
 {
     if (_x.isEmpty())
     {
@@ -1597,9 +1564,9 @@ CLJAtoms& CLJAtoms::operator+=(const CLJAtoms &other)
 }
 
 /** Append the passed array of CLJAtom objects onto this array */
-CLJAtoms& CLJAtoms::operator+=(const QVector<CLJAtom> &atoms)
+CLJAtoms &CLJAtoms::operator+=(const QVector<CLJAtom> &atoms)
 {
-    return this->operator+=( CLJAtoms(atoms) );
+    return this->operator+=(CLJAtoms(atoms));
 }
 
 /** Return the combination of this CLJAtoms with 'other' pasted
@@ -1649,16 +1616,16 @@ void CLJAtoms::append(const CLJAtoms &other, int n)
     }
     else
     {
-        //how many partial vectors need to be added?
+        // how many partial vectors need to be added?
         const int n_partial = n % MultiFloat::count();
 
-        //how many whole vectors need to be added?
+        // how many whole vectors need to be added?
         const int n_whole = n / MultiFloat::count();
 
-        //start index of added vectors
+        // start index of added vectors
         const int start_idx = _x.count();
 
-        //what will be the new size of the vector?
+        // what will be the new size of the vector?
         const int new_size = start_idx + n_whole + (n_partial == 0 ? 0 : 1);
 
         _x.resize(new_size);
@@ -1671,18 +1638,18 @@ void CLJAtoms::append(const CLJAtoms &other, int n)
 
         if (n_whole > 0)
         {
-            std::memcpy( &(_x[start_idx]), &(other._x[0]), n_whole * sizeof(MultiFloat) );
-            std::memcpy( &(_y[start_idx]), &(other._y[0]), n_whole * sizeof(MultiFloat) );
-            std::memcpy( &(_z[start_idx]), &(other._z[0]), n_whole * sizeof(MultiFloat) );
-            std::memcpy( &(_q[start_idx]), &(other._q[0]), n_whole * sizeof(MultiFloat) );
-            std::memcpy( &(_sig[start_idx]), &(other._sig[0]), n_whole * sizeof(MultiFloat) );
-            std::memcpy( &(_eps[start_idx]), &(other._eps[0]), n_whole * sizeof(MultiFloat) );
-            std::memcpy( &(_id[start_idx]), &(other._id[0]), n_whole * sizeof(MultiInt) );
+            std::memcpy(&(_x[start_idx]), &(other._x[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(&(_y[start_idx]), &(other._y[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(&(_z[start_idx]), &(other._z[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(&(_q[start_idx]), &(other._q[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(&(_sig[start_idx]), &(other._sig[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(&(_eps[start_idx]), &(other._eps[0]), n_whole * sizeof(MultiFloat));
+            std::memcpy(&(_id[start_idx]), &(other._id[0]), n_whole * sizeof(MultiInt));
         }
 
         if (n_partial > 0)
         {
-            for (int i=0; i<n_partial; ++i)
+            for (int i = 0; i < n_partial; ++i)
             {
                 _x.last().set(i, other._x[n_whole][i]);
                 _y.last().set(i, other._y[n_whole][i]);
@@ -1720,9 +1687,9 @@ QString CLJAtoms::toString() const
 {
     QStringList lines;
 
-    foreach( CLJAtom atom, this->atoms() )
+    foreach (CLJAtom atom, this->atoms())
     {
-        lines.append( atom.toString() );
+        lines.append(atom.toString());
     }
 
     if (lines.isEmpty())
@@ -1839,9 +1806,9 @@ void CLJAtoms::setAllID(qint32 idnum)
 {
     qint32 dummy_id = idOfDummy()[0];
 
-    for (int i=0; i<_id.count(); ++i)
+    for (int i = 0; i < _id.count(); ++i)
     {
-        for (int j=0; j<MultiInt::count(); ++j)
+        for (int j = 0; j < MultiInt::count(); ++j)
         {
             if (_id[i][j] != dummy_id)
             {
@@ -1870,13 +1837,13 @@ void CLJAtoms::resize(int new_size)
     const int old_natoms = this->nAtoms();
 
     if (new_size == old_natoms)
-        //nothing needs to be done
+        // nothing needs to be done
         return;
 
     const int new_remainder = new_size % MultiFloat::count();
     const int new_nvectors = new_size / MultiFloat::count() + (new_remainder == 0 ? 0 : 1);
 
-    //resize the actual vectors
+    // resize the actual vectors
     if (new_nvectors != _x.count())
     {
         _x.resize(new_nvectors);
@@ -1888,10 +1855,10 @@ void CLJAtoms::resize(int new_size)
         _id.resize(new_nvectors);
     }
 
-    //padd with dummies (if needed)
+    // padd with dummies (if needed)
     if (new_remainder != 0)
     {
-        for (int i=new_remainder; i<MultiFloat::count(); ++i)
+        for (int i = new_remainder; i < MultiFloat::count(); ++i)
         {
             _id.last().set(i, id_of_dummy);
         }
@@ -1899,10 +1866,12 @@ void CLJAtoms::resize(int new_size)
 
     if (this->count() < new_size)
     {
-        throw SireError::program_bug( QObject::tr(
-                "Something went wrong resizing CLJAtoms from size %1 to size %2. "
-                "New size is %3.")
-                    .arg(old_natoms).arg(new_size).arg(this->count()), CODELOC );
+        throw SireError::program_bug(QObject::tr("Something went wrong resizing CLJAtoms from size %1 to size %2. "
+                                                 "New size is %3.")
+                                         .arg(old_natoms)
+                                         .arg(new_size)
+                                         .arg(this->count()),
+                                     CODELOC);
     }
 }
 
@@ -1910,7 +1879,7 @@ void CLJAtoms::resize(int new_size)
     and copying all elements of 'other' */
 void CLJAtoms::copyIn(const CLJAtoms &other)
 {
-    //straight copy
+    // straight copy
     if (other._x.count() >= _x.count())
     {
         this->operator=(other);
@@ -1919,13 +1888,13 @@ void CLJAtoms::copyIn(const CLJAtoms &other)
 
     const int nelements = other._x.count();
 
-    std::memcpy( _x.data(), other._x.constData(), nelements * sizeof(MultiFloat) );
-    std::memcpy( _y.data(), other._y.constData(), nelements * sizeof(MultiFloat) );
-    std::memcpy( _z.data(), other._z.constData(), nelements * sizeof(MultiFloat) );
-    std::memcpy( _q.data(), other._q.constData(), nelements * sizeof(MultiFloat) );
-    std::memcpy( _sig.data(), other._sig.constData(), nelements * sizeof(MultiFloat) );
-    std::memcpy( _eps.data(), other._eps.constData(), nelements * sizeof(MultiFloat) );
-    std::memcpy( _id.data(), other._id.constData(), nelements * sizeof(MultiInt) );
+    std::memcpy(_x.data(), other._x.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(_y.data(), other._y.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(_z.data(), other._z.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(_q.data(), other._q.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(_sig.data(), other._sig.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(_eps.data(), other._eps.constData(), nelements * sizeof(MultiFloat));
+    std::memcpy(_id.data(), other._id.constData(), nelements * sizeof(MultiInt));
 }
 
 /** Return a copy of these CLJAtoms where the charge and LJ epsilon parameters
@@ -1935,7 +1904,7 @@ CLJAtoms CLJAtoms::negate() const
 {
     CLJAtoms ret(*this);
 
-    for (int i=0; i<_q.count(); ++i)
+    for (int i = 0; i < _q.count(); ++i)
     {
         ret._q[i] = -(_q[i]);
         ret._eps[i] = -(_eps[i]);
@@ -1971,12 +1940,12 @@ QVector<CLJAtom> CLJAtoms::atoms() const
     if (this->isEmpty())
         return QVector<CLJAtom>();
 
-    QVector<CLJAtom> atms( _x.count() * MultiFloat::count() );
+    QVector<CLJAtom> atms(_x.count() * MultiFloat::count());
     CLJAtom *a = atms.data();
 
     int idx = 0;
 
-    for (int i=0; i<_x.count(); ++i)
+    for (int i = 0; i < _x.count(); ++i)
     {
         const MultiFloat &xf = _x[i];
         const MultiFloat &yf = _y[i];
@@ -1986,7 +1955,7 @@ QVector<CLJAtom> CLJAtoms::atoms() const
         const MultiFloat &epsf = _eps[i];
         const MultiInt &idf = _id[i];
 
-        for (int j=0; j<MultiFloat::count(); ++j)
+        for (int j = 0; j < MultiFloat::count(); ++j)
         {
             CLJAtom &atom = a[idx];
             ++idx;
@@ -2011,27 +1980,27 @@ QVector<Vector> CLJAtoms::coordinates() const
         return QVector<Vector>();
 
     QVector<Vector> coords;
-    coords.reserve( _x.count() * MultiFloat::count() );
+    coords.reserve(_x.count() * MultiFloat::count());
 
-    for (int i=0; i<_x.count(); ++i)
+    for (int i = 0; i < _x.count(); ++i)
     {
         const MultiFloat &xf = _x[i];
         const MultiFloat &yf = _y[i];
         const MultiFloat &zf = _z[i];
 
-        if (i < (_x.count() -1))
+        if (i < (_x.count() - 1))
         {
-            for (int j=0; j<MultiFloat::count(); ++j)
+            for (int j = 0; j < MultiFloat::count(); ++j)
             {
-                coords.append( Vector(xf[j], yf[j], zf[j]) );
+                coords.append(Vector(xf[j], yf[j], zf[j]));
             }
         }
         else
         {
-            //make sure we don't add any padded atoms
+            // make sure we don't add any padded atoms
             int npadding = 0;
 
-            for (int j=MultiFloat::count()-1; j>=0; --j)
+            for (int j = MultiFloat::count() - 1; j >= 0; --j)
             {
                 if (_id[i][j] == 0)
                 {
@@ -2039,9 +2008,9 @@ QVector<Vector> CLJAtoms::coordinates() const
                 }
             }
 
-            for (int j=0; j<MultiFloat::count()-npadding; ++j)
+            for (int j = 0; j < MultiFloat::count() - npadding; ++j)
             {
-                coords.append( Vector(xf[j], yf[j], zf[j]) );
+                coords.append(Vector(xf[j], yf[j], zf[j]));
             }
         }
     }
@@ -2056,25 +2025,25 @@ QVector<Charge> CLJAtoms::charges() const
         return QVector<Charge>();
 
     QVector<Charge> chgs;
-    chgs.reserve( _x.count() * MultiFloat::count() );
+    chgs.reserve(_x.count() * MultiFloat::count());
 
-    for (int i=0; i<_x.count(); ++i)
+    for (int i = 0; i < _x.count(); ++i)
     {
         const MultiFloat &qf = _q[i];
 
         if (i < (_x.count() - 1))
         {
-            for (int j=0; j<MultiFloat::count(); ++j)
+            for (int j = 0; j < MultiFloat::count(); ++j)
             {
-                chgs.append( Charge( qf[j] / std::sqrt(SireUnits::one_over_four_pi_eps0) ) );
+                chgs.append(Charge(qf[j] / std::sqrt(SireUnits::one_over_four_pi_eps0)));
             }
         }
         else
         {
-            //make sure we don't add any padded atoms
+            // make sure we don't add any padded atoms
             int npadding = 0;
 
-            for (int j=MultiFloat::count()-1; j>=0; --j)
+            for (int j = MultiFloat::count() - 1; j >= 0; --j)
             {
                 if (_id[i][j] == 0)
                 {
@@ -2082,9 +2051,9 @@ QVector<Charge> CLJAtoms::charges() const
                 }
             }
 
-            for (int j=0; j<MultiFloat::count()-npadding; ++j)
+            for (int j = 0; j < MultiFloat::count() - npadding; ++j)
             {
-                chgs.append( Charge( qf[j] / std::sqrt(SireUnits::one_over_four_pi_eps0) ) );
+                chgs.append(Charge(qf[j] / std::sqrt(SireUnits::one_over_four_pi_eps0)));
             }
         }
     }
@@ -2099,30 +2068,30 @@ QVector<LJParameter> CLJAtoms::ljParameters() const
         return QVector<LJParameter>();
 
     QVector<LJParameter> ljs;
-    ljs.reserve( _x.count() * MultiFloat::count() );
+    ljs.reserve(_x.count() * MultiFloat::count());
 
-    for (int i=0; i<_x.count(); ++i)
+    for (int i = 0; i < _x.count(); ++i)
     {
         const MultiFloat &sigf = _sig[i];
         const MultiFloat &epsf = _eps[i];
 
         if (i < (_x.count() - 1))
         {
-            for (int j=0; j<MultiFloat::count(); ++j)
+            for (int j = 0; j < MultiFloat::count(); ++j)
             {
                 double sig = sigf[j] * sigf[j];
                 double eps = epsf[j] * epsf[j];
 
-                ljs.append( LJParameter(SireUnits::Dimension::Length(sig),
-                                        SireUnits::Dimension::MolarEnergy(eps / 4.0) ) );
+                ljs.append(
+                    LJParameter(SireUnits::Dimension::Length(sig), SireUnits::Dimension::MolarEnergy(eps / 4.0)));
             }
         }
         else
         {
-            //make sure we don't add any padded atoms
+            // make sure we don't add any padded atoms
             int npadding = 0;
 
-            for (int j=MultiFloat::count()-1; j>=0; --j)
+            for (int j = MultiFloat::count() - 1; j >= 0; --j)
             {
                 if (_id[i][j] == 0)
                 {
@@ -2130,13 +2099,13 @@ QVector<LJParameter> CLJAtoms::ljParameters() const
                 }
             }
 
-            for (int j=0; j<MultiFloat::count()-npadding; ++j)
+            for (int j = 0; j < MultiFloat::count() - npadding; ++j)
             {
                 double sig = sigf[j] * sigf[j];
                 double eps = epsf[j] * epsf[j];
 
-                ljs.append( LJParameter(SireUnits::Dimension::Length(sig),
-                                        SireUnits::Dimension::MolarEnergy(eps / 4.0) ) );
+                ljs.append(
+                    LJParameter(SireUnits::Dimension::Length(sig), SireUnits::Dimension::MolarEnergy(eps / 4.0)));
             }
         }
     }
@@ -2150,16 +2119,16 @@ QVector<qint32> CLJAtoms::IDs() const
     if (this->isEmpty())
         return QVector<qint32>();
 
-    QVector<qint32> ids( _id.count() * MultiFloat::count() );
+    QVector<qint32> ids(_id.count() * MultiFloat::count());
     qint32 *idval = ids.data();
 
     int idx = 0;
 
-    for (int i=0; i<_id.count(); ++i)
+    for (int i = 0; i < _id.count(); ++i)
     {
         const MultiInt &idf = _id[i];
 
-        for (int j=0; j<MultiInt::count(); ++j)
+        for (int j = 0; j < MultiInt::count(); ++j)
         {
             idval[idx] = idf[j];
             ++idx;
@@ -2175,11 +2144,11 @@ bool CLJAtoms::hasDummies() const
     if (this->isEmpty())
         return false;
 
-    for (int i=0; i<_id.count(); ++i)
+    for (int i = 0; i < _id.count(); ++i)
     {
         const MultiInt &idf = _id[i];
 
-        for (int j=0; j<MultiInt::count(); ++j)
+        for (int j = 0; j < MultiInt::count(); ++j)
         {
             if (idf[j] == id_of_dummy)
                 return true;
@@ -2197,11 +2166,11 @@ int CLJAtoms::nDummies() const
 
     int ndummies = 0;
 
-    for (int i=0; i<_id.count(); ++i)
+    for (int i = 0; i < _id.count(); ++i)
     {
         const MultiInt &idf = _id[i];
 
-        for (int j=0; j<MultiInt::count(); ++j)
+        for (int j = 0; j < MultiInt::count(); ++j)
         {
             if (idf[j] == id_of_dummy)
                 ndummies += 1;
@@ -2221,20 +2190,20 @@ int CLJAtoms::nAtoms() const
 /** Return the minimum coordinates of these atoms (ignoring dummies) */
 Vector CLJAtoms::minCoords() const
 {
-    Vector mincoords( std::numeric_limits<double>::max() );
+    Vector mincoords(std::numeric_limits<double>::max());
 
-    for (int i=0; i<_id.count(); ++i)
+    for (int i = 0; i < _id.count(); ++i)
     {
         const MultiFloat &xf = _x[i];
         const MultiFloat &yf = _y[i];
         const MultiFloat &zf = _z[i];
         const MultiInt &idf = _id[i];
 
-        for (int j=0; j<MultiInt::count(); ++j)
+        for (int j = 0; j < MultiInt::count(); ++j)
         {
             if (idf[j] != id_of_dummy)
             {
-                mincoords.setMin( Vector(xf[j],yf[j],zf[j]) );
+                mincoords.setMin(Vector(xf[j], yf[j], zf[j]));
             }
         }
     }
@@ -2245,20 +2214,20 @@ Vector CLJAtoms::minCoords() const
 /** Return the maximum coordinates of these atoms (ignoring dummies) */
 Vector CLJAtoms::maxCoords() const
 {
-    Vector maxcoords( -std::numeric_limits<double>::max() );
+    Vector maxcoords(-std::numeric_limits<double>::max());
 
-    for (int i=0; i<_id.count(); ++i)
+    for (int i = 0; i < _id.count(); ++i)
     {
         const MultiFloat &xf = _x[i];
         const MultiFloat &yf = _y[i];
         const MultiFloat &zf = _z[i];
         const MultiInt &idf = _id[i];
 
-        for (int j=0; j<MultiInt::count(); ++j)
+        for (int j = 0; j < MultiInt::count(); ++j)
         {
             if (idf[j] != id_of_dummy)
             {
-                maxcoords.setMax( Vector(xf[j],yf[j],zf[j]) );
+                maxcoords.setMax(Vector(xf[j], yf[j], zf[j]));
             }
         }
     }

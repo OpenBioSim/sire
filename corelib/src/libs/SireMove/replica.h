@@ -28,8 +28,8 @@
 #ifndef SIREMOVE_REPLICA_H
 #define SIREMOVE_REPLICA_H
 
-#include "suprasubsystem.h"
 #include "ensemble.h"
+#include "suprasubsystem.h"
 
 #include "SireBase/propertymap.h"
 
@@ -41,157 +41,155 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Replica;
+    class Replica;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::Replica&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::Replica&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Replica &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Replica &);
 
 namespace SireMove
 {
 
-class Replicas;
-class RepExSubMove;
+    class Replicas;
+    class RepExSubMove;
 
-using SireBase::PropertyName;
+    using SireBase::PropertyName;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-/** This is a replica within a replica exchange simulation
+    /** This is a replica within a replica exchange simulation
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Replica
-        : public SireBase::ConcreteProperty<Replica,SupraSubSystem>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Replica : public SireBase::ConcreteProperty<Replica, SupraSubSystem>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Replica&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Replica&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Replica &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Replica &);
 
-friend class Replicas; //so can call protected editing functions
-friend class RepExSubMove; //so can call protected editing functions
+        friend class Replicas;     // so can call protected editing functions
+        friend class RepExSubMove; // so can call protected editing functions
 
-public:
-    Replica();
-    Replica(const SupraSubSystem &subsystem);
+    public:
+        Replica();
+        Replica(const SupraSubSystem &subsystem);
 
-    Replica(const Replica &other);
+        Replica(const Replica &other);
 
-    ~Replica();
+        ~Replica();
 
-    Replica& operator=(const Replica &other);
+        Replica &operator=(const Replica &other);
 
-    bool operator==(const Replica &other) const;
-    bool operator!=(const Replica &other) const;
+        bool operator==(const Replica &other) const;
+        bool operator!=(const Replica &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const Ensemble& ensemble() const;
+        const Ensemble &ensemble() const;
 
-    const Symbol& energyComponent() const;
+        const Symbol &energyComponent() const;
 
-    const PropertyName& spaceProperty() const;
+        const PropertyName &spaceProperty() const;
 
-    const Symbol& lambdaComponent() const;
+        const Symbol &lambdaComponent() const;
 
-    double lambdaValue() const;
+        double lambdaValue() const;
 
-    SireUnits::Dimension::Temperature temperature() const;
-    SireUnits::Dimension::Pressure pressure() const;
-    SireUnits::Dimension::Pressure fugacity() const;
-    SireUnits::Dimension::MolarEnergy chemicalPotential() const;
+        SireUnits::Dimension::Temperature temperature() const;
+        SireUnits::Dimension::Pressure pressure() const;
+        SireUnits::Dimension::Pressure fugacity() const;
+        SireUnits::Dimension::MolarEnergy chemicalPotential() const;
 
-    SireUnits::Dimension::Volume volume() const;
-    SireUnits::Dimension::MolarEnergy energy();
+        SireUnits::Dimension::Volume volume() const;
+        SireUnits::Dimension::MolarEnergy energy();
 
-    bool isConstantEnergy() const;
-    bool isConstantTemperature() const;
-    bool isConstantPressure() const;
-    bool isConstantVolume() const;
-    bool isConstantNParticles() const;
-    bool isConstantFugacity() const;
-    bool isConstantChemicalPotential() const;
-    bool isConstantLambda(const Symbol &lam) const;
+        bool isConstantEnergy() const;
+        bool isConstantTemperature() const;
+        bool isConstantPressure() const;
+        bool isConstantVolume() const;
+        bool isConstantNParticles() const;
+        bool isConstantFugacity() const;
+        bool isConstantChemicalPotential() const;
+        bool isConstantLambda(const Symbol &lam) const;
 
-protected:
-    void setEnergyComponent(const Symbol &symbol);
-    void setSpaceProperty(const PropertyName &spaceproperty);
+    protected:
+        void setEnergyComponent(const Symbol &symbol);
+        void setSpaceProperty(const PropertyName &spaceproperty);
 
-    void setLambdaComponent(const Symbol &symbol);
-    void setLambdaValue(double value);
+        void setLambdaComponent(const Symbol &symbol);
+        void setLambdaValue(double value);
 
-    void setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void setPressure(const SireUnits::Dimension::Pressure &pressure);
-    void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
-    void setChemicalPotential(
-                     const SireUnits::Dimension::MolarEnergy &chemical_potential);
+        void setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void setPressure(const SireUnits::Dimension::Pressure &pressure);
+        void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
+        void setChemicalPotential(const SireUnits::Dimension::MolarEnergy &chemical_potential);
 
-    void setSubSystem(const System &subsystem);
-    void setSubMoves(const Moves &submoves);
+        void setSubSystem(const System &subsystem);
+        void setSubMoves(const Moves &submoves);
 
-    void setSubSystemAndMoves(const SimStore &simstore);
+        void setSubSystemAndMoves(const SimStore &simstore);
 
-    void setGenerator(const RanGenerator &rangenerator);
+        void setGenerator(const RanGenerator &rangenerator);
 
-    void swapInSystem(const SimStore &simstore, bool swap_monitors=false);
-    void swapInMolecules(const SimStore &simstore);
+        void swapInSystem(const SimStore &simstore, bool swap_monitors = false);
+        void swapInMolecules(const SimStore &simstore);
 
-    void _post_unpack();
+        void _post_unpack();
 
-private:
-    void updatedMoves();
+    private:
+        void updatedMoves();
 
-    /** Identifiers for the list of actions that can be deferred
-        until the replica is unpacked */
-    enum ReplicaCommand
-         {
-           ENERGY_COMPONENT = 1,  // calls this->setEnergyComponent
-           SPACE_PROPERTY   = 2,  // calls this->setSpaceProperty
-           LAMBDA_COMPONENT = 3,  // calls this->setLambdaComponent
-           LAMBDA_VALUE     = 4,  // calls this->setLambdaValue
-           REP_TEMPERATURE  = 5,  // calls this->setTemperature
-           REP_PRESSURE     = 6,  // calls this->setPressure
-           REP_CHEMPOT      = 7,  // calls this->setChemicalPotential
-           REP_FUGACITY     = 8,  // calls this->setFugacity
-           SWAP_REP_AND_MON = 9,  // calls this->swapInSystem(replica, true)
-           SWAP_REP_ONLY    = 10, // calls this->swapInSystem(replica, false)
-           SWAP_MOLECULES   = 11, // calls this->swapInMolecules(replica)
-           SET_RANGENERATOR = 12  // calls this->setGenerator
-         };
+        /** Identifiers for the list of actions that can be deferred
+            until the replica is unpacked */
+        enum ReplicaCommand
+        {
+            ENERGY_COMPONENT = 1, // calls this->setEnergyComponent
+            SPACE_PROPERTY = 2,   // calls this->setSpaceProperty
+            LAMBDA_COMPONENT = 3, // calls this->setLambdaComponent
+            LAMBDA_VALUE = 4,     // calls this->setLambdaValue
+            REP_TEMPERATURE = 5,  // calls this->setTemperature
+            REP_PRESSURE = 6,     // calls this->setPressure
+            REP_CHEMPOT = 7,      // calls this->setChemicalPotential
+            REP_FUGACITY = 8,     // calls this->setFugacity
+            SWAP_REP_AND_MON = 9, // calls this->swapInSystem(replica, true)
+            SWAP_REP_ONLY = 10,   // calls this->swapInSystem(replica, false)
+            SWAP_MOLECULES = 11,  // calls this->swapInMolecules(replica)
+            SET_RANGENERATOR = 12 // calls this->setGenerator
+        };
 
-    template<class T>
-    void deferCommand(ReplicaCommand command, const T &argument);
+        template <class T>
+        void deferCommand(ReplicaCommand command, const T &argument);
 
-    /** The values that need to be set when the replica is unpacked,
-        in the order in which they should be applied */
-    QList< QPair<quint32,QVariant> > vars_to_be_set;
+        /** The values that need to be set when the replica is unpacked,
+            in the order in which they should be applied */
+        QList<QPair<quint32, QVariant>> vars_to_be_set;
 
-    /** The ensemble sampled by moves in this replica */
-    Ensemble replica_ensemble;
+        /** The ensemble sampled by moves in this replica */
+        Ensemble replica_ensemble;
 
-    /** The property used to get the simulation space (for volume)
-        for this replica */
-    PropertyName space_property;
+        /** The property used to get the simulation space (for volume)
+            for this replica */
+        PropertyName space_property;
 
-    /** The symbol that represents the component of the energy
-        that is evaluate for this replica - it is this energy
-        that is put into the replica exchange test */
-    Symbol nrg_component;
+        /** The symbol that represents the component of the energy
+            that is evaluate for this replica - it is this energy
+            that is put into the replica exchange test */
+        Symbol nrg_component;
 
-    /** The symbol representing the lambda coordinate for
-        lambda-based Hamiltonian replica exchange. This is null
-        if this type of replica-exchange is not being performed */
-    Symbol lambda_component;
+        /** The symbol representing the lambda coordinate for
+            lambda-based Hamiltonian replica exchange. This is null
+            if this type of replica-exchange is not being performed */
+        Symbol lambda_component;
 
-    /** The value of lambda for this replica */
-    double lambda_value;
-};
+        /** The value of lambda for this replica */
+        double lambda_value;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::Replica )
+Q_DECLARE_METATYPE(SireMove::Replica)
 
-SIRE_EXPOSE_CLASS( SireMove::Replica )
+SIRE_EXPOSE_CLASS(SireMove::Replica)
 
 SIRE_END_HEADER
 

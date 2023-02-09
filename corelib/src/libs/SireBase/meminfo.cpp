@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#include <QThread>
 #include <QMutex>
+#include <QThread>
 
 #include <QFile>
 #include <QTextStream>
@@ -52,20 +52,25 @@ using namespace SireBase;
 
 #ifdef HAVE_SYSCTL
 
-    ///////////
-    /////////// Implementation for systems that have sysctl support
-    /////////// for probing the status of the system
-    ///////////
-    namespace SireBase{ namespace detail {
+///////////
+/////////// Implementation for systems that have sysctl support
+/////////// for probing the status of the system
+///////////
+namespace SireBase
+{
+    namespace detail
+    {
 
         class SysInfoPvt
         {
         public:
             SysInfoPvt()
-            {}
+            {
+            }
 
             ~SysInfoPvt()
-            {}
+            {
+            }
 
             quint64 totalSystemMemory() const
             {
@@ -93,23 +98,29 @@ using namespace SireBase;
             }
         };
 
-    }}
+    } // namespace detail
+} // namespace SireBase
 
 #else
 
-    ///////////
-    /////////// Implementation for systems with no memory info
-    ///////////
-    namespace SireBase{ namespace detail {
+///////////
+/////////// Implementation for systems with no memory info
+///////////
+namespace SireBase
+{
+    namespace detail
+    {
 
         class SysInfoPvt
         {
         public:
             SysInfoPvt()
-            {}
+            {
+            }
 
             ~SysInfoPvt()
-            {}
+            {
+            }
 
             quint64 totalSystemMemory() const
             {
@@ -137,7 +148,8 @@ using namespace SireBase;
             }
         };
 
-    }}
+    } // namespace detail
+} // namespace SireBase
 
 #endif
 
@@ -152,18 +164,20 @@ using namespace SireBase;
 
 #ifdef HAVE_MALLINFO
 
-    ///////////
-    /////////// Implementation for systems with mallinfo
-    ///////////  (e.g. glibc systems)
-    ///////////
+///////////
+/////////// Implementation for systems with mallinfo
+///////////  (e.g. glibc systems)
+///////////
 
-    #ifdef HAVE_MALLOC_MALLOC_H
-        #include <malloc/malloc.h>  // CONDITIONAL_INCLUDE
-    #else
-        #include <malloc.h>  // CONDITIONAL_INCLUDE
-    #endif
+#ifdef HAVE_MALLOC_MALLOC_H
+#include <malloc/malloc.h> // CONDITIONAL_INCLUDE
+#else
+#include <malloc.h> // CONDITIONAL_INCLUDE
+#endif
 
-    namespace SireBase{ namespace detail
+namespace SireBase
+{
+    namespace detail
     {
         /** Implementation of MemInfoPvt for mallinfo systems */
         class MemInfoPvt : public SysInfoPvt
@@ -203,13 +217,14 @@ using namespace SireBase;
 
             QString toString() const
             {
-                float alloc = this->allocatedBytes() / (1024.0*1024.0);
-                float used = this->usedBytes() / (1024.0*1024.0);
+                float alloc = this->allocatedBytes() / (1024.0 * 1024.0);
+                float used = this->usedBytes() / (1024.0 * 1024.0);
 
                 QString this_string = QObject::tr("Memory usage: %1 MB allocated, "
                                                   "of which %2 MB are used (%3 \%)")
-                                            .arg(alloc).arg(used)
-                                            .arg(100.0*used/alloc);
+                                          .arg(alloc)
+                                          .arg(used)
+                                          .arg(100.0 * used / alloc);
 
                 QString sys_string = SysInfoPvt::toString();
 
@@ -220,21 +235,24 @@ using namespace SireBase;
             }
         };
 
-    }}
+    } // namespace detail
+} // namespace SireBase
 
 #elif HAVE_MSTATS
 
-    ///////////
-    /////////// Implementation for systems with mstats (e.g. OS X)
-    ///////////
+///////////
+/////////// Implementation for systems with mstats (e.g. OS X)
+///////////
 
-    #ifdef HAVE_MALLOC_MALLOC_H
-        #include <malloc/malloc.h>  // CONDITIONAL_INCLUDE
-    #else
-        #include <malloc.h>  // CONDITIONAL_INCLUDE
-    #endif
+#ifdef HAVE_MALLOC_MALLOC_H
+#include <malloc/malloc.h> // CONDITIONAL_INCLUDE
+#else
+#include <malloc.h> // CONDITIONAL_INCLUDE
+#endif
 
-    namespace SireBase{ namespace detail
+namespace SireBase
+{
+    namespace detail
     {
         /** Implementation of MemInfoPvt for mallinfo systems */
         class MemInfoPvt : public SysInfoPvt
@@ -268,13 +286,14 @@ using namespace SireBase;
 
             QString toString() const
             {
-                float alloc = this->allocatedBytes() / (1024.0*1024.0);
-                float used = this->usedBytes() / (1024.0*1024.0);
+                float alloc = this->allocatedBytes() / (1024.0 * 1024.0);
+                float used = this->usedBytes() / (1024.0 * 1024.0);
 
                 QString this_string = QObject::tr("Memory usage: %1 MB allocated, "
                                                   "of which %2 MB are used (%3 \%)")
-                                            .arg(alloc).arg(used)
-                                            .arg(100.0*used/alloc);
+                                          .arg(alloc)
+                                          .arg(used)
+                                          .arg(100.0 * used / alloc);
 
                 QString sys_string = SysInfoPvt::toString();
 
@@ -285,15 +304,18 @@ using namespace SireBase;
             }
         };
 
-    }}
+    } // namespace detail
+} // namespace SireBase
 
 #else
 
-    ///////////
-    /////////// Implementation for systems with no support
-    ///////////
+///////////
+/////////// Implementation for systems with no support
+///////////
 
-    namespace SireBase{ namespace detail
+namespace SireBase
+{
+    namespace detail
     {
 
         /** Implementation of a null MemInfoPvt */
@@ -301,15 +323,16 @@ using namespace SireBase;
         {
         public:
             MemInfoPvt() : SysInfoPvt()
-            {}
+            {
+            }
 
             ~MemInfoPvt()
-            {}
+            {
+            }
 
             QString toString() const
             {
-                return QObject::tr("Memory usage: unknown\n%1")
-                                    .arg( SysInfoPvt::toString() );
+                return QObject::tr("Memory usage: unknown\n%1").arg(SysInfoPvt::toString());
             }
 
             quint64 allocatedBytes() const
@@ -328,7 +351,8 @@ using namespace SireBase;
             }
         };
 
-    }}
+    } // namespace detail
+} // namespace SireBase
 
 #endif
 
@@ -338,18 +362,21 @@ using namespace SireBase;
 
 /** Null constructor */
 MemInfo::MemInfo()
-{}
+{
+}
 
 /** Copy constructor */
 MemInfo::MemInfo(const MemInfo &other) : d(other.d)
-{}
+{
+}
 
 /** Destructor */
 MemInfo::~MemInfo()
-{}
+{
+}
 
 /** Copy assignment operator */
-MemInfo& MemInfo::operator=(const MemInfo &other)
+MemInfo &MemInfo::operator=(const MemInfo &other)
 {
     d = other.d;
     return *this;
@@ -411,7 +438,7 @@ MemInfo MemInfo::takeMeasurement()
 {
     MemInfo ret;
 
-    ret.d.reset( new detail::MemInfoPvt() );
+    ret.d.reset(new detail::MemInfoPvt());
 
     return ret;
 }
@@ -480,13 +507,13 @@ private:
     int ms;
 };
 
-MemoryMonitor::MemoryMonitor(int time_ms)
-              : QThread(), ms(time_ms)
-{}
+MemoryMonitor::MemoryMonitor(int time_ms) : QThread(), ms(time_ms)
+{
+}
 
-MemoryMonitor::MemoryMonitor(const QString &file, int time_ms)
-              : QThread(), filename(file), ms(time_ms)
-{}
+MemoryMonitor::MemoryMonitor(const QString &file, int time_ms) : QThread(), filename(file), ms(time_ms)
+{
+}
 
 MemoryMonitor::~MemoryMonitor()
 {
@@ -503,12 +530,12 @@ static void openFile(const QString &filename, QFile &file)
 {
     if (filename.isEmpty())
     {
-        if (not file.open( stdout, QIODevice::WriteOnly | QIODevice::Unbuffered ))
+        if (not file.open(stdout, QIODevice::WriteOnly | QIODevice::Unbuffered))
             qWarning() << "Could not open STDOUT???";
     }
     else
     {
-        if (not file.open( QIODevice::WriteOnly|QIODevice::Unbuffered|QIODevice::Append ))
+        if (not file.open(QIODevice::WriteOnly | QIODevice::Unbuffered | QIODevice::Append))
         {
             openFile(QString(), file);
         }
@@ -524,7 +551,7 @@ void MemoryMonitor::run()
 
     openFile(filename, file);
 
-    QTextStream ts( &file );
+    QTextStream ts(&file);
 
     ts << " ** " << MemInfo::takeMeasurement().toString() << "\n";
     ts.flush();
@@ -535,7 +562,7 @@ void MemoryMonitor::run()
 
         while (have_slept < ms)
         {
-            QThread::msleep( qMin(100, ms - have_slept) );
+            QThread::msleep(qMin(100, ms - have_slept));
             have_slept += 100;
         }
 
@@ -547,7 +574,7 @@ void MemoryMonitor::run()
     }
 }
 
-Q_GLOBAL_STATIC( QMutex, memMonitorMutex );
+Q_GLOBAL_STATIC(QMutex, memMonitorMutex);
 
 static boost::shared_ptr<MemoryMonitor> monitor;
 
@@ -555,9 +582,9 @@ static boost::shared_ptr<MemoryMonitor> monitor;
     out to the screen every 'ms' milliseconds */
 void MemInfo::startMonitoring(int ms)
 {
-    QMutexLocker lkr( memMonitorMutex() );
+    QMutexLocker lkr(memMonitorMutex());
 
-    monitor.reset( new MemoryMonitor(ms) );
+    monitor.reset(new MemoryMonitor(ms));
 
     monitor->start();
 }
@@ -566,9 +593,9 @@ void MemInfo::startMonitoring(int ms)
     out to the file 'filename' every 'ms' milliseconds */
 void MemInfo::startMonitoring(const QString &filename, int ms)
 {
-    QMutexLocker lkr( memMonitorMutex() );
+    QMutexLocker lkr(memMonitorMutex());
 
-    monitor.reset( new MemoryMonitor(filename,ms) );
+    monitor.reset(new MemoryMonitor(filename, ms));
 
     monitor->start();
 }
@@ -576,7 +603,7 @@ void MemInfo::startMonitoring(const QString &filename, int ms)
 /** Stop monitoring the memory of this process */
 void MemInfo::stopMonitoring()
 {
-    QMutexLocker lkr( memMonitorMutex() );
+    QMutexLocker lkr(memMonitorMutex());
 
     monitor.reset();
 }

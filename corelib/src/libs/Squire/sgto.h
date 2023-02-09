@@ -38,148 +38,146 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class S_GTO;
-class SS_GTO;
-}
+    class S_GTO;
+    class SS_GTO;
+} // namespace Squire
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::S_GTO&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::S_GTO&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::S_GTO &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::S_GTO &);
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::SS_GTO&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::SS_GTO&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::SS_GTO &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::SS_GTO &);
 
 namespace Squire
 {
 
-using SireMaths::TrigMatrix;
-using SireBase::TrigArray2D;
+    using SireBase::TrigArray2D;
+    using SireMaths::TrigMatrix;
 
-class PointCharge;
-class PointDipole;
+    class PointCharge;
+    class PointDipole;
 
-/** This is a single S-type Gaussian Type Orbital shell */
-class SQUIRE_EXPORT S_GTO : public SireBase::ConcreteProperty<S_GTO,GTO>
-{
-public:
-    S_GTO();
-    S_GTO(double alpha, double scale=1);
+    /** This is a single S-type Gaussian Type Orbital shell */
+    class SQUIRE_EXPORT S_GTO : public SireBase::ConcreteProperty<S_GTO, GTO>
+    {
+    public:
+        S_GTO();
+        S_GTO(double alpha, double scale = 1);
 
-    S_GTO(const S_GTO &other);
+        S_GTO(const S_GTO &other);
 
-    ~S_GTO();
+        ~S_GTO();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    S_GTO& operator=(const S_GTO &other);
+        S_GTO &operator=(const S_GTO &other);
 
-    bool operator==(const S_GTO &other) const;
-    bool operator!=(const S_GTO &other) const;
+        bool operator==(const S_GTO &other) const;
+        bool operator!=(const S_GTO &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    int angularMomentum() const;
-    int nOrbitals() const;
-};
+        int angularMomentum() const;
+        int nOrbitals() const;
+    };
 
-/** This is the combined SS shell pair composed from two S-type
-    GTO shells */
-class SQUIRE_EXPORT SS_GTO : public SireBase::ConcreteProperty<SS_GTO,GTOPair>
-{
+    /** This is the combined SS shell pair composed from two S-type
+        GTO shells */
+    class SQUIRE_EXPORT SS_GTO : public SireBase::ConcreteProperty<SS_GTO, GTOPair>
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const SS_GTO&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, SS_GTO&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const SS_GTO &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, SS_GTO &);
 
-public:
-    SS_GTO();
-    SS_GTO(const Vector &A, const S_GTO &a,
-           const Vector &B, const S_GTO &b);
+    public:
+        SS_GTO();
+        SS_GTO(const Vector &A, const S_GTO &a, const Vector &B, const S_GTO &b);
 
-    SS_GTO(const SS_GTO &other);
+        SS_GTO(const SS_GTO &other);
 
-    ~SS_GTO();
+        ~SS_GTO();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    SS_GTO& operator=(const SS_GTO &other);
+        SS_GTO &operator=(const SS_GTO &other);
 
-    bool operator==(const SS_GTO &other) const;
-    bool operator!=(const SS_GTO &other) const;
+        bool operator==(const SS_GTO &other) const;
+        bool operator!=(const SS_GTO &other) const;
 
-    int angularMomentum0() const;
-    int angularMomentum1() const;
+        int angularMomentum0() const;
+        int angularMomentum1() const;
 
-    int nOrbitals0() const;
-    int nOrbitals1() const;
-};
+        int nOrbitals0() const;
+        int nOrbitals1() const;
+    };
 
-/** This class is used to calculate integrals involving just SS pairs.
-    It is used to aid in the calculation of integrals.
+    /** This class is used to calculate integrals involving just SS pairs.
+        It is used to aid in the calculation of integrals.
 
-	@author Christopher Woods
-*/
-class SQUIRE_EXPORT SS_GTOs
-{
-public:
-	SS_GTOs();
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT SS_GTOs
+    {
+    public:
+        SS_GTOs();
 
-    SS_GTOs(const QVector<S_GTO> &s_gtos,
-        	const QVector<Vector> &centers);
+        SS_GTOs(const QVector<S_GTO> &s_gtos, const QVector<Vector> &centers);
 
-    SS_GTOs(const SS_GTOs &other);
+        SS_GTOs(const SS_GTOs &other);
 
-    ~SS_GTOs();
+        ~SS_GTOs();
 
-    SS_GTOs& operator=(const SS_GTOs &other);
+        SS_GTOs &operator=(const SS_GTOs &other);
 
-	TrigMatrix overlap_integral() const;
-    TrigMatrix kinetic_integral() const;
+        TrigMatrix overlap_integral() const;
+        TrigMatrix kinetic_integral() const;
 
-    TrigMatrix potential_integral(const QVector<PointCharge> &C) const;
-    TrigMatrix potential_integral(const QVector<PointCharge> &C, int m) const;
+        TrigMatrix potential_integral(const QVector<PointCharge> &C) const;
+        TrigMatrix potential_integral(const QVector<PointCharge> &C, int m) const;
 
-    TrigMatrix coulomb_integral(const SS_GTOs &other) const;
-    TrigMatrix exchange_integral(const SS_GTOs &other) const;
+        TrigMatrix coulomb_integral(const SS_GTOs &other) const;
+        TrigMatrix exchange_integral(const SS_GTOs &other) const;
 
-private:
-	/** All of the orbital pairs */
-    TrigArray2D<SS_GTO> orbs;
-};
+    private:
+        /** All of the orbital pairs */
+        TrigArray2D<SS_GTO> orbs;
+    };
 
-//////////
-////////// Integrals involving only S-orbitals
-//////////
+    //////////
+    ////////// Integrals involving only S-orbitals
+    //////////
 
-SQUIRE_EXPORT double kinetic_integral(const SS_GTO &P);
-SQUIRE_EXPORT double overlap_integral(const SS_GTO &P);
+    SQUIRE_EXPORT double kinetic_integral(const SS_GTO &P);
+    SQUIRE_EXPORT double overlap_integral(const SS_GTO &P);
 
-SQUIRE_EXPORT double potential_integral(const QVector<PointCharge> &C, const SS_GTO &P);
-SQUIRE_EXPORT double potential_integral(const QVector<PointDipole> &C, const SS_GTO &P);
+    SQUIRE_EXPORT double potential_integral(const QVector<PointCharge> &C, const SS_GTO &P);
+    SQUIRE_EXPORT double potential_integral(const QVector<PointDipole> &C, const SS_GTO &P);
 
-SQUIRE_EXPORT double potential_integral(const QVector<PointCharge> &C, const SS_GTO &P, int m);
-SQUIRE_EXPORT double potential_integral(const QVector<PointDipole> &C, const SS_GTO &P, int m);
+    SQUIRE_EXPORT double potential_integral(const QVector<PointCharge> &C, const SS_GTO &P, int m);
+    SQUIRE_EXPORT double potential_integral(const QVector<PointDipole> &C, const SS_GTO &P, int m);
 
-SQUIRE_EXPORT double potential_integral(const PointCharge &Q, const SS_GTO &P);
-SQUIRE_EXPORT double potential_integral(const PointDipole &Q, const SS_GTO &P);
+    SQUIRE_EXPORT double potential_integral(const PointCharge &Q, const SS_GTO &P);
+    SQUIRE_EXPORT double potential_integral(const PointDipole &Q, const SS_GTO &P);
 
-SQUIRE_EXPORT double potential_integral(const PointCharge &C, const SS_GTO &P, int m);
-SQUIRE_EXPORT double potential_integral(const PointDipole &C, const SS_GTO &P, int m);
+    SQUIRE_EXPORT double potential_integral(const PointCharge &C, const SS_GTO &P, int m);
+    SQUIRE_EXPORT double potential_integral(const PointDipole &C, const SS_GTO &P, int m);
 
-SQUIRE_EXPORT double electron_integral(const SS_GTO &P, const SS_GTO &Q);
-SQUIRE_EXPORT double electron_integral(const SS_GTO &P, const SS_GTO &Q, int m);
+    SQUIRE_EXPORT double electron_integral(const SS_GTO &P, const SS_GTO &Q);
+    SQUIRE_EXPORT double electron_integral(const SS_GTO &P, const SS_GTO &Q, int m);
 
-}
+} // namespace Squire
 
-Q_DECLARE_METATYPE( Squire::S_GTO )
-Q_DECLARE_METATYPE( Squire::SS_GTO )
+Q_DECLARE_METATYPE(Squire::S_GTO)
+Q_DECLARE_METATYPE(Squire::SS_GTO)
 
-SIRE_EXPOSE_CLASS( Squire::S_GTO )
-SIRE_EXPOSE_CLASS( Squire::SS_GTO )
-SIRE_EXPOSE_CLASS( Squire::SS_GTOs )
+SIRE_EXPOSE_CLASS(Squire::S_GTO)
+SIRE_EXPOSE_CLASS(Squire::SS_GTO)
+SIRE_EXPOSE_CLASS(Squire::SS_GTOs)
 
-SIRE_EXPOSE_FUNCTION( Squire::kinetic_integral )
-SIRE_EXPOSE_FUNCTION( Squire::potential_integral )
-SIRE_EXPOSE_FUNCTION( Squire::overlap_integral )
-SIRE_EXPOSE_FUNCTION( Squire::electron_integral )
+SIRE_EXPOSE_FUNCTION(Squire::kinetic_integral)
+SIRE_EXPOSE_FUNCTION(Squire::potential_integral)
+SIRE_EXPOSE_FUNCTION(Squire::overlap_integral)
+SIRE_EXPOSE_FUNCTION(Squire::electron_integral)
 
 SIRE_END_HEADER
 

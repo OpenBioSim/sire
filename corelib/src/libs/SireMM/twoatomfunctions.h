@@ -32,9 +32,9 @@
 
 #include "atomfunctions.h"
 
-#include "SireMol/cgatomidx.h"
-#include "SireMol/atomidx.h"
 #include "SireMol/atomid.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/cgatomidx.h"
 
 #include "SireMol/bondid.h"
 
@@ -42,212 +42,206 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class TwoAtomFunction;
-class TwoAtomFunctions;
-}
+    class TwoAtomFunction;
+    class TwoAtomFunctions;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::TwoAtomFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::TwoAtomFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::TwoAtomFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::TwoAtomFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::TwoAtomFunctions&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::TwoAtomFunctions&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::TwoAtomFunctions &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::TwoAtomFunctions &);
 
 namespace SireMol
 {
-class AtomSelection;
+    class AtomSelection;
 }
 
 namespace SireMM
 {
 
-using SireMol::CGAtomIdx;
-using SireMol::AtomIdx;
-using SireMol::AtomID;
-using SireMol::BondID;
-using SireMol::AtomSelection;
-using SireMol::AtomMatcher;
+    using SireMol::AtomID;
+    using SireMol::AtomIdx;
+    using SireMol::AtomMatcher;
+    using SireMol::AtomSelection;
+    using SireMol::BondID;
+    using SireMol::CGAtomIdx;
 
-/** This class holds a function that acts using the
-    coordinate information of just two atoms */
-class SIREMM_EXPORT TwoAtomFunction : public AtomFunction
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const TwoAtomFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, TwoAtomFunction&);
-
-public:
-    TwoAtomFunction();
-    TwoAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1,
-                    const SireCAS::Expression &function);
-
-    TwoAtomFunction(const TwoAtomFunction &other);
-
-    ~TwoAtomFunction();
-
-    TwoAtomFunction& operator=(const TwoAtomFunction &other);
-
-    bool operator==(const TwoAtomFunction &other) const;
-    bool operator!=(const TwoAtomFunction &other) const;
-
-    QString toString() const;
-
-    const CGAtomIdx& atom0() const;
-    const CGAtomIdx& atom1() const;
-
-private:
-    /** The indicies of the two atoms */
-    CGAtomIdx atm0, atm1;
-};
-
-namespace detail
-{
-
-class IDPair
-{
-public:
-    IDPair(quint32 atom0=0, quint32 atom1=0);
-    IDPair(const IDPair &other);
-
-    ~IDPair();
-
-    IDPair& operator=(const IDPair &other);
-
-    bool operator==(const IDPair &other) const;
-    bool operator!=(const IDPair &other) const;
-
-    bool operator<(const IDPair &other) const;
-    bool operator<=(const IDPair &other) const;
-    bool operator>(const IDPair &other) const;
-    bool operator>=(const IDPair &other) const;
-
-    quint32 operator[](int i) const
+    /** This class holds a function that acts using the
+        coordinate information of just two atoms */
+    class SIREMM_EXPORT TwoAtomFunction : public AtomFunction
     {
-        if (i == 0)
-            return atom0;
-        else
-            return atom1;
-    }
 
-    quint32 atom0;
-    quint32 atom1;
-};
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const TwoAtomFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, TwoAtomFunction &);
 
-SIRE_ALWAYS_INLINE uint qHash(const IDPair &idpair)
-{
-    return (idpair.atom0 << 16) | (idpair.atom1 & 0x0000FFFF);
-}
+    public:
+        TwoAtomFunction();
+        TwoAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1, const SireCAS::Expression &function);
 
-}
+        TwoAtomFunction(const TwoAtomFunction &other);
 
-/** This class holds the set of TwoAtomFunction potentials that
-    act between the atoms in a molecule
+        ~TwoAtomFunction();
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT TwoAtomFunctions
-        : public SireBase::ConcreteProperty<TwoAtomFunctions,AtomFunctions>
-{
+        TwoAtomFunction &operator=(const TwoAtomFunction &other);
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const TwoAtomFunctions&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, TwoAtomFunctions&);
+        bool operator==(const TwoAtomFunction &other) const;
+        bool operator!=(const TwoAtomFunction &other) const;
 
-public:
-    TwoAtomFunctions();
+        QString toString() const;
 
-    TwoAtomFunctions(const MoleculeData &moldata);
-    TwoAtomFunctions(const MoleculeInfoData &molinfo);
+        const CGAtomIdx &atom0() const;
+        const CGAtomIdx &atom1() const;
 
-    TwoAtomFunctions(const TwoAtomFunctions &other);
+    private:
+        /** The indicies of the two atoms */
+        CGAtomIdx atm0, atm1;
+    };
 
-    ~TwoAtomFunctions();
+    namespace detail
+    {
 
-    static const char* typeName();
+        class IDPair
+        {
+        public:
+            IDPair(quint32 atom0 = 0, quint32 atom1 = 0);
+            IDPair(const IDPair &other);
 
-    TwoAtomFunctions& operator=(const TwoAtomFunctions &other);
+            ~IDPair();
 
-    bool operator==(const TwoAtomFunctions &other) const;
-    bool operator!=(const TwoAtomFunctions &other) const;
+            IDPair &operator=(const IDPair &other);
 
-    QString toString() const;
+            bool operator==(const IDPair &other) const;
+            bool operator!=(const IDPair &other) const;
 
-    void set(AtomIdx atom0, AtomIdx atom1,
-             const Expression &expression);
+            bool operator<(const IDPair &other) const;
+            bool operator<=(const IDPair &other) const;
+            bool operator>(const IDPair &other) const;
+            bool operator>=(const IDPair &other) const;
 
-    void set(const AtomID &atom0, const AtomID &atom1,
-             const Expression &expression);
+            quint32 operator[](int i) const
+            {
+                if (i == 0)
+                    return atom0;
+                else
+                    return atom1;
+            }
 
-    void set(const BondID &bondid, const Expression &expression);
+            quint32 atom0;
+            quint32 atom1;
+        };
 
-    void clear(AtomIdx atom);
-    void clear(const AtomID &atom);
+        SIRE_ALWAYS_INLINE uint qHash(const IDPair &idpair)
+        {
+            return (idpair.atom0 << 16) | (idpair.atom1 & 0x0000FFFF);
+        }
 
-    void clear(AtomIdx atom0, AtomIdx atom1);
-    void clear(const AtomID &atom0, const AtomID &atom1);
-    void clear(const BondID &bondid);
+    } // namespace detail
 
-    void clear();
+    /** This class holds the set of TwoAtomFunction potentials that
+        act between the atoms in a molecule
 
-    void substitute(const Identities &identities);
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT TwoAtomFunctions : public SireBase::ConcreteProperty<TwoAtomFunctions, AtomFunctions>
+    {
 
-    bool isEmpty() const;
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const TwoAtomFunctions &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, TwoAtomFunctions &);
 
-    int nFunctions() const;
+    public:
+        TwoAtomFunctions();
 
-    Expression potential(AtomIdx atom0, AtomIdx atom1) const;
-    Expression potential(const AtomID &atom0, const AtomID &atom1) const;
-    Expression potential(const BondID &bondid) const;
+        TwoAtomFunctions(const MoleculeData &moldata);
+        TwoAtomFunctions(const MoleculeInfoData &molinfo);
 
-    Expression force(AtomIdx atom0, AtomIdx atom1, const Symbol &symbol) const;
-    Expression force(const AtomID &atom0, const AtomID &atom1,
-                     const Symbol &symbol) const;
-    Expression force(const BondID &bondid, const Symbol &symbol) const;
+        TwoAtomFunctions(const TwoAtomFunctions &other);
 
-    QVector<TwoAtomFunction> potentials() const;
-    QVector<TwoAtomFunction> forces(const Symbol &symbol) const;
+        ~TwoAtomFunctions();
 
-    TwoAtomFunctions includeOnly(const AtomSelection &selection,
-                                 bool isstrict=true) const;
+        static const char *typeName();
 
-protected:
-    SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                  const AtomMatcher &atommatcher) const;
-    SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                  const QHash<AtomIdx,AtomIdx> &map) const;
+        TwoAtomFunctions &operator=(const TwoAtomFunctions &other);
 
-private:
-    void removeSymbols(QSet<Symbol> symbols);
+        bool operator==(const TwoAtomFunctions &other) const;
+        bool operator!=(const TwoAtomFunctions &other) const;
 
-    /** All of the potential functions, identified by the atom pair
-        that contains that function */
-    QHash<detail::IDPair,Expression> potentials_by_atoms;
-};
+        QString toString() const;
+
+        void set(AtomIdx atom0, AtomIdx atom1, const Expression &expression);
+
+        void set(const AtomID &atom0, const AtomID &atom1, const Expression &expression);
+
+        void set(const BondID &bondid, const Expression &expression);
+
+        void clear(AtomIdx atom);
+        void clear(const AtomID &atom);
+
+        void clear(AtomIdx atom0, AtomIdx atom1);
+        void clear(const AtomID &atom0, const AtomID &atom1);
+        void clear(const BondID &bondid);
+
+        void clear();
+
+        void substitute(const Identities &identities);
+
+        bool isEmpty() const;
+
+        int nFunctions() const;
+
+        Expression potential(AtomIdx atom0, AtomIdx atom1) const;
+        Expression potential(const AtomID &atom0, const AtomID &atom1) const;
+        Expression potential(const BondID &bondid) const;
+
+        Expression force(AtomIdx atom0, AtomIdx atom1, const Symbol &symbol) const;
+        Expression force(const AtomID &atom0, const AtomID &atom1, const Symbol &symbol) const;
+        Expression force(const BondID &bondid, const Symbol &symbol) const;
+
+        QVector<TwoAtomFunction> potentials() const;
+        QVector<TwoAtomFunction> forces(const Symbol &symbol) const;
+
+        TwoAtomFunctions includeOnly(const AtomSelection &selection, bool isstrict = true) const;
+
+    protected:
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const QHash<AtomIdx, AtomIdx> &map) const;
+
+    private:
+        void removeSymbols(QSet<Symbol> symbols);
+
+        /** All of the potential functions, identified by the atom pair
+            that contains that function */
+        QHash<detail::IDPair, Expression> potentials_by_atoms;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-//////
-////// Inline functions of TwoAtomFunction
-//////
+    //////
+    ////// Inline functions of TwoAtomFunction
+    //////
 
-/** Return the first atom of the pair */
-SIRE_ALWAYS_INLINE const CGAtomIdx& TwoAtomFunction::atom0() const
-{
-    return atm0;
-}
+    /** Return the first atom of the pair */
+    SIRE_ALWAYS_INLINE const CGAtomIdx &TwoAtomFunction::atom0() const
+    {
+        return atm0;
+    }
 
-/** Return the second atom of the pair */
-SIRE_ALWAYS_INLINE const CGAtomIdx& TwoAtomFunction::atom1() const
-{
-    return atm1;
-}
+    /** Return the second atom of the pair */
+    SIRE_ALWAYS_INLINE const CGAtomIdx &TwoAtomFunction::atom1() const
+    {
+        return atm1;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::TwoAtomFunctions );
+Q_DECLARE_METATYPE(SireMM::TwoAtomFunctions);
 
-SIRE_EXPOSE_CLASS( SireMM::TwoAtomFunction )
-SIRE_EXPOSE_CLASS( SireMM::TwoAtomFunctions )
+SIRE_EXPOSE_CLASS(SireMM::TwoAtomFunction)
+SIRE_EXPOSE_CLASS(SireMM::TwoAtomFunctions)
 
 SIRE_END_HEADER
 

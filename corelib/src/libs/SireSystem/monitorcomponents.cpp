@@ -46,23 +46,20 @@ using namespace SireStream;
 static const RegisterMetaType<MonitorComponents> r_moncomps;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const MonitorComponents &moncomps)
+QDataStream &operator<<(QDataStream &ds, const MonitorComponents &moncomps)
 {
     writeHeader(ds, r_moncomps, 1);
 
     SharedDataStream sds(ds);
 
-    sds << moncomps.include_symbols << moncomps.exclude_symbols
-        << moncomps.accumulator_template << moncomps.accumes
-        << static_cast<const SystemMonitor&>(moncomps);
+    sds << moncomps.include_symbols << moncomps.exclude_symbols << moncomps.accumulator_template << moncomps.accumes
+        << static_cast<const SystemMonitor &>(moncomps);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                          MonitorComponents &moncomps)
+QDataStream &operator>>(QDataStream &ds, MonitorComponents &moncomps)
 {
     VersionID v = readHeader(ds, r_moncomps);
 
@@ -70,9 +67,8 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> moncomps.include_symbols >> moncomps.exclude_symbols
-            >> moncomps.accumulator_template >> moncomps.accumes
-            >> static_cast<SystemMonitor&>(moncomps);
+        sds >> moncomps.include_symbols >> moncomps.exclude_symbols >> moncomps.accumulator_template >>
+            moncomps.accumes >> static_cast<SystemMonitor &>(moncomps);
     }
     else
         throw version_error(v, "1", r_moncomps, CODELOC);
@@ -81,58 +77,55 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-MonitorComponents::MonitorComponents()
-                  : ConcreteProperty<MonitorComponents,SystemMonitor>()
-{}
+MonitorComponents::MonitorComponents() : ConcreteProperty<MonitorComponents, SystemMonitor>()
+{
+}
 
 /** Construct a monitor to monitor all components using the
     accumulator 'accumulator' */
 MonitorComponents::MonitorComponents(const Accumulator &accumulator)
-                  : ConcreteProperty<MonitorComponents,SystemMonitor>(),
-                    accumulator_template(accumulator)
-{}
+    : ConcreteProperty<MonitorComponents, SystemMonitor>(), accumulator_template(accumulator)
+{
+}
 
 /** Construct a monitor to monitor the component 'component' using
     the accumulator 'accumulator' */
-MonitorComponents::MonitorComponents(const Symbol &component,
-                                     const Accumulator &accumulator)
-                  : ConcreteProperty<MonitorComponents,SystemMonitor>(),
-                    include_symbols(component),
-                    accumulator_template(accumulator)
-{}
+MonitorComponents::MonitorComponents(const Symbol &component, const Accumulator &accumulator)
+    : ConcreteProperty<MonitorComponents, SystemMonitor>(), include_symbols(component),
+      accumulator_template(accumulator)
+{
+}
 
 /** Construct a monitor to monitor the components 'components'
     using the accumulator 'accumulator' */
-MonitorComponents::MonitorComponents(const Symbols &components,
-                                     const Accumulator &accumulator)
-                  : ConcreteProperty<MonitorComponents,SystemMonitor>(),
-                    include_symbols(components),
-                    accumulator_template(accumulator)
-{}
+MonitorComponents::MonitorComponents(const Symbols &components, const Accumulator &accumulator)
+    : ConcreteProperty<MonitorComponents, SystemMonitor>(), include_symbols(components),
+      accumulator_template(accumulator)
+{
+}
 
 /** Construct a MonitorComponents that is the (near) equivalent of
     the MonitorComponent 'component_monitor' */
 MonitorComponents::MonitorComponents(const MonitorComponent &component_monitor)
-                  : ConcreteProperty<MonitorComponents,SystemMonitor>(),
-                    include_symbols(component_monitor.component()),
-                    accumulator_template(component_monitor.accumulator())
-{}
+    : ConcreteProperty<MonitorComponents, SystemMonitor>(), include_symbols(component_monitor.component()),
+      accumulator_template(component_monitor.accumulator())
+{
+}
 
 /** Copy constructor */
 MonitorComponents::MonitorComponents(const MonitorComponents &other)
-                  : ConcreteProperty<MonitorComponents,SystemMonitor>(other),
-                    include_symbols(other.include_symbols),
-                    exclude_symbols(other.exclude_symbols),
-                    accumulator_template(other.accumulator_template),
-                    accumes(other.accumes)
-{}
+    : ConcreteProperty<MonitorComponents, SystemMonitor>(other), include_symbols(other.include_symbols),
+      exclude_symbols(other.exclude_symbols), accumulator_template(other.accumulator_template), accumes(other.accumes)
+{
+}
 
 /** Destructor */
 MonitorComponents::~MonitorComponents()
-{}
+{
+}
 
 /** Copy assignment operator */
-MonitorComponents& MonitorComponents::operator=(const MonitorComponents &other)
+MonitorComponents &MonitorComponents::operator=(const MonitorComponents &other)
 {
     if (this != &other)
     {
@@ -149,11 +142,9 @@ MonitorComponents& MonitorComponents::operator=(const MonitorComponents &other)
 bool MonitorComponents::operator==(const MonitorComponents &other) const
 {
     return (this == &other) or
-           (include_symbols == other.include_symbols and
-            exclude_symbols == other.exclude_symbols and
-            accumulator_template == other.accumulator_template and
-            accumes == other.accumes and
-            SystemMonitor::operator==(other) );
+           (include_symbols == other.include_symbols and exclude_symbols == other.exclude_symbols and
+            accumulator_template == other.accumulator_template and accumes == other.accumes and
+            SystemMonitor::operator==(other));
 }
 
 /** Comparison operator */
@@ -177,13 +168,13 @@ void MonitorComponents::excludeComponent(const Symbols &components)
 /** Return the components that will be monitored
     (if they exist, and not if they are excluded). If this
     is empty, then all components are monitored */
-const Symbols& MonitorComponents::includeComponents() const
+const Symbols &MonitorComponents::includeComponents() const
 {
     return include_symbols;
 }
 
 /** Return the components that will definitely not be monitored */
-const Symbols& MonitorComponents::excludeComponents() const
+const Symbols &MonitorComponents::excludeComponents() const
 {
     return exclude_symbols;
 }
@@ -197,7 +188,7 @@ Symbols MonitorComponents::monitoredComponents() const
 
 /** Return the accumulator that is the template used for new accumulators
     that are created when a new component is monitored */
-const Accumulator& MonitorComponents::accumulatorTemplate() const
+const Accumulator &MonitorComponents::accumulatorTemplate() const
 {
     return accumulator_template;
 }
@@ -206,16 +197,17 @@ const Accumulator& MonitorComponents::accumulatorTemplate() const
 
     \throw SireCAS::missing_symbol
 */
-const Accumulator& MonitorComponents::accumulator(const Symbol &component) const
+const Accumulator &MonitorComponents::accumulator(const Symbol &component) const
 {
-    QHash<Symbol,AccumulatorPtr>::const_iterator it = accumes.constFind(component);
+    QHash<Symbol, AccumulatorPtr>::const_iterator it = accumes.constFind(component);
 
     if (it == accumes.constEnd())
-        throw SireCAS::missing_symbol( QObject::tr(
-            "There is no accumulator for the component represented by the symbol %1. "
-            "Available components are %2.")
+        throw SireCAS::missing_symbol(
+            QObject::tr("There is no accumulator for the component represented by the symbol %1. "
+                        "Available components are %2.")
                 .arg(component.toString())
-                .arg(Sire::toString(accumes.keys())), CODELOC );
+                .arg(Sire::toString(accumes.keys())),
+            CODELOC);
 
     return it.value();
 }
@@ -232,7 +224,7 @@ void MonitorComponents::clearStatistics()
 void MonitorComponents::monitor(System &system)
 {
     if (accumulator_template.isNull())
-        //there is no accumulator
+        // there is no accumulator
         return;
 
     Values vals;
@@ -246,7 +238,7 @@ void MonitorComponents::monitor(System &system)
         else
         {
             Symbols available_components = include_symbols;
-            available_components.intersect( system.componentSymbols() );
+            available_components.intersect(system.componentSymbols());
 
             if (not available_components.isEmpty())
                 vals = system.componentValues(available_components);
@@ -265,11 +257,9 @@ void MonitorComponents::monitor(System &system)
             vals = system.energies(available_components);
     }
 
-    const QHash<SymbolID,double> &values = vals.values();
+    const QHash<SymbolID, double> &values = vals.values();
 
-    for (QHash<SymbolID,double>::const_iterator it = values.constBegin();
-         it != values.constEnd();
-         ++it)
+    for (QHash<SymbolID, double>::const_iterator it = values.constBegin(); it != values.constEnd(); ++it)
     {
         Symbol component(it.key());
 
@@ -280,7 +270,7 @@ void MonitorComponents::monitor(System &system)
     }
 }
 
-const char* MonitorComponents::typeName()
+const char *MonitorComponents::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MonitorComponents>() );
+    return QMetaType::typeName(qMetaTypeId<MonitorComponents>());
 }

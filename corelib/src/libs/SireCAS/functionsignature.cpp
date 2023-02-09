@@ -53,7 +53,7 @@ QDataStream &operator>>(QDataStream &ds, FunctionSignature &sig)
 
         ds >> name >> args;
 
-        sig = SireCAS::FunctionSignature(name,args);
+        sig = SireCAS::FunctionSignature(name, args);
     }
     else
         throw version_error(v, "1", r_sig, CODELOC);
@@ -61,7 +61,7 @@ QDataStream &operator>>(QDataStream &ds, FunctionSignature &sig)
     return ds;
 }
 
-const char* FunctionSignature::typeName()
+const char *FunctionSignature::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FunctionSignature>() );
+    return QMetaType::typeName(qMetaTypeId<FunctionSignature>());
 }

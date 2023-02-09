@@ -41,62 +41,69 @@ This file contains the exceptions that can be thrown by the SireMove library.
 namespace SireMove
 {
 
-/** This is the base class of all SireMove errors */
-class SIREMOVE_EXPORT siremove_error : public SireError::exception
-{
-public:
-    siremove_error() : exception()
-    {}
-
-    siremove_error(QString err, QString place = QString()) : exception(err,place)
-    {}
-
-    siremove_error(const siremove_error &other) : exception(other)
-    {}
-
-    ~siremove_error() throw()
-    {}
-
-    static const char* typeName()
+    /** This is the base class of all SireMove errors */
+    class SIREMOVE_EXPORT siremove_error : public SireError::exception
     {
-        return "SireMove::siremove_error";
-    }
-};
+    public:
+        siremove_error() : exception()
+        {
+        }
 
-/** This exception is thrown when a z-matrix error is detected
+        siremove_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT zmatrix_error : public siremove_error
-{
-public:
-    zmatrix_error() : siremove_error()
-    {}
+        siremove_error(const siremove_error &other) : exception(other)
+        {
+        }
 
-    zmatrix_error(QString err, QString place = QString())
-              : siremove_error(err,place)
-    {}
+        ~siremove_error() throw()
+        {
+        }
 
-    zmatrix_error(const zmatrix_error &other) : siremove_error(other)
-    {}
+        static const char *typeName()
+        {
+            return "SireMove::siremove_error";
+        }
+    };
 
-    ~zmatrix_error() throw()
-    {}
+    /** This exception is thrown when a z-matrix error is detected
 
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT zmatrix_error : public siremove_error
     {
-        return zmatrix_error::typeName();
-    }
+    public:
+        zmatrix_error() : siremove_error()
+        {
+        }
 
-    void throwSelf() const
-    {
-        throw zmatrix_error(*this);
-    }
-};
+        zmatrix_error(QString err, QString place = QString()) : siremove_error(err, place)
+        {
+        }
 
-}
+        zmatrix_error(const zmatrix_error &other) : siremove_error(other)
+        {
+        }
+
+        ~zmatrix_error() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return zmatrix_error::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw zmatrix_error(*this);
+        }
+    };
+
+} // namespace SireMove
 
 Q_DECLARE_METATYPE(SireMove::zmatrix_error)
 

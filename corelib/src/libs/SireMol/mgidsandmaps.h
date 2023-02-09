@@ -34,8 +34,8 @@
 #include "SireBase/property.h"
 #include "SireBase/propertymap.h"
 
-#include <QVector>
 #include <QList>
+#include <QVector>
 
 #include <boost/tuple/tuple.hpp>
 
@@ -43,88 +43,87 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MGIDsAndMaps;
+    class MGIDsAndMaps;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MGIDsAndMaps&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MGIDsAndMaps&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MGIDsAndMaps &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MGIDsAndMaps &);
 
 namespace SireMol
 {
 
-/** This class holds a set of molecule group IDs, together
-    with the property maps that should be used with the
-    associated molecule groups. This provides a store for
-    information used to identify groups of molecule groups,
-    together with the properties needed to manipulate those
-    groups
+    /** This class holds a set of molecule group IDs, together
+        with the property maps that should be used with the
+        associated molecule groups. This provides a store for
+        information used to identify groups of molecule groups,
+        together with the properties needed to manipulate those
+        groups
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MGIDsAndMaps
-        : public SireBase::ConcreteProperty<MGIDsAndMaps,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MGIDsAndMaps : public SireBase::ConcreteProperty<MGIDsAndMaps, SireBase::Property>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MGIDsAndMaps&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MGIDsAndMaps&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MGIDsAndMaps &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MGIDsAndMaps &);
 
-public:
-    MGIDsAndMaps();
+    public:
+        MGIDsAndMaps();
 
-    MGIDsAndMaps(const MoleculeGroup &mgroup);
-    MGIDsAndMaps(const MoleculeGroup &mgroup, const PropertyMap &map);
+        MGIDsAndMaps(const MoleculeGroup &mgroup);
+        MGIDsAndMaps(const MoleculeGroup &mgroup, const PropertyMap &map);
 
-    MGIDsAndMaps(const boost::tuple<MolGroupPtr,PropertyMap> group_and_map);
+        MGIDsAndMaps(const boost::tuple<MolGroupPtr, PropertyMap> group_and_map);
 
-    MGIDsAndMaps(const QList<MolGroupPtr> &mgroups);
-    MGIDsAndMaps(const QList< boost::tuple<MolGroupPtr,PropertyMap> > &groups_and_maps);
+        MGIDsAndMaps(const QList<MolGroupPtr> &mgroups);
+        MGIDsAndMaps(const QList<boost::tuple<MolGroupPtr, PropertyMap>> &groups_and_maps);
 
-    MGIDsAndMaps(const QList<MolGroupPtr> &mgroups, const PropertyMap &map);
-    MGIDsAndMaps(const boost::tuple<QList<MolGroupPtr>,PropertyMap> &groups_and_maps);
+        MGIDsAndMaps(const QList<MolGroupPtr> &mgroups, const PropertyMap &map);
+        MGIDsAndMaps(const boost::tuple<QList<MolGroupPtr>, PropertyMap> &groups_and_maps);
 
-    MGIDsAndMaps(const MGID &mgid);
-    MGIDsAndMaps(const MGID &mgid, const PropertyMap &map);
+        MGIDsAndMaps(const MGID &mgid);
+        MGIDsAndMaps(const MGID &mgid, const PropertyMap &map);
 
-    MGIDsAndMaps(const boost::tuple<MGIdentifier,PropertyMap> mgid_and_map);
+        MGIDsAndMaps(const boost::tuple<MGIdentifier, PropertyMap> mgid_and_map);
 
-    MGIDsAndMaps(const QList<MGIdentifier> &mgids);
-    MGIDsAndMaps(const QList< boost::tuple<MGIdentifier,PropertyMap> > &mgids_and_maps);
+        MGIDsAndMaps(const QList<MGIdentifier> &mgids);
+        MGIDsAndMaps(const QList<boost::tuple<MGIdentifier, PropertyMap>> &mgids_and_maps);
 
-    MGIDsAndMaps(const QList<MGIdentifier> &mgids, const PropertyMap &map);
-    MGIDsAndMaps(const boost::tuple<QList<MGIdentifier>,PropertyMap> &mgids_and_maps);
+        MGIDsAndMaps(const QList<MGIdentifier> &mgids, const PropertyMap &map);
+        MGIDsAndMaps(const boost::tuple<QList<MGIdentifier>, PropertyMap> &mgids_and_maps);
 
-    MGIDsAndMaps(const QList<MGIDsAndMaps> &mgids_and_maps);
+        MGIDsAndMaps(const QList<MGIDsAndMaps> &mgids_and_maps);
 
-    MGIDsAndMaps(const MGIDsAndMaps &other);
+        MGIDsAndMaps(const MGIDsAndMaps &other);
 
-    ~MGIDsAndMaps();
+        ~MGIDsAndMaps();
 
-    MGIDsAndMaps& operator=(const MGIDsAndMaps &other);
+        MGIDsAndMaps &operator=(const MGIDsAndMaps &other);
 
-    bool operator==(const MGIDsAndMaps &other) const;
-    bool operator!=(const MGIDsAndMaps &other) const;
+        bool operator==(const MGIDsAndMaps &other) const;
+        bool operator!=(const MGIDsAndMaps &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    int count() const;
+        int count() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    const QVector<MGIdentifier>& mgIDs() const;
-    const QVector<PropertyMap>& propertyMaps() const;
+        const QVector<MGIdentifier> &mgIDs() const;
+        const QVector<PropertyMap> &propertyMaps() const;
 
-private:
-    QVector<MGIdentifier> mgids;
-    QVector<PropertyMap> maps;
-};
+    private:
+        QVector<MGIdentifier> mgids;
+        QVector<PropertyMap> maps;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::MGIDsAndMaps )
+Q_DECLARE_METATYPE(SireMol::MGIDsAndMaps)
 
-SIRE_EXPOSE_CLASS( SireMol::MGIDsAndMaps )
+SIRE_EXPOSE_CLASS(SireMol::MGIDsAndMaps)
 
 SIRE_END_HEADER
 

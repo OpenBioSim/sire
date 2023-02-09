@@ -29,13 +29,13 @@
 
 #include "ljparameterdb.h"
 
-#include "SireFF/errors.h"
 #include "SireError/errors.h"
+#include "SireFF/errors.h"
 
 using namespace SireMM;
 using namespace SireBase;
 
-static QHash<QString,LJParameterDB::CombiningRules> rule_types;
+static QHash<QString, LJParameterDB::CombiningRules> rule_types;
 
 LJParameterDB::LJParameterDBData LJParameterDB::ljdb;
 
@@ -52,26 +52,26 @@ LJParameterDB::CombiningRules LJParameterDB::interpret(const QString &rule)
         LJParameterDB::unlock();
     }
 
-    QHash<QString,CombiningRules>::const_iterator it = rule_types.constFind(rule);
+    QHash<QString, CombiningRules>::const_iterator it = rule_types.constFind(rule);
 
     if (it == rule_types.constEnd())
-        throw SireError::invalid_arg( QObject::tr(
-            "There is no combining rule available that matches the ID \"%1\". "
-            "Available rules are [ %2 ].")
-                .arg(rule, QStringList(rule_types.keys()).join(", ")), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("There is no combining rule available that matches the ID \"%1\". "
+                                                 "Available rules are [ %2 ].")
+                                         .arg(rule, QStringList(rule_types.keys()).join(", ")),
+                                     CODELOC);
 
     return *it;
 }
 
 /** Convert the passed rule into the string representing that rule */
-const QString& LJParameterDB::toString(LJParameterDB::CombiningRules rule)
+const QString &LJParameterDB::toString(LJParameterDB::CombiningRules rule)
 {
     switch (rule)
     {
-        case ARITHMETIC:
-            return rule_types.constFind("arithmetic").key();
-        case GEOMETRIC:
-            return rule_types.constFind("geometric").key();
+    case ARITHMETIC:
+        return rule_types.constFind("arithmetic").key();
+    case GEOMETRIC:
+        return rule_types.constFind("geometric").key();
     }
 
     return rule_types.constFind("arithmetic").key();
@@ -80,7 +80,8 @@ const QString& LJParameterDB::toString(LJParameterDB::CombiningRules rule)
 using namespace SireMM::detail;
 
 LJDBIOLockData::LJDBIOLockData() : boost::noncopyable()
-{}
+{
+}
 
 LJDBIOLockData::~LJDBIOLockData()
 {
@@ -88,16 +89,20 @@ LJDBIOLockData::~LJDBIOLockData()
 }
 
 LJDBIOLock::LJDBIOLock()
-{}
+{
+}
 
 LJDBIOLock::LJDBIOLock(const boost::shared_ptr<LJDBIOLockData> &ptr) : d(ptr)
-{}
+{
+}
 
 LJDBIOLock::LJDBIOLock(const LJDBIOLock &other) : d(other.d)
-{}
+{
+}
 
 LJDBIOLock::~LJDBIOLock()
-{}
+{
+}
 
 /** Save the LJParameter database to the datastream */
 LJDBIOLock LJParameterDB::saveParameters(SireStream::SharedDataStream &sds)
@@ -106,11 +111,11 @@ LJDBIOLock LJParameterDB::saveParameters(SireStream::SharedDataStream &sds)
 
     if (ljdb.dbio_count == 1)
     {
-        QReadLocker lkr( &(ljdb.db_lock) );
+        QReadLocker lkr(&(ljdb.db_lock));
         sds << ljdb.ljparams_by_idx;
     }
 
-    return LJDBIOLock( boost::shared_ptr<detail::LJDBIOLockData>( new detail::LJDBIOLockData() ) );
+    return LJDBIOLock(boost::shared_ptr<detail::LJDBIOLockData>(new detail::LJDBIOLockData()));
 }
 
 /** Load the LJParameter database from the datastream */
@@ -131,28 +136,32 @@ LJDBIOLock LJParameterDB::loadParameters(SireStream::SharedDataStream &sds)
         ljdb.unlock();
     }
 
-    return LJDBIOLock( boost::shared_ptr<detail::LJDBIOLockData>( new detail::LJDBIOLockData() ) );
+    return LJDBIOLock(boost::shared_ptr<detail::LJDBIOLockData>(new detail::LJDBIOLockData()));
 }
 
 void LJParameterDB::finishedIO()
 {
     ljdb.dbio_count -= 1;
 
-    if (ljdb.dbio_count < 0){ ljdb.dbio_count = 0; }
+    if (ljdb.dbio_count < 0)
+    {
+        ljdb.dbio_count = 0;
+    }
 }
 
 /** Constructor */
 LJParameterDB::LJParameterDBData::LJParameterDBData()
 {
-    //add the null LJ parameter - this has ID == 0
-    ljparams_by_idx.append( LJParameter::dummy() );
-    ljparams_by_value.insert( LJParameter::dummy(), 0 );
+    // add the null LJ parameter - this has ID == 0
+    ljparams_by_idx.append(LJParameter::dummy());
+    ljparams_by_value.insert(LJParameter::dummy(), 0);
     dbio_count = 0;
 }
 
 /** Destructor */
 LJParameterDB::LJParameterDBData::~LJParameterDBData()
-{}
+{
+}
 
 /** Return a square matrix of all of the combined LJ parameters, combined
     using geometric combining rules */
@@ -160,18 +169,18 @@ LJPairMatrix LJParameterDB::LJParameterDBData::combineGeometric() const
 {
     int nlj = ljparams_by_idx.count();
 
-    LJPairMatrix ljpairs( nlj, nlj );
+    LJPairMatrix ljpairs(nlj, nlj);
 
     LJPair *ljpairs_array = ljpairs.data();
 
     const LJParameter *ljparams_array = ljparams_by_idx.constData();
 
-    for (int i=0; i<nlj; ++i)
+    for (int i = 0; i < nlj; ++i)
     {
         const LJParameter &ljparam0 = ljparams_array[i];
-        LJPair *ljpairs_row = ljpairs_array + ljpairs.map(i,0);
+        LJPair *ljpairs_row = ljpairs_array + ljpairs.map(i, 0);
 
-        for (int j=0; j<nlj; ++j)
+        for (int j = 0; j < nlj; ++j)
         {
             ljpairs_row[j] = LJPair::geometric(ljparam0, ljparams_array[j]);
         }
@@ -186,18 +195,18 @@ LJPairMatrix LJParameterDB::LJParameterDBData::combineArithmetic() const
 {
     int nlj = ljparams_by_idx.count();
 
-    LJPairMatrix ljpairs( nlj, nlj );
+    LJPairMatrix ljpairs(nlj, nlj);
 
     LJPair *ljpairs_array = ljpairs.data();
 
     const LJParameter *ljparams_array = ljparams_by_idx.constData();
 
-    for (int i=0; i<nlj; ++i)
+    for (int i = 0; i < nlj; ++i)
     {
         const LJParameter &ljparam0 = ljparams_array[i];
-        LJPair *ljpairs_row = ljpairs_array + ljpairs.map(i,0);
+        LJPair *ljpairs_row = ljpairs_array + ljpairs.map(i, 0);
 
-        for (int j=0; j<nlj; ++j)
+        for (int j = 0; j < nlj; ++j)
         {
             ljpairs_row[j] = LJPair::arithmetic(ljparam0, ljparams_array[j]);
         }
@@ -207,10 +216,10 @@ LJPairMatrix LJParameterDB::LJParameterDBData::combineArithmetic() const
 }
 
 /** Return the matrix of LJ pairs for the given combining rules */
-const LJPairMatrix& LJParameterDB::LJParameterDBData::getLJPairs(CombiningRules type)
+const LJPairMatrix &LJParameterDB::LJParameterDBData::getLJPairs(CombiningRules type)
 {
-    //use a scope so that variables below are private - this allows
-    //me to use a QReadLocker to safely lock the database
+    // use a scope so that variables below are private - this allows
+    // me to use a QReadLocker to safely lock the database
     {
         QReadLocker lkr(&db_lock);
 
@@ -219,21 +228,21 @@ const LJPairMatrix& LJParameterDB::LJParameterDBData::getLJPairs(CombiningRules 
         if (it != ljpair_arrays.constEnd())
             return it.value();
 
-        //read lock is released at exit of this scope
+        // read lock is released at exit of this scope
     }
 
-    //the array wasn't found - it needs to be constructed
+    // the array wasn't found - it needs to be constructed
     QWriteLocker lkr(&db_lock);
 
     switch (type)
     {
-        case ARITHMETIC:
-            ljpair_arrays.insert( type, this->combineArithmetic() );
-            break;
+    case ARITHMETIC:
+        ljpair_arrays.insert(type, this->combineArithmetic());
+        break;
 
-        case GEOMETRIC:
-            ljpair_arrays.insert( type, this->combineGeometric() );
-            break;
+    case GEOMETRIC:
+        ljpair_arrays.insert(type, this->combineGeometric());
+        break;
     }
 
     return *(ljpair_arrays.constFind(type));
@@ -251,25 +260,23 @@ void LJParameterDB::LJParameterDBData::lock()
     locked the database via the lock() function, and you must
     unlock the database via the unlock() function once you have
     finished adding all of the parameters */
-quint32 LJParameterDB::LJParameterDBData::_locked_addLJParameter(
-                                                    const LJParameter &ljparam)
+quint32 LJParameterDB::LJParameterDBData::_locked_addLJParameter(const LJParameter &ljparam)
 {
-    //does the parameter exist already in the database?
-    QHash<LJParameter,quint32>::const_iterator
-                                    it = ljparams_by_value.constFind(ljparam);
+    // does the parameter exist already in the database?
+    QHash<LJParameter, quint32>::const_iterator it = ljparams_by_value.constFind(ljparam);
 
     if (it != ljparams_by_value.constEnd())
     {
         return it.value();
     }
 
-    //the parameter needs to be added
+    // the parameter needs to be added
     quint32 idx = ljparams_by_idx.count();
 
     ljparams_by_idx.append(ljparam);
     ljparams_by_value.insert(ljparam, idx);
 
-    //clear the existing LJ pair matricies, as these are now invalid
+    // clear the existing LJ pair matricies, as these are now invalid
     ljpair_arrays.clear();
 
     return idx;
@@ -298,11 +305,12 @@ quint32 LJParameterDB::LJParameterDBData::addLJParameter(const LJParameter &ljpa
 */
 LJParameter LJParameterDB::LJParameterDBData::_locked_getLJParameter(quint32 id) const
 {
-    //does the parameter exist already in the database?
+    // does the parameter exist already in the database?
     if (id > quint32(ljparams_by_idx.count()))
-        throw SireFF::missing_parameter( QObject::tr(
-            "Could not find the LJ parameter with ID %1 in the global "
-            "LJ parameter database.").arg(id), CODELOC );
+        throw SireFF::missing_parameter(QObject::tr("Could not find the LJ parameter with ID %1 in the global "
+                                                    "LJ parameter database.")
+                                            .arg(id),
+                                        CODELOC);
 
     return ljparams_by_idx.constData()[id];
 }

@@ -34,70 +34,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class BondType;
+    class BondType;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::BondType&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::BondType&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BondType &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BondType &);
 
 namespace SireMol
 {
 
-/** This class represents a bond type (e.g. single, double etc.)
+    /** This class represents a bond type (e.g. single, double etc.)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BondType
-    : public SireBase::ConcreteProperty<BondType,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BondType : public SireBase::ConcreteProperty<BondType, SireBase::Property>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const BondType&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, BondType&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BondType &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BondType &);
 
-public:
-    BondType();
+    public:
+        BondType();
 
-    BondType(const QString &s);
-    BondType(int sdf_value);
+        BondType(const QString &s);
+        BondType(int sdf_value);
 
-    BondType(const BondType &other);
+        BondType(const BondType &other);
 
-    ~BondType();
+        ~BondType();
 
-    BondType& operator=(const BondType &other);
+        BondType &operator=(const BondType &other);
 
-    bool operator==(const BondType &other) const;
-    bool operator!=(const BondType &other) const;
+        bool operator==(const BondType &other) const;
+        bool operator!=(const BondType &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    static BondType singleBond();
-    static BondType doubleBond();
-    static BondType tripleBond();
-    static BondType aromaticBond();
-    static BondType undefinedBond();
+        static BondType singleBond();
+        static BondType doubleBond();
+        static BondType tripleBond();
+        static BondType aromaticBond();
+        static BondType undefinedBond();
 
-    QString toString() const;
+        QString toString() const;
 
-    int value() const;
-    int sdfValue() const;
+        int value() const;
+        int sdfValue() const;
 
-    bool isDefined() const;
-    bool isSingle() const;
-    bool isDouble() const;
-    bool isTriple() const;
-    bool isAromatic() const;
+        bool isDefined() const;
+        bool isSingle() const;
+        bool isDouble() const;
+        bool isTriple() const;
+        bool isAromatic() const;
 
-private:
-    /** The bond type. We use an integer in SDF format */
-    qint32 bond_type;
-};
+    private:
+        /** The bond type. We use an integer in SDF format */
+        qint32 bond_type;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::BondType )
+Q_DECLARE_METATYPE(SireMol::BondType)
 
-SIRE_EXPOSE_CLASS( SireMol::BondType )
+SIRE_EXPOSE_CLASS(SireMol::BondType)
 
 SIRE_END_HEADER
 

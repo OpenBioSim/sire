@@ -34,121 +34,120 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SupraMoves;
-class SameSupraMoves;
-}
+    class SupraMoves;
+    class SameSupraMoves;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SupraMoves&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SupraMoves&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SupraMoves &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SupraMoves &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SameSupraMoves&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SameSupraMoves&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SameSupraMoves &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SameSupraMoves &);
 
 namespace SireMove
 {
 
-/** This is the base class of all sets of moves that can be applied
-    to supra-systems
+    /** This is the base class of all sets of moves that can be applied
+        to supra-systems
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraMoves : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SupraMoves&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraMoves&);
-
-public:
-    SupraMoves();
-
-    SupraMoves(const SupraMoves &other);
-
-    virtual ~SupraMoves();
-
-    virtual SupraMoves* clone() const=0;
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraMoves : public SireBase::Property
     {
-        return "SireMove::SupraMoves";
-    }
 
-    const SupraMove& operator[](int i) const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SupraMoves &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SupraMoves &);
 
-    int count() const;
-    int size() const;
-    int nSubMoveTypes() const;
+    public:
+        SupraMoves();
 
-    virtual int nMoves() const=0;
+        SupraMoves(const SupraMoves &other);
 
-    virtual QString toString() const=0;
+        virtual ~SupraMoves();
 
-    virtual void move(SupraSystem &system, int nmoves, bool record_stats=true)=0;
+        virtual SupraMoves *clone() const = 0;
 
-    virtual void clearStatistics()=0;
+        static const char *typeName()
+        {
+            return "SireMove::SupraMoves";
+        }
 
-    virtual QList<SupraMovePtr> moves() const=0;
+        const SupraMove &operator[](int i) const;
 
-    static const SameSupraMoves& null();
+        int count() const;
+        int size() const;
+        int nSubMoveTypes() const;
 
-protected:
-    SupraMoves& operator=(const SupraMoves &other);
+        virtual int nMoves() const = 0;
 
-    bool operator==(const SupraMoves &other) const;
-    bool operator!=(const SupraMoves &other) const;
-};
+        virtual QString toString() const = 0;
 
-/** This SupraMoves object is used to apply the same SupraMove
-    repeatedly to a SupraSystem
+        virtual void move(SupraSystem &system, int nmoves, bool record_stats = true) = 0;
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SameSupraMoves
-            : public SireBase::ConcreteProperty<SameSupraMoves,SupraMoves>
-{
+        virtual void clearStatistics() = 0;
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SameSupraMoves&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SameSupraMoves&);
+        virtual QList<SupraMovePtr> moves() const = 0;
 
-public:
-    SameSupraMoves();
-    SameSupraMoves(const SupraMove &move);
+        static const SameSupraMoves &null();
 
-    SameSupraMoves(const SameSupraMoves &other);
+    protected:
+        SupraMoves &operator=(const SupraMoves &other);
 
-    ~SameSupraMoves();
+        bool operator==(const SupraMoves &other) const;
+        bool operator!=(const SupraMoves &other) const;
+    };
 
-    SameSupraMoves& operator=(const SameSupraMoves &other);
+    /** This SupraMoves object is used to apply the same SupraMove
+        repeatedly to a SupraSystem
 
-    bool operator==(const SameSupraMoves &other) const;
-    bool operator!=(const SameSupraMoves &other) const;
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SameSupraMoves : public SireBase::ConcreteProperty<SameSupraMoves, SupraMoves>
+    {
 
-    static const char* typeName();
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SameSupraMoves &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SameSupraMoves &);
 
-    QString toString() const;
+    public:
+        SameSupraMoves();
+        SameSupraMoves(const SupraMove &move);
 
-    void move(SupraSystem &system, int nmoves, bool record_stats=true);
+        SameSupraMoves(const SameSupraMoves &other);
 
-    int nMoves() const;
+        ~SameSupraMoves();
 
-    void clearStatistics();
+        SameSupraMoves &operator=(const SameSupraMoves &other);
 
-    QList<SupraMovePtr> moves() const;
+        bool operator==(const SameSupraMoves &other) const;
+        bool operator!=(const SameSupraMoves &other) const;
 
-private:
-    /** The move that will be repeatedly applied to the SupraSystem */
-    SupraMovePtr mv;
-};
+        static const char *typeName();
 
-typedef SireBase::PropPtr<SupraMoves> SupraMovesPtr;
+        QString toString() const;
 
-}
+        void move(SupraSystem &system, int nmoves, bool record_stats = true);
 
-Q_DECLARE_METATYPE( SireMove::SameSupraMoves )
+        int nMoves() const;
 
-SIRE_EXPOSE_CLASS( SireMove::SupraMoves )
-SIRE_EXPOSE_CLASS( SireMove::SameSupraMoves )
+        void clearStatistics();
 
-SIRE_EXPOSE_PROPERTY( SireMove::SupraMovesPtr, SireMove::SupraMoves )
+        QList<SupraMovePtr> moves() const;
+
+    private:
+        /** The move that will be repeatedly applied to the SupraSystem */
+        SupraMovePtr mv;
+    };
+
+    typedef SireBase::PropPtr<SupraMoves> SupraMovesPtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::SameSupraMoves)
+
+SIRE_EXPOSE_CLASS(SireMove::SupraMoves)
+SIRE_EXPOSE_CLASS(SireMove::SameSupraMoves)
+
+SIRE_EXPOSE_PROPERTY(SireMove::SupraMovesPtr, SireMove::SupraMoves)
 
 SIRE_END_HEADER
 

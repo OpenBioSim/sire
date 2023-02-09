@@ -43,13 +43,16 @@ using namespace SireStream;
 ///////
 
 MonitorID::MonitorID() : SireID::ID()
-{}
+{
+}
 
 MonitorID::MonitorID(const MonitorID &other) : SireID::ID(other)
-{}
+{
+}
 
 MonitorID::~MonitorID()
-{}
+{
+}
 
 Specify<MonitorID> MonitorID::operator[](int i) const
 {
@@ -96,13 +99,11 @@ IDOrSet<MonitorID> MonitorID::operator|(const MonitorID &other) const
     return this->operator*(other);
 }
 
-QList<MonitorName> MonitorID::processMatches(QList<MonitorName> &matches,
-                                             const SystemMonitors &monitors) const
+QList<MonitorName> MonitorID::processMatches(QList<MonitorName> &matches, const SystemMonitors &monitors) const
 {
     if (matches.isEmpty())
-        throw SireSystem::missing_monitor( QObject::tr(
-            "There are no monitors available that match the ID \"%1\".")
-                .arg(this->toString()), CODELOC );
+        throw SireSystem::missing_monitor(
+            QObject::tr("There are no monitors available that match the ID \"%1\".").arg(this->toString()), CODELOC);
 
     return matches;
 }
@@ -118,7 +119,7 @@ QDataStream &operator<<(QDataStream &ds, const MonitorIdx &monidx)
 {
     writeHeader(ds, r_monidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<MonitorIdx>&>(monidx);
+    ds << static_cast<const SireID::Index_T_<MonitorIdx> &>(monidx);
 
     return ds;
 }
@@ -130,26 +131,29 @@ QDataStream &operator>>(QDataStream &ds, MonitorIdx &monidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<MonitorIdx>&>(monidx);
+        ds >> static_cast<SireID::Index_T_<MonitorIdx> &>(monidx);
     }
     else
-        throw version_error( v, "1", r_monidx, CODELOC );
+        throw version_error(v, "1", r_monidx, CODELOC);
 
     return ds;
 }
 
 MonitorIdx::MonitorIdx() : SireID::Index_T_<MonitorIdx>(), MonitorID()
-{}
+{
+}
 
 MonitorIdx::MonitorIdx(qint32 idx) : SireID::Index_T_<MonitorIdx>(idx), MonitorID()
-{}
+{
+}
 
-MonitorIdx::MonitorIdx(const MonitorIdx &other)
-           : SireID::Index_T_<MonitorIdx>(other), MonitorID(other)
-{}
+MonitorIdx::MonitorIdx(const MonitorIdx &other) : SireID::Index_T_<MonitorIdx>(other), MonitorID(other)
+{
+}
 
 MonitorIdx::~MonitorIdx()
-{}
+{
+}
 
 QList<MonitorName> MonitorIdx::map(const SystemMonitors &monitors) const
 {
@@ -176,7 +180,7 @@ QString MonitorIdx::toString() const
     return QString("MonitorIdx(%1)").arg(_idx);
 }
 
-MonitorIdx& MonitorIdx::operator=(const MonitorIdx &other)
+MonitorIdx &MonitorIdx::operator=(const MonitorIdx &other)
 {
     SireID::IndexBase::operator=(other);
     MonitorID::operator=(other);
@@ -188,9 +192,9 @@ bool MonitorIdx::operator==(const SireID::ID &other) const
     return SireID::ID::compare<MonitorIdx>(*this, other);
 }
 
-const char* MonitorIdx::typeName()
+const char *MonitorIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MonitorIdx>() );
+    return QMetaType::typeName(qMetaTypeId<MonitorIdx>());
 }
 
 ///////
@@ -204,7 +208,7 @@ QDataStream &operator<<(QDataStream &ds, const MonitorName &monname)
 {
     writeHeader(ds, r_monname, 1);
 
-    ds << static_cast<const SireID::Name&>(monname);
+    ds << static_cast<const SireID::Name &>(monname);
 
     return ds;
 }
@@ -216,25 +220,29 @@ QDataStream &operator>>(QDataStream &ds, MonitorName &monname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(monname);
+        ds >> static_cast<SireID::Name &>(monname);
     }
     else
-        throw version_error( v, "1", r_monname, CODELOC );
+        throw version_error(v, "1", r_monname, CODELOC);
 
     return ds;
 }
 
 MonitorName::MonitorName() : SireID::Name(), MonitorID()
-{}
+{
+}
 
 MonitorName::MonitorName(const QString &name) : SireID::Name(name), MonitorID()
-{}
+{
+}
 
 MonitorName::MonitorName(const MonitorName &other) : SireID::Name(other), MonitorID(other)
-{}
+{
+}
 
 MonitorName::~MonitorName()
-{}
+{
+}
 
 bool MonitorName::isNull() const
 {
@@ -251,7 +259,7 @@ QString MonitorName::toString() const
     return QString("MonitorName('%1')").arg(_name);
 }
 
-MonitorName& MonitorName::operator=(const MonitorName &other)
+MonitorName &MonitorName::operator=(const MonitorName &other)
 {
     SireID::Name::operator=(other);
     MonitorID::operator=(other);
@@ -278,9 +286,9 @@ QList<MonitorName> MonitorName::map(const SystemMonitors &monitors) const
     return monitors.map(*this);
 }
 
-const char* MonitorName::typeName()
+const char *MonitorName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MonitorName>() );
+    return QMetaType::typeName(qMetaTypeId<MonitorName>());
 }
 
 ///////
@@ -291,20 +299,18 @@ namespace SireID
     template class Specify<MonitorID>;
     template class IDAndSet<MonitorID>;
     template class IDOrSet<MonitorID>;
-}
+} // namespace SireID
 
-static const RegisterMetaType< Specify<MonitorID> > r_specify_monid;
-static const RegisterMetaType< IDAndSet<MonitorID> > r_idandset_monid;
-static const RegisterMetaType< IDOrSet<MonitorID> > r_idorset_monid;
+static const RegisterMetaType<Specify<MonitorID>> r_specify_monid;
+static const RegisterMetaType<IDAndSet<MonitorID>> r_idandset_monid;
+static const RegisterMetaType<IDOrSet<MonitorID>> r_idorset_monid;
 
-MonitorIdx* MonitorIdx::clone() const
+MonitorIdx *MonitorIdx::clone() const
 {
     return new MonitorIdx(*this);
 }
 
-
-MonitorName* MonitorName::clone() const
+MonitorName *MonitorName::clone() const
 {
     return new MonitorName(*this);
 }
-

@@ -34,68 +34,67 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Stereoscopy;
+    class Stereoscopy;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Stereoscopy&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Stereoscopy&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Stereoscopy &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Stereoscopy &);
 
 namespace SireMol
 {
 
-/** This class represents a bond type (e.g. single, double etc.)
+    /** This class represents a bond type (e.g. single, double etc.)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT Stereoscopy
-    : public SireBase::ConcreteProperty<Stereoscopy,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT Stereoscopy : public SireBase::ConcreteProperty<Stereoscopy, SireBase::Property>
+    {
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const Stereoscopy&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, Stereoscopy&);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Stereoscopy &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Stereoscopy &);
 
-public:
-    Stereoscopy();
+    public:
+        Stereoscopy();
 
-    Stereoscopy(const QString &s);
-    Stereoscopy(int sdf_value);
+        Stereoscopy(const QString &s);
+        Stereoscopy(int sdf_value);
 
-    Stereoscopy(const Stereoscopy &other);
+        Stereoscopy(const Stereoscopy &other);
 
-    ~Stereoscopy();
+        ~Stereoscopy();
 
-    Stereoscopy& operator=(const Stereoscopy &other);
+        Stereoscopy &operator=(const Stereoscopy &other);
 
-    bool operator==(const Stereoscopy &other) const;
-    bool operator!=(const Stereoscopy &other) const;
+        bool operator==(const Stereoscopy &other) const;
+        bool operator!=(const Stereoscopy &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    static Stereoscopy up();
-    static Stereoscopy down();
-    static Stereoscopy notStereo();
-    static Stereoscopy undefined();
+        static Stereoscopy up();
+        static Stereoscopy down();
+        static Stereoscopy notStereo();
+        static Stereoscopy undefined();
 
-    QString toString() const;
+        QString toString() const;
 
-    int value() const;
-    int sdfValue() const;
+        int value() const;
+        int sdfValue() const;
 
-    bool isDefined() const;
-    bool isUp() const;
-    bool isDown() const;
-    bool isNotStereo() const;
+        bool isDefined() const;
+        bool isUp() const;
+        bool isDown() const;
+        bool isNotStereo() const;
 
-private:
-    /** The stereo type. We use an integer in SDF format */
-    qint32 stereo_type;
-};
+    private:
+        /** The stereo type. We use an integer in SDF format */
+        qint32 stereo_type;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::Stereoscopy )
+Q_DECLARE_METATYPE(SireMol::Stereoscopy)
 
-SIRE_EXPOSE_CLASS( SireMol::Stereoscopy )
+SIRE_EXPOSE_CLASS(SireMol::Stereoscopy)
 
 SIRE_END_HEADER
 

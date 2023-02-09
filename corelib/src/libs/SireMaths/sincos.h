@@ -47,6 +47,6 @@ namespace SireMaths
         *sval = std::sin(ang);
         *cval = std::cos(ang);
     }
-}
+} // namespace SireMaths
 
 #endif

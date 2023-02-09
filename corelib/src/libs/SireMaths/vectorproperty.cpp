@@ -38,19 +38,19 @@ namespace SireMaths
 {
     PropertyPtr wrap(const Vector &vector)
     {
-        return PropertyPtr( VectorProperty(vector) );
+        return PropertyPtr(VectorProperty(vector));
     }
 
     PropertyPtr wrap(const QVector<Vector> &vector)
     {
-        return PropertyPtr( VectorArrayProperty(vector) );
+        return PropertyPtr(VectorArrayProperty(vector));
     }
 
     PropertyPtr wrap(const QList<Vector> &vector)
     {
-        return PropertyPtr( VectorArrayProperty(vector) );
+        return PropertyPtr(VectorArrayProperty(vector));
     }
-}
+} // namespace SireMaths
 
 //////////
 ////////// Implementation of VectorArrayProperty
@@ -85,31 +85,35 @@ QDataStream &operator>>(QDataStream &ds, VectorArrayProperty &vecarray)
     return ds;
 }
 
-VectorArrayProperty::VectorArrayProperty()
-                    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector> >()
-{}
+VectorArrayProperty::VectorArrayProperty() : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector>>()
+{
+}
 
 VectorArrayProperty::VectorArrayProperty(const QList<Vector> &array)
-                    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector> >(array)
-{}
+    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector>>(array)
+{
+}
 
 VectorArrayProperty::VectorArrayProperty(const QVector<Vector> &array)
-                    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector> >(array)
-{}
+    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector>>(array)
+{
+}
 
 VectorArrayProperty::VectorArrayProperty(const VectorArrayProperty &other)
-                    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector> >(other)
-{}
+    : ConcreteProperty<VectorArrayProperty, ArrayProperty<Vector>>(other)
+{
+}
 
 VectorArrayProperty::~VectorArrayProperty()
-{}
+{
+}
 
-const char* VectorArrayProperty::typeName()
+const char *VectorArrayProperty::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<VectorArrayProperty>());
 }
 
-VectorArrayProperty& VectorArrayProperty::operator=(const VectorArrayProperty &other)
+VectorArrayProperty &VectorArrayProperty::operator=(const VectorArrayProperty &other)
 {
     ArrayProperty<Vector>::operator=(other);
     return *this;
@@ -127,10 +131,10 @@ bool VectorArrayProperty::operator!=(const VectorArrayProperty &other) const
 
 VectorArrayProperty VectorArrayProperty::operator+(const VectorArrayProperty &other) const
 {
-    return VectorArrayProperty( ArrayProperty<Vector>::operator+(other) );
+    return VectorArrayProperty(ArrayProperty<Vector>::operator+(other));
 }
 
-VectorArrayProperty& VectorArrayProperty::operator+=(const VectorArrayProperty &other)
+VectorArrayProperty &VectorArrayProperty::operator+=(const VectorArrayProperty &other)
 {
     ArrayProperty<Vector>::operator+=(other);
     return *this;
@@ -146,7 +150,7 @@ QDataStream &operator<<(QDataStream &ds, const VectorProperty &vecprop)
 {
     writeHeader(ds, r_vecprop, 1);
 
-    ds << static_cast<const Vector&>(vecprop);
+    ds << static_cast<const Vector &>(vecprop);
 
     return ds;
 }
@@ -157,7 +161,7 @@ QDataStream &operator>>(QDataStream &ds, VectorProperty &vecprop)
 
     if (v == 1)
     {
-        ds >> static_cast<Vector&>(vecprop);
+        ds >> static_cast<Vector &>(vecprop);
     }
     else
         throw version_error(v, "1", r_vecprop, CODELOC);
@@ -166,47 +170,50 @@ QDataStream &operator>>(QDataStream &ds, VectorProperty &vecprop)
 }
 
 /** Constructor */
-VectorProperty::VectorProperty() : ConcreteProperty<VectorProperty,Property>(), Vector()
-{}
+VectorProperty::VectorProperty() : ConcreteProperty<VectorProperty, Property>(), Vector()
+{
+}
 
 /** Construct a copy of the passed vector */
-VectorProperty::VectorProperty(const Vector &value)
-               : ConcreteProperty<VectorProperty,Property>(), Vector(value)
-{}
+VectorProperty::VectorProperty(const Vector &value) : ConcreteProperty<VectorProperty, Property>(), Vector(value)
+{
+}
 
 /** Copy constructor */
 VectorProperty::VectorProperty(const VectorProperty &other)
-               : ConcreteProperty<VectorProperty,Property>(other), Vector(other)
-{}
+    : ConcreteProperty<VectorProperty, Property>(other), Vector(other)
+{
+}
 
 /** Destructor */
 VectorProperty::~VectorProperty()
-{}
-
-const char* VectorProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<VectorProperty>() );
 }
 
-const char* VectorProperty::what() const
+const char *VectorProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<VectorProperty>());
+}
+
+const char *VectorProperty::what() const
 {
     return VectorProperty::typeName();
 }
 
-VectorProperty* VectorProperty::clone() const
+VectorProperty *VectorProperty::clone() const
 {
     return new VectorProperty(*this);
 }
 
 /** Copy assignment operator */
-VectorProperty& VectorProperty::operator=(const VectorProperty &other)
+VectorProperty &VectorProperty::operator=(const VectorProperty &other)
 {
     Vector::operator=(other);
     return *this;
 }
 
 /** Copy assignment operator */
-VectorProperty& VectorProperty::operator=(const Vector &other)
+VectorProperty &VectorProperty::operator=(const Vector &other)
 {
     Vector::operator=(other);
     return *this;
@@ -234,4 +241,3 @@ QString VectorProperty::toString() const
 {
     return Vector::toString();
 }
-

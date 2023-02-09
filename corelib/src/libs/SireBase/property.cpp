@@ -27,9 +27,9 @@
 
 #include <QMutex>
 
+#include "generalunitproperty.h"
 #include "property.h"
 #include "propertylist.h"
-#include "generalunitproperty.h"
 
 #include <QDebug>
 
@@ -43,16 +43,16 @@ using namespace SireBase;
 using namespace SireBase;
 using namespace SireStream;
 
-Q_GLOBAL_STATIC_WITH_ARGS( QMutex, getGlobalMutex, ((QMutex::Recursive)) );
+Q_GLOBAL_STATIC_WITH_ARGS(QMutex, getGlobalMutex, ((QMutex::Recursive)));
 
 namespace SireBase
 {
 
-/** Return a pointer to a global mutex */
-QMutex *globalLock()
-{
-    return getGlobalMutex();
-}
+    /** Return a pointer to a global mutex */
+    QMutex *globalLock()
+    {
+        return getGlobalMutex();
+    }
 
 } // end of namespace SireBase
 
@@ -62,30 +62,33 @@ QMutex *globalLock()
 
 /** Constructor */
 Property::Property() : RefCountData()
-{}
+{
+}
 
 /** Copy constructor */
-Property::Property(const Property&) : RefCountData()
-{}
+Property::Property(const Property &) : RefCountData()
+{
+}
 
 /** Destructor */
 Property::~Property()
-{}
+{
+}
 
 /** Assignment operator */
-Property& Property::operator=(const Property&)
+Property &Property::operator=(const Property &)
 {
     return *this;
 }
 
 /** Comparison operator */
-bool Property::operator==(const Property&) const
+bool Property::operator==(const Property &) const
 {
     return true;
 }
 
 /** Comparison operator */
-bool Property::operator!=(const Property&) const
+bool Property::operator!=(const Property &) const
 {
     return false;
 }
@@ -94,7 +97,7 @@ bool Property::operator!=(const Property&) const
     help if all properties output something more sensible */
 QString Property::toString() const
 {
-    return QString("%1()").arg( this->what() );
+    return QString("%1()").arg(this->what());
 }
 
 /** Return whether or not this property holds a string (or can convert
@@ -198,10 +201,11 @@ PropertyList Property::asAnArray() const
 */
 void Property::throwInvalidCast(const Property &other) const
 {
-    throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast from an object of class \"%1\" to an object "
-            "of class \"%2\".")
-                .arg(other.what()).arg(this->what()), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast from an object of class \"%1\" to an object "
+                                              "of class \"%2\".")
+                                      .arg(other.what())
+                                      .arg(this->what()),
+                                  CODELOC);
 }
 
 /** Throw an invalid cast!
@@ -210,17 +214,17 @@ void Property::throwInvalidCast(const Property &other) const
 */
 void Property::throwInvalidCast(const char *typenam) const
 {
-    throw SireError::invalid_cast( QObject::tr(
-            "Cannot cast from an object of class \"%1\" to an object "
-            "of class \"%2\".")
-                .arg(this->what()).arg(typenam), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast from an object of class \"%1\" to an object "
+                                              "of class \"%2\".")
+                                      .arg(this->what())
+                                      .arg(typenam),
+                                  CODELOC);
 }
 
-static const RegisterMetaType<Property> r_propbase(MAGIC_ONLY,
-                                                       "SireBase::Property");
+static const RegisterMetaType<Property> r_propbase(MAGIC_ONLY, "SireBase::Property");
 
 /** Serialise to a binary data stream */
-QDataStream &operator<<(QDataStream &ds, const Property&)
+QDataStream &operator<<(QDataStream &ds, const Property &)
 {
     writeHeader(ds, r_propbase, 0);
 
@@ -228,7 +232,7 @@ QDataStream &operator<<(QDataStream &ds, const Property&)
 }
 
 /** Deserialise from a binary data stream */
-QDataStream &operator>>(QDataStream &ds, Property&)
+QDataStream &operator>>(QDataStream &ds, Property &)
 {
     VersionID v = readHeader(ds, r_propbase);
 
@@ -249,7 +253,7 @@ QDataStream &operator<<(QDataStream &ds, const NullProperty &property)
 {
     writeHeader(ds, r_nullprop, 1);
 
-    ds << static_cast<const Property&>(property);
+    ds << static_cast<const Property &>(property);
 
     return ds;
 }
@@ -261,7 +265,7 @@ QDataStream &operator>>(QDataStream &ds, NullProperty &property)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(property);
+        ds >> static_cast<Property &>(property);
     }
     else
         throw version_error(v, "1", r_nullprop, CODELOC);
@@ -269,24 +273,25 @@ QDataStream &operator>>(QDataStream &ds, NullProperty &property)
     return ds;
 }
 
-NullProperty::NullProperty()
-             : ConcreteProperty<NullProperty,Property>()
-{}
+NullProperty::NullProperty() : ConcreteProperty<NullProperty, Property>()
+{
+}
 
-NullProperty::NullProperty(const NullProperty &other)
-             : ConcreteProperty<NullProperty,Property>(other)
-{}
+NullProperty::NullProperty(const NullProperty &other) : ConcreteProperty<NullProperty, Property>(other)
+{
+}
 
 NullProperty::~NullProperty()
-{}
-
-const char* NullProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullProperty>() );
+}
+
+const char *NullProperty::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullProperty>());
 }
 
 /** Return the global null property */
-const NullProperty& Property::null()
+const NullProperty &Property::null()
 {
     return *create_shared_null<NullProperty>();
 }
@@ -300,12 +305,10 @@ QString NullProperty::toString() const
 /////////////// Implementation of PropPtrBase
 ///////////////
 
-static const RegisterMetaType<PropPtrBase> r_propptr( MAGIC_ONLY, NO_ROOT,
-                                                      "SireBase::PropPtrBase" );
+static const RegisterMetaType<PropPtrBase> r_propptr(MAGIC_ONLY, NO_ROOT, "SireBase::PropPtrBase");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const PropPtrBase &propptr)
+QDataStream &operator<<(QDataStream &ds, const PropPtrBase &propptr)
 {
     writeHeader(ds, r_propptr, 1);
 
@@ -334,27 +337,28 @@ QDataStream &operator>>(QDataStream &ds, PropPtrBase &propptr)
 }
 
 /** Construct to hold a pointer to 'property' */
-PropPtrBase::PropPtrBase(const Property &property)
-                : ptr(property)
-{}
+PropPtrBase::PropPtrBase(const Property &property) : ptr(property)
+{
+}
 
 /** Construct to hold a pointer to 'property' - this takes over
     ownership of the pointer */
-PropPtrBase::PropPtrBase(Property *property)
-            : ptr(property)
-{}
+PropPtrBase::PropPtrBase(Property *property) : ptr(property)
+{
+}
 
 /** Copy constructor */
-PropPtrBase::PropPtrBase(const PropPtrBase &other)
-                : ptr(other.ptr)
-{}
+PropPtrBase::PropPtrBase(const PropPtrBase &other) : ptr(other.ptr)
+{
+}
 
 /** Destructor */
 PropPtrBase::~PropPtrBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-PropPtrBase& PropPtrBase::operator=(const PropPtrBase &other)
+PropPtrBase &PropPtrBase::operator=(const PropPtrBase &other)
 {
     ptr = other.ptr;
     return *this;
@@ -363,29 +367,25 @@ PropPtrBase& PropPtrBase::operator=(const PropPtrBase &other)
 /** Comparison operator */
 bool PropPtrBase::operator==(const PropPtrBase &other) const
 {
-    return ptr.constData() == other.ptr.constData() or
-           ptr->equals(*(other.ptr));
+    return ptr.constData() == other.ptr.constData() or ptr->equals(*(other.ptr));
 }
 
 /** Comparison operator */
 bool PropPtrBase::operator!=(const PropPtrBase &other) const
 {
-    return ptr.constData() != other.ptr.constData() and
-           not ptr->equals(*(other.ptr));
+    return ptr.constData() != other.ptr.constData() and not ptr->equals(*(other.ptr));
 }
 
 /** Comparison operator */
 bool PropPtrBase::operator==(const Property &other) const
 {
-    return ptr.constData() == &other or
-           ptr->equals(other);
+    return ptr.constData() == &other or ptr->equals(other);
 }
 
 /** Comparison operator */
 bool PropPtrBase::operator!=(const Property &other) const
 {
-    return ptr.constData() != &other and
-           not ptr->equals(other);
+    return ptr.constData() != &other and not ptr->equals(other);
 }
 
 /** Is this a unique pointer to the object? */
@@ -401,102 +401,102 @@ void PropPtrBase::detach()
 }
 
 /** Allow automatic casting to a Property */
-PropPtrBase::operator const Property&() const
+PropPtrBase::operator const Property &() const
 {
     return *ptr;
 }
 
 /** Return a read-only reference to the object */
-const Property& PropPtrBase::read() const
+const Property &PropPtrBase::read() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return *ptr;
 }
 
 /** Return a writable reference to the object. This performs
     a copy-on-write test and action */
-Property& PropPtrBase::edit()
+Property &PropPtrBase::edit()
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return *ptr;
 }
 
 /** Return a writable reference to the object. This performs
     a copy-on-write test and action - this is a synonym for PropPtr::edit */
-Property& PropPtrBase::write()
+Property &PropPtrBase::write()
 {
     return PropPtrBase::edit();
 }
 
 bool PropPtrBase::isAString() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAString();
 }
 
 bool PropPtrBase::isAUnit() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAUnit();
 }
 
 bool PropPtrBase::isADouble() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isADouble();
 }
 
 bool PropPtrBase::isAnInteger() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAnInteger();
 }
 
 bool PropPtrBase::isABoolean() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isABoolean();
 }
 
 bool PropPtrBase::isAnArray() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAnArray();
 }
 
 QString PropPtrBase::asAString() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAString();
 }
 
 SireUnits::Dimension::GeneralUnit PropPtrBase::asAUnit() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAUnit();
 }
 
 double PropPtrBase::asADouble() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asADouble();
 }
 
 int PropPtrBase::asAnInteger() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAnInteger();
 }
 
 bool PropPtrBase::asABoolean() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asABoolean();
 }
 
 PropertyList PropPtrBase::asAnArray() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAnArray();
 }
 
@@ -506,21 +506,18 @@ PropertyList PropPtrBase::asAnArray() const
 */
 void PropPtrBase::throwCastingError(const char *got_type, const char *want_type)
 {
-    throw SireError::invalid_cast( QObject::tr(
-        "Cannot cast from a %1 into a %2.")
-            .arg(got_type).arg(want_type), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast from a %1 into a %2.").arg(got_type).arg(want_type),
+                                  CODELOC);
 }
 
 ///////////////
 /////////////// Implementation of GlobalPropPtrBase
 ///////////////
 
-static const RegisterMetaType<GlobalPropPtrBase> r_globalpropptr( MAGIC_ONLY, NO_ROOT,
-                                                      "SireBase::GlobalPropPtrBase" );
+static const RegisterMetaType<GlobalPropPtrBase> r_globalpropptr(MAGIC_ONLY, NO_ROOT, "SireBase::GlobalPropPtrBase");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const GlobalPropPtrBase &propptr)
+QDataStream &operator<<(QDataStream &ds, const GlobalPropPtrBase &propptr)
 {
     writeHeader(ds, r_globalpropptr, 1);
 
@@ -549,27 +546,28 @@ QDataStream &operator>>(QDataStream &ds, GlobalPropPtrBase &propptr)
 }
 
 /** Construct to hold a pointer to 'property' */
-GlobalPropPtrBase::GlobalPropPtrBase(const Property &property)
-                  : ptr(property)
-{}
+GlobalPropPtrBase::GlobalPropPtrBase(const Property &property) : ptr(property)
+{
+}
 
 /** Construct to hold a pointer to 'property' - this takes over
     ownership of the pointer */
-GlobalPropPtrBase::GlobalPropPtrBase(Property *property)
-                  : ptr(property)
-{}
+GlobalPropPtrBase::GlobalPropPtrBase(Property *property) : ptr(property)
+{
+}
 
 /** Copy constructor */
-GlobalPropPtrBase::GlobalPropPtrBase(const GlobalPropPtrBase &other)
-                  : ptr(other.ptr)
-{}
+GlobalPropPtrBase::GlobalPropPtrBase(const GlobalPropPtrBase &other) : ptr(other.ptr)
+{
+}
 
 /** Destructor */
 GlobalPropPtrBase::~GlobalPropPtrBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-GlobalPropPtrBase& GlobalPropPtrBase::operator=(const GlobalPropPtrBase &other)
+GlobalPropPtrBase &GlobalPropPtrBase::operator=(const GlobalPropPtrBase &other)
 {
     ptr = other.ptr;
     return *this;
@@ -590,15 +588,13 @@ bool GlobalPropPtrBase::operator!=(const GlobalPropPtrBase &other) const
 /** Comparison operator */
 bool GlobalPropPtrBase::operator==(const Property &other) const
 {
-    return ptr.constData() == &other or
-           ptr->equals(other);
+    return ptr.constData() == &other or ptr->equals(other);
 }
 
 /** Comparison operator */
 bool GlobalPropPtrBase::operator!=(const Property &other) const
 {
-    return ptr.constData() != &other and
-           not ptr->equals(other);
+    return ptr.constData() != &other and not ptr->equals(other);
 }
 
 /** Is this a unique pointer to the object? */
@@ -608,86 +604,86 @@ bool GlobalPropPtrBase::unique() const
 }
 
 /** Allow automatic casting to a Property */
-GlobalPropPtrBase::operator const Property&() const
+GlobalPropPtrBase::operator const Property &() const
 {
     return *ptr;
 }
 
 /** Return a read-only reference to the object */
-const Property& GlobalPropPtrBase::read() const
+const Property &GlobalPropPtrBase::read() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return *ptr;
 }
 bool GlobalPropPtrBase::isAString() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAString();
 }
 
 bool GlobalPropPtrBase::isAUnit() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAUnit();
 }
 
 bool GlobalPropPtrBase::isADouble() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isADouble();
 }
 
 bool GlobalPropPtrBase::isAnInteger() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAnInteger();
 }
 
 bool GlobalPropPtrBase::isABoolean() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isABoolean();
 }
 
 bool GlobalPropPtrBase::isAnArray() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->isAnArray();
 }
 
 QString GlobalPropPtrBase::asAString() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAString();
 }
 
 SireUnits::Dimension::GeneralUnit GlobalPropPtrBase::asAUnit() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAUnit();
 }
 
 double GlobalPropPtrBase::asADouble() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asADouble();
 }
 
 int GlobalPropPtrBase::asAnInteger() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAnInteger();
 }
 
 bool GlobalPropPtrBase::asABoolean() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asABoolean();
 }
 
 PropertyList GlobalPropPtrBase::asAnArray() const
 {
-    BOOST_ASSERT( ptr.constData() != 0 );
+    BOOST_ASSERT(ptr.constData() != 0);
     return ptr->asAnArray();
 }
 
@@ -697,101 +693,102 @@ PropertyList GlobalPropPtrBase::asAnArray() const
 */
 void GlobalPropPtrBase::throwCastingError(const char *got_type, const char *want_type)
 {
-    throw SireError::invalid_cast( QObject::tr(
-        "Cannot cast from a %1 into a %2.")
-            .arg(got_type).arg(want_type), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot cast from a %1 into a %2.").arg(got_type).arg(want_type),
+                                  CODELOC);
 }
 
 ////////
 //////// Full instantiation of PropPtr<Property>
 ////////
 
-PropPtr<Property>::PropPtr() : PropPtrBase( Property::null() )
-{}
+PropPtr<Property>::PropPtr() : PropPtrBase(Property::null())
+{
+}
 
-PropPtr<Property>::PropPtr(const Property &property)
-                  : PropPtrBase(property)
-{}
+PropPtr<Property>::PropPtr(const Property &property) : PropPtrBase(property)
+{
+}
 
-PropPtr<Property>::PropPtr(Property *property)
-                  : PropPtrBase(property)
-{}
+PropPtr<Property>::PropPtr(Property *property) : PropPtrBase(property)
+{
+}
 
-PropPtr<Property>::PropPtr(const PropPtrBase &other)
-                  : PropPtrBase(other)
-{}
+PropPtr<Property>::PropPtr(const PropPtrBase &other) : PropPtrBase(other)
+{
+}
 
-PropPtr<Property>::PropPtr(const PropPtr<Property> &other)
-                  : PropPtrBase(other)
-{}
+PropPtr<Property>::PropPtr(const PropPtr<Property> &other) : PropPtrBase(other)
+{
+}
 
 PropPtr<Property>::~PropPtr()
-{}
+{
+}
 
-PropPtr<Property>& PropPtr<Property>::operator=(const PropPtr<Property> &other)
+PropPtr<Property> &PropPtr<Property>::operator=(const PropPtr<Property> &other)
 {
     PropPtrBase::operator=(other);
     return *this;
 }
 
-PropPtr<Property>& PropPtr<Property>::operator=(const Property &property)
+PropPtr<Property> &PropPtr<Property>::operator=(const Property &property)
 {
-    return this->operator=( PropPtr<Property>(property) );
+    return this->operator=(PropPtr<Property>(property));
 }
 
-PropPtr<Property>& PropPtr<Property>::operator=(Property *property)
+PropPtr<Property> &PropPtr<Property>::operator=(Property *property)
 {
-    return this->operator=( PropPtr<Property>(property) );
+    return this->operator=(PropPtr<Property>(property));
 }
 
-PropPtr<Property>& PropPtr<Property>::operator=(const PropPtrBase &property)
+PropPtr<Property> &PropPtr<Property>::operator=(const PropPtrBase &property)
 {
-    return this->operator=( PropPtr<Property>(property) );
+    return this->operator=(PropPtr<Property>(property));
 }
 
-const Property* PropPtr<Property>::operator->() const
+const Property *PropPtr<Property>::operator->() const
 {
     return &(PropPtrBase::read());
 }
 
-const Property& PropPtr<Property>::operator*() const
+const Property &PropPtr<Property>::operator*() const
 {
     return PropPtrBase::read();
 }
 
-const Property& PropPtr<Property>::read() const
+const Property &PropPtr<Property>::read() const
 {
     return PropPtrBase::read();
 }
 
-Property& PropPtr<Property>::edit()
+Property &PropPtr<Property>::edit()
 {
     return PropPtrBase::edit();
 }
 
-const Property* PropPtr<Property>::data() const
+const Property *PropPtr<Property>::data() const
 {
     return &(PropPtrBase::read());
 }
 
-const Property* PropPtr<Property>::constData() const
+const Property *PropPtr<Property>::constData() const
 {
     return &(PropPtrBase::read());
 }
 
-Property* PropPtr<Property>::data()
+Property *PropPtr<Property>::data()
 {
     return &(PropPtrBase::edit());
 }
 
-PropPtr<Property>::operator const Property&() const
+PropPtr<Property>::operator const Property &() const
 {
     return PropPtrBase::read();
 }
 
 bool PropPtr<Property>::isNull() const
 {
-    return PropPtrBase::operator==( Property::null() );
+    return PropPtrBase::operator==(Property::null());
 }
 
 PropPtr<Property> PropPtr<Property>::null()
@@ -803,84 +800,84 @@ PropPtr<Property> PropPtr<Property>::null()
 //////// Full instantiation of GlobalPropPtr<Property>
 ////////
 
-GlobalPropPtr<Property>::GlobalPropPtr() : GlobalPropPtrBase( Property::null() )
-{}
+GlobalPropPtr<Property>::GlobalPropPtr() : GlobalPropPtrBase(Property::null())
+{
+}
 
-GlobalPropPtr<Property>::GlobalPropPtr(const Property &property)
-                        : GlobalPropPtrBase(property)
-{}
+GlobalPropPtr<Property>::GlobalPropPtr(const Property &property) : GlobalPropPtrBase(property)
+{
+}
 
-GlobalPropPtr<Property>::GlobalPropPtr(Property *property)
-                        : GlobalPropPtrBase(property)
-{}
+GlobalPropPtr<Property>::GlobalPropPtr(Property *property) : GlobalPropPtrBase(property)
+{
+}
 
-GlobalPropPtr<Property>::GlobalPropPtr(const GlobalPropPtrBase &other)
-                        : GlobalPropPtrBase(other)
-{}
+GlobalPropPtr<Property>::GlobalPropPtr(const GlobalPropPtrBase &other) : GlobalPropPtrBase(other)
+{
+}
 
-GlobalPropPtr<Property>::GlobalPropPtr(const GlobalPropPtr<Property> &other)
-                        : GlobalPropPtrBase(other)
-{}
+GlobalPropPtr<Property>::GlobalPropPtr(const GlobalPropPtr<Property> &other) : GlobalPropPtrBase(other)
+{
+}
 
 GlobalPropPtr<Property>::~GlobalPropPtr()
-{}
+{
+}
 
-GlobalPropPtr<Property>& GlobalPropPtr<Property>::operator=(
-                                            const GlobalPropPtr<Property> &other)
+GlobalPropPtr<Property> &GlobalPropPtr<Property>::operator=(const GlobalPropPtr<Property> &other)
 {
     GlobalPropPtrBase::operator=(other);
     return *this;
 }
 
-GlobalPropPtr<Property>& GlobalPropPtr<Property>::operator=(const Property &property)
+GlobalPropPtr<Property> &GlobalPropPtr<Property>::operator=(const Property &property)
 {
-    return this->operator=( GlobalPropPtr<Property>(property) );
+    return this->operator=(GlobalPropPtr<Property>(property));
 }
 
-GlobalPropPtr<Property>& GlobalPropPtr<Property>::operator=(Property *property)
+GlobalPropPtr<Property> &GlobalPropPtr<Property>::operator=(Property *property)
 {
-    return this->operator=( GlobalPropPtr<Property>(property) );
+    return this->operator=(GlobalPropPtr<Property>(property));
 }
 
-GlobalPropPtr<Property>& GlobalPropPtr<Property>::operator=(
-                                                   const GlobalPropPtrBase &property)
+GlobalPropPtr<Property> &GlobalPropPtr<Property>::operator=(const GlobalPropPtrBase &property)
 {
-    return this->operator=( GlobalPropPtr<Property>(property) );
+    return this->operator=(GlobalPropPtr<Property>(property));
 }
 
-const Property* GlobalPropPtr<Property>::operator->() const
+const Property *GlobalPropPtr<Property>::operator->() const
 {
     return &(GlobalPropPtrBase::read());
 }
 
-const Property& GlobalPropPtr<Property>::operator*() const
+const Property &GlobalPropPtr<Property>::operator*() const
 {
     return GlobalPropPtrBase::read();
 }
 
-const Property& GlobalPropPtr<Property>::read() const
+const Property &GlobalPropPtr<Property>::read() const
 {
     return GlobalPropPtrBase::read();
 }
 
-const Property* GlobalPropPtr<Property>::data() const
+const Property *GlobalPropPtr<Property>::data() const
 {
     return &(GlobalPropPtrBase::read());
 }
 
-const Property* GlobalPropPtr<Property>::constData() const
+const Property *GlobalPropPtr<Property>::constData() const
 {
     return &(GlobalPropPtrBase::read());
 }
 
-GlobalPropPtr<Property>::operator const Property&() const
+GlobalPropPtr<Property>::operator const Property &() const
 {
     return GlobalPropPtrBase::read();
 }
 
 bool GlobalPropPtr<Property>::isNull() const
 {
-    return GlobalPropPtrBase::operator==( Property::null() );
+    return GlobalPropPtrBase::operator==(Property::null());
 }
 
 GlobalPropPtr<Property> GlobalPropPtr<Property>::null()

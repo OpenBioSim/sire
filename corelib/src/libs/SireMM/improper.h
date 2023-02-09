@@ -28,14 +28,14 @@
 #ifndef SIREMM_IMPROPER_H
 #define SIREMM_IMPROPER_H
 
+#include "SireMol/angleid.h"
 #include "SireMol/atom.h"
 #include "SireMol/bondid.h"
-#include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
-#include "SireMol/improperid.h"
 #include "SireMol/connectivity.h"
-#include "SireMol/mover.hpp"
+#include "SireMol/dihedralid.h"
 #include "SireMol/evaluator.h"
+#include "SireMol/improperid.h"
+#include "SireMol/mover.hpp"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/generalunit.h"
@@ -44,134 +44,127 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class Improper;
+    class Improper;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::Improper&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::Improper&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::Improper &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::Improper &);
 
 namespace SireCAS
 {
-class Expression;
+    class Expression;
 }
 
 namespace SireMM
 {
 
-class SelectorImproper;
+    class SelectorImproper;
 
-/** This class provides a molecule view to an improper */
-class SIREMM_EXPORT Improper
-    : public SireBase::ConcreteProperty<Improper, SireMol::MoleculeView>
-{
-
-friend QDataStream& ::operator<<(QDataStream&, const Improper&);
-friend QDataStream& ::operator>>(QDataStream&, Improper&);
-
-public:
-    Improper();
-    Improper(const SireMol::Atom &atom0, const SireMol::Atom &atom1,
-             const SireMol::Atom &atom2, const SireMol::Atom &atom3);
-    Improper(const SireMol::MoleculeView &molview,
-             const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-             const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
-    Improper(const SireMol::MoleculeData &moldata,
-             const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-             const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
-    Improper(const SireMol::MoleculeData &moldata,
-             const SireMol::ImproperID &improper);
-
-    Improper(const Improper &other);
-    virtual ~Improper();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    /** This class provides a molecule view to an improper */
+    class SIREMM_EXPORT Improper : public SireBase::ConcreteProperty<Improper, SireMol::MoleculeView>
     {
-        return Improper::typeName();
-    }
 
-    virtual Improper* clone() const
-    {
-        return new Improper(*this);
-    }
+        friend QDataStream & ::operator<<(QDataStream &, const Improper &);
+        friend QDataStream & ::operator>>(QDataStream &, Improper &);
 
-    Improper& operator=(const Improper &other);
+    public:
+        Improper();
+        Improper(const SireMol::Atom &atom0, const SireMol::Atom &atom1, const SireMol::Atom &atom2,
+                 const SireMol::Atom &atom3);
+        Improper(const SireMol::MoleculeView &molview, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                 const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
+        Improper(const SireMol::MoleculeData &moldata, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                 const SireMol::AtomID &atom2, const SireMol::AtomID &atom3);
+        Improper(const SireMol::MoleculeData &moldata, const SireMol::ImproperID &improper);
 
-    bool operator==(const Improper &other) const;
-    bool operator!=(const Improper &other) const;
+        Improper(const Improper &other);
+        virtual ~Improper();
 
-    SireMol::MolViewPtr toSelector() const;
+        static const char *typeName();
 
-    QString toString() const;
+        virtual const char *what() const
+        {
+            return Improper::typeName();
+        }
 
-    SireMol::Atom atom0() const;
-    SireMol::Atom atom1() const;
-    SireMol::Atom atom2() const;
-    SireMol::Atom atom3() const;
+        virtual Improper *clone() const
+        {
+            return new Improper(*this);
+        }
 
-    SireMol::ImproperID ID() const;
+        Improper &operator=(const Improper &other);
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        bool operator==(const Improper &other) const;
+        bool operator!=(const Improper &other) const;
 
-    SelectorImproper selector() const;
-    SelectorImproper invert() const;
+        SireMol::MolViewPtr toSelector() const;
 
-    SireMol::AtomSelection selection() const;
+        QString toString() const;
 
-    bool hasProperty(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key,
-                     const SireBase::PropertyName &metakey) const;
+        SireMol::Atom atom0() const;
+        SireMol::Atom atom1() const;
+        SireMol::Atom atom2() const;
+        SireMol::Atom atom3() const;
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const SireBase::PropertyName &key) const;
+        SireMol::ImproperID ID() const;
 
-    SireBase::Properties properties() const;
+        bool isEmpty() const;
+        bool selectedAll() const;
 
-    SireMol::Evaluator evaluate() const;
-    SireMol::Mover<Improper> move() const;
+        SelectorImproper selector() const;
+        SelectorImproper invert() const;
 
-    const Property& property(const SireBase::PropertyName &key) const;
-    const Property& property(const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        SireMol::AtomSelection selection() const;
 
-    SireUnits::Dimension::Angle theta() const;
-    SireUnits::Dimension::Angle theta(const SireBase::PropertyMap &map) const;
+        bool hasProperty(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const;
 
-    SireUnits::Dimension::Angle phi() const;
-    SireUnits::Dimension::Angle phi(const SireBase::PropertyMap &map) const;
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const SireBase::PropertyName &key) const;
 
-    SireUnits::Dimension::Angle size() const;
-    SireUnits::Dimension::Angle size(const SireBase::PropertyMap &map) const;
+        SireBase::Properties properties() const;
 
-    SireUnits::Dimension::Angle measure() const;
-    SireUnits::Dimension::Angle measure(const SireBase::PropertyMap &map) const;
+        SireMol::Evaluator evaluate() const;
+        SireMol::Mover<Improper> move() const;
 
-    SireCAS::Expression potential() const;
-    SireCAS::Expression potential(const SireBase::PropertyMap &map) const;
+        const Property &property(const SireBase::PropertyName &key) const;
+        const Property &property(const SireBase::PropertyName &key, const Property &default_value) const;
 
-    SireUnits::Dimension::GeneralUnit energy() const;
-    SireUnits::Dimension::GeneralUnit energy(
-                            const SireBase::PropertyMap &map) const;
+        SireUnits::Dimension::Angle theta() const;
+        SireUnits::Dimension::Angle theta(const SireBase::PropertyMap &map) const;
 
-protected:
-    bool hasConnectivity() const;
-    const SireMol::Connectivity& getConnectivity() const;
+        SireUnits::Dimension::Angle phi() const;
+        SireUnits::Dimension::Angle phi(const SireBase::PropertyMap &map) const;
 
-    /** The ID of the improper (holding AtomIdx IDs) */
-    SireMol::ImproperID imp;
-};
+        SireUnits::Dimension::Angle size() const;
+        SireUnits::Dimension::Angle size(const SireBase::PropertyMap &map) const;
 
-}
+        SireUnits::Dimension::Angle measure() const;
+        SireUnits::Dimension::Angle measure(const SireBase::PropertyMap &map) const;
 
-Q_DECLARE_METATYPE( SireMM::Improper )
+        SireCAS::Expression potential() const;
+        SireCAS::Expression potential(const SireBase::PropertyMap &map) const;
+
+        SireUnits::Dimension::GeneralUnit energy() const;
+        SireUnits::Dimension::GeneralUnit energy(const SireBase::PropertyMap &map) const;
+
+    protected:
+        bool hasConnectivity() const;
+        const SireMol::Connectivity &getConnectivity() const;
+
+        /** The ID of the improper (holding AtomIdx IDs) */
+        SireMol::ImproperID imp;
+    };
+
+} // namespace SireMM
+
+Q_DECLARE_METATYPE(SireMM::Improper)
 Q_DECLARE_METATYPE(SireMol::Mover<SireMM::Improper>);
 
-SIRE_EXPOSE_CLASS( SireMM::Improper )
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMM::Improper>, SireMol::Mover_Improper_ )
+SIRE_EXPOSE_CLASS(SireMM::Improper)
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMM::Improper>, SireMol::Mover_Improper_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
@@ -182,7 +175,7 @@ namespace SireMol
     template class SireMol::Mover<SireMM::Improper>;
 }
 
-#endif //SIRE_INSTANTIATE_TEMPLATES
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

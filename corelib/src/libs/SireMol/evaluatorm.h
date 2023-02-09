@@ -35,96 +35,95 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class EvaluatorM;
-class SelectorMol;
+    class EvaluatorM;
+    class SelectorMol;
 
-template<class T>
-class SelectorM;
-}
+    template <class T>
+    class SelectorM;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::EvaluatorM&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::EvaluatorM&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::EvaluatorM &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::EvaluatorM &);
 
 namespace SireMol
 {
 
-/** This is a multi-molecule version of the evaluator class */
-class SIREMOL_EXPORT EvaluatorM
-    : public SireBase::ConcreteProperty<EvaluatorM, SireBase::Property>
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const EvaluatorM&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, EvaluatorM&);
-
-public:
-    EvaluatorM();
-    EvaluatorM(const SelectorMol &mols);
-
-    template<class T>
-    EvaluatorM(const SelectorM<T> &views);
-
-    EvaluatorM(const EvaluatorM &other);
-
-    virtual ~EvaluatorM();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    /** This is a multi-molecule version of the evaluator class */
+    class SIREMOL_EXPORT EvaluatorM : public SireBase::ConcreteProperty<EvaluatorM, SireBase::Property>
     {
-        return EvaluatorM::typeName();
-    }
 
-    virtual EvaluatorM* clone() const
-    {
-        return new EvaluatorM(*this);
-    }
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const EvaluatorM &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, EvaluatorM &);
 
-    EvaluatorM& operator=(const EvaluatorM &other);
+    public:
+        EvaluatorM();
+        EvaluatorM(const SelectorMol &mols);
 
-    bool operator==(const EvaluatorM &other) const;
-    bool operator!=(const EvaluatorM &other) const;
+        template <class T>
+        EvaluatorM(const SelectorM<T> &views);
 
-    QString toString() const;
+        EvaluatorM(const EvaluatorM &other);
 
-    bool isEmpty() const;
+        virtual ~EvaluatorM();
 
-    int nAtoms() const;
-    int nMolecules() const;
+        static const char *typeName();
 
-    SireUnits::Dimension::MolarMass mass() const;
-    SireUnits::Dimension::MolarMass mass(const SireBase::PropertyMap &map) const;
+        virtual const char *what() const
+        {
+            return EvaluatorM::typeName();
+        }
 
-    SireUnits::Dimension::Charge charge() const;
-    SireUnits::Dimension::Charge charge(const PropertyMap &map) const;
+        virtual EvaluatorM *clone() const
+        {
+            return new EvaluatorM(*this);
+        }
 
-    SireMaths::Vector center() const;
-    SireMaths::Vector center(const PropertyMap &map) const;
+        EvaluatorM &operator=(const EvaluatorM &other);
 
-    SireVol::AABox aaBox() const;
-    SireVol::AABox aaBox(const PropertyMap &map) const;
+        bool operator==(const EvaluatorM &other) const;
+        bool operator!=(const EvaluatorM &other) const;
 
-    SireMaths::Sphere boundingSphere() const;
-    SireMaths::Sphere boundingSphere(const PropertyMap &map) const;
+        QString toString() const;
 
-    SireMaths::Vector centroid() const;
-    SireMaths::Vector centroid(const PropertyMap &map) const;
+        bool isEmpty() const;
 
-    SireMaths::Vector centerOfGeometry() const;
-    SireMaths::Vector centerOfGeometry(const PropertyMap &map) const;
+        int nAtoms() const;
+        int nMolecules() const;
 
-    SireMaths::Vector centerOfMass() const;
-    SireMaths::Vector centerOfMass(const PropertyMap &map) const;
+        SireUnits::Dimension::MolarMass mass() const;
+        SireUnits::Dimension::MolarMass mass(const SireBase::PropertyMap &map) const;
 
-protected:
-    /** The actual views */
-    QList<SireMol::PartialMolecule> vws;
-};
+        SireUnits::Dimension::Charge charge() const;
+        SireUnits::Dimension::Charge charge(const PropertyMap &map) const;
+
+        SireMaths::Vector center() const;
+        SireMaths::Vector center(const PropertyMap &map) const;
+
+        SireVol::AABox aaBox() const;
+        SireVol::AABox aaBox(const PropertyMap &map) const;
+
+        SireMaths::Sphere boundingSphere() const;
+        SireMaths::Sphere boundingSphere(const PropertyMap &map) const;
+
+        SireMaths::Vector centroid() const;
+        SireMaths::Vector centroid(const PropertyMap &map) const;
+
+        SireMaths::Vector centerOfGeometry() const;
+        SireMaths::Vector centerOfGeometry(const PropertyMap &map) const;
+
+        SireMaths::Vector centerOfMass() const;
+        SireMaths::Vector centerOfMass(const PropertyMap &map) const;
+
+    protected:
+        /** The actual views */
+        QList<SireMol::PartialMolecule> vws;
+    };
 
 } // end of namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::EvaluatorM )
+Q_DECLARE_METATYPE(SireMol::EvaluatorM)
 
-SIRE_EXPOSE_CLASS( SireMol::EvaluatorM )
+SIRE_EXPOSE_CLASS(SireMol::EvaluatorM)
 
 SIRE_END_HEADER
 

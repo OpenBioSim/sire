@@ -28,8 +28,8 @@
 #include <QMutex>
 #include <limits>
 
-#include "space.h"
 #include "cartesian.h"
+#include "space.h"
 
 #include "SireMaths/rangenerator.h"
 
@@ -49,24 +49,21 @@ using namespace SireStream;
 static const RegisterMetaType<Space> r_space(MAGIC_ONLY, "SireVol::Space");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const Space &space)
+QDataStream &operator<<(QDataStream &ds, const Space &space)
 {
-    writeHeader(ds, r_space, 1)
-            << static_cast<const Property&>(space);
+    writeHeader(ds, r_space, 1) << static_cast<const Property &>(space);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       Space &space)
+QDataStream &operator>>(QDataStream &ds, Space &space)
 {
     VersionID v = readHeader(ds, r_space);
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(space);
+        ds >> static_cast<Property &>(space);
     }
     else
         throw version_error(v, "1", r_space, CODELOC);
@@ -76,15 +73,18 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Construct a Space. */
 Space::Space() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 Space::Space(const Space &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 Space::~Space()
-{}
+{
+}
 
 /** Return the maximum cutoff that can be used in this space
     so that calculations obey the minimum image convention.
@@ -99,7 +99,7 @@ SireUnits::Dimension::Length Space::maximumCutoff() const
 /** Change the volume of this space by 'delta' */
 SpacePtr Space::changeVolume(SireUnits::Dimension::Volume delta) const
 {
-    return this->setVolume( this->volume() + delta );
+    return this->setVolume(this->volume() + delta);
 }
 
 /** Return a random point within this space using the passed
@@ -107,7 +107,7 @@ SpacePtr Space::changeVolume(SireUnits::Dimension::Volume delta) const
     numbers, and centering the box at the origin */
 Vector Space::getRandomPoint(const RanGenerator &generator) const
 {
-    return this->getRandomPoint(Vector(0,0,0), generator);
+    return this->getRandomPoint(Vector(0, 0, 0), generator);
 }
 
 /** Return a random point within this space using the global
@@ -123,7 +123,7 @@ Vector Space::getRandomPoint(const Vector &center) const
 Vector Space::getRandomPoint() const
 {
     RanGenerator generator;
-    return this->getRandomPoint(Vector(0,0,0), generator);
+    return this->getRandomPoint(Vector(0, 0, 0), generator);
 }
 
 /** Assert that 'other' is of the same type as this space
@@ -132,17 +132,18 @@ Vector Space::getRandomPoint() const
 */
 void Space::assertCompatible(const Space &other) const
 {
-    if ( QLatin1String(this->what()) != QLatin1String(other.what()) )
-        throw SireError::incompatible_error( QObject::tr(
-            "This space (of type \"%1\") is incompatible with "
-            "a space of type \"%2\".")
-                .arg(this->what()).arg(other.what()), CODELOC );
+    if (QLatin1String(this->what()) != QLatin1String(other.what()))
+        throw SireError::incompatible_error(QObject::tr("This space (of type \"%1\") is incompatible with "
+                                                        "a space of type \"%2\".")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
 }
 
-Q_GLOBAL_STATIC( Cartesian, nullCartesian )
+Q_GLOBAL_STATIC(Cartesian, nullCartesian)
 
 /** Return the default space (Cartesian infinite box) */
-const Cartesian& Space::null()
+const Cartesian &Space::null()
 {
     return *(nullCartesian());
 }

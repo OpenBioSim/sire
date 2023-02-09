@@ -50,7 +50,7 @@ using namespace SireStream;
 /** Null constructor */
 SoftCLJEnergy::SoftCLJEnergy()
 {
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         nrgs[i][0] = 0;
         nrgs[i][1] = 0;
@@ -60,28 +60,29 @@ SoftCLJEnergy::SoftCLJEnergy()
 /** Copy constructor */
 SoftCLJEnergy::SoftCLJEnergy(const SoftCLJEnergy &other)
 {
-    quickCopy<double>( (double*)nrgs, (double*)(other.nrgs), MAX_ALPHA_VALUES*2 );
+    quickCopy<double>((double *)nrgs, (double *)(other.nrgs), MAX_ALPHA_VALUES * 2);
 }
 
 /** Destructor */
 SoftCLJEnergy::~SoftCLJEnergy()
-{}
+{
+}
 
 /** Copy assignment operator */
-SoftCLJEnergy& SoftCLJEnergy::operator=(const SoftCLJEnergy &other)
+SoftCLJEnergy &SoftCLJEnergy::operator=(const SoftCLJEnergy &other)
 {
     if (this != &other)
     {
-        quickCopy<double>( (double*)nrgs, (double*)(other.nrgs), MAX_ALPHA_VALUES*2 );
+        quickCopy<double>((double *)nrgs, (double *)(other.nrgs), MAX_ALPHA_VALUES * 2);
     }
 
     return *this;
 }
 
 /** Self-addition operator */
-SoftCLJEnergy& SoftCLJEnergy::operator+=(const SoftCLJEnergy &other)
+SoftCLJEnergy &SoftCLJEnergy::operator+=(const SoftCLJEnergy &other)
 {
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         nrgs[i][0] += other.nrgs[i][0];
         nrgs[i][1] += other.nrgs[i][1];
@@ -91,9 +92,9 @@ SoftCLJEnergy& SoftCLJEnergy::operator+=(const SoftCLJEnergy &other)
 }
 
 /** Self-subtraction operator */
-SoftCLJEnergy& SoftCLJEnergy::operator-=(const SoftCLJEnergy &other)
+SoftCLJEnergy &SoftCLJEnergy::operator-=(const SoftCLJEnergy &other)
 {
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         nrgs[i][0] -= other.nrgs[i][0];
         nrgs[i][1] -= other.nrgs[i][1];
@@ -125,7 +126,7 @@ SoftCLJEnergy SoftCLJEnergy::operator-(const SoftCLJEnergy &other) const
 */
 void SoftCLJEnergy::setEnergy(int i, double cnrg, double ljnrg)
 {
-    i = Index(i).map( MAX_ALPHA_VALUES );
+    i = Index(i).map(MAX_ALPHA_VALUES);
 
     nrgs[i][0] = cnrg;
     nrgs[i][1] = ljnrg;
@@ -136,7 +137,7 @@ double SoftCLJEnergy::coulomb() const
 {
     double sum = nrgs[0][0];
 
-    for (int i=1; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 1; i < MAX_ALPHA_VALUES; ++i)
     {
         sum += nrgs[i][0];
     }
@@ -149,7 +150,7 @@ double SoftCLJEnergy::lj() const
 {
     double sum = nrgs[0][1];
 
-    for (int i=1; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 1; i < MAX_ALPHA_VALUES; ++i)
     {
         sum += nrgs[i][1];
     }
@@ -163,7 +164,7 @@ double SoftCLJEnergy::lj() const
 */
 double SoftCLJEnergy::coulomb(int i) const
 {
-    i = SireID::Index(i).map( MAX_ALPHA_VALUES );
+    i = SireID::Index(i).map(MAX_ALPHA_VALUES);
 
     return nrgs[i][0];
 }
@@ -174,7 +175,7 @@ double SoftCLJEnergy::coulomb(int i) const
 */
 double SoftCLJEnergy::lj(int i) const
 {
-    i = SireID::Index(i).map( MAX_ALPHA_VALUES );
+    i = SireID::Index(i).map(MAX_ALPHA_VALUES);
 
     return nrgs[i][1];
 }
@@ -182,9 +183,9 @@ double SoftCLJEnergy::lj(int i) const
 /** Return the total energy of all of the alpha values */
 double SoftCLJEnergy::total() const
 {
-    double sum[2] = { nrgs[0][0], nrgs[0][1] };
+    double sum[2] = {nrgs[0][0], nrgs[0][1]};
 
-    for (int i=1; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 1; i < MAX_ALPHA_VALUES; ++i)
     {
         sum[0] += nrgs[i][0];
         sum[1] += nrgs[i][1];
@@ -205,13 +206,13 @@ double SoftCLJEnergy::total(int i) const
 }
 
 /** Return the sum of all of the coulomb components */
-double SoftCLJEnergy::component(const CoulombComponent&) const
+double SoftCLJEnergy::component(const CoulombComponent &) const
 {
     return this->coulomb();
 }
 
 /** Return the sum of all of the LJ components */
-double SoftCLJEnergy::component(const LJComponent&) const
+double SoftCLJEnergy::component(const LJComponent &) const
 {
     return this->lj();
 }
@@ -220,7 +221,7 @@ double SoftCLJEnergy::component(const LJComponent&) const
 
     \throw SireError::invalid_index
 */
-double SoftCLJEnergy::component(const CoulombComponent&, int i) const
+double SoftCLJEnergy::component(const CoulombComponent &, int i) const
 {
     return this->coulomb(i);
 }
@@ -229,7 +230,7 @@ double SoftCLJEnergy::component(const CoulombComponent&, int i) const
 
     \throw SireError::invalid_index
 */
-double SoftCLJEnergy::component(const LJComponent&, int i) const
+double SoftCLJEnergy::component(const LJComponent &, int i) const
 {
     return this->lj(i);
 }
@@ -241,12 +242,11 @@ double SoftCLJEnergy::component(const LJComponent&, int i) const
 static const RegisterMetaType<SoftCLJComponent> r_softcljcomp;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const SoftCLJComponent &softcljcomp)
+QDataStream &operator<<(QDataStream &ds, const SoftCLJComponent &softcljcomp)
 {
     writeHeader(ds, r_softcljcomp, 1);
 
-    ds << static_cast<const CLJComponent&>(softcljcomp);
+    ds << static_cast<const CLJComponent &>(softcljcomp);
 
     return ds;
 }
@@ -257,11 +257,11 @@ void SoftCLJComponent::rebuildComponents()
 {
     FFName ffname = this->forceFieldName();
 
-    alpha_components = QVector<CLJComponent>( MAX_ALPHA_VALUES );
+    alpha_components = QVector<CLJComponent>(MAX_ALPHA_VALUES);
 
     CLJComponent *alpha_components_array = alpha_components.data();
 
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         alpha_components_array[i] = CLJComponent(ffname, QString::number(i));
     }
@@ -274,7 +274,7 @@ QDataStream &operator>>(QDataStream &ds, SoftCLJComponent &softcljcomp)
 
     if (v == 1)
     {
-        ds >> static_cast<CLJComponent&>(softcljcomp);
+        ds >> static_cast<CLJComponent &>(softcljcomp);
         softcljcomp.rebuildComponents();
     }
     else
@@ -285,33 +285,34 @@ QDataStream &operator>>(QDataStream &ds, SoftCLJComponent &softcljcomp)
 
 /** Construct a null set of SoftCLJComponents */
 SoftCLJComponent::SoftCLJComponent() : CLJComponent()
-{}
+{
+}
 
 /** Construct the SoftCLJComponents for the passed name */
-SoftCLJComponent::SoftCLJComponent(const FFName &name)
-                 : CLJComponent(name)
+SoftCLJComponent::SoftCLJComponent(const FFName &name) : CLJComponent(name)
 {
     this->rebuildComponents();
 }
 
 /** Construct the SoftCLJComponents from the passed symbol */
-SoftCLJComponent::SoftCLJComponent(const SireCAS::Symbol &symbol)
-                 : CLJComponent(symbol)
+SoftCLJComponent::SoftCLJComponent(const SireCAS::Symbol &symbol) : CLJComponent(symbol)
 {
     this->rebuildComponents();
 }
 
 /** Copy constructor */
 SoftCLJComponent::SoftCLJComponent(const SoftCLJComponent &other)
-                 : CLJComponent(other), alpha_components(other.alpha_components)
-{}
+    : CLJComponent(other), alpha_components(other.alpha_components)
+{
+}
 
 /** Destructor */
 SoftCLJComponent::~SoftCLJComponent()
-{}
+{
+}
 
 /** Copy assignment operator */
-SoftCLJComponent& SoftCLJComponent::operator=(const SoftCLJComponent &other)
+SoftCLJComponent &SoftCLJComponent::operator=(const SoftCLJComponent &other)
 {
     CLJComponent::operator=(other);
     alpha_components = other.alpha_components;
@@ -321,21 +322,21 @@ SoftCLJComponent& SoftCLJComponent::operator=(const SoftCLJComponent &other)
 
 /** Return the component representing the total coulomb energy
     of all of the alpha values */
-const CoulombComponent& SoftCLJComponent::coulomb() const
+const CoulombComponent &SoftCLJComponent::coulomb() const
 {
     return CLJComponent::coulomb();
 }
 
 /** Return the component representing the total LJ energy
     of all of the alpha values */
-const LJComponent& SoftCLJComponent::lj() const
+const LJComponent &SoftCLJComponent::lj() const
 {
     return CLJComponent::lj();
 }
 
 /** Return the component representing the total energy of
     all of the alpha values */
-const CLJComponent& SoftCLJComponent::total() const
+const CLJComponent &SoftCLJComponent::total() const
 {
     return CLJComponent::total();
 }
@@ -345,10 +346,9 @@ const CLJComponent& SoftCLJComponent::total() const
 
     \throw SireError::invalid_index
 */
-const CoulombComponent& SoftCLJComponent::coulomb(int i) const
+const CoulombComponent &SoftCLJComponent::coulomb(int i) const
 {
-    return alpha_components.at( Index(i).map(alpha_components.count()) )
-                           .coulomb();
+    return alpha_components.at(Index(i).map(alpha_components.count())).coulomb();
 }
 
 /** Return the component representing the LJ energy of
@@ -356,10 +356,9 @@ const CoulombComponent& SoftCLJComponent::coulomb(int i) const
 
     \throw SireError::invalid_index
 */
-const LJComponent& SoftCLJComponent::lj(int i) const
+const LJComponent &SoftCLJComponent::lj(int i) const
 {
-    return alpha_components.at( Index(i).map(alpha_components.count()) )
-                           .lj();
+    return alpha_components.at(Index(i).map(alpha_components.count())).lj();
 }
 
 /** Return the component representing the total energy of
@@ -367,22 +366,19 @@ const LJComponent& SoftCLJComponent::lj(int i) const
 
     \throw SireError::invalid_index
 */
-const CLJComponent& SoftCLJComponent::total(int i) const
+const CLJComponent &SoftCLJComponent::total(int i) const
 {
-    return alpha_components.at( Index(i).map(alpha_components.count()) )
-                           .total();
+    return alpha_components.at(Index(i).map(alpha_components.count())).total();
 }
 
-void SoftCLJComponent::setEnergy(FF&, const CLJEnergy&) const
+void SoftCLJComponent::setEnergy(FF &, const CLJEnergy &) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "It is a mistake to call this function!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("It is a mistake to call this function!"), CODELOC);
 }
 
-void SoftCLJComponent::changeEnergy(FF&, const CLJEnergy&) const
+void SoftCLJComponent::changeEnergy(FF &, const CLJEnergy &) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "It is a mistake to call this function!"), CODELOC );
+    throw SireError::program_bug(QObject::tr("It is a mistake to call this function!"), CODELOC);
 }
 
 /** Set the energy in the forcefield 'ff' of all of these components to the
@@ -396,7 +392,7 @@ void SoftCLJComponent::setEnergy(FF &ff, const SoftCLJEnergy &value) const
     FFComponent::setEnergy(ff, this->coulomb(), cnrg);
     FFComponent::setEnergy(ff, this->lj(), ljnrg);
 
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         const CLJComponent &clj = alpha_components.constData()[i];
 
@@ -420,7 +416,7 @@ void SoftCLJComponent::changeEnergy(FF &ff, const SoftCLJEnergy &delta) const
     FFComponent::changeEnergy(ff, this->coulomb(), cnrg);
     FFComponent::changeEnergy(ff, this->lj(), ljnrg);
 
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         const CLJComponent &clj = alpha_components.constData()[i];
 
@@ -438,13 +434,13 @@ SireCAS::Symbols SoftCLJComponent::symbols() const
 {
     Symbols symbls;
 
-    symbls.reserve( 3 * (MAX_ALPHA_VALUES+1) );
+    symbls.reserve(3 * (MAX_ALPHA_VALUES + 1));
 
     symbls.insert(this->total());
     symbls.insert(this->coulomb());
     symbls.insert(this->lj());
 
-    for (int i=0; i<MAX_ALPHA_VALUES; ++i)
+    for (int i = 0; i < MAX_ALPHA_VALUES; ++i)
     {
         const CLJComponent &clj = alpha_components.constData()[i];
 
@@ -456,7 +452,7 @@ SireCAS::Symbols SoftCLJComponent::symbols() const
     return symbls;
 }
 
-const char* SoftCLJComponent::typeName()
+const char *SoftCLJComponent::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SoftCLJComponent>() );
+    return QMetaType::typeName(qMetaTypeId<SoftCLJComponent>());
 }

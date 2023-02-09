@@ -42,317 +42,316 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MoleculeGroup;
+    class MoleculeGroup;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MoleculeGroup&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MoleculeGroup&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MoleculeGroup &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MoleculeGroup &);
 
 namespace SireID
 {
-class Index;
+    class Index;
 }
 
 namespace SireBase
 {
-class Version;
+    class Version;
 }
 
 namespace SireMol
 {
 
-namespace detail
-{
-class MolGroupPvt;
-}
-
-using SireID::Index;
-
-class MoleculeData;
-class Molecules;
-class Molecule;
-class MoleculeView;
-class PartialMolecule;
-class ViewsOfMol;
-class SelectResult;
-
-class MolNum;
-class MolNumViewIdx;
-
-class MGName;
-class MGNum;
-
-using SireBase::ConcreteProperty;
-using SireBase::Property;
-using SireBase::Version;
-
-/** This is the virtual base class of all MoleculeGroup type
-    objects. Molecule groups are groups of molecules that also
-    provide full indexing, versioning and identification support.
-
-    Molecule group form the foundation of forcefields (which use
-    groups to hold the molecules), Systems (again, use groups
-    to hold the molecules) and Moves (use groups to select which
-    molecules should be moved).
-
-    Molecule groups provide the common interface for indexing,
-    searching and managing groups of molecules.
-
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MoleculeGroup : public ConcreteProperty<MoleculeGroup,Property>
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MoleculeGroup&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MoleculeGroup&);
-
-public:
-
-    typedef Molecules::const_iterator const_iterator;
-    typedef Molecules::iterator iterator;
-
-    MoleculeGroup();
-
-    MoleculeGroup(const Molecules &molecules);
-
-    MoleculeGroup(const QString &name);
-
-    MoleculeGroup(const QString &name, const MoleculeView &molview);
-    MoleculeGroup(const QString &name, const Molecules &molecules);
-    MoleculeGroup(const QString &name, const MoleculeGroup &other);
-
-    MoleculeGroup(const SelectResult &result);
-    MoleculeGroup(const QString &name, const SelectResult &result);
-
-    MoleculeGroup(const MoleculeGroup &other);
-
-    virtual ~MoleculeGroup();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    namespace detail
     {
-        return MoleculeGroup::typeName();
+        class MolGroupPvt;
     }
 
-    virtual MoleculeGroup* clone() const;
+    using SireID::Index;
 
-    MoleculeGroup& operator=(const MoleculeGroup &other);
+    class MoleculeData;
+    class Molecules;
+    class Molecule;
+    class MoleculeView;
+    class PartialMolecule;
+    class ViewsOfMol;
+    class SelectResult;
 
-    virtual bool operator==(const MoleculeGroup &other) const;
-    virtual bool operator!=(const MoleculeGroup &other) const;
+    class MolNum;
+    class MolNumViewIdx;
 
-    const ViewsOfMol& operator[](MolNum molnum) const;
-    const ViewsOfMol& operator[](MolIdx molidx) const;
-    const ViewsOfMol& operator[](const MolName &molname) const;
-    const ViewsOfMol& operator[](const MolID &molid) const;
+    class MGName;
+    class MGNum;
 
-    PartialMolecule operator[](const boost::tuple<MolNum,Index> &viewidx) const;
-    PartialMolecule operator[](const boost::tuple<MolIdentifier,Index> &viewidx) const;
+    using SireBase::ConcreteProperty;
+    using SireBase::Property;
+    using SireBase::Version;
 
-    MoleculeGroup& operator+=(const Molecules &molecules);
-    MoleculeGroup& operator-=(const Molecules &molecules);
+    /** This is the virtual base class of all MoleculeGroup type
+        objects. Molecule groups are groups of molecules that also
+        provide full indexing, versioning and identification support.
 
-    quint64 getMoleculeVersion(MolNum molnum) const;
-    quint64 getMoleculeVersion(const MolID &molid) const;
+        Molecule group form the foundation of forcefields (which use
+        groups to hold the molecules), Systems (again, use groups
+        to hold the molecules) and Moves (use groups to select which
+        molecules should be moved).
 
-    const ViewsOfMol& at(MolNum molnum) const;
-    const ViewsOfMol& at(MolIdx molidx) const;
-    const ViewsOfMol& at(const MolName &molname) const;
-    const ViewsOfMol& at(const MolID &molid) const;
+        Molecule groups provide the common interface for indexing,
+        searching and managing groups of molecules.
 
-    PartialMolecule at(const boost::tuple<MolNum,Index> &viewidx) const;
-    PartialMolecule at(const boost::tuple<MolIdentifier,Index> &viewidx) const;
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MoleculeGroup : public ConcreteProperty<MoleculeGroup, Property>
+    {
 
-    PartialMolecule at(MolNum molnum, int viewidx) const;
-    PartialMolecule at(const MolID &molid, int viewidx) const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MoleculeGroup &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MoleculeGroup &);
 
-    const ViewsOfMol& moleculeAt(int idx) const;
-    PartialMolecule viewAt(int idx) const;
+    public:
+        typedef Molecules::const_iterator const_iterator;
+        typedef Molecules::iterator iterator;
 
-    MolNum molNumAt(int idx) const;
-    const boost::tuple<MolNum,SireID::Index>& molViewIndexAt(int idx) const;
+        MoleculeGroup();
 
-    int indexOf(const MoleculeView &molview) const;
-    int indexOf(MolNum molnum) const;
+        MoleculeGroup(const Molecules &molecules);
 
-    const QVector<MolNum>& molNums() const;
-    const QVector< boost::tuple<MolNum,SireID::Index> >& molViewIndicies() const;
+        MoleculeGroup(const QString &name);
 
-    const ViewsOfMol& molecule(MolNum molnum) const;
-    const ViewsOfMol& molecule(MolIdx molidx) const;
-    const ViewsOfMol& molecule(const MolName &molname) const;
-    const ViewsOfMol& molecule(const MolID &molid) const;
+        MoleculeGroup(const QString &name, const MoleculeView &molview);
+        MoleculeGroup(const QString &name, const Molecules &molecules);
+        MoleculeGroup(const QString &name, const MoleculeGroup &other);
 
-    Molecules molecules(const MolID &molid) const;
+        MoleculeGroup(const SelectResult &result);
+        MoleculeGroup(const QString &name, const SelectResult &result);
 
-    MolNum getMoleculeNumber(MolNum molnum) const;
-    MolNum getMoleculeNumber(MolIdx molidx) const;
-    MolNum getMoleculeNumber(const MolName &molname) const;
-    MolNum getMoleculeNumber(const MolID &molid) const;
+        MoleculeGroup(const MoleculeGroup &other);
 
-    QList<MolNum> map(MolNum molnum) const;
-    QList<MolNum> map(MolIdx molidx) const;
-    QList<MolNum> map(const MolName &molname) const;
-    QList<MolNum> map(const MolID &molid) const;
+        virtual ~MoleculeGroup();
 
-    bool contains(MolNum molnum) const;
-    bool contains(MolIdx molidx) const;
-    bool contains(const MolName &molname) const;
-    bool contains(const MolID &molid) const;
+        static const char *typeName();
 
-    bool contains(const MoleculeView &molview) const;
-    bool contains(const ViewsOfMol &molviews) const;
-    bool contains(const Molecules &molecules) const;
-    bool contains(const MoleculeGroup &MoleculeGroup) const;
+        virtual const char *what() const
+        {
+            return MoleculeGroup::typeName();
+        }
 
-    bool intersects(const MoleculeView &molview) const;
-    bool intersects(const Molecules &other) const;
-    bool intersects(const MoleculeGroup &MoleculeGroup) const;
+        virtual MoleculeGroup *clone() const;
 
-    int nAtoms() const;
-    int nResidues() const;
-    int nChains() const;
-    int nSegments() const;
-    int nMolecules() const;
+        MoleculeGroup &operator=(const MoleculeGroup &other);
 
-    int nViews() const;
+        virtual bool operator==(const MoleculeGroup &other) const;
+        virtual bool operator!=(const MoleculeGroup &other) const;
 
-    int nViews(MolNum molnum) const;
-    int nViews(const MolID &molid) const;
+        const ViewsOfMol &operator[](MolNum molnum) const;
+        const ViewsOfMol &operator[](MolIdx molidx) const;
+        const ViewsOfMol &operator[](const MolName &molname) const;
+        const ViewsOfMol &operator[](const MolID &molid) const;
 
-    int nViews(Index idx) const;
+        PartialMolecule operator[](const boost::tuple<MolNum, Index> &viewidx) const;
+        PartialMolecule operator[](const boost::tuple<MolIdentifier, Index> &viewidx) const;
 
-    bool isEmpty() const;
+        MoleculeGroup &operator+=(const Molecules &molecules);
+        MoleculeGroup &operator-=(const Molecules &molecules);
 
-    const Molecules& molecules() const;
+        quint64 getMoleculeVersion(MolNum molnum) const;
+        quint64 getMoleculeVersion(const MolID &molid) const;
 
-    const ViewsOfMol& first() const;
-    const ViewsOfMol& last() const;
+        const ViewsOfMol &at(MolNum molnum) const;
+        const ViewsOfMol &at(MolIdx molidx) const;
+        const ViewsOfMol &at(const MolName &molname) const;
+        const ViewsOfMol &at(const MolID &molid) const;
 
-    const ViewsOfMol& front() const;
-    const ViewsOfMol& back() const;
+        PartialMolecule at(const boost::tuple<MolNum, Index> &viewidx) const;
+        PartialMolecule at(const boost::tuple<MolIdentifier, Index> &viewidx) const;
 
-    const_iterator begin() const;
-    const_iterator end() const;
+        PartialMolecule at(MolNum molnum, int viewidx) const;
+        PartialMolecule at(const MolID &molid, int viewidx) const;
 
-    const_iterator constBegin() const;
-    const_iterator constEnd() const;
+        const ViewsOfMol &moleculeAt(int idx) const;
+        PartialMolecule viewAt(int idx) const;
 
-    const_iterator find(MolNum molnum) const;
-    const_iterator constFind(MolNum molnum) const;
+        MolNum molNumAt(int idx) const;
+        const boost::tuple<MolNum, SireID::Index> &molViewIndexAt(int idx) const;
 
-    const_iterator find(const MolID &molid) const;
-    const_iterator constFind(const MolID &molid) const;
+        int indexOf(const MoleculeView &molview) const;
+        int indexOf(MolNum molnum) const;
 
-    SelectResult search(const QString &search_term) const;
+        const QVector<MolNum> &molNums() const;
+        const QVector<boost::tuple<MolNum, SireID::Index>> &molViewIndicies() const;
 
-    QSet<MolName> molNames() const;
+        const ViewsOfMol &molecule(MolNum molnum) const;
+        const ViewsOfMol &molecule(MolIdx molidx) const;
+        const ViewsOfMol &molecule(const MolName &molname) const;
+        const ViewsOfMol &molecule(const MolID &molid) const;
 
-    void assertContains(MolNum molnum) const;
-    void assertContains(const MolName &molname) const;
+        Molecules molecules(const MolID &molid) const;
 
-    const MGName& name() const;
-    MGNum number() const;
-    const Version& version() const;
+        MolNum getMoleculeNumber(MolNum molnum) const;
+        MolNum getMoleculeNumber(MolIdx molidx) const;
+        MolNum getMoleculeNumber(const MolName &molname) const;
+        MolNum getMoleculeNumber(const MolID &molid) const;
 
-    virtual QString toString() const;
+        QList<MolNum> map(MolNum molnum) const;
+        QList<MolNum> map(MolIdx molidx) const;
+        QList<MolNum> map(const MolName &molname) const;
+        QList<MolNum> map(const MolID &molid) const;
 
-    virtual void setName(const QString &new_name);
-    virtual void setNumber(quint32 new_number);
-    void setNewNumber();
+        bool contains(MolNum molnum) const;
+        bool contains(MolIdx molidx) const;
+        bool contains(const MolName &molname) const;
+        bool contains(const MolID &molid) const;
 
-    quint64 majorVersion() const;
-    quint64 minorVersion() const;
+        bool contains(const MoleculeView &molview) const;
+        bool contains(const ViewsOfMol &molviews) const;
+        bool contains(const Molecules &molecules) const;
+        bool contains(const MoleculeGroup &MoleculeGroup) const;
 
-    virtual void add(const MoleculeView &molview);
-    virtual void add(const ViewsOfMol &molviews);
-    virtual void add(const Molecules &molecules);
-    virtual void add(const MoleculeGroup &MoleculeGroup);
+        bool intersects(const MoleculeView &molview) const;
+        bool intersects(const Molecules &other) const;
+        bool intersects(const MoleculeGroup &MoleculeGroup) const;
 
-    virtual bool addIfUnique(const MoleculeView &molview);
-    virtual ViewsOfMol addIfUnique(const ViewsOfMol &molviews);
-    virtual QList<ViewsOfMol> addIfUnique(const Molecules &molecules);
-    virtual QList<ViewsOfMol> addIfUnique(const MoleculeGroup &MoleculeGroup);
+        int nAtoms() const;
+        int nResidues() const;
+        int nChains() const;
+        int nSegments() const;
+        int nMolecules() const;
 
-    bool unite(const MoleculeView &molview);
-    ViewsOfMol unite(const ViewsOfMol &molviews);
-    QList<ViewsOfMol> unite(const Molecules &molecules);
-    QList<ViewsOfMol> unite(const MoleculeGroup &MoleculeGroup);
+        int nViews() const;
 
-    virtual bool remove(const MoleculeView &molview);
-    virtual ViewsOfMol remove(const ViewsOfMol &molviews);
-    virtual QList<ViewsOfMol> remove(const Molecules &molecules);
-    virtual QList<ViewsOfMol> remove(const MoleculeGroup &MoleculeGroup);
+        int nViews(MolNum molnum) const;
+        int nViews(const MolID &molid) const;
 
-    virtual bool removeAll(const MoleculeView &molview);
-    virtual ViewsOfMol removeAll(const ViewsOfMol &molviews);
-    virtual QList<ViewsOfMol> removeAll(const Molecules &molecules);
-    virtual QList<ViewsOfMol> removeAll(const MoleculeGroup &MoleculeGroup);
+        int nViews(Index idx) const;
 
-    virtual ViewsOfMol remove(MolNum molnum);
-    virtual QList<ViewsOfMol> remove(const QSet<MolNum> &molnums);
+        bool isEmpty() const;
 
-    virtual void removeAll();
+        const Molecules &molecules() const;
 
-    virtual bool update(const MoleculeData &moldata, bool auto_commit=true);
-    bool update(const MoleculeView &molview, bool auto_commit=true);
+        const ViewsOfMol &first() const;
+        const ViewsOfMol &last() const;
 
-    virtual QList<Molecule> update(const Molecules &molecules, bool auto_commit=true);
-    virtual QList<Molecule> update(const MoleculeGroup &MoleculeGroup, bool auto_commit=true);
+        const ViewsOfMol &front() const;
+        const ViewsOfMol &back() const;
 
-    virtual bool setContents(const MoleculeView &molview);
-    virtual bool setContents(const ViewsOfMol &molviews);
-    virtual bool setContents(const Molecules &molecules);
-    virtual bool setContents(const MoleculeGroup &MoleculeGroup);
+        const_iterator begin() const;
+        const_iterator end() const;
 
-    virtual void accept();
-    virtual bool needsAccepting() const;
+        const_iterator constBegin() const;
+        const_iterator constEnd() const;
 
-    virtual int nFrames() const;
-    virtual int nFrames(const SireBase::PropertyMap &map) const;
+        const_iterator find(MolNum molnum) const;
+        const_iterator constFind(MolNum molnum) const;
 
-    virtual void loadFrame(int frame);
-    virtual void saveFrame(int frame);
-    virtual void saveFrame();
-    virtual void deleteFrame(int frame);
+        const_iterator find(const MolID &molid) const;
+        const_iterator constFind(const MolID &molid) const;
 
-    virtual void loadFrame(int frame, const SireBase::PropertyMap &map);
-    virtual void saveFrame(int frame, const SireBase::PropertyMap &map);
-    virtual void saveFrame(const SireBase::PropertyMap &map);
-    virtual void deleteFrame(int frame, const SireBase::PropertyMap &map);
+        SelectResult search(const QString &search_term) const;
 
-    static const MoleculeGroup& null();
+        QSet<MolName> molNames() const;
 
-private:
-    bool _pvt_remove(const MoleculeView &molview);
-    ViewsOfMol _pvt_remove(const ViewsOfMol &molviews);
+        void assertContains(MolNum molnum) const;
+        void assertContains(const MolName &molname) const;
 
-    ViewsOfMol _pvt_remove(MolNum molnum);
+        const MGName &name() const;
+        MGNum number() const;
+        const Version &version() const;
 
-    bool _pvt_removeAll(const MoleculeView &molview);
-    ViewsOfMol _pvt_removeAll(const ViewsOfMol &molviews);
+        virtual QString toString() const;
 
-    void _pvt_setContents(const Molecules &molecules);
+        virtual void setName(const QString &new_name);
+        virtual void setNumber(quint32 new_number);
+        void setNewNumber();
 
-    /** Implicitly shared pointer to the contents and index
-        of this group */
-    SireBase::SharedDataPointer<detail::MolGroupPvt> d;
+        quint64 majorVersion() const;
+        quint64 minorVersion() const;
 
-    /** The workspace used to cache updates, thus preventing
-        excessive re-allocation of memory during, e.g. MC moves */
-    MolGroupWorkspace workspace;
-};
+        virtual void add(const MoleculeView &molview);
+        virtual void add(const ViewsOfMol &molviews);
+        virtual void add(const Molecules &molecules);
+        virtual void add(const MoleculeGroup &MoleculeGroup);
 
-typedef SireBase::PropPtr<MoleculeGroup> MolGroupPtr;
+        virtual bool addIfUnique(const MoleculeView &molview);
+        virtual ViewsOfMol addIfUnique(const ViewsOfMol &molviews);
+        virtual QList<ViewsOfMol> addIfUnique(const Molecules &molecules);
+        virtual QList<ViewsOfMol> addIfUnique(const MoleculeGroup &MoleculeGroup);
 
-}
+        bool unite(const MoleculeView &molview);
+        ViewsOfMol unite(const ViewsOfMol &molviews);
+        QList<ViewsOfMol> unite(const Molecules &molecules);
+        QList<ViewsOfMol> unite(const MoleculeGroup &MoleculeGroup);
+
+        virtual bool remove(const MoleculeView &molview);
+        virtual ViewsOfMol remove(const ViewsOfMol &molviews);
+        virtual QList<ViewsOfMol> remove(const Molecules &molecules);
+        virtual QList<ViewsOfMol> remove(const MoleculeGroup &MoleculeGroup);
+
+        virtual bool removeAll(const MoleculeView &molview);
+        virtual ViewsOfMol removeAll(const ViewsOfMol &molviews);
+        virtual QList<ViewsOfMol> removeAll(const Molecules &molecules);
+        virtual QList<ViewsOfMol> removeAll(const MoleculeGroup &MoleculeGroup);
+
+        virtual ViewsOfMol remove(MolNum molnum);
+        virtual QList<ViewsOfMol> remove(const QSet<MolNum> &molnums);
+
+        virtual void removeAll();
+
+        virtual bool update(const MoleculeData &moldata, bool auto_commit = true);
+        bool update(const MoleculeView &molview, bool auto_commit = true);
+
+        virtual QList<Molecule> update(const Molecules &molecules, bool auto_commit = true);
+        virtual QList<Molecule> update(const MoleculeGroup &MoleculeGroup, bool auto_commit = true);
+
+        virtual bool setContents(const MoleculeView &molview);
+        virtual bool setContents(const ViewsOfMol &molviews);
+        virtual bool setContents(const Molecules &molecules);
+        virtual bool setContents(const MoleculeGroup &MoleculeGroup);
+
+        virtual void accept();
+        virtual bool needsAccepting() const;
+
+        virtual int nFrames() const;
+        virtual int nFrames(const SireBase::PropertyMap &map) const;
+
+        virtual void loadFrame(int frame);
+        virtual void saveFrame(int frame);
+        virtual void saveFrame();
+        virtual void deleteFrame(int frame);
+
+        virtual void loadFrame(int frame, const SireBase::PropertyMap &map);
+        virtual void saveFrame(int frame, const SireBase::PropertyMap &map);
+        virtual void saveFrame(const SireBase::PropertyMap &map);
+        virtual void deleteFrame(int frame, const SireBase::PropertyMap &map);
+
+        static const MoleculeGroup &null();
+
+    private:
+        bool _pvt_remove(const MoleculeView &molview);
+        ViewsOfMol _pvt_remove(const ViewsOfMol &molviews);
+
+        ViewsOfMol _pvt_remove(MolNum molnum);
+
+        bool _pvt_removeAll(const MoleculeView &molview);
+        ViewsOfMol _pvt_removeAll(const ViewsOfMol &molviews);
+
+        void _pvt_setContents(const Molecules &molecules);
+
+        /** Implicitly shared pointer to the contents and index
+            of this group */
+        SireBase::SharedDataPointer<detail::MolGroupPvt> d;
+
+        /** The workspace used to cache updates, thus preventing
+            excessive re-allocation of memory during, e.g. MC moves */
+        MolGroupWorkspace workspace;
+    };
+
+    typedef SireBase::PropPtr<MoleculeGroup> MolGroupPtr;
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::MoleculeGroup);
 
-SIRE_EXPOSE_CLASS( SireMol::MoleculeGroup )
+SIRE_EXPOSE_CLASS(SireMol::MoleculeGroup)
 
-SIRE_EXPOSE_PROPERTY( SireMol::MolGroupPtr, SireMol::MoleculeGroup )
+SIRE_EXPOSE_PROPERTY(SireMol::MolGroupPtr, SireMol::MoleculeGroup)
 
 SIRE_END_HEADER
 

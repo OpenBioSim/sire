@@ -32,8 +32,8 @@
 
 #include "core.h"
 
-#include "SireBase/parallel.h"
 #include "SireBase/booleanproperty.h"
+#include "SireBase/parallel.h"
 
 #include "SireMol/errors.h"
 
@@ -45,7 +45,7 @@ namespace SireMol
     class SelectorM;
 
     class SelectorMol;
-}
+} // namespace SireMol
 
 template <class T>
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::SelectorM<T> &);
@@ -60,8 +60,7 @@ namespace SireMol
         to hold views from multiple molecules
     */
     template <class T>
-    class SIREMOL_EXPORT SelectorM
-        : public SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>
+    class SIREMOL_EXPORT SelectorM : public SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const SelectorM<T> &);
@@ -82,8 +81,7 @@ namespace SireMol
         SelectorM(const SelectorMol &mols);
         SelectorM(const SelectorMol &mols, const SireBase::Slice &slice);
         SelectorM(const SelectorMol &mols, const QList<qint64> &idxs);
-        SelectorM(const SelectorMol &mols, const QString &name,
-                  const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        SelectorM(const SelectorMol &mols, const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap());
         SelectorM(const SelectorMol &mols, const typename T::ID &id);
 
         template <class U>
@@ -164,123 +162,85 @@ namespace SireMol
         bool contains(const Selector<T> &view) const;
         bool contains(const T &view) const;
 
-        Molecule molecule(int i,
-                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Molecule molecule(const QString &name,
-                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Molecule molecule(const MolID &molid,
-                          const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        Molecule molecule(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Molecule molecule(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Molecule molecule(const MolID &molid, const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         SelectorMol molecules() const;
-        SelectorMol molecules(int i,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorMol molecules(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorMol molecules(const SireBase::Slice &slice,
                               const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorMol molecules(const QList<qint64> &idxs,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorMol molecules(const QString &name,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorMol molecules(const MolID &molid,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorMol molecules(const QList<qint64> &idxs, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorMol molecules(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorMol molecules(const MolID &molid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
-        Atom atom(int i,
-                  const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Atom atom(const QString &name,
-                  const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Atom atom(const AtomID &atomid,
-                  const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Atom atom(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Atom atom(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Atom atom(const AtomID &atomid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
-        Residue residue(int i,
-                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Residue residue(const QString &name,
-                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Residue residue(const ResID &resid,
-                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Residue residue(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Residue residue(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Residue residue(const ResID &resid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
-        Chain chain(int i,
-                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Chain chain(const QString &name,
-                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Chain chain(const ChainID &chainid,
-                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Chain chain(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Chain chain(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Chain chain(const ChainID &chainid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
-        Segment segment(int i,
-                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Segment segment(const QString &name,
-                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        Segment segment(const SegID &segid,
-                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Segment segment(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Segment segment(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        Segment segment(const SegID &segid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
-        CutGroup cutGroup(int i,
-                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        CutGroup cutGroup(const QString &name,
-                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        CutGroup cutGroup(const CGID &cgid,
-                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        CutGroup cutGroup(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        CutGroup cutGroup(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        CutGroup cutGroup(const CGID &cgid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         SelectorM<Atom> atoms() const;
-        SelectorM<Atom> atoms(int i,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Atom> atoms(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Atom> atoms(const SireBase::Slice &slice,
                               const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Atom> atoms(const QList<qint64> &idxs,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Atom> atoms(const QString &name,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Atom> atoms(const AtomID &atomid,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Atom> atoms(const QList<qint64> &idxs, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Atom> atoms(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Atom> atoms(const AtomID &atomid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         SelectorM<Residue> residues() const;
-        SelectorM<Residue> residues(int i,
-                                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Residue> residues(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Residue> residues(const SireBase::Slice &slice,
                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Residue> residues(const QList<qint64> &idxs,
                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Residue> residues(const QString &name,
-                                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Residue> residues(const ResID &resid,
-                                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Residue> residues(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Residue> residues(const ResID &resid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         SelectorM<Chain> chains() const;
-        SelectorM<Chain> chains(int i,
-                                const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Chain> chains(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Chain> chains(const SireBase::Slice &slice,
                                 const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Chain> chains(const QList<qint64> &idxs,
                                 const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Chain> chains(const QString &name,
-                                const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Chain> chains(const ChainID &chainid,
-                                const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Chain> chains(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Chain> chains(const ChainID &chainid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         SelectorM<Segment> segments() const;
-        SelectorM<Segment> segments(int i,
-                                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Segment> segments(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Segment> segments(const SireBase::Slice &slice,
                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<Segment> segments(const QList<qint64> &idxs,
                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Segment> segments(const QString &name,
-                                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<Segment> segments(const SegID &segid,
-                                    const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Segment> segments(const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<Segment> segments(const SegID &segid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         SelectorM<CutGroup> cutGroups() const;
-        SelectorM<CutGroup> cutGroups(int i,
-                                      const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<CutGroup> cutGroups(int i, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<CutGroup> cutGroups(const SireBase::Slice &slice,
                                       const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<CutGroup> cutGroups(const QList<qint64> &idxs,
                                       const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
         SelectorM<CutGroup> cutGroups(const QString &name,
                                       const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-        SelectorM<CutGroup> cutGroups(const CGID &cgid,
-                                      const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+        SelectorM<CutGroup> cutGroups(const CGID &cgid, const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         SelectResult search(const QString &search_string) const;
-        SelectResult search(const QString &search_string,
-                            const SireBase::PropertyMap &map) const;
+        SelectResult search(const QString &search_string, const SireBase::PropertyMap &map) const;
 
         QList<typename T::Index> IDs() const;
         QList<typename T::Index> indexes() const;
@@ -352,8 +312,7 @@ namespace SireMol
             if (_usesParallel(vws, map))
             {
                 nframes = tbb::parallel_reduce(
-                    tbb::blocked_range<int>(0, vws.count()),
-                    std::numeric_limits<int>::max(),
+                    tbb::blocked_range<int>(0, vws.count()), std::numeric_limits<int>::max(),
                     [&](tbb::blocked_range<int> r, int my_nframes)
                     {
                         for (int i = r.begin(); i < r.end(); ++i)
@@ -393,14 +352,12 @@ namespace SireMol
 
             if (_usesParallel(vws, map))
             {
-                tbb::parallel_for(tbb::blocked_range<int>(0, n),
-                                  [&](tbb::blocked_range<int> r)
+                tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
                                   {
-                                      for (int i = r.begin(); i < r.end(); ++i)
-                                      {
-                                          vws[i].loadFrame(frame, map);
-                                      }
-                                  });
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                vws[i].loadFrame(frame, map);
+            } });
             }
             else
             {
@@ -421,14 +378,12 @@ namespace SireMol
 
             if (_usesParallel(vws, map))
             {
-                tbb::parallel_for(tbb::blocked_range<int>(0, n),
-                                  [&](tbb::blocked_range<int> r)
+                tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
                                   {
-                                      for (int i = r.begin(); i < r.end(); ++i)
-                                      {
-                                          vws[i].saveFrame(frame, map);
-                                      }
-                                  });
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                vws[i].saveFrame(frame, map);
+            } });
             }
             else
             {
@@ -447,14 +402,12 @@ namespace SireMol
 
             if (_usesParallel(vws, map))
             {
-                tbb::parallel_for(tbb::blocked_range<int>(0, n),
-                                  [&](tbb::blocked_range<int> r)
+                tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
                                   {
-                                      for (int i = r.begin(); i < r.end(); ++i)
-                                      {
-                                          vws[i].saveFrame(map);
-                                      }
-                                  });
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                vws[i].saveFrame(map);
+            } });
             }
             else
             {
@@ -475,14 +428,12 @@ namespace SireMol
 
             if (_usesParallel(vws, map))
             {
-                tbb::parallel_for(tbb::blocked_range<int>(0, n),
-                                  [&](tbb::blocked_range<int> r)
+                tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
                                   {
-                                      for (int i = r.begin(); i < r.end(); ++i)
-                                      {
-                                          vws[i].deleteFrame(frame, map);
-                                      }
-                                  });
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                vws[i].deleteFrame(frame, map);
+            } });
             }
             else
             {
@@ -497,23 +448,19 @@ namespace SireMol
 #endif // GCCXML_PARSE
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM()
-        : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM() : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const T &view)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const T &view)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         this->vws.append(Selector<T>(view));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const Selector<T> &views)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const Selector<T> &views)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         if (not views.isEmpty())
@@ -549,8 +496,7 @@ namespace SireMol
             return view.atoms(name);
         }
 
-        static SelectorM<T> getID(const SelectorM<T> &view,
-                                  const typename T::ID &id)
+        static SelectorM<T> getID(const SelectorM<T> &view, const typename T::ID &id)
         {
             return view.atoms(id);
         }
@@ -563,19 +509,13 @@ namespace SireMol
 
         static void raise_duplicate(const QString &id, int n)
         {
-            throw SireMol::duplicate_atom(QObject::tr(
-                                              "Multiple atoms matched %1. Number of matches is %2.")
-                                              .arg(id)
-                                              .arg(n),
+            throw SireMol::duplicate_atom(QObject::tr("Multiple atoms matched %1. Number of matches is %2.").arg(id).arg(n),
                                           CODELOC);
         }
 
         static void raise_missing(const QString &id)
         {
-            throw SireMol::missing_atom(QObject::tr(
-                                            "No atom matches %1.")
-                                            .arg(id),
-                                        CODELOC);
+            throw SireMol::missing_atom(QObject::tr("No atom matches %1.").arg(id), CODELOC);
         }
     };
 
@@ -594,14 +534,12 @@ namespace SireMol
             return mols.residue(idx);
         }
 
-        static SelectorM<Residue> getName(const SelectorM<Residue> &view,
-                                          const QString &name)
+        static SelectorM<Residue> getName(const SelectorM<Residue> &view, const QString &name)
         {
             return view.residues(name);
         }
 
-        static SelectorM<Residue> getID(const SelectorM<Residue> &view,
-                                        const Residue::ID &id)
+        static SelectorM<Residue> getID(const SelectorM<Residue> &view, const Residue::ID &id)
         {
             return view.residues(id);
         }
@@ -623,19 +561,13 @@ namespace SireMol
 
         static void raise_duplicate(const QString &id, int n)
         {
-            throw SireMol::duplicate_residue(QObject::tr(
-                                                 "Multiple residues matched %1. Number of matches is %2.")
-                                                 .arg(id)
-                                                 .arg(n),
-                                             CODELOC);
+            throw SireMol::duplicate_residue(
+                QObject::tr("Multiple residues matched %1. Number of matches is %2.").arg(id).arg(n), CODELOC);
         }
 
         static void raise_missing(const QString &id)
         {
-            throw SireMol::missing_residue(QObject::tr(
-                                               "No residue matches %1.")
-                                               .arg(id),
-                                           CODELOC);
+            throw SireMol::missing_residue(QObject::tr("No residue matches %1.").arg(id), CODELOC);
         }
     };
 
@@ -654,14 +586,12 @@ namespace SireMol
             return mols.chain(idx);
         }
 
-        static SelectorM<Chain> getName(const SelectorM<Chain> &view,
-                                        const QString &name)
+        static SelectorM<Chain> getName(const SelectorM<Chain> &view, const QString &name)
         {
             return view.chains(name);
         }
 
-        static SelectorM<Chain> getID(const SelectorM<Chain> &view,
-                                      const Chain::ID &id)
+        static SelectorM<Chain> getID(const SelectorM<Chain> &view, const Chain::ID &id)
         {
             return view.chains(id);
         }
@@ -683,19 +613,13 @@ namespace SireMol
 
         static void raise_duplicate(const QString &id, int n)
         {
-            throw SireMol::duplicate_chain(QObject::tr(
-                                               "Multiple chains matched %1. Number of matches is %2.")
-                                               .arg(id)
-                                               .arg(n),
-                                           CODELOC);
+            throw SireMol::duplicate_chain(
+                QObject::tr("Multiple chains matched %1. Number of matches is %2.").arg(id).arg(n), CODELOC);
         }
 
         static void raise_missing(const QString &id)
         {
-            throw SireMol::missing_chain(QObject::tr(
-                                             "No chain matches %1.")
-                                             .arg(id),
-                                         CODELOC);
+            throw SireMol::missing_chain(QObject::tr("No chain matches %1.").arg(id), CODELOC);
         }
     };
 
@@ -714,14 +638,12 @@ namespace SireMol
             return mols.cutGroup(idx);
         }
 
-        static SelectorM<CutGroup> getName(const SelectorM<CutGroup> &view,
-                                           const QString &name)
+        static SelectorM<CutGroup> getName(const SelectorM<CutGroup> &view, const QString &name)
         {
             return view.cutGroup(name);
         }
 
-        static SelectorM<CutGroup> getID(const SelectorM<Residue> &view,
-                                         const CutGroup::ID &id)
+        static SelectorM<CutGroup> getID(const SelectorM<Residue> &view, const CutGroup::ID &id)
         {
             return view.cutGroups(id);
         }
@@ -743,19 +665,13 @@ namespace SireMol
 
         static void raise_duplicate(const QString &id, int n)
         {
-            throw SireMol::duplicate_cutgroup(QObject::tr(
-                                                  "Multiple CutGroups matched %1. Number of matches is %2.")
-                                                  .arg(id)
-                                                  .arg(n),
-                                              CODELOC);
+            throw SireMol::duplicate_cutgroup(
+                QObject::tr("Multiple CutGroups matched %1. Number of matches is %2.").arg(id).arg(n), CODELOC);
         }
 
         static void raise_missing(const QString &id)
         {
-            throw SireMol::missing_cutgroup(QObject::tr(
-                                                "No CutGroup matches %1.")
-                                                .arg(id),
-                                            CODELOC);
+            throw SireMol::missing_cutgroup(QObject::tr("No CutGroup matches %1.").arg(id), CODELOC);
         }
     };
 
@@ -774,14 +690,12 @@ namespace SireMol
             return mols.segment(idx);
         }
 
-        static SelectorM<Segment> getName(const SelectorM<Segment> &view,
-                                          const QString &name)
+        static SelectorM<Segment> getName(const SelectorM<Segment> &view, const QString &name)
         {
             return view.segments(name);
         }
 
-        static SelectorM<Segment> getID(const SelectorM<Segment> &view,
-                                        const Segment::ID &id)
+        static SelectorM<Segment> getID(const SelectorM<Segment> &view, const Segment::ID &id)
         {
             return view.segments(id);
         }
@@ -803,25 +717,18 @@ namespace SireMol
 
         static void raise_duplicate(const QString &id, int n)
         {
-            throw SireMol::duplicate_segment(QObject::tr(
-                                                 "Multiple segments matched %1. Number of matches is %2.")
-                                                 .arg(id)
-                                                 .arg(n),
-                                             CODELOC);
+            throw SireMol::duplicate_segment(
+                QObject::tr("Multiple segments matched %1. Number of matches is %2.").arg(id).arg(n), CODELOC);
         }
 
         static void raise_missing(const QString &id)
         {
-            throw SireMol::missing_segment(QObject::tr(
-                                               "No segment matches %1.")
-                                               .arg(id),
-                                           CODELOC);
+            throw SireMol::missing_segment(QObject::tr("No segment matches %1.").arg(id), CODELOC);
         }
     };
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorMol &mols)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorMol &mols)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &mol : mols)
@@ -850,8 +757,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const Molecules &molecules)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const Molecules &molecules)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         if (not molecules.isEmpty())
@@ -879,8 +785,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const MoleculeGroup &molecules)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const MoleculeGroup &molecules)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         if (not molecules.isEmpty())
@@ -896,8 +801,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const MolGroupsBase &molecules)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const MolGroupsBase &molecules)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         if (not molecules.isEmpty())
@@ -913,8 +817,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectResult &molecules)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectResult &molecules)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         if (not molecules.isEmpty())
@@ -929,20 +832,17 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorMol &mols, const SireBase::Slice &slice)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorMol &mols, const SireBase::Slice &slice)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
-        for (auto it = slice.begin(_get_view<T>::count(mols));
-             not it.atEnd(); it.next())
+        for (auto it = slice.begin(_get_view<T>::count(mols)); not it.atEnd(); it.next())
         {
             this->_append(_get_view<T>::at(mols, it.value()));
         }
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorMol &mols, const QList<qint64> &idxs)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorMol &mols, const QList<qint64> &idxs)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &idx : idxs)
@@ -952,9 +852,8 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorMol &mols, const QString &name,
-                            const SireBase::PropertyMap &map)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorMol &mols, const QString &name,
+                                                    const SireBase::PropertyMap &map)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &mol : mols)
@@ -990,8 +889,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorMol &mols, const typename T::ID &id)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorMol &mols, const typename T::ID &id)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &mol : mols)
@@ -1013,8 +911,7 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorM<U> &other)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &o : other)
@@ -1025,12 +922,10 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorM<U> &other, const SireBase::Slice &slice)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other, const SireBase::Slice &slice)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
-        for (auto it = slice.begin(_get_view<T>::count(other));
-             not it.atEnd(); it.next())
+        for (auto it = slice.begin(_get_view<T>::count(other)); not it.atEnd(); it.next())
         {
             this->_append(_get_view<T>::at(other, it.value()));
         }
@@ -1038,8 +933,7 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorM<U> &other, const QList<qint64> &idxs)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other, const QList<qint64> &idxs)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &idx : idxs)
@@ -1050,8 +944,7 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorM<U> &other, const QString &name)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other, const QString &name)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &view : other)
@@ -1088,8 +981,7 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorM<U> &other, const typename T::ID &id)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other, const typename T::ID &id)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &view : other)
@@ -1110,16 +1002,13 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    SelectorM<T>::SelectorM(const SelectorM<T> &other)
-        : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>(),
-          vws(other.vws)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<T> &other)
+        : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>(), vws(other.vws)
     {
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>::~SelectorM()
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::~SelectorM()
     {
     }
 
@@ -1130,9 +1019,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T> &
-        SelectorM<T>::operator=(const SelectorM<T> &other)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator=(const SelectorM<T> &other)
     {
         if (this != &other)
         {
@@ -1156,9 +1043,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        SelectorM<T>::operator[](int i) const
+    SIRE_OUTOFLINE_TEMPLATE T SelectorM<T>::operator[](int i) const
     {
         i = SireID::Index(i).map(this->count());
 
@@ -1180,25 +1065,19 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::operator[](const SireBase::Slice &slice) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator[](const SireBase::Slice &slice) const
     {
         return SelectorM<T>(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::operator[](const QList<qint64> &idxs) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator[](const QList<qint64> &idxs) const
     {
         return SelectorM<T>(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        SelectorM<T>::operator[](const QString &name) const
+    SIRE_OUTOFLINE_TEMPLATE T SelectorM<T>::operator[](const QString &name) const
     {
         auto all = _get_view<T>::getName(*this, name);
 
@@ -1213,9 +1092,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        SelectorM<T>::operator[](const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE T SelectorM<T>::operator[](const typename T::ID &id) const
     {
         auto all = _get_view<T>::getID(*this, id);
 
@@ -1230,33 +1107,25 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        SelectorM<T>::operator()(int i) const
+    SIRE_OUTOFLINE_TEMPLATE T SelectorM<T>::operator()(int i) const
     {
         return this->operator[](i);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        SelectorM<T>::operator()(const QString &name) const
+    SIRE_OUTOFLINE_TEMPLATE T SelectorM<T>::operator()(const QString &name) const
     {
         return this->operator[](name);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        T
-        SelectorM<T>::operator()(const typename T::ID &id) const
+    SIRE_OUTOFLINE_TEMPLATE T SelectorM<T>::operator()(const typename T::ID &id) const
     {
         return this->operator[](id);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<MolViewPtr>
-        SelectorM<T>::toList() const
+    SIRE_OUTOFLINE_TEMPLATE QList<MolViewPtr> SelectorM<T>::toList() const
     {
         QList<MolViewPtr> l;
         l.reserve(vws.count());
@@ -1270,25 +1139,19 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Molecules
-        SelectorM<T>::toMolecules() const
+    SIRE_OUTOFLINE_TEMPLATE Molecules SelectorM<T>::toMolecules() const
     {
         return Molecules(this->vws);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectResult
-        SelectorM<T>::toSelectResult() const
+    SIRE_OUTOFLINE_TEMPLATE SelectResult SelectorM<T>::toSelectResult() const
     {
         return SelectResult(this->vws);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<qint64>
-        SelectorM<T>::find(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE QList<qint64> SelectorM<T>::find(const T &view) const
     {
         QList<qint64> matches;
 
@@ -1313,9 +1176,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<qint64>
-        SelectorM<T>::find(const Selector<T> &views) const
+    SIRE_OUTOFLINE_TEMPLATE QList<qint64> SelectorM<T>::find(const Selector<T> &views) const
     {
         QList<qint64> matches;
 
@@ -1347,9 +1208,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<qint64>
-        SelectorM<T>::find(const SelectorM<T> &views) const
+    SIRE_OUTOFLINE_TEMPLATE QList<qint64> SelectorM<T>::find(const SelectorM<T> &views) const
     {
         QList<qint64> matches;
 
@@ -1369,8 +1228,7 @@ namespace SireMol
     }
 
     template <class T>
-    QList<qint64>
-    Selector<T>::find(const SelectorM<T> &views) const
+    QList<qint64> Selector<T>::find(const SelectorM<T> &views) const
     {
         return SelectorM<T>(*this).find(views);
     }
@@ -1382,9 +1240,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::add(const SelectorM<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::add(const SelectorM<T> &other) const
     {
         SelectorM<T> ret(*this);
 
@@ -1397,9 +1253,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::add(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::add(const Selector<T> &other) const
     {
         SelectorM<T> ret(*this);
 
@@ -1412,9 +1266,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::add(const T &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::add(const T &other) const
     {
         SelectorM<T> ret(*this);
         ret._append(other);
@@ -1422,9 +1274,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::subtract(const SelectorM<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::subtract(const SelectorM<T> &other) const
     {
         SelectorM<T> ret;
 
@@ -1448,9 +1298,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::subtract(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::subtract(const Selector<T> &other) const
     {
         SelectorM<T> ret;
 
@@ -1471,9 +1319,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::subtract(const T &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::subtract(const T &other) const
     {
         SelectorM<T> ret;
 
@@ -1494,9 +1340,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::intersection(const SelectorM<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::intersection(const SelectorM<T> &other) const
     {
         SelectorM<T> ret;
 
@@ -1520,9 +1364,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::intersection(const Selector<T> &views) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::intersection(const Selector<T> &views) const
     {
         SelectorM<T> ret;
 
@@ -1543,9 +1385,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::intersection(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::intersection(const T &view) const
     {
         if (this->contains(view))
         {
@@ -1556,9 +1396,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<T>
-        SelectorM<T>::invert() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::invert() const
     {
         SelectorM<T> ret;
 
@@ -1678,19 +1516,15 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectResult
-        SelectorM<T>::search(const QString &search_term) const
+    SIRE_OUTOFLINE_TEMPLATE SelectResult SelectorM<T>::search(const QString &search_term) const
     {
         Select search(search_term);
         return search(this->toSelectResult());
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectResult
-        SelectorM<T>::search(const QString &search_term,
-                             const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectResult SelectorM<T>::search(const QString &search_term,
+                                                              const SireBase::PropertyMap &map) const
     {
         Select search(search_term);
         return search(this->toSelectResult(), map);
@@ -1716,9 +1550,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        MoleculeGroup
-        SelectorM<T>::toMoleculeGroup() const
+    SIRE_OUTOFLINE_TEMPLATE MoleculeGroup SelectorM<T>::toMoleculeGroup() const
     {
         MoleculeGroup grp;
 
@@ -1731,10 +1563,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Molecule
-        SelectorM<T>::molecule(int i,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE Molecule SelectorM<T>::molecule(int i, const SireBase::PropertyMap &) const
     {
         i = SireID::Index(i).map(this->vws.count());
 
@@ -1742,19 +1571,14 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Molecule
-        SelectorM<T>::molecule(const QString &name,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Molecule SelectorM<T>::molecule(const QString &name, const SireBase::PropertyMap &map) const
     {
         auto mols = this->molecules(name, map);
 
         if (mols.count() > 1)
-            throw SireMol::duplicate_molecule(QObject::tr(
-                                                  "More than one molecule matches '%1'. Number of matches is %2.")
-                                                  .arg(name)
-                                                  .arg(mols.count()),
-                                              CODELOC);
+            throw SireMol::duplicate_molecule(
+                QObject::tr("More than one molecule matches '%1'. Number of matches is %2.").arg(name).arg(mols.count()),
+                CODELOC);
 
         BOOST_ASSERT(not mols.isEmpty());
 
@@ -1762,16 +1586,12 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Molecule
-        SelectorM<T>::molecule(const MolID &molid,
-                               const SireBase::PropertyMap &map)
+    SIRE_OUTOFLINE_TEMPLATE Molecule SelectorM<T>::molecule(const MolID &molid, const SireBase::PropertyMap &map)
     {
         auto mols = this->molecules(molid, map);
 
         if (mols.count() > 1)
-            throw SireMol::duplicate_molecule(QObject::tr(
-                                                  "More than one molecule matches '%1'. Number of matches is %2.")
+            throw SireMol::duplicate_molecule(QObject::tr("More than one molecule matches '%1'. Number of matches is %2.")
                                                   .arg(molid.toString())
                                                   .arg(mols.count()),
                                               CODELOC);
@@ -1782,62 +1602,45 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorMol
-        SelectorM<T>::molecules() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::molecules() const
     {
         return SelectorMol(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorMol
-        SelectorM<T>::molecules(int i,
-                                const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::molecules(int i, const SireBase::PropertyMap &map) const
     {
         return SelectorMol(this->molecule(i, map));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorMol
-        SelectorM<T>::molecules(const SireBase::Slice &slice,
-                                const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::molecules(const SireBase::Slice &slice,
+                                                                const SireBase::PropertyMap &) const
     {
         return SelectorMol(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorMol
-        SelectorM<T>::molecules(const QList<qint64> &idxs,
-                                const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::molecules(const QList<qint64> &idxs,
+                                                                const SireBase::PropertyMap &) const
     {
         return SelectorMol(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorMol
-        SelectorM<T>::molecules(const QString &name,
-                                const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::molecules(const QString &name, const SireBase::PropertyMap &map) const
     {
         return SelectorMol(*this, name, map);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorMol
-        SelectorM<T>::molecules(const MolID &molid,
-                                const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::molecules(const MolID &molid, const SireBase::PropertyMap &) const
     {
         return SelectorMol(*this, molid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Atom
-        SelectorM<T>::atom(int i, const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE Atom SelectorM<T>::atom(int i, const SireBase::PropertyMap &) const
     {
         i = SireID::Index(i).map(this->nAtoms());
 
@@ -1859,10 +1662,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Atom
-        SelectorM<T>::atom(const QString &name,
-                           const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Atom SelectorM<T>::atom(const QString &name, const SireBase::PropertyMap &map) const
     {
         auto all = this->atoms(name, map);
 
@@ -1875,10 +1675,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Atom
-        SelectorM<T>::atom(const AtomID &atomid,
-                           const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Atom SelectorM<T>::atom(const AtomID &atomid, const SireBase::PropertyMap &map) const
     {
         auto all = this->atoms(atomid, map);
 
@@ -1891,9 +1688,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Residue
-        SelectorM<T>::residue(int i, const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE Residue SelectorM<T>::residue(int i, const SireBase::PropertyMap &) const
     {
         i = SireID::Index(i).map(this->nResidues());
 
@@ -1915,10 +1710,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Residue
-        SelectorM<T>::residue(const QString &name,
-                              const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Residue SelectorM<T>::residue(const QString &name, const SireBase::PropertyMap &map) const
     {
         auto all = this->residues(name, map);
 
@@ -1931,10 +1723,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Residue
-        SelectorM<T>::residue(const ResID &resid,
-                              const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Residue SelectorM<T>::residue(const ResID &resid, const SireBase::PropertyMap &map) const
     {
         auto all = this->residues(resid, map);
 
@@ -1947,9 +1736,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Chain
-        SelectorM<T>::chain(int i, const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE Chain SelectorM<T>::chain(int i, const SireBase::PropertyMap &) const
     {
         i = SireID::Index(i).map(this->nChains());
 
@@ -1971,10 +1758,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Chain
-        SelectorM<T>::chain(const QString &name,
-                            const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Chain SelectorM<T>::chain(const QString &name, const SireBase::PropertyMap &map) const
     {
         auto all = this->chains(name, map);
 
@@ -1987,10 +1771,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Chain
-        SelectorM<T>::chain(const ChainID &chainid,
-                            const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Chain SelectorM<T>::chain(const ChainID &chainid, const SireBase::PropertyMap &map) const
     {
         auto all = this->chains(chainid);
 
@@ -2003,9 +1784,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Segment
-        SelectorM<T>::segment(int i, const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE Segment SelectorM<T>::segment(int i, const SireBase::PropertyMap &) const
     {
         i = SireID::Index(i).map(this->nSegments());
 
@@ -2027,10 +1806,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Segment
-        SelectorM<T>::segment(const QString &name,
-                              const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Segment SelectorM<T>::segment(const QString &name, const SireBase::PropertyMap &map) const
     {
         auto all = this->segments(name, map);
 
@@ -2043,10 +1819,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        Segment
-        SelectorM<T>::segment(const SegID &segid,
-                              const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE Segment SelectorM<T>::segment(const SegID &segid, const SireBase::PropertyMap &map) const
     {
         auto all = this->segments(segid, map);
 
@@ -2059,9 +1832,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        CutGroup
-        SelectorM<T>::cutGroup(int i, const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE CutGroup SelectorM<T>::cutGroup(int i, const SireBase::PropertyMap &) const
     {
         i = SireID::Index(i).map(this->nCutGroups());
 
@@ -2083,10 +1854,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        CutGroup
-        SelectorM<T>::cutGroup(const QString &name,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE CutGroup SelectorM<T>::cutGroup(const QString &name, const SireBase::PropertyMap &map) const
     {
         auto all = this->cutGroups(name, map);
 
@@ -2099,10 +1867,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        CutGroup
-        SelectorM<T>::cutGroup(const CGID &cgid,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE CutGroup SelectorM<T>::cutGroup(const CGID &cgid, const SireBase::PropertyMap &map) const
     {
         auto all = this->cutGroups(cgid, map);
 
@@ -2115,273 +1880,205 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Atom>
-        SelectorM<T>::atoms() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Atom> SelectorM<T>::atoms() const
     {
         return SelectorM<Atom>(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Atom>
-        SelectorM<T>::atoms(int i, const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Atom> SelectorM<T>::atoms(int i, const SireBase::PropertyMap &map) const
     {
         return SelectorM<Atom>(this->atom(i, map));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Atom>
-        SelectorM<T>::atoms(const SireBase::Slice &slice,
-                            const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Atom> SelectorM<T>::atoms(const SireBase::Slice &slice,
+                                                                const SireBase::PropertyMap &) const
     {
         return SelectorM<Atom>(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Atom>
-        SelectorM<T>::atoms(const QList<qint64> &idxs,
-                            const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Atom> SelectorM<T>::atoms(const QList<qint64> &idxs,
+                                                                const SireBase::PropertyMap &) const
     {
         return SelectorM<Atom>(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Atom>
-        SelectorM<T>::atoms(const QString &name,
-                            const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Atom> SelectorM<T>::atoms(const QString &name, const SireBase::PropertyMap &map) const
     {
         return SelectorM<Atom>(*this, name, map);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Atom>
-        SelectorM<T>::atoms(const AtomID &atomid,
-                            const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Atom> SelectorM<T>::atoms(const AtomID &atomid, const SireBase::PropertyMap &) const
     {
         return SelectorM<Atom>(*this, atomid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Residue>
-        SelectorM<T>::residues() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Residue> SelectorM<T>::residues() const
     {
         return SelectorM<Residue>(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Residue>
-        SelectorM<T>::residues(int i,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Residue> SelectorM<T>::residues(int i, const SireBase::PropertyMap &map) const
     {
         return SelectorM<Residue>(this->residue(i, map));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Residue>
-        SelectorM<T>::residues(const SireBase::Slice &slice,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Residue> SelectorM<T>::residues(const SireBase::Slice &slice,
+                                                                      const SireBase::PropertyMap &) const
     {
         return SelectorM<Residue>(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Residue>
-        SelectorM<T>::residues(const QList<qint64> &idxs,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Residue> SelectorM<T>::residues(const QList<qint64> &idxs,
+                                                                      const SireBase::PropertyMap &) const
     {
         return SelectorM<Residue>(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Residue>
-        SelectorM<T>::residues(const QString &name,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Residue> SelectorM<T>::residues(const QString &name,
+                                                                      const SireBase::PropertyMap &map) const
     {
         return SelectorM<Residue>(*this, name, map);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Residue>
-        SelectorM<T>::residues(const ResID &resid,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Residue> SelectorM<T>::residues(const ResID &resid,
+                                                                      const SireBase::PropertyMap &) const
     {
         return SelectorM<Residue>(*this, resid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Chain>
-        SelectorM<T>::chains() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Chain> SelectorM<T>::chains() const
     {
         return SelectorM<Chain>(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Chain>
-        SelectorM<T>::chains(int i,
-                             const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Chain> SelectorM<T>::chains(int i, const SireBase::PropertyMap &map) const
     {
         return SelectorM<Chain>(this->chain(i, map));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Chain>
-        SelectorM<T>::chains(const SireBase::Slice &slice,
-                             const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Chain> SelectorM<T>::chains(const SireBase::Slice &slice,
+                                                                  const SireBase::PropertyMap &) const
     {
         return SelectorM<Chain>(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Chain>
-        SelectorM<T>::chains(const QList<qint64> &idxs,
-                             const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Chain> SelectorM<T>::chains(const QList<qint64> &idxs,
+                                                                  const SireBase::PropertyMap &) const
     {
         return SelectorM<Chain>(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Chain>
-        SelectorM<T>::chains(const QString &name,
-                             const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Chain> SelectorM<T>::chains(const QString &name,
+                                                                  const SireBase::PropertyMap &map) const
     {
         return SelectorM<Chain>(*this, name, map);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Chain>
-        SelectorM<T>::chains(const ChainID &chainid,
-                             const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Chain> SelectorM<T>::chains(const ChainID &chainid,
+                                                                  const SireBase::PropertyMap &) const
     {
         return SelectorM<Chain>(*this, chainid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Segment>
-        SelectorM<T>::segments() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Segment> SelectorM<T>::segments() const
     {
         return SelectorM<Segment>(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Segment>
-        SelectorM<T>::segments(int i,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Segment> SelectorM<T>::segments(int i, const SireBase::PropertyMap &map) const
     {
         return SelectorM<Segment>(this->segment(i, map));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Segment>
-        SelectorM<T>::segments(const SireBase::Slice &slice,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Segment> SelectorM<T>::segments(const SireBase::Slice &slice,
+                                                                      const SireBase::PropertyMap &) const
     {
         return SelectorM<Segment>(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Segment>
-        SelectorM<T>::segments(const QList<qint64> &idxs,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Segment> SelectorM<T>::segments(const QList<qint64> &idxs,
+                                                                      const SireBase::PropertyMap &) const
     {
         return SelectorM<Segment>(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Segment>
-        SelectorM<T>::segments(const QString &name,
-                               const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Segment> SelectorM<T>::segments(const QString &name,
+                                                                      const SireBase::PropertyMap &map) const
     {
         return SelectorM<Segment>(*this, name, map);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<Segment>
-        SelectorM<T>::segments(const SegID &segid,
-                               const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<Segment> SelectorM<T>::segments(const SegID &segid,
+                                                                      const SireBase::PropertyMap &) const
     {
         return SelectorM<Segment>(*this, segid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<CutGroup>
-        SelectorM<T>::cutGroups() const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<CutGroup> SelectorM<T>::cutGroups() const
     {
         return SelectorM<CutGroup>(*this);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<CutGroup>
-        SelectorM<T>::cutGroups(int i,
-                                const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<CutGroup> SelectorM<T>::cutGroups(int i, const SireBase::PropertyMap &map) const
     {
         return SelectorM<CutGroup>(this->cutGroup(i, map));
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<CutGroup>
-        SelectorM<T>::cutGroups(const SireBase::Slice &slice,
-                                const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<CutGroup> SelectorM<T>::cutGroups(const SireBase::Slice &slice,
+                                                                        const SireBase::PropertyMap &) const
     {
         return SelectorM<CutGroup>(*this, slice);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<CutGroup>
-        SelectorM<T>::cutGroups(const QList<qint64> &idxs,
-                                const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<CutGroup> SelectorM<T>::cutGroups(const QList<qint64> &idxs,
+                                                                        const SireBase::PropertyMap &) const
     {
         return SelectorM<CutGroup>(*this, idxs);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<CutGroup>
-        SelectorM<T>::cutGroups(const QString &name,
-                                const SireBase::PropertyMap &map) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<CutGroup> SelectorM<T>::cutGroups(const QString &name,
+                                                                        const SireBase::PropertyMap &map) const
     {
         return SelectorM<CutGroup>(*this, name, map);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        SelectorM<CutGroup>
-        SelectorM<T>::cutGroups(const CGID &cgid,
-                                const SireBase::PropertyMap &) const
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<CutGroup> SelectorM<T>::cutGroups(const CGID &cgid,
+                                                                        const SireBase::PropertyMap &) const
     {
         return SelectorM<CutGroup>(*this, cgid);
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Index>
-        SelectorM<T>::IDs() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Index> SelectorM<T>::IDs() const
     {
         QList<typename T::Index> ids;
 
@@ -2394,9 +2091,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Index>
-        SelectorM<T>::indexes() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Index> SelectorM<T>::indexes() const
     {
         QList<typename T::Index> idxs;
 
@@ -2409,9 +2104,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Number>
-        SelectorM<T>::numbers() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Number> SelectorM<T>::numbers() const
     {
         QList<typename T::Number> nums;
 
@@ -2424,9 +2117,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QList<typename T::Name>
-        SelectorM<T>::names() const
+    SIRE_OUTOFLINE_TEMPLATE QList<typename T::Name> SelectorM<T>::names() const
     {
         QList<typename T::Name> nmes;
 
@@ -2576,41 +2267,31 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        typename SelectorM<T>::const_iterator
-        SelectorM<T>::begin() const
+    SIRE_OUTOFLINE_TEMPLATE typename SelectorM<T>::const_iterator SelectorM<T>::begin() const
     {
         return this->vws.constBegin();
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        typename SelectorM<T>::const_iterator
-        SelectorM<T>::end() const
+    SIRE_OUTOFLINE_TEMPLATE typename SelectorM<T>::const_iterator SelectorM<T>::end() const
     {
         return this->vws.constEnd();
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        typename SelectorM<T>::const_iterator
-        SelectorM<T>::constBegin() const
+    SIRE_OUTOFLINE_TEMPLATE typename SelectorM<T>::const_iterator SelectorM<T>::constBegin() const
     {
         return this->vws.constBegin();
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        typename SelectorM<T>::const_iterator
-        SelectorM<T>::constEnd() const
+    SIRE_OUTOFLINE_TEMPLATE typename SelectorM<T>::const_iterator SelectorM<T>::constEnd() const
     {
         return this->vws.constEnd();
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        QString
-        SelectorM<T>::toString() const
+    SIRE_OUTOFLINE_TEMPLATE QString SelectorM<T>::toString() const
     {
         if (this->isEmpty())
         {
@@ -2628,10 +2309,7 @@ namespace SireMol
                 {
                     const auto view = this->operator[](i);
 
-                    parts.append(QString("%1: %2 %3")
-                                     .arg(i)
-                                     .arg(view.data().number().toString())
-                                     .arg(view.toString()));
+                    parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
                 }
             }
             else
@@ -2640,10 +2318,7 @@ namespace SireMol
                 {
                     const auto view = this->operator[](i);
 
-                    parts.append(QString("%1: %2 %3")
-                                     .arg(i)
-                                     .arg(view.data().number().toString())
-                                     .arg(view.toString()));
+                    parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
                 }
 
                 parts.append("...");
@@ -2652,17 +2327,11 @@ namespace SireMol
                 {
                     const auto view = this->operator[](i);
 
-                    parts.append(QString("%1: %2 %3")
-                                     .arg(i)
-                                     .arg(view.data().number().toString())
-                                     .arg(view.toString()));
+                    parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
                 }
             }
 
-            return QObject::tr("%1( size=%2\n%3\n)")
-                .arg(this->what())
-                .arg(n)
-                .arg(parts.join("\n"));
+            return QObject::tr("%1( size=%2\n%3\n)").arg(this->what()).arg(n).arg(parts.join("\n"));
         }
     }
 
@@ -2678,8 +2347,7 @@ namespace SireMol
 {
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-    EvaluatorM::EvaluatorM(const SelectorM<T> &views)
+    SIRE_OUTOFLINE_TEMPLATE EvaluatorM::EvaluatorM(const SelectorM<T> &views)
         : SireBase::ConcreteProperty<EvaluatorM, SireBase::Property>()
     {
         this->vws.reserve(views.count());
@@ -2691,9 +2359,7 @@ namespace SireMol
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE
-        EvaluatorM
-        SelectorM<T>::evaluate() const
+    SIRE_OUTOFLINE_TEMPLATE EvaluatorM SelectorM<T>::evaluate() const
     {
         return EvaluatorM(*this);
     }

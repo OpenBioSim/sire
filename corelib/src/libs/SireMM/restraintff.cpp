@@ -28,8 +28,8 @@
 #include "restraintff.h"
 
 #include "SireMol/molecule.h"
-#include "SireMol/molecules.h"
 #include "SireMol/moleculedata.h"
+#include "SireMol/molecules.h"
 #include "SireMol/partialmolecule.h"
 #include "SireMol/viewsofmol.h"
 
@@ -38,10 +38,10 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include "SireError/errors.h"
-#include "SireCAS/errors.h"
-#include "SireFF/errors.h"
 #include "SireBase/errors.h"
+#include "SireCAS/errors.h"
+#include "SireError/errors.h"
+#include "SireFF/errors.h"
 
 #include <memory>
 
@@ -62,9 +62,7 @@ QDataStream &operator<<(QDataStream &ds, const RestraintFF &restraintff)
 
     SharedDataStream sds(ds);
 
-    sds << restraintff.restraints_by_idx
-        << restraintff.spce
-        << static_cast<const G1FF&>(restraintff);
+    sds << restraintff.restraints_by_idx << restraintff.spce << static_cast<const G1FF &>(restraintff);
 
     return ds;
 }
@@ -78,15 +76,13 @@ QDataStream &operator>>(QDataStream &ds, RestraintFF &restraintff)
     {
         SharedDataStream sds(ds);
 
-        sds >> restraintff.restraints_by_idx
-            >> restraintff.spce
-            >> static_cast<G1FF&>(restraintff);
+        sds >> restraintff.restraints_by_idx >> restraintff.spce >> static_cast<G1FF &>(restraintff);
 
         restraintff.reindexRestraints();
         restraintff._pvt_updateName();
     }
     else
-        throw version_error( v, "1", r_restraintff, CODELOC );
+        throw version_error(v, "1", r_restraintff, CODELOC);
 
     return ds;
 }
@@ -107,11 +103,11 @@ void RestraintFF::rebuildProperties()
 {
     props.clear();
 
-    props.setProperty( "space", spce );
+    props.setProperty("space", spce);
 
     foreach (Symbol symbol, user_values.symbols())
     {
-        props.setProperty( symbol.toString(), wrap(user_values[symbol]) );
+        props.setProperty(symbol.toString(), wrap(user_values[symbol]));
     }
 }
 
@@ -125,15 +121,13 @@ void RestraintFF::reindexRestraints()
     user_values = Values();
     builtin_symbols.clear();
 
-    for (quint32 i=0; i<nrestraints; ++i)
+    for (quint32 i = 0; i < nrestraints; ++i)
     {
         const Restraint3D &restraint = restraints_array[i].read();
 
         Molecules mols = restraint.molecules();
 
-        for (Molecules::const_iterator it = mols.constBegin();
-             it != mols.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = mols.constBegin(); it != mols.constEnd(); ++it)
         {
             restraints_by_molnum[it->number()].append(i);
         }
@@ -148,8 +142,7 @@ void RestraintFF::reindexRestraints()
 }
 
 /** Constructor */
-RestraintFF::RestraintFF() : ConcreteProperty<RestraintFF,G1FF>(true), FF3D(),
-                             recalc_from_scratch(true)
+RestraintFF::RestraintFF() : ConcreteProperty<RestraintFF, G1FF>(true), FF3D(), recalc_from_scratch(true)
 {
     this->_pvt_updateName();
     this->rebuildProperties();
@@ -157,8 +150,7 @@ RestraintFF::RestraintFF() : ConcreteProperty<RestraintFF,G1FF>(true), FF3D(),
 
 /** Construct, giving the forcefield the specified name */
 RestraintFF::RestraintFF(const QString &name)
-            : ConcreteProperty<RestraintFF,G1FF>(true), FF3D(),
-              recalc_from_scratch(true)
+    : ConcreteProperty<RestraintFF, G1FF>(true), FF3D(), recalc_from_scratch(true)
 {
     FF::setName(name);
     this->rebuildProperties();
@@ -166,29 +158,25 @@ RestraintFF::RestraintFF(const QString &name)
 
 /** Copy constructor */
 RestraintFF::RestraintFF(const RestraintFF &other)
-            : ConcreteProperty<RestraintFF,G1FF>(other), FF3D(other),
-              ffcomponents(other.ffcomponents),
-              restraints_by_idx(other.restraints_by_idx),
-              old_restraints_by_idx(other.old_restraints_by_idx),
-              restraints_by_molnum(other.restraints_by_molnum),
-              spce(other.spce),
-              user_values(other.user_values),
-              builtin_symbols(other.builtin_symbols),
-              props(other.props),
-              recalc_from_scratch(other.recalc_from_scratch)
-{}
+    : ConcreteProperty<RestraintFF, G1FF>(other), FF3D(other), ffcomponents(other.ffcomponents),
+      restraints_by_idx(other.restraints_by_idx), old_restraints_by_idx(other.old_restraints_by_idx),
+      restraints_by_molnum(other.restraints_by_molnum), spce(other.spce), user_values(other.user_values),
+      builtin_symbols(other.builtin_symbols), props(other.props), recalc_from_scratch(other.recalc_from_scratch)
+{
+}
 
 /** Destructor */
 RestraintFF::~RestraintFF()
-{}
-
-const char* RestraintFF::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RestraintFF>() );
+}
+
+const char *RestraintFF::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<RestraintFF>());
 }
 
 /** Copy assignment operator */
-RestraintFF& RestraintFF::operator=(const RestraintFF &other)
+RestraintFF &RestraintFF::operator=(const RestraintFF &other)
 {
     if (this != &other)
     {
@@ -212,9 +200,7 @@ RestraintFF& RestraintFF::operator=(const RestraintFF &other)
 /** Comparison operator */
 bool RestraintFF::operator==(const RestraintFF &other) const
 {
-    return this == &other or
-           (restraints_by_idx == other.restraints_by_idx and
-            G1FF::operator==(other));
+    return this == &other or (restraints_by_idx == other.restraints_by_idx and G1FF::operator==(other));
 }
 
 /** Comparison operator */
@@ -224,13 +210,13 @@ bool RestraintFF::operator!=(const RestraintFF &other) const
 }
 
 /** Internal function used to get the forcefield components */
-const RestraintComponent& RestraintFF::_pvt_components() const
+const RestraintComponent &RestraintFF::_pvt_components() const
 {
     return ffcomponents;
 }
 
 /** Return the components of this forcefield */
-const RestraintComponent& RestraintFF::components() const
+const RestraintComponent &RestraintFF::components() const
 {
     return ffcomponents;
 }
@@ -240,7 +226,7 @@ void RestraintFF::recalculateEnergy()
 {
     if (old_restraints_by_idx.isEmpty())
     {
-        //recalculate the energy from scratch
+        // recalculate the energy from scratch
         const Restraint3DPtr *restraints_array = restraints_by_idx.constData();
         const int nrestraints = restraints_by_idx.count();
 
@@ -251,9 +237,9 @@ void RestraintFF::recalculateEnergy()
 
             RestraintEnergy my_nrg(0);
 
-            for (int i=0; i<nrestraints; ++i)
+            for (int i = 0; i < nrestraints; ++i)
             {
-                my_nrg += RestraintEnergy( my_restraints_array[i].read().energy() );
+                my_nrg += RestraintEnergy(my_restraints_array[i].read().energy());
             }
 
             {
@@ -267,21 +253,19 @@ void RestraintFF::recalculateEnergy()
     }
     else
     {
-        //evaluate the change in energy
+        // evaluate the change in energy
         RestraintEnergy delta_nrg(0);
 
         const Restraint3DPtr *restraints_array = restraints_by_idx.constData();
         const quint32 nrestraints = restraints_by_idx.count();
 
-        for (QHash<quint32,Restraint3DPtr>::const_iterator
-                                        it = old_restraints_by_idx.constBegin();
-             it != old_restraints_by_idx.constEnd();
-             ++it)
+        for (QHash<quint32, Restraint3DPtr>::const_iterator it = old_restraints_by_idx.constBegin();
+             it != old_restraints_by_idx.constEnd(); ++it)
         {
-            BOOST_ASSERT( it.key() < nrestraints );
+            BOOST_ASSERT(it.key() < nrestraints);
 
-            delta_nrg += RestraintEnergy( restraints_array[it.key()].read().energy() );
-            delta_nrg -= RestraintEnergy( it.value().read().energy() );
+            delta_nrg += RestraintEnergy(restraints_array[it.key()].read().energy());
+            delta_nrg -= RestraintEnergy(it.value().read().energy());
         }
 
         this->components().changeEnergy(*this, delta_nrg);
@@ -294,7 +278,7 @@ void RestraintFF::recalculateEnergy()
 /** Update the restraints with the new molecule data in 'moldata' */
 void RestraintFF::updateRestraints(const MoleculeData &moldata)
 {
-    //get the list of restraints potentially affected by this change in molecule
+    // get the list of restraints potentially affected by this change in molecule
     QList<quint32> restraint_idxs = restraints_by_molnum.value(moldata.number());
 
     if (restraint_idxs.isEmpty())
@@ -309,8 +293,7 @@ void RestraintFF::updateRestraints(const MoleculeData &moldata)
 
         quint32 idx = *(restraint_idxs.constBegin());
 
-        bool save_old_state = not ( recalc_from_scratch or
-                                    old_restraints_by_idx.contains(idx) );
+        bool save_old_state = not(recalc_from_scratch or old_restraints_by_idx.contains(idx));
 
         Restraint3DPtr old_restraint;
 
@@ -324,11 +307,11 @@ void RestraintFF::updateRestraints(const MoleculeData &moldata)
     }
     else
     {
-        #ifdef BOOST_NO_CXX11_SMART_PTR
-          std::auto_ptr<RestraintFF> old_state( this->clone() );
-        #else
-          std::unique_ptr<RestraintFF> old_state( this->clone() );
-        #endif
+#ifdef BOOST_NO_CXX11_SMART_PTR
+        std::auto_ptr<RestraintFF> old_state(this->clone());
+#else
+        std::unique_ptr<RestraintFF> old_state(this->clone());
+#endif
 
         try
         {
@@ -339,8 +322,7 @@ void RestraintFF::updateRestraints(const MoleculeData &moldata)
 
             foreach (quint32 idx, restraint_idxs)
             {
-                bool save_old_state = not ( recalc_from_scratch or
-                                            old_restraints_by_idx.contains(idx) );
+                bool save_old_state = not(recalc_from_scratch or old_restraints_by_idx.contains(idx));
 
                 Restraint3DPtr old_restraint;
 
@@ -353,9 +335,9 @@ void RestraintFF::updateRestraints(const MoleculeData &moldata)
                     old_restraints_by_idx.insert(idx, old_restraint);
             }
         }
-        catch(...)
+        catch (...)
         {
-            this->copy( *old_state );
+            this->copy(*old_state);
             throw;
         }
     }
@@ -364,12 +346,10 @@ void RestraintFF::updateRestraints(const MoleculeData &moldata)
 /** Update the restraints with the new molecule data in 'molecules' */
 void RestraintFF::updateRestraints(const Molecules &molecules)
 {
-    //get the list of restraints potentially affected by this change in molecules
+    // get the list of restraints potentially affected by this change in molecules
     QList<quint32> restraint_idxs;
 
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         restraint_idxs += restraints_by_molnum.value(it.key());
     }
@@ -386,8 +366,7 @@ void RestraintFF::updateRestraints(const Molecules &molecules)
 
         quint32 idx = *(restraint_idxs.constBegin());
 
-        bool save_old_state = not ( recalc_from_scratch or
-                                    old_restraints_by_idx.contains(idx) );
+        bool save_old_state = not(recalc_from_scratch or old_restraints_by_idx.contains(idx));
 
         Restraint3DPtr old_restraint;
 
@@ -401,11 +380,11 @@ void RestraintFF::updateRestraints(const Molecules &molecules)
     }
     else
     {
-        #ifdef BOOST_NO_CXX11_SMART_PTR
-          std::auto_ptr<RestraintFF> old_state( this->clone() );
-        #else
-          std::unique_ptr<RestraintFF> old_state( this->clone() );
-        #endif
+#ifdef BOOST_NO_CXX11_SMART_PTR
+        std::auto_ptr<RestraintFF> old_state(this->clone());
+#else
+        std::unique_ptr<RestraintFF> old_state(this->clone());
+#endif
 
         try
         {
@@ -416,8 +395,7 @@ void RestraintFF::updateRestraints(const Molecules &molecules)
 
             foreach (quint32 idx, restraint_idxs)
             {
-                bool save_old_state = not ( recalc_from_scratch or
-                                            old_restraints_by_idx.contains(idx) );
+                bool save_old_state = not(recalc_from_scratch or old_restraints_by_idx.contains(idx));
 
                 Restraint3DPtr old_restraint;
 
@@ -430,9 +408,9 @@ void RestraintFF::updateRestraints(const Molecules &molecules)
                     old_restraints_by_idx.insert(idx, old_restraint);
             }
         }
-        catch(...)
+        catch (...)
         {
-            this->copy( *old_state );
+            this->copy(*old_state);
             throw;
         }
     }
@@ -447,8 +425,9 @@ void RestraintFF::_pvt_updateName()
 
 /** Internal function called when a molecule is added - this forcefield
     doesn't care about molecules being added - only restraints */
-void RestraintFF::_pvt_added(const PartialMolecule&, const PropertyMap&)
-{}
+void RestraintFF::_pvt_added(const PartialMolecule &, const PropertyMap &)
+{
+}
 
 /** Internal function called when a molecule is remove - this forcefield
     will remove the first restraint it finds that contains this exact
@@ -462,12 +441,12 @@ void RestraintFF::_pvt_removed(const PartialMolecule &mol)
     {
         if (restraints_by_idx.at(idx).read().molecules().contains(mol))
         {
-            //this restraint contains this view - we need to remove
-            //this restraint, which will remove all molecule views
-            //involved with this restraint. *However* we need to ensure
-            //that only one copy of this view is removed, so we need
-            //to re-add it to this forcefield so that it is available
-            //to be removed when this restraint is removed
+            // this restraint contains this view - we need to remove
+            // this restraint, which will remove all molecule views
+            // involved with this restraint. *However* we need to ensure
+            // that only one copy of this view is removed, so we need
+            // to re-add it to this forcefield so that it is available
+            // to be removed when this restraint is removed
             this->add(mol);
             this->removeRestraintAt(idx);
             return;
@@ -480,7 +459,7 @@ void RestraintFF::_pvt_removed(const PartialMolecule &mol)
     need to be updated */
 void RestraintFF::_pvt_changed(const SireMol::Molecule &mol, bool auto_update)
 {
-    this->updateRestraints( mol.data() );
+    this->updateRestraints(mol.data());
 }
 
 /** This internal function is called when the molecules in 'mols'
@@ -488,7 +467,7 @@ void RestraintFF::_pvt_changed(const SireMol::Molecule &mol, bool auto_update)
     will need to be updated */
 void RestraintFF::_pvt_changed(const QList<SireMol::Molecule> &mols, bool auto_update)
 {
-    this->updateRestraints( Molecules(mols) );
+    this->updateRestraints(Molecules(mols));
 }
 
 /** This internal function is called when all molecules (and hence
@@ -506,16 +485,16 @@ void RestraintFF::_pvt_removedAll()
 /** This internal function is called to see if changing properties would
     change the forcefield - as we can't change properties of restraints,
     this cannot change the forcefield */
-bool RestraintFF::_pvt_wouldChangeProperties(SireMol::MolNum,
-                                             const PropertyMap&) const
+bool RestraintFF::_pvt_wouldChangeProperties(SireMol::MolNum, const PropertyMap &) const
 {
     return false;
 }
 
 /** Internal function called when a molecule is added - this forcefield
     doesn't care about molecules being added - only restraints */
-void RestraintFF::_pvt_added(const ViewsOfMol&, const PropertyMap&)
-{}
+void RestraintFF::_pvt_added(const ViewsOfMol &, const PropertyMap &)
+{
+}
 
 /** Internal function called to remove all of the views in 'mol'.
     Note that this only removes the first restraints that contain
@@ -523,7 +502,7 @@ void RestraintFF::_pvt_added(const ViewsOfMol&, const PropertyMap&)
     molecules involved in this restraint */
 void RestraintFF::_pvt_removed(const ViewsOfMol &mol)
 {
-    for (int i=0; i<mol.nViews(); ++i)
+    for (int i = 0; i < mol.nViews(); ++i)
     {
         this->_pvt_removed(mol.valueAt(i));
     }
@@ -545,9 +524,9 @@ void RestraintFF::_pvt_removedAll(const PartialMolecule &mol)
         {
             if (restraints_by_idx.at(idx).read().molecules().contains(mol))
             {
-                //this restraint contains this view - we need to remove
-                //this restraint, which will remove all molecule views
-                //involved with this restraint
+                // this restraint contains this view - we need to remove
+                // this restraint, which will remove all molecule views
+                // involved with this restraint
                 this->removeRestraintAt(idx);
                 more_to_remove = true;
                 break;
@@ -564,14 +543,14 @@ void RestraintFF::_pvt_removedAll(const PartialMolecule &mol)
     all of the molecules used in those restraints */
 void RestraintFF::_pvt_removedAll(const ViewsOfMol &mol)
 {
-    for (int i=0; i<mol.nViews(); ++i)
+    for (int i = 0; i < mol.nViews(); ++i)
     {
-        this->_pvt_removedAll( mol.valueAt(i) );
+        this->_pvt_removedAll(mol.valueAt(i));
     }
 }
 
 /** Return the space used by this forcefield */
-const Space& RestraintFF::space() const
+const Space &RestraintFF::space() const
 {
     return spce.read();
 }
@@ -586,7 +565,7 @@ bool RestraintFF::setSpace(const Space &space)
     {
         QVector<Restraint3DPtr> new_restraints = restraints_by_idx;
 
-        for (int i=0; i<new_restraints.count(); ++i)
+        for (int i = 0; i < new_restraints.count(); ++i)
         {
             new_restraints[i].edit().setSpace(space);
         }
@@ -613,13 +592,14 @@ bool RestraintFF::setSpace(const Space &space)
 bool RestraintFF::setValue(const Symbol &symbol, double value)
 {
     if (builtin_symbols.contains(symbol))
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot set the value of the symbol %1 to %2 as this "
-            "is one of the built-in symbols (%3) of the restraints in "
-            "this forcefield (%4).")
-                .arg(symbol.toString()).arg(value)
-                .arg( Sire::toString(builtin_symbols) )
-                .arg(this->toString()), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot set the value of the symbol %1 to %2 as this "
+                                                 "is one of the built-in symbols (%3) of the restraints in "
+                                                 "this forcefield (%4).")
+                                         .arg(symbol.toString())
+                                         .arg(value)
+                                         .arg(Sire::toString(builtin_symbols))
+                                         .arg(this->toString()),
+                                     CODELOC);
 
     if (user_values.contains(symbol))
     {
@@ -628,7 +608,7 @@ bool RestraintFF::setValue(const Symbol &symbol, double value)
 
         QVector<Restraint3DPtr> new_restraints = restraints_by_idx;
 
-        for (int i=0; i<new_restraints.count(); ++i)
+        for (int i = 0; i < new_restraints.count(); ++i)
         {
             if (new_restraints.at(i).read().hasValue(symbol))
                 new_restraints[i].edit().setValue(symbol, value);
@@ -638,7 +618,7 @@ bool RestraintFF::setValue(const Symbol &symbol, double value)
 
         restraints_by_idx = new_restraints;
 
-        props.setProperty( symbol.toString(), wrap(value) );
+        props.setProperty(symbol.toString(), wrap(value));
 
         return true;
     }
@@ -650,10 +630,10 @@ bool RestraintFF::setValue(const Symbol &symbol, double value)
 double RestraintFF::getValue(const Symbol &symbol) const
 {
     if (not user_values.contains(symbol))
-        throw SireCAS::missing_symbol( QObject::tr(
-            "There is no user-supplied value of the symbol %1 in the "
-            "forcefield %2.")
-                .arg(symbol.toString(), this->toString()), CODELOC );
+        throw SireCAS::missing_symbol(QObject::tr("There is no user-supplied value of the symbol %1 in the "
+                                                  "forcefield %2.")
+                                          .arg(symbol.toString(), this->toString()),
+                                      CODELOC);
 
     return user_values[symbol];
 }
@@ -675,20 +655,20 @@ bool RestraintFF::setProperty(const QString &name, const Property &property)
 {
     if (name == QLatin1String("space"))
     {
-        return this->setSpace( property.asA<Space>() );
+        return this->setSpace(property.asA<Space>());
     }
     else if (props.hasProperty(name))
     {
-        return this->setValue( Symbol(name), property.asADouble() );
+        return this->setValue(Symbol(name), property.asADouble());
     }
     else
     {
-        throw SireBase::missing_property( QObject::tr(
-                "There is no property called \"%1\" in the forcefield %2, "
-                "so it cannot be set to the value %3. Available properties "
-                "are [ %4 ].")
-                    .arg(name, this->toString(), property.toString())
-                    .arg( Sire::toString(props.propertyKeys()) ), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no property called \"%1\" in the forcefield %2, "
+                                                     "so it cannot be set to the value %3. Available properties "
+                                                     "are [ %4 ].")
+                                             .arg(name, this->toString(), property.toString())
+                                             .arg(Sire::toString(props.propertyKeys())),
+                                         CODELOC);
 
         return false;
     }
@@ -698,7 +678,7 @@ bool RestraintFF::setProperty(const QString &name, const Property &property)
 
     \throw SireBase::missing_property
 */
-const Property& RestraintFF::property(const QString &name) const
+const Property &RestraintFF::property(const QString &name) const
 {
     return props.property(name);
 }
@@ -710,7 +690,7 @@ bool RestraintFF::containsProperty(const QString &name) const
 }
 
 /** Return all of the properties of this forcefield */
-const Properties& RestraintFF::properties() const
+const Properties &RestraintFF::properties() const
 {
     return props;
 }
@@ -751,14 +731,13 @@ Values RestraintFF::userValues() const
 */
 RestraintFF RestraintFF::differentiate(const Symbol &symbol) const
 {
-    RestraintFF diff( *this );
+    RestraintFF diff(*this);
 
     diff.restraints_by_idx.clear();
 
-    for (int i=0; i<restraints_by_idx.count(); ++i)
+    for (int i = 0; i < restraints_by_idx.count(); ++i)
     {
-        Restraint3DPtr diff_restraint = restraints_by_idx.at(i).read()
-                                                               .differentiate(symbol);
+        Restraint3DPtr diff_restraint = restraints_by_idx.at(i).read().differentiate(symbol);
 
         if (not diff_restraint.isNull())
             diff.restraints_by_idx.append(diff_restraint);
@@ -773,7 +752,7 @@ RestraintFF RestraintFF::differentiate(const Symbol &symbol) const
     'restraint' */
 bool RestraintFF::contains(const Restraint3D &restraint) const
 {
-    for (int i=0; i<restraints_by_idx.count(); ++i)
+    for (int i = 0; i < restraints_by_idx.count(); ++i)
     {
         if (restraints_by_idx.at(i).read().equals(restraint))
             return true;
@@ -787,63 +766,64 @@ bool RestraintFF::contains(const Restraint3D &restraint) const
     whether or not this changes this forcefield */
 bool RestraintFF::add(const Restraint3D &restraint)
 {
-    //make sure that there are no current user values that clash
-    //with the builtin symbols of this restraint
+    // make sure that there are no current user values that clash
+    // with the builtin symbols of this restraint
     const Symbols user_symbols = user_values.symbols();
 
     if (restraint.builtinSymbols().intersects(user_symbols))
-        throw SireError::incompatible_error( QObject::tr(
-            "Cannot add the restraint %1 to the forcefield %2 as there "
-            "is a clash between the built-in symbols of this restraint (%3) "
-            "and the user-supplied symbols of this forcefield (%4).")
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot add the restraint %1 to the forcefield %2 as there "
+                        "is a clash between the built-in symbols of this restraint (%3) "
+                        "and the user-supplied symbols of this forcefield (%4).")
                 .arg(restraint.toString(), this->toString())
-                .arg( Sire::toString(restraint.builtinSymbols()) )
-                .arg( Sire::toString(user_symbols) ), CODELOC );
+                .arg(Sire::toString(restraint.builtinSymbols()))
+                .arg(Sire::toString(user_symbols)),
+            CODELOC);
 
-    Restraint3DPtr new_restraint( restraint );
+    Restraint3DPtr new_restraint(restraint);
 
-    //update the restraint with the current space
+    // update the restraint with the current space
     if (not new_restraint.read().space().equals(spce))
     {
         new_restraint.edit().setSpace(spce);
     }
 
-    //update the restraint with the current symbol values
+    // update the restraint with the current symbol values
     foreach (Symbol symbol, user_symbols)
     {
         new_restraint.edit().setValue(symbol, user_values[symbol]);
     }
 
-    //update the restraint with the current versions of the molecules
+    // update the restraint with the current versions of the molecules
     if (not this->isEmpty())
     {
-        new_restraint.edit().update( this->molecules() );
+        new_restraint.edit().update(this->molecules());
     }
 
-    //now see if we have this restraint already?
+    // now see if we have this restraint already?
     if (not this->contains(new_restraint))
     {
-        //we don't - add the new restraint
-        #ifdef BOOST_NO_CXX11_SMART_PTR
-          std::auto_ptr<RestraintFF> old_state( this->clone() );
-        #else
-          std::unique_ptr<RestraintFF> old_state( this->clone() );
-        #endif
+// we don't - add the new restraint
+#ifdef BOOST_NO_CXX11_SMART_PTR
+        std::auto_ptr<RestraintFF> old_state(this->clone());
+#else
+        std::unique_ptr<RestraintFF> old_state(this->clone());
+#endif
 
         try
         {
-            //add the restraint onto the list of existing restraints...
-            restraints_by_idx.append( new_restraint );
+            // add the restraint onto the list of existing restraints...
+            restraints_by_idx.append(new_restraint);
 
-            //now add the molecules in this restraint
-            this->add( new_restraint.read().molecules() );
+            // now add the molecules in this restraint
+            this->add(new_restraint.read().molecules());
 
-            //finally, reindex the restraints
+            // finally, reindex the restraints
             this->reindexRestraints();
 
             return true;
         }
-        catch(...)
+        catch (...)
         {
             this->copy(*old_state);
             throw;
@@ -869,9 +849,9 @@ int RestraintFF::nRestraints() const
 
     \throw SireError::index_error
 */
-const Restraint3D& RestraintFF::restraintAt(int i) const
+const Restraint3D &RestraintFF::restraintAt(int i) const
 {
-    return restraints_by_idx.at( Index(i).map(this->nRestraints()) );
+    return restraints_by_idx.at(Index(i).map(this->nRestraints()));
 }
 
 /** Remove the ith restraint
@@ -880,32 +860,32 @@ const Restraint3D& RestraintFF::restraintAt(int i) const
 */
 void RestraintFF::removeRestraintAt(int i)
 {
-    i = Index(i).map( this->nRestraints() );
+    i = Index(i).map(this->nRestraints());
 
-    #ifdef BOOST_NO_CXX11_SMART_PTR
-      std::auto_ptr<RestraintFF> old_state( this->clone() );
-    #else
-      std::unique_ptr<RestraintFF> old_state( this->clone() );
-    #endif
+#ifdef BOOST_NO_CXX11_SMART_PTR
+    std::auto_ptr<RestraintFF> old_state(this->clone());
+#else
+    std::unique_ptr<RestraintFF> old_state(this->clone());
+#endif
 
     try
     {
-        //get the molecules in this restraint
+        // get the molecules in this restraint
         Molecules mols = restraints_by_idx.at(i).read().molecules();
 
-        //lose this restraint from the list
+        // lose this restraint from the list
         restraints_by_idx.remove(i);
 
-        //reindex the restraints before removing the molecules so as
-        //to ensure that we don't trigger infinite recursion as
-        //removing more molecules causes the restraint to be removed again
+        // reindex the restraints before removing the molecules so as
+        // to ensure that we don't trigger infinite recursion as
+        // removing more molecules causes the restraint to be removed again
         this->reindexRestraints();
 
         this->remove(mols);
     }
-    catch(...)
+    catch (...)
     {
-        this->copy( *old_state );
+        this->copy(*old_state);
         throw;
     }
 }
@@ -915,7 +895,7 @@ void RestraintFF::removeRestraintAt(int i)
     whether or not the restraint was removed. */
 bool RestraintFF::remove(const Restraint3D &restraint)
 {
-    for (int i=0; i<restraints_by_idx.count(); ++i)
+    for (int i = 0; i < restraints_by_idx.count(); ++i)
     {
         if (restraints_by_idx.at(i).read().equals(restraint))
         {
@@ -929,15 +909,12 @@ bool RestraintFF::remove(const Restraint3D &restraint)
 
 void RestraintFF::energy(EnergyTable &energytable, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "RestraintFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("RestraintFF does not yet support energy calculations!"), CODELOC);
 }
 
-void RestraintFF::energy(EnergyTable &energytable, const Symbol &symbol,
-                           double scale_energy)
+void RestraintFF::energy(EnergyTable &energytable, const Symbol &symbol, double scale_energy)
 {
-    throw SireError::incomplete_code( QObject::tr(
-            "RestraintFF does not yet support energy calculations!"), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("RestraintFF does not yet support energy calculations!"), CODELOC);
 }
 
 /** Calculate the forces on the molecules in 'forcetable' caused
@@ -945,7 +922,7 @@ void RestraintFF::energy(EnergyTable &energytable, const Symbol &symbol,
     forcetable, optionally scaled by 'scale_force' */
 void RestraintFF::force(ForceTable &forcetable, double scale_force)
 {
-    for (int i=0; i<restraints_by_idx.count(); ++i)
+    for (int i = 0; i < restraints_by_idx.count(); ++i)
     {
         restraints_by_idx.at(i).read().force(forcetable, scale_force);
     }
@@ -962,75 +939,70 @@ void RestraintFF::force(ForceTable &forcetable, const Symbol &symbol, double sca
     if (symbol == ffcomponents.total())
         this->force(forcetable, scale_force);
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no forcefield component represented by %1 in the "
-            "forcefield %2. Available components are %3.")
-                .arg(symbol.toString(), this->toString(),
-                     ffcomponents.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no forcefield component represented by %1 in the "
+                                                    "forcefield %2. Available components are %3.")
+                                            .arg(symbol.toString(), this->toString(), ffcomponents.total().toString()),
+                                        CODELOC);
 }
 
-RestraintFF* RestraintFF::clone() const
+RestraintFF *RestraintFF::clone() const
 {
     return new RestraintFF(*this);
 }
 
 void RestraintFF::field(FieldTable &fieldtable, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }
 
-void RestraintFF::field(FieldTable &fieldtable, const Symbol &component,
-                        double scale_field)
+void RestraintFF::field(FieldTable &fieldtable, const Symbol &component, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }
 
 void RestraintFF::potential(PotentialTable &potentialtable, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }
 
-void RestraintFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                            double scale_potential)
+void RestraintFF::potential(PotentialTable &potentialtable, const Symbol &component, double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }
 
 void RestraintFF::field(FieldTable &fieldtable, const Probe &probe, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }
 
-void RestraintFF::field(FieldTable &fieldtable, const Symbol &component,
-                        const Probe &probe, double scale_field)
+void RestraintFF::field(FieldTable &fieldtable, const Symbol &component, const Probe &probe, double scale_field)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }
 
-void RestraintFF::potential(PotentialTable &potentialtable, const Probe &probe,
+void RestraintFF::potential(PotentialTable &potentialtable, const Probe &probe, double scale_potential)
+{
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
+}
+
+void RestraintFF::potential(PotentialTable &potentialtable, const Symbol &component, const Probe &probe,
                             double scale_potential)
 {
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
-}
-
-void RestraintFF::potential(PotentialTable &potentialtable, const Symbol &component,
-                            const Probe &probe, double scale_potential)
-{
-    throw SireError::incomplete_code( QObject::tr(
-                "The code to calculate the field of a restraint has not "
-                "been written."), CODELOC );
+    throw SireError::incomplete_code(QObject::tr("The code to calculate the field of a restraint has not "
+                                                 "been written."),
+                                     CODELOC);
 }

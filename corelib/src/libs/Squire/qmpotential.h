@@ -30,15 +30,15 @@
 
 #include "SireMol/element.h"
 
-#include "SireBase/property.h"
 #include "SireBase/properties.h"
+#include "SireBase/property.h"
 
 #include "SireVol/space.h"
 
 #include "SireFF/ffcomponent.h"
 
-#include "SireFF/detail/ffmolecules3d.h"
 #include "SireFF/detail/atomicparameters3d.hpp"
+#include "SireFF/detail/ffmolecules3d.h"
 
 #include "SireUnits/dimensions.h"
 
@@ -46,307 +46,275 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class QMPotential;
-class QMProgram;
-class QMComponent;
-}
+    class QMPotential;
+    class QMProgram;
+    class QMComponent;
+} // namespace Squire
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::QMPotential&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::QMPotential&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::QMPotential &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::QMPotential &);
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::QMProgram&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::QMProgram&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::QMProgram &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::QMProgram &);
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::QMComponent&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::QMComponent&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::QMComponent &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::QMComponent &);
 
 namespace SireFF
 {
-class ForceTable;
-class FieldTable;
-class PotentialTable;
-class Probe;
-}
+    class ForceTable;
+    class FieldTable;
+    class PotentialTable;
+    class Probe;
+} // namespace SireFF
 
 namespace SireMM
 {
-class CoulombProbe;
+    class CoulombProbe;
 }
 
 namespace SireCAS
 {
-class Symbol;
+    class Symbol;
 }
 
 namespace Squire
 {
 
-using SireBase::PropertyMap;
-using SireBase::Property;
-using SireBase::Property;
-using SireBase::Properties;
+    using SireBase::Properties;
+    using SireBase::Property;
+    using SireBase::PropertyMap;
 
-using SireMol::PartialMolecule;
-using SireMol::MoleculeGroup;
+    using SireMol::MoleculeGroup;
+    using SireMol::PartialMolecule;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-using SireVol::Space;
-using SireVol::SpacePtr;
+    using SireVol::Space;
+    using SireVol::SpacePtr;
 
-using SireFF::ForceTable;
-using SireFF::FieldTable;
-using SireFF::PotentialTable;
-using SireFF::Probe;
+    using SireFF::FieldTable;
+    using SireFF::ForceTable;
+    using SireFF::PotentialTable;
+    using SireFF::Probe;
 
-class QMComponent;
-class QMProgram;
-class LatticeCharges;
+    class QMComponent;
+    class QMProgram;
+    class LatticeCharges;
 
-typedef SireFF::ComponentEnergy<QMComponent> QMEnergy;
+    typedef SireFF::ComponentEnergy<QMComponent> QMEnergy;
 
-/** This class represents a QM energy */
-class SQUIRE_EXPORT QMComponent : public SireFF::FFComponent
-{
-public:
-    QMComponent(const SireFF::FFName &ffname = SireFF::FFName());
-    QMComponent(const SireCAS::Symbol &symbol);
-
-    QMComponent(const QMComponent &other);
-
-    ~QMComponent();
-
-    static const char* typeName()
+    /** This class represents a QM energy */
+    class SQUIRE_EXPORT QMComponent : public SireFF::FFComponent
     {
-        return "Squire::QMComponent";
-    }
+    public:
+        QMComponent(const SireFF::FFName &ffname = SireFF::FFName());
+        QMComponent(const SireCAS::Symbol &symbol);
 
-    const char* what() const
+        QMComponent(const QMComponent &other);
+
+        ~QMComponent();
+
+        static const char *typeName()
+        {
+            return "Squire::QMComponent";
+        }
+
+        const char *what() const
+        {
+            return QMComponent::typeName();
+        }
+
+        QMComponent *clone() const
+        {
+            return new QMComponent(*this);
+        }
+
+        const QMComponent &total() const
+        {
+            return *this;
+        }
+
+        void setEnergy(SireFF::FF &ff, const QMEnergy &qmnrg) const;
+        void changeEnergy(SireFF::FF &ff, const QMEnergy &qmnrg) const;
+
+        SireCAS::Symbols symbols() const
+        {
+            return *this;
+        }
+    };
+
+    /** This class provides the default name of the
+        property that contains the element parameters */
+    class SQUIRE_EXPORT ElementParameterName
     {
-        return QMComponent::typeName();
-    }
+    public:
+        ElementParameterName()
+        {
+        }
 
-    QMComponent* clone() const
+        ~ElementParameterName()
+        {
+        }
+
+        const QString &element() const
+        {
+            return element_param;
+        }
+
+    private:
+        static QString element_param;
+    };
+
+    /** This class provides the default names of the element
+        and coordinates properties that contain these parameters */
+    class SQUIRE_EXPORT ElementParameterName3D : public ElementParameterName, public SireFF::detail::Coords3DParameterName
     {
-        return new QMComponent(*this);
-    }
+    public:
+        ElementParameterName3D() : ElementParameterName(), SireFF::detail::Coords3DParameterName()
+        {
+        }
 
-    const QMComponent& total() const
+        ~ElementParameterName3D()
+        {
+        }
+    };
+
+    typedef SireBase::PropPtr<QMProgram> QMProgPtr;
+
+    /** This is a QM potential. This provides the classes and code necessary
+        to calculate QM energies and forces
+
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT QMPotential
     {
-        return *this;
-    }
 
-    void setEnergy(SireFF::FF &ff, const QMEnergy &qmnrg) const;
-    void changeEnergy(SireFF::FF &ff, const QMEnergy &qmnrg) const;
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const QMPotential &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, QMPotential &);
 
-    SireCAS::Symbols symbols() const
-    {
-        return *this;
-    }
-};
+    public:
+        typedef QMEnergy Energy;
+        typedef Energy::Components Components;
+        typedef ElementParameterName3D ParameterNames;
 
-/** This class provides the default name of the
-    property that contains the element parameters */
-class SQUIRE_EXPORT ElementParameterName
-{
-public:
-    ElementParameterName()
-    {}
+        typedef SireMM::CoulombProbe Probe;
 
-    ~ElementParameterName()
-    {}
+        typedef SireMol::Element Parameter;
+        typedef SireFF::detail::AtomicParameters3D<Parameter> Parameters;
 
-    const QString& element() const
-    {
-        return element_param;
-    }
+        typedef SireFF::detail::FFMolecule3D<QMPotential> Molecule;
+        typedef SireFF::detail::FFMolecules3D<QMPotential> Molecules;
+        typedef SireFF::detail::ChangedMolecule<Molecule> ChangedMolecule;
 
-private:
-    static QString element_param;
-};
+        QMPotential();
 
-/** This class provides the default names of the element
-    and coordinates properties that contain these parameters */
-class SQUIRE_EXPORT ElementParameterName3D
-          : public ElementParameterName, public SireFF::detail::Coords3DParameterName
-{
-public:
-    ElementParameterName3D() : ElementParameterName(),
-                               SireFF::detail::Coords3DParameterName()
-    {}
+        QMPotential(const QMPotential &other);
 
-    ~ElementParameterName3D()
-    {}
-};
+        virtual ~QMPotential();
 
-typedef SireBase::PropPtr<QMProgram> QMProgPtr;
+        static ParameterNames parameters()
+        {
+            return ParameterNames();
+        }
 
-/** This is a QM potential. This provides the classes and code necessary
-    to calculate QM energies and forces
+        static const char *typeName()
+        {
+            return "Squire::QMPotential";
+        }
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT QMPotential
-{
+        virtual const char *what() const
+        {
+            return QMPotential::typeName();
+        }
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const QMPotential&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, QMPotential&);
+        QMPotential &operator=(const QMPotential &other);
 
-public:
+        bool setProperty(const QString &name, const Property &value);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
 
-    typedef QMEnergy Energy;
-    typedef Energy::Components Components;
-    typedef ElementParameterName3D ParameterNames;
+        bool setSpace(const Space &space);
+        bool setQuantumProgram(const QMProgram &program);
+        bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
 
-    typedef SireMM::CoulombProbe Probe;
+        const Space &space() const;
+        const QMProgram &quantumProgram() const;
+        SireUnits::Dimension::MolarEnergy zeroEnergy() const;
 
-    typedef SireMol::Element Parameter;
-    typedef SireFF::detail::AtomicParameters3D<Parameter> Parameters;
+        QMPotential::Parameters getParameters(const PartialMolecule &mol, const PropertyMap &map = PropertyMap());
 
-    typedef SireFF::detail::FFMolecule3D<QMPotential> Molecule;
-    typedef SireFF::detail::FFMolecules3D<QMPotential> Molecules;
-    typedef SireFF::detail::ChangedMolecule<Molecule> ChangedMolecule;
+        QMPotential::Parameters updateParameters(const QMPotential::Parameters &old_params, const PartialMolecule &old_mol,
+                                                 const PartialMolecule &new_mol, const PropertyMap &map = PropertyMap());
 
-    QMPotential();
+        QMPotential::Parameters updateParameters(const QMPotential::Parameters &old_params,
+                                                 const PartialMolecule &old_molecule, const PartialMolecule &new_molecule,
+                                                 const PropertyMap &old_map, const PropertyMap &new_map);
 
-    QMPotential(const QMPotential &other);
+        QMPotential::Molecule parameterise(const PartialMolecule &molecule, const PropertyMap &map = PropertyMap());
 
-    virtual ~QMPotential();
+        QMPotential::Molecules parameterise(const MoleculeGroup &molecules, const PropertyMap &map = PropertyMap());
 
-    static ParameterNames parameters()
-    {
-        return ParameterNames();
-    }
+        void calculateForce(const Molecules &molecules, ForceTable &forcetable, double scale_force = 1) const;
 
-    static const char* typeName()
-    {
-        return "Squire::QMPotential";
-    }
+        void calculateForce(const Molecules &molecules, ForceTable &forcetable, const Symbol &symbol,
+                            const Components &components, double scale_force = 1) const;
 
-    virtual const char* what() const
-    {
-        return QMPotential::typeName();
-    }
+        void calculatePotential(const Molecules &molecules, PotentialTable &pottable, const SireFF::Probe &probe,
+                                double scale_potential = 1) const;
 
-    QMPotential& operator=(const QMPotential &other);
+        void calculatePotential(const Molecules &molecules, PotentialTable &pottable, const SireFF::Probe &probe,
+                                const Symbol &symbol, const Components &components, double scale_potential = 1) const;
 
-    bool setProperty(const QString &name, const Property &value);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
+        void calculateField(const Molecules &molecules, FieldTable &fieldtable, const SireFF::Probe &probe,
+                            double scale_field = 1) const;
 
-    bool setSpace(const Space &space);
-    bool setQuantumProgram(const QMProgram &program);
-    bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
+        void calculateField(const Molecules &molecules, FieldTable &fieldtable, const SireFF::Probe &probe,
+                            const Symbol &symbol, const Components &components, double scale_field = 1) const;
 
-    const Space& space() const;
-    const QMProgram& quantumProgram() const;
-    SireUnits::Dimension::MolarEnergy zeroEnergy() const;
+        void calculateEnergy(const Molecules &molecules, Energy &nrg, double scale_energy = 1) const;
 
-    QMPotential::Parameters
-    getParameters(const PartialMolecule &mol,
-                  const PropertyMap &map = PropertyMap());
+        QString energyCommandFile(const Molecules &molecules) const;
 
-    QMPotential::Parameters
-    updateParameters(const QMPotential::Parameters &old_params,
-                     const PartialMolecule &old_mol,
-                     const PartialMolecule &new_mol,
-                     const PropertyMap &map = PropertyMap());
+        QString forceCommandFile(const Molecules &molecules, const ForceTable &forcetable) const;
 
-    QMPotential::Parameters
-    updateParameters(const QMPotential::Parameters &old_params,
-                     const PartialMolecule &old_molecule,
-                     const PartialMolecule &new_molecule,
-                     const PropertyMap &old_map, const PropertyMap &new_map);
-
-    QMPotential::Molecule
-    parameterise(const PartialMolecule &molecule,
-                 const PropertyMap &map = PropertyMap());
-
-    QMPotential::Molecules
-    parameterise(const MoleculeGroup &molecules,
-                 const PropertyMap &map = PropertyMap());
-
-    void calculateForce(const Molecules &molecules,
-                        ForceTable &forcetable,
-                        double scale_force=1) const;
-
-    void calculateForce(const Molecules &molecules,
-                        ForceTable &forcetable,
-                        const Symbol &symbol,
-                        const Components &components,
-                        double scale_force=1) const;
-
-    void calculatePotential(const Molecules &molecules,
-                            PotentialTable &pottable,
-                            const SireFF::Probe &probe,
-                            double scale_potential=1) const;
-
-    void calculatePotential(const Molecules &molecules,
-                            PotentialTable &pottable,
-                            const SireFF::Probe &probe,
-                            const Symbol &symbol,
-                            const Components &components,
-                            double scale_potential=1) const;
-
-    void calculateField(const Molecules &molecules,
-                        FieldTable &fieldtable,
-                        const SireFF::Probe &probe,
-                        double scale_field=1) const;
-
-    void calculateField(const Molecules &molecules,
-                        FieldTable &fieldtable,
-                        const SireFF::Probe &probe,
-                        const Symbol &symbol,
-                        const Components &components,
-                        double scale_field=1) const;
-
-    void calculateEnergy(const Molecules &molecules, Energy &nrg,
-                         double scale_energy=1) const;
-
-    QString energyCommandFile(const Molecules &molecules) const;
-
-    QString forceCommandFile(const Molecules &molecules,
-                             const ForceTable &forcetable) const;
-
-    QString fieldCommandFile(const Molecules &molecules,
-                             const FieldTable &fieldtable,
-                             const SireFF::Probe &probe) const;
-
-    QString potentialCommandFile(const Molecules &molecules,
-                                 const PotentialTable &pottable,
+        QString fieldCommandFile(const Molecules &molecules, const FieldTable &fieldtable,
                                  const SireFF::Probe &probe) const;
 
-protected:
-    virtual void changedPotential()=0;
+        QString potentialCommandFile(const Molecules &molecules, const PotentialTable &pottable,
+                                     const SireFF::Probe &probe) const;
 
-    Molecules mapIntoSpace(const Molecules &molecules) const;
+    protected:
+        virtual void changedPotential() = 0;
 
-private:
-    /** The properties that define this potential */
-    Properties props;
+        Molecules mapIntoSpace(const Molecules &molecules) const;
 
-    /** The space in which the molecules exist */
-    SpacePtr spce;
+    private:
+        /** The properties that define this potential */
+        Properties props;
 
-    /** The QM program that is used to calculate the energy */
-    QMProgPtr qmprog;
+        /** The space in which the molecules exist */
+        SpacePtr spce;
 
-    /** The absolute value of the energy that corresponds
-        to 'zero' - this is necessary to shift the QM energy
-        into the same range as the MM energy. This is a constant
-        that is added on to every QM energy evaluated */
-    double zero_energy;
-};
+        /** The QM program that is used to calculate the energy */
+        QMProgPtr qmprog;
+
+        /** The absolute value of the energy that corresponds
+            to 'zero' - this is necessary to shift the QM energy
+            into the same range as the MM energy. This is a constant
+            that is added on to every QM energy evaluated */
+        double zero_energy;
+    };
 
 } // end of namespace Squire
 
-Q_DECLARE_METATYPE( Squire::QMComponent )
+Q_DECLARE_METATYPE(Squire::QMComponent)
 
-SIRE_EXPOSE_CLASS( Squire::QMComponent )
+SIRE_EXPOSE_CLASS(Squire::QMComponent)
 
-SIRE_EXPOSE_CLASS( Squire::ElementParameterName )
-SIRE_EXPOSE_CLASS( Squire::ElementParameterName3D )
+SIRE_EXPOSE_CLASS(Squire::ElementParameterName)
+SIRE_EXPOSE_CLASS(Squire::ElementParameterName3D)
 
 SIRE_END_HEADER
 

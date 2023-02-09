@@ -30,32 +30,28 @@
 
 #include "coulombpotential.h"
 
-#include "SireFF/inter2b3dff.hpp"
 #include "SireFF/inter2b2g3dff.hpp"
+#include "SireFF/inter2b3dff.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
 
-using SireFF::Inter2BFF;
-using SireFF::Inter2B3DFF;
-using SireFF::Inter2B2GFF;
-using SireFF::Inter2B2G3DFF;
+    using SireFF::Inter2B2G3DFF;
+    using SireFF::Inter2B2GFF;
+    using SireFF::Inter2B3DFF;
+    using SireFF::Inter2BFF;
 
-typedef Inter2BFF< CoulombPotentialInterface<InterCoulombPotential> >
-InterCoulombFFBase;
+    typedef Inter2BFF<CoulombPotentialInterface<InterCoulombPotential>> InterCoulombFFBase;
 
-typedef Inter2B3DFF< CoulombPotentialInterface<InterCoulombPotential> >
-InterCoulombFF;
+    typedef Inter2B3DFF<CoulombPotentialInterface<InterCoulombPotential>> InterCoulombFF;
 
-typedef Inter2B2GFF< CoulombPotentialInterface<InterCoulombPotential> >
-InterGroupCoulombFFBase;
+    typedef Inter2B2GFF<CoulombPotentialInterface<InterCoulombPotential>> InterGroupCoulombFFBase;
 
-typedef Inter2B2G3DFF< CoulombPotentialInterface<InterCoulombPotential> >
-InterGroupCoulombFF;
+    typedef Inter2B2G3DFF<CoulombPotentialInterface<InterCoulombPotential>> InterGroupCoulombFF;
 
-}
+} // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMM::InterCoulombFFBase);
 Q_DECLARE_METATYPE(SireMM::InterCoulombFF);
@@ -66,37 +62,28 @@ Q_DECLARE_METATYPE(SireMM::InterGroupCoulombFF);
 SIRE_EXPOSE_ALIAS(SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>,
                   SireMM::CoulombPotentialInterface_InterCoulombPotential_)
 
-SIRE_EXPOSE_ALIAS(
-    SireFF::Inter2BFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
-    SireMM::InterCoulombFFBase )
+SIRE_EXPOSE_ALIAS(SireFF::Inter2BFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>,
+                  SireMM::InterCoulombFFBase)
 
-SIRE_EXPOSE_ALIAS(
-    SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
-    SireMM::InterCoulombFF )
+SIRE_EXPOSE_ALIAS(SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>,
+                  SireMM::InterCoulombFF)
 
-SIRE_EXPOSE_ALIAS(
-    SireFF::Inter2B2GFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
-    SireMM::InterGroupCoulombFFBase)
+SIRE_EXPOSE_ALIAS(SireFF::Inter2B2GFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>,
+                  SireMM::InterGroupCoulombFFBase)
 
-SIRE_EXPOSE_ALIAS(
-    SireFF::Inter2B2G3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >,
-    SireMM::InterGroupCoulombFF )
+SIRE_EXPOSE_ALIAS(SireFF::Inter2B2G3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>,
+                  SireMM::InterGroupCoulombFF)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
-template class
-SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>;
+template class SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>;
 
-template class
-SireFF::Inter2BFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >;
+template class SireFF::Inter2BFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>;
 
-template class
-SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >;
+template class SireFF::Inter2B3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>;
 
-template class
-SireFF::Inter2B2GFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >;
+template class SireFF::Inter2B2GFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>;
 
-template class
-SireFF::Inter2B2G3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential> >;
+template class SireFF::Inter2B2G3DFF<SireMM::CoulombPotentialInterface<SireMM::InterCoulombPotential>>;
 #endif
 
 SIRE_END_HEADER

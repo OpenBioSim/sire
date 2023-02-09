@@ -40,146 +40,116 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class QMMMElecEmbedPotential;
+    class QMMMElecEmbedPotential;
 }
 
-QDataStream& operator<<(QDataStream&, const Squire::QMMMElecEmbedPotential&);
-QDataStream& operator>>(QDataStream&, Squire::QMMMElecEmbedPotential&);
+QDataStream &operator<<(QDataStream &, const Squire::QMMMElecEmbedPotential &);
+QDataStream &operator>>(QDataStream &, Squire::QMMMElecEmbedPotential &);
 
 namespace Squire
 {
 
-using SireMM::SwitchingFunction;
-using SireVol::Space;
+    using SireMM::SwitchingFunction;
+    using SireVol::Space;
 
-/** This is a QM/MM potential that uses electrostatic embedding to
-    allow the MM point charges to polarise the QM wavefunction
+    /** This is a QM/MM potential that uses electrostatic embedding to
+        allow the MM point charges to polarise the QM wavefunction
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT QMMMElecEmbedPotential
-           : public QMMMPotential<QMPotential, SireMM::InterCoulombPotential>
-{
-
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const QMMMElecEmbedPotential&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, QMMMElecEmbedPotential&);
-
-public:
-    typedef QMEnergy Energy;
-    typedef Energy::Components Components;
-
-    typedef SireMM::CoulombProbe Probe;
-
-    QMMMElecEmbedPotential();
-    QMMMElecEmbedPotential(const QMMMElecEmbedPotential &other);
-
-    ~QMMMElecEmbedPotential();
-
-    QMMMElecEmbedPotential& operator=(const QMMMElecEmbedPotential &other);
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT QMMMElecEmbedPotential : public QMMMPotential<QMPotential, SireMM::InterCoulombPotential>
     {
-        return "Squire::QMMMElecEmbedPotential";
-    }
 
-    const char* what() const
-    {
-        return QMMMElecEmbedPotential::typeName();
-    }
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const QMMMElecEmbedPotential &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, QMMMElecEmbedPotential &);
 
-    bool setProperty(const QString &name, const Property &property);
-    const Property& property(const QString &name) const;
-    bool containsProperty(const QString &name) const;
-    const Properties& properties() const;
+    public:
+        typedef QMEnergy Energy;
+        typedef Energy::Components Components;
 
-    bool setSpace(const Space &space);
-    bool setSwitchingFunction(const SwitchingFunction &switchfunc);
-    bool setQuantumProgram(const QMProgram &program);
-    bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
-    bool setChargeScalingFactor(double scale_factor);
+        typedef SireMM::CoulombProbe Probe;
 
-    const Space& space() const;
-    const SwitchingFunction& switchingFunction() const;
-    const QMProgram& quantumProgram() const;
-    SireUnits::Dimension::MolarEnergy zeroEnergy() const;
-    double chargeScalingFactor() const;
+        QMMMElecEmbedPotential();
+        QMMMElecEmbedPotential(const QMMMElecEmbedPotential &other);
 
-    void calculateForce(const QMMolecules &qmmols,
-                        const MMMolecules &mmmols,
-                        ForceTable &forcetable,
-                        double scale_force=1) const;
+        ~QMMMElecEmbedPotential();
 
-    void calculateForce(const QMMolecules &qmmols,
-                        const MMMolecules &mmmols,
-                        ForceTable &forcetable,
-                        const Symbol &symbol,
-                        const Components &components,
-                        double scale_force=1) const;
+        QMMMElecEmbedPotential &operator=(const QMMMElecEmbedPotential &other);
 
-    void calculateField(const QMMolecules &qmmols,
-                        const MMMolecules &mmmols,
-                        FieldTable &fieldtable,
-                        const SireFF::Probe &probe,
-                        double scale_field=1) const;
+        static const char *typeName()
+        {
+            return "Squire::QMMMElecEmbedPotential";
+        }
 
-    void calculateField(const QMMolecules &qmmols,
-                        const MMMolecules &mmmols,
-                        FieldTable &fieldtable,
-                        const SireFF::Probe &probe,
-                        const Symbol &symbol,
-                        const Components &components,
-                        double scale_field=1) const;
+        const char *what() const
+        {
+            return QMMMElecEmbedPotential::typeName();
+        }
 
-    void calculatePotential(const QMMolecules &qmmols,
-                            const MMMolecules &mmmols,
-                            PotentialTable &pottable,
-                            const SireFF::Probe &probe,
-                            double scale_potential=1) const;
+        bool setProperty(const QString &name, const Property &property);
+        const Property &property(const QString &name) const;
+        bool containsProperty(const QString &name) const;
+        const Properties &properties() const;
 
-    void calculatePotential(const QMMolecules &qmmols,
-                            const MMMolecules &mmmols,
-                            PotentialTable &pottable,
-                            const SireFF::Probe &probe,
-                            const Symbol &symbol,
-                            const Components &components,
-                            double scale_potential=1) const;
+        bool setSpace(const Space &space);
+        bool setSwitchingFunction(const SwitchingFunction &switchfunc);
+        bool setQuantumProgram(const QMProgram &program);
+        bool setZeroEnergy(SireUnits::Dimension::MolarEnergy zero_energy);
+        bool setChargeScalingFactor(double scale_factor);
 
-    void calculateEnergy(const QMMolecules &qmmols,
-                         const MMMolecules &mmmols,
-                         Energy &nrg, double scale_energy=1) const;
+        const Space &space() const;
+        const SwitchingFunction &switchingFunction() const;
+        const QMProgram &quantumProgram() const;
+        SireUnits::Dimension::MolarEnergy zeroEnergy() const;
+        double chargeScalingFactor() const;
 
-    QString energyCommandFile(const QMMolecules &qmmols,
-                              const MMMolecules &mmmols) const;
+        void calculateForce(const QMMolecules &qmmols, const MMMolecules &mmmols, ForceTable &forcetable,
+                            double scale_force = 1) const;
 
-    QString forceCommandFile(const QMMolecules &qmmols,
-                             const MMMolecules &mmmols,
-                             const ForceTable &forcetable) const;
+        void calculateForce(const QMMolecules &qmmols, const MMMolecules &mmmols, ForceTable &forcetable,
+                            const Symbol &symbol, const Components &components, double scale_force = 1) const;
 
-    QString fieldCommandFile(const QMMolecules &qmmols,
-                             const MMMolecules &mmmols,
-                             const FieldTable &fieldtable,
-                             const SireFF::Probe &probe) const;
+        void calculateField(const QMMolecules &qmmols, const MMMolecules &mmmols, FieldTable &fieldtable,
+                            const SireFF::Probe &probe, double scale_field = 1) const;
 
-    QString potentialCommandFile(const QMMolecules &qmmols,
-                                 const MMMolecules &mmmols,
-                                 const PotentialTable &pottable,
+        void calculateField(const QMMolecules &qmmols, const MMMolecules &mmmols, FieldTable &fieldtable,
+                            const SireFF::Probe &probe, const Symbol &symbol, const Components &components,
+                            double scale_field = 1) const;
+
+        void calculatePotential(const QMMolecules &qmmols, const MMMolecules &mmmols, PotentialTable &pottable,
+                                const SireFF::Probe &probe, double scale_potential = 1) const;
+
+        void calculatePotential(const QMMolecules &qmmols, const MMMolecules &mmmols, PotentialTable &pottable,
+                                const SireFF::Probe &probe, const Symbol &symbol, const Components &components,
+                                double scale_potential = 1) const;
+
+        void calculateEnergy(const QMMolecules &qmmols, const MMMolecules &mmmols, Energy &nrg,
+                             double scale_energy = 1) const;
+
+        QString energyCommandFile(const QMMolecules &qmmols, const MMMolecules &mmmols) const;
+
+        QString forceCommandFile(const QMMolecules &qmmols, const MMMolecules &mmmols, const ForceTable &forcetable) const;
+
+        QString fieldCommandFile(const QMMolecules &qmmols, const MMMolecules &mmmols, const FieldTable &fieldtable,
                                  const SireFF::Probe &probe) const;
 
-private:
-    LatticeCharges getLatticeCharges(const QMMolecules &qmmols,
-                                     const MMMolecules &mmmols,
-        QHash<SireMol::MolNum,SireMol::AtomIntProperty> *lattice_indicies=0) const;
+        QString potentialCommandFile(const QMMolecules &qmmols, const MMMolecules &mmmols, const PotentialTable &pottable,
+                                     const SireFF::Probe &probe) const;
 
-    void mergeProperties();
+    private:
+        LatticeCharges getLatticeCharges(const QMMolecules &qmmols, const MMMolecules &mmmols,
+                                         QHash<SireMol::MolNum, SireMol::AtomIntProperty> *lattice_indicies = 0) const;
 
-    /** The properties that define this potential */
-    Properties props;
+        void mergeProperties();
 
-    /** The MM charge scaling factor */
-    double chg_sclfac;
-};
+        /** The properties that define this potential */
+        Properties props;
 
-}
+        /** The MM charge scaling factor */
+        double chg_sclfac;
+    };
+
+} // namespace Squire
 
 SIRE_END_HEADER
 

@@ -24,4 +24,3 @@
   *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
-

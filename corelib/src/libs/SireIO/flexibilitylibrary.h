@@ -30,8 +30,8 @@
 
 #include "iobase.h"
 
-#include "SireMol/bondid.h"
 #include "SireMol/angleid.h"
+#include "SireMol/bondid.h"
 #include "SireMol/dihedralid.h"
 
 #include "SireUnits/dimensions.h"
@@ -40,158 +40,157 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class FlexibilityLibrary;
-class FlexibilityTemplate;
-}
+    class FlexibilityLibrary;
+    class FlexibilityTemplate;
+} // namespace SireIO
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::FlexibilityLibrary&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::FlexibilityLibrary&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::FlexibilityLibrary &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::FlexibilityLibrary &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::FlexibilityTemplate&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::FlexibilityTemplate&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::FlexibilityTemplate &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::FlexibilityTemplate &);
 
 namespace SireMol
 {
-class MoleculeView;
+    class MoleculeView;
 }
 
 namespace SireMove
 {
-class Flexibility;
+    class Flexibility;
 }
 
 namespace SireIO
 {
 
-using SireMol::BondID;
-using SireMol::AngleID;
-using SireMol::DihedralID;
-using SireMol::MoleculeView;
+    using SireMol::AngleID;
+    using SireMol::BondID;
+    using SireMol::DihedralID;
+    using SireMol::MoleculeView;
 
-using SireMove::Flexibility;
+    using SireMove::Flexibility;
 
-using SireUnits::Dimension::Length;
-using SireUnits::Dimension::Angle;
+    using SireUnits::Dimension::Angle;
+    using SireUnits::Dimension::Length;
 
-/** Internal class used to store the data describing a single flexibility template
+    /** Internal class used to store the data describing a single flexibility template
 
-    @author Julien Michel
-*/
-class SIREIO_EXPORT FlexibilityTemplate
-{
+        @author Julien Michel
+    */
+    class SIREIO_EXPORT FlexibilityTemplate
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const FlexibilityTemplate&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, FlexibilityTemplate&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const FlexibilityTemplate &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, FlexibilityTemplate &);
 
-public:
-    FlexibilityTemplate();
-    FlexibilityTemplate(const QString &name);
+    public:
+        FlexibilityTemplate();
+        FlexibilityTemplate(const QString &name);
 
-    FlexibilityTemplate(const FlexibilityTemplate &other);
+        FlexibilityTemplate(const FlexibilityTemplate &other);
 
-    ~FlexibilityTemplate();
+        ~FlexibilityTemplate();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    FlexibilityTemplate& operator=(const FlexibilityTemplate &other);
+        FlexibilityTemplate &operator=(const FlexibilityTemplate &other);
 
-    bool operator==(const FlexibilityTemplate &other) const;
-    bool operator!=(const FlexibilityTemplate &other) const;
+        bool operator==(const FlexibilityTemplate &other) const;
+        bool operator!=(const FlexibilityTemplate &other) const;
 
-    const QString getName();
+        const QString getName();
 
-    void setRotation(const Angle &angle);
-    void setTranslation(const Length &distance);
-    void setMaximumBondVar(int maxvar);
-    void setMaximumAngleVar(int maxvar);
-    void setMaximumDihedralVar(int maxvar);
+        void setRotation(const Angle &angle);
+        void setTranslation(const Length &distance);
+        void setMaximumBondVar(int maxvar);
+        void setMaximumAngleVar(int maxvar);
+        void setMaximumDihedralVar(int maxvar);
 
-    void setBondDelta(const BondID &bondid, const Length &delta);
-    void setAngleDelta(const AngleID &angleid, const Angle &delta);
-    void setDihedralDelta(const DihedralID &dihedralid, const Angle &delta);
+        void setBondDelta(const BondID &bondid, const Length &delta);
+        void setAngleDelta(const AngleID &angleid, const Angle &delta);
+        void setDihedralDelta(const DihedralID &dihedralid, const Angle &delta);
 
-    Length getTranslation() const;
-    Angle getRotation() const;
-    int getMaximumBondVar() const;
-    int getMaximumAngleVar() const;
-    int getMaximumDihedralVar() const;
+        Length getTranslation() const;
+        Angle getRotation() const;
+        int getMaximumBondVar() const;
+        int getMaximumAngleVar() const;
+        int getMaximumDihedralVar() const;
 
-    Length getDelta(const BondID &bondid) const;
-    Angle getDelta(const AngleID &angleid) const;
-    Angle getDelta(const DihedralID &dihedralid) const;
+        Length getDelta(const BondID &bondid) const;
+        Angle getDelta(const AngleID &angleid) const;
+        Angle getDelta(const DihedralID &dihedralid) const;
 
-    const QHash<BondID,Length>& getBondDeltas() const;
-    const QHash<AngleID,Angle>& getAngleDeltas() const;
-    const QHash<DihedralID,Angle>& getDihedralDeltas() const;
+        const QHash<BondID, Length> &getBondDeltas() const;
+        const QHash<AngleID, Angle> &getAngleDeltas() const;
+        const QHash<DihedralID, Angle> &getDihedralDeltas() const;
 
-private:
-    QString name;
-    Length translation;
-    Angle rotation;
-    qint32 maxbondvar;
-    qint32 maxanglevar;
-    qint32 maxdihedralvar;
+    private:
+        QString name;
+        Length translation;
+        Angle rotation;
+        qint32 maxbondvar;
+        qint32 maxanglevar;
+        qint32 maxdihedralvar;
 
-    QHash<BondID,Length> bonds;
-    QHash<AngleID,Angle> angles;
-    QHash<DihedralID,Angle> dihedrals;
-};
+        QHash<BondID, Length> bonds;
+        QHash<AngleID, Angle> angles;
+        QHash<DihedralID, Angle> dihedrals;
+    };
 
-/** This class is used to read templates describing how a
-    molecule will be moved by an InternalMove and to create
-    the property "flexibility" for a molecule whose template is available
+    /** This class is used to read templates describing how a
+        molecule will be moved by an InternalMove and to create
+        the property "flexibility" for a molecule whose template is available
 
-    @author Julien Michel
-*/
+        @author Julien Michel
+    */
 
-class SIREIO_EXPORT FlexibilityLibrary
-        : public SireBase::ConcreteProperty<FlexibilityLibrary,SireBase::Property>
-{
+    class SIREIO_EXPORT FlexibilityLibrary : public SireBase::ConcreteProperty<FlexibilityLibrary, SireBase::Property>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const SireIO::FlexibilityLibrary&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, SireIO::FlexibilityLibrary&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const SireIO::FlexibilityLibrary &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, SireIO::FlexibilityLibrary &);
 
-public:
-    FlexibilityLibrary();
-    FlexibilityLibrary(const QString &file);
+    public:
+        FlexibilityLibrary();
+        FlexibilityLibrary(const QString &file);
 
-    FlexibilityLibrary(const FlexibilityLibrary &other);
+        FlexibilityLibrary(const FlexibilityLibrary &other);
 
-    ~FlexibilityLibrary();
+        ~FlexibilityLibrary();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    FlexibilityLibrary& operator=(const FlexibilityLibrary &other);
+        FlexibilityLibrary &operator=(const FlexibilityLibrary &other);
 
-    bool operator==(const FlexibilityLibrary &other) const;
-    bool operator!=(const FlexibilityLibrary &other) const;
+        bool operator==(const FlexibilityLibrary &other) const;
+        bool operator!=(const FlexibilityLibrary &other) const;
 
-    void loadTemplates(const QString &file);
+        void loadTemplates(const QString &file);
 
-    FlexibilityLibrary& operator+=(const FlexibilityLibrary &other);
+        FlexibilityLibrary &operator+=(const FlexibilityLibrary &other);
 
-    FlexibilityLibrary operator+(const FlexibilityLibrary &other) const;
+        FlexibilityLibrary operator+(const FlexibilityLibrary &other) const;
 
-    void add(const FlexibilityLibrary &other);
+        void add(const FlexibilityLibrary &other);
 
-    const FlexibilityTemplate& getTemplate(const QString &key);
+        const FlexibilityTemplate &getTemplate(const QString &key);
 
-    void setTemplate(const QString &key, const FlexibilityTemplate &tmplate);
+        void setTemplate(const QString &key, const FlexibilityTemplate &tmplate);
 
-    Flexibility getFlexibility(const MoleculeView &molecule) const;
+        Flexibility getFlexibility(const MoleculeView &molecule) const;
 
-private:
-    /** The flexibility templates, indexed by molecule name*/
-    QHash<QString,FlexibilityTemplate> templates;
-};
+    private:
+        /** The flexibility templates, indexed by molecule name*/
+        QHash<QString, FlexibilityTemplate> templates;
+    };
 
 } // end of namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::FlexibilityLibrary )
-Q_DECLARE_METATYPE( SireIO::FlexibilityTemplate )
+Q_DECLARE_METATYPE(SireIO::FlexibilityLibrary)
+Q_DECLARE_METATYPE(SireIO::FlexibilityTemplate)
 
-SIRE_EXPOSE_CLASS( SireIO::FlexibilityLibrary )
-SIRE_EXPOSE_CLASS( SireIO::FlexibilityTemplate )
+SIRE_EXPOSE_CLASS(SireIO::FlexibilityLibrary)
+SIRE_EXPOSE_CLASS(SireIO::FlexibilityTemplate)
 
 SIRE_END_HEADER
 

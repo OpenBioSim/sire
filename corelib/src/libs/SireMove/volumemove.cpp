@@ -30,14 +30,14 @@
 #include "SireSystem/system.h"
 #include "SireVol/space.h"
 
-#include "SireMol/molecule.h"
-#include "SireMol/mover.hpp"
-#include "SireMol/moleculegroup.h"
 #include "SireMol/mgname.h"
+#include "SireMol/molecule.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/mover.hpp"
 
 #include "SireUnits/dimensions.h"
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "SireBase/savestate.h"
 
@@ -62,9 +62,7 @@ QDataStream &operator<<(QDataStream &ds, const VolumeMove &volmove)
 {
     writeHeader(ds, r_volmove, 2);
 
-    ds << volmove.volchanger
-       << double(volmove.maxchange.to(angstrom3))
-       << static_cast<const MonteCarlo&>(volmove);
+    ds << volmove.volchanger << double(volmove.maxchange.to(angstrom3)) << static_cast<const MonteCarlo &>(volmove);
 
     return ds;
 }
@@ -77,30 +75,28 @@ QDataStream &operator>>(QDataStream &ds, VolumeMove &volmove)
     if (v == 2)
     {
         double maxchange;
-        ds >> volmove.volchanger >> maxchange
-           >> static_cast<MonteCarlo&>(volmove);
+        ds >> volmove.volchanger >> maxchange >> static_cast<MonteCarlo &>(volmove);
 
         volmove.maxchange = maxchange * angstrom3;
     }
     else if (v == 1)
     {
         double maxchange;
-        ds >> maxchange >> static_cast<MonteCarlo&>(volmove);
+        ds >> maxchange >> static_cast<MonteCarlo &>(volmove);
 
         volmove.maxchange = maxchange * angstrom3;
-        volmove.volchanger = ScaleVolumeFromCenter( MGIdentifier() );
+        volmove.volchanger = ScaleVolumeFromCenter(MGIdentifier());
     }
     else
-        throw version_error( v, "1", r_volmove, CODELOC );
+        throw version_error(v, "1", r_volmove, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
-VolumeMove::VolumeMove(const PropertyMap &map)
-           : ConcreteProperty<VolumeMove,MonteCarlo>(map), maxchange(0)
+VolumeMove::VolumeMove(const PropertyMap &map) : ConcreteProperty<VolumeMove, MonteCarlo>(map), maxchange(0)
 {
-    MonteCarlo::setEnsemble( Ensemble::NPT( 25 * celsius, 1 * atm ) );
+    MonteCarlo::setEnsemble(Ensemble::NPT(25 * celsius, 1 * atm));
 }
 
 /** Construct a volume move that can be used to generate the ensemble
@@ -109,51 +105,44 @@ VolumeMove::VolumeMove(const PropertyMap &map)
     molecule groups that match the ID 'mgid'
     using a ScaleVolumeFromCenter centered on the origin */
 VolumeMove::VolumeMove(const MGID &mgid, const PropertyMap &map)
-           : ConcreteProperty<VolumeMove,MonteCarlo>(map),
-             volchanger( ScaleVolumeFromCenter(mgid) ),
-             maxchange(100*angstrom3)
+    : ConcreteProperty<VolumeMove, MonteCarlo>(map), volchanger(ScaleVolumeFromCenter(mgid)), maxchange(100 * angstrom3)
 {
-    MonteCarlo::setEnsemble( Ensemble::NPT( 25 * celsius, 1 * atm ) );
+    MonteCarlo::setEnsemble(Ensemble::NPT(25 * celsius, 1 * atm));
 }
 
 /** Construct a volume move that can be used to generate the ensemble
     for a temperature of 25 C, pressure of 1 atm, and with a maximum
     change of 100 A^3 by moving the molecules in 'molgroup'
     using a ScaleVolumeFromCenter centered on the origin */
-VolumeMove::VolumeMove(const MoleculeGroup &molgroup,
-                       const PropertyMap &map)
-           : ConcreteProperty<VolumeMove,MonteCarlo>(map),
-             volchanger( ScaleVolumeFromCenter(molgroup) ),
-             maxchange(100*angstrom3)
+VolumeMove::VolumeMove(const MoleculeGroup &molgroup, const PropertyMap &map)
+    : ConcreteProperty<VolumeMove, MonteCarlo>(map), volchanger(ScaleVolumeFromCenter(molgroup)),
+      maxchange(100 * angstrom3)
 {
-    MonteCarlo::setEnsemble( Ensemble::NPT( 25 * celsius, 1 * atm ) );
+    MonteCarlo::setEnsemble(Ensemble::NPT(25 * celsius, 1 * atm));
 }
 
 /** Construct a volume move that can be used to generate the ensemble
     for a temperature of 25 C, pressure of 1 atm, and with a maximum
     change of 100 A^3 using the passed volume changer */
-VolumeMove::VolumeMove(const VolumeChanger &volumechanger,
-                       const PropertyMap &map)
-           : ConcreteProperty<VolumeMove,MonteCarlo>(map),
-             volchanger(volumechanger),
-             maxchange(100*angstrom3)
+VolumeMove::VolumeMove(const VolumeChanger &volumechanger, const PropertyMap &map)
+    : ConcreteProperty<VolumeMove, MonteCarlo>(map), volchanger(volumechanger), maxchange(100 * angstrom3)
 {
-    MonteCarlo::setEnsemble( Ensemble::NPT( 25 * celsius, 1 * atm ) );
+    MonteCarlo::setEnsemble(Ensemble::NPT(25 * celsius, 1 * atm));
 }
 
 /** Copy constructor */
 VolumeMove::VolumeMove(const VolumeMove &other)
-           : ConcreteProperty<VolumeMove,MonteCarlo>(other),
-             volchanger(other.volchanger),
-             maxchange(other.maxchange)
-{}
+    : ConcreteProperty<VolumeMove, MonteCarlo>(other), volchanger(other.volchanger), maxchange(other.maxchange)
+{
+}
 
 /** Destructor */
 VolumeMove::~VolumeMove()
-{}
+{
+}
 
 /** Copy assignment operator */
-VolumeMove& VolumeMove::operator=(const VolumeMove &other)
+VolumeMove &VolumeMove::operator=(const VolumeMove &other)
 {
     volchanger = other.volchanger;
     maxchange = other.maxchange;
@@ -165,17 +154,13 @@ VolumeMove& VolumeMove::operator=(const VolumeMove &other)
 /** Comparison operator */
 bool VolumeMove::operator==(const VolumeMove &other) const
 {
-    return volchanger == other.volchanger and
-           maxchange == other.maxchange and
-           MonteCarlo::operator==(other);
+    return volchanger == other.volchanger and maxchange == other.maxchange and MonteCarlo::operator==(other);
 }
 
 /** Comparison operator */
 bool VolumeMove::operator!=(const VolumeMove &other) const
 {
-    return volchanger != other.volchanger or
-           maxchange != other.maxchange or
-           MonteCarlo::operator!=(other);
+    return volchanger != other.volchanger or maxchange != other.maxchange or MonteCarlo::operator!=(other);
 }
 
 /** Return a string representation of this move */
@@ -183,21 +168,21 @@ QString VolumeMove::toString() const
 {
     return QObject::tr("VolumeMove( maximumVolumeChange() = %1 A^3 "
                        "nAccepted() = %2 nRejected() = %3 )")
-                  .arg(this->maximumVolumeChange().to(angstrom3))
-                  .arg(this->nAccepted())
-                  .arg(this->nRejected());
+        .arg(this->maximumVolumeChange().to(angstrom3))
+        .arg(this->nAccepted())
+        .arg(this->nRejected());
 }
 
 /** Internal function called to set the temperature */
 void VolumeMove::_pvt_setTemperature(const Temperature &temperature)
 {
-    MonteCarlo::setEnsemble( Ensemble::NPT( temperature, this->pressure() ) );
+    MonteCarlo::setEnsemble(Ensemble::NPT(temperature, this->pressure()));
 }
 
 /** Internal function called to set the pressure */
 void VolumeMove::_pvt_setPressure(const Pressure &pressure)
 {
-    MonteCarlo::setEnsemble( Ensemble::NPT( this->temperature(), pressure ) );
+    MonteCarlo::setEnsemble(Ensemble::NPT(this->temperature(), pressure));
 }
 
 /** Set the maximum change in volume */
@@ -207,7 +192,7 @@ void VolumeMove::setMaximumVolumeChange(const Volume &delta)
 }
 
 /** Return the maximum change of volume attempted by a move */
-const Volume& VolumeMove::maximumVolumeChange() const
+const Volume &VolumeMove::maximumVolumeChange() const
 {
     return maxchange;
 }
@@ -227,14 +212,14 @@ void VolumeMove::setVolumeChanger(const MoleculeGroup &molgroup)
 }
 
 /** Return the volume changer used to change the volume */
-const VolumeChanger& VolumeMove::volumeChanger() const
+const VolumeChanger &VolumeMove::volumeChanger() const
 {
     return volchanger.read();
 }
 
 /** Return the ID that matches the molecule groups that
     will be affected by this move */
-const MGID& VolumeMove::groupID() const
+const MGID &VolumeMove::groupID() const
 {
     return volchanger.read().groupID();
 }
@@ -261,30 +246,26 @@ void VolumeMove::move(System &system, int nmoves, bool record_stats)
     {
         const PropertyMap &map = this->propertyMap();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             System old_system(system);
 
-            //calculate the old energy and volume
+            // calculate the old energy and volume
             double old_nrg = this->energy(system);
             Volume old_vol = this->volume(system);
 
             double old_bias = 1;
             double new_bias = 1;
 
-            int nmols = this->volumeChanger()
-                            .randomChangeVolume(system, maxchange,
-                                                new_bias, old_bias, map);
+            int nmols = this->volumeChanger().randomChangeVolume(system, maxchange, new_bias, old_bias, map);
 
-            //calculate the new energy and volume
+            // calculate the new energy and volume
             double new_nrg = this->energy(system);
             Volume new_vol = this->volume(system);
 
-            if (not this->test(new_nrg, old_nrg, nmols,
-                               new_vol, old_vol,
-                               new_bias, old_bias))
+            if (not this->test(new_nrg, old_nrg, nmols, new_vol, old_vol, new_bias, old_bias))
             {
-                //move failed - go back to the last step
+                // move failed - go back to the last step
                 system = old_system;
             }
 
@@ -294,16 +275,15 @@ void VolumeMove::move(System &system, int nmoves, bool record_stats)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         old_system_state.restore(system);
         this->operator=(old_state);
         throw;
     }
-
 }
 
-const char* VolumeMove::typeName()
+const char *VolumeMove::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<VolumeMove>() );
+    return QMetaType::typeName(qMetaTypeId<VolumeMove>());
 }

@@ -38,89 +38,85 @@ SIRE_BEGIN_HEADER
 namespace SireMove
 {
 
-using SireCluster::Node;
+    using SireCluster::Node;
 
-/** This class is used to start and manage an active
-    supra-simulation (a simulation of a SupraSystem).
+    /** This class is used to start and manage an active
+        supra-simulation (a simulation of a SupraSystem).
 
-    A supra-simulation consists of a collection of
-    supra-moves that are applied to a supra-system.
+        A supra-simulation consists of a collection of
+        supra-moves that are applied to a supra-system.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraSim
-{
-public:
-    SupraSim();
-    SupraSim(const SupraSim &other);
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraSim
+    {
+    public:
+        SupraSim();
+        SupraSim(const SupraSim &other);
 
-    ~SupraSim();
+        ~SupraSim();
 
-    SupraSim& operator=(const SupraSim &other);
+        SupraSim &operator=(const SupraSim &other);
 
-    bool operator==(const SupraSim &other) const;
-    bool operator!=(const SupraSim &other) const;
+        bool operator==(const SupraSim &other) const;
+        bool operator!=(const SupraSim &other) const;
 
-    static SupraSim run(const SupraSystem &system, const SupraMoves &moves,
-                        int nmoves, bool record_stats=true);
+        static SupraSim run(const SupraSystem &system, const SupraMoves &moves, int nmoves, bool record_stats = true);
 
-    static SupraSim run(const SupraSystem &system, const SupraMove &move,
-                        int nmoves, bool record_stats=true);
+        static SupraSim run(const SupraSystem &system, const SupraMove &move, int nmoves, bool record_stats = true);
 
-    static SupraSim run(const SupraSimPacket &simpacket);
+        static SupraSim run(const SupraSimPacket &simpacket);
 
-    static SupraSim run(Node &node,
-                        const SupraSystem &system, const SupraMoves &moves,
-                        int nmoves, bool record_stats=true);
+        static SupraSim run(Node &node, const SupraSystem &system, const SupraMoves &moves, int nmoves,
+                            bool record_stats = true);
 
-    static SupraSim run(Node &node,
-                        const SupraSystem &system, const SupraMove &move,
-                        int nmoves, bool record_stats=true);
+        static SupraSim run(Node &node, const SupraSystem &system, const SupraMove &move, int nmoves,
+                            bool record_stats = true);
 
-    static SupraSim run(Node &node, const SupraSimPacket &simpacket);
+        static SupraSim run(Node &node, const SupraSimPacket &simpacket);
 
-    void abort();
-    void stop();
+        void abort();
+        void stop();
 
-    void wait();
-    bool wait(int timeout);
+        void wait();
+        bool wait(int timeout);
 
-    bool isRunning();
+        bool isRunning();
 
-    bool isError();
-    void throwError();
+        bool isError();
+        void throwError();
 
-    bool wasStopped();
+        bool wasStopped();
 
-    bool wasAborted();
+        bool wasAborted();
 
-    bool hasFinished();
+        bool hasFinished();
 
-    float progress();
+        float progress();
 
-    SupraSimPacket input();
-    SupraSimPacket interimResult();
-    SupraSimPacket result();
+        SupraSimPacket input();
+        SupraSimPacket interimResult();
+        SupraSimPacket result();
 
-    SupraSystemPtr initialSystem();
-    SupraMovesPtr initialMoves();
+        SupraSystemPtr initialSystem();
+        SupraMovesPtr initialMoves();
 
-    SupraSystemPtr interimSystem();
-    SupraMovesPtr interimMoves();
+        SupraSystemPtr interimSystem();
+        SupraMovesPtr interimMoves();
 
-    SupraSystemPtr system();
-    SupraMovesPtr moves();
+        SupraSystemPtr system();
+        SupraMovesPtr moves();
 
-private:
-    SupraSim(const SireCluster::Promise &promise);
+    private:
+        SupraSim(const SireCluster::Promise &promise);
 
-    /** The promise holding the running supra-simulation */
-    SireCluster::Promise sim_promise;
-};
+        /** The promise holding the running supra-simulation */
+        SireCluster::Promise sim_promise;
+    };
 
-}
+} // namespace SireMove
 
-SIRE_EXPOSE_CLASS( SireMove::SupraSim )
+SIRE_EXPOSE_CLASS(SireMove::SupraSim)
 
 SIRE_END_HEADER
 

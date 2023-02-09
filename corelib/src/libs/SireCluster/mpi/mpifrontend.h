@@ -40,52 +40,52 @@ SIRE_BEGIN_HEADER
 
 namespace SireCluster
 {
-namespace MPI
-{
+    namespace MPI
+    {
 
-/** This is a Frontend that is specialised to communicate with
-    a backend over an MPI connection
+        /** This is a Frontend that is specialised to communicate with
+            a backend over an MPI connection
 
-    @author Christopher Woods
-*/
-class MPIFrontend : public FrontendBase
-{
-public:
-    MPIFrontend();
-    MPIFrontend(const P2PComm &p2pcomm);
+            @author Christopher Woods
+        */
+        class MPIFrontend : public FrontendBase
+        {
+        public:
+            MPIFrontend();
+            MPIFrontend(const P2PComm &p2pcomm);
 
-    ~MPIFrontend();
+            ~MPIFrontend();
 
-    bool isLocal() const;
+            bool isLocal() const;
 
-    QUuid UID();
+            QUuid UID();
 
-    void startJob(const WorkPacket &workpacket);
+            void startJob(const WorkPacket &workpacket);
 
-    void stopJob();
-    void abortJob();
+            void stopJob();
+            void abortJob();
 
-    void wait();
-    bool wait(int timeout);
+            void wait();
+            bool wait(int timeout);
 
-    float progress();
-    WorkPacket interimResult();
+            float progress();
+            WorkPacket interimResult();
 
-    WorkPacket result();
+            WorkPacket result();
 
-private:
-    /** A mutex used to protect access to the communicator */
-    QMutex datamutex;
+        private:
+            /** A mutex used to protect access to the communicator */
+            QMutex datamutex;
 
-    /** The cached QUuid */
-    QUuid cached_uid;
+            /** The cached QUuid */
+            QUuid cached_uid;
 
-    /** The point-to-point communicator used to communicate
-        with the remote backend */
-    P2PComm p2p;
-};
+            /** The point-to-point communicator used to communicate
+                with the remote backend */
+            P2PComm p2p;
+        };
 
-} // end of namespace MPI
+    } // end of namespace MPI
 } // end of namespace SireCluster
 
 SIRE_END_HEADER

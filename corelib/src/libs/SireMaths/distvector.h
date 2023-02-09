@@ -34,127 +34,127 @@ SIRE_BEGIN_HEADER
 
 namespace SireMaths
 {
-class DistVector;
+    class DistVector;
 }
 
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::DistVector&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::DistVector&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::DistVector &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::DistVector &);
 
 namespace SireMaths
 {
 
-/** This is a vector that stores the vector as a unit vector giving
-    the direction, and a scalar giving the magnitude
+    /** This is a vector that stores the vector as a unit vector giving
+        the direction, and a scalar giving the magnitude
 
-    @author Christopher Woods
-*/
-class SIREMATHS_EXPORT DistVector : private Vector
-{
-
-friend SIREMATHS_EXPORT QDataStream& ::operator<<(QDataStream&, const DistVector&);
-friend SIREMATHS_EXPORT QDataStream& ::operator>>(QDataStream&, DistVector&);
-
-public:
-    DistVector();
-
-    DistVector(const Vector &vec);
-
-    DistVector(const DistVector &other);
-
-    ~DistVector();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMATHS_EXPORT DistVector : private Vector
     {
-        return DistVector::typeName();
-    }
 
-    double x() const;
-    double y() const;
-    double z() const;
+        friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const DistVector &);
+        friend SIREMATHS_EXPORT QDataStream & ::operator>>(QDataStream &, DistVector &);
 
-    double r() const;
-    double g() const;
-    double b() const;
+    public:
+        DistVector();
 
-    const Vector& direction() const;
-    double magnitude() const;
+        DistVector(const Vector &vec);
 
-    const DistVector& operator=(const DistVector &other);
+        DistVector(const DistVector &other);
 
-    bool operator==(const DistVector &p1) const;
-    bool operator!=(const DistVector &p1) const;
+        ~DistVector();
 
-    const DistVector& operator+=(const DistVector &other);
-    const DistVector& operator-=(const DistVector &other);
-    const DistVector& operator*=(const double &other);
-    const DistVector& operator/=(const double &other);
-    DistVector operator-() const;
+        static const char *typeName();
 
-    double operator[](unsigned int i) const;
+        const char *what() const
+        {
+            return DistVector::typeName();
+        }
 
-    double getitem(int i) const{ return this->operator[](i); }
+        double x() const;
+        double y() const;
+        double z() const;
 
-    unsigned int count() const;
-    double at(unsigned int i) const;
+        double r() const;
+        double g() const;
+        double b() const;
 
-    double manhattanLength() const;
+        const Vector &direction() const;
+        double magnitude() const;
 
-    double length() const;
-    double length2() const;
+        const DistVector &operator=(const DistVector &other);
 
-    double invLength() const;
-    double invLength2() const;
+        bool operator==(const DistVector &p1) const;
+        bool operator!=(const DistVector &p1) const;
 
-    DistVector normalise() const;
+        const DistVector &operator+=(const DistVector &other);
+        const DistVector &operator-=(const DistVector &other);
+        const DistVector &operator*=(const double &other);
+        const DistVector &operator/=(const double &other);
+        DistVector operator-() const;
 
-    bool isZero() const;
+        double operator[](unsigned int i) const;
 
-    QString toString() const;
+        double getitem(int i) const
+        {
+            return this->operator[](i);
+        }
 
-    static DistVector fromString(const QString &str);
+        unsigned int count() const;
+        double at(unsigned int i) const;
 
-    static double dot(const DistVector &v0, const DistVector &v1);
-    static DistVector cross(const DistVector &v0, const DistVector &v1);
+        double manhattanLength() const;
 
-    void setMax(const DistVector &other);
-    void setMin(const DistVector &other);
+        double length() const;
+        double length2() const;
 
-    DistVector max(const DistVector &other) const;
-    DistVector min(const DistVector &other) const;
+        double invLength() const;
+        double invLength2() const;
 
-    Angle bearing() const;
-    Angle bearingXY(const DistVector &v) const;
-    Angle bearingXZ(const DistVector &v) const;
-    Angle bearingYZ(const DistVector &v) const;
+        DistVector normalise() const;
 
-    Matrix metricTensor() const;
+        bool isZero() const;
 
-    static double distance2(const DistVector &v1, const DistVector &v2);
-    static double distance(const DistVector &v1, const DistVector &v2);
+        QString toString() const;
 
-    static double invDistance(const DistVector &v1, const DistVector &v2);
-    static double invDistance2(const DistVector &v1, const DistVector &v2);
+        static DistVector fromString(const QString &str);
 
-    static Angle angle(const DistVector &v0, const DistVector &v1);
-    static Angle angle(const DistVector &v0, const DistVector &v1,
-                       const DistVector &v2);
+        static double dot(const DistVector &v0, const DistVector &v1);
+        static DistVector cross(const DistVector &v0, const DistVector &v1);
 
-    static Angle dihedral(const DistVector &v0, const DistVector &v1,
-                          const DistVector &v2, const DistVector &v3);
+        void setMax(const DistVector &other);
+        void setMin(const DistVector &other);
 
-    static DistVector generate(double dst, const DistVector &v1, const Angle &ang,
-                               const DistVector &v2, const Angle &dih,
-                               const DistVector &v3);
-};
+        DistVector max(const DistVector &other) const;
+        DistVector min(const DistVector &other) const;
 
-}
+        Angle bearing() const;
+        Angle bearingXY(const DistVector &v) const;
+        Angle bearingXZ(const DistVector &v) const;
+        Angle bearingYZ(const DistVector &v) const;
+
+        Matrix metricTensor() const;
+
+        static double distance2(const DistVector &v1, const DistVector &v2);
+        static double distance(const DistVector &v1, const DistVector &v2);
+
+        static double invDistance(const DistVector &v1, const DistVector &v2);
+        static double invDistance2(const DistVector &v1, const DistVector &v2);
+
+        static Angle angle(const DistVector &v0, const DistVector &v1);
+        static Angle angle(const DistVector &v0, const DistVector &v1, const DistVector &v2);
+
+        static Angle dihedral(const DistVector &v0, const DistVector &v1, const DistVector &v2, const DistVector &v3);
+
+        static DistVector generate(double dst, const DistVector &v1, const Angle &ang, const DistVector &v2,
+                                   const Angle &dih, const DistVector &v3);
+    };
+
+} // namespace SireMaths
 
 Q_DECLARE_TYPEINFO(SireMaths::DistVector, Q_MOVABLE_TYPE);
 Q_DECLARE_METATYPE(SireMaths::DistVector);
 
-SIRE_EXPOSE_CLASS( SireMaths::DistVector )
+SIRE_EXPOSE_CLASS(SireMaths::DistVector)
 
 SIRE_END_HEADER
 

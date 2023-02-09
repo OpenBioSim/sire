@@ -43,8 +43,8 @@
 // Helper struct for sorting based on first pair value.
 struct QPairFirstComparer
 {
-    template<typename T1, typename T2>
-    bool operator()(const QPair<T1,T2> & a, const QPair<T1,T2> & b) const
+    template <typename T1, typename T2>
+    bool operator()(const QPair<T1, T2> &a, const QPair<T1, T2> &b) const
     {
         return a.first < b.first;
     }
@@ -60,12 +60,9 @@ static const RegisterMetaType<TriclinicBox> r_box;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const TriclinicBox &box)
 {
-    writeHeader(ds, r_box, 1)
-               << box.v0_orig
-               << box.v1_orig
-               << box.v2_orig;
+    writeHeader(ds, r_box, 1) << box.v0_orig << box.v1_orig << box.v2_orig;
 
-               //no need to store anything else as it can be regenerated
+    // no need to store anything else as it can be regenerated
 
     return ds;
 }
@@ -92,7 +89,7 @@ QDataStream &operator>>(QDataStream &ds, TriclinicBox &box)
 }
 
 /** Construct a default TriclinicBox (large volume) */
-TriclinicBox::TriclinicBox() : ConcreteProperty<TriclinicBox,Cartesian>()
+TriclinicBox::TriclinicBox() : ConcreteProperty<TriclinicBox, Cartesian>()
 {
     Vector v0(1e12, 0, 0);
     Vector v1(0, 1e12, 0);
@@ -102,16 +99,8 @@ TriclinicBox::TriclinicBox() : ConcreteProperty<TriclinicBox,Cartesian>()
 }
 
 /** Construct a TriclinicBox with the specified lattice vectors */
-TriclinicBox::TriclinicBox(const Vector &v0,
-                           const Vector &v1,
-                           const Vector &v2)
-            : ConcreteProperty<TriclinicBox,Cartesian>(),
-              v0(v0),
-              v1(v1),
-              v2(v2),
-              v0_orig(v0),
-              v1_orig(v1),
-              v2_orig(v2)
+TriclinicBox::TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2)
+    : ConcreteProperty<TriclinicBox, Cartesian>(), v0(v0), v1(v1), v2(v2), v0_orig(v0), v1_orig(v1), v2_orig(v2)
 {
     this->construct(v0, v1, v2);
 }
@@ -126,10 +115,8 @@ TriclinicBox::TriclinicBox(const Vector &v0,
     beta = angle between first and third lattice vectors
     gamma = angle between second and first lattice vectors
 */
-TriclinicBox::TriclinicBox(double a, double b, double c,
-                           const SireUnits::Dimension::Angle &alpha,
-                           const SireUnits::Dimension::Angle &beta,
-                           const SireUnits::Dimension::Angle &gamma)
+TriclinicBox::TriclinicBox(double a, double b, double c, const SireUnits::Dimension::Angle &alpha,
+                           const SireUnits::Dimension::Angle &beta, const SireUnits::Dimension::Angle &gamma)
 {
     // Adapted from:
     // https://github.com/rosswhitfield/ase/blob/master/ase/lattice/triclinic.py
@@ -141,18 +128,15 @@ TriclinicBox::TriclinicBox(double a, double b, double c,
     auto sing = sin(gamma.value());
 
     Vector v0(a, 0, 0);
-    Vector v1(b*cosg, b*sing, 0);
-    Vector v2(c*cosb, c*(cosa-cosb*cosg)/sing,
-              c*std::sqrt(sinb*sinb - (((cosa-cosb*cosg)/sing)*
-                                       ((cosa-cosb*cosg)/sing))));
+    Vector v1(b * cosg, b * sing, 0);
+    Vector v2(c * cosb, c * (cosa - cosb * cosg) / sing,
+              c * std::sqrt(sinb * sinb - (((cosa - cosb * cosg) / sing) * ((cosa - cosb * cosg) / sing))));
 
     this->construct(v0, v1, v2);
 }
 
 /** Construct a TriclinicBox with the specified lattice vectors */
-void TriclinicBox::construct(const Vector &v0,
-                             const Vector &v1,
-                             const Vector &v2)
+void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v2)
 {
     // What follows was adapted from Appendex A from Chapter 3 of
     // "Molecular dynamics of sense and sensibility in processing and analysis of data"
@@ -171,7 +155,7 @@ void TriclinicBox::construct(const Vector &v0,
     auto m2 = v2.magnitude();
 
     // Create a list containing of magnitude/vector pairs.
-    QList<QPair<double, Vector> > magnitudes;
+    QList<QPair<double, Vector>> magnitudes;
     magnitudes.append(qMakePair(m0, v0));
     magnitudes.append(qMakePair(m1, v1));
     magnitudes.append(qMakePair(m2, v2));
@@ -189,7 +173,7 @@ void TriclinicBox::construct(const Vector &v0,
 
     // Evaluate the square root of the difference between the length of v1 squared
     // and the projection of that vector on v0 squared.
-    auto yn1 = std::sqrt(m1*m1 - xn1*xn1);
+    auto yn1 = std::sqrt(m1 * m1 - xn1 * xn1);
 
     // Evaluate the vector product of v0 and v1 and take the magnitude.
     auto zn2 = Vector::realCross(v0, v1).magnitude();
@@ -198,9 +182,7 @@ void TriclinicBox::construct(const Vector &v0,
     Matrix X = Matrix(v0, v1, Vector::realCross(v0, v1)).transpose();
 
     // Constuct the rotated matrix.
-    Matrix X_rot(Vector(m0, xn1, 0),
-                 Vector(0, yn1, 0),
-                 Vector(0, 0, zn2));
+    Matrix X_rot(Vector(m0, xn1, 0), Vector(0, yn1, 0), Vector(0, 0, zn2));
 
     // Evaluate and store the rotation matrix and its inverse.
     this->rotation_matrix = X_rot * X.inverse();
@@ -244,9 +226,9 @@ void TriclinicBox::construct(const Vector &v0,
      */
 
     // Perform the reduction.
-    auto new_v1  = this->v1 - std::round(this->v1.x() / this->v0.x())*this->v0;
-    auto tmp     = this->v2 - std::round(this->v2.y() / this->v1.y())*this->v1;
-    auto new_v2  = tmp - std::round(tmp.x() / this->v0.x())*this->v0;
+    auto new_v1 = this->v1 - std::round(this->v1.x() / this->v0.x()) * this->v0;
+    auto tmp = this->v2 - std::round(this->v2.y() / this->v1.y()) * this->v1;
+    auto new_v2 = tmp - std::round(tmp.x() / this->v0.x()) * this->v0;
 
     // Update the lattice vectors.
     this->v1 = new_v1;
@@ -309,55 +291,39 @@ void TriclinicBox::construct(const Vector &v0,
 
     // Work out the angle between each pair of vectors.
     this->_alpha = Vector::angle(this->v1, this->v2).value();
-    this->_beta  = Vector::angle(this->v0, this->v2).value();
+    this->_beta = Vector::angle(this->v0, this->v2).value();
     this->_gamma = Vector::angle(this->v1, this->v0).value();
 
     auto cos_alpha = cos(this->_alpha);
-    auto cos_beta  = cos(this->_beta);
+    auto cos_beta = cos(this->_beta);
     auto cos_gamma = cos(this->_gamma);
 
     // Now work out the volume of the cell.
     this->vol = this->v0.magnitude() * this->v1.magnitude() * this->v2.magnitude() *
-                std::sqrt(1 - cos_alpha*cos_alpha
-                            - cos_beta*cos_beta
-                            - cos_gamma*cos_gamma
-                            + 2.0*cos_alpha*cos_beta*cos_gamma);
+                std::sqrt(1 - cos_alpha * cos_alpha - cos_beta * cos_beta - cos_gamma * cos_gamma +
+                          2.0 * cos_alpha * cos_beta * cos_gamma);
 
     // Store the inverse lengths of the lattice vectors.
-    this->invlength = Vector(1.0/this->v0.magnitude(),
-                             1.0/this->v1.magnitude(),
-                             1.0/this->v2.magnitude());
+    this->invlength = Vector(1.0 / this->v0.magnitude(), 1.0 / this->v1.magnitude(), 1.0 / this->v2.magnitude());
 }
 
 /** Copy constructor */
 TriclinicBox::TriclinicBox(const TriclinicBox &other)
-            : ConcreteProperty<TriclinicBox,Cartesian>(other),
-              v0(other.v0),
-              v1(other.v1),
-              v2(other.v2),
-              v0_orig(other.v0_orig),
-              v1_orig(other.v1_orig),
-              v2_orig(other.v2_orig),
-              rotation_matrix(other.rotation_matrix),
-              cell_matrix(other.cell_matrix),
-              cell_matrix_inverse(other.cell_matrix_inverse),
-              M(other.M),
-              dist_max(other.dist_max),
-              max_length(other.max_length),
-              _alpha(other._alpha),
-              _beta(other._beta),
-              _gamma(other._gamma),
-              vol(other.vol),
-              is_rotated(other.is_rotated),
-              invlength(other.invlength)
-{}
+    : ConcreteProperty<TriclinicBox, Cartesian>(other), v0(other.v0), v1(other.v1), v2(other.v2),
+      v0_orig(other.v0_orig), v1_orig(other.v1_orig), v2_orig(other.v2_orig), rotation_matrix(other.rotation_matrix),
+      cell_matrix(other.cell_matrix), cell_matrix_inverse(other.cell_matrix_inverse), M(other.M),
+      dist_max(other.dist_max), max_length(other.max_length), _alpha(other._alpha), _beta(other._beta),
+      _gamma(other._gamma), vol(other.vol), is_rotated(other.is_rotated), invlength(other.invlength)
+{
+}
 
 /** Destructor */
 TriclinicBox::~TriclinicBox()
-{}
+{
+}
 
 /** Copy assignment operator */
-TriclinicBox& TriclinicBox::operator=(const TriclinicBox &other)
+TriclinicBox &TriclinicBox::operator=(const TriclinicBox &other)
 {
     if (this != &other)
     {
@@ -386,22 +352,14 @@ TriclinicBox& TriclinicBox::operator=(const TriclinicBox &other)
 /** Comparison operator */
 bool TriclinicBox::operator==(const TriclinicBox &other) const
 {
-    return v0 == other.v0 and
-           v1 == other.v1 and
-           v2 == other.v2 and
-           v0_orig == other.v0_orig and
-           v1_orig == other.v1_orig and
-           v2_orig == other.v2_orig;
+    return v0 == other.v0 and v1 == other.v1 and v2 == other.v2 and v0_orig == other.v0_orig and
+           v1_orig == other.v1_orig and v2_orig == other.v2_orig;
 }
 
 /** Comparison operator */
 bool TriclinicBox::operator!=(const TriclinicBox &other) const
 {
-    return v0 != other.v0 or
-           v1 != other.v1 or
-           v2 != other.v2 or
-           v0_orig != other.v0_orig or
-           v1_orig != other.v1_orig or
+    return v0 != other.v0 or v1 != other.v1 or v2 != other.v2 or v0_orig != other.v0_orig or v1_orig != other.v1_orig or
            v2_orig != other.v2_orig;
 }
 
@@ -415,31 +373,29 @@ bool TriclinicBox::isPeriodic() const
 bool TriclinicBox::isCartesian() const
 {
     // Only cubic boxes are Cartesian.
-    return this->_alpha == M_PI_2 and
-           this->_beta  == M_PI_2 and
-           this->_gamma == M_PI_2;
+    return this->_alpha == M_PI_2 and this->_beta == M_PI_2 and this->_gamma == M_PI_2;
 }
 
 /** Return the first box vector. */
-const Vector& TriclinicBox::vector0() const
+const Vector &TriclinicBox::vector0() const
 {
     return v0;
 }
 
 /** Return the second box vector. */
-const Vector& TriclinicBox::vector1() const
+const Vector &TriclinicBox::vector1() const
 {
     return v1;
 }
 
 /** Return the third box vector. */
-const Vector& TriclinicBox::vector2() const
+const Vector &TriclinicBox::vector2() const
 {
     return v2;
 }
 
 /** Return the rotation matrix. */
-const Matrix& TriclinicBox::rotationMatrix() const
+const Matrix &TriclinicBox::rotationMatrix() const
 {
     return rotation_matrix;
 }
@@ -487,7 +443,7 @@ TriclinicBox TriclinicBox::rhombicDodecahedronSquare(double d)
 {
     Vector v0(d, 0, 0);
     Vector v1(0, d, 0);
-    Vector v2(0.5*d, 0.5*d, 0.5*std::sqrt(2)*d);
+    Vector v2(0.5 * d, 0.5 * d, 0.5 * std::sqrt(2) * d);
 
     return TriclinicBox(v0, v1, v2);
 }
@@ -496,8 +452,8 @@ TriclinicBox TriclinicBox::rhombicDodecahedronSquare(double d)
 TriclinicBox TriclinicBox::rhombicDodecahedronHexagon(double d)
 {
     Vector v0(d, 0, 0);
-    Vector v1(0.5, 0.5*std::sqrt(3)*d, 0);
-    Vector v2(0.5*d, (1/6.0)*std::sqrt(3)*d, (1/3.0)*std::sqrt(6)*d);
+    Vector v1(0.5, 0.5 * std::sqrt(3) * d, 0);
+    Vector v2(0.5 * d, (1 / 6.0) * std::sqrt(3) * d, (1 / 3.0) * std::sqrt(6) * d);
 
     return TriclinicBox(v0, v1, v2);
 }
@@ -506,8 +462,8 @@ TriclinicBox TriclinicBox::rhombicDodecahedronHexagon(double d)
 TriclinicBox TriclinicBox::truncatedOctahedron(double d)
 {
     Vector v0(d, 0, 0);
-    Vector v1(d/3.0, (2/3.0)*std::sqrt(2)*d, 0);
-    Vector v2(-d/3.0, (1/3.0)*std::sqrt(2)*d, (1/3.0)*std::sqrt(6)*d);
+    Vector v1(d / 3.0, (2 / 3.0) * std::sqrt(2) * d, 0);
+    Vector v2(-d / 3.0, (1 / 3.0) * std::sqrt(2) * d, (1 / 3.0) * std::sqrt(6) * d);
 
     return TriclinicBox(v0, v1, v2);
 }
@@ -516,9 +472,9 @@ TriclinicBox TriclinicBox::truncatedOctahedron(double d)
 QString TriclinicBox::toString() const
 {
     return QObject::tr("TriclinicBox( %1, %2, %3 )")
-                .arg( this->vector0().toString() )
-                .arg( this->vector1().toString() )
-                .arg( this->vector2().toString() );
+        .arg(this->vector0().toString())
+        .arg(this->vector1().toString())
+        .arg(this->vector2().toString());
 }
 
 /** Return the volume of the central box of this space. */
@@ -536,16 +492,16 @@ SpacePtr TriclinicBox::setVolume(SireUnits::Dimension::Volume vol) const
     double new_volume = vol;
 
     if (new_volume < 0)
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot set the volume of a periodic box to a negative value! (%1)")
-                .arg(new_volume), CODELOC );
+        throw SireError::invalid_arg(
+            QObject::tr("You cannot set the volume of a periodic box to a negative value! (%1)").arg(new_volume),
+            CODELOC);
 
     if (old_volume == new_volume)
         return *this;
 
-    double scl = std::pow( new_volume / old_volume, 1.0/3.0 ); // rats - no cbrt function!
+    double scl = std::pow(new_volume / old_volume, 1.0 / 3.0); // rats - no cbrt function!
 
-    return TriclinicBox(scl*this->v0, scl*this->v1, scl*this->v2);
+    return TriclinicBox(scl * this->v0, scl * this->v1, scl * this->v2);
 }
 
 /** Whether the triclinic cell has been rotated to comply with the contraints
@@ -562,8 +518,8 @@ bool TriclinicBox::isRotated() const
 Vector TriclinicBox::wrapDelta(const Vector &v0, const Vector &v1) const
 {
     // Work out the positions of v0 and v1 in "box" space.
-    auto v0_box = this->cell_matrix_inverse*v0;
-    auto v1_box = this->cell_matrix_inverse*v1;
+    auto v0_box = this->cell_matrix_inverse * v0;
+    auto v1_box = this->cell_matrix_inverse * v1;
 
     // Work out the distance vector in "box" space.
     auto dist_box = v1_box - v0_box;
@@ -579,26 +535,32 @@ Vector TriclinicBox::wrapDelta(const Vector &v0, const Vector &v1) const
     // Shift to box.
 
     // x
-    if      (frac_x >=  0.5) int_x += 1.0;
-    else if (frac_x <= -0.5) int_x -= 1.0;
+    if (frac_x >= 0.5)
+        int_x += 1.0;
+    else if (frac_x <= -0.5)
+        int_x -= 1.0;
 
     // y
-    if      (frac_y >=  0.5) int_y += 1.0;
-    else if (frac_y <= -0.5) int_y -= 1.0;
+    if (frac_y >= 0.5)
+        int_y += 1.0;
+    else if (frac_y <= -0.5)
+        int_y -= 1.0;
 
     // z
-    if      (frac_z >=  0.5) int_z += 1.0;
-    else if (frac_z <= -0.5) int_z -= 1.0;
+    if (frac_z >= 0.5)
+        int_z += 1.0;
+    else if (frac_z <= -0.5)
+        int_z -= 1.0;
 
     // Return the shifts over the box vectors.
-    return this->cell_matrix*Vector(int_x, int_y, int_z);
+    return this->cell_matrix * Vector(int_x, int_y, int_z);
 }
 
 /** Calculate the distance between two points */
 double TriclinicBox::calcDist(const Vector &point0, const Vector &point1) const
 {
     // Work out the distance vector in "box" space.
-    auto dist_box = this->cell_matrix_inverse*point1 - this->cell_matrix_inverse*point0;
+    auto dist_box = this->cell_matrix_inverse * point1 - this->cell_matrix_inverse * point0;
 
     // Extract the integer and fractional components of the distance.
     int int_x = int(dist_box.x());
@@ -611,22 +573,28 @@ double TriclinicBox::calcDist(const Vector &point0, const Vector &point1) const
     // Shift to box.
 
     // x
-    if      (frac_x >=  0.5) frac_x -= 1.0;
-    else if (frac_x <= -0.5) frac_x += 1.0;
+    if (frac_x >= 0.5)
+        frac_x -= 1.0;
+    else if (frac_x <= -0.5)
+        frac_x += 1.0;
 
     // y
-    if      (frac_y >=  0.5) frac_y -= 1.0;
-    else if (frac_y <= -0.5) frac_y += 1.0;
+    if (frac_y >= 0.5)
+        frac_y -= 1.0;
+    else if (frac_y <= -0.5)
+        frac_y += 1.0;
 
     // z
-    if      (frac_z >=  0.5) frac_z -= 1.0;
-    else if (frac_z <= -0.5) frac_z += 1.0;
+    if (frac_z >= 0.5)
+        frac_z -= 1.0;
+    else if (frac_z <= -0.5)
+        frac_z += 1.0;
 
     // Construct a vector from the fractional components.
     Vector frac_dist(frac_x, frac_y, frac_z);
 
     // Calculate the distance in the minimum image.
-    auto dist = std::sqrt(Vector::dot(frac_dist, this->M*frac_dist));
+    auto dist = std::sqrt(Vector::dot(frac_dist, this->M * frac_dist));
 
     return dist;
 }
@@ -635,36 +603,35 @@ double TriclinicBox::calcDist(const Vector &point0, const Vector &point1) const
 double TriclinicBox::calcDist2(const Vector &point0, const Vector &point1) const
 {
     auto dist = this->calcDist(point0, point1);
-    return dist*dist;
+    return dist * dist;
 }
 
 /** Populate the matrix 'mat' with the distances between all of the
     atoms of the two CoordGroups. Return the shortest distance^2 between the two
     CoordGroups. */
-double TriclinicBox::calcDist(const CoordGroup &group0, const CoordGroup &group1,
-                              DistMatrix &mat) const
+double TriclinicBox::calcDist(const CoordGroup &group0, const CoordGroup &group1, DistMatrix &mat) const
 {
     double mindist(std::numeric_limits<double>::max());
 
     const int n0 = group0.count();
     const int n1 = group1.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(n0, n1);
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array0 = group0.constData();
     const Vector *array1 = group1.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group0.aaBox().center(), group1.aaBox().center());
 
-    for (int i=0; i<n0; ++i)
+    for (int i = 0; i < n0; ++i)
     {
         Vector point0 = array0[i] + wrapdelta;
         mat.setOuterIndex(i);
 
-        for (int j=0; j<n1; ++j)
+        for (int j = 0; j < n1; ++j)
         {
             const double dist = Vector::distance(point0, array1[j]);
 
@@ -673,33 +640,32 @@ double TriclinicBox::calcDist(const CoordGroup &group0, const CoordGroup &group1
         }
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return mindist;
 }
 
 /** Populate the matrix 'mat' with the distances between all of the
     atoms of the passed CoordGroup to the passed point. Return the shortest
     distance. */
-double TriclinicBox::calcDist(const CoordGroup &group, const Vector &point,
-                              DistMatrix &mat) const
+double TriclinicBox::calcDist(const CoordGroup &group, const Vector &point, DistMatrix &mat) const
 {
     double mindist(std::numeric_limits<double>::max());
 
     const int n = group.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(1, n);
 
-    //get raw pointer to the array - this provides more efficient access
+    // get raw pointer to the array - this provides more efficient access
     const Vector *array = group.constData();
 
     mat.setOuterIndex(0);
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group.aaBox().center(), point);
     Vector wrapped_point = point + wrapdelta;
 
-    for (int j=0; j<n; ++j)
+    for (int j = 0; j < n; ++j)
     {
         const double dist = Vector::distance(wrapped_point, array[j]);
 
@@ -707,33 +673,32 @@ double TriclinicBox::calcDist(const CoordGroup &group, const Vector &point,
         mat[j] = dist;
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return mindist;
 }
 
 /** Populate the matrix 'mat' with the distances squared between all of the
     atoms of the passed CoordGroup to the passed point. Return the shortest
     distance. */
-double TriclinicBox::calcDist2(const CoordGroup &group, const Vector &point,
-                               DistMatrix &mat) const
+double TriclinicBox::calcDist2(const CoordGroup &group, const Vector &point, DistMatrix &mat) const
 {
     double mindist2(std::numeric_limits<double>::max());
 
     const int n = group.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(1, n);
 
-    //get raw pointer to the array - this provides more efficient access
+    // get raw pointer to the array - this provides more efficient access
     const Vector *array = group.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group.aaBox().center(), point);
     Vector wrapped_point = point + wrapdelta;
 
     mat.setOuterIndex(0);
 
-    for (int j=0; j<n; ++j)
+    for (int j = 0; j < n; ++j)
     {
         const double dist2 = Vector::distance2(wrapped_point, array[j]);
 
@@ -741,58 +706,56 @@ double TriclinicBox::calcDist2(const CoordGroup &group, const Vector &point,
         mat[j] = dist2;
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return std::sqrt(mindist2);
 }
 
 /** Populate the matrix 'mat' with the distances^2 between all of the
     atoms of the two CoordGroups. Return the shortest distance between the
     two CoordGroups. */
-double TriclinicBox::calcDist2(const CoordGroup &group0, const CoordGroup &group1,
-                               DistMatrix &mat) const
+double TriclinicBox::calcDist2(const CoordGroup &group0, const CoordGroup &group1, DistMatrix &mat) const
 {
     double mindist2(std::numeric_limits<double>::max());
 
     const int n0 = group0.count();
     const int n1 = group1.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(n0, n1);
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array0 = group0.constData();
     const Vector *array1 = group1.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group0.aaBox().center(), group1.aaBox().center());
 
-    for (int i=0; i<n0; ++i)
+    for (int i = 0; i < n0; ++i)
     {
         Vector point0 = array0[i] + wrapdelta;
         mat.setOuterIndex(i);
 
-        for (int j=0; j<n1; ++j)
+        for (int j = 0; j < n1; ++j)
         {
-            //calculate the distance between the two points
+            // calculate the distance between the two points
             const double tmpdist = Vector::distance2(point0, array1[j]);
 
-            //store the minimum distance, the value expected to be the minimum
-            //value is most efficiently placed as the second argument
+            // store the minimum distance, the value expected to be the minimum
+            // value is most efficiently placed as the second argument
             mindist2 = qMin(tmpdist, mindist2);
 
-            //place this distance into the matrix
+            // place this distance into the matrix
             mat[j] = tmpdist;
         }
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return std::sqrt(mindist2);
 }
 
 /** Populate the matrix 'mat' with the inverse distances between all of the
     atoms of the two CoordGroups. Return the shortest distance between the two CoordGroups. */
-double TriclinicBox::calcInvDist(const CoordGroup &group0, const CoordGroup &group1,
-                                 DistMatrix &mat) const
+double TriclinicBox::calcInvDist(const CoordGroup &group0, const CoordGroup &group1, DistMatrix &mat) const
 {
     double maxinvdist(0);
     double tmpdist;
@@ -800,43 +763,42 @@ double TriclinicBox::calcInvDist(const CoordGroup &group0, const CoordGroup &gro
     int n0 = group0.count();
     int n1 = group1.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(n0, n1);
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array0 = group0.constData();
     const Vector *array1 = group1.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group0.aaBox().center(), group1.aaBox().center());
 
-    for (int i=0; i<n0; ++i)
+    for (int i = 0; i < n0; ++i)
     {
         Vector point0 = array0[i] + wrapdelta;
         mat.setOuterIndex(i);
 
-        for (int j=0; j<n1; ++j)
+        for (int j = 0; j < n1; ++j)
         {
-            //calculate the distance between the two points
+            // calculate the distance between the two points
             tmpdist = Vector::invDistance(point0, array1[j]);
 
-            //store the minimum distance, the value expected to be the minimum
-            //value is most efficiently placed as the second argument
+            // store the minimum distance, the value expected to be the minimum
+            // value is most efficiently placed as the second argument
             maxinvdist = qMax(tmpdist, maxinvdist);
 
-            //place this distance into the matrix
+            // place this distance into the matrix
             mat[j] = tmpdist;
         }
     }
 
-    //return the shortest distance
+    // return the shortest distance
     return 1.0 / maxinvdist;
 }
 
 /** Populate the matrix 'mat' with the inverse distances^2 between all of the
     atoms of the two CoordGroups. Return the shortest distance between the two CoordGroups. */
-double TriclinicBox::calcInvDist2(const CoordGroup &group0, const CoordGroup &group1,
-                                  DistMatrix &mat) const
+double TriclinicBox::calcInvDist2(const CoordGroup &group0, const CoordGroup &group1, DistMatrix &mat) const
 {
     double maxinvdist2(0);
     double tmpdist;
@@ -844,45 +806,44 @@ double TriclinicBox::calcInvDist2(const CoordGroup &group0, const CoordGroup &gr
     int n0 = group0.count();
     int n1 = group1.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(n0, n1);
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array0 = group0.constData();
     const Vector *array1 = group1.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group0.aaBox().center(), group1.aaBox().center());
 
-    for (int i=0; i<n0; ++i)
+    for (int i = 0; i < n0; ++i)
     {
         Vector point0 = array0[i] + wrapdelta;
         mat.setOuterIndex(i);
 
-        for (int j=0; j<n1; ++j)
+        for (int j = 0; j < n1; ++j)
         {
-            //calculate the inverse squared distance between the two points
+            // calculate the inverse squared distance between the two points
             tmpdist = Vector::invDistance2(point0, array1[j]);
 
-            //store the minimum distance, the value expected to be the minimum
-            //value is most efficiently placed as the second argument
+            // store the minimum distance, the value expected to be the minimum
+            // value is most efficiently placed as the second argument
             maxinvdist2 = qMax(tmpdist, maxinvdist2);
 
-            //place this distance into the matrix
+            // place this distance into the matrix
             mat[j] = tmpdist;
         }
     }
 
-    //return the shortest distance
+    // return the shortest distance
     return 1.0 / std::sqrt(maxinvdist2);
 }
 
 /** Calculate the distance vector between two points */
-DistVector TriclinicBox::calcDistVector(const Vector &point0,
-                                        const Vector &point1) const
+DistVector TriclinicBox::calcDistVector(const Vector &point0, const Vector &point1) const
 {
     // Work out the distance vector in "box" space.
-    auto dist_box = this->cell_matrix_inverse*point1 - this->cell_matrix_inverse*point0;
+    auto dist_box = this->cell_matrix_inverse * point1 - this->cell_matrix_inverse * point0;
 
     // Extract the integer and fractional components of the distance.
     int int_x = int(dist_box.x());
@@ -895,65 +856,69 @@ DistVector TriclinicBox::calcDistVector(const Vector &point0,
     // Shift to box.
 
     // x
-    if      (frac_x >=  0.5) frac_x -= 1.0;
-    else if (frac_x <= -0.5) frac_x += 1.0;
+    if (frac_x >= 0.5)
+        frac_x -= 1.0;
+    else if (frac_x <= -0.5)
+        frac_x += 1.0;
 
     // y
-    if      (frac_y >=  0.5) frac_y -= 1.0;
-    else if (frac_y <= -0.5) frac_y += 1.0;
+    if (frac_y >= 0.5)
+        frac_y -= 1.0;
+    else if (frac_y <= -0.5)
+        frac_y += 1.0;
 
     // z
-    if      (frac_z >=  0.5) frac_z -= 1.0;
-    else if (frac_z <= -0.5) frac_z += 1.0;
-
+    if (frac_z >= 0.5)
+        frac_z -= 1.0;
+    else if (frac_z <= -0.5)
+        frac_z += 1.0;
 
     // Construct a vector from the fractional components.
     Vector frac_dist(frac_x, frac_y, frac_z);
 
     // Return the fractional distance vector mapped back to the triclinic
     // cell space.
-    return this->cell_matrix*frac_dist;
+    return this->cell_matrix * frac_dist;
 }
 
 /** Populate the matrix 'distmat' between all the points of the two CoordGroups
     'group1' and 'group2' - the returned matrix has the vectors pointing
     from each point in 'group1' to each point in 'group2'. This returns
     the shortest distance between two points in the group */
-double TriclinicBox::calcDistVectors(const CoordGroup &group0, const CoordGroup &group1,
-                                     DistVectorMatrix &mat) const
+double TriclinicBox::calcDistVectors(const CoordGroup &group0, const CoordGroup &group1, DistVectorMatrix &mat) const
 {
     double mindist(std::numeric_limits<double>::max());
 
     const int n0 = group0.count();
     const int n1 = group1.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(n0, n1);
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array0 = group0.constData();
     const Vector *array1 = group1.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group0.aaBox().center(), group1.aaBox().center());
 
-    for (int i=0; i<n0; ++i)
+    for (int i = 0; i < n0; ++i)
     {
-        //add the delta to the coordinates of atom0
+        // add the delta to the coordinates of atom0
         Vector point0 = array0[i] + wrapdelta;
         mat.setOuterIndex(i);
 
-        for (int j=0; j<n1; ++j)
+        for (int j = 0; j < n1; ++j)
         {
             mat[j] = (array1[j] - point0);
 
-            //store the minimum distance, the value expected to be the minimum
-            //value is most efficiently placed as the second argument
+            // store the minimum distance, the value expected to be the minimum
+            // value is most efficiently placed as the second argument
             mindist = qMin(mat[j].length(), mindist);
         }
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return mindist;
 }
 
@@ -961,42 +926,40 @@ double TriclinicBox::calcDistVectors(const CoordGroup &group0, const CoordGroup 
     to the point 'point' - the returned matrix has the vectors pointing
     from the point to each point in 'group'. This returns
     the shortest distance. */
-double TriclinicBox::calcDistVectors(const CoordGroup &group, const Vector &point,
-                                     DistVectorMatrix &mat) const
+double TriclinicBox::calcDistVectors(const CoordGroup &group, const Vector &point, DistVectorMatrix &mat) const
 {
     double mindist(std::numeric_limits<double>::max());
 
     const int n = group.count();
 
-    //redimension the matrix to hold all of the pairs
+    // redimension the matrix to hold all of the pairs
     mat.redimension(1, n);
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array = group.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group.aaBox().center(), point);
     Vector wrapped_point = point + wrapdelta;
 
     mat.setOuterIndex(0);
 
-    for (int j=0; j<n; ++j)
+    for (int j = 0; j < n; ++j)
     {
         mat[j] = (array[j] - wrapped_point);
 
-        //store the minimum distance, the value expected to be the minimum
-        //value is most efficiently placed as the second argument
+        // store the minimum distance, the value expected to be the minimum
+        // value is most efficiently placed as the second argument
         mindist = qMin(mat[j].length(), mindist);
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return mindist;
 }
 
 /** Calculate the angle between the passed three points. This should return
     the acute angle between the points, which should lie between 0 and 180 degrees */
-Angle TriclinicBox::calcAngle(const Vector &point0, const Vector &point1,
-                              const Vector &point2) const
+Angle TriclinicBox::calcAngle(const Vector &point0, const Vector &point1, const Vector &point2) const
 {
     Vector p0 = this->getMinimumImage(point0, point1);
     Vector p2 = this->getMinimumImage(point2, point1);
@@ -1008,8 +971,8 @@ Angle TriclinicBox::calcAngle(const Vector &point0, const Vector &point1,
     return the torsion angle measured clockwise when looking down the
     torsion from point0-point1-point2-point3. This will lie between 0 and 360
     degrees */
-Angle TriclinicBox::calcDihedral(const Vector &point0, const Vector &point1,
-                                 const Vector &point2, const Vector &point3) const
+Angle TriclinicBox::calcDihedral(const Vector &point0, const Vector &point1, const Vector &point2,
+                                 const Vector &point3) const
 {
     Vector p0 = this->getMinimumImage(point0, point1);
     Vector p2 = this->getMinimumImage(point2, point1);
@@ -1024,13 +987,12 @@ bool TriclinicBox::beyond(double dist, const AABox &aabox0, const AABox &aabox1)
 {
     Vector wrapdelta = this->wrapDelta(aabox0.center(), aabox1.center());
 
-    return Vector::distance2(aabox0.center()+wrapdelta, aabox1.center()) >
-                      SireMaths::pow_2(dist + aabox0.radius() + aabox1.radius());
+    return Vector::distance2(aabox0.center() + wrapdelta, aabox1.center()) >
+           SireMaths::pow_2(dist + aabox0.radius() + aabox1.radius());
 }
 
 /** Return whether or not these two groups are definitely beyond the cutoff distance. */
-bool TriclinicBox::beyond(double dist, const CoordGroup &group0,
-                          const CoordGroup &group1) const
+bool TriclinicBox::beyond(double dist, const CoordGroup &group0, const CoordGroup &group1) const
 {
     return this->beyond(dist, group0.aaBox(), group1.aaBox());
 }
@@ -1059,37 +1021,36 @@ double TriclinicBox::minimumDistance(const AABox &box0, const AABox &box1) const
     If this is a periodic space then this uses the minimum image convention
     (i.e. the minimum distance between the closest periodic replicas are
     used) */
-double TriclinicBox::minimumDistance(const CoordGroup &group0,
-                                     const CoordGroup &group1) const
+double TriclinicBox::minimumDistance(const CoordGroup &group0, const CoordGroup &group1) const
 {
     double mindist2(std::numeric_limits<double>::max());
 
     int n0 = group0.count();
     int n1 = group1.count();
 
-    //get raw pointers to the arrays - this provides more efficient access
+    // get raw pointers to the arrays - this provides more efficient access
     const Vector *array0 = group0.constData();
     const Vector *array1 = group1.constData();
 
-    //see if we need to wrap the coordinates...
+    // see if we need to wrap the coordinates...
     Vector wrapdelta = this->wrapDelta(group0.aaBox().center(), group1.aaBox().center());
 
-    for (int i=0; i<n0; ++i)
+    for (int i = 0; i < n0; ++i)
     {
         Vector point0 = array0[i] + wrapdelta;
 
-        for (int j=0; j<n1; ++j)
+        for (int j = 0; j < n1; ++j)
         {
-            //calculate the distance between the two atoms
+            // calculate the distance between the two atoms
             double tmpdist = Vector::distance2(point0, array1[j]);
 
-            //store the minimum distance, the value expected to be the minimum
-            //value is most efficiently placed as the second argument
+            // store the minimum distance, the value expected to be the minimum
+            // value is most efficiently placed as the second argument
             mindist2 = qMin(tmpdist, mindist2);
         }
     }
 
-    //return the minimum distance
+    // return the minimum distance
     return std::sqrt(mindist2);
 }
 
@@ -1098,7 +1059,7 @@ double TriclinicBox::minimumDistance(const CoordGroup &group0,
 Vector TriclinicBox::getMinimumImage(const Vector &point, const Vector &center) const
 {
     // Calculate the position of point in "box" space.
-    auto point_box = this->cell_matrix_inverse*point;
+    auto point_box = this->cell_matrix_inverse * point;
 
     // Get the box shift.
     auto wrapdelta = this->wrapDelta(point, center);
@@ -1110,8 +1071,7 @@ Vector TriclinicBox::getMinimumImage(const Vector &point, const Vector &center) 
 /** Return the closest periodic copy of 'group' to the point 'point',
     according to the minimum image convention. The effect of this is
     to move 'group' into the box which is now centered on 'point' */
-CoordGroup TriclinicBox::getMinimumImage(const CoordGroup &group,
-                                         const Vector &point) const
+CoordGroup TriclinicBox::getMinimumImage(const CoordGroup &group, const Vector &point) const
 {
     Vector wrapdelta = this->wrapDelta(group.aaBox().center(), point);
 
@@ -1131,21 +1091,20 @@ CoordGroup TriclinicBox::getMinimumImage(const CoordGroup &group,
 
 /** Private function used to get the minimum image of all of the
     groups in 'groups' */
-CoordGroupArray TriclinicBox::_pvt_getMinimumImage(const CoordGroupArray &groups,
-                                                   const Vector &point) const
+CoordGroupArray TriclinicBox::_pvt_getMinimumImage(const CoordGroupArray &groups, const Vector &point) const
 {
     int ncg = groups.count();
 
     const CoordGroup *group_array = groups.constData();
 
     if (ncg == 1)
-        return CoordGroupArray( this->getMinimumImage(group_array[0], point));
+        return CoordGroupArray(this->getMinimumImage(group_array[0], point));
 
-    //create a new array of the right size
+    // create a new array of the right size
     QVector<CoordGroup> moved_groups(ncg);
     CoordGroup *moved_array = moved_groups.data();
 
-    for (int i=0; i<ncg; ++i)
+    for (int i = 0; i < ncg; ++i)
     {
         moved_array[i] = this->getMinimumImage(group_array[i], point);
     }
@@ -1161,8 +1120,7 @@ CoordGroupArray TriclinicBox::_pvt_getMinimumImage(const CoordGroupArray &groups
     group, and so it translates it together. This is useful
     to get the minimum image of a molecule as a whole, rather
     than breaking the molecule across a box boundary */
-CoordGroupArray TriclinicBox::getMinimumImage(const CoordGroupArray &groups,
-                                              const Vector &point,
+CoordGroupArray TriclinicBox::getMinimumImage(const CoordGroupArray &groups, const Vector &point,
                                               bool translate_as_one) const
 {
     if (translate_as_one or groups.nCoordGroups() == 1)
@@ -1183,12 +1141,12 @@ CoordGroupArray TriclinicBox::getMinimumImage(const CoordGroupArray &groups,
     }
     else
     {
-        //run through all of the groups and see if any of them need moving...
+        // run through all of the groups and see if any of them need moving...
         int ncg = groups.count();
 
         const CoordGroup *group_array = groups.constData();
 
-        for (int i=0; i<ncg; ++i)
+        for (int i = 0; i < ncg; ++i)
         {
             const CoordGroup &group = group_array[i];
 
@@ -1196,13 +1154,13 @@ CoordGroupArray TriclinicBox::getMinimumImage(const CoordGroupArray &groups,
 
             if (not wrapdelta.isZero())
             {
-                //there is at least one CoordGroup that needs moving
-                // - look to translate them all!
+                // there is at least one CoordGroup that needs moving
+                //  - look to translate them all!
                 return this->_pvt_getMinimumImage(groups, point);
             }
         }
 
-        //all of the CoordGroups are in the box - just return the original array
+        // all of the CoordGroups are in the box - just return the original array
         return groups;
     }
 }
@@ -1230,8 +1188,7 @@ AABox TriclinicBox::getMinimumImage(const AABox &aabox, const Vector &center) co
 
 /** Return all periodic images of 'point' with respect to 'center' within
     'dist' distance of 'center' */
-QVector<Vector> TriclinicBox::getImagesWithin(const Vector &point, const Vector &center,
-                                              double dist) const
+QVector<Vector> TriclinicBox::getImagesWithin(const Vector &point, const Vector &center, double dist) const
 {
     QVector<Vector> points;
 
@@ -1247,11 +1204,11 @@ QVector<Vector> TriclinicBox::getImagesWithin(const Vector &point, const Vector 
         // if dist is >= halflength.x() and < 1.5 length.x()
         // then there is only the need to go out to the first layer in the
         // x-dimension.
-        int nlayers_x = int( (dist*invlength.x()) + 0.5 );
-        int nlayers_y = int( (dist*invlength.y()) + 0.5 );
-        int nlayers_z = int( (dist*invlength.z()) + 0.5 );
+        int nlayers_x = int((dist * invlength.x()) + 0.5);
+        int nlayers_y = int((dist * invlength.y()) + 0.5);
+        int nlayers_z = int((dist * invlength.z()) + 0.5);
 
-        //loop over all peridic boxes in range
+        // loop over all peridic boxes in range
         for (int i = -nlayers_x; i <= nlayers_x; ++i)
         {
             for (int j = -nlayers_y; j <= nlayers_y; ++j)
@@ -1260,7 +1217,7 @@ QVector<Vector> TriclinicBox::getImagesWithin(const Vector &point, const Vector 
                 {
                     // Get the delta value needed to translate the minimum
                     // image into the i,j,k box
-                    auto delta = this->cell_matrix*Vector(i, j, k);
+                    auto delta = this->cell_matrix * Vector(i, j, k);
 
                     // Translate just the center of the minimum image...
                     Vector p_image = p + delta;
@@ -1287,37 +1244,36 @@ QVector<Vector> TriclinicBox::getImagesWithin(const Vector &point, const Vector 
 
     If there are no periodic replicas of 'group' that are within
     'dist' of 'center', then an empty list is returned. */
-QList< tuple<double,CoordGroup> >
-TriclinicBox::getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
-                              double dist) const
+QList<tuple<double, CoordGroup>> TriclinicBox::getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
+                                                               double dist) const
 {
     if (dist > this->max_length)
-        throw SireError::invalid_arg( QObject::tr(
-            "You cannot use a distance (%1) that is greater than the "
-            "maximum box length (%2).")
-                .arg(dist).arg(this->max_length), CODELOC );
+        throw SireError::invalid_arg(QObject::tr("You cannot use a distance (%1) that is greater than the "
+                                                 "maximum box length (%2).")
+                                         .arg(dist)
+                                         .arg(this->max_length),
+                                     CODELOC);
 
     // are there any copies within range?
-    if (this->beyond(dist, group,center))
-        //yep - there are no copies that are sufficiently close
-        return QList< tuple<double,CoordGroup> >();
+    if (this->beyond(dist, group, center))
+        // yep - there are no copies that are sufficiently close
+        return QList<tuple<double, CoordGroup>>();
 
-    //ok, first move 'group' into the box that has its center at the
-    //same point as the center of the center group - this will give us
-    //the group that is closest to us (the minimum image)
+    // ok, first move 'group' into the box that has its center at the
+    // same point as the center of the center group - this will give us
+    // the group that is closest to us (the minimum image)
     CoordGroup minimum_image = this->getMinimumImage(group, center.aaBox().center());
 
-    //now loop over periodic boxes, moving ever outward, trying to find
-    //all copies that are within the distance
+    // now loop over periodic boxes, moving ever outward, trying to find
+    // all copies that are within the distance
 
-    //we can work out the maximum number of layers to go out to based on
-    //the radii of the two groups, the maximum distance, and the dimensions
-    //of the box
+    // we can work out the maximum number of layers to go out to based on
+    // the radii of the two groups, the maximum distance, and the dimensions
+    // of the box
     const AABox &centerbox = center.aaBox();
     const AABox &imagebox = minimum_image.aaBox();
 
-    double sum_of_radii_and_distance = centerbox.radius() +
-                                       imagebox.radius() + dist;
+    double sum_of_radii_and_distance = centerbox.radius() + imagebox.radius() + dist;
 
     double sum_of_radii_and_distance2 = SireMaths::pow_2(sum_of_radii_and_distance);
 
@@ -1325,13 +1281,13 @@ TriclinicBox::getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
     // if sum_of_radii_and_distance is >= halflength.x() and < 1.5 length.x()
     // then there is only the need to go out to the first layer in the
     // x-dimension.
-    int nlayers_x = int( (sum_of_radii_and_distance*invlength.x()) + 0.5 );
-    int nlayers_y = int( (sum_of_radii_and_distance*invlength.y()) + 0.5 );
-    int nlayers_z = int( (sum_of_radii_and_distance*invlength.z()) + 0.5 );
+    int nlayers_x = int((sum_of_radii_and_distance * invlength.x()) + 0.5);
+    int nlayers_y = int((sum_of_radii_and_distance * invlength.y()) + 0.5);
+    int nlayers_z = int((sum_of_radii_and_distance * invlength.z()) + 0.5);
 
-    QList< tuple<double,CoordGroup> > neargroups;
+    QList<tuple<double, CoordGroup>> neargroups;
 
-    //loop over all cubes
+    // loop over all cubes
     for (int i = -nlayers_x; i <= nlayers_x; ++i)
     {
         for (int j = -nlayers_y; j <= nlayers_y; ++j)
@@ -1340,27 +1296,25 @@ TriclinicBox::getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
             {
                 // Get the delta value needed to translate the minimum
                 // image into the i,j,k box
-                auto delta = this->cell_matrix*Vector(i, j, k);
+                auto delta = this->cell_matrix * Vector(i, j, k);
 
-                //translate just the center of the minimum image...
+                // translate just the center of the minimum image...
                 Vector center_of_replica = imagebox.center() + delta;
 
-                //is the box in range?
-                if ( Vector::distance2(center_of_replica,centerbox.center())
-                                    <= sum_of_radii_and_distance2 )
+                // is the box in range?
+                if (Vector::distance2(center_of_replica, centerbox.center()) <= sum_of_radii_and_distance2)
                 {
-                    //yes it is! Translate the entire CoordGroup
+                    // yes it is! Translate the entire CoordGroup
                     CoordGroupEditor editor = minimum_image.edit();
                     editor.translate(delta);
                     CoordGroup periodic_replica = editor.commit();
 
-                    //calculate the minimum distance... (using the cartesian space)
+                    // calculate the minimum distance... (using the cartesian space)
                     double mindist = Cartesian::minimumDistance(periodic_replica, center);
 
                     if (mindist <= dist)
                     {
-                        neargroups.append(
-                                  tuple<double,CoordGroup>(mindist,periodic_replica) );
+                        neargroups.append(tuple<double, CoordGroup>(mindist, periodic_replica));
                     }
                 }
             }
@@ -1372,30 +1326,27 @@ TriclinicBox::getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
 
 /** Return a random point within the box (placing the center of the box
     is at the center 'center') */
-Vector TriclinicBox::getRandomPoint(const Vector &center,
-                                    const RanGenerator &generator) const
+Vector TriclinicBox::getRandomPoint(const Vector &center, const RanGenerator &generator) const
 {
-    return this->cell_matrix*Vector(generator.rand(-0.5, 0.5),
-                                    generator.rand(-0.5, 0.5),
-                                    generator.rand(-0.5, 0.5))
-           + center;
+    return this->cell_matrix * Vector(generator.rand(-0.5, 0.5), generator.rand(-0.5, 0.5), generator.rand(-0.5, 0.5)) +
+           center;
 }
 
 /** Return the center of the box that contains the point 'p' assuming
     that the center for the central box is located at the origin */
 Vector TriclinicBox::getBoxCenter(const Vector &p) const
 {
-	return this->wrapDelta(Vector(0,0,0), p);
+    return this->wrapDelta(Vector(0, 0, 0), p);
 }
 
 /** Return the center of the box that contains the point 'p' assuming
     that the center for the central box is located at 'center' */
 Vector TriclinicBox::getBoxCenter(const Vector &p, const Vector &center) const
 {
-	return this->wrapDelta(center, p);
+    return this->wrapDelta(center, p);
 }
 
-const char* TriclinicBox::typeName()
+const char *TriclinicBox::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<TriclinicBox>() );
+    return QMetaType::typeName(qMetaTypeId<TriclinicBox>());
 }

@@ -34,9 +34,9 @@
 
 #include "SireBase/propertylist.h"
 
+#include "SireBase/errors.h"
 #include "SireError/errors.h"
 #include "SireFF/errors.h"
-#include "SireBase/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -61,8 +61,8 @@ namespace SireFF
         template class FFMolecule3D<QMPotential>;
         template class FFMolecules3D<QMPotential>;
         template class ChangedMolecule<QMPotential::Molecule>;
-    }
-}
+    } // namespace detail
+} // namespace SireFF
 
 /////////
 ///////// Implementation of QMComponent
@@ -74,7 +74,7 @@ static const RegisterMetaType<QMComponent> r_qmcomp(NO_ROOT);
 QDataStream &operator<<(QDataStream &ds, const QMComponent &qmcomp)
 {
     writeHeader(ds, r_qmcomp, 1);
-    ds << static_cast<const FFComponent&>(qmcomp);
+    ds << static_cast<const FFComponent &>(qmcomp);
 
     return ds;
 }
@@ -86,7 +86,7 @@ QDataStream &operator>>(QDataStream &ds, QMComponent &qmcomp)
 
     if (v == 1)
     {
-        ds >> static_cast<FFComponent&>(qmcomp);
+        ds >> static_cast<FFComponent &>(qmcomp);
     }
     else
         throw version_error(v, "1", r_qmcomp, CODELOC);
@@ -95,26 +95,27 @@ QDataStream &operator>>(QDataStream &ds, QMComponent &qmcomp)
 }
 
 /** Constructor for the forcefield called 'ffname' */
-QMComponent::QMComponent(const FFName &ffname)
-            : FFComponent(ffname, QLatin1String("QM"))
-{}
+QMComponent::QMComponent(const FFName &ffname) : FFComponent(ffname, QLatin1String("QM"))
+{
+}
 
 /** Construct from a symbol
 
     \throw SireError::incompatible_error
 */
-QMComponent::QMComponent(const SireCAS::Symbol &symbol)
-            : FFComponent(symbol, QLatin1String("QM"))
-{}
+QMComponent::QMComponent(const SireCAS::Symbol &symbol) : FFComponent(symbol, QLatin1String("QM"))
+{
+}
 
 /** Copy constructor */
-QMComponent::QMComponent(const QMComponent &other)
-            : FFComponent(other)
-{}
+QMComponent::QMComponent(const QMComponent &other) : FFComponent(other)
+{
+}
 
 /** Destructor */
 QMComponent::~QMComponent()
-{}
+{
+}
 
 /** Set the QM component of the energy in the forcefield 'ff'
     to equal to the passed QMEnergy */
@@ -142,8 +143,7 @@ QString ElementParameterName::element_param("element");
 ///////// Implementation of QMPotential
 /////////
 
-static const RegisterMetaType<QMPotential> r_qmpot( MAGIC_ONLY, NO_ROOT,
-                                                    "Squire::QMPotential" );
+static const RegisterMetaType<QMPotential> r_qmpot(MAGIC_ONLY, NO_ROOT, "Squire::QMPotential");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const QMPotential &qmpot)
@@ -170,8 +170,7 @@ QDataStream &operator>>(QDataStream &ds, QMPotential &qmpot)
 
         qmpot.spce = qmpot.props.property("space");
         qmpot.qmprog = qmpot.props.property("quantum program");
-        qmpot.zero_energy = qmpot.props.property("zero energy")
-                                       .asADouble();
+        qmpot.zero_energy = qmpot.props.property("zero energy").asADouble();
     }
     else
         throw version_error(v, "1", r_qmpot, CODELOC);
@@ -182,23 +181,24 @@ QDataStream &operator>>(QDataStream &ds, QMPotential &qmpot)
 /** Constructor */
 QMPotential::QMPotential() : zero_energy(0)
 {
-    props.setProperty( "space", spce );
-    props.setProperty( "quantum program", qmprog );
-    props.setProperty( "zero energy", wrap(zero_energy) );
+    props.setProperty("space", spce);
+    props.setProperty("quantum program", qmprog);
+    props.setProperty("zero energy", wrap(zero_energy));
 }
 
 /** Copy constructor */
 QMPotential::QMPotential(const QMPotential &other)
-            : props(other.props), spce(other.spce),
-              qmprog(other.qmprog), zero_energy(other.zero_energy)
-{}
+    : props(other.props), spce(other.spce), qmprog(other.qmprog), zero_energy(other.zero_energy)
+{
+}
 
 /** Destructor */
 QMPotential::~QMPotential()
-{}
+{
+}
 
 /** Copy assignment operator */
-QMPotential& QMPotential::operator=(const QMPotential &other)
+QMPotential &QMPotential::operator=(const QMPotential &other)
 {
     if (this != &other)
     {
@@ -219,40 +219,38 @@ QMPotential& QMPotential::operator=(const QMPotential &other)
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-static PackedArray2D<Element> getQMParameters(const PartialMolecule &molecule,
-                                              const PropertyName &element_property)
+static PackedArray2D<Element> getQMParameters(const PartialMolecule &molecule, const PropertyName &element_property)
 {
-    const AtomElements &elements = molecule.property(element_property)
-                                           .asA<AtomElements>();
+    const AtomElements &elements = molecule.property(element_property).asA<AtomElements>();
 
     const AtomSelection &selected_atoms = molecule.selection();
 
     if (selected_atoms.selectedNone())
         return PackedArray2D<Element>();
 
-    //create space for the parameters - only need space for CutGroups
-    //that contain at least one selected atom
-    QVector< QVector<Element> > elementparams( selected_atoms.nSelectedCutGroups() );
-    QVector<Element>* elementparams_array = elementparams.data();
+    // create space for the parameters - only need space for CutGroups
+    // that contain at least one selected atom
+    QVector<QVector<Element>> elementparams(selected_atoms.nSelectedCutGroups());
+    QVector<Element> *elementparams_array = elementparams.data();
 
     if (selected_atoms.selectedAllCutGroups())
     {
         const int ncg = molecule.data().info().nCutGroups();
 
-        for (CGIdx i(0); i<ncg; ++i)
+        for (CGIdx i(0); i < ncg; ++i)
         {
             const int nats = molecule.data().info().nAtoms(i);
 
             QVector<Element> group_elements(nats);
             Element *group_elements_array = group_elements.data();
 
-            //get the arrays containing the element parameters
-            //for this CutGroup
+            // get the arrays containing the element parameters
+            // for this CutGroup
             const Element *group_e = elements.constData(i);
 
             if (selected_atoms.selectedAll(i))
             {
-                for (Index j(0); j<nats; ++j)
+                for (Index j(0); j < nats; ++j)
                 {
                     group_elements_array[j] = group_e[j];
                 }
@@ -277,13 +275,13 @@ static PackedArray2D<Element> getQMParameters(const PartialMolecule &molecule,
             QVector<Element> group_elements(nats);
             Element *group_elements_array = group_elements.data();
 
-            //get the arrays containing the element parameters
-            //for this CutGroup
+            // get the arrays containing the element parameters
+            // for this CutGroup
             const Element *group_e = elements.constData(i);
 
             if (selected_atoms.selectedAll(i))
             {
-                for (Index j(0); j<nats; ++j)
+                for (Index j(0); j < nats; ++j)
                 {
                     group_elements_array[j] = group_e[j];
                 }
@@ -300,7 +298,7 @@ static PackedArray2D<Element> getQMParameters(const PartialMolecule &molecule,
         }
     }
 
-    return PackedArray2D<Element>( elementparams );
+    return PackedArray2D<Element>(elementparams);
 }
 
 /** Return the parameters for the molecule 'mol', using the property names
@@ -310,11 +308,10 @@ static PackedArray2D<Element> getQMParameters(const PartialMolecule &molecule,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-QMPotential::Parameters QMPotential::getParameters(const PartialMolecule &molecule,
-                                                   const PropertyMap &map)
+QMPotential::Parameters QMPotential::getParameters(const PartialMolecule &molecule, const PropertyMap &map)
 {
-    return Parameters( molecule, map[parameters().coordinates()],
-                       getQMParameters(molecule, map[parameters().element()]) );
+    return Parameters(molecule, map[parameters().coordinates()],
+                      getQMParameters(molecule, map[parameters().element()]));
 }
 
 /** Update the parameters for the molecule going from 'old_molecule' to
@@ -324,39 +321,33 @@ QMPotential::Parameters QMPotential::getParameters(const PartialMolecule &molecu
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-QMPotential::Parameters
-QMPotential::updateParameters(const QMPotential::Parameters &old_params,
-                              const PartialMolecule &old_molecule,
-                              const PartialMolecule &new_molecule,
-                              const PropertyMap &map)
+QMPotential::Parameters QMPotential::updateParameters(const QMPotential::Parameters &old_params,
+                                                      const PartialMolecule &old_molecule,
+                                                      const PartialMolecule &new_molecule, const PropertyMap &map)
 {
     if (old_molecule.selection() != new_molecule.selection())
-        //the selection has changed - just get completely new parameters
+        // the selection has changed - just get completely new parameters
         return this->getParameters(new_molecule, map);
 
     Parameters new_params = old_params;
 
-    //get the property names
+    // get the property names
     const PropertyName &coords_property = map[parameters().coordinates()];
     const PropertyName &element_property = map[parameters().element()];
 
-    //get what has changed
-    bool new_coords = old_molecule.version(coords_property) !=
-                         new_molecule.version(coords_property);
+    // get what has changed
+    bool new_coords = old_molecule.version(coords_property) != new_molecule.version(coords_property);
 
-    bool new_elements = old_molecule.version(element_property) !=
-                          new_molecule.version(element_property);
+    bool new_elements = old_molecule.version(element_property) != new_molecule.version(element_property);
 
     if (new_coords)
     {
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule,
-                                                        coords_property) );
+        new_params.setAtomicCoordinates(AtomicCoords3D(new_molecule, coords_property));
     }
 
     if (new_elements)
     {
-        new_params.setAtomicParameters( getQMParameters(new_molecule,
-                                                        element_property) );
+        new_params.setAtomicParameters(getQMParameters(new_molecule, element_property));
     }
 
     return new_params;
@@ -370,41 +361,36 @@ QMPotential::updateParameters(const QMPotential::Parameters &old_params,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-QMPotential::Parameters
-QMPotential::updateParameters(const QMPotential::Parameters &old_params,
-                              const PartialMolecule &old_molecule,
-                              const PartialMolecule &new_molecule,
-                              const PropertyMap &old_map, const PropertyMap &new_map)
+QMPotential::Parameters QMPotential::updateParameters(const QMPotential::Parameters &old_params,
+                                                      const PartialMolecule &old_molecule,
+                                                      const PartialMolecule &new_molecule, const PropertyMap &old_map,
+                                                      const PropertyMap &new_map)
 {
     if (old_molecule.selection() != new_molecule.selection())
-        //the selection has changed - just get completely new parameters
+        // the selection has changed - just get completely new parameters
         return this->getParameters(new_molecule, new_map);
 
     Parameters new_params = old_params;
 
-    //get the property names
+    // get the property names
     const PropertyName &old_coords = old_map[parameters().coordinates()];
     const PropertyName &old_elements = old_map[parameters().element()];
 
     const PropertyName &new_coords = new_map[parameters().coordinates()];
     const PropertyName &new_elements = new_map[parameters().element()];
 
-    //get what has changed
-    bool changed_coords = (new_coords != old_coords) or
-                           old_molecule.version(old_coords) !=
-                           new_molecule.version(old_coords);
+    // get what has changed
+    bool changed_coords =
+        (new_coords != old_coords) or old_molecule.version(old_coords) != new_molecule.version(old_coords);
 
-    bool changed_elements = (new_elements != old_elements) or
-                             old_molecule.version(old_elements) !=
-                             new_molecule.version(old_elements);
+    bool changed_elements =
+        (new_elements != old_elements) or old_molecule.version(old_elements) != new_molecule.version(old_elements);
 
     if (changed_coords)
-        new_params.setAtomicCoordinates( AtomicCoords3D(new_molecule,
-                                                        new_coords) );
+        new_params.setAtomicCoordinates(AtomicCoords3D(new_molecule, new_coords));
 
     if (changed_elements)
-        new_params.setAtomicParameters( getQMParameters(new_molecule,
-                                                        new_elements) );
+        new_params.setAtomicParameters(getQMParameters(new_molecule, new_elements));
 
     return new_params;
 }
@@ -417,8 +403,7 @@ QMPotential::updateParameters(const QMPotential::Parameters &old_params,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-QMPotential::Molecule QMPotential::parameterise(const PartialMolecule &molecule,
-                                                const PropertyMap &map)
+QMPotential::Molecule QMPotential::parameterise(const PartialMolecule &molecule, const PropertyMap &map)
 {
     return QMPotential::Molecule(molecule, *this, map);
 }
@@ -431,21 +416,20 @@ QMPotential::Molecule QMPotential::parameterise(const PartialMolecule &molecule,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-QMPotential::Molecules QMPotential::parameterise(const MoleculeGroup &molecules,
-                                                 const PropertyMap &map)
+QMPotential::Molecules QMPotential::parameterise(const MoleculeGroup &molecules, const PropertyMap &map)
 {
     return QMPotential::Molecules(molecules, *this, map);
 }
 
 /** Return the space within which the molecules in this potential exist */
-const Space& QMPotential::space() const
+const Space &QMPotential::space() const
 {
     return spce.read();
 }
 
 /** Return the handle to the quantum chemical program that is used
     by this potential to calculate the QM energies and forces */
-const QMProgram& QMPotential::quantumProgram() const
+const QMProgram &QMPotential::quantumProgram() const
 {
     return qmprog.read();
 }
@@ -464,7 +448,7 @@ MolarEnergy QMPotential::zeroEnergy() const
     potential. */
 bool QMPotential::setSpace(const Space &space)
 {
-    if ( not spce->equals(space) )
+    if (not spce->equals(space))
     {
         spce = space;
         props.setProperty("space", spce);
@@ -480,7 +464,7 @@ bool QMPotential::setSpace(const Space &space)
     This returns whether or not this changes this potential */
 bool QMPotential::setQuantumProgram(const QMProgram &program)
 {
-    if ( not qmprog->equals(program) )
+    if (not qmprog->equals(program))
     {
         qmprog = program;
         props.setProperty("quantum program", qmprog);
@@ -497,7 +481,7 @@ bool QMPotential::setQuantumProgram(const QMProgram &program)
     so that it is comparable to an MM energy */
 bool QMPotential::setZeroEnergy(MolarEnergy zeroenergy)
 {
-    if ( zero_energy != zeroenergy )
+    if (zero_energy != zeroenergy)
     {
         zero_energy = zeroenergy;
         props.setProperty("zero energy", wrap(zero_energy));
@@ -519,21 +503,21 @@ bool QMPotential::setProperty(const QString &name, const Property &value)
 {
     if (name == QLatin1String("space"))
     {
-        return this->setSpace( value.asA<Space>() );
+        return this->setSpace(value.asA<Space>());
     }
     else if (name == QLatin1String("quantum program"))
     {
-        return this->setQuantumProgram( value.asA<QMProgram>() );
+        return this->setQuantumProgram(value.asA<QMProgram>());
     }
     else if (name == QLatin1String("zero energy"))
     {
-        return this->setZeroEnergy( MolarEnergy(value.asADouble()) );
+        return this->setZeroEnergy(MolarEnergy(value.asADouble()));
     }
     else
-        throw SireBase::missing_property( QObject::tr(
-            "The QM potential does not have a property called \"%1\" that "
-            "can be changed. Available properties are [ %2 ].")
-                .arg(name, QStringList(props.propertyKeys()).join(", ")), CODELOC );
+        throw SireBase::missing_property(QObject::tr("The QM potential does not have a property called \"%1\" that "
+                                                     "can be changed. Available properties are [ %2 ].")
+                                             .arg(name, QStringList(props.propertyKeys()).join(", ")),
+                                         CODELOC);
 
     return false;
 }
@@ -542,7 +526,7 @@ bool QMPotential::setProperty(const QString &name, const Property &value)
 
     \throw SireBase::missing_property
 */
-const Property& QMPotential::property(const QString &name) const
+const Property &QMPotential::property(const QString &name) const
 {
     return props.property(name);
 }
@@ -554,19 +538,18 @@ bool QMPotential::containsProperty(const QString &name) const
 }
 
 /** Return all of the properties of this potential */
-const Properties& QMPotential::properties() const
+const Properties &QMPotential::properties() const
 {
     return props;
 }
 
 /** Map the molecules in 'molecules' into the space for this potential */
-QMPotential::Molecules
-QMPotential::mapIntoSpace(const QMPotential::Molecules &mols) const
+QMPotential::Molecules QMPotential::mapIntoSpace(const QMPotential::Molecules &mols) const
 {
 #ifdef _MSC_VER
-    #pragma WARNING(Need to write QMPotential::mapIntoSpace())
+#pragma WARNING(Need to write QMPotential::mapIntoSpace())
 #else
-    #warning Need to write QMPotential::mapIntoSpace()
+#warning Need to write QMPotential::mapIntoSpace()
 #endif
     return mols;
 }
@@ -574,14 +557,13 @@ QMPotential::mapIntoSpace(const QMPotential::Molecules &mols) const
 /** Calculate the QM forces on the molecules in 'molecules' and add them
     onto the forces in the passed force table (scaled by the optional
     scaling constant 'scale_force') */
-void QMPotential::calculateForce(const QMPotential::Molecules &molecules,
-                                 ForceTable &forcetable,
+void QMPotential::calculateForce(const QMPotential::Molecules &molecules, ForceTable &forcetable,
                                  double scale_force) const
 {
     if (scale_force == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMPotential::Molecules mapped_qmmols = QMPotential::mapIntoSpace(molecules);
 
     quantumProgram().calculateForce(mapped_qmmols, forcetable, scale_force);
@@ -590,112 +572,100 @@ void QMPotential::calculateForce(const QMPotential::Molecules &molecules,
 /** Calculate the QM forces on the molecules in 'molecules' and add them
     onto the forces in the passed force table (scaled by the optional
     scaling constant 'scale_force') */
-void QMPotential::calculateForce(const QMPotential::Molecules &molecules,
-                                 ForceTable &forcetable,
-                                 const Symbol &symbol,
-                                 const QMPotential::Components &components,
-                                 double scale_force) const
+void QMPotential::calculateForce(const QMPotential::Molecules &molecules, ForceTable &forcetable, const Symbol &symbol,
+                                 const QMPotential::Components &components, double scale_force) const
 {
     if (symbol == components.total())
         this->calculateForce(molecules, forcetable, scale_force);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no force component in potential %1 - available "
-            "components are %2.")
-                .arg(this->what())
-                .arg(components.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no force component in potential %1 - available "
+                                                    "components are %2.")
+                                            .arg(this->what())
+                                            .arg(components.total().toString()),
+                                        CODELOC);
 }
 
 /** Calculate the QM energy of the collection of molecules in 'molecules'
     and add it onto 'nrg' (scaled by the optional scaling constant 'scale_energy') */
-void QMPotential::calculateEnergy(const QMPotential::Molecules &molecules,
-                                  QMPotential::Energy &nrg, double scale_energy) const
+void QMPotential::calculateEnergy(const QMPotential::Molecules &molecules, QMPotential::Energy &nrg,
+                                  double scale_energy) const
 {
     if (scale_energy == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     Molecules mapped_mols = this->mapIntoSpace(molecules);
 
-    //now tell the qm_program to calculate the energy that we need
+    // now tell the qm_program to calculate the energy that we need
     double qmnrg = qmprog->calculateEnergy(mapped_mols);
 
-    nrg += Energy( scale_energy * (qmnrg - zero_energy) );
+    nrg += Energy(scale_energy * (qmnrg - zero_energy));
 }
 
 /** Calculate the fields on the atoms */
-void QMPotential::calculateField(const QMPotential::Molecules &molecules,
-                                 FieldTable &fieldtable, const SireFF::Probe &probe,
-                                 double scale_field) const
+void QMPotential::calculateField(const QMPotential::Molecules &molecules, FieldTable &fieldtable,
+                                 const SireFF::Probe &probe, double scale_field) const
 {
     if (scale_field == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMPotential::Molecules mapped_qmmols = QMPotential::mapIntoSpace(molecules);
 
     quantumProgram().calculateField(mapped_qmmols, fieldtable, probe, scale_field);
 }
 
 /** Calculate the fields on the atoms */
-void QMPotential::calculateField(const QMPotential::Molecules &molecules,
-                                 FieldTable &fieldtable, const SireFF::Probe &probe,
-                                 const Symbol &symbol,
-                                 const QMPotential::Components &components,
-                                 double scale_field) const
+void QMPotential::calculateField(const QMPotential::Molecules &molecules, FieldTable &fieldtable,
+                                 const SireFF::Probe &probe, const Symbol &symbol,
+                                 const QMPotential::Components &components, double scale_field) const
 {
     if (symbol == components.total())
         this->calculateField(molecules, fieldtable, probe, scale_field);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no field component in potential %1 - available "
-            "components are %2.")
-                .arg(this->what())
-                .arg(components.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no field component in potential %1 - available "
+                                                    "components are %2.")
+                                            .arg(this->what())
+                                            .arg(components.total().toString()),
+                                        CODELOC);
 }
 
 /** Calculate the potentials on the atoms */
-void QMPotential::calculatePotential(const QMPotential::Molecules &molecules,
-                                     PotentialTable &pottable,
-                                     const SireFF::Probe &probe,
-                                     double scale_potential) const
+void QMPotential::calculatePotential(const QMPotential::Molecules &molecules, PotentialTable &pottable,
+                                     const SireFF::Probe &probe, double scale_potential) const
 {
     if (scale_potential == 0)
         return;
 
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     QMPotential::Molecules mapped_qmmols = QMPotential::mapIntoSpace(molecules);
 
     quantumProgram().calculatePotential(mapped_qmmols, pottable, probe, scale_potential);
 }
 
 /** Calculate the potentials on the atoms */
-void QMPotential::calculatePotential(const QMPotential::Molecules &molecules,
-                                     PotentialTable &pottable,
-                                     const SireFF::Probe &probe,
-                                     const Symbol &symbol,
-                                     const QMPotential::Components &components,
-                                     double scale_potential) const
+void QMPotential::calculatePotential(const QMPotential::Molecules &molecules, PotentialTable &pottable,
+                                     const SireFF::Probe &probe, const Symbol &symbol,
+                                     const QMPotential::Components &components, double scale_potential) const
 {
     if (symbol == components.total())
         this->calculatePotential(molecules, pottable, probe, scale_potential);
 
     else
-        throw SireFF::missing_component( QObject::tr(
-            "There is no potential component in potential %1 - available "
-            "components are %2.")
-                .arg(this->what())
-                .arg(components.total().toString()), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no potential component in potential %1 - available "
+                                                    "components are %2.")
+                                            .arg(this->what())
+                                            .arg(components.total().toString()),
+                                        CODELOC);
 }
 
 /** Return the command file that would be used to calculate the forces on
     the molecules in 'molecules' */
-QString QMPotential::forceCommandFile(const QMPotential::Molecules &molecules,
-                                      const ForceTable &forcetable) const
+QString QMPotential::forceCommandFile(const QMPotential::Molecules &molecules, const ForceTable &forcetable) const
 {
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     Molecules mapped_mols = this->mapIntoSpace(molecules);
 
     return qmprog->forceCommandFile(mapped_mols, forcetable);
@@ -705,7 +675,7 @@ QString QMPotential::forceCommandFile(const QMPotential::Molecules &molecules,
     the molecules in 'molecules' */
 QString QMPotential::energyCommandFile(const QMPotential::Molecules &molecules) const
 {
-    //map all of the molecules so that they are in this space
+    // map all of the molecules so that they are in this space
     Molecules mapped_mols = this->mapIntoSpace(molecules);
 
     return qmprog->energyCommandFile(mapped_mols);
@@ -713,8 +683,7 @@ QString QMPotential::energyCommandFile(const QMPotential::Molecules &molecules) 
 
 /** Return the command file that would be used to calculate the field
     for the passed molecules, if they are in the passed fieldtable */
-QString QMPotential::fieldCommandFile(const Molecules &molecules,
-                                      const FieldTable &fieldtable,
+QString QMPotential::fieldCommandFile(const Molecules &molecules, const FieldTable &fieldtable,
                                       const SireFF::Probe &probe) const
 {
     Molecules mapped_mols = this->mapIntoSpace(molecules);
@@ -724,8 +693,7 @@ QString QMPotential::fieldCommandFile(const Molecules &molecules,
 
 /** Return the command file that would be used to calculate the potential
     for the passed molecules, if they are in the passed potential table */
-QString QMPotential::potentialCommandFile(const Molecules &molecules,
-                                          const PotentialTable &pottable,
+QString QMPotential::potentialCommandFile(const Molecules &molecules, const PotentialTable &pottable,
                                           const SireFF::Probe &probe) const
 {
     Molecules mapped_mols = this->mapIntoSpace(molecules);

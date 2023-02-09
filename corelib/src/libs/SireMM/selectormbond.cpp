@@ -31,9 +31,9 @@
 
 #include "SireCAS/expression.h"
 
-#include "SireMol/errors.h"
-#include "SireError/errors.h"
 #include "SireBase/errors.h"
+#include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -53,7 +53,7 @@ SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorMBond &bnds
 
     SharedDataStream sds(ds);
 
-    sds << bnds.bnds << static_cast<const Property&>(bnds);
+    sds << bnds.bnds << static_cast<const Property &>(bnds);
 
     return ds;
 }
@@ -66,7 +66,7 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorMBond &bnds)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> bnds.bnds >> static_cast<Property&>(bnds);
+        sds >> bnds.bnds >> static_cast<Property &>(bnds);
     }
     else
         throw version_error(v, "1", r_sbnd, CODELOC);
@@ -74,33 +74,29 @@ SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, SelectorMBond &bnds)
     return ds;
 }
 
-SelectorMBond::SelectorMBond()
-              : ConcreteProperty<SelectorMBond, Property>()
-{}
+SelectorMBond::SelectorMBond() : ConcreteProperty<SelectorMBond, Property>()
+{
+}
 
-SelectorMBond::SelectorMBond(const Bond &view)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const Bond &view) : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not view.isEmpty())
         bnds.append(SelectorBond(view));
 }
 
-SelectorMBond::SelectorMBond(const Molecules &mols,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const Molecules &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not mols.isEmpty())
     {
         auto toList = [](const QSet<MolNum> &molnums)
-        {
-            return molnums.values();
-        };
+        { return molnums.values(); };
 
         auto molnums = toList(mols.molNums());
 
-        //sort them, as this is also likely the order the molecules
-        //were read in from a file, and so more likely to be the
-        //order the user would expect
+        // sort them, as this is also likely the order the molecules
+        // were read in from a file, and so more likely to be the
+        // order the user would expect
         std::sort(molnums.begin(), molnums.end());
 
         this->bnds.reserve(molnums.count());
@@ -115,9 +111,8 @@ SelectorMBond::SelectorMBond(const Molecules &mols,
     }
 }
 
-SelectorMBond::SelectorMBond(const MoleculeGroup &mols,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const MoleculeGroup &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -134,9 +129,8 @@ SelectorMBond::SelectorMBond(const MoleculeGroup &mols,
     }
 }
 
-SelectorMBond::SelectorMBond(const MolGroupsBase &mols,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const MolGroupsBase &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -153,9 +147,8 @@ SelectorMBond::SelectorMBond(const MolGroupsBase &mols,
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectResult &mols,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const SelectResult &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -176,9 +169,8 @@ SelectorMBond::SelectorMBond(const SelectResult &mols,
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectResult &mols, const BondID &bond,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const SelectResult &mols, const BondID &bond, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -193,15 +185,15 @@ SelectorMBond::SelectorMBond(const SelectResult &mols, const BondID &bond,
                 if (not b.isEmpty())
                     this->bnds.append(b);
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
         }
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectorM<Atom> &atoms,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const SelectorM<Atom> &atoms, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     for (const auto &mol_atoms : atoms)
     {
@@ -210,10 +202,8 @@ SelectorMBond::SelectorMBond(const SelectorM<Atom> &atoms,
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectorM<Atom> &atoms0,
-                             const SelectorM<Atom> &atoms1,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const SelectorM<Atom> &atoms0, const SelectorM<Atom> &atoms1, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     for (const auto &mol_atoms0 : atoms0)
     {
@@ -228,16 +218,14 @@ SelectorMBond::SelectorMBond(const SelectorM<Atom> &atoms0,
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectorBond &bonds)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const SelectorBond &bonds) : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not bonds.isEmpty())
         bnds.append(bonds);
 }
 
-SelectorMBond::SelectorMBond(const SelectorMol &mols,
-                             const PropertyMap &map)
-              : ConcreteProperty<SelectorMBond, Property>()
+SelectorMBond::SelectorMBond(const SelectorMol &mols, const PropertyMap &map)
+    : ConcreteProperty<SelectorMBond, Property>()
 {
     if (not mols.isEmpty())
     {
@@ -262,7 +250,7 @@ void SelectorMBond::_append(const SelectorBond &bonds)
         this->bnds.append(bonds);
     else
     {
-        for (int i=0; i<bonds.count(); ++i)
+        for (int i = 0; i < bonds.count(); ++i)
         {
             this->_append(bonds(i));
         }
@@ -287,20 +275,17 @@ void SelectorMBond::_append(const Bond &bond)
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectorMBond &bonds,
-                             const SireBase::Slice &slice)
-              : SireBase::ConcreteProperty<SelectorMBond,Property>()
+SelectorMBond::SelectorMBond(const SelectorMBond &bonds, const SireBase::Slice &slice)
+    : SireBase::ConcreteProperty<SelectorMBond, Property>()
 {
-    for (auto it = slice.begin(bonds.count());
-         not it.atEnd(); it.next())
+    for (auto it = slice.begin(bonds.count()); not it.atEnd(); it.next())
     {
         this->_append(bonds[it.value()]);
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectorMBond &bonds,
-                             const QList<qint64> &idxs)
-              : SireBase::ConcreteProperty<SelectorMBond,Property>()
+SelectorMBond::SelectorMBond(const SelectorMBond &bonds, const QList<qint64> &idxs)
+    : SireBase::ConcreteProperty<SelectorMBond, Property>()
 {
     for (const auto &idx : idxs)
     {
@@ -308,19 +293,20 @@ SelectorMBond::SelectorMBond(const SelectorMBond &bonds,
     }
 }
 
-SelectorMBond::SelectorMBond(const SelectorMBond &other)
-              : ConcreteProperty<SelectorMBond, Property>(), bnds(other.bnds)
-{}
+SelectorMBond::SelectorMBond(const SelectorMBond &other) : ConcreteProperty<SelectorMBond, Property>(), bnds(other.bnds)
+{
+}
 
 SelectorMBond::~SelectorMBond()
-{}
+{
+}
 
-const char* SelectorMBond::typeName()
+const char *SelectorMBond::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<SelectorMBond>());
 }
 
-SelectorMBond& SelectorMBond::operator=(const SelectorMBond &other)
+SelectorMBond &SelectorMBond::operator=(const SelectorMBond &other)
 {
     if (this != &other)
     {
@@ -387,8 +373,9 @@ SelectorMBond SelectorMBond::operator[](const BondID &id) const
                 ret.bnds.append(r);
             }
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     return ret;
@@ -491,7 +478,6 @@ MoleculeGroup SelectorMBond::toMoleculeGroup() const
     }
 
     return grp;
-
 }
 
 bool SelectorMBond::isSelector() const
@@ -640,7 +626,7 @@ CutGroup SelectorMBond::cutGroup(const CGID &cgid, const PropertyMap &map) const
 
 SelectorM<Atom> SelectorMBond::atoms() const
 {
-    QList< Selector<Atom> > ret;
+    QList<Selector<Atom>> ret;
 
     for (const auto &b : this->bnds)
     {
@@ -677,7 +663,7 @@ SelectorM<Atom> SelectorMBond::atoms(const AtomID &atomid, const PropertyMap &ma
 
 SelectorM<Residue> SelectorMBond::residues() const
 {
-    QList< Selector<Residue> > ret;
+    QList<Selector<Residue>> ret;
 
     for (const auto &b : this->bnds)
     {
@@ -714,7 +700,7 @@ SelectorM<Residue> SelectorMBond::residues(const ResID &resid, const PropertyMap
 
 SelectorM<Chain> SelectorMBond::chains() const
 {
-    QList< Selector<Chain> > ret;
+    QList<Selector<Chain>> ret;
 
     for (const auto &b : this->bnds)
     {
@@ -751,7 +737,7 @@ SelectorM<Chain> SelectorMBond::chains(const ChainID &chainid, const PropertyMap
 
 SelectorM<Segment> SelectorMBond::segments() const
 {
-    QList< Selector<Segment> > ret;
+    QList<Selector<Segment>> ret;
 
     for (const auto &b : this->bnds)
     {
@@ -788,7 +774,7 @@ SelectorM<Segment> SelectorMBond::segments(const SegID &segid, const PropertyMap
 
 SelectorM<CutGroup> SelectorMBond::cutGroups() const
 {
-    QList< Selector<CutGroup> > ret;
+    QList<Selector<CutGroup>> ret;
 
     for (const auto &b : this->bnds)
     {
@@ -829,8 +815,7 @@ SelectResult SelectorMBond::search(const QString &search_string) const
     return search(this->toSelectResult());
 }
 
-SelectResult SelectorMBond::search(const QString &search_string,
-                                   const PropertyMap &map) const
+SelectResult SelectorMBond::search(const QString &search_string, const PropertyMap &map) const
 {
     Select search(search_string);
     return search(this->toSelectResult(), map);
@@ -1002,41 +987,33 @@ QString SelectorMBond::toString() const
 
         if (n <= 10)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
         }
         else
         {
-            for (int i=0; i<5; ++i)
+            for (int i = 0; i < 5; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
 
             parts.append("...");
 
-            for (int i=n-5; i<n; ++i)
+            for (int i = n - 5; i < n; ++i)
             {
                 const auto view = this->operator[](i);
 
-                parts.append(QString("%1: %2 %3")
-                    .arg(i).arg(view.data().number().toString())
-                    .arg(view.toString()));
+                parts.append(QString("%1: %2 %3").arg(i).arg(view.data().number().toString()).arg(view.toString()));
             }
         }
 
-        return QObject::tr("SelectorMBond( size=%2\n%3\n)")
-                    .arg(n)
-                    .arg(parts.join("\n"));
+        return QObject::tr("SelectorMBond( size=%2\n%3\n)").arg(n).arg(parts.join("\n"));
     }
 }
 
@@ -1052,7 +1029,7 @@ SelectorMBond SelectorMBond::add(const SelectorMBond &other) const
         }
         else if (ret.bnds.last().isSameMolecule(value))
         {
-            for (int i=0; i<value.count(); ++i)
+            for (int i = 0; i < value.count(); ++i)
             {
                 ret._append(value(i));
             }
@@ -1133,8 +1110,7 @@ bool SelectorMBond::hasMetadata(const SireBase::PropertyName &key) const
     return false;
 }
 
-bool SelectorMBond::hasMetadata(const SireBase::PropertyName &key,
-                                const SireBase::PropertyName &metakey) const
+bool SelectorMBond::hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const
 {
     for (const auto &val : bnds)
     {
@@ -1145,14 +1121,14 @@ bool SelectorMBond::hasMetadata(const SireBase::PropertyName &key,
     return false;
 }
 
-template<class T>
+template <class T>
 inline QSet<T> _to_set(const QList<T> &l)
 {
-    #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-        return l.toSet();
-    #else
-        return QSet<T>(l.constBegin(), l.constEnd());
-    #endif
+#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
+    return l.toSet();
+#else
+    return QSet<T>(l.constBegin(), l.constEnd());
+#endif
 }
 
 QStringList SelectorMBond::propertyKeys() const
@@ -1216,11 +1192,11 @@ QList<SireBase::PropertyPtr> SelectorMBond::property(const SireBase::PropertyNam
             props += val.property(key);
             has_prop = true;
         }
-        catch(const SireError::exception&)
+        catch (const SireError::exception &)
         {
             PropertyPtr null(new NullProperty());
 
-            for (int i=0; i<val.count(); ++i)
+            for (int i = 0; i < val.count(); ++i)
             {
                 props.append(null);
             }
@@ -1228,9 +1204,8 @@ QList<SireBase::PropertyPtr> SelectorMBond::property(const SireBase::PropertyNam
     }
 
     if (not has_prop)
-        throw SireBase::missing_property(QObject::tr(
-            "None of the bonds in this container have a property called %1.")
-                .arg(key.source()), CODELOC);
+        throw SireBase::missing_property(
+            QObject::tr("None of the bonds in this container have a property called %1.").arg(key.source()), CODELOC);
 
     return props;
 }
@@ -1297,8 +1272,7 @@ QList<SireUnits::Dimension::GeneralUnit> SelectorMBond::energies() const
     return this->energies(PropertyMap());
 }
 
-QList<SireUnits::Dimension::GeneralUnit> SelectorMBond::energies(
-                                    const SireBase::PropertyMap &map) const
+QList<SireUnits::Dimension::GeneralUnit> SelectorMBond::energies(const SireBase::PropertyMap &map) const
 {
     QList<SireUnits::Dimension::GeneralUnit> e;
 
@@ -1315,8 +1289,7 @@ SireUnits::Dimension::GeneralUnit SelectorMBond::energy() const
     return this->energy(PropertyMap());
 }
 
-SireUnits::Dimension::GeneralUnit SelectorMBond::energy(
-                                const SireBase::PropertyMap &map) const
+SireUnits::Dimension::GeneralUnit SelectorMBond::energy(const SireBase::PropertyMap &map) const
 {
     SireUnits::Dimension::GeneralUnit nrg(0);
 

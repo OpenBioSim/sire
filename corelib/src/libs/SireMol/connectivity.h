@@ -29,556 +29,495 @@
 #define SIREMOL_CONNECTIVITY_H
 
 #include <QHash>
-#include <QVector>
 #include <QSet>
+#include <QVector>
 
 #include <boost/tuple/tuple.hpp>
 
 #include "bondhunter.h"
-#include "molviewproperty.h"
 #include "moleculeinfo.h"
+#include "molviewproperty.h"
 
-#include "SireBase/property.h"
 #include "SireBase/properties.h"
+#include "SireBase/property.h"
 #include "SireBase/shareddatapointer.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ConnectivityBase;
-class Connectivity;
-class ConnectivityEditor;
-class MoleculeInfo;
-}
+    class ConnectivityBase;
+    class Connectivity;
+    class ConnectivityEditor;
+    class MoleculeInfo;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ConnectivityBase&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ConnectivityBase&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ConnectivityBase &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ConnectivityBase &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Connectivity&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Connectivity&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Connectivity &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Connectivity &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ConnectivityEditor&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ConnectivityEditor&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ConnectivityEditor &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ConnectivityEditor &);
 
 namespace SireMol
 {
 
-using boost::tuple;
+    using boost::tuple;
 
-class AtomIdx;
-class ResIdx;
+    class AtomIdx;
+    class ResIdx;
 
-class AtomSelection;
+    class AtomSelection;
 
-class AtomID;
-class ResID;
+    class AtomID;
+    class ResID;
 
-class BondID;
-class AngleID;
-class DihedralID;
-class ImproperID;
+    class BondID;
+    class AngleID;
+    class DihedralID;
+    class ImproperID;
 
-class MoleculeData;
-class MoleculeInfoData;
+    class MoleculeData;
+    class MoleculeInfoData;
 
-class ConnectivityEditor;
+    class ConnectivityEditor;
 
-namespace detail
-{
-
-class IDPair
-{
-public:
-    IDPair(quint32 atom0=0, quint32 atom1=0);
-    IDPair(const IDPair &other);
-
-    ~IDPair();
-
-    IDPair& operator=(const IDPair &other);
-
-    bool operator==(const IDPair &other) const;
-    bool operator!=(const IDPair &other) const;
-
-    bool operator<(const IDPair &other) const;
-    bool operator<=(const IDPair &other) const;
-
-    bool operator>(const IDPair &other) const;
-    bool operator>=(const IDPair &other) const;
-
-    quint32 atom0;
-    quint32 atom1;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const IDPair &idpair)
-{
-    return (idpair.atom0 << 16) | (idpair.atom1 & 0x0000FFFF);
-}
-
-} // end of namespace detail
-
-/** The base class of Connectivity and ConnectivityEditor
-
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ConnectivityBase : public MolViewProperty
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SireMol::ConnectivityBase&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::ConnectivityBase&);
-
-public:
-    ~ConnectivityBase();
-
-    static const char* typeName()
+    namespace detail
     {
-        return "SireMol::ConnectivityBase";
-    }
 
-    QString toString() const;
-    QString toCONECT(int offset=0) const;
+        class IDPair
+        {
+        public:
+            IDPair(quint32 atom0 = 0, quint32 atom1 = 0);
+            IDPair(const IDPair &other);
 
-    MoleculeInfo info() const;
+            ~IDPair();
 
-    bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+            IDPair &operator=(const IDPair &other);
 
-    bool areConnected(AtomIdx atom0, AtomIdx atom1) const;
-    bool areConnected(const AtomID &atom0, const AtomID &atom1) const;
+            bool operator==(const IDPair &other) const;
+            bool operator!=(const IDPair &other) const;
 
-    bool areConnected(ResIdx res0, ResIdx res1) const;
-    bool areConnected(const ResID &res0, const ResID &res1) const;
+            bool operator<(const IDPair &other) const;
+            bool operator<=(const IDPair &other) const;
 
-    bool areConnected(CGIdx cg0, CGIdx cg1) const;
-    bool areConnected(const CGID &cg0, const CGID &cg1) const;
+            bool operator>(const IDPair &other) const;
+            bool operator>=(const IDPair &other) const;
 
-    bool areBonded(AtomIdx atom0, AtomIdx atom1) const;
-    bool areAngled(AtomIdx atom0, AtomIdx atom2) const;
-    bool areDihedraled(AtomIdx atom0, AtomIdx atom3) const;
+            quint32 atom0;
+            quint32 atom1;
+        };
 
-    bool areBonded(const AtomID &atom0, const AtomID &atom1) const;
-    bool areAngled(const AtomID &atom0, const AtomID &atom2) const;
-    bool areDihedraled(const AtomID &atom0, const AtomID &atom3) const;
+        SIRE_ALWAYS_INLINE uint qHash(const IDPair &idpair)
+        {
+            return (idpair.atom0 << 16) | (idpair.atom1 & 0x0000FFFF);
+        }
 
-    int connectionType(AtomIdx atom0, AtomIdx atom1) const;
-    int connectionType(const AtomID &atom0, const AtomID &atom1) const;
+    } // end of namespace detail
 
-    QList<AtomIdx> findPath(AtomIdx atom0, AtomIdx atom1) const;
-    QList<AtomIdx> findPath(AtomIdx atom0, AtomIdx atom1, int max_length) const;
-    QList< QList<AtomIdx> > findPaths(AtomIdx atom0, AtomIdx atom1) const;
-    QList< QList<AtomIdx> > findPaths(AtomIdx atom0, AtomIdx atom1, int max_length) const;
+    /** The base class of Connectivity and ConnectivityEditor
 
-    QList<AtomIdx> findPath(const AtomID &atom0, const AtomID &atom1) const;
-    QList<AtomIdx> findPath(const AtomID &atom0, const AtomID &atom1, int max_length) const;
-    QList< QList<AtomIdx> > findPaths(const AtomID &atom0, const AtomID &atom1) const;
-    QList< QList<AtomIdx> > findPaths(const AtomID &atom0, const AtomID &atom1, int max_length) const;
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ConnectivityBase : public MolViewProperty
+    {
 
-    bool inRing(AtomIdx atom) const;
-    bool inRing(AtomIdx atom0, AtomIdx atom1) const;
-    bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const;
-    bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMol::ConnectivityBase &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SireMol::ConnectivityBase &);
 
-    bool inRing(const AtomID &atom) const;
-    bool inRing(const AtomID &atom0, const AtomID &atom1) const;
-    bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
-    bool inRing(const AtomID &atom0, const AtomID &atom1,
-                const AtomID &atom2, const AtomID &atom3) const;
+    public:
+        ~ConnectivityBase();
 
-    bool inRing(const BondID &bond) const;
-    bool inRing(const AngleID &angle) const;
-    bool inRing(const DihedralID &dihedral) const;
+        static const char *typeName()
+        {
+            return "SireMol::ConnectivityBase";
+        }
 
-    int nConnections() const;
-    int nConnections(AtomIdx atomidx) const;
-    int nConnections(const AtomID &atomid) const;
+        QString toString() const;
+        QString toCONECT(int offset = 0) const;
 
-    int nConnections(ResIdx residx) const;
-    int nConnections(const ResID &resid) const;
+        MoleculeInfo info() const;
 
-    int nConnections(ResIdx res0, ResIdx res1) const;
-    int nConnections(const ResID &res0, const ResID &res1) const;
+        bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 
-    const QSet<AtomIdx>& connectionsTo(AtomIdx atomidx) const;
-    const QSet<AtomIdx>& connectionsTo(const AtomID &atomid) const;
+        bool areConnected(AtomIdx atom0, AtomIdx atom1) const;
+        bool areConnected(const AtomID &atom0, const AtomID &atom1) const;
 
-    const QSet<ResIdx>& connectionsTo(ResIdx residx) const;
-    const QSet<ResIdx>& connectionsTo(const ResID &resid) const;
+        bool areConnected(ResIdx res0, ResIdx res1) const;
+        bool areConnected(const ResID &res0, const ResID &res1) const;
 
-    tuple<AtomSelection,AtomSelection> split(AtomIdx atom0, AtomIdx atom1) const;
-    tuple<AtomSelection,AtomSelection> split(const AtomID &atom0,
-                                             const AtomID &atom1) const;
+        bool areConnected(CGIdx cg0, CGIdx cg1) const;
+        bool areConnected(const CGID &cg0, const CGID &cg1) const;
 
-    tuple<AtomSelection,AtomSelection> split(const BondID &bond) const;
+        bool areBonded(AtomIdx atom0, AtomIdx atom1) const;
+        bool areAngled(AtomIdx atom0, AtomIdx atom2) const;
+        bool areDihedraled(AtomIdx atom0, AtomIdx atom3) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(AtomIdx atom0, AtomIdx atom1, const AtomSelection &selected_atoms) const;
+        bool areBonded(const AtomID &atom0, const AtomID &atom1) const;
+        bool areAngled(const AtomID &atom0, const AtomID &atom2) const;
+        bool areDihedraled(const AtomID &atom0, const AtomID &atom3) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const AtomID &atom0, const AtomID &atom1,
-          const AtomSelection &selected_atoms) const;
+        int connectionType(AtomIdx atom0, AtomIdx atom1) const;
+        int connectionType(const AtomID &atom0, const AtomID &atom1) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const BondID &bond, const AtomSelection &selected_atoms) const;
+        QList<AtomIdx> findPath(AtomIdx atom0, AtomIdx atom1) const;
+        QList<AtomIdx> findPath(AtomIdx atom0, AtomIdx atom1, int max_length) const;
+        QList<QList<AtomIdx>> findPaths(AtomIdx atom0, AtomIdx atom1) const;
+        QList<QList<AtomIdx>> findPaths(AtomIdx atom0, AtomIdx atom1, int max_length) const;
 
-    tuple<AtomSelection,AtomSelection> split(AtomIdx atom0, AtomIdx atom1,
-                                             AtomIdx atom2) const;
-    tuple<AtomSelection,AtomSelection> split(const AtomID &atom0,
-                                             const AtomID &atom1,
-                                             const AtomID &atom2) const;
+        QList<AtomIdx> findPath(const AtomID &atom0, const AtomID &atom1) const;
+        QList<AtomIdx> findPath(const AtomID &atom0, const AtomID &atom1, int max_length) const;
+        QList<QList<AtomIdx>> findPaths(const AtomID &atom0, const AtomID &atom1) const;
+        QList<QList<AtomIdx>> findPaths(const AtomID &atom0, const AtomID &atom1, int max_length) const;
 
-    tuple<AtomSelection,AtomSelection> split(const AngleID &angle) const;
+        bool inRing(AtomIdx atom) const;
+        bool inRing(AtomIdx atom0, AtomIdx atom1) const;
+        bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const;
+        bool inRing(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2,
-          const AtomSelection &selected_atoms) const;
+        bool inRing(const AtomID &atom) const;
+        bool inRing(const AtomID &atom0, const AtomID &atom1) const;
+        bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
+        bool inRing(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
-          const AtomSelection &selected_atoms) const;
+        bool inRing(const BondID &bond) const;
+        bool inRing(const AngleID &angle) const;
+        bool inRing(const DihedralID &dihedral) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const AngleID &angle, const AtomSelection &selected_atoms) const;
+        int nConnections() const;
+        int nConnections(AtomIdx atomidx) const;
+        int nConnections(const AtomID &atomid) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const;
+        int nConnections(ResIdx residx) const;
+        int nConnections(const ResID &resid) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const AtomID &atom0, const AtomID &atom1,
-          const AtomID &atom2, const AtomID &atom3) const;
+        int nConnections(ResIdx res0, ResIdx res1) const;
+        int nConnections(const ResID &res0, const ResID &res1) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const DihedralID &dihedral) const;
+        const QSet<AtomIdx> &connectionsTo(AtomIdx atomidx) const;
+        const QSet<AtomIdx> &connectionsTo(const AtomID &atomid) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3,
-          const AtomSelection &selected_atoms) const;
+        const QSet<ResIdx> &connectionsTo(ResIdx residx) const;
+        const QSet<ResIdx> &connectionsTo(const ResID &resid) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const AtomID &atom0, const AtomID &atom1,
-          const AtomID &atom2, const AtomID &atom3,
-          const AtomSelection &selected_atoms) const;
+        tuple<AtomSelection, AtomSelection> split(AtomIdx atom0, AtomIdx atom1) const;
+        tuple<AtomSelection, AtomSelection> split(const AtomID &atom0, const AtomID &atom1) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const DihedralID &dihedral,
-          const AtomSelection &selected_atoms) const;
+        tuple<AtomSelection, AtomSelection> split(const BondID &bond) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const ImproperID &improper) const;
+        tuple<AtomSelection, AtomSelection> split(AtomIdx atom0, AtomIdx atom1, const AtomSelection &selected_atoms) const;
 
-    tuple<AtomSelection,AtomSelection>
-    split(const ImproperID &improper,
-          const AtomSelection &selected_atoms) const;
+        tuple<AtomSelection, AtomSelection> split(const AtomID &atom0, const AtomID &atom1,
+                                                  const AtomSelection &selected_atoms) const;
 
-    QList<BondID> getBonds() const;
-    QList<BondID> getBonds(const AtomID &atom) const;
-    QList<AngleID> getAngles() const;
-    QList<AngleID> getAngles(const AtomID &atom0) const;
-    QList<AngleID> getAngles(const AtomID &atom0, const AtomID &atom1) const;
-    QList<DihedralID> getDihedrals() const;
-    QList<DihedralID> getDihedrals(const AtomID &atom0) const;
-    QList<DihedralID> getDihedrals(const AtomID &atom0, const AtomID &atom1) const;
-    QList<DihedralID> getDihedrals(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
+        tuple<AtomSelection, AtomSelection> split(const BondID &bond, const AtomSelection &selected_atoms) const;
 
-    QVector< QVector<bool> > getBondMatrix(int order) const;
-    QVector< QVector<bool> > getBondMatrix(int start, int end) const;
+        tuple<AtomSelection, AtomSelection> split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const;
+        tuple<AtomSelection, AtomSelection> split(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
 
-    QStringList propertyKeys() const;
+        tuple<AtomSelection, AtomSelection> split(const AngleID &angle) const;
 
-    bool hasProperty(const BondID &bond,
-                     const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2,
+                                                  const AtomSelection &selected_atoms) const;
 
-    template<class T>
-    bool hasPropertyOfType(const BondID &bond,
-                           const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                                                  const AtomSelection &selected_atoms) const;
 
-    const char* propertyType(const BondID &bond,
-                             const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(const AngleID &angle, const AtomSelection &selected_atoms) const;
 
-    SireBase::Properties properties(const BondID &bond) const;
+        tuple<AtomSelection, AtomSelection> split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const;
 
-    QStringList propertyKeys(const BondID &bond) const;
+        tuple<AtomSelection, AtomSelection> split(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                                                  const AtomID &atom3) const;
 
-    const Property& property(const BondID &bond,
-                             const SireBase::PropertyName &key) const;
-    const Property& property(const BondID &bond,
-                             const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        tuple<AtomSelection, AtomSelection> split(const DihedralID &dihedral) const;
 
-    void assertHasProperty(const BondID &bond,
-                           const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3,
+                                                  const AtomSelection &selected_atoms) const;
 
-    bool hasProperty(const AngleID &ang,
-                     const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                                                  const AtomID &atom3, const AtomSelection &selected_atoms) const;
 
-    template<class T>
-    bool hasPropertyOfType(const AngleID &ang,
-                           const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(const DihedralID &dihedral, const AtomSelection &selected_atoms) const;
 
-    const char* propertyType(const AngleID &ang,
-                             const SireBase::PropertyName &key) const;
+        tuple<AtomSelection, AtomSelection> split(const ImproperID &improper) const;
 
-    SireBase::Properties properties(const AngleID &ang) const;
+        tuple<AtomSelection, AtomSelection> split(const ImproperID &improper, const AtomSelection &selected_atoms) const;
 
-    QStringList propertyKeys(const AngleID &ang) const;
+        QList<BondID> getBonds() const;
+        QList<BondID> getBonds(const AtomID &atom) const;
+        QList<AngleID> getAngles() const;
+        QList<AngleID> getAngles(const AtomID &atom0) const;
+        QList<AngleID> getAngles(const AtomID &atom0, const AtomID &atom1) const;
+        QList<DihedralID> getDihedrals() const;
+        QList<DihedralID> getDihedrals(const AtomID &atom0) const;
+        QList<DihedralID> getDihedrals(const AtomID &atom0, const AtomID &atom1) const;
+        QList<DihedralID> getDihedrals(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
 
-    const Property& property(const AngleID &ang,
-                             const SireBase::PropertyName &key) const;
-    const Property& property(const AngleID &ang,
-                             const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        QVector<QVector<bool>> getBondMatrix(int order) const;
+        QVector<QVector<bool>> getBondMatrix(int start, int end) const;
 
-    void assertHasProperty(const AngleID &ang,
-                           const SireBase::PropertyName &key) const;
+        QStringList propertyKeys() const;
 
-    bool hasProperty(const DihedralID &dih,
-                     const SireBase::PropertyName &key) const;
+        bool hasProperty(const BondID &bond, const SireBase::PropertyName &key) const;
 
-    template<class T>
-    bool hasPropertyOfType(const DihedralID &dih,
-                           const SireBase::PropertyName &key) const;
+        template <class T>
+        bool hasPropertyOfType(const BondID &bond, const SireBase::PropertyName &key) const;
 
-    const char* propertyType(const DihedralID &dih,
-                             const SireBase::PropertyName &key) const;
+        const char *propertyType(const BondID &bond, const SireBase::PropertyName &key) const;
 
-    SireBase::Properties properties(const DihedralID &dih) const;
+        SireBase::Properties properties(const BondID &bond) const;
 
-    QStringList propertyKeys(const DihedralID &dih) const;
+        QStringList propertyKeys(const BondID &bond) const;
 
-    const Property& property(const DihedralID &dih,
-                             const SireBase::PropertyName &key) const;
-    const Property& property(const DihedralID &dih,
-                             const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        const Property &property(const BondID &bond, const SireBase::PropertyName &key) const;
+        const Property &property(const BondID &bond, const SireBase::PropertyName &key,
+                                 const Property &default_value) const;
 
-    void assertHasProperty(const DihedralID &dih,
-                           const SireBase::PropertyName &key) const;
+        void assertHasProperty(const BondID &bond, const SireBase::PropertyName &key) const;
 
-    bool hasProperty(const ImproperID &imp,
-                     const SireBase::PropertyName &key) const;
+        bool hasProperty(const AngleID &ang, const SireBase::PropertyName &key) const;
 
-    template<class T>
-    bool hasPropertyOfType(const ImproperID &imp,
-                           const SireBase::PropertyName &key) const;
+        template <class T>
+        bool hasPropertyOfType(const AngleID &ang, const SireBase::PropertyName &key) const;
 
-    const char* propertyType(const ImproperID &imp,
-                             const SireBase::PropertyName &key) const;
+        const char *propertyType(const AngleID &ang, const SireBase::PropertyName &key) const;
 
-    SireBase::Properties properties(const ImproperID &imp) const;
+        SireBase::Properties properties(const AngleID &ang) const;
 
-    QStringList propertyKeys(const ImproperID &imp) const;
+        QStringList propertyKeys(const AngleID &ang) const;
 
-    const Property& property(const ImproperID &imp,
-                             const SireBase::PropertyName &key) const;
-    const Property& property(const ImproperID &imp,
-                             const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        const Property &property(const AngleID &ang, const SireBase::PropertyName &key) const;
+        const Property &property(const AngleID &ang, const SireBase::PropertyName &key,
+                                 const Property &default_value) const;
 
-    void assertHasProperty(const ImproperID &imp,
-                           const SireBase::PropertyName &key) const;
+        void assertHasProperty(const AngleID &ang, const SireBase::PropertyName &key) const;
 
-protected:
-    ConnectivityBase();
-    ConnectivityBase(const MoleculeInfo &molinfo);
-    ConnectivityBase(const MoleculeData &moldata);
+        bool hasProperty(const DihedralID &dih, const SireBase::PropertyName &key) const;
 
-    ConnectivityBase(const ConnectivityBase &other);
+        template <class T>
+        bool hasPropertyOfType(const DihedralID &dih, const SireBase::PropertyName &key) const;
 
-    ConnectivityBase& operator=(const ConnectivityBase &other);
+        const char *propertyType(const DihedralID &dih, const SireBase::PropertyName &key) const;
 
-    bool operator==(const ConnectivityBase &other) const;
-    bool operator!=(const ConnectivityBase &other) const;
+        SireBase::Properties properties(const DihedralID &dih) const;
 
-    SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                  const AtomMatcher &atommatcher) const;
-    SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                  const QHash<AtomIdx,AtomIdx> &map) const;
+        QStringList propertyKeys(const DihedralID &dih) const;
 
+        const Property &property(const DihedralID &dih, const SireBase::PropertyName &key) const;
+        const Property &property(const DihedralID &dih, const SireBase::PropertyName &key,
+                                 const Property &default_value) const;
 
-    /** The which atoms are connected to which other atoms
-        in this molecule */
-    QVector< QSet<AtomIdx> > connected_atoms;
+        void assertHasProperty(const DihedralID &dih, const SireBase::PropertyName &key) const;
 
-    /** Which residues are connected to which other residues */
-    QVector< QSet<ResIdx> > connected_res;
+        bool hasProperty(const ImproperID &imp, const SireBase::PropertyName &key) const;
 
-    /** Bond properties */
-    QHash<detail::IDPair, SireBase::Properties> bond_props;
+        template <class T>
+        bool hasPropertyOfType(const ImproperID &imp, const SireBase::PropertyName &key) const;
 
-    /** Angle properties */
-    QHash<SireMol::AngleID, SireBase::Properties> ang_props;
+        const char *propertyType(const ImproperID &imp, const SireBase::PropertyName &key) const;
 
-    /** Dihedral properties */
-    QHash<SireMol::DihedralID, SireBase::Properties> dih_props;
+        SireBase::Properties properties(const ImproperID &imp) const;
 
-    /** Improper properties */
-    QHash<SireMol::ImproperID, SireBase::Properties> imp_props;
+        QStringList propertyKeys(const ImproperID &imp) const;
 
-    /** The info object that describes the molecule */
-    MoleculeInfo minfo;
+        const Property &property(const ImproperID &imp, const SireBase::PropertyName &key) const;
+        const Property &property(const ImproperID &imp, const SireBase::PropertyName &key,
+                                 const Property &default_value) const;
 
-private:
-    const QSet<AtomIdx>& _pvt_connectedTo(AtomIdx atomidx) const;
+        void assertHasProperty(const ImproperID &imp, const SireBase::PropertyName &key) const;
 
-    QList< QList<AtomIdx> > _pvt_findPaths(AtomIdx cursor, const AtomIdx end_atom,
-                                           QSet<AtomIdx> &done, int max_length=-1) const;
+    protected:
+        ConnectivityBase();
+        ConnectivityBase(const MoleculeInfo &molinfo);
+        ConnectivityBase(const MoleculeData &moldata);
 
-    void traceRoute(AtomIdx start, QSet<AtomIdx> &root,
-                    QSet<AtomIdx> &group) const;
+        ConnectivityBase(const ConnectivityBase &other);
 
-    void traceRoute(const AtomSelection &selected_atoms,
-                    AtomIdx start, QSet<AtomIdx> &root,
-                    QSet<AtomIdx> &group) const;
+        ConnectivityBase &operator=(const ConnectivityBase &other);
 
-    tuple<AtomSelection,AtomSelection>
-    selectGroups(const QSet<AtomIdx> &group0,
-                 const QSet<AtomIdx> &group1) const;
-};
+        bool operator==(const ConnectivityBase &other) const;
+        bool operator!=(const ConnectivityBase &other) const;
 
-/** This class contains the connectivity of the molecule, namely which
-atoms are connected to which other atoms. The connectivity is used
-to move parts of the molecule (e.g. moving an atom also moves all
-of the atoms that it is connected to), and to automatically generate
-the internal geometry of the molecule (e.g. to auto-generate
-all of the bonds, angles and dihedrals). Note that the connectivity
-is not the same as the bonding - the connectivity is used to move
-parts of the molecule (e.g. moving an atom should move all of the
-atoms it is connected to) and also to auto-generate internal angles
-(e.g. auto-generation of bonds, angles and dihedrals)
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const QHash<AtomIdx, AtomIdx> &map) const;
 
-    @author Christopher Woods
+        /** The which atoms are connected to which other atoms
+            in this molecule */
+        QVector<QSet<AtomIdx>> connected_atoms;
 
-*/
-class SIREMOL_EXPORT Connectivity
-            : public SireBase::ConcreteProperty<Connectivity,
-                                                ConnectivityBase>
-{
+        /** Which residues are connected to which other residues */
+        QVector<QSet<ResIdx>> connected_res;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SireMol::Connectivity&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::Connectivity&);
+        /** Bond properties */
+        QHash<detail::IDPair, SireBase::Properties> bond_props;
 
-public:
-    Connectivity();
+        /** Angle properties */
+        QHash<SireMol::AngleID, SireBase::Properties> ang_props;
 
-    Connectivity(const MoleculeInfo &molinfo);
-    Connectivity(const MoleculeData &moldata);
+        /** Dihedral properties */
+        QHash<SireMol::DihedralID, SireBase::Properties> dih_props;
 
-    Connectivity(const MoleculeView &molview,
-                 const BondHunter &bondhunter = CovalentBondHunter(),
-                 const PropertyMap &map = PropertyMap());
+        /** Improper properties */
+        QHash<SireMol::ImproperID, SireBase::Properties> imp_props;
 
-    Connectivity(const ConnectivityEditor &editor);
-    Connectivity(const Connectivity &other);
+        /** The info object that describes the molecule */
+        MoleculeInfo minfo;
 
-    ~Connectivity();
+    private:
+        const QSet<AtomIdx> &_pvt_connectedTo(AtomIdx atomidx) const;
 
-    static const char* typeName();
+        QList<QList<AtomIdx>> _pvt_findPaths(AtomIdx cursor, const AtomIdx end_atom, QSet<AtomIdx> &done,
+                                             int max_length = -1) const;
 
-    Connectivity& operator=(const Connectivity &other);
-    Connectivity& operator=(const ConnectivityEditor &editor);
+        void traceRoute(AtomIdx start, QSet<AtomIdx> &root, QSet<AtomIdx> &group) const;
 
-    bool operator==(const Connectivity &other) const;
-    bool operator!=(const Connectivity &other) const;
+        void traceRoute(const AtomSelection &selected_atoms, AtomIdx start, QSet<AtomIdx> &root,
+                        QSet<AtomIdx> &group) const;
 
-    ConnectivityEditor edit() const;
+        tuple<AtomSelection, AtomSelection> selectGroups(const QSet<AtomIdx> &group0, const QSet<AtomIdx> &group1) const;
+    };
 
-protected:
-    friend class ConnectivityBase;
-    Connectivity(const ConnectivityBase &other);
+    /** This class contains the connectivity of the molecule, namely which
+    atoms are connected to which other atoms. The connectivity is used
+    to move parts of the molecule (e.g. moving an atom also moves all
+    of the atoms that it is connected to), and to automatically generate
+    the internal geometry of the molecule (e.g. to auto-generate
+    all of the bonds, angles and dihedrals). Note that the connectivity
+    is not the same as the bonding - the connectivity is used to move
+    parts of the molecule (e.g. moving an atom should move all of the
+    atoms it is connected to) and also to auto-generate internal angles
+    (e.g. auto-generation of bonds, angles and dihedrals)
 
-private:
-    void squeeze();
-};
+        @author Christopher Woods
 
-/** An editor that can be used to edit a Connectivity object
+    */
+    class SIREMOL_EXPORT Connectivity : public SireBase::ConcreteProperty<Connectivity, ConnectivityBase>
+    {
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ConnectivityEditor
-        : public SireBase::ConcreteProperty<ConnectivityEditor,
-                                            ConnectivityBase>
-{
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMol::Connectivity &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SireMol::Connectivity &);
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const SireMol::ConnectivityEditor&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, SireMol::ConnectivityEditor&);
+    public:
+        Connectivity();
 
-public:
-    ConnectivityEditor();
+        Connectivity(const MoleculeInfo &molinfo);
+        Connectivity(const MoleculeData &moldata);
 
-    ConnectivityEditor(const Connectivity &connectivity);
+        Connectivity(const MoleculeView &molview, const BondHunter &bondhunter = CovalentBondHunter(),
+                     const PropertyMap &map = PropertyMap());
 
-    ConnectivityEditor(const ConnectivityEditor &other);
+        Connectivity(const ConnectivityEditor &editor);
+        Connectivity(const Connectivity &other);
 
-    ~ConnectivityEditor();
+        ~Connectivity();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    ConnectivityEditor& operator=(const ConnectivityBase &other);
+        Connectivity &operator=(const Connectivity &other);
+        Connectivity &operator=(const ConnectivityEditor &editor);
 
-    bool operator==(const ConnectivityEditor &other) const;
-    bool operator!=(const ConnectivityEditor &other) const;
+        bool operator==(const Connectivity &other) const;
+        bool operator!=(const Connectivity &other) const;
 
-    ConnectivityEditor& connect(AtomIdx atom0, AtomIdx atom1);
-    ConnectivityEditor& disconnect(AtomIdx atom0, AtomIdx atom1);
+        ConnectivityEditor edit() const;
 
-    ConnectivityEditor& connect(const AtomID &atom0, const AtomID &atom1);
-    ConnectivityEditor& disconnect(const AtomID &atom0, const AtomID &atom1);
+    protected:
+        friend class ConnectivityBase;
+        Connectivity(const ConnectivityBase &other);
 
-    ConnectivityEditor& disconnectAll(AtomIdx atomidx);
-    ConnectivityEditor& disconnectAll(ResIdx residx);
+    private:
+        void squeeze();
+    };
 
-    ConnectivityEditor& disconnectAll(const AtomID &atomid);
-    ConnectivityEditor& disconnectAll(const ResID &resid);
+    /** An editor that can be used to edit a Connectivity object
 
-    ConnectivityEditor& disconnectAll();
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ConnectivityEditor : public SireBase::ConcreteProperty<ConnectivityEditor, ConnectivityBase>
+    {
 
-    ConnectivityEditor& setProperty(const BondID &bond,
-                                    const QString &key, const Property &value);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMol::ConnectivityEditor &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, SireMol::ConnectivityEditor &);
 
-    ConnectivityEditor& setProperty(const AngleID &ang,
-                                    const QString &key, const Property &value);
+    public:
+        ConnectivityEditor();
 
-    ConnectivityEditor& setProperty(const DihedralID &dih,
-                                    const QString &key, const Property &value);
+        ConnectivityEditor(const Connectivity &connectivity);
 
-    ConnectivityEditor& setProperty(const ImproperID &imp,
-                                    const QString &key, const Property &value);
+        ConnectivityEditor(const ConnectivityEditor &other);
 
-    ConnectivityEditor& removeProperty(const QString &key);
+        ~ConnectivityEditor();
 
-    ConnectivityEditor& removeProperty(const BondID &bond, const QString &key);
-    SireBase::PropertyPtr takeProperty(const BondID &bond, const QString &key);
+        static const char *typeName();
 
-    ConnectivityEditor& removeProperty(const AngleID &ang, const QString &key);
-    SireBase::PropertyPtr takeProperty(const AngleID &ang, const QString &key);
+        ConnectivityEditor &operator=(const ConnectivityBase &other);
 
-    ConnectivityEditor& removeProperty(const DihedralID &dih, const QString &key);
-    SireBase::PropertyPtr takeProperty(const DihedralID &dih, const QString &key);
+        bool operator==(const ConnectivityEditor &other) const;
+        bool operator!=(const ConnectivityEditor &other) const;
 
-    ConnectivityEditor& removeProperty(const ImproperID &imp, const QString &key);
-    SireBase::PropertyPtr takeProperty(const ImproperID &imp, const QString &key);
+        ConnectivityEditor &connect(AtomIdx atom0, AtomIdx atom1);
+        ConnectivityEditor &disconnect(AtomIdx atom0, AtomIdx atom1);
 
-    Connectivity commit() const;
-};
+        ConnectivityEditor &connect(const AtomID &atom0, const AtomID &atom1);
+        ConnectivityEditor &disconnect(const AtomID &atom0, const AtomID &atom1);
+
+        ConnectivityEditor &disconnectAll(AtomIdx atomidx);
+        ConnectivityEditor &disconnectAll(ResIdx residx);
+
+        ConnectivityEditor &disconnectAll(const AtomID &atomid);
+        ConnectivityEditor &disconnectAll(const ResID &resid);
+
+        ConnectivityEditor &disconnectAll();
+
+        ConnectivityEditor &setProperty(const BondID &bond, const QString &key, const Property &value);
+
+        ConnectivityEditor &setProperty(const AngleID &ang, const QString &key, const Property &value);
+
+        ConnectivityEditor &setProperty(const DihedralID &dih, const QString &key, const Property &value);
+
+        ConnectivityEditor &setProperty(const ImproperID &imp, const QString &key, const Property &value);
+
+        ConnectivityEditor &removeProperty(const QString &key);
+
+        ConnectivityEditor &removeProperty(const BondID &bond, const QString &key);
+        SireBase::PropertyPtr takeProperty(const BondID &bond, const QString &key);
+
+        ConnectivityEditor &removeProperty(const AngleID &ang, const QString &key);
+        SireBase::PropertyPtr takeProperty(const AngleID &ang, const QString &key);
+
+        ConnectivityEditor &removeProperty(const DihedralID &dih, const QString &key);
+        SireBase::PropertyPtr takeProperty(const DihedralID &dih, const QString &key);
+
+        ConnectivityEditor &removeProperty(const ImproperID &imp, const QString &key);
+        SireBase::PropertyPtr takeProperty(const ImproperID &imp, const QString &key);
+
+        Connectivity commit() const;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-template<class T>
-SIRE_INLINE_TEMPLATE
-bool ConnectivityBase::hasPropertyOfType(const BondID &bond,
-                                         const SireBase::PropertyName &key) const
-{
-    return this->properties(bond).hasPropertyOfType<T>(key);
-}
+    template <class T>
+    SIRE_INLINE_TEMPLATE bool ConnectivityBase::hasPropertyOfType(const BondID &bond,
+                                                                  const SireBase::PropertyName &key) const
+    {
+        return this->properties(bond).hasPropertyOfType<T>(key);
+    }
 
 #endif
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::Connectivity);
 Q_DECLARE_METATYPE(SireMol::ConnectivityEditor);
 
-SIRE_EXPOSE_CLASS( SireMol::ConnectivityBase )
-SIRE_EXPOSE_CLASS( SireMol::Connectivity )
-SIRE_EXPOSE_CLASS( SireMol::ConnectivityEditor )
+SIRE_EXPOSE_CLASS(SireMol::ConnectivityBase)
+SIRE_EXPOSE_CLASS(SireMol::Connectivity)
+SIRE_EXPOSE_CLASS(SireMol::ConnectivityEditor)
 
 SIRE_END_HEADER
 

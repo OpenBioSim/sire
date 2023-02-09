@@ -31,12 +31,12 @@
 
 #include "SireCAS/symbols.h"
 
-#include "SireMol/moleculeinfodata.h"
-#include "SireMol/atomselection.h"
 #include "SireMol/atommatcher.h"
+#include "SireMol/atomselection.h"
+#include "SireMol/moleculeinfodata.h"
 
-#include "SireMol/errors.h"
 #include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -53,47 +53,43 @@ using namespace SireStream;
 ////// Implementation of TwoAtomFunction
 //////
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const TwoAtomFunction &twoatomfunc)
+QDataStream &operator<<(QDataStream &ds, const TwoAtomFunction &twoatomfunc)
 {
-    ds << twoatomfunc.atm0 << twoatomfunc.atm1
-       << static_cast<const AtomFunction&>(twoatomfunc);
+    ds << twoatomfunc.atm0 << twoatomfunc.atm1 << static_cast<const AtomFunction &>(twoatomfunc);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                      TwoAtomFunction &twoatomfunc)
+QDataStream &operator>>(QDataStream &ds, TwoAtomFunction &twoatomfunc)
 {
-    ds >> twoatomfunc.atm0 >> twoatomfunc.atm1
-       >> static_cast<AtomFunction&>(twoatomfunc);
+    ds >> twoatomfunc.atm0 >> twoatomfunc.atm1 >> static_cast<AtomFunction &>(twoatomfunc);
 
     return ds;
 }
 
 /** Constructor */
 TwoAtomFunction::TwoAtomFunction() : AtomFunction()
-{}
+{
+}
 
 /** Construct for the specified pair of atoms with the specified function */
-TwoAtomFunction::TwoAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1,
-                                 const SireCAS::Expression &function)
-                : AtomFunction(function),
-                  atm0(atom0), atm1(atom1)
-{}
+TwoAtomFunction::TwoAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1, const SireCAS::Expression &function)
+    : AtomFunction(function), atm0(atom0), atm1(atom1)
+{
+}
 
 /** Copy constructor */
-TwoAtomFunction::TwoAtomFunction(const TwoAtomFunction &other)
-                : AtomFunction(other),
-                  atm0(other.atm0), atm1(other.atm1)
-{}
+TwoAtomFunction::TwoAtomFunction(const TwoAtomFunction &other) : AtomFunction(other), atm0(other.atm0), atm1(other.atm1)
+{
+}
 
 /** Destructor */
 TwoAtomFunction::~TwoAtomFunction()
-{}
+{
+}
 
 /** Copy assignment operator */
-TwoAtomFunction& TwoAtomFunction::operator=(const TwoAtomFunction &other)
+TwoAtomFunction &TwoAtomFunction::operator=(const TwoAtomFunction &other)
 {
     AtomFunction::operator=(other);
     atm0 = other.atm0;
@@ -105,58 +101,55 @@ TwoAtomFunction& TwoAtomFunction::operator=(const TwoAtomFunction &other)
 /** Comparison operator */
 bool TwoAtomFunction::operator==(const TwoAtomFunction &other) const
 {
-    return atm0 == other.atm0 and atm1 == other.atm1 and
-           AtomFunction::operator==(other);
+    return atm0 == other.atm0 and atm1 == other.atm1 and AtomFunction::operator==(other);
 }
 
 /** Comparison operator */
 bool TwoAtomFunction::operator!=(const TwoAtomFunction &other) const
 {
-    return atm0 != other.atm0 or atm1 != other.atm1 or
-           AtomFunction::operator!=(other);
+    return atm0 != other.atm0 or atm1 != other.atm1 or AtomFunction::operator!=(other);
 }
 
 /** Return a string representation */
 QString TwoAtomFunction::toString() const
 {
     return QObject::tr("TwoAtomFunction( %1 <-> %2 : %3 )")
-                .arg(atm0.toString(), atm1.toString(),
-                     this->function().toString());
+        .arg(atm0.toString(), atm1.toString(), this->function().toString());
 }
 
 //////
 ////// Implementation of detail::IDPair
 //////
 
-SIRE_ALWAYS_INLINE QDataStream& operator<<(QDataStream &ds, const IDPair &idpair)
+SIRE_ALWAYS_INLINE QDataStream &operator<<(QDataStream &ds, const IDPair &idpair)
 {
     ds << idpair.atom0 << idpair.atom1;
     return ds;
 }
 
-SIRE_ALWAYS_INLINE QDataStream& operator>>(QDataStream &ds, IDPair &idpair)
+SIRE_ALWAYS_INLINE QDataStream &operator>>(QDataStream &ds, IDPair &idpair)
 {
     ds >> idpair.atom0 >> idpair.atom1;
     return ds;
 }
 
-IDPair::IDPair(quint32 atm0, quint32 atm1)
-       : atom0(atm0), atom1(atm1)
+IDPair::IDPair(quint32 atm0, quint32 atm1) : atom0(atm0), atom1(atm1)
 {
     if (atm0 > atm1)
     {
-        qSwap(atom0,atom1);
+        qSwap(atom0, atom1);
     }
 }
 
-IDPair::IDPair(const IDPair &other)
-       : atom0(other.atom0), atom1(other.atom1)
-{}
+IDPair::IDPair(const IDPair &other) : atom0(other.atom0), atom1(other.atom1)
+{
+}
 
 IDPair::~IDPair()
-{}
+{
+}
 
-IDPair& IDPair::operator=(const IDPair &other)
+IDPair &IDPair::operator=(const IDPair &other)
 {
     atom0 = other.atom0;
     atom1 = other.atom1;
@@ -175,26 +168,22 @@ bool IDPair::operator!=(const IDPair &other) const
 
 bool IDPair::operator<(const IDPair &other) const
 {
-    return atom0 < other.atom0 or
-           (atom0 == other.atom0 and atom1 < other.atom1);
+    return atom0 < other.atom0 or (atom0 == other.atom0 and atom1 < other.atom1);
 }
 
 bool IDPair::operator<=(const IDPair &other) const
 {
-    return atom0 < other.atom0 or
-           (atom0 == other.atom0 and atom1 <= other.atom1);
+    return atom0 < other.atom0 or (atom0 == other.atom0 and atom1 <= other.atom1);
 }
 
 bool IDPair::operator>(const IDPair &other) const
 {
-    return atom0 > other.atom0 or
-           (atom0 == other.atom0 and atom1 > other.atom1);
+    return atom0 > other.atom0 or (atom0 == other.atom0 and atom1 > other.atom1);
 }
 
 bool IDPair::operator>=(const IDPair &other) const
 {
-    return atom0 > other.atom0 or
-           (atom0 == other.atom0 and atom1 >= other.atom1);
+    return atom0 > other.atom0 or (atom0 == other.atom0 and atom1 >= other.atom1);
 }
 
 //////
@@ -204,22 +193,19 @@ bool IDPair::operator>=(const IDPair &other) const
 static const RegisterMetaType<TwoAtomFunctions> r_twoatomfuncs;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const TwoAtomFunctions &twoatomfuncs)
+QDataStream &operator<<(QDataStream &ds, const TwoAtomFunctions &twoatomfuncs)
 {
     writeHeader(ds, r_twoatomfuncs, 1);
 
     SharedDataStream sds(ds);
 
-    sds << twoatomfuncs.potentials_by_atoms
-        << static_cast<const AtomFunctions&>(twoatomfuncs);
+    sds << twoatomfuncs.potentials_by_atoms << static_cast<const AtomFunctions &>(twoatomfuncs);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      TwoAtomFunctions &twoatomfuncs)
+QDataStream &operator>>(QDataStream &ds, TwoAtomFunctions &twoatomfuncs)
 {
     VersionID v = readHeader(ds, r_twoatomfuncs);
 
@@ -227,8 +213,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> twoatomfuncs.potentials_by_atoms
-            >> static_cast<AtomFunctions&>(twoatomfuncs);
+        sds >> twoatomfuncs.potentials_by_atoms >> static_cast<AtomFunctions &>(twoatomfuncs);
     }
     else
         throw version_error(v, "1", r_twoatomfuncs, CODELOC);
@@ -237,34 +222,37 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-TwoAtomFunctions::TwoAtomFunctions()
-                 : ConcreteProperty<TwoAtomFunctions,AtomFunctions>()
-{}
+TwoAtomFunctions::TwoAtomFunctions() : ConcreteProperty<TwoAtomFunctions, AtomFunctions>()
+{
+}
 
 /** Construct the container to hold the set of two-atom functions
     for the molecule whose data is in 'moldata' */
 TwoAtomFunctions::TwoAtomFunctions(const MoleculeData &moldata)
-                 : ConcreteProperty<TwoAtomFunctions,AtomFunctions>(moldata)
-{}
+    : ConcreteProperty<TwoAtomFunctions, AtomFunctions>(moldata)
+{
+}
 
 /** Construct the container to hold the set of two-atom functions
     for the molecule whose layout is in 'molinfo' */
 TwoAtomFunctions::TwoAtomFunctions(const MoleculeInfoData &molinfo)
-                 : ConcreteProperty<TwoAtomFunctions,AtomFunctions>(molinfo)
-{}
+    : ConcreteProperty<TwoAtomFunctions, AtomFunctions>(molinfo)
+{
+}
 
 /** Copy constructor */
 TwoAtomFunctions::TwoAtomFunctions(const TwoAtomFunctions &other)
-                 : ConcreteProperty<TwoAtomFunctions,AtomFunctions>(other),
-                   potentials_by_atoms(other.potentials_by_atoms)
-{}
+    : ConcreteProperty<TwoAtomFunctions, AtomFunctions>(other), potentials_by_atoms(other.potentials_by_atoms)
+{
+}
 
 /** Destructor */
 TwoAtomFunctions::~TwoAtomFunctions()
-{}
+{
+}
 
 /** Copy assignment operator */
-TwoAtomFunctions& TwoAtomFunctions::operator=(const TwoAtomFunctions &other)
+TwoAtomFunctions &TwoAtomFunctions::operator=(const TwoAtomFunctions &other)
 {
     AtomFunctions::operator=(other);
     potentials_by_atoms = other.potentials_by_atoms;
@@ -275,34 +263,25 @@ TwoAtomFunctions& TwoAtomFunctions::operator=(const TwoAtomFunctions &other)
 /** Comparison operator */
 bool TwoAtomFunctions::operator==(const TwoAtomFunctions &other) const
 {
-    return AtomFunctions::operator==(other) and
-           potentials_by_atoms == other.potentials_by_atoms;
+    return AtomFunctions::operator==(other) and potentials_by_atoms == other.potentials_by_atoms;
 }
 
 /** Comparison operator */
 bool TwoAtomFunctions::operator!=(const TwoAtomFunctions &other) const
 {
-    return AtomFunctions::operator!=(other) or
-           potentials_by_atoms != other.potentials_by_atoms;
+    return AtomFunctions::operator!=(other) or potentials_by_atoms != other.potentials_by_atoms;
 }
 
 inline QString _id_string(const MoleculeInfoData &info, int atom)
 {
-    return QString("%1:%2").arg(info.name(AtomIdx(atom)))
-                           .arg(info.number(AtomIdx(atom)));
+    return QString("%1:%2").arg(info.name(AtomIdx(atom))).arg(info.number(AtomIdx(atom)));
 }
 
-inline QString _pretty_string(const MoleculeInfoData &info,
-                              const IDPair &pair,
-                              const Expression &func)
+inline QString _pretty_string(const MoleculeInfoData &info, const IDPair &pair, const Expression &func)
 {
-    QString id = QString("%1-%2")
-                    .arg(_id_string(info, pair.atom0), 7)
-                    .arg(_id_string(info, pair.atom1), -7);
+    QString id = QString("%1-%2").arg(_id_string(info, pair.atom0), 7).arg(_id_string(info, pair.atom1), -7);
 
-    return QString("%1 : %2")
-                .arg(id, -15)
-                .arg(func.toString());
+    return QString("%1 : %2").arg(id, -15).arg(func.toString());
 }
 
 /** Return a string representation */
@@ -322,37 +301,30 @@ QString TwoAtomFunctions::toString() const
 
         if (n <= 10)
         {
-            for (int i=0; i<n; ++i)
+            for (int i = 0; i < n; ++i)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                        .arg(_pretty_string(info(),
-                                            keys[i],
-                                            potentials_by_atoms[keys[i]])));
+                parts.append(
+                    QObject::tr("%1: %2").arg(i).arg(_pretty_string(info(), keys[i], potentials_by_atoms[keys[i]])));
             }
         }
         else
         {
-            for (int i=0; i<5; ++i)
+            for (int i = 0; i < 5; ++i)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                        .arg(_pretty_string(info(),
-                                            keys[i],
-                                            potentials_by_atoms[keys[i]])));
+                parts.append(
+                    QObject::tr("%1: %2").arg(i).arg(_pretty_string(info(), keys[i], potentials_by_atoms[keys[i]])));
             }
 
             parts.append("...");
 
-            for (int i=n-5; i<n; ++i)
+            for (int i = n - 5; i < n; ++i)
             {
-                parts.append(QObject::tr("%1: %2").arg(i)
-                        .arg(_pretty_string(info(),
-                                            keys[i],
-                                            potentials_by_atoms[keys[i]])));
+                parts.append(
+                    QObject::tr("%1: %2").arg(i).arg(_pretty_string(info(), keys[i], potentials_by_atoms[keys[i]])));
             }
         }
 
-        return QObject::tr("TwoAtomFunctions( size=%1\n%2\n)")
-                        .arg(n).arg(parts.join("\n"));
+        return QObject::tr("TwoAtomFunctions( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
     }
 }
 
@@ -364,15 +336,14 @@ QString TwoAtomFunctions::toString() const
 */
 void TwoAtomFunctions::set(AtomIdx atom0, AtomIdx atom1, const Expression &expression)
 {
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
 
     if (atm0 == atm1)
-        throw SireMol::duplicate_atom( QObject::tr(
-            "You cannot add a function that acts between the same atom! (%1)")
-                .arg(atm0), CODELOC );
+        throw SireMol::duplicate_atom(
+            QObject::tr("You cannot add a function that acts between the same atom! (%1)").arg(atm0), CODELOC);
 
-    potentials_by_atoms.insert( IDPair(atm0,atm1), expression );
+    potentials_by_atoms.insert(IDPair(atm0, atm1), expression);
     AtomFunctions::addSymbols(expression.symbols());
 }
 
@@ -383,10 +354,9 @@ void TwoAtomFunctions::set(AtomIdx atom0, AtomIdx atom1, const Expression &expre
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-void TwoAtomFunctions::set(const AtomID &atom0, const AtomID &atom1,
-                           const Expression &expression)
+void TwoAtomFunctions::set(const AtomID &atom0, const AtomID &atom1, const Expression &expression)
 {
-    this->set( info().atomIdx(atom0), info().atomIdx(atom1), expression );
+    this->set(info().atomIdx(atom0), info().atomIdx(atom1), expression);
 }
 
 /** Set the potential energy function used for the bond identified by 'bondid'
@@ -406,16 +376,14 @@ void TwoAtomFunctions::set(const BondID &bondid, const Expression &expression)
     this->clear(atom0, atom1);
     this->clear(atom1, atom0);
 
-    this->set( atom0, atom1, expression );
+    this->set(atom0, atom1, expression);
 }
 
 /** Check if any of the symbols in 'symbols' need to be removed... */
 void TwoAtomFunctions::removeSymbols(QSet<Symbol> symbols)
 {
-    for (QHash<IDPair,Expression>::const_iterator
-                                    it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDPair, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
         if (symbols.isEmpty())
             return;
@@ -423,8 +391,8 @@ void TwoAtomFunctions::removeSymbols(QSet<Symbol> symbols)
         symbols.subtract(it.value().symbols());
     }
 
-    //the only remaining symbols are ones that no longer exist
-    //in this set
+    // the only remaining symbols are ones that no longer exist
+    // in this set
     AtomFunctions::removeSymbols(symbols);
 }
 
@@ -434,11 +402,10 @@ void TwoAtomFunctions::removeSymbols(QSet<Symbol> symbols)
 */
 void TwoAtomFunctions::clear(AtomIdx atom0, AtomIdx atom1)
 {
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
 
-    TwoAtomFunctions::removeSymbols( potentials_by_atoms
-                                        .take( IDPair(atm0,atm1) ).symbols() );
+    TwoAtomFunctions::removeSymbols(potentials_by_atoms.take(IDPair(atm0, atm1)).symbols());
 }
 
 /** Clear all functions that involve the atom 'atom'
@@ -455,8 +422,7 @@ void TwoAtomFunctions::clear(AtomIdx atom)
     {
         if (key.atom0 == atm or key.atom1 == atm)
         {
-            TwoAtomFunctions::removeSymbols( potentials_by_atoms
-                                               .take(key).symbols() );
+            TwoAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
         }
     }
 }
@@ -504,8 +470,8 @@ void TwoAtomFunctions::clear(const AtomID &atom0, const AtomID &atom1)
 */
 void TwoAtomFunctions::clear(const BondID &bondid)
 {
-    this->clear( bondid.atom0(), bondid.atom1() );
-    this->clear( bondid.atom1(), bondid.atom0() );
+    this->clear(bondid.atom0(), bondid.atom1());
+    this->clear(bondid.atom1(), bondid.atom0());
 }
 
 /** Completely clear all of the functions from this set */
@@ -523,9 +489,7 @@ void TwoAtomFunctions::substitute(const Identities &identities)
 {
     AtomFunctions::removeSymbols();
 
-    for (QHash<IDPair,Expression>::iterator it = potentials_by_atoms.begin();
-         it != potentials_by_atoms.end();
-         ++it)
+    for (QHash<IDPair, Expression>::iterator it = potentials_by_atoms.begin(); it != potentials_by_atoms.end(); ++it)
     {
         it.value() = it.value().substitute(identities);
         AtomFunctions::addSymbols(it.value().symbols());
@@ -547,15 +511,14 @@ bool TwoAtomFunctions::isEmpty() const
 */
 Expression TwoAtomFunctions::potential(AtomIdx atom0, AtomIdx atom1) const
 {
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
 
     if (atm0 == atm1)
-        throw SireMol::duplicate_atom( QObject::tr(
-            "There is no potential that acts between the same atom! (%1)")
-                .arg(atm0), CODELOC );
+        throw SireMol::duplicate_atom(
+            QObject::tr("There is no potential that acts between the same atom! (%1)").arg(atm0), CODELOC);
 
-    return potentials_by_atoms.value( IDPair(atm0,atm1) );
+    return potentials_by_atoms.value(IDPair(atm0, atm1));
 }
 
 /** Return the function acting between the atoms 'atom0' and 'atom1'.
@@ -566,10 +529,9 @@ Expression TwoAtomFunctions::potential(AtomIdx atom0, AtomIdx atom1) const
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Expression TwoAtomFunctions::potential(const AtomID &atom0,
-                                       const AtomID &atom1) const
+Expression TwoAtomFunctions::potential(const AtomID &atom0, const AtomID &atom1) const
 {
-    return this->potential( info().atomIdx(atom0), info().atomIdx(atom1) );
+    return this->potential(info().atomIdx(atom0), info().atomIdx(atom1));
 }
 
 /** Return the function acting on the bond identified by 'bondid'.
@@ -588,15 +550,15 @@ Expression TwoAtomFunctions::potential(const BondID &bondid) const
     AtomIdx atom0 = info().atomIdx(bondid.atom0());
     AtomIdx atom1 = info().atomIdx(bondid.atom1());
 
-    quint32 atm0 = atom0.map( info().nAtoms() );
-    quint32 atm1 = atom1.map( info().nAtoms() );
+    quint32 atm0 = atom0.map(info().nAtoms());
+    quint32 atm1 = atom1.map(info().nAtoms());
 
-    if (potentials_by_atoms.contains( IDPair(atm0,atm1) ))
+    if (potentials_by_atoms.contains(IDPair(atm0, atm1)))
     {
-        return potentials_by_atoms.value( IDPair(atm0,atm1) );
+        return potentials_by_atoms.value(IDPair(atm0, atm1));
     }
     else
-        return potentials_by_atoms.value( IDPair(atm1,atm0) );
+        return potentials_by_atoms.value(IDPair(atm1, atm0));
 }
 
 /** Return the force (derivative of the potential with respect to 'symbol')
@@ -604,10 +566,9 @@ Expression TwoAtomFunctions::potential(const BondID &bondid) const
 
     \throw SireError::invalid_index
 */
-Expression TwoAtomFunctions::force(AtomIdx atom0, AtomIdx atom1,
-                                   const Symbol &symbol) const
+Expression TwoAtomFunctions::force(AtomIdx atom0, AtomIdx atom1, const Symbol &symbol) const
 {
-    return -(this->potential(atom0,atom1).differentiate(symbol));
+    return -(this->potential(atom0, atom1).differentiate(symbol));
 }
 
 /** Return the force (derivative of the potential with respect to 'symbol')
@@ -617,10 +578,9 @@ Expression TwoAtomFunctions::force(AtomIdx atom0, AtomIdx atom1,
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Expression TwoAtomFunctions::force(const AtomID &atom0, const AtomID &atom1,
-                                   const Symbol &symbol) const
+Expression TwoAtomFunctions::force(const AtomID &atom0, const AtomID &atom1, const Symbol &symbol) const
 {
-    return -(this->potential(atom0,atom1).differentiate(symbol));
+    return -(this->potential(atom0, atom1).differentiate(symbol));
 }
 
 /** Return the force (derivative of the potential with respect to 'symbol')
@@ -642,20 +602,17 @@ Expression TwoAtomFunctions::force(const BondID &bondid, const Symbol &symbol) c
     pairs of atoms */
 QVector<TwoAtomFunction> TwoAtomFunctions::potentials() const
 {
-    QVector<TwoAtomFunction> funcs( potentials_by_atoms.count() );
+    QVector<TwoAtomFunction> funcs(potentials_by_atoms.count());
 
     TwoAtomFunction *funcs_array = funcs.data();
 
     int i = 0;
 
-    for (QHash<IDPair,Expression>::const_iterator
-                                    it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDPair, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
-        funcs_array[i] = TwoAtomFunction( info().cgAtomIdx( AtomIdx(it.key().atom0) ),
-                                          info().cgAtomIdx( AtomIdx(it.key().atom1) ),
-                                          it.value() );
+        funcs_array[i] = TwoAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                         info().cgAtomIdx(AtomIdx(it.key().atom1)), it.value());
 
         ++i;
     }
@@ -670,19 +627,15 @@ QVector<TwoAtomFunction> TwoAtomFunctions::forces(const Symbol &symbol) const
     QVector<TwoAtomFunction> forces;
     forces.reserve(potentials_by_atoms.count());
 
-    for (QHash<IDPair,Expression>::const_iterator
-                                    it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDPair, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
         Expression force = it.value().differentiate(symbol);
 
         if (not force.isZero())
         {
-            forces.append( TwoAtomFunction(
-                              info().cgAtomIdx( AtomIdx(it.key().atom0) ),
-                              info().cgAtomIdx( AtomIdx(it.key().atom1) ),
-                              -force ) );
+            forces.append(TwoAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                          info().cgAtomIdx(AtomIdx(it.key().atom1)), -force));
         }
     }
 
@@ -694,12 +647,11 @@ QVector<TwoAtomFunction> TwoAtomFunctions::forces(const Symbol &symbol) const
     only include functions where all of the atoms are in 'selected_atoms',
     while if 'isstrict' is false, include functions where at least one
     atom is in 'selected_atoms' */
-TwoAtomFunctions TwoAtomFunctions::includeOnly(const AtomSelection &selected_atoms,
-                                               bool isstrict) const
+TwoAtomFunctions TwoAtomFunctions::includeOnly(const AtomSelection &selected_atoms, bool isstrict) const
 {
     TwoAtomFunctions ret(*this);
 
-    QMutableHashIterator<IDPair,Expression> it(ret.potentials_by_atoms);
+    QMutableHashIterator<IDPair, Expression> it(ret.potentials_by_atoms);
 
     if (isstrict)
     {
@@ -707,8 +659,8 @@ TwoAtomFunctions TwoAtomFunctions::includeOnly(const AtomSelection &selected_ato
         {
             it.next();
 
-            if (not (selected_atoms.selected(AtomIdx(it.key().atom0)) and
-                     selected_atoms.selected(AtomIdx(it.key().atom1)) ) )
+            if (not(selected_atoms.selected(AtomIdx(it.key().atom0)) and
+                    selected_atoms.selected(AtomIdx(it.key().atom1))))
             {
                 it.remove();
             }
@@ -720,8 +672,8 @@ TwoAtomFunctions TwoAtomFunctions::includeOnly(const AtomSelection &selected_ato
         {
             it.next();
 
-            if (not (selected_atoms.selected(AtomIdx(it.key().atom0)) or
-                     selected_atoms.selected(AtomIdx(it.key().atom1)) ) )
+            if (not(selected_atoms.selected(AtomIdx(it.key().atom0)) or
+                    selected_atoms.selected(AtomIdx(it.key().atom1))))
             {
                 it.remove();
             }
@@ -751,20 +703,19 @@ int TwoAtomFunctions::nFunctions() const
 
     \throw SireError::incompatible_error
 */
-PropertyPtr
-TwoAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                          const AtomMatcher &atommatcher) const
+PropertyPtr TwoAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const AtomMatcher &atommatcher) const
 {
     if (not atommatcher.changesOrder(this->info(), molinfo))
     {
-        //the order of the atoms remains the same - this means that the
-        //AtomIdx indicies are still valid
+        // the order of the atoms remains the same - this means that the
+        // AtomIdx indicies are still valid
         TwoAtomFunctions ret(molinfo);
         ret.potentials_by_atoms = this->potentials_by_atoms;
         return ret;
     }
 
-    QHash<AtomIdx,AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
+    QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
 
     return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
 }
@@ -783,29 +734,27 @@ TwoAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
 
     \throw SireError::incompatible_error
 */
-PropertyPtr
-TwoAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                          const QHash<AtomIdx,AtomIdx> &map) const
+PropertyPtr TwoAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const QHash<AtomIdx, AtomIdx> &map) const
 {
     TwoAtomFunctions ret(molinfo);
 
-    for (QHash<IDPair,Expression>::const_iterator it = potentials_by_atoms.constBegin();
-         it != potentials_by_atoms.constEnd();
-         ++it)
+    for (QHash<IDPair, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
     {
-        AtomIdx new_atom0 = map.value( AtomIdx(it.key().atom0), AtomIdx(-1) );
-        AtomIdx new_atom1 = map.value( AtomIdx(it.key().atom1), AtomIdx(-1) );
+        AtomIdx new_atom0 = map.value(AtomIdx(it.key().atom0), AtomIdx(-1));
+        AtomIdx new_atom1 = map.value(AtomIdx(it.key().atom1), AtomIdx(-1));
 
         if (new_atom0 == -1 or new_atom1 == -1)
             continue;
 
-        ret.set( new_atom0, new_atom1, it.value() );
+        ret.set(new_atom0, new_atom1, it.value());
     }
 
     return ret;
 }
 
-const char* TwoAtomFunctions::typeName()
+const char *TwoAtomFunctions::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<TwoAtomFunctions>() );
+    return QMetaType::typeName(qMetaTypeId<TwoAtomFunctions>());
 }

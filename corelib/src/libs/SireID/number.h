@@ -36,66 +36,66 @@ SIRE_BEGIN_HEADER
 
 namespace SireID
 {
-class Number;
+    class Number;
 }
 
-SIREID_EXPORT QDataStream& operator<<(QDataStream&, const SireID::Number&);
-SIREID_EXPORT QDataStream& operator>>(QDataStream&, SireID::Number&);
+SIREID_EXPORT QDataStream &operator<<(QDataStream &, const SireID::Number &);
+SIREID_EXPORT QDataStream &operator>>(QDataStream &, SireID::Number &);
 
 namespace SireID
 {
 
-/** This is the base class of all Number ID objects. A Number
-    is used to provide an object with an identifying number.
-    This could be the number of a residue in a molecule, a
-    user-supplied number of a CutGroup in a molecule, or
-    perhaps the automatic unique ID numbers of molecules,
-    forcefields or molecule groups that are assigned by the
-    program. The key point of a Number is to provide an ID
-    that can be queried and compared rapidly, and that
-    does not change as the object is moved between different
-    containers. Generally an object should keep its number
-    throughout its lifetime.
+    /** This is the base class of all Number ID objects. A Number
+        is used to provide an object with an identifying number.
+        This could be the number of a residue in a molecule, a
+        user-supplied number of a CutGroup in a molecule, or
+        perhaps the automatic unique ID numbers of molecules,
+        forcefields or molecule groups that are assigned by the
+        program. The key point of a Number is to provide an ID
+        that can be queried and compared rapidly, and that
+        does not change as the object is moved between different
+        containers. Generally an object should keep its number
+        throughout its lifetime.
 
-    @author Christopher Woods
-*/
-class SIREID_EXPORT Number
-{
+        @author Christopher Woods
+    */
+    class SIREID_EXPORT Number
+    {
 
-friend SIREID_EXPORT QDataStream& ::operator<<(QDataStream&, const Number&);
-friend SIREID_EXPORT QDataStream& ::operator>>(QDataStream&, Number&);
+        friend SIREID_EXPORT QDataStream & ::operator<<(QDataStream &, const Number &);
+        friend SIREID_EXPORT QDataStream & ::operator>>(QDataStream &, Number &);
 
-public:
-    ~Number();
+    public:
+        ~Number();
 
-    operator qint32() const;
+        operator qint32() const;
 
-    static qint32 null();
+        static qint32 null();
 
-    bool isNull() const;
+        bool isNull() const;
 
-    uint hash() const;
+        uint hash() const;
 
-    qint32 value() const;
+        qint32 value() const;
 
-protected:
-    Number(qint32 num=0);
+    protected:
+        Number(qint32 num = 0);
 
-    Number(const Number &other);
+        Number(const Number &other);
 
-    /** The actual number */
-    qint32 _num;
-};
+        /** The actual number */
+        qint32 _num;
+    };
 
-/** Return a hash of this Number */
-SIRE_ALWAYS_INLINE uint qHash(const Number &number)
-{
-    return number.hash();
-}
+    /** Return a hash of this Number */
+    SIRE_ALWAYS_INLINE uint qHash(const Number &number)
+    {
+        return number.hash();
+    }
 
-}
+} // namespace SireID
 
-SIRE_EXPOSE_CLASS( SireID::Number )
+SIRE_EXPOSE_CLASS(SireID::Number)
 
 SIRE_END_HEADER
 

@@ -37,89 +37,89 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class MolAtomID;
+    class MolAtomID;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolAtomID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolAtomID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolAtomID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolAtomID &);
 
 namespace SireMol
 {
 
-/** This class represents an ID that is used to identify
-    a specific atom (or atoms) in a specific molecule
-    (of molecules)
+    /** This class represents an ID that is used to identify
+        a specific atom (or atoms) in a specific molecule
+        (of molecules)
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolAtomID : public AtomID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const MolAtomID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, MolAtomID&);
-
-public:
-    MolAtomID();
-    MolAtomID(const MolID &molid, const AtomID &atomid);
-    MolAtomID(const AtomID &atomid, const MolID &molid);
-
-    MolAtomID(const boost::tuple<MolIdentifier,AtomIdentifier> &molatomid);
-    MolAtomID(const boost::tuple<AtomIdentifier,MolIdentifier> &molatomid);
-
-    MolAtomID(const MolAtomID &other);
-
-    ~MolAtomID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolAtomID : public AtomID
     {
-        return MolAtomID::typeName();
-    }
 
-    MolAtomID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolAtomID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolAtomID &);
 
-    bool isNull() const;
+    public:
+        MolAtomID();
+        MolAtomID(const MolID &molid, const AtomID &atomid);
+        MolAtomID(const AtomID &atomid, const MolID &molid);
 
-    uint hash() const;
+        MolAtomID(const boost::tuple<MolIdentifier, AtomIdentifier> &molatomid);
+        MolAtomID(const boost::tuple<AtomIdentifier, MolIdentifier> &molatomid);
 
-    QString toString() const;
+        MolAtomID(const MolAtomID &other);
 
-    const AtomID& atomID() const;
-    const MolID& molID() const;
+        ~MolAtomID();
 
-    MolAtomID& operator=(const MolAtomID &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
+        const char *what() const
+        {
+            return MolAtomID::typeName();
+        }
 
-    bool operator==(const MolAtomID &other) const;
-    bool operator!=(const MolAtomID &other) const;
+        MolAtomID *clone() const;
 
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
+        bool isNull() const;
 
-    QHash< MolNum,Selector<Atom> > selectAllFrom(const Molecules &molecules,
-                                                 const PropertyMap &map = PropertyMap()) const;
-    QHash< MolNum,Selector<Atom> > selectAllFrom(const MoleculeGroup &molgroup,
-                                                 const PropertyMap &map = PropertyMap()) const;
-    QHash< MolNum,Selector<Atom> > selectAllFrom(const MolGroupsBase &molgroups,
-                                                 const PropertyMap &map = PropertyMap()) const;
+        uint hash() const;
 
-private:
-    void collapse();
+        QString toString() const;
 
-    /** The molecule identifier */
-    MolIdentifier molid;
+        const AtomID &atomID() const;
+        const MolID &molID() const;
 
-    /** The atom identifier */
-    AtomIdentifier atomid;
-};
+        MolAtomID &operator=(const MolAtomID &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
-Q_DECLARE_METATYPE( SireMol::MolAtomID )
+        bool operator==(const MolAtomID &other) const;
+        bool operator!=(const MolAtomID &other) const;
 
-SIRE_EXPOSE_CLASS( SireMol::MolAtomID )
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
+
+        QHash<MolNum, Selector<Atom>> selectAllFrom(const Molecules &molecules,
+                                                    const PropertyMap &map = PropertyMap()) const;
+        QHash<MolNum, Selector<Atom>> selectAllFrom(const MoleculeGroup &molgroup,
+                                                    const PropertyMap &map = PropertyMap()) const;
+        QHash<MolNum, Selector<Atom>> selectAllFrom(const MolGroupsBase &molgroups,
+                                                    const PropertyMap &map = PropertyMap()) const;
+
+    private:
+        void collapse();
+
+        /** The molecule identifier */
+        MolIdentifier molid;
+
+        /** The atom identifier */
+        AtomIdentifier atomid;
+    };
+
+} // namespace SireMol
+
+Q_DECLARE_METATYPE(SireMol::MolAtomID)
+
+SIRE_EXPOSE_CLASS(SireMol::MolAtomID)
 
 SIRE_END_HEADER
 

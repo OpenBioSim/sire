@@ -39,23 +39,20 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-using SireUnits::Dimension::Force;
+    using SireUnits::Dimension::Force;
 
-typedef SireMaths::Vector3D<Force> Force3D;
+    typedef SireMaths::Vector3D<Force> Force3D;
 
-typedef AtomProperty<Force3D> AtomForces;
+    typedef AtomProperty<Force3D> AtomForces;
 
-}
+} // namespace SireMol
 
-SIRE_EXPOSE_ALIAS(
-        (SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0> >),
-        SireMol::Force3D )
+SIRE_EXPOSE_ALIAS((SireMaths::Vector3D<SireUnits::Dimension::PhysUnit<1, 1, -2, 0, 0, 0, 0>>), SireMol::Force3D)
 
-Q_DECLARE_METATYPE( SireMol::AtomForces );
-Q_DECLARE_METATYPE( SireMol::Force3D );
+Q_DECLARE_METATYPE(SireMol::AtomForces);
+Q_DECLARE_METATYPE(SireMol::Force3D);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireMaths::Vector3D<SireUnits::Dimension::Force>,
-                           SireMol::AtomForces )
+SIRE_EXPOSE_ATOM_PROPERTY(SireMaths::Vector3D<SireUnits::Dimension::Force>, SireMol::AtomForces)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMaths::Vector3D<SireUnits::Dimension::Force>;

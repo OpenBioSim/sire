@@ -30,29 +30,27 @@
 
 #include "softcljpotential.h"
 
-#include "SireFF/inter2b3dff.hpp"
 #include "SireFF/inter2b2g3dff.hpp"
+#include "SireFF/inter2b3dff.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
 
-using SireFF::Inter2BFF;
-using SireFF::Inter2B3DFF;
-using SireFF::Inter2B2GFF;
-using SireFF::Inter2B2G3DFF;
+    using SireFF::Inter2B2G3DFF;
+    using SireFF::Inter2B2GFF;
+    using SireFF::Inter2B3DFF;
+    using SireFF::Inter2BFF;
 
-typedef Inter2BFF< SoftCLJPotentialInterface<InterSoftCLJPotential> > InterSoftCLJFFBase;
-typedef Inter2B3DFF< SoftCLJPotentialInterface<InterSoftCLJPotential> > InterSoftCLJFF;
+    typedef Inter2BFF<SoftCLJPotentialInterface<InterSoftCLJPotential>> InterSoftCLJFFBase;
+    typedef Inter2B3DFF<SoftCLJPotentialInterface<InterSoftCLJPotential>> InterSoftCLJFF;
 
-typedef Inter2B2GFF< SoftCLJPotentialInterface<InterSoftCLJPotential> >
-                                                                InterGroupSoftCLJFFBase;
+    typedef Inter2B2GFF<SoftCLJPotentialInterface<InterSoftCLJPotential>> InterGroupSoftCLJFFBase;
 
-typedef Inter2B2G3DFF< SoftCLJPotentialInterface<InterSoftCLJPotential> >
-                                                                InterGroupSoftCLJFF;
+    typedef Inter2B2G3DFF<SoftCLJPotentialInterface<InterSoftCLJPotential>> InterGroupSoftCLJFF;
 
-}
+} // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMM::InterSoftCLJFFBase);
 Q_DECLARE_METATYPE(SireMM::InterSoftCLJFF);
@@ -66,37 +64,28 @@ SIRE_EXPOSE_ALIAS(SireMM::CLJPotentialInterface<SireMM::InterSoftCLJPotential>,
 SIRE_EXPOSE_ALIAS(SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>,
                   SireMM::SoftCLJPotentialInterface_InterSoftCLJPotential_)
 
-SIRE_EXPOSE_ALIAS(
-    SireFF::Inter2BFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
-    SireMM::InterSoftCLJFFBase )
+SIRE_EXPOSE_ALIAS(SireFF::Inter2BFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>,
+                  SireMM::InterSoftCLJFFBase)
 
-SIRE_EXPOSE_ALIAS(
-    SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
-    SireMM::InterSoftCLJFF )
+SIRE_EXPOSE_ALIAS(SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>,
+                  SireMM::InterSoftCLJFF)
 
-SIRE_EXPOSE_ALIAS(
- SireFF::Inter2B2GFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
- SireMM::InterGroupSoftCLJFFBase)
+SIRE_EXPOSE_ALIAS(SireFF::Inter2B2GFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>,
+                  SireMM::InterGroupSoftCLJFFBase)
 
-SIRE_EXPOSE_ALIAS(
- SireFF::Inter2B2G3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >,
- SireMM::InterGroupSoftCLJFF )
+SIRE_EXPOSE_ALIAS(SireFF::Inter2B2G3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>,
+                  SireMM::InterGroupSoftCLJFF)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
-template class
-SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>;
+template class SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>;
 
-template class
-SireFF::Inter2BFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >;
+template class SireFF::Inter2BFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>;
 
-template class
-SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >;
+template class SireFF::Inter2B3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>;
 
-template class
-SireFF::Inter2B2GFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >;
+template class SireFF::Inter2B2GFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>;
 
-template class
-SireFF::Inter2B2G3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential> >;
+template class SireFF::Inter2B2G3DFF<SireMM::SoftCLJPotentialInterface<SireMM::InterSoftCLJPotential>>;
 #endif
 
 SIRE_END_HEADER

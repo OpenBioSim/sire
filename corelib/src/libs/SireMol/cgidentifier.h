@@ -34,88 +34,87 @@
 
 namespace SireMol
 {
-class CGIdentifier;
-class CGIDSet;
-}
+    class CGIdentifier;
+    class CGIDSet;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGIdentifier &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGIDSet&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGIDSet&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGIDSet &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGIDSet &);
 
 namespace SireMol
 {
 
-class CGIdx;
+    class CGIdx;
 
-class SIREMOL_EXPORT CGIdentifier : public CGID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CGIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGIdentifier&);
-
-public:
-    CGIdentifier();
-    CGIdentifier(const CGID &cgid);
-    CGIdentifier(const CGIdentifier &other);
-
-    ~CGIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+    class SIREMOL_EXPORT CGIdentifier : public CGID
     {
-        return CGIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CGIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CGIdentifier &);
+
+    public:
+        CGIdentifier();
+        CGIdentifier(const CGID &cgid);
+        CGIdentifier(const CGIdentifier &other);
+
+        ~CGIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return CGIdentifier::typeName();
+        }
+
+        CGIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const CGID &base() const;
+
+        CGIdentifier &operator=(const CGIdentifier &other);
+        CGIdentifier &operator=(const CGID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const CGIdentifier &other) const;
+        bool operator!=(const CGIdentifier &other) const;
+
+        bool operator==(const CGID &other) const;
+        bool operator!=(const CGID &other) const;
+
+        QList<CGIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        /** Pointer to the CGID */
+        boost::shared_ptr<CGID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const CGIdentifier &cgid)
+    {
+        return cgid.hash();
     }
 
-    CGIdentifier* clone() const;
+} // namespace SireMol
 
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const CGID& base() const;
-
-    CGIdentifier& operator=(const CGIdentifier &other);
-    CGIdentifier& operator=(const CGID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const CGIdentifier &other) const;
-    bool operator!=(const CGIdentifier &other) const;
-
-    bool operator==(const CGID &other) const;
-    bool operator!=(const CGID &other) const;
-
-    QList<CGIdx> map(const MolInfo &molinfo) const;
-
-private:
-    /** Pointer to the CGID */
-    boost::shared_ptr<CGID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const CGIdentifier &cgid)
-{
-    return cgid.hash();
-}
-
-}
-
-#include "cgidx.h"
 #include "atomidx.h"
+#include "cgidx.h"
 
-Q_DECLARE_METATYPE( SireID::Specify<SireMol::CGID> );
-Q_DECLARE_METATYPE( SireMol::AtomsIn<SireMol::CGID> );
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::CGID> );
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::CGID> );
-Q_DECLARE_METATYPE( SireID::MatchAll<SireMol::CGID> );
-Q_DECLARE_METATYPE( SireID::InvertMatch<SireMol::CGID> );
+Q_DECLARE_METATYPE(SireID::Specify<SireMol::CGID>);
+Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::CGID>);
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::CGID>);
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::CGID>);
+Q_DECLARE_METATYPE(SireID::MatchAll<SireMol::CGID>);
+Q_DECLARE_METATYPE(SireID::InvertMatch<SireMol::CGID>);
 
 Q_DECLARE_METATYPE(SireMol::CGIdentifier);
 
 #endif
-

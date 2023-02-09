@@ -64,13 +64,12 @@ QDataStream &operator>>(QDataStream &ds, Radical &r)
 }
 
 /** Constructor (default is an undefined Radical) */
-Radical::Radical()
-        : ConcreteProperty<Radical,Property>(), radical_type(0)
-{}
+Radical::Radical() : ConcreteProperty<Radical, Property>(), radical_type(0)
+{
+}
 
 /** Construct from the passed string */
-Radical::Radical(const QString &str)
-        : ConcreteProperty<Radical,Property>()
+Radical::Radical(const QString &str) : ConcreteProperty<Radical, Property>()
 {
     auto s = str.trimmed().toLower();
 
@@ -83,40 +82,40 @@ Radical::Radical(const QString &str)
     else if (s == "undefined")
         this->radical_type = -1;
     else
-        throw SireError::invalid_arg(QObject::tr(
-            "Cannot interpret radical type '%1'. Should be one of "
-            "'singlet', 'doublet', 'triplet' or 'undefined'.")
-              .arg(str), CODELOC);
+        throw SireError::invalid_arg(QObject::tr("Cannot interpret radical type '%1'. Should be one of "
+                                                 "'singlet', 'doublet', 'triplet' or 'undefined'.")
+                                         .arg(str),
+                                     CODELOC);
 }
 
 /** Construct from the the passed number */
-Radical::Radical(int value)
-        : ConcreteProperty<Radical,Property>()
+Radical::Radical(int value) : ConcreteProperty<Radical, Property>()
 {
-    if (value >=0 or value <= 3)
+    if (value >= 0 or value <= 3)
     {
         this->radical_type = value;
     }
     else
     {
-        throw SireError::invalid_arg(QObject::tr(
-            "Invalid radical type '%1'. Should be an integer between "
-            "0 to 3").arg(value), CODELOC);
+        throw SireError::invalid_arg(QObject::tr("Invalid radical type '%1'. Should be an integer between "
+                                                 "0 to 3")
+                                         .arg(value),
+                                     CODELOC);
     }
 }
 
 /** Copy constructor */
-Radical::Radical(const Radical &other)
-        : ConcreteProperty<Radical,Property>(other),
-          radical_type(other.radical_type)
-{}
+Radical::Radical(const Radical &other) : ConcreteProperty<Radical, Property>(other), radical_type(other.radical_type)
+{
+}
 
 /** Destructor */
 Radical::~Radical()
-{}
+{
+}
 
 /** Copy assignment operator */
-Radical& Radical::operator=(const Radical &other)
+Radical &Radical::operator=(const Radical &other)
 {
     radical_type = other.radical_type;
     return *this;
@@ -134,27 +133,25 @@ bool Radical::operator!=(const Radical &other) const
     return not this->operator==(other);
 }
 
-const char* Radical::typeName()
+const char *Radical::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Radical>() );
+    return QMetaType::typeName(qMetaTypeId<Radical>());
 }
 
 QString Radical::toString() const
 {
     switch (this->radical_type)
     {
-        case 0:
-            return "undefined";
-        case 1:
-            return "singlet";
-        case 2:
-            return "doublet";
-        case 3:
-            return "triplet";
-        default:
-            throw SireError::program_bug(
-                QObject::tr("Should not get here: %1").arg(this->radical_type),
-                  CODELOC);
+    case 0:
+        return "undefined";
+    case 1:
+        return "singlet";
+    case 2:
+        return "doublet";
+    case 3:
+        return "triplet";
+    default:
+        throw SireError::program_bug(QObject::tr("Should not get here: %1").arg(this->radical_type), CODELOC);
     }
 }
 

@@ -38,107 +38,103 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SimPacket;
+    class SimPacket;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SimPacket&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SimPacket&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SimPacket &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SimPacket &);
 
 namespace SireMove
 {
 
-using SireSystem::System;
+    using SireSystem::System;
 
-/** This is a WorkPacket that is used to run part of a
-    simulation
+    /** This is a WorkPacket that is used to run part of a
+        simulation
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SimPacket : public SireCluster::WorkPacketBase
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SimPacket&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SimPacket&);
-
-public:
-    SimPacket();
-
-    SimPacket(const System &system, const Moves &moves,
-              int nmoves, bool record_stats=true);
-
-    SimPacket(const System &system, const Moves &moves,
-              int nmoves, int nmoves_per_chunk, bool record_stats=true);
-
-    SimPacket(const SimStore &simstore, int nmoves,
-              bool record_stats=true);
-
-    SimPacket(const SimStore &simstore, int nmoves,
-              int nmoves_per_chunk, bool record_stats=true);
-
-    SimPacket(const SimPacket &other);
-
-    ~SimPacket();
-
-    SimPacket& operator=(const SimPacket &other);
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SimPacket : public SireCluster::WorkPacketBase
     {
-        return SimPacket::typeName();
-    }
 
-    SimPacket* clone() const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SimPacket &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SimPacket &);
 
-    bool operator==(const SimPacket &other) const;
-    bool operator!=(const SimPacket &other) const;
+    public:
+        SimPacket();
 
-    bool shouldPack() const;
-    int approximatePacketSize() const;
+        SimPacket(const System &system, const Moves &moves, int nmoves, bool record_stats = true);
 
-    SimStore systemAndMoves() const;
+        SimPacket(const System &system, const Moves &moves, int nmoves, int nmoves_per_chunk, bool record_stats = true);
 
-    System system() const;
-    MovesPtr moves() const;
+        SimPacket(const SimStore &simstore, int nmoves, bool record_stats = true);
 
-    int nMoves() const;
-    int nCompleted() const;
+        SimPacket(const SimStore &simstore, int nmoves, int nmoves_per_chunk, bool record_stats = true);
 
-    int nMovesPerChunk() const;
+        SimPacket(const SimPacket &other);
 
-    bool recordingStatistics() const;
+        ~SimPacket();
 
-    bool hasFinished() const;
+        SimPacket &operator=(const SimPacket &other);
 
-protected:
-    float chunk();
+        static const char *typeName();
 
-private:
-    /** The system being simulated and the moves being applied to the system */
-    SimStore sim_store;
+        const char *what() const
+        {
+            return SimPacket::typeName();
+        }
 
-    /** The number of moves to run on the system */
-    quint32 nmoves;
+        SimPacket *clone() const;
 
-    /** The number of moves already run on the system */
-    quint32 ncompleted;
+        bool operator==(const SimPacket &other) const;
+        bool operator!=(const SimPacket &other) const;
 
-    /** The number of moves to run per chunk */
-    quint32 nmoves_per_chunk;
+        bool shouldPack() const;
+        int approximatePacketSize() const;
 
-    /** Whether or not to record move statistics */
-    bool record_stats;
+        SimStore systemAndMoves() const;
 
-    /** Whether or not the SimStore was packed before we ran
-        this work packet */
-    bool sim_store_was_packed;
-};
+        System system() const;
+        MovesPtr moves() const;
 
-}
+        int nMoves() const;
+        int nCompleted() const;
 
-Q_DECLARE_METATYPE( SireMove::SimPacket )
+        int nMovesPerChunk() const;
 
-SIRE_EXPOSE_CLASS( SireMove::SimPacket )
+        bool recordingStatistics() const;
+
+        bool hasFinished() const;
+
+    protected:
+        float chunk();
+
+    private:
+        /** The system being simulated and the moves being applied to the system */
+        SimStore sim_store;
+
+        /** The number of moves to run on the system */
+        quint32 nmoves;
+
+        /** The number of moves already run on the system */
+        quint32 ncompleted;
+
+        /** The number of moves to run per chunk */
+        quint32 nmoves_per_chunk;
+
+        /** Whether or not to record move statistics */
+        bool record_stats;
+
+        /** Whether or not the SimStore was packed before we ran
+            this work packet */
+        bool sim_store_was_packed;
+    };
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::SimPacket)
+
+SIRE_EXPOSE_CLASS(SireMove::SimPacket)
 
 SIRE_END_HEADER
 

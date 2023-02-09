@@ -28,14 +28,14 @@
 #ifndef SIREMM_ANGLE_H
 #define SIREMM_ANGLE_H
 
+#include "SireMol/angleid.h"
 #include "SireMol/atom.h"
 #include "SireMol/bondid.h"
-#include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
-#include "SireMol/improperid.h"
 #include "SireMol/connectivity.h"
-#include "SireMol/mover.hpp"
+#include "SireMol/dihedralid.h"
 #include "SireMol/evaluator.h"
+#include "SireMol/improperid.h"
+#include "SireMol/mover.hpp"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/generalunit.h"
@@ -44,126 +44,119 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class Angle;
+    class Angle;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::Angle&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::Angle&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::Angle &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::Angle &);
 
 namespace SireCAS
 {
-class Expression;
+    class Expression;
 }
 
 namespace SireMM
 {
 
-class SelectorAngle;
+    class SelectorAngle;
 
-/** This class provides a molecule view to an angle */
-class SIREMM_EXPORT Angle
-    : public SireBase::ConcreteProperty<Angle, SireMol::MoleculeView>
-{
-
-friend QDataStream& ::operator<<(QDataStream&, const Angle&);
-friend QDataStream& ::operator>>(QDataStream&, Angle&);
-
-public:
-    Angle();
-    Angle(const SireMol::Atom &atom0, const SireMol::Atom &atom1,
-          const SireMol::Atom &atom2);
-    Angle(const SireMol::MoleculeView &molview,
-          const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-          const SireMol::AtomID &atom2);
-    Angle(const SireMol::MoleculeData &moldata,
-          const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
-          const SireMol::AtomID &atom2);
-    Angle(const SireMol::MoleculeData &moldata, const SireMol::AngleID &angle);
-
-    Angle(const Angle &other);
-    virtual ~Angle();
-
-    static const char* typeName();
-
-    virtual const char* what() const
+    /** This class provides a molecule view to an angle */
+    class SIREMM_EXPORT Angle : public SireBase::ConcreteProperty<Angle, SireMol::MoleculeView>
     {
-        return Angle::typeName();
-    }
 
-    virtual Angle* clone() const
-    {
-        return new Angle(*this);
-    }
+        friend QDataStream & ::operator<<(QDataStream &, const Angle &);
+        friend QDataStream & ::operator>>(QDataStream &, Angle &);
 
-    Angle& operator=(const Angle &other);
+    public:
+        Angle();
+        Angle(const SireMol::Atom &atom0, const SireMol::Atom &atom1, const SireMol::Atom &atom2);
+        Angle(const SireMol::MoleculeView &molview, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+              const SireMol::AtomID &atom2);
+        Angle(const SireMol::MoleculeData &moldata, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+              const SireMol::AtomID &atom2);
+        Angle(const SireMol::MoleculeData &moldata, const SireMol::AngleID &angle);
 
-    bool operator==(const Angle &other) const;
-    bool operator!=(const Angle &other) const;
+        Angle(const Angle &other);
+        virtual ~Angle();
 
-    SireMol::MolViewPtr toSelector() const;
+        static const char *typeName();
 
-    QString toString() const;
+        virtual const char *what() const
+        {
+            return Angle::typeName();
+        }
 
-    SireMol::Atom atom0() const;
-    SireMol::Atom atom1() const;
-    SireMol::Atom atom2() const;
+        virtual Angle *clone() const
+        {
+            return new Angle(*this);
+        }
 
-    SireMol::AngleID ID() const;
+        Angle &operator=(const Angle &other);
 
-    bool isEmpty() const;
-    bool selectedAll() const;
+        bool operator==(const Angle &other) const;
+        bool operator!=(const Angle &other) const;
 
-    SelectorAngle selector() const;
-    SelectorAngle invert() const;
+        SireMol::MolViewPtr toSelector() const;
 
-    SireMol::AtomSelection selection() const;
+        QString toString() const;
 
-    bool hasProperty(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key) const;
-    bool hasMetadata(const SireBase::PropertyName &key,
-                     const SireBase::PropertyName &metakey) const;
+        SireMol::Atom atom0() const;
+        SireMol::Atom atom1() const;
+        SireMol::Atom atom2() const;
 
-    QStringList propertyKeys() const;
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const SireBase::PropertyName &key) const;
+        SireMol::AngleID ID() const;
 
-    SireBase::Properties properties() const;
+        bool isEmpty() const;
+        bool selectedAll() const;
 
-    SireMol::Evaluator evaluate() const;
-    SireMol::Mover<Angle> move() const;
+        SelectorAngle selector() const;
+        SelectorAngle invert() const;
 
-    const Property& property(const SireBase::PropertyName &key) const;
-    const Property& property(const SireBase::PropertyName &key,
-                             const Property &default_value) const;
+        SireMol::AtomSelection selection() const;
 
-    SireUnits::Dimension::Angle size() const;
-    SireUnits::Dimension::Angle size(const SireBase::PropertyMap &map) const;
+        bool hasProperty(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key) const;
+        bool hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const;
 
-    SireUnits::Dimension::Angle measure() const;
-    SireUnits::Dimension::Angle measure(const SireBase::PropertyMap &map) const;
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const SireBase::PropertyName &key) const;
 
-    SireCAS::Expression potential() const;
-    SireCAS::Expression potential(const SireBase::PropertyMap &map) const;
+        SireBase::Properties properties() const;
 
-    SireUnits::Dimension::GeneralUnit energy() const;
-    SireUnits::Dimension::GeneralUnit energy(
-                            const SireBase::PropertyMap &map) const;
+        SireMol::Evaluator evaluate() const;
+        SireMol::Mover<Angle> move() const;
 
-protected:
-    bool hasConnectivity() const;
-    const SireMol::Connectivity& getConnectivity() const;
+        const Property &property(const SireBase::PropertyName &key) const;
+        const Property &property(const SireBase::PropertyName &key, const Property &default_value) const;
 
-    /** The ID of the angle (holding AtomIdx IDs) */
-    SireMol::AngleID ang;
-};
+        SireUnits::Dimension::Angle size() const;
+        SireUnits::Dimension::Angle size(const SireBase::PropertyMap &map) const;
 
-}
+        SireUnits::Dimension::Angle measure() const;
+        SireUnits::Dimension::Angle measure(const SireBase::PropertyMap &map) const;
 
-Q_DECLARE_METATYPE( SireMM::Angle )
+        SireCAS::Expression potential() const;
+        SireCAS::Expression potential(const SireBase::PropertyMap &map) const;
+
+        SireUnits::Dimension::GeneralUnit energy() const;
+        SireUnits::Dimension::GeneralUnit energy(const SireBase::PropertyMap &map) const;
+
+    protected:
+        bool hasConnectivity() const;
+        const SireMol::Connectivity &getConnectivity() const;
+
+        /** The ID of the angle (holding AtomIdx IDs) */
+        SireMol::AngleID ang;
+    };
+
+} // namespace SireMM
+
+Q_DECLARE_METATYPE(SireMM::Angle)
 Q_DECLARE_METATYPE(SireMol::Mover<SireMM::Angle>);
 
-SIRE_EXPOSE_CLASS( SireMM::Angle )
-SIRE_EXPOSE_ALIAS( SireMol::Mover<SireMM::Angle>, SireMol::Mover_Angle_ )
+SIRE_EXPOSE_CLASS(SireMM::Angle)
+SIRE_EXPOSE_ALIAS(SireMol::Mover<SireMM::Angle>, SireMol::Mover_Angle_)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 
@@ -174,7 +167,7 @@ namespace SireMol
     template class SireMol::Mover<SireMM::Angle>;
 }
 
-#endif //SIRE_INSTANTIATE_TEMPLATES
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

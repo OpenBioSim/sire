@@ -31,188 +31,186 @@
 #include <QString>
 
 #include "exbase.h"
-#include "symbolvalue.h"
 #include "symbolcomplex.h"
 #include "symbolexpression.h"
+#include "symbolvalue.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Symbol;
+    class Symbol;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Symbol&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Symbol&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Symbol &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Symbol &);
 
 namespace SireCAS
 {
 
-class Symbols;
-class Values;
+    class Symbols;
+    class Values;
 
-/** This class represents an algebraic symbol in the equation (e.g. 'x' or 'y')
+    /** This class represents an algebraic symbol in the equation (e.g. 'x' or 'y')
 
-    @author Christopher Woods
-*/
-class SIRECAS_EXPORT Symbol : public ExBase
-{
-
-friend SIRECAS_EXPORT QDataStream& ::operator<<(QDataStream&, const Symbol&);
-friend SIRECAS_EXPORT QDataStream& ::operator>>(QDataStream&, Symbol&);
-
-public:
-    Symbol();
-    Symbol(SymbolID symid);
-    Symbol(const QString &rep);
-
-    Symbol(const Symbol &other);
-
-    ~Symbol();
-
-    Symbol& operator=(const Symbol &other);
-    Symbol& operator=(SymbolID symid);
-
-    /** Return the unique ID number of the symbol */
-    SymbolID ID() const
+        @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Symbol : public ExBase
     {
-        return id;
+
+        friend SIRECAS_EXPORT QDataStream & ::operator<<(QDataStream &, const Symbol &);
+        friend SIRECAS_EXPORT QDataStream & ::operator>>(QDataStream &, Symbol &);
+
+    public:
+        Symbol();
+        Symbol(SymbolID symid);
+        Symbol(const QString &rep);
+
+        Symbol(const Symbol &other);
+
+        ~Symbol();
+
+        Symbol &operator=(const Symbol &other);
+        Symbol &operator=(SymbolID symid);
+
+        /** Return the unique ID number of the symbol */
+        SymbolID ID() const
+        {
+            return id;
+        }
+
+        /** Convienient operator used to combine a symbol with a value */
+        SymbolValue operator==(double val) const
+        {
+            return SymbolValue(ID(), val);
+        }
+
+        /** Convienient operator used to combine a symbol with a value */
+        SymbolValue operator==(int val) const
+        {
+            return SymbolValue(ID(), val);
+        }
+
+        /** Convienient operator used to combine a symbol with a Complex */
+        SymbolComplex operator==(const Complex &val) const
+        {
+            return SymbolComplex(ID(), val);
+        }
+
+        /** Convieient operator used to combine a symbol with an equivalent
+            expression */
+        SymbolExpression operator==(const Expression &ex) const
+        {
+            return SymbolExpression(*this, ex);
+        }
+
+        Expression differentiate(const Symbol &symbol) const;
+        Expression integrate(const Symbol &symbol) const;
+
+        bool isFunction(const Symbol &) const;
+        bool isConstant() const;
+
+        bool operator==(const ExBase &other) const;
+
+        bool operator<(const Symbol &other) const;
+        bool operator>(const Symbol &other) const;
+        bool operator<=(const Symbol &other) const;
+        bool operator>=(const Symbol &other) const;
+
+        uint hash() const;
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return Symbol::typeName();
+        }
+
+        Symbol *clone() const;
+
+        QString toString() const;
+
+        bool isNull() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+        Expression substitute(const Identities &identities) const;
+
+        Symbols symbols() const;
+        Functions functions() const;
+        Expressions children() const;
+
+        QList<Factor> expand(const Symbol &symbol) const;
+
+    protected:
+        static SymbolID getNewID(const QString &symbol);
+        static QString getName(SymbolID symid);
+
+        /** Unique ID number that is given to every symbol */
+        SymbolID id;
+
+        /** String representation of this symbol */
+        QString stringrep;
+    };
+
+    /** This is a small class that can hold the factor and power of a symbol
+
+        @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Factor
+    {
+    public:
+        Factor();
+
+        Factor(const Symbol &symbol, double factor, double power);
+        Factor(const Symbol &symbol, const Expression &factor, const Expression &power);
+
+        Factor(const Factor &other);
+
+        ~Factor();
+
+        Factor &operator=(const Factor &other);
+
+        bool operator==(const Factor &other) const;
+        bool operator!=(const Factor &other) const;
+
+        QString toString() const;
+
+        const Symbol &symbol() const
+        {
+            return s;
+        }
+
+        const Expression &factor() const
+        {
+            return f;
+        }
+
+        const Expression &power() const
+        {
+            return p;
+        }
+
+    private:
+        /** The symbol for the factor */
+        Symbol s;
+
+        /** The factor and power */
+        Expression f, p;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const Symbol &symbol)
+    {
+        return symbol.hash();
     }
 
-    /** Convienient operator used to combine a symbol with a value */
-    SymbolValue operator==(double val) const
-    {
-        return SymbolValue(ID(), val);
-    }
-
-    /** Convienient operator used to combine a symbol with a value */
-    SymbolValue operator==(int val) const
-    {
-        return SymbolValue(ID(), val);
-    }
-
-    /** Convienient operator used to combine a symbol with a Complex */
-    SymbolComplex operator==(const Complex &val) const
-    {
-        return SymbolComplex(ID(), val);
-    }
-
-    /** Convieient operator used to combine a symbol with an equivalent
-        expression */
-    SymbolExpression operator==(const Expression &ex) const
-    {
-        return SymbolExpression(*this, ex);
-    }
-
-    Expression differentiate(const Symbol &symbol) const;
-    Expression integrate(const Symbol &symbol) const;
-
-    bool isFunction(const Symbol&) const;
-    bool isConstant() const;
-
-    bool operator==(const ExBase &other) const;
-
-    bool operator<(const Symbol &other) const;
-    bool operator>(const Symbol &other) const;
-    bool operator<=(const Symbol &other) const;
-    bool operator>=(const Symbol &other) const;
-
-    uint hash() const;
-
-    static const char* typeName();
-
-    const char* what() const
-    {
-        return Symbol::typeName();
-    }
-
-    Symbol* clone() const;
-
-    QString toString() const;
-
-    bool isNull() const;
-
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
-
-    Expression substitute(const Identities &identities) const;
-
-    Symbols symbols() const;
-    Functions functions() const;
-    Expressions children() const;
-
-    QList<Factor> expand(const Symbol &symbol) const;
-
-protected:
-
-    static SymbolID getNewID(const QString &symbol);
-    static QString getName(SymbolID symid);
-
-    /** Unique ID number that is given to every symbol */
-    SymbolID id;
-
-    /** String representation of this symbol */
-    QString stringrep;
-};
-
-/** This is a small class that can hold the factor and power of a symbol
-
-    @author Christopher Woods
-*/
-class SIRECAS_EXPORT Factor
-{
-public:
-    Factor();
-
-    Factor(const Symbol &symbol, double factor, double power);
-    Factor(const Symbol &symbol,
-           const Expression &factor, const Expression &power);
-
-    Factor(const Factor &other);
-
-    ~Factor();
-
-    Factor& operator=(const Factor &other);
-
-    bool operator==(const Factor &other) const;
-    bool operator!=(const Factor &other) const;
-
-    QString toString() const;
-
-    const Symbol& symbol() const
-    {
-        return s;
-    }
-
-    const Expression& factor() const
-    {
-        return f;
-    }
-
-    const Expression& power() const
-    {
-        return p;
-    }
-
-private:
-    /** The symbol for the factor */
-    Symbol s;
-
-    /** The factor and power */
-    Expression f, p;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const Symbol &symbol)
-{
-    return symbol.hash();
-}
-
-}
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Symbol)
 
-SIRE_EXPOSE_CLASS( SireCAS::Symbol )
-SIRE_EXPOSE_CLASS( SireCAS::Factor )
+SIRE_EXPOSE_CLASS(SireCAS::Symbol)
+SIRE_EXPOSE_CLASS(SireCAS::Factor)
 
 SIRE_END_HEADER
 

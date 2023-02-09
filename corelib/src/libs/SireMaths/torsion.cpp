@@ -40,8 +40,7 @@ static RegisterMetaType<Torsion> r_torsion(NO_ROOT);
 /** Serialise to a binary data stream */
 QDataStream &operator<<(QDataStream &ds, const Torsion &torsion)
 {
-    writeHeader(ds, r_torsion, 1) << torsion.points[0] << torsion.points[1]
-                                  << torsion.points[2] << torsion.points[3];
+    writeHeader(ds, r_torsion, 1) << torsion.points[0] << torsion.points[1] << torsion.points[2] << torsion.points[3];
 
     return ds;
 }
@@ -53,8 +52,7 @@ QDataStream &operator>>(QDataStream &ds, Torsion &torsion)
 
     if (v == 1)
     {
-        ds >> torsion.points[0] >> torsion.points[1]
-           >> torsion.points[2] >> torsion.points[3];
+        ds >> torsion.points[0] >> torsion.points[1] >> torsion.points[2] >> torsion.points[3];
     }
     else
         throw version_error(v, "1", r_torsion, CODELOC);
@@ -64,11 +62,11 @@ QDataStream &operator>>(QDataStream &ds, Torsion &torsion)
 
 /** Construct a zero torsion */
 Torsion::Torsion()
-{}
+{
+}
 
 /** Construct a torsion from the points 0 to 4 */
-Torsion::Torsion(const Vector &point0, const Vector &point1,
-                 const Vector &point2, const Vector &point3)
+Torsion::Torsion(const Vector &point0, const Vector &point1, const Vector &point2, const Vector &point3)
 {
     points[0] = point0;
     points[1] = point1;
@@ -78,13 +76,13 @@ Torsion::Torsion(const Vector &point0, const Vector &point1,
 
 /** Destructor */
 Torsion::~Torsion()
-{}
+{
+}
 
 /** Return a string representation of this torsion */
 QString Torsion::toString() const
 {
-    return QObject::tr("Torsion: Angle %1 degrees, length03 = %2")
-                  .arg(angle().to(degrees)).arg(vector03().length());
+    return QObject::tr("Torsion: Angle %1 degrees, length03 = %2").arg(angle().to(degrees)).arg(vector03().length());
 }
 
 /** Return the torsion angle of this torsion (the torsion angle 0-1-2-3
@@ -98,15 +96,15 @@ Angle Torsion::angle() const
     vector 0-1 and the plane formed by 1-2-3) */
 Angle Torsion::improperAngle() const
 {
-    //get the vector perpendicular to the plane
-    Vector perp = Vector::cross( points[2] - points[1], points[3] - points[1] );
+    // get the vector perpendicular to the plane
+    Vector perp = Vector::cross(points[2] - points[1], points[3] - points[1]);
 
-    //get the angle between the perpendicular and the vector
-    //from 0-1
-    Angle angle = Vector::angle( points[0] - points[1], perp );
+    // get the angle between the perpendicular and the vector
+    // from 0-1
+    Angle angle = Vector::angle(points[0] - points[1], perp);
 
-    //return 90 - angle
-    return (90*degrees) - angle;
+    // return 90 - angle
+    return (90 * degrees) - angle;
 }
 
 /** Return the line from point 0 to point 3 */
@@ -152,24 +150,24 @@ int Torsion::count() const
 }
 
 /** Return the point at index 'i' */
-const Vector& Torsion::point( int i ) const
+const Vector &Torsion::point(int i) const
 {
-    return points[ i % 4 ];
+    return points[i % 4];
 }
 
 /** Return the point at index 'i' */
-const Vector& Torsion::operator[] ( int i ) const
+const Vector &Torsion::operator[](int i) const
 {
     return this->point(i);
 }
 
 /** Return the point at index 'i' */
-const Vector& Torsion::at( int i ) const
+const Vector &Torsion::at(int i) const
 {
     return this->point(i);
 }
 
-const char* Torsion::typeName()
+const char *Torsion::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Torsion>() );
+    return QMetaType::typeName(qMetaTypeId<Torsion>());
 }

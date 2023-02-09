@@ -30,12 +30,12 @@
 
 #include "moleculeparser.h"
 
-#include "SireMol/atomname.h"
-#include "SireMol/resname.h"
-#include "SireMol/chainname.h"
-#include "SireMol/bondid.h"
 #include "SireMol/angleid.h"
+#include "SireMol/atomname.h"
+#include "SireMol/bondid.h"
+#include "SireMol/chainname.h"
 #include "SireMol/dihedralid.h"
+#include "SireMol/resname.h"
 
 #include "SireMM/gromacsparams.h"
 #include "SireMM/mmdetail.h"
@@ -46,505 +46,485 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class GroTop;
-class GroMolType;
-class GroAtom;
-class GroSystem;
-}
+    class GroTop;
+    class GroMolType;
+    class GroAtom;
+    class GroSystem;
+} // namespace SireIO
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::GroTop&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::GroTop&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::GroTop &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::GroTop &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::GroMolType&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::GroMolType&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::GroMolType &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::GroMolType &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::GroAtom&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::GroAtom&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::GroAtom &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::GroAtom &);
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::GroSystem&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::GroSystem&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::GroSystem &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::GroSystem &);
 
 namespace SireIO
 {
 
-using SireMM::GromacsBond;
-using SireMM::GromacsAngle;
-using SireMM::GromacsDihedral;
+    using SireMM::GromacsAngle;
+    using SireMM::GromacsBond;
+    using SireMM::GromacsDihedral;
 
-/** This class is used by GroTop to hold the intermediate representation of
-    a Gromacs atom in a moleculetype
+    /** This class is used by GroTop to hold the intermediate representation of
+        a Gromacs atom in a moleculetype
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT GroAtom
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT GroAtom
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const GroAtom&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, GroAtom&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const GroAtom &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, GroAtom &);
 
-public:
-    GroAtom();
+    public:
+        GroAtom();
 
-    GroAtom(const GroAtom &other);
+        GroAtom(const GroAtom &other);
 
-    ~GroAtom();
+        ~GroAtom();
 
-    GroAtom& operator=(const GroAtom &other);
+        GroAtom &operator=(const GroAtom &other);
 
-    bool operator==(const GroAtom &other) const;
-    bool operator!=(const GroAtom &other) const;
+        bool operator==(const GroAtom &other) const;
+        bool operator!=(const GroAtom &other) const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isNull() const;
+        bool isNull() const;
 
-    SireMol::AtomName name() const;
-    SireMol::AtomNum number() const;
+        SireMol::AtomName name() const;
+        SireMol::AtomNum number() const;
 
-    SireMol::ResName residueName() const;
-    SireMol::ResNum residueNumber() const;
+        SireMol::ResName residueName() const;
+        SireMol::ResNum residueNumber() const;
 
-    SireMol::ChainName chainName() const;
+        SireMol::ChainName chainName() const;
 
-    qint64 chargeGroup() const;
+        qint64 chargeGroup() const;
 
-    QString atomType() const;
-    QString bondType() const;
+        QString atomType() const;
+        QString bondType() const;
 
-    SireUnits::Dimension::Charge charge() const;
-    SireUnits::Dimension::MolarMass mass() const;
+        SireUnits::Dimension::Charge charge() const;
+        SireUnits::Dimension::MolarMass mass() const;
 
-    void setName(const QString &name);
-    void setNumber(qint64 number);
+        void setName(const QString &name);
+        void setNumber(qint64 number);
 
-    void setResidueName(const QString &name);
-    void setResidueNumber(qint64 number);
+        void setResidueName(const QString &name);
+        void setResidueNumber(qint64 number);
 
-    void setChainName(const QString &name);
+        void setChainName(const QString &name);
 
-    void setChargeGroup(qint64 grp);
+        void setChargeGroup(qint64 grp);
 
-    void setAtomType(const QString &atomtype);
-    void setBondType(const QString &bondtype);
+        void setAtomType(const QString &atomtype);
+        void setBondType(const QString &bondtype);
 
-    void setCharge(SireUnits::Dimension::Charge charge);
-    void setMass(SireUnits::Dimension::MolarMass mass);
+        void setCharge(SireUnits::Dimension::Charge charge);
+        void setMass(SireUnits::Dimension::MolarMass mass);
 
-private:
-    /** Name of the atom */
-    QString atmname;
+    private:
+        /** Name of the atom */
+        QString atmname;
 
-    /** Name of the residue */
-    QString resname;
+        /** Name of the residue */
+        QString resname;
 
-    /** Name of the chain */
-    QString chainname;
+        /** Name of the chain */
+        QString chainname;
 
-    /** Atom type */
-    QString atmtyp;
+        /** Atom type */
+        QString atmtyp;
 
-    /** Bond type - normally the same as the atom type */
-    QString bndtyp;
+        /** Bond type - normally the same as the atom type */
+        QString bndtyp;
 
-    /** Atom number */
-    qint64 atmnum;
+        /** Atom number */
+        qint64 atmnum;
 
-    /** Residue number */
-    qint64 resnum;
+        /** Residue number */
+        qint64 resnum;
 
-    /** Charge group */
-    qint64 chggrp;
+        /** Charge group */
+        qint64 chggrp;
 
-    /** Charge */
-    SireUnits::Dimension::Charge chg;
+        /** Charge */
+        SireUnits::Dimension::Charge chg;
 
-    /** Mass */
-    SireUnits::Dimension::MolarMass mss;
-};
+        /** Mass */
+        SireUnits::Dimension::MolarMass mss;
+    };
 
-/** This class is used by GroTop to hold an intermediate representation of a
-    Gromacs moleculetype. This provides metadata about the molecule that is
-    needed to construct the whole molecule.
+    /** This class is used by GroTop to hold an intermediate representation of a
+        Gromacs moleculetype. This provides metadata about the molecule that is
+        needed to construct the whole molecule.
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT GroMolType
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT GroMolType
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const GroMolType&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, GroMolType&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const GroMolType &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, GroMolType &);
 
-public:
-    GroMolType();
-    GroMolType(const SireMol::Molecule &mol, const PropertyMap &map=PropertyMap());
+    public:
+        GroMolType();
+        GroMolType(const SireMol::Molecule &mol, const PropertyMap &map = PropertyMap());
 
-    GroMolType(const GroMolType &other);
+        GroMolType(const GroMolType &other);
 
-    ~GroMolType();
+        ~GroMolType();
 
-    GroMolType& operator=(const GroMolType &other);
+        GroMolType &operator=(const GroMolType &other);
 
-    bool operator==(const GroMolType &other) const;
-    bool operator!=(const GroMolType &other) const;
+        bool operator==(const GroMolType &other) const;
+        bool operator!=(const GroMolType &other) const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isNull() const;
-    bool isPerturbable() const;
+        bool isNull() const;
+        bool isPerturbable() const;
 
-    QString name() const;
-    void setName(const QString &name);
+        QString name() const;
+        void setName(const QString &name);
 
-    qint64 nExcludedAtoms(bool is_lambda1=false) const;
-    void setNExcludedAtoms(qint64 nexcl, bool is_lambda1=false);
+        qint64 nExcludedAtoms(bool is_lambda1 = false) const;
+        void setNExcludedAtoms(qint64 nexcl, bool is_lambda1 = false);
 
-    SireMM::MMDetail forcefield(bool is_lambda1=false) const;
+        SireMM::MMDetail forcefield(bool is_lambda1 = false) const;
 
-    void addAtom(const GroAtom &atom, bool is_lambda1=false);
+        void addAtom(const GroAtom &atom, bool is_lambda1 = false);
 
-    void addBond(const SireMol::BondID &bond, const GromacsBond &parm, bool is_lambda1=false);
-    void addAngle(const SireMol::AngleID &angle, const GromacsAngle &parm, bool is_lambda1=false);
-    void addDihedral(const SireMol::DihedralID &dihedral, const GromacsDihedral &parm, bool is_lambda1=false);
+        void addBond(const SireMol::BondID &bond, const GromacsBond &parm, bool is_lambda1 = false);
+        void addAngle(const SireMol::AngleID &angle, const GromacsAngle &parm, bool is_lambda1 = false);
+        void addDihedral(const SireMol::DihedralID &dihedral, const GromacsDihedral &parm, bool is_lambda1 = false);
 
-    void addBonds(const QMultiHash<SireMol::BondID,GromacsBond> &bonds, bool is_lambda1=false);
-    void addAngles(const QMultiHash<SireMol::AngleID,GromacsAngle> &angles, bool is_lambda1=false);
-    void addDihedrals(const QMultiHash<SireMol::DihedralID,GromacsDihedral> &dihedrals, bool is_lambda1=false);
+        void addBonds(const QMultiHash<SireMol::BondID, GromacsBond> &bonds, bool is_lambda1 = false);
+        void addAngles(const QMultiHash<SireMol::AngleID, GromacsAngle> &angles, bool is_lambda1 = false);
+        void addDihedrals(const QMultiHash<SireMol::DihedralID, GromacsDihedral> &dihedrals, bool is_lambda1 = false);
 
-    void sanitise(QString elecstyle, QString vdwstyle,
-                  QString combrule, double elec14, double vdw14, bool is_lambda1=false);
+        void sanitise(QString elecstyle, QString vdwstyle, QString combrule, double elec14, double vdw14,
+                      bool is_lambda1 = false);
 
-    void addWarning(const QString &warning);
+        void addWarning(const QString &warning);
 
-    int nAtoms(bool is_lambda1=false) const;
-    int nResidues(bool is_lambda1=false) const;
+        int nAtoms(bool is_lambda1 = false) const;
+        int nResidues(bool is_lambda1 = false) const;
 
-    GroAtom atom(const SireMol::AtomIdx &atomidx, bool is_lambda1=false) const;
-    GroAtom atom(const SireMol::AtomNum &atomnum, bool is_lambda1=false) const;
-    GroAtom atom(const SireMol::AtomName &atomnam, bool is_lambda1=false) const;
+        GroAtom atom(const SireMol::AtomIdx &atomidx, bool is_lambda1 = false) const;
+        GroAtom atom(const SireMol::AtomNum &atomnum, bool is_lambda1 = false) const;
+        GroAtom atom(const SireMol::AtomName &atomnam, bool is_lambda1 = false) const;
 
-    QVector<GroAtom> atoms(bool is_lambda1=false) const;
-    void setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1=false);
+        QVector<GroAtom> atoms(bool is_lambda1 = false) const;
+        void setAtoms(const QVector<GroAtom> &atoms, bool is_lambda1 = false);
 
-    QVector<GroAtom> atoms(const SireMol::AtomName &atomnam, bool is_lambda1=false) const;
+        QVector<GroAtom> atoms(const SireMol::AtomName &atomnam, bool is_lambda1 = false) const;
 
-    QVector<GroAtom> atoms(const SireMol::ResIdx &residx, bool is_lambda1=false) const;
-    QVector<GroAtom> atoms(const SireMol::ResNum &resnum, bool is_lambda1=false) const;
-    QVector<GroAtom> atoms(const SireMol::ResName &resnam, bool is_lambda1=false) const;
+        QVector<GroAtom> atoms(const SireMol::ResIdx &residx, bool is_lambda1 = false) const;
+        QVector<GroAtom> atoms(const SireMol::ResNum &resnum, bool is_lambda1 = false) const;
+        QVector<GroAtom> atoms(const SireMol::ResName &resnam, bool is_lambda1 = false) const;
 
-    QMultiHash<SireMol::BondID,GromacsBond> bonds(bool is_lambda1=false) const;
-    QMultiHash<SireMol::AngleID,GromacsAngle> angles(bool is_lambda1=false) const;
-    QMultiHash<SireMol::DihedralID,GromacsDihedral> dihedrals(bool is_lambda1=false) const;
+        QMultiHash<SireMol::BondID, GromacsBond> bonds(bool is_lambda1 = false) const;
+        QMultiHash<SireMol::AngleID, GromacsAngle> angles(bool is_lambda1 = false) const;
+        QMultiHash<SireMol::DihedralID, GromacsDihedral> dihedrals(bool is_lambda1 = false) const;
 
-    bool isWater(bool is_lambda1=false) const;
-    QStringList settlesLines(bool is_lambda1=false) const;
+        bool isWater(bool is_lambda1 = false) const;
+        QStringList settlesLines(bool is_lambda1 = false) const;
 
-    QStringList warnings() const;
+        QStringList warnings() const;
 
-    bool needsSanitising(bool is_lambda1=false) const;
+        bool needsSanitising(bool is_lambda1 = false) const;
 
-private:
-    void _pvt_sanitise(bool is_lambda1=false);
+    private:
+        void _pvt_sanitise(bool is_lambda1 = false);
 
-    /** The name of this moleculetype */
-    QString nme;
+        /** The name of this moleculetype */
+        QString nme;
 
-    /** A set of warnings that are generated about this type */
-    QStringList warns;
+        /** A set of warnings that are generated about this type */
+        QStringList warns;
 
-    /** Array of all of the atoms in this molecule */
-    QVector<GroAtom> atms0;
-    QVector<GroAtom> atms1;
+        /** Array of all of the atoms in this molecule */
+        QVector<GroAtom> atms0;
+        QVector<GroAtom> atms1;
 
-    /** Array giving the index of the first atom in each residue */
-    QVector<qint64> first_atoms0;
-    QVector<qint64> first_atoms1;
+        /** Array giving the index of the first atom in each residue */
+        QVector<qint64> first_atoms0;
+        QVector<qint64> first_atoms1;
 
-    /** Hash of all of the bonds */
-    QMultiHash<SireMol::BondID,GromacsBond> bnds0;
-    QMultiHash<SireMol::BondID,GromacsBond> bnds1;
+        /** Hash of all of the bonds */
+        QMultiHash<SireMol::BondID, GromacsBond> bnds0;
+        QMultiHash<SireMol::BondID, GromacsBond> bnds1;
 
-    /** Hash of all of the angles */
-    QMultiHash<SireMol::AngleID,GromacsAngle> angs0;
-    QMultiHash<SireMol::AngleID,GromacsAngle> angs1;
+        /** Hash of all of the angles */
+        QMultiHash<SireMol::AngleID, GromacsAngle> angs0;
+        QMultiHash<SireMol::AngleID, GromacsAngle> angs1;
 
-    /** Hash of all of the dihedrals */
-    QMultiHash<SireMol::DihedralID,GromacsDihedral> dihs0;
-    QMultiHash<SireMol::DihedralID,GromacsDihedral> dihs1;
+        /** Hash of all of the dihedrals */
+        QMultiHash<SireMol::DihedralID, GromacsDihedral> dihs0;
+        QMultiHash<SireMol::DihedralID, GromacsDihedral> dihs1;
 
-    /** The details about the forcefield used for this molecule */
-    SireMM::MMDetail ffield0;
-    SireMM::MMDetail ffield1;
+        /** The details about the forcefield used for this molecule */
+        SireMM::MMDetail ffield0;
+        SireMM::MMDetail ffield1;
 
-    /** The number of excluded atoms */
-    qint64 nexcl0;
-    qint64 nexcl1;
+        /** The number of excluded atoms */
+        qint64 nexcl0;
+        qint64 nexcl1;
 
-    /** Whether this molecule is perturbable. */
-    bool is_perturbable;
-};
+        /** Whether this molecule is perturbable. */
+        bool is_perturbable;
+    };
 
-/** This class describes a Gromacs System */
-class SIREIO_EXPORT GroSystem
-{
+    /** This class describes a Gromacs System */
+    class SIREIO_EXPORT GroSystem
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const GroSystem&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, GroSystem&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const GroSystem &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, GroSystem &);
 
-public:
-    GroSystem();
-    GroSystem(const QString &name);
+    public:
+        GroSystem();
+        GroSystem(const QString &name);
 
-    GroSystem(const GroSystem &other);
+        GroSystem(const GroSystem &other);
 
-    ~GroSystem();
+        ~GroSystem();
 
-    GroSystem& operator=(const GroSystem &other);
+        GroSystem &operator=(const GroSystem &other);
 
-    bool operator==(const GroSystem &other) const;
-    bool operator!=(const GroSystem &other) const;
+        bool operator==(const GroSystem &other) const;
+        bool operator!=(const GroSystem &other) const;
 
-    QString operator[](int i) const;
+        QString operator[](int i) const;
 
-    QString at(int i) const;
+        QString at(int i) const;
 
-    int size() const;
-    int count() const;
-    int nMolecules() const;
+        int size() const;
+        int count() const;
+        int nMolecules() const;
 
-    QStringList uniqueTypes() const;
+        QStringList uniqueTypes() const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString name() const;
-    void setName(QString name);
+        QString name() const;
+        void setName(QString name);
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isNull() const;
-    bool isEmpty() const;
+        bool isNull() const;
+        bool isEmpty() const;
 
-    void add(QString moltype, int ncopies=1);
+        void add(QString moltype, int ncopies = 1);
 
-private:
-    /** Name of the system */
-    QString nme;
+    private:
+        /** Name of the system */
+        QString nme;
 
-    /** The list of molecule types */
-    QStringList moltypes;
+        /** The list of molecule types */
+        QStringList moltypes;
 
-    /** The number of each type of molecule */
-    QList<qint64> nmols;
+        /** The number of each type of molecule */
+        QList<qint64> nmols;
 
-    /** The total number of molecules */
-    qint64 total_nmols;
-};
+        /** The total number of molecules */
+        qint64 total_nmols;
+    };
 
-/** This class holds a parser for reading and writing Gromacs "top" topology files.
+    /** This class holds a parser for reading and writing Gromacs "top" topology files.
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT GroTop : public SireBase::ConcreteProperty<GroTop,MoleculeParser>
-{
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT GroTop : public SireBase::ConcreteProperty<GroTop, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const GroTop&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, GroTop&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const GroTop &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, GroTop &);
 
-public:
-    GroTop();
-    GroTop(const QString &filename,
-           const PropertyMap &map = PropertyMap());
+    public:
+        GroTop();
+        GroTop(const QString &filename, const PropertyMap &map = PropertyMap());
 
-    GroTop(const QStringList &lines,
-           const PropertyMap &map = PropertyMap());
-    GroTop(const SireSystem::System &system,
-           const PropertyMap &map = PropertyMap());
+        GroTop(const QStringList &lines, const PropertyMap &map = PropertyMap());
+        GroTop(const SireSystem::System &system, const PropertyMap &map = PropertyMap());
 
-    GroTop(const GroTop &other);
+        GroTop(const GroTop &other);
 
-    ~GroTop();
+        ~GroTop();
 
-    GroTop& operator=(const GroTop &other);
+        GroTop &operator=(const GroTop &other);
 
-    bool operator==(const GroTop &other) const;
-    bool operator!=(const GroTop &other) const;
+        bool operator==(const GroTop &other) const;
+        bool operator!=(const GroTop &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    bool isTopology() const;
+        bool isTopology() const;
 
-    QStringList includePath(bool absolute_paths=false) const;
-    QStringList includedFiles(bool absolute_paths=false) const;
+        QStringList includePath(bool absolute_paths = false) const;
+        QStringList includedFiles(bool absolute_paths = false) const;
 
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-    int nonBondedFunctionType() const;
-    int combiningRules() const;
-    double fudgeLJ() const;
-    double fudgeQQ() const;
-    bool generateNonBondedPairs() const;
+        int nonBondedFunctionType() const;
+        int combiningRules() const;
+        double fudgeLJ() const;
+        double fudgeQQ() const;
+        bool generateNonBondedPairs() const;
 
-    SireMM::GromacsAtomType atomType(const QString &atm) const;
+        SireMM::GromacsAtomType atomType(const QString &atm) const;
 
-    SireMM::GromacsBond bond(const QString &atm0, const QString &atm1, int func) const;
-    QList<SireMM::GromacsBond> bonds(const QString &atm0, const QString &atm1, int func) const;
+        SireMM::GromacsBond bond(const QString &atm0, const QString &atm1, int func) const;
+        QList<SireMM::GromacsBond> bonds(const QString &atm0, const QString &atm1, int func) const;
 
-    SireMM::GromacsAngle angle(const QString &atm0, const QString &atm1,
-                               const QString &atm2, int func) const;
+        SireMM::GromacsAngle angle(const QString &atm0, const QString &atm1, const QString &atm2, int func) const;
 
-    QList<SireMM::GromacsAngle> angles(const QString &atm0, const QString &atm1,
-                                       const QString &atm2, int func) const;
+        QList<SireMM::GromacsAngle> angles(const QString &atm0, const QString &atm1, const QString &atm2, int func) const;
 
-    SireMM::GromacsDihedral dihedral(const QString &atm0, const QString &atm1,
-                                     const QString &atm2, const QString &atm3,
-                                     int func) const;
+        SireMM::GromacsDihedral dihedral(const QString &atm0, const QString &atm1, const QString &atm2, const QString &atm3,
+                                         int func) const;
 
-    QList<SireMM::GromacsDihedral> dihedrals(const QString &atm0, const QString &atm1,
-                                             const QString &atm2, const QString &atm3,
-                                             int func) const;
+        QList<SireMM::GromacsDihedral> dihedrals(const QString &atm0, const QString &atm1, const QString &atm2,
+                                                 const QString &atm3, int func) const;
 
-    QHash<QString,SireMM::GromacsAtomType> atomTypes() const;
+        QHash<QString, SireMM::GromacsAtomType> atomTypes() const;
 
-    QMultiHash<QString,SireMM::GromacsBond> bondPotentials() const;
-    QMultiHash<QString,SireMM::GromacsAngle> anglePotentials() const;
-    QMultiHash<QString,SireMM::GromacsDihedral> dihedralPotentials() const;
+        QMultiHash<QString, SireMM::GromacsBond> bondPotentials() const;
+        QMultiHash<QString, SireMM::GromacsAngle> anglePotentials() const;
+        QMultiHash<QString, SireMM::GromacsDihedral> dihedralPotentials() const;
 
-    GroMolType moleculeType(const QString &name) const;
-    QVector<GroMolType> moleculeTypes() const;
+        GroMolType moleculeType(const QString &name) const;
+        QVector<GroMolType> moleculeTypes() const;
 
-    int nAtoms() const;
+        int nAtoms() const;
 
-    GroSystem groSystem() const;
+        GroSystem groSystem() const;
 
-    QStringList postprocessedLines() const;
+        QStringList postprocessedLines() const;
 
-    QStringList warnings() const;
+        QStringList warnings() const;
 
-protected:
-    SireSystem::System startSystem(const PropertyMap &map) const;
+    protected:
+        SireSystem::System startSystem(const PropertyMap &map) const;
 
-private:
-    void assertSane() const;
-    void parseLines(const QString &path, const PropertyMap &map);
+    private:
+        void assertSane() const;
+        void parseLines(const QString &path, const PropertyMap &map);
 
-    void getIncludePath(const PropertyMap &map);
+        void getIncludePath(const PropertyMap &map);
 
-    QString searchForDihType(const QString &atom0, const QString &atom1,
-                             const QString &atom2, const QString &atom3,
-                             int func) const;
+        QString searchForDihType(const QString &atom0, const QString &atom1, const QString &atom2, const QString &atom3,
+                                 int func) const;
 
-    QString findIncludeFile(QString filename, QString current_directory);
+        QString findIncludeFile(QString filename, QString current_directory);
 
-    QVector<QString> loadInclude(QString filename, QString current_directory);
+        QVector<QString> loadInclude(QString filename, QString current_directory);
 
-    QVector<QString> preprocess(const QVector<QString> &lines,
-                                QHash<QString,QString> &defines,
-                                const QString &current_directory,
-                                const QString &parent_file);
+        QVector<QString> preprocess(const QVector<QString> &lines, QHash<QString, QString> &defines,
+                                    const QString &current_directory, const QString &parent_file);
 
-    void interpret();
+        void interpret();
 
-    QStringList processDirectives(const QMap<int,QString> &taglocs,
-                                  const QHash<QString,int> &ntags);
+        QStringList processDirectives(const QMap<int, QString> &taglocs, const QHash<QString, int> &ntags);
 
-    const QVector<QString>& expandedLines() const;
+        const QVector<QString> &expandedLines() const;
 
-    SireMol::Molecule createMolecule(const GroMolType &moltype, QStringList &errors,
-                                     const PropertyMap &map) const;
-    SireMol::Molecule createMolecule(QString moltype, QStringList &errors,
-                                     const PropertyMap &map) const;
+        SireMol::Molecule createMolecule(const GroMolType &moltype, QStringList &errors, const PropertyMap &map) const;
+        SireMol::Molecule createMolecule(QString moltype, QStringList &errors, const PropertyMap &map) const;
 
-    typedef std::tuple<SireBase::Properties,QStringList> PropsAndErrors;
+        typedef std::tuple<SireBase::Properties, QStringList> PropsAndErrors;
 
-    PropsAndErrors getAtomProperties(const SireMol::MoleculeInfo &molinfo,
-                                     const GroMolType &moltype) const;
-    PropsAndErrors getBondProperties(const SireMol::MoleculeInfo &molinfo,
-                                     const GroMolType &moltype) const;
-    PropsAndErrors getAngleProperties(const SireMol::MoleculeInfo &molinfo,
-                                      const GroMolType &moltype) const;
-    PropsAndErrors getDihedralProperties(const SireMol::MoleculeInfo &molinfo,
-                                         const GroMolType &moltype) const;
+        PropsAndErrors getAtomProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
+        PropsAndErrors getBondProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
+        PropsAndErrors getAngleProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
+        PropsAndErrors getDihedralProperties(const SireMol::MoleculeInfo &molinfo, const GroMolType &moltype) const;
 
-    /** This is the full search path of all directories that should
-        be searched for Gromacs include files */
-    QStringList include_path;
+        /** This is the full search path of all directories that should
+            be searched for Gromacs include files */
+        QStringList include_path;
 
-    /** This is the set of files that had to be included as part of parsing
-        this file, arranged as dependencies of the files */
-    QHash<QString,QStringList> included_files;
+        /** This is the set of files that had to be included as part of parsing
+            this file, arranged as dependencies of the files */
+        QHash<QString, QStringList> included_files;
 
-    /** The post-processed lines */
-    QVector<QString> expanded_lines;
+        /** The post-processed lines */
+        QVector<QString> expanded_lines;
 
-    /** The database of atom types */
-    QHash<QString,SireMM::GromacsAtomType> atom_types;
+        /** The database of atom types */
+        QHash<QString, SireMM::GromacsAtomType> atom_types;
 
-    /** The database of bond potentials */
-    QMultiHash<QString,SireMM::GromacsBond> bond_potentials;
+        /** The database of bond potentials */
+        QMultiHash<QString, SireMM::GromacsBond> bond_potentials;
 
-    /** The database of angle potentials */
-    QMultiHash<QString,SireMM::GromacsAngle> ang_potentials;
+        /** The database of angle potentials */
+        QMultiHash<QString, SireMM::GromacsAngle> ang_potentials;
 
-    /** The database of dihedral potentials */
-    QMultiHash<QString,SireMM::GromacsDihedral> dih_potentials;
+        /** The database of dihedral potentials */
+        QMultiHash<QString, SireMM::GromacsDihedral> dih_potentials;
 
-    /** The list of all moleculetypes loaded from this file */
-    QVector<GroMolType> moltypes;
+        /** The list of all moleculetypes loaded from this file */
+        QVector<GroMolType> moltypes;
 
-    /** The GroSystem that describes the system in full */
-    GroSystem grosys;
+        /** The GroSystem that describes the system in full */
+        GroSystem grosys;
 
-    /** The non-bonded function type to use for all molecules */
-    qint32 nb_func_type;
+        /** The non-bonded function type to use for all molecules */
+        qint32 nb_func_type;
 
-    /** The combining rule used for all molecules */
-    qint32 combining_rule;
+        /** The combining rule used for all molecules */
+        qint32 combining_rule;
 
-    /** The fudge LJ value for all molecules */
-    double fudge_lj;
+        /** The fudge LJ value for all molecules */
+        double fudge_lj;
 
-    /** The fudge QQ value for all molecules */
-    double fudge_qq;
+        /** The fudge QQ value for all molecules */
+        double fudge_qq;
 
-    /** All of the parse warnings */
-    QStringList parse_warnings;
+        /** All of the parse warnings */
+        QStringList parse_warnings;
 
-    /** Whether or not to generate pairs for all molecules */
-    bool generate_pairs;
-};
+        /** Whether or not to generate pairs for all molecules */
+        bool generate_pairs;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::GroTop )
-Q_DECLARE_METATYPE( SireIO::GroMolType )
-Q_DECLARE_METATYPE( SireIO::GroAtom )
-Q_DECLARE_METATYPE( SireIO::GroSystem )
+Q_DECLARE_METATYPE(SireIO::GroTop)
+Q_DECLARE_METATYPE(SireIO::GroMolType)
+Q_DECLARE_METATYPE(SireIO::GroAtom)
+Q_DECLARE_METATYPE(SireIO::GroSystem)
 
-SIRE_EXPOSE_CLASS( SireIO::GroTop )
-SIRE_EXPOSE_CLASS( SireIO::GroMolType )
-SIRE_EXPOSE_CLASS( SireIO::GroAtom )
-SIRE_EXPOSE_CLASS( SireIO::GroSystem )
+SIRE_EXPOSE_CLASS(SireIO::GroTop)
+SIRE_EXPOSE_CLASS(SireIO::GroMolType)
+SIRE_EXPOSE_CLASS(SireIO::GroAtom)
+SIRE_EXPOSE_CLASS(SireIO::GroSystem)
 
 SIRE_END_HEADER
 

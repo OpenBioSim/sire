@@ -63,24 +63,23 @@ QDataStream &operator>>(QDataStream &ds, LJParameter &ljparam)
 
 /** Construct a dummy LJ parameter */
 LJParameter::LJParameter() : sqrtsig(0.0), sqrteps(0.0)
-{}
+{
+}
 
 /** Construct from an LJPair */
-LJParameter::LJParameter(const LJPair &ljpair)
-            : sqrtsig(ljpair.sqrtSigma()),
-              sqrteps(ljpair.sqrtEpsilon())
-{}
+LJParameter::LJParameter(const LJPair &ljpair) : sqrtsig(ljpair.sqrtSigma()), sqrteps(ljpair.sqrtEpsilon())
+{
+}
 
 /** Copy constructor */
-LJParameter::LJParameter(const LJParameter &other)
-            : sqrtsig(other.sqrtsig), sqrteps(other.sqrteps)
-{}
+LJParameter::LJParameter(const LJParameter &other) : sqrtsig(other.sqrtsig), sqrteps(other.sqrteps)
+{
+}
 
 /** Construct a LJParameter that has the specified sigma and epsilon */
-LJParameter::LJParameter(Length s, MolarEnergy e)
-            : sqrtsig( std::sqrt(std::abs(s)) ), sqrteps( std::sqrt(std::abs(e)) )
+LJParameter::LJParameter(Length s, MolarEnergy e) : sqrtsig(std::sqrt(std::abs(s))), sqrteps(std::sqrt(std::abs(e)))
 {
-    if ( SireMaths::isZero(sqrtsig) or SireMaths::isZero(sqrteps) )
+    if (SireMaths::isZero(sqrtsig) or SireMaths::isZero(sqrteps))
     {
         sqrtsig = 0.0;
         sqrteps = 0.0;
@@ -89,7 +88,8 @@ LJParameter::LJParameter(Length s, MolarEnergy e)
 
 /** Destructor */
 LJParameter::~LJParameter()
-{}
+{
+}
 
 /** Return the LJParameter that is this parameter combined with 'other'
     using arithmetic combining rules */
@@ -119,38 +119,35 @@ LJParameter LJParameter::combineGeometric(const LJParameter &other) const
 
 /** Return the LJParameter that is this parameter combined with 'other' according
     to the passed combining rules */
-LJParameter LJParameter::combine(const LJParameter &other,
-                                 LJParameter::CombiningRules rules) const
+LJParameter LJParameter::combine(const LJParameter &other, LJParameter::CombiningRules rules) const
 {
-    switch(rules)
+    switch (rules)
     {
-        case LJParameter::ARITHMETIC:
-            return this->combineArithmetic(other);
-        case LJParameter::GEOMETRIC:
-            return this->combineGeometric(other);
-        default:
-            return this->combineGeometric(other);
+    case LJParameter::ARITHMETIC:
+        return this->combineArithmetic(other);
+    case LJParameter::GEOMETRIC:
+        return this->combineGeometric(other);
+    default:
+        return this->combineGeometric(other);
     }
 }
 
 /** Return a dummy CLJParameter */
 LJParameter LJParameter::dummy()
 {
-    return LJParameter( Length(0), MolarEnergy(0) );
+    return LJParameter(Length(0), MolarEnergy(0));
 }
 
 /** Return the LJ 'A' parameter */
 double LJParameter::A() const
 {
-    return double(4.0) * double(epsilon())
-                       * SireMaths::pow_12( double(sigma()) );
+    return double(4.0) * double(epsilon()) * SireMaths::pow_12(double(sigma()));
 }
 
 /** Return the LJ 'B' parameter */
 double LJParameter::B() const
 {
-    return double(4.0) * double(epsilon())
-                       * SireMaths::pow_6( double(sigma()) );
+    return double(4.0) * double(epsilon()) * SireMaths::pow_6(double(sigma()));
 }
 
 /** Return the LJ 'rmin' parameter - this is the location of the minimum.
@@ -166,8 +163,7 @@ Length LJParameter::rmin() const
 /** Return a string representation of the CLJ parameter */
 QString LJParameter::toString() const
 {
-    return QString("LJ( sigma = %1, epsilon = %2 )").arg(sigma().toString())
-                                                    .arg(epsilon().toString());
+    return QString("LJ( sigma = %1, epsilon = %2 )").arg(sigma().toString()).arg(epsilon().toString());
 }
 
 /** Return a LJ parameter that corresponds to the passed values of sigma and epsilon,
@@ -176,7 +172,7 @@ QString LJParameter::toString() const
 */
 LJParameter LJParameter::fromSigmaAndEpsilon(Length sigma, MolarEnergy epsilon)
 {
-    return LJParameter(sigma,epsilon);
+    return LJParameter(sigma, epsilon);
 }
 
 /** Return a LJ parameter that corresponds to the passed LJ parameters A and B,
@@ -194,8 +190,7 @@ LJParameter LJParameter::fromAAndB(double a, double b)
     //           epsilon = B / (4 (A/B) )
     //                   = B^2 / 4A
 
-    return LJParameter( Length(std::pow( (a/b), (1.0/6.0)) ),
-                        MolarEnergy((b*b) / (4.0*a)) );
+    return LJParameter(Length(std::pow((a / b), (1.0 / 6.0))), MolarEnergy((b * b) / (4.0 * a)));
 }
 
 /** Return a LJ parameter that corresponds to the curve that has a minimum at
@@ -207,13 +202,12 @@ LJParameter LJParameter::fromAAndB(double a, double b)
 */
 LJParameter LJParameter::fromRMinAndEpsilon(Length rmin, MolarEnergy epsilon)
 {
-    //sigma = rmin / 2^(1/6) - 2^(1/6) = 1.122462048309372981439932526193103967671
+    // sigma = rmin / 2^(1/6) - 2^(1/6) = 1.122462048309372981439932526193103967671
 
-    return LJParameter( rmin / double(1.122462048309372981439932526193103967671),
-                        epsilon );
+    return LJParameter(rmin / double(1.122462048309372981439932526193103967671), epsilon);
 }
 
-const char* LJParameter::typeName()
+const char *LJParameter::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<LJParameter>() );
+    return QMetaType::typeName(qMetaTypeId<LJParameter>());
 }

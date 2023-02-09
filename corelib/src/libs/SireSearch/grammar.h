@@ -27,14 +27,14 @@
 
 #ifndef SIRESEARCH_GRAMMAR_H
 
-using qi::lit;
-using qi::lexeme;
-using qi::eps;
 using qi::_1;
-using qi::int_;
 using qi::double_;
-using qi::on_error;
+using qi::eps;
 using qi::fail;
+using qi::int_;
+using qi::lexeme;
+using qi::lit;
+using qi::on_error;
 using namespace qi::labels;
 using qi::as_string;
 
@@ -46,20 +46,16 @@ using boost::spirit::ascii::char_;
 UserTokens getUserTokens();
 
 /** This is the grammar that enables skipping of spaces, newlines and comments */
-template<typename IteratorT>
+template <typename IteratorT>
 class SkipperGrammar : public qi::grammar<IteratorT>
 {
 public:
-    SkipperGrammar() : SkipperGrammar::base_type( rule )
+    SkipperGrammar() : SkipperGrammar::base_type(rule)
     {
-        lineCommentRule  = qi::lit( "//" ) >>
-                           *(qi::char_ -qi::eol) >>
-                           qi::eol;
-        blockCommentRule = qi::lit( "/*" ) >>
-                           *(qi::char_ -qi::lit( "*/" ) ) >>
-                           qi::lit( "*/" );
-        spaceRule        = qi::space;
-        rule             = spaceRule | lineCommentRule | blockCommentRule;
+        lineCommentRule = qi::lit("//") >> *(qi::char_ - qi::eol) >> qi::eol;
+        blockCommentRule = qi::lit("/*") >> *(qi::char_ - qi::lit("*/")) >> qi::lit("*/");
+        spaceRule = qi::space;
+        rule = spaceRule | lineCommentRule | blockCommentRule;
     }
 
     qi::rule<IteratorT> lineCommentRule;
@@ -70,582 +66,339 @@ public:
 
 /** This is a quoted string grammar that will parse quoted strings and also
     auto-escape characters */
-template<typename IteratorT, typename SkipperT>
+template <typename IteratorT, typename SkipperT>
 class ValueGrammar : public qi::grammar<IteratorT, std::string(), SkipperT>
 {
 public:
-    ValueGrammar() : ValueGrammar::base_type( rule, "String" )
+    ValueGrammar() : ValueGrammar::base_type(rule, "String")
     {
-        escapedStringRule %= qi::lexeme[
-             qi::lit( "'" ) >>
-             *( escapeCharSymbols | ( qi::char_ - qi::char_( "'" ) ) ) >>
-             qi::lit( "'" ) ];
+        escapedStringRule %=
+            qi::lexeme[qi::lit("'") >> *(escapeCharSymbols | (qi::char_ - qi::char_("'"))) >> qi::lit("'")];
 
-        rawStringRule %= qi::lexeme[
-                    +( qi::alnum |
-                       qi::char_( '.' ) |
-                       qi::char_( '/' ) |
-                       qi::char_( '_' ) |
-                       qi::char_( '-' )
-                      ) ];
+        rawStringRule %= qi::lexeme[+(qi::alnum | qi::char_('.') | qi::char_('/') | qi::char_('_') | qi::char_('-'))];
 
         rule %= rawStringRule | escapedStringRule;
 
-        escapeCharSymbols.add( "\\a", '\a' )
-                             ( "\\b", '\b' )
-                             ( "\\f", '\f' )
-                             ( "\\n", '\n' )
-                             ( "\\r", '\r' )
-                             ( "\\t", '\t' )
-                             ( "\\v", '\v' )
-                             ( "\\\\", '\\' )
-                             ( "\\\'", '\'' )
-                             ( "\\\"", '\"' );
+        escapeCharSymbols.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')("\\r", '\r')("\\t", '\t')(
+            "\\v", '\v')("\\\\", '\\')("\\\'", '\'')("\\\"", '\"');
 
-        escapedStringRule.name( "Escaped String" );
-        rawStringRule.name( "Escaped String" );
+        escapedStringRule.name("Escaped String");
+        rawStringRule.name("Escaped String");
 
-        escapeCharSymbols.name( "Escaped Chars" );
+        escapeCharSymbols.name("Escaped Chars");
     }
 
-    qi::rule<IteratorT, std::string(), SkipperT>   escapedStringRule;
-    qi::rule<IteratorT, std::string(), SkipperT>   rawStringRule;
-    qi::rule<IteratorT, std::string(), SkipperT>   rule;
-    qi::symbols<const char, const char>            escapeCharSymbols;
+    qi::rule<IteratorT, std::string(), SkipperT> escapedStringRule;
+    qi::rule<IteratorT, std::string(), SkipperT> rawStringRule;
+    qi::rule<IteratorT, std::string(), SkipperT> rule;
+    qi::symbols<const char, const char> escapeCharSymbols;
 };
 
 /** This the main grammar for the selection statements */
-template<typename IteratorT, typename SkipperT>
+template <typename IteratorT, typename SkipperT>
 class Grammar : public qi::grammar<IteratorT, AST::Node(), SkipperT>
 {
 public:
-    Grammar() : Grammar::base_type( nodeRule, "Node" )
+    Grammar() : Grammar::base_type(nodeRule, "Node")
     {
         /////
         ///// first define all of the tokens recognised by the grammar
         /////
 
-        //all of the different words to match "all"
-        all_token.add( "*", AST::IDAll(AST::VIEW) )
-                     ( "all", AST::IDAll(AST::VIEW) )
-                     ( "atoms", AST::IDAll(AST::ATOM) )
-                     ( "atom", AST::IDAll(AST::ATOM) )
-                     ( "bonds", AST::IDAll(AST::BOND) )
-                     ( "bond", AST::IDAll(AST::BOND) )
-                     ( "angles", AST::IDAll(AST::ANGLE) )
-                     ( "angle", AST::IDAll(AST::ANGLE) )
-                     ( "dihedrals", AST::IDAll(AST::DIHEDRAL) )
-                     ( "dihedral", AST::IDAll(AST::DIHEDRAL) )
-                     ( "impropers", AST::IDAll(AST::IMPROPER) )
-                     ( "improper", AST::IDAll(AST::IMPROPER) )
-                     ( "residues", AST::IDAll(AST::RESIDUE) )
-                     ( "residue", AST::IDAll(AST::RESIDUE) )
-                     ( "res", AST::IDAll(AST::RESIDUE) )
-                     ( "chains", AST::IDAll(AST::CHAIN) )
-                     ( "chain", AST::IDAll(AST::CHAIN) )
-                     ( "segments", AST::IDAll(AST::SEGMENT) )
-                     ( "segment", AST::IDAll(AST::SEGMENT) )
-                     ( "segs", AST::IDAll(AST::SEGMENT) )
-                     ( "seg", AST::IDAll(AST::SEGMENT) )
-                     ( "molecules", AST::IDAll(AST::MOLECULE) )
-                     ( "molecule", AST::IDAll(AST::MOLECULE) )
-                     ( "mols", AST::IDAll(AST::MOLECULE) )
-                     ( "mol", AST::IDAll(AST::MOLECULE) )
-                     ( "cutgroups", AST::IDAll(AST::CUTGROUP) )
-                     ( "cutgroup", AST::IDAll(AST::CUTGROUP) )
-                     ;
+        // all of the different words to match "all"
+        all_token.add("*", AST::IDAll(AST::VIEW))("all", AST::IDAll(AST::VIEW))("atoms", AST::IDAll(AST::ATOM))(
+            "atom", AST::IDAll(AST::ATOM))("bonds", AST::IDAll(AST::BOND))("bond", AST::IDAll(AST::BOND))(
+            "angles", AST::IDAll(AST::ANGLE))("angle", AST::IDAll(AST::ANGLE))("dihedrals", AST::IDAll(AST::DIHEDRAL))(
+            "dihedral", AST::IDAll(AST::DIHEDRAL))("impropers", AST::IDAll(AST::IMPROPER))(
+            "improper", AST::IDAll(AST::IMPROPER))("residues", AST::IDAll(AST::RESIDUE))(
+            "residue", AST::IDAll(AST::RESIDUE))("res", AST::IDAll(AST::RESIDUE))("chains", AST::IDAll(AST::CHAIN))(
+            "chain", AST::IDAll(AST::CHAIN))("segments", AST::IDAll(AST::SEGMENT))("segment", AST::IDAll(AST::SEGMENT))(
+            "segs", AST::IDAll(AST::SEGMENT))("seg", AST::IDAll(AST::SEGMENT))("molecules", AST::IDAll(AST::MOLECULE))(
+            "molecule", AST::IDAll(AST::MOLECULE))("mols", AST::IDAll(AST::MOLECULE))("mol", AST::IDAll(AST::MOLECULE))(
+            "cutgroups", AST::IDAll(AST::CUTGROUP))("cutgroup", AST::IDAll(AST::CUTGROUP));
 
         // all of the different tokens to match "water"
-        water_token.add( "water", AST::IDWater() )
-                       ( "WATER", AST::IDWater() )
-                       ( "wat", AST::IDWater() )
-                       ( "WAT", AST::IDWater() )
-                       ( "waters", AST::IDWater() )
-                       ( "WATERS", AST::IDWater() );
+        water_token.add("water", AST::IDWater())("WATER", AST::IDWater())("wat", AST::IDWater())("WAT", AST::IDWater())(
+            "waters", AST::IDWater())("WATERS", AST::IDWater());
 
         // all of the different tokens to match "protein"
-        protein_token.add( "protein", AST::IDProtein() )
-                         ( "proteins", AST::IDProtein() )
-                         ( "PROTEIN", AST::IDProtein() )
-                         ( "PROTEINS", AST::IDProtein() );
+        protein_token.add("protein", AST::IDProtein())("proteins", AST::IDProtein())("PROTEIN", AST::IDProtein())(
+            "PROTEINS", AST::IDProtein());
 
         // all of the different tokens to match "perturbable"
-        pert_token.add( "perturbable", AST::IDPerturbable() )
-                      ( "PERTURBABLE", AST::IDPerturbable() )
-                      ( "pert", AST::IDPerturbable() )
-                      ( "PERT", AST::IDPerturbable() );
+        pert_token.add("perturbable", AST::IDPerturbable())("PERTURBABLE", AST::IDPerturbable())(
+            "pert", AST::IDPerturbable())("PERT", AST::IDPerturbable());
 
-        //all of the different object names
-        name_token.add( "atomnam", AST::ATOM )
-                      ( "atomname", AST::ATOM )
-                      ( "cgname", AST::CUTGROUP )
-                      ( "cgnam", AST::CUTGROUP )
-                      ( "resnam", AST::RESIDUE )
-                      ( "resname", AST::RESIDUE )
-                      ( "chainnam", AST::CHAIN )
-                      ( "chainname", AST::CHAIN )
-                      ( "segnam", AST::SEGMENT )
-                      ( "segname", AST::SEGMENT )
-                      ( "molnam", AST::MOLECULE )
-                      ( "molname", AST::MOLECULE );
+        // all of the different object names
+        name_token.add("atomnam", AST::ATOM)("atomname", AST::ATOM)("cgname", AST::CUTGROUP)("cgnam", AST::CUTGROUP)(
+            "resnam", AST::RESIDUE)("resname", AST::RESIDUE)("chainnam", AST::CHAIN)("chainname", AST::CHAIN)(
+            "segnam", AST::SEGMENT)("segname", AST::SEGMENT)("molnam", AST::MOLECULE)("molname", AST::MOLECULE);
 
-        //all of the different object numbers
-        number_token
-          .add( "atomnum", QPair<AST::IDObject,AST::IDNumType>(AST::ATOM,AST::ID_NUMBER) )
-              ( "atomidx", QPair<AST::IDObject,AST::IDNumType>(AST::ATOM,AST::ID_INDEX) )
-              ( "cgnum", QPair<AST::IDObject,AST::IDNumType>(AST::CUTGROUP,AST::ID_NUMBER) )
-              ( "cgidx", QPair<AST::IDObject,AST::IDNumType>(AST::CUTGROUP,AST::ID_INDEX) )
-              ( "resnum", QPair<AST::IDObject,AST::IDNumType>(AST::RESIDUE,AST::ID_NUMBER) )
-              ( "residx", QPair<AST::IDObject,AST::IDNumType>(AST::RESIDUE,AST::ID_INDEX) )
-              ( "chainnum", QPair<AST::IDObject,AST::IDNumType>(AST::CHAIN,AST::ID_NUMBER) )
-              ( "chainidx", QPair<AST::IDObject,AST::IDNumType>(AST::CHAIN,AST::ID_INDEX) )
-              ( "segnum", QPair<AST::IDObject,AST::IDNumType>(AST::SEGMENT,AST::ID_NUMBER) )
-              ( "segidx", QPair<AST::IDObject,AST::IDNumType>(AST::SEGMENT,AST::ID_INDEX) )
-              ( "molnum", QPair<AST::IDObject,AST::IDNumType>(AST::MOLECULE,AST::ID_NUMBER) )
-              ( "molidx", QPair<AST::IDObject,AST::IDNumType>(AST::MOLECULE,AST::ID_INDEX) )
-              ;
+        // all of the different object numbers
+        number_token.add("atomnum", QPair<AST::IDObject, AST::IDNumType>(AST::ATOM, AST::ID_NUMBER))(
+            "atomidx", QPair<AST::IDObject, AST::IDNumType>(AST::ATOM, AST::ID_INDEX))(
+            "cgnum", QPair<AST::IDObject, AST::IDNumType>(AST::CUTGROUP, AST::ID_NUMBER))(
+            "cgidx", QPair<AST::IDObject, AST::IDNumType>(AST::CUTGROUP, AST::ID_INDEX))(
+            "resnum", QPair<AST::IDObject, AST::IDNumType>(AST::RESIDUE, AST::ID_NUMBER))(
+            "residx", QPair<AST::IDObject, AST::IDNumType>(AST::RESIDUE, AST::ID_INDEX))(
+            "chainnum", QPair<AST::IDObject, AST::IDNumType>(AST::CHAIN, AST::ID_NUMBER))(
+            "chainidx", QPair<AST::IDObject, AST::IDNumType>(AST::CHAIN, AST::ID_INDEX))(
+            "segnum", QPair<AST::IDObject, AST::IDNumType>(AST::SEGMENT, AST::ID_NUMBER))(
+            "segidx", QPair<AST::IDObject, AST::IDNumType>(AST::SEGMENT, AST::ID_INDEX))(
+            "molnum", QPair<AST::IDObject, AST::IDNumType>(AST::MOLECULE, AST::ID_NUMBER))(
+            "molidx", QPair<AST::IDObject, AST::IDNumType>(AST::MOLECULE, AST::ID_INDEX));
 
-        //all of the different types of logical operation
-        op_token.add( "and", AST::ID_AND )
-                    ( "AND", AST::ID_AND )
-                    ( "&", AST::ID_AND )
-                    ( "&&", AST::ID_AND )
-                    ( "or", AST::ID_OR )
-                    ( "OR", AST::ID_OR )
-                    ( "|", AST::ID_OR )
-                    ( "||", AST::ID_OR );
+        // all of the different types of logical operation
+        op_token.add("and", AST::ID_AND)("AND", AST::ID_AND)("&", AST::ID_AND)("&&", AST::ID_AND)("or", AST::ID_OR)(
+            "OR", AST::ID_OR)("|", AST::ID_OR)("||", AST::ID_OR);
 
-        //all of the different value comparison tokens
-        cmp_token.add( "<=", AST::ID_CMP_LE )
-                     ( "<", AST::ID_CMP_LT )
-                     ( "==", AST::ID_CMP_EQ )
-                     ( "!=", AST::ID_CMP_NE )
-                     ( ">=", AST::ID_CMP_GE )
-                     ( ">", AST::ID_CMP_GT )
-                     ( "=~", AST::ID_CMP_AE )
-                     ( ">~", AST::ID_CMP_GA )
-                     ( "<~", AST::ID_CMP_LA )
-                     ( "!~", AST::ID_CMP_NA )
-                     ( "<=~", AST::ID_CMP_LAE )
-                     ( ">=~", AST::ID_CMP_GAE )
-                     ;
+        // all of the different value comparison tokens
+        cmp_token.add("<=", AST::ID_CMP_LE)("<", AST::ID_CMP_LT)("==", AST::ID_CMP_EQ)("!=", AST::ID_CMP_NE)(
+            ">=", AST::ID_CMP_GE)(">", AST::ID_CMP_GT)("=~", AST::ID_CMP_AE)(">~", AST::ID_CMP_GA)(
+            "<~", AST::ID_CMP_LA)("!~", AST::ID_CMP_NA)("<=~", AST::ID_CMP_LAE)(">=~", AST::ID_CMP_GAE);
 
-        //all of the different object identification tokens
-        obj_token.add( "atoms",  AST::ATOM )
-                     ( "atom", AST::ATOM )
-                     ( "cutgroups", AST::CUTGROUP )
-                     ( "cutgroup", AST::CUTGROUP )
-                     ( "group", AST::CUTGROUP )
-                     ( "groups", AST::CUTGROUP )
-                     ( "residues", AST::RESIDUE )
-                     ( "residue", AST::RESIDUE )
-                     ( "res", AST::RESIDUE )
-                     ( "chains", AST::CHAIN )
-                     ( "chain", AST::CHAIN )
-                     ( "segments", AST::SEGMENT )
-                     ( "segment", AST::SEGMENT )
-                     ( "segs", AST::SEGMENT )
-                     ( "seg", AST::SEGMENT )
-                     ( "molecules", AST::MOLECULE )
-                     ( "molecule", AST::MOLECULE )
-                     ( "mol", AST::MOLECULE )
-                     ( "mols", AST::MOLECULE )
-                     ( "bond", AST::BOND )
-                     ( "bonds", AST::BOND )
-                    ;
+        // all of the different object identification tokens
+        obj_token.add("atoms", AST::ATOM)("atom", AST::ATOM)("cutgroups", AST::CUTGROUP)("cutgroup", AST::CUTGROUP)(
+            "group", AST::CUTGROUP)("groups", AST::CUTGROUP)("residues", AST::RESIDUE)("residue", AST::RESIDUE)(
+            "res", AST::RESIDUE)("chains", AST::CHAIN)("chain", AST::CHAIN)("segments", AST::SEGMENT)(
+            "segment", AST::SEGMENT)("segs", AST::SEGMENT)("seg", AST::SEGMENT)("molecules", AST::MOLECULE)(
+            "molecule", AST::MOLECULE)("mol", AST::MOLECULE)("mols", AST::MOLECULE)("bond", AST::BOND)("bonds",
+                                                                                                       AST::BOND);
 
-        //all of the different length unit tokens
-        length_token.add( "Angstroms", SireUnits::angstrom )
-                        ( "Angstrom", SireUnits::angstrom )
-                        ( "angstroms", SireUnits::angstrom )
-                        ( "angstrom", SireUnits::angstrom )
-                        ( "A", SireUnits::angstrom )
-                        ( "picometers", SireUnits::picometer )
-                        ( "picometer", SireUnits::picometer )
-                        ( "pm", SireUnits::picometer )
-                        ( "nanometers", SireUnits::nanometer )
-                        ( "nanometer", SireUnits::nanometer )
-                        ( "nm", SireUnits::nanometer )
-                        ;
+        // all of the different length unit tokens
+        length_token.add("Angstroms", SireUnits::angstrom)("Angstrom", SireUnits::angstrom)(
+            "angstroms", SireUnits::angstrom)("angstrom", SireUnits::angstrom)("A", SireUnits::angstrom)(
+            "picometers", SireUnits::picometer)("picometer", SireUnits::picometer)("pm", SireUnits::picometer)(
+            "nanometers", SireUnits::nanometer)("nanometer", SireUnits::nanometer)("nm", SireUnits::nanometer);
 
-        //all of the different mass tokens
-        mass_token.add( "g_per_mol", SireUnits::g_per_mol )
-                      ( "mg_per_mol", SireUnits::mg_per_mol )
-                      ( "kg_per_mol", SireUnits::kg_per_mol )
-                      ;
+        // all of the different mass tokens
+        mass_token.add("g_per_mol", SireUnits::g_per_mol)("mg_per_mol", SireUnits::mg_per_mol)("kg_per_mol",
+                                                                                               SireUnits::kg_per_mol);
 
-        //all of the different charge tokens
-        charge_token.add( "e", SireUnits::mod_electron )
-                        ( "coulomb", SireUnits::coulomb )
-                        ;
+        // all of the different charge tokens
+        charge_token.add("e", SireUnits::mod_electron)("coulomb", SireUnits::coulomb);
 
-        //all of the different "with" and "in" expression tokens
-        with_token.add( "with", AST::ID_WITH )
-                      ( "in", AST::ID_IN )
-                    ;
+        // all of the different "with" and "in" expression tokens
+        with_token.add("with", AST::ID_WITH)("in", AST::ID_IN);
 
-        //all of the different bond tokens
-        bond_token.add( "to", AST::ID_BOND_TO )
-                      ( "from", AST::ID_BOND_FROM )
-                    ;
+        // all of the different bond tokens
+        bond_token.add("to", AST::ID_BOND_TO)("from", AST::ID_BOND_FROM);
 
-        //all of the different types of coordinates tokens
-        coord_token.add( "center", AST::ID_COORD_CENTER )
-                       ( "coords.center", AST::ID_COORD_CENTER )
-                       ( "center.x", AST::ID_COORD_CENTER_X )
-                       ( "coords.center.x", AST::ID_COORD_CENTER_X )
-                       ( "center.y", AST::ID_COORD_CENTER_Y )
-                       ( "coords.center.y", AST::ID_COORD_CENTER_Y )
-                       ( "center.z", AST::ID_COORD_CENTER_Z )
-                       ( "coords.center.z", AST::ID_COORD_CENTER_Z )
-                       ( "max", AST::ID_COORD_MAX )
-                       ( "coords.max", AST::ID_COORD_MAX )
-                       ( "max.x", AST::ID_COORD_MAX_X )
-                       ( "coords.max.x", AST::ID_COORD_MAX_X )
-                       ( "max.y", AST::ID_COORD_MAX_Y )
-                       ( "coords.max.y", AST::ID_COORD_MAX_Y )
-                       ( "max.z", AST::ID_COORD_MAX_Z )
-                       ( "coords.max.z", AST::ID_COORD_MAX_Z )
-                       ( "min", AST::ID_COORD_MIN )
-                       ( "coords.min", AST::ID_COORD_MIN )
-                       ( "min.x", AST::ID_COORD_MIN_X )
-                       ( "coords.min.x", AST::ID_COORD_MIN_X )
-                       ( "min.y", AST::ID_COORD_MIN_Y )
-                       ( "coords.min.y", AST::ID_COORD_MIN_Y )
-                       ( "min.z", AST::ID_COORD_MIN_Z )
-                       ( "coords.min.z", AST::ID_COORD_MIN_Z )
-                       ( "x", AST::ID_COORD_X )
-                       ( "coords.x", AST::ID_COORD_X )
-                       ( "y", AST::ID_COORD_Y )
-                       ( "coords.y", AST::ID_COORD_Y )
-                       ( "z", AST::ID_COORD_Z )
-                       ( "coords.z", AST::ID_COORD_Z )
-                    ;
+        // all of the different types of coordinates tokens
+        coord_token.add("center", AST::ID_COORD_CENTER)("coords.center", AST::ID_COORD_CENTER)(
+            "center.x", AST::ID_COORD_CENTER_X)("coords.center.x", AST::ID_COORD_CENTER_X)(
+            "center.y", AST::ID_COORD_CENTER_Y)("coords.center.y", AST::ID_COORD_CENTER_Y)(
+            "center.z", AST::ID_COORD_CENTER_Z)("coords.center.z", AST::ID_COORD_CENTER_Z)("max", AST::ID_COORD_MAX)(
+            "coords.max", AST::ID_COORD_MAX)("max.x", AST::ID_COORD_MAX_X)("coords.max.x", AST::ID_COORD_MAX_X)(
+            "max.y", AST::ID_COORD_MAX_Y)("coords.max.y", AST::ID_COORD_MAX_Y)("max.z", AST::ID_COORD_MAX_Z)(
+            "coords.max.z", AST::ID_COORD_MAX_Z)("min", AST::ID_COORD_MIN)("coords.min", AST::ID_COORD_MIN)(
+            "min.x", AST::ID_COORD_MIN_X)("coords.min.x", AST::ID_COORD_MIN_X)("min.y", AST::ID_COORD_MIN_Y)(
+            "coords.min.y", AST::ID_COORD_MIN_Y)("min.z", AST::ID_COORD_MIN_Z)("coords.min.z", AST::ID_COORD_MIN_Z)(
+            "x", AST::ID_COORD_X)("coords.x", AST::ID_COORD_X)("y", AST::ID_COORD_Y)("coords.y", AST::ID_COORD_Y)(
+            "z", AST::ID_COORD_Z)("coords.z", AST::ID_COORD_Z);
 
-        //now add in all of the element tokens
-        for (int i=0; i<=111; ++i)  //loop through all known elements
+        // now add in all of the element tokens
+        for (int i = 0; i <= 111; ++i) // loop through all known elements
         {
             Element e(i);
 
-            //add tokens for the capitalised symbol, and lowercase symbol and name
-            element_token.add( e.symbol().toLatin1().constData(), e.symbol() );
-            element_token.add( e.symbol().toLower().toLatin1().constData(), e.symbol() );
-            element_token.add( e.name().toLower().toLatin1().constData(), e.symbol() );
+            // add tokens for the capitalised symbol, and lowercase symbol and name
+            element_token.add(e.symbol().toLatin1().constData(), e.symbol());
+            element_token.add(e.symbol().toLower().toLatin1().constData(), e.symbol());
+            element_token.add(e.name().toLower().toLatin1().constData(), e.symbol());
         }
 
         element_token.add("biological", "biological");
         element_token.add("bio", "biological");
 
-        //now get all of the user tokens (user-identified sub-expressions)
+        // now get all of the user tokens (user-identified sub-expressions)
         user_token = getUserTokens();
 
         /////
         ///// Now define all of the grammar rules
         /////
 
-        //root rule to read a node as a single expression and no further input (eoi)
+        // root rule to read a node as a single expression and no further input (eoi)
         nodeRule = expressionRule >> qi::eoi;
 
-        //convenient shortcuts for the brackets
+        // convenient shortcuts for the brackets
         static const auto leftB = qi::lit("(");
         static const auto rightB = qi::lit(")");
 
-        //rule for the left hand side of an expression - this can only
-        //be an ExpressionPartRule, or an ExpressionRule that is enclosed
-        //in brackets
-        lhsRule = (expressionPartRule) |
-                  (leftB >> expressionRule >> rightB);
+        // rule for the left hand side of an expression - this can only
+        // be an ExpressionPartRule, or an ExpressionRule that is enclosed
+        // in brackets
+        lhsRule = (expressionPartRule) | (leftB >> expressionRule >> rightB);
 
-        //rule for the right hand side of an expression - this can only
-        //be an ExpressionRule
-        rhsRule = (expressionRule) |
-                  (leftB >> expressionRule >> rightB);
+        // rule for the right hand side of an expression - this can only
+        // be an ExpressionRule
+        rhsRule = (expressionRule) | (leftB >> expressionRule >> rightB);
 
-        //an expression is either a binary, a with or an expression
-        expressionRule = binaryRule |
-                         withinRule | withinVectorRule | whereRule |
-                         withRule |
-                         subscriptRule |
-                         expressionPartRule |
-                         (leftB >> expressionRule >> rightB);
+        // an expression is either a binary, a with or an expression
+        expressionRule = binaryRule | withinRule | withinVectorRule | whereRule | withRule | subscriptRule |
+                         expressionPartRule | (leftB >> expressionRule >> rightB);
 
-        //a binary is two expressions separated by an op_token (and/or)
-        binaryRule = ( lhsRule >>
-                       op_token >>
-                       rhsRule
-                     );
+        // a binary is two expressions separated by an op_token (and/or)
+        binaryRule = (lhsRule >> op_token >> rhsRule);
 
-        //a withRule is two expressions separated by a "with" or "in"
-        withRule = ( lhsRule >>
-                     with_token >>
-                     rhsRule );
+        // a withRule is two expressions separated by a "with" or "in"
+        withRule = (lhsRule >> with_token >> rhsRule);
 
-        //grammar for a "within" expression
-        withinRule = ( lhsRule >>
-                       qi::lit("within ") >>
-                       lengthValueRule >>
-                       qi::lit("of ") >>
-                       rhsRule
-                     );
+        // grammar for a "within" expression
+        withinRule = (lhsRule >> qi::lit("within ") >> lengthValueRule >> qi::lit("of ") >> rhsRule);
 
-        //grammar for a "within" expression comparing with a vector position.
-        withinVectorRule = ( lhsRule >>
-                             qi::lit("within ") >>
-                             lengthValueRule >>
-                             qi::lit("of") >>
-                             vectorValueRule
-                           );
+        // grammar for a "within" expression comparing with a vector position.
+        withinVectorRule = (lhsRule >> qi::lit("within ") >> lengthValueRule >> qi::lit("of") >> vectorValueRule);
 
-        //grammar for a "where" expression
-        whereRule = ( lhsRule >>
-                      qi::lit("where ") >>
-                      coord_token >>
-                      (whereWithinRule | whereCompareRule)
-                    );
+        // grammar for a "where" expression
+        whereRule = (lhsRule >> qi::lit("where ") >> coord_token >> (whereWithinRule | whereCompareRule));
 
-        //sub-grammar for a "where within" expression
-        whereWithinRule = qi::lit("within ") >>
-                          lengthValueRule >>
-                          qi::lit("of ") >>
-                          rhsRule;
+        // sub-grammar for a "where within" expression
+        whereWithinRule = qi::lit("within ") >> lengthValueRule >> qi::lit("of ") >> rhsRule;
 
-        //sub-grammar for a "where comparison" expression
+        // sub-grammar for a "where comparison" expression
         whereCompareRule = cmp_token >> vectorValueRule;
 
-        //grammar to enable subscripting of an expression
-        subscriptRule = ( lhsRule >>
-                          qi::lit("[") >>
-                          rangeValueRule >>
-                          qi::lit("]")
-                        );
+        // grammar to enable subscripting of an expression
+        subscriptRule = (lhsRule >> qi::lit("[") >> rangeValueRule >> qi::lit("]"));
 
-        //an expression is either a subscript, name, number, within, where, not
-        //or user-identified expression, optionally surrounded by parenthesis '( )'
-        expressionPartRule = idNameRule | idNumberRule | idElementRule |
-                             propertyRule | bondRule |
-                             water_token | pert_token | protein_token |
-                             notRule | joinRule |
-                             massRule | massCmpRule |
-                             chargeRule | chargeCmpRule |
-                             massObjRule | massObjCmpRule |
-                             chargeObjRule | chargeObjCmpRule |
+        // an expression is either a subscript, name, number, within, where, not
+        // or user-identified expression, optionally surrounded by parenthesis '( )'
+        expressionPartRule = idNameRule | idNumberRule | idElementRule | propertyRule | bondRule | water_token |
+                             pert_token | protein_token | notRule | joinRule | massRule | massCmpRule | chargeRule |
+                             chargeCmpRule | massObjRule | massObjCmpRule | chargeObjRule | chargeObjCmpRule |
                              all_token | countRule | user_token;
 
-        //grammar that specifies a list of names (comma-separated)
-        nameValuesRule = ( nameValueRule % qi::lit( ',' ) );
+        // grammar that specifies a list of names (comma-separated)
+        nameValuesRule = (nameValueRule % qi::lit(','));
 
-        //grammar for a single name (string or regular expression)
+        // grammar for a single name (string or regular expression)
         nameValueRule = regExpRule | stringRule;
 
-        //grammar for a regular expression (identified using '/')
-        regExpRule = eps [ _val = AST::RegExpValue() ] >>
-                     (
-                        lexeme[ "/" >> as_string[+(char_ - "/")][ _val += _1 ] >> "/" ]
-                        >> -qi::lit("i")[ _val *= 1 ]
-                     )
-                     ;
+        // grammar for a regular expression (identified using '/')
+        regExpRule = eps[_val = AST::RegExpValue()] >>
+                     (lexeme["/" >> as_string[+(char_ - "/")][_val += _1] >> "/"] >> -qi::lit("i")[_val *= 1]);
 
-        //grammar for a set of integers (either as ranges or comparisons)
-        rangeValuesRule = ( (compareValueRule | rangeValueRule) % qi::lit( ',' ) );
+        // grammar for a set of integers (either as ranges or comparisons)
+        rangeValuesRule = ((compareValueRule | rangeValueRule) % qi::lit(','));
 
-        //grammar for an integer or range (e.g. 0:10, or 5)
-        rangeValueRule = eps [ _val = AST::RangeValue() ] >>
-                            (
-                                -(int_[ _val += _1 ]) >>
-                                -(qi::lit(":")[ _val *= 1 ]) >>
-                                -(int_[ _val += _1 ]) >>
-                                -(qi::lit(":")[ _val *= 1 ]) >>
-                                -(int_[ _val += _1 ])
-                            )
-                            ;
+        // grammar for an integer or range (e.g. 0:10, or 5)
+        rangeValueRule =
+            eps[_val = AST::RangeValue()] >> (-(int_[_val += _1]) >> -(qi::lit(":")[_val *= 1]) >>
+                                              -(int_[_val += _1]) >> -(qi::lit(":")[_val *= 1]) >> -(int_[_val += _1]));
 
-        massValueRule = eps [ _val = AST::IDMass() ] >>
-                            (
-                                double_[ _val += _1 ] >>
-                                mass_token[ _val += _1 ]
-                            )
-                            |
-                            (
-                                double_[ _val += _1 ]
-                            )
-                            ;
+        massValueRule =
+            eps[_val = AST::IDMass()] >> (double_[_val += _1] >> mass_token[_val += _1]) | (double_[_val += _1]);
 
-        chargeValueRule = eps [ _val = AST::IDCharge() ] >>
-                              (
-                                  double_[ _val += _1 ] >>
-                                  charge_token[ _val += _1 ]
-                              )
-                              |
-                              (
-                                  double_[ _val += _1 ]
-                              )
-                              ;
+        chargeValueRule =
+            eps[_val = AST::IDCharge()] >> (double_[_val += _1] >> charge_token[_val += _1]) | (double_[_val += _1]);
 
-        //allow looking for mass
+        // allow looking for mass
         massRule = qi::lit("mass ") >> massValueRule;
         massCmpRule = qi::lit("mass ") >> cmp_token >> massValueRule;
         massObjRule = obj_token >> qi::lit("mass ") >> massValueRule;
         massObjCmpRule = obj_token >> qi::lit("mass ") >> cmp_token >> massValueRule;
 
-        //allow looking for charge
+        // allow looking for charge
         chargeRule = qi::lit("charge ") >> chargeValueRule;
         chargeCmpRule = qi::lit("charge ") >> cmp_token >> chargeValueRule;
         chargeObjRule = obj_token >> qi::lit("charge ") >> chargeValueRule;
         chargeObjCmpRule = obj_token >> qi::lit("charge ") >> cmp_token >> chargeValueRule;
 
-        //grammar for a comparison (e.g. x > 5)
+        // grammar for a comparison (e.g. x > 5)
         compareValueRule = cmp_token >> int_;
 
-        //grammar for a length/distance (with optional unit)
-        lengthValueRule = eps [ _val = AST::LengthValue() ] >>
-                            (
-                                double_[ _val += _1 ] >>
-                                length_token[ _val += _1 ]
-                            )
-                            |
-                            (
-                                double_[ _val += _1 ]
-                            )
-                            ;
+        // grammar for a length/distance (with optional unit)
+        lengthValueRule =
+            eps[_val = AST::LengthValue()] >> (double_[_val += _1] >> length_token[_val += _1]) | (double_[_val += _1]);
 
-        //grammar for a vector/point (with optional units, and optionally in brackets '(')
-        vectorValueRule = eps[ _val = AST::VectorValue() ] >>
-                            (
-                                lengthValueRule[ _val += _1 ] >>
-                                qi::repeat(0,2)[( ',' >> lengthValueRule[ _val += _1 ] )]
-                            )
-                            |
-                            (
-                                qi::lit('(') >>
-                                lengthValueRule[ _val += _1 ] >>
-                                qi::repeat(0,2)[( ',' >> lengthValueRule[ _val += _1 ] )] >>
-                                qi::lit(')')
-                            )
-                            ;
+        // grammar for a vector/point (with optional units, and optionally in brackets '(')
+        vectorValueRule = eps[_val = AST::VectorValue()] >>
+                              (lengthValueRule[_val += _1] >> qi::repeat(0, 2)[(',' >> lengthValueRule[_val += _1])]) |
+                          (qi::lit('(') >> lengthValueRule[_val += _1] >>
+                           qi::repeat(0, 2)[(',' >> lengthValueRule[_val += _1])] >> qi::lit(')'));
 
-        //grammar for an individual name assigned to name values
+        // grammar for an individual name assigned to name values
         idNameRule = name_token >> nameValuesRule;
 
-        //grammer for an individual numbers assigned to number values
-        idNumberRule = eps [ _val = AST::IDNumber() ] >>
-                            (
-                                number_token[ _val += _1 ] >>
-                                rangeValuesRule[ _val += _1 ]
-                            )
-                            ;
+        // grammer for an individual numbers assigned to number values
+        idNumberRule = eps[_val = AST::IDNumber()] >> (number_token[_val += _1] >> rangeValuesRule[_val += _1]);
 
-        //grammar for selecting by chemical element
-        idElementRule = qi::lit("element ") >> ( element_token % qi::lit(",") );
+        // grammar for selecting by chemical element
+        idElementRule = qi::lit("element ") >> (element_token % qi::lit(","));
 
-        //allow searching by molecular property
-        propertyRule = eps [ _val = AST::IDProperty() ] >>
-                            (
-                                qi::lit("property ")[ _val /= 1 ] >>
-                                stringRule[ _val += _1 ] >>
-                                cmp_token[ _val += _1 ] >>
-                                stringRule[ _val *= _1 ]
-                            )
-                            |
-                            (
-                                qi::lit("property ")[ _val /= 1 ] >>
-                                stringRule[ _val += _1 ]
-                            )
-                            |
-                            (
-                                obj_token[ _val += _1 ] >>
-                                qi::lit("property ") >>
-                                stringRule[ _val += _1 ] >>
-                                cmp_token[ _val += _1 ] >>
-                                stringRule[ _val *= _1 ]
-                            )
-                            |
-                            (
-                                obj_token[ _val += _1 ] >>
-                                qi::lit("property ") >>
-                                stringRule[ _val += _1 ]
-                            )
-                            ;
+        // allow searching by molecular property
+        propertyRule = eps[_val = AST::IDProperty()] >> (qi::lit("property ")[_val /= 1] >> stringRule[_val += _1] >>
+                                                         cmp_token[_val += _1] >> stringRule[_val *= _1]) |
+                       (qi::lit("property ")[_val /= 1] >> stringRule[_val += _1]) |
+                       (obj_token[_val += _1] >> qi::lit("property ") >> stringRule[_val += _1] >>
+                        cmp_token[_val += _1] >> stringRule[_val *= _1]) |
+                       (obj_token[_val += _1] >> qi::lit("property ") >> stringRule[_val += _1]);
 
-        //allow looking for bonds
-        bondRule = (qi::lit("bonds ") >> bond_token >> expressionRule
-                                      >> bond_token >> expressionRule) |
+        // allow looking for bonds
+        bondRule = (qi::lit("bonds ") >> bond_token >> expressionRule >> bond_token >> expressionRule) |
                    (qi::lit("bonds ") >> bond_token >> expressionRule);
 
-        //grammar for a "not" expression
-        notRule = qi::lit("not ") >> expressionRule |
-                  qi::lit("NOT ") >> expressionRule |
-                  qi::lit("!") >> expressionRule;
+        // grammar for a "not" expression
+        notRule =
+            qi::lit("not ") >> expressionRule | qi::lit("NOT ") >> expressionRule | qi::lit("!") >> expressionRule;
 
-        //grammar for a "join" expression
+        // grammar for a "join" expression
         joinRule = qi::lit("join ") >> expressionRule;
 
-        //grammar for a count expression e.g. count(atoms) < 5
-        countRule = eps [ _val = AST::IDCount() ] >>
-                            (
-                                qi::lit("count(") >>
-                                expressionRule[ _val += _1 ] >>
-                                qi::lit(")") >>
-                                cmp_token[ _val += _1 ] >>
-                                qi::int_[ _val += _1 ]
-                            )
-                            ;
+        // grammar for a count expression e.g. count(atoms) < 5
+        countRule = eps[_val = AST::IDCount()] >> (qi::lit("count(") >> expressionRule[_val += _1] >> qi::lit(")") >>
+                                                   cmp_token[_val += _1] >> qi::int_[_val += _1]);
 
         /////
         ///// name all of the rules to simplify error messages
         /////
-        nodeRule.name( "Node" );
-        idNameRule.name( "Name" );
-        idNumberRule.name( "Number" );
-        idElementRule.name( "Element" );
-        binaryRule.name( "Binary" );
-        withRule.name( "With" );
-        withinRule.name( "Within" );
-        withinVectorRule.name( "Within Vector" );
-        notRule.name( "Not" );
-        joinRule.name( "Join" );
-        subscriptRule.name( "Subscript" );
-        whereRule.name( "Where" );
-        whereWithinRule.name( "Where Within" );
-        whereCompareRule.name( "Where Compare" );
-        countRule.name( "Count Rule" );
-        lhsRule.name( "LHS" );
-        rhsRule.name( "RHS" );
-        expressionRule.name( "Expression" );
-        expressionPartRule.name( "Expression Part" );
-        nameValuesRule.name( "Name Values" );
-        nameValueRule.name( "Name Value" );
-        rangeValuesRule.name( "Range Values" );
-        compareValueRule.name( "Compare Value" );
-        rangeValueRule.name( "Range Value" );
-        lengthValueRule.name( "Length Value" );
-        vectorValueRule.name( "Vector Value" );
-        massValueRule.name( "Mass Value" );
-        chargeValueRule.name( "Charge Value" );
-        massRule.name( "Mass Rule" );
-        massCmpRule.name( "Mass Compare Rule" );
-        massObjRule.name( "Mass Object Rule" );
-        massObjCmpRule.name( "Mass Object Compare Rule" );
-        chargeRule.name( "Charge Rule" );
-        chargeCmpRule.name( "Charge Compare Rule" );
-        chargeObjRule.name( "Charge Object Rule" );
-        chargeObjCmpRule.name( "Charge Object Compare Rule" );
-        stringRule.name( "String" );
-        regExpRule.name( "RegExp" );
-        bondRule.name( "Bond" );
-        propertyRule.name( "Property" );
+        nodeRule.name("Node");
+        idNameRule.name("Name");
+        idNumberRule.name("Number");
+        idElementRule.name("Element");
+        binaryRule.name("Binary");
+        withRule.name("With");
+        withinRule.name("Within");
+        withinVectorRule.name("Within Vector");
+        notRule.name("Not");
+        joinRule.name("Join");
+        subscriptRule.name("Subscript");
+        whereRule.name("Where");
+        whereWithinRule.name("Where Within");
+        whereCompareRule.name("Where Compare");
+        countRule.name("Count Rule");
+        lhsRule.name("LHS");
+        rhsRule.name("RHS");
+        expressionRule.name("Expression");
+        expressionPartRule.name("Expression Part");
+        nameValuesRule.name("Name Values");
+        nameValueRule.name("Name Value");
+        rangeValuesRule.name("Range Values");
+        compareValueRule.name("Compare Value");
+        rangeValueRule.name("Range Value");
+        lengthValueRule.name("Length Value");
+        vectorValueRule.name("Vector Value");
+        massValueRule.name("Mass Value");
+        chargeValueRule.name("Charge Value");
+        massRule.name("Mass Rule");
+        massCmpRule.name("Mass Compare Rule");
+        massObjRule.name("Mass Object Rule");
+        massObjCmpRule.name("Mass Object Compare Rule");
+        chargeRule.name("Charge Rule");
+        chargeCmpRule.name("Charge Compare Rule");
+        chargeObjRule.name("Charge Object Rule");
+        chargeObjCmpRule.name("Charge Object Compare Rule");
+        stringRule.name("String");
+        regExpRule.name("RegExp");
+        bondRule.name("Bond");
+        propertyRule.name("Property");
 
-        //action on failure to parse the string using the grammar
-        on_error<fail>
-        (
-            nodeRule
-          , std::cout
-                << val("Error! Expecting ")
-                << _4                               // what failed?
-                << val(" here: \"")
-                << construct<std::string>(_3, _2)   // iterators to error-pos, end
-                << val("\"")
-                << std::endl
-        );
+        // action on failure to parse the string using the grammar
+        on_error<fail>(nodeRule, std::cout << val("Error! Expecting ") << _4 // what failed?
+                                           << val(" here: \"")
+                                           << construct<std::string>(_3, _2) // iterators to error-pos, end
+                                           << val("\"") << std::endl);
     }
 
     qi::rule<IteratorT, AST::Node(), SkipperT> nodeRule;
@@ -695,22 +448,22 @@ public:
     qi::rule<IteratorT, AST::LengthValue(), SkipperT> lengthValueRule;
     qi::rule<IteratorT, AST::VectorValue(), SkipperT> vectorValueRule;
 
-    qi::symbols<char,AST::IDObject> name_token;
-    qi::symbols<char,QPair<AST::IDObject,AST::IDNumType> > number_token;
-    qi::symbols<char,AST::IDOperation> op_token;
-    qi::symbols<char,AST::IDObject> obj_token;
-    qi::symbols<char,AST::IDToken> with_token;
-    qi::symbols<char,AST::IDBondToken> bond_token;
-    qi::symbols<char,SireUnits::Dimension::Length> length_token;
-    qi::symbols<char,SireUnits::Dimension::MolarMass> mass_token;
-    qi::symbols<char,SireUnits::Dimension::Charge> charge_token;
-    qi::symbols<char,AST::IDComparison> cmp_token;
-    qi::symbols<char,AST::IDCoordType> coord_token;
-    qi::symbols<char,QString> element_token;
-    qi::symbols<char,AST::IDAll> all_token;
-    qi::symbols<char,AST::IDWater> water_token;
-    qi::symbols<char,AST::IDPerturbable> pert_token;
-    qi::symbols<char,AST::IDProtein> protein_token;
+    qi::symbols<char, AST::IDObject> name_token;
+    qi::symbols<char, QPair<AST::IDObject, AST::IDNumType>> number_token;
+    qi::symbols<char, AST::IDOperation> op_token;
+    qi::symbols<char, AST::IDObject> obj_token;
+    qi::symbols<char, AST::IDToken> with_token;
+    qi::symbols<char, AST::IDBondToken> bond_token;
+    qi::symbols<char, SireUnits::Dimension::Length> length_token;
+    qi::symbols<char, SireUnits::Dimension::MolarMass> mass_token;
+    qi::symbols<char, SireUnits::Dimension::Charge> charge_token;
+    qi::symbols<char, AST::IDComparison> cmp_token;
+    qi::symbols<char, AST::IDCoordType> coord_token;
+    qi::symbols<char, QString> element_token;
+    qi::symbols<char, AST::IDAll> all_token;
+    qi::symbols<char, AST::IDWater> water_token;
+    qi::symbols<char, AST::IDPerturbable> pert_token;
+    qi::symbols<char, AST::IDProtein> protein_token;
     UserTokens user_token;
 
     ValueGrammar<IteratorT, SkipperT> stringRule;

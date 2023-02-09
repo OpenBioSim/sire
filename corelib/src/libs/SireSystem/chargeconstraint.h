@@ -38,70 +38,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class ChargeConstraint;
+    class ChargeConstraint;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::ChargeConstraint&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::ChargeConstraint&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::ChargeConstraint &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::ChargeConstraint &);
 
 namespace SireSystem
 {
 
-using SireBase::PropertyMap;
-using SireBase::PropertyName;
+    using SireBase::PropertyMap;
+    using SireBase::PropertyName;
 
-using SireMol::MoleculeGroup;
+    using SireMol::MoleculeGroup;
 
-/** This is the base class of constraints that are used to change
-    the charges on a molecule to match those of an underlying function,
-    e.g. this can be used to recalculate the atomic partial charges of a
-    molecule every time it changes conformation, or it can
-    be used to modify the charges to correspond to
-    polarisation caused by the environment
+    /** This is the base class of constraints that are used to change
+        the charges on a molecule to match those of an underlying function,
+        e.g. this can be used to recalculate the atomic partial charges of a
+        molecule every time it changes conformation, or it can
+        be used to modify the charges to correspond to
+        polarisation caused by the environment
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT ChargeConstraint : public MoleculeConstraint
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT ChargeConstraint : public MoleculeConstraint
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const ChargeConstraint&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, ChargeConstraint&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const ChargeConstraint &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, ChargeConstraint &);
 
-public:
-    ChargeConstraint();
-    ChargeConstraint(const MoleculeGroup &molgroup,
-                     const PropertyMap &map = PropertyMap());
+    public:
+        ChargeConstraint();
+        ChargeConstraint(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    ChargeConstraint(const ChargeConstraint &other);
+        ChargeConstraint(const ChargeConstraint &other);
 
-    ~ChargeConstraint();
+        ~ChargeConstraint();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const MoleculeGroup& moleculeGroup() const;
+        const MoleculeGroup &moleculeGroup() const;
 
-    const PropertyMap& propertyMap() const;
+        const PropertyMap &propertyMap() const;
 
-protected:
-    ChargeConstraint& operator=(const ChargeConstraint &other);
+    protected:
+        ChargeConstraint &operator=(const ChargeConstraint &other);
 
-    bool operator==(const ChargeConstraint &other) const;
-    bool operator!=(const ChargeConstraint &other) const;
+        bool operator==(const ChargeConstraint &other) const;
+        bool operator!=(const ChargeConstraint &other) const;
 
-    void updateGroup(const System &system);
+        void updateGroup(const System &system);
 
-	/** The molecule group that contains the molecules
-        whose charges are being constrained */
-    SireMol::MolGroupPtr molgroup;
+        /** The molecule group that contains the molecules
+            whose charges are being constrained */
+        SireMol::MolGroupPtr molgroup;
 
-    /** The property map used to find the properties that
-        are necessary to implement this constraint */
-    PropertyMap prop_map;
-};
+        /** The property map used to find the properties that
+            are necessary to implement this constraint */
+        PropertyMap prop_map;
+    };
 
-}
+} // namespace SireSystem
 
-SIRE_EXPOSE_CLASS( SireSystem::ChargeConstraint )
+SIRE_EXPOSE_CLASS(SireSystem::ChargeConstraint)
 
 SIRE_END_HEADER
 

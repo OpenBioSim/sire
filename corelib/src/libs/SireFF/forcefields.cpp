@@ -29,36 +29,36 @@
 
 #include "forcefields.h"
 
+#include "energytable.h"
+#include "ff3d.h"
 #include "ffidx.h"
 #include "ffname.h"
-#include "ff3d.h"
-#include "energytable.h"
-#include "forcetable.h"
 #include "fieldtable.h"
+#include "forcetable.h"
 #include "potentialtable.h"
 #include "probe.h"
 
-#include "SireMol/mgnum.h"
 #include "SireMol/mgidx.h"
+#include "SireMol/mgnum.h"
 
+#include "SireMol/molecule.h"
+#include "SireMol/moleculegroup.h"
+#include "SireMol/molecules.h"
 #include "SireMol/moleculeview.h"
 #include "SireMol/partialmolecule.h"
-#include "SireMol/molecule.h"
 #include "SireMol/viewsofmol.h"
-#include "SireMol/molecules.h"
-#include "SireMol/moleculegroup.h"
 
 #include "SireCAS/identities.h"
 
-#include "SireBase/linktoproperty.h"
 #include "SireBase/combineproperties.h"
+#include "SireBase/linktoproperty.h"
 
 #include "tostring.h"
 
-#include "SireMol/errors.h"
-#include "SireFF/errors.h"
 #include "SireBase/errors.h"
 #include "SireError/errors.h"
+#include "SireFF/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireVol/space.h"
 
@@ -83,493 +83,423 @@ using SireUnits::Dimension::MolarEnergy;
 
 namespace SireFF
 {
-namespace detail
-{
-
-/** This is a private hierarchy of classes that is used just by ForceFields
-    to relate a symbol to an energy component, forcefield expression or
-    constant */
-class FFSymbol
-{
-public:
-    FFSymbol();
-    FFSymbol(const Symbol &symbol);
-
-    FFSymbol(const FFSymbol &other);
-
-    virtual ~FFSymbol();
-
-    virtual const char* what() const=0;
-
-    virtual void load(QDataStream &ds);
-    virtual void save(QDataStream &ds) const;
-
-    virtual Expression toExpression() const=0;
-
-    virtual bool isConstant() const=0;
-
-    bool isEnergy() const
+    namespace detail
     {
-        return not this->isConstant();
-    }
-
-    virtual double value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const=0;
-
-    virtual MolarEnergy energy(QVector<FFPtr> &forcefields,
-                          const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                          double scale_energy=1) const=0;
-
-    virtual void energy(EnergyTable &energytable,
-                       QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy=1) const=0;
-
-    virtual void force(ForceTable &forcetable,
-                       QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_force=1) const=0;
-
-    virtual void field(FieldTable &fieldtable,
-                       QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_field=1) const=0;
-
-    virtual void field(FieldTable &fieldtable,
-                       const Probe &probe,
-                       QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_field=1) const=0;
-
-    virtual void potential(PotentialTable &pottable,
-                           QVector<FFPtr> &forcefields,
-                           const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                           double scale_potential=1) const=0;
-
-    virtual void potential(PotentialTable &pottable,
-                           const Probe &probe,
-                           QVector<FFPtr> &forcefields,
-                           const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                           double scale_potential=1) const=0;
-
-    const Symbol& symbol() const;
-
-    template<class T>
-    bool isA() const
-    {
-        return dynamic_cast<const T*>(this) != 0;
-    }
-
-    template<class T>
-    const T& asA() const
-    {
-        return dynamic_cast<const T&>(*this);
-    }
-
-    template<class T>
-    T& asA()
-    {
-        return dynamic_cast<T&>(*this);
-    }
 
-private:
-    /** The symbol that this object represents */
-    Symbol s;
-};
-
-/** This is an FFSymbol that holds just a single value */
-class FFConstantValue : public FFSymbol
-{
-public:
-    FFConstantValue();
-    FFConstantValue(const Symbol &symbol, double value);
-
-    FFConstantValue(const FFConstantValue &other);
-
-    ~FFConstantValue();
-
-    const char* what() const
-    {
-        return "SireFF::FFConstantValue";
-    }
-
-    void load(QDataStream &ds);
-    void save(QDataStream &ds) const;
-
-    bool isConstant() const { return true; }
-
-    Expression toExpression() const;
-
-    double value() const;
-
-    double value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const;
-
-    MolarEnergy energy(QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy=1) const;
-
-    void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
-		 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-		 double scale_energy=1) const;
-
-    void force(ForceTable &forcetable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_force=1) const;
-
-    void field(FieldTable &fieldtable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
-
-    void field(FieldTable &fieldtable,
-               const Probe &probe,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
-
-    void potential(PotentialTable &pottable,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
-
-    void potential(PotentialTable &pottable,
-                   const Probe &probe,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
-
-private:
-    /** The value of this symbol */
-    double v;
-};
+        /** This is a private hierarchy of classes that is used just by ForceFields
+            to relate a symbol to an energy component, forcefield expression or
+            constant */
+        class FFSymbol
+        {
+        public:
+            FFSymbol();
+            FFSymbol(const Symbol &symbol);
 
-/** This is an FFSymbol that holds a constant expression */
-class FFConstantExpression : public FFSymbol
-{
-public:
-    FFConstantExpression();
-    FFConstantExpression(const Symbol &symbol, const Expression &expression);
+            FFSymbol(const FFSymbol &other);
 
-    FFConstantExpression(const FFConstantExpression &other);
+            virtual ~FFSymbol();
 
-    ~FFConstantExpression();
+            virtual const char *what() const = 0;
 
-    const char* what() const
-    {
-        return "SireFF::FFConstantExpression";
-    }
+            virtual void load(QDataStream &ds);
+            virtual void save(QDataStream &ds) const;
 
-    void load(QDataStream &ds);
-    void save(QDataStream &ds) const;
+            virtual Expression toExpression() const = 0;
 
-    bool isConstant() const { return true; }
-
-    Expression toExpression() const;
+            virtual bool isConstant() const = 0;
 
-    void assertNotDepends(const QSet<Symbol> &ffsymbols) const;
-
-    double value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const;
-
-    MolarEnergy energy(QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy=1) const;
-
-    void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
-		 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-		 double scale_energy=1) const;
-
-    void force(ForceTable &forcetable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_force=1) const;
-
-    void field(FieldTable &fieldtable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
-
-    void field(FieldTable &fieldtable,
-               const Probe &probe,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
-
-    void potential(PotentialTable &pottable,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
-
-    void potential(PotentialTable &pottable,
-                   const Probe &probe,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
-
-private:
-    Expression expression;
-    Symbols syms;
-};
+            bool isEnergy() const
+            {
+                return not this->isConstant();
+            }
 
-/** This is an FFSymbol that holds a single forcefield component */
-class FFSymbolFF : public FFSymbol
-{
-public:
-    FFSymbolFF();
-    FFSymbolFF(FFIdx ffidx, const Symbol &component);
+            virtual double value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const = 0;
 
-    FFSymbolFF(const FFSymbolFF &other);
+            virtual MolarEnergy energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                                       double scale_energy = 1) const = 0;
 
-    ~FFSymbolFF();
+            virtual void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
+                                const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_energy = 1) const = 0;
 
-    static const char* typeName()
-    {
-        return "SireFF::FFSymbolFF";
-    }
+            virtual void force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_force = 1) const = 0;
 
-    const char* what() const
-    {
-        return FFSymbolFF::typeName();
-    }
+            virtual void field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_field = 1) const = 0;
 
-    bool isConstant() const { return false; }
+            virtual void field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                               const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field = 1) const = 0;
 
-    void load(QDataStream &ds);
-    void save(QDataStream &ds) const;
+            virtual void potential(PotentialTable &pottable, QVector<FFPtr> &forcefields,
+                                   const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const = 0;
 
-    Expression toExpression() const;
+            virtual void potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                                   const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const = 0;
 
-    FFIdx ffIdx() const;
+            const Symbol &symbol() const;
 
-    double value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const;
+            template <class T>
+            bool isA() const
+            {
+                return dynamic_cast<const T *>(this) != 0;
+            }
 
-    MolarEnergy energy(QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy=1) const;
+            template <class T>
+            const T &asA() const
+            {
+                return dynamic_cast<const T &>(*this);
+            }
 
-    void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
-		 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-		 double scale_energy=1) const;
-
-    void force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_force=1) const;
-
-    void field(FieldTable &fieldtable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
-
-    void field(FieldTable &fieldtable,
-               const Probe &probe,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
-
-    void potential(PotentialTable &pottable,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
+            template <class T>
+            T &asA()
+            {
+                return dynamic_cast<T &>(*this);
+            }
 
-    void potential(PotentialTable &pottable,
-                   const Probe &probe,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
+        private:
+            /** The symbol that this object represents */
+            Symbol s;
+        };
 
-private:
-    /** The index of the forcefield that contains this component */
-    FFIdx ffidx;
-};
+        /** This is an FFSymbol that holds just a single value */
+        class FFConstantValue : public FFSymbol
+        {
+        public:
+            FFConstantValue();
+            FFConstantValue(const Symbol &symbol, double value);
 
-/** This is an FFSymbol that represents a complete forcefield expression */
-class FFSymbolExpression : public FFSymbol
-{
-public:
-    FFSymbolExpression();
-    FFSymbolExpression(const Symbol &symbol, const Expression &expression);
+            FFConstantValue(const FFConstantValue &other);
 
-    FFSymbolExpression(const FFSymbolExpression &other);
+            ~FFConstantValue();
 
-    ~FFSymbolExpression();
+            const char *what() const
+            {
+                return "SireFF::FFConstantValue";
+            }
 
-    static const char* typeName()
-    {
-        return "SireFF::FFSymbolExpression";
-    }
+            void load(QDataStream &ds);
+            void save(QDataStream &ds) const;
 
-    const char* what() const
-    {
-        return FFSymbolExpression::typeName();
-    }
+            bool isConstant() const
+            {
+                return true;
+            }
 
-    void load(QDataStream &ds);
-    void save(QDataStream &ds) const;
+            Expression toExpression() const;
 
-    bool isConstant() const { return false; }
+            double value() const;
 
-    Expression toExpression() const;
+            double value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const;
 
-    const Expression& expression() const;
+            MolarEnergy energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_energy = 1) const;
 
-    void expandInTermsOf(const QSet<Symbol> &ffsymbols,
-                         const QHash<Symbol,FFSymbolPtr> &ffmap);
+            void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                        double scale_energy = 1) const;
 
-    double value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const;
+            void force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_force = 1) const;
 
-    MolarEnergy energy(QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy=1) const;
+            void field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_field = 1) const;
 
-    void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
-		 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-		 double scale_energy=1) const;
+            void field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                       const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field = 1) const;
 
-    void force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_force=1) const;
+            void potential(PotentialTable &pottable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                           double scale_potential = 1) const;
 
-    void field(FieldTable &fieldtable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
+            void potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const;
 
-    void field(FieldTable &fieldtable,
-               const Probe &probe,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
+        private:
+            /** The value of this symbol */
+            double v;
+        };
 
-    void potential(PotentialTable &pottable,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
+        /** This is an FFSymbol that holds a constant expression */
+        class FFConstantExpression : public FFSymbol
+        {
+        public:
+            FFConstantExpression();
+            FFConstantExpression(const Symbol &symbol, const Expression &expression);
 
-    void potential(PotentialTable &pottable,
-                   const Probe &probe,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
+            FFConstantExpression(const FFConstantExpression &other);
 
-private:
-    class Component
-    {
-    public:
-        Component();
-        Component(const Expression &scale_factor, const Symbol &component,
-                  int ffidx=-1);
+            ~FFConstantExpression();
 
-        Component(const Component &other);
+            const char *what() const
+            {
+                return "SireFF::FFConstantExpression";
+            }
 
-        ~Component();
+            void load(QDataStream &ds);
+            void save(QDataStream &ds) const;
 
-        int ffIdx() const;
-        int nDependents() const;
-        const QVector<Symbol>& dependents() const;
+            bool isConstant() const
+            {
+                return true;
+            }
 
-        double scalingFactor(const Values &values) const;
-        const Expression& scalingExpression() const;
+            Expression toExpression() const;
 
-        const Symbol& symbol() const;
+            void assertNotDepends(const QSet<Symbol> &ffsymbols) const;
 
-    private:
-        /** The symbol for this component */
-        Symbol s;
+            double value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const;
 
-        /** The symbols used in the scaling factor */
-        QVector<Symbol> deps;
+            MolarEnergy energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_energy = 1) const;
 
-        /** The expression for the scaling factor */
-        Expression sclfac;
+            void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                        double scale_energy = 1) const;
 
-        /** The index of the forcefield for this component */
-        int ffidx;
-    };
+            void force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_force = 1) const;
 
-    /** The forcefield expression */
-    Expression ffexpression;
+            void field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_field = 1) const;
 
-    /** All of the components of this expression */
-    QVector<Component> components;
+            void field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                       const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field = 1) const;
 
-    /** All of the components sorted by FFIdx */
-    QVector< QVector<Component> > sorted_components;
-};
+            void potential(PotentialTable &pottable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                           double scale_potential = 1) const;
 
-/** This is an FFSymbol that represents just a simple total of the energy
-    of the forcefields */
-class FFTotalExpression : public FFSymbol
-{
-public:
-    FFTotalExpression();
-    FFTotalExpression(const Symbol &symbol);
+            void potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const;
 
-    FFTotalExpression(const FFTotalExpression &other);
+        private:
+            Expression expression;
+            Symbols syms;
+        };
 
-    ~FFTotalExpression();
+        /** This is an FFSymbol that holds a single forcefield component */
+        class FFSymbolFF : public FFSymbol
+        {
+        public:
+            FFSymbolFF();
+            FFSymbolFF(FFIdx ffidx, const Symbol &component);
 
-    static const char* typeName()
-    {
-        return "SireFF::FFTotalExpression";
-    }
+            FFSymbolFF(const FFSymbolFF &other);
 
-    const char* what() const
-    {
-        return FFTotalExpression::typeName();
-    }
+            ~FFSymbolFF();
 
-    void load(QDataStream &ds);
-    void save(QDataStream &ds) const;
+            static const char *typeName()
+            {
+                return "SireFF::FFSymbolFF";
+            }
 
-    bool isConstant() const { return false; }
+            const char *what() const
+            {
+                return FFSymbolFF::typeName();
+            }
 
-    Expression toExpression() const;
+            bool isConstant() const
+            {
+                return false;
+            }
 
-    double value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const;
+            void load(QDataStream &ds);
+            void save(QDataStream &ds) const;
 
-    MolarEnergy energy(QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy=1) const;
+            Expression toExpression() const;
 
-    void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
-		 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-		 double scale_energy=1) const;
+            FFIdx ffIdx() const;
 
-    void force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_force=1) const;
+            double value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const;
 
+            MolarEnergy energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_energy = 1) const;
 
-    void field(FieldTable &fieldtable,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
+            void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                        double scale_energy = 1) const;
 
-    void field(FieldTable &fieldtable,
-               const Probe &probe,
-               QVector<FFPtr> &forcefields,
-               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-               double scale_field=1) const;
+            void force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_force = 1) const;
 
-    void potential(PotentialTable &pottable,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
+            void field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_field = 1) const;
 
-    void potential(PotentialTable &pottable,
-                   const Probe &probe,
-                   QVector<FFPtr> &forcefields,
-                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                   double scale_potential=1) const;
-};
+            void field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                       const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field = 1) const;
 
-} // end of namespace detail
+            void potential(PotentialTable &pottable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                           double scale_potential = 1) const;
+
+            void potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const;
+
+        private:
+            /** The index of the forcefield that contains this component */
+            FFIdx ffidx;
+        };
+
+        /** This is an FFSymbol that represents a complete forcefield expression */
+        class FFSymbolExpression : public FFSymbol
+        {
+        public:
+            FFSymbolExpression();
+            FFSymbolExpression(const Symbol &symbol, const Expression &expression);
+
+            FFSymbolExpression(const FFSymbolExpression &other);
+
+            ~FFSymbolExpression();
+
+            static const char *typeName()
+            {
+                return "SireFF::FFSymbolExpression";
+            }
+
+            const char *what() const
+            {
+                return FFSymbolExpression::typeName();
+            }
+
+            void load(QDataStream &ds);
+            void save(QDataStream &ds) const;
+
+            bool isConstant() const
+            {
+                return false;
+            }
+
+            Expression toExpression() const;
+
+            const Expression &expression() const;
+
+            void expandInTermsOf(const QSet<Symbol> &ffsymbols, const QHash<Symbol, FFSymbolPtr> &ffmap);
+
+            double value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const;
+
+            MolarEnergy energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_energy = 1) const;
+
+            void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                        double scale_energy = 1) const;
+
+            void force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_force = 1) const;
+
+            void field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_field = 1) const;
+
+            void field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                       const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field = 1) const;
+
+            void potential(PotentialTable &pottable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                           double scale_potential = 1) const;
+
+            void potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const;
+
+        private:
+            class Component
+            {
+            public:
+                Component();
+                Component(const Expression &scale_factor, const Symbol &component, int ffidx = -1);
+
+                Component(const Component &other);
+
+                ~Component();
+
+                int ffIdx() const;
+                int nDependents() const;
+                const QVector<Symbol> &dependents() const;
+
+                double scalingFactor(const Values &values) const;
+                const Expression &scalingExpression() const;
+
+                const Symbol &symbol() const;
+
+            private:
+                /** The symbol for this component */
+                Symbol s;
+
+                /** The symbols used in the scaling factor */
+                QVector<Symbol> deps;
+
+                /** The expression for the scaling factor */
+                Expression sclfac;
+
+                /** The index of the forcefield for this component */
+                int ffidx;
+            };
+
+            /** The forcefield expression */
+            Expression ffexpression;
+
+            /** All of the components of this expression */
+            QVector<Component> components;
+
+            /** All of the components sorted by FFIdx */
+            QVector<QVector<Component>> sorted_components;
+        };
+
+        /** This is an FFSymbol that represents just a simple total of the energy
+            of the forcefields */
+        class FFTotalExpression : public FFSymbol
+        {
+        public:
+            FFTotalExpression();
+            FFTotalExpression(const Symbol &symbol);
+
+            FFTotalExpression(const FFTotalExpression &other);
+
+            ~FFTotalExpression();
+
+            static const char *typeName()
+            {
+                return "SireFF::FFTotalExpression";
+            }
+
+            const char *what() const
+            {
+                return FFTotalExpression::typeName();
+            }
+
+            void load(QDataStream &ds);
+            void save(QDataStream &ds) const;
+
+            bool isConstant() const
+            {
+                return false;
+            }
+
+            Expression toExpression() const;
+
+            double value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const;
+
+            MolarEnergy energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                               double scale_energy = 1) const;
+
+            void energy(EnergyTable &energytable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                        double scale_energy = 1) const;
+
+            void force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_force = 1) const;
+
+            void field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                       double scale_field = 1) const;
+
+            void field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                       const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field = 1) const;
+
+            void potential(PotentialTable &pottable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                           double scale_potential = 1) const;
+
+            void potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential = 1) const;
+        };
+
+    } // end of namespace detail
 
 } // end of namespace SireFF
 
 using namespace SireFF::detail;
 
 /** Serialise an FFSymbol to a binary datastream */
-QDataStream& operator<<(QDataStream &ds, const FFSymbolPtr &ffsymbol)
+QDataStream &operator<<(QDataStream &ds, const FFSymbolPtr &ffsymbol)
 {
     if (ffsymbol.get() == 0)
     {
@@ -577,7 +507,7 @@ QDataStream& operator<<(QDataStream &ds, const FFSymbolPtr &ffsymbol)
     }
     else
     {
-        ds << QString( ffsymbol->what() );
+        ds << QString(ffsymbol->what());
         ffsymbol->save(ds);
     }
 
@@ -585,7 +515,7 @@ QDataStream& operator<<(QDataStream &ds, const FFSymbolPtr &ffsymbol)
 }
 
 /** Extract an FFSymbol from a binary datastream */
-QDataStream& operator>>(QDataStream &ds, FFSymbolPtr &ffsymbol)
+QDataStream &operator>>(QDataStream &ds, FFSymbolPtr &ffsymbol)
 {
     QString type_name;
 
@@ -599,30 +529,31 @@ QDataStream& operator>>(QDataStream &ds, FFSymbolPtr &ffsymbol)
     {
         if (type_name == QLatin1String("SireFF::FFSymbolFF"))
         {
-            ffsymbol.reset( new FFSymbolFF() );
+            ffsymbol.reset(new FFSymbolFF());
         }
         else if (type_name == QLatin1String("SireFF::FFConstantValue") or
                  type_name == QLatin1String("SireFF::FFSymbolValue"))
         {
-            ffsymbol.reset( new FFConstantValue() );
+            ffsymbol.reset(new FFConstantValue());
         }
         else if (type_name == QLatin1String("SireFF::FFConstantExpression"))
         {
-            ffsymbol.reset( new FFConstantExpression() );
+            ffsymbol.reset(new FFConstantExpression());
         }
         else if (type_name == QLatin1String("SireFF::FFSymbolExpression"))
         {
-            ffsymbol.reset( new FFSymbolExpression() );
+            ffsymbol.reset(new FFSymbolExpression());
         }
         else if (type_name == QLatin1String("SireFF::FFTotalExpression"))
         {
-            ffsymbol.reset( new FFTotalExpression() );
+            ffsymbol.reset(new FFTotalExpression());
         }
         else
         {
-            throw SireError::program_bug( QObject::tr(
-                "Internal error with ForceFields - it can't recognise the "
-                "FFSymbol type %1.").arg(type_name), CODELOC );
+            throw SireError::program_bug(QObject::tr("Internal error with ForceFields - it can't recognise the "
+                                                     "FFSymbol type %1.")
+                                             .arg(type_name),
+                                         CODELOC);
         }
 
         ffsymbol->load(ds);
@@ -636,18 +567,22 @@ QDataStream& operator>>(QDataStream &ds, FFSymbolPtr &ffsymbol)
 ///////////
 
 FFSymbol::FFSymbol()
-{}
+{
+}
 
 FFSymbol::FFSymbol(const Symbol &symbol) : s(symbol)
-{}
+{
+}
 
 FFSymbol::FFSymbol(const FFSymbol &other) : s(other.s)
-{}
+{
+}
 
 FFSymbol::~FFSymbol()
-{}
+{
+}
 
-const Symbol& FFSymbol::symbol() const
+const Symbol &FFSymbol::symbol() const
 {
     return s;
 }
@@ -667,18 +602,20 @@ void FFSymbol::save(QDataStream &ds) const
 ///////////
 
 FFConstantValue::FFConstantValue() : FFSymbol(), v(0)
-{}
+{
+}
 
-FFConstantValue::FFConstantValue(const Symbol &symbol, double value)
-              : FFSymbol(symbol), v(value)
-{}
+FFConstantValue::FFConstantValue(const Symbol &symbol, double value) : FFSymbol(symbol), v(value)
+{
+}
 
-FFConstantValue::FFConstantValue(const FFConstantValue &other)
-               : FFSymbol(other), v(other.v)
-{}
+FFConstantValue::FFConstantValue(const FFConstantValue &other) : FFSymbol(other), v(other.v)
+{
+}
 
 FFConstantValue::~FFConstantValue()
-{}
+{
+}
 
 void FFConstantValue::load(QDataStream &ds)
 {
@@ -702,81 +639,71 @@ double FFConstantValue::value() const
     return v;
 }
 
-double FFConstantValue::value(const QHash<Symbol,FFSymbolPtr>&) const
+double FFConstantValue::value(const QHash<Symbol, FFSymbolPtr> &) const
 {
     return v;
 }
 
-MolarEnergy FFConstantValue::energy(QVector<FFPtr> &forcefields,
-                                  const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                  double scale_energy) const
+MolarEnergy FFConstantValue::energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
+                                    double scale_energy) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not have an energy, and should "
-            "not be called as if they have an energy! %1 == %2")
-                .arg(this->symbol().toString()).arg(v), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not have an energy, and should "
+                                             "not be called as if they have an energy! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(v),
+                                 CODELOC);
 
     return MolarEnergy();
 }
 
-void FFConstantValue::energy(EnergyTable &energytable,
-                          QVector<FFPtr> &forcefields,
-                          const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                          double scale_energy) const
+void FFConstantValue::energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
+                             const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_energy) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not have an energy, and should "
-            "not be called as if they have an energy! %1 == %2")
-                .arg(this->symbol().toString()).arg(v), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not have an energy, and should "
+                                             "not be called as if they have an energy! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(v),
+                                 CODELOC);
 }
 
-void FFConstantValue::force(ForceTable &forcetable,
-                          QVector<FFPtr> &forcefields,
-                          const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                          double scale_force) const
+void FFConstantValue::force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
+                            const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_force) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not cause a force, and should "
-            "not be called as if they could cause a force! %1 == %2")
-                .arg(this->symbol().toString()).arg(v), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not cause a force, and should "
+                                             "not be called as if they could cause a force! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(v),
+                                 CODELOC);
 }
 
-void FFConstantValue::field(FieldTable &fieldtable,
-                            QVector<FFPtr> &forcefields,
-                            const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                            double scale_field) const
+void FFConstantValue::field(FieldTable &fieldtable, QVector<FFPtr> &forcefields,
+                            const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not cause a field, and should "
-            "not be called as if they could cause a field! %1 == %2")
-                .arg(this->symbol().toString()).arg(v), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not cause a field, and should "
+                                             "not be called as if they could cause a field! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(v),
+                                 CODELOC);
 }
 
-void FFConstantValue::field(FieldTable &fieldtable,
-                            const Probe &probe,
-                            QVector<FFPtr> &forcefields,
-                            const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                            double scale_field) const
+void FFConstantValue::field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                            const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     FFConstantValue::field(fieldtable, forcefields, ffsymbols, scale_field);
 }
 
-void FFConstantValue::potential(PotentialTable &pottable,
-                                QVector<FFPtr> &forcefields,
-                                const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                double scale_potential) const
+void FFConstantValue::potential(PotentialTable &pottable, QVector<FFPtr> &forcefields,
+                                const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not cause a field, and should "
-            "not be called as if they could cause a field! %1 == %2")
-                .arg(this->symbol().toString()).arg(v), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not cause a field, and should "
+                                             "not be called as if they could cause a field! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(v),
+                                 CODELOC);
 }
 
-void FFConstantValue::potential(PotentialTable &pottable,
-                                const Probe &probe,
-                                QVector<FFPtr> &forcefields,
-                                const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                double scale_potential) const
+void FFConstantValue::potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                                const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     FFConstantValue::potential(pottable, forcefields, ffsymbols, scale_potential);
 }
@@ -786,20 +713,22 @@ void FFConstantValue::potential(PotentialTable &pottable,
 ///////////
 
 FFConstantExpression::FFConstantExpression() : FFSymbol()
-{}
+{
+}
 
-FFConstantExpression::FFConstantExpression(const Symbol &symbol,
-                                           const Expression &e)
-                     : FFSymbol(symbol), expression(e), syms(e.symbols())
-{}
+FFConstantExpression::FFConstantExpression(const Symbol &symbol, const Expression &e)
+    : FFSymbol(symbol), expression(e), syms(e.symbols())
+{
+}
 
 FFConstantExpression::FFConstantExpression(const FFConstantExpression &other)
-                     : FFSymbol(other), expression(other.expression),
-                       syms(other.syms)
-{}
+    : FFSymbol(other), expression(other.expression), syms(other.syms)
+{
+}
 
 FFConstantExpression::~FFConstantExpression()
-{}
+{
+}
 
 void FFConstantExpression::load(QDataStream &ds)
 {
@@ -827,11 +756,12 @@ void FFConstantExpression::assertNotDepends(const QSet<Symbol> &ffsyms) const
         foreach (const Symbol &ffsym, ffsyms)
         {
             if (syms.contains(ffsym))
-                throw SireError::incompatible_error( QObject::tr(
-                    "The constant expression %1 == %2 is not really constant as it "
-                    "depends on the energy expression with symbol %3.")
+                throw SireError::incompatible_error(
+                    QObject::tr("The constant expression %1 == %2 is not really constant as it "
+                                "depends on the energy expression with symbol %3.")
                         .arg(this->symbol().toString(), expression.toString())
-                        .arg(ffsym.toString()), CODELOC );
+                        .arg(ffsym.toString()),
+                    CODELOC);
         }
     }
     else
@@ -839,16 +769,17 @@ void FFConstantExpression::assertNotDepends(const QSet<Symbol> &ffsyms) const
         foreach (const Symbol &sym, syms)
         {
             if (ffsyms.contains(sym))
-                throw SireError::incompatible_error( QObject::tr(
-                    "The constant expression %1 == %2 is not really constant as it "
-                    "depends on the energy expression with symbol %3.")
+                throw SireError::incompatible_error(
+                    QObject::tr("The constant expression %1 == %2 is not really constant as it "
+                                "depends on the energy expression with symbol %3.")
                         .arg(this->symbol().toString(), expression.toString())
-                        .arg(sym.toString()), CODELOC );
+                        .arg(sym.toString()),
+                    CODELOC);
         }
     }
 }
 
-double FFConstantExpression::value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) const
+double FFConstantExpression::value(const QHash<Symbol, FFSymbolPtr> &ffsymbols) const
 {
     if (not syms.isEmpty())
     {
@@ -864,79 +795,66 @@ double FFConstantExpression::value(const QHash<Symbol,FFSymbolPtr> &ffsymbols) c
         return expression(vals);
     }
     else
-        return expression( Values() );
+        return expression(Values());
 }
 
-MolarEnergy FFConstantExpression::energy(QVector<FFPtr> &forcefields,
-                                         const QHash<Symbol,FFSymbolPtr> &ffsymbols,
+MolarEnergy FFConstantExpression::energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
                                          double scale_energy) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not have an energy, and should "
-            "not be called as if they have an energy! %1 == %2")
-                .arg(this->symbol().toString(), expression.toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not have an energy, and should "
+                                             "not be called as if they have an energy! %1 == %2")
+                                     .arg(this->symbol().toString(), expression.toString()),
+                                 CODELOC);
 
     return MolarEnergy();
 }
 
-void FFConstantExpression::energy(EnergyTable &energytable,
-                                 QVector<FFPtr> &forcefields,
-                                 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                 double scale_energy) const
+void FFConstantExpression::energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
+                                  const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_energy) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not have an energy, and should "
-            "not be called as if they have an energy! %1 == %2")
-                .arg(this->symbol().toString(), expression.toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not have an energy, and should "
+                                             "not be called as if they have an energy! %1 == %2")
+                                     .arg(this->symbol().toString(), expression.toString()),
+                                 CODELOC);
 }
 
-void FFConstantExpression::force(ForceTable &forcetable,
-                                 QVector<FFPtr> &forcefields,
-                                 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                 double scale_force) const
+void FFConstantExpression::force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
+                                 const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_force) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not cause a force, and should "
-            "not be called as if they could cause a force! %1 == %2")
-                .arg(this->symbol().toString(), expression.toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not cause a force, and should "
+                                             "not be called as if they could cause a force! %1 == %2")
+                                     .arg(this->symbol().toString(), expression.toString()),
+                                 CODELOC);
 }
 
-void FFConstantExpression::field(FieldTable &fieldtable,
-                                 QVector<FFPtr> &forcefields,
-                                 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                 double scale_field) const
+void FFConstantExpression::field(FieldTable &fieldtable, QVector<FFPtr> &forcefields,
+                                 const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not cause a field, and should "
-            "not be called as if they could cause a field! %1 == %2")
-                .arg(this->symbol().toString()).arg(expression.toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not cause a field, and should "
+                                             "not be called as if they could cause a field! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(expression.toString()),
+                                 CODELOC);
 }
 
-void FFConstantExpression::field(FieldTable &fieldtable,
-                                 const Probe &probe,
-                                 QVector<FFPtr> &forcefields,
-                                 const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                 double scale_field) const
+void FFConstantExpression::field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                                 const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     FFConstantExpression::field(fieldtable, forcefields, ffsymbols, scale_field);
 }
 
-void FFConstantExpression::potential(PotentialTable &pottable,
-                                     QVector<FFPtr> &forcefields,
-                                     const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                     double scale_potential) const
+void FFConstantExpression::potential(PotentialTable &pottable, QVector<FFPtr> &forcefields,
+                                     const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
-    throw SireError::program_bug( QObject::tr(
-            "Constant values or expressions do not cause a field, and should "
-            "not be called as if they could cause a field! %1 == %2")
-                .arg(this->symbol().toString()).arg(expression.toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("Constant values or expressions do not cause a field, and should "
+                                             "not be called as if they could cause a field! %1 == %2")
+                                     .arg(this->symbol().toString())
+                                     .arg(expression.toString()),
+                                 CODELOC);
 }
 
-void FFConstantExpression::potential(PotentialTable &pottable,
-                                     const Probe &probe,
-                                     QVector<FFPtr> &forcefields,
-                                     const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                     double scale_potential) const
+void FFConstantExpression::potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                                     const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     FFConstantExpression::potential(pottable, forcefields, ffsymbols, scale_potential);
 }
@@ -946,18 +864,20 @@ void FFConstantExpression::potential(PotentialTable &pottable,
 ///////////
 
 FFSymbolFF::FFSymbolFF() : FFSymbol(), ffidx(0)
-{}
+{
+}
 
-FFSymbolFF::FFSymbolFF(FFIdx ffindex, const Symbol &component)
-           : FFSymbol(component), ffidx(ffindex)
-{}
+FFSymbolFF::FFSymbolFF(FFIdx ffindex, const Symbol &component) : FFSymbol(component), ffidx(ffindex)
+{
+}
 
-FFSymbolFF::FFSymbolFF(const FFSymbolFF &other)
-           : FFSymbol(other), ffidx(other.ffidx)
-{}
+FFSymbolFF::FFSymbolFF(const FFSymbolFF &other) : FFSymbol(other), ffidx(other.ffidx)
+{
+}
 
 FFSymbolFF::~FFSymbolFF()
-{}
+{
+}
 
 void FFSymbolFF::load(QDataStream &ds)
 {
@@ -981,17 +901,17 @@ Expression FFSymbolFF::toExpression() const
     return Expression(this->symbol());
 }
 
-double FFSymbolFF::value(const QHash<Symbol,FFSymbolPtr>&) const
+double FFSymbolFF::value(const QHash<Symbol, FFSymbolPtr> &) const
 {
-    throw SireError::program_bug( QObject::tr(
-        "There is no constant value associated with a forcefield (%1, %2)")
-            .arg(ffidx).arg(this->symbol().toString()), CODELOC );
+    throw SireError::program_bug(QObject::tr("There is no constant value associated with a forcefield (%1, %2)")
+                                     .arg(ffidx)
+                                     .arg(this->symbol().toString()),
+                                 CODELOC);
 
     return 0;
 }
 
-MolarEnergy FFSymbolFF::energy(QVector<FFPtr> &forcefields,
-                               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
+MolarEnergy FFSymbolFF::energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
                                double scale_energy) const
 {
     if (scale_energy != 0)
@@ -1001,97 +921,88 @@ MolarEnergy FFSymbolFF::energy(QVector<FFPtr> &forcefields,
 }
 
 void FFSymbolFF::energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_energy) const
+                        const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_energy) const
 {
 
     FFPtr &ffield = forcefields[ffidx];
 
     if (not ffield->isA<FF3D>())
-        throw SireFF::missing_derivative( QObject::tr(
-            "The forcefield of type %1 does not inherit from FF3D so does "
-            "not provide an energy function.")
-                .arg(ffield->what()), CODELOC );
+        throw SireFF::missing_derivative(QObject::tr("The forcefield of type %1 does not inherit from FF3D so does "
+                                                     "not provide an energy function.")
+                                             .arg(ffield->what()),
+                                         CODELOC);
 
     ffield.edit().asA<FF3D>().energy(energytable, this->symbol(), scale_energy);
 }
 
-void FFSymbolFF::force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
+void FFSymbolFF::force(ForceTable &forcetable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
                        double scale_force) const
 {
     FFPtr &ffield = forcefields[ffidx];
 
     if (not ffield->isA<FF3D>())
-        throw SireFF::missing_derivative( QObject::tr(
-            "The forcefield of type %1 does not inherit from FF3D so does "
-            "not provide a force function.")
-                .arg(ffield->what()), CODELOC );
+        throw SireFF::missing_derivative(QObject::tr("The forcefield of type %1 does not inherit from FF3D so does "
+                                                     "not provide a force function.")
+                                             .arg(ffield->what()),
+                                         CODELOC);
 
     ffield.edit().asA<FF3D>().force(forcetable, this->symbol(), scale_force);
 }
 
-void FFSymbolFF::field(FieldTable &fieldtable, QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
+void FFSymbolFF::field(FieldTable &fieldtable, QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
                        double scale_field) const
 {
     FFPtr &ffield = forcefields[ffidx];
 
     if (not ffield->isA<FF3D>())
-        throw SireFF::missing_derivative( QObject::tr(
-            "The forcefield of type %1 does not inherit from FF3D so does "
-            "not provide a force function.")
-                .arg(ffield->what()), CODELOC );
+        throw SireFF::missing_derivative(QObject::tr("The forcefield of type %1 does not inherit from FF3D so does "
+                                                     "not provide a force function.")
+                                             .arg(ffield->what()),
+                                         CODELOC);
 
     ffield.edit().asA<FF3D>().field(fieldtable, this->symbol(), scale_field);
 }
 
-void FFSymbolFF::field(FieldTable &fieldtable, const Probe &probe,
-                       QVector<FFPtr> &forcefields,
-                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                       double scale_field) const
+void FFSymbolFF::field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                       const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     FFPtr &ffield = forcefields[ffidx];
 
     if (not ffield->isA<FF3D>())
-        throw SireFF::missing_derivative( QObject::tr(
-            "The forcefield of type %1 does not inherit from FF3D so does "
-            "not provide a force function.")
-                .arg(ffield->what()), CODELOC );
+        throw SireFF::missing_derivative(QObject::tr("The forcefield of type %1 does not inherit from FF3D so does "
+                                                     "not provide a force function.")
+                                             .arg(ffield->what()),
+                                         CODELOC);
 
     ffield.edit().asA<FF3D>().field(fieldtable, this->symbol(), probe, scale_field);
 }
 
 void FFSymbolFF::potential(PotentialTable &pottable, QVector<FFPtr> &forcefields,
-                           const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                           double scale_potential) const
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     FFPtr &ffield = forcefields[ffidx];
 
     if (not ffield->isA<FF3D>())
-        throw SireFF::missing_derivative( QObject::tr(
-            "The forcefield of type %1 does not inherit from FF3D so does "
-            "not provide a force function.")
-                .arg(ffield->what()), CODELOC );
+        throw SireFF::missing_derivative(QObject::tr("The forcefield of type %1 does not inherit from FF3D so does "
+                                                     "not provide a force function.")
+                                             .arg(ffield->what()),
+                                         CODELOC);
 
     ffield.edit().asA<FF3D>().potential(pottable, this->symbol(), scale_potential);
 }
 
-void FFSymbolFF::potential(PotentialTable &pottable, const Probe &probe,
-                           QVector<FFPtr> &forcefields,
-                           const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                           double scale_potential) const
+void FFSymbolFF::potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                           const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     FFPtr &ffield = forcefields[ffidx];
 
     if (not ffield->isA<FF3D>())
-        throw SireFF::missing_derivative( QObject::tr(
-            "The forcefield of type %1 does not inherit from FF3D so does "
-            "not provide a force function.")
-                .arg(ffield->what()), CODELOC );
+        throw SireFF::missing_derivative(QObject::tr("The forcefield of type %1 does not inherit from FF3D so does "
+                                                     "not provide a force function.")
+                                             .arg(ffield->what()),
+                                         CODELOC);
 
-    ffield.edit().asA<FF3D>().potential(pottable, this->symbol(),
-                                        probe, scale_potential);
+    ffield.edit().asA<FF3D>().potential(pottable, this->symbol(), probe, scale_potential);
 }
 
 ///////////
@@ -1099,17 +1010,17 @@ void FFSymbolFF::potential(PotentialTable &pottable, const Probe &probe,
 ///////////
 
 FFSymbolExpression::Component::Component()
-{}
+{
+}
 
-FFSymbolExpression::Component::Component(const Expression &scale_factor,
-                                         const Symbol &component, int idx)
-                   : s(component), sclfac(scale_factor), ffidx(idx)
+FFSymbolExpression::Component::Component(const Expression &scale_factor, const Symbol &component, int idx)
+    : s(component), sclfac(scale_factor), ffidx(idx)
 {
     Symbols dependents = scale_factor.symbols();
 
     if (not dependents.isEmpty())
     {
-        deps = QVector<Symbol>( dependents.count() );
+        deps = QVector<Symbol>(dependents.count());
         Symbol *deps_array = deps.data();
 
         int i = 0;
@@ -1122,11 +1033,13 @@ FFSymbolExpression::Component::Component(const Expression &scale_factor,
 }
 
 FFSymbolExpression::Component::Component(const Component &other)
-                   : s(other.s), deps(other.deps), sclfac(other.sclfac), ffidx(other.ffidx)
-{}
+    : s(other.s), deps(other.deps), sclfac(other.sclfac), ffidx(other.ffidx)
+{
+}
 
 FFSymbolExpression::Component::~Component()
-{}
+{
+}
 
 int FFSymbolExpression::Component::ffIdx() const
 {
@@ -1138,12 +1051,12 @@ int FFSymbolExpression::Component::nDependents() const
     return deps.count();
 }
 
-const QVector<Symbol>& FFSymbolExpression::Component::dependents() const
+const QVector<Symbol> &FFSymbolExpression::Component::dependents() const
 {
     return deps;
 }
 
-const Expression& FFSymbolExpression::Component::scalingExpression() const
+const Expression &FFSymbolExpression::Component::scalingExpression() const
 {
     return sclfac;
 }
@@ -1153,26 +1066,29 @@ double FFSymbolExpression::Component::scalingFactor(const Values &values) const
     return sclfac.evaluate(values);
 }
 
-const Symbol& FFSymbolExpression::Component::symbol() const
+const Symbol &FFSymbolExpression::Component::symbol() const
 {
     return s;
 }
 
 FFSymbolExpression::FFSymbolExpression() : FFSymbol()
-{}
+{
+}
 
-FFSymbolExpression::FFSymbolExpression(const Symbol &symbol,
-                                       const Expression &expression)
-                   : FFSymbol(symbol), ffexpression(expression)
-{}
+FFSymbolExpression::FFSymbolExpression(const Symbol &symbol, const Expression &expression)
+    : FFSymbol(symbol), ffexpression(expression)
+{
+}
 
 FFSymbolExpression::FFSymbolExpression(const FFSymbolExpression &other)
-                   : FFSymbol(other), ffexpression(other.ffexpression),
-                     components(other.components), sorted_components(other.sorted_components)
-{}
+    : FFSymbol(other), ffexpression(other.ffexpression), components(other.components),
+      sorted_components(other.sorted_components)
+{
+}
 
 FFSymbolExpression::~FFSymbolExpression()
-{}
+{
+}
 
 void FFSymbolExpression::load(QDataStream &ds)
 {
@@ -1189,25 +1105,24 @@ void FFSymbolExpression::save(QDataStream &ds) const
     FFSymbol::save(ds);
 }
 
-const Expression& FFSymbolExpression::expression() const
+const Expression &FFSymbolExpression::expression() const
 {
     return ffexpression;
 }
 
-void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
-                                         const QHash<Symbol,FFSymbolPtr> &ffmap)
+void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols, const QHash<Symbol, FFSymbolPtr> &ffmap)
 {
-    //get all of the symbols in which to expand this expression
+    // get all of the symbols in which to expand this expression
     components.clear();
     sorted_components.clear();
 
     QSet<Symbol> symbols = ffexpression.symbols();
     symbols.intersect(ffsymbols);
 
-    //now, we need to fully expand the forcefield expression. This is so that we
-    //can evaluate all of the forcefields individually in one go, rather than
-    //walking down a tree (and thus potentially evaluating the same forcefield
-    //in two different walks) - we will expand into a copy of the expression
+    // now, we need to fully expand the forcefield expression. This is so that we
+    // can evaluate all of the forcefields individually in one go, rather than
+    // walking down a tree (and thus potentially evaluating the same forcefield
+    // in two different walks) - we will expand into a copy of the expression
     Expression expanded = ffexpression;
 
     while (true)
@@ -1222,7 +1137,7 @@ void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
                 {
                     Expression e = ffmap[symbol]->asA<FFSymbolExpression>().expression();
 
-                    expanded = expanded.substitute( symbol == e );
+                    expanded = expanded.substitute(symbol == e);
 
                     symbols = expanded.symbols();
                     symbols.intersect(ffsymbols);
@@ -1250,25 +1165,25 @@ void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
                 continue;
 
             if (factor.power() != Expression(1))
-                throw SireError::incompatible_error( QObject::tr(
-                    "You cannot raise a forcefield energy component (%1) "
-                    "to any power (%2) other than 1 as this is not "
-                    "dimensionally correct.")
-                        .arg(symbol.toString(), factor.power().toString()),
-                            CODELOC );
+                throw SireError::incompatible_error(QObject::tr("You cannot raise a forcefield energy component (%1) "
+                                                                "to any power (%2) other than 1 as this is not "
+                                                                "dimensionally correct.")
+                                                        .arg(symbol.toString(), factor.power().toString()),
+                                                    CODELOC);
 
             foreach (const Symbol &fac_symbol, factor.factor().symbols())
             {
                 if (ffsymbols.contains(fac_symbol))
-                    throw SireError::incompatible_error( QObject::tr(
-                        "You cannot multiply or divide one forcefield energy "
-                        "component by another (%1 by %2), as this is not "
-                        "dimensionally correct.")
-                            .arg(symbol.toString(), fac_symbol.toString()), CODELOC );
+                    throw SireError::incompatible_error(
+                        QObject::tr("You cannot multiply or divide one forcefield energy "
+                                    "component by another (%1 by %2), as this is not "
+                                    "dimensionally correct.")
+                            .arg(symbol.toString(), fac_symbol.toString()),
+                        CODELOC);
             }
 
-            //now find out which forcefield (if any) this symbol needs to evaluate
-            //the energy
+            // now find out which forcefield (if any) this symbol needs to evaluate
+            // the energy
             int ffidx = -1;
 
             if (ffmap.contains(symbol))
@@ -1288,13 +1203,13 @@ void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
 
             remainder = (remainder - (symbol * factor.factor())).simplify();
 
-            //if this is a forcefield component, then add this to the sorted
-            //list, so that we can collect all symbols that belong to the same forcefield
+            // if this is a forcefield component, then add this to the sorted
+            // list, so that we can collect all symbols that belong to the same forcefield
             if (ffidx != -1)
             {
                 bool found = false;
 
-                for (int i=0; i<sorted_components.count(); ++i)
+                for (int i = 0; i < sorted_components.count(); ++i)
                 {
                     if (sorted_components[i][0].ffIdx() == ffidx)
                     {
@@ -1306,7 +1221,7 @@ void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
 
                 if (not found)
                 {
-                    sorted_components.append( QVector<Component>() );
+                    sorted_components.append(QVector<Component>());
                     sorted_components.last().append(component);
                 }
             }
@@ -1317,7 +1232,7 @@ void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
 
     int ncheck = 0;
 
-    for (int i=0; i<sorted_components.count(); ++i)
+    for (int i = 0; i < sorted_components.count(); ++i)
     {
         sorted_components[i].squeeze();
         ncheck += sorted_components[i].count();
@@ -1327,16 +1242,15 @@ void FFSymbolExpression::expandInTermsOf(const QSet<Symbol> &ffsymbols,
 
     if (ncheck != components.count())
     {
-        qDebug() << "WARNING - DISAGREEMENT OF NUMBER OF COMPONENTS"
-                 << ncheck << components.count();
+        qDebug() << "WARNING - DISAGREEMENT OF NUMBER OF COMPONENTS" << ncheck << components.count();
 
-        throw SireError::program_bug( QObject::tr(
-                "Disagreement of number of components. %1 vs. %2")
-                    .arg(ncheck).arg(components.count()), CODELOC );
+        throw SireError::program_bug(
+            QObject::tr("Disagreement of number of components. %1 vs. %2").arg(ncheck).arg(components.count()),
+            CODELOC);
     }
 
-    //normally this should be zero, but there are some good cases (e.g. Nautilus)
-    //when you want dimensionless constants to be added to the energy
+    // normally this should be zero, but there are some good cases (e.g. Nautilus)
+    // when you want dimensionless constants to be added to the energy
     remainder = remainder.simplify();
 }
 
@@ -1345,19 +1259,18 @@ Expression FFSymbolExpression::toExpression() const
     return ffexpression;
 }
 
-double FFSymbolExpression::value(const QHash<Symbol,FFSymbolPtr>&) const
+double FFSymbolExpression::value(const QHash<Symbol, FFSymbolPtr> &) const
 {
-    throw SireError::incompatible_error( QObject::tr(
-        "There is no constant value associated with an energy expression. "
-        "You cannot multiply one forcefield component (%1) by another in "
-        "the forcefield expression %2.")
-            .arg(symbol().toString(), ffexpression.toString()), CODELOC );
+    throw SireError::incompatible_error(QObject::tr("There is no constant value associated with an energy expression. "
+                                                    "You cannot multiply one forcefield component (%1) by another in "
+                                                    "the forcefield expression %2.")
+                                            .arg(symbol().toString(), ffexpression.toString()),
+                                        CODELOC);
 
     return 0;
 }
 
-MolarEnergy FFSymbolExpression::energy(QVector<FFPtr> &forcefields,
-                                       const QHash<Symbol,FFSymbolPtr> &ffsymbols,
+MolarEnergy FFSymbolExpression::energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
                                        double scale_energy) const
 {
     if (scale_energy == 0)
@@ -1366,8 +1279,8 @@ MolarEnergy FFSymbolExpression::energy(QVector<FFPtr> &forcefields,
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
-    //The energy expression takes the form;
-    // E = Sum{i=1,n} ( {scale expression}_i * {forcefield energy component}_i )
+    // The energy expression takes the form;
+    //  E = Sum{i=1,n} ( {scale expression}_i * {forcefield energy component}_i )
 
     // where {scale_expression}_i is a constant expression that acts to scale (multiply)
     // the energy of the ith forcefield energy component, {forcefield energy component}_i
@@ -1381,276 +1294,255 @@ MolarEnergy FFSymbolExpression::energy(QVector<FFPtr> &forcefields,
     Values values;
 
     // loop over all i=1,n components of the energy expression
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
-        //this is the ith component
+        // this is the ith component
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols for the scaling constant
-        //for the energy in this ith component
+        // evaluate all of the dependent symbols for the scaling constant
+        // for the energy in this ith component
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
             {
-                //all of the FFSymbols should be constants, so will raise
-                //an exception here if they require a forcefield evaluation
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                // all of the FFSymbols should be constants, so will raise
+                // an exception here if they require a forcefield evaluation
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
             }
         }
     }
 
-    //now that we have all of the scaling factors, we need to loop over
-    //all dependent forcefields of this expression and will evaluate their
-    //energies. To do this, we have to find all of the sub-forcefields,
-    //as we must loop over forcefields, not components (else we risk
-    //a race condition where the same forcefield is queried simultaneously
-    //from two different threads)
+    // now that we have all of the scaling factors, we need to loop over
+    // all dependent forcefields of this expression and will evaluate their
+    // energies. To do this, we have to find all of the sub-forcefields,
+    // as we must loop over forcefields, not components (else we risk
+    // a race condition where the same forcefield is queried simultaneously
+    // from two different threads)
     const int nforcefields = sorted_components.count();
     const QVector<Component> *sorted_components_array = sorted_components.constData();
     FFPtr *forcefields_array = forcefields.data();
 
-    //loop over each forcefield in the expression and sum the total energy
-    double total_nrg = tbb::parallel_reduce( tbb::blocked_range<int>(0,nforcefields), 0.0,
-    [=](const tbb::blocked_range<int> &r, double nrg)->double
-    {
-        for (int i=r.begin(); i != r.end(); ++i)
+    // loop over each forcefield in the expression and sum the total energy
+    double total_nrg = tbb::parallel_reduce(
+        tbb::blocked_range<int>(0, nforcefields), 0.0,
+        [=](const tbb::blocked_range<int> &r, double nrg) -> double
         {
-            const QVector<Component> &ffcomponents = sorted_components_array[i];
-            const int ffidx = ffcomponents[0].ffIdx();
-
-            FF &forcefield = forcefields_array[ffidx].edit();
-
-            for (int j=0; j<ffcomponents.count(); ++j)
+            for (int i = r.begin(); i != r.end(); ++i)
             {
-                const Component &component = ffcomponents.constData()[j];
+                const QVector<Component> &ffcomponents = sorted_components_array[i];
+                const int ffidx = ffcomponents[0].ffIdx();
 
-                const double scl = scale_energy * component.scalingFactor(values);
+                FF &forcefield = forcefields_array[ffidx].edit();
 
-                if (scl != 0)
+                for (int j = 0; j < ffcomponents.count(); ++j)
                 {
-                    nrg += forcefield.energy(component.symbol()) * scl;
+                    const Component &component = ffcomponents.constData()[j];
+
+                    const double scl = scale_energy * component.scalingFactor(values);
+
+                    if (scl != 0)
+                    {
+                        nrg += forcefield.energy(component.symbol()) * scl;
+                    }
                 }
             }
-        }
 
-        return nrg;
-    },
-    []( double x, double y )->double
-    {
-        return x+y;
-    });
+            return nrg;
+        },
+        [](double x, double y) -> double
+        { return x + y; });
 
     return MolarEnergy(total_nrg);
 }
 
-void FFSymbolExpression::energy(EnergyTable &energytable,
-                               QVector<FFPtr> &forcefields,
-                               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                               double scale_energy) const
+void FFSymbolExpression::energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
+                                const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_energy) const
 {
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
     Values values;
 
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols...
+        // evaluate all of the dependent symbols...
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
         }
 
-        //now evaluate the scaling factor...
+        // now evaluate the scaling factor...
         double scale = scale_energy * component.scalingFactor(values);
 
-        ffsymbols[component.symbol()]->energy(energytable, forcefields,
-					      ffsymbols, scale);
+        ffsymbols[component.symbol()]->energy(energytable, forcefields, ffsymbols, scale);
     }
 }
 
-void FFSymbolExpression::force(ForceTable &forcetable,
-                               QVector<FFPtr> &forcefields,
-                               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                               double scale_force) const
+void FFSymbolExpression::force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
+                               const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_force) const
 {
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
     Values values;
 
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols...
+        // evaluate all of the dependent symbols...
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
         }
 
-        //now evaluate the scaling factor...
+        // now evaluate the scaling factor...
         double scale = scale_force * component.scalingFactor(values);
 
-        ffsymbols[component.symbol()]->force(forcetable, forcefields,
-                                             ffsymbols, scale);
+        ffsymbols[component.symbol()]->force(forcetable, forcefields, ffsymbols, scale);
     }
 }
 
-void FFSymbolExpression::field(FieldTable &fieldtable,
-                               QVector<FFPtr> &forcefields,
-                               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                               double scale_field) const
+void FFSymbolExpression::field(FieldTable &fieldtable, QVector<FFPtr> &forcefields,
+                               const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
     Values values;
 
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols...
+        // evaluate all of the dependent symbols...
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
         }
 
-        //now evaluate the scaling factor...
+        // now evaluate the scaling factor...
         double scale = scale_field * component.scalingFactor(values);
 
-        ffsymbols[component.symbol()]->field(fieldtable, forcefields,
-                                             ffsymbols, scale);
+        ffsymbols[component.symbol()]->field(fieldtable, forcefields, ffsymbols, scale);
     }
 }
 
-void FFSymbolExpression::field(FieldTable &fieldtable,
-                               const Probe &probe,
-                               QVector<FFPtr> &forcefields,
-                               const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                               double scale_field) const
+void FFSymbolExpression::field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                               const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
     Values values;
 
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols...
+        // evaluate all of the dependent symbols...
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
         }
 
-        //now evaluate the scaling factor...
+        // now evaluate the scaling factor...
         double scale = scale_field * component.scalingFactor(values);
 
-        ffsymbols[component.symbol()]->field(fieldtable, probe, forcefields,
-                                             ffsymbols, scale);
+        ffsymbols[component.symbol()]->field(fieldtable, probe, forcefields, ffsymbols, scale);
     }
 }
 
-void FFSymbolExpression::potential(PotentialTable &pottable,
-                                   QVector<FFPtr> &forcefields,
-                                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                   double scale_potential) const
+void FFSymbolExpression::potential(PotentialTable &pottable, QVector<FFPtr> &forcefields,
+                                   const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
     Values values;
 
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols...
+        // evaluate all of the dependent symbols...
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
         }
 
-        //now evaluate the scaling factor...
+        // now evaluate the scaling factor...
         double scale = scale_potential * component.scalingFactor(values);
 
-        ffsymbols[component.symbol()]->potential(pottable, forcefields,
-                                                 ffsymbols, scale);
+        ffsymbols[component.symbol()]->potential(pottable, forcefields, ffsymbols, scale);
     }
 }
 
-void FFSymbolExpression::potential(PotentialTable &pottable,
-                                   const Probe &probe,
-                                   QVector<FFPtr> &forcefields,
-                                   const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                   double scale_potential) const
+void FFSymbolExpression::potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                                   const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     int ncomponents = components.count();
     const Component *components_array = components.constData();
 
     Values values;
 
-    for (int i=0; i<ncomponents; ++i)
+    for (int i = 0; i < ncomponents; ++i)
     {
         const Component &component = components_array[i];
 
-        //evaluate all of the dependent symbols...
+        // evaluate all of the dependent symbols...
         int ndeps = component.nDependents();
         const Symbol *deps_array = component.dependents().constData();
 
-        for (int j=0; j<ndeps; ++j)
+        for (int j = 0; j < ndeps; ++j)
         {
             const Symbol &symbol = deps_array[j];
 
             if (not values.contains(symbol))
-                values.set( symbol, ffsymbols[symbol]->value(ffsymbols) );
+                values.set(symbol, ffsymbols[symbol]->value(ffsymbols));
         }
 
-        //now evaluate the scaling factor...
+        // now evaluate the scaling factor...
         double scale = scale_potential * component.scalingFactor(values);
 
-        ffsymbols[component.symbol()]->potential(pottable, probe, forcefields,
-                                                 ffsymbols, scale);
+        ffsymbols[component.symbol()]->potential(pottable, probe, forcefields, ffsymbols, scale);
     }
 }
 
@@ -1659,18 +1551,20 @@ void FFSymbolExpression::potential(PotentialTable &pottable,
 ///////////
 
 FFTotalExpression::FFTotalExpression() : FFSymbol()
-{}
+{
+}
 
-FFTotalExpression::FFTotalExpression(const Symbol &symbol)
-                  : FFSymbol(symbol)
-{}
+FFTotalExpression::FFTotalExpression(const Symbol &symbol) : FFSymbol(symbol)
+{
+}
 
-FFTotalExpression::FFTotalExpression(const FFTotalExpression &other)
-                  : FFSymbol(other)
-{}
+FFTotalExpression::FFTotalExpression(const FFTotalExpression &other) : FFSymbol(other)
+{
+}
 
 FFTotalExpression::~FFTotalExpression()
-{}
+{
+}
 
 void FFTotalExpression::load(QDataStream &ds)
 {
@@ -1687,18 +1581,16 @@ Expression FFTotalExpression::toExpression() const
     return Expression(this->symbol());
 }
 
-double FFTotalExpression::value(const QHash<Symbol,FFSymbolPtr>&) const
+double FFTotalExpression::value(const QHash<Symbol, FFSymbolPtr> &) const
 {
-    throw SireError::program_bug( QObject::tr(
-        "An FFTotalExpression does not have a constant value and should never "
-        "be used in a situation where its constant value must be determined..."),
-            CODELOC );
+    throw SireError::program_bug(QObject::tr("An FFTotalExpression does not have a constant value and should never "
+                                             "be used in a situation where its constant value must be determined..."),
+                                 CODELOC);
 
     return 0;
 }
 
-MolarEnergy FFTotalExpression::energy(QVector<FFPtr> &forcefields,
-                                      const QHash<Symbol,FFSymbolPtr> &ffsymbols,
+MolarEnergy FFTotalExpression::energy(QVector<FFPtr> &forcefields, const QHash<Symbol, FFSymbolPtr> &ffsymbols,
                                       double scale_energy) const
 {
     int nffields = forcefields.count();
@@ -1710,17 +1602,15 @@ MolarEnergy FFTotalExpression::energy(QVector<FFPtr> &forcefields,
 
     FFPtr *ffields_array = forcefields.data();
 
-    QVector<double> nrgs( nffields, 0 );
+    QVector<double> nrgs(nffields, 0);
     double *nrgs_data = nrgs.data();
 
     tbb::parallel_for(0, nffields, 1, [=](int i)
-    {
-        nrgs_data[i] = ffields_array[i].edit().energy();
-    });
+                      { nrgs_data[i] = ffields_array[i].edit().energy(); });
 
     double nrg = 0;
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         nrg += nrgs_data[i];
     }
@@ -1728,15 +1618,13 @@ MolarEnergy FFTotalExpression::energy(QVector<FFPtr> &forcefields,
     return MolarEnergy(nrg * scale_energy);
 }
 
-void FFTotalExpression::energy(EnergyTable &energytable,
-                              QVector<FFPtr> &forcefields,
-                              const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                              double scale_energy) const
+void FFTotalExpression::energy(EnergyTable &energytable, QVector<FFPtr> &forcefields,
+                               const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_energy) const
 {
     int nffields = forcefields.count();
     FFPtr *ffields_array = forcefields.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         FFPtr &ffield = ffields_array[i];
 
@@ -1745,15 +1633,13 @@ void FFTotalExpression::energy(EnergyTable &energytable,
     }
 }
 
-void FFTotalExpression::force(ForceTable &forcetable,
-                              QVector<FFPtr> &forcefields,
-                              const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                              double scale_force) const
+void FFTotalExpression::force(ForceTable &forcetable, QVector<FFPtr> &forcefields,
+                              const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_force) const
 {
     int nffields = forcefields.count();
     FFPtr *ffields_array = forcefields.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         FFPtr &ffield = ffields_array[i];
 
@@ -1762,15 +1648,13 @@ void FFTotalExpression::force(ForceTable &forcetable,
     }
 }
 
-void FFTotalExpression::field(FieldTable &fieldtable,
-                              QVector<FFPtr> &forcefields,
-                              const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                              double scale_field) const
+void FFTotalExpression::field(FieldTable &fieldtable, QVector<FFPtr> &forcefields,
+                              const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     int nffields = forcefields.count();
     FFPtr *ffields_array = forcefields.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         FFPtr &ffield = ffields_array[i];
 
@@ -1779,16 +1663,13 @@ void FFTotalExpression::field(FieldTable &fieldtable,
     }
 }
 
-void FFTotalExpression::field(FieldTable &fieldtable,
-                              const Probe &probe,
-                              QVector<FFPtr> &forcefields,
-                              const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                              double scale_field) const
+void FFTotalExpression::field(FieldTable &fieldtable, const Probe &probe, QVector<FFPtr> &forcefields,
+                              const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_field) const
 {
     int nffields = forcefields.count();
     FFPtr *ffields_array = forcefields.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         FFPtr &ffield = ffields_array[i];
 
@@ -1797,15 +1678,13 @@ void FFTotalExpression::field(FieldTable &fieldtable,
     }
 }
 
-void FFTotalExpression::potential(PotentialTable &pottable,
-                                  QVector<FFPtr> &forcefields,
-                                  const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                  double scale_potential) const
+void FFTotalExpression::potential(PotentialTable &pottable, QVector<FFPtr> &forcefields,
+                                  const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     int nffields = forcefields.count();
     FFPtr *ffields_array = forcefields.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         FFPtr &ffield = ffields_array[i];
 
@@ -1814,16 +1693,13 @@ void FFTotalExpression::potential(PotentialTable &pottable,
     }
 }
 
-void FFTotalExpression::potential(PotentialTable &pottable,
-                                  const Probe &probe,
-                                  QVector<FFPtr> &forcefields,
-                                  const QHash<Symbol,FFSymbolPtr> &ffsymbols,
-                                  double scale_potential) const
+void FFTotalExpression::potential(PotentialTable &pottable, const Probe &probe, QVector<FFPtr> &forcefields,
+                                  const QHash<Symbol, FFSymbolPtr> &ffsymbols, double scale_potential) const
 {
     int nffields = forcefields.count();
     FFPtr *ffields_array = forcefields.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         FFPtr &ffield = ffields_array[i];
 
@@ -1845,11 +1721,8 @@ QDataStream &operator<<(QDataStream &ds, const ForceFields &ffields)
 
     SharedDataStream sds(ds);
 
-    //write out all of the forcefields
-    sds << ffields.ffields_by_idx
-        << ffields.ffsymbols
-        << ffields.additional_properties
-        << ffields.property_aliases
+    // write out all of the forcefields
+    sds << ffields.ffields_by_idx << ffields.ffsymbols << ffields.additional_properties << ffields.property_aliases
         << ffields.combined_properties;
 
     return ds;
@@ -1864,17 +1737,14 @@ QDataStream &operator>>(QDataStream &ds, ForceFields &ffields)
     {
         SharedDataStream sds(ds);
 
-        //read into a new object, as a lot can go wrong!
+        // read into a new object, as a lot can go wrong!
         ForceFields new_ffields;
 
-        //read in the forcefields
-        sds >> new_ffields.ffields_by_idx
-            >> new_ffields.ffsymbols
-            >> new_ffields.additional_properties
-            >> new_ffields.property_aliases
-            >> new_ffields.combined_properties;
+        // read in the forcefields
+        sds >> new_ffields.ffields_by_idx >> new_ffields.ffsymbols >> new_ffields.additional_properties >>
+            new_ffields.property_aliases >> new_ffields.combined_properties;
 
-        //rebuild the index
+        // rebuild the index
         new_ffields.rebuildIndex();
 
         ffields = new_ffields;
@@ -1883,14 +1753,13 @@ QDataStream &operator>>(QDataStream &ds, ForceFields &ffields)
     {
         SharedDataStream sds(ds);
 
-        //read into a new object, as a lot can go wrong!
+        // read into a new object, as a lot can go wrong!
         ForceFields new_ffields;
 
-        //read in the forcefields
-        sds >> new_ffields.ffields_by_idx
-            >> new_ffields.ffsymbols;
+        // read in the forcefields
+        sds >> new_ffields.ffields_by_idx >> new_ffields.ffsymbols;
 
-        //rebuild the index
+        // rebuild the index
         new_ffields.rebuildIndex();
 
         ffields = new_ffields;
@@ -1904,57 +1773,58 @@ QDataStream &operator>>(QDataStream &ds, ForceFields &ffields)
 Symbol ForceFields::total_component("E_{total}");
 
 /** Return the symbol representing the total energy component */
-const Symbol& ForceFields::totalComponent()
+const Symbol &ForceFields::totalComponent()
 {
     return total_component;
 }
 
 /** Constructor */
-ForceFields::ForceFields() : ConcreteProperty<ForceFields,MolGroupsBase>()
-{}
+ForceFields::ForceFields() : ConcreteProperty<ForceFields, MolGroupsBase>()
+{
+}
 
 /** Internal function used to return the ith forcefield
     (this performs no bounds checking!) */
-const FF& ForceFields::_pvt_forceField(int i) const
+const FF &ForceFields::_pvt_forceField(int i) const
 {
     return ffields_by_idx.constData()[i].read();
 }
 
 /** Internal function used to return the ith forcefield
     (this performs no bounds checking!) */
-FF& ForceFields::_pvt_forceField(int i)
+FF &ForceFields::_pvt_forceField(int i)
 {
     return ffields_by_idx.data()[i].edit();
 }
 
 /** Internal function used to return the forcefield with name 'ffname'.
     This does not check to see if this forcefield exists */
-const FF& ForceFields::_pvt_forceField(const FFName &ffname) const
+const FF &ForceFields::_pvt_forceField(const FFName &ffname) const
 {
-    return this->_pvt_forceField( *(ffields_by_name.constFind(ffname)) );
+    return this->_pvt_forceField(*(ffields_by_name.constFind(ffname)));
 }
 
 /** Internal function used to return the forcefield with name 'ffname'.
     This does not check to see if this forcefield exists */
-FF& ForceFields::_pvt_forceField(const FFName &ffname)
+FF &ForceFields::_pvt_forceField(const FFName &ffname)
 {
-    return this->_pvt_forceField( *(ffields_by_name.constFind(ffname)) );
+    return this->_pvt_forceField(*(ffields_by_name.constFind(ffname)));
 }
 
 /** Internal function used to return the forcefield that contains the
     molecule group with number 'mgnum'. This does not check to see
     if such a group exists */
-const FF& ForceFields::_pvt_forceField(const MGNum &mgnum) const
+const FF &ForceFields::_pvt_forceField(const MGNum &mgnum) const
 {
-    return this->_pvt_forceField( *(mgroups_by_num.constFind(mgnum)) );
+    return this->_pvt_forceField(*(mgroups_by_num.constFind(mgnum)));
 }
 
 /** Internal function used to return the forcefield that contains the
     molecule group with number 'mgnum'. This does not check to see
     if such a group exists */
-FF& ForceFields::_pvt_forceField(const MGNum &mgnum)
+FF &ForceFields::_pvt_forceField(const MGNum &mgnum)
 {
-    return this->_pvt_forceField( *(mgroups_by_num.constFind(mgnum)) );
+    return this->_pvt_forceField(*(mgroups_by_num.constFind(mgnum)));
 }
 
 /** Reindex the moleculegroups and molecules */
@@ -1965,13 +1835,13 @@ void ForceFields::reindex()
     int nffields = ffields_by_idx.count();
     const FFPtr *ffields_array = ffields_by_idx.constData();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         const FFPtr &ffield = ffields_array[i];
 
-        for (int j=0; j<ffield->nGroups(); ++j)
+        for (int j = 0; j < ffield->nGroups(); ++j)
         {
-            MolGroupsBase::addToIndex( ffield->at(MGIdx(j)) );
+            MolGroupsBase::addToIndex(ffield->at(MGIdx(j)));
         }
     }
 }
@@ -1985,7 +1855,7 @@ void ForceFields::rebuildIndex()
     int nffields = ffields_by_idx.count();
     const FFPtr *ffields_array = ffields_by_idx.constData();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         const FFPtr &ffield = ffields_array[i];
 
@@ -1993,16 +1863,17 @@ void ForceFields::rebuildIndex()
         {
             const FFPtr &old_ffield = this->_pvt_forceField(ffield->name());
 
-            throw SireFF::duplicate_forcefield( QObject::tr(
-                "Cannot have two forcefields in the same set that both "
-                "have the same name! (%1, %2 version %3 vs. %4 version %5)")
-                    .arg(ffield->name())
-                    .arg(ffield->UID().toString()).arg(ffield->version())
-                    .arg(old_ffield->UID().toString()).arg(old_ffield->version()),
-                            CODELOC );
+            throw SireFF::duplicate_forcefield(QObject::tr("Cannot have two forcefields in the same set that both "
+                                                           "have the same name! (%1, %2 version %3 vs. %4 version %5)")
+                                                   .arg(ffield->name())
+                                                   .arg(ffield->UID().toString())
+                                                   .arg(ffield->version())
+                                                   .arg(old_ffield->UID().toString())
+                                                   .arg(old_ffield->version()),
+                                               CODELOC);
         }
 
-        ffields_by_name.insert( ffield->name(), i );
+        ffields_by_name.insert(ffield->name(), i);
 
         foreach (MGNum mgnum, ffield->mgNums())
         {
@@ -2010,115 +1881,106 @@ void ForceFields::rebuildIndex()
             {
                 const FFPtr &old_ffield = this->_pvt_forceField(mgnum);
 
-                throw SireMol::duplicate_group( QObject::tr(
-                    "Cannot have two different forcefields containing the same "
-                    "molecule group - %1 (%2 version %3 %4 vs. "
-                    "%5 version %6 %7)")
-                        .arg(mgnum)
-                        .arg(ffield->name()).arg(ffield->version())
-                        .arg(ffield->UID().toString())
-                        .arg(old_ffield->name()).arg(old_ffield->version())
-                        .arg(old_ffield->UID().toString()), CODELOC );
+                throw SireMol::duplicate_group(QObject::tr("Cannot have two different forcefields containing the same "
+                                                           "molecule group - %1 (%2 version %3 %4 vs. "
+                                                           "%5 version %6 %7)")
+                                                   .arg(mgnum)
+                                                   .arg(ffield->name())
+                                                   .arg(ffield->version())
+                                                   .arg(ffield->UID().toString())
+                                                   .arg(old_ffield->name())
+                                                   .arg(old_ffield->version())
+                                                   .arg(old_ffield->UID().toString()),
+                                               CODELOC);
             }
 
-            mgroups_by_num.insert( mgnum, ffield->name() );
+            mgroups_by_num.insert(mgnum, ffield->name());
         }
     }
 
     ffields_by_name.squeeze();
     mgroups_by_num.squeeze();
 
-    //now rebuild the index of molecules and molecule groups
+    // now rebuild the index of molecules and molecule groups
     MolGroupsBase::clearIndex();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         const FFPtr &ffield = ffields_array[i];
 
-        for (int j=0; j<ffield->nGroups(); ++j)
+        for (int j = 0; j < ffield->nGroups(); ++j)
         {
-            MolGroupsBase::addToIndex( ffield->at(MGIdx(j)) );
+            MolGroupsBase::addToIndex(ffield->at(MGIdx(j)));
         }
     }
 
-    //now rebuild the index of forcefield expressions and symbols
-    QHash<Symbol,FFSymbolPtr> new_symbols;
+    // now rebuild the index of forcefield expressions and symbols
+    QHash<Symbol, FFSymbolPtr> new_symbols;
 
-    //first copy in all of the symbols representing all of the forcefield
-    //components
+    // first copy in all of the symbols representing all of the forcefield
+    // components
     QSet<Symbol> all_ff_symbols;
 
-    for (FFIdx i(0); i<nffields; ++i)
+    for (FFIdx i(0); i < nffields; ++i)
     {
         Symbols symbols = ffields_array[i]->components().symbols();
 
         foreach (const Symbol &symbol, symbols)
         {
             if (new_symbols.contains(symbol))
-                throw SireError::program_bug( QObject::tr(
-                    "It should not be possible for two forcefields to have "
-                    "the same component symbol... (%1)")
-                        .arg(symbol.toString()), CODELOC );
+                throw SireError::program_bug(QObject::tr("It should not be possible for two forcefields to have "
+                                                         "the same component symbol... (%1)")
+                                                 .arg(symbol.toString()),
+                                             CODELOC);
 
-            new_symbols.insert( symbol, FFSymbolPtr(new FFSymbolFF(i, symbol)) );
+            new_symbols.insert(symbol, FFSymbolPtr(new FFSymbolFF(i, symbol)));
             all_ff_symbols.insert(symbol);
         }
     }
 
-    //copy in the non-forcefield symbols from the old array
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    // copy in the non-forcefield symbols from the old array
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
-        if ( not (it.value()->isA<FFSymbolFF>() or
-                  it.value()->isA<FFTotalExpression>()) )
+        if (not(it.value()->isA<FFSymbolFF>() or it.value()->isA<FFTotalExpression>()))
         {
             if (new_symbols.contains(it.key()))
-                throw SireFF::duplicate_component( QObject::tr(
-                    "You cannot use the symbol %1 to represent a forcefield "
-                    "expression or parameter as it already in use to represent "
-                    "an energy component of a forcefield.")
-                        .arg(it.key().toString()), CODELOC );
+                throw SireFF::duplicate_component(
+                    QObject::tr("You cannot use the symbol %1 to represent a forcefield "
+                                "expression or parameter as it already in use to represent "
+                                "an energy component of a forcefield.")
+                        .arg(it.key().toString()),
+                    CODELOC);
 
             new_symbols.insert(it.key(), it.value());
         }
     }
 
-    //if there isn't a total energy component, then add the default one
-    if (not new_symbols.contains( this->totalComponent() ))
+    // if there isn't a total energy component, then add the default one
+    if (not new_symbols.contains(this->totalComponent()))
     {
-        new_symbols.insert(this->totalComponent(),
-                           FFSymbolPtr(new FFTotalExpression()));
+        new_symbols.insert(this->totalComponent(), FFSymbolPtr(new FFTotalExpression()));
     }
 
-    for (QHash<Symbol,FFSymbolPtr>::iterator it = new_symbols.begin();
-         it != new_symbols.end();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::iterator it = new_symbols.begin(); it != new_symbols.end(); ++it)
     {
-        if (it.value()->isA<FFSymbolExpression>() or
-            it.value()->isA<FFTotalExpression>())
+        if (it.value()->isA<FFSymbolExpression>() or it.value()->isA<FFTotalExpression>())
         {
             all_ff_symbols.insert(it.key());
         }
     }
 
-    //now process each forcefield expression...
-    for (QHash<Symbol,FFSymbolPtr>::iterator it = new_symbols.begin();
-         it != new_symbols.end();
-         ++it)
+    // now process each forcefield expression...
+    for (QHash<Symbol, FFSymbolPtr>::iterator it = new_symbols.begin(); it != new_symbols.end(); ++it)
     {
         if (it.value()->isA<FFSymbolExpression>())
         {
-            it.value()->asA<FFSymbolExpression>().expandInTermsOf(all_ff_symbols,
-                                                                  new_symbols);
+            it.value()->asA<FFSymbolExpression>().expandInTermsOf(all_ff_symbols, new_symbols);
         }
     }
 
-    //now loop through the constant expressions and make sure
-    //that they really are constant!
-    for (QHash<Symbol,FFSymbolPtr>::iterator it = new_symbols.begin();
-         it != new_symbols.end();
-         ++it)
+    // now loop through the constant expressions and make sure
+    // that they really are constant!
+    for (QHash<Symbol, FFSymbolPtr>::iterator it = new_symbols.begin(); it != new_symbols.end(); ++it)
     {
         if (it.value()->isA<FFConstantExpression>())
         {
@@ -2130,16 +1992,14 @@ void ForceFields::rebuildIndex()
 }
 
 /** Construct a group that holds just a single forcefield */
-ForceFields::ForceFields(const FF& forcefield)
-            : ConcreteProperty<ForceFields,MolGroupsBase>()
+ForceFields::ForceFields(const FF &forcefield) : ConcreteProperty<ForceFields, MolGroupsBase>()
 {
     ffields_by_idx.append(forcefield);
     this->rebuildIndex();
 }
 
 /** Construct a group that holds lots of forcefields */
-ForceFields::ForceFields(const QList<FFPtr> &forcefields)
-            : ConcreteProperty<ForceFields,MolGroupsBase>()
+ForceFields::ForceFields(const QList<FFPtr> &forcefields) : ConcreteProperty<ForceFields, MolGroupsBase>()
 {
     ffields_by_idx = forcefields.toVector();
 
@@ -2151,9 +2011,9 @@ ForceFields::ForceFields(const QList<FFPtr> &forcefields)
 
         FFPtr *ffields_array = ffields_by_idx.data();
 
-        for (int i=1; i<nffields; ++i)
+        for (int i = 1; i < nffields; ++i)
         {
-            mols += ffields_array[i-1]->molecules();
+            mols += ffields_array[i - 1]->molecules();
             ffields_array[i].edit().update(mols);
         }
     }
@@ -2163,30 +2023,27 @@ ForceFields::ForceFields(const QList<FFPtr> &forcefields)
 
 /** Construct a group that holds lots of forcefields */
 ForceFields::ForceFields(const QVector<FFPtr> &forcefields)
-            : ConcreteProperty<ForceFields,MolGroupsBase>(),
-              ffields_by_idx(forcefields)
+    : ConcreteProperty<ForceFields, MolGroupsBase>(), ffields_by_idx(forcefields)
 {
     this->rebuildIndex();
 }
 
 /** Copy constructor */
 ForceFields::ForceFields(const ForceFields &other)
-            : ConcreteProperty<ForceFields,MolGroupsBase>(other),
-              ffields_by_idx(other.ffields_by_idx),
-              ffields_by_name(other.ffields_by_name),
-              mgroups_by_num(other.mgroups_by_num),
-              ffsymbols(other.ffsymbols),
-              additional_properties(other.additional_properties),
-              property_aliases(other.property_aliases),
-              combined_properties(other.combined_properties)
-{}
+    : ConcreteProperty<ForceFields, MolGroupsBase>(other), ffields_by_idx(other.ffields_by_idx),
+      ffields_by_name(other.ffields_by_name), mgroups_by_num(other.mgroups_by_num), ffsymbols(other.ffsymbols),
+      additional_properties(other.additional_properties), property_aliases(other.property_aliases),
+      combined_properties(other.combined_properties)
+{
+}
 
 /** Destructor */
 ForceFields::~ForceFields()
-{}
+{
+}
 
 /** Copy assignment operator */
-ForceFields& ForceFields::operator=(const ForceFields &other)
+ForceFields &ForceFields::operator=(const ForceFields &other)
 {
     if (this != &other)
     {
@@ -2208,58 +2065,51 @@ ForceFields& ForceFields::operator=(const ForceFields &other)
 bool ForceFields::operator==(const ForceFields &other) const
 {
     return this == &other or
-           ( ffields_by_idx == other.ffields_by_idx and
-             additional_properties == other.additional_properties and
-             property_aliases == other.property_aliases and
-             combined_properties == other.combined_properties );
+           (ffields_by_idx == other.ffields_by_idx and additional_properties == other.additional_properties and
+            property_aliases == other.property_aliases and combined_properties == other.combined_properties);
 }
 
 /** Comparison operator */
 bool ForceFields::operator!=(const ForceFields &other) const
 {
     return this != &other and
-           ( ffields_by_idx != other.ffields_by_idx or
-             additional_properties != other.additional_properties or
-             property_aliases != other.property_aliases or
-             combined_properties != other.combined_properties );
+           (ffields_by_idx != other.ffields_by_idx or additional_properties != other.additional_properties or
+            property_aliases != other.property_aliases or combined_properties != other.combined_properties);
 }
 
 /** Internal function used to return the group with number 'mgnum' */
-const MoleculeGroup& ForceFields::getGroup(MGNum mgnum) const
+const MoleculeGroup &ForceFields::getGroup(MGNum mgnum) const
 {
     if (not mgroups_by_num.contains(mgnum))
-        throw SireMol::missing_group( QObject::tr(
-            "None of the forcefields in this set contain a molecule group "
-            "with number %1. Available groups are %2.")
-                .arg(mgnum).arg(Sire::toString(mgroups_by_num.keys())),
-                    CODELOC );
+        throw SireMol::missing_group(QObject::tr("None of the forcefields in this set contain a molecule group "
+                                                 "with number %1. Available groups are %2.")
+                                         .arg(mgnum)
+                                         .arg(Sire::toString(mgroups_by_num.keys())),
+                                     CODELOC);
 
     return this->_pvt_forceField(mgnum).group(mgnum);
 }
 
 /** Internal function used to get the pointers to lots of groups */
-void ForceFields::getGroups(const QList<MGNum> &mgnums,
-                            QVarLengthArray<const MoleculeGroup*,10> &groups) const
+void ForceFields::getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const
 {
     groups.clear();
 
     foreach (MGNum mgnum, mgnums)
     {
-        groups.append( &(this->getGroup(mgnum)) );
+        groups.append(&(this->getGroup(mgnum)));
     }
 }
 
 /** Internal function used to get pointers to all of the groups
     in all of the forcefields of this set */
-QHash<MGNum,const MoleculeGroup*> ForceFields::getGroups() const
+QHash<MGNum, const MoleculeGroup *> ForceFields::getGroups() const
 {
-    QHash<MGNum,const MoleculeGroup*> groups;
+    QHash<MGNum, const MoleculeGroup *> groups;
 
-    for (QHash<MGNum,FFName>::const_iterator it = mgroups_by_num.constBegin();
-         it != mgroups_by_num.constEnd();
-         ++it)
+    for (QHash<MGNum, FFName>::const_iterator it = mgroups_by_num.constBegin(); it != mgroups_by_num.constEnd(); ++it)
     {
-        groups.insert( it.key(), &(this->_pvt_forceField(it.value()).group(it.key())) );
+        groups.insert(it.key(), &(this->_pvt_forceField(it.value()).group(it.key())));
     }
 
     return groups;
@@ -2269,14 +2119,14 @@ QHash<MGNum,const MoleculeGroup*> ForceFields::getGroups() const
 
     \throw SireFF::missing_forcefield
 */
-const FF& ForceFields::operator[](const FFName &ffname) const
+const FF &ForceFields::operator[](const FFName &ffname) const
 {
     if (not ffields_by_name.contains(ffname))
-        throw SireFF::missing_forcefield( QObject::tr(
-            "There is no forcefield called \"%1\" in this set. Available "
-            "forcefields are called %2.")
-                .arg(ffname).arg( Sire::toString(ffields_by_name.keys()) ),
-                    CODELOC );
+        throw SireFF::missing_forcefield(QObject::tr("There is no forcefield called \"%1\" in this set. Available "
+                                                     "forcefields are called %2.")
+                                             .arg(ffname)
+                                             .arg(Sire::toString(ffields_by_name.keys())),
+                                         CODELOC);
 
     return this->_pvt_forceField(ffname);
 }
@@ -2285,9 +2135,9 @@ const FF& ForceFields::operator[](const FFName &ffname) const
 
     \throw SireError::invalid_index
 */
-const FF& ForceFields::operator[](const FFIdx &ffidx) const
+const FF &ForceFields::operator[](const FFIdx &ffidx) const
 {
-    return this->_pvt_forceField( ffidx.map( ffields_by_idx.count() ) );
+    return this->_pvt_forceField(ffidx.map(ffields_by_idx.count()));
 }
 
 /** Return the forcefield with ID 'ffid'
@@ -2296,16 +2146,16 @@ const FF& ForceFields::operator[](const FFIdx &ffidx) const
     \throw SireFF::duplicate_forcefield
     \throw SireError::invalid_index
 */
-const FF& ForceFields::operator[](const FFID &ffid) const
+const FF &ForceFields::operator[](const FFID &ffid) const
 {
-    return this->_pvt_forceField( this->ffIdx(ffid) );
+    return this->_pvt_forceField(this->ffIdx(ffid));
 }
 
 /** Return the forcefield with name 'ffname'
 
     \throw SireFF::missing_forcefield
 */
-const FF& ForceFields::at(const FFName &ffname) const
+const FF &ForceFields::at(const FFName &ffname) const
 {
     return this->operator[](ffname);
 }
@@ -2314,7 +2164,7 @@ const FF& ForceFields::at(const FFName &ffname) const
 
     \throw SireError::invalid_index
 */
-const FF& ForceFields::at(const FFIdx &ffidx) const
+const FF &ForceFields::at(const FFIdx &ffidx) const
 {
     return this->operator[](ffidx);
 }
@@ -2325,7 +2175,7 @@ const FF& ForceFields::at(const FFIdx &ffidx) const
     \throw SireFF::duplicate_forcefield
     \throw SireError::invalid_index
 */
-const FF& ForceFields::at(const FFID &ffid) const
+const FF &ForceFields::at(const FFID &ffid) const
 {
     return this->operator[](ffid);
 }
@@ -2334,7 +2184,7 @@ const FF& ForceFields::at(const FFID &ffid) const
 
     \throw SireFF::missing_forcefield
 */
-const FF& ForceFields::forceField(const FFName &ffname) const
+const FF &ForceFields::forceField(const FFName &ffname) const
 {
     return this->operator[](ffname);
 }
@@ -2343,7 +2193,7 @@ const FF& ForceFields::forceField(const FFName &ffname) const
 
     \throw SireError::invalid_index
 */
-const FF& ForceFields::forceField(const FFIdx &ffidx) const
+const FF &ForceFields::forceField(const FFIdx &ffidx) const
 {
     return this->operator[](ffidx);
 }
@@ -2354,7 +2204,7 @@ const FF& ForceFields::forceField(const FFIdx &ffidx) const
     \throw SireFF::duplicate_forcefield
     \throw SireError::invalid_index
 */
-const FF& ForceFields::forceField(const FFID &ffid) const
+const FF &ForceFields::forceField(const FFID &ffid) const
 {
     return this->operator[](ffid);
 }
@@ -2364,14 +2214,14 @@ const FF& ForceFields::forceField(const FFID &ffid) const
 
     \throw SireMol::missing_group
 */
-const FF& ForceFields::forceField(const MGNum &mgnum) const
+const FF &ForceFields::forceField(const MGNum &mgnum) const
 {
     if (not mgroups_by_num.contains(mgnum))
-        throw SireMol::missing_group( QObject::tr(
-            "None of the forcefields in this set contain a molecule group "
-            "with number %1. Available groups are %2.")
-                .arg(mgnum).arg(Sire::toString(mgroups_by_num.keys())),
-                    CODELOC );
+        throw SireMol::missing_group(QObject::tr("None of the forcefields in this set contain a molecule group "
+                                                 "with number %1. Available groups are %2.")
+                                         .arg(mgnum)
+                                         .arg(Sire::toString(mgroups_by_num.keys())),
+                                     CODELOC);
 
     return this->_pvt_forceField(mgnum);
 }
@@ -2392,9 +2242,10 @@ FFIdx ForceFields::ffIdx(const FFName &ffname) const
     QList<FFIdx> ffidxs = ffname.map(*this);
 
     if (ffidxs.count() > 1)
-        throw SireFF::duplicate_forcefield( QObject::tr(
-            "There is more than one forcefield that matches the name "
-            "\"%1\".").arg(ffname), CODELOC );
+        throw SireFF::duplicate_forcefield(QObject::tr("There is more than one forcefield that matches the name "
+                                                       "\"%1\".")
+                                               .arg(ffname),
+                                           CODELOC);
 
     return ffidxs.first();
 }
@@ -2405,7 +2256,7 @@ FFIdx ForceFields::ffIdx(const FFName &ffname) const
 */
 FFIdx ForceFields::ffIdx(const FFIdx &ffidx) const
 {
-    return FFIdx( ffidx.map(this->nForceFields()) );
+    return FFIdx(ffidx.map(this->nForceFields()));
 }
 
 /** Return the FFIdx of the forcefield that matches the ID 'ffid'
@@ -2419,11 +2270,10 @@ FFIdx ForceFields::ffIdx(const FFID &ffid) const
     QList<FFIdx> ffidxs = ffid.map(*this);
 
     if (ffidxs.count() > 1)
-        throw SireFF::duplicate_forcefield( QObject::tr(
-            "More than one forcefield in this set matches the ID %1. "
-            "Matching forcefield have indicies %2.")
-                .arg(ffid.toString(), Sire::toString(ffidxs)),
-                    CODELOC );
+        throw SireFF::duplicate_forcefield(QObject::tr("More than one forcefield in this set matches the ID %1. "
+                                                       "Matching forcefield have indicies %2.")
+                                               .arg(ffid.toString(), Sire::toString(ffidxs)),
+                                           CODELOC);
 
     return ffidxs.at(0);
 }
@@ -2437,7 +2287,7 @@ QList<FFIdx> ForceFields::map(const FFIdx &ffidx) const
 {
     QList<FFIdx> ffidxs;
 
-    ffidxs.append( this->ffIdx(ffidx) );
+    ffidxs.append(this->ffIdx(ffidx));
 
     return ffidxs;
 }
@@ -2448,30 +2298,29 @@ QList<FFIdx> ForceFields::map(const FFName &ffname) const
 
     if (ffname.isCaseSensitive())
     {
-        QHash<QString,int>::const_iterator it = ffields_by_name.constFind(ffname);
+        QHash<QString, int>::const_iterator it = ffields_by_name.constFind(ffname);
 
         if (it != ffields_by_name.constEnd())
-            ffidxs.append( FFIdx(it.value()) );
+            ffidxs.append(FFIdx(it.value()));
     }
     else
     {
         QString lower_name = QString(ffname).toLower();
 
-        for (QHash<QString,int>::const_iterator it = ffields_by_name.constBegin();
-             it != ffields_by_name.constEnd();
+        for (QHash<QString, int>::const_iterator it = ffields_by_name.constBegin(); it != ffields_by_name.constEnd();
              ++it)
         {
             if (it.key().toLower() == lower_name)
-                ffidxs.append( FFIdx(it.value()) );
+                ffidxs.append(FFIdx(it.value()));
         }
     }
 
     if (ffidxs.isEmpty())
-        throw SireFF::missing_forcefield( QObject::tr(
-            "There are no forcefields in this set called %1. "
-            "Available forcefields are called %2.")
-                .arg(ffname).arg( Sire::toString(ffields_by_name.keys()) ),
-                    CODELOC );
+        throw SireFF::missing_forcefield(QObject::tr("There are no forcefields in this set called %1. "
+                                                     "Available forcefields are called %2.")
+                                             .arg(ffname)
+                                             .arg(Sire::toString(ffields_by_name.keys())),
+                                         CODELOC);
 
     return ffidxs;
 }
@@ -2480,16 +2329,15 @@ QList<FFIdx> ForceFields::map(const FFName &ffname) const
 
     \throw SireFF::missing_forcefield
 */
-const FFName& ForceFields::ffName(const FFName &ffname) const
+const FFName &ForceFields::ffName(const FFName &ffname) const
 {
     QList<FFIdx> ffidxs = this->map(ffname);
 
     if (ffidxs.count() > 1)
-        throw SireFF::duplicate_forcefield( QObject::tr(
-            "More than one forcefield in this set has the name %1. "
-            "Matching forcefield have indicies %2.")
-                .arg(ffname.toString(), Sire::toString(ffidxs)),
-                    CODELOC );
+        throw SireFF::duplicate_forcefield(QObject::tr("More than one forcefield in this set has the name %1. "
+                                                       "Matching forcefield have indicies %2.")
+                                               .arg(ffname.toString(), Sire::toString(ffidxs)),
+                                           CODELOC);
 
     return ffname;
 }
@@ -2498,9 +2346,9 @@ const FFName& ForceFields::ffName(const FFName &ffname) const
 
     \throw SireError::invalid_index
 */
-const FFName& ForceFields::ffName(const FFIdx &ffidx) const
+const FFName &ForceFields::ffName(const FFIdx &ffidx) const
 {
-    return this->_pvt_forceField( ffidx.map(this->nForceFields()) ).name();
+    return this->_pvt_forceField(ffidx.map(this->nForceFields())).name();
 }
 
 /** Return the name of the forcefield that matches the ID 'ffid'
@@ -2509,18 +2357,17 @@ const FFName& ForceFields::ffName(const FFIdx &ffidx) const
     \throw SireFF::duplicate_forcefield
     \throw SireError::invalid_index
 */
-const FFName& ForceFields::ffName(const FFID &ffid) const
+const FFName &ForceFields::ffName(const FFID &ffid) const
 {
     QList<FFIdx> ffidxs = ffid.map(*this);
 
     if (ffidxs.count() > 1)
-        throw SireFF::duplicate_forcefield( QObject::tr(
-            "More than one forcefield in this set matches the ID %1. "
-            "Matching forcefield have indicies %2.")
-                .arg(ffid.toString(), Sire::toString(ffidxs)),
-                    CODELOC );
+        throw SireFF::duplicate_forcefield(QObject::tr("More than one forcefield in this set matches the ID %1. "
+                                                       "Matching forcefield have indicies %2.")
+                                               .arg(ffid.toString(), Sire::toString(ffidxs)),
+                                           CODELOC);
 
-    return this->_pvt_forceField( ffidxs.at(0).map(this->nForceFields()) ).name();
+    return this->_pvt_forceField(ffidxs.at(0).map(this->nForceFields())).name();
 }
 
 /** Return a string representation of this set */
@@ -2540,18 +2387,16 @@ SireUnits::Dimension::MolarEnergy ForceFields::energy(const Symbol &component)
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     return comp->energy(ffields_by_idx, ffsymbols);
 }
@@ -2565,17 +2410,15 @@ double ForceFields::componentValue(const Symbol &component)
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no available component represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(componentSymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no available component represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(componentSymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
         return comp->value(ffsymbols);
     else
         return comp->energy(ffields_by_idx, ffsymbols).value();
-
 }
 
 /** Return the values of the energy or constant components whose
@@ -2589,7 +2432,7 @@ Values ForceFields::componentValues(const QSet<Symbol> &components)
 
     foreach (const Symbol &component, components)
     {
-        vals.set( component, this->componentValue(component) );
+        vals.set(component, this->componentValue(component));
     }
 
     return vals;
@@ -2601,7 +2444,7 @@ Values ForceFields::componentValues()
     Values vals;
     vals.reserve(ffsymbols.count());
 
-    QHashIterator<Symbol,FFSymbolPtr> it( ffsymbols );
+    QHashIterator<Symbol, FFSymbolPtr> it(ffsymbols);
 
     while (it.hasNext())
     {
@@ -2622,7 +2465,7 @@ Values ForceFields::componentValues()
     contained forcefields */
 SireUnits::Dimension::MolarEnergy ForceFields::energy()
 {
-    return this->energy( this->totalComponent() );
+    return this->energy(this->totalComponent());
 }
 
 /** Return the energies of all of the energy components of all of the forcefields,
@@ -2631,11 +2474,9 @@ Values ForceFields::energies()
 {
     Values vals;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
-        if ( (*it)->isEnergy() )
+        if ((*it)->isEnergy())
             vals.set(it.key(), this->energy(it.key()).value());
     }
 
@@ -2670,11 +2511,10 @@ bool ForceFields::isEnergyComponent(const Symbol &component) const
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     return comp->isEnergy();
 }
@@ -2707,15 +2547,14 @@ bool ForceFields::hasEnergyComponent(const Symbol &component) const
 */
 void ForceFields::setEnergyComponent(const Symbol &symbol, const Expression &expression)
 {
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
-        ffsymbols.insert( symbol,
-                          FFSymbolPtr(new FFSymbolExpression(symbol, expression)) );
+        ffsymbols.insert(symbol, FFSymbolPtr(new FFSymbolExpression(symbol, expression)));
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -2727,12 +2566,10 @@ QSet<Symbol> ForceFields::energySymbols() const
 {
     QSet<Symbol> syms;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
-        if ( (*it)->isEnergy() )
-            syms.insert( it.key() );
+        if ((*it)->isEnergy())
+            syms.insert(it.key());
     }
 
     return syms;
@@ -2753,18 +2590,16 @@ Expression ForceFields::energyExpression(const Symbol &component) const
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     return comp->toExpression();
 }
@@ -2774,31 +2609,28 @@ Expression ForceFields::energyExpression(const Symbol &component) const
 
     \throw SireFF::missing_component
 */
-QHash<Symbol,Expression> ForceFields::energyExpressions(
-                                        const QSet<Symbol> &symbols) const
+QHash<Symbol, Expression> ForceFields::energyExpressions(const QSet<Symbol> &symbols) const
 {
-    QHash<Symbol,Expression> exps;
-    exps.reserve( symbols.count() );
+    QHash<Symbol, Expression> exps;
+    exps.reserve(symbols.count());
 
     foreach (const Symbol &symbol, symbols)
     {
-        exps.insert( symbol, this->energyExpression(symbol) );
+        exps.insert(symbol, this->energyExpression(symbol));
     }
 
     return exps;
 }
 
 /** Return all of the energy expressions in this forcefield */
-QHash<Symbol,Expression> ForceFields::energyExpressions() const
+QHash<Symbol, Expression> ForceFields::energyExpressions() const
 {
-    QHash<Symbol,Expression> exps;
+    QHash<Symbol, Expression> exps;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
-        if ( (*it)->isEnergy() )
-            exps.insert( it.key(), (*it)->toExpression() );
+        if ((*it)->isEnergy())
+            exps.insert(it.key(), (*it)->toExpression());
     }
 
     return exps;
@@ -2812,25 +2644,21 @@ double ForceFields::constant(const Symbol &component) const
 {
     if (not ffsymbols.contains(component))
     {
-        throw SireFF::missing_component( QObject::tr(
-            "There is no constant represented by the symbol %1. "
-            "Available constants are %2.")
-                .arg(component.toString(),
-                        Sire::toString(this->constantSymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no constant represented by the symbol %1. "
+                                                    "Available constants are %2.")
+                                            .arg(component.toString(), Sire::toString(this->constantSymbols())),
+                                        CODELOC);
     }
 
     FFSymbolPtr val = ffsymbols.value(component);
 
     if (not val->isConstant())
     {
-        throw SireFF::missing_component( QObject::tr(
-            "There is no constant represented by the symbol %1. There is an "
-            "energy component with this symbol, but this is not constant! "
-            "Available constants are %2.")
-                .arg(component.toString(),
-                     Sire::toString(this->constantSymbols())),
-                        CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no constant represented by the symbol %1. There is an "
+                                                    "energy component with this symbol, but this is not constant! "
+                                                    "Available constants are %2.")
+                                            .arg(component.toString(), Sire::toString(this->constantSymbols())),
+                                        CODELOC);
     }
 
     return val->value(ffsymbols);
@@ -2841,9 +2669,7 @@ Values ForceFields::constants() const
 {
     Values constant_values;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
         if ((*it)->isConstant())
         {
@@ -2863,11 +2689,9 @@ Values ForceFields::constants(const QSet<Symbol> &components) const
 {
     Values constant_values;
 
-    for (QSet<Symbol>::const_iterator it = components.constBegin();
-         it != components.constEnd();
-         ++it)
+    for (QSet<Symbol>::const_iterator it = components.constBegin(); it != components.constEnd(); ++it)
     {
-        constant_values.set( *it, this->constant(*it) );
+        constant_values.set(*it, this->constant(*it));
     }
 
     return constant_values;
@@ -2881,11 +2705,10 @@ Values ForceFields::constants(const QSet<Symbol> &components) const
 bool ForceFields::isConstantComponent(const Symbol &component) const
 {
     if (not ffsymbols.contains(component))
-        throw SireFF::missing_component( QObject::tr(
-                "There is no forcefield component %1 (constant or otherwise!). "
-                "Available constant components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(constantSymbols())), CODELOC);
+        throw SireFF::missing_component(QObject::tr("There is no forcefield component %1 (constant or otherwise!). "
+                                                    "Available constant components are %2.")
+                                            .arg(component.toString(), Sire::toString(constantSymbols())),
+                                        CODELOC);
 
     return this->hasConstantComponent(component);
 }
@@ -2913,31 +2736,30 @@ void ForceFields::setConstantComponent(const Symbol &symbol, double value)
 {
     if (ffsymbols.contains(symbol))
     {
-        //if we are just changing the value then we can short-cut the process
+        // if we are just changing the value then we can short-cut the process
         const FFSymbolPtr &ffsym = ffsymbols.constFind(symbol).value();
 
         if (ffsym->isA<FFConstantValue>())
         {
             if (ffsym->asA<FFConstantValue>().value() == value)
-                //no need to change anything
+                // no need to change anything
                 return;
             else
             {
-                ffsymbols[symbol] = FFSymbolPtr( new FFConstantValue(symbol,value) );
+                ffsymbols[symbol] = FFSymbolPtr(new FFConstantValue(symbol, value));
                 return;
             }
         }
     }
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
-        ffsymbols.insert( symbol,
-                          FFSymbolPtr(new FFConstantValue(symbol, value)) );
+        ffsymbols.insert(symbol, FFSymbolPtr(new FFConstantValue(symbol, value)));
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -2956,8 +2778,7 @@ void ForceFields::setConstantComponent(const Symbol &symbol, double value)
 
     \throw SireFF::duplicate_component
 */
-void ForceFields::setConstantComponent(const Symbol &symbol,
-                                       const Expression &expression)
+void ForceFields::setConstantComponent(const Symbol &symbol, const Expression &expression)
 {
     if (expression.isConstant())
     {
@@ -2965,15 +2786,14 @@ void ForceFields::setConstantComponent(const Symbol &symbol,
         return;
     }
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
-        ffsymbols.insert( symbol,
-                          FFSymbolPtr(new FFConstantExpression(symbol, expression)) );
+        ffsymbols.insert(symbol, FFSymbolPtr(new FFConstantExpression(symbol, expression)));
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -2985,9 +2805,7 @@ QSet<Symbol> ForceFields::constantSymbols() const
 {
     QSet<Symbol> constant_symbols;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
         if ((*it)->isConstant())
         {
@@ -3011,20 +2829,18 @@ Values ForceFields::constantComponents() const
 Expression ForceFields::constantExpression(const Symbol &component) const
 {
     if (not ffsymbols.contains(component))
-        throw SireFF::missing_component( QObject::tr(
-                "There is no forcefield component %1 (constant or otherwise!). "
-                "Available constant components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(constantSymbols())), CODELOC);
+        throw SireFF::missing_component(QObject::tr("There is no forcefield component %1 (constant or otherwise!). "
+                                                    "Available constant components are %2.")
+                                            .arg(component.toString(), Sire::toString(constantSymbols())),
+                                        CODELOC);
 
     FFSymbolPtr val = ffsymbols.value(component);
 
     if (not val->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is not a constant component. Available constant "
-                "components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(constantSymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is not a constant component. Available constant "
+                                                    "components are %2.")
+                                            .arg(component.toString(), Sire::toString(constantSymbols())),
+                                        CODELOC);
 
     return val->toExpression();
 }
@@ -3033,28 +2849,25 @@ Expression ForceFields::constantExpression(const Symbol &component) const
 
     \throw SireFF::missing_component
 */
-QHash<Symbol,Expression> ForceFields::constantExpressions(
-                                            const QSet<Symbol> &symbols) const
+QHash<Symbol, Expression> ForceFields::constantExpressions(const QSet<Symbol> &symbols) const
 {
-    QHash<Symbol,Expression> exps;
-    exps.reserve( symbols.count() );
+    QHash<Symbol, Expression> exps;
+    exps.reserve(symbols.count());
 
-    foreach (const Symbol &symbol, symbols )
+    foreach (const Symbol &symbol, symbols)
     {
-        exps.insert( symbol, this->constantExpression(symbol) );
+        exps.insert(symbol, this->constantExpression(symbol));
     }
 
     return exps;
 }
 
 /** Return all of the constant expressions in the forcefields */
-QHash<Symbol,Expression> ForceFields::constantExpressions() const
+QHash<Symbol, Expression> ForceFields::constantExpressions() const
 {
-    QHash<Symbol,Expression> exps;
+    QHash<Symbol, Expression> exps;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
         if ((*it)->isConstant())
         {
@@ -3126,11 +2939,10 @@ Expression ForceFields::componentExpression(const Symbol &symbol) const
     FFSymbolPtr sym = ffsymbols.value(symbol);
 
     if (sym.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-                "There is no energy or constant component %1. Available "
-                "components are %2.")
-                    .arg(symbol.toString(),
-                         Sire::toString(ffsymbols.keys())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no energy or constant component %1. Available "
+                                                    "components are %2.")
+                                            .arg(symbol.toString(), Sire::toString(ffsymbols.keys())),
+                                        CODELOC);
 
     return sym->toExpression();
 }
@@ -3140,15 +2952,14 @@ Expression ForceFields::componentExpression(const Symbol &symbol) const
 
     \throw SireFF::missing_component
 */
-QHash<Symbol,Expression> ForceFields::componentExpressions(
-                                        const QSet<Symbol> &symbols) const
+QHash<Symbol, Expression> ForceFields::componentExpressions(const QSet<Symbol> &symbols) const
 {
-    QHash<Symbol,Expression> exps;
+    QHash<Symbol, Expression> exps;
     exps.reserve(symbols.count());
 
     foreach (const Symbol &symbol, symbols)
     {
-        exps.insert( symbol, this->componentExpression(symbol) );
+        exps.insert(symbol, this->componentExpression(symbol));
     }
 
     return exps;
@@ -3156,13 +2967,11 @@ QHash<Symbol,Expression> ForceFields::componentExpressions(
 
 /** Return all of the constant and energy expressions attached
     to these forcefields */
-QHash<Symbol,Expression> ForceFields::componentExpressions() const
+QHash<Symbol, Expression> ForceFields::componentExpressions() const
 {
-    QHash<Symbol,Expression> exps;
+    QHash<Symbol, Expression> exps;
 
-    for (QHash<Symbol,FFSymbolPtr>::const_iterator it = ffsymbols.constBegin();
-         it != ffsymbols.constEnd();
-         ++it)
+    for (QHash<Symbol, FFSymbolPtr>::const_iterator it = ffsymbols.constBegin(); it != ffsymbols.constEnd(); ++it)
     {
         exps.insert(it.key(), it.value()->toExpression());
     }
@@ -3170,24 +2979,21 @@ QHash<Symbol,Expression> ForceFields::componentExpressions() const
     return exps;
 }
 
-void ForceFields::energy(EnergyTable &energytable, const Symbol &component,
-			 double scale_energy)
+void ForceFields::energy(EnergyTable &energytable, const Symbol &component, double scale_energy)
 {
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
     comp->energy(energytable, ffields_by_idx, ffsymbols, scale_energy);
 }
 
@@ -3198,33 +3004,28 @@ void ForceFields::energy(EnergyTable &energytable, double scale_energy)
     this->energy(energytable, this->totalComponent(), scale_energy);
 }
 
-
 /** Add the force due to the component 'component' to the molecules
     in the force table 'forcetable', scaled by 'scale_force'
 
     \throw SireFF::missing_component
 */
-void ForceFields::force(ForceTable &forcetable, const Symbol &component,
-                        double scale_force)
+void ForceFields::force(ForceTable &forcetable, const Symbol &component, double scale_force)
 {
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
-    comp->force(forcetable, ffields_by_idx,
-                ffsymbols, scale_force);
+    comp->force(forcetable, ffields_by_idx, ffsymbols, scale_force);
 }
 
 /** Add the forces due to the forcefields in this set to the molecules
@@ -3239,27 +3040,23 @@ void ForceFields::force(ForceTable &forcetable, double scale_force)
 
     \throw SireFF::missing_component
 */
-void ForceFields::field(FieldTable &fieldtable, const Symbol &component,
-                        double scale_field)
+void ForceFields::field(FieldTable &fieldtable, const Symbol &component, double scale_field)
 {
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
-    comp->field(fieldtable, ffields_by_idx,
-                ffsymbols, scale_field);
+    comp->field(fieldtable, ffields_by_idx, ffsymbols, scale_field);
 }
 
 /** Add the fields due to the forcefields in this set to the molecules
@@ -3274,27 +3071,23 @@ void ForceFields::field(FieldTable &fieldtable, double scale_field)
 
     \throw SireFF::missing_component
 */
-void ForceFields::field(FieldTable &fieldtable, const Symbol &component,
-                        const Probe &probe, double scale_field)
+void ForceFields::field(FieldTable &fieldtable, const Symbol &component, const Probe &probe, double scale_field)
 {
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
-    comp->field(fieldtable, probe, ffields_by_idx,
-                ffsymbols, scale_field);
+    comp->field(fieldtable, probe, ffields_by_idx, ffsymbols, scale_field);
 }
 
 /** Add the fields due to the forcefields in this set to the molecules
@@ -3309,27 +3102,23 @@ void ForceFields::field(FieldTable &fieldtable, const Probe &probe, double scale
 
     \throw SireFF::missing_component
 */
-void ForceFields::potential(PotentialTable &pottable, const Symbol &component,
-                            double scale_potential)
+void ForceFields::potential(PotentialTable &pottable, const Symbol &component, double scale_potential)
 {
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
-    comp->potential(pottable, ffields_by_idx,
-                    ffsymbols, scale_potential);
+    comp->potential(pottable, ffields_by_idx, ffsymbols, scale_potential);
 }
 
 /** Add the potential due to the forcefields in this set to the molecules
@@ -3344,33 +3133,29 @@ void ForceFields::potential(PotentialTable &pottable, double scale_potential)
 
     \throw SireFF::missing_component
 */
-void ForceFields::potential(PotentialTable &pottable, const Symbol &component,
-                            const Probe &probe, double scale_potential)
+void ForceFields::potential(PotentialTable &pottable, const Symbol &component, const Probe &probe,
+                            double scale_potential)
 {
     FFSymbolPtr comp = ffsymbols.value(component);
 
     if (comp.get() == 0)
-        throw SireFF::missing_component( QObject::tr(
-            "There is no component of the energy represented by the "
-            "symbol %1. Available components are %2.")
-                .arg(component.toString(), Sire::toString(energySymbols())),
-                    CODELOC );
+        throw SireFF::missing_component(QObject::tr("There is no component of the energy represented by the "
+                                                    "symbol %1. Available components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
     if (comp->isConstant())
-        throw SireFF::missing_component( QObject::tr(
-                "The component %1 is a constant component (it is not an energy "
-                "component). Available energy components are %2.")
-                    .arg(component.toString(),
-                         Sire::toString(energySymbols())), CODELOC );
+        throw SireFF::missing_component(QObject::tr("The component %1 is a constant component (it is not an energy "
+                                                    "component). Available energy components are %2.")
+                                            .arg(component.toString(), Sire::toString(energySymbols())),
+                                        CODELOC);
 
-    comp->potential(pottable, probe, ffields_by_idx,
-                    ffsymbols, scale_potential);
+    comp->potential(pottable, probe, ffields_by_idx, ffsymbols, scale_potential);
 }
 
 /** Add the potential due to the forcefields in this set to the molecules
     in the potential table 'pottable', scaled by 'scale_potential' */
-void ForceFields::potential(PotentialTable &pottable,
-                            const Probe &probe, double scale_potential)
+void ForceFields::potential(PotentialTable &pottable, const Probe &probe, double scale_potential)
 {
     this->potential(pottable, this->totalComponent(), probe, scale_potential);
 }
@@ -3385,29 +3170,28 @@ void ForceFields::sanitiseUserProperties()
 {
     bool something_changed = false;
 
-    //need to keep iterating until nothing changes as there
-    //can be quite complicated dependencies caused by links
-    //disappering causing combined properties to fall back
-    //to a different real value, which may then make the
-    //combined property invalid, which will then break
-    //another link...!
+    // need to keep iterating until nothing changes as there
+    // can be quite complicated dependencies caused by links
+    // disappering causing combined properties to fall back
+    // to a different real value, which may then make the
+    // combined property invalid, which will then break
+    // another link...!
     do
     {
         something_changed = false;
 
         if (not additional_properties.isEmpty())
         {
-            //we cannot have an additional property that is also
-            //a built-in property
+            // we cannot have an additional property that is also
+            // a built-in property
             foreach (QString key, additional_properties.keys())
             {
-                for (QVector<FFPtr>::const_iterator it = ffields_by_idx.constBegin();
-                     it != ffields_by_idx.constEnd();
+                for (QVector<FFPtr>::const_iterator it = ffields_by_idx.constBegin(); it != ffields_by_idx.constEnd();
                      ++it)
                 {
                     if (it->read().containsProperty(key))
                     {
-                        //this is a built-in property!
+                        // this is a built-in property!
                         additional_properties.remove(key);
                         something_changed = true;
                         break;
@@ -3439,10 +3223,10 @@ void ForceFields::sanitiseUserProperties()
                     if (not updated_combinations.contains(key))
                         this->updateCombinedProperty(key, true, &updated_combinations);
                 }
-                catch(...)
+                catch (...)
                 {
-                    //we can no longer update this combined property or
-                    //one of its dependencies, so lets just remove it
+                    // we can no longer update this combined property or
+                    // one of its dependencies, so lets just remove it
                     combined_properties.remove(key);
                     something_changed = true;
                 }
@@ -3469,8 +3253,7 @@ void ForceFields::removeProperty(const QString &name)
     property (either a link or a combined property) */
 bool ForceFields::isCompoundProperty(const QString &name) const
 {
-    return combined_properties.contains(name) or
-           property_aliases.contains(name);
+    return combined_properties.contains(name) or property_aliases.contains(name);
 }
 
 /** Return whether or not the property 'name' exists and is a user
@@ -3495,32 +3278,30 @@ bool ForceFields::isBuiltinProperty(const QString &name) const
 
     \throw SireBase::missing_property
 */
-const Property& ForceFields::compoundProperty(const QString &name) const
+const Property &ForceFields::compoundProperty(const QString &name) const
 {
     bool is_link = property_aliases.contains(name);
     bool is_combined = combined_properties.contains(name);
 
     if (is_link and is_combined)
-        throw SireError::program_bug( QObject::tr(
-            "How can the property %1 be both a link and a combined property?")
-                .arg(name), CODELOC );
+        throw SireError::program_bug(
+            QObject::tr("How can the property %1 be both a link and a combined property?").arg(name), CODELOC);
 
-    else if (not (is_link or is_combined))
+    else if (not(is_link or is_combined))
     {
-        QStringList compound_props = property_aliases.keys() +
-                                     combined_properties.keys();
+        QStringList compound_props = property_aliases.keys() + combined_properties.keys();
 
         if (not this->containsProperty(name))
-            throw SireBase::missing_property( QObject::tr(
-                    "There is no property %1 in this set of forcefields. "
-                    "Available compound properties are [ %2 ].")
-                        .arg(name, Sire::toString(compound_props)), CODELOC );
+            throw SireBase::missing_property(QObject::tr("There is no property %1 in this set of forcefields. "
+                                                         "Available compound properties are [ %2 ].")
+                                                 .arg(name, Sire::toString(compound_props)),
+                                             CODELOC);
 
         else
-            throw SireBase::missing_property( QObject::tr(
-                    "The property %1 is not a compound property. "
-                    "Available compound properties are [ %2 ].")
-                        .arg(name, Sire::toString(compound_props)), CODELOC );
+            throw SireBase::missing_property(QObject::tr("The property %1 is not a compound property. "
+                                                         "Available compound properties are [ %2 ].")
+                                                 .arg(name, Sire::toString(compound_props)),
+                                             CODELOC);
     }
     else if (is_link)
     {
@@ -3535,15 +3316,15 @@ const Property& ForceFields::compoundProperty(const QString &name) const
 
     \throw SireBase::missing_property
 */
-const Property& ForceFields::userProperty(const QString &name) const
+const Property &ForceFields::userProperty(const QString &name) const
 {
     if (not this->isUserProperty(name))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no user property with name %1. Available user properties "
-            "are [ %2 ].")
-                .arg(name, Sire::toString( property_aliases.keys() +
-                                           combined_properties.keys() +
-                                           additional_properties.keys() ) ), CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("There is no user property with name %1. Available user properties "
+                        "are [ %2 ].")
+                .arg(name, Sire::toString(property_aliases.keys() + combined_properties.keys() +
+                                          additional_properties.keys())),
+            CODELOC);
 
     return this->property(name);
 }
@@ -3554,7 +3335,7 @@ const Property& ForceFields::userProperty(const QString &name) const
 
     \throw SireBase::missing_property
 */
-const Property& ForceFields::builtinProperty(const QString &name) const
+const Property &ForceFields::builtinProperty(const QString &name) const
 {
     return this->property(FFIdentifier(), name);
 }
@@ -3566,8 +3347,7 @@ void ForceFields::getDependencies(const QString &name, QSet<QString> &deps) cons
 {
     if (property_aliases.contains(name))
     {
-        const LinkToProperty &link = property_aliases.constFind(name)
-                                                     ->read().asA<LinkToProperty>();
+        const LinkToProperty &link = property_aliases.constFind(name)->read().asA<LinkToProperty>();
 
         if (not link.isFiltered() and link.target().hasSource())
         {
@@ -3580,12 +3360,9 @@ void ForceFields::getDependencies(const QString &name, QSet<QString> &deps) cons
     }
     else if (combined_properties.contains(name))
     {
-        const CombineProperties &combined = combined_properties.constFind(name)
-                                                    ->read().asA<CombineProperties>();
+        const CombineProperties &combined = combined_properties.constFind(name)->read().asA<CombineProperties>();
 
-        for (CombineProperties::const_iterator it = combined.constBegin();
-             it != combined.constEnd();
-             ++it)
+        for (CombineProperties::const_iterator it = combined.constBegin(); it != combined.constEnd(); ++it)
         {
             if (it->hasSource())
             {
@@ -3608,53 +3385,51 @@ void ForceFields::assertNonCircularProperty(const QString &name) const
     this->getDependencies(name, deps);
 
     if (deps.contains(name))
-        throw SireError::invalid_state( QObject::tr(
-            "Circular link detected from %1 to %1. The dependencies "
-            "of this property are %2.")
-                .arg(name).arg( Sire::toString(deps) ), CODELOC );
+        throw SireError::invalid_state(QObject::tr("Circular link detected from %1 to %1. The dependencies "
+                                                   "of this property are %2.")
+                                           .arg(name)
+                                           .arg(Sire::toString(deps)),
+                                       CODELOC);
 }
 
 /** Assert that the link at 'name' is valid */
 void ForceFields::assertValidLink(const QString &name) const
 {
     if (not property_aliases.contains(name))
-        throw SireBase::missing_property( QObject::tr(
-                "There is no link with name %1.").arg(name), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no link with name %1.").arg(name), CODELOC);
 
-    const LinkToProperty &link = property_aliases.constFind(name)
-                                                ->read().asA<LinkToProperty>();
+    const LinkToProperty &link = property_aliases.constFind(name)->read().asA<LinkToProperty>();
 
     if (link.target().isNull())
-        throw SireError::invalid_state( QObject::tr(
-                "Null link detected from %1 -> NULL")
-                    .arg(name), CODELOC );
+        throw SireError::invalid_state(QObject::tr("Null link detected from %1 -> NULL").arg(name), CODELOC);
 
     if (link.isFiltered())
     {
         if (not link.filter().isA<FFID>())
-            throw SireError::invalid_cast( QObject::tr(
-                    "You cannot not add a link that is filtered by a non FFID-derived "
-                    "identifier (as you can only filter on forcefield IDs). "
-                    "The link from %1 is %2.")
-                        .arg(name, link.toString()), CODELOC );
+            throw SireError::invalid_cast(
+                QObject::tr("You cannot not add a link that is filtered by a non FFID-derived "
+                            "identifier (as you can only filter on forcefield IDs). "
+                            "The link from %1 is %2.")
+                    .arg(name, link.toString()),
+                CODELOC);
 
         this->map(link.filter().asA<FFID>());
     }
 
-    //see if we can get this property
+    // see if we can get this property
     if (link.target().hasSource())
     {
         if (link.isFiltered())
         {
-            //ensure that we can actually get the link
+            // ensure that we can actually get the link
             this->property(link.filter().asA<FFID>(), link.target().source());
         }
         else
         {
-            //ensure that this property is not a circular link
+            // ensure that this property is not a circular link
             this->assertNonCircularProperty(name);
 
-            //ensure that we can actually get the link
+            // ensure that we can actually get the link
             this->property(link.target().source());
         }
     }
@@ -3668,7 +3443,7 @@ bool ForceFields::isValidLink(const QString &name) const
         this->assertValidLink(name);
         return true;
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -3680,8 +3455,7 @@ bool ForceFields::isValidLink(const QString &name) const
     when this was updated. This internal function is not atomic,
     so should only be called by another function that explicitly
     ensures atomicity */
-void ForceFields::updateCombinedProperty(const QString &name,
-                                         bool update_dependencies,
+void ForceFields::updateCombinedProperty(const QString &name, bool update_dependencies,
                                          QSet<QString> *updated_combinations)
 {
     if (updated_combinations)
@@ -3691,18 +3465,15 @@ void ForceFields::updateCombinedProperty(const QString &name,
     }
 
     if (not combined_properties.contains(name))
-        throw SireBase::missing_property( QObject::tr(
-                "There is no property combination with name %1.").arg(name), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no property combination with name %1.").arg(name),
+                                         CODELOC);
 
-    CombineProperties &combined = combined_properties.find(name)
-                                           ->edit().asA<CombineProperties>();
+    CombineProperties &combined = combined_properties.find(name)->edit().asA<CombineProperties>();
 
-    //get all of the dependent properties of this combination
+    // get all of the dependent properties of this combination
     Properties dependencies;
 
-    for (CombineProperties::const_iterator it = combined.constBegin();
-         it != combined.constEnd();
-         ++it)
+    for (CombineProperties::const_iterator it = combined.constBegin(); it != combined.constEnd(); ++it)
     {
         if (it->hasSource())
         {
@@ -3727,11 +3498,11 @@ void ForceFields::updateCombinedProperties()
 
     else if (combined_properties.count() == 1)
     {
-        this->updateCombinedProperty( combined_properties.constBegin().key(), false );
+        this->updateCombinedProperty(combined_properties.constBegin().key(), false);
     }
     else
     {
-        QHash<QString,PropertyPtr> old_combined_properties = combined_properties;
+        QHash<QString, PropertyPtr> old_combined_properties = combined_properties;
 
         try
         {
@@ -3742,7 +3513,7 @@ void ForceFields::updateCombinedProperties()
                 this->updateCombinedProperty(key, true, &updated_combinations);
             }
         }
-        catch(...)
+        catch (...)
         {
             combined_properties = old_combined_properties;
             throw;
@@ -3761,18 +3532,16 @@ void ForceFields::setProperty(const QString &name, const Property &value)
     if (name.isEmpty())
         return;
 
-    //is this property a link? If so, then we need to forward this
-    //setProperty to the target of the link
+    // is this property a link? If so, then we need to forward this
+    // setProperty to the target of the link
     if (property_aliases.contains(name))
     {
-        const LinkToProperty &link = property_aliases.constFind(name)->read()
-                                                        .asA<LinkToProperty>();
+        const LinkToProperty &link = property_aliases.constFind(name)->read().asA<LinkToProperty>();
 
         if (link.target().hasSource())
         {
             if (link.isFiltered())
-                this->setProperty(link.filter().asA<FFID>(),
-                                  link.target().source(), value);
+                this->setProperty(link.filter().asA<FFID>(), link.target().source(), value);
             else
                 this->setProperty(link.target().source(), value);
         }
@@ -3782,10 +3551,10 @@ void ForceFields::setProperty(const QString &name, const Property &value)
 
     if (value.isA<LinkToProperty>())
     {
-        //remove any existing link or combined property with this name
-        QHash<QString,PropertyPtr> old_combined_properties = combined_properties;
-        QHash<QString,PropertyPtr> old_property_aliases = property_aliases;
-        QHash<QString,PropertyPtr> old_additional_properties = additional_properties;
+        // remove any existing link or combined property with this name
+        QHash<QString, PropertyPtr> old_combined_properties = combined_properties;
+        QHash<QString, PropertyPtr> old_property_aliases = property_aliases;
+        QHash<QString, PropertyPtr> old_additional_properties = additional_properties;
 
         try
         {
@@ -3796,7 +3565,7 @@ void ForceFields::setProperty(const QString &name, const Property &value)
             this->assertValidLink(name);
             this->sanitiseUserProperties();
         }
-        catch(...)
+        catch (...)
         {
             additional_properties = old_additional_properties;
             property_aliases = old_property_aliases;
@@ -3806,10 +3575,10 @@ void ForceFields::setProperty(const QString &name, const Property &value)
     }
     else if (value.isA<CombineProperties>())
     {
-        //remove any existing link or combined property with this name
-        QHash<QString,PropertyPtr> old_additional_properties = additional_properties;
-        QHash<QString,PropertyPtr> old_combined_properties = combined_properties;
-        QHash<QString,PropertyPtr> old_property_aliases = property_aliases;
+        // remove any existing link or combined property with this name
+        QHash<QString, PropertyPtr> old_additional_properties = additional_properties;
+        QHash<QString, PropertyPtr> old_combined_properties = combined_properties;
+        QHash<QString, PropertyPtr> old_property_aliases = property_aliases;
 
         try
         {
@@ -3820,7 +3589,7 @@ void ForceFields::setProperty(const QString &name, const Property &value)
             this->assertNonCircularProperty(name);
             this->sanitiseUserProperties();
         }
-        catch(...)
+        catch (...)
         {
             additional_properties = old_additional_properties;
             property_aliases = old_property_aliases;
@@ -3831,22 +3600,22 @@ void ForceFields::setProperty(const QString &name, const Property &value)
     else
     {
         QVector<FFPtr> old_ffields_by_idx = ffields_by_idx;
-        QHash<QString,PropertyPtr> old_additional_properties = additional_properties;
-        QHash<QString,PropertyPtr> old_combined_properties = combined_properties;
-        QHash<QString,PropertyPtr> old_property_aliases = property_aliases;
+        QHash<QString, PropertyPtr> old_additional_properties = additional_properties;
+        QHash<QString, PropertyPtr> old_combined_properties = combined_properties;
+        QHash<QString, PropertyPtr> old_property_aliases = property_aliases;
 
         try
         {
             if (additional_properties.contains(name))
             {
-                //we already know that the forcefields don't contain
-                //this property - update the additional property
+                // we already know that the forcefields don't contain
+                // this property - update the additional property
                 additional_properties.insert(name, value);
                 this->sanitiseUserProperties();
             }
             else
             {
-                //this is a new property that has replaced any link or combined property
+                // this is a new property that has replaced any link or combined property
                 combined_properties.remove(name);
                 property_aliases.remove(name);
 
@@ -3856,7 +3625,7 @@ void ForceFields::setProperty(const QString &name, const Property &value)
                 bool changed_property = false;
                 bool contains_property = false;
 
-                for (int i=0; i<nffields; ++i)
+                for (int i = 0; i < nffields; ++i)
                 {
                     if (ffields_array[i].read().containsProperty(name))
                     {
@@ -3871,13 +3640,13 @@ void ForceFields::setProperty(const QString &name, const Property &value)
                     this->sanitiseUserProperties();
 
                 else if (not contains_property)
-                    //there is no property in the forcefields, so add this
-                    //as an additional property - no need to sanitise
-                    //user properties as this is a totally new property
+                    // there is no property in the forcefields, so add this
+                    // as an additional property - no need to sanitise
+                    // user properties as this is a totally new property
                     additional_properties.insert(name, value);
             }
         }
-        catch(...)
+        catch (...)
         {
             ffields_by_idx = old_ffields_by_idx;
             additional_properties = old_additional_properties;
@@ -3903,10 +3672,9 @@ void ForceFields::setProperty(const QString &name, const Property &value)
     \throw SireError::incompatible_error
     \throw SireError::invalid_cast
 */
-void ForceFields::setProperty(const FFID &ffid, const QString &name,
-                              const Property &value)
+void ForceFields::setProperty(const FFID &ffid, const QString &name, const Property &value)
 {
-    QVector<FFPtr> old_state( ffields_by_idx );
+    QVector<FFPtr> old_state(ffields_by_idx);
 
     try
     {
@@ -3926,7 +3694,7 @@ void ForceFields::setProperty(const FFID &ffid, const QString &name,
         if (changed_property)
             this->sanitiseUserProperties();
     }
-    catch(...)
+    catch (...)
     {
         ffields_by_idx = old_state;
         throw;
@@ -3940,7 +3708,7 @@ void ForceFields::setProperty(const FFID &ffid, const QString &name,
     \throw SireBase::duplicate_property
     \throw SireBase::missing_property
 */
-const Property& ForceFields::property(const QString &name) const
+const Property &ForceFields::property(const QString &name) const
 {
     if (additional_properties.contains(name))
     {
@@ -3948,27 +3716,22 @@ const Property& ForceFields::property(const QString &name) const
     }
     else if (property_aliases.contains(name))
     {
-        const LinkToProperty &link = property_aliases.constFind(name)->read()
-                                                     .asA<LinkToProperty>();
+        const LinkToProperty &link = property_aliases.constFind(name)->read().asA<LinkToProperty>();
 
         if (link.target().isNull())
-            throw SireError::program_bug( QObject::tr(
-                    "How did a null link from %1 get through???")
-                        .arg(name), CODELOC );
+            throw SireError::program_bug(QObject::tr("How did a null link from %1 get through???").arg(name), CODELOC);
 
         if (link.target().hasSource())
         {
             if (link.isFiltered())
             {
-                return this->property(link.filter().asA<FFID>(),
-                                      link.target().source());
+                return this->property(link.filter().asA<FFID>(), link.target().source());
             }
             else
             {
                 if (link.target().source() == name)
-                    throw SireError::program_bug( QObject::tr(
-                        "How did the circular reference from %1 to %1 get through?")
-                            .arg(name), CODELOC );
+                    throw SireError::program_bug(
+                        QObject::tr("How did the circular reference from %1 to %1 get through?").arg(name), CODELOC);
 
                 return this->property(link.target().source());
             }
@@ -3978,46 +3741,46 @@ const Property& ForceFields::property(const QString &name) const
     }
     else if (combined_properties.contains(name))
     {
-        return combined_properties.constFind(name)->read().asA<CombineProperties>()
-                                                          .combinedProperty();
+        return combined_properties.constFind(name)->read().asA<CombineProperties>().combinedProperty();
     }
     else
     {
-        //there is no user property with this name - try to find
-        //a built-in property with this name
+        // there is no user property with this name - try to find
+        // a built-in property with this name
 
         int nffields = ffields_by_idx.count();
         const FFPtr *ffields_array = ffields_by_idx.constData();
 
         const Property *p = &(Property::null());
 
-        for (int i=0; i<nffields; ++i)
+        for (int i = 0; i < nffields; ++i)
         {
             if (ffields_array[i]->containsProperty(name))
             {
-                if ( p->equals(Property::null()) )
+                if (p->equals(Property::null()))
                 {
                     p = &(ffields_array[i]->property(name));
                 }
-                else if ( not p->equals(ffields_array[i]->property(name)) )
+                else if (not p->equals(ffields_array[i]->property(name)))
                 {
-                    throw SireBase::duplicate_property( QObject::tr(
-                        "More than one forcefield contains the property (%1), and "
-                        "it has a different value in these forcefields. "
-                        "You will have to search for this property "
-                        "individually in each forcefield (e.g. using the "
-                        "ForceFields::forceFieldsWithProperty(...) member function).")
-                            .arg(name), CODELOC );
+                    throw SireBase::duplicate_property(
+                        QObject::tr("More than one forcefield contains the property (%1), and "
+                                    "it has a different value in these forcefields. "
+                                    "You will have to search for this property "
+                                    "individually in each forcefield (e.g. using the "
+                                    "ForceFields::forceFieldsWithProperty(...) member function).")
+                            .arg(name),
+                        CODELOC);
                 }
             }
         }
 
-        if ( p->equals(Property::null()) )
+        if (p->equals(Property::null()))
         {
-            throw SireBase::missing_property( QObject::tr(
-                "None of the contained forcefields have a property called %1. "
-                "Available properties are %2.")
-                    .arg(name, Sire::toString(this->propertyKeys()) ), CODELOC );
+            throw SireBase::missing_property(QObject::tr("None of the contained forcefields have a property called %1. "
+                                                         "Available properties are %2.")
+                                                 .arg(name, Sire::toString(this->propertyKeys())),
+                                             CODELOC);
         }
 
         return *p;
@@ -4036,9 +3799,9 @@ const Property& ForceFields::property(const QString &name) const
     \throw SireFF::duplicate_forcefield
     \throw SireBase::missing_property
 */
-const Property& ForceFields::property(const FFID &ffid, const QString &name) const
+const Property &ForceFields::property(const FFID &ffid, const QString &name) const
 {
-    //get the list of forcefields that match this ID
+    // get the list of forcefields that match this ID
     QList<FFIdx> ffidxs = ffid.map(*this);
 
     const Property *p = &(Property::null());
@@ -4051,30 +3814,31 @@ const Property& ForceFields::property(const FFID &ffid, const QString &name) con
 
         if (ff.containsProperty(name))
         {
-            if ( p->equals(Property::null()) )
+            if (p->equals(Property::null()))
             {
                 p = &(ff.property(name));
                 has_property = true;
             }
-            else if ( not p->equals(ff.property(name)) )
+            else if (not p->equals(ff.property(name)))
             {
-                throw SireBase::duplicate_property( QObject::tr(
-                    "More than one of the forcefields that match the ID %1 "
-                    "contain the property %2, and it has a different value "
-                    "in at least two of these forcefields. You will need "
-                    "to search for this property one forcefield at a time "
-                    "(e.g. using the ForceFields::forceFieldsWithProperty(...) "
-                    "member function).")
-                        .arg(ffid.toString(), name), CODELOC );
+                throw SireBase::duplicate_property(
+                    QObject::tr("More than one of the forcefields that match the ID %1 "
+                                "contain the property %2, and it has a different value "
+                                "in at least two of these forcefields. You will need "
+                                "to search for this property one forcefield at a time "
+                                "(e.g. using the ForceFields::forceFieldsWithProperty(...) "
+                                "member function).")
+                        .arg(ffid.toString(), name),
+                    CODELOC);
             }
         }
     }
 
     if (not has_property)
-        throw SireBase::missing_property( QObject::tr(
-            "None of the forcefields that match the ID '%1' contain "
-            "a property called %2.")
-                .arg(ffid.toString(), name), CODELOC );
+        throw SireBase::missing_property(QObject::tr("None of the forcefields that match the ID '%1' contain "
+                                                     "a property called %2.")
+                                             .arg(ffid.toString(), name),
+                                         CODELOC);
 
     return *p;
 }
@@ -4089,11 +3853,11 @@ bool ForceFields::containsProperty(const QString &name) const
     }
     else
     {
-        //look for a built-in property with this name
+        // look for a built-in property with this name
         int nffields = ffields_by_idx.count();
         const FFPtr *ffields_array = ffields_by_idx.constData();
 
-        for (int i=0; i<nffields; ++i)
+        for (int i = 0; i < nffields; ++i)
         {
             if (ffields_array[i]->containsProperty(name))
                 return true;
@@ -4159,28 +3923,28 @@ QStringList ForceFields::propertyKeys() const
 {
     QSet<QString> keys;
 
-    keys.unite( convert_to_qset(property_aliases.keys()) );
-    keys.unite( convert_to_qset(combined_properties.keys()) );
-    keys.unite( convert_to_qset(additional_properties.keys()) );
+    keys.unite(convert_to_qset(property_aliases.keys()));
+    keys.unite(convert_to_qset(combined_properties.keys()));
+    keys.unite(convert_to_qset(additional_properties.keys()));
 
     int nffields = this->nForceFields();
 
     if (nffields == 0)
     {
-        return QStringList( keys.values() );
+        return QStringList(keys.values());
     }
     else if (nffields == 1)
     {
-        keys.unite( convert_to_qset(this->_pvt_forceField(0).propertyKeys()) );
-        return QStringList( keys.values() );
+        keys.unite(convert_to_qset(this->_pvt_forceField(0).propertyKeys()));
+        return QStringList(keys.values());
     }
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
-        keys.unite( convert_to_qset(this->_pvt_forceField(i).propertyKeys()) );
+        keys.unite(convert_to_qset(this->_pvt_forceField(i).propertyKeys()));
     }
 
-    return QStringList( keys.values() );
+    return QStringList(keys.values());
 }
 
 /** Return the names of all of the properties in the forcefields
@@ -4209,7 +3973,7 @@ QStringList ForceFields::propertyKeys(const FFID &ffid) const
         keys.unite(convert_to_qset(this->_pvt_forceField(idx).propertyKeys()));
     }
 
-    return QStringList( keys.values() );
+    return QStringList(keys.values());
 }
 
 /** Return all of the properties in all of the forcefields. This will raise
@@ -4306,17 +4070,17 @@ QVector<FFPtr> ForceFields::forceFieldsWithProperty(const QString &name) const
 
     int nffields = this->nForceFields();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         if (this->_pvt_forceField(i).containsProperty(name))
-            ffs.append( this->_pvt_forceField(i) );
+            ffs.append(this->_pvt_forceField(i));
     }
 
     if (ffs.isEmpty())
-        throw SireBase::missing_property( QObject::tr(
-            "No forcefields contain the property %1. Available properties "
-            "are %2.")
-                .arg(name, Sire::toString(this->propertyKeys())), CODELOC );
+        throw SireBase::missing_property(QObject::tr("No forcefields contain the property %1. Available properties "
+                                                     "are %2.")
+                                             .arg(name, Sire::toString(this->propertyKeys())),
+                                         CODELOC);
 
     return ffs;
 }
@@ -4332,8 +4096,7 @@ QVector<FFPtr> ForceFields::forceFieldsWithProperty(const QString &name) const
     \throw SireBase::missing_property
     \throw SireError::invalid_index
 */
-QVector<FFPtr> ForceFields::forceFieldsWithProperty(const FFID &ffid,
-                                                    const QString &name) const
+QVector<FFPtr> ForceFields::forceFieldsWithProperty(const FFID &ffid, const QString &name) const
 {
     QList<FFIdx> ffidxs = ffid.map(*this);
 
@@ -4342,15 +4105,14 @@ QVector<FFPtr> ForceFields::forceFieldsWithProperty(const FFID &ffid,
     foreach (FFIdx ffidx, ffidxs)
     {
         if (this->_pvt_forceField(ffidx).containsProperty(name))
-            ffs.append( this->_pvt_forceField(ffidx) );
+            ffs.append(this->_pvt_forceField(ffidx));
     }
 
     if (ffs.isEmpty())
-        throw SireBase::missing_property( QObject::tr(
-            "None of the forcefields that match the ID %1 contain the "
-            "property called %2. Available properties are %3.")
-                .arg(ffid.toString(), name,
-                     Sire::toString(this->propertyKeys(ffid))), CODELOC );
+        throw SireBase::missing_property(QObject::tr("None of the forcefields that match the ID %1 contain the "
+                                                     "property called %2. Available properties are %3.")
+                                             .arg(ffid.toString(), name, Sire::toString(this->propertyKeys(ffid))),
+                                         CODELOC);
 
     return ffs;
 }
@@ -4369,7 +4131,7 @@ QVector<FFPtr> ForceFields::forceFields(const FFID &ffid) const
 
     foreach (FFIdx ffidx, ffidxs)
     {
-        ffs.append( this->_pvt_forceField(ffidx) );
+        ffs.append(this->_pvt_forceField(ffidx));
     }
 
     return ffs;
@@ -4388,7 +4150,7 @@ QList<FFName> ForceFields::ffNames(const FFID &ffid) const
 
     foreach (FFIdx ffidx, ffidxs)
     {
-        names.append( this->_pvt_forceField(ffidx).name() );
+        names.append(this->_pvt_forceField(ffidx).name());
     }
 
     return names;
@@ -4396,14 +4158,14 @@ QList<FFName> ForceFields::ffNames(const FFID &ffid) const
 
 /** Return an array containing all of the forcefields in this set, ordered
     in the same order as they appear in this set */
-const QVector<FFPtr>& ForceFields::forceFields() const
+const QVector<FFPtr> &ForceFields::forceFields() const
 {
     return ffields_by_idx;
 }
 
 /** Return an array containing all of the forcefields in this set, ordered
     in the same order as they appear in this set */
-const QVector<FFPtr>& ForceFields::list() const
+const QVector<FFPtr> &ForceFields::list() const
 {
     return this->forceFields();
 }
@@ -4414,11 +4176,9 @@ QList<FFName> ForceFields::ffNames() const
 {
     QList<FFName> ffnames;
 
-    for (QHash<QString,int>::const_iterator it = ffields_by_name.constBegin();
-         it != ffields_by_name.constEnd();
-         ++it)
+    for (QHash<QString, int>::const_iterator it = ffields_by_name.constBegin(); it != ffields_by_name.constEnd(); ++it)
     {
-        ffnames.append( FFName(it.key()) );
+        ffnames.append(FFName(it.key()));
     }
 
     return ffnames;
@@ -4440,7 +4200,7 @@ void ForceFields::mustNowRecalculateFromScratch()
     int nffields = ffields_by_idx.count();
     FFPtr *ffields_array = ffields_by_idx.data();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         ffields_array[i].edit().mustNowRecalculateFromScratch();
     }
@@ -4453,7 +4213,7 @@ bool ForceFields::isDirty() const
     int nffields = ffields_by_idx.count();
     const FFPtr *ffields_array = ffields_by_idx.constData();
 
-    for (int i=0; i<nffields; ++i)
+    for (int i = 0; i < nffields; ++i)
     {
         if (ffields_array[i]->isDirty())
             return true;
@@ -4481,20 +4241,20 @@ bool ForceFields::isClean() const
 */
 void ForceFields::add(const FF &forcefield)
 {
-    FFPtr ff( forcefield );
-    ff.edit().update( this->matchToExistingVersion(forcefield.molecules()) );
+    FFPtr ff(forcefield);
+    ff.edit().update(this->matchToExistingVersion(forcefield.molecules()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
         ffields_by_idx.append(ff);
         this->rebuildIndex();
 
-        //adding the forcefield may break some links
+        // adding the forcefield may break some links
         this->sanitiseUserProperties();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4504,17 +4264,17 @@ void ForceFields::add(const FF &forcefield)
 /** Internal function used to remove the ith forcefield */
 void ForceFields::_pvt_remove(int i)
 {
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
         ffields_by_idx.remove(i);
         this->rebuildIndex();
 
-        //removing the forcefield may break some links
+        // removing the forcefield may break some links
         this->sanitiseUserProperties();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4527,7 +4287,7 @@ void ForceFields::_pvt_remove(int i)
 */
 void ForceFields::remove(const FFIdx &ffidx)
 {
-    this->_pvt_remove( ffidx.map(ffields_by_idx.count()) );
+    this->_pvt_remove(ffidx.map(ffields_by_idx.count()));
 }
 
 /** Remove the forcefield with name 'ffname'.
@@ -4536,7 +4296,7 @@ void ForceFields::remove(const FFIdx &ffidx)
 */
 void ForceFields::remove(const FFName &ffname)
 {
-    this->_pvt_remove( this->ffIdx(ffname) );
+    this->_pvt_remove(this->ffIdx(ffname));
 }
 
 /** Remove the forcefield(s) that match the ID 'ffid'
@@ -4548,7 +4308,7 @@ void ForceFields::remove(const FFID &ffid)
 {
     QList<FFIdx> ffidxs = ffid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4559,10 +4319,10 @@ void ForceFields::remove(const FFID &ffid)
 
         this->rebuildIndex();
 
-        //removing the forcefield may break some links
+        // removing the forcefield may break some links
         this->sanitiseUserProperties();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4586,7 +4346,7 @@ void ForceFields::removeAllForceFields()
         this->clearIndex();
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4597,14 +4357,14 @@ void ForceFields::removeAllForceFields()
 
     \throw SireMol::missing_group
 */
-const MoleculeGroup& ForceFields::at(MGNum mgnum) const
+const MoleculeGroup &ForceFields::at(MGNum mgnum) const
 {
     if (not mgroups_by_num.contains(mgnum))
-        throw SireMol::missing_group( QObject::tr(
-            "None of the forcefields in this set contain a molecule group "
-            "with number %1. Available groups have numbers %2.")
-                .arg(mgnum).arg( Sire::toString(mgroups_by_num.keys()) ),
-                    CODELOC );
+        throw SireMol::missing_group(QObject::tr("None of the forcefields in this set contain a molecule group "
+                                                 "with number %1. Available groups have numbers %2.")
+                                         .arg(mgnum)
+                                         .arg(Sire::toString(mgroups_by_num.keys())),
+                                     CODELOC);
 
     return this->_pvt_forceField(mgnum).at(mgnum);
 }
@@ -4618,15 +4378,14 @@ const MoleculeGroup& ForceFields::at(MGNum mgnum) const
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::add(const MoleculeView &molview, const MGID &mgid,
-                      const PropertyMap &map)
+void ForceFields::add(const MoleculeView &molview, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     PartialMolecule view(molview);
-    view.update( this->matchToExistingVersion(view.data()) );
+    view.update(this->matchToExistingVersion(view.data()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4636,7 +4395,7 @@ void ForceFields::add(const MoleculeView &molview, const MGID &mgid,
             MolGroupsBase::addToIndex(mgnum, view.data().number());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4652,15 +4411,14 @@ void ForceFields::add(const MoleculeView &molview, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::add(const ViewsOfMol &molviews, const MGID &mgid,
-                      const PropertyMap &map)
+void ForceFields::add(const ViewsOfMol &molviews, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     ViewsOfMol views(molviews);
-    views.update( this->matchToExistingVersion(views.data()) );
+    views.update(this->matchToExistingVersion(views.data()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4670,7 +4428,7 @@ void ForceFields::add(const ViewsOfMol &molviews, const MGID &mgid,
             MolGroupsBase::addToIndex(mgnum, views.number());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4686,14 +4444,13 @@ void ForceFields::add(const ViewsOfMol &molviews, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::add(const Molecules &molecules, const MGID &mgid,
-                      const PropertyMap &map)
+void ForceFields::add(const Molecules &molecules, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     Molecules mols = this->matchToExistingVersion(molecules);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4704,7 +4461,7 @@ void ForceFields::add(const Molecules &molecules, const MGID &mgid,
             MolGroupsBase::addToIndex(mgnum, mols.molNums());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4720,17 +4477,16 @@ void ForceFields::add(const Molecules &molecules, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::add(const MoleculeGroup &molgroup, const MGID &mgid,
-                      const PropertyMap &map)
+void ForceFields::add(const MoleculeGroup &molgroup, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    //update the group to match the molecule versions
-    //already present in this group...
+    // update the group to match the molecule versions
+    // already present in this group...
     MolGroupPtr group(molgroup);
-    group.edit().update( this->matchToExistingVersion(group.read().molecules()) );
+    group.edit().update(this->matchToExistingVersion(group.read().molecules()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4738,11 +4494,10 @@ void ForceFields::add(const MoleculeGroup &molgroup, const MGID &mgid,
         {
             this->_pvt_forceField(mgnum).add(group, mgnum, map);
 
-            MolGroupsBase::addToIndex(mgnum,
-                                      convert_to_qset(group->molNums()));
+            MolGroupsBase::addToIndex(mgnum, convert_to_qset(group->molNums()));
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4759,15 +4514,14 @@ void ForceFields::add(const MoleculeGroup &molgroup, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::addIfUnique(const MoleculeView &molview, const MGID &mgid,
-                              const PropertyMap &map)
+void ForceFields::addIfUnique(const MoleculeView &molview, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     PartialMolecule view(molview);
-    view.update( this->matchToExistingVersion(view.data()) );
+    view.update(this->matchToExistingVersion(view.data()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4778,7 +4532,7 @@ void ForceFields::addIfUnique(const MoleculeView &molview, const MGID &mgid,
             MolGroupsBase::addToIndex(mgnum, view.data().number());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4795,15 +4549,14 @@ void ForceFields::addIfUnique(const MoleculeView &molview, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
-                              const PropertyMap &map)
+void ForceFields::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     ViewsOfMol views(molviews);
-    views.update( this->matchToExistingVersion(views.data()) );
+    views.update(this->matchToExistingVersion(views.data()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4814,7 +4567,7 @@ void ForceFields::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
             MolGroupsBase::addToIndex(mgnum, views.number());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4831,15 +4584,14 @@ void ForceFields::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::addIfUnique(const Molecules &molecules, const MGID &mgid,
-                              const PropertyMap &map)
+void ForceFields::addIfUnique(const Molecules &molecules, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     Molecules mols = this->matchToExistingVersion(molecules);
     QSet<MolNum> molnums = mols.molNums();
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4850,7 +4602,7 @@ void ForceFields::addIfUnique(const Molecules &molecules, const MGID &mgid,
             MolGroupsBase::addToIndex(mgnum, mols.molNums());
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -4867,16 +4619,15 @@ void ForceFields::addIfUnique(const Molecules &molecules, const MGID &mgid,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid,
-                              const PropertyMap &map)
+void ForceFields::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    //update the group...
+    // update the group...
     MolGroupPtr group(molgroup);
-    group.edit().update( this->matchToExistingVersion(molgroup.molecules()) );
+    group.edit().update(this->matchToExistingVersion(molgroup.molecules()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -4884,11 +4635,10 @@ void ForceFields::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid,
         {
             this->_pvt_forceField(mgnum).addIfUnique(group, mgnum, map);
 
-            MolGroupsBase::addToIndex(mgnum,
-                                      convert_to_qset(group.read().molNums()));
+            MolGroupsBase::addToIndex(mgnum, convert_to_qset(group.read().molNums()));
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5021,7 +4771,7 @@ bool ForceFields::removeAll(const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5040,7 +4790,7 @@ bool ForceFields::removeAll(const MGID &mgid)
             MolGroupsBase::clearIndex(mgnum);
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5062,7 +4812,7 @@ bool ForceFields::remove(const MoleculeView &molview, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5082,7 +4832,7 @@ bool ForceFields::remove(const MoleculeView &molview, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5104,7 +4854,7 @@ bool ForceFields::remove(const ViewsOfMol &molviews, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5124,7 +4874,7 @@ bool ForceFields::remove(const ViewsOfMol &molviews, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5146,7 +4896,7 @@ bool ForceFields::remove(const Molecules &molecules, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5162,9 +4912,7 @@ bool ForceFields::remove(const Molecules &molecules, const MGID &mgid)
 
             const MoleculeGroup &molgroup = ff.group(mgnum);
 
-            for (Molecules::const_iterator it = molecules.constBegin();
-                 it != molecules.constEnd();
-                 ++it)
+            for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
             {
                 if (not molgroup.contains(it->number()))
                 {
@@ -5173,7 +4921,7 @@ bool ForceFields::remove(const Molecules &molecules, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5207,7 +4955,7 @@ bool ForceFields::removeAll(const MoleculeView &molview, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5227,7 +4975,7 @@ bool ForceFields::removeAll(const MoleculeView &molview, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5247,7 +4995,7 @@ bool ForceFields::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5267,7 +5015,7 @@ bool ForceFields::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5287,7 +5035,7 @@ bool ForceFields::removeAll(const Molecules &molecules, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5303,9 +5051,7 @@ bool ForceFields::removeAll(const Molecules &molecules, const MGID &mgid)
 
             const MoleculeGroup &group = ff.group(mgnum);
 
-            for (Molecules::const_iterator it = molecules.constBegin();
-                 it != molecules.constEnd();
-                 ++it)
+            for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
             {
                 if (not group.contains(it->number()))
                 {
@@ -5314,7 +5060,7 @@ bool ForceFields::removeAll(const Molecules &molecules, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5360,7 +5106,7 @@ bool ForceFields::remove(MolNum molnum, const MGID &mgid)
     }
     else
     {
-        ForceFields old_state( *this );
+        ForceFields old_state(*this);
 
         bool mols_removed = false;
 
@@ -5375,7 +5121,7 @@ bool ForceFields::remove(MolNum molnum, const MGID &mgid)
                 }
             }
         }
-        catch(...)
+        catch (...)
         {
             this->operator=(old_state);
             throw;
@@ -5395,7 +5141,7 @@ bool ForceFields::remove(const QSet<MolNum> &molnums, const MGID &mgid)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     bool mols_removed = false;
 
@@ -5410,7 +5156,7 @@ bool ForceFields::remove(const QSet<MolNum> &molnums, const MGID &mgid)
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5440,13 +5186,13 @@ void ForceFields::update(const MoleculeData &moldata, bool auto_commit)
 
     if (mgnums.count() == 1)
     {
-        this->_pvt_forceField(mgnums.at(0)).update(moldata,auto_commit);
+        this->_pvt_forceField(mgnums.at(0)).update(moldata, auto_commit);
     }
     else
     {
         foreach (const MGNum &mgnum, mgnums)
         {
-            this->_pvt_forceField(mgnum).update(moldata,auto_commit);
+            this->_pvt_forceField(mgnum).update(moldata, auto_commit);
         }
     }
 
@@ -5468,7 +5214,7 @@ void ForceFields::update(const Molecules &molecules, bool auto_commit)
 
     else if (molecules.count() == 1)
     {
-        this->update( molecules.constBegin()->data(), auto_commit );
+        this->update(molecules.constBegin()->data(), auto_commit);
     }
     else
     {
@@ -5478,9 +5224,9 @@ void ForceFields::update(const Molecules &molecules, bool auto_commit)
         int nffields = ffields_by_idx.count();
         FFPtr *ffields_array = ffields_by_idx.data();
 
-        for (int i=0; i<nffields; ++i)
+        for (int i = 0; i < nffields; ++i)
         {
-            ffields_array[i].edit().update(molecules,auto_commit);
+            ffields_array[i].edit().update(molecules, auto_commit);
         }
 
         if (auto_commit and this->needsAccepting())
@@ -5498,7 +5244,7 @@ void ForceFields::update(const Molecules &molecules, bool auto_commit)
 */
 void ForceFields::update(const MoleculeGroup &molgroup, bool auto_commit)
 {
-    this->update( molgroup.molecules(), auto_commit );
+    this->update(molgroup.molecules(), auto_commit);
 }
 
 /** Set the contents of the molecule groups identified by the ID 'mgid'
@@ -5511,15 +5257,14 @@ void ForceFields::update(const MoleculeGroup &molgroup, bool auto_commit)
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::setContents(const MGID &mgid, const MoleculeView &molview,
-                              const PropertyMap &map)
+void ForceFields::setContents(const MGID &mgid, const MoleculeView &molview, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     PartialMolecule view(molview);
-    view.update( this->matchToExistingVersion(view.data()) );
+    view.update(this->matchToExistingVersion(view.data()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -5530,7 +5275,7 @@ void ForceFields::setContents(const MGID &mgid, const MoleculeView &molview,
 
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5547,15 +5292,14 @@ void ForceFields::setContents(const MGID &mgid, const MoleculeView &molview,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::setContents(const MGID &mgid, const ViewsOfMol &molviews,
-                              const PropertyMap &map)
+void ForceFields::setContents(const MGID &mgid, const ViewsOfMol &molviews, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     ViewsOfMol views(molviews);
-    views.update( this->matchToExistingVersion(views.data()) );
+    views.update(this->matchToExistingVersion(views.data()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -5566,7 +5310,7 @@ void ForceFields::setContents(const MGID &mgid, const ViewsOfMol &molviews,
 
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5583,14 +5327,13 @@ void ForceFields::setContents(const MGID &mgid, const ViewsOfMol &molviews,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::setContents(const MGID &mgid, const Molecules &molecules,
-                              const PropertyMap &map)
+void ForceFields::setContents(const MGID &mgid, const Molecules &molecules, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     Molecules mols = this->matchToExistingVersion(molecules);
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -5601,7 +5344,7 @@ void ForceFields::setContents(const MGID &mgid, const Molecules &molecules,
 
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5618,15 +5361,14 @@ void ForceFields::setContents(const MGID &mgid, const Molecules &molecules,
     \throw SireError::invalid_cast
     \throw SireError::incompatible_error
 */
-void ForceFields::setContents(const MGID &mgid, const MoleculeGroup &molgroup,
-                              const PropertyMap &map)
+void ForceFields::setContents(const MGID &mgid, const MoleculeGroup &molgroup, const PropertyMap &map)
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
     MoleculeGroup group(molgroup);
-    group.update( this->matchToExistingVersion(group.molecules()) );
+    group.update(this->matchToExistingVersion(group.molecules()));
 
-    ForceFields old_state( *this );
+    ForceFields old_state(*this);
 
     try
     {
@@ -5637,7 +5379,7 @@ void ForceFields::setContents(const MGID &mgid, const MoleculeGroup &molgroup,
 
         this->rebuildIndex();
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -5708,7 +5450,7 @@ void ForceFields::setContents(const MGID &mgid, const MoleculeGroup &molgroup)
     to be accepted */
 bool ForceFields::needsAccepting() const
 {
-    for (int i=0; i<ffields_by_idx.count(); ++i)
+    for (int i = 0; i < ffields_by_idx.count(); ++i)
     {
         if (ffields_by_idx.constData()[i].read().needsAccepting())
             return true;
@@ -5722,7 +5464,7 @@ void ForceFields::accept()
 {
     FFPtr *ffs = ffields_by_idx.data();
 
-    for (int i=0; i<ffields_by_idx.count(); ++i)
+    for (int i = 0; i < ffields_by_idx.count(); ++i)
     {
         if (ffs[i].read().needsAccepting())
         {
@@ -5774,7 +5516,7 @@ void ForceFields::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     if (not space_property.hasSource())
     {
-        //nothing to do
+        // nothing to do
         return;
     }
 
@@ -5782,7 +5524,7 @@ void ForceFields::loadFrame(int frame, const SireBase::PropertyMap &map)
     {
         old_space = this->property(space_property.source()).asA<Space>();
     }
-    catch(...)
+    catch (...)
     {
         // no default space
         old_space = Cartesian();
@@ -5792,9 +5534,7 @@ void ForceFields::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     const auto groups = this->getGroups();
 
-    for (auto it = groups.constBegin();
-         it != groups.constEnd();
-         ++it)
+    for (auto it = groups.constBegin(); it != groups.constEnd(); ++it)
     {
         bool found = false;
 
@@ -5805,8 +5545,9 @@ void ForceFields::loadFrame(int frame, const SireBase::PropertyMap &map)
                 new_space = mol.data().property(space_property.source()).asA<Space>();
                 found = true;
             }
-            catch(...)
-            {}
+            catch (...)
+            {
+            }
 
             if (found)
                 break;
@@ -5843,7 +5584,7 @@ void ForceFields::deleteFrame(int frame, const SireBase::PropertyMap &map)
     MolGroupsBase::deleteFrame(frame, map);
 }
 
-const char* ForceFields::typeName()
+const char *ForceFields::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ForceFields>() );
+    return QMetaType::typeName(qMetaTypeId<ForceFields>());
 }

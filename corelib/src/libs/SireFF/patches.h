@@ -36,253 +36,246 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class Patches;
-class FFBead;
-class FFBeadChange;
-}
+    class Patches;
+    class FFBead;
+    class FFBeadChange;
+} // namespace SireFF
 
-QDataStream& operator<<(QDataStream&, const SireFF::Patches&);
-QDataStream& operator>>(QDataStream&, SireFF::Patches&);
+QDataStream &operator<<(QDataStream &, const SireFF::Patches &);
+QDataStream &operator>>(QDataStream &, SireFF::Patches &);
 
-QDataStream& operator<<(QDataStream&, const SireFF::FFBead&);
-QDataStream& operator>>(QDataStream&, SireFF::FFBead&);
+QDataStream &operator<<(QDataStream &, const SireFF::FFBead &);
+QDataStream &operator>>(QDataStream &, SireFF::FFBead &);
 
-QDataStream& operator<<(QDataStream&, const SireFF::FFBeadChange&);
-QDataStream& operator>>(QDataStream&, SireFF::FFBeadChange&);
+QDataStream &operator<<(QDataStream &, const SireFF::FFBeadChange &);
+QDataStream &operator>>(QDataStream &, SireFF::FFBeadChange &);
 
 namespace SireFF
 {
 
-using SireVol::Patching;
-using SireVol::Space;
-using SireVol::CoordGroup;
-using SireVol::AABox;
+    using SireVol::AABox;
+    using SireVol::CoordGroup;
+    using SireVol::Patching;
+    using SireVol::Space;
 
-/** This simple class holds the coordinates and forcefield parameters
-    for a bead
+    /** This simple class holds the coordinates and forcefield parameters
+        for a bead
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFBead
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFBead
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFBead&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFBead&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFBead &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFBead &);
 
-public:
-    FFBead();
-    FFBead(const CoordGroup &coordinates, const FFParameters &parameters);
+    public:
+        FFBead();
+        FFBead(const CoordGroup &coordinates, const FFParameters &parameters);
 
-    FFBead(const FFBead &other);
+        FFBead(const FFBead &other);
 
-    ~FFBead();
+        ~FFBead();
 
-    FFBead& operator=(const FFBead &other);
+        FFBead &operator=(const FFBead &other);
 
-    bool operator==(const FFBead &other) const;
-    bool operator!=(const FFBead &other) const;
+        bool operator==(const FFBead &other) const;
+        bool operator!=(const FFBead &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const CoordGroup& coordinates() const;
-    const FFParameters& parameters() const;
+        const CoordGroup &coordinates() const;
+        const FFParameters &parameters() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-private:
-    /** The bead coordinates */
-    CoordGroup coords;
+    private:
+        /** The bead coordinates */
+        CoordGroup coords;
 
-    /** The bead parameters */
-    FFParametersPtr params;
-};
+        /** The bead parameters */
+        FFParametersPtr params;
+    };
 
-/** This simple class holds the data the describes a change
-    in a bead
+    /** This simple class holds the data the describes a change
+        in a bead
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT FFBeadChange
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT FFBeadChange
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const FFBeadChange&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, FFBeadChange&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const FFBeadChange &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, FFBeadChange &);
 
-public:
-    FFBeadChange();
-    FFBeadChange(const FFBead &old_bead, const FFBead &new_bead);
+    public:
+        FFBeadChange();
+        FFBeadChange(const FFBead &old_bead, const FFBead &new_bead);
 
-    FFBeadChange(const FFBeadChange &other);
+        FFBeadChange(const FFBeadChange &other);
 
-    ~FFBeadChange();
+        ~FFBeadChange();
 
-    FFBeadChange& operator=(const FFBeadChange &other);
+        FFBeadChange &operator=(const FFBeadChange &other);
 
-    bool operator==(const FFBeadChange &other) const;
-    bool operator!=(const FFBeadChange &other) const;
+        bool operator==(const FFBeadChange &other) const;
+        bool operator!=(const FFBeadChange &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    const FFBead& oldBead() const;
-    const FFBead& newBead() const;
+        const FFBead &oldBead() const;
+        const FFBead &newBead() const;
 
-    FFBeadChange update(const FFBead &newer_bead) const;
+        FFBeadChange update(const FFBead &newer_bead) const;
 
-private:
-    /** The old state of the bead */
-    FFBead old_bead;
+    private:
+        /** The old state of the bead */
+        FFBead old_bead;
 
-    /** The new state of the bead */
-    FFBead new_bead;
-};
+        /** The new state of the bead */
+        FFBead new_bead;
+    };
 
-/** This class holds a collection of Patch objects. All of the beads
-    in a forcefield are arranged into Patches, with each patch containing
-    a neighbouring group of beads.
+    /** This class holds a collection of Patch objects. All of the beads
+        in a forcefield are arranged into Patches, with each patch containing
+        a neighbouring group of beads.
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT Patches
-        : public SireBase::ConcreteProperty<Patches,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT Patches : public SireBase::ConcreteProperty<Patches, SireBase::Property>
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const Patches&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, Patches&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const Patches &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, Patches &);
 
-public:
-    Patches();
-    Patches(const Space &space, const Patching &patching);
+    public:
+        Patches();
+        Patches(const Space &space, const Patching &patching);
 
-    Patches(const Patching &patching);
+        Patches(const Patching &patching);
 
-    Patches(const Patches &other);
+        Patches(const Patches &other);
 
-    ~Patches();
+        ~Patches();
 
-    Patches& operator=(const Patches &other);
+        Patches &operator=(const Patches &other);
 
-    bool operator==(const Patches &other) const;
-    bool operator!=(const Patches &other) const;
+        bool operator==(const Patches &other) const;
+        bool operator!=(const Patches &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    const Patching& patching() const;
-    const Space& space() const;
+        const Patching &patching() const;
+        const Space &space() const;
 
-    void repatch(const Patching &patching);
-    void repatch(const Space &space);
+        void repatch(const Patching &patching);
+        void repatch(const Space &space);
 
-    int nPatches() const;
-    int size() const;
-    int count() const;
+        int nPatches() const;
+        int size() const;
+        int count() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    int nBeads() const;
+        int nBeads() const;
 
-    const Patch& operator[](int i) const;
-    const Patch& at(int i) const;
+        const Patch &operator[](int i) const;
+        const Patch &at(int i) const;
 
-    const Patch* data() const;
-    const Patch* constData() const;
+        const Patch *data() const;
+        const Patch *constData() const;
 
-    QPair<int,int> getLocation(quint32 beadid) const;
+        QPair<int, int> getLocation(quint32 beadid) const;
 
-    QPair<quint32,FFBead> add(const CoordGroup &coords, const FFParameters &params);
-    QPair<quint32,FFBead> add(const FFBead &bead);
+        QPair<quint32, FFBead> add(const CoordGroup &coords, const FFParameters &params);
+        QPair<quint32, FFBead> add(const FFBead &bead);
 
-    QHash<quint32,FFBead> add(const CoordGroupArray &coords,
-                              const FFParametersArray &params);
+        QHash<quint32, FFBead> add(const CoordGroupArray &coords, const FFParametersArray &params);
 
-    QHash<quint32,FFBead> add(const QVector<CoordGroup> &coords,
-                              const QVector<FFParametersPtr> &params);
+        QHash<quint32, FFBead> add(const QVector<CoordGroup> &coords, const QVector<FFParametersPtr> &params);
 
-    QHash<quint32,FFBead> add(const QVector<FFBead> &beads);
+        QHash<quint32, FFBead> add(const QVector<FFBead> &beads);
 
-    FFBeadChange update(quint32 beadid, const CoordGroup &coords);
-    FFBeadChange update(quint32 beadid, const FFParameters &params);
-    FFBeadChange update(quint32 beadid, const CoordGroup &coords,
-                        const FFParameters &params);
-    FFBeadChange update(quint32 beadid, const FFBead &bead);
+        FFBeadChange update(quint32 beadid, const CoordGroup &coords);
+        FFBeadChange update(quint32 beadid, const FFParameters &params);
+        FFBeadChange update(quint32 beadid, const CoordGroup &coords, const FFParameters &params);
+        FFBeadChange update(quint32 beadid, const FFBead &bead);
 
-    QHash<quint32,FFBeadChange> update(const QVector<quint32> &beadids,
-                                       const CoordGroupArray &coords);
+        QHash<quint32, FFBeadChange> update(const QVector<quint32> &beadids, const CoordGroupArray &coords);
 
-    QHash<quint32,FFBeadChange> update(const QVector<quint32> &beadids,
-                                       const FFParametersArray &params);
+        QHash<quint32, FFBeadChange> update(const QVector<quint32> &beadids, const FFParametersArray &params);
 
-    QHash<quint32,FFBeadChange> update(const QVector<quint32> &beadids,
-                                       const CoordGroupArray &coords,
-                                       const FFParametersArray &params);
+        QHash<quint32, FFBeadChange> update(const QVector<quint32> &beadids, const CoordGroupArray &coords,
+                                            const FFParametersArray &params);
 
-    FFBeadChange remove(quint32 beadid);
-    QHash<quint32,FFBeadChange> remove(const QVector<quint32> &beadids);
+        FFBeadChange remove(quint32 beadid);
+        QHash<quint32, FFBeadChange> remove(const QVector<quint32> &beadids);
 
-    void removeAll();
+        void removeAll();
 
-private:
-    int getIdx(quint32 beadid) const;
+    private:
+        int getIdx(quint32 beadid) const;
 
-    /** The current patching scheme (contains the space as well) */
-    SireVol::PatchingPtr ptchng;
+        /** The current patching scheme (contains the space as well) */
+        SireVol::PatchingPtr ptchng;
 
-    /** All of the patches */
-    QVector<Patch> ptchs;
+        /** All of the patches */
+        QVector<Patch> ptchs;
 
-    /** Index of the patch that contains each bead */
-    QHash<quint32,quint32> beadid_to_patch;
+        /** Index of the patch that contains each bead */
+        QHash<quint32, quint32> beadid_to_patch;
 
-    /** The last assigned bead ID */
-    quint32 last_beadid;
-};
+        /** The last assigned bead ID */
+        quint32 last_beadid;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the coordinates of this bead */
-SIRE_ALWAYS_INLINE const CoordGroup& FFBead::coordinates() const
-{
-    return coords;
-}
+    /** Return the coordinates of this bead */
+    SIRE_ALWAYS_INLINE const CoordGroup &FFBead::coordinates() const
+    {
+        return coords;
+    }
 
-/** Return the parameters of the bead */
-SIRE_ALWAYS_INLINE const FFParameters& FFBead::parameters() const
-{
-    return params.read();
-}
+    /** Return the parameters of the bead */
+    SIRE_ALWAYS_INLINE const FFParameters &FFBead::parameters() const
+    {
+        return params.read();
+    }
 
-/** Return whether or not this bead is empty */
-SIRE_ALWAYS_INLINE bool FFBead::isEmpty() const
-{
-    return coords.isEmpty();
-}
+    /** Return whether or not this bead is empty */
+    SIRE_ALWAYS_INLINE bool FFBead::isEmpty() const
+    {
+        return coords.isEmpty();
+    }
 
-/** Return whether the change is empty (represents no change) */
-SIRE_ALWAYS_INLINE bool FFBeadChange::isEmpty() const
-{
-    return old_bead.isEmpty() and new_bead.isEmpty();
-}
+    /** Return whether the change is empty (represents no change) */
+    SIRE_ALWAYS_INLINE bool FFBeadChange::isEmpty() const
+    {
+        return old_bead.isEmpty() and new_bead.isEmpty();
+    }
 
-/** Return the state of the bead before the change */
-SIRE_ALWAYS_INLINE const FFBead& FFBeadChange::oldBead() const
-{
-    return old_bead;
-}
+    /** Return the state of the bead before the change */
+    SIRE_ALWAYS_INLINE const FFBead &FFBeadChange::oldBead() const
+    {
+        return old_bead;
+    }
 
-/** Return the state of the bead after the change */
-SIRE_ALWAYS_INLINE const FFBead& FFBeadChange::newBead() const
-{
-    return new_bead;
-}
+    /** Return the state of the bead after the change */
+    SIRE_ALWAYS_INLINE const FFBead &FFBeadChange::newBead() const
+    {
+        return new_bead;
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireFF
 
-Q_DECLARE_METATYPE( SireFF::FFBead )
-Q_DECLARE_METATYPE( SireFF::FFBeadChange )
-Q_DECLARE_METATYPE( SireFF::Patches )
+Q_DECLARE_METATYPE(SireFF::FFBead)
+Q_DECLARE_METATYPE(SireFF::FFBeadChange)
+Q_DECLARE_METATYPE(SireFF::Patches)
 
 SIRE_END_HEADER
 

@@ -37,115 +37,115 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CLJDelta;
+    class CLJDelta;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJDelta&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJDelta&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJDelta &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJDelta &);
 
 namespace SireMM
 {
 
-class CLJBoxes;
+    class CLJBoxes;
 
-using boost::tuple;
+    using boost::tuple;
 
-/** This class is used to hold the change in coordinates etc. of a set of atoms caused
-    by e.g. a Monte Carlo move
+    /** This class is used to hold the change in coordinates etc. of a set of atoms caused
+        by e.g. a Monte Carlo move
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJDelta
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJDelta
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJDelta&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJDelta&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJDelta &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJDelta &);
 
-public:
-    CLJDelta();
-    CLJDelta(qint32 idnum, const CLJAtoms &oldatoms, const CLJAtoms &newatoms);
+    public:
+        CLJDelta();
+        CLJDelta(qint32 idnum, const CLJAtoms &oldatoms, const CLJAtoms &newatoms);
 
-    CLJDelta(const CLJDelta &other);
+        CLJDelta(const CLJDelta &other);
 
-    ~CLJDelta();
+        ~CLJDelta();
 
-    CLJDelta& operator=(const CLJDelta &other);
+        CLJDelta &operator=(const CLJDelta &other);
 
-    bool operator==(const CLJDelta &other) const;
-    bool operator!=(const CLJDelta &other) const;
+        bool operator==(const CLJDelta &other) const;
+        bool operator!=(const CLJDelta &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isEmpty() const;
-    bool isNull() const;
+        bool isEmpty() const;
+        bool isNull() const;
 
-    qint32 ID() const;
+        qint32 ID() const;
 
-    CLJAtoms newAtoms() const;
-    CLJAtoms oldAtoms() const;
+        CLJAtoms newAtoms() const;
+        CLJAtoms oldAtoms() const;
 
-    CLJAtoms changedAtoms() const;
+        CLJAtoms changedAtoms() const;
 
-    void assertIdenticalTo(const CLJDelta &other) const;
+        void assertIdenticalTo(const CLJDelta &other) const;
 
-    static CLJAtoms mergeChanged(const CLJDelta *deltas, int count);
-    static CLJAtoms mergeChanged(const QVector<CLJDelta> &deltas);
+        static CLJAtoms mergeChanged(const CLJDelta *deltas, int count);
+        static CLJAtoms mergeChanged(const QVector<CLJDelta> &deltas);
 
-    static CLJAtoms mergeNew(const CLJDelta *deltas, int count);
-    static CLJAtoms mergeNew(const QVector<CLJDelta> &deltas);
+        static CLJAtoms mergeNew(const CLJDelta *deltas, int count);
+        static CLJAtoms mergeNew(const QVector<CLJDelta> &deltas);
 
-    static CLJAtoms mergeOld(const CLJDelta *deltas, int count);
-    static CLJAtoms mergeOld(const QVector<CLJDelta> &deltas);
+        static CLJAtoms mergeOld(const CLJDelta *deltas, int count);
+        static CLJAtoms mergeOld(const QVector<CLJDelta> &deltas);
 
-    static tuple<CLJAtoms,CLJAtoms,CLJAtoms> merge(const CLJDelta *deltas, int count);
-    static tuple<CLJAtoms,CLJAtoms,CLJAtoms> merge(const QVector<CLJDelta> &deltas);
+        static tuple<CLJAtoms, CLJAtoms, CLJAtoms> merge(const CLJDelta *deltas, int count);
+        static tuple<CLJAtoms, CLJAtoms, CLJAtoms> merge(const QVector<CLJDelta> &deltas);
 
-private:
-    /** The old atoms */
-    CLJAtoms old_atoms;
+    private:
+        /** The old atoms */
+        CLJAtoms old_atoms;
 
-    /** The new atoms */
-    CLJAtoms new_atoms;
+        /** The new atoms */
+        CLJAtoms new_atoms;
 
-    /** The ID number of this delta in the CLJWorkspace that created
-        and manages it */
-    qint32 idnum;
-};
+        /** The ID number of this delta in the CLJWorkspace that created
+            and manages it */
+        qint32 idnum;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the ID number of this delta. This can be used for book-keeping
-    by the object that created this delta */
-SIRE_ALWAYS_INLINE qint32 CLJDelta::ID() const
-{
-    return idnum;
-}
+    /** Return the ID number of this delta. This can be used for book-keeping
+        by the object that created this delta */
+    SIRE_ALWAYS_INLINE qint32 CLJDelta::ID() const
+    {
+        return idnum;
+    }
 
-/** Return the old version of the atoms in a format that should make
-    them easy to rebox */
-SIRE_ALWAYS_INLINE CLJAtoms CLJDelta::oldAtoms() const
-{
-    return old_atoms;
-}
+    /** Return the old version of the atoms in a format that should make
+        them easy to rebox */
+    SIRE_ALWAYS_INLINE CLJAtoms CLJDelta::oldAtoms() const
+    {
+        return old_atoms;
+    }
 
-/** Return the new version of the atoms in a format that should make
-    them easy to rebox */
-SIRE_ALWAYS_INLINE CLJAtoms CLJDelta::newAtoms() const
-{
-    return new_atoms;
-}
+    /** Return the new version of the atoms in a format that should make
+        them easy to rebox */
+    SIRE_ALWAYS_INLINE CLJAtoms CLJDelta::newAtoms() const
+    {
+        return new_atoms;
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::CLJDelta )
+Q_DECLARE_METATYPE(SireMM::CLJDelta)
 
-SIRE_EXPOSE_CLASS( SireMM::CLJDelta )
+SIRE_EXPOSE_CLASS(SireMM::CLJDelta)
 
 SIRE_END_HEADER
 

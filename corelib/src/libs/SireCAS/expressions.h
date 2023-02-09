@@ -28,7 +28,7 @@
 #ifndef SIRECAS_EXPRESSIONS_H
 #define SIRECAS_EXPRESSIONS_H
 
-#include  <QList>
+#include <QList>
 
 #include "expression.h"
 
@@ -39,16 +39,16 @@ SIRE_BEGIN_HEADER
 namespace SireCAS
 {
 
-class Expression;
+  class Expression;
 
-/**
-Expressions provides a list of expressions.
+  /**
+  Expressions provides a list of expressions.
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT Expressions : public QList<Expression>
-{
-public:
+  @author Christopher Woods
+  */
+  class SIRECAS_EXPORT Expressions : public QList<Expression>
+  {
+  public:
     Expressions();
 
     Expressions(const Expression &expression);
@@ -59,10 +59,39 @@ public:
 
     Expressions differentiate(const Symbol &symbol) const;
     Expressions integrate(const Symbol &symbol) const;
+  };
 
-};
+} // namespace SireCAS
 
+#ifndef SIRE_SKIP_INLINE_FUNCTIONS
+
+namespace SireCAS
+{
+  /** Return a list of all children of type 'T' in this expression */
+  template <class T>
+  SIRE_OUTOFLINE_TEMPLATE QList<T> Expression::children() const
+  {
+    Expressions exs = this->children();
+
+    QList<T> children_t;
+
+    for (Expressions::const_iterator it = exs.constBegin(); it != exs.constEnd(); ++it)
+    {
+      const ExpressionBase &base = it->base();
+
+// gccxml doesn't like this section, so remove it
+// when we are generating the python wrappers
+#ifndef SKIP_BROKEN_GCCXML_PARTS
+      if (base.isA<T>())
+        children_t.append(base.asA<T>());
+#endif
+    }
+
+    return children_t;
+  }
 }
+
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
 SIRE_END_HEADER
 

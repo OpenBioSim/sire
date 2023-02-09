@@ -47,14 +47,14 @@ using namespace SireStream;
 ////////// Implementation of GTO
 //////////
 
-static const RegisterMetaType<GTO> r_gto( MAGIC_ONLY, GTO::typeName() );
+static const RegisterMetaType<GTO> r_gto(MAGIC_ONLY, GTO::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const GTO &gto)
 {
     writeHeader(ds, r_gto, 1);
 
-    ds << gto.alfa << gto.scl << static_cast<const OrbitalShell&>(gto);
+    ds << gto.alfa << gto.scl << static_cast<const OrbitalShell &>(gto);
 
     return ds;
 }
@@ -66,7 +66,7 @@ QDataStream &operator>>(QDataStream &ds, GTO &gto)
 
     if (v == 1)
     {
-        ds >> gto.alfa >> gto.scl >> static_cast<OrbitalShell&>(gto);
+        ds >> gto.alfa >> gto.scl >> static_cast<OrbitalShell &>(gto);
     }
     else
         throw version_error(v, "1", r_gto, CODELOC);
@@ -76,30 +76,31 @@ QDataStream &operator>>(QDataStream &ds, GTO &gto)
 
 /** Constructor */
 GTO::GTO() : OrbitalShell(), alfa(0), scl(0)
-{}
+{
+}
 
 /** Construct with the specified value of the alpha (exponent)
     and scale (unnormalised) */
-GTO::GTO(double alpha, double scale)
-    : OrbitalShell(), alfa(alpha), scl(scale)
+GTO::GTO(double alpha, double scale) : OrbitalShell(), alfa(alpha), scl(scale)
 {
-	if (scl < 0)
-    	throw SireError::invalid_arg( QObject::tr(
-        		"Squire does not support the use of GTOs with negative "
-                "scale factors."), CODELOC );
+    if (scl < 0)
+        throw SireError::invalid_arg(QObject::tr("Squire does not support the use of GTOs with negative "
+                                                 "scale factors."),
+                                     CODELOC);
 }
 
 /** Copy constructor */
-GTO::GTO(const GTO &other)
-    : OrbitalShell(other), alfa(other.alfa), scl(other.scl)
-{}
+GTO::GTO(const GTO &other) : OrbitalShell(other), alfa(other.alfa), scl(other.scl)
+{
+}
 
 /** Destructor */
 GTO::~GTO()
-{}
+{
+}
 
 /** Copy assignment operator */
-GTO& GTO::operator=(const GTO &other)
+GTO &GTO::operator=(const GTO &other)
 {
     if (this != &other)
     {
@@ -114,8 +115,7 @@ GTO& GTO::operator=(const GTO &other)
 /** Comparison operator */
 bool GTO::operator==(const GTO &other) const
 {
-    return alfa == other.alfa and scl == other.scl and
-           OrbitalShell::operator==(other);
+    return alfa == other.alfa and scl == other.scl and OrbitalShell::operator==(other);
 }
 
 /** Comparison operator */
@@ -128,25 +128,23 @@ bool GTO::operator!=(const GTO &other) const
     if the scale or exponent are 0 */
 bool GTO::isNull() const
 {
-	return alfa == 0 or scl == 0;
+    return alfa == 0 or scl == 0;
 }
 
 /** Return this orbital shell multiplied by 'coefficient' */
 GTOPtr GTO::multiply(double coefficient) const
 {
-	if (coefficient < 0)
-    	throw SireError::invalid_arg( QObject::tr(
-        		"Squire does not support GTOs with negative scale factors."),
-                	CODELOC );
+    if (coefficient < 0)
+        throw SireError::invalid_arg(QObject::tr("Squire does not support GTOs with negative scale factors."), CODELOC);
 
-	GTOPtr ret( this->clone() );
+    GTOPtr ret(this->clone());
 
     ret.edit().scl *= coefficient;
 
     if (ret.read().scl == 0)
-    	return GTOPtr();
+        return GTOPtr();
     else
-		return ret;
+        return ret;
 }
 
 /** Return the value of alpha (the exponent) for this gaussian */
@@ -168,21 +166,21 @@ double GTO::scale() const
     return scl;
 }
 
-const char* GTO::typeName()
+const char *GTO::typeName()
 {
     return "Squire::GTO";
 }
 
 static SharedPolyPointer<GTO> global_null_gto;
 
-const GTO& GTO::null()
+const GTO &GTO::null()
 {
     if (global_null_gto.constData() == 0)
     {
-        QMutexLocker lkr( globalLock() );
+        QMutexLocker lkr(globalLock());
 
         if (global_null_gto.constData() == 0)
-            global_null_gto = static_cast<GTO*>(new S_GTO());
+            global_null_gto = static_cast<GTO *>(new S_GTO());
     }
 
     return *(global_null_gto.constData());
@@ -192,16 +190,15 @@ const GTO& GTO::null()
 ////////// Implementation of ShellPair
 //////////
 
-static const RegisterMetaType<GTOPair> r_gtopair( MAGIC_ONLY, GTOPair::typeName() );
+static const RegisterMetaType<GTOPair> r_gtopair(MAGIC_ONLY, GTOPair::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const GTOPair &gtopair)
 {
     writeHeader(ds, r_gtopair, 1);
 
-    ds << gtopair._P << gtopair._R2 << gtopair._zeta << gtopair._xi
-       << gtopair._K << gtopair._ss << gtopair._Q_AB
-       << static_cast<const ShellPair&>(gtopair);
+    ds << gtopair._P << gtopair._R2 << gtopair._zeta << gtopair._xi << gtopair._K << gtopair._ss << gtopair._Q_AB
+       << static_cast<const ShellPair &>(gtopair);
 
     return ds;
 }
@@ -213,9 +210,8 @@ QDataStream &operator>>(QDataStream &ds, GTOPair &gtopair)
 
     if (v == 1)
     {
-        ds >> gtopair._P >> gtopair._R2 >> gtopair._zeta
-           >> gtopair._xi >> gtopair._K >> gtopair._ss >> gtopair._Q_AB
-           >> static_cast<ShellPair&>(gtopair);
+        ds >> gtopair._P >> gtopair._R2 >> gtopair._zeta >> gtopair._xi >> gtopair._K >> gtopair._ss >> gtopair._Q_AB >>
+            static_cast<ShellPair &>(gtopair);
     }
     else
         throw version_error(v, "1", r_gtopair, CODELOC);
@@ -224,22 +220,20 @@ QDataStream &operator>>(QDataStream &ds, GTOPair &gtopair)
 }
 
 /** Null constructor */
-GTOPair::GTOPair()
-        : ShellPair(), _R2(0), _zeta(0), _xi(0), _K(0), _ss(0), _Q_AB(0)
-{}
+GTOPair::GTOPair() : ShellPair(), _R2(0), _zeta(0), _xi(0), _K(0), _ss(0), _Q_AB(0)
+{
+}
 
-static const double sqrt_two_times_pi_to_5_4 = std::sqrt(2.0) * std::pow(pi, (5.0/4.0));
-static const double four_over_pi2 = 4 / (pi*pi);
+static const double sqrt_two_times_pi_to_5_4 = std::sqrt(2.0) * std::pow(pi, (5.0 / 4.0));
+static const double four_over_pi2 = 4 / (pi * pi);
 
 /** Construct a shell pair from the passed two GTO orbital shells,
     located at the specified points */
-GTOPair::GTOPair(const Vector &A, const GTO &a,
-                 const Vector &B, const GTO &b)
-        : ShellPair(), _Q_AB(0)
+GTOPair::GTOPair(const Vector &A, const GTO &a, const Vector &B, const GTO &b) : ShellPair(), _Q_AB(0)
 {
-	if (a.isNull() or b.isNull())
+    if (a.isNull() or b.isNull())
     {
-		_R2 = 0;
+        _R2 = 0;
         _zeta = 0;
         _xi = 0;
         _K = 0;
@@ -247,43 +241,43 @@ GTOPair::GTOPair(const Vector &A, const GTO &a,
     }
     else
     {
-        //the product of two Gaussians is a Gaussian :-)
+        // the product of two Gaussians is a Gaussian :-)
         const double alpha_times_beta = a.alpha() * b.alpha();
         const double alpha_plus_beta = a.alpha() + b.alpha();
 
-        _P = (a.alpha()*A + b.alpha()*B) / alpha_plus_beta;
+        _P = (a.alpha() * A + b.alpha() * B) / alpha_plus_beta;
         _R2 = Vector::distance2(A, B);
         _zeta = alpha_plus_beta;
         _xi = alpha_times_beta / alpha_plus_beta;
 
-        const double scl = a.scale() * b.scale() *
-                              std::pow( four_over_pi2 * a.alpha() * b.beta(), 0.75 );
+        const double scl = a.scale() * b.scale() * std::pow(four_over_pi2 * a.alpha() * b.beta(), 0.75);
 
-        const double G = scl * std::exp(-_xi*_R2);
-        _ss = std::pow( pi / _zeta, 1.5 ) * G;
+        const double G = scl * std::exp(-_xi * _R2);
+        _ss = std::pow(pi / _zeta, 1.5) * G;
 
         _K = sqrt_two_times_pi_to_5_4 * G / alpha_plus_beta;
-	}
+    }
 }
 
 /** Copy constructor */
 GTOPair::GTOPair(const GTOPair &other)
-        : ShellPair(other),
-          _P(other._P), _R2(other._R2), _zeta(other._zeta), _xi(other._xi),
-          _K(other._K), _ss(other._ss), _Q_AB(other._Q_AB)
-{}
+    : ShellPair(other), _P(other._P), _R2(other._R2), _zeta(other._zeta), _xi(other._xi), _K(other._K), _ss(other._ss),
+      _Q_AB(other._Q_AB)
+{
+}
 
 /** Destructor */
 GTOPair::~GTOPair()
-{}
+{
+}
 
-const char* GTOPair::typeName()
+const char *GTOPair::typeName()
 {
     return "Squire::GTOPair";
 }
 
 /** Copy assignment operator */
-GTOPair& GTOPair::operator=(const GTOPair &other)
+GTOPair &GTOPair::operator=(const GTOPair &other)
 {
     _P = other._P;
     _R2 = other._R2;
@@ -301,8 +295,7 @@ GTOPair& GTOPair::operator=(const GTOPair &other)
 /** Comparison operator */
 bool GTOPair::operator==(const GTOPair &other) const
 {
-    return _P == other._P and _R2 == other._R2 and
-           _zeta == other._zeta and _K == other._K and
+    return _P == other._P and _R2 == other._R2 and _zeta == other._zeta and _K == other._K and
            ShellPair::operator==(other);
 }
 
@@ -316,7 +309,7 @@ bool GTOPair::operator!=(const GTOPair &other) const
     set the value of Q */
 void GTOPair::setQ(double q)
 {
-	_Q_AB = q;
+    _Q_AB = q;
 }
 
 /** Return the rho value for the two passed GTOPair pairs
@@ -334,7 +327,7 @@ double GTOPair::rho(const GTOPair &P, const GTOPair &Q)
 */
 double GTOPair::T(const GTOPair &P, const GTOPair &Q)
 {
-    return GTOPair::rho(P,Q) * Vector::distance2(P.P(), Q.Q());
+    return GTOPair::rho(P, Q) * Vector::distance2(P.P(), Q.Q());
 }
 
 /** Return the prefactor value for the two passed GTOPair pairs
@@ -354,26 +347,25 @@ Vector GTOPair::W(const GTOPair &P, const GTOPair &Q)
 {
     const double zeta_plus_eta = P.zeta() + Q.eta();
 
-    return ( (P.zeta()/zeta_plus_eta) * P.P() ) +
-           ( (Q.eta()/zeta_plus_eta) * Q.Q() );
+    return ((P.zeta() / zeta_plus_eta) * P.P()) + ((Q.eta() / zeta_plus_eta) * Q.Q());
 }
 
 /** Return whether or not this pair is null */
 bool GTOPair::isNull() const
 {
-	return _ss == 0;
+    return _ss == 0;
 }
 
 static SharedPolyPointer<GTOPair> global_null_gtopair;
 
-const GTOPair& GTOPair::null()
+const GTOPair &GTOPair::null()
 {
     if (global_null_gtopair.constData() == 0)
     {
-        QMutexLocker lkr( globalLock() );
+        QMutexLocker lkr(globalLock());
 
         if (global_null_gtopair.constData() == 0)
-            global_null_gtopair = static_cast<GTOPair*>(new SS_GTO());
+            global_null_gtopair = static_cast<GTOPair *>(new SS_GTO());
     }
 
     return *(global_null_gtopair.constData());

@@ -35,87 +35,84 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class VolumeMove;
+    class VolumeMove;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::VolumeMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::VolumeMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::VolumeMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::VolumeMove &);
 
 namespace SireMove
 {
 
-using SireMol::MGID;
-using SireMol::MoleculeGroup;
+    using SireMol::MGID;
+    using SireMol::MoleculeGroup;
 
-/** This is a Monte Carlo volume move. This is used to allow
-    the pressure to be kept constant
+    /** This is a Monte Carlo volume move. This is used to allow
+        the pressure to be kept constant
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT VolumeMove
-            : public SireBase::ConcreteProperty<VolumeMove,MonteCarlo>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT VolumeMove : public SireBase::ConcreteProperty<VolumeMove, MonteCarlo>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const VolumeMove&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, VolumeMove&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const VolumeMove &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, VolumeMove &);
 
-public:
-    VolumeMove(const PropertyMap &map = PropertyMap());
+    public:
+        VolumeMove(const PropertyMap &map = PropertyMap());
 
-    VolumeMove(const MGID &mgid, const PropertyMap &map = PropertyMap());
-    VolumeMove(const MoleculeGroup &molgroup,
-               const PropertyMap &map = PropertyMap());
+        VolumeMove(const MGID &mgid, const PropertyMap &map = PropertyMap());
+        VolumeMove(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    VolumeMove(const VolumeChanger &volchanger,
-               const PropertyMap &map = PropertyMap());
+        VolumeMove(const VolumeChanger &volchanger, const PropertyMap &map = PropertyMap());
 
-    VolumeMove(const VolumeMove &other);
+        VolumeMove(const VolumeMove &other);
 
-    ~VolumeMove();
+        ~VolumeMove();
 
-    VolumeMove& operator=(const VolumeMove &other);
+        VolumeMove &operator=(const VolumeMove &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    bool operator==(const VolumeMove &other) const;
-    bool operator!=(const VolumeMove &other) const;
+        bool operator==(const VolumeMove &other) const;
+        bool operator!=(const VolumeMove &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    void setVolumeChanger(const VolumeChanger &volchanger);
-    void setVolumeChanger(const MoleculeGroup &molgroup);
+        void setVolumeChanger(const VolumeChanger &volchanger);
+        void setVolumeChanger(const MoleculeGroup &molgroup);
 
-    const VolumeChanger& volumeChanger() const;
+        const VolumeChanger &volumeChanger() const;
 
-    const MGID& groupID() const;
+        const MGID &groupID() const;
 
-    void setGenerator(const RanGenerator &rangenerator);
+        void setGenerator(const RanGenerator &rangenerator);
 
-    void setMaximumVolumeChange(const SireUnits::Dimension::Volume &delta);
-    const SireUnits::Dimension::Volume& maximumVolumeChange() const;
+        void setMaximumVolumeChange(const SireUnits::Dimension::Volume &delta);
+        const SireUnits::Dimension::Volume &maximumVolumeChange() const;
 
-    void move(System &system, int nmoves, bool record_stats=true);
+        void move(System &system, int nmoves, bool record_stats = true);
 
-protected:
-    void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
+    protected:
+        void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
 
-private:
-    /** The volume changing function used to change the volume of
-        the system */
-    VolumeChangerPtr volchanger;
+    private:
+        /** The volume changing function used to change the volume of
+            the system */
+        VolumeChangerPtr volchanger;
 
-    #ifndef SKIP_BROKEN_GCCXML_PARTS
-    /** The maximum volume change */
-    SireUnits::Dimension::Volume maxchange;
-    #endif
-};
+#ifndef SKIP_BROKEN_GCCXML_PARTS
+        /** The maximum volume change */
+        SireUnits::Dimension::Volume maxchange;
+#endif
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::VolumeMove )
+Q_DECLARE_METATYPE(SireMove::VolumeMove)
 
-SIRE_EXPOSE_CLASS( SireMove::VolumeMove )
+SIRE_EXPOSE_CLASS(SireMove::VolumeMove)
 
 SIRE_END_HEADER
 

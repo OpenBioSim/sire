@@ -28,299 +28,295 @@
 #ifndef SIREBASE_PROPERTYLIST_H
 #define SIREBASE_PROPERTYLIST_H
 
-#include "SireBase/property.h"
 #include "SireBase/arrayproperty.hpp"
+#include "SireBase/property.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class PropertyList;
-class DoubleArrayProperty;
-class IntegerArrayProperty;
-class StringArrayProperty;
-}
+    class PropertyList;
+    class DoubleArrayProperty;
+    class IntegerArrayProperty;
+    class StringArrayProperty;
+} // namespace SireBase
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::PropertyList&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::PropertyList&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::PropertyList &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::PropertyList &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::DoubleArrayProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::DoubleArrayProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::DoubleArrayProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::DoubleArrayProperty &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::IntegerArrayProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::IntegerArrayProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::IntegerArrayProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::IntegerArrayProperty &);
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::StringArrayProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::StringArrayProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::StringArrayProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::StringArrayProperty &);
 
 namespace SireBase
 {
 
-/** This class provides a simple list of properties. This is useful,
-    e.g. if the user wants to store a list of values in a molecule.
+    /** This class provides a simple list of properties. This is useful,
+        e.g. if the user wants to store a list of values in a molecule.
 
-    This class is designed to be used with StringProperty, NumberProperty
-    and VectorProperty (from SireMaths) to make it easy to attach
-    arbitrary data to any Sire object, e.g. storing a fixed center
-    point in a molecule, saving a list of velocities with a molecule,
-    etc.
+        This class is designed to be used with StringProperty, NumberProperty
+        and VectorProperty (from SireMaths) to make it easy to attach
+        arbitrary data to any Sire object, e.g. storing a fixed center
+        point in a molecule, saving a list of velocities with a molecule,
+        etc.
 
-    Note also that Properties already provides a Property dictionary.
+        Note also that Properties already provides a Property dictionary.
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT PropertyList : public ConcreteProperty<PropertyList,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT PropertyList : public ConcreteProperty<PropertyList, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const PropertyList&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, PropertyList&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const PropertyList &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, PropertyList &);
 
-public:
-    PropertyList();
-    PropertyList(const QList<double> &numbers);
-    PropertyList(const QStringList &strings);
-    PropertyList(const DoubleArrayProperty &array);
-    PropertyList(const IntegerArrayProperty &array);
-    PropertyList(const StringArrayProperty &array);
-    PropertyList(const QList<PropertyPtr> &props);
-    PropertyList(const Property &other);
-    PropertyList(const PropertyList &other);
+    public:
+        PropertyList();
+        PropertyList(const QList<double> &numbers);
+        PropertyList(const QStringList &strings);
+        PropertyList(const DoubleArrayProperty &array);
+        PropertyList(const IntegerArrayProperty &array);
+        PropertyList(const StringArrayProperty &array);
+        PropertyList(const QList<PropertyPtr> &props);
+        PropertyList(const Property &other);
+        PropertyList(const PropertyList &other);
 
-    ~PropertyList();
+        ~PropertyList();
 
-    PropertyList& operator=(const PropertyList &other);
-    bool operator==(const PropertyList &other) const;
-    bool operator!=(const PropertyList &other) const;
+        PropertyList &operator=(const PropertyList &other);
+        bool operator==(const PropertyList &other) const;
+        bool operator!=(const PropertyList &other) const;
 
-    PropertyList operator+(const PropertyList &other) const;
-    PropertyList& operator+=(const Property &other);
-    const Property& operator[](int i) const;
+        PropertyList operator+(const PropertyList &other) const;
+        PropertyList &operator+=(const Property &other);
+        const Property &operator[](int i) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    QList<PropertyPtr> array() const;
+        QList<PropertyPtr> array() const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    void append(const Property &property);
-    void append(const QList<PropertyPtr> &props);
+        void append(const Property &property);
+        void append(const QList<PropertyPtr> &props);
 
-    const Property& at(int i) const;
+        const Property &at(int i) const;
 
-    void clear();
+        void clear();
 
-    bool empty() const;
-    bool isEmpty() const;
+        bool empty() const;
+        bool isEmpty() const;
 
-    void insert(int i, const Property &value);
+        void insert(int i, const Property &value);
 
-    PropertyList mid(int pos, int length=-1) const;
+        PropertyList mid(int pos, int length = -1) const;
 
-    void move(int from, int to);
+        void move(int from, int to);
 
-    void pop_back();
-    void pop_front();
-    void prepend(const Property &value);
-    void push_back(const Property &value);
-    void push_front(const Property &value);
+        void pop_back();
+        void pop_front();
+        void prepend(const Property &value);
+        void push_back(const Property &value);
+        void push_front(const Property &value);
 
-    void removeAt(int i);
-    void removeFirst();
-    void removeLast();
+        void removeAt(int i);
+        void removeFirst();
+        void removeLast();
 
-    void replace(int i, const Property &value);
+        void replace(int i, const Property &value);
 
-    void swap(PropertyList &other);
+        void swap(PropertyList &other);
 
-    void swap(int i, int j);
+        void swap(int i, int j);
 
-    PropertyPtr takeAt(int i);
-    PropertyPtr takeFirst();
-    PropertyPtr takeLast();
+        PropertyPtr takeAt(int i);
+        PropertyPtr takeFirst();
+        PropertyPtr takeLast();
 
-    QList<PropertyPtr> toList() const;
-    QVector<PropertyPtr> toVector() const;
+        QList<PropertyPtr> toList() const;
+        QVector<PropertyPtr> toVector() const;
 
-    PropertyPtr value(int i) const;
-    PropertyPtr value(int i, const Property &default_value) const;
+        PropertyPtr value(int i) const;
+        PropertyPtr value(int i, const Property &default_value) const;
 
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
 
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
 
-    operator QList<PropertyPtr>() const;
-
-private:
-    /** The actual list */
-    QList<PropertyPtr> l;
-};
+        operator QList<PropertyPtr>() const;
 
-class SIREBASE_EXPORT DoubleArrayProperty
-        : public ConcreteProperty<DoubleArrayProperty,ArrayProperty<double> >
-{
+    private:
+        /** The actual list */
+        QList<PropertyPtr> l;
+    };
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const DoubleArrayProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, DoubleArrayProperty&);
+    class SIREBASE_EXPORT DoubleArrayProperty : public ConcreteProperty<DoubleArrayProperty, ArrayProperty<double>>
+    {
 
-public:
-    DoubleArrayProperty();
-    DoubleArrayProperty(const QList<double> &array);
-    DoubleArrayProperty(const QVector<double> &array);
-    DoubleArrayProperty(const StringArrayProperty &array);
-    DoubleArrayProperty(const IntegerArrayProperty &array);
-    DoubleArrayProperty(const PropertyList &array);
-    DoubleArrayProperty(const DoubleArrayProperty &other);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const DoubleArrayProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, DoubleArrayProperty &);
 
-    ~DoubleArrayProperty();
+    public:
+        DoubleArrayProperty();
+        DoubleArrayProperty(const QList<double> &array);
+        DoubleArrayProperty(const QVector<double> &array);
+        DoubleArrayProperty(const StringArrayProperty &array);
+        DoubleArrayProperty(const IntegerArrayProperty &array);
+        DoubleArrayProperty(const PropertyList &array);
+        DoubleArrayProperty(const DoubleArrayProperty &other);
 
-    static const char* typeName();
+        ~DoubleArrayProperty();
 
-    DoubleArrayProperty& operator=(const DoubleArrayProperty &other);
+        static const char *typeName();
 
-    bool operator==(const DoubleArrayProperty &other) const;
-    bool operator!=(const DoubleArrayProperty &other) const;
+        DoubleArrayProperty &operator=(const DoubleArrayProperty &other);
 
-    DoubleArrayProperty operator+(const DoubleArrayProperty &other) const;
-    DoubleArrayProperty& operator+=(const DoubleArrayProperty &other);
-
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
-
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
-    PropertyList asAnArray() const;
-};
-
-class SIREBASE_EXPORT IntegerArrayProperty
-        : public ConcreteProperty<IntegerArrayProperty,ArrayProperty<qint64> >
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const IntegerArrayProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, IntegerArrayProperty&);
-
-public:
-    IntegerArrayProperty();
-    IntegerArrayProperty(const QList<qint64> &array);
-    IntegerArrayProperty(const QVector<qint64> &array);
-    IntegerArrayProperty(const StringArrayProperty &array);
-    IntegerArrayProperty(const DoubleArrayProperty &array);
-    IntegerArrayProperty(const PropertyList &array);
-    IntegerArrayProperty(const IntegerArrayProperty &other);
-
-    ~IntegerArrayProperty();
-
-    static const char* typeName();
-
-    IntegerArrayProperty& operator=(const IntegerArrayProperty &other);
-
-    bool operator==(const IntegerArrayProperty &other) const;
-    bool operator!=(const IntegerArrayProperty &other) const;
-
-    IntegerArrayProperty operator+(const IntegerArrayProperty &other) const;
-    IntegerArrayProperty& operator+=(const IntegerArrayProperty &other);
-
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
-
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
-    PropertyList asAnArray() const;
-};
-
-class SIREBASE_EXPORT StringArrayProperty
-        : public ConcreteProperty<StringArrayProperty,ArrayProperty<QString> >
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const StringArrayProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, StringArrayProperty&);
-
-public:
-    StringArrayProperty();
-    StringArrayProperty(const QList<QString> &array);
-    StringArrayProperty(const QVector<QString> &array);
-    StringArrayProperty(const DoubleArrayProperty &array);
-    StringArrayProperty(const IntegerArrayProperty &array);
-    StringArrayProperty(const PropertyList &array);
-    StringArrayProperty(const StringArrayProperty &other);
-
-    ~StringArrayProperty();
-
-    static const char* typeName();
-
-    StringArrayProperty& operator=(const StringArrayProperty &other);
-
-    bool operator==(const StringArrayProperty &other) const;
-    bool operator!=(const StringArrayProperty &other) const;
-
-    StringArrayProperty operator+(const StringArrayProperty &other) const;
-    StringArrayProperty& operator+=(const StringArrayProperty &other);
-
-    bool isAString() const;
-    bool isADouble() const;
-    bool isAnInteger() const;
-    bool isABoolean() const;
-
-    QString asAString() const;
-    double asADouble() const;
-    int asAnInteger() const;
-    bool asABoolean() const;
-    PropertyList asAnArray() const;
-};
-
-SIREBASE_EXPORT PropertyPtr wrap(const Property &value);
-SIREBASE_EXPORT PropertyPtr wrap(const QString &value);
-SIREBASE_EXPORT PropertyPtr wrap(double value);
-SIREBASE_EXPORT PropertyPtr wrap(const QVariant &value);
-SIREBASE_EXPORT PropertyPtr wrap(const char *value);
-SIREBASE_EXPORT PropertyPtr wrap(qint32 value);
-SIREBASE_EXPORT PropertyPtr wrap(qint64 value);
-SIREBASE_EXPORT PropertyPtr wrap(quint32 value);
-SIREBASE_EXPORT PropertyPtr wrap(quint64 value);
-SIREBASE_EXPORT PropertyPtr wrap(bool value);
-
-SIREBASE_EXPORT PropertyPtr wrap(const QList<PropertyPtr> &value);
-SIREBASE_EXPORT PropertyPtr wrap(const QList<double> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QList<int> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QVector<double> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QVector<int> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QList<QString> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QVector<QString> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QStringList &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QList<QVariant> &values);
-SIREBASE_EXPORT PropertyPtr wrap(const QVector<QVariant> &values);
-
-}
-
-SIRE_EXPOSE_FUNCTION( SireBase::wrap )
-
-Q_DECLARE_METATYPE( SireBase::DoubleArrayProperty )
-Q_DECLARE_METATYPE( SireBase::IntegerArrayProperty )
-Q_DECLARE_METATYPE( SireBase::StringArrayProperty )
-Q_DECLARE_METATYPE( SireBase::PropertyList )
-
-SIRE_EXPOSE_CLASS( SireBase::DoubleArrayProperty )
-SIRE_EXPOSE_CLASS( SireBase::IntegerArrayProperty )
-SIRE_EXPOSE_CLASS( SireBase::StringArrayProperty )
-SIRE_EXPOSE_CLASS( SireBase::PropertyList )
+        bool operator==(const DoubleArrayProperty &other) const;
+        bool operator!=(const DoubleArrayProperty &other) const;
+
+        DoubleArrayProperty operator+(const DoubleArrayProperty &other) const;
+        DoubleArrayProperty &operator+=(const DoubleArrayProperty &other);
+
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+        PropertyList asAnArray() const;
+    };
+
+    class SIREBASE_EXPORT IntegerArrayProperty : public ConcreteProperty<IntegerArrayProperty, ArrayProperty<qint64>>
+    {
+
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const IntegerArrayProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, IntegerArrayProperty &);
+
+    public:
+        IntegerArrayProperty();
+        IntegerArrayProperty(const QList<qint64> &array);
+        IntegerArrayProperty(const QVector<qint64> &array);
+        IntegerArrayProperty(const StringArrayProperty &array);
+        IntegerArrayProperty(const DoubleArrayProperty &array);
+        IntegerArrayProperty(const PropertyList &array);
+        IntegerArrayProperty(const IntegerArrayProperty &other);
+
+        ~IntegerArrayProperty();
+
+        static const char *typeName();
+
+        IntegerArrayProperty &operator=(const IntegerArrayProperty &other);
+
+        bool operator==(const IntegerArrayProperty &other) const;
+        bool operator!=(const IntegerArrayProperty &other) const;
+
+        IntegerArrayProperty operator+(const IntegerArrayProperty &other) const;
+        IntegerArrayProperty &operator+=(const IntegerArrayProperty &other);
+
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+        PropertyList asAnArray() const;
+    };
+
+    class SIREBASE_EXPORT StringArrayProperty : public ConcreteProperty<StringArrayProperty, ArrayProperty<QString>>
+    {
+
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const StringArrayProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, StringArrayProperty &);
+
+    public:
+        StringArrayProperty();
+        StringArrayProperty(const QList<QString> &array);
+        StringArrayProperty(const QVector<QString> &array);
+        StringArrayProperty(const DoubleArrayProperty &array);
+        StringArrayProperty(const IntegerArrayProperty &array);
+        StringArrayProperty(const PropertyList &array);
+        StringArrayProperty(const StringArrayProperty &other);
+
+        ~StringArrayProperty();
+
+        static const char *typeName();
+
+        StringArrayProperty &operator=(const StringArrayProperty &other);
+
+        bool operator==(const StringArrayProperty &other) const;
+        bool operator!=(const StringArrayProperty &other) const;
+
+        StringArrayProperty operator+(const StringArrayProperty &other) const;
+        StringArrayProperty &operator+=(const StringArrayProperty &other);
+
+        bool isAString() const;
+        bool isADouble() const;
+        bool isAnInteger() const;
+        bool isABoolean() const;
+
+        QString asAString() const;
+        double asADouble() const;
+        int asAnInteger() const;
+        bool asABoolean() const;
+        PropertyList asAnArray() const;
+    };
+
+    SIREBASE_EXPORT PropertyPtr wrap(const Property &value);
+    SIREBASE_EXPORT PropertyPtr wrap(const QString &value);
+    SIREBASE_EXPORT PropertyPtr wrap(double value);
+    SIREBASE_EXPORT PropertyPtr wrap(const QVariant &value);
+    SIREBASE_EXPORT PropertyPtr wrap(const char *value);
+    SIREBASE_EXPORT PropertyPtr wrap(qint32 value);
+    SIREBASE_EXPORT PropertyPtr wrap(qint64 value);
+    SIREBASE_EXPORT PropertyPtr wrap(quint32 value);
+    SIREBASE_EXPORT PropertyPtr wrap(quint64 value);
+    SIREBASE_EXPORT PropertyPtr wrap(bool value);
+
+    SIREBASE_EXPORT PropertyPtr wrap(const QList<PropertyPtr> &value);
+    SIREBASE_EXPORT PropertyPtr wrap(const QList<double> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QList<int> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QVector<double> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QVector<int> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QList<QString> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QVector<QString> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QStringList &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QList<QVariant> &values);
+    SIREBASE_EXPORT PropertyPtr wrap(const QVector<QVariant> &values);
+
+} // namespace SireBase
+
+SIRE_EXPOSE_FUNCTION(SireBase::wrap)
+
+Q_DECLARE_METATYPE(SireBase::DoubleArrayProperty)
+Q_DECLARE_METATYPE(SireBase::IntegerArrayProperty)
+Q_DECLARE_METATYPE(SireBase::StringArrayProperty)
+Q_DECLARE_METATYPE(SireBase::PropertyList)
+
+SIRE_EXPOSE_CLASS(SireBase::DoubleArrayProperty)
+SIRE_EXPOSE_CLASS(SireBase::IntegerArrayProperty)
+SIRE_EXPOSE_CLASS(SireBase::StringArrayProperty)
+SIRE_EXPOSE_CLASS(SireBase::PropertyList)
 
 SIRE_END_HEADER
 
 #endif
-

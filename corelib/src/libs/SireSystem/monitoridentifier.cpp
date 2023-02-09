@@ -43,8 +43,7 @@ using namespace SireStream;
 static const RegisterMetaType<MonitorIdentifier> r_monid;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                          const MonitorIdentifier &monid)
+QDataStream &operator<<(QDataStream &ds, const MonitorIdentifier &monid)
 {
     writeHeader(ds, r_monid, 1);
 
@@ -63,33 +62,34 @@ QDataStream &operator>>(QDataStream &ds, MonitorIdentifier &monid)
         SireStream::loadPolyPointer(ds, monid.d);
     }
     else
-        throw version_error( v, "1", r_monid, CODELOC );
+        throw version_error(v, "1", r_monid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MonitorIdentifier::MonitorIdentifier() : MonitorID()
-{}
+{
+}
 
 /** Construct from the passed MonitorID */
-MonitorIdentifier::MonitorIdentifier(const MonitorID &monid)
-                  : MonitorID()
+MonitorIdentifier::MonitorIdentifier(const MonitorID &monid) : MonitorID()
 {
     if (monid.isA<MonitorIdentifier>())
         d = monid.asA<MonitorIdentifier>().d;
     else if (not monid.isNull())
-        d.reset( monid.clone() );
+        d.reset(monid.clone());
 }
 
 /** Copy constructor */
-MonitorIdentifier::MonitorIdentifier(const MonitorIdentifier &other)
-                  : MonitorID(other), d(other.d)
-{}
+MonitorIdentifier::MonitorIdentifier(const MonitorIdentifier &other) : MonitorID(other), d(other.d)
+{
+}
 
 /** Destructor */
 MonitorIdentifier::~MonitorIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool MonitorIdentifier::isNull() const
@@ -116,7 +116,7 @@ QString MonitorIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const MonitorID& MonitorIdentifier::base() const
+const MonitorID &MonitorIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -125,14 +125,14 @@ const MonitorID& MonitorIdentifier::base() const
 }
 
 /** Copy assignment operator */
-MonitorIdentifier& MonitorIdentifier::operator=(const MonitorIdentifier &other)
+MonitorIdentifier &MonitorIdentifier::operator=(const MonitorIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-MonitorIdentifier& MonitorIdentifier::operator=(const MonitorID &other)
+MonitorIdentifier &MonitorIdentifier::operator=(const MonitorID &other)
 {
     if (other.isA<MonitorIdentifier>())
         d = other.asA<MonitorIdentifier>().d;
@@ -197,9 +197,8 @@ QList<MonitorName> MonitorIdentifier::map(const SystemMonitors &monitors) const
         QList<MonitorName> names = monitors.monitorNames();
 
         if (names.isEmpty())
-            throw SireSystem::missing_monitor( QObject::tr(
-                "There are no monitors available in the system at all!"),
-                    CODELOC );
+            throw SireSystem::missing_monitor(QObject::tr("There are no monitors available in the system at all!"),
+                                              CODELOC);
 
         return names;
     }
@@ -207,12 +206,12 @@ QList<MonitorName> MonitorIdentifier::map(const SystemMonitors &monitors) const
         return d->map(monitors);
 }
 
-const char* MonitorIdentifier::typeName()
+const char *MonitorIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MonitorIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<MonitorIdentifier>());
 }
 
-MonitorIdentifier* MonitorIdentifier::clone() const
+MonitorIdentifier *MonitorIdentifier::clone() const
 {
     return new MonitorIdentifier(*this);
 }

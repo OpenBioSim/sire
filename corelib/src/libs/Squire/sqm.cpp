@@ -27,9 +27,9 @@
 
 #include "SireMaths/vector.h"
 
-#include "sqm.h"
-#include "qmpotential.h"
 #include "latticecharges.h"
+#include "qmpotential.h"
+#include "sqm.h"
 
 #include "SireMol/element.h"
 
@@ -39,9 +39,9 @@
 
 #include "SireVol/grid.h"
 
-#include "SireBase/tempdir.h"
 #include "SireBase/findexe.h"
 #include "SireBase/sire_process.h"
+#include "SireBase/tempdir.h"
 
 #include "SireUnits/units.h"
 
@@ -52,8 +52,8 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include <QTime>
 #include <QDebug>
+#include <QTime>
 
 using namespace Squire;
 using namespace SireMM;
@@ -75,13 +75,8 @@ QDataStream &operator<<(QDataStream &ds, const SQM &sqm)
 
     SharedDataStream sds(ds);
 
-    sds << sqm.env_variables
-        << sqm.sqm_exe << sqm.qm_method
-        << sqm.energy_template << sqm.force_template
-        << sqm.total_charge
-        << sqm.max_sqm_runtime
-        << sqm.max_sqm_lines
-        << sqm.expected_n_qm;
+    sds << sqm.env_variables << sqm.sqm_exe << sqm.qm_method << sqm.energy_template << sqm.force_template
+        << sqm.total_charge << sqm.max_sqm_runtime << sqm.max_sqm_lines << sqm.expected_n_qm;
 
     return ds;
 }
@@ -95,11 +90,8 @@ QDataStream &operator>>(QDataStream &ds, SQM &sqm)
     {
         SharedDataStream sds(ds);
 
-        sds >> sqm.env_variables
-            >> sqm.sqm_exe >> sqm.qm_method
-            >> sqm.energy_template >> sqm.force_template
-            >> sqm.total_charge >> sqm.max_sqm_runtime
-            >> sqm.max_sqm_lines >> sqm.expected_n_qm;
+        sds >> sqm.env_variables >> sqm.sqm_exe >> sqm.qm_method >> sqm.energy_template >> sqm.force_template >>
+            sqm.total_charge >> sqm.max_sqm_runtime >> sqm.max_sqm_lines >> sqm.expected_n_qm;
     }
     else
         throw version_error(v, "1", r_sqm, CODELOC);
@@ -107,67 +99,55 @@ QDataStream &operator>>(QDataStream &ds, SQM &sqm)
     return ds;
 }
 
-//here is the template for the energy command file. We try to save as many lines
-//as possible as SQM has a 1000 line limit for the command file!!!
+// here is the template for the energy command file. We try to save as many lines
+// as possible as SQM has a 1000 line limit for the command file!!!
 static const QString default_energy_template =
-"single point energy calculation created for QM or QM/MM calcs using Sire\n"
-"&qmmm\n"
-" qm_theory = '@QM_METHOD@', qmcharge = @QM_CHARGE@, maxcyc = 0, qmmm_int = @USE_LATTICE_POINTS@,\n"
-" /\n"  // need space before backslash or it is not recognised
-"@QM_COORDS@\n"
-"@LATTICE_POINTS@\n";
+    "single point energy calculation created for QM or QM/MM calcs using Sire\n"
+    "&qmmm\n"
+    " qm_theory = '@QM_METHOD@', qmcharge = @QM_CHARGE@, maxcyc = 0, qmmm_int = @USE_LATTICE_POINTS@,\n"
+    " /\n" // need space before backslash or it is not recognised
+    "@QM_COORDS@\n"
+    "@LATTICE_POINTS@\n";
 
-//the number of lines in the energy template command file, excluding the lines needed
-//for the QM atoms or MM atoms
+// the number of lines in the energy template command file, excluding the lines needed
+// for the QM atoms or MM atoms
 static const int n_energy_template_lines = 4;
 
 static const QString default_force_template = "! NEEDS TO BE WRITTEN";
 
 /** Constructor */
 SQM::SQM()
-       : ConcreteProperty<SQM,QMProgram>(),
-         qm_method("AM1"),
-         energy_template(default_energy_template),
-         force_template(default_force_template),
-         total_charge(0),
-         max_sqm_runtime( 5 * 60 * 1000 ),
-         max_sqm_lines(999),
-         expected_n_qm(50)
-{}
+    : ConcreteProperty<SQM, QMProgram>(), qm_method("AM1"), energy_template(default_energy_template),
+      force_template(default_force_template), total_charge(0), max_sqm_runtime(5 * 60 * 1000), max_sqm_lines(999),
+      expected_n_qm(50)
+{
+}
 
 /** Construct, passing in the location of the SQM executable */
 SQM::SQM(const QString &sqm_exe)
-       : ConcreteProperty<SQM,QMProgram>(),
-         qm_method("AM1"),
-         energy_template(default_energy_template),
-         force_template(default_force_template),
-         total_charge(0),
-         max_sqm_runtime( 5 * 60 * 1000 ),
-         max_sqm_lines(999),
-         expected_n_qm(50)
+    : ConcreteProperty<SQM, QMProgram>(), qm_method("AM1"), energy_template(default_energy_template),
+      force_template(default_force_template), total_charge(0), max_sqm_runtime(5 * 60 * 1000), max_sqm_lines(999),
+      expected_n_qm(50)
 {
     this->setExecutable(sqm_exe);
 }
 
 /** Copy constructor */
 SQM::SQM(const SQM &other)
-       : ConcreteProperty<SQM,QMProgram>(other),
-         env_variables(other.env_variables), sqm_exe(other.sqm_exe),
-         qm_method(other.qm_method),
-         energy_template(other.energy_template),
-         force_template(other.force_template),
-         total_charge(other.total_charge),
-         max_sqm_runtime(other.max_sqm_runtime),
-         max_sqm_lines(other.max_sqm_lines),
-         expected_n_qm(other.expected_n_qm)
-{}
+    : ConcreteProperty<SQM, QMProgram>(other), env_variables(other.env_variables), sqm_exe(other.sqm_exe),
+      qm_method(other.qm_method), energy_template(other.energy_template), force_template(other.force_template),
+      total_charge(other.total_charge), max_sqm_runtime(other.max_sqm_runtime), max_sqm_lines(other.max_sqm_lines),
+      expected_n_qm(other.expected_n_qm)
+{
+}
 
 /** Destructor */
 SQM::~SQM()
-{}
+{
+}
 
 /** Copy assignment operator */
-SQM& SQM::operator=(const SQM &other)
+SQM &SQM::operator=(const SQM &other)
 {
     if (this != &other)
     {
@@ -189,15 +169,10 @@ SQM& SQM::operator=(const SQM &other)
 bool SQM::operator==(const SQM &other) const
 {
     return this == &other or
-           (env_variables == other.env_variables and
-            sqm_exe == other.sqm_exe and
-            qm_method == other.qm_method and
-            energy_template == other.energy_template and
-            force_template == other.force_template and
-            total_charge == other.total_charge and
-            max_sqm_runtime == other.max_sqm_runtime and
-            max_sqm_lines == other.max_sqm_lines and
-            expected_n_qm == other.expected_n_qm);
+           (env_variables == other.env_variables and sqm_exe == other.sqm_exe and qm_method == other.qm_method and
+            energy_template == other.energy_template and force_template == other.force_template and
+            total_charge == other.total_charge and max_sqm_runtime == other.max_sqm_runtime and
+            max_sqm_lines == other.max_sqm_lines and expected_n_qm == other.expected_n_qm);
 }
 
 /** Comparison operator */
@@ -230,7 +205,7 @@ void SQM::setEnvironment(const QString &variable, const QString &value)
 /** Return all of the environmental variables that are to be set explicitly
     when SQM is run. This does not include any environmental variables
     that have not been explicitly set, but do have values */
-const QHash<QString,QString>& SQM::environment() const
+const QHash<QString, QString> &SQM::environment() const
 {
     return env_variables;
 }
@@ -258,7 +233,7 @@ void SQM::setMethod(const QString &method)
 /** Return the QM method to be used to calculate the energy or
     force (e.g. AM1, PM3, AM1/d etc.). This will substitute for
     @QM_METHOD@ in the command file templates */
-const QString& SQM::method() const
+const QString &SQM::method() const
 {
     return qm_method;
 }
@@ -341,7 +316,7 @@ int SQM::numberOfMMAtomsLimit() const
         return -1;
     else
         return max_sqm_lines - n_energy_template_lines - expected_n_qm - 2;
-        //need -2 as have two extra lines if we have MM atoms, #EXCHARGES and #END
+    // need -2 as have two extra lines if we have MM atoms, #EXCHARGES and #END
 }
 
 /** Return the maximum number of MM atoms supported by SQM if there
@@ -353,7 +328,7 @@ int SQM::numberOfMMAtomsLimit(int num_qm_atoms) const
         return -1;
     else
         return max_sqm_lines - n_energy_template_lines - num_qm_atoms - 2;
-        //need -2 as have two extra lines if we have MM atoms, #EXCHARGES and #END
+    // need -2 as have two extra lines if we have MM atoms, #EXCHARGES and #END
 }
 
 /** Set the template for the command file to be used to get
@@ -373,7 +348,7 @@ void SQM::setEnergyTemplate(const QString &cmd_template)
 
 /** Return the template for the command file to be used to get SQM
     to calculate the energy. */
-const QString& SQM::energyTemplate() const
+const QString &SQM::energyTemplate() const
 {
     return energy_template;
 }
@@ -395,93 +370,84 @@ void SQM::setForceTemplate(const QString &cmd_template)
 
 /** Return the template for the command file to be used to get SQM
     to calculate the forces. */
-const QString& SQM::forceTemplate() const
+const QString &SQM::forceTemplate() const
 {
     return force_template;
 }
 
 /** Function used to substitute in the atom and lattice coordinates
     into the provided SQM command template */
-QString SQM::createCommandFile(QString cmd_template,
-                               const QMPotential::Molecules &molecules,
+QString SQM::createCommandFile(QString cmd_template, const QMPotential::Molecules &molecules,
                                const LatticeCharges &lattice_charges) const
 {
-    //replace the easy things...
-    cmd_template.replace( QLatin1String("@QM_METHOD@"),
-                          qm_method, Qt::CaseInsensitive );
+    // replace the easy things...
+    cmd_template.replace(QLatin1String("@QM_METHOD@"), qm_method, Qt::CaseInsensitive);
 
-    cmd_template.replace( QLatin1String("@QM_CHARGE@"),
-                          QString::number(total_charge), Qt::CaseInsensitive );
+    cmd_template.replace(QLatin1String("@QM_CHARGE@"), QString::number(total_charge), Qt::CaseInsensitive);
 
     if (lattice_charges.isEmpty())
     {
-        //there are no lattice charges
-        cmd_template.replace( QLatin1String("@USE_LATTICE_POINTS@"),
-                              QString::number(0), Qt::CaseInsensitive );
+        // there are no lattice charges
+        cmd_template.replace(QLatin1String("@USE_LATTICE_POINTS@"), QString::number(0), Qt::CaseInsensitive);
 
-        cmd_template.replace( QLatin1String("@LATTICE_POINTS@"),
-                              QLatin1String(""), Qt::CaseInsensitive );
+        cmd_template.replace(QLatin1String("@LATTICE_POINTS@"), QLatin1String(""), Qt::CaseInsensitive);
     }
 
-    //now build the list of all of the atoms
+    // now build the list of all of the atoms
     QStringList atom_coords;
 
     int nmols = molecules.count();
-    const ChunkedVector<QMPotential::Molecule> &molecules_array
-                                                    = molecules.moleculesByIndex();
+    const ChunkedVector<QMPotential::Molecule> &molecules_array = molecules.moleculesByIndex();
 
     // format for atom lines;
     // atomic_number  atom_name  x_coords  y_coords  z_coords  (free format)
-    for (int i=0; i<nmols; ++i)
+    for (int i = 0; i < nmols; ++i)
     {
         const QMPotential::Molecule &molecule = molecules_array[i];
 
-        //loop through the atoms...
+        // loop through the atoms...
         const CoordGroupArray &coords = molecule.coordinates();
         const PackedArray2D<Element> &elements = molecule.parameters().atomicParameters();
 
         int natoms = coords.nCoords();
 
-        BOOST_ASSERT( natoms == elements.nValues() );
+        BOOST_ASSERT(natoms == elements.nValues());
 
         const Vector *coords_array = coords.constCoordsData();
         const Element *elements_array = elements.constValueData();
 
-        for (int j=0; j<natoms; ++j)
+        for (int j = 0; j < natoms; ++j)
         {
             const Element &element = elements_array[j];
 
             if (element.nProtons() > 0)
             {
-                //this is not a dummy atom!
+                // this is not a dummy atom!
                 const Vector &c = coords_array[j];
 
-                atom_coords.append( QString("%1  %2  %3  %4  %5")
-                                        .arg(QString::number(element.nProtons()),
-                                             element.symbol(),
-                                             QString::number(c.x(), 'f', 8),
-                                             QString::number(c.y(), 'f', 8),
-                                             QString::number(c.z(), 'f', 8) ) );
+                atom_coords.append(QString("%1  %2  %3  %4  %5")
+                                       .arg(QString::number(element.nProtons()), element.symbol(),
+                                            QString::number(c.x(), 'f', 8), QString::number(c.y(), 'f', 8),
+                                            QString::number(c.z(), 'f', 8)));
             }
         }
     }
 
-    if (max_sqm_lines > 0 and
-        atom_coords.count() + n_energy_template_lines > max_sqm_lines)
+    if (max_sqm_lines > 0 and atom_coords.count() + n_energy_template_lines > max_sqm_lines)
     {
-        throw SireError::unsupported( QObject::tr(
-                "SQM has a %1-line limit for its input command file, so it is not possible "
-                "to have more than %2 QM atoms. You currently have %3 atoms...")
-                    .arg(max_sqm_lines)
-                    .arg(max_sqm_lines - n_energy_template_lines)
-                    .arg(atom_coords.count()), CODELOC );
+        throw SireError::unsupported(
+            QObject::tr("SQM has a %1-line limit for its input command file, so it is not possible "
+                        "to have more than %2 QM atoms. You currently have %3 atoms...")
+                .arg(max_sqm_lines)
+                .arg(max_sqm_lines - n_energy_template_lines)
+                .arg(atom_coords.count()),
+            CODELOC);
     }
 
-    cmd_template.replace( QLatin1String("@QM_COORDS@"),
-                          atom_coords.join("\n"), Qt::CaseInsensitive );
+    cmd_template.replace(QLatin1String("@QM_COORDS@"), atom_coords.join("\n"), Qt::CaseInsensitive);
 
-    //put the lattice charges in now (as they can make the command
-    //file *very* large)
+    // put the lattice charges in now (as they can make the command
+    // file *very* large)
     if (not lattice_charges.isEmpty())
     {
         QStringList charges;
@@ -489,7 +455,7 @@ QString SQM::createCommandFile(QString cmd_template,
         int ncharges = 0;
         const LatticeCharge *charges_array = lattice_charges.constData();
 
-        for (int i=0; i<lattice_charges.count(); ++i)
+        for (int i = 0; i < lattice_charges.count(); ++i)
         {
             const LatticeCharge &charge = charges_array[i];
 
@@ -499,35 +465,30 @@ QString SQM::createCommandFile(QString cmd_template,
 
                 Element element = charge.element();
 
-                charges.append( QString("%1 %2 %3 %4 %5 %6")
-                                    .arg(QString::number(element.nProtons()),
-                                         element.symbol(),
-                                         QString::number(charge.x(), 'f', 8),
-                                         QString::number(charge.y(), 'f', 8),
-                                         QString::number(charge.z(), 'f', 8),
-                                         QString::number(charge.charge(), 'f', 8) ) );
+                charges.append(QString("%1 %2 %3 %4 %5 %6")
+                                   .arg(QString::number(element.nProtons()), element.symbol(),
+                                        QString::number(charge.x(), 'f', 8), QString::number(charge.y(), 'f', 8),
+                                        QString::number(charge.z(), 'f', 8), QString::number(charge.charge(), 'f', 8)));
             }
         }
 
-        if (max_sqm_lines > 0 and
-            atom_coords.count()+n_energy_template_lines+ncharges+2 > max_sqm_lines)
+        if (max_sqm_lines > 0 and atom_coords.count() + n_energy_template_lines + ncharges + 2 > max_sqm_lines)
         {
-            throw SireError::unsupported( QObject::tr(
-                    "SQM has a %1-line limit for its input command file, so it is not possible "
-                    "to have more than %2 MM atoms when you have %3 QM atoms. You currently have "
-                    "%4 MM atoms. Try to reduce the cutoff so that you have fewer MM atoms.")
-                        .arg(max_sqm_lines)
-                        .arg(max_sqm_lines - n_energy_template_lines - atom_coords.count() - 2)
-                        .arg(atom_coords.count())
-                        .arg(ncharges), CODELOC );
+            throw SireError::unsupported(
+                QObject::tr("SQM has a %1-line limit for its input command file, so it is not possible "
+                            "to have more than %2 MM atoms when you have %3 QM atoms. You currently have "
+                            "%4 MM atoms. Try to reduce the cutoff so that you have fewer MM atoms.")
+                    .arg(max_sqm_lines)
+                    .arg(max_sqm_lines - n_energy_template_lines - atom_coords.count() - 2)
+                    .arg(atom_coords.count())
+                    .arg(ncharges),
+                CODELOC);
         }
 
-        cmd_template.replace( QLatin1String("@USE_LATTICE_POINTS@"),
-                              QString::number(1), Qt::CaseInsensitive );
+        cmd_template.replace(QLatin1String("@USE_LATTICE_POINTS@"), QString::number(1), Qt::CaseInsensitive);
 
-        cmd_template.replace( QLatin1String("@LATTICE_POINTS@"),
-                              QString("#EXCHARGES\n%1\n#END").arg(charges.join("\n")),
-                              Qt::CaseInsensitive );
+        cmd_template.replace(QLatin1String("@LATTICE_POINTS@"), QString("#EXCHARGES\n%1\n#END").arg(charges.join("\n")),
+                             Qt::CaseInsensitive);
     }
 
     return cmd_template;
@@ -542,20 +503,18 @@ QString SQM::energyCommandFile(const QMPotential::Molecules &molecules) const
 
 /** Return the command file that will be used to calculate the energy of the
     molecules in 'molecules' in the field of point charges in 'lattice_charges' */
-QString SQM::energyCommandFile(const QMPotential::Molecules &molecules,
-                               const LatticeCharges &lattice_charges) const
+QString SQM::energyCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges) const
 {
     return this->createCommandFile(energy_template, molecules, lattice_charges);
 }
 
 /** Return the command files that will be used to calculate the forces on the
     atoms of the molecules in 'molecules' */
-QString SQM::forceCommandFile(const QMPotential::Molecules &molecules,
-                              const ForceTable&) const
+QString SQM::forceCommandFile(const QMPotential::Molecules &molecules, const ForceTable &) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM forces using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM forces using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QString();
 }
@@ -564,67 +523,60 @@ QString SQM::forceCommandFile(const QMPotential::Molecules &molecules,
     atoms of the molecules in 'molecules' in the field of point charges
     in 'lattice_charges' - this also calculates the forces on those
     point charges */
-QString SQM::forceCommandFile(const QMPotential::Molecules &molecules,
-                              const LatticeCharges &lattice_charges,
-                              const ForceTable&) const
+QString SQM::forceCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                              const ForceTable &) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM forces using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM forces using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QString();
 }
 
 /** Return the command files that will be used to calculate the fields on the
     atoms of the molecules in 'molecules' */
-QString SQM::fieldCommandFile(const QMPotential::Molecules &molecules,
-                              const FieldTable &fieldtable,
+QString SQM::fieldCommandFile(const QMPotential::Molecules &molecules, const FieldTable &fieldtable,
                               const SireFF::Probe &probe) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM fields using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM fields using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QString();
 }
 
 /** Return the command files that will be used to calculate the fields on the
     atoms of the molecules in 'molecules' */
-QString SQM::fieldCommandFile(const QMPotential::Molecules &molecules,
-                              const LatticeCharges &lattice_charges,
-                              const FieldTable &fieldtable,
-                              const SireFF::Probe &probe) const
+QString SQM::fieldCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                              const FieldTable &fieldtable, const SireFF::Probe &probe) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM fields using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM fields using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QString();
 }
 
 /** Return the command files that will be used to calculate the potentials on the
     atoms of the molecules in 'molecules' */
-QString SQM::potentialCommandFile(const QMPotential::Molecules &molecules,
-                                  const PotentialTable &pottable,
+QString SQM::potentialCommandFile(const QMPotential::Molecules &molecules, const PotentialTable &pottable,
                                   const SireFF::Probe &probe) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM potentials using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM potentials using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QString();
 }
 
 /** Return the command files that will be used to calculate the potentials on the
     atoms of the molecules in 'molecules' */
-QString SQM::potentialCommandFile(const QMPotential::Molecules &molecules,
-                                     const LatticeCharges &lattice_charges,
-                                     const PotentialTable &pottable,
-                                     const SireFF::Probe &probe) const
+QString SQM::potentialCommandFile(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
+                                  const PotentialTable &pottable, const SireFF::Probe &probe) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM potentials using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM potentials using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QString();
 }
@@ -634,8 +586,8 @@ double SQM::extractEnergy(QFile &sqm_output) const
 {
     QTextStream ts(&sqm_output);
 
-    //the energy is written on the line that looks like this;
-    //Total SCF energy    =      -8037.75735154 kcal/mol  (     -348.54331345 eV)
+    // the energy is written on the line that looks like this;
+    // Total SCF energy    =      -8037.75735154 kcal/mol  (     -348.54331345 eV)
     QRegExp regexp("Total\\s+SCF\\s+energy\\s*=\\s*([-\\d\\.]+)", Qt::CaseInsensitive);
 
     QStringList lines;
@@ -647,7 +599,7 @@ double SQM::extractEnergy(QFile &sqm_output) const
 
         if (regexp.indexIn(line) != -1)
         {
-            //we've found the "Total SCF energy" line
+            // we've found the "Total SCF energy" line
             QString num = regexp.cap(1);
 
             bool ok;
@@ -655,18 +607,18 @@ double SQM::extractEnergy(QFile &sqm_output) const
             double nrg = num.toDouble(&ok);
 
             if (not ok)
-                throw SireError::process_error( QObject::tr(
-                    "The energy obtained from SQM is garbled (%1) - %2.")
-                        .arg(regexp.cap(1), regexp.cap(0)), CODELOC );
+                throw SireError::process_error(
+                    QObject::tr("The energy obtained from SQM is garbled (%1) - %2.").arg(regexp.cap(1), regexp.cap(0)),
+                    CODELOC);
 
-            //the energy is already in kcal mol-1
+            // the energy is already in kcal mol-1
             return nrg;
         }
     }
 
-    //ok - something went wrong - we couldn't find the output
-    // Lets try reading the file again (in case it wasn't fully written
-    // to the disc)
+    // ok - something went wrong - we couldn't find the output
+    //  Lets try reading the file again (in case it wasn't fully written
+    //  to the disc)
     QTextStream ts2(&sqm_output);
 
     lines = QStringList();
@@ -678,7 +630,7 @@ double SQM::extractEnergy(QFile &sqm_output) const
 
         if (regexp.indexIn(line) != -1)
         {
-            //we've found the "SCF energy" line
+            // we've found the "SCF energy" line
             QString num = regexp.cap(1);
 
             bool ok;
@@ -686,19 +638,20 @@ double SQM::extractEnergy(QFile &sqm_output) const
             double nrg = num.toDouble(&ok);
 
             if (not ok)
-                throw SireError::process_error( QObject::tr(
-                    "The energy obtained from SQM is garbled (%1) - %2.")
-                        .arg(regexp.cap(1), regexp.cap(0)), CODELOC );
+                throw SireError::process_error(
+                    QObject::tr("The energy obtained from SQM is garbled (%1) - %2.").arg(regexp.cap(1), regexp.cap(0)),
+                    CODELOC);
 
-            //the energy is already in kcal mol-1
+            // the energy is already in kcal mol-1
             return nrg;
         }
     }
 
-    //the "SCF energy" line was not found!
-    throw SireError::process_error( QObject::tr(
-            "Could not find the total energy in the SQM output!\n"
-                "%1").arg(lines.join("\n")), CODELOC );
+    // the "SCF energy" line was not found!
+    throw SireError::process_error(QObject::tr("Could not find the total energy in the SQM output!\n"
+                                               "%1")
+                                       .arg(lines.join("\n")),
+                                   CODELOC);
 }
 
 /** Internal function used to write the shell script that is used to
@@ -715,28 +668,24 @@ QString SQM::writeShellFile(const TempDir &tempdir) const
 
     QTextStream ts(&f);
 
-    //set the environmental variables of the job
-    for (QHash<QString,QString>::const_iterator it = env_variables.constBegin();
-         it != env_variables.constEnd();
-         ++it)
+    // set the environmental variables of the job
+    for (QHash<QString, QString>::const_iterator it = env_variables.constBegin(); it != env_variables.constEnd(); ++it)
     {
         ts << "export " << it.key() << "=\"" << it.value() << "\"\n";
     }
 
-    //set the script to change into the run directory of the job
+    // set the script to change into the run directory of the job
     ts << QString("\ncd %1").arg(tempdir.path()) << "\n\n";
 
-    //write the line used to run SQM
+    // write the line used to run SQM
     if (sqm_exe.isEmpty())
     {
-        //the user hasn't specified a SQM executable - try to find one
+        // the user hasn't specified a SQM executable - try to find one
         QString found_sqm = SireBase::findExe("sqm").absoluteFilePath();
-        ts << QString("%1 -O -i sqm_input -o sqm_output\n")
-                    .arg(found_sqm);
+        ts << QString("%1 -O -i sqm_input -o sqm_output\n").arg(found_sqm);
     }
     else
-        ts << QString("%1 -O -i sqm_input -o sqm_output\n")
-                        .arg(sqm_exe);
+        ts << QString("%1 -O -i sqm_input -o sqm_output\n").arg(sqm_exe);
 
     ts << "sync\n";
 
@@ -762,121 +711,115 @@ static QByteArray readAll(const QString &file)
     the path to the file) */
 double SQM::calculateEnergy(const QString &cmdfile, int ntries) const
 {
-    //create a temporary directory in which to run SQM
+    // create a temporary directory in which to run SQM
     QString tmppath = env_variables.value("TMPDIR");
 
     if (tmppath.isEmpty())
         tmppath = QDir::temp().absolutePath();
 
     TempDir tmpdir(tmppath);
-    //tmpdir.doNotDelete();
+    // tmpdir.doNotDelete();
 
-    //write the file processed by the shell used to run the job
+    // write the file processed by the shell used to run the job
     QString shellfile = this->writeShellFile(tmpdir);
 
     {
-        QFile f( QString("%1/sqm_input").arg(tmpdir.path()) );
+        QFile f(QString("%1/sqm_input").arg(tmpdir.path()));
 
-        if (not f.open( QIODevice::WriteOnly ))
+        if (not f.open(QIODevice::WriteOnly))
             throw SireError::file_error(f, CODELOC);
 
-        //write the command file
-        f.write( cmdfile.toUtf8() );
+        // write the command file
+        f.write(cmdfile.toUtf8());
         f.close();
     }
 
-    //run the shell file...
-    //QTime t;
-    //qDebug() << "Running SQM...";
-    //t.start();
-    Process p = Process::run( "sh", shellfile );
+    // run the shell file...
+    // QTime t;
+    // qDebug() << "Running SQM...";
+    // t.start();
+    Process p = Process::run("sh", shellfile);
 
-    //wait until the job has finished
+    // wait until the job has finished
     if (not p.wait(max_sqm_runtime))
     {
         qDebug() << "Maximum SQM runtime was exceeded - has it hung?";
         p.kill();
 
         if (ntries > 0)
-            return this->calculateEnergy(cmdfile, ntries-1);
+            return this->calculateEnergy(cmdfile, ntries - 1);
     }
 
-    //int ms = t.elapsed();
-    //qDebug() << "SQM finised. Took" << ms << "ms";
+    // int ms = t.elapsed();
+    // qDebug() << "SQM finised. Took" << ms << "ms";
 
     if (p.wasKilled())
     {
-        throw SireError::process_error( QObject::tr(
-            "The SQM job was killed."), CODELOC );
+        throw SireError::process_error(QObject::tr("The SQM job was killed."), CODELOC);
     }
 
     if (p.isError())
     {
         QByteArray shellcontents = ::readAll(shellfile);
         QByteArray cmdcontents = ::readAll(QString("%1/sqm_input").arg(tmpdir.path()));
-        QByteArray outputcontents = ::readAll(QString("%1/sqm_output")
-                                                    .arg(tmpdir.path()));
+        QByteArray outputcontents = ::readAll(QString("%1/sqm_output").arg(tmpdir.path()));
 
-        throw SireError::process_error( QObject::tr(
-            "There was an error running the SQM job.\n"
-            "The shell script used to run the job was;\n"
-            "*****************************************\n"
-            "%1\n"
-            "*****************************************\n"
-            "The SQM input used to run the job was;\n"
-            "*****************************************\n"
-            "%2\n"
-            "*****************************************\n"
-            "The SQM output was;\n"
-            "*****************************************\n"
-            "%3\n"
-            "*****************************************\n"
-            )
-                .arg( QLatin1String(shellcontents),
-                      QLatin1String(cmdcontents),
-                      QLatin1String(outputcontents) ), CODELOC );
+        throw SireError::process_error(
+            QObject::tr("There was an error running the SQM job.\n"
+                        "The shell script used to run the job was;\n"
+                        "*****************************************\n"
+                        "%1\n"
+                        "*****************************************\n"
+                        "The SQM input used to run the job was;\n"
+                        "*****************************************\n"
+                        "%2\n"
+                        "*****************************************\n"
+                        "The SQM output was;\n"
+                        "*****************************************\n"
+                        "%3\n"
+                        "*****************************************\n")
+                .arg(QLatin1String(shellcontents), QLatin1String(cmdcontents), QLatin1String(outputcontents)),
+            CODELOC);
     }
 
-    //read all of the output
-    QFile f( QString("%1/sqm_output").arg(tmpdir.path()) );
+    // read all of the output
+    QFile f(QString("%1/sqm_output").arg(tmpdir.path()));
 
-    if ( not (f.exists() and f.open(QIODevice::ReadOnly)) )
+    if (not(f.exists() and f.open(QIODevice::ReadOnly)))
     {
         QByteArray shellcontents = ::readAll(shellfile);
         QByteArray cmdcontents = ::readAll(QString("%1/sqm_input").arg(tmpdir.path()));
 
-        throw SireError::process_error( QObject::tr(
-            "There was an error running the SQM job - no output was created.\n"
-            "The shell script used to run the job was;\n"
-            "*****************************************\n"
-            "%1\n"
-            "*****************************************\n"
-            "The SQM input used to run the job was;\n"
-            "*****************************************\n"
-            "%2\n"
-            "*****************************************\n")
-                .arg( QLatin1String(shellcontents),
-                      QLatin1String(cmdcontents) ), CODELOC );
+        throw SireError::process_error(QObject::tr("There was an error running the SQM job - no output was created.\n"
+                                                   "The shell script used to run the job was;\n"
+                                                   "*****************************************\n"
+                                                   "%1\n"
+                                                   "*****************************************\n"
+                                                   "The SQM input used to run the job was;\n"
+                                                   "*****************************************\n"
+                                                   "%2\n"
+                                                   "*****************************************\n")
+                                           .arg(QLatin1String(shellcontents), QLatin1String(cmdcontents)),
+                                       CODELOC);
     }
-
 
     try
     {
-        //parse the output to get the energy
+        // parse the output to get the energy
         return this->extractEnergy(f);
     }
-    catch(...)
+    catch (...)
     {
         qDebug() << "SQM process error. Number of remaining attempts = " << ntries;
 
-        //print out the last 150 lines of output
+        // print out the last 150 lines of output
         const int nlines_to_print = 150;
 
         qDebug() << "Printing out the last" << nlines_to_print << "lines of output...";
 
-        QFile f( QString("%1/sqm_output").arg(tmpdir.path()) );
+        QFile f(QString("%1/sqm_output").arg(tmpdir.path()));
 
-        if ( not (f.exists() and f.open(QIODevice::ReadOnly)) )
+        if (not(f.exists() and f.open(QIODevice::ReadOnly)))
             qDebug() << "Could not read the file" << tmpdir.path() << "/sqm_output";
         else
         {
@@ -886,33 +829,35 @@ double SQM::calculateEnergy(const QString &cmdfile, int ntries) const
 
             while (not ts.atEnd())
             {
-                lines.append( ts.readLine() );
+                lines.append(ts.readLine());
 
                 if (lines.count() > nlines_to_print)
                     lines.removeFirst();
             }
 
-            foreach (QString line, lines){ qDebug() << qPrintable(line); }
+            foreach (QString line, lines)
+            {
+                qDebug() << qPrintable(line);
+            }
         }
 
         if (ntries <= 0)
-            //don't bother trying again - it's not going to work!
+            // don't bother trying again - it's not going to work!
             throw;
 
-        //give it one more go - you never know, it may work
-        return this->calculateEnergy(cmdfile, ntries-1);
+        // give it one more go - you never know, it may work
+        return this->calculateEnergy(cmdfile, ntries - 1);
     }
 }
 
 /** Run SQM and use it to calculate the energy of the molecules in
     'molecules'. This blocks until SQM has completed */
-double SQM::calculateEnergy(const QMPotential::Molecules &molecules,
-                            int ntries) const
+double SQM::calculateEnergy(const QMPotential::Molecules &molecules, int ntries) const
 {
     if (molecules.count() == 0)
         return 0;
 
-    //create the command file to be used by SQM
+    // create the command file to be used by SQM
     QString cmdfile = this->energyCommandFile(molecules);
 
     return this->calculateEnergy(cmdfile, ntries);
@@ -920,14 +865,13 @@ double SQM::calculateEnergy(const QMPotential::Molecules &molecules,
 
 /** Calculate the SQM QM energy of the molecules in 'molecules'
     in the field of point charges in 'lattice_charges' */
-double SQM::calculateEnergy(const QMPotential::Molecules &molecules,
-                            const LatticeCharges &lattice_charges,
+double SQM::calculateEnergy(const QMPotential::Molecules &molecules, const LatticeCharges &lattice_charges,
                             int ntries) const
 {
     if (molecules.count() == 0)
         return 0;
 
-    //create the command file to be used by SQM
+    // create the command file to be used by SQM
     QString cmdfile = this->energyCommandFile(molecules, lattice_charges);
 
     return this->calculateEnergy(cmdfile, ntries);
@@ -936,45 +880,40 @@ double SQM::calculateEnergy(const QMPotential::Molecules &molecules,
 /** Internal function to calculate the potentials specified in the
     passed command file, and to return then together with the points
     at which they were evaluated */
-QHash<QString,double> SQM::calculatePotential(const QString &cmdfile,
-                                              int ntries) const
+QHash<QString, double> SQM::calculatePotential(const QString &cmdfile, int ntries) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM potentials using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM potentials using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
-    return QHash<QString,double>();
+    return QHash<QString, double>();
 }
 
 /** Calculate the potential around the passed molecules, and place them into the passed
     potential table, optionally scaled by 'scale_potential' */
-void SQM::calculatePotential(const QMPotential::Molecules &molecules,
-                             PotentialTable &pottable,
-                             const SireFF::Probe &probe,
-                             double scale_potential, int ntries) const
+void SQM::calculatePotential(const QMPotential::Molecules &molecules, PotentialTable &pottable,
+                             const SireFF::Probe &probe, double scale_potential, int ntries) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM potentials using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM potentials using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 }
 
 /** Calculate the potentials around the passed molecules, and place them into the passed
     potential table, optionally scaled by 'scale_potential', and return the accompanying
     potentials on the passed lattice points, also scaled by 'scale_potential' */
 QVector<MolarEnergy> SQM::calculatePotential(const QMPotential::Molecules &molecules,
-                                             const LatticeCharges &lattice_charges,
-                                             PotentialTable &pottable,
-                                             const SireFF::Probe &probe,
-                                             double scale_potential, int ntries) const
+                                             const LatticeCharges &lattice_charges, PotentialTable &pottable,
+                                             const SireFF::Probe &probe, double scale_potential, int ntries) const
 {
-    throw SireError::unsupported( QObject::tr(
-            "Calculating QM potentials using the SQM() interface is "
-            "currently not supported."), CODELOC );
+    throw SireError::unsupported(QObject::tr("Calculating QM potentials using the SQM() interface is "
+                                             "currently not supported."),
+                                 CODELOC);
 
     return QVector<MolarEnergy>();
 }
 
-const char* SQM::typeName()
+const char *SQM::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<SQM>() );
+    return QMetaType::typeName(qMetaTypeId<SQM>());
 }

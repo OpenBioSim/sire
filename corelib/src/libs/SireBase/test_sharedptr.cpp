@@ -28,9 +28,9 @@
 #include "SireBase/parallel.h"
 #include "SireBase/unittest.h"
 
+#include "SireBase/refcountdata.h"
 #include "SireBase/shareddatapointer.hpp"
 #include "SireBase/sharedpolypointer.hpp"
-#include "SireBase/refcountdata.h"
 
 #include <cmath>
 
@@ -41,7 +41,7 @@ class Foo : public RefCountData
 public:
     Foo() : RefCountData()
     {
-        for (int i=0; i<size(); ++i)
+        for (int i = 0; i < size(); ++i)
         {
             data[i] = std::rand();
         }
@@ -49,18 +49,19 @@ public:
 
     Foo(const Foo &other) : RefCountData()
     {
-        for (int i=0; i<size(); ++i)
+        for (int i = 0; i < size(); ++i)
         {
             data[i] = other.data[i];
         }
     }
 
     virtual ~Foo()
-    {}
-
-    Foo& operator=(const Foo &other)
     {
-        for (int i=0; i<size(); ++i)
+    }
+
+    Foo &operator=(const Foo &other)
+    {
+        for (int i = 0; i < size(); ++i)
         {
             data[i] = other.data[i];
         }
@@ -70,7 +71,7 @@ public:
 
     bool operator==(const Foo &other) const
     {
-        for (int i=0; i<size(); ++i)
+        for (int i = 0; i < size(); ++i)
         {
             if (data[i] != other.data[i])
                 return false;
@@ -94,7 +95,7 @@ public:
         return 24;
     }
 
-    virtual Foo* clone() const
+    virtual Foo *clone() const
     {
         return new Foo(*this);
     }
@@ -116,61 +117,56 @@ void test_sharedptr(bool verbose)
 
     FooPtr f2 = f1;
 
-    assert_equal( f1.read(), f2.read(), CODELOC );
-    assert_equal( f1.read().pointer(), f2.read().pointer(), CODELOC );
+    assert_equal(f1.read(), f2.read(), CODELOC);
+    assert_equal(f1.read().pointer(), f2.read().pointer(), CODELOC);
 
     f2.detach();
 
-    assert_equal( f1.read(), f2.read(), CODELOC );
-    assert_not_equal( f1.read().pointer(), f2.read().pointer(), CODELOC );
+    assert_equal(f1.read(), f2.read(), CODELOC);
+    assert_not_equal(f1.read().pointer(), f2.read().pointer(), CODELOC);
 
     const int nfoo = 2048;
 
     QVector<FooPtr> foos(nfoo);
 
-    tbb::parallel_for( tbb::blocked_range<int>(0,nfoo),
-                       [&](tbb::blocked_range<int> r)
-    {
-        for (int i=r.begin(); i<r.end(); ++i)
+    tbb::parallel_for(tbb::blocked_range<int>(0, nfoo), [&](tbb::blocked_range<int> r)
+                      {
+        for (int i = r.begin(); i < r.end(); ++i)
         {
             foos[i] = Foo();
-        }
-    });
+        } });
 
     QVector<FooPtr> foos2(foos);
     foos2.detach();
 
-    for (int i=0; i<nfoo; ++i)
+    for (int i = 0; i < nfoo; ++i)
     {
-        assert_equal( foos[i].read(), foos2[i].read(), CODELOC );
-        assert_equal( foos[i].read().pointer(), foos2[i].read().pointer(), CODELOC );
+        assert_equal(foos[i].read(), foos2[i].read(), CODELOC);
+        assert_equal(foos[i].read().pointer(), foos2[i].read().pointer(), CODELOC);
     }
 
     QVector<FooPtr> foos3(foos);
 
-    for (int i=0; i<nfoo; ++i)
+    for (int i = 0; i < nfoo; ++i)
     {
-        assert_equal( foos[i].read(), foos3[i].read(), CODELOC );
-        assert_equal( foos3[i].read().pointer(), foos3[i].read().pointer(), CODELOC );
+        assert_equal(foos[i].read(), foos3[i].read(), CODELOC);
+        assert_equal(foos3[i].read().pointer(), foos3[i].read().pointer(), CODELOC);
     }
 
     foos.detach();
 
-    tbb::parallel_for( tbb::blocked_range<int>(0,nfoo),
-                        [&](tbb::blocked_range<int> r)
-    {
-        for (int i=r.begin(); i<r.end(); ++i)
+    tbb::parallel_for(tbb::blocked_range<int>(0, nfoo), [&](tbb::blocked_range<int> r)
+                      {
+        for (int i = r.begin(); i < r.end(); ++i)
         {
             foos[i].write();
-        }
-    });
+        } });
 
-    for (int i=0; i<nfoo; ++i)
+    for (int i = 0; i < nfoo; ++i)
     {
-        assert_equal( foos[i].read(), foos3[i].read(), CODELOC );
-        assert_not_equal( foos[i].read().pointer(), foos3[i].read().pointer(), CODELOC );
+        assert_equal(foos[i].read(), foos3[i].read(), CODELOC);
+        assert_not_equal(foos[i].read().pointer(), foos3[i].read().pointer(), CODELOC);
     }
-
 }
 
-SIRE_UNITTEST( test_sharedptr )
+SIRE_UNITTEST(test_sharedptr)

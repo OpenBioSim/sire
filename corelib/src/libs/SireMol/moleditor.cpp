@@ -27,20 +27,20 @@
 
 #include "moleditor.h"
 
-#include "segeditor.h"
+#include "atomeditor.h"
+#include "cgeditor.h"
 #include "chaineditor.h"
 #include "reseditor.h"
-#include "cgeditor.h"
-#include "atomeditor.h"
+#include "segeditor.h"
 
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "residue.h"
+#include "segment.h"
 
-#include "selector.hpp"
 #include "mover.hpp"
+#include "selector.hpp"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -50,9 +50,9 @@ using namespace SireStream;
 
 namespace SireMol
 {
-    //instantiate the underlying Editor class
+    // instantiate the underlying Editor class
     template class Editor<MolEditor, Molecule>;
-}
+} // namespace SireMol
 
 //////////
 ////////// Implementation of MolEditor
@@ -61,25 +61,23 @@ namespace SireMol
 static const RegisterMetaType<MolEditor> r_moleditor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const MolEditor &moleditor)
+QDataStream &operator<<(QDataStream &ds, const MolEditor &moleditor)
 {
     writeHeader(ds, r_moleditor, 1);
 
-    ds << static_cast<const Editor<MolEditor, Molecule>&>(moleditor);
+    ds << static_cast<const Editor<MolEditor, Molecule> &>(moleditor);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       MolEditor &moleditor)
+QDataStream &operator>>(QDataStream &ds, MolEditor &moleditor)
 {
     VersionID v = readHeader(ds, r_moleditor);
 
     if (v == 1)
     {
-        ds >> static_cast<Editor<MolEditor, Molecule>&>(moleditor);
+        ds >> static_cast<Editor<MolEditor, Molecule> &>(moleditor);
     }
     else
         throw version_error(v, "1", r_moleditor, CODELOC);
@@ -88,32 +86,34 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-MolEditor::MolEditor() : ConcreteProperty< MolEditor,Editor<MolEditor,Molecule> >()
-{}
+MolEditor::MolEditor() : ConcreteProperty<MolEditor, Editor<MolEditor, Molecule>>()
+{
+}
 
 /** Construct an editor to edit a copy of 'molecule' */
-MolEditor::MolEditor(const Molecule &molecule)
-          : ConcreteProperty< MolEditor,Editor<MolEditor,Molecule> >(molecule)
-{}
+MolEditor::MolEditor(const Molecule &molecule) : ConcreteProperty<MolEditor, Editor<MolEditor, Molecule>>(molecule)
+{
+}
 
 /** Copy constructor */
-MolEditor::MolEditor(const MolEditor &other)
-          : ConcreteProperty< MolEditor,Editor<MolEditor,Molecule> >(other)
-{}
+MolEditor::MolEditor(const MolEditor &other) : ConcreteProperty<MolEditor, Editor<MolEditor, Molecule>>(other)
+{
+}
 
 /** Destructor */
 MolEditor::~MolEditor()
-{}
+{
+}
 
 /** Assign so that this edits a copy of 'molecule' */
-MolEditor& MolEditor::operator=(const Molecule &molecule)
+MolEditor &MolEditor::operator=(const Molecule &molecule)
 {
     Editor<MolEditor, Molecule>::operator=(molecule);
     return *this;
 }
 
 /** Copy assignment operator */
-MolEditor& MolEditor::operator=(const MolEditor &other)
+MolEditor &MolEditor::operator=(const MolEditor &other)
 {
     Editor<MolEditor, Molecule>::operator=(other);
     return *this;
@@ -122,33 +122,33 @@ MolEditor& MolEditor::operator=(const MolEditor &other)
 /** Return a string representation of this editor */
 QString MolEditor::toString() const
 {
-    return QObject::tr( "Editor{ %1 }" ).arg( Molecule::toString() );
+    return QObject::tr("Editor{ %1 }").arg(Molecule::toString());
 }
 
 /** Rename this molecule to 'newname' */
-MolEditor& MolEditor::rename(const QString &newname)
+MolEditor &MolEditor::rename(const QString &newname)
 {
     if (MolName(newname) == this->name())
-        //nothing needs doing
+        // nothing needs doing
         return *this;
 
-    d->rename( MolName(newname) );
+    d->rename(MolName(newname));
 
     return *this;
 }
 
 /** Give this molecule a new, unique ID number */
-MolEditor& MolEditor::renumber()
+MolEditor &MolEditor::renumber()
 {
     d->renumber();
     return *this;
 }
 
 /** Give this molecule the ID number 'newnum' */
-MolEditor& MolEditor::renumber(MolNum newnum)
+MolEditor &MolEditor::renumber(MolNum newnum)
 {
     if (newnum == this->number())
-        //nothing needs doing
+        // nothing needs doing
         return *this;
 
     d->renumber(newnum);
@@ -157,7 +157,7 @@ MolEditor& MolEditor::renumber(MolNum newnum)
 }
 
 /** Renumber the atoms in the molecule according to the passed map */
-MolEditor& MolEditor::renumber(const QHash<AtomNum,AtomNum> &atomnums)
+MolEditor &MolEditor::renumber(const QHash<AtomNum, AtomNum> &atomnums)
 {
     if (atomnums.isEmpty())
         return *this;
@@ -168,7 +168,7 @@ MolEditor& MolEditor::renumber(const QHash<AtomNum,AtomNum> &atomnums)
 }
 
 /** Renumber the residues in the molecule according to the passed map */
-MolEditor& MolEditor::renumber(const QHash<ResNum,ResNum> &resnums)
+MolEditor &MolEditor::renumber(const QHash<ResNum, ResNum> &resnums)
 {
     if (resnums.isEmpty())
         return *this;
@@ -179,13 +179,12 @@ MolEditor& MolEditor::renumber(const QHash<ResNum,ResNum> &resnums)
 }
 
 /** Renumber the atoms and residues in the molecule according to the passed maps */
-MolEditor& MolEditor::renumber(const QHash<AtomNum,AtomNum> &atomnums,
-                               const QHash<ResNum,ResNum> &resnums)
+MolEditor &MolEditor::renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums)
 {
     if (atomnums.isEmpty() and resnums.isEmpty())
         return *this;
 
-    d->renumber(atomnums,resnums);
+    d->renumber(atomnums, resnums);
 
     return *this;
 }
@@ -343,9 +342,9 @@ Molecule MolEditor::commit() const
     return *this;
 }
 
-const char* MolEditor::typeName()
+const char *MolEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolEditor>() );
+    return QMetaType::typeName(qMetaTypeId<MolEditor>());
 }
 
 //////////
@@ -355,72 +354,72 @@ const char* MolEditor::typeName()
 static const RegisterMetaType<MolStructureEditor> r_molstructeditor;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const MolStructureEditor &moleditor)
+QDataStream &operator<<(QDataStream &ds, const MolStructureEditor &moleditor)
 {
     writeHeader(ds, r_molstructeditor, 1);
 
-    ds << static_cast<const StructureEditor&>(moleditor);
+    ds << static_cast<const StructureEditor &>(moleditor);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       MolStructureEditor &moleditor)
+QDataStream &operator>>(QDataStream &ds, MolStructureEditor &moleditor)
 {
     VersionID v = readHeader(ds, r_molstructeditor);
 
     if (v == 1)
     {
-        ds >> static_cast<MolStructureEditor&>(moleditor);
+        ds >> static_cast<MolStructureEditor &>(moleditor);
     }
     else
-        throw version_error( v, "1", r_molstructeditor, CODELOC );
+        throw version_error(v, "1", r_molstructeditor, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MolStructureEditor::MolStructureEditor() : StructureEditor()
-{}
+{
+}
 
 /** Construct a structure editor of the molecule viewed by 'molview' */
-MolStructureEditor::MolStructureEditor(const MoleculeView &molview)
-                   : StructureEditor(molview.data())
-{}
+MolStructureEditor::MolStructureEditor(const MoleculeView &molview) : StructureEditor(molview.data())
+{
+}
 
 /** Construct a structure editor that edits the structure of the molecule
     being edited by 'other' */
-MolStructureEditor::MolStructureEditor(const StructureEditor &other)
-                   : StructureEditor(other)
-{}
+MolStructureEditor::MolStructureEditor(const StructureEditor &other) : StructureEditor(other)
+{
+}
 
 /** Copy constructor */
-MolStructureEditor::MolStructureEditor(const MolStructureEditor &other)
-                   : StructureEditor(other)
-{}
+MolStructureEditor::MolStructureEditor(const MolStructureEditor &other) : StructureEditor(other)
+{
+}
 
 /** Destructor */
 MolStructureEditor::~MolStructureEditor()
-{}
+{
+}
 
 /** Assign to edit the structure of a copy of the molecule viewed in 'molview' */
-MolStructureEditor& MolStructureEditor::operator=(const MoleculeView &molview)
+MolStructureEditor &MolStructureEditor::operator=(const MoleculeView &molview)
 {
     StructureEditor::operator=(molview.data());
     return *this;
 }
 
 /** Copy assignment from another editor */
-MolStructureEditor& MolStructureEditor::operator=(const StructureEditor &other)
+MolStructureEditor &MolStructureEditor::operator=(const StructureEditor &other)
 {
     StructureEditor::operator=(other);
     return *this;
 }
 
 /** Copy assignment from another editor */
-MolStructureEditor& MolStructureEditor::operator=(const MolStructureEditor &other)
+MolStructureEditor &MolStructureEditor::operator=(const MolStructureEditor &other)
 {
     StructureEditor::operator=(other);
     return *this;
@@ -429,9 +428,7 @@ MolStructureEditor& MolStructureEditor::operator=(const MolStructureEditor &othe
 /** Return a string representation of this editor */
 QString MolStructureEditor::toString() const
 {
-    return QObject::tr( "StructureEditor{ Molecule( %1 : %2 ) }" )
-                    .arg(this->name())
-                    .arg(this->number());
+    return QObject::tr("StructureEditor{ Molecule( %1 : %2 ) }").arg(this->name()).arg(this->number());
 }
 
 /** Return whether or not this is a complete molecule */
@@ -551,7 +548,7 @@ SegStructureEditor MolStructureEditor::segment(const SegID &segid)
 }
 
 /** Return the name of this molecule */
-const MolName& MolStructureEditor::name() const
+const MolName &MolStructureEditor::name() const
 {
     return this->molName();
 }
@@ -593,21 +590,21 @@ int MolStructureEditor::nSegments() const
 }
 
 /** Rename this molecule to 'newname' */
-MolStructureEditor& MolStructureEditor::rename(const MolName &newname)
+MolStructureEditor &MolStructureEditor::rename(const MolName &newname)
 {
     this->renameMolecule(newname);
     return *this;
 }
 
 /** Give this molecule a new, unique ID number */
-MolStructureEditor& MolStructureEditor::renumber()
+MolStructureEditor &MolStructureEditor::renumber()
 {
     this->renumberMolecule();
     return *this;
 }
 
 /** Renumber this molecule to have the number 'newnum' */
-MolStructureEditor& MolStructureEditor::renumber(MolNum newnum)
+MolStructureEditor &MolStructureEditor::renumber(MolNum newnum)
 {
     this->renumberMolecule(newnum);
     return *this;
@@ -678,7 +675,7 @@ SegStructureEditor MolStructureEditor::add(const SegName &name)
 
 /** Remove all atoms that match the ID 'atomid' - this does
     nothing if there are no atoms that match this ID */
-MolStructureEditor& MolStructureEditor::remove(const AtomID &atomid)
+MolStructureEditor &MolStructureEditor::remove(const AtomID &atomid)
 {
     this->removeAtoms(atomid);
     return *this;
@@ -686,7 +683,7 @@ MolStructureEditor& MolStructureEditor::remove(const AtomID &atomid)
 
 /** Remove all CutGroups that match the ID 'cgid' - this does
     nothing if there are no CutGroups that match this ID */
-MolStructureEditor& MolStructureEditor::remove(const CGID &cgid)
+MolStructureEditor &MolStructureEditor::remove(const CGID &cgid)
 {
     this->removeCutGroups(cgid);
     return *this;
@@ -694,7 +691,7 @@ MolStructureEditor& MolStructureEditor::remove(const CGID &cgid)
 
 /** Remove all residues that match the ID 'resid' - this does
     nothing if there are no residues that match this ID */
-MolStructureEditor& MolStructureEditor::remove(const ResID &resid)
+MolStructureEditor &MolStructureEditor::remove(const ResID &resid)
 {
     this->removeResidues(resid);
     return *this;
@@ -702,7 +699,7 @@ MolStructureEditor& MolStructureEditor::remove(const ResID &resid)
 
 /** Remove all chains that match the ID 'chainid' - this does
     nothing if there are no chains that match this ID */
-MolStructureEditor& MolStructureEditor::remove(const ChainID &chainid)
+MolStructureEditor &MolStructureEditor::remove(const ChainID &chainid)
 {
     this->removeChains(chainid);
     return *this;
@@ -710,42 +707,42 @@ MolStructureEditor& MolStructureEditor::remove(const ChainID &chainid)
 
 /** Remove all segments that match the ID 'segid' - this does
     nothing if there are no segments that match this ID */
-MolStructureEditor& MolStructureEditor::remove(const SegID &segid)
+MolStructureEditor &MolStructureEditor::remove(const SegID &segid)
 {
     this->removeSegments(segid);
     return *this;
 }
 
 /** Remove all atoms from this molecule */
-MolStructureEditor& MolStructureEditor::removeAllAtoms()
+MolStructureEditor &MolStructureEditor::removeAllAtoms()
 {
     StructureEditor::removeAllAtoms();
     return *this;
 }
 
 /** Remove all CutGroups from this molecule */
-MolStructureEditor& MolStructureEditor::removeAllCutGroups()
+MolStructureEditor &MolStructureEditor::removeAllCutGroups()
 {
     StructureEditor::removeAllCutGroups();
     return *this;
 }
 
 /** Remove all residues from this molecule */
-MolStructureEditor& MolStructureEditor::removeAllResidues()
+MolStructureEditor &MolStructureEditor::removeAllResidues()
 {
     StructureEditor::removeAllResidues();
     return *this;
 }
 
 /** Remove all chains from this molecule */
-MolStructureEditor& MolStructureEditor::removeAllChains()
+MolStructureEditor &MolStructureEditor::removeAllChains()
 {
     StructureEditor::removeAllChains();
     return *this;
 }
 
 /** Remove all segments from this molecule */
-MolStructureEditor& MolStructureEditor::removeAllSegments()
+MolStructureEditor &MolStructureEditor::removeAllSegments()
 {
     StructureEditor::removeAllSegments();
     return *this;
@@ -754,7 +751,7 @@ MolStructureEditor& MolStructureEditor::removeAllSegments()
 /** Commit the changes and return a Molecule copy */
 Molecule MolStructureEditor::commit() const
 {
-    return Molecule( this->commitChanges() );
+    return Molecule(this->commitChanges());
 }
 
 /** Automatically convert this editor to a Molecule() */
@@ -763,12 +760,12 @@ MolStructureEditor::operator Molecule() const
     return this->commit();
 }
 
-const char* MolStructureEditor::typeName()
+const char *MolStructureEditor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolStructureEditor>() );
+    return QMetaType::typeName(qMetaTypeId<MolStructureEditor>());
 }
 
-MolStructureEditor* MolStructureEditor::clone() const
+MolStructureEditor *MolStructureEditor::clone() const
 {
     return new MolStructureEditor(*this);
 }

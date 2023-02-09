@@ -28,11 +28,11 @@
 #ifndef SIREMATHS_RATIONAL_H
 #define SIREMATHS_RATIONAL_H
 
-#include <QString>
 #include <QObject>
+#include <QString>
 
-#include "SireMaths/maths.h"
 #include "SireMaths/errors.h"
+#include "SireMaths/maths.h"
 
 #include "sireglobal.h"
 
@@ -41,157 +41,159 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-/** Thin wrapper around boost::rational - cannot use directly as it kills
-    compilers! */
-class SIREMATHS_EXPORT Rational
-{
-public:
-    Rational() : num(0), den(1)
-    {}
-
-
-    Rational(qint32 number) : num(number) , den(1)
-    {}
-
-    Rational(qint32 numerator, qint32 denominator)
-        : num(numerator), den(denominator)
-    {}
-
-    Rational(const Rational &other) : num(other.num), den(other.den)
-    {}
-
-    ~Rational();
-
-    Rational& operator=(const Rational &other)
+    /** Thin wrapper around boost::rational - cannot use directly as it kills
+        compilers! */
+    class SIREMATHS_EXPORT Rational
     {
-        num = other.num;
-        den = other.den;
-        return *this;
-    }
+    public:
+        Rational() : num(0), den(1)
+        {
+        }
 
-    Rational& operator=(qint32 number)
-    {
-        num = number;
-        den = 1;
-        return *this;
-    }
+        Rational(qint32 number) : num(number), den(1)
+        {
+        }
 
-    bool operator==(const Rational &other) const;
-    bool operator!=(const Rational &other) const;
-    bool operator>=(const Rational &other) const;
-    bool operator<=(const Rational &other) const;
-    bool operator>(const Rational &other) const;
-    bool operator<(const Rational &other) const;
+        Rational(qint32 numerator, qint32 denominator) : num(numerator), den(denominator)
+        {
+        }
 
-    bool operator==(qint32 number) const;
-    bool operator!=(qint32 number) const;
-    bool operator>=(qint32 number) const;
-    bool operator<=(qint32 number) const;
-    bool operator>(qint32 number) const;
-    bool operator<(qint32 number) const;
+        Rational(const Rational &other) : num(other.num), den(other.den)
+        {
+        }
 
-    Rational operator-() const
-    {
-        return Rational(-num,den);
-    }
+        ~Rational();
 
-    Rational& operator+=(const Rational &other);
-    Rational& operator-=(const Rational &other);
-    Rational& operator*=(const Rational &other);
-    Rational& operator/=(const Rational &other);
+        Rational &operator=(const Rational &other)
+        {
+            num = other.num;
+            den = other.den;
+            return *this;
+        }
 
-    Rational& operator+=(qint32 number)
-    {
-        num += number*den;
-        return *this;
-    }
+        Rational &operator=(qint32 number)
+        {
+            num = number;
+            den = 1;
+            return *this;
+        }
 
-    Rational& operator-=(qint32 number)
-    {
-        num -= number*den;
-        return *this;
-    }
+        bool operator==(const Rational &other) const;
+        bool operator!=(const Rational &other) const;
+        bool operator>=(const Rational &other) const;
+        bool operator<=(const Rational &other) const;
+        bool operator>(const Rational &other) const;
+        bool operator<(const Rational &other) const;
 
-    Rational& operator*=(qint32 number);
-    Rational& operator/=(qint32 number);
+        bool operator==(qint32 number) const;
+        bool operator!=(qint32 number) const;
+        bool operator>=(qint32 number) const;
+        bool operator<=(qint32 number) const;
+        bool operator>(qint32 number) const;
+        bool operator<(qint32 number) const;
 
-    QString toString() const;
+        Rational operator-() const
+        {
+            return Rational(-num, den);
+        }
 
-    const Rational& operator++()
-    {
-        num += den;
-        return *this;
-    }
+        Rational &operator+=(const Rational &other);
+        Rational &operator-=(const Rational &other);
+        Rational &operator*=(const Rational &other);
+        Rational &operator/=(const Rational &other);
 
-    const Rational& operator--()
-    {
-        num -= den;
-        return *this;
-    }
+        Rational &operator+=(qint32 number)
+        {
+            num += number * den;
+            return *this;
+        }
 
-    bool operator!() const
-    {
-        return !num;
-    }
+        Rational &operator-=(qint32 number)
+        {
+            num -= number * den;
+            return *this;
+        }
 
-    qint32 numerator() const
-    {
-        return num;
-    }
+        Rational &operator*=(qint32 number);
+        Rational &operator/=(qint32 number);
 
-    qint32 denominator() const
-    {
-        return den;
-    }
+        QString toString() const;
 
-private:
-    qint32 num, den;
-};
+        const Rational &operator++()
+        {
+            num += den;
+            return *this;
+        }
 
-/** Expose the boost gcd and lcm functions */
-qint32 gcd(qint32 n, qint32 m);
+        const Rational &operator--()
+        {
+            num -= den;
+            return *this;
+        }
 
-/** Expose the boost gcd and lcm functions */
-qint32 lcm(qint32 n, qint32 m);
+        bool operator!() const
+        {
+            return !num;
+        }
 
-}
+        qint32 numerator() const
+        {
+            return num;
+        }
+
+        qint32 denominator() const
+        {
+            return den;
+        }
+
+    private:
+        qint32 num, den;
+    };
+
+    /** Expose the boost gcd and lcm functions */
+    qint32 gcd(qint32 n, qint32 m);
+
+    /** Expose the boost gcd and lcm functions */
+    qint32 lcm(qint32 n, qint32 m);
+
+} // namespace SireMaths
 
 class QDataStream;
-SIREMATHS_EXPORT QDataStream& operator<<(QDataStream&, const SireMaths::Rational&);
-SIREMATHS_EXPORT QDataStream& operator>>(QDataStream&, SireMaths::Rational&);
+SIREMATHS_EXPORT QDataStream &operator<<(QDataStream &, const SireMaths::Rational &);
+SIREMATHS_EXPORT QDataStream &operator>>(QDataStream &, SireMaths::Rational &);
 
 namespace SireMaths
 {
 
-/** Return a QString representation of the rational number */
-SIREMATHS_EXPORT QString toString(const SireMaths::Rational &val);
+    /** Return a QString representation of the rational number */
+    SIREMATHS_EXPORT QString toString(const SireMaths::Rational &val);
 
-/** Private function used by 'pow' to calculate 'x' raised to the positive
-    fractional power 'power' */
-double pow_pvt(double x, const Rational &power);
+    /** Private function used by 'pow' to calculate 'x' raised to the positive
+        fractional power 'power' */
+    double pow_pvt(double x, const Rational &power);
 
-/** Return x raised to the fractional power 'power' */
-SIREMATHS_EXPORT double pow(double x, const Rational &power);
+    /** Return x raised to the fractional power 'power' */
+    SIREMATHS_EXPORT double pow(double x, const Rational &power);
 
-/** Return whether this is a rational number (with maximum denominator = 'maxdenom') */
-SIREMATHS_EXPORT bool isRational(double val, int maxdenom);
+    /** Return whether this is a rational number (with maximum denominator = 'maxdenom') */
+    SIREMATHS_EXPORT bool isRational(double val, int maxdenom);
 
-/** Return 'val' converted into the best approximated rational number
-    with maximum denominator 'maxdenom'. A perfect conversion will only
-    result if 'isRational(val,maxdenom)' returned true. */
-SIREMATHS_EXPORT Rational toRational(double val, int maxdenom);
+    /** Return 'val' converted into the best approximated rational number
+        with maximum denominator 'maxdenom'. A perfect conversion will only
+        result if 'isRational(val,maxdenom)' returned true. */
+    SIREMATHS_EXPORT Rational toRational(double val, int maxdenom);
 
-SIREMATHS_EXPORT bool isRational(double val);
+    SIREMATHS_EXPORT bool isRational(double val);
 
-SIREMATHS_EXPORT Rational toRational(double val);
+    SIREMATHS_EXPORT Rational toRational(double val);
 
-/** Return 'val' converted to a double */
-SIREMATHS_EXPORT double toDouble(const Rational &val);
+    /** Return 'val' converted to a double */
+    SIREMATHS_EXPORT double toDouble(const Rational &val);
 
-/** Return a hash of the rational number */
-uint qHash(const Rational &val);
+    /** Return a hash of the rational number */
+    uint qHash(const Rational &val);
 
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::Rational)
 

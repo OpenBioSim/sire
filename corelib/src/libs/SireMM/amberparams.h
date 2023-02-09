@@ -33,24 +33,23 @@
 
 #include "SireID/index.h"
 
-#include "SireMol/molecule.h"
-#include "SireMol/moleculeinfo.h"
-#include "SireMol/partialmolecule.h"
-#include "SireMol/bondid.h"
 #include "SireMol/angleid.h"
+#include "SireMol/atomcharges.h"
+#include "SireMol/atomelements.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/atommasses.h"
+#include "SireMol/atomradii.h"
+#include "SireMol/bondid.h"
 #include "SireMol/dihedralid.h"
 #include "SireMol/improperid.h"
-#include "SireMol/atomidx.h"
-#include "SireMol/mover.hpp"
-#include "SireMol/molviewproperty.h"
-#include "SireMol/atomcharges.h"
-#include "SireMol/atommasses.h"
-#include "SireMol/atomelements.h"
-#include "SireMol/atomradii.h"
+#include "SireMol/molecule.h"
 #include "SireMol/moleculeinfo.h"
+#include "SireMol/molviewproperty.h"
+#include "SireMol/mover.hpp"
+#include "SireMol/partialmolecule.h"
 
-#include "SireMM/cljnbpairs.h"
 #include "SireMM/atomljs.h"
+#include "SireMM/cljnbpairs.h"
 
 #include "SireCAS/symbol.h"
 
@@ -73,7 +72,7 @@ namespace SireMM
     class FourAtomFunctions;
     class CLJNBPairs;
     class CLJScaleFactor;
-}
+} // namespace SireMM
 
 SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::AmberParams &);
 SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::AmberParams &);
@@ -105,7 +104,7 @@ namespace SireMol
     class Molecule;
     class MoleculeData;
     class Connectivity;
-}
+} // namespace SireMol
 
 namespace SireCAS
 {
@@ -275,8 +274,7 @@ namespace SireMM
 
         AmberDihedral(AmberDihPart part);
 
-        AmberDihedral(const SireCAS::Expression &f, const SireCAS::Symbol &PHI,
-                      bool test_ryckaert_bellemans = true);
+        AmberDihedral(const SireCAS::Expression &f, const SireCAS::Symbol &PHI, bool test_ryckaert_bellemans = true);
 
         AmberDihedral(const AmberDihedral &other);
 
@@ -400,8 +398,7 @@ namespace SireMM
 
         @author Julien Michel / Christopher Woods
      */
-    class SIREMM_EXPORT AmberParams
-        : public SireBase::ConcreteProperty<AmberParams, SireMol::MoleculeProperty>
+    class SIREMM_EXPORT AmberParams : public SireBase::ConcreteProperty<AmberParams, SireMol::MoleculeProperty>
     {
 
         friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMM::AmberParams &);
@@ -409,8 +406,7 @@ namespace SireMM
 
     public:
         AmberParams();
-        AmberParams(const SireMol::MoleculeView &molecule,
-                    const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        AmberParams(const SireMol::MoleculeView &molecule, const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         AmberParams(const SireMol::MoleculeInfo &molinfo);
         AmberParams(const SireMol::MoleculeInfoData &molinfo);
@@ -436,15 +432,9 @@ namespace SireMM
 
         QString toString() const;
 
-        void add(const SireMol::AtomID &atom,
-                 SireUnits::Dimension::Charge charge,
-                 SireUnits::Dimension::MolarMass mass,
-                 const SireMol::Element &element,
-                 const SireMM::LJParameter &ljparam,
-                 const QString &amber_type,
-                 SireUnits::Dimension::Length born_radius,
-                 double screening_parameter,
-                 const QString &treechain);
+        void add(const SireMol::AtomID &atom, SireUnits::Dimension::Charge charge, SireUnits::Dimension::MolarMass mass,
+                 const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
+                 SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain);
 
         SireMol::AtomCharges charges() const;
         SireMol::AtomMasses masses() const;
@@ -479,8 +469,7 @@ namespace SireMM
         ThreeAtomFunctions angleFunctions() const;
         ThreeAtomFunctions angleFunctions(const SireCAS::Symbol &THETA) const;
 
-        void add(const DihedralID &dihedral, double k, double periodicity, double phase,
-                 bool includes_hydrogen);
+        void add(const DihedralID &dihedral, double k, double periodicity, double phase, bool includes_hydrogen);
         void remove(const DihedralID &dihedral);
 
         AmberDihedral getParameter(const DihedralID &dihedral) const;
@@ -488,8 +477,7 @@ namespace SireMM
         FourAtomFunctions dihedralFunctions() const;
         FourAtomFunctions dihedralFunctions(const SireCAS::Symbol &PHI) const;
 
-        void add(const ImproperID &improper, double v, double periodicity, double phase,
-                 bool includes_hydrogen);
+        void add(const ImproperID &improper, double v, double periodicity, double phase, bool includes_hydrogen);
         void remove(const ImproperID &improper);
 
         AmberDihedral getParameter(const ImproperID &improper) const;
@@ -527,18 +515,10 @@ namespace SireMM
         void _pvt_createFrom(const MoleculeData &moldata);
         void _pvt_updateFrom(const MoleculeData &moldata);
 
-        void getAmberBondsFrom(const TwoAtomFunctions &funcs,
-                               const MoleculeData &moldata,
-                               const PropertyMap &map);
-        void getAmberAnglesFrom(const ThreeAtomFunctions &funcs,
-                                const MoleculeData &moldata,
-                                const PropertyMap &map);
-        void getAmberDihedralsFrom(const FourAtomFunctions &funcs,
-                                   const MoleculeData &moldata,
-                                   const PropertyMap &map);
-        void getAmberImpropersFrom(const FourAtomFunctions &funcs,
-                                   const MoleculeData &moldata,
-                                   const PropertyMap &map);
+        void getAmberBondsFrom(const TwoAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
+        void getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
+        void getAmberDihedralsFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
+        void getAmberImpropersFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
 
         void getAmberNBsFrom(const CLJNBPairs &nbpairs, const FourAtomFunctions &funcs);
 
@@ -834,7 +814,7 @@ namespace SireMM
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMM::AmberParams)
 Q_DECLARE_METATYPE(SireMM::AmberBond)

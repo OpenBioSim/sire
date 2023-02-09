@@ -38,228 +38,228 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-using SireID::IDAndSet;
-using SireID::IDOrSet;
+    using SireID::IDAndSet;
+    using SireID::IDOrSet;
 
-class MolIdx;
-class MolIdentifier;
-class MolNum;
+    class MolIdx;
+    class MolIdentifier;
+    class MolNum;
 
-class MolAtomID;
+    class MolAtomID;
 
-class SpecifyMol;
+    class SpecifyMol;
 
-class AtomID;
+    class AtomID;
 
-class Molecules;
-class MoleculeGroup;
-class MolGroupsBase;
+    class Molecules;
+    class MoleculeGroup;
+    class MolGroupsBase;
 
-/** This is the base class of all identifiers that are used
-    to identify a Molecule
+    /** This is the base class of all identifiers that are used
+        to identify a Molecule
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT MolID : public SireID::ID
-{
-public:
-    typedef MolNum Index;
-    typedef MolIdentifier Identifier;
-    typedef Molecules SearchObject;
-
-    MolID();
-
-    MolID(const MolID &other);
-
-    virtual ~MolID();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT MolID : public SireID::ID
     {
-        return "SireMol::MolID";
-    }
+    public:
+        typedef MolNum Index;
+        typedef MolIdentifier Identifier;
+        typedef Molecules SearchObject;
 
-    virtual MolID* clone() const=0;
+        MolID();
 
-    SpecifyMol operator[](int i) const;
-    SpecifyMol operator()(int i) const;
-    SpecifyMol operator()(int i, int j) const;
+        MolID(const MolID &other);
 
-    IDAndSet<MolID> operator+(const MolID &other) const;
-    MolAtomID operator+(const AtomID &other) const;
+        virtual ~MolID();
 
-    IDOrSet<MolID> operator*(const MolID &other) const;
+        static const char *typeName()
+        {
+            return "SireMol::MolID";
+        }
 
-    IDAndSet<MolID> operator&&(const MolID &other) const;
-    MolAtomID operator&&(const AtomID &other) const;
+        virtual MolID *clone() const = 0;
 
-    IDAndSet<MolID> operator&(const MolID &other) const;
-    MolAtomID operator&(const AtomID &other) const;
+        SpecifyMol operator[](int i) const;
+        SpecifyMol operator()(int i) const;
+        SpecifyMol operator()(int i, int j) const;
 
-    IDOrSet<MolID> operator||(const MolID &other) const;
-    IDOrSet<MolID> operator|(const MolID &other) const;
+        IDAndSet<MolID> operator+(const MolID &other) const;
+        MolAtomID operator+(const AtomID &other) const;
 
-    IDOrSet<AtomID> operator*(const AtomID &other) const;
-    IDOrSet<AtomID> operator|(const AtomID &other) const;
-    IDOrSet<AtomID> operator||(const AtomID &other) const;
+        IDOrSet<MolID> operator*(const MolID &other) const;
 
-    /* TODO!!!
-    SireID::InvertMatch<MolID> operator!() const;
-    SireID::InvertMatch<MolID> invert() const;
-    SireID::InvertMatch<MolID> inverse() const;
+        IDAndSet<MolID> operator&&(const MolID &other) const;
+        MolAtomID operator&&(const AtomID &other) const;
 
-    static SireID::MatchAll<MolID> any();*/
+        IDAndSet<MolID> operator&(const MolID &other) const;
+        MolAtomID operator&(const AtomID &other) const;
 
-    virtual QList<MolNum> map(const Molecules &molecules) const=0;
-    virtual QList<MolNum> map(const MoleculeGroup &molgroup) const=0;
-    virtual QList<MolNum> map(const MolGroupsBase &molgroupsbase) const=0;
+        IDOrSet<MolID> operator||(const MolID &other) const;
+        IDOrSet<MolID> operator|(const MolID &other) const;
 
-protected:
-    void processMatches(QList<MolNum> &matches, const Molecules &mols) const;
-};
+        IDOrSet<AtomID> operator*(const AtomID &other) const;
+        IDOrSet<AtomID> operator|(const AtomID &other) const;
+        IDOrSet<AtomID> operator||(const AtomID &other) const;
 
-}
+        /* TODO!!!
+        SireID::InvertMatch<MolID> operator!() const;
+        SireID::InvertMatch<MolID> invert() const;
+        SireID::InvertMatch<MolID> inverse() const;
 
-#include "molnum.h"
+        static SireID::MatchAll<MolID> any();*/
+
+        virtual QList<MolNum> map(const Molecules &molecules) const = 0;
+        virtual QList<MolNum> map(const MoleculeGroup &molgroup) const = 0;
+        virtual QList<MolNum> map(const MolGroupsBase &molgroupsbase) const = 0;
+
+    protected:
+        void processMatches(QList<MolNum> &matches, const Molecules &mols) const;
+    };
+
+} // namespace SireMol
+
 #include "molidentifier.h"
+#include "molnum.h"
 
 namespace SireID
 {
 
-using SireMol::MolID;
-using SireMol::MolIdentifier;
-using SireMol::MolNum;
-using SireMol::Molecules;
-using SireMol::MoleculeGroup;
-using SireMol::MolGroupsBase;
+    using SireMol::MoleculeGroup;
+    using SireMol::Molecules;
+    using SireMol::MolGroupsBase;
+    using SireMol::MolID;
+    using SireMol::MolIdentifier;
+    using SireMol::MolNum;
 
-template<>
-class SIREMOL_EXPORT IDAndSet<MolID> : public MolID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<<>(QDataStream&, const IDAndSet<MolID>&);
-friend SIREMOL_EXPORT QDataStream& ::operator>><>(QDataStream&, IDAndSet<MolID>&);
-
-public:
-    IDAndSet();
-    IDAndSet(const MolID &id);
-    IDAndSet(const MolID &id0, const MolID &id1);
-
-    IDAndSet(const QList<MolIdentifier> &ids);
-
-    IDAndSet(const IDAndSet<MolID> &other);
-
-    ~IDAndSet();
-
-    static const char* typeName();
-
-    const char* what() const
+    template <>
+    class SIREMOL_EXPORT IDAndSet<MolID> : public MolID
     {
-        return IDAndSet<MolID>::typeName();
-    }
 
-    IDAndSet<MolID>* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const IDAndSet<MolID> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, IDAndSet<MolID> &);
 
-    bool isNull() const;
+    public:
+        IDAndSet();
+        IDAndSet(const MolID &id);
+        IDAndSet(const MolID &id0, const MolID &id1);
 
-    uint hash() const;
+        IDAndSet(const QList<MolIdentifier> &ids);
 
-    QString toString() const;
+        IDAndSet(const IDAndSet<MolID> &other);
 
-    const QSet<MolIdentifier>& IDs() const;
+        ~IDAndSet();
 
-    IDAndSet<MolID>& operator=(const IDAndSet<MolID> &other);
-    IDAndSet<MolID>& operator=(const MolID &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
-    bool operator!=(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return IDAndSet<MolID>::typeName();
+        }
 
-    bool operator==(const IDAndSet<MolID> &other) const;
-    bool operator!=(const IDAndSet<MolID> &other) const;
+        IDAndSet<MolID> *clone() const;
 
-    bool operator==(const MolID &other) const;
-    bool operator!=(const MolID &other) const;
+        bool isNull() const;
 
-    QList<MolNum> map(const Molecules &mols) const;
-    QList<MolNum> map(const MoleculeGroup &molgroup) const;
-    QList<MolNum> map(const MolGroupsBase &molgroups) const;
+        uint hash() const;
 
-private:
-    void add(const MolID &id);
+        QString toString() const;
 
-    template<class T>
-    QList<MolNum> _pvt_map(const T &group) const;
+        const QSet<MolIdentifier> &IDs() const;
 
-    QSet<MolIdentifier> ids;
-};
+        IDAndSet<MolID> &operator=(const IDAndSet<MolID> &other);
+        IDAndSet<MolID> &operator=(const MolID &other);
 
-template<>
-class SIREMOL_EXPORT IDOrSet<MolID> : public MolID
-{
+        bool operator==(const SireID::ID &other) const;
+        bool operator!=(const SireID::ID &other) const;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<<>(QDataStream&, const IDOrSet<MolID>&);
-friend SIREMOL_EXPORT QDataStream& ::operator>><>(QDataStream&, IDOrSet<MolID>&);
+        bool operator==(const IDAndSet<MolID> &other) const;
+        bool operator!=(const IDAndSet<MolID> &other) const;
 
-public:
-    IDOrSet();
-    IDOrSet(const MolID &id);
-    IDOrSet(const MolID &id0, const MolID &id1);
+        bool operator==(const MolID &other) const;
+        bool operator!=(const MolID &other) const;
 
-    IDOrSet(const QList<MolIdentifier> &ids);
+        QList<MolNum> map(const Molecules &mols) const;
+        QList<MolNum> map(const MoleculeGroup &molgroup) const;
+        QList<MolNum> map(const MolGroupsBase &molgroups) const;
 
-    IDOrSet(const IDOrSet<MolID> &other);
+    private:
+        void add(const MolID &id);
 
-    ~IDOrSet();
+        template <class T>
+        QList<MolNum> _pvt_map(const T &group) const;
 
-    static const char* typeName();
+        QSet<MolIdentifier> ids;
+    };
 
-    const char* what() const
+    template <>
+    class SIREMOL_EXPORT IDOrSet<MolID> : public MolID
     {
-        return IDOrSet<MolID>::typeName();
-    }
 
-    IDOrSet<MolID>* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const IDOrSet<MolID> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, IDOrSet<MolID> &);
 
-    bool isNull() const;
+    public:
+        IDOrSet();
+        IDOrSet(const MolID &id);
+        IDOrSet(const MolID &id0, const MolID &id1);
 
-    uint hash() const;
+        IDOrSet(const QList<MolIdentifier> &ids);
 
-    QString toString() const;
+        IDOrSet(const IDOrSet<MolID> &other);
 
-    const QSet<MolIdentifier>& IDs() const;
+        ~IDOrSet();
 
-    IDOrSet<MolID>& operator=(const IDOrSet<MolID> &other);
-    IDOrSet<MolID>& operator=(const MolID &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
-    bool operator!=(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return IDOrSet<MolID>::typeName();
+        }
 
-    bool operator==(const IDOrSet<MolID> &other) const;
-    bool operator!=(const IDOrSet<MolID> &other) const;
+        IDOrSet<MolID> *clone() const;
 
-    bool operator==(const MolID &other) const;
-    bool operator!=(const MolID &other) const;
+        bool isNull() const;
 
-    QList<MolNum> map(const Molecules &mols) const;
-    QList<MolNum> map(const MoleculeGroup &molgroup) const;
-    QList<MolNum> map(const MolGroupsBase &molgroups) const;
+        uint hash() const;
 
-private:
-    void add(const MolID &id);
-    QList<MolNum> process(QList<MolNum> molnums) const;
+        QString toString() const;
 
-    QSet<MolIdentifier> ids;
-};
+        const QSet<MolIdentifier> &IDs() const;
+
+        IDOrSet<MolID> &operator=(const IDOrSet<MolID> &other);
+        IDOrSet<MolID> &operator=(const MolID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        bool operator!=(const SireID::ID &other) const;
+
+        bool operator==(const IDOrSet<MolID> &other) const;
+        bool operator!=(const IDOrSet<MolID> &other) const;
+
+        bool operator==(const MolID &other) const;
+        bool operator!=(const MolID &other) const;
+
+        QList<MolNum> map(const Molecules &mols) const;
+        QList<MolNum> map(const MoleculeGroup &molgroup) const;
+        QList<MolNum> map(const MolGroupsBase &molgroups) const;
+
+    private:
+        void add(const MolID &id);
+        QList<MolNum> process(QList<MolNum> molnums) const;
+
+        QSet<MolIdentifier> ids;
+    };
 
 } // end of namespace SireID
 
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::MolID> )
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::MolID> )
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::MolID>)
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::MolID>)
 
 #include "molidentifier.h"
 
-SIRE_EXPOSE_CLASS( SireMol::MolID )
-SIRE_EXPOSE_ALIAS( SireID::IDAndSet<SireMol::MolID>, SireMol::IDAndSet_MolID_ )
-SIRE_EXPOSE_ALIAS( SireID::IDOrSet<SireMol::MolID>, SireMol::IDOrSet_MolID_ )
+SIRE_EXPOSE_CLASS(SireMol::MolID)
+SIRE_EXPOSE_ALIAS(SireID::IDAndSet<SireMol::MolID>, SireMol::IDAndSet_MolID_)
+SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireMol::MolID>, SireMol::IDOrSet_MolID_)
 
 SIRE_END_HEADER
 

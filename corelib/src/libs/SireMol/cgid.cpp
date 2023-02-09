@@ -34,21 +34,21 @@
 #include "atom.h"
 #include "selector.hpp"
 
-#include "mover.hpp"
 #include "editor.hpp"
+#include "mover.hpp"
 
 #include "molinfo.h"
 
-#include "partialmolecule.h"
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "partialmolecule.h"
+#include "residue.h"
+#include "segment.h"
 
-#include "molecules.h"
 #include "moleculegroup.h"
 #include "moleculegroups.h"
+#include "molecules.h"
 
 #include "SireMol/errors.h"
 
@@ -62,15 +62,18 @@ using namespace SireStream;
 
 /** Constructor */
 CGID::CGID() : ID()
-{}
+{
+}
 
 /** Copy constructor */
 CGID::CGID(const CGID &other) : ID(other)
-{}
+{
+}
 
 /** Destructor */
 CGID::~CGID()
-{}
+{
+}
 
 /** Return an CGID constructed from the passed string */
 CGIdentifier CGID::fromString(const QString &id)
@@ -133,73 +136,73 @@ IDAndSet<CGID> CGID::operator&(const CGID &other) const
 }
 
 /** Combine with another ID */
-GroupAtomID<CGID,AtomID> CGID::operator+(const AtomID &other) const
+GroupAtomID<CGID, AtomID> CGID::operator+(const AtomID &other) const
 {
-    return GroupAtomID<CGID,AtomID>(*this, other);
+    return GroupAtomID<CGID, AtomID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<CGID,AtomID> CGID::operator&&(const AtomID &other) const
+GroupAtomID<CGID, AtomID> CGID::operator&&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupAtomID<CGID,AtomID> CGID::operator&(const AtomID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Combine with another ID */
-GroupGroupID<SegID,CGID> CGID::operator+(const SegID &other) const
-{
-    return GroupGroupID<SegID,CGID>(other, *this);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,CGID> CGID::operator&&(const SegID &other) const
-{
-    return this->operator+(other);
-}
-
-/** Syntactic sugar for operator+ */
-GroupGroupID<SegID,CGID> CGID::operator&(const SegID &other) const
+GroupAtomID<CGID, AtomID> CGID::operator&(const AtomID &other) const
 {
     return this->operator+(other);
 }
 
 /** Combine with another ID */
-GroupGroupID<CGID,ChainID> CGID::operator+(const ChainID &other) const
+GroupGroupID<SegID, CGID> CGID::operator+(const SegID &other) const
 {
-    return GroupGroupID<CGID,ChainID>(*this, other);
+    return GroupGroupID<SegID, CGID>(other, *this);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ChainID> CGID::operator&&(const ChainID &other) const
+GroupGroupID<SegID, CGID> CGID::operator&&(const SegID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ChainID> CGID::operator&(const ChainID &other) const
+GroupGroupID<SegID, CGID> CGID::operator&(const SegID &other) const
 {
     return this->operator+(other);
 }
 
 /** Combine with another ID */
-GroupGroupID<CGID,ResID> CGID::operator+(const ResID &other) const
+GroupGroupID<CGID, ChainID> CGID::operator+(const ChainID &other) const
 {
-    return GroupGroupID<CGID,ResID>(*this, other);
+    return GroupGroupID<CGID, ChainID>(*this, other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ResID> CGID::operator&&(const ResID &other) const
+GroupGroupID<CGID, ChainID> CGID::operator&&(const ChainID &other) const
 {
     return this->operator+(other);
 }
 
 /** Syntactic sugar for operator+ */
-GroupGroupID<CGID,ResID> CGID::operator&(const ResID &other) const
+GroupGroupID<CGID, ChainID> CGID::operator&(const ChainID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Combine with another ID */
+GroupGroupID<CGID, ResID> CGID::operator+(const ResID &other) const
+{
+    return GroupGroupID<CGID, ResID>(*this, other);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<CGID, ResID> CGID::operator&&(const ResID &other) const
+{
+    return this->operator+(other);
+}
+
+/** Syntactic sugar for operator+ */
+GroupGroupID<CGID, ResID> CGID::operator&(const ResID &other) const
 {
     return this->operator+(other);
 }
@@ -247,25 +250,25 @@ IDAndSet<CGID> CGID::operator-(const CGID &other) const
 }
 
 /** Return the combination of this with not other */
-GroupAtomID<CGID,AtomID> CGID::operator-(const AtomID &other) const
+GroupAtomID<CGID, AtomID> CGID::operator-(const AtomID &other) const
 {
     return this->operator+(other.inverse());
 }
 
 /** Return the combination of this with not other */
-GroupGroupID<SegID,CGID> CGID::operator-(const SegID &other) const
+GroupGroupID<SegID, CGID> CGID::operator-(const SegID &other) const
 {
     return this->operator+(other.inverse());
 }
 
 /** Return the combination of this with not other */
-GroupGroupID<CGID,ChainID> CGID::operator-(const ChainID &other) const
+GroupGroupID<CGID, ChainID> CGID::operator-(const ChainID &other) const
 {
     return this->operator+(other.inverse());
 }
 
 /** Return the combination of this with not other */
-GroupGroupID<CGID,ResID> CGID::operator-(const ResID &other) const
+GroupGroupID<CGID, ResID> CGID::operator-(const ResID &other) const
 {
     return this->operator+(other.inverse());
 }
@@ -324,12 +327,13 @@ AtomsIn<CGID> CGID::atoms(int i, int j) const
     return AtomsIn<CGID>(*this, i, j);
 }
 
-void CGID::processMatches(QList<CGIdx> &matches, const MolInfo&) const
+void CGID::processMatches(QList<CGIdx> &matches, const MolInfo &) const
 {
     if (matches.isEmpty())
-        throw SireMol::missing_cutgroup( QObject::tr(
-            "There are no CutGroups that match the ID \"%1\" in the passed molecule.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_cutgroup(
+            QObject::tr("There are no CutGroups that match the ID \"%1\" in the passed molecule.")
+                .arg(this->toString()),
+            CODELOC);
 
     std::sort(matches.begin(), matches.end());
 }
@@ -339,9 +343,9 @@ void CGID::processMatches(QList<CGIdx> &matches, const MolInfo&) const
     \throw SireMol::missing_cutgroup
     \throw SireError::invalid_index
 */
-QList<CGIdx> CGID::map(const MoleculeView &molview, const PropertyMap&) const
+QList<CGIdx> CGID::map(const MoleculeView &molview, const PropertyMap &) const
 {
-    QList<CGIdx> cgidxs = this->map( molview.data().info() );
+    QList<CGIdx> cgidxs = this->map(molview.data().info());
 
     if (molview.selectedAll())
         return cgidxs;
@@ -360,9 +364,9 @@ QList<CGIdx> CGID::map(const MoleculeView &molview, const PropertyMap&) const
         }
 
         if (cgidxs.isEmpty())
-            throw SireMol::missing_cutgroup( QObject::tr(
-                    "No CutGroups matching %1 can be found in the passed molecule.")
-                        .arg(this->toString()), CODELOC );
+            throw SireMol::missing_cutgroup(
+                QObject::tr("No CutGroups matching %1 can be found in the passed molecule.").arg(this->toString()),
+                CODELOC);
 
         return cgidxs;
     }
@@ -379,10 +383,10 @@ CutGroup CGID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     QList<CGIdx> cgidxs = this->map(molview, map);
 
     if (cgidxs.count() > 1)
-        throw SireMol::duplicate_cutgroup( QObject::tr(
-                "More than one CutGroup matches the ID %1 (CutGroups %2).")
-                    .arg(this->toString()).arg(Sire::toString(cgidxs)),
-                        CODELOC );
+        throw SireMol::duplicate_cutgroup(QObject::tr("More than one CutGroup matches the ID %1 (CutGroups %2).")
+                                              .arg(this->toString())
+                                              .arg(Sire::toString(cgidxs)),
+                                          CODELOC);
 
     return CutGroup(molview.data(), cgidxs.at(0));
 }
@@ -393,8 +397,7 @@ CutGroup CGID::selectFrom(const MoleculeView &molview, const PropertyMap &map) c
     \throw SireError::invalid_index
     \throw SireMol::duplicate_cutgroup
 */
-Selector<CutGroup> CGID::selectAllFrom(const MoleculeView &molview,
-                                       const PropertyMap &map) const
+Selector<CutGroup> CGID::selectAllFrom(const MoleculeView &molview, const PropertyMap &map) const
 {
     QList<CGIdx> cgidxs = this->map(molview, map);
 
@@ -406,30 +409,28 @@ Selector<CutGroup> CGID::selectAllFrom(const MoleculeView &molview,
 
     \throw SireMol::missing_cutgroup
 */
-QHash< MolNum,Selector<CutGroup> >
-CGID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
+QHash<MolNum, Selector<CutGroup>> CGID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<CutGroup> > selected_cgs;
+    QHash<MolNum, Selector<CutGroup>> selected_cgs;
 
-    //loop over all molecules...
-    for (Molecules::const_iterator it = molecules.constBegin();
-         it != molecules.constEnd();
-         ++it)
+    // loop over all molecules...
+    for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
     {
         try
         {
-            //try to find this CutGroup in this molecule
-            selected_cgs.insert( it.key(), this->selectAllFrom(*it,map) );
+            // try to find this CutGroup in this molecule
+            selected_cgs.insert(it.key(), this->selectAllFrom(*it, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_cgs.isEmpty())
-        throw SireMol::missing_cutgroup( QObject::tr(
-            "There was no atom matching the ID \"%1\" in "
-            "the set of molecules.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_cutgroup(QObject::tr("There was no atom matching the ID \"%1\" in "
+                                                    "the set of molecules.")
+                                            .arg(this->toString()),
+                                        CODELOC);
 
     return selected_cgs;
 }
@@ -442,24 +443,24 @@ CGID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 */
 CutGroup CGID::selectFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<CutGroup> > mols = this->selectAllFrom(molecules, map);
+    QHash<MolNum, Selector<CutGroup>> mols = this->selectAllFrom(molecules, map);
 
     if (mols.count() > 1)
-        throw SireMol::duplicate_cutgroup( QObject::tr(
-            "More than one molecule contains an atom that "
-            "matches this ID (%1). These molecules have numbers %2.")
-                .arg(this->toString()).arg(Sire::toString(mols.keys())),
-                    CODELOC );
+        throw SireMol::duplicate_cutgroup(QObject::tr("More than one molecule contains an atom that "
+                                                      "matches this ID (%1). These molecules have numbers %2.")
+                                              .arg(this->toString())
+                                              .arg(Sire::toString(mols.keys())),
+                                          CODELOC);
 
     const Selector<CutGroup> &atoms = *(mols.constBegin());
 
     if (atoms.count() > 1)
-        throw SireMol::duplicate_cutgroup( QObject::tr(
-            "While only one molecule (MolNum == %1) "
-            "contains an atom that matches this ID (%2), it contains "
-            "more than one atom that matches.")
-                .arg(atoms.data().number()).arg(this->toString()),
-                    CODELOC );
+        throw SireMol::duplicate_cutgroup(QObject::tr("While only one molecule (MolNum == %1) "
+                                                      "contains an atom that matches this ID (%2), it contains "
+                                                      "more than one atom that matches.")
+                                              .arg(atoms.data().number())
+                                              .arg(this->toString()),
+                                          CODELOC);
 
     return atoms(0);
 }
@@ -470,8 +471,7 @@ CutGroup CGID::selectFrom(const Molecules &molecules, const PropertyMap &map) co
     \throw SireMol::missing_cutgroup
     \throw SireMol::duplicate_cutgroup
 */
-CutGroup CGID::selectFrom(const MoleculeGroup &molgroup,
-                        const PropertyMap &map) const
+CutGroup CGID::selectFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectFrom(molgroup.molecules(), map);
 }
@@ -481,9 +481,7 @@ CutGroup CGID::selectFrom(const MoleculeGroup &molgroup,
 
     \throw SireMol::missing_cutgroup
 */
-QHash< MolNum,Selector<CutGroup> >
-CGID::selectAllFrom(const MoleculeGroup &molgroup,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<CutGroup>> CGID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroup.molecules(), map);
 }
@@ -494,8 +492,7 @@ CGID::selectAllFrom(const MoleculeGroup &molgroup,
     \throw SireMol::missing_cutgroup
     \throw SireMol::duplicate_cutgroup
 */
-CutGroup CGID::selectFrom(const MolGroupsBase &molgroups,
-                        const PropertyMap &map) const
+CutGroup CGID::selectFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectFrom(molgroups.molecules(), map);
 }
@@ -505,27 +502,25 @@ CutGroup CGID::selectFrom(const MolGroupsBase &molgroups,
 
     \throw SireMol::missing_cutgroup
 */
-QHash< MolNum,Selector<CutGroup> >
-CGID::selectAllFrom(const MolGroupsBase &molgroups,
-                      const PropertyMap &map) const
+QHash<MolNum, Selector<CutGroup>> CGID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
     return this->selectAllFrom(molgroups.molecules(), map);
 }
 
-//fully instantiate Specify<CGID> and AtomsIn<CGID>
+// fully instantiate Specify<CGID> and AtomsIn<CGID>
 namespace SireID
 {
     template class Specify<CGID>;
     template class IDAndSet<CGID>;
     template class IDOrSet<CGID>;
-}
+} // namespace SireID
 
 namespace SireMol
 {
     template class AtomsIn<CGID>;
 }
 
-static const RegisterMetaType< Specify<CGID> > r_specify_cgid;
-static const RegisterMetaType< AtomsIn<CGID> > r_atomsin_cgid;
-static const RegisterMetaType< IDAndSet<CGID> > r_idandset_cgid;
-static const RegisterMetaType< IDOrSet<CGID> > r_idorset_cgid;
+static const RegisterMetaType<Specify<CGID>> r_specify_cgid;
+static const RegisterMetaType<AtomsIn<CGID>> r_atomsin_cgid;
+static const RegisterMetaType<IDAndSet<CGID>> r_idandset_cgid;
+static const RegisterMetaType<IDOrSet<CGID>> r_idorset_cgid;

@@ -40,12 +40,14 @@ using boost::shared_ptr;
 /////////
 
 /** Constructor */
-FrontendBase::FrontendBase() : boost::noncopyable(), datamutex( QMutex::Recursive )
-{}
+FrontendBase::FrontendBase() : boost::noncopyable(), datamutex(QMutex::Recursive)
+{
+}
 
 /** Destructor */
 FrontendBase::~FrontendBase()
-{}
+{
+}
 
 /////////
 ///////// Implementation of LocalFrontend
@@ -87,13 +89,14 @@ private:
 };
 
 /** Construct a Frontend for the local Backend 'backend' */
-LocalFrontend::LocalFrontend(const ActiveBackend &_backend)
-              : FrontendBase(), backend(_backend)
-{}
+LocalFrontend::LocalFrontend(const ActiveBackend &_backend) : FrontendBase(), backend(_backend)
+{
+}
 
 /** Destructor */
 LocalFrontend::~LocalFrontend()
-{}
+{
+}
 
 bool LocalFrontend::isLocal() const
 {
@@ -151,12 +154,13 @@ WorkPacket LocalFrontend::result()
 
 /** Null constructor */
 Frontend::Frontend()
-{}
+{
+}
 
 /** Construct from the passed Frontend pointer */
-Frontend::Frontend(const boost::shared_ptr<FrontendBase> &ptr)
-         : d(ptr)
-{}
+Frontend::Frontend(const boost::shared_ptr<FrontendBase> &ptr) : d(ptr)
+{
+}
 
 /** Construct a local Frontend that talks to the local Backend 'backend'.
     This will block while the backend is busy talking to another frontend */
@@ -164,7 +168,7 @@ Frontend::Frontend(const Backend &backend)
 {
     if (not backend.isNull())
     {
-        d.reset( new LocalFrontend(backend.connect()) );
+        d.reset(new LocalFrontend(backend.connect()));
     }
 }
 
@@ -179,23 +183,24 @@ Frontend Frontend::tryAcquire(const Backend &backend)
 
     if (not active_backend.isNull())
     {
-        frontend.d.reset( new LocalFrontend(active_backend) );
+        frontend.d.reset(new LocalFrontend(active_backend));
     }
 
     return frontend;
 }
 
 /** Copy constructor */
-Frontend::Frontend(const Frontend &other)
-         : d(other.d)
-{}
+Frontend::Frontend(const Frontend &other) : d(other.d)
+{
+}
 
 /** Destructor */
 Frontend::~Frontend()
-{}
+{
+}
 
 /** Copy assignment operator */
-Frontend& Frontend::operator=(const Frontend &other)
+Frontend &Frontend::operator=(const Frontend &other)
 {
     d = other.d;
     return *this;
@@ -235,7 +240,7 @@ QUuid Frontend::UID()
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         return d->UID();
     }
     else
@@ -248,7 +253,7 @@ void Frontend::startJob(const WorkPacket &workpacket)
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         d->startJob(workpacket);
     }
 }
@@ -260,7 +265,7 @@ void Frontend::stopJob()
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         d->stopJob();
     }
 }
@@ -271,7 +276,7 @@ void Frontend::abortJob()
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         d->abortJob();
     }
 }
@@ -303,7 +308,7 @@ float Frontend::progress()
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         return d->progress();
     }
     else
@@ -315,7 +320,7 @@ WorkPacket Frontend::interimResult()
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         return d->interimResult();
     }
     else
@@ -327,7 +332,7 @@ WorkPacket Frontend::result()
 {
     if (not this->isNull())
     {
-        QMutexLocker lkr( &(d->datamutex) );
+        QMutexLocker lkr(&(d->datamutex));
         return d->result();
     }
     else

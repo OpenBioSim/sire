@@ -28,8 +28,8 @@
 #include "SireError/exception.h"
 #include "SireStream/datastream.h"
 
-#include "SireError/printerror.h"
 #include "SireError/errors.h"
+#include "SireError/printerror.h"
 
 #include "getbacktrace.h"
 
@@ -48,137 +48,139 @@
 using namespace SireError;
 using namespace SireStream;
 
-Q_GLOBAL_STATIC( QThreadStorage<QString*>, pidStrings );
-Q_GLOBAL_STATIC( QString, processString );
+Q_GLOBAL_STATIC(QThreadStorage<QString *>, pidStrings);
+Q_GLOBAL_STATIC(QString, processString);
 
 namespace Sire
 {
-namespace detail
-{
-    QHash< QString, QSet<QString> > branch_classes;
-    QHash< QString, QSet<QString> > leaf_classes;
-    QSet<QString> rootless_classes;
-
-    const QHash< QString, QSet<QString> > branchClasses()
+    namespace detail
     {
-        return branch_classes;
-    }
+        QHash<QString, QSet<QString>> branch_classes;
+        QHash<QString, QSet<QString>> leaf_classes;
+        QSet<QString> rootless_classes;
 
-    const QHash< QString, QSet<QString> > leafClasses()
-    {
-        return leaf_classes;
-    }
-
-    const QSet<QString> rootlessClasses()
-    {
-        return rootless_classes;
-    }
-
-    void registerLeaf(const QString &type_name, const char *root)
-    {
-        QLatin1String r(root);
-        if (not leaf_classes.contains(r))
+        const QHash<QString, QSet<QString>> branchClasses()
         {
-            leaf_classes.insert(r, QSet<QString>());
+            return branch_classes;
         }
 
-        leaf_classes[r].insert(type_name);
-    }
-
-    void registerBranch(const QString &type_name, const char *root)
-    {
-        QLatin1String r(root);
-        if (not branch_classes.contains(r))
+        const QHash<QString, QSet<QString>> leafClasses()
         {
-            branch_classes.insert(r, QSet<QString>());
+            return leaf_classes;
         }
 
-        branch_classes[r].insert(type_name);
-    }
+        const QSet<QString> rootlessClasses()
+        {
+            return rootless_classes;
+        }
 
-    void registerRootless(const QString &type_name)
-    {
-        rootless_classes.insert(type_name);
-    }
+        void registerLeaf(const QString &type_name, const char *root)
+        {
+            QLatin1String r(root);
+            if (not leaf_classes.contains(r))
+            {
+                leaf_classes.insert(r, QSet<QString>());
+            }
 
-} // end of namespace detail
+            leaf_classes[r].insert(type_name);
+        }
+
+        void registerBranch(const QString &type_name, const char *root)
+        {
+            QLatin1String r(root);
+            if (not branch_classes.contains(r))
+            {
+                branch_classes.insert(r, QSet<QString>());
+            }
+
+            branch_classes[r].insert(type_name);
+        }
+
+        void registerRootless(const QString &type_name)
+        {
+            rootless_classes.insert(type_name);
+        }
+
+    } // end of namespace detail
 } // end of namespace Sire
 
 namespace SireError
 {
 
-/** Set the string that SireError will use to identify this process */
-void setProcessString(const QString &s)
-{
-    *(processString()) = s;
-}
-
-/** Set the string that SireError will used to identify this thread
-    within the process */
-void setThreadString(const QString &s)
-{
-    pidStrings()->setLocalData( new QString(s) );
-}
-
-/** Return the string used by SireError to identify the process */
-QString getProcessString()
-{
-    QString *s = processString();
-
-    if (s->isEmpty())
+    /** Set the string that SireError will use to identify this process */
+    void setProcessString(const QString &s)
     {
-        return *s = QObject::tr("master");
+        *(processString()) = s;
     }
 
-    return *s;
-}
-
-/** Return the string used to identify a particular thread */
-QString getThreadString()
-{
-    QThreadStorage<QString*> *store = pidStrings();
-
-    if (store->hasLocalData())
+    /** Set the string that SireError will used to identify this thread
+        within the process */
+    void setThreadString(const QString &s)
     {
-        return *(store->localData());
+        pidStrings()->setLocalData(new QString(s));
     }
-    else
-    {
-        return QString();
-    }
-}
 
-/** Return the string used by SireError to identify a particular
-    thread within a process */
-QString getPIDString()
-{
-    QThreadStorage<QString*> *store = pidStrings();
+    /** Return the string used by SireError to identify the process */
+    QString getProcessString()
+    {
+        QString *s = processString();
 
-    if (store->hasLocalData())
-    {
-        return QString("%1:%2").arg( getProcessString(),
-                                     *(store->localData()) );
+        if (s->isEmpty())
+        {
+            return *s = QObject::tr("master");
+        }
+
+        return *s;
     }
-    else
+
+    /** Return the string used to identify a particular thread */
+    QString getThreadString()
     {
-        return getProcessString();
+        QThreadStorage<QString *> *store = pidStrings();
+
+        if (store->hasLocalData())
+        {
+            return *(store->localData());
+        }
+        else
+        {
+            return QString();
+        }
     }
-}
+
+    /** Return the string used by SireError to identify a particular
+        thread within a process */
+    QString getPIDString()
+    {
+        QThreadStorage<QString *> *store = pidStrings();
+
+        if (store->hasLocalData())
+        {
+            return QString("%1:%2").arg(getProcessString(), *(store->localData()));
+        }
+        else
+        {
+            return getProcessString();
+        }
+    }
 
 } // end of namespace SireError
 
 QAtomicInt FastExceptionFlag::enable_fast_exceptions(0);
 
 FastExceptionFlag::FastExceptionFlag()
-{}
+{
+}
 
 FastExceptionFlag::FastExceptionFlag(const FastExceptionFlag &other) : d(other.d)
-{}
+{
+}
 
 FastExceptionFlag::~FastExceptionFlag()
-{}
+{
+}
 
-FastExceptionFlag& FastExceptionFlag::operator=(const FastExceptionFlag &other)
+FastExceptionFlag &FastExceptionFlag::operator=(const FastExceptionFlag &other)
 {
     d = other.d;
     return *this;
@@ -187,7 +189,7 @@ FastExceptionFlag& FastExceptionFlag::operator=(const FastExceptionFlag &other)
 FastExceptionFlag FastExceptionFlag::construct()
 {
     FastExceptionFlag f;
-    f.d.reset( new FastExceptionFlagData() );
+    f.d.reset(new FastExceptionFlagData());
     return f;
 }
 
@@ -221,7 +223,7 @@ exception::exception()
     if (FastExceptionFlag::enable_fast_exceptions)
         return;
 
-    //pidstr = getPIDString();
+    // pidstr = getPIDString();
 }
 
 /** Constructor.
@@ -234,41 +236,44 @@ exception::exception(QString error, QString place) : err(error), plce(place)
     if (FastExceptionFlag::enable_fast_exceptions > 0)
         return;
 
-    #if defined(SIRE_ENABLE_BACKTRACE) || defined(SIRE_ENABLE_BOOST_BACKTRACE)
-    #ifdef SIRE_ENABLE_BACKTRACE
-        bt = getBackTrace();
-    #else
-        std::stringstream ss;
-        ss << boost::stacktrace::stacktrace();
-        bt = QString::fromStdString(ss.str()).split("\n");
-    #endif
-        pidstr = getPIDString();
-    #endif
+#if defined(SIRE_ENABLE_BACKTRACE) || defined(SIRE_ENABLE_BOOST_BACKTRACE)
+#ifdef SIRE_ENABLE_BACKTRACE
+    bt = getBackTrace();
+#else
+    std::stringstream ss;
+    ss << boost::stacktrace::stacktrace();
+    bt = QString::fromStdString(ss.str()).split("\n");
+#endif
+    pidstr = getPIDString();
+#endif
 }
 
 /** Copy constructor */
 exception::exception(const exception &other)
-          : std::exception(other), err(other.err), plce(other.plce),
-                                   bt(other.bt), pidstr(other.pidstr)
-{}
+    : std::exception(other), err(other.err), plce(other.plce), bt(other.bt), pidstr(other.pidstr)
+{
+}
 
 /** Destructor */
 exception::~exception() throw()
-{}
+{
+}
 
 /** Return a clone of this exception */
-exception* exception::clone() const
+exception *exception::clone() const
 {
-    //get the ID number of this type
-    int id = QMetaType::type( this->what() );
+    // get the ID number of this type
+    int id = QMetaType::type(this->what());
 
-    if ( id == 0 or not QMetaType::isRegistered(id) )
-        throw SireError::unknown_type(QObject::tr(
-            "The exception with type \"%1\" does not appear to have been "
-            "registered with QMetaType. It cannot be cloned! (%2, %3)")
-                .arg(this->what()).arg(id).arg(QMetaType::isRegistered(id)), CODELOC);
+    if (id == 0 or not QMetaType::isRegistered(id))
+        throw SireError::unknown_type(QObject::tr("The exception with type \"%1\" does not appear to have been "
+                                                  "registered with QMetaType. It cannot be cloned! (%2, %3)")
+                                          .arg(this->what())
+                                          .arg(id)
+                                          .arg(QMetaType::isRegistered(id)),
+                                      CODELOC);
 
-    return static_cast<exception*>( QMetaType::create(id,this) );
+    return static_cast<exception *>(QMetaType::create(id, this));
 }
 
 /** Pack this exception into a binary QByteArray - this packs the exception
@@ -277,30 +282,32 @@ QByteArray exception::pack() const
 {
     QByteArray data;
 
-    //reserve 128K of space for the exception (should be way
-    //more than enough!)
-    data.reserve( 128 * 1024 );
+    // reserve 128K of space for the exception (should be way
+    // more than enough!)
+    data.reserve(128 * 1024);
 
     QDataStream ds(&data, QIODevice::WriteOnly);
 
-    //get the ID number of this type
-    int id = QMetaType::type( this->what() );
+    // get the ID number of this type
+    int id = QMetaType::type(this->what());
 
-    if ( id == 0 or not QMetaType::isRegistered(id) )
-        throw SireError::unknown_type(QObject::tr(
-            "The exception with type \"%1\" does not appear to have been "
-            "registered with QMetaType. It cannot be streamed! (%2, %3)")
-                .arg(this->what()).arg(id).arg(QMetaType::isRegistered(id)), CODELOC);
+    if (id == 0 or not QMetaType::isRegistered(id))
+        throw SireError::unknown_type(QObject::tr("The exception with type \"%1\" does not appear to have been "
+                                                  "registered with QMetaType. It cannot be streamed! (%2, %3)")
+                                          .arg(this->what())
+                                          .arg(id)
+                                          .arg(QMetaType::isRegistered(id)),
+                                      CODELOC);
 
-    //save the object type name
+    // save the object type name
     ds << QString(this->what());
 
-    //use the QMetaType streaming function to save this table
+    // use the QMetaType streaming function to save this table
     if (not QMetaType::save(ds, id, this))
-        throw SireError::program_bug(QObject::tr(
-            "There was an error saving the exception of type \"%1\". "
-            "Has the programmer added a RegisterMetaType for this exception?")
-                .arg(this->what()), CODELOC);
+        throw SireError::program_bug(QObject::tr("There was an error saving the exception of type \"%1\". "
+                                                 "Has the programmer added a RegisterMetaType for this exception?")
+                                         .arg(this->what()),
+                                     CODELOC);
 
     return data;
 }
@@ -310,30 +317,29 @@ boost::shared_ptr<SireError::exception> exception::unpack(const QByteArray &data
 {
     QDataStream ds(data);
 
-    //read the type of exception first
+    // read the type of exception first
     QString type_name;
 
     ds >> type_name;
 
-    //get the type that represents this name
-    int id = QMetaType::type( type_name.toLatin1().constData() );
+    // get the type that represents this name
+    int id = QMetaType::type(type_name.toLatin1().constData());
 
-    if ( id == 0 or not QMetaType::isRegistered(id) )
-        throw SireError::unknown_type( QObject::tr(
-              "Cannot deserialise an exception of type \"%1\". "
-              "Ensure that the library or module containing "
-              "this exception has been loaded and that it has been registered "
-              "with QMetaType.").arg(type_name), CODELOC );
+    if (id == 0 or not QMetaType::isRegistered(id))
+        throw SireError::unknown_type(QObject::tr("Cannot deserialise an exception of type \"%1\". "
+                                                  "Ensure that the library or module containing "
+                                                  "this exception has been loaded and that it has been registered "
+                                                  "with QMetaType.")
+                                          .arg(type_name),
+                                      CODELOC);
 
-    //construct an exception of this type
-    boost::shared_ptr<exception> ptr(
-                        static_cast<exception*>(QMetaType::create(id,0)) );
+    // construct an exception of this type
+    boost::shared_ptr<exception> ptr(static_cast<exception *>(QMetaType::create(id, 0)));
 
-    //load the object from the datastream
-    if ( not QMetaType::load(ds, id, ptr.get()) )
-        throw SireError::program_bug(QObject::tr(
-            "There was an error loading the exception of type \"%1\"")
-                 .arg(type_name), CODELOC);
+    // load the object from the datastream
+    if (not QMetaType::load(ds, id, ptr.get()))
+        throw SireError::program_bug(
+            QObject::tr("There was an error loading the exception of type \"%1\"").arg(type_name), CODELOC);
 
     return ptr;
 }
@@ -359,7 +365,11 @@ QString exception::toString() const throw()
                        "Exception '%1' thrown by the thread '%2'.\n"
                        "%3\n"
                        "Thrown from %4")
-             .arg(what()).arg(pid()).arg(why()).arg(where()).arg(trace().join("\n"));
+        .arg(what())
+        .arg(pid())
+        .arg(why())
+        .arg(where())
+        .arg(trace().join("\n"));
 }
 
 /** Return the error message associated with this exception.
@@ -384,16 +394,16 @@ QString exception::from() const throw()
 /** Return the function backtrace when the exception was constructed */
 QStringList exception::trace() const throw()
 {
-    #if defined(SIRE_ENABLE_BACKTRACE) || defined(SIRE_ENABLE_BOOST_BACKTRACE)
-        return bt;
-    #else
-        QStringList btrace;
-        btrace.append( QObject::tr("No backtrace available. "
-                "Recompile the SireError library with -DSIRE_ENABLE_BACKTRACE "
-                "to enable backtraces.") );
+#if defined(SIRE_ENABLE_BACKTRACE) || defined(SIRE_ENABLE_BOOST_BACKTRACE)
+    return bt;
+#else
+    QStringList btrace;
+    btrace.append(QObject::tr("No backtrace available. "
+                              "Recompile the SireError library with -DSIRE_ENABLE_BACKTRACE "
+                              "to enable backtraces."));
 
-        return btrace;
-    #endif
+    return btrace;
+#endif
 }
 
 /** Overloaded functions to give logical names... */

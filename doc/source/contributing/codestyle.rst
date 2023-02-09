@@ -16,6 +16,14 @@ Python code should be written to be `PEP8-compliant <https://pep8.org>`__,
 ideally autoformatted using a tool such as
 `black <https://black.readthedocs.io/en/stable/>`__.
 
+.. note::
+
+   The developers use `black <https://black.readthedocs.io/en/stable/>`__
+   and will autoformat all python code with this tool to maintain
+   a consistent style. Please use `black <https://black.readthedocs.io/en/stable/>`__
+   if you can, as this will make diffs, pull requests and other changes
+   smaller and easier for everyone to review. Thanks :-)
+
 C++
 ===
 
@@ -190,3 +198,16 @@ Finally, keep an eye here as more rules will be written
 This document will continue to evolve. If you would like to debate
 an existing rule or propose a new rule then please
 `raise an issue on GitHub <https://github.com/OpenBioSim/sire/issues>`__.
+
+.. note::
+
+   The developers use the C++ autoformatting tool built into the C++
+   extension of VSCode (e.g. as `described here <https://dev.to/thiagoow/format-ccpp-files-automatically-on-vs-code-ad7>`__).
+   This is based on (and formats identically to `clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__
+   using the ``Visual Studio`` theme - roughly equivalent to
+   ``clang-format -style="{ BasedOnStyle: LLVM, UseTab: Never, IndentWidth: 4, TabWidth: 4, BreakBeforeBraces: Allman, AllowShortIfStatementsOnASingleLine: false, IndentCaseLabels: false, ColumnLimit: 0, AccessModifierOffset: -4, NamespaceIndentation: All, FixNamespaceComments: false })"``,
+   and so can be installed on any IDE (or run from the command line).
+   Please use the VSCode autoformatter, or
+   `clang-format <https://clang.llvm.org/docs/ClangFormat.html>`__ if you
+   can, as this will make diffs, pull requests and other changes
+   smaller and easier for everyone to review. Thanks :-)

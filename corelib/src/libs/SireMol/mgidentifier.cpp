@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "mgidentifier.h"
-#include "mgnum.h"
 #include "mgidx.h"
 #include "mgname.h"
+#include "mgnum.h"
 #include "moleculegroups.h"
 
 #include "SireStream/datastream.h"
@@ -64,33 +64,34 @@ QDataStream &operator>>(QDataStream &ds, MGIdentifier &mgid)
         SireStream::loadPolyPointer(ds, mgid.d);
     }
     else
-        throw version_error( v, "1", r_mgid, CODELOC );
+        throw version_error(v, "1", r_mgid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 MGIdentifier::MGIdentifier() : MGID()
-{}
+{
+}
 
 /** Construct from the passed MGID */
-MGIdentifier::MGIdentifier(const MGID &molid)
-             : MGID()
+MGIdentifier::MGIdentifier(const MGID &molid) : MGID()
 {
     if (molid.isA<MGIdentifier>())
         d = molid.asA<MGIdentifier>().d;
     else if (not molid.isNull())
-        d.reset( molid.clone() );
+        d.reset(molid.clone());
 }
 
 /** Copy constructor */
-MGIdentifier::MGIdentifier(const MGIdentifier &other)
-             : MGID(other), d(other.d)
-{}
+MGIdentifier::MGIdentifier(const MGIdentifier &other) : MGID(other), d(other.d)
+{
+}
 
 /** Destructor */
 MGIdentifier::~MGIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool MGIdentifier::isNull() const
@@ -117,7 +118,7 @@ QString MGIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const MGID& MGIdentifier::base() const
+const MGID &MGIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -134,14 +135,14 @@ QList<MGNum> MGIdentifier::map(const MolGroupsBase &molgroups) const
 }
 
 /** Copy assignment operator */
-MGIdentifier& MGIdentifier::operator=(const MGIdentifier &other)
+MGIdentifier &MGIdentifier::operator=(const MGIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-MGIdentifier& MGIdentifier::operator=(const MGID &other)
+MGIdentifier &MGIdentifier::operator=(const MGID &other)
 {
     if (other.isA<MGIdentifier>())
         d = other.asA<MGIdentifier>().d;
@@ -210,7 +211,7 @@ QDataStream &operator<<(QDataStream &ds, const MGIdx &mgidx)
 {
     writeHeader(ds, r_mgidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<MGIdx>&>(mgidx);
+    ds << static_cast<const SireID::Index_T_<MGIdx> &>(mgidx);
 
     return ds;
 }
@@ -222,10 +223,10 @@ QDataStream &operator>>(QDataStream &ds, MGIdx &mgidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<MGIdx>&>(mgidx);
+        ds >> static_cast<SireID::Index_T_<MGIdx> &>(mgidx);
     }
     else
-        throw version_error( v, "1", r_mgidx, CODELOC );
+        throw version_error(v, "1", r_mgidx, CODELOC);
 
     return ds;
 }
@@ -241,7 +242,7 @@ QDataStream &operator<<(QDataStream &ds, const MGNum &mgnum)
 {
     writeHeader(ds, r_mgnum, 1);
 
-    ds << static_cast<const SireID::Number&>(mgnum);
+    ds << static_cast<const SireID::Number &>(mgnum);
 
     return ds;
 }
@@ -253,10 +254,10 @@ QDataStream &operator>>(QDataStream &ds, MGNum &mgnum)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Number&>(mgnum);
+        ds >> static_cast<SireID::Number &>(mgnum);
     }
     else
-        throw version_error( v, "1", r_mgnum, CODELOC );
+        throw version_error(v, "1", r_mgnum, CODELOC);
 
     return ds;
 }
@@ -272,7 +273,7 @@ QDataStream &operator<<(QDataStream &ds, const MGName &mgname)
 {
     writeHeader(ds, r_mgname, 1);
 
-    ds << static_cast<const SireID::Name&>(mgname);
+    ds << static_cast<const SireID::Name &>(mgname);
 
     return ds;
 }
@@ -284,20 +285,20 @@ QDataStream &operator>>(QDataStream &ds, MGName &mgname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(mgname);
+        ds >> static_cast<SireID::Name &>(mgname);
     }
     else
-        throw version_error( v, "1", r_mgname, CODELOC );
+        throw version_error(v, "1", r_mgname, CODELOC);
 
     return ds;
 }
 
-const char* MGIdentifier::typeName()
+const char *MGIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MGIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<MGIdentifier>());
 }
 
-MGIdentifier* MGIdentifier::clone() const
+MGIdentifier *MGIdentifier::clone() const
 {
     return new MGIdentifier(*this);
 }

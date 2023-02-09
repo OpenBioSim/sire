@@ -38,111 +38,114 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CLJWorkspace;
-namespace detail{ class CLJWorkspaceData; }
-}
+    class CLJWorkspace;
+    namespace detail
+    {
+        class CLJWorkspaceData;
+    }
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJWorkspace&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJWorkspace&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJWorkspace &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJWorkspace &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::detail::CLJWorkspaceData&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::detail::CLJWorkspaceData&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::detail::CLJWorkspaceData &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::detail::CLJWorkspaceData &);
 
 namespace SireMM
 {
 
-using boost::tuple;
+    using boost::tuple;
 
-/** This class provides a workspace in which to hold the details of the changes
-    that occur in a CLJ forcefield during a Monte Carlo move. The class is optimised
-    to avoid copying or duplicating data during Sire's copy-on-write copying
-    (e.g. the memory allocated in a workspace will always be available for the
-     new copy of a forcefield rather than the old, which, if things work correctly,
-     will mean that there should be no memory allocation during simple MC moves...)
+    /** This class provides a workspace in which to hold the details of the changes
+        that occur in a CLJ forcefield during a Monte Carlo move. The class is optimised
+        to avoid copying or duplicating data during Sire's copy-on-write copying
+        (e.g. the memory allocated in a workspace will always be available for the
+         new copy of a forcefield rather than the old, which, if things work correctly,
+         will mean that there should be no memory allocation during simple MC moves...)
 
-     @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJWorkspace
-{
+         @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJWorkspace
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const CLJWorkspace&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, CLJWorkspace&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const CLJWorkspace &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, CLJWorkspace &);
 
-public:
-    CLJWorkspace();
-    CLJWorkspace(const CLJWorkspace &other);
+    public:
+        CLJWorkspace();
+        CLJWorkspace(const CLJWorkspace &other);
 
-    ~CLJWorkspace();
+        ~CLJWorkspace();
 
-    CLJWorkspace& operator=(const CLJWorkspace &other);
+        CLJWorkspace &operator=(const CLJWorkspace &other);
 
-    bool operator==(const CLJWorkspace &other) const;
-    bool operator!=(const CLJWorkspace &other) const;
+        bool operator==(const CLJWorkspace &other) const;
+        bool operator!=(const CLJWorkspace &other) const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    const CLJDelta& operator[](int i) const;
+        const CLJDelta &operator[](int i) const;
 
-    const CLJDelta& at(int i) const;
+        const CLJDelta &at(int i) const;
 
-    CLJDelta getitem(int i) const;
+        CLJDelta getitem(int i) const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    const CLJDelta* data() const;
-    const CLJDelta* constData() const;
+        const CLJDelta *data() const;
+        const CLJDelta *constData() const;
 
-    CLJDelta push(CLJBoxes &boxes, const QVector<CLJBoxIndex> &old_atoms,
-                  const CLJAtoms &new_atoms, const CLJDelta &old_delta);
+        CLJDelta push(CLJBoxes &boxes, const QVector<CLJBoxIndex> &old_atoms, const CLJAtoms &new_atoms,
+                      const CLJDelta &old_delta);
 
-    void removeSameIDAtoms(CLJBoxes &boxes);
+        void removeSameIDAtoms(CLJBoxes &boxes);
 
-    QVector<CLJBoxIndex> commit(CLJBoxes &boxes, const CLJDelta &delta);
-    QVector<CLJBoxIndex> revert(CLJBoxes &boxes, const CLJDelta &delta);
+        QVector<CLJBoxIndex> commit(CLJBoxes &boxes, const CLJDelta &delta);
+        QVector<CLJBoxIndex> revert(CLJBoxes &boxes, const CLJDelta &delta);
 
-    int nDeltas() const;
+        int nDeltas() const;
 
-    bool isSingleID() const;
+        bool isSingleID() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    tuple<CLJAtoms,CLJAtoms,CLJAtoms> merge() const;
+        tuple<CLJAtoms, CLJAtoms, CLJAtoms> merge() const;
 
-    CLJAtoms changedAtoms() const;
-    CLJAtoms oldAtoms() const;
-    CLJAtoms newAtoms() const;
+        CLJAtoms changedAtoms() const;
+        CLJAtoms oldAtoms() const;
+        CLJAtoms newAtoms() const;
 
-    void clear();
+        void clear();
 
-    bool needsAccepting() const;
+        bool needsAccepting() const;
 
-    void accept(CLJBoxes &boxes);
-    void mustRecalculateFromScratch(CLJBoxes &boxes);
+        void accept(CLJBoxes &boxes);
+        void mustRecalculateFromScratch(CLJBoxes &boxes);
 
-    bool recalculatingFromScratch() const;
+        bool recalculatingFromScratch() const;
 
-private:
-    void returnToMemoryPool();
-    void createFromMemoryPool();
+    private:
+        void returnToMemoryPool();
+        void createFromMemoryPool();
 
-    void detach();
+        void detach();
 
-    /** Implicitly shared pointer to the data */
-    boost::shared_ptr<detail::CLJWorkspaceData> d;
+        /** Implicitly shared pointer to the data */
+        boost::shared_ptr<detail::CLJWorkspaceData> d;
 
-    /** Whether or not we are recalculating everything from scratch */
-    bool recalc_from_scratch;
-};
+        /** Whether or not we are recalculating everything from scratch */
+        bool recalc_from_scratch;
+    };
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::CLJWorkspace )
+Q_DECLARE_METATYPE(SireMM::CLJWorkspace)
 
-SIRE_EXPOSE_CLASS( SireMM::CLJWorkspace )
+SIRE_EXPOSE_CLASS(SireMM::CLJWorkspace)
 
 SIRE_END_HEADER
 

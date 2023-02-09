@@ -30,158 +30,158 @@
 
 #include "cljextractor.h"
 
-#include "SireMol/moleculegroup.h"
 #include "SireBase/chunkedhash.hpp"
+#include "SireMol/moleculegroup.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class CLJGroup;
+    class CLJGroup;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::CLJGroup&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::CLJGroup&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::CLJGroup &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::CLJGroup &);
 
 namespace SireMM
 {
 
-using SireMol::MolNum;
-using SireMol::MoleculeGroup;
+    using SireMol::MoleculeGroup;
+    using SireMol::MolNum;
 
-/** This class holds and manages a group of molecules that have been
-    added to a CLJBoxes object.
+    /** This class holds and manages a group of molecules that have been
+        added to a CLJBoxes object.
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT CLJGroup
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT CLJGroup
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const SireMM::CLJGroup&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, SireMM::CLJGroup&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const SireMM::CLJGroup &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, SireMM::CLJGroup &);
 
-public:
-    CLJGroup();
-    CLJGroup(CLJAtoms::ID_SOURCE id_source);
-    CLJGroup(CLJExtractor::EXTRACT_SOURCE extract_source);
-    CLJGroup(CLJAtoms::ID_SOURCE id_source, CLJExtractor::EXTRACT_SOURCE extract_source);
+    public:
+        CLJGroup();
+        CLJGroup(CLJAtoms::ID_SOURCE id_source);
+        CLJGroup(CLJExtractor::EXTRACT_SOURCE extract_source);
+        CLJGroup(CLJAtoms::ID_SOURCE id_source, CLJExtractor::EXTRACT_SOURCE extract_source);
 
-    CLJGroup(const CLJGroup &other);
+        CLJGroup(const CLJGroup &other);
 
-    ~CLJGroup();
+        ~CLJGroup();
 
-    CLJGroup& operator=(const CLJGroup &other);
+        CLJGroup &operator=(const CLJGroup &other);
 
-    bool operator==(const CLJGroup &other) const;
-    bool operator!=(const CLJGroup &other) const;
+        bool operator==(const CLJGroup &other) const;
+        bool operator!=(const CLJGroup &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    Length boxLength() const;
-    void setBoxLength(Length box_length);
+        Length boxLength() const;
+        void setBoxLength(Length box_length);
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    Molecules molecules() const;
+        Molecules molecules() const;
 
-    PropertyMap mapForMolecule(MolNum molnum) const;
+        PropertyMap mapForMolecule(MolNum molnum) const;
 
-    void add(const MoleculeView &molview, const PropertyMap &map = PropertyMap());
-    void add(const Molecules &molecules, const PropertyMap &map = PropertyMap());
-    void add(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
+        void add(const MoleculeView &molview, const PropertyMap &map = PropertyMap());
+        void add(const Molecules &molecules, const PropertyMap &map = PropertyMap());
+        void add(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    void update(const MoleculeView &molview);
-    void update(const Molecules &molecules);
-    void update(const MoleculeGroup &molecules);
+        void update(const MoleculeView &molview);
+        void update(const Molecules &molecules);
+        void update(const MoleculeGroup &molecules);
 
-    void updatedConnectedGroup();
+        void updatedConnectedGroup();
 
-    void remove(const MoleculeView &molview);
-    void remove(const Molecules &molecules);
-    void remove(const MoleculeGroup &molecules);
+        void remove(const MoleculeView &molview);
+        void remove(const Molecules &molecules);
+        void remove(const MoleculeGroup &molecules);
 
-    void remove(MolNum molnum);
+        void remove(MolNum molnum);
 
-    void removeAll();
+        void removeAll();
 
-    bool needsAccepting() const;
-    void accept();
+        bool needsAccepting() const;
+        void accept();
 
-    const CLJBoxes& cljBoxes() const;
+        const CLJBoxes &cljBoxes() const;
 
-    CLJAtoms changedAtoms() const;
-    CLJAtoms newAtoms() const;
-    CLJAtoms oldAtoms() const;
+        CLJAtoms changedAtoms() const;
+        CLJAtoms newAtoms() const;
+        CLJAtoms oldAtoms() const;
 
-    bool isSingleIDChange() const;
-    tuple<CLJAtoms,CLJAtoms,CLJAtoms> mergeChanges() const;
+        bool isSingleIDChange() const;
+        tuple<CLJAtoms, CLJAtoms, CLJAtoms> mergeChanges() const;
 
-    int nChangedMolecules() const;
+        int nChangedMolecules() const;
 
-    Molecules changedMolecules() const;
+        Molecules changedMolecules() const;
 
-    void mustRecalculateFromScratch();
+        void mustRecalculateFromScratch();
 
-    void mustReallyRecalculateFromScratch();
+        void mustReallyRecalculateFromScratch();
 
-    bool recalculatingFromScratch() const;
+        bool recalculatingFromScratch() const;
 
-private:
-    /** All of the extractors that manage extracting the charge and LJ
-        properties from all of the molecules */
-    SireBase::ChunkedHash<MolNum,CLJExtractor> cljexts;
+    private:
+        /** All of the extractors that manage extracting the charge and LJ
+            properties from all of the molecules */
+        SireBase::ChunkedHash<MolNum, CLJExtractor> cljexts;
 
-    /** The boxes to which the CLJAtoms from each molecule in this group
-        have been added */
-    CLJBoxes cljboxes;
+        /** The boxes to which the CLJAtoms from each molecule in this group
+            have been added */
+        CLJBoxes cljboxes;
 
-    /** The workspace used to cache information about moves */
-    CLJWorkspace cljworkspace;
+        /** The workspace used to cache information about moves */
+        CLJWorkspace cljworkspace;
 
-    /** All of the changed molecules */
-    QHash<MolNum,CLJExtractor> changed_mols;
+        /** All of the changed molecules */
+        QHash<MolNum, CLJExtractor> changed_mols;
 
-    /** The set of all of the property maps used for each molecule */
-    QHash<MolNum,PropertyMap> props;
+        /** The set of all of the property maps used for each molecule */
+        QHash<MolNum, PropertyMap> props;
 
-    /** The source for the ID numbers for the atoms */
-    CLJAtoms::ID_SOURCE id_source;
+        /** The source for the ID numbers for the atoms */
+        CLJAtoms::ID_SOURCE id_source;
 
-    /** How to extract atoms in the CLJExtractor */
-    CLJExtractor::EXTRACT_SOURCE extract_source;
-};
+        /** How to extract atoms in the CLJExtractor */
+        CLJExtractor::EXTRACT_SOURCE extract_source;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the CLJBoxes that contains all of the atoms in this group */
-SIRE_ALWAYS_INLINE const CLJBoxes& CLJGroup::cljBoxes() const
-{
-    return cljboxes;
-}
+    /** Return the CLJBoxes that contains all of the atoms in this group */
+    SIRE_ALWAYS_INLINE const CLJBoxes &CLJGroup::cljBoxes() const
+    {
+        return cljboxes;
+    }
 
-/** Return whether or not we are recalculating the energy from scratch */
-SIRE_ALWAYS_INLINE bool CLJGroup::recalculatingFromScratch() const
-{
-    return cljworkspace.recalculatingFromScratch();
-}
+    /** Return whether or not we are recalculating the energy from scratch */
+    SIRE_ALWAYS_INLINE bool CLJGroup::recalculatingFromScratch() const
+    {
+        return cljworkspace.recalculatingFromScratch();
+    }
 
-/** Return whether or not we don't have any molecules */
-SIRE_ALWAYS_INLINE bool CLJGroup::isEmpty() const
-{
-    return cljexts.isEmpty() and changed_mols.isEmpty();
-}
+    /** Return whether or not we don't have any molecules */
+    SIRE_ALWAYS_INLINE bool CLJGroup::isEmpty() const
+    {
+        return cljexts.isEmpty() and changed_mols.isEmpty();
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::CLJGroup )
+Q_DECLARE_METATYPE(SireMM::CLJGroup)
 
-SIRE_EXPOSE_CLASS( SireMM::CLJGroup )
+SIRE_EXPOSE_CLASS(SireMM::CLJGroup)
 
 SIRE_END_HEADER
 

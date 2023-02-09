@@ -30,21 +30,21 @@
 
 #include "flexibilitylibrary.h"
 
+#include "SireMol/angleid.h"
 #include "SireMol/atom.h"
 #include "SireMol/atomeditor.h"
+#include "SireMol/bondid.h"
+#include "SireMol/dihedralid.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/selector.hpp"
-#include "SireMol/bondid.h"
-#include "SireMol/angleid.h"
-#include "SireMol/dihedralid.h"
 
 #include "SireUnits/convert.h"
-#include "SireUnits/units.h"
 #include "SireUnits/dimensions.h"
+#include "SireUnits/units.h"
 
-#include "SireMove/internalmove.h"
 #include "SireMove/flexibility.h"
+#include "SireMove/internalmove.h"
 
 #include "SireError/errors.h"
 #include "SireIO/errors.h"
@@ -62,17 +62,14 @@ using namespace SireUnits;
 
 static RegisterMetaType<FlexibilityTemplate> r_flextemplate(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const FlexibilityTemplate &flextemplate)
+QDataStream &operator<<(QDataStream &ds, const FlexibilityTemplate &flextemplate)
 {
     writeHeader(ds, r_flextemplate, 1);
 
     SharedDataStream sds(ds);
 
-    sds << flextemplate.name << flextemplate.translation
-        << flextemplate.rotation << flextemplate.maxbondvar
-	<< flextemplate.maxanglevar << flextemplate.maxdihedralvar
-        << flextemplate.bonds << flextemplate.angles
+    sds << flextemplate.name << flextemplate.translation << flextemplate.rotation << flextemplate.maxbondvar
+        << flextemplate.maxanglevar << flextemplate.maxdihedralvar << flextemplate.bonds << flextemplate.angles
         << flextemplate.dihedrals;
 
     return ds;
@@ -86,11 +83,9 @@ QDataStream &operator>>(QDataStream &ds, FlexibilityTemplate &flextemplate)
     {
         SharedDataStream sds(ds);
 
-        sds >> flextemplate.name >> flextemplate.translation
-            >> flextemplate.rotation >> flextemplate.maxbondvar
-	    >> flextemplate.maxanglevar >> flextemplate.maxdihedralvar
-            >> flextemplate.bonds >> flextemplate.angles
-            >> flextemplate.dihedrals;
+        sds >> flextemplate.name >> flextemplate.translation >> flextemplate.rotation >> flextemplate.maxbondvar >>
+            flextemplate.maxanglevar >> flextemplate.maxdihedralvar >> flextemplate.bonds >> flextemplate.angles >>
+            flextemplate.dihedrals;
     }
     else
         throw version_error(v, "1", r_flextemplate, CODELOC);
@@ -100,33 +95,35 @@ QDataStream &operator>>(QDataStream &ds, FlexibilityTemplate &flextemplate)
 
 /** Constructor */
 FlexibilityTemplate::FlexibilityTemplate()
-                    : translation(0), rotation(0), maxbondvar(0), maxanglevar(0), maxdihedralvar(0)
-{}
+    : translation(0), rotation(0), maxbondvar(0), maxanglevar(0), maxdihedralvar(0)
+{
+}
 
 FlexibilityTemplate::FlexibilityTemplate(const QString &name)
-  : name(name), translation(0), rotation(0), maxbondvar(0), maxanglevar(0), maxdihedralvar(0)
-{}
+    : name(name), translation(0), rotation(0), maxbondvar(0), maxanglevar(0), maxdihedralvar(0)
+{
+}
 
 /** Copy constructor */
 FlexibilityTemplate::FlexibilityTemplate(const FlexibilityTemplate &other)
-                    : name(other.name), translation(other.translation),
-                      rotation(other.rotation), maxbondvar(other.maxbondvar),
-		      maxanglevar(other.maxanglevar), maxdihedralvar(other.maxdihedralvar),
-                      bonds(other.bonds), angles(other.angles),
-                      dihedrals(other.dihedrals)
-{}
+    : name(other.name), translation(other.translation), rotation(other.rotation), maxbondvar(other.maxbondvar),
+      maxanglevar(other.maxanglevar), maxdihedralvar(other.maxdihedralvar), bonds(other.bonds), angles(other.angles),
+      dihedrals(other.dihedrals)
+{
+}
 
 /** Destructor */
 FlexibilityTemplate::~FlexibilityTemplate()
-{}
-
-const char* FlexibilityTemplate::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FlexibilityTemplate>() );
+}
+
+const char *FlexibilityTemplate::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<FlexibilityTemplate>());
 }
 
 /** Copy assignment operator */
-FlexibilityTemplate& FlexibilityTemplate::operator=(const FlexibilityTemplate &other)
+FlexibilityTemplate &FlexibilityTemplate::operator=(const FlexibilityTemplate &other)
 {
     if (this != &other)
     {
@@ -134,8 +131,8 @@ FlexibilityTemplate& FlexibilityTemplate::operator=(const FlexibilityTemplate &o
         translation = other.translation;
         rotation = other.rotation;
         maxbondvar = other.maxbondvar;
-	maxanglevar = other.maxanglevar;
-	maxdihedralvar = other.maxdihedralvar;
+        maxanglevar = other.maxanglevar;
+        maxdihedralvar = other.maxdihedralvar;
         bonds = other.bonds;
         angles = other.angles;
         dihedrals = other.dihedrals;
@@ -147,12 +144,10 @@ FlexibilityTemplate& FlexibilityTemplate::operator=(const FlexibilityTemplate &o
 /** Comparison operator */
 bool FlexibilityTemplate::operator==(const FlexibilityTemplate &other) const
 {
-    return this == &other or
-           (name == other.name and translation == other.translation and
-            rotation == other.rotation and maxbondvar == other.maxbondvar and
-	    maxanglevar == other.maxanglevar and maxdihedralvar == other.maxdihedralvar and
-            bonds == other.bonds and angles == other.angles and
-            dihedrals == other.dihedrals);
+    return this == &other or (name == other.name and translation == other.translation and rotation == other.rotation and
+                              maxbondvar == other.maxbondvar and maxanglevar == other.maxanglevar and
+                              maxdihedralvar == other.maxdihedralvar and bonds == other.bonds and
+                              angles == other.angles and dihedrals == other.dihedrals);
 }
 
 /** Comparison operator */
@@ -191,7 +186,6 @@ void FlexibilityTemplate::setMaximumDihedralVar(int maxvar)
     this->maxdihedralvar = maxvar;
 }
 
-
 Angle FlexibilityTemplate::getRotation() const
 {
     return this->rotation;
@@ -217,7 +211,6 @@ int FlexibilityTemplate::getMaximumDihedralVar() const
     return this->maxdihedralvar;
 }
 
-
 void FlexibilityTemplate::setBondDelta(const BondID &bond, const Length &delta)
 {
     bonds.insert(bond, delta);
@@ -230,7 +223,7 @@ void FlexibilityTemplate::setAngleDelta(const AngleID &angle, const Angle &delta
 
 void FlexibilityTemplate::setDihedralDelta(const DihedralID &dihedral, const Angle &delta)
 {
-    dihedrals.insert(dihedral,delta);
+    dihedrals.insert(dihedral, delta);
 }
 
 Length FlexibilityTemplate::getDelta(const BondID &bondid) const
@@ -248,17 +241,17 @@ Angle FlexibilityTemplate::getDelta(const DihedralID &dihedralid) const
     return dihedrals.value(dihedralid, Angle(0));
 }
 
-const QHash<BondID,Length>& FlexibilityTemplate::getBondDeltas() const
+const QHash<BondID, Length> &FlexibilityTemplate::getBondDeltas() const
 {
     return this->bonds;
 }
 
-const QHash<AngleID,Angle>& FlexibilityTemplate::getAngleDeltas() const
+const QHash<AngleID, Angle> &FlexibilityTemplate::getAngleDeltas() const
 {
     return this->angles;
 }
 
-const QHash<DihedralID,Angle>& FlexibilityTemplate::getDihedralDeltas() const
+const QHash<DihedralID, Angle> &FlexibilityTemplate::getDihedralDeltas() const
 {
     return this->dihedrals;
 }
@@ -267,16 +260,16 @@ const QHash<DihedralID,Angle>& FlexibilityTemplate::getDihedralDeltas() const
 // Helper functions to parse a templates input file
 //
 
-static int processVersionLine( QString& line)
+static int processVersionLine(QString &line)
 {
     QStringList words = line.split(" ", Qt::SkipEmptyParts);
     bool ok;
     int version = words[1].toInt(&ok);
 
     if (not ok)
-        throw SireError::program_bug( QObject::tr(
-                    "Unexpected error while trying to read the version line "
-                    "of the zmatrix template file"), CODELOC);
+        throw SireError::program_bug(QObject::tr("Unexpected error while trying to read the version line "
+                                                 "of the zmatrix template file"),
+                                     CODELOC);
 
     return version;
 }
@@ -287,8 +280,7 @@ static int processVersionLine( QString& line)
 static const RegisterMetaType<FlexibilityLibrary> r_flexibilitymaker;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                      const FlexibilityLibrary &flexibilitymaker)
+QDataStream &operator<<(QDataStream &ds, const FlexibilityLibrary &flexibilitymaker)
 {
     writeHeader(ds, r_flexibilitymaker, 1);
 
@@ -300,8 +292,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                      FlexibilityLibrary &flexibilitymaker)
+QDataStream &operator>>(QDataStream &ds, FlexibilityLibrary &flexibilitymaker)
 {
     VersionID v = readHeader(ds, r_flexibilitymaker);
 
@@ -312,14 +303,15 @@ QDataStream &operator>>(QDataStream &ds,
         sds >> flexibilitymaker.templates;
     }
     else
-        throw version_error( v, "1", r_flexibilitymaker, CODELOC );
+        throw version_error(v, "1", r_flexibilitymaker, CODELOC);
 
     return ds;
 }
 
 /** Default constructor */
 FlexibilityLibrary::FlexibilityLibrary()
-{}
+{
+}
 
 /** Construct, loading the library from the passed file */
 FlexibilityLibrary::FlexibilityLibrary(const QString &file)
@@ -328,16 +320,17 @@ FlexibilityLibrary::FlexibilityLibrary(const QString &file)
 }
 
 /** Copy constructor */
-FlexibilityLibrary::FlexibilityLibrary(const FlexibilityLibrary &other)
-                 : templates(other.templates)
-{}
+FlexibilityLibrary::FlexibilityLibrary(const FlexibilityLibrary &other) : templates(other.templates)
+{
+}
 
 //** Destructor */
 FlexibilityLibrary::~FlexibilityLibrary()
-{}
+{
+}
 
 /** Copy assignment operator */
-FlexibilityLibrary& FlexibilityLibrary::operator=(const FlexibilityLibrary &other)
+FlexibilityLibrary &FlexibilityLibrary::operator=(const FlexibilityLibrary &other)
 {
     templates = other.templates;
     return *this;
@@ -355,13 +348,13 @@ bool FlexibilityLibrary::operator!=(const FlexibilityLibrary &other) const
     return not FlexibilityLibrary::operator==(other);
 }
 
-const char* FlexibilityLibrary::typeName()
+const char *FlexibilityLibrary::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<FlexibilityLibrary>() );
+    return QMetaType::typeName(qMetaTypeId<FlexibilityLibrary>());
 }
 
 /** Add the templates in 'other' into this library */
-FlexibilityLibrary& FlexibilityLibrary::operator+=(const FlexibilityLibrary &other)
+FlexibilityLibrary &FlexibilityLibrary::operator+=(const FlexibilityLibrary &other)
 {
     if (templates.isEmpty())
     {
@@ -369,12 +362,10 @@ FlexibilityLibrary& FlexibilityLibrary::operator+=(const FlexibilityLibrary &oth
     }
     else
     {
-        for (QHash<QString,FlexibilityTemplate>::const_iterator
-                                            it = other.templates.constBegin();
-             it != other.templates.constEnd();
-             ++it)
+        for (QHash<QString, FlexibilityTemplate>::const_iterator it = other.templates.constBegin();
+             it != other.templates.constEnd(); ++it)
         {
-            templates.insert( it.key(), it.value() );
+            templates.insert(it.key(), it.value());
         }
     }
 
@@ -399,22 +390,21 @@ void FlexibilityLibrary::add(const FlexibilityLibrary &other)
 
     \throw SireError::invalid_key
 */
-const FlexibilityTemplate& FlexibilityLibrary::getTemplate(const QString &key)
+const FlexibilityTemplate &FlexibilityLibrary::getTemplate(const QString &key)
 {
-    QHash<QString,FlexibilityTemplate>::const_iterator it = templates.constFind(key);
+    QHash<QString, FlexibilityTemplate>::const_iterator it = templates.constFind(key);
 
     if (it == templates.constEnd())
-        throw SireError::invalid_key( QObject::tr(
-                "Cannot find the template with key \"%1\". Available templates "
-                "are %2.")
-                    .arg(key, Sire::toString(templates.keys())), CODELOC );
+        throw SireError::invalid_key(QObject::tr("Cannot find the template with key \"%1\". Available templates "
+                                                 "are %2.")
+                                         .arg(key, Sire::toString(templates.keys())),
+                                     CODELOC);
 
     return it.value();
 }
 
 /** Set the template associated with the passed key */
-void FlexibilityLibrary::setTemplate(const QString &key,
-                                     const FlexibilityTemplate &tmplate)
+void FlexibilityLibrary::setTemplate(const QString &key, const FlexibilityTemplate &tmplate)
 {
     templates.insert(key, tmplate);
 }
@@ -423,7 +413,7 @@ void FlexibilityLibrary::loadTemplates(const QString &templatefile)
 {
     QFile template_f(templatefile);
 
-    if ( not (template_f.exists() and template_f.open(QIODevice::ReadOnly) ) )
+    if (not(template_f.exists() and template_f.open(QIODevice::ReadOnly)))
     {
         throw SireError::file_error(template_f, CODELOC);
     }
@@ -436,65 +426,59 @@ void FlexibilityLibrary::loadTemplates(const QString &templatefile)
     int version = ::processVersionLine(line);
 
     if (version != 1)
-        throw SireError::process_error( QObject::tr(
-                    "Invalid version of the template, got '%1' but only support '1'")
-                        .arg(version), CODELOC);
+        throw SireError::process_error(
+            QObject::tr("Invalid version of the template, got '%1' but only support '1'").arg(version), CODELOC);
 
     QString current = " "; // the template currently being read
 
-    QHash <QString,FlexibilityTemplate> new_templates;
+    QHash<QString, FlexibilityTemplate> new_templates;
 
     /** Now read rest of the file */
-    while ( not line.isNull() )
+    while (not line.isNull())
     {
         line = ts.readLine();
         QStringList words = line.split(" ", Qt::SkipEmptyParts);
         //     qDebug() << line;
 
-        if ( line.startsWith("molecule") )
+        if (line.startsWith("molecule"))
         {
             // create a new flexibilitytemplate
-            FlexibilityTemplate flextemplate = FlexibilityTemplate( words[1] );
+            FlexibilityTemplate flextemplate = FlexibilityTemplate(words[1]);
             current = flextemplate.getName();
             new_templates[current] = flextemplate;
         }
-        else if ( line.startsWith("rigidbody") )
+        else if (line.startsWith("rigidbody"))
         {
-            new_templates[current].setRotation( words[2].toDouble() * degrees );
-            new_templates[current].setTranslation( words[4].toDouble() * angstroms );
+            new_templates[current].setRotation(words[2].toDouble() * degrees);
+            new_templates[current].setTranslation(words[4].toDouble() * angstroms);
         }
-        else if ( line.startsWith("maximumbondvariables") )
+        else if (line.startsWith("maximumbondvariables"))
         {
-            new_templates[current].setMaximumBondVar( words[1].toInt() );
+            new_templates[current].setMaximumBondVar(words[1].toInt());
         }
-        else if ( line.startsWith("maximumanglevariables") )
+        else if (line.startsWith("maximumanglevariables"))
         {
-            new_templates[current].setMaximumAngleVar( words[1].toInt() );
+            new_templates[current].setMaximumAngleVar(words[1].toInt());
         }
-        else if ( line.startsWith("maximumdihedralvariables") )
+        else if (line.startsWith("maximumdihedralvariables"))
         {
-            new_templates[current].setMaximumDihedralVar( words[1].toInt() );
+            new_templates[current].setMaximumDihedralVar(words[1].toInt());
         }
-        else if ( line.startsWith("bond") )
+        else if (line.startsWith("bond"))
         {
-            new_templates[current].setBondDelta( BondID(AtomName(words[1]),
-                                                        AtomName(words[2])),
-                                                 words[4].toDouble() * angstroms );
+            new_templates[current].setBondDelta(BondID(AtomName(words[1]), AtomName(words[2])),
+                                                words[4].toDouble() * angstroms);
         }
-        else if ( line.startsWith("angle") )
+        else if (line.startsWith("angle"))
         {
-            new_templates[current].setAngleDelta( AngleID(AtomName(words[1]),
-                                                          AtomName(words[2]),
-                                                          AtomName(words[3])),
-                                                  words[5].toDouble() * degrees );
+            new_templates[current].setAngleDelta(AngleID(AtomName(words[1]), AtomName(words[2]), AtomName(words[3])),
+                                                 words[5].toDouble() * degrees);
         }
-        else if ( line.startsWith("dihedral") )
+        else if (line.startsWith("dihedral"))
         {
-            new_templates[current].setDihedralDelta( DihedralID(AtomName(words[1]),
-                                                                AtomName(words[2]),
-                                                                AtomName(words[3]),
-                                                                AtomName(words[4])),
-                                                     words[6].toDouble() * degrees );
+            new_templates[current].setDihedralDelta(
+                DihedralID(AtomName(words[1]), AtomName(words[2]), AtomName(words[3]), AtomName(words[4])),
+                words[6].toDouble() * degrees);
         }
     }
 
@@ -502,7 +486,7 @@ void FlexibilityLibrary::loadTemplates(const QString &templatefile)
     {
         QString templname = templ.getName();
 
-        if ( not templates.contains(templname) )
+        if (not templates.contains(templname))
             templates.insert(templname, templ);
     }
 }
@@ -516,10 +500,11 @@ Flexibility FlexibilityLibrary::getFlexibility(const MoleculeView &molecule) con
 
     MolName moleculename = molecule.data().name();
 
-    if ( not this->templates.contains(moleculename) )
+    if (not this->templates.contains(moleculename))
         throw SireError::invalid_key(QObject::tr("There is no flexibility template for the "
-               "molecule with name \"%1\" - available templates are %2.")
-                    .arg(moleculename, Sire::toString(templates.keys())), CODELOC);
+                                                 "molecule with name \"%1\" - available templates are %2.")
+                                         .arg(moleculename, Sire::toString(templates.keys())),
+                                     CODELOC);
 
     FlexibilityTemplate templ = this->templates[moleculename];
 
@@ -529,47 +514,39 @@ Flexibility FlexibilityLibrary::getFlexibility(const MoleculeView &molecule) con
     flexibility.setMaximumAngleVar(templ.getMaximumAngleVar());
     flexibility.setMaximumDihedralVar(templ.getMaximumDihedralVar());
 
-    for (QHash<BondID,Length>::const_iterator it = templ.getBondDeltas().constBegin();
-         it != templ.getBondDeltas().constEnd();
-         ++it)
+    for (QHash<BondID, Length>::const_iterator it = templ.getBondDeltas().constBegin();
+         it != templ.getBondDeltas().constEnd(); ++it)
     {
         const BondID &bond = it.key();
 
-        if ( selected_atoms.selectedAll() or
-             (selected_atoms.selected(bond.atom0()) and
-              selected_atoms.selected(bond.atom1())) )
+        if (selected_atoms.selectedAll() or
+            (selected_atoms.selected(bond.atom0()) and selected_atoms.selected(bond.atom1())))
         {
             flexibility.add(bond, it.value());
         }
     }
 
-    for (QHash<AngleID,Angle>::const_iterator it = templ.getAngleDeltas().constBegin();
-         it != templ.getAngleDeltas().constEnd();
-         ++it)
+    for (QHash<AngleID, Angle>::const_iterator it = templ.getAngleDeltas().constBegin();
+         it != templ.getAngleDeltas().constEnd(); ++it)
     {
         const AngleID &angle = it.key();
 
-        if ( selected_atoms.selectedAll() or
-             (selected_atoms.selected(angle.atom0()) and
-              selected_atoms.selected(angle.atom1()) and
-              selected_atoms.selected(angle.atom2())) )
+        if (selected_atoms.selectedAll() or
+            (selected_atoms.selected(angle.atom0()) and selected_atoms.selected(angle.atom1()) and
+             selected_atoms.selected(angle.atom2())))
         {
             flexibility.add(angle, it.value());
         }
     }
 
-    for (QHash<DihedralID,Angle>::const_iterator
-                                    it = templ.getDihedralDeltas().constBegin();
-         it != templ.getDihedralDeltas().constEnd();
-         ++it)
+    for (QHash<DihedralID, Angle>::const_iterator it = templ.getDihedralDeltas().constBegin();
+         it != templ.getDihedralDeltas().constEnd(); ++it)
     {
         const DihedralID &dihedral = it.key();
 
-        if ( selected_atoms.selectedAll() or
-             (selected_atoms.selected(dihedral.atom0()) and
-              selected_atoms.selected(dihedral.atom1()) and
-              selected_atoms.selected(dihedral.atom2()) and
-              selected_atoms.selected(dihedral.atom3())) )
+        if (selected_atoms.selectedAll() or
+            (selected_atoms.selected(dihedral.atom0()) and selected_atoms.selected(dihedral.atom1()) and
+             selected_atoms.selected(dihedral.atom2()) and selected_atoms.selected(dihedral.atom3())))
         {
             flexibility.add(dihedral, it.value());
         }

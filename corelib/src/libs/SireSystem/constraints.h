@@ -38,109 +38,108 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class Constraints;
+    class Constraints;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::Constraints&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::Constraints&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::Constraints &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::Constraints &);
 
 namespace SireMol
 {
-class MolNum;
-class Molecules;
-}
+    class MolNum;
+    class Molecules;
+} // namespace SireMol
 
 namespace SireSystem
 {
 
-class Delta;
+    class Delta;
 
-using SireMol::MolNum;
-using SireMol::Molecules;
+    using SireMol::Molecules;
+    using SireMol::MolNum;
 
-/** This class is used to hold and organise a collection of Constraint objects
+    /** This class is used to hold and organise a collection of Constraint objects
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT Constraints
-            : public SireBase::ConcreteProperty<Constraints,SireBase::Property>
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const Constraints&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, Constraints&);
-
-public:
-    Constraints();
-
-    Constraints(const Constraint &constraint);
-
-    Constraints(const QVector<ConstraintPtr> &constraints);
-    Constraints(const QList<ConstraintPtr> &constraints);
-
-    Constraints(const Constraints &other);
-
-    ~Constraints();
-
-    Constraints& operator=(const Constraints &other);
-
-    bool operator==(const Constraints &other) const;
-    bool operator!=(const Constraints &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT Constraints : public SireBase::ConcreteProperty<Constraints, SireBase::Property>
     {
-        return Constraints::typeName();
-    }
 
-    const Constraint& operator[](int i) const;
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const Constraints &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, Constraints &);
 
-    Constraints& operator+=(const Constraint &constraint);
-    Constraints& operator+=(const Constraints &constraints);
+    public:
+        Constraints();
 
-    Constraints& operator-=(const Constraint &constraint);
-    Constraints& operator-=(const Constraints &constraints);
+        Constraints(const Constraint &constraint);
 
-    int count() const;
-    int size() const;
+        Constraints(const QVector<ConstraintPtr> &constraints);
+        Constraints(const QList<ConstraintPtr> &constraints);
 
-    bool isEmpty() const;
+        Constraints(const Constraints &other);
 
-    int nConstraints() const;
+        ~Constraints();
 
-    QVector<ConstraintPtr> constraints() const;
+        Constraints &operator=(const Constraints &other);
 
-    void add(const Constraint &constraint);
-    void add(const Constraints &constraints);
+        bool operator==(const Constraints &other) const;
+        bool operator!=(const Constraints &other) const;
 
-    void remove(const Constraint &constraint);
-    void remove(const Constraints &constraints);
+        static const char *typeName();
 
-    void removeAt(int i);
+        const char *what() const
+        {
+            return Constraints::typeName();
+        }
 
-    bool areSatisfied(const System &system) const;
-    void assertSatisfied(const System &system) const;
+        const Constraint &operator[](int i) const;
 
-    System apply(const System &system);
+        Constraints &operator+=(const Constraint &constraint);
+        Constraints &operator+=(const Constraints &constraints);
 
-protected:
-    friend class Delta; // so can call apply(delta)
-    bool apply(Delta &delta);
+        Constraints &operator-=(const Constraint &constraint);
+        Constraints &operator-=(const Constraints &constraints);
 
-    friend class System; // so can call committed(system)
-    void committed(const System &system);
+        int count() const;
+        int size() const;
 
-private:
-    /** The list of all constraints that are to be
-        applied to the system */
-    QVector<ConstraintPtr> cons;
-};
+        bool isEmpty() const;
 
-}
+        int nConstraints() const;
 
-Q_DECLARE_METATYPE( SireSystem::Constraints )
+        QVector<ConstraintPtr> constraints() const;
 
-SIRE_EXPOSE_CLASS( SireSystem::Constraints )
+        void add(const Constraint &constraint);
+        void add(const Constraints &constraints);
+
+        void remove(const Constraint &constraint);
+        void remove(const Constraints &constraints);
+
+        void removeAt(int i);
+
+        bool areSatisfied(const System &system) const;
+        void assertSatisfied(const System &system) const;
+
+        System apply(const System &system);
+
+    protected:
+        friend class Delta; // so can call apply(delta)
+        bool apply(Delta &delta);
+
+        friend class System; // so can call committed(system)
+        void committed(const System &system);
+
+    private:
+        /** The list of all constraints that are to be
+            applied to the system */
+        QVector<ConstraintPtr> cons;
+    };
+
+} // namespace SireSystem
+
+Q_DECLARE_METATYPE(SireSystem::Constraints)
+
+SIRE_EXPOSE_CLASS(SireSystem::Constraints)
 
 SIRE_END_HEADER
 

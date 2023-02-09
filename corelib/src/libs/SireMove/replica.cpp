@@ -60,11 +60,8 @@ QDataStream &operator<<(QDataStream &ds, const Replica &replica)
 
     SharedDataStream sds(ds);
 
-    sds << replica.replica_ensemble << replica.space_property
-        << replica.nrg_component
-        << replica.lambda_component << replica.lambda_value
-        << replica.vars_to_be_set
-        << static_cast<const SupraSubSystem&>(replica);
+    sds << replica.replica_ensemble << replica.space_property << replica.nrg_component << replica.lambda_component
+        << replica.lambda_value << replica.vars_to_be_set << static_cast<const SupraSubSystem &>(replica);
 
     return ds;
 }
@@ -80,21 +77,19 @@ QDataStream &operator>>(QDataStream &ds, Replica &replica)
 
         Replica new_replica;
 
-        sds >> new_replica.replica_ensemble >> new_replica.space_property
-            >> new_replica.nrg_component
-            >> new_replica.lambda_component >> new_replica.lambda_value
-            >> new_replica.vars_to_be_set
-            >> static_cast<SupraSubSystem&>(new_replica);
+        sds >> new_replica.replica_ensemble >> new_replica.space_property >> new_replica.nrg_component >>
+            new_replica.lambda_component >> new_replica.lambda_value >> new_replica.vars_to_be_set >>
+            static_cast<SupraSubSystem &>(new_replica);
 
         replica = new_replica;
     }
     else if (v < 3)
     {
-        throw SireError::program_bug( QObject::tr(
-            "Reading of version %1 of SireMove::Replica should have "
-            "been handled by the deprecated classes reader. Something has "
-            "gone wrong if they are are being read here...")
-                .arg(v), CODELOC );
+        throw SireError::program_bug(QObject::tr("Reading of version %1 of SireMove::Replica should have "
+                                                 "been handled by the deprecated classes reader. Something has "
+                                                 "gone wrong if they are are being read here...")
+                                         .arg(v),
+                                     CODELOC);
     }
     else
         throw version_error(v, "3", r_replica, CODELOC);
@@ -105,29 +100,26 @@ QDataStream &operator>>(QDataStream &ds, Replica &replica)
 static void assertSupportedEnsemble(const Ensemble &replica_ensemble)
 {
 
-    if ( not (replica_ensemble.isConstantNParticles() or
-              replica_ensemble.isConstantChemicalPotential()) )
-        throw SireError::incompatible_error( QObject::tr(
-            "Only replica exchange moves involving a constant number of "
-            "particles or constant chemical potential are supported. "
-            "The %1 is not supported.").arg(replica_ensemble.toString()),
-                CODELOC );
+    if (not(replica_ensemble.isConstantNParticles() or replica_ensemble.isConstantChemicalPotential()))
+        throw SireError::incompatible_error(QObject::tr("Only replica exchange moves involving a constant number of "
+                                                        "particles or constant chemical potential are supported. "
+                                                        "The %1 is not supported.")
+                                                .arg(replica_ensemble.toString()),
+                                            CODELOC);
 
-    if ( not (replica_ensemble.isConstantEnergy() or
-              replica_ensemble.isConstantTemperature()) )
-        throw SireError::incompatible_error( QObject::tr(
-            "Only replica exchange moves involving constant energy or "
-            "constant temperature ensembles are supported. "
-            "The %1 is not supported.").arg(replica_ensemble.toString()),
-                CODELOC );
+    if (not(replica_ensemble.isConstantEnergy() or replica_ensemble.isConstantTemperature()))
+        throw SireError::incompatible_error(QObject::tr("Only replica exchange moves involving constant energy or "
+                                                        "constant temperature ensembles are supported. "
+                                                        "The %1 is not supported.")
+                                                .arg(replica_ensemble.toString()),
+                                            CODELOC);
 
-    if ( not (replica_ensemble.isConstantVolume() or
-              replica_ensemble.isConstantPressure()) )
-        throw SireError::incompatible_error( QObject::tr(
-            "Only replica exchange moves involving constant volume or "
-            "constant pressure ensembles are supported. "
-            "The %1 is not supported.").arg(replica_ensemble.toString()),
-                CODELOC );
+    if (not(replica_ensemble.isConstantVolume() or replica_ensemble.isConstantPressure()))
+        throw SireError::incompatible_error(QObject::tr("Only replica exchange moves involving constant volume or "
+                                                        "constant pressure ensembles are supported. "
+                                                        "The %1 is not supported.")
+                                                .arg(replica_ensemble.toString()),
+                                            CODELOC);
 }
 
 /** Internal function called whenever the moves have changed
@@ -151,7 +143,7 @@ void Replica::updatedMoves()
     {
         if (not mvs.isConstantLambda(lambda_component))
         {
-            //these moves don't keep lambda constrained to the same value
+            // these moves don't keep lambda constrained to the same value
             lambda_component = Symbol();
             lambda_value = 0;
         }
@@ -159,12 +151,12 @@ void Replica::updatedMoves()
 }
 
 /** Constructor */
-Replica::Replica() : ConcreteProperty<Replica,SupraSubSystem>(), lambda_value(0)
-{}
+Replica::Replica() : ConcreteProperty<Replica, SupraSubSystem>(), lambda_value(0)
+{
+}
 
 /** Construct from another SubSystem */
-Replica::Replica(const SupraSubSystem &subsys)
-        : ConcreteProperty<Replica,SupraSubSystem>(subsys), lambda_value(0)
+Replica::Replica(const SupraSubSystem &subsys) : ConcreteProperty<Replica, SupraSubSystem>(subsys), lambda_value(0)
 {
     if (subsys.isA<Replica>())
     {
@@ -178,21 +170,19 @@ Replica::Replica(const SupraSubSystem &subsys)
 
 /** Copy constructor */
 Replica::Replica(const Replica &other)
-        : ConcreteProperty<Replica,SupraSubSystem>(other),
-          vars_to_be_set(other.vars_to_be_set),
-          replica_ensemble(other.replica_ensemble),
-          space_property(other.space_property),
-          nrg_component(other.nrg_component),
-          lambda_component(other.lambda_component),
-          lambda_value(other.lambda_value)
-{}
+    : ConcreteProperty<Replica, SupraSubSystem>(other), vars_to_be_set(other.vars_to_be_set),
+      replica_ensemble(other.replica_ensemble), space_property(other.space_property),
+      nrg_component(other.nrg_component), lambda_component(other.lambda_component), lambda_value(other.lambda_value)
+{
+}
 
 /** Destructor */
 Replica::~Replica()
-{}
+{
+}
 
 /** Copy assignment operator */
-Replica& Replica::operator=(const Replica &other)
+Replica &Replica::operator=(const Replica &other)
 {
     if (this != &other)
     {
@@ -213,12 +203,9 @@ Replica& Replica::operator=(const Replica &other)
 bool Replica::operator==(const Replica &other) const
 {
     return (this == &other) or
-           ( replica_ensemble == other.replica_ensemble and
-             space_property == other.space_property and
-             nrg_component == other.nrg_component and
-             lambda_component == other.lambda_component and
-             lambda_value == other.lambda_value and
-             SupraSubSystem::operator==(other) );
+           (replica_ensemble == other.replica_ensemble and space_property == other.space_property and
+            nrg_component == other.nrg_component and lambda_component == other.lambda_component and
+            lambda_value == other.lambda_value and SupraSubSystem::operator==(other));
 }
 
 /** Comparison operator */
@@ -228,14 +215,14 @@ bool Replica::operator!=(const Replica &other) const
 }
 
 /** Return the ensemble defined by the moves of this replica */
-const Ensemble& Replica::ensemble() const
+const Ensemble &Replica::ensemble() const
 {
     return replica_ensemble;
 }
 
 /** Return the energy component that describes the Hamiltonian
     that is sampled by this replica */
-const Symbol& Replica::energyComponent() const
+const Symbol &Replica::energyComponent() const
 {
     return nrg_component;
 }
@@ -243,7 +230,7 @@ const Symbol& Replica::energyComponent() const
 /** Return the name of the property containing the simulation box
     that is sampled by this replica - this is used to get the
     volume of the simulation space */
-const PropertyName& Replica::spaceProperty() const
+const PropertyName &Replica::spaceProperty() const
 {
     return space_property;
 }
@@ -251,7 +238,7 @@ const PropertyName& Replica::spaceProperty() const
 /** Return the component that can be used to change the Hamiltonian
     for Hamiltonian replica exchange - this is a null symbol if
     this replica is not used in Hamiltonian replica exchange */
-const Symbol& Replica::lambdaComponent() const
+const Symbol &Replica::lambdaComponent() const
 {
     return lambda_component;
 }
@@ -383,8 +370,8 @@ bool Replica::isConstantLambda(const Symbol &lam) const
 void Replica::setSubSystem(const System &subsystem)
 {
     if (this->isPacked())
-        //need to unpack as we also need to run through
-        //all of the deferred commands
+        // need to unpack as we also need to run through
+        // all of the deferred commands
         this->unpack();
 
     System new_system = subsystem;
@@ -406,8 +393,8 @@ void Replica::setSubSystem(const System &subsystem)
 void Replica::setSubMoves(const Moves &submoves)
 {
     if (this->isPacked())
-        //need to unpack as we also need to run through
-        //all of the deferred commands
+        // need to unpack as we also need to run through
+        // all of the deferred commands
         this->unpack();
 
     MovesPtr old_moves = SupraSubSystem::subMoves();
@@ -418,19 +405,19 @@ void Replica::setSubMoves(const Moves &submoves)
         if (new_moves->isConstantTemperature() and old_moves->isConstantTemperature())
         {
             if (new_moves->temperature() != old_moves->temperature())
-                new_moves.edit().setTemperature( old_moves->temperature() );
+                new_moves.edit().setTemperature(old_moves->temperature());
         }
 
         if (new_moves->isConstantPressure() and old_moves->isConstantPressure())
         {
             if (new_moves->pressure() != old_moves->pressure())
-                new_moves.edit().setPressure( old_moves->pressure() );
+                new_moves.edit().setPressure(old_moves->pressure());
         }
 
         if (new_moves->isConstantFugacity() and old_moves->isConstantFugacity())
         {
             if (new_moves->fugacity() != old_moves->fugacity())
-                new_moves.edit().setFugacity( old_moves->fugacity() );
+                new_moves.edit().setFugacity(old_moves->fugacity());
         }
 
         if (not nrg_component.isNull())
@@ -448,7 +435,7 @@ void Replica::setSubMoves(const Moves &submoves)
         SupraSubSystem::setSubMoves(new_moves);
         this->updatedMoves();
     }
-    catch(...)
+    catch (...)
     {
         SupraSubSystem::setSubMoves(old_moves);
         throw;
@@ -466,21 +453,20 @@ void Replica::setSubSystemAndMoves(const SimStore &simstore)
     if (simstore.isPacked())
         unpacked_simstore.unpack();
 
-    //do moves first, as they may change the ensemble
+    // do moves first, as they may change the ensemble
     this->setSubMoves(simstore.moves());
 
-    //now do the system
+    // now do the system
     this->setSubSystem(simstore.system());
 }
 
 /** Internal function used to add the command 'command' with
     argument 'argument' to the list of commands that will be performed
     when the system is next unpacked */
-template<class T>
+template <class T>
 void Replica::deferCommand(ReplicaCommand command, const T &argument)
 {
-    vars_to_be_set.append(
-        QPair<quint32,QVariant>( quint32(command), QVariant::fromValue<T>(argument) ) );
+    vars_to_be_set.append(QPair<quint32, QVariant>(quint32(command), QVariant::fromValue<T>(argument)));
 }
 
 /** Internal function used to set the energy component that represents
@@ -488,7 +474,7 @@ void Replica::deferCommand(ReplicaCommand command, const T &argument)
 void Replica::setEnergyComponent(const Symbol &symbol)
 {
     if (this->isPacked())
-        this->deferCommand( ENERGY_COMPONENT, symbol );
+        this->deferCommand(ENERGY_COMPONENT, symbol);
 
     else
     {
@@ -496,12 +482,12 @@ void Replica::setEnergyComponent(const Symbol &symbol)
             return;
 
         if (not this->subSystem().hasComponent(symbol))
-            throw SireFF::missing_component( QObject::tr(
-                "Cannot set the energy component for this replica to %1, "
-                "as this system (%2) doesn't have such a component. Available energy "
-                "components are %3.")
-                    .arg(symbol.toString(), subSystem().toString(),
-                         Sire::toString(subSystem().componentSymbols())), CODELOC );
+            throw SireFF::missing_component(
+                QObject::tr("Cannot set the energy component for this replica to %1, "
+                            "as this system (%2) doesn't have such a component. Available energy "
+                            "components are %3.")
+                    .arg(symbol.toString(), subSystem().toString(), Sire::toString(subSystem().componentSymbols())),
+                CODELOC);
 
         MovesPtr mvs = SupraSubSystem::subMoves();
         mvs.edit().setEnergyComponent(symbol);
@@ -515,7 +501,7 @@ void Replica::setEnergyComponent(const Symbol &symbol)
 void Replica::setSpaceProperty(const PropertyName &spaceproperty)
 {
     if (this->isPacked())
-        this->deferCommand( SPACE_PROPERTY, spaceproperty );
+        this->deferCommand(SPACE_PROPERTY, spaceproperty);
 
     else
     {
@@ -555,7 +541,7 @@ void Replica::setLambdaComponent(const Symbol &symbol)
             {
                 System new_system = SupraSubSystem::subSystem();
 
-                //default always to lambda=0
+                // default always to lambda=0
                 new_system.setComponent(symbol, 0);
                 current_value = new_system.componentValue(symbol);
 
@@ -572,9 +558,10 @@ void Replica::setLambdaComponent(const Symbol &symbol)
 void Replica::setLambdaValue(double value)
 {
     if (lambda_component.isNull())
-        throw SireError::incompatible_error( QObject::tr(
-            "You cannot set the value of lambda to %1 as there is no "
-            "lambda component.").arg(value), CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You cannot set the value of lambda to %1 as there is no "
+                                                        "lambda component.")
+                                                .arg(value),
+                                            CODELOC);
 
     if (this->isPacked())
         this->deferCommand(LAMBDA_VALUE, value);
@@ -585,7 +572,7 @@ void Replica::setLambdaValue(double value)
             return;
 
         System new_system = SupraSubSystem::subSystem();
-        new_system.setComponent( lambda_component, value );
+        new_system.setComponent(lambda_component, value);
         SupraSubSystem::setSubSystem(new_system);
 
         lambda_value = value;
@@ -600,10 +587,12 @@ void Replica::setLambdaValue(double value)
 void Replica::setTemperature(const Temperature &t)
 {
     if (not this->isConstantTemperature())
-        throw SireError::incompatible_error( QObject::tr(
-            "Cannot set the temperature to %1 K as the replica ensemble (%2) "
-            "is not constant temperature.")
-                .arg(t.to(kelvin)).arg(replica_ensemble.toString()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot set the temperature to %1 K as the replica ensemble (%2) "
+                        "is not constant temperature.")
+                .arg(t.to(kelvin))
+                .arg(replica_ensemble.toString()),
+            CODELOC);
 
     if (this->isPacked())
         this->deferCommand(REP_TEMPERATURE, t.to(kelvin));
@@ -627,13 +616,15 @@ void Replica::setTemperature(const Temperature &t)
 void Replica::setPressure(const Pressure &p)
 {
     if (not this->isConstantPressure())
-        throw SireError::incompatible_error( QObject::tr(
-            "Cannot set the pressure to %1 atm as the replica ensemble (%2) "
-            "is not constant pressure.")
-                .arg(p.to(atm)).arg(replica_ensemble.toString()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot set the pressure to %1 atm as the replica ensemble (%2) "
+                        "is not constant pressure.")
+                .arg(p.to(atm))
+                .arg(replica_ensemble.toString()),
+            CODELOC);
 
     if (this->isPacked())
-        this->deferCommand( REP_PRESSURE, p.to(atm) );
+        this->deferCommand(REP_PRESSURE, p.to(atm));
 
     else
     {
@@ -654,13 +645,15 @@ void Replica::setPressure(const Pressure &p)
 void Replica::setFugacity(const Pressure &f)
 {
     if (not this->isConstantFugacity())
-        throw SireError::incompatible_error( QObject::tr(
-            "Cannot set the fugacity to %1 atm as the replica ensemble (%2) "
-            "is not constant fugacity.")
-                .arg(f.to(atm)).arg(replica_ensemble.toString()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot set the fugacity to %1 atm as the replica ensemble (%2) "
+                        "is not constant fugacity.")
+                .arg(f.to(atm))
+                .arg(replica_ensemble.toString()),
+            CODELOC);
 
     if (this->isPacked())
-        this->deferCommand( REP_FUGACITY, f.to(atm) );
+        this->deferCommand(REP_FUGACITY, f.to(atm));
 
     else
     {
@@ -681,13 +674,15 @@ void Replica::setFugacity(const Pressure &f)
 void Replica::setChemicalPotential(const MolarEnergy &c)
 {
     if (not this->isConstantChemicalPotential())
-        throw SireError::incompatible_error( QObject::tr(
-            "Cannot set the chemical potential to %1 kcal mol-1 as the replica "
-            "ensemble (%2) is not constant chemical potential.")
-                .arg(c.to(kcal_per_mol)).arg(replica_ensemble.toString()), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot set the chemical potential to %1 kcal mol-1 as the replica "
+                        "ensemble (%2) is not constant chemical potential.")
+                .arg(c.to(kcal_per_mol))
+                .arg(replica_ensemble.toString()),
+            CODELOC);
 
     if (this->isPacked())
-        this->deferCommand( REP_CHEMPOT, c.to(kcal_per_mol) );
+        this->deferCommand(REP_CHEMPOT, c.to(kcal_per_mol));
 
     else
     {
@@ -704,7 +699,7 @@ void Replica::setChemicalPotential(const MolarEnergy &c)
 void Replica::setGenerator(const RanGenerator &rangenerator)
 {
     if (this->isPacked())
-        this->deferCommand( SET_RANGENERATOR, rangenerator );
+        this->deferCommand(SET_RANGENERATOR, rangenerator);
 
     else
     {
@@ -744,7 +739,7 @@ void Replica::swapInSystem(const SimStore &simstore, bool swap_monitors)
             new_system = simstore.system();
 
         if (not swap_monitors)
-            new_system.setMonitors( this->subSystem().monitors() );
+            new_system.setMonitors(this->subSystem().monitors());
 
         this->setSubSystem(new_system);
     }
@@ -774,7 +769,7 @@ void Replica::swapInMolecules(const SimStore &simstore)
             old_system = simstore.system();
 
         System new_system = SupraSubSystem::subSystem();
-        new_system.update( old_system.molecules() );
+        new_system.update(old_system.molecules());
         SupraSubSystem::setSubSystem(new_system);
     }
 }
@@ -784,15 +779,15 @@ void Replica::swapInMolecules(const SimStore &simstore)
 
     \throw SireError::invalid_cast
 */
-template<class T>
+template <class T>
 static T convert(const QVariant &value)
 {
     if (not value.canConvert<T>())
-        throw SireError::invalid_cast( QObject::tr(
-            "Cannot apply a deferred command as the argument of type %1 "
-            "cannot be cast to a value of type %2.")
-                .arg( typeid(T).name() )
-                .arg( QVariant::typeToName(value.type()) ), CODELOC );
+        throw SireError::invalid_cast(QObject::tr("Cannot apply a deferred command as the argument of type %1 "
+                                                  "cannot be cast to a value of type %2.")
+                                          .arg(typeid(T).name())
+                                          .arg(QVariant::typeToName(value.type())),
+                                      CODELOC);
 
     return value.value<T>();
 }
@@ -802,83 +797,80 @@ static T convert(const QVariant &value)
     while the system has been packed */
 void Replica::_post_unpack()
 {
-    BOOST_ASSERT( not this->isPacked() );
+    BOOST_ASSERT(not this->isPacked());
 
-    //apply the variables in order
-    QList< QPair<quint32,QVariant> > to_set = vars_to_be_set;
+    // apply the variables in order
+    QList<QPair<quint32, QVariant>> to_set = vars_to_be_set;
 
-    //clear the list - this is so that we would have the same
-    //state if an exception is thrown if the variables had
-    //been set directly
-    vars_to_be_set = QList< QPair<quint32,QVariant> >();
+    // clear the list - this is so that we would have the same
+    // state if an exception is thrown if the variables had
+    // been set directly
+    vars_to_be_set = QList<QPair<quint32, QVariant>>();
 
-    //apply the actions, in the order that they were requested
-    for (QList< QPair<quint32,QVariant> >::const_iterator it = to_set.constBegin();
-         it != to_set.constEnd();
-         ++it)
+    // apply the actions, in the order that they were requested
+    for (QList<QPair<quint32, QVariant>>::const_iterator it = to_set.constBegin(); it != to_set.constEnd(); ++it)
     {
         switch (it->first)
         {
-            case ENERGY_COMPONENT:
-                this->setEnergyComponent( ::convert<Symbol>(it->second) );
-                break;
+        case ENERGY_COMPONENT:
+            this->setEnergyComponent(::convert<Symbol>(it->second));
+            break;
 
-            case SPACE_PROPERTY:
-                this->setSpaceProperty( ::convert<PropertyName>(it->second) );
-                break;
+        case SPACE_PROPERTY:
+            this->setSpaceProperty(::convert<PropertyName>(it->second));
+            break;
 
-            case LAMBDA_COMPONENT:
-                this->setLambdaComponent( ::convert<Symbol>(it->second) );
-                break;
+        case LAMBDA_COMPONENT:
+            this->setLambdaComponent(::convert<Symbol>(it->second));
+            break;
 
-            case LAMBDA_VALUE:
-                this->setLambdaValue( ::convert<double>(it->second) );
-                break;
+        case LAMBDA_VALUE:
+            this->setLambdaValue(::convert<double>(it->second));
+            break;
 
-            case REP_TEMPERATURE:
-                this->setTemperature( ::convert<double>(it->second) * kelvin );
-                break;
+        case REP_TEMPERATURE:
+            this->setTemperature(::convert<double>(it->second) * kelvin);
+            break;
 
-            case REP_PRESSURE:
-                this->setPressure( ::convert<double>(it->second) * atm );
-                break;
+        case REP_PRESSURE:
+            this->setPressure(::convert<double>(it->second) * atm);
+            break;
 
-            case REP_CHEMPOT:
-                this->setChemicalPotential(
-                                    ::convert<double>(it->second) * kcal_per_mol  );
-                break;
+        case REP_CHEMPOT:
+            this->setChemicalPotential(::convert<double>(it->second) * kcal_per_mol);
+            break;
 
-            case REP_FUGACITY:
-                this->setFugacity( ::convert<double>(it->second) * atm );
-                break;
+        case REP_FUGACITY:
+            this->setFugacity(::convert<double>(it->second) * atm);
+            break;
 
-            case SWAP_REP_AND_MON:
-                this->swapInSystem( ::convert<SimStore>(it->second), true );
-                break;
+        case SWAP_REP_AND_MON:
+            this->swapInSystem(::convert<SimStore>(it->second), true);
+            break;
 
-            case SWAP_REP_ONLY:
-                this->swapInSystem( ::convert<SimStore>(it->second), false );
-                break;
+        case SWAP_REP_ONLY:
+            this->swapInSystem(::convert<SimStore>(it->second), false);
+            break;
 
-            case SWAP_MOLECULES:
-                this->swapInMolecules( ::convert<SimStore>(it->second) );
-                break;
+        case SWAP_MOLECULES:
+            this->swapInMolecules(::convert<SimStore>(it->second));
+            break;
 
-            case SET_RANGENERATOR:
-                this->setGenerator( ::convert<RanGenerator>(it->second) );
-                break;
+        case SET_RANGENERATOR:
+            this->setGenerator(::convert<RanGenerator>(it->second));
+            break;
 
-            default:
-                throw SireError::unsupported( QObject::tr(
-                    "A request was made of an unsuppoted action in Replica. "
-                    "The action with ID %1 was requested, but this is not "
-                    "supported with this version of Replica.")
-                        .arg(it->first), CODELOC );
+        default:
+            throw SireError::unsupported(QObject::tr("A request was made of an unsuppoted action in Replica. "
+                                                     "The action with ID %1 was requested, but this is not "
+                                                     "supported with this version of Replica.")
+                                             .arg(it->first),
+                                         CODELOC);
         }
     }
 }
 
-const char* Replica::typeName()
+const char *Replica::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Replica>() );
+    return QMetaType::typeName(qMetaTypeId<Replica>());
 }

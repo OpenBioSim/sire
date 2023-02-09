@@ -32,79 +32,79 @@
 
 #include "sireglobal.h"
 
-#include <QUuid>
 #include <QList>
+#include <QUuid>
 
 SIRE_BEGIN_HEADER
 
 namespace SireCluster
 {
 
-class Frontend;
-class Backend;
+    class Frontend;
+    class Backend;
 
-namespace MPI
-{
+    namespace MPI
+    {
 
-class Message;
-class Reply;
-class P2PComm;
+        class Message;
+        class Reply;
+        class P2PComm;
 
-/** This class provides the global interface to all of the
-    MPI nodes in the cluster (and, on the root node, the
-    global registry of all nodes available via MPI)
+        /** This class provides the global interface to all of the
+            MPI nodes in the cluster (and, on the root node, the
+            global registry of all nodes available via MPI)
 
-    This is a private class which is only available internally
-    to SireCluster if MPI is available
+            This is a private class which is only available internally
+            to SireCluster if MPI is available
 
-    @author Christopher Woods
-*/
-class MPICluster
-{
-public:
-    static void start();
-    static void shutdown();
+            @author Christopher Woods
+        */
+        class MPICluster
+        {
+        public:
+            static void start();
+            static void shutdown();
 
-    static void sync();
+            static void sync();
 
-    static bool isRunning();
+            static bool isRunning();
 
-    static void registerBackend(const Backend &backend);
+            static void registerBackend(const Backend &backend);
 
-    static P2PComm createP2P(int master_rank, int slave_rank);
+            static P2PComm createP2P(int master_rank, int slave_rank);
 
-    static Frontend getFrontend();
-    static Frontend getFrontend(const QUuid &uid);
+            static Frontend getFrontend();
+            static Frontend getFrontend(const QUuid &uid);
 
-    static QList<Frontend> getFrontends(int n);
+            static QList<Frontend> getFrontends(int n);
 
-    static QList<QUuid> UIDs();
+            static QList<QUuid> UIDs();
 
-    static bool hasBackend(const QUuid &uid);
+            static bool hasBackend(const QUuid &uid);
 
-    static int master();
-    static int getRank();
-    static int getCount();
-    static bool isMaster();
+            static int master();
+            static int getRank();
+            static int getCount();
+            static bool isMaster();
 
-    static void send(const Message &message);
-    static void received(const Message &message);
+            static void send(const Message &message);
+            static void received(const Message &message);
 
-    //functions called by MPI messages
-    static void registerBackend(int rank, const QUuid &uid);
-    static void informedShutdown();
+            // functions called by MPI messages
+            static void registerBackend(int rank, const QUuid &uid);
+            static void informedShutdown();
 
-    static Reply getReply(const Message &message);
+            static Reply getReply(const Message &message);
 
-    static void postResult(const QUuid &subject_uid, int sender,
-                           const QByteArray &result_data);
+            static void postResult(const QUuid &subject_uid, int sender,
+                                   const QByteArray &result_data);
 
-    static void postError(const QUuid &subject_uid, int sender,
-                          const QByteArray &message_data,
-                          const QByteArray &error_data);
-};
+            static void postError(const QUuid &subject_uid, int sender,
+                                  const QByteArray &message_data,
+                                  const QByteArray &error_data);
+        };
 
-} // end of namespace MPI
+    } // end of namespace MPI
 
 } // end of namespace SireCluster
 

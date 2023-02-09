@@ -39,6 +39,7 @@ def fix_expression(c):
     c.add_registration_code("def( self / other<SireCAS::ExBase>() )")
     
 def fix_exbase(c):
+    c.add_declaration_code("#include \"SireCAS/expressions.h\"")
     add_expression_operators(c)
 
 def fix_SymbolValue(c):

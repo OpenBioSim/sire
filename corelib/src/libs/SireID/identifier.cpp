@@ -55,14 +55,15 @@ QDataStream &operator>>(QDataStream &ds, Identifier &id)
         SireStream::loadPolyPointer(ds, id.d);
     }
     else
-        throw SireStream::version_error( v, "1", r_id, CODELOC );
+        throw SireStream::version_error(v, "1", r_id, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 Identifier::Identifier() : ID()
-{}
+{
+}
 
 /** Construct from the passed ID */
 Identifier::Identifier(const ID &id) : ID()
@@ -70,17 +71,18 @@ Identifier::Identifier(const ID &id) : ID()
     if (id.isA<Identifier>())
         d = id.asA<Identifier>().d;
     else if (not id.isNull())
-        d.reset( id.clone() );
+        d.reset(id.clone());
 }
 
 /** Copy constructor */
-Identifier::Identifier(const Identifier &other)
-           : ID(other), d(other.d)
-{}
+Identifier::Identifier(const Identifier &other) : ID(other), d(other.d)
+{
+}
 
 /** Destructor */
 Identifier::~Identifier()
-{}
+{
+}
 
 /** Is this ID null? */
 bool Identifier::isNull() const
@@ -107,7 +109,7 @@ QString Identifier::toString() const
 }
 
 /** Return the base type of this ID */
-const ID& Identifier::base() const
+const ID &Identifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -116,14 +118,14 @@ const ID& Identifier::base() const
 }
 
 /** Copy assignment operator */
-Identifier& Identifier::operator=(const Identifier &other)
+Identifier &Identifier::operator=(const Identifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-Identifier& Identifier::operator=(const ID &other)
+Identifier &Identifier::operator=(const ID &other)
 {
     if (other.isA<Identifier>())
         d = other.asA<Identifier>().d;
@@ -165,13 +167,12 @@ bool Identifier::operator!=(const Identifier &other) const
         return d != other.d and *d != *(other.d);
 }
 
-const char* Identifier::typeName()
+const char *Identifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Identifier>() );
+    return QMetaType::typeName(qMetaTypeId<Identifier>());
 }
 
-Identifier* Identifier::clone() const
+Identifier *Identifier::clone() const
 {
     return new Identifier(*this);
 }
-

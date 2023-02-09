@@ -33,8 +33,8 @@
 
 #include "core.h"
 
-#include "SireCAS/values.h"
 #include "SireCAS/identities.h"
+#include "SireCAS/values.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -48,28 +48,29 @@ using namespace SireStream;
 ////////// Implementation of PerturbationSymbols
 //////////
 
-PerturbationSymbols::PerturbationSymbols()
-                    : lam("lambda"), init("initial"), finl("final")
-{}
+PerturbationSymbols::PerturbationSymbols() : lam("lambda"), init("initial"), finl("final")
+{
+}
 
 PerturbationSymbols::~PerturbationSymbols()
-{}
+{
+}
 
 /** Return the symbol used to represent the driving (reaction)
     coordinate */
-const Symbol& PerturbationSymbols::lambda() const
+const Symbol &PerturbationSymbols::lambda() const
 {
     return lam;
 }
 
 /** Return the symbol used to represent the initial state */
-const Symbol& PerturbationSymbols::initial() const
+const Symbol &PerturbationSymbols::initial() const
 {
     return init;
 }
 
 /** Return the symbol used to represent the final state */
-const Symbol& PerturbationSymbols::final() const
+const Symbol &PerturbationSymbols::final() const
 {
     return finl;
 }
@@ -78,18 +79,16 @@ const Symbol& PerturbationSymbols::final() const
 ////////// Implementation of Perturbation
 //////////
 
-static const RegisterMetaType<Perturbation> r_pert( MAGIC_ONLY,
-                                                    Perturbation::typeName() );
+static const RegisterMetaType<Perturbation> r_pert(MAGIC_ONLY, Perturbation::typeName());
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const Perturbation &pert)
+QDataStream &operator<<(QDataStream &ds, const Perturbation &pert)
 {
     writeHeader(ds, r_pert, 1);
 
     SharedDataStream sds(ds);
 
-    sds << pert.mapping_eqn << pert.map << static_cast<const Property&>(pert);
+    sds << pert.mapping_eqn << pert.map << static_cast<const Property &>(pert);
 
     return ds;
 }
@@ -103,7 +102,7 @@ QDataStream &operator>>(QDataStream &ds, Perturbation &pert)
     {
         SharedDataStream sds(ds);
 
-        sds >> pert.mapping_eqn >> pert.map >> static_cast<Property&>(pert);
+        sds >> pert.mapping_eqn >> pert.map >> static_cast<Property &>(pert);
     }
     else
         throw version_error(v, "1", r_pert, CODELOC);
@@ -113,12 +112,12 @@ QDataStream &operator>>(QDataStream &ds, Perturbation &pert)
 
 static Expression *default_equation(0);
 
-Q_GLOBAL_STATIC_WITH_ARGS( QMutex, globalMutex, (QMutex::Recursive) )
-Q_GLOBAL_STATIC( PerturbationSymbols, perturbationSymbols )
+Q_GLOBAL_STATIC_WITH_ARGS(QMutex, globalMutex, (QMutex::Recursive))
+Q_GLOBAL_STATIC(PerturbationSymbols, perturbationSymbols)
 
 /** Return the symbols object that contains the symbols used
     by the mapping equation */
-const PerturbationSymbols& Perturbation::symbols()
+const PerturbationSymbols &Perturbation::symbols()
 {
     return *(perturbationSymbols());
 }
@@ -126,20 +125,18 @@ const PerturbationSymbols& Perturbation::symbols()
 /** Return the default mapping equation for the perturbations - this
     linearly maps from the initial values at lambda=0 to the
     final value at lambda=1 */
-const Expression& Perturbation::defaultFunction()
+const Expression &Perturbation::defaultFunction()
 {
     if (not default_equation)
     {
-        QMutexLocker lkr( globalMutex() );
+        QMutexLocker lkr(globalMutex());
 
         if (not default_equation)
         {
             default_equation = new Expression();
 
-            *default_equation = ((1 - Perturbation::symbols().lambda()) *
-                                            Perturbation::symbols().initial() ) +
-                                ( Perturbation::symbols().lambda() *
-                                            Perturbation::symbols().final() );
+            *default_equation = ((1 - Perturbation::symbols().lambda()) * Perturbation::symbols().initial()) +
+                                (Perturbation::symbols().lambda() * Perturbation::symbols().final());
         }
     }
 
@@ -147,28 +144,30 @@ const Expression& Perturbation::defaultFunction()
 }
 
 /** Constructor */
-Perturbation::Perturbation() : Property(), mapping_eqn( defaultFunction() )
-{}
+Perturbation::Perturbation() : Property(), mapping_eqn(defaultFunction())
+{
+}
 
-Perturbation::Perturbation(const PropertyMap &m)
-             : Property(), mapping_eqn( defaultFunction() ), map(m)
-{}
+Perturbation::Perturbation(const PropertyMap &m) : Property(), mapping_eqn(defaultFunction()), map(m)
+{
+}
 
-Perturbation::Perturbation(const Expression &equation, const PropertyMap &m)
-             : Property(), mapping_eqn(equation), map(m)
-{}
+Perturbation::Perturbation(const Expression &equation, const PropertyMap &m) : Property(), mapping_eqn(equation), map(m)
+{
+}
 
 /** Copy constructor */
-Perturbation::Perturbation(const Perturbation &other)
-             : Property(other), mapping_eqn(other.mapping_eqn), map(other.map)
-{}
+Perturbation::Perturbation(const Perturbation &other) : Property(other), mapping_eqn(other.mapping_eqn), map(other.map)
+{
+}
 
 /** Destructor */
 Perturbation::~Perturbation()
-{}
+{
+}
 
 /** Copy assignment operator */
-Perturbation& Perturbation::operator=(const Perturbation &other)
+Perturbation &Perturbation::operator=(const Perturbation &other)
 {
     if (this != &other)
     {
@@ -184,8 +183,7 @@ Perturbation& Perturbation::operator=(const Perturbation &other)
 /** Comparison operator */
 bool Perturbation::operator==(const Perturbation &other) const
 {
-    return mapping_eqn == other.mapping_eqn and map == other.map and
-           Property::operator==(other);
+    return mapping_eqn == other.mapping_eqn and map == other.map and Property::operator==(other);
 }
 
 /** Comparison operator */
@@ -237,8 +235,7 @@ PerturbationPtr Perturbation::recreate(const PropertyMap &new_map) const
 
 /** Recreate this perturbation, replacing both the mapping function and
     the property map */
-PerturbationPtr Perturbation::recreate(const Expression &mapping_function,
-                                       const PropertyMap &new_map) const
+PerturbationPtr Perturbation::recreate(const Expression &mapping_function, const PropertyMap &new_map) const
 {
     if (mapping_function == mapping_eqn and new_map == map)
     {
@@ -283,10 +280,9 @@ PerturbationPtr Perturbation::substitute(const Identities &identities) const
 
     alpha_perturbations = lambda_perturbations.substitute(lam, alpha);
 */
-PerturbationPtr Perturbation::substitute(const Symbol &old_symbol,
-                                         const Symbol &new_symbol) const
+PerturbationPtr Perturbation::substitute(const Symbol &old_symbol, const Symbol &new_symbol) const
 {
-    return this->substitute( old_symbol == Expression(new_symbol) );
+    return this->substitute(old_symbol == Expression(new_symbol));
 }
 
 /** Return all of the child perturbations that make up
@@ -294,7 +290,7 @@ PerturbationPtr Perturbation::substitute(const Symbol &old_symbol,
 QList<PerturbationPtr> Perturbation::children() const
 {
     QList<PerturbationPtr> ret;
-    ret.append( *this );
+    ret.append(*this);
     return ret;
 }
 
@@ -304,8 +300,8 @@ QList<PerturbationPtr> Perturbation::children() const
 QSet<Symbol> Perturbation::requiredSymbols() const
 {
     QSet<Symbol> syms = mapping_eqn.symbols();
-    syms.remove( symbols().initial() );
-    syms.remove( symbols().final() );
+    syms.remove(symbols().initial());
+    syms.remove(symbols().final());
 
     return syms;
 }
@@ -315,14 +311,14 @@ QSet<Symbol> Perturbation::requiredSymbols() const
     the final value (represented using symbols().final()) as a
     function of the reaction coordinate (which is normally
     represented using symbols().lambda()) */
-const Expression& Perturbation::mappingFunction() const
+const Expression &Perturbation::mappingFunction() const
 {
     return mapping_eqn;
 }
 
 /** Return the property map used to find the properties used,
     and affected by this perturbation */
-const PropertyMap& Perturbation::propertyMap() const
+const PropertyMap &Perturbation::propertyMap() const
 {
     return map;
 }
@@ -340,23 +336,23 @@ Molecule Perturbation::perturb(const Molecule &molecule, const Values &values) c
     return editor.commit();
 }
 
-const char* Perturbation::typeName()
+const char *Perturbation::typeName()
 {
     return "SireMol::Perturbation";
 }
 
-Q_GLOBAL_STATIC( SharedPolyPointer<Perturbation>, perturbationPtr );
+Q_GLOBAL_STATIC(SharedPolyPointer<Perturbation>, perturbationPtr);
 
-const NullPerturbation& Perturbation::null()
+const NullPerturbation &Perturbation::null()
 {
     SharedPolyPointer<Perturbation> *ptr = perturbationPtr();
 
     if (ptr->constData() == 0)
     {
-        QMutexLocker lkr( globalMutex() );
+        QMutexLocker lkr(globalMutex());
 
         if (ptr->constData() == 0)
-            *ptr = static_cast<Perturbation*>(new NullPerturbation());
+            *ptr = static_cast<Perturbation *>(new NullPerturbation());
     }
 
     return ptr->constData()->asA<NullPerturbation>();
@@ -372,7 +368,7 @@ QDataStream &operator<<(QDataStream &ds, const NullPerturbation &nullpert)
 {
     writeHeader(ds, r_nullpert, 1);
 
-    ds << static_cast<const Perturbation&>(nullpert);
+    ds << static_cast<const Perturbation &>(nullpert);
 
     return ds;
 }
@@ -383,7 +379,7 @@ QDataStream &operator>>(QDataStream &ds, NullPerturbation &nullpert)
 
     if (v == 1)
     {
-        ds >> static_cast<Perturbation&>(nullpert);
+        ds >> static_cast<Perturbation &>(nullpert);
     }
     else
         throw version_error(v, "1", r_nullpert, CODELOC);
@@ -391,22 +387,25 @@ QDataStream &operator>>(QDataStream &ds, NullPerturbation &nullpert)
     return ds;
 }
 
-NullPerturbation::NullPerturbation() : ConcreteProperty<NullPerturbation,Perturbation>()
-{}
-
-NullPerturbation::NullPerturbation(const NullPerturbation &other)
-                 : ConcreteProperty<NullPerturbation,Perturbation>(other)
-{}
-
-NullPerturbation::~NullPerturbation()
-{}
-
-const char* NullPerturbation::typeName()
+NullPerturbation::NullPerturbation() : ConcreteProperty<NullPerturbation, Perturbation>()
 {
-    return QMetaType::typeName( qMetaTypeId<NullPerturbation>() );
 }
 
-NullPerturbation& NullPerturbation::operator=(const NullPerturbation &other)
+NullPerturbation::NullPerturbation(const NullPerturbation &other)
+    : ConcreteProperty<NullPerturbation, Perturbation>(other)
+{
+}
+
+NullPerturbation::~NullPerturbation()
+{
+}
+
+const char *NullPerturbation::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullPerturbation>());
+}
+
+NullPerturbation &NullPerturbation::operator=(const NullPerturbation &other)
 {
     Perturbation::operator=(other);
     return *this;
@@ -432,13 +431,14 @@ QSet<QString> NullPerturbation::requiredProperties() const
     return QSet<QString>();
 }
 
-bool NullPerturbation::wouldChange(const Molecule&, const Values&) const
+bool NullPerturbation::wouldChange(const Molecule &, const Values &) const
 {
     return false;
 }
 
-void NullPerturbation::perturbMolecule(MolEditor&, const Values&) const
-{}
+void NullPerturbation::perturbMolecule(MolEditor &, const Values &) const
+{
+}
 
 //////////
 ////////// Implementation of Perturbations
@@ -447,14 +447,13 @@ void NullPerturbation::perturbMolecule(MolEditor&, const Values&) const
 static const RegisterMetaType<Perturbations> r_perts;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const Perturbations &perts)
+QDataStream &operator<<(QDataStream &ds, const Perturbations &perts)
 {
     writeHeader(ds, r_perts, 1);
 
     SharedDataStream sds(ds);
 
-    sds << perts.perts << static_cast<const Perturbation&>(perts);
+    sds << perts.perts << static_cast<const Perturbation &>(perts);
 
     return ds;
 }
@@ -468,7 +467,7 @@ QDataStream &operator>>(QDataStream &ds, Perturbations &perts)
     {
         SharedDataStream sds(ds);
 
-        sds >> perts.perts >> static_cast<Perturbation&>(perts);
+        sds >> perts.perts >> static_cast<Perturbation &>(perts);
 
         perts.makeSane();
     }
@@ -487,37 +486,34 @@ void Perturbations::makeSane()
 
     QList<PerturbationPtr> kids = this->children();
 
-    for (QList<PerturbationPtr>::const_iterator it = kids.constBegin();
-         it != kids.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = kids.constBegin(); it != kids.constEnd(); ++it)
     {
         if ((*it)->isA<NullPerturbation>())
             continue;
 
-        else if ((*it)->isA<GeometryPerturbation>() and
-                 not (*it)->isA<GeometryPerturbations>())
+        else if ((*it)->isA<GeometryPerturbation>() and not(*it)->isA<GeometryPerturbations>())
         {
-            geom_perts.append( (*it)->asA<GeometryPerturbation>() );
+            geom_perts.append((*it)->asA<GeometryPerturbation>());
         }
-        else if (not (*it)->isA<Perturbations>())
+        else if (not(*it)->isA<Perturbations>())
         {
             norm_perts.append(*it);
         }
     }
 
-    norm_perts.append( GeometryPerturbations(geom_perts) );
+    norm_perts.append(GeometryPerturbations(geom_perts));
 
     perts = norm_perts;
 }
 
 /** Constructor */
-Perturbations::Perturbations()
-              : ConcreteProperty<Perturbations,Perturbation>(Expression())
-{}
+Perturbations::Perturbations() : ConcreteProperty<Perturbations, Perturbation>(Expression())
+{
+}
 
 /** Construct just to perform the passed perturbation */
 Perturbations::Perturbations(const Perturbation &perturbation)
-              : ConcreteProperty<Perturbations,Perturbation>(Expression())
+    : ConcreteProperty<Perturbations, Perturbation>(Expression())
 {
     perts.append(perturbation);
     this->makeSane();
@@ -525,24 +521,24 @@ Perturbations::Perturbations(const Perturbation &perturbation)
 
 /** Construct to perform the passed perturbations */
 Perturbations::Perturbations(const QList<PerturbationPtr> &perturbations)
-              : ConcreteProperty<Perturbations,Perturbation>(Expression()),
-                perts(perturbations)
+    : ConcreteProperty<Perturbations, Perturbation>(Expression()), perts(perturbations)
 {
     this->makeSane();
 }
 
 /** Copy constructor */
 Perturbations::Perturbations(const Perturbations &other)
-              : ConcreteProperty<Perturbations,Perturbation>(other),
-                perts(other.perts)
-{}
+    : ConcreteProperty<Perturbations, Perturbation>(other), perts(other.perts)
+{
+}
 
 /** Destructor */
 Perturbations::~Perturbations()
-{}
+{
+}
 
 /** Copy assignment operator */
-Perturbations& Perturbations::operator=(const Perturbations &other)
+Perturbations &Perturbations::operator=(const Perturbations &other)
 {
     perts = other.perts;
     Perturbation::operator=(other);
@@ -561,9 +557,9 @@ bool Perturbations::operator!=(const Perturbations &other) const
     return perts != other.perts or Perturbation::operator!=(other);
 }
 
-const char* Perturbations::typeName()
+const char *Perturbations::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Perturbations>() );
+    return QMetaType::typeName(qMetaTypeId<Perturbations>());
 }
 
 QString Perturbations::toString() const
@@ -573,11 +569,11 @@ QString Perturbations::toString() const
     if (perts.isEmpty())
         return QObject::tr("Perturbations::null");
 
-    lines.append( QObject::tr("Perturbations:") );
+    lines.append(QObject::tr("Perturbations:"));
 
     foreach (PerturbationPtr pert, perts)
     {
-        lines.append( QString("   %1").arg(pert->toString()) );
+        lines.append(QString("   %1").arg(pert->toString()));
     }
 
     return lines.join("\n");
@@ -595,11 +591,9 @@ PerturbationPtr Perturbations::recreate(const Expression &mapping_function) cons
 {
     QList<PerturbationPtr> new_perts;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append( it->read().recreate(mapping_function) );
+        new_perts.append(it->read().recreate(mapping_function));
     }
 
     Perturbations ret(*this);
@@ -614,11 +608,9 @@ PerturbationPtr Perturbations::recreate(const PropertyMap &map) const
 {
     QList<PerturbationPtr> new_perts;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append( it->read().recreate(map) );
+        new_perts.append(it->read().recreate(map));
     }
 
     Perturbations ret(*this);
@@ -629,16 +621,13 @@ PerturbationPtr Perturbations::recreate(const PropertyMap &map) const
 
 /** Return a re-created version of this set of perturbations where all child
     perturbations are changed to use the passed mapping function and property map */
-PerturbationPtr Perturbations::recreate(const Expression &mapping_function,
-                                        const PropertyMap &map) const
+PerturbationPtr Perturbations::recreate(const Expression &mapping_function, const PropertyMap &map) const
 {
     QList<PerturbationPtr> new_perts;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append( it->read().recreate(mapping_function,map) );
+        new_perts.append(it->read().recreate(mapping_function, map));
     }
 
     Perturbations ret(*this);
@@ -657,11 +646,9 @@ PerturbationPtr Perturbations::substitute(const Identities &identities) const
 {
     QList<PerturbationPtr> new_perts;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append( it->read().substitute(identities) );
+        new_perts.append(it->read().substitute(identities));
     }
 
     Perturbations ret(*this);
@@ -670,8 +657,7 @@ PerturbationPtr Perturbations::substitute(const Identities &identities) const
     return ret;
 }
 
-PerturbationPtr Perturbations::substitute(const SireCAS::Symbol &old_symbol,
-                                          const SireCAS::Symbol &new_symbol) const
+PerturbationPtr Perturbations::substitute(const SireCAS::Symbol &old_symbol, const SireCAS::Symbol &new_symbol) const
 {
     return Perturbation::substitute(old_symbol, new_symbol);
 }
@@ -682,9 +668,7 @@ QList<PerturbationPtr> Perturbations::children() const
 {
     QList<PerturbationPtr> kids;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         kids += it->read().children();
     }
@@ -697,9 +681,7 @@ QSet<Symbol> Perturbations::requiredSymbols() const
 {
     QSet<Symbol> syms;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         syms += it->read().requiredSymbols();
     }
@@ -713,9 +695,7 @@ QSet<QString> Perturbations::requiredProperties() const
 {
     QSet<QString> props;
 
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         props += it->read().requiredProperties();
     }
@@ -729,19 +709,17 @@ bool Perturbations::wouldChange(const Molecule &molecule, const Values &values) 
 {
     try
     {
-        for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-             it != perts.constEnd();
-             ++it)
+        for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
         {
-            if (it->read().wouldChange(molecule,values))
+            if (it->read().wouldChange(molecule, values))
                 return true;
         }
 
         return false;
     }
-    catch(...)
+    catch (...)
     {
-        //if an error occured, then the molecule won't be changed
+        // if an error occured, then the molecule won't be changed
         return false;
     }
 }
@@ -750,9 +728,7 @@ bool Perturbations::wouldChange(const Molecule &molecule, const Values &values) 
     specified lambda value */
 void Perturbations::perturbMolecule(MolEditor &molecule, const Values &values) const
 {
-    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<PerturbationPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         it->read().perturbMolecule(molecule, values);
     }

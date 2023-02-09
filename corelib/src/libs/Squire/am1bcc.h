@@ -28,83 +28,78 @@
 #ifndef SQUIRE_AM1BCC_H
 #define SQUIRE_AM1BCC_H
 
-#include "qmchargecalculator.h"
 #include "mopac.h"
+#include "qmchargecalculator.h"
 
 SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class AM1BCC;
+    class AM1BCC;
 }
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::AM1BCC&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::AM1BCC&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::AM1BCC &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::AM1BCC &);
 
 namespace Squire
 {
 
-/** This charge calculator calculates AM1-BCC partial
-    atomic charges
+    /** This charge calculator calculates AM1-BCC partial
+        atomic charges
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT AM1BCC
-        : public SireBase::ConcreteProperty<AM1BCC,QMChargeCalculator>
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT AM1BCC : public SireBase::ConcreteProperty<AM1BCC, QMChargeCalculator>
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const AM1BCC&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, AM1BCC&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const AM1BCC &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, AM1BCC &);
 
-public:
-    AM1BCC();
-    AM1BCC(const AM1BCC &other);
+    public:
+        AM1BCC();
+        AM1BCC(const AM1BCC &other);
 
-    ~AM1BCC();
+        ~AM1BCC();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    AM1BCC& operator=(const AM1BCC &other);
+        AM1BCC &operator=(const AM1BCC &other);
 
-    bool operator==(const AM1BCC &other) const;
-    bool operator!=(const AM1BCC &other) const;
+        bool operator==(const AM1BCC &other) const;
+        bool operator!=(const AM1BCC &other) const;
 
-    void setEnvironment(const QString &variable, const QString &value);
+        void setEnvironment(const QString &variable, const QString &value);
 
-    const QHash<QString,QString>& environment() const;
+        const QHash<QString, QString> &environment() const;
 
-    QString environment(const QString &variable) const;
+        QString environment(const QString &variable) const;
 
-    void setTotalCharge(int charge);
-    int totalCharge() const;
+        void setTotalCharge(int charge);
+        int totalCharge() const;
 
-    void setScaleFactor(double sclfac);
+        void setScaleFactor(double sclfac);
 
-    AtomCharges operator()(const PartialMolecule &molecule,
-                           const PropertyMap &map = PropertyMap()) const;
+        AtomCharges operator()(const PartialMolecule &molecule, const PropertyMap &map = PropertyMap()) const;
 
-    bool mayChangeCharges(const PartialMolecule &oldmol,
-                          const PartialMolecule &newmol,
-                          const PropertyMap &map = PropertyMap()) const;
+        bool mayChangeCharges(const PartialMolecule &oldmol, const PartialMolecule &newmol,
+                              const PropertyMap &map = PropertyMap()) const;
 
-private:
-    QString getAmberHome() const;
+    private:
+        QString getAmberHome() const;
 
-    AtomCharges convertAM1MullikenToAM1BCC(const AtomCharges &am1mulliken,
-                                           const Molecule &molecule,
-                                           const PropertyMap &map,
-                                           const QString &amberhome) const;
+        AtomCharges convertAM1MullikenToAM1BCC(const AtomCharges &am1mulliken, const Molecule &molecule,
+                                               const PropertyMap &map, const QString &amberhome) const;
 
-    /** Currently, this uses Mopac to calculate the
-        AM1 Mulliken charges */
-    Mopac mopac;
-};
+        /** Currently, this uses Mopac to calculate the
+            AM1 Mulliken charges */
+        Mopac mopac;
+    };
 
-}
+} // namespace Squire
 
-Q_DECLARE_METATYPE( Squire::AM1BCC )
+Q_DECLARE_METATYPE(Squire::AM1BCC)
 
-SIRE_EXPOSE_CLASS( Squire::AM1BCC )
+SIRE_EXPOSE_CLASS(Squire::AM1BCC)
 
 SIRE_END_HEADER
 

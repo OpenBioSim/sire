@@ -37,19 +37,17 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty<SireUnits::Dimension::MolarEnergy> AtomEnergies;
+    typedef AtomProperty<SireUnits::Dimension::MolarEnergy> AtomEnergies;
 
 }
 
-Q_DECLARE_METATYPE( SireMol::AtomEnergies );
+Q_DECLARE_METATYPE(SireMol::AtomEnergies);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireUnits::Dimension::MolarEnergy,
-                           SireMol::AtomEnergies )
+SIRE_EXPOSE_ATOM_PROPERTY(SireUnits::Dimension::MolarEnergy, SireMol::AtomEnergies)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireUnits::Dimension::MolarEnergy>;
 #endif
-
 
 SIRE_END_HEADER
 

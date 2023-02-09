@@ -36,77 +36,77 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class AtomIdx;
+    class AtomIdx;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomIdx&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomIdx&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomIdx &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomIdx &);
 
 namespace SireMol
 {
 
-class MoleculeInfo;
+    class MoleculeInfo;
 
-/** This is an ID object that is used to index atoms (e.g. index
-    in a list or array, or in a molecule).
+    /** This is an ID object that is used to index atoms (e.g. index
+        in a list or array, or in a molecule).
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomIdx : public SireID::Index_T_<AtomIdx>, public AtomID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomIdx&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomIdx&);
-
-public:
-    AtomIdx();
-    explicit AtomIdx(qint32 idx);
-
-    AtomIdx(const AtomIdx &other);
-
-    ~AtomIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomIdx : public SireID::Index_T_<AtomIdx>, public AtomID
     {
-        return AtomIdx::typeName();
-    }
 
-    AtomIdx* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomIdx &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomIdx &);
 
-    static AtomIdx null();
+    public:
+        AtomIdx();
+        explicit AtomIdx(qint32 idx);
 
-    bool isNull() const;
+        AtomIdx(const AtomIdx &other);
 
-    uint hash() const;
+        ~AtomIdx();
 
-    QString toString() const;
+        static const char *typeName();
 
-    AtomIdx& operator=(const AtomIdx &other);
+        const char *what() const
+        {
+            return AtomIdx::typeName();
+        }
 
-    bool operator==(const SireID::ID &other) const;
+        AtomIdx *clone() const;
 
-    using SireID::Index_T_<AtomIdx>::operator=;
+        static AtomIdx null();
 
-    using SireID::Index_T_<AtomIdx>::operator==;
-    using SireID::Index_T_<AtomIdx>::operator!=;
+        bool isNull() const;
 
-    using SireID::Index_T_<AtomIdx>::operator+=;
-    using SireID::Index_T_<AtomIdx>::operator++;
-    using SireID::Index_T_<AtomIdx>::operator-=;
-    using SireID::Index_T_<AtomIdx>::operator--;
+        uint hash() const;
 
-    using SireID::Index_T_<AtomIdx>::map;
+        QString toString() const;
 
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
-};
+        AtomIdx &operator=(const AtomIdx &other);
 
-}
+        bool operator==(const SireID::ID &other) const;
+
+        using SireID::Index_T_<AtomIdx>::operator=;
+
+        using SireID::Index_T_<AtomIdx>::operator==;
+        using SireID::Index_T_<AtomIdx>::operator!=;
+
+        using SireID::Index_T_<AtomIdx>::operator+=;
+        using SireID::Index_T_<AtomIdx>::operator++;
+        using SireID::Index_T_<AtomIdx>::operator-=;
+        using SireID::Index_T_<AtomIdx>::operator--;
+
+        using SireID::Index_T_<AtomIdx>::map;
+
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::AtomIdx);
 
-SIRE_EXPOSE_CLASS( SireMol::AtomIdx )
+SIRE_EXPOSE_CLASS(SireMol::AtomIdx)
 
 SIRE_END_HEADER
 

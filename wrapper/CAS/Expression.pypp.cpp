@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 #include "expression.h"
 
+#include "expressions.h"
+
 #include "functions.h"
 
 #include "i.h"

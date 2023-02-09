@@ -32,37 +32,37 @@ using namespace SireMol;
 
 static const RegisterMetaType<CGAtomIdx> r_cgatomidx;
 
-QDataStream &operator<<(QDataStream &ds,
-                                       const CGAtomIdx &cgatomidx)
+QDataStream &operator<<(QDataStream &ds, const CGAtomIdx &cgatomidx)
 {
     ds << cgatomidx._cgidx << cgatomidx._atmidx;
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                       CGAtomIdx &cgatomidx)
+QDataStream &operator>>(QDataStream &ds, CGAtomIdx &cgatomidx)
 {
     ds >> cgatomidx._cgidx >> cgatomidx._atmidx;
     return ds;
 }
 
 CGAtomIdx::CGAtomIdx() : AtomID()
-{}
+{
+}
 
-CGAtomIdx::CGAtomIdx(CGIdx cgid, SireID::Index atomid)
-      : AtomID(), _cgidx(cgid), _atmidx(atomid)
-{}
+CGAtomIdx::CGAtomIdx(CGIdx cgid, SireID::Index atomid) : AtomID(), _cgidx(cgid), _atmidx(atomid)
+{
+}
 
-CGAtomIdx::CGAtomIdx(const CGAtomIdx &other)
-      : AtomID(other), _cgidx(other._cgidx), _atmidx(other._atmidx)
-{}
+CGAtomIdx::CGAtomIdx(const CGAtomIdx &other) : AtomID(other), _cgidx(other._cgidx), _atmidx(other._atmidx)
+{
+}
 
 CGAtomIdx::~CGAtomIdx()
-{}
+{
+}
 
 CGAtomIdx CGAtomIdx::null()
 {
-    return CGAtomIdx( CGIdx::null(), SireID::Index::null() );
+    return CGAtomIdx(CGIdx::null(), SireID::Index::null());
 }
 
 bool CGAtomIdx::isNull() const
@@ -80,7 +80,7 @@ QString CGAtomIdx::toString() const
     return QString("{%1,%2}").arg(_cgidx.toString(), _atmidx.toString());
 }
 
-CGAtomIdx& CGAtomIdx::operator=(const CGAtomIdx &other)
+CGAtomIdx &CGAtomIdx::operator=(const CGAtomIdx &other)
 {
     _cgidx = other._cgidx;
     _atmidx = other._atmidx;
@@ -125,27 +125,26 @@ CGAtomIdx CGIdx::operator+(const SireID::Index &other) const
 namespace SireMol
 {
 
-CGAtomIdx operator+(const SireID::Index &idx, const CGIdx &cgidx)
-{
-    return CGAtomIdx(cgidx, idx);
-}
+    CGAtomIdx operator+(const SireID::Index &idx, const CGIdx &cgidx)
+    {
+        return CGAtomIdx(cgidx, idx);
+    }
 
-}
+} // namespace SireMol
 
 QList<AtomIdx> CGAtomIdx::map(const MolInfo &molinfo) const
 {
     QList<AtomIdx> atomidxs;
-    atomidxs.append( molinfo.getAtom(_cgidx, _atmidx) );
+    atomidxs.append(molinfo.getAtom(_cgidx, _atmidx));
     return atomidxs;
 }
 
-const char* CGAtomIdx::typeName()
+const char *CGAtomIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<CGAtomIdx>() );
+    return QMetaType::typeName(qMetaTypeId<CGAtomIdx>());
 }
 
-CGAtomIdx* CGAtomIdx::clone() const
+CGAtomIdx *CGAtomIdx::clone() const
 {
     return new CGAtomIdx(*this);
 }
-

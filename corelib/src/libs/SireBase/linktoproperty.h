@@ -37,69 +37,69 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class LinkToProperty;
+    class LinkToProperty;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::LinkToProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::LinkToProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::LinkToProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::LinkToProperty &);
 
 namespace SireBase
 {
 
-/** This property is actually an alias for another property.
+    /** This property is actually an alias for another property.
 
-    It allows a single property to be referenced by multiple
-    different names. Also, optional identifiers can be used
-    so that this link only applies to properties in specifically
-    identified objects.
+        It allows a single property to be referenced by multiple
+        different names. Also, optional identifiers can be used
+        so that this link only applies to properties in specifically
+        identified objects.
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT LinkToProperty : public ConcreteProperty<LinkToProperty,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT LinkToProperty : public ConcreteProperty<LinkToProperty, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const LinkToProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, LinkToProperty&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const LinkToProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, LinkToProperty &);
 
-public:
-    LinkToProperty();
+    public:
+        LinkToProperty();
 
-    LinkToProperty(const PropertyName &source);
-    LinkToProperty(const PropertyName &source, const SireID::ID &filter);
+        LinkToProperty(const PropertyName &source);
+        LinkToProperty(const PropertyName &source, const SireID::ID &filter);
 
-    LinkToProperty(const LinkToProperty &other);
+        LinkToProperty(const LinkToProperty &other);
 
-    ~LinkToProperty();
+        ~LinkToProperty();
 
-    LinkToProperty& operator=(const LinkToProperty &other);
+        LinkToProperty &operator=(const LinkToProperty &other);
 
-    bool operator==(const LinkToProperty &other) const;
-    bool operator!=(const LinkToProperty &other) const;
+        bool operator==(const LinkToProperty &other) const;
+        bool operator!=(const LinkToProperty &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const PropertyName& target() const;
+        const PropertyName &target() const;
 
-    const SireID::ID& filter() const;
+        const SireID::ID &filter() const;
 
-    bool isFiltered() const;
+        bool isFiltered() const;
 
-private:
-    /** The target of this alias */
-    PropertyName target_source;
+    private:
+        /** The target of this alias */
+        PropertyName target_source;
 
-    /** The object identity filter used to select
-        only properties that match identified objects */
-    SireID::Identifier id_filter;
-};
+        /** The object identity filter used to select
+            only properties that match identified objects */
+        SireID::Identifier id_filter;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::LinkToProperty )
+Q_DECLARE_METATYPE(SireBase::LinkToProperty)
 
-SIRE_EXPOSE_CLASS( SireBase::LinkToProperty )
+SIRE_EXPOSE_CLASS(SireBase::LinkToProperty)
 
 SIRE_END_HEADER
 

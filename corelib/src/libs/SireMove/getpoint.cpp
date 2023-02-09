@@ -27,10 +27,10 @@
 
 #include "getpoint.h"
 
-#include "SireMol/moleculeview.h"
-#include "SireMol/evaluator.h"
 #include "SireMol/atom.h"
 #include "SireMol/atomcoords.h"
+#include "SireMol/evaluator.h"
+#include "SireMol/moleculeview.h"
 #include "SireMol/mover.hpp"
 #include "SireMol/selector.hpp"
 
@@ -53,14 +53,13 @@ using namespace SireStream;
 /////////// Implementation of GetPoint
 ///////////
 
-static const RegisterMetaType<GetPoint> r_getpoint( MAGIC_ONLY,
-                                                    GetPoint::typeName() );
+static const RegisterMetaType<GetPoint> r_getpoint(MAGIC_ONLY, GetPoint::typeName());
 
 QDataStream &operator<<(QDataStream &ds, const GetPoint &getpoint)
 {
     writeHeader(ds, r_getpoint, 1);
 
-    ds << static_cast<const Property&>(getpoint);
+    ds << static_cast<const Property &>(getpoint);
 
     return ds;
 }
@@ -71,7 +70,7 @@ QDataStream &operator>>(QDataStream &ds, GetPoint &getpoint)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(getpoint);
+        ds >> static_cast<Property &>(getpoint);
     }
     else
         throw version_error(v, "1", r_getpoint, CODELOC);
@@ -81,18 +80,21 @@ QDataStream &operator>>(QDataStream &ds, GetPoint &getpoint)
 
 /** Constructor */
 GetPoint::GetPoint() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 GetPoint::GetPoint(const GetPoint &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 GetPoint::~GetPoint()
-{}
+{
+}
 
 /** Copy assignment operator */
-GetPoint& GetPoint::operator=(const GetPoint &other)
+GetPoint &GetPoint::operator=(const GetPoint &other)
 {
     Property::operator=(other);
     return *this;
@@ -110,7 +112,7 @@ bool GetPoint::operator!=(const GetPoint &other) const
     return Property::operator!=(other);
 }
 
-const char* GetPoint::typeName()
+const char *GetPoint::typeName()
 {
     return "SireMove::GetPoint";
 }
@@ -139,12 +141,11 @@ NullGetPoint GetPoint::null()
 
 static const RegisterMetaType<NullGetPoint> r_nullgetpoint;
 
-QDataStream &operator<<(QDataStream &ds,
-                                        const NullGetPoint &getpoint)
+QDataStream &operator<<(QDataStream &ds, const NullGetPoint &getpoint)
 {
     writeHeader(ds, r_nullgetpoint, 1);
 
-    ds << static_cast<const GetPoint&>(getpoint);
+    ds << static_cast<const GetPoint &>(getpoint);
 
     return ds;
 }
@@ -155,7 +156,7 @@ QDataStream &operator>>(QDataStream &ds, NullGetPoint &getpoint)
 
     if (v == 1)
     {
-        ds >> static_cast<GetPoint&>(getpoint);
+        ds >> static_cast<GetPoint &>(getpoint);
     }
     else
         throw version_error(v, "1", r_nullgetpoint, CODELOC);
@@ -164,25 +165,27 @@ QDataStream &operator>>(QDataStream &ds, NullGetPoint &getpoint)
 }
 
 /** Constructor */
-NullGetPoint::NullGetPoint() : ConcreteProperty<NullGetPoint,GetPoint>()
-{}
+NullGetPoint::NullGetPoint() : ConcreteProperty<NullGetPoint, GetPoint>()
+{
+}
 
 /** Copy constructor */
-NullGetPoint::NullGetPoint(const NullGetPoint &other)
-             : ConcreteProperty<NullGetPoint,GetPoint>(other)
-{}
+NullGetPoint::NullGetPoint(const NullGetPoint &other) : ConcreteProperty<NullGetPoint, GetPoint>(other)
+{
+}
 
 /** Destructor */
 NullGetPoint::~NullGetPoint()
-{}
-
-const char* NullGetPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullGetPoint>() );
+}
+
+const char *NullGetPoint::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullGetPoint>());
 }
 
 /** Copy assignment operator */
-NullGetPoint& NullGetPoint::operator=(const NullGetPoint &other)
+NullGetPoint &NullGetPoint::operator=(const NullGetPoint &other)
 {
     GetPoint::operator=(other);
     return *this;
@@ -200,8 +203,7 @@ bool NullGetPoint::operator!=(const NullGetPoint &other) const
     return GetPoint::operator!=(other);
 }
 
-Vector NullGetPoint::getPoint(const MoleculeView &molecule,
-                              const PropertyMap &map) const
+Vector NullGetPoint::getPoint(const MoleculeView &molecule, const PropertyMap &map) const
 {
     return Vector(0);
 }
@@ -212,14 +214,13 @@ Vector NullGetPoint::getPoint(const MoleculeView &molecule,
 
 static const RegisterMetaType<GetCOGPoint> r_getcogpoint;
 
-QDataStream &operator<<(QDataStream &ds,
-                                        const GetCOGPoint &getpoint)
+QDataStream &operator<<(QDataStream &ds, const GetCOGPoint &getpoint)
 {
     writeHeader(ds, r_getcogpoint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << getpoint.atomids << static_cast<const GetPoint&>(getpoint);
+    sds << getpoint.atomids << static_cast<const GetPoint &>(getpoint);
 
     return ds;
 }
@@ -232,7 +233,7 @@ QDataStream &operator>>(QDataStream &ds, GetCOGPoint &getpoint)
     {
         SharedDataStream sds(ds);
 
-        sds >> getpoint.atomids >> static_cast<GetPoint&>(getpoint);
+        sds >> getpoint.atomids >> static_cast<GetPoint &>(getpoint);
     }
     else
         throw version_error(v, "1", r_getcogpoint, CODELOC);
@@ -241,47 +242,47 @@ QDataStream &operator>>(QDataStream &ds, GetCOGPoint &getpoint)
 }
 
 /** Constructor */
-GetCOGPoint::GetCOGPoint() : ConcreteProperty<GetCOGPoint,GetPoint>()
-{}
+GetCOGPoint::GetCOGPoint() : ConcreteProperty<GetCOGPoint, GetPoint>()
+{
+}
 
 /** Construct to get the COG of the atoms in the molecule that match
     the passed AtomID */
-GetCOGPoint::GetCOGPoint(const AtomID &atomid)
-            : ConcreteProperty<GetCOGPoint,GetPoint>(),
-              atomids(atomid)
-{}
+GetCOGPoint::GetCOGPoint(const AtomID &atomid) : ConcreteProperty<GetCOGPoint, GetPoint>(), atomids(atomid)
+{
+}
 
 /** Construct to get the COG of the atoms in the molecule that
     match either of the two passed AtomIDs */
 GetCOGPoint::GetCOGPoint(const AtomID &atomid0, const AtomID &atomid1)
-            : ConcreteProperty<GetCOGPoint,GetPoint>(),
-              atomids(atomid0,atomid1)
-{}
+    : ConcreteProperty<GetCOGPoint, GetPoint>(), atomids(atomid0, atomid1)
+{
+}
 
 /** Construct to get the COG of the atoms in the molecule that
     match any of the passed AtomIDs */
-GetCOGPoint::GetCOGPoint(const QList<AtomIdentifier> &ids)
-            : ConcreteProperty<GetCOGPoint,GetPoint>(),
-              atomids(ids)
-{}
+GetCOGPoint::GetCOGPoint(const QList<AtomIdentifier> &ids) : ConcreteProperty<GetCOGPoint, GetPoint>(), atomids(ids)
+{
+}
 
 /** Copy constructor */
 GetCOGPoint::GetCOGPoint(const GetCOGPoint &other)
-            : ConcreteProperty<GetCOGPoint,GetPoint>(other),
-              atomids(other.atomids)
-{}
+    : ConcreteProperty<GetCOGPoint, GetPoint>(other), atomids(other.atomids)
+{
+}
 
 /** Destructor */
 GetCOGPoint::~GetCOGPoint()
-{}
-
-const char* GetCOGPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GetCOGPoint>() );
+}
+
+const char *GetCOGPoint::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<GetCOGPoint>());
 }
 
 /** Copy assignment operator */
-GetCOGPoint& GetCOGPoint::operator=(const GetCOGPoint &other)
+GetCOGPoint &GetCOGPoint::operator=(const GetCOGPoint &other)
 {
     GetPoint::operator=(other);
     atomids = other.atomids;
@@ -302,19 +303,18 @@ bool GetCOGPoint::operator!=(const GetCOGPoint &other) const
 }
 
 /** Return the AtomID(s) used to limit the search for the point */
-const AtomID& GetCOGPoint::atomID() const
+const AtomID &GetCOGPoint::atomID() const
 {
     return atomids;
 }
 
-Vector GetCOGPoint::getPoint(const MoleculeView &molecule,
-                             const PropertyMap &map) const
+Vector GetCOGPoint::getPoint(const MoleculeView &molecule, const PropertyMap &map) const
 {
     if (atomids.IDs().isEmpty())
         return Evaluator(molecule).centerOfGeometry(map);
 
     else
-        return molecule.atoms(atomids,map).evaluate().centerOfGeometry(map);
+        return molecule.atoms(atomids, map).evaluate().centerOfGeometry(map);
 }
 
 ///////////
@@ -323,14 +323,13 @@ Vector GetCOGPoint::getPoint(const MoleculeView &molecule,
 
 static const RegisterMetaType<GetCOMPoint> r_getcompoint;
 
-QDataStream &operator<<(QDataStream &ds,
-                                        const GetCOMPoint &getpoint)
+QDataStream &operator<<(QDataStream &ds, const GetCOMPoint &getpoint)
 {
     writeHeader(ds, r_getcompoint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << getpoint.atomids << static_cast<const GetPoint&>(getpoint);
+    sds << getpoint.atomids << static_cast<const GetPoint &>(getpoint);
 
     return ds;
 }
@@ -343,7 +342,7 @@ QDataStream &operator>>(QDataStream &ds, GetCOMPoint &getpoint)
     {
         SharedDataStream sds(ds);
 
-        sds >> getpoint.atomids >> static_cast<GetPoint&>(getpoint);
+        sds >> getpoint.atomids >> static_cast<GetPoint &>(getpoint);
     }
     else
         throw version_error(v, "1", r_getcompoint, CODELOC);
@@ -352,47 +351,47 @@ QDataStream &operator>>(QDataStream &ds, GetCOMPoint &getpoint)
 }
 
 /** Constructor */
-GetCOMPoint::GetCOMPoint() : ConcreteProperty<GetCOMPoint,GetPoint>()
-{}
+GetCOMPoint::GetCOMPoint() : ConcreteProperty<GetCOMPoint, GetPoint>()
+{
+}
 
 /** Construct to get the COM of the atoms in the molecule that match
     the passed AtomID */
-GetCOMPoint::GetCOMPoint(const AtomID &atomid)
-            : ConcreteProperty<GetCOMPoint,GetPoint>(),
-              atomids(atomid)
-{}
+GetCOMPoint::GetCOMPoint(const AtomID &atomid) : ConcreteProperty<GetCOMPoint, GetPoint>(), atomids(atomid)
+{
+}
 
 /** Construct to get the COM of the atoms in the molecule that
     match either of the two passed AtomIDs */
 GetCOMPoint::GetCOMPoint(const AtomID &atomid0, const AtomID &atomid1)
-            : ConcreteProperty<GetCOMPoint,GetPoint>(),
-              atomids(atomid0,atomid1)
-{}
+    : ConcreteProperty<GetCOMPoint, GetPoint>(), atomids(atomid0, atomid1)
+{
+}
 
 /** Construct to get the COM of the atoms in the molecule that
     match any of the passed AtomIDs */
-GetCOMPoint::GetCOMPoint(const QList<AtomIdentifier> &ids)
-            : ConcreteProperty<GetCOMPoint,GetPoint>(),
-              atomids(ids)
-{}
+GetCOMPoint::GetCOMPoint(const QList<AtomIdentifier> &ids) : ConcreteProperty<GetCOMPoint, GetPoint>(), atomids(ids)
+{
+}
 
 /** Copy constructor */
 GetCOMPoint::GetCOMPoint(const GetCOMPoint &other)
-            : ConcreteProperty<GetCOMPoint,GetPoint>(other),
-              atomids(other.atomids)
-{}
+    : ConcreteProperty<GetCOMPoint, GetPoint>(other), atomids(other.atomids)
+{
+}
 
 /** Destructor */
 GetCOMPoint::~GetCOMPoint()
-{}
-
-const char* GetCOMPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GetCOMPoint>() );
+}
+
+const char *GetCOMPoint::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<GetCOMPoint>());
 }
 
 /** Copy assignment operator */
-GetCOMPoint& GetCOMPoint::operator=(const GetCOMPoint &other)
+GetCOMPoint &GetCOMPoint::operator=(const GetCOMPoint &other)
 {
     GetPoint::operator=(other);
     atomids = other.atomids;
@@ -412,20 +411,18 @@ bool GetCOMPoint::operator!=(const GetCOMPoint &other) const
 }
 
 /** Return the AtomID(s) used to limit the search for the point */
-const AtomID& GetCOMPoint::atomID() const
+const AtomID &GetCOMPoint::atomID() const
 {
     return atomids;
 }
 
-Vector GetCOMPoint::getPoint(const MoleculeView &molecule,
-                             const PropertyMap &map) const
+Vector GetCOMPoint::getPoint(const MoleculeView &molecule, const PropertyMap &map) const
 {
     if (atomids.IDs().isEmpty())
         return Evaluator(molecule).centerOfMass(map);
     else
-        return molecule.atoms(atomids,map).evaluate().centerOfMass(map);
+        return molecule.atoms(atomids, map).evaluate().centerOfMass(map);
 }
-
 
 ///////////
 /////////// Implementation of GetCentroidPoint
@@ -433,14 +430,13 @@ Vector GetCOMPoint::getPoint(const MoleculeView &molecule,
 
 static const RegisterMetaType<GetCentroidPoint> r_getcentroidpoint;
 
-QDataStream &operator<<(QDataStream &ds,
-                                        const GetCentroidPoint &getpoint)
+QDataStream &operator<<(QDataStream &ds, const GetCentroidPoint &getpoint)
 {
     writeHeader(ds, r_getcentroidpoint, 1);
 
     SharedDataStream sds(ds);
 
-    sds << getpoint.atomids << static_cast<const GetPoint&>(getpoint);
+    sds << getpoint.atomids << static_cast<const GetPoint &>(getpoint);
 
     return ds;
 }
@@ -453,7 +449,7 @@ QDataStream &operator>>(QDataStream &ds, GetCentroidPoint &getpoint)
     {
         SharedDataStream sds(ds);
 
-        sds >> getpoint.atomids >> static_cast<GetPoint&>(getpoint);
+        sds >> getpoint.atomids >> static_cast<GetPoint &>(getpoint);
     }
     else
         throw version_error(v, "1", r_getcentroidpoint, CODELOC);
@@ -462,47 +458,49 @@ QDataStream &operator>>(QDataStream &ds, GetCentroidPoint &getpoint)
 }
 
 /** Constructor */
-GetCentroidPoint::GetCentroidPoint() : ConcreteProperty<GetCentroidPoint,GetPoint>()
-{}
+GetCentroidPoint::GetCentroidPoint() : ConcreteProperty<GetCentroidPoint, GetPoint>()
+{
+}
 
 /** Construct to get the centroid of the atoms in the molecule that match
     the passed AtomID */
 GetCentroidPoint::GetCentroidPoint(const AtomID &atomid)
-                 : ConcreteProperty<GetCentroidPoint,GetPoint>(),
-                   atomids(atomid)
-{}
+    : ConcreteProperty<GetCentroidPoint, GetPoint>(), atomids(atomid)
+{
+}
 
 /** Construct to get the centroid of the atoms in the molecule that
     match either of the two passed AtomIDs */
 GetCentroidPoint::GetCentroidPoint(const AtomID &atomid0, const AtomID &atomid1)
-                 : ConcreteProperty<GetCentroidPoint,GetPoint>(),
-                   atomids(atomid0,atomid1)
-{}
+    : ConcreteProperty<GetCentroidPoint, GetPoint>(), atomids(atomid0, atomid1)
+{
+}
 
 /** Construct to get the centroid of the atoms in the molecule that
     match any of the passed AtomIDs */
 GetCentroidPoint::GetCentroidPoint(const QList<AtomIdentifier> &ids)
-                 : ConcreteProperty<GetCentroidPoint,GetPoint>(),
-                   atomids(ids)
-{}
+    : ConcreteProperty<GetCentroidPoint, GetPoint>(), atomids(ids)
+{
+}
 
 /** Copy constructor */
 GetCentroidPoint::GetCentroidPoint(const GetCentroidPoint &other)
-                 : ConcreteProperty<GetCentroidPoint,GetPoint>(other),
-                   atomids(other.atomids)
-{}
+    : ConcreteProperty<GetCentroidPoint, GetPoint>(other), atomids(other.atomids)
+{
+}
 
 /** Destructor */
 GetCentroidPoint::~GetCentroidPoint()
-{}
-
-const char* GetCentroidPoint::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GetCentroidPoint>() );
+}
+
+const char *GetCentroidPoint::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<GetCentroidPoint>());
 }
 
 /** Copy assignment operator */
-GetCentroidPoint& GetCentroidPoint::operator=(const GetCentroidPoint &other)
+GetCentroidPoint &GetCentroidPoint::operator=(const GetCentroidPoint &other)
 {
     GetPoint::operator=(other);
     atomids = other.atomids;
@@ -522,16 +520,15 @@ bool GetCentroidPoint::operator!=(const GetCentroidPoint &other) const
 }
 
 /** Return the AtomID(s) used to limit the search for the point */
-const AtomID& GetCentroidPoint::atomID() const
+const AtomID &GetCentroidPoint::atomID() const
 {
     return atomids;
 }
 
-Vector GetCentroidPoint::getPoint(const MoleculeView &molecule,
-                                  const PropertyMap &map) const
+Vector GetCentroidPoint::getPoint(const MoleculeView &molecule, const PropertyMap &map) const
 {
     if (atomids.IDs().isEmpty())
         return Evaluator(molecule).centroid(map);
     else
-        return molecule.atoms(atomids,map).evaluate().centroid(map);
+        return molecule.atoms(atomids, map).evaluate().centroid(map);
 }

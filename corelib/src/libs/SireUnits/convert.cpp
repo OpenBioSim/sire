@@ -25,11 +25,11 @@
   *
 \*********************************************/
 
+#include <QMap>
+#include <QMutex>
+#include <QPair>
 #include <QString>
 #include <QStringList>
-#include <QMap>
-#include <QPair>
-#include <QMutex>
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,284 +42,255 @@
 namespace SireUnits
 {
 
-namespace Dimension
-{
-
-static void appendString(int M, QString rep, QStringList &pos, QStringList &neg)
-{
-    if (M > 1)
+    namespace Dimension
     {
-        pos.append( QString("%1^%2").arg(rep).arg(M) );
-    }
-    else if (M == 1)
-    {
-        pos.append(rep);
-    }
-    else if (M < 0)
-    {
-        neg.append( QString("%1%2").arg(rep).arg(M) );
-    }
-}
 
-static QString getGenericUnitString(int M, int L, int T, int C,
-                                    int t, int Q, int A)
-{
-    QStringList pos;
-    QStringList neg;
+        static void appendString(int M, QString rep, QStringList &pos, QStringList &neg)
+        {
+            if (M > 1)
+            {
+                pos.append(QString("%1^%2").arg(rep).arg(M));
+            }
+            else if (M == 1)
+            {
+                pos.append(rep);
+            }
+            else if (M < 0)
+            {
+                neg.append(QString("%1%2").arg(rep).arg(M));
+            }
+        }
 
-    appendString(M, "M", pos, neg);
-    appendString(L, "L", pos, neg);
-    appendString(T, "T", pos, neg);
-    appendString(C, "C", pos, neg);
-    appendString(t, "t", pos, neg);
-    appendString(Q, "Q", pos, neg);
-    appendString(A, "A", pos, neg);
+        static QString getGenericUnitString(int M, int L, int T, int C, int t, int Q, int A)
+        {
+            QStringList pos;
+            QStringList neg;
 
-    if (pos.isEmpty() and neg.isEmpty())
-        return "";
-    else if (neg.isEmpty())
-        return pos.join(" ");
-    else if (pos.isEmpty())
-        return neg.join(" ");
-    else
-        return QString("%1 %2").arg(pos.join(" "), neg.join(" "));
-}
+            appendString(M, "M", pos, neg);
+            appendString(L, "L", pos, neg);
+            appendString(T, "T", pos, neg);
+            appendString(C, "C", pos, neg);
+            appendString(t, "t", pos, neg);
+            appendString(Q, "Q", pos, neg);
+            appendString(A, "A", pos, neg);
 
-class DimensionKey
-{
-public:
-    template<int M, int L, int T, int C, int t, int Q, int A>
-    DimensionKey(const PhysUnit<M,L,T,C,t,Q,A> &unit)
-          : M_(M), L_(L), T_(T), C_(C), t_(t), Q_(Q), A_(A)
-    {}
+            if (pos.isEmpty() and neg.isEmpty())
+                return "";
+            else if (neg.isEmpty())
+                return pos.join(" ");
+            else if (pos.isEmpty())
+                return neg.join(" ");
+            else
+                return QString("%1 %2").arg(pos.join(" "), neg.join(" "));
+        }
 
-    DimensionKey(int M, int L, int T, int C, int t, int Q, int A)
-          : M_(M), L_(L), T_(T), C_(C), t_(t), Q_(Q), A_(A)
-    {}
+        class DimensionKey
+        {
+        public:
+            template <int M, int L, int T, int C, int t, int Q, int A>
+            DimensionKey(const PhysUnit<M, L, T, C, t, Q, A> &unit) : M_(M), L_(L), T_(T), C_(C), t_(t), Q_(Q), A_(A)
+            {
+            }
 
-    DimensionKey(const DimensionKey &other)
-          : M_(other.M_), L_(other.L_), T_(other.T_),
-            C_(other.C_), t_(other.t_), Q_(other.Q_), A_(other.A_)
-    {}
+            DimensionKey(int M, int L, int T, int C, int t, int Q, int A) : M_(M), L_(L), T_(T), C_(C), t_(t), Q_(Q), A_(A)
+            {
+            }
 
-    ~DimensionKey()
-    {}
+            DimensionKey(const DimensionKey &other)
+                : M_(other.M_), L_(other.L_), T_(other.T_), C_(other.C_), t_(other.t_), Q_(other.Q_), A_(other.A_)
+            {
+            }
 
-    int M_, L_, T_, C_, t_, Q_, A_;
+            ~DimensionKey()
+            {
+            }
 
-    bool operator==(const DimensionKey &other) const
-    {
-        return M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and
-               C_ == other.C_ and t_ == other.t_ and Q_ == other.Q_ and
-               A_ == other.A_;
-    }
+            int M_, L_, T_, C_, t_, Q_, A_;
 
-    bool operator!=(const DimensionKey &other) const
-    {
-        return not this->operator==(other);
-    }
+            bool operator==(const DimensionKey &other) const
+            {
+                return M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and C_ == other.C_ and t_ == other.t_ and
+                       Q_ == other.Q_ and A_ == other.A_;
+            }
 
-    bool operator<(const DimensionKey &other) const
-    {
-        return (M_ < other.M_) or
+            bool operator!=(const DimensionKey &other) const
+            {
+                return not this->operator==(other);
+            }
 
-               (M_ == other.M_ and L_ < other.L_) or
+            bool operator<(const DimensionKey &other) const
+            {
+                return (M_ < other.M_) or
 
-               (M_ == other.M_ and L_ == other.L_ and T_ < other.T_) or
+                       (M_ == other.M_ and L_ < other.L_) or
 
-               (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and
-                C_ < other.C_) or
+                       (M_ == other.M_ and L_ == other.L_ and T_ < other.T_) or
 
-               (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and
-                C_ == other.C_ and t_ < other.t_) or
+                       (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and C_ < other.C_) or
 
-               (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and
-                C_ == other.C_ and t_ == other.t_ and Q_ < other.Q_) or
+                       (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and C_ == other.C_ and t_ < other.t_) or
 
-               (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and
-                C_ == other.C_ and t_ == other.t_ and Q_ == other.Q_ and
-                A_ < other.A_);
-    }
+                       (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and C_ == other.C_ and t_ == other.t_ and
+                        Q_ < other.Q_) or
 
-    bool operator<=(const DimensionKey &other) const
-    {
-        return this->operator==(other) or this->operator<(other);
-    }
+                       (M_ == other.M_ and L_ == other.L_ and T_ == other.T_ and C_ == other.C_ and t_ == other.t_ and
+                        Q_ == other.Q_ and A_ < other.A_);
+            }
 
-    bool operator>=(const DimensionKey &other) const
-    {
-        return not this->operator<(other);
-    }
+            bool operator<=(const DimensionKey &other) const
+            {
+                return this->operator==(other) or this->operator<(other);
+            }
 
-    bool operator>(const DimensionKey &other) const
-    {
-        return not this->operator<=(other);
-    }
-};
+            bool operator>=(const DimensionKey &other) const
+            {
+                return not this->operator<(other);
+            }
 
-Q_GLOBAL_STATIC( QMutex, globalUnitMutex )
+            bool operator>(const DimensionKey &other) const
+            {
+                return not this->operator<=(other);
+            }
+        };
 
-boost::shared_ptr< QMap< DimensionKey,QPair<double,QString> > > default_strings;
+        Q_GLOBAL_STATIC(QMutex, globalUnitMutex)
 
-double convert_unspecified_to_internal(double value,
-                                       int M, int L, int T, int C,
-                                       int t, int Q, int A)
-{
-    QMutexLocker lkr( globalUnitMutex() );
+        boost::shared_ptr<QMap<DimensionKey, QPair<double, QString>>> default_strings;
 
-    QMap< DimensionKey,QPair<double,QString> >::const_iterator
-                 it = default_strings->constFind(DimensionKey(M,L,T,C,t,Q,A));
+        double convert_unspecified_to_internal(double value, int M, int L, int T, int C, int t, int Q, int A)
+        {
+            QMutexLocker lkr(globalUnitMutex());
 
-    if (it != default_strings->constEnd())
-    {
-        return value / it->first;
-    }
-    else
-    {
-        // this must already be in default internal units
-        return value;
-    }
-}
+            QMap<DimensionKey, QPair<double, QString>>::const_iterator it =
+                default_strings->constFind(DimensionKey(M, L, T, C, t, Q, A));
 
-void set_default_unit(double value, QString unit_string,
-                      int M, int L, int T, int C,
-                      int t, int Q, int A)
-{
-    QMutexLocker lkr( globalUnitMutex() );
+            if (it != default_strings->constEnd())
+            {
+                return value / it->first;
+            }
+            else
+            {
+                // this must already be in default internal units
+                return value;
+            }
+        }
 
-    if (default_strings == 0)
-    {
-        // create the default set
-        lkr.unlock();
-        getUnitString(M, L, T, C, t, Q, A);
-        lkr.relock();
-    }
+        void set_default_unit(double value, QString unit_string, int M, int L, int T, int C, int t, int Q, int A)
+        {
+            QMutexLocker lkr(globalUnitMutex());
 
-    unit_string = unit_string.simplified();
+            if (default_strings == 0)
+            {
+                // create the default set
+                lkr.unlock();
+                getUnitString(M, L, T, C, t, Q, A);
+                lkr.relock();
+            }
 
-    default_strings->insert( DimensionKey(M,L,T,C,t,Q,A),
-                             QPair<double,QString>(value, unit_string) );
-}
+            unit_string = unit_string.simplified();
 
-double get_default_unit(int M, int L, int T, int C, int t, int Q, int A)
-{
-    QMutexLocker lkr( globalUnitMutex() );
+            default_strings->insert(DimensionKey(M, L, T, C, t, Q, A), QPair<double, QString>(value, unit_string));
+        }
 
-    if (default_strings == 0)
-    {
-        // create the default set
-        lkr.unlock();
-        getUnitString(M, L, T, C, t, Q, A);
-        lkr.relock();
-    }
+        double get_default_unit(int M, int L, int T, int C, int t, int Q, int A)
+        {
+            QMutexLocker lkr(globalUnitMutex());
 
-    QMap< DimensionKey,QPair<double,QString> >::const_iterator
-                 it = default_strings->constFind(DimensionKey(M,L,T,C,t,Q,A));
+            if (default_strings == 0)
+            {
+                // create the default set
+                lkr.unlock();
+                getUnitString(M, L, T, C, t, Q, A);
+                lkr.relock();
+            }
 
-    if (it != default_strings->constEnd())
-    {
-        return it->first;
-    }
-    else
-    {
-        // this must already be in default internal units
-        return 1.0;
-    }
-}
+            QMap<DimensionKey, QPair<double, QString>>::const_iterator it =
+                default_strings->constFind(DimensionKey(M, L, T, C, t, Q, A));
 
-GeneralUnit GeneralUnit::getDefault() const
-{
-    GeneralUnit ret(*this);
+            if (it != default_strings->constEnd())
+            {
+                return it->first;
+            }
+            else
+            {
+                // this must already be in default internal units
+                return 1.0;
+            }
+        }
 
-    ret.setScale(get_default_unit(Mass, Length, Time, Charge,
-                                  temperature, Quantity, Angle));
+        GeneralUnit GeneralUnit::getDefault() const
+        {
+            GeneralUnit ret(*this);
 
-    return ret;
-}
+            ret.setScale(get_default_unit(Mass, Length, Time, Charge, temperature, Quantity, Angle));
 
-void GeneralUnit::setAsDefault(const QString &unit_name) const
-{
-    set_default_unit(this->value(), unit_name,
-                     Mass, Length, Time, Charge, temperature,
-                     Quantity, Angle);
-}
+            return ret;
+        }
 
-/** Return a string representing the unit with specified dimensions */
-QPair<double,QString> getUnitString(int M, int L, int T, int C,
-                                    int t, int Q, int A)
-{
-    QMutexLocker lkr( globalUnitMutex() );
+        void GeneralUnit::setAsDefault(const QString &unit_name) const
+        {
+            set_default_unit(this->value(), unit_name, Mass, Length, Time, Charge, temperature, Quantity, Angle);
+        }
 
-    if (default_strings == 0)
-    {
-        boost::shared_ptr< QMap< DimensionKey, QPair<double,QString> > > strings(
-                new QMap< DimensionKey,QPair<double,QString> >() );
+        /** Return a string representing the unit with specified dimensions */
+        QPair<double, QString> getUnitString(int M, int L, int T, int C, int t, int Q, int A)
+        {
+            QMutexLocker lkr(globalUnitMutex());
 
-        strings->insert( DimensionKey(kcal_per_mol),
-                         QPair<double,QString>( kcal_per_mol, "kcal mol-1" ) );
+            if (default_strings == 0)
+            {
+                boost::shared_ptr<QMap<DimensionKey, QPair<double, QString>>> strings(
+                    new QMap<DimensionKey, QPair<double, QString>>());
 
-        strings->insert( DimensionKey(kcal),
-                         QPair<double,QString>( kcal, "kcal"));
+                strings->insert(DimensionKey(kcal_per_mol), QPair<double, QString>(kcal_per_mol, "kcal mol-1"));
 
-        strings->insert( DimensionKey(kelvin),
-                         QPair<double,QString>( kelvin, "°K"));
+                strings->insert(DimensionKey(kcal), QPair<double, QString>(kcal, "kcal"));
 
-        strings->insert( DimensionKey(degree),
-                         QPair<double,QString>( degree, "°" ) );
+                strings->insert(DimensionKey(kelvin), QPair<double, QString>(kelvin, "K"));
 
-        strings->insert( DimensionKey(1/angstrom),
-                         QPair<double,QString>( 1/angstrom, "Å-1"));
+                strings->insert(DimensionKey(degree), QPair<double, QString>(degree, "°"));
 
-        strings->insert( DimensionKey(1/(angstrom*angstrom)),
-                         QPair<double,QString>( 1/(angstrom*angstrom), "Å-2"));
+                strings->insert(DimensionKey(1 / angstrom), QPair<double, QString>(1 / angstrom, "Å-1"));
 
-        strings->insert( DimensionKey(angstrom),
-                         QPair<double,QString>( angstrom, "Å" ) );
+                strings->insert(DimensionKey(1 / (angstrom * angstrom)),
+                                QPair<double, QString>(1 / (angstrom * angstrom), "Å-2"));
 
-        strings->insert( DimensionKey(angstrom2),
-                         QPair<double,QString>( angstrom2, "Å^2" ) );
+                strings->insert(DimensionKey(angstrom), QPair<double, QString>(angstrom, "Å"));
 
-        strings->insert( DimensionKey(angstrom3),
-                         QPair<double,QString>( angstrom3, "Å^3" ) );
+                strings->insert(DimensionKey(angstrom2), QPair<double, QString>(angstrom2, "Å^2"));
 
-        strings->insert( DimensionKey(g_per_mol),
-                         QPair<double,QString>( g_per_mol, "g mol-1" ) );
+                strings->insert(DimensionKey(angstrom3), QPair<double, QString>(angstrom3, "Å^3"));
 
-        strings->insert( DimensionKey(mole),
-                         QPair<double,QString>( mole, "mol"));
+                strings->insert(DimensionKey(g_per_mol), QPair<double, QString>(g_per_mol, "g mol-1"));
 
-        strings->insert( DimensionKey(mod_electron),
-                         QPair<double,QString>( mod_electron, "|e|" ) );
+                strings->insert(DimensionKey(mole), QPair<double, QString>(mole, "mol"));
 
-        strings->insert( DimensionKey(picosecond),
-                         QPair<double,QString>( picosecond, "ps" ) );
+                strings->insert(DimensionKey(mod_electron), QPair<double, QString>(mod_electron, "|e|"));
 
-        strings->insert( DimensionKey(atm),
-                         QPair<double,QString>( atm, "atm" ) );
+                strings->insert(DimensionKey(picosecond), QPair<double, QString>(picosecond, "ps"));
 
-        strings->insert( DimensionKey(gram),
-                         QPair<double,QString>( gram, "g"));
+                strings->insert(DimensionKey(atm), QPair<double, QString>(atm, "atm"));
 
-        strings->insert( DimensionKey(angstrom/picosecond),
-                         QPair<double,QString>( angstrom/picosecond, "Å ps-1" ) );
+                strings->insert(DimensionKey(gram), QPair<double, QString>(gram, "g"));
 
-        strings->insert( DimensionKey(angstrom/(picosecond*picosecond)),
-                         QPair<double,QString>( angstrom/(picosecond*picosecond), "Å ps-2" ) );
+                strings->insert(DimensionKey(angstrom / picosecond), QPair<double, QString>(angstrom / picosecond, "Å ps-1"));
 
-        default_strings = strings;
-    }
+                strings->insert(DimensionKey(angstrom / (picosecond * picosecond)),
+                                QPair<double, QString>(angstrom / (picosecond * picosecond), "Å ps-2"));
 
-    QMap< DimensionKey,QPair<double,QString> >::const_iterator
-                 it = default_strings->constFind(DimensionKey(M,L,T,C,t,Q,A));
+                default_strings = strings;
+            }
 
-    if (it != default_strings->constEnd())
-        return *it;
+            QMap<DimensionKey, QPair<double, QString>>::const_iterator it =
+                default_strings->constFind(DimensionKey(M, L, T, C, t, Q, A));
 
-    else
-        return QPair<double,QString>(1.0, getGenericUnitString(M,L,T,C,t,Q,A));
-}
+            if (it != default_strings->constEnd())
+                return *it;
 
-}
+            else
+                return QPair<double, QString>(1.0, getGenericUnitString(M, L, T, C, t, Q, A));
+        }
 
-}
+    } // namespace Dimension
 
+} // namespace SireUnits

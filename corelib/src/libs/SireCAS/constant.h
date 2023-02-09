@@ -36,74 +36,74 @@ SIRE_BEGIN_HEADER
 
 namespace SireCAS
 {
-class Constant;
+    class Constant;
 }
 
-SIRECAS_EXPORT QDataStream& operator<<(QDataStream&, const SireCAS::Constant&);
-SIRECAS_EXPORT QDataStream& operator>>(QDataStream&, SireCAS::Constant&);
+SIRECAS_EXPORT QDataStream &operator<<(QDataStream &, const SireCAS::Constant &);
+SIRECAS_EXPORT QDataStream &operator>>(QDataStream &, SireCAS::Constant &);
 
 namespace SireCAS
 {
 
-/**
-This class represents a constant value (e.g. a number).
+    /**
+    This class represents a constant value (e.g. a number).
 
-@author Christopher Woods
-*/
-class SIRECAS_EXPORT Constant : public ExBase
-{
-public:
-    Constant();
-    Constant(const Constant &other);
-
-    ~Constant();
-
-    ///////
-    /////// Virtual functions - you may wish to override these
-    /////// in your derived class
-    ///////
-
-    Expression differentiate(const Symbol &symbol) const;
-    Expression integrate(const Symbol &symbol) const;
-
-    ///////
-    /////// Pure-virtual functions - these must be overridden
-    /////// in your derived class
-    ///////
-
-    bool operator==(const ExBase &other) const;
-
-    uint hash() const;
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Constant : public ExBase
     {
-        return Constant::typeName();
-    }
+    public:
+        Constant();
+        Constant(const Constant &other);
 
-    Constant* clone() const;
+        ~Constant();
 
-    QString toString() const;
+        ///////
+        /////// Virtual functions - you may wish to override these
+        /////// in your derived class
+        ///////
 
-    double evaluate(const Values &values) const;
-    Complex evaluate(const ComplexValues &values) const;
+        Expression differentiate(const Symbol &symbol) const;
+        Expression integrate(const Symbol &symbol) const;
 
-    Expression substitute(const Identities &identities) const;
+        ///////
+        /////// Pure-virtual functions - these must be overridden
+        /////// in your derived class
+        ///////
 
-    Symbols symbols() const;
-    Functions functions() const;
+        bool operator==(const ExBase &other) const;
 
-    Expressions children() const;
+        uint hash() const;
 
-    QList<Factor> expand(const Symbol &symbol) const;
-};
+        static const char *typeName();
 
-}
+        const char *what() const
+        {
+            return Constant::typeName();
+        }
+
+        Constant *clone() const;
+
+        QString toString() const;
+
+        double evaluate(const Values &values) const;
+        Complex evaluate(const ComplexValues &values) const;
+
+        Expression substitute(const Identities &identities) const;
+
+        Symbols symbols() const;
+        Functions functions() const;
+
+        Expressions children() const;
+
+        QList<Factor> expand(const Symbol &symbol) const;
+    };
+
+} // namespace SireCAS
 
 Q_DECLARE_METATYPE(SireCAS::Constant)
 
-SIRE_EXPOSE_CLASS( SireCAS::Constant )
+SIRE_EXPOSE_CLASS(SireCAS::Constant)
 
 SIRE_END_HEADER
 

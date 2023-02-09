@@ -32,9 +32,9 @@
 
 #include "atomfunctions.h"
 
-#include "SireMol/cgatomidx.h"
-#include "SireMol/atomidx.h"
 #include "SireMol/atomid.h"
+#include "SireMol/atomidx.h"
+#include "SireMol/cgatomidx.h"
 
 #include "SireMol/angleid.h"
 
@@ -42,232 +42,220 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class ThreeAtomFunction;
-class ThreeAtomFunctions;
-}
+    class ThreeAtomFunction;
+    class ThreeAtomFunctions;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::ThreeAtomFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::ThreeAtomFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::ThreeAtomFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::ThreeAtomFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::ThreeAtomFunctions&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::ThreeAtomFunctions&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::ThreeAtomFunctions &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::ThreeAtomFunctions &);
 
 namespace SireMol
 {
-class AtomSelection;
+    class AtomSelection;
 }
 
 namespace SireMM
 {
 
-using SireMol::CGAtomIdx;
-using SireMol::AtomIdx;
-using SireMol::AtomID;
-using SireMol::AngleID;
-using SireMol::AtomSelection;
-using SireMol::AtomMatcher;
+    using SireMol::AngleID;
+    using SireMol::AtomID;
+    using SireMol::AtomIdx;
+    using SireMol::AtomMatcher;
+    using SireMol::AtomSelection;
+    using SireMol::CGAtomIdx;
 
-/** This class holds a function that acts using the
-    coordinate information of just three atoms */
-class SIREMM_EXPORT ThreeAtomFunction : public AtomFunction
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const ThreeAtomFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, ThreeAtomFunction&);
-
-public:
-    ThreeAtomFunction();
-    ThreeAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1,
-                      const CGAtomIdx &atom2,
-                      const SireCAS::Expression &function);
-
-    ThreeAtomFunction(const ThreeAtomFunction &other);
-
-    ~ThreeAtomFunction();
-
-    ThreeAtomFunction& operator=(const ThreeAtomFunction &other);
-
-    bool operator==(const ThreeAtomFunction &other) const;
-    bool operator!=(const ThreeAtomFunction &other) const;
-
-    QString toString() const;
-
-    const CGAtomIdx& atom0() const;
-    const CGAtomIdx& atom1() const;
-    const CGAtomIdx& atom2() const;
-
-private:
-    /** The indicies of the three atoms */
-    CGAtomIdx atm0, atm1, atm2;
-};
-
-namespace detail
-{
-
-class IDTriple
-{
-public:
-    IDTriple(quint32 atom0=0, quint32 atom1=0, quint32 atom2=0);
-    IDTriple(const IDTriple &other);
-
-    ~IDTriple();
-
-    IDTriple& operator=(const IDTriple &other);
-
-    bool operator==(const IDTriple &other) const;
-    bool operator!=(const IDTriple &other) const;
-
-    bool operator<(const IDTriple &other) const;
-    bool operator<=(const IDTriple &other) const;
-    bool operator>(const IDTriple &other) const;
-    bool operator>=(const IDTriple &other) const;
-
-    quint32 operator[](int i) const
+    /** This class holds a function that acts using the
+        coordinate information of just three atoms */
+    class SIREMM_EXPORT ThreeAtomFunction : public AtomFunction
     {
-        switch(i)
+
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const ThreeAtomFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, ThreeAtomFunction &);
+
+    public:
+        ThreeAtomFunction();
+        ThreeAtomFunction(const CGAtomIdx &atom0, const CGAtomIdx &atom1, const CGAtomIdx &atom2,
+                          const SireCAS::Expression &function);
+
+        ThreeAtomFunction(const ThreeAtomFunction &other);
+
+        ~ThreeAtomFunction();
+
+        ThreeAtomFunction &operator=(const ThreeAtomFunction &other);
+
+        bool operator==(const ThreeAtomFunction &other) const;
+        bool operator!=(const ThreeAtomFunction &other) const;
+
+        QString toString() const;
+
+        const CGAtomIdx &atom0() const;
+        const CGAtomIdx &atom1() const;
+        const CGAtomIdx &atom2() const;
+
+    private:
+        /** The indicies of the three atoms */
+        CGAtomIdx atm0, atm1, atm2;
+    };
+
+    namespace detail
+    {
+
+        class IDTriple
         {
-        case 0:
-            return atom0;
-        case 1:
-            return atom1;
-        default:
-            return atom2;
+        public:
+            IDTriple(quint32 atom0 = 0, quint32 atom1 = 0, quint32 atom2 = 0);
+            IDTriple(const IDTriple &other);
+
+            ~IDTriple();
+
+            IDTriple &operator=(const IDTriple &other);
+
+            bool operator==(const IDTriple &other) const;
+            bool operator!=(const IDTriple &other) const;
+
+            bool operator<(const IDTriple &other) const;
+            bool operator<=(const IDTriple &other) const;
+            bool operator>(const IDTriple &other) const;
+            bool operator>=(const IDTriple &other) const;
+
+            quint32 operator[](int i) const
+            {
+                switch (i)
+                {
+                case 0:
+                    return atom0;
+                case 1:
+                    return atom1;
+                default:
+                    return atom2;
+                }
+            }
+
+            quint32 atom0;
+            quint32 atom1;
+            quint32 atom2;
+        };
+
+        SIRE_ALWAYS_INLINE uint qHash(const IDTriple &idtriple)
+        {
+            return (idtriple.atom0 << 24) | (idtriple.atom1 & 0x00FFFF00) | (idtriple.atom2 & 0x000000FF);
         }
-    }
 
-    quint32 atom0;
-    quint32 atom1;
-    quint32 atom2;
-};
+    } // namespace detail
 
-SIRE_ALWAYS_INLINE uint qHash(const IDTriple &idtriple)
-{
-    return (idtriple.atom0 << 24) | (idtriple.atom1 & 0x00FFFF00) |
-                                    (idtriple.atom2 & 0x000000FF);
-}
+    /** This class holds the set of ThreeAtomFunction potentials that
+        act between the atoms in a molecule
 
-}
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT ThreeAtomFunctions : public SireBase::ConcreteProperty<ThreeAtomFunctions, AtomFunctions>
+    {
 
-/** This class holds the set of ThreeAtomFunction potentials that
-    act between the atoms in a molecule
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const ThreeAtomFunctions &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, ThreeAtomFunctions &);
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT ThreeAtomFunctions
-        : public SireBase::ConcreteProperty<ThreeAtomFunctions,AtomFunctions>
-{
+    public:
+        ThreeAtomFunctions();
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const ThreeAtomFunctions&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, ThreeAtomFunctions&);
+        ThreeAtomFunctions(const MoleculeData &moldata);
+        ThreeAtomFunctions(const MoleculeInfoData &molinfo);
 
-public:
-    ThreeAtomFunctions();
+        ThreeAtomFunctions(const ThreeAtomFunctions &other);
 
-    ThreeAtomFunctions(const MoleculeData &moldata);
-    ThreeAtomFunctions(const MoleculeInfoData &molinfo);
+        ~ThreeAtomFunctions();
 
-    ThreeAtomFunctions(const ThreeAtomFunctions &other);
+        static const char *typeName();
 
-    ~ThreeAtomFunctions();
+        ThreeAtomFunctions &operator=(const ThreeAtomFunctions &other);
 
-    static const char* typeName();
+        bool operator==(const ThreeAtomFunctions &other) const;
+        bool operator!=(const ThreeAtomFunctions &other) const;
 
-    ThreeAtomFunctions& operator=(const ThreeAtomFunctions &other);
+        QString toString() const;
 
-    bool operator==(const ThreeAtomFunctions &other) const;
-    bool operator!=(const ThreeAtomFunctions &other) const;
+        void set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, const Expression &expression);
 
-    QString toString() const;
+        void set(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const Expression &expression);
 
-    void set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2,
-             const Expression &expression);
+        void set(const AngleID &angleid, const Expression &expression);
 
-    void set(const AtomID &atom0, const AtomID &atom1,
-             const AtomID &atom2,
-             const Expression &expression);
+        void clear(AtomIdx atom);
+        void clear(const AtomID &atom);
 
-    void set(const AngleID &angleid, const Expression &expression);
+        void clear(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2);
+        void clear(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2);
+        void clear(const AngleID &angleid);
 
-    void clear(AtomIdx atom);
-    void clear(const AtomID &atom);
+        void clear();
 
-    void clear(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2);
-    void clear(const AtomID &atom0, const AtomID &atom1,
-               const AtomID &atom2);
-    void clear(const AngleID &angleid);
+        void substitute(const Identities &identities);
 
-    void clear();
+        int nFunctions() const;
 
-    void substitute(const Identities &identities);
+        bool isEmpty() const;
 
-    int nFunctions() const;
+        Expression potential(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const;
+        Expression potential(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
+        Expression potential(const AngleID &angleid) const;
 
-    bool isEmpty() const;
+        Expression force(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, const Symbol &symbol) const;
+        Expression force(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const Symbol &symbol) const;
+        Expression force(const AngleID &angleid, const Symbol &symbol) const;
 
-    Expression potential(AtomIdx atom0, AtomIdx atom1,
-                         AtomIdx atom2) const;
-    Expression potential(const AtomID &atom0, const AtomID &atom1,
-                         const AtomID &atom2) const;
-    Expression potential(const AngleID &angleid) const;
+        QVector<ThreeAtomFunction> potentials() const;
+        QVector<ThreeAtomFunction> forces(const Symbol &symbol) const;
 
-    Expression force(AtomIdx atom0, AtomIdx atom1,
-                     AtomIdx atom2, const Symbol &symbol) const;
-    Expression force(const AtomID &atom0, const AtomID &atom1,
-                     const AtomID &atom2, const Symbol &symbol) const;
-    Expression force(const AngleID &angleid, const Symbol &symbol) const;
+        ThreeAtomFunctions includeOnly(const AtomSelection &selected_atoms, bool isstrict = true) const;
 
-    QVector<ThreeAtomFunction> potentials() const;
-    QVector<ThreeAtomFunction> forces(const Symbol &symbol) const;
+    protected:
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const QHash<AtomIdx, AtomIdx> &map) const;
 
-    ThreeAtomFunctions includeOnly(const AtomSelection &selected_atoms,
-                                   bool isstrict=true) const;
+    private:
+        void removeSymbols(QSet<Symbol> symbols);
 
-protected:
-    SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                  const AtomMatcher &atommatcher) const;
-    SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                  const QHash<AtomIdx,AtomIdx> &map) const;
-
-private:
-    void removeSymbols(QSet<Symbol> symbols);
-
-    /** All of the potential functions, identified by the atom triple
-        that contains that function */
-    QHash<detail::IDTriple,Expression> potentials_by_atoms;
-};
+        /** All of the potential functions, identified by the atom triple
+            that contains that function */
+        QHash<detail::IDTriple, Expression> potentials_by_atoms;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-//////
-////// Inline functions of ThreeAtomFunction
-//////
+    //////
+    ////// Inline functions of ThreeAtomFunction
+    //////
 
-/** Return the first atom of the triple */
-SIRE_ALWAYS_INLINE const CGAtomIdx& ThreeAtomFunction::atom0() const
-{
-    return atm0;
-}
+    /** Return the first atom of the triple */
+    SIRE_ALWAYS_INLINE const CGAtomIdx &ThreeAtomFunction::atom0() const
+    {
+        return atm0;
+    }
 
-/** Return the second atom of the triple */
-SIRE_ALWAYS_INLINE const CGAtomIdx& ThreeAtomFunction::atom1() const
-{
-    return atm1;
-}
+    /** Return the second atom of the triple */
+    SIRE_ALWAYS_INLINE const CGAtomIdx &ThreeAtomFunction::atom1() const
+    {
+        return atm1;
+    }
 
-/** Return the third atom of the triple */
-SIRE_ALWAYS_INLINE const CGAtomIdx& ThreeAtomFunction::atom2() const
-{
-    return atm2;
-}
+    /** Return the third atom of the triple */
+    SIRE_ALWAYS_INLINE const CGAtomIdx &ThreeAtomFunction::atom2() const
+    {
+        return atm2;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::ThreeAtomFunctions );
+Q_DECLARE_METATYPE(SireMM::ThreeAtomFunctions);
 
-SIRE_EXPOSE_CLASS( SireMM::ThreeAtomFunction )
-SIRE_EXPOSE_CLASS( SireMM::ThreeAtomFunctions )
+SIRE_EXPOSE_CLASS(SireMM::ThreeAtomFunction)
+SIRE_EXPOSE_CLASS(SireMM::ThreeAtomFunctions)
 
 SIRE_END_HEADER
 

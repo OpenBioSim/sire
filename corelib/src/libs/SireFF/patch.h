@@ -38,131 +38,125 @@ SIRE_BEGIN_HEADER
 
 namespace SireFF
 {
-class Patch;
+    class Patch;
 }
 
-QDataStream& operator<<(QDataStream&, const SireFF::Patch&);
-QDataStream& operator>>(QDataStream&, SireFF::Patch&);
+QDataStream &operator<<(QDataStream &, const SireFF::Patch &);
+QDataStream &operator>>(QDataStream &, SireFF::Patch &);
 
 namespace SireFF
 {
 
-using SireVol::CoordGroupArray;
-using SireVol::CoordGroup;
-using SireVol::AABox;
+    using SireVol::AABox;
+    using SireVol::CoordGroup;
+    using SireVol::CoordGroupArray;
 
-class Patches;
-class FFBead;
-class FFBeadChange;
+    class Patches;
+    class FFBead;
+    class FFBeadChange;
 
-/** A patch is used by the forcefield classes to organise the
-    beads into groups (normally spatially grouped, e.g. into
-    patches of neighbouring groups). This allows the forcefield
-    classes to optimise intermolecular energy evaluations by
-    performing a domain decomposition.
+    /** A patch is used by the forcefield classes to organise the
+        beads into groups (normally spatially grouped, e.g. into
+        patches of neighbouring groups). This allows the forcefield
+        classes to optimise intermolecular energy evaluations by
+        performing a domain decomposition.
 
-    This class is publically read-only, though can be modified
-    by a Patches class (as the Patches class is designed to
-    modify the Patch objects that it contains). This is because
-    the Patches class contains the Patcher object that contains
-    the geometric information about this patch, and also because
-    the Patches object manages the bead ID numbers used to rapidly
-    identify each bead in the set of patches.
+        This class is publically read-only, though can be modified
+        by a Patches class (as the Patches class is designed to
+        modify the Patch objects that it contains). This is because
+        the Patches class contains the Patcher object that contains
+        the geometric information about this patch, and also because
+        the Patches object manages the bead ID numbers used to rapidly
+        identify each bead in the set of patches.
 
-    @author Christopher Woods
-*/
-class SIREFF_EXPORT Patch
-        : public SireBase::ConcreteProperty<Patch,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREFF_EXPORT Patch : public SireBase::ConcreteProperty<Patch, SireBase::Property>
+    {
 
-friend SIREFF_EXPORT QDataStream& ::operator<<(QDataStream&, const Patch&);
-friend SIREFF_EXPORT QDataStream& ::operator>>(QDataStream&, Patch&);
+        friend SIREFF_EXPORT QDataStream & ::operator<<(QDataStream &, const Patch &);
+        friend SIREFF_EXPORT QDataStream & ::operator>>(QDataStream &, Patch &);
 
-friend class Patches;
+        friend class Patches;
 
-public:
-    Patch();
-    Patch(const Patch &other);
+    public:
+        Patch();
+        Patch(const Patch &other);
 
-    ~Patch();
+        ~Patch();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    Patch& operator=(const Patch &other);
+        Patch &operator=(const Patch &other);
 
-    bool operator==(const Patch &other) const;
-    bool operator!=(const Patch &other) const;
+        bool operator==(const Patch &other) const;
+        bool operator!=(const Patch &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    int nBeads() const;
+        int nBeads() const;
 
-    const AABox& aaBox() const;
+        const AABox &aaBox() const;
 
-    const QVector<quint32> beadIDs() const;
-    const CoordGroupArray& coordinates() const;
-    const FFParametersArray& parameters() const;
+        const QVector<quint32> beadIDs() const;
+        const CoordGroupArray &coordinates() const;
+        const FFParametersArray &parameters() const;
 
-    int getLocation(quint32 beadid) const;
+        int getLocation(quint32 beadid) const;
 
-protected:
-    /////////////////////////////////////////////////////////////////////////
-    //Functions to modify the Patch, called only by the parent Patches class
+    protected:
+        /////////////////////////////////////////////////////////////////////////
+        // Functions to modify the Patch, called only by the parent Patches class
 
-    FFBead add(quint32 beadid, const CoordGroup &coords, const FFParameters &params);
-    QHash<quint32,FFBead> add(const QVarLengthArray<quint32> &beadids,
-                              const CoordGroupArray &coords,
-                              const FFParametersArray &params);
+        FFBead add(quint32 beadid, const CoordGroup &coords, const FFParameters &params);
+        QHash<quint32, FFBead> add(const QVarLengthArray<quint32> &beadids, const CoordGroupArray &coords,
+                                   const FFParametersArray &params);
 
-    FFBeadChange update(quint32 beadid, const CoordGroup &coords);
-    FFBeadChange update(quint32 beadid, const FFParameters &params);
-    FFBeadChange update(quint32 beadid, const CoordGroup &coords,
-                                        const FFParameters &params);
+        FFBeadChange update(quint32 beadid, const CoordGroup &coords);
+        FFBeadChange update(quint32 beadid, const FFParameters &params);
+        FFBeadChange update(quint32 beadid, const CoordGroup &coords, const FFParameters &params);
 
-    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids,
-                                       const CoordGroupArray &coords);
-    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids,
-                                       const FFParametersArray &params);
-    QHash<quint32,FFBeadChange> update(const QVarLengthArray<quint32> &beadids,
-                                       const CoordGroupArray &coords,
-                                       const FFParametersArray &params);
+        QHash<quint32, FFBeadChange> update(const QVarLengthArray<quint32> &beadids, const CoordGroupArray &coords);
+        QHash<quint32, FFBeadChange> update(const QVarLengthArray<quint32> &beadids, const FFParametersArray &params);
+        QHash<quint32, FFBeadChange> update(const QVarLengthArray<quint32> &beadids, const CoordGroupArray &coords,
+                                            const FFParametersArray &params);
 
-    FFBead remove(quint32 beadid);
-    QHash<quint32,FFBead> remove(const QVarLengthArray<quint32> &beadids);
+        FFBead remove(quint32 beadid);
+        QHash<quint32, FFBead> remove(const QVarLengthArray<quint32> &beadids);
 
-    void removeAll();
+        void removeAll();
 
-    //
-    //////////////////////////////////////////////////////////////////////////
-private:
-    int getBeadIdx(quint32 beadid) const;
+        //
+        //////////////////////////////////////////////////////////////////////////
+    private:
+        int getBeadIdx(quint32 beadid) const;
 
-    /** The coordinates of all of the atoms in the patch,
-        arranged into beads (CoordGroups). This object also
-        contains the AABox that completely encompasses the
-        beads in the patch */
-    CoordGroupArray coords;
+        /** The coordinates of all of the atoms in the patch,
+            arranged into beads (CoordGroups). This object also
+            contains the AABox that completely encompasses the
+            beads in the patch */
+        CoordGroupArray coords;
 
-    /** The parameters for all of the beads, in the same order
-        as the coordinates */
-    FFParametersArrayPtr params;
+        /** The parameters for all of the beads, in the same order
+            as the coordinates */
+        FFParametersArrayPtr params;
 
-    /** Internal ID number of each bead */
-    QVector<quint32> idx_to_beadid;
+        /** Internal ID number of each bead */
+        QVector<quint32> idx_to_beadid;
 
-    /** Index of each bead in the arrays */
-    QHash<quint32,int> beadid_to_idx;
+        /** Index of each bead in the arrays */
+        QHash<quint32, int> beadid_to_idx;
 
-    /** The AABox that completely encloses all of the
-        atoms in this patch */
-    AABox aabox;
-};
+        /** The AABox that completely encloses all of the
+            atoms in this patch */
+        AABox aabox;
+    };
 
-}
+} // namespace SireFF
 
-Q_DECLARE_METATYPE( SireFF::Patch )
+Q_DECLARE_METATYPE(SireFF::Patch)
 
 SIRE_END_HEADER
 

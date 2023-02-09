@@ -26,12 +26,12 @@
 \*********************************************/
 
 #include "exbase.h"
-#include "values.h"
-#include "identities.h"
 #include "complexvalues.h"
-#include "functions.h"
-#include "expressionbase.h"
 #include "expression.h"
+#include "expressionbase.h"
+#include "functions.h"
+#include "identities.h"
+#include "values.h"
 
 #include "SireCAS/errors.h"
 
@@ -44,14 +44,14 @@ using namespace SireStream;
 static const RegisterMetaType<ExBase> r_exbase(MAGIC_ONLY, "SireCAS::ExBase");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, const ExBase&)
+QDataStream &operator<<(QDataStream &ds, const ExBase &)
 {
     writeHeader(ds, r_exbase, 0);
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, ExBase&)
+QDataStream &operator>>(QDataStream &ds, ExBase &)
 {
     VersionID v = readHeader(ds, r_exbase);
 
@@ -63,15 +63,18 @@ QDataStream &operator>>(QDataStream &ds, ExBase&)
 
 /** Constructor */
 ExBase::ExBase() : RefCountData()
-{}
+{
+}
 
 /** Copy constructor */
 ExBase::ExBase(const ExBase &) : RefCountData()
-{}
+{
+}
 
 /** Destructor */
 ExBase::~ExBase()
-{}
+{
+}
 
 /** Comparison operator */
 bool ExBase::operator!=(const ExBase &other) const
@@ -93,9 +96,10 @@ Expression ExBase::operator-() const
 */
 Expression ExBase::differentiate(const Symbol &symbol) const
 {
-    throw SireCAS::unavailable_differential(QObject::tr(
-        "The differential of \"%1\" with respect to \"%2\" is not available.")
-            .arg(toString(), symbol.toString()), CODELOC);
+    throw SireCAS::unavailable_differential(
+        QObject::tr("The differential of \"%1\" with respect to \"%2\" is not available.")
+            .arg(toString(), symbol.toString()),
+        CODELOC);
 }
 
 /** Return the indefinite integral of this 'ExBase' with respect to
@@ -107,9 +111,9 @@ Expression ExBase::differentiate(const Symbol &symbol) const
 */
 Expression ExBase::integrate(const Symbol &symbol) const
 {
-    throw SireCAS::unavailable_integral(QObject::tr(
-        "The integral of \"%1\" with respect to \"%2\" is not available.")
-            .arg(toString(), symbol.toString()), CODELOC);
+    throw SireCAS::unavailable_integral(QObject::tr("The integral of \"%1\" with respect to \"%2\" is not available.")
+                                            .arg(toString(), symbol.toString()),
+                                        CODELOC);
 }
 
 /** Return a series expansion of this expression with respect to
@@ -117,7 +121,7 @@ Expression ExBase::integrate(const Symbol &symbol) const
     'n'. This is not guaranteed to work, and will return this expression
     unchanged if it doesn't work. If it is expanded, then a series
     will be returned, together with an estimate of the error (e.g. O(x^2)) */
-Expression ExBase::series(const Symbol&, int) const
+Expression ExBase::series(const Symbol &, int) const
 {
     return Expression(*this);
 }
@@ -138,7 +142,7 @@ Expression ExBase::conjugate() const
 }
 
 /** Return whether or not this is a function of the passed Symbol */
-bool ExBase::isFunction(const Symbol&) const
+bool ExBase::isFunction(const Symbol &) const
 {
     return false;
 }
@@ -166,186 +170,183 @@ bool ExBase::isCompound() const
     return false;
 }
 
-
-QString ExBase::toOpenMMString() const{
+QString ExBase::toOpenMMString() const
+{
 
     return this->toString();
 }
 
-
-
-
 namespace SireCAS
 {
 
-Expression operator+(const ExBase &base0, const ExBase &base1)
-{
-    return Expression(base0) + Expression(base1);
-}
+    Expression operator+(const ExBase &base0, const ExBase &base1)
+    {
+        return Expression(base0) + Expression(base1);
+    }
 
-Expression operator+(const Expression &ex, const ExBase &base)
-{
-    return ex.add(base);
-}
+    Expression operator+(const Expression &ex, const ExBase &base)
+    {
+        return ex.add(base);
+    }
 
-Expression operator+(const ExBase &base, const Expression &ex)
-{
-    return ex.add(base);
-}
+    Expression operator+(const ExBase &base, const Expression &ex)
+    {
+        return ex.add(base);
+    }
 
-Expression operator+(double val, const ExBase &base)
-{
-    return Expression(base).add(val);
-}
+    Expression operator+(double val, const ExBase &base)
+    {
+        return Expression(base).add(val);
+    }
 
-Expression operator+(const ExBase &base, double val)
-{
-    return Expression(base).add(val);
-}
+    Expression operator+(const ExBase &base, double val)
+    {
+        return Expression(base).add(val);
+    }
 
-Expression operator+(const Complex &val, const ExBase &base)
-{
-    return Expression(base).add(val);
-}
+    Expression operator+(const Complex &val, const ExBase &base)
+    {
+        return Expression(base).add(val);
+    }
 
-Expression operator+(const ExBase &base, const Complex &val)
-{
-    return Expression(base).add(val);
-}
+    Expression operator+(const ExBase &base, const Complex &val)
+    {
+        return Expression(base).add(val);
+    }
 
-Expression operator-(const ExBase &base0, const ExBase &base1)
-{
-    return Expression(base0) - Expression(base1);
-}
+    Expression operator-(const ExBase &base0, const ExBase &base1)
+    {
+        return Expression(base0) - Expression(base1);
+    }
 
-Expression operator-(const Expression &ex, const ExBase &base)
-{
-    return ex.subtract(base);
-}
+    Expression operator-(const Expression &ex, const ExBase &base)
+    {
+        return ex.subtract(base);
+    }
 
-Expression operator-(const ExBase &base, const Expression &ex)
-{
-    return Expression(base).subtract(ex);
-}
+    Expression operator-(const ExBase &base, const Expression &ex)
+    {
+        return Expression(base).subtract(ex);
+    }
 
-Expression operator-(double val, const ExBase &base)
-{
-    return Expression(val).subtract(base);
-}
+    Expression operator-(double val, const ExBase &base)
+    {
+        return Expression(val).subtract(base);
+    }
 
-Expression operator-(const ExBase &base, double val)
-{
-    return Expression(base).subtract(val);
-}
+    Expression operator-(const ExBase &base, double val)
+    {
+        return Expression(base).subtract(val);
+    }
 
-Expression operator-(const Complex &val, const ExBase &base)
-{
-    return Expression(val).subtract(base);
-}
+    Expression operator-(const Complex &val, const ExBase &base)
+    {
+        return Expression(val).subtract(base);
+    }
 
-Expression operator-(const ExBase &base, const Complex &val)
-{
-    return Expression(base).subtract(val);
-}
+    Expression operator-(const ExBase &base, const Complex &val)
+    {
+        return Expression(base).subtract(val);
+    }
 
-Expression operator*(const ExBase &base0, const ExBase &base1)
-{
-    return Expression(base0) * Expression(base1);
-}
+    Expression operator*(const ExBase &base0, const ExBase &base1)
+    {
+        return Expression(base0) * Expression(base1);
+    }
 
-Expression operator*(const Expression &ex, const ExBase &base)
-{
-    return ex.multiply(base);
-}
+    Expression operator*(const Expression &ex, const ExBase &base)
+    {
+        return ex.multiply(base);
+    }
 
-Expression operator*(const ExBase &base, const Expression &ex)
-{
-    return ex.multiply(base);
-}
+    Expression operator*(const ExBase &base, const Expression &ex)
+    {
+        return ex.multiply(base);
+    }
 
-Expression operator*(double val, const ExBase &base)
-{
-    return Expression(base).multiply(val);
-}
+    Expression operator*(double val, const ExBase &base)
+    {
+        return Expression(base).multiply(val);
+    }
 
-Expression operator*(const ExBase &base, double val)
-{
-    return Expression(base).multiply(val);
-}
+    Expression operator*(const ExBase &base, double val)
+    {
+        return Expression(base).multiply(val);
+    }
 
-Expression operator*(const Complex &val, const ExBase &base)
-{
-    return Expression(base).multiply(val);
-}
+    Expression operator*(const Complex &val, const ExBase &base)
+    {
+        return Expression(base).multiply(val);
+    }
 
-Expression operator*(const ExBase &base, const Complex &val)
-{
-    return Expression(base).multiply(val);
-}
+    Expression operator*(const ExBase &base, const Complex &val)
+    {
+        return Expression(base).multiply(val);
+    }
 
-Expression operator/(const ExBase &base0, const ExBase &base1)
-{
-    return Expression(base0) / Expression(base1);
-}
+    Expression operator/(const ExBase &base0, const ExBase &base1)
+    {
+        return Expression(base0) / Expression(base1);
+    }
 
-Expression operator/(const Expression &ex, const ExBase &base)
-{
-    return ex.divide(base);
-}
+    Expression operator/(const Expression &ex, const ExBase &base)
+    {
+        return ex.divide(base);
+    }
 
-Expression operator/(const ExBase &base, const Expression &ex)
-{
-    return Expression(base).divide(ex);
-}
+    Expression operator/(const ExBase &base, const Expression &ex)
+    {
+        return Expression(base).divide(ex);
+    }
 
-Expression operator/(double val, const ExBase &base)
-{
-    return Expression(val).divide(base);
-}
+    Expression operator/(double val, const ExBase &base)
+    {
+        return Expression(val).divide(base);
+    }
 
-Expression operator/(const ExBase &base, double val)
-{
-    return Expression(base).divide(val);
-}
+    Expression operator/(const ExBase &base, double val)
+    {
+        return Expression(base).divide(val);
+    }
 
-Expression operator/(const Complex &val, const ExBase &base)
-{
-    return Expression(val).divide(base);
-}
+    Expression operator/(const Complex &val, const ExBase &base)
+    {
+        return Expression(val).divide(base);
+    }
 
-Expression operator/(const ExBase &base, const Complex &val)
-{
-    return Expression(base).divide(val);
-}
+    Expression operator/(const ExBase &base, const Complex &val)
+    {
+        return Expression(base).divide(val);
+    }
 
-Expression pow(const ExBase &base, int n)
-{
-    return Expression(base).pow(n);
-}
+    Expression pow(const ExBase &base, int n)
+    {
+        return Expression(base).pow(n);
+    }
 
-Expression pow(const ExBase &base, const Rational &n)
-{
-    return Expression(base).pow(n);
-}
+    Expression pow(const ExBase &base, const Rational &n)
+    {
+        return Expression(base).pow(n);
+    }
 
-Expression pow(const ExBase &base, double n)
-{
-    return Expression(base).pow(n);
-}
+    Expression pow(const ExBase &base, double n)
+    {
+        return Expression(base).pow(n);
+    }
 
-Expression pow(const ExBase &base, const Complex &n)
-{
-    return Expression(base).pow(n);
-}
+    Expression pow(const ExBase &base, const Complex &n)
+    {
+        return Expression(base).pow(n);
+    }
 
-Expression pow(const ExBase &base, const Expression &n)
-{
-    return Expression(base).pow(n);
-}
+    Expression pow(const ExBase &base, const Expression &n)
+    {
+        return Expression(base).pow(n);
+    }
 
-Expression pow(const ExBase &base, const ExBase &n)
-{
-    return Expression(base).pow(Expression(n));
-}
+    Expression pow(const ExBase &base, const ExBase &n)
+    {
+        return Expression(base).pow(Expression(n));
+    }
 
-}
+} // namespace SireCAS

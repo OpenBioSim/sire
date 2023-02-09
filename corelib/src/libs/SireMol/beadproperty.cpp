@@ -37,7 +37,7 @@ namespace SireMol
     template class BeadProperty<double>;
     template class BeadProperty<QVariant>;
     template class BeadProperty<SireBase::PropertyPtr>;
-}
+} // namespace SireMol
 
 static const RegisterMetaType<BeadStringProperty> r_beadstring;
 static const RegisterMetaType<BeadIntProperty> r_beadint;
@@ -49,8 +49,7 @@ static const RegisterMetaType<BeadPropertyProperty> r_beadproprop;
 /////// Implementation of BeadProp
 ///////
 
-static const RegisterMetaType<BeadProp> r_beadprop(MAGIC_ONLY,
-                                                 "SireMol::BeadProp");
+static const RegisterMetaType<BeadProp> r_beadprop(MAGIC_ONLY, "SireMol::BeadProp");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const BeadProp &beadprop)
@@ -59,19 +58,19 @@ QDataStream &operator<<(QDataStream &ds, const BeadProp &beadprop)
 
     SharedDataStream sds(ds);
 
-    sds << beadprop.bdng << static_cast<const MolViewProperty&>(beadprop);
+    sds << beadprop.bdng << static_cast<const MolViewProperty &>(beadprop);
 
     return ds;
 }
 
-/** Extract from a binary datastream */QDataStream &operator>>(QDataStream &ds, BeadProp &beadprop)
+/** Extract from a binary datastream */ QDataStream &operator>>(QDataStream &ds, BeadProp &beadprop)
 {
     VersionID v = readHeader(ds, r_beadprop);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        ds >> beadprop.bdng >> static_cast<MolViewProperty&>(beadprop);
+        ds >> beadprop.bdng >> static_cast<MolViewProperty &>(beadprop);
     }
     else
         throw version_error(v, "1", r_beadprop, CODELOC);
@@ -80,18 +79,22 @@ QDataStream &operator<<(QDataStream &ds, const BeadProp &beadprop)
 }
 
 BeadProp::BeadProp() : MolViewProperty()
-{}
+{
+}
 
 BeadProp::BeadProp(const Beading &beading) : MolViewProperty(), bdng(beading)
-{}
+{
+}
 
 BeadProp::BeadProp(const BeadProp &other) : MolViewProperty(other), bdng(other.bdng)
-{}
+{
+}
 
 BeadProp::~BeadProp()
-{}
+{
+}
 
-BeadProp& BeadProp::operator=(const BeadProp &other)
+BeadProp &BeadProp::operator=(const BeadProp &other)
 {
     bdng = other.bdng;
     MolViewProperty::operator=(other);
@@ -109,7 +112,7 @@ bool BeadProp::operator!=(const BeadProp &other) const
 }
 
 /** Return the beading property used to define the beads in the molecule */
-const Beading& BeadProp::beading() const
+const Beading &BeadProp::beading() const
 {
     return bdng.read();
 }

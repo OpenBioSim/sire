@@ -28,8 +28,8 @@
 #ifndef SIREMOVE_TITRATOR_H
 #define SIREMOVE_TITRATOR_H
 
-#include "SireBase/property.h"
 #include "SireBase/majorminorversion.h"
+#include "SireBase/property.h"
 
 #include "SireMol/mgname.h"
 #include "SireMol/mgnum.h"
@@ -39,158 +39,157 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Titrator;
+    class Titrator;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::Titrator&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::Titrator&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Titrator &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Titrator &);
 
-namespace SireSystem{ class System; }
-namespace SireMol{ class MoleculeGroup; }
+namespace SireSystem
+{
+    class System;
+}
+namespace SireMol
+{
+    class MoleculeGroup;
+}
 
 namespace SireMove
 {
 
-using SireSystem::System;
-using SireMol::Molecule;
-using SireMol::MoleculeGroup;
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
+    using SireMol::Molecule;
+    using SireMol::MoleculeGroup;
+    using SireSystem::System;
 
-/** This property is used by the TitrationMove to maintain a list
-    of which molecules can be titrated, and the list of titration
-    states of each molecule.
+    /** This property is used by the TitrationMove to maintain a list
+        of which molecules can be titrated, and the list of titration
+        states of each molecule.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Titrator
-        : public SireBase::ConcreteProperty<Titrator,SireBase::Property>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Titrator : public SireBase::ConcreteProperty<Titrator, SireBase::Property>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Titrator&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Titrator&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Titrator &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Titrator &);
 
-public:
-    Titrator();
-    Titrator(const MoleculeGroup &group);
+    public:
+        Titrator();
+        Titrator(const MoleculeGroup &group);
 
-    Titrator(const Titrator &other);
+        Titrator(const Titrator &other);
 
-    ~Titrator();
+        ~Titrator();
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    Titrator& operator=(const Titrator &other);
+        Titrator &operator=(const Titrator &other);
 
-    bool operator==(const Titrator &other) const;
-    bool operator!=(const Titrator &other) const;
+        bool operator==(const Titrator &other) const;
+        bool operator!=(const Titrator &other) const;
 
-    void setMoleculeGroup(const MoleculeGroup &group);
+        void setMoleculeGroup(const MoleculeGroup &group);
 
-    void setPositiveTemplate(const Molecule &positive_ion,
-                             const QStringList &properties,
-                             const PropertyMap &map = PropertyMap());
+        void setPositiveTemplate(const Molecule &positive_ion, const QStringList &properties,
+                                 const PropertyMap &map = PropertyMap());
 
-    void setNegativeTemplate(const Molecule &negative_ion,
-                             const QStringList &properties,
-                             const PropertyMap &map = PropertyMap());
+        void setNegativeTemplate(const Molecule &negative_ion, const QStringList &properties,
+                                 const PropertyMap &map = PropertyMap());
 
-    void setNeutralTemplate(const Molecule &neutral_mol,
-                            const QStringList &properties,
-                            const PropertyMap &map = PropertyMap());
+        void setNeutralTemplate(const Molecule &neutral_mol, const QStringList &properties,
+                                const PropertyMap &map = PropertyMap());
 
-    void setPositiveTemplate(const Molecule &positive_ion,
-                             const PropertyMap &map = PropertyMap());
-    void setNegativeTemplate(const Molecule &negative_ion,
-                             const PropertyMap &map = PropertyMap());
-    void setNeutralTemplate(const Molecule &neutral_mol,
-                            const PropertyMap &map = PropertyMap());
+        void setPositiveTemplate(const Molecule &positive_ion, const PropertyMap &map = PropertyMap());
+        void setNegativeTemplate(const Molecule &negative_ion, const PropertyMap &map = PropertyMap());
+        void setNeutralTemplate(const Molecule &neutral_mol, const PropertyMap &map = PropertyMap());
 
-    int nIons() const;
-    int nNeutrals() const;
+        int nIons() const;
+        int nNeutrals() const;
 
-    int nPositiveIons() const;
-    int nNegativeIons() const;
+        int nPositiveIons() const;
+        int nNegativeIons() const;
 
-    int getIonIndex(int ion_index) const;
-    int getPositiveIonIndex(int ion_index) const;
-    int getNegativeIonIndex(int ion_index) const;
-    int getNeutralIndex(int neutral_index) const;
+        int getIonIndex(int ion_index) const;
+        int getPositiveIonIndex(int ion_index) const;
+        int getNegativeIonIndex(int ion_index) const;
+        int getNeutralIndex(int neutral_index) const;
 
-    int getCharge(int i) const;
-    void swapCharge(int i, int j);
+        int getCharge(int i) const;
+        void swapCharge(int i, int j);
 
-    void randomiseCharge(int ncharges);
-    void randomiseCharge(int npositive, int nnegative);
+        void randomiseCharge(int ncharges);
+        void randomiseCharge(int npositive, int nnegative);
 
-    double applyTo(System &system);
+        double applyTo(System &system);
 
-private:
-    void initialiseFromGroup(const MoleculeGroup &group);
-    void clearState();
+    private:
+        void initialiseFromGroup(const MoleculeGroup &group);
+        void clearState();
 
-    /** The name of the molecule group containing all of the
-        molecules that can swap */
-    SireMol::MGName mgname;
+        /** The name of the molecule group containing all of the
+            molecules that can swap */
+        SireMol::MGName mgname;
 
-    /** The number of the last molecule group to which this was applied */
-    SireMol::MGNum mgnum;
+        /** The number of the last molecule group to which this was applied */
+        SireMol::MGNum mgnum;
 
-    /** The version of the molecule group the last time this was applied */
-    SireBase::Version mgversion;
+        /** The version of the molecule group the last time this was applied */
+        SireBase::Version mgversion;
 
-    /** The current charge of each molecule in the group */
-    QVector<qint32> chgs;
+        /** The current charge of each molecule in the group */
+        QVector<qint32> chgs;
 
-    /** The desired charge of each molecule in the group */
-    QVector<qint32> desired_chgs;
+        /** The desired charge of each molecule in the group */
+        QVector<qint32> desired_chgs;
 
-    /** The template for the neutral molecule */
-    Molecule neutral_template;
+        /** The template for the neutral molecule */
+        Molecule neutral_template;
 
-    /** The template for a negative ion */
-    Molecule negative_template;
+        /** The template for a negative ion */
+        Molecule negative_template;
 
-    /** The template for a positive ion */
-    Molecule positive_template;
+        /** The template for a positive ion */
+        Molecule positive_template;
 
-    /** The properties copied for a neutral molecule. If empty,
-        everything is copied except for map["coordinates"] */
-    QStringList neutral_properties;
+        /** The properties copied for a neutral molecule. If empty,
+            everything is copied except for map["coordinates"] */
+        QStringList neutral_properties;
 
-    /** The properties copied for a negative ion. Again, if empty,
-        everything is copied except for map["coordinates"] */
-    QStringList negative_properties;
+        /** The properties copied for a negative ion. Again, if empty,
+            everything is copied except for map["coordinates"] */
+        QStringList negative_properties;
 
-    /** The properties copied for a positive ion. Again, if empty,
-        everything is copied except for map["coordinates"] */
-    QStringList positive_properties;
+        /** The properties copied for a positive ion. Again, if empty,
+            everything is copied except for map["coordinates"] */
+        QStringList positive_properties;
 
-    /** The property map used to extract properties from the neutral
-        molecule */
-    PropertyMap neutral_map;
+        /** The property map used to extract properties from the neutral
+            molecule */
+        PropertyMap neutral_map;
 
-    /** The property map used to extract properties from the negative ion */
-    PropertyMap negative_map;
+        /** The property map used to extract properties from the negative ion */
+        PropertyMap negative_map;
 
-    /** The property map used to extract properties from the positive ion */
-    PropertyMap positive_map;
+        /** The property map used to extract properties from the positive ion */
+        PropertyMap positive_map;
 
-    /** The property map used to put properties into the actual molecules */
-    PropertyMap propmap;
+        /** The property map used to put properties into the actual molecules */
+        PropertyMap propmap;
 
-    /** The charge of the positive ion template */
-    qint32 pos_charge;
+        /** The charge of the positive ion template */
+        qint32 pos_charge;
 
-    /** The charge of the negative ion template */
-    qint32 neg_charge;
-};
+        /** The charge of the negative ion template */
+        qint32 neg_charge;
+    };
 
 } // end of namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::Titrator )
+Q_DECLARE_METATYPE(SireMove::Titrator)
 
-SIRE_EXPOSE_CLASS( SireMove::Titrator )
+SIRE_EXPOSE_CLASS(SireMove::Titrator)
 
 SIRE_END_HEADER
 

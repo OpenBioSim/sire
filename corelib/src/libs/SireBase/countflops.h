@@ -30,12 +30,12 @@
 
 #include "sireglobal.h"
 
+#include <QMutex>
 #include <QTime>
 #include <QVector>
-#include <QMutex>
 
 #ifdef SIRE_TIME_ROUTINES
-#include <pthread.h>  // CONDITIONAL_INCLUDE
+#include <pthread.h> // CONDITIONAL_INCLUDE
 #endif
 
 SIRE_BEGIN_HEADER
@@ -43,113 +43,113 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-class CountFlops;
+    class CountFlops;
 
-/** This class contains a marker that may be
-    used to get the flops per second
+    /** This class contains a marker that may be
+        used to get the flops per second
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT FlopsMark
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT FlopsMark
+    {
 
-friend class CountFlops;
+        friend class CountFlops;
 
-public:
-    FlopsMark();
-    FlopsMark(const FlopsMark &other);
+    public:
+        FlopsMark();
+        FlopsMark(const FlopsMark &other);
 
-    ~FlopsMark();
+        ~FlopsMark();
 
-    FlopsMark& operator=(const FlopsMark &other);
+        FlopsMark &operator=(const FlopsMark &other);
 
-    double operator-(const FlopsMark &other) const;
+        double operator-(const FlopsMark &other) const;
 
-    FlopsMark operator[](int i) const;
+        FlopsMark operator[](int i) const;
 
-    int nFlops() const;
-    int nThreads() const;
+        int nFlops() const;
+        int nThreads() const;
 
-    FlopsMark threadFlops(int i) const;
+        FlopsMark threadFlops(int i) const;
 
-    static double benchmark();
-    static double benchmarkSum();
-    static double benchmarkProduct();
-    static double benchmarkQuotient();
+        static double benchmark();
+        static double benchmarkSum();
+        static double benchmarkProduct();
+        static double benchmarkQuotient();
 
-protected:
-    FlopsMark(const QVector<int> &nflops, int ms);
+    protected:
+        FlopsMark(const QVector<int> &nflops, int ms);
 
-private:
-    /** The number of flops carried out by at this mark
-        for each thread */
-    QVector<int> nflops;
+    private:
+        /** The number of flops carried out by at this mark
+            for each thread */
+        QVector<int> nflops;
 
-    /** The time that this mark was taken (in ms) */
-    int ms;
-};
+        /** The time that this mark was taken (in ms) */
+        int ms;
+    };
 
 #ifdef SIRE_TIME_ROUTINES
 
-/** This is the singleton class that can be used
-    to count floating point operations in the program
+    /** This is the singleton class that can be used
+        to count floating point operations in the program
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT CountFlops
-{
-public:
-    class SIREBASE_EXPORT ThreadFlops
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT CountFlops
     {
     public:
-        ThreadFlops();
-        ~ThreadFlops();
+        class SIREBASE_EXPORT ThreadFlops
+        {
+        public:
+            ThreadFlops();
+            ~ThreadFlops();
 
-        int nflops;
+            int nflops;
+        };
+
+        CountFlops();
+        ~CountFlops();
+
+        static void addFlops(int nflops);
+        static FlopsMark mark();
+
+    private:
+        static CountFlops *global_counter;
+
+        static void createGlobalCounter();
+
+        pthread_key_t thread_key;
+
+        /** The timer used to get the flop rate */
+        QTime flop_timer;
     };
-
-    CountFlops();
-    ~CountFlops();
-
-    static void addFlops(int nflops);
-    static FlopsMark mark();
-
-private:
-    static CountFlops *global_counter;
-
-    static void createGlobalCounter();
-
-    pthread_key_t thread_key;
-
-    /** The timer used to get the flop rate */
-    QTime flop_timer;
-};
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Add 'nflops' floating point operations to the count of floating
-    point operations for this thread */
-SIRE_ALWAYS_INLINE void CountFlops::addFlops(int nflops)
-{
-    if (global_counter == 0)
+    /** Add 'nflops' floating point operations to the count of floating
+        point operations for this thread */
+    SIRE_ALWAYS_INLINE void CountFlops::addFlops(int nflops)
     {
-        CountFlops::createGlobalCounter();
+        if (global_counter == 0)
+        {
+            CountFlops::createGlobalCounter();
+        }
+
+        ThreadFlops *ptr = (ThreadFlops *)(pthread_getspecific(global_counter->thread_key));
+
+        if (ptr == 0)
+        {
+            ptr = new ThreadFlops();
+            pthread_setspecific(global_counter->thread_key, ptr);
+        }
+
+        ptr->nflops += nflops;
     }
-
-    ThreadFlops *ptr = (ThreadFlops*)(pthread_getspecific(global_counter->thread_key));
-
-    if (ptr == 0)
-    {
-        ptr = new ThreadFlops();
-        pthread_setspecific(global_counter->thread_key, ptr);
-    }
-
-    ptr->nflops += nflops;
-}
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-#endif //SIRE_TIME_ROUTINES
+#endif // SIRE_TIME_ROUTINES
 
 } // end of namespace SireBase
 
@@ -158,12 +158,12 @@ SIRE_ALWAYS_INLINE void CountFlops::addFlops(int nflops)
 #endif
 
 #ifdef SIRE_TIME_ROUTINES
-#define ADD_FLOPS(n)  SireBase::CountFlops::addFlops(n);
+#define ADD_FLOPS(n) SireBase::CountFlops::addFlops(n);
 #else
 #define ADD_FLOPS(n) /* Not adding n flops */
 #endif
 
-SIRE_EXPOSE_CLASS( SireBase::FlopsMark )
+SIRE_EXPOSE_CLASS(SireBase::FlopsMark)
 
 SIRE_END_HEADER
 

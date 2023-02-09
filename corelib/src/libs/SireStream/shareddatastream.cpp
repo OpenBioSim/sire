@@ -56,18 +56,20 @@ using boost::weak_ptr;
 ////////
 
 SharedDataHolder::SharedDataHolder()
-{}
+{
+}
 
 SharedDataHolder::~SharedDataHolder()
-{}
-
-void SharedDataHolder::throwCastingError(const char *trycast,
-                                         const char *iscast) const
 {
-    throw SireError::program_bug( QObject::tr(
-        "SharedDataStream has got confused over types and is attempting "
-        "an invalid cast! (from %1 to %2)")
-            .arg(iscast).arg(trycast), CODELOC );
+}
+
+void SharedDataHolder::throwCastingError(const char *trycast, const char *iscast) const
+{
+    throw SireError::program_bug(QObject::tr("SharedDataStream has got confused over types and is attempting "
+                                             "an invalid cast! (from %1 to %2)")
+                                     .arg(iscast)
+                                     .arg(trycast),
+                                 CODELOC);
 }
 
 ////////
@@ -76,7 +78,8 @@ void SharedDataHolder::throwCastingError(const char *trycast,
 
 /** Constructor */
 SharedDataRegistry::SharedDataRegistry() : ds(0), version_number(0)
-{}
+{
+}
 
 /** Assert that this is a valid ID */
 void SharedDataRegistry::assertValidID(quint32 id) const
@@ -86,33 +89,34 @@ void SharedDataRegistry::assertValidID(quint32 id) const
         QList<quint32> keys = objects_by_id.keys();
         std::sort(keys.begin(), keys.end());
 
-        throw SireError::program_bug( QObject::tr(
-            "The SharedDataStream has encountered an invalid object ID (%1). "
-            "The maximum ID available is %2. This is sometimes caused "
-            "by the programmer forgetting to detach a shared_ptr<T> before "
-            "streaming into it.")
-                .arg(id).arg( keys.last() ), CODELOC );
+        throw SireError::program_bug(QObject::tr("The SharedDataStream has encountered an invalid object ID (%1). "
+                                                 "The maximum ID available is %2. This is sometimes caused "
+                                                 "by the programmer forgetting to detach a shared_ptr<T> before "
+                                                 "streaming into it.")
+                                         .arg(id)
+                                         .arg(keys.last()),
+                                     CODELOC);
     }
 }
 
 /** Something went wrong with the ID system... */
 void SharedDataRegistry::throwIDError(quint32 registered_id) const
 {
-    throw SireError::program_bug( QObject::tr(
-        "The SharedDataStream has got confused and messed up its ID numbers. "
-        "The object with ID %1 has already been registered!")
-            .arg(registered_id), CODELOC );
+    throw SireError::program_bug(QObject::tr("The SharedDataStream has got confused and messed up its ID numbers. "
+                                             "The object with ID %1 has already been registered!")
+                                     .arg(registered_id),
+                                 CODELOC);
 }
 
-typedef QHash< QDataStream*, weak_ptr<SharedDataRegistry> > GlobalRegistry;
+typedef QHash<QDataStream *, weak_ptr<SharedDataRegistry>> GlobalRegistry;
 
-Q_GLOBAL_STATIC( QMutex, registryMutex );
-Q_GLOBAL_STATIC( GlobalRegistry, globalRegistry );
+Q_GLOBAL_STATIC(QMutex, registryMutex);
+Q_GLOBAL_STATIC(GlobalRegistry, globalRegistry);
 
 /** Construct and return the shared registry for the passed QDataStream */
 shared_ptr<SharedDataRegistry> SharedDataRegistry::construct(QDataStream &ds)
 {
-    QMutexLocker lkr( registryMutex() );
+    QMutexLocker lkr(registryMutex());
 
     if (globalRegistry()->contains(&ds))
     {
@@ -122,11 +126,11 @@ shared_ptr<SharedDataRegistry> SharedDataRegistry::construct(QDataStream &ds)
             return reg;
     }
 
-    shared_ptr<SharedDataRegistry> reg( new SharedDataRegistry() );
+    shared_ptr<SharedDataRegistry> reg(new SharedDataRegistry());
 
     reg->ds = &ds;
 
-    globalRegistry()->insert( &ds, reg );
+    globalRegistry()->insert(&ds, reg);
 
     return reg;
 }
@@ -134,8 +138,8 @@ shared_ptr<SharedDataRegistry> SharedDataRegistry::construct(QDataStream &ds)
 /** Destructor */
 SharedDataRegistry::~SharedDataRegistry()
 {
-    //remove this registry from the global_registry
-    QMutexLocker lkr( registryMutex() );
+    // remove this registry from the global_registry
+    QMutexLocker lkr(registryMutex());
 
     if (ds)
     {
@@ -154,7 +158,7 @@ bool SharedDataRegistry::containsKey(quint32 key) const
 quint32 SharedDataRegistry::version() const
 {
     if (version_number == 0)
-        //the version number has not been set - use the latest version
+        // the version number has not been set - use the latest version
         return 2;
     else
         return version_number;
@@ -175,19 +179,19 @@ bool SharedDataRegistry::peekMagic()
     if (ds == 0)
         return false;
 
-    //peek to see if the 64bit magic number is next in the stream
+    // peek to see if the 64bit magic number is next in the stream
     char magic_number_data[8];
 
-    int nbytes_read = ds->device()->peek( magic_number_data, 8 );
+    int nbytes_read = ds->device()->peek(magic_number_data, 8);
 
     if (nbytes_read < 8)
     {
-        //there is not enough data to contain the magic number
+        // there is not enough data to contain the magic number
         return false;
     }
 
-    //now read the number
-    quint64 magic_number = qFromBigEndian<quint64>( *((quint64*)magic_number_data) );
+    // now read the number
+    quint64 magic_number = qFromBigEndian<quint64>(*((quint64 *)magic_number_data));
 
     return (magic_number == SHARED_DATASTREAM_MAGIC);
 }
@@ -204,31 +208,31 @@ void SharedDataRegistry::readVersion()
 
     if (not this->peekMagic())
     {
-        //there is no magic - we must be at version 1
+        // there is no magic - we must be at version 1
         version_number = 1;
         return;
     }
 
-    //read the magic number and version number
+    // read the magic number and version number
     quint64 magic_number;
 
     (*ds) >> magic_number >> version_number;
 
     if (magic_number != SHARED_DATASTREAM_MAGIC)
-        throw SireError::program_bug( QObject::tr(
-            "Something went wrong when reading the SharedDataStream version! "
-            "The magic number changed (from %1 to %2)")
-                .arg(SHARED_DATASTREAM_MAGIC).arg(magic_number), CODELOC );
+        throw SireError::program_bug(QObject::tr("Something went wrong when reading the SharedDataStream version! "
+                                                 "The magic number changed (from %1 to %2)")
+                                         .arg(SHARED_DATASTREAM_MAGIC)
+                                         .arg(magic_number),
+                                     CODELOC);
 
     if (version_number == 0)
-        throw SireError::program_bug( QObject::tr(
-            "There was no version number, even though there should have been one!"),
-                CODELOC );
+        throw SireError::program_bug(
+            QObject::tr("There was no version number, even though there should have been one!"), CODELOC);
 
     if (version_number > 2)
     {
-        qWarning() << "Reading a SharedDataStream written using a newer version ("
-                   << version_number << ") than this version (2) - this could lead "
+        qWarning() << "Reading a SharedDataStream written using a newer version (" << version_number
+                   << ") than this version (2) - this could lead "
                    << "to problems...";
     }
 }
@@ -243,7 +247,7 @@ void SharedDataRegistry::writeVersion()
     if (version_number != 0)
         return;
 
-    //we are at version 2
+    // we are at version 2
     version_number = 2;
 
     (*ds) << SHARED_DATASTREAM_MAGIC << version_number;
@@ -255,15 +259,15 @@ void SharedDataRegistry::writeVersion()
 
 /** Construct a SharedDataStream that uses the QDataStream 'datastream'
     to serialise and unserialise the objects. */
-SharedDataStream::SharedDataStream(QDataStream &qdatastream)
-                 : ds(qdatastream)
+SharedDataStream::SharedDataStream(QDataStream &qdatastream) : ds(qdatastream)
 {
     registry = SharedDataRegistry::construct(qdatastream);
 }
 
 /** Destructor */
 SharedDataStream::~SharedDataStream()
-{}
+{
+}
 
 /** Return the version number of the shared data stream */
 quint32 SharedDataStream::version() const
@@ -300,16 +304,17 @@ quint32 SharedDataStream::loadID()
         ds >> magic >> id;
 
         if (magic != SHARED_DATASTREAM_MAGIC)
-            throw SireStream::corrupted_data( QObject::tr(
-                "There was a problem reading the magic number of the "
-                "SharedDataStream - read %1, but expected %2.")
-                    .arg(magic).arg(SHARED_DATASTREAM_MAGIC), CODELOC );
+            throw SireStream::corrupted_data(QObject::tr("There was a problem reading the magic number of the "
+                                                         "SharedDataStream - read %1, but expected %2.")
+                                                 .arg(magic)
+                                                 .arg(SHARED_DATASTREAM_MAGIC),
+                                             CODELOC);
     }
     else
-        throw SireError::version_error( QObject::tr(
-            "Reading version %1 of the SharedDataStream format, but this "
-            "program only supports versions 1 and 2.").arg(this->version()),
-                CODELOC );
+        throw SireError::version_error(QObject::tr("Reading version %1 of the SharedDataStream format, but this "
+                                                   "program only supports versions 1 and 2.")
+                                           .arg(this->version()),
+                                       CODELOC);
 
     return id;
 }
@@ -331,51 +336,48 @@ void SharedDataStream::writeVersion()
 namespace SireStream
 {
 
-namespace detail
-{
-
-/** This is a helper class that helps the loading and saving of a shared
-    pointer */
-struct GetQStringPointer
-{
-    static bool isEmpty(const QString &string)
+    namespace detail
     {
-        return string.isEmpty();
+
+        /** This is a helper class that helps the loading and saving of a shared
+            pointer */
+        struct GetQStringPointer
+        {
+            static bool isEmpty(const QString &string)
+            {
+                return string.isEmpty();
+            }
+
+            static const void *value(const QString &string)
+            {
+                return string.constData();
+            }
+
+            static void load(QDataStream &ds, QString &string)
+            {
+                ds >> string;
+            }
+
+            static void save(QDataStream &ds, const QString &string)
+            {
+                ds << string;
+            }
+        };
+
+    } // end of namespace detail
+
+    SharedDataStream &operator<<(SharedDataStream &sds, const QString &string)
+    {
+        sds.sharedSave<QString, GetQStringPointer>(shareString(string));
+        return sds;
     }
 
-    static const void* value(const QString &string)
+    SharedDataStream &operator>>(SharedDataStream &sds, QString &string)
     {
-        return string.constData();
+        sds.sharedLoad<QString, GetQStringPointer>(string);
+        string = shareString(string);
+
+        return sds;
     }
-
-    static void load(QDataStream &ds, QString &string)
-    {
-        ds >> string;
-    }
-
-    static void save(QDataStream &ds, const QString &string)
-    {
-        ds << string;
-    }
-};
-
-} // end of namespace detail
-
-
-
-SharedDataStream &operator<<(SharedDataStream &sds,
-                                               const QString &string)
-{
-    sds.sharedSave<QString, GetQStringPointer>( shareString(string) );
-    return sds;
-}
-
-SharedDataStream &operator>>(SharedDataStream &sds, QString &string)
-{
-    sds.sharedLoad<QString, GetQStringPointer>(string);
-    string = shareString(string);
-
-    return sds;
-}
 
 } // end of namespace SireStream

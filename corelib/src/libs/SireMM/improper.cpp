@@ -34,9 +34,9 @@
 #include "SireMol/mover.hpp"
 #include "SireMol/selector.hpp"
 
+#include "SireCAS/expression.h"
 #include "SireCAS/symbol.h"
 #include "SireCAS/values.h"
-#include "SireCAS/expression.h"
 
 #include "SireMaths/torsion.h"
 
@@ -60,20 +60,20 @@ using namespace SireUnits;
 
 static const RegisterMetaType<Improper> r_improper;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const Improper &improper)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const Improper &improper)
 {
     writeHeader(ds, r_improper, 1);
-    ds << improper.imp << static_cast<const MoleculeView&>(improper);
+    ds << improper.imp << static_cast<const MoleculeView &>(improper);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Improper &improper)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, Improper &improper)
 {
     auto v = readHeader(ds, r_improper);
 
     if (v == 1)
     {
-        ds >> improper.imp >> static_cast<MoleculeView&>(improper);
+        ds >> improper.imp >> static_cast<MoleculeView &>(improper);
     }
     else
         throw SireStream::version_error(v, "1", r_improper, CODELOC);
@@ -82,96 +82,81 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Improper &improper)
 }
 
 Improper::Improper() : ConcreteProperty<Improper, MoleculeView>()
-{}
-
-
-Improper::Improper(const Atom &atom0, const Atom &atom1,
-                   const Atom &atom2, const Atom &atom3)
-         : ConcreteProperty<Improper, MoleculeView>()
 {
-    if ((not atom0.isSameMolecule(atom1)) or
-        (not atom0.isSameMolecule(atom2)) or
-        (not atom0.isSameMolecule(atom3)))
+}
+
+Improper::Improper(const Atom &atom0, const Atom &atom1, const Atom &atom2, const Atom &atom3)
+    : ConcreteProperty<Improper, MoleculeView>()
+{
+    if ((not atom0.isSameMolecule(atom1)) or (not atom0.isSameMolecule(atom2)) or (not atom0.isSameMolecule(atom3)))
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create an Improper from four atoms in the same molecule. "
-            "%1-%2-%3-%4 are from different molecules (%5-%6-%7-%8)")
-                .arg(atom0.toString()).arg(atom1.toString())
-                .arg(atom2.toString()).arg(atom3.toString())
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create an Improper from four atoms in the same molecule. "
+                        "%1-%2-%3-%4 are from different molecules (%5-%6-%7-%8)")
+                .arg(atom0.toString())
+                .arg(atom1.toString())
+                .arg(atom2.toString())
+                .arg(atom3.toString())
                 .arg(atom0.molecule().toString())
                 .arg(atom1.molecule().toString())
                 .arg(atom2.molecule().toString())
-                .arg(atom3.molecule().toString()), CODELOC);
+                .arg(atom3.molecule().toString()),
+            CODELOC);
     }
 
-    this->operator=(Improper(atom0.data(),
-                          ImproperID(atom0.index(),
-                                     atom1.index(),
-                                     atom2.index(),
-                                     atom3.index())));
+    this->operator=(Improper(atom0.data(), ImproperID(atom0.index(), atom1.index(), atom2.index(), atom3.index())));
 }
 
-Improper::Improper(const MoleculeView &molview,
-                   const AtomID &atom0, const AtomID &atom1,
-                   const AtomID &atom2, const AtomID &atom3)
-     : ConcreteProperty<Improper, MoleculeView>()
+Improper::Improper(const MoleculeView &molview, const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                   const AtomID &atom3)
+    : ConcreteProperty<Improper, MoleculeView>()
 {
-    this->operator=(Improper(molview.atom(atom0),
-                             molview.atom(atom1),
-                             molview.atom(atom2),
-                             molview.atom(atom3)));
+    this->operator=(Improper(molview.atom(atom0), molview.atom(atom1), molview.atom(atom2), molview.atom(atom3)));
 }
 
-Improper::Improper(const MoleculeData &moldata,
-                   const AtomID &atm0, const AtomID &atm1,
-                   const AtomID &atm2, const AtomID &atm3)
-     : ConcreteProperty<Improper, MoleculeView>()
+Improper::Improper(const MoleculeData &moldata, const AtomID &atm0, const AtomID &atm1, const AtomID &atm2,
+                   const AtomID &atm3)
+    : ConcreteProperty<Improper, MoleculeView>()
 {
-    this->operator=(Improper(Atom(moldata, atm0),
-                             Atom(moldata, atm1),
-                             Atom(moldata, atm2),
-                             Atom(moldata, atm3)));
+    this->operator=(Improper(Atom(moldata, atm0), Atom(moldata, atm1), Atom(moldata, atm2), Atom(moldata, atm3)));
 }
 
 Improper::Improper(const MoleculeData &moldata, const ImproperID &improper)
-         : ConcreteProperty<Improper, MoleculeView>(moldata)
+    : ConcreteProperty<Improper, MoleculeView>(moldata)
 {
     auto atomidx0 = moldata.info().atomIdx(improper.atom0());
     auto atomidx1 = moldata.info().atomIdx(improper.atom1());
     auto atomidx2 = moldata.info().atomIdx(improper.atom2());
     auto atomidx3 = moldata.info().atomIdx(improper.atom3());
 
-    if ((atomidx0 == atomidx1) or
-        (atomidx0 == atomidx2) or
-        (atomidx0 == atomidx3) or
-        (atomidx1 == atomidx2) or
-        (atomidx1 == atomidx3) or
-        (atomidx2 == atomidx3))
+    if ((atomidx0 == atomidx1) or (atomidx0 == atomidx2) or (atomidx0 == atomidx3) or (atomidx1 == atomidx2) or
+        (atomidx1 == atomidx3) or (atomidx2 == atomidx3))
     {
-        throw SireMol::duplicate_atom(QObject::tr(
-            "You cannot make an Improper out of identical atoms. %1-%2-%3-%4")
-                .arg(atomidx0.toString())
-                .arg(atomidx1.toString())
-                .arg(atomidx2.toString())
-                .arg(atomidx3.toString()), CODELOC);
+        throw SireMol::duplicate_atom(QObject::tr("You cannot make an Improper out of identical atoms. %1-%2-%3-%4")
+                                          .arg(atomidx0.toString())
+                                          .arg(atomidx1.toString())
+                                          .arg(atomidx2.toString())
+                                          .arg(atomidx3.toString()),
+                                      CODELOC);
     }
 
     imp = ImproperID(atomidx0, atomidx1, atomidx2, atomidx3);
 }
 
-Improper::Improper(const Improper &other)
-         : ConcreteProperty<Improper, MoleculeView>(other), imp(other.imp)
-{}
+Improper::Improper(const Improper &other) : ConcreteProperty<Improper, MoleculeView>(other), imp(other.imp)
+{
+}
 
 Improper::~Improper()
-{}
+{
+}
 
-const char* Improper::typeName()
+const char *Improper::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Improper>());
 }
 
-Improper& Improper::operator=(const Improper &other)
+Improper &Improper::operator=(const Improper &other)
 {
     if (this != &other)
     {
@@ -208,10 +193,14 @@ QString Improper::toString() const
     auto a3 = this->atom3();
 
     return QObject::tr("Improper( %1:%2 <= %3:%4 => %5:%6 -- %7:%8 )")
-            .arg(a0.name()).arg(a0.number())
-            .arg(a1.name()).arg(a1.number())
-            .arg(a2.name()).arg(a2.number())
-            .arg(a3.name()).arg(a3.number());
+        .arg(a0.name())
+        .arg(a0.number())
+        .arg(a1.name())
+        .arg(a1.number())
+        .arg(a2.name())
+        .arg(a2.number())
+        .arg(a3.name())
+        .arg(a3.number());
 }
 
 Atom Improper::atom0() const
@@ -280,7 +269,7 @@ bool Improper::hasConnectivity() const
     return this->data().hasProperty("connectivity");
 }
 
-const Connectivity& Improper::getConnectivity() const
+const Connectivity &Improper::getConnectivity() const
 {
     return this->data().property("connectivity").asA<Connectivity>();
 }
@@ -300,8 +289,7 @@ bool Improper::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool Improper::hasMetadata(const PropertyName &key,
-                           const PropertyName &metakey) const
+bool Improper::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -336,7 +324,7 @@ Properties Improper::properties() const
     return Properties();
 }
 
-const Property& Improper::property(const PropertyName &key) const
+const Property &Improper::property(const PropertyName &key) const
 {
     if (this->hasConnectivity())
     {
@@ -346,16 +334,13 @@ const Property& Improper::property(const PropertyName &key) const
     if (key.hasValue())
         return key.value();
 
-    throw SireBase::missing_property(QObject::tr(
-        "Improper %1 has no property at key %2.")
-            .arg(this->toString()).arg(key.source()),
-                CODELOC);
+    throw SireBase::missing_property(
+        QObject::tr("Improper %1 has no property at key %2.").arg(this->toString()).arg(key.source()), CODELOC);
 
     return key.value();
 }
 
-const Property& Improper::property(const PropertyName &key,
-                                   const Property &default_value) const
+const Property &Improper::property(const PropertyName &key, const Property &default_value) const
 {
     if (this->hasConnectivity())
     {
@@ -429,8 +414,9 @@ Expression Improper::potential(const PropertyMap &map) const
 
         return p;
     }
-    catch(const SireError::exception&)
-    {}
+    catch (const SireError::exception &)
+    {
+    }
 
     return Expression();
 }
@@ -446,8 +432,7 @@ SireUnits::Dimension::GeneralUnit Improper::energy(const PropertyMap &map) const
     auto phi = this->phi(map);
     auto theta = this->theta(map);
 
-    Values vals(Symbol("phi")==phi.to(radians),
-                Symbol("theta")==theta.to(radians));
+    Values vals(Symbol("phi") == phi.to(radians), Symbol("theta") == theta.to(radians));
 
     SireUnits::Dimension::GeneralUnit value;
     value.setComponent("improper", pot.evaluate(vals) * kcal_per_mol);

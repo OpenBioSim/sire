@@ -32,12 +32,12 @@
 #include "mover.hpp"
 #include "selector.hpp"
 
-#include "molecule.h"
-#include "segment.h"
-#include "chain.h"
-#include "residue.h"
-#include "cutgroup.h"
 #include "atom.h"
+#include "chain.h"
+#include "cutgroup.h"
+#include "molecule.h"
+#include "residue.h"
+#include "segment.h"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -55,22 +55,19 @@ using namespace SireStream;
 RegisterMetaType<ViewsOfMol> r_molviews;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const ViewsOfMol &molviews)
+QDataStream &operator<<(QDataStream &ds, const ViewsOfMol &molviews)
 {
     writeHeader(ds, r_molviews, 1);
 
     SharedDataStream sds(ds);
 
-    sds << molviews.selected_atoms << molviews.views
-        << static_cast<const MoleculeView&>(molviews);
+    sds << molviews.selected_atoms << molviews.views << static_cast<const MoleculeView &>(molviews);
 
     return ds;
 }
 
 /** Deserialise from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                       ViewsOfMol &molviews)
+QDataStream &operator>>(QDataStream &ds, ViewsOfMol &molviews)
 {
     VersionID v = readHeader(ds, r_molviews);
 
@@ -78,8 +75,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> molviews.selected_atoms >> molviews.views
-            >> static_cast<MoleculeView&>(molviews);
+        sds >> molviews.selected_atoms >> molviews.views >> static_cast<MoleculeView &>(molviews);
     }
     else
         throw version_error(v, "1", r_molviews, CODELOC);
@@ -88,29 +84,27 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Null constructor */
-ViewsOfMol::ViewsOfMol() : ConcreteProperty<ViewsOfMol,MoleculeView>()
-{}
+ViewsOfMol::ViewsOfMol() : ConcreteProperty<ViewsOfMol, MoleculeView>()
+{
+}
 
 /** Construct an empty view of the molecule whose data
     is in 'moldata' */
 ViewsOfMol::ViewsOfMol(const MoleculeData &moldata)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>(moldata),
-             selected_atoms(moldata)
-{}
+    : ConcreteProperty<ViewsOfMol, MoleculeView>(moldata), selected_atoms(moldata)
+{
+}
 
 /** Construct the view of the passed molecule */
-ViewsOfMol::ViewsOfMol(const MoleculeData &moldata,
-                       const AtomSelection &molview)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>(moldata),
-             selected_atoms(molview)
+ViewsOfMol::ViewsOfMol(const MoleculeData &moldata, const AtomSelection &molview)
+    : ConcreteProperty<ViewsOfMol, MoleculeView>(moldata), selected_atoms(molview)
 {
     selected_atoms.assertCompatibleWith(moldata);
 }
 
 /** Construct the views of the passed molecule */
-ViewsOfMol::ViewsOfMol(const MoleculeData &moldata,
-                       const QList<AtomSelection> &molviews)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>(moldata)
+ViewsOfMol::ViewsOfMol(const MoleculeData &moldata, const QList<AtomSelection> &molviews)
+    : ConcreteProperty<ViewsOfMol, MoleculeView>(moldata)
 {
     if (molviews.isEmpty())
     {
@@ -133,12 +127,12 @@ ViewsOfMol::ViewsOfMol(const MoleculeData &moldata,
 
 /** Construct just a single view of a molecule */
 ViewsOfMol::ViewsOfMol(const MoleculeView &view)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>(view),
-             selected_atoms(view.selection())
-{}
+    : ConcreteProperty<ViewsOfMol, MoleculeView>(view), selected_atoms(view.selection())
+{
+}
 
 /** Set this equal to the multiple views held in 'selection' */
-template<class T>
+template <class T>
 void ViewsOfMol::setEqualTo(const Selector<T> &selection)
 {
     MoleculeView::operator=(selection);
@@ -153,9 +147,9 @@ void ViewsOfMol::setEqualTo(const Selector<T> &selection)
     }
     else if (nviews > 1)
     {
-        for (int i=0; i<nviews; ++i)
+        for (int i = 0; i < nviews; ++i)
         {
-            views.append( selection(i).selection() );
+            views.append(selection(i).selection());
         }
 
         selected_atoms = views.at(0);
@@ -164,53 +158,48 @@ void ViewsOfMol::setEqualTo(const Selector<T> &selection)
 }
 
 /** Construct from the set of atoms */
-ViewsOfMol::ViewsOfMol(const Selector<Atom> &atoms)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>()
+ViewsOfMol::ViewsOfMol(const Selector<Atom> &atoms) : ConcreteProperty<ViewsOfMol, MoleculeView>()
 {
     this->setEqualTo(atoms);
 }
 
 /** Construct from the set of CutGroups */
-ViewsOfMol::ViewsOfMol(const Selector<CutGroup> &cgroups)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>()
+ViewsOfMol::ViewsOfMol(const Selector<CutGroup> &cgroups) : ConcreteProperty<ViewsOfMol, MoleculeView>()
 {
     this->setEqualTo(cgroups);
 }
 
 /** Construct from the set of residues */
-ViewsOfMol::ViewsOfMol(const Selector<Residue> &residues)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>()
+ViewsOfMol::ViewsOfMol(const Selector<Residue> &residues) : ConcreteProperty<ViewsOfMol, MoleculeView>()
 {
     this->setEqualTo(residues);
 }
 
 /** Construct from the set of chains */
-ViewsOfMol::ViewsOfMol(const Selector<Chain> &chains)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>()
+ViewsOfMol::ViewsOfMol(const Selector<Chain> &chains) : ConcreteProperty<ViewsOfMol, MoleculeView>()
 {
     this->setEqualTo(chains);
 }
 
 /** Construct from the set of segments */
-ViewsOfMol::ViewsOfMol(const Selector<Segment> &segments)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>()
+ViewsOfMol::ViewsOfMol(const Selector<Segment> &segments) : ConcreteProperty<ViewsOfMol, MoleculeView>()
 {
     this->setEqualTo(segments);
 }
 
 /** Copy constructor */
 ViewsOfMol::ViewsOfMol(const ViewsOfMol &other)
-           : ConcreteProperty<ViewsOfMol,MoleculeView>(other),
-             selected_atoms(other.selected_atoms),
-             views(other.views)
-{}
+    : ConcreteProperty<ViewsOfMol, MoleculeView>(other), selected_atoms(other.selected_atoms), views(other.views)
+{
+}
 
 /** Destructor */
 ViewsOfMol::~ViewsOfMol()
-{}
+{
+}
 
 /** Copy assignment operator */
-ViewsOfMol& ViewsOfMol::operator=(const ViewsOfMol &other)
+ViewsOfMol &ViewsOfMol::operator=(const ViewsOfMol &other)
 {
     MoleculeView::operator=(other);
     selected_atoms = other.selected_atoms;
@@ -220,7 +209,7 @@ ViewsOfMol& ViewsOfMol::operator=(const ViewsOfMol &other)
 }
 
 /** Copy assignment operator */
-ViewsOfMol& ViewsOfMol::operator=(const MoleculeView &view)
+ViewsOfMol &ViewsOfMol::operator=(const MoleculeView &view)
 {
     MoleculeView::operator=(view);
     selected_atoms = view.selection();
@@ -230,35 +219,35 @@ ViewsOfMol& ViewsOfMol::operator=(const MoleculeView &view)
 }
 
 /** Copy assignment operator from a set of atoms */
-ViewsOfMol& ViewsOfMol::operator=(const Selector<Atom> &atoms)
+ViewsOfMol &ViewsOfMol::operator=(const Selector<Atom> &atoms)
 {
     this->setEqualTo(atoms);
     return *this;
 }
 
 /** Copy assignment operator from a set of CutGroups */
-ViewsOfMol& ViewsOfMol::operator=(const Selector<CutGroup> &cgroups)
+ViewsOfMol &ViewsOfMol::operator=(const Selector<CutGroup> &cgroups)
 {
     this->setEqualTo(cgroups);
     return *this;
 }
 
 /** Copy assignment operator from a set of residues */
-ViewsOfMol& ViewsOfMol::operator=(const Selector<Residue> &residues)
+ViewsOfMol &ViewsOfMol::operator=(const Selector<Residue> &residues)
 {
     this->setEqualTo(residues);
     return *this;
 }
 
 /** Copy assignment operator from a set of chains */
-ViewsOfMol& ViewsOfMol::operator=(const Selector<Chain> &chains)
+ViewsOfMol &ViewsOfMol::operator=(const Selector<Chain> &chains)
 {
     this->setEqualTo(chains);
     return *this;
 }
 
 /** Copy assignment operator from a set of segments */
-ViewsOfMol& ViewsOfMol::operator=(const Selector<Segment> &segments)
+ViewsOfMol &ViewsOfMol::operator=(const Selector<Segment> &segments)
 {
     this->setEqualTo(segments);
     return *this;
@@ -267,26 +256,22 @@ ViewsOfMol& ViewsOfMol::operator=(const Selector<Segment> &segments)
 /** Comparison operator */
 bool ViewsOfMol::operator==(const ViewsOfMol &other) const
 {
-    return MoleculeView::operator==(other) and
-           selected_atoms == other.selected_atoms and
-           views == other.views;
+    return MoleculeView::operator==(other) and selected_atoms == other.selected_atoms and views == other.views;
 }
 
 /** Comparison operator */
 bool ViewsOfMol::operator!=(const ViewsOfMol &other) const
 {
-    return MoleculeView::operator!=(other) or
-           selected_atoms != other.selected_atoms or
-           views != other.views;
+    return MoleculeView::operator!=(other) or selected_atoms != other.selected_atoms or views != other.views;
 }
 
 /** Return a string representation of these views */
 QString ViewsOfMol::toString() const
 {
-    return QObject::tr( "ViewsOfMol( %1 : %2 : nViews() == %3 )" )
-                .arg( this->name() )
-                .arg( this->number() )
-                .arg( this->nViews() );
+    return QObject::tr("ViewsOfMol( %1 : %2 : nViews() == %3 )")
+        .arg(this->name())
+        .arg(this->number())
+        .arg(this->nViews());
 }
 
 /** Return whether or not this is empty */
@@ -321,9 +306,9 @@ int ViewsOfMol::nViews() const
 */
 MolViewPtr ViewsOfMol::operator[](int i) const
 {
-    i = Index(i).map( this->nViews() );
+    i = Index(i).map(this->nViews());
 
-    if ( i == 0 and views.isEmpty() )
+    if (i == 0 and views.isEmpty())
         return PartialMolecule(*d, selected_atoms).toUnit();
     else
         return PartialMolecule(*d, views.at(i)).toUnit();
@@ -447,7 +432,7 @@ MolViewPtr ViewsOfMol::toSelector() const
 }
 
 /** Return the name of the molecule being viewed */
-const MolName& ViewsOfMol::name() const
+const MolName &ViewsOfMol::name() const
 {
     return d->name();
 }
@@ -477,7 +462,7 @@ quint64 ViewsOfMol::version(const PropertyName &key) const
 
     \throw SireError::invalid_index
 */
-const AtomSelection& ViewsOfMol::viewAt(int i) const
+const AtomSelection &ViewsOfMol::viewAt(int i) const
 {
     return this->selection(i);
 }
@@ -619,14 +604,14 @@ QList<AtomSelection> ViewsOfMol::unite(const QList<AtomSelection> &views)
 */
 AtomSelection ViewsOfMol::removeAt(int i)
 {
-    i = Index(i).map( this->nViews() );
+    i = Index(i).map(this->nViews());
 
     AtomSelection removed_view;
 
     if (views.isEmpty())
     {
-        //there is only one view in this set - and it is
-        //the total selection
+        // there is only one view in this set - and it is
+        // the total selection
         removed_view = selected_atoms;
         this->removeAll();
     }
@@ -813,16 +798,16 @@ QList<AtomSelection> ViewsOfMol::removeDuplicates()
 
     int nviews = views.count();
 
-    //compare all pairs of views
+    // compare all pairs of views
     int i = 0;
 
-    while (i < nviews-1)
+    while (i < nviews - 1)
     {
-        //need to take a pointer as removing views would
-        //screw up the reference
+        // need to take a pointer as removing views would
+        // screw up the reference
         const AtomSelection *view0 = &(views.at(i));
 
-        int j = i+1;
+        int j = i + 1;
 
         while (j < nviews)
         {
@@ -830,13 +815,13 @@ QList<AtomSelection> ViewsOfMol::removeDuplicates()
 
             if (*view0 == view1)
             {
-                //this is a duplicate view - remove the later view
+                // this is a duplicate view - remove the later view
                 removed_views.append(view1);
                 views.removeAt(j);
                 --nviews;
 
-                //need to retake the pointer to view0 as removing the
-                //item may have moved view0 in memory
+                // need to retake the pointer to view0 as removing the
+                // item may have moved view0 in memory
                 view0 = &(views.at(i));
             }
             else
@@ -883,7 +868,7 @@ ViewsOfMol ViewsOfMol::operator-(const ViewsOfMol &other) const
 
     \throw SireError::incompatible_error
 */
-ViewsOfMol& ViewsOfMol::operator+=(const ViewsOfMol &other)
+ViewsOfMol &ViewsOfMol::operator+=(const ViewsOfMol &other)
 {
     this->add(other);
     return *this;
@@ -894,7 +879,7 @@ ViewsOfMol& ViewsOfMol::operator+=(const ViewsOfMol &other)
 
     \throw SireError::incompatible_error
 */
-ViewsOfMol& ViewsOfMol::operator-=(const ViewsOfMol &other)
+ViewsOfMol &ViewsOfMol::operator-=(const ViewsOfMol &other)
 {
     this->remove(other);
     return *this;
@@ -938,9 +923,9 @@ AtomSelection ViewsOfMol::selection() const
 
     \throw SireError:invalid_index
 */
-const AtomSelection& ViewsOfMol::selection(int i) const
+const AtomSelection &ViewsOfMol::selection(int i) const
 {
-    i = Index(i).map( this->nViews() );
+    i = Index(i).map(this->nViews());
 
     if (views.isEmpty())
         return selected_atoms;
@@ -1099,30 +1084,31 @@ void ViewsOfMol::assertNoOverlap() const
     if (nviews < 2)
         return;
 
-    //compare each pair of views...
-    for (int i=0; i<nviews-1; ++i)
+    // compare each pair of views...
+    for (int i = 0; i < nviews - 1; ++i)
     {
         const AtomSelection &view0 = views.at(i);
 
-        for (int j=i+1; j<nviews; ++j)
+        for (int j = i + 1; j < nviews; ++j)
         {
             const AtomSelection &view1 = views.at(j);
 
             if (view0.intersects(view1))
-                //there are some common atoms...!
-                throw SireMol::duplicate_atom( QObject::tr(
-                    "The views (%1 and %2) of molecule %3 (%4) contain "
-                    "overlapping atoms.")
-                        .arg(i).arg(j)
-                        .arg(this->name()).arg(this->number()),
-                            CODELOC );
+                // there are some common atoms...!
+                throw SireMol::duplicate_atom(QObject::tr("The views (%1 and %2) of molecule %3 (%4) contain "
+                                                          "overlapping atoms.")
+                                                  .arg(i)
+                                                  .arg(j)
+                                                  .arg(this->name())
+                                                  .arg(this->number()),
+                                              CODELOC);
         }
     }
 }
 
-const char* ViewsOfMol::typeName()
+const char *ViewsOfMol::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ViewsOfMol>() );
+    return QMetaType::typeName(qMetaTypeId<ViewsOfMol>());
 }
 
 namespace SireMol
@@ -1132,9 +1118,9 @@ namespace SireMol
     ////////
 
     template class Mover<ViewsOfMol>;
-}
+} // namespace SireMol
 
-ViewsOfMol* ViewsOfMol::clone() const
+ViewsOfMol *ViewsOfMol::clone() const
 {
     return new ViewsOfMol(*this);
 }

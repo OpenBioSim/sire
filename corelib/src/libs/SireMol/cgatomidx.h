@@ -28,8 +28,8 @@
 #ifndef SIREMOL_CGATOMIDX_H
 #define SIREMOL_CGATOMIDX_H
 
-#include "cgidx.h"
 #include "atomidx.h"
+#include "cgidx.h"
 
 #include "SireID/index.h"
 
@@ -37,80 +37,80 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class CGAtomIdx;
+    class CGAtomIdx;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CGAtomIdx&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CGAtomIdx&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CGAtomIdx &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CGAtomIdx &);
 
 namespace SireMol
 {
 
-/** This is the basic type used to ID atoms within a molecule. This
-    provides the fastest way of indexing atoms and is the base
-    type that all other AtomID classes map to.
+    /** This is the basic type used to ID atoms within a molecule. This
+        provides the fastest way of indexing atoms and is the base
+        type that all other AtomID classes map to.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CGAtomIdx : public AtomID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CGAtomIdx&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CGAtomIdx&);
-
-public:
-    CGAtomIdx();
-
-    CGAtomIdx(CGIdx cgid, SireID::Index atomid);
-
-    CGAtomIdx(const CGAtomIdx &other);
-
-    ~CGAtomIdx();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CGAtomIdx : public AtomID
     {
-        return CGAtomIdx::typeName();
-    }
 
-    CGAtomIdx* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CGAtomIdx &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CGAtomIdx &);
 
-    static CGAtomIdx null();
+    public:
+        CGAtomIdx();
 
-    bool isNull() const;
+        CGAtomIdx(CGIdx cgid, SireID::Index atomid);
 
-    uint hash() const;
+        CGAtomIdx(const CGAtomIdx &other);
 
-    QString toString() const;
+        ~CGAtomIdx();
 
-    CGAtomIdx& operator=(const CGAtomIdx &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return CGAtomIdx::typeName();
+        }
 
-    bool operator==(const CGAtomIdx &other) const;
+        CGAtomIdx *clone() const;
 
-    bool operator!=(const CGAtomIdx &other) const;
+        static CGAtomIdx null();
 
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
+        bool isNull() const;
 
-    CGIdx cutGroup() const;
+        uint hash() const;
 
-    SireID::Index atom() const;
+        QString toString() const;
 
-private:
-    /** The index of the CutGroup that contains the atom */
-    CGIdx _cgidx;
+        CGAtomIdx &operator=(const CGAtomIdx &other);
 
-    /** The index of the atom within the CutGroup */
-    SireID::Index _atmidx;
-};
+        bool operator==(const SireID::ID &other) const;
 
-}
+        bool operator==(const CGAtomIdx &other) const;
+
+        bool operator!=(const CGAtomIdx &other) const;
+
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
+
+        CGIdx cutGroup() const;
+
+        SireID::Index atom() const;
+
+    private:
+        /** The index of the CutGroup that contains the atom */
+        CGIdx _cgidx;
+
+        /** The index of the atom within the CutGroup */
+        SireID::Index _atmidx;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::CGAtomIdx);
 
-SIRE_EXPOSE_CLASS( SireMol::CGAtomIdx )
+SIRE_EXPOSE_CLASS(SireMol::CGAtomIdx)
 
 SIRE_END_HEADER
 

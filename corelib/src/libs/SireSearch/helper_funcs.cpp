@@ -36,16 +36,13 @@
 struct ProtRes
 {
     int min_res = 5;
-    QSet<QString> res_names = {"gly", "ala", "val", "leu", "ile", "ser",
-                               "thr", "asp", "asn", "lys", "glu", "gln",
-                               "arg", "his", "phe", "cys", "trp", "tyr",
-                               "met", "pro", "ash", "glh", "cyx", "hid",
-                               "hie", "hip"};
+    QSet<QString> res_names = {"gly", "ala", "val", "leu", "ile", "ser", "thr", "asp", "asn",
+                               "lys", "glu", "gln", "arg", "his", "phe", "cys", "trp", "tyr",
+                               "met", "pro", "ash", "glh", "cyx", "hid", "hie", "hip"};
     QReadWriteLock lock;
 };
 
 Q_GLOBAL_STATIC(ProtRes, protres);
-
 
 namespace SireSearch
 {
@@ -117,4 +114,4 @@ namespace SireSearch
     {
         parser::SearchParser::globalParser().delete_all_tokens();
     }
-}
+} // namespace SireSearch

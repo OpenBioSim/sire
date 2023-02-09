@@ -28,317 +28,306 @@
 #ifndef SIREMOL_TRAJECTORY_H
 #define SIREMOL_TRAJECTORY_H
 
-#include "SireMol/molviewproperty.h"
 #include "SireMol/atomcoords.h"
-#include "SireMol/atomvelocities.h"
 #include "SireMol/atomforces.h"
+#include "SireMol/atomvelocities.h"
+#include "SireMol/molviewproperty.h"
 
 #include "SireVol/space.h"
 
-#include "SireBase/sharedpolypointer.hpp"
 #include "SireBase/refcountdata.h"
+#include "SireBase/sharedpolypointer.hpp"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class Trajectory;
-class Frame;
-class TrajectoryData;
-class MolTrajectoryData;
-}
+    class Trajectory;
+    class Frame;
+    class TrajectoryData;
+    class MolTrajectoryData;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Trajectory&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Trajectory&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Trajectory &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Trajectory &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::Frame&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::Frame&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Frame &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Frame &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::TrajectoryData&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::TrajectoryData&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::TrajectoryData &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::TrajectoryData &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::MolTrajectoryData&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::MolTrajectoryData&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolTrajectoryData &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolTrajectoryData &);
 
 namespace SireMol
 {
 
-typedef SireBase::SharedPolyPointer<TrajectoryData> TrajectoryDataPtr;
+    typedef SireBase::SharedPolyPointer<TrajectoryData> TrajectoryDataPtr;
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-/** This is a single trajectory frame. */
-class SIREMOL_EXPORT Frame
-    : public SireBase::ConcreteProperty<Frame,MoleculeProperty>
-{
+    /** This is a single trajectory frame. */
+    class SIREMOL_EXPORT Frame : public SireBase::ConcreteProperty<Frame, MoleculeProperty>
+    {
 
-friend QDataStream& ::operator<<(QDataStream&, const Frame&);
-friend QDataStream& ::operator>>(QDataStream&, Frame&);
+        friend QDataStream & ::operator<<(QDataStream &, const Frame &);
+        friend QDataStream & ::operator>>(QDataStream &, Frame &);
 
-public:
-    Frame();
+    public:
+        Frame();
 
-    Frame(const Molecule &mol, const PropertyMap &map = PropertyMap());
-    Frame(const MoleculeData &mol, const PropertyMap &map = PropertyMap());
+        Frame(const Molecule &mol, const PropertyMap &map = PropertyMap());
+        Frame(const MoleculeData &mol, const PropertyMap &map = PropertyMap());
 
-    Frame(const QVector<Vector> &coordinates,
-          const Space &space,
-          SireUnits::Dimension::Time time);
+        Frame(const QVector<Vector> &coordinates, const Space &space, SireUnits::Dimension::Time time);
 
-    Frame(const QVector<Vector> &coordinates,
-          const QVector<Velocity3D> &velocities,
-          const Space &space,
-          SireUnits::Dimension::Time time);
+        Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocities, const Space &space,
+              SireUnits::Dimension::Time time);
 
-    Frame(const QVector<Vector> &coordinates,
-          const QVector<Velocity3D> &velocites,
-          const QVector<Force3D> &forces,
-          const Space &space,
-          SireUnits::Dimension::Time time);
+        Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocites, const QVector<Force3D> &forces,
+              const Space &space, SireUnits::Dimension::Time time);
 
-    Frame(const Frame &other);
+        Frame(const Frame &other);
 
-    ~Frame();
+        ~Frame();
 
-    Frame& operator=(const Frame &other);
+        Frame &operator=(const Frame &other);
 
-    bool operator==(const Frame &other) const;
-    bool operator!=(const Frame &other) const;
+        bool operator==(const Frame &other) const;
+        bool operator!=(const Frame &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    Frame* clone() const;
+        Frame *clone() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    bool hasCoordinates() const;
-    bool hasVelocities() const;
-    bool hasForces() const;
+        bool hasCoordinates() const;
+        bool hasVelocities() const;
+        bool hasForces() const;
 
-    QVector<Vector> coordinates() const;
-    QVector<Velocity3D> velocities() const;
-    QVector<Force3D> forces() const;
+        QVector<Vector> coordinates() const;
+        QVector<Velocity3D> velocities() const;
+        QVector<Force3D> forces() const;
 
-    const SireVol::Space& space() const;
-    SireUnits::Dimension::Time time() const;
+        const SireVol::Space &space() const;
+        SireUnits::Dimension::Time time() const;
 
-    int nAtoms() const;
+        int nAtoms() const;
 
-    int numBytes() const;
+        int numBytes() const;
 
-    Frame subset(int start_atom, int natoms) const;
+        Frame subset(int start_atom, int natoms) const;
 
-    bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+        bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 
-protected:
-    void assertSane() const;
+    protected:
+        void assertSane() const;
 
-private:
-    QVector<Vector> coords;
-    QVector<Velocity3D> vels;
-    QVector<Force3D> frcs;
-    SireVol::SpacePtr spc;
-    SireUnits::Dimension::Time t;
-};
+    private:
+        QVector<Vector> coords;
+        QVector<Velocity3D> vels;
+        QVector<Force3D> frcs;
+        SireVol::SpacePtr spc;
+        SireUnits::Dimension::Time t;
+    };
 
-/** This is the virtual base class of all TrajectoryData objects.
- *  These objects hold handles to trajectory data. They do
- *  all of the work of loading trajectory data from the file formats
- *  they handle.
- */
-class SIREMOL_EXPORT TrajectoryData : public SireBase::RefCountData
-{
+    /** This is the virtual base class of all TrajectoryData objects.
+     *  These objects hold handles to trajectory data. They do
+     *  all of the work of loading trajectory data from the file formats
+     *  they handle.
+     */
+    class SIREMOL_EXPORT TrajectoryData : public SireBase::RefCountData
+    {
 
-friend QDataStream& ::operator<<(QDataStream&, const TrajectoryData&);
-friend QDataStream& ::operator>>(QDataStream&, TrajectoryData&);
+        friend QDataStream & ::operator<<(QDataStream &, const TrajectoryData &);
+        friend QDataStream & ::operator>>(QDataStream &, TrajectoryData &);
 
-public:
-    typedef TrajectoryData ROOT;
+    public:
+        typedef TrajectoryData ROOT;
 
-    TrajectoryData();
-    TrajectoryData(const TrajectoryData &other);
+        TrajectoryData();
+        TrajectoryData(const TrajectoryData &other);
 
-    virtual ~TrajectoryData();
+        virtual ~TrajectoryData();
 
-    virtual const char* what() const=0;
+        virtual const char *what() const = 0;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    virtual TrajectoryData* clone() const=0;
+        virtual TrajectoryData *clone() const = 0;
 
-    bool operator==(const TrajectoryData &other) const;
-    bool operator!=(const TrajectoryData &other) const;
+        bool operator==(const TrajectoryData &other) const;
+        bool operator!=(const TrajectoryData &other) const;
 
-    virtual int nFrames() const=0;
-    virtual int nAtoms() const=0;
+        virtual int nFrames() const = 0;
+        virtual int nAtoms() const = 0;
 
-    int nFiles() const;
+        int nFiles() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    virtual QStringList filenames() const=0;
+        virtual QStringList filenames() const = 0;
 
-    virtual Frame getFrame(int i) const=0;
+        virtual Frame getFrame(int i) const = 0;
 
-    QList<Frame> getFrames() const;
-    QList<Frame> getFrames(int start_atom, int natoms) const;
+        QList<Frame> getFrames() const;
+        QList<Frame> getFrames(int start_atom, int natoms) const;
 
-    Frame operator[](int i) const;
+        Frame operator[](int i) const;
 
-    virtual bool isEditable() const;
-    virtual void assertIsEditable() const;
+        virtual bool isEditable() const;
+        virtual void assertIsEditable() const;
 
-    virtual TrajectoryDataPtr makeEditable() const;
-    virtual TrajectoryDataPtr makeSubsetEditable(int start_atom, int natoms) const;
+        virtual TrajectoryDataPtr makeEditable() const;
+        virtual TrajectoryDataPtr makeSubsetEditable(int start_atom, int natoms) const;
 
-    virtual void setFrame(int i, const Frame &frame);
-    virtual void appendFrame(const Frame &frame);
-    virtual void insertFrame(int i, const Frame &frame);
-    virtual void deleteFrame(int i);
+        virtual void setFrame(int i, const Frame &frame);
+        virtual void appendFrame(const Frame &frame);
+        virtual void insertFrame(int i, const Frame &frame);
+        virtual void deleteFrame(int i);
 
-protected:
-    TrajectoryData& operator=(const TrajectoryData &other);
+    protected:
+        TrajectoryData &operator=(const TrajectoryData &other);
 
-    virtual bool _equals(const TrajectoryData &other) const=0;
-};
+        virtual bool _equals(const TrajectoryData &other) const = 0;
+    };
 
-/** This class holds an editable trajectory that has been extracted
- *  for a single molecule. This is what is used when parts of a trajectory
- *  are edited for a single molecule (or when new trajectory data is
- *  generated for a new molecule)
- */
-class SIREMOL_EXPORT MolTrajectoryData : public TrajectoryData
-{
+    /** This class holds an editable trajectory that has been extracted
+     *  for a single molecule. This is what is used when parts of a trajectory
+     *  are edited for a single molecule (or when new trajectory data is
+     *  generated for a new molecule)
+     */
+    class SIREMOL_EXPORT MolTrajectoryData : public TrajectoryData
+    {
 
-friend QDataStream& ::operator<<(QDataStream&, const MolTrajectoryData&);
-friend QDataStream& ::operator>>(QDataStream&, MolTrajectoryData&);
+        friend QDataStream & ::operator<<(QDataStream &, const MolTrajectoryData &);
+        friend QDataStream & ::operator>>(QDataStream &, MolTrajectoryData &);
 
-public:
-    MolTrajectoryData();
-    MolTrajectoryData(const Frame &frame);
-    MolTrajectoryData(const QList<Frame> &frames);
+    public:
+        MolTrajectoryData();
+        MolTrajectoryData(const Frame &frame);
+        MolTrajectoryData(const QList<Frame> &frames);
 
-    MolTrajectoryData(const MolTrajectoryData &other);
+        MolTrajectoryData(const MolTrajectoryData &other);
 
-    ~MolTrajectoryData();
+        ~MolTrajectoryData();
 
-    const char* what() const;
+        const char *what() const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    MolTrajectoryData& operator=(const MolTrajectoryData &other);
+        MolTrajectoryData &operator=(const MolTrajectoryData &other);
 
-    MolTrajectoryData* clone() const;
+        MolTrajectoryData *clone() const;
 
-    int nFrames() const;
-    int nAtoms() const;
+        int nFrames() const;
+        int nAtoms() const;
 
-    QStringList filenames() const;
+        QStringList filenames() const;
 
-    Frame getFrame(int i) const;
+        Frame getFrame(int i) const;
 
-    bool isEditable() const;
+        bool isEditable() const;
 
-    TrajectoryDataPtr makeEditable() const;
-    TrajectoryDataPtr makeSubsetEditable(int start_atom, int natoms) const;
+        TrajectoryDataPtr makeEditable() const;
+        TrajectoryDataPtr makeSubsetEditable(int start_atom, int natoms) const;
 
-    void setFrame(int i, const Frame &frame);
-    void appendFrame(const Frame &frame);
-    void insertFrame(int i, const Frame &frame);
-    void deleteFrame(int i);
+        void setFrame(int i, const Frame &frame);
+        void appendFrame(const Frame &frame);
+        void insertFrame(int i, const Frame &frame);
+        void deleteFrame(int i);
 
-protected:
-    bool _equals(const TrajectoryData &other) const;
+    protected:
+        bool _equals(const TrajectoryData &other) const;
 
-private:
-    QList<Frame> frames;
-};
+    private:
+        QList<Frame> frames;
+    };
 
-/** This is a molecular property that holds the handle to the
- *  trajectory data for that molecule. In addition to the
- *  handle, this also holds the index of the first atom
- *  in the underlying trajectory data (trajectory data is a
- *  vector of coordinates in atom index order for each molecule)
- */
-class SIREMOL_EXPORT Trajectory
-    : public SireBase::ConcreteProperty<Trajectory, SireMol::MoleculeProperty>
-{
+    /** This is a molecular property that holds the handle to the
+     *  trajectory data for that molecule. In addition to the
+     *  handle, this also holds the index of the first atom
+     *  in the underlying trajectory data (trajectory data is a
+     *  vector of coordinates in atom index order for each molecule)
+     */
+    class SIREMOL_EXPORT Trajectory : public SireBase::ConcreteProperty<Trajectory, SireMol::MoleculeProperty>
+    {
 
-friend QDataStream& ::operator<<(QDataStream&, const Trajectory&);
-friend QDataStream& ::operator>>(QDataStream&, Trajectory&);
+        friend QDataStream & ::operator<<(QDataStream &, const Trajectory &);
+        friend QDataStream & ::operator>>(QDataStream &, Trajectory &);
 
-public:
-    Trajectory();
+    public:
+        Trajectory();
 
-    Trajectory(const TrajectoryData &trajectory);
-    Trajectory(const QList<TrajectoryDataPtr> &trajectories);
+        Trajectory(const TrajectoryData &trajectory);
+        Trajectory(const QList<TrajectoryDataPtr> &trajectories);
 
-    Trajectory(const TrajectoryData &trajectory,
-               int start_atom, int natoms);
+        Trajectory(const TrajectoryData &trajectory, int start_atom, int natoms);
 
-    Trajectory(const QList<TrajectoryDataPtr> &trajectories,
-               int start_atom, int natoms);
+        Trajectory(const QList<TrajectoryDataPtr> &trajectories, int start_atom, int natoms);
 
-    Trajectory(const Trajectory &other);
+        Trajectory(const Trajectory &other);
 
-    ~Trajectory();
+        ~Trajectory();
 
-    Trajectory& operator=(const Trajectory &other);
+        Trajectory &operator=(const Trajectory &other);
 
-    bool operator==(const Trajectory &other) const;
-    bool operator!=(const Trajectory &other) const;
+        bool operator==(const Trajectory &other) const;
+        bool operator!=(const Trajectory &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    QString toString() const;
+        QString toString() const;
 
-    const char* what() const;
+        const char *what() const;
 
-    Trajectory* clone() const;
+        Trajectory *clone() const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    int nFrames() const;
+        int nFrames() const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    int nAtoms() const;
+        int nAtoms() const;
 
-    Frame getFrame(int i) const;
+        Frame getFrame(int i) const;
 
-    Frame operator[](int i) const;
-    QList<Frame> operator[](const QList<qint64> &idxs) const;
-    QList<Frame> operator[](const SireBase::Slice &slice) const;
+        Frame operator[](int i) const;
+        QList<Frame> operator[](const QList<qint64> &idxs) const;
+        QList<Frame> operator[](const SireBase::Slice &slice) const;
 
-    void setFrame(int i, const Frame &frame);
-    void appendFrame(const Frame &frame);
-    void insertFrame(int i, const Frame &frame);
-    void deleteFrame(int i);
+        void setFrame(int i, const Frame &frame);
+        void appendFrame(const Frame &frame);
+        void insertFrame(int i, const Frame &frame);
+        void deleteFrame(int i);
 
-    bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+        bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 
-private:
-    int _getIndexForFrame(int &frame) const;
+    private:
+        int _getIndexForFrame(int &frame) const;
 
-    TrajectoryData& _makeEditable(int &frame);
-    Frame _subset(const Frame &frame) const;
+        TrajectoryData &_makeEditable(int &frame);
+        Frame _subset(const Frame &frame) const;
 
-    /** Handles to the underlying trajectory data */
-    QList<TrajectoryDataPtr> d;
+        /** Handles to the underlying trajectory data */
+        QList<TrajectoryDataPtr> d;
 
-    /** Index of the molecule's first atom in the trajectory */
-    qint64 start_atom;
+        /** Index of the molecule's first atom in the trajectory */
+        qint64 start_atom;
 
-    /** The number of atoms in this molecule */
-    qint64 natoms;
-};
+        /** The number of atoms in this molecule */
+        qint64 natoms;
+    };
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::Trajectory)
 Q_DECLARE_METATYPE(SireMol::Frame)

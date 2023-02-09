@@ -31,14 +31,14 @@
 
 #include "atomcharges.h"
 
-#include "mover.hpp"
 #include "evaluator.h"
+#include "mover.hpp"
 
-#include "cutgroup.h"
-#include "residue.h"
 #include "chain.h"
-#include "segment.h"
+#include "cutgroup.h"
 #include "molecule.h"
+#include "residue.h"
+#include "segment.h"
 #include "selector.hpp"
 
 #include "SireBase/errors.h"
@@ -65,7 +65,7 @@ QDataStream &operator<<(QDataStream &ds, const Atom &atom)
 {
     writeHeader(ds, r_atom, 1);
 
-    ds << atom.atomidx << static_cast<const MoleculeView&>(atom);
+    ds << atom.atomidx << static_cast<const MoleculeView &>(atom);
 
     return ds;
 }
@@ -77,7 +77,7 @@ QDataStream &operator>>(QDataStream &ds, Atom &atom)
 
     if (v == 1)
     {
-        ds >> atom.atomidx >> static_cast<MoleculeView&>(atom);
+        ds >> atom.atomidx >> static_cast<MoleculeView &>(atom);
     }
     else
         throw version_error(v, "1", r_atom, CODELOC);
@@ -85,18 +85,20 @@ QDataStream &operator>>(QDataStream &ds, Atom &atom)
     return ds;
 }
 
-void SireMol::detail::assertSameSize(Atom*, int nats, int nprops)
+void SireMol::detail::assertSameSize(Atom *, int nats, int nprops)
 {
     if (nats != nprops)
-        throw SireError::incompatible_error( QObject::tr(
-            "The number of supplied properties (%1) is not the same "
-            "as the number of atoms (%2).")
-                .arg(nprops).arg(nats), CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The number of supplied properties (%1) is not the same "
+                                                        "as the number of atoms (%2).")
+                                                .arg(nprops)
+                                                .arg(nats),
+                                            CODELOC);
 }
 
 /** Null constructor */
-Atom::Atom() : ConcreteProperty<Atom,MoleculeView>(), atomidx( Index::null() )
-{}
+Atom::Atom() : ConcreteProperty<Atom, MoleculeView>(), atomidx(Index::null())
+{
+}
 
 /** Construct the atom that that is identified by ID 'atomid'
     in the view 'molview' - this atom must be within this view
@@ -105,8 +107,7 @@ Atom::Atom() : ConcreteProperty<Atom,MoleculeView>(), atomidx( Index::null() )
     \throw SireMol::duplicate_atom
     \throw SireError::invalid_index
 */
-Atom::Atom(const MoleculeView &molview, const AtomID &atomid)
-     : ConcreteProperty<Atom,MoleculeView>(molview)
+Atom::Atom(const MoleculeView &molview, const AtomID &atomid) : ConcreteProperty<Atom, MoleculeView>(molview)
 {
     atomidx = d->info().atomIdx(atomid);
     molview.assertContains(atomidx);
@@ -120,21 +121,22 @@ Atom::Atom(const MoleculeView &molview, const AtomID &atomid)
     \throw SireError::invalid_index
 */
 Atom::Atom(const MoleculeData &moldata, const AtomID &atomid)
-     : ConcreteProperty<Atom,MoleculeView>(moldata),
-       atomidx( moldata.info().atomIdx(atomid) )
-{}
+    : ConcreteProperty<Atom, MoleculeView>(moldata), atomidx(moldata.info().atomIdx(atomid))
+{
+}
 
 /** Copy constructor */
-Atom::Atom(const Atom &other)
-     : ConcreteProperty<Atom,MoleculeView>(other), atomidx(other.atomidx)
-{}
+Atom::Atom(const Atom &other) : ConcreteProperty<Atom, MoleculeView>(other), atomidx(other.atomidx)
+{
+}
 
 /** Destructor */
 Atom::~Atom()
-{}
+{
+}
 
 /** Copy assignment operator */
-Atom& Atom::operator=(const Atom &other)
+Atom &Atom::operator=(const Atom &other)
 {
     MoleculeView::operator=(other);
     atomidx = other.atomidx;
@@ -161,27 +163,26 @@ QString Atom::toString() const
     {
         try
         {
-            QString name = QString("%1:%2").arg(this->name())
-                                           .arg(this->number());
+            QString name = QString("%1:%2").arg(this->name()).arg(this->number());
 
             Vector c = this->property<Vector>("coordinates");
             return QObject::tr("Atom( %1 [%2, %3, %4] )")
-                        .arg(name, -7)
-                        .arg(c.x(), 7, 'f', 2)
-                        .arg(c.y(), 7, 'f', 2)
-                        .arg(c.z(), 7, 'f', 2);
+                .arg(name, -7)
+                .arg(c.x(), 7, 'f', 2)
+                .arg(c.y(), 7, 'f', 2)
+                .arg(c.z(), 7, 'f', 2);
         }
-        catch(SireError::exception&)
-        {}
+        catch (SireError::exception &)
+        {
+        }
     }
 
-    return QObject::tr( "Atom( %1:%2 )" ).arg(this->name())
-                                          .arg(this->number());
+    return QObject::tr("Atom( %1:%2 )").arg(this->name()).arg(this->number());
 }
 
 MolViewPtr Atom::toSelector() const
 {
-    return MolViewPtr( Selector<Atom>(*this) );
+    return MolViewPtr(Selector<Atom>(*this));
 }
 
 /** Is this atom empty? */
@@ -224,7 +225,7 @@ AtomIdx Atom::index() const
 }
 
 /** Return the CGAtomIdx of this atom */
-const CGAtomIdx& Atom::cgAtomIdx() const
+const CGAtomIdx &Atom::cgAtomIdx() const
 {
     return d->info().cgAtomIdx(atomidx);
 }
@@ -323,20 +324,21 @@ Molecule Atom::molecule() const
 */
 void Atom::update(const MoleculeData &moldata)
 {
-    //check that the new data is compatible (has same molecule
-    //number and info ID number)
-    if (d->number() != moldata.number() or
-        d->info().UID() != moldata.info().UID())
+    // check that the new data is compatible (has same molecule
+    // number and info ID number)
+    if (d->number() != moldata.number() or d->info().UID() != moldata.info().UID())
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "You can only update an atom with the molecule data "
-            "for the same molecule (same molecule number) and that "
-            "has a .info() object that has the same UID. You are "
-            "trying to update atom %1 in molecule %2 with UID %3 "
-            "with molecule %4 with UID %5.")
-                .arg(atomidx).arg(d->number()).arg(d->info().UID().toString())
-                .arg(moldata.number()).arg(moldata.info().UID().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You can only update an atom with the molecule data "
+                                                        "for the same molecule (same molecule number) and that "
+                                                        "has a .info() object that has the same UID. You are "
+                                                        "trying to update atom %1 in molecule %2 with UID %3 "
+                                                        "with molecule %4 with UID %5.")
+                                                .arg(atomidx)
+                                                .arg(d->number())
+                                                .arg(d->info().UID().toString())
+                                                .arg(moldata.number())
+                                                .arg(moldata.info().UID().toString()),
+                                            CODELOC);
     }
 
     d = moldata;
@@ -373,8 +375,7 @@ bool Atom::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool Atom::hasMetadata(const PropertyName &key,
-                       const PropertyName &metakey) const
+bool Atom::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->hasMetadataOfType<AtomProp>(key, metakey);
 }
@@ -408,9 +409,8 @@ QStringList Atom::metadataKeys(const PropertyName &key) const
 void Atom::assertContains(AtomIdx atom) const
 {
     if (atomidx != atom.map(d->info().nAtoms()))
-        throw SireMol::missing_atom( QObject::tr(
-            "This atom (index %1) is not the atom at index %2.")
-                .arg(atomidx).arg(atom), CODELOC );
+        throw SireMol::missing_atom(
+            QObject::tr("This atom (index %1) is not the atom at index %2.").arg(atomidx).arg(atom), CODELOC);
 }
 
 /** Assert that this atom has an AtomProperty at key 'key'
@@ -420,9 +420,8 @@ void Atom::assertContains(AtomIdx atom) const
 void Atom::assertContainsProperty(const PropertyName &key) const
 {
     if (not this->hasProperty(key))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no AtomProperty at key '%1' for this atom.")
-                .arg(key.toString()), CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("There is no AtomProperty at key '%1' for this atom.").arg(key.toString()), CODELOC);
 }
 
 /** Assert that this atom has an AtomProperty piece of metadata
@@ -433,10 +432,10 @@ void Atom::assertContainsProperty(const PropertyName &key) const
 void Atom::assertContainsMetadata(const PropertyName &metakey) const
 {
     if (not this->hasMetadata(metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no AtomProperty metadata at metakey '%1' for "
-            "this atom.")
-                .arg(metakey.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no AtomProperty metadata at metakey '%1' for "
+                                                     "this atom.")
+                                             .arg(metakey.toString()),
+                                         CODELOC);
 }
 
 /** Assert that the property at key 'key' has an AtomProperty
@@ -444,45 +443,41 @@ void Atom::assertContainsMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-void Atom::assertContainsMetadata(const PropertyName &key,
-                                  const PropertyName &metakey) const
+void Atom::assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     if (not this->hasMetadata(key, metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no AtomProperty metadata at metakey '%1' "
-            "for the property at key '%2' for this atom.")
-                .arg(metakey.toString(), key.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no AtomProperty metadata at metakey '%1' "
+                                                     "for the property at key '%2' for this atom.")
+                                             .arg(metakey.toString(), key.toString()),
+                                         CODELOC);
 }
 
-const char* Atom::typeName()
+const char *Atom::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Atom>() );
+    return QMetaType::typeName(qMetaTypeId<Atom>());
 }
 
 namespace SireMol
 {
-namespace detail
-{
+    namespace detail
+    {
 
-bool has_property(const Atom*, const MoleculeData &moldata,
-                                 const PropertyName &key)
-{
-    return moldata.hasPropertyOfType<AtomProp>(key);
-}
+        bool has_property(const Atom *, const MoleculeData &moldata, const PropertyName &key)
+        {
+            return moldata.hasPropertyOfType<AtomProp>(key);
+        }
 
-bool has_metadata(const Atom*, const MoleculeData &moldata,
-                                 const PropertyName &metakey)
-{
-    return moldata.hasMetadataOfType<AtomProp>(metakey);
-}
+        bool has_metadata(const Atom *, const MoleculeData &moldata, const PropertyName &metakey)
+        {
+            return moldata.hasMetadataOfType<AtomProp>(metakey);
+        }
 
-bool has_metadata(const Atom*, const MoleculeData &moldata,
-                                 const PropertyName &key, const PropertyName &metakey)
-{
-    return moldata.hasMetadataOfType<AtomProp>(key, metakey);
-}
+        bool has_metadata(const Atom *, const MoleculeData &moldata, const PropertyName &key, const PropertyName &metakey)
+        {
+            return moldata.hasMetadataOfType<AtomProp>(key, metakey);
+        }
 
-} // end of namespace detail
+    } // end of namespace detail
 } // end of namespace SireMol
 
 ///////
@@ -494,10 +489,10 @@ namespace SireMol
     template class Selector<Atom>;
     template class Mover<Atom>;
 
-    template class Mover< Selector<Atom> >;
-}
+    template class Mover<Selector<Atom>>;
+} // namespace SireMol
 
-Atom* Atom::clone() const
+Atom *Atom::clone() const
 {
     return new Atom(*this);
 }

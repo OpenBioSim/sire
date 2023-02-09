@@ -31,11 +31,11 @@
 #include "sireglobal.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 4, 0)
-  #include <QAtomicInt>
+#include <QAtomicInt>
 #elif QT_VERSION >= QT_VERSION_CHECK(4, 1, 0)
-  #include <QAtomic>
+#include <QAtomic>
 #else
-  #error You need at least Qt Version 4.1
+#error You need at least Qt Version 4.1
 #endif
 
 #include <boost/throw_exception.hpp>
@@ -45,54 +45,56 @@ SIRE_BEGIN_HEADER
 namespace SireBase
 {
 
-/** This is a simple class that provides a thread-safe
-    incrementable integer. This can be used, for example,
-    to give a unique version of ID number to objects.
+    /** This is a simple class that provides a thread-safe
+        incrementable integer. This can be used, for example,
+        to give a unique version of ID number to objects.
 
-    @author Christopher Woods
-*/
-class Incremint
-{
-public:
-    Incremint(int value=0);
-    Incremint(const Incremint &other);
+        @author Christopher Woods
+    */
+    class Incremint
+    {
+    public:
+        Incremint(int value = 0);
+        Incremint(const Incremint &other);
 
-    ~Incremint();
+        ~Incremint();
 
-    int increment();
+        int increment();
 
-private:
-    /** The volatile integer that is being incremented */
-    QAtomicInt atomic_int;
-};
+    private:
+        /** The volatile integer that is being incremented */
+        QAtomicInt atomic_int;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Constructor */
-SIRE_ALWAYS_INLINE Incremint::Incremint(int value) : atomic_int(value)
-{}
+    /** Constructor */
+    SIRE_ALWAYS_INLINE Incremint::Incremint(int value) : atomic_int(value)
+    {
+    }
 
-/** Copy constructor */
-SIRE_ALWAYS_INLINE Incremint::Incremint(const Incremint &other)
-                 : atomic_int(other.atomic_int)
-{}
+    /** Copy constructor */
+    SIRE_ALWAYS_INLINE Incremint::Incremint(const Incremint &other) : atomic_int(other.atomic_int)
+    {
+    }
 
-/** Destructor */
-SIRE_ALWAYS_INLINE Incremint::~Incremint()
-{}
+    /** Destructor */
+    SIRE_ALWAYS_INLINE Incremint::~Incremint()
+    {
+    }
 
-/** Increment the Incremint and return its new value */
-SIRE_ALWAYS_INLINE int Incremint::increment()
-{
-    int value = atomic_int.fetchAndAddRelaxed(1);
-    return value+1;
-}
+    /** Increment the Incremint and return its new value */
+    SIRE_ALWAYS_INLINE int Incremint::increment()
+    {
+        int value = atomic_int.fetchAndAddRelaxed(1);
+        return value + 1;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
 } // end of namespace SireBase
 
-SIRE_EXPOSE_CLASS( SireBase::Incremint )
+SIRE_EXPOSE_CLASS(SireBase::Incremint)
 
 SIRE_END_HEADER
 

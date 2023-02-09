@@ -57,40 +57,31 @@ namespace SireMM
 
         SelectorBond(const Bond &bond);
 
-        SelectorBond(const SireMol::MoleculeData &molecule,
+        SelectorBond(const SireMol::MoleculeData &molecule, const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        SelectorBond(const MoleculeView &molecule, const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        SelectorBond(const SireMol::MoleculeData &molecule, const SireMol::AtomID &atom,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-        SelectorBond(const MoleculeView &molecule,
+        SelectorBond(const SireMol::MoleculeData &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-        SelectorBond(const SireMol::MoleculeData &molecule,
-                     const SireMol::AtomID &atom,
+        SelectorBond(const SireMol::MoleculeView &molecule, const SireMol::AtomID &atom,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-        SelectorBond(const SireMol::MoleculeData &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+        SelectorBond(const SireMol::MoleculeView &molecule, const SireMol::BondID &bond,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-        SelectorBond(const SireMol::MoleculeView &molecule,
-                     const SireMol::AtomID &atom,
+        SelectorBond(const SireMol::MoleculeView &molecule, const QList<SireMol::BondID> &bonds,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
-        SelectorBond(const SireMol::MoleculeView &molecule,
-                     const SireMol::BondID &bond,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-        SelectorBond(const SireMol::MoleculeView &molecule,
-                     const QList<SireMol::BondID> &bonds,
-                     const SireBase::PropertyMap &map = SireBase::PropertyMap());
-
-        SelectorBond(const SireMol::MoleculeView &molecule,
-                     const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+        SelectorBond(const SireMol::MoleculeView &molecule, const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
-        SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms0,
-                     const SireMol::Selector<SireMol::Atom> &atoms1,
+        SelectorBond(const SireMol::Selector<SireMol::Atom> &atoms0, const SireMol::Selector<SireMol::Atom> &atoms1,
                      const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         SelectorBond(const SelectorBond &other);
@@ -155,8 +146,7 @@ namespace SireMM
 
         bool hasProperty(const SireBase::PropertyName &key) const;
         bool hasMetadata(const SireBase::PropertyName &key) const;
-        bool hasMetadata(const SireBase::PropertyName &key,
-                         const SireBase::PropertyName &metakey) const;
+        bool hasMetadata(const SireBase::PropertyName &key, const SireBase::PropertyName &metakey) const;
 
         QStringList propertyKeys() const;
         QStringList metadataKeys() const;
@@ -168,8 +158,7 @@ namespace SireMM
         SireMol::Evaluator evaluate() const;
 
         QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key) const;
-        QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key,
-                                              const Property &default_value) const;
+        QList<SireBase::PropertyPtr> property(const SireBase::PropertyName &key, const Property &default_value) const;
 
         QList<SireUnits::Dimension::Length> lengths() const;
         QList<SireUnits::Dimension::Length> lengths(const SireBase::PropertyMap &map) const;
@@ -181,12 +170,10 @@ namespace SireMM
         QList<SireCAS::Expression> potentials(const SireBase::PropertyMap &map) const;
 
         QList<SireUnits::Dimension::GeneralUnit> energies() const;
-        QList<SireUnits::Dimension::GeneralUnit> energies(
-            const SireBase::PropertyMap &map) const;
+        QList<SireUnits::Dimension::GeneralUnit> energies(const SireBase::PropertyMap &map) const;
 
         SireUnits::Dimension::GeneralUnit energy() const;
-        SireUnits::Dimension::GeneralUnit energy(
-            const SireBase::PropertyMap &map) const;
+        SireUnits::Dimension::GeneralUnit energy(const SireBase::PropertyMap &map) const;
 
     protected:
         /** The IDs of the bond (holding AtomIdx IDs) */

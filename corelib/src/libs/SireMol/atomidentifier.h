@@ -34,87 +34,87 @@
 
 namespace SireMol
 {
-class AtomIdentifier;
-class AtomIDSet;
-}
+    class AtomIdentifier;
+    class AtomIDSet;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomIdentifier&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomIdentifier&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomIdentifier &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomIdentifier &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomIDSet&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomIDSet&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomIDSet &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomIDSet &);
 
 namespace SireMol
 {
 
-class AtomIdx;
+    class AtomIdx;
 
-/** This is a generic holder for any AtomID class!
+    /** This is a generic holder for any AtomID class!
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomIdentifier : public AtomID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomIdentifier&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomIdentifier&);
-
-public:
-    AtomIdentifier();
-    AtomIdentifier(const AtomID &atomid);
-    AtomIdentifier(const AtomIdentifier &other);
-
-    ~AtomIdentifier();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomIdentifier : public AtomID
     {
-        return AtomIdentifier::typeName();
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomIdentifier &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomIdentifier &);
+
+    public:
+        AtomIdentifier();
+        AtomIdentifier(const AtomID &atomid);
+        AtomIdentifier(const AtomIdentifier &other);
+
+        ~AtomIdentifier();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return AtomIdentifier::typeName();
+        }
+
+        AtomIdentifier *clone() const;
+
+        bool isNull() const;
+
+        uint hash() const;
+
+        QString toString() const;
+
+        const AtomID &base() const;
+
+        AtomIdentifier &operator=(const AtomIdentifier &other);
+        AtomIdentifier &operator=(const AtomID &other);
+
+        bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
+
+        bool operator==(const AtomIdentifier &other) const;
+        bool operator!=(const AtomIdentifier &other) const;
+
+        bool operator==(const AtomID &other) const;
+        bool operator!=(const AtomID &other) const;
+
+        QList<AtomIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        /** Pointer to the AtomID */
+        boost::shared_ptr<AtomID> d;
+    };
+
+    SIRE_ALWAYS_INLINE uint qHash(const AtomIdentifier &atomid)
+    {
+        return atomid.hash();
     }
 
-    AtomIdentifier* clone() const;
-
-    bool isNull() const;
-
-    uint hash() const;
-
-    QString toString() const;
-
-    const AtomID& base() const;
-
-    AtomIdentifier& operator=(const AtomIdentifier &other);
-    AtomIdentifier& operator=(const AtomID &other);
-
-    bool operator==(const SireID::ID &other) const;
-    using SireID::ID::operator!=;
-
-    bool operator==(const AtomIdentifier &other) const;
-    bool operator!=(const AtomIdentifier &other) const;
-
-    bool operator==(const AtomID &other) const;
-    bool operator!=(const AtomID &other) const;
-
-    QList<AtomIdx> map(const MolInfo &molinfo) const;
-
-private:
-    /** Pointer to the AtomID */
-    boost::shared_ptr<AtomID> d;
-};
-
-SIRE_ALWAYS_INLINE uint qHash(const AtomIdentifier &atomid)
-{
-    return atomid.hash();
-}
-
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::AtomIdentifier);
 
-Q_DECLARE_METATYPE( SireID::Specify<SireMol::AtomID> );
-Q_DECLARE_METATYPE( SireID::IDAndSet<SireMol::AtomID> );
-Q_DECLARE_METATYPE( SireID::IDOrSet<SireMol::AtomID> );
-Q_DECLARE_METATYPE( SireID::InvertMatch<SireMol::AtomID> );
-Q_DECLARE_METATYPE( SireID::MatchAll<SireMol::AtomID> );
+Q_DECLARE_METATYPE(SireID::Specify<SireMol::AtomID>);
+Q_DECLARE_METATYPE(SireID::IDAndSet<SireMol::AtomID>);
+Q_DECLARE_METATYPE(SireID::IDOrSet<SireMol::AtomID>);
+Q_DECLARE_METATYPE(SireID::InvertMatch<SireMol::AtomID>);
+Q_DECLARE_METATYPE(SireID::MatchAll<SireMol::AtomID>);
 
 #endif

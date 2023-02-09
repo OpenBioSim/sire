@@ -37,192 +37,187 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class BondHunter;
+    class BondHunter;
 
-class NullBondHunter;
-class CovalentBondHunter;
-class ChemicalBondHunter;
-}
+    class NullBondHunter;
+    class CovalentBondHunter;
+    class ChemicalBondHunter;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::BondHunter&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::BondHunter&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BondHunter &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BondHunter &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::NullBondHunter&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::NullBondHunter&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::NullBondHunter &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::NullBondHunter &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::CovalentBondHunter&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::CovalentBondHunter&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::CovalentBondHunter &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::CovalentBondHunter &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ChemicalBondHunter&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ChemicalBondHunter&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ChemicalBondHunter &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ChemicalBondHunter &);
 
 namespace SireMol
 {
 
-class Connectivity;
-class MoleculeView;
+    class Connectivity;
+    class MoleculeView;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** Base class of all functions used to hunt for bonds in a molecule
+    /** Base class of all functions used to hunt for bonds in a molecule
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT BondHunter : public SireBase::Property
-{
-public:
-    BondHunter();
-    BondHunter(const BondHunter &other);
-
-    virtual ~BondHunter();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT BondHunter : public SireBase::Property
     {
-        return "SireMol::BondHunter";
-    }
+    public:
+        BondHunter();
+        BondHunter(const BondHunter &other);
 
-    virtual BondHunter* clone() const=0;
+        virtual ~BondHunter();
 
-    /** Return the connectivity of the molecule viewed in 'molview'
-        using this function to hunt for all of the bonded atoms.
-        This only searches for the bonds between atoms that are
-        part of this view */
-    virtual Connectivity operator()(const MoleculeView &molview,
-                                    const PropertyMap &map = PropertyMap()) const=0;
+        static const char *typeName()
+        {
+            return "SireMol::BondHunter";
+        }
 
-    static const NullBondHunter& null();
-};
+        virtual BondHunter *clone() const = 0;
 
-class SIREMOL_EXPORT CovalentBondHunterParameters
-{
-public:
-    CovalentBondHunterParameters()
-    {}
+        /** Return the connectivity of the molecule viewed in 'molview'
+            using this function to hunt for all of the bonded atoms.
+            This only searches for the bonds between atoms that are
+            part of this view */
+        virtual Connectivity operator()(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const = 0;
 
-    ~CovalentBondHunterParameters()
-    {}
+        static const NullBondHunter &null();
+    };
 
-    static const SireBase::PropertyName& coordinates()
+    class SIREMOL_EXPORT CovalentBondHunterParameters
     {
-        return coords_param;
-    }
+    public:
+        CovalentBondHunterParameters()
+        {
+        }
 
-    static const SireBase::PropertyName& element()
+        ~CovalentBondHunterParameters()
+        {
+        }
+
+        static const SireBase::PropertyName &coordinates()
+        {
+            return coords_param;
+        }
+
+        static const SireBase::PropertyName &element()
+        {
+            return elements_param;
+        }
+
+    private:
+        static SireBase::PropertyName coords_param;
+        static SireBase::PropertyName elements_param;
+    };
+
+    /** This is a bond hunter that finds bonded atoms by comparing
+        the distance between the atoms to the sum of their covalent radii.
+        If the distance is less than the sum of the covalent radii then the atoms
+        are bonded.
+
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT CovalentBondHunter : public SireBase::ConcreteProperty<CovalentBondHunter, BondHunter>
     {
-        return elements_param;
-    }
 
-private:
-    static SireBase::PropertyName coords_param;
-    static SireBase::PropertyName elements_param;
-};
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const CovalentBondHunter &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, CovalentBondHunter &);
 
-/** This is a bond hunter that finds bonded atoms by comparing
-    the distance between the atoms to the sum of their covalent radii.
-    If the distance is less than the sum of the covalent radii then the atoms
-    are bonded.
+    public:
+        CovalentBondHunter(double tolerance = 1.1, double max_radius2 = 25);
+        CovalentBondHunter(const CovalentBondHunter &other);
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT CovalentBondHunter
-           : public SireBase::ConcreteProperty<CovalentBondHunter,BondHunter>
-{
+        ~CovalentBondHunter();
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const CovalentBondHunter&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, CovalentBondHunter&);
+        static const char *typeName();
 
-public:
-    CovalentBondHunter(double tolerance=1.1, double max_radius2=25);
-    CovalentBondHunter(const CovalentBondHunter &other);
+        CovalentBondHunter &operator=(const CovalentBondHunter &other);
 
-    ~CovalentBondHunter();
+        bool operator==(const CovalentBondHunter &other) const;
+        bool operator!=(const CovalentBondHunter &other) const;
 
-    static const char* typeName();
+        static const CovalentBondHunterParameters &parameters()
+        {
+            return params;
+        }
 
-    CovalentBondHunter& operator=(const CovalentBondHunter &other);
+        Connectivity operator()(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
 
-    bool operator==(const CovalentBondHunter &other) const;
-    bool operator!=(const CovalentBondHunter &other) const;
+    private:
+        static CovalentBondHunterParameters params;
 
-    static const CovalentBondHunterParameters& parameters()
+        /** The tolerance added to the sum of vdw radii when hunting for bonds */
+        double tol;
+
+        /** The maximum squared distance between CoordGroups */
+        double max_radius2;
+    };
+
+    /** This is a null bond hunter. This finds no bonds in a molecule and is used
+        when you want to create an empty connectivity object for a molecule
+
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT NullBondHunter : public SireBase::ConcreteProperty<NullBondHunter, BondHunter>
     {
-        return params;
-    }
+    public:
+        NullBondHunter();
+        NullBondHunter(const NullBondHunter &other);
 
-    Connectivity operator()(const MoleculeView &molview,
-                            const PropertyMap &map = PropertyMap()) const;
+        ~NullBondHunter();
 
-private:
-    static CovalentBondHunterParameters params;
+        static const char *typeName();
 
-    /** The tolerance added to the sum of vdw radii when hunting for bonds */
-    double tol;
+        const char *what() const;
 
-    /** The maximum squared distance between CoordGroups */
-    double max_radius2;
-};
+        Connectivity operator()(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+    };
 
-/** This is a null bond hunter. This finds no bonds in a molecule and is used
-    when you want to create an empty connectivity object for a molecule
+    /** This is a bond hunter that hunts for bonds using the distance between
+        atoms (and comparing that distance against the sum of atomic covalent
+        radii), but then it runs over each atom and ensures that the atom does
+        not contain too many bonds. If it does, then only the n closest bonds
+        are retained.
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT NullBondHunter
-           : public SireBase::ConcreteProperty<NullBondHunter,BondHunter>
-{
-public:
-    NullBondHunter();
-    NullBondHunter(const NullBondHunter &other);
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ChemicalBondHunter : public SireBase::ConcreteProperty<ChemicalBondHunter, CovalentBondHunter>
+    {
+    public:
+        ChemicalBondHunter();
+        ChemicalBondHunter(double tolerance);
+        ChemicalBondHunter(const ChemicalBondHunter &other);
 
-    ~NullBondHunter();
+        ~ChemicalBondHunter();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        Connectivity operator()(const MoleculeView &molview, const PropertyMap &map = PropertyMap()) const;
+    };
 
-    Connectivity operator()(const MoleculeView &molview,
-                            const PropertyMap &map = PropertyMap()) const;
-};
+    typedef SireBase::PropPtr<BondHunter> BondHunterPtr;
 
-/** This is a bond hunter that hunts for bonds using the distance between
-    atoms (and comparing that distance against the sum of atomic covalent
-    radii), but then it runs over each atom and ensures that the atom does
-    not contain too many bonds. If it does, then only the n closest bonds
-    are retained.
+} // namespace SireMol
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ChemicalBondHunter
-           : public SireBase::ConcreteProperty<ChemicalBondHunter,CovalentBondHunter>
-{
-public:
-    ChemicalBondHunter();
-    ChemicalBondHunter(double tolerance);
-    ChemicalBondHunter(const ChemicalBondHunter &other);
+Q_DECLARE_METATYPE(SireMol::NullBondHunter)
+Q_DECLARE_METATYPE(SireMol::CovalentBondHunter)
+Q_DECLARE_METATYPE(SireMol::ChemicalBondHunter)
 
-    ~ChemicalBondHunter();
+SIRE_EXPOSE_CLASS(SireMol::BondHunter)
+SIRE_EXPOSE_CLASS(SireMol::NullBondHunter)
+SIRE_EXPOSE_CLASS(SireMol::CovalentBondHunter)
+SIRE_EXPOSE_CLASS(SireMol::ChemicalBondHunter)
+SIRE_EXPOSE_CLASS(SireMol::CovalentBondHunterParameters)
 
-    static const char* typeName();
-
-    Connectivity operator()(const MoleculeView &molview,
-                            const PropertyMap &map = PropertyMap()) const;
-};
-
-typedef SireBase::PropPtr<BondHunter> BondHunterPtr;
-
-}
-
-Q_DECLARE_METATYPE( SireMol::NullBondHunter )
-Q_DECLARE_METATYPE( SireMol::CovalentBondHunter )
-Q_DECLARE_METATYPE( SireMol::ChemicalBondHunter )
-
-SIRE_EXPOSE_CLASS( SireMol::BondHunter )
-SIRE_EXPOSE_CLASS( SireMol::NullBondHunter )
-SIRE_EXPOSE_CLASS( SireMol::CovalentBondHunter )
-SIRE_EXPOSE_CLASS( SireMol::ChemicalBondHunter )
-SIRE_EXPOSE_CLASS( SireMol::CovalentBondHunterParameters )
-
-SIRE_EXPOSE_PROPERTY( SireMol::BondHunterPtr, SireMol::BondHunter )
+SIRE_EXPOSE_PROPERTY(SireMol::BondHunterPtr, SireMol::BondHunter)
 
 SIRE_END_HEADER
 

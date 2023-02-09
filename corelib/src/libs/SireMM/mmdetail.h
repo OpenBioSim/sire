@@ -34,88 +34,84 @@ SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class MMDetail;
+    class MMDetail;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::MMDetail&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::MMDetail&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::MMDetail &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::MMDetail &);
 
 namespace SireMM
 {
 
-/** This class holds most of the data the describes different types
-    of molecular mechanics forcefields, e.g. Amber FF99, OPLS etc.
+    /** This class holds most of the data the describes different types
+        of molecular mechanics forcefields, e.g. Amber FF99, OPLS etc.
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT MMDetail : public SireBase::ConcreteProperty<MMDetail,SireFF::FFDetail>
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT MMDetail : public SireBase::ConcreteProperty<MMDetail, SireFF::FFDetail>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const MMDetail&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, MMDetail&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const MMDetail &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, MMDetail &);
 
-public:
-    MMDetail();
-    MMDetail(QString name, QString combining_rules,
-             double scale14elec, double scale14vdw,
-             QString elecstyle, QString vdwstyle,
-             QString bondstyle, QString anglestyle,
-             QString dihedralstyle);
+    public:
+        MMDetail();
+        MMDetail(QString name, QString combining_rules, double scale14elec, double scale14vdw, QString elecstyle,
+                 QString vdwstyle, QString bondstyle, QString anglestyle, QString dihedralstyle);
 
-    MMDetail(const MMDetail &other);
+        MMDetail(const MMDetail &other);
 
-    ~MMDetail();
+        ~MMDetail();
 
-    MMDetail& operator=(const MMDetail &other);
+        MMDetail &operator=(const MMDetail &other);
 
-    bool operator==(const MMDetail &other) const;
-    bool operator!=(const MMDetail &other) const;
+        bool operator==(const MMDetail &other) const;
+        bool operator!=(const MMDetail &other) const;
 
-    MMDetail* clone() const;
+        MMDetail *clone() const;
 
-    static const char* typeName();
-    const char* what() const;
+        static const char *typeName();
+        const char *what() const;
 
-    QString toString() const;
+        QString toString() const;
 
-    QString combiningRules() const;
-    bool usesArithmeticCombiningRules() const;
-    bool usesGeometricCombiningRules() const;
+        QString combiningRules() const;
+        bool usesArithmeticCombiningRules() const;
+        bool usesGeometricCombiningRules() const;
 
-    double electrostatic14ScaleFactor() const;
-    double vdw14ScaleFactor() const;
+        double electrostatic14ScaleFactor() const;
+        double vdw14ScaleFactor() const;
 
-    bool usesCoulombCharges() const;
-    QString electrostaticStyle() const;
+        bool usesCoulombCharges() const;
+        QString electrostaticStyle() const;
 
-    bool usesLJTerm() const;
-    bool usesBuckinghamTerm() const;
-    QString vdwStyle() const;
+        bool usesLJTerm() const;
+        bool usesBuckinghamTerm() const;
+        QString vdwStyle() const;
 
-    bool usesHarmonicBonds() const;
-    QString bondStyle() const;
+        bool usesHarmonicBonds() const;
+        QString bondStyle() const;
 
-    bool usesHarmonicAngles() const;
-    QString angleStyle() const;
+        bool usesHarmonicAngles() const;
+        QString angleStyle() const;
 
-    bool usesCosineDihedrals() const;
-    QString dihedralStyle() const;
+        bool usesCosineDihedrals() const;
+        QString dihedralStyle() const;
 
-    bool isAmberStyle() const;
-    bool isOPLS() const;
+        bool isAmberStyle() const;
+        bool isOPLS() const;
 
-    bool isCompatibleWith(const FFDetail &other) const;
+        bool isCompatibleWith(const FFDetail &other) const;
 
-    static MMDetail guessFrom(QString combrule, QString elecstyle, QString vdwstyle,
-                              double elec14, double vdw14, QString bondstyle,
-                              QString anglestyle, QString dihedralstyle);
-};
+        static MMDetail guessFrom(QString combrule, QString elecstyle, QString vdwstyle, double elec14, double vdw14,
+                                  QString bondstyle, QString anglestyle, QString dihedralstyle);
+    };
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::MMDetail )
+Q_DECLARE_METATYPE(SireMM::MMDetail)
 
-SIRE_EXPOSE_CLASS( SireMM::MMDetail )
+SIRE_EXPOSE_CLASS(SireMM::MMDetail)
 
 SIRE_END_HEADER
 

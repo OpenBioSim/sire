@@ -34,9 +34,9 @@
 #include "SireMol/mover.hpp"
 #include "SireMol/selector.hpp"
 
+#include "SireCAS/expression.h"
 #include "SireCAS/symbol.h"
 #include "SireCAS/values.h"
-#include "SireCAS/expression.h"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
@@ -59,20 +59,20 @@ using namespace SireUnits::Dimension;
 
 static const RegisterMetaType<Bond> r_bond;
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream &ds, const Bond &bond)
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &ds, const Bond &bond)
 {
     writeHeader(ds, r_bond, 1);
-    ds << bond.bnd << static_cast<const MoleculeView&>(bond);
+    ds << bond.bnd << static_cast<const MoleculeView &>(bond);
     return ds;
 }
 
-SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Bond &bond)
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &ds, Bond &bond)
 {
     auto v = readHeader(ds, r_bond);
 
     if (v == 1)
     {
-        ds >> bond.bnd >> static_cast<MoleculeView&>(bond);
+        ds >> bond.bnd >> static_cast<MoleculeView &>(bond);
     }
     else
         throw SireStream::version_error(v, "1", r_bond, CODELOC);
@@ -81,42 +81,38 @@ SIREMM_EXPORT QDataStream& operator>>(QDataStream &ds, Bond &bond)
 }
 
 Bond::Bond() : ConcreteProperty<Bond, MoleculeView>()
-{}
+{
+}
 
-
-Bond::Bond(const Atom &atom0, const Atom &atom1)
-     : ConcreteProperty<Bond, MoleculeView>()
+Bond::Bond(const Atom &atom0, const Atom &atom1) : ConcreteProperty<Bond, MoleculeView>()
 {
     if (not atom0.isSameMolecule(atom1))
     {
-        throw SireError::incompatible_error(QObject::tr(
-            "You can only create a bond from two atoms in the same molecule. "
-            "%1 and %2 are from different molecules (%3 and %4)")
-                .arg(atom0.toString()).arg(atom1.toString())
+        throw SireError::incompatible_error(
+            QObject::tr("You can only create a bond from two atoms in the same molecule. "
+                        "%1 and %2 are from different molecules (%3 and %4)")
+                .arg(atom0.toString())
+                .arg(atom1.toString())
                 .arg(atom0.molecule().toString())
-                .arg(atom1.molecule().toString()), CODELOC);
+                .arg(atom1.molecule().toString()),
+            CODELOC);
     }
 
-    this->operator=(Bond(atom0.data(),
-                         BondID(atom0.index(), atom1.index())));
+    this->operator=(Bond(atom0.data(), BondID(atom0.index(), atom1.index())));
 }
 
-Bond::Bond(const MoleculeView &molview,
-           const AtomID &atom0, const AtomID &atom1)
-     : ConcreteProperty<Bond, MoleculeView>(molview)
+Bond::Bond(const MoleculeView &molview, const AtomID &atom0, const AtomID &atom1)
+    : ConcreteProperty<Bond, MoleculeView>(molview)
 {
     this->operator=(Bond(molview.atom(atom0), molview.atom(atom1)));
 }
 
-Bond::Bond(const MoleculeData &moldata,
-           const AtomID &atm0, const AtomID &atm1)
-     : ConcreteProperty<Bond, MoleculeView>()
+Bond::Bond(const MoleculeData &moldata, const AtomID &atm0, const AtomID &atm1) : ConcreteProperty<Bond, MoleculeView>()
 {
     this->operator=(Bond(Atom(moldata, atm0), Atom(moldata, atm1)));
 }
 
-Bond::Bond(const MoleculeData &moldata, const BondID &bond)
-     : ConcreteProperty<Bond, MoleculeView>(moldata)
+Bond::Bond(const MoleculeData &moldata, const BondID &bond) : ConcreteProperty<Bond, MoleculeView>(moldata)
 {
     auto atomidx0 = moldata.info().atomIdx(bond.atom0());
     auto atomidx1 = moldata.info().atomIdx(bond.atom1());
@@ -127,27 +123,27 @@ Bond::Bond(const MoleculeData &moldata, const BondID &bond)
     }
     else if (atomidx0 == atomidx1)
     {
-        throw SireMol::duplicate_atom(QObject::tr(
-            "You cannot make a bond out of two identical atoms. %1")
-                .arg(atomidx0.toString()), CODELOC);
+        throw SireMol::duplicate_atom(
+            QObject::tr("You cannot make a bond out of two identical atoms. %1").arg(atomidx0.toString()), CODELOC);
     }
 
     bnd = BondID(atomidx0, atomidx1);
 }
 
-Bond::Bond(const Bond &other)
-     : ConcreteProperty<Bond, MoleculeView>(other), bnd(other.bnd)
-{}
+Bond::Bond(const Bond &other) : ConcreteProperty<Bond, MoleculeView>(other), bnd(other.bnd)
+{
+}
 
 Bond::~Bond()
-{}
+{
+}
 
-const char* Bond::typeName()
+const char *Bond::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Bond>());
 }
 
-Bond& Bond::operator=(const Bond &other)
+Bond &Bond::operator=(const Bond &other)
 {
     if (this != &other)
     {
@@ -181,9 +177,7 @@ QString Bond::toString() const
     auto a0 = this->atom0();
     auto a1 = this->atom1();
 
-    return QObject::tr("Bond( %1:%2 => %3:%4 )")
-            .arg(a0.name()).arg(a0.number())
-            .arg(a1.name()).arg(a1.number());
+    return QObject::tr("Bond( %1:%2 => %3:%4 )").arg(a0.name()).arg(a0.number()).arg(a1.name()).arg(a1.number());
 }
 
 Atom Bond::atom0() const
@@ -250,7 +244,7 @@ bool Bond::hasConnectivity() const
     return this->data().hasProperty("connectivity");
 }
 
-const Connectivity& Bond::getConnectivity() const
+const Connectivity &Bond::getConnectivity() const
 {
     return this->data().property("connectivity").asA<Connectivity>();
 }
@@ -270,8 +264,7 @@ bool Bond::hasMetadata(const PropertyName &key) const
     return false;
 }
 
-bool Bond::hasMetadata(const PropertyName &key,
-                       const PropertyName &metakey) const
+bool Bond::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }
@@ -306,7 +299,7 @@ Properties Bond::properties() const
     return Properties();
 }
 
-const Property& Bond::property(const PropertyName &key) const
+const Property &Bond::property(const PropertyName &key) const
 {
     if (this->hasConnectivity())
     {
@@ -316,16 +309,13 @@ const Property& Bond::property(const PropertyName &key) const
     if (key.hasValue())
         return key.value();
 
-    throw SireBase::missing_property(QObject::tr(
-        "Bond %1 has no property at key %2.")
-            .arg(this->toString()).arg(key.source()),
-                CODELOC);
+    throw SireBase::missing_property(
+        QObject::tr("Bond %1 has no property at key %2.").arg(this->toString()).arg(key.source()), CODELOC);
 
     return key.value();
 }
 
-const Property& Bond::property(const PropertyName &key,
-                               const Property &default_value) const
+const Property &Bond::property(const PropertyName &key, const Property &default_value) const
 {
     if (this->hasConnectivity())
     {
@@ -370,8 +360,9 @@ Expression Bond::potential(const PropertyMap &map) const
         auto funcs = this->data().property(map["bond"]).asA<TwoAtomFunctions>();
         return funcs.potential(bnd);
     }
-    catch(const SireError::exception&)
-    {}
+    catch (const SireError::exception &)
+    {
+    }
 
     return Expression();
 }
@@ -388,7 +379,7 @@ SireUnits::Dimension::GeneralUnit Bond::energy(const PropertyMap &map) const
 
     GeneralUnit value;
 
-    Values vals(Symbol("r")==l.to(angstrom));
+    Values vals(Symbol("r") == l.to(angstrom));
     value.setComponent("bond", pot.evaluate(vals) * kcal_per_mol);
 
     return value;

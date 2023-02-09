@@ -36,71 +36,68 @@
 using namespace SireMaths;
 
 #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-    static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
-    {
-        return (quintptr)pointer % size_t(32) == 0;
-    }
+static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
+{
+    return (quintptr)pointer % size_t(32) == 0;
+}
 
-    static void assertAligned32(const void *pointer, QString place)
-    {
-        if (not isAligned32(pointer))
-            throw SireError::program_bug( QObject::tr(
-                    "An unaligned MultiInt has been created! %1")
-                        .arg((quintptr)pointer % size_t(32)), place );
-    }
+static void assertAligned32(const void *pointer, QString place)
+{
+    if (not isAligned32(pointer))
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiInt has been created! %1").arg((quintptr)pointer % size_t(32)), place);
+}
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-    static SIRE_ALWAYS_INLINE bool isAligned16(const void *pointer)
-    {
-        return (quintptr)pointer % size_t(16) == 0;
-    }
+static SIRE_ALWAYS_INLINE bool isAligned16(const void *pointer)
+{
+    return (quintptr)pointer % size_t(16) == 0;
+}
 
-    static void assertAligned16(const void *pointer, QString place)
-    {
-        if (not isAligned16(pointer))
-            throw SireError::program_bug( QObject::tr(
-                    "An unaligned MultiInt has been created! %1")
-                        .arg((quintptr)pointer % size_t(16)), place );
-    }
+static void assertAligned16(const void *pointer, QString place)
+{
+    if (not isAligned16(pointer))
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiInt has been created! %1").arg((quintptr)pointer % size_t(16)), place);
+}
 #else
-    static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
-    {
-        return (quintptr)pointer % size_t(32) == 0;
-    }
+static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
+{
+    return (quintptr)pointer % size_t(32) == 0;
+}
 
-    static void assertAligned32(const void *pointer, QString place)
-    {
-        if (not isAligned32(pointer))
-            throw SireError::program_bug( QObject::tr(
-                    "An unaligned MultiInt has been created! %1")
-                        .arg((quintptr)pointer % size_t(32)), place );
-    }
+static void assertAligned32(const void *pointer, QString place)
+{
+    if (not isAligned32(pointer))
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiInt has been created! %1").arg((quintptr)pointer % size_t(32)), place);
+}
 #endif
 #endif
 
 void MultiInt::assertAligned(const void *ptr, size_t size)
 {
-    if ( (quintptr)ptr % size != 0 )
-        throw SireError::program_bug( QObject::tr(
-                "An unaligned MultiInt has been created! %1, %2, %3")
-                    .arg((quintptr)ptr)
-                    .arg((quintptr)ptr % size)
-                    .arg(size), CODELOC );
+    if ((quintptr)ptr % size != 0)
+        throw SireError::program_bug(QObject::tr("An unaligned MultiInt has been created! %1, %2, %3")
+                                         .arg((quintptr)ptr)
+                                         .arg((quintptr)ptr % size)
+                                         .arg(size),
+                                     CODELOC);
 }
 
 /** Construct from a MultiFloat - this rounds down (same as standard float to int rounding) */
 MultiInt::MultiInt(const MultiFloat &other)
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         v.a[i] = other.v.a[i];
     }
 }
 
 /** Copy assignment from a MultiFloat - this rounds down (same as standard float to in rounding) */
-MultiInt& MultiInt::operator=(const MultiFloat &other)
+MultiInt &MultiInt::operator=(const MultiFloat &other)
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         v.a[i] = other.v.a[i];
     }
@@ -116,85 +113,85 @@ MultiInt::MultiInt(const qint32 *array, int size)
     assertAligned();
 
     if (size > MULTIFLOAT_SIZE)
-        throw SireError::unsupported( QObject::tr(
-                "Cannot fit an array of size %1 in this MultiInt, as it is only "
-                "capable of holding %2 values...").arg(size).arg(MULTIFLOAT_SIZE), CODELOC );
+        throw SireError::unsupported(QObject::tr("Cannot fit an array of size %1 in this MultiInt, as it is only "
+                                                 "capable of holding %2 values...")
+                                         .arg(size)
+                                         .arg(MULTIFLOAT_SIZE),
+                                     CODELOC);
 
     if (size <= 0)
     {
-        #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-            #ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
-                v.x = _mm256_set1_epi32(0);
-            #else
-                v.x[0] = _mm_set1_epi32(0);
-                v.x[1] = _mm_set1_epi32(0);
-            #endif
-        #else
-        #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-            v.x = _mm_set1_epi32(0);
-        #else
-            for (int i=0; i<MULTIFLOAT_SIZE; ++i)
-            {
-                v.a[i] = 0;
-            }
-        #endif
-        #endif
+#ifdef MULTIFLOAT_AVX_IS_AVAILABLE
+#ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
+        v.x = _mm256_set1_epi32(0);
+#else
+        v.x[0] = _mm_set1_epi32(0);
+        v.x[1] = _mm_set1_epi32(0);
+#endif
+#else
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+        v.x = _mm_set1_epi32(0);
+#else
+        for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
+        {
+            v.a[i] = 0;
+        }
+#endif
+#endif
     }
     else if (size == MULTIFLOAT_SIZE)
     {
-        #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-            #ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
-                v.x = _mm256_set_epi32(array[7], array[6], array[5], array[4],
-                                       array[3], array[2], array[1], array[0]);
-            #else
-                v.x[1] = _mm_set_epi32(array[7], array[6], array[5], array[4]);
-                v.x[0] = _mm_set_epi32(array[3], array[2], array[1], array[0]);
-            #endif
-        #else
-        #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-            //note that SSE packs things the 'wrong' way around
-            v.x = _mm_set_epi32(array[3], array[2], array[1], array[0]);
-        #else
-            for (int i=0; i<MULTIFLOAT_SIZE; ++i)
-            {
-                v.a[i] = array[i];
-            }
-        #endif
-        #endif
+#ifdef MULTIFLOAT_AVX_IS_AVAILABLE
+#ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
+        v.x = _mm256_set_epi32(array[7], array[6], array[5], array[4], array[3], array[2], array[1], array[0]);
+#else
+        v.x[1] = _mm_set_epi32(array[7], array[6], array[5], array[4]);
+        v.x[0] = _mm_set_epi32(array[3], array[2], array[1], array[0]);
+#endif
+#else
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+        // note that SSE packs things the 'wrong' way around
+        v.x = _mm_set_epi32(array[3], array[2], array[1], array[0]);
+#else
+        for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
+        {
+            v.a[i] = array[i];
+        }
+#endif
+#endif
     }
     else
     {
         qint32 tmp[MULTIFLOAT_SIZE];
 
-        for (int i=0; i<size; ++i)
+        for (int i = 0; i < size; ++i)
         {
             tmp[i] = array[i];
         }
 
-        for (int i=size; i<MULTIFLOAT_SIZE; ++i)
+        for (int i = size; i < MULTIFLOAT_SIZE; ++i)
         {
             tmp[i] = 0;
         }
 
-        #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-            #ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
-                v.x = _mm256_set_epi32(tmp[7], tmp[6], tmp[5], tmp[4],
-                                       tmp[3], tmp[2], tmp[1], tmp[0]);
-            #else
-                v.x[1] = _mm_set_epi32(tmp[7], tmp[6], tmp[5], tmp[4]);
-                v.x[0] = _mm_set_epi32(tmp[3], tmp[2], tmp[1], tmp[0]);
-            #endif
-        #else
-        #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-            //note that sse packs things the 'wrong' way around
-            v.x = _mm_set_epi32(tmp[3], tmp[2], tmp[1], tmp[0]);
-        #else
-            for (int i=0; i<MULTIFLOAT_SIZE; ++i)
-            {
-                v.a[i] = tmp[i];
-            }
-        #endif
-        #endif
+#ifdef MULTIFLOAT_AVX_IS_AVAILABLE
+#ifdef MULTIFLOAT_AVX2_IS_AVAILABLE
+        v.x = _mm256_set_epi32(tmp[7], tmp[6], tmp[5], tmp[4], tmp[3], tmp[2], tmp[1], tmp[0]);
+#else
+        v.x[1] = _mm_set_epi32(tmp[7], tmp[6], tmp[5], tmp[4]);
+        v.x[0] = _mm_set_epi32(tmp[3], tmp[2], tmp[1], tmp[0]);
+#endif
+#else
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+        // note that sse packs things the 'wrong' way around
+        v.x = _mm_set_epi32(tmp[3], tmp[2], tmp[1], tmp[0]);
+#else
+        for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
+        {
+            v.a[i] = tmp[i];
+        }
+#endif
+#endif
     }
 }
 
@@ -202,22 +199,22 @@ MultiInt::MultiInt(const qint32 *array, int size)
 MultiInt::MultiInt(const QVector<qint32> &array)
 {
     assertAligned();
-    this->operator=( MultiInt(array.constData(), array.size()) );
+    this->operator=(MultiInt(array.constData(), array.size()));
 }
 
 /** Return whether or not this MultiInt is correctly aligned. If it is not,
     then any SSE operations will fail */
 bool MultiInt::isAligned() const
 {
-    #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        return isAligned32(this);
-    #else
-    #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-        return isAligned16(this);
-    #else
-        return true;
-    #endif
-    #endif
+#ifdef MULTIFLOAT_AVX_IS_AVAILABLE
+    return isAligned32(this);
+#else
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+    return isAligned16(this);
+#else
+    return true;
+#endif
+#endif
 }
 
 QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
@@ -228,102 +225,102 @@ QVector<MultiInt> MultiInt::fromArray(const qint32 *array, int size)
     int nvecs = size / MULTIFLOAT_SIZE;
     int nremain = size % MULTIFLOAT_SIZE;
 
-    QVector<MultiInt> marray(nvecs + ( (nremain > 0) ? 1 : 0 ));
+    QVector<MultiInt> marray(nvecs + ((nremain > 0) ? 1 : 0));
     MultiInt *ma = marray.data();
 
     int idx = 0;
 
-    #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-        if (isAligned16(array))
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+    if (isAligned16(array))
+    {
+        for (int i = 0; i < nvecs; ++i)
         {
-            for (int i=0; i<nvecs; ++i)
-            {
-                ma[i] = MultiInt(array+idx, MULTIFLOAT_SIZE);
-                idx += MULTIFLOAT_SIZE;
-            }
-
-            if (nremain > 0)
-            {
-                ma[marray.count()-1] = MultiInt(array+idx, nremain);
-            }
+            ma[i] = MultiInt(array + idx, MULTIFLOAT_SIZE);
+            idx += MULTIFLOAT_SIZE;
         }
-        else
+
+        if (nremain > 0)
         {
-            qint32 _ALIGNED(16) tmp[MULTIFLOAT_SIZE];
-
-            for (int i=0; i<nvecs; ++i)
-            {
-                for (int j=0; j<MULTIFLOAT_SIZE; ++j)
-                {
-                    tmp[j] = array[idx];
-                    ++idx;
-                }
-
-                ma[i] = MultiInt((qint32*)(&tmp), MULTIFLOAT_SIZE);
-            }
-
-            if (nremain > 0)
-            {
-                for (int j=0; j<nremain; ++j)
-                {
-                    tmp[j] = array[idx];
-                    ++idx;
-                }
-
-                ma[marray.count()-1] = MultiInt((qint32*)(&tmp), nremain);
-            }
+            ma[marray.count() - 1] = MultiInt(array + idx, nremain);
         }
-    #else
-        if (isAligned32(array))
+    }
+    else
+    {
+        qint32 _ALIGNED(16) tmp[MULTIFLOAT_SIZE];
+
+        for (int i = 0; i < nvecs; ++i)
         {
-            for (int i=0; i<nvecs; ++i)
+            for (int j = 0; j < MULTIFLOAT_SIZE; ++j)
             {
-                ma[i] = MultiInt(array+idx, MULTIFLOAT_SIZE);
-                idx += MULTIFLOAT_SIZE;
+                tmp[j] = array[idx];
+                ++idx;
             }
 
-            if (nremain > 0)
-            {
-                ma[marray.count()-1] = MultiInt(array+idx, nremain);
-            }
+            ma[i] = MultiInt((qint32 *)(&tmp), MULTIFLOAT_SIZE);
         }
-        else
+
+        if (nremain > 0)
         {
-            qint32 _ALIGNED(32) tmp[MULTIFLOAT_SIZE];
-
-            for (int i=0; i<nvecs; ++i)
+            for (int j = 0; j < nremain; ++j)
             {
-                for (int j=0; j<MULTIFLOAT_SIZE; ++j)
-                {
-                    tmp[j] = array[idx];
-                    ++idx;
-                }
-
-                ma[i] = MultiInt((qint32*)(&tmp), MULTIFLOAT_SIZE);
+                tmp[j] = array[idx];
+                ++idx;
             }
 
-            if (nremain > 0)
-            {
-                for (int j=0; j<nremain; ++j)
-                {
-                    tmp[j] = array[idx];
-                    ++idx;
-                }
-
-                ma[marray.count()-1] = MultiInt((qint32*)(&tmp), nremain);
-            }
+            ma[marray.count() - 1] = MultiInt((qint32 *)(&tmp), nremain);
         }
-    #endif
+    }
+#else
+    if (isAligned32(array))
+    {
+        for (int i = 0; i < nvecs; ++i)
+        {
+            ma[i] = MultiInt(array + idx, MULTIFLOAT_SIZE);
+            idx += MULTIFLOAT_SIZE;
+        }
 
-    #ifdef MULTIFLOAT_AVX_IS_AVAILABLE
-        assertAligned32(marray.constData(), CODELOC);
-    #else
-    #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
-        assertAligned16(marray.constData(), CODELOC);
-    #else
-        assertAligned32(marray.constData(), CODELOC);
-    #endif
-    #endif
+        if (nremain > 0)
+        {
+            ma[marray.count() - 1] = MultiInt(array + idx, nremain);
+        }
+    }
+    else
+    {
+        qint32 _ALIGNED(32) tmp[MULTIFLOAT_SIZE];
+
+        for (int i = 0; i < nvecs; ++i)
+        {
+            for (int j = 0; j < MULTIFLOAT_SIZE; ++j)
+            {
+                tmp[j] = array[idx];
+                ++idx;
+            }
+
+            ma[i] = MultiInt((qint32 *)(&tmp), MULTIFLOAT_SIZE);
+        }
+
+        if (nremain > 0)
+        {
+            for (int j = 0; j < nremain; ++j)
+            {
+                tmp[j] = array[idx];
+                ++idx;
+            }
+
+            ma[marray.count() - 1] = MultiInt((qint32 *)(&tmp), nremain);
+        }
+    }
+#endif
+
+#ifdef MULTIFLOAT_AVX_IS_AVAILABLE
+    assertAligned32(marray.constData(), CODELOC);
+#else
+#ifdef MULTIFLOAT_SSE_IS_AVAILABLE
+    assertAligned16(marray.constData(), CODELOC);
+#else
+    assertAligned32(marray.constData(), CODELOC);
+#endif
+#endif
 
     return marray;
 }
@@ -342,13 +339,13 @@ QVector<qint32> MultiInt::toArray(const QVector<MultiInt> &array)
         return QVector<qint32>();
 
     QVector<qint32> ret;
-    ret.reserve( array.count() * MULTIFLOAT_SIZE );
+    ret.reserve(array.count() * MULTIFLOAT_SIZE);
 
-    for (int i=0; i<array.count(); ++i)
+    for (int i = 0; i < array.count(); ++i)
     {
         const MultiInt &f = array.constData()[i];
 
-        for (int j=0; j<MULTIFLOAT_SIZE; ++j)
+        for (int j = 0; j < MULTIFLOAT_SIZE; ++j)
         {
             ret.append(f[j]);
         }
@@ -360,7 +357,7 @@ QVector<qint32> MultiInt::toArray(const QVector<MultiInt> &array)
 /** Comparison operator - only returns true if all elements are equal */
 bool MultiInt::operator==(const MultiInt &other) const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         if (v.a[i] != other.v.a[i])
             return false;
@@ -372,7 +369,7 @@ bool MultiInt::operator==(const MultiInt &other) const
 /** Comparison operator - only returns true if all elements are not equal */
 bool MultiInt::operator!=(const MultiInt &other) const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         if (v.a[i] == other.v.a[i])
             return false;
@@ -385,11 +382,11 @@ bool MultiInt::operator!=(const MultiInt &other) const
     equal to 0x00000000 (e.g. every bit in the entire vector is 0) */
 bool MultiInt::isBinaryZero() const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_zero = 0x00000000;
 
-        if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) != bin_zero)
+        if (*(reinterpret_cast<const quint32 *>(&(v.a[i]))) != bin_zero)
             return false;
     }
 
@@ -407,11 +404,11 @@ bool MultiInt::isNotBinaryZero() const
     is binary zero (the float is equal to 0x00000000) */
 bool MultiInt::hasBinaryZero() const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_zero = 0x00000000;
 
-        if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) == bin_zero)
+        if (*(reinterpret_cast<const quint32 *>(&(v.a[i]))) == bin_zero)
             return true;
     }
 
@@ -422,11 +419,11 @@ bool MultiInt::hasBinaryZero() const
     equal to 0xFFFFFFFF (e.g. every bit in the entire vector is 1) */
 bool MultiInt::isBinaryOne() const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_one = 0xFFFFFFFF;
 
-        if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) != bin_one)
+        if (*(reinterpret_cast<const quint32 *>(&(v.a[i]))) != bin_one)
             return false;
     }
 
@@ -444,11 +441,11 @@ bool MultiInt::isNotBinaryOne() const
     is binary one (the float is equal to 0xFFFFFFFF) */
 bool MultiInt::hasBinaryOne() const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         static const quint32 bin_one = 0xFFFFFFFF;
 
-        if (*(reinterpret_cast<const quint32*>(&(v.a[i]))) == bin_one)
+        if (*(reinterpret_cast<const quint32 *>(&(v.a[i]))) == bin_one)
             return true;
     }
 
@@ -458,7 +455,7 @@ bool MultiInt::hasBinaryOne() const
 /** Comparison operator - only returns true if all elements are less */
 bool MultiInt::operator<(const MultiInt &other) const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         if (v.a[i] >= other.v.a[i])
             return false;
@@ -470,7 +467,7 @@ bool MultiInt::operator<(const MultiInt &other) const
 /** Comparison operator - only returns true if all elements are greater */
 bool MultiInt::operator>(const MultiInt &other) const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         if (v.a[i] <= other.v.a[i])
             return false;
@@ -482,7 +479,7 @@ bool MultiInt::operator>(const MultiInt &other) const
 /** Comparison operator - only returns true if all elements are less or equal */
 bool MultiInt::operator<=(const MultiInt &other) const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         if (v.a[i] > other.v.a[i])
             return false;
@@ -494,7 +491,7 @@ bool MultiInt::operator<=(const MultiInt &other) const
 /** Comparison operator - only returns true if all elements are greater or equal */
 bool MultiInt::operator>=(const MultiInt &other) const
 {
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         if (v.a[i] < other.v.a[i])
             return false;
@@ -511,9 +508,9 @@ qint32 MultiInt::at(int i) const
 
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
-        throw SireError::invalid_index( QObject::tr(
-                "Cannot access element %1 of MultiInt (holds only %2 values)")
-                    .arg(i).arg(MULTIFLOAT_SIZE), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element %1 of MultiInt (holds only %2 values)").arg(i).arg(MULTIFLOAT_SIZE),
+            CODELOC);
     }
 
     return v.a[i];
@@ -529,7 +526,7 @@ MultiInt MultiInt::operator-() const
 {
     MultiInt ret;
 
-    for (int i=0; i<MULTIFLOAT_SIZE; ++i)
+    for (int i = 0; i < MULTIFLOAT_SIZE; ++i)
     {
         ret.v.a[i] = -v.a[i];
     }
@@ -545,9 +542,9 @@ void MultiInt::set(int i, qint32 value)
 
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
-        throw SireError::invalid_index( QObject::tr(
-                "Cannot access element %1 of MultiInt (holds only %2 values)")
-                    .arg(i).arg(MULTIFLOAT_SIZE), CODELOC );
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element %1 of MultiInt (holds only %2 values)").arg(i).arg(MULTIFLOAT_SIZE),
+            CODELOC);
     }
 
     v.a[i] = value;
@@ -560,12 +557,12 @@ qint32 MultiInt::get(int i) const
     return at(i);
 }
 
-const char* MultiInt::what() const
+const char *MultiInt::what() const
 {
     return MultiInt::typeName();
 }
 
-const char* MultiInt::typeName()
+const char *MultiInt::typeName()
 {
     return "SireMaths::MultiInt";
 }
@@ -574,9 +571,9 @@ QString MultiInt::toString() const
 {
     QStringList vals;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
-        vals.append( QString::number(v.a[i]) );
+        vals.append(QString::number(v.a[i]));
     }
 
     return QObject::tr("{ %1 }").arg(vals.join(", "));
@@ -586,15 +583,15 @@ QString MultiInt::toBinaryString() const
 {
     QStringList vals;
 
-    for (int i=0; i<this->count(); ++i)
+    for (int i = 0; i < this->count(); ++i)
     {
-        const unsigned char *c = reinterpret_cast<const unsigned char*>(&(v.a[i]));
+        const unsigned char *c = reinterpret_cast<const unsigned char *>(&(v.a[i]));
 
         QString val("0x");
 
-        for (unsigned int j=0; j<sizeof(qint32); ++j)
+        for (unsigned int j = 0; j < sizeof(qint32); ++j)
         {
-            val.append( QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')) );
+            val.append(QString("%1").arg((unsigned short)(c[j]), 2, 16, QChar('0')));
         }
 
         vals.append(val);

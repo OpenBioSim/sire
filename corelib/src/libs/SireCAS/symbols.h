@@ -39,176 +39,171 @@ SIRE_BEGIN_HEADER
 namespace SireCAS
 {
 
-/** Trival derivation of QSet<Symbol> that adds a constructor that
-    automatically adds the passed Symbol
+    /** Trival derivation of QSet<Symbol> that adds a constructor that
+        automatically adds the passed Symbol
 
-    @author Christopher Woods
-*/
-class SIRECAS_EXPORT Symbols : public QSet<Symbol>
-{
-public:
-    Symbols();
+        @author Christopher Woods
+    */
+    class SIRECAS_EXPORT Symbols : public QSet<Symbol>
+    {
+    public:
+        Symbols();
 
-    Symbols(const Symbol &sym);
+        Symbols(const Symbol &sym);
 
-    Symbols(const QSet<Symbol> &other);
+        Symbols(const QSet<Symbol> &other);
 
-    Symbols(const QList<Symbol> &other);
+        Symbols(const QList<Symbol> &other);
 
-    ~Symbols();
+        ~Symbols();
 
-    Symbols& operator+=(const Symbols &other);
-    Symbols& operator-=(const Symbols &other);
+        Symbols &operator+=(const Symbols &other);
+        Symbols &operator-=(const Symbols &other);
 
-    Symbols operator+(const Symbols &other) const;
-    Symbols operator-(const Symbols &other) const;
+        Symbols operator+(const Symbols &other) const;
+        Symbols operator-(const Symbols &other) const;
 
-    Symbols& add(const Symbols &other);
-    Symbols& subtract(const Symbols &other);
+        Symbols &add(const Symbols &other);
+        Symbols &subtract(const Symbols &other);
 
-    QString toString() const;
+        QString toString() const;
 
-    void insert(const Symbol &symbol);
+        void insert(const Symbol &symbol);
 
-    void insert(const Symbols &symbols);
+        void insert(const Symbols &symbols);
 
-    bool intersects(const QSet<Symbol> &other) const;
+        bool intersects(const QSet<Symbol> &other) const;
 
-    bool contains(const Symbol &symbol) const;
-    bool contains(const QSet<Symbol> &other) const;
-};
+        bool contains(const Symbol &symbol) const;
+        bool contains(const QSet<Symbol> &other) const;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-SIRE_ALWAYS_INLINE Symbols::Symbols() : QSet<Symbol>()
-{}
-
-SIRE_ALWAYS_INLINE Symbols::Symbols(const Symbol &sym) : QSet<Symbol>()
-{
-    this->insert(sym);
-}
-
-SIRE_ALWAYS_INLINE Symbols::Symbols(const QSet<Symbol> &other) : QSet<Symbol>(other)
-{}
-
-SIRE_ALWAYS_INLINE Symbols::Symbols(const QList<Symbol> &other) : QSet<Symbol>()
-{
-    int n = other.count();
-    for (int i=0; i<n; ++i)
-        insert( other.at(i) );
-}
-
-SIRE_ALWAYS_INLINE Symbols::~Symbols()
-{}
-
-SIRE_ALWAYS_INLINE Symbols& Symbols::add(const Symbols &other)
-{
-    QSet<Symbol>::unite(other);
-    return *this;
-}
-
-SIRE_ALWAYS_INLINE Symbols& Symbols::subtract(const Symbols &other)
-{
-    QSet<Symbol>::subtract(other);
-    return *this;
-}
-
-SIRE_ALWAYS_INLINE Symbols& Symbols::operator+=(const Symbols &other)
-{
-    return Symbols::add(other);
-}
-
-SIRE_ALWAYS_INLINE Symbols& Symbols::operator-=(const Symbols &other)
-{
-    return Symbols::subtract(other);
-}
-
-SIRE_ALWAYS_INLINE Symbols Symbols::operator+(const Symbols &other) const
-{
-    Symbols ret(*this);
-    ret += other;
-
-    return ret;
-}
-
-SIRE_ALWAYS_INLINE Symbols Symbols::operator-(const Symbols &other) const
-{
-    Symbols ret(*this);
-    ret -= other;
-
-    return ret;
-}
-
-SIRE_ALWAYS_INLINE QString Symbols::toString() const
-{
-    return Sire::toString( QSet<Symbol>(*this) );
-}
-
-SIRE_ALWAYS_INLINE void Symbols::insert(const Symbol &symbol)
-{
-    QSet<Symbol>::insert(symbol);
-}
-
-SIRE_ALWAYS_INLINE void Symbols::insert(const Symbols &symbols)
-{
-    for (Symbols::const_iterator it = symbols.begin();
-         it != symbols.end();
-         ++it)
+    SIRE_ALWAYS_INLINE Symbols::Symbols() : QSet<Symbol>()
     {
-        this->insert(*it);
     }
-}
 
-SIRE_ALWAYS_INLINE bool Symbols::intersects(const QSet<Symbol> &other) const
-{
-    if (other.count() < this->count())
+    SIRE_ALWAYS_INLINE Symbols::Symbols(const Symbol &sym) : QSet<Symbol>()
     {
-        for (QSet<Symbol>::const_iterator it = other.constBegin();
-             it != other.constEnd();
-             ++it)
-        {
-            if (this->contains(*it))
-                return true;
-        }
+        this->insert(sym);
     }
-    else
+
+    SIRE_ALWAYS_INLINE Symbols::Symbols(const QSet<Symbol> &other) : QSet<Symbol>(other)
     {
-        for (QSet<Symbol>::const_iterator it = this->constBegin();
-             it != this->constEnd();
-             ++it)
+    }
+
+    SIRE_ALWAYS_INLINE Symbols::Symbols(const QList<Symbol> &other) : QSet<Symbol>()
+    {
+        int n = other.count();
+        for (int i = 0; i < n; ++i)
+            insert(other.at(i));
+    }
+
+    SIRE_ALWAYS_INLINE Symbols::~Symbols()
+    {
+    }
+
+    SIRE_ALWAYS_INLINE Symbols &Symbols::add(const Symbols &other)
+    {
+        QSet<Symbol>::unite(other);
+        return *this;
+    }
+
+    SIRE_ALWAYS_INLINE Symbols &Symbols::subtract(const Symbols &other)
+    {
+        QSet<Symbol>::subtract(other);
+        return *this;
+    }
+
+    SIRE_ALWAYS_INLINE Symbols &Symbols::operator+=(const Symbols &other)
+    {
+        return Symbols::add(other);
+    }
+
+    SIRE_ALWAYS_INLINE Symbols &Symbols::operator-=(const Symbols &other)
+    {
+        return Symbols::subtract(other);
+    }
+
+    SIRE_ALWAYS_INLINE Symbols Symbols::operator+(const Symbols &other) const
+    {
+        Symbols ret(*this);
+        ret += other;
+
+        return ret;
+    }
+
+    SIRE_ALWAYS_INLINE Symbols Symbols::operator-(const Symbols &other) const
+    {
+        Symbols ret(*this);
+        ret -= other;
+
+        return ret;
+    }
+
+    SIRE_ALWAYS_INLINE QString Symbols::toString() const
+    {
+        return Sire::toString(QSet<Symbol>(*this));
+    }
+
+    SIRE_ALWAYS_INLINE void Symbols::insert(const Symbol &symbol)
+    {
+        QSet<Symbol>::insert(symbol);
+    }
+
+    SIRE_ALWAYS_INLINE void Symbols::insert(const Symbols &symbols)
+    {
+        for (Symbols::const_iterator it = symbols.begin(); it != symbols.end(); ++it)
         {
-            if (other.contains(*it))
-                return true;
+            this->insert(*it);
         }
     }
 
-    return false;
-}
+    SIRE_ALWAYS_INLINE bool Symbols::intersects(const QSet<Symbol> &other) const
+    {
+        if (other.count() < this->count())
+        {
+            for (QSet<Symbol>::const_iterator it = other.constBegin(); it != other.constEnd(); ++it)
+            {
+                if (this->contains(*it))
+                    return true;
+            }
+        }
+        else
+        {
+            for (QSet<Symbol>::const_iterator it = this->constBegin(); it != this->constEnd(); ++it)
+            {
+                if (other.contains(*it))
+                    return true;
+            }
+        }
 
-SIRE_ALWAYS_INLINE bool Symbols::contains(const Symbol &symbol) const
-{
-    return QSet<Symbol>::contains(symbol);
-}
-
-SIRE_ALWAYS_INLINE bool Symbols::contains(const QSet<Symbol> &other) const
-{
-    if (other.count() > this->count())
         return false;
-
-    for (QSet<Symbol>::const_iterator it = other.constBegin();
-         it != other.constEnd();
-         ++it)
-    {
-        if (not this->contains(*it))
-            return false;
     }
 
-    return true;
-}
+    SIRE_ALWAYS_INLINE bool Symbols::contains(const Symbol &symbol) const
+    {
+        return QSet<Symbol>::contains(symbol);
+    }
+
+    SIRE_ALWAYS_INLINE bool Symbols::contains(const QSet<Symbol> &other) const
+    {
+        if (other.count() > this->count())
+            return false;
+
+        for (QSet<Symbol>::const_iterator it = other.constBegin(); it != other.constEnd(); ++it)
+        {
+            if (not this->contains(*it))
+                return false;
+        }
+
+        return true;
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireCAS
 
 SIRE_END_HEADER
 

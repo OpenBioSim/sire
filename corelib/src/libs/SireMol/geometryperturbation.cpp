@@ -27,13 +27,13 @@
 
 #include "geometryperturbation.h"
 
+#include "core.h"
 #include "molecule.h"
 #include "moleditor.h"
 #include "mover.hpp"
-#include "core.h"
 
-#include "SireCAS/values.h"
 #include "SireCAS/identities.h"
+#include "SireCAS/values.h"
 
 #include "SireUnits/units.h"
 
@@ -51,15 +51,13 @@ using namespace SireStream;
 /////////// Implementation of GeometryPerturbation
 ///////////
 
-static const RegisterMetaType<GeometryPerturbation> r_geompert( MAGIC_ONLY,
-                                                     GeometryPerturbation::typeName() );
+static const RegisterMetaType<GeometryPerturbation> r_geompert(MAGIC_ONLY, GeometryPerturbation::typeName());
 
-QDataStream &operator<<(QDataStream &ds,
-                                       const GeometryPerturbation &geompert)
+QDataStream &operator<<(QDataStream &ds, const GeometryPerturbation &geompert)
 {
     writeHeader(ds, r_geompert, 1);
 
-    ds << static_cast<const Perturbation&>(geompert);
+    ds << static_cast<const Perturbation &>(geompert);
 
     return ds;
 }
@@ -70,7 +68,7 @@ QDataStream &operator>>(QDataStream &ds, GeometryPerturbation &geompert)
 
     if (v == 1)
     {
-        ds >> static_cast<Perturbation&>(geompert);
+        ds >> static_cast<Perturbation &>(geompert);
     }
     else
         throw version_error(v, "1", r_geompert, CODELOC);
@@ -80,25 +78,27 @@ QDataStream &operator>>(QDataStream &ds, GeometryPerturbation &geompert)
 
 /** Constructor */
 GeometryPerturbation::GeometryPerturbation(const PropertyMap &map) : Perturbation(map)
-{}
+{
+}
 
 /** Constructor */
-GeometryPerturbation::GeometryPerturbation(const Expression &mapping_function,
-                                           const PropertyMap &map)
-                     : Perturbation(mapping_function, map)
-{}
+GeometryPerturbation::GeometryPerturbation(const Expression &mapping_function, const PropertyMap &map)
+    : Perturbation(mapping_function, map)
+{
+}
 
 /** Copy constructor */
-GeometryPerturbation::GeometryPerturbation(const GeometryPerturbation &other)
-                     : Perturbation(other)
-{}
+GeometryPerturbation::GeometryPerturbation(const GeometryPerturbation &other) : Perturbation(other)
+{
+}
 
 /** Destructor */
 GeometryPerturbation::~GeometryPerturbation()
-{}
+{
+}
 
 /** Copy assignment operator */
-GeometryPerturbation& GeometryPerturbation::operator=(const GeometryPerturbation &other)
+GeometryPerturbation &GeometryPerturbation::operator=(const GeometryPerturbation &other)
 {
     Perturbation::operator=(other);
     return *this;
@@ -124,13 +124,12 @@ QSet<QString> GeometryPerturbation::requiredProperties() const
     PropertyName coords_property = propertyMap()["coordinates"];
 
     if (coords_property.hasSource())
-        props.insert( coords_property.source() );
+        props.insert(coords_property.source());
 
     return props;
 }
 
-void GeometryPerturbation::perturbMolecule(MolEditor &molecule,
-                                           const Values &values) const
+void GeometryPerturbation::perturbMolecule(MolEditor &molecule, const Values &values) const
 {
     Mover<Molecule> molmover = molecule.move();
 
@@ -139,24 +138,24 @@ void GeometryPerturbation::perturbMolecule(MolEditor &molecule,
     molecule = molmover.commit().edit();
 }
 
-const char* GeometryPerturbation::typeName()
+const char *GeometryPerturbation::typeName()
 {
     return "SireMol::GeometryPerturbation";
 }
 
-Q_GLOBAL_STATIC( QMutex, globalMutex )
-Q_GLOBAL_STATIC( SharedPolyPointer<GeometryPerturbation>, perturbationPtr );
+Q_GLOBAL_STATIC(QMutex, globalMutex)
+Q_GLOBAL_STATIC(SharedPolyPointer<GeometryPerturbation>, perturbationPtr);
 
-const NullGeometryPerturbation& GeometryPerturbation::null()
+const NullGeometryPerturbation &GeometryPerturbation::null()
 {
     SharedPolyPointer<GeometryPerturbation> *ptr = perturbationPtr();
 
     if (ptr->constData() == 0)
     {
-        QMutexLocker lkr( globalMutex() );
+        QMutexLocker lkr(globalMutex());
 
         if (ptr->constData() == 0)
-            *ptr = static_cast<GeometryPerturbation*>(new NullGeometryPerturbation());
+            *ptr = static_cast<GeometryPerturbation *>(new NullGeometryPerturbation());
     }
 
     return ptr->constData()->asA<NullGeometryPerturbation>();
@@ -168,24 +167,22 @@ const NullGeometryPerturbation& GeometryPerturbation::null()
 
 static const RegisterMetaType<NullGeometryPerturbation> r_nullpert;
 
-QDataStream &operator<<(QDataStream &ds,
-                                       const NullGeometryPerturbation &nullpert)
+QDataStream &operator<<(QDataStream &ds, const NullGeometryPerturbation &nullpert)
 {
     writeHeader(ds, r_nullpert, 1);
 
-    ds << static_cast<const GeometryPerturbation&>(nullpert);
+    ds << static_cast<const GeometryPerturbation &>(nullpert);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                       NullGeometryPerturbation &nullpert)
+QDataStream &operator>>(QDataStream &ds, NullGeometryPerturbation &nullpert)
 {
     VersionID v = readHeader(ds, r_nullpert);
 
     if (v == 1)
     {
-        ds >> static_cast<GeometryPerturbation&>(nullpert);
+        ds >> static_cast<GeometryPerturbation &>(nullpert);
     }
     else
         throw version_error(v, "1", r_nullpert, CODELOC);
@@ -194,23 +191,25 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 NullGeometryPerturbation::NullGeometryPerturbation()
-        : ConcreteProperty<NullGeometryPerturbation,GeometryPerturbation>()
-{}
-
-NullGeometryPerturbation::NullGeometryPerturbation(const NullGeometryPerturbation &other)
-        : ConcreteProperty<NullGeometryPerturbation,GeometryPerturbation>(other)
-{}
-
-NullGeometryPerturbation::~NullGeometryPerturbation()
-{}
-
-const char* NullGeometryPerturbation::typeName()
+    : ConcreteProperty<NullGeometryPerturbation, GeometryPerturbation>()
 {
-    return QMetaType::typeName( qMetaTypeId<NullGeometryPerturbation>() );
 }
 
-NullGeometryPerturbation&
-NullGeometryPerturbation::operator=(const NullGeometryPerturbation &other)
+NullGeometryPerturbation::NullGeometryPerturbation(const NullGeometryPerturbation &other)
+    : ConcreteProperty<NullGeometryPerturbation, GeometryPerturbation>(other)
+{
+}
+
+NullGeometryPerturbation::~NullGeometryPerturbation()
+{
+}
+
+const char *NullGeometryPerturbation::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullGeometryPerturbation>());
+}
+
+NullGeometryPerturbation &NullGeometryPerturbation::operator=(const NullGeometryPerturbation &other)
 {
     GeometryPerturbation::operator=(other);
     return *this;
@@ -236,16 +235,18 @@ QSet<QString> NullGeometryPerturbation::requiredProperties() const
     return QSet<QString>();
 }
 
-bool NullGeometryPerturbation::wouldChange(const Molecule&, const Values&) const
+bool NullGeometryPerturbation::wouldChange(const Molecule &, const Values &) const
 {
     return false;
 }
 
-void NullGeometryPerturbation::perturbMolecule(MolEditor&, const Values&) const
-{}
+void NullGeometryPerturbation::perturbMolecule(MolEditor &, const Values &) const
+{
+}
 
-void NullGeometryPerturbation::perturbMolecule(Mover<Molecule>&, const Values&) const
-{}
+void NullGeometryPerturbation::perturbMolecule(Mover<Molecule> &, const Values &) const
+{
+}
 
 ///////////
 /////////// Implementation of GeometryPerturbations
@@ -253,20 +254,18 @@ void NullGeometryPerturbation::perturbMolecule(Mover<Molecule>&, const Values&) 
 
 static const RegisterMetaType<GeometryPerturbations> r_geomperts;
 
-QDataStream &operator<<(QDataStream &ds,
-                                       const GeometryPerturbations &geomperts)
+QDataStream &operator<<(QDataStream &ds, const GeometryPerturbations &geomperts)
 {
     writeHeader(ds, r_geomperts, 1);
 
     SharedDataStream sds(ds);
 
-    sds << geomperts.perts << static_cast<const GeometryPerturbation&>(geomperts);
+    sds << geomperts.perts << static_cast<const GeometryPerturbation &>(geomperts);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                       GeometryPerturbations &geomperts)
+QDataStream &operator>>(QDataStream &ds, GeometryPerturbations &geomperts)
 {
     VersionID v = readHeader(ds, r_geomperts);
 
@@ -274,7 +273,7 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> geomperts.perts >> static_cast<GeometryPerturbation&>(geomperts);
+        sds >> geomperts.perts >> static_cast<GeometryPerturbation &>(geomperts);
     }
     else
         throw version_error(v, "1", r_geomperts, CODELOC);
@@ -284,28 +283,27 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Constructor */
 GeometryPerturbations::GeometryPerturbations()
-    : ConcreteProperty<GeometryPerturbations,GeometryPerturbation>(Expression())
-{}
+    : ConcreteProperty<GeometryPerturbations, GeometryPerturbation>(Expression())
+{
+}
 
 /** Construct to hold just a single perturbation */
 GeometryPerturbations::GeometryPerturbations(const GeometryPerturbation &perturbation)
-    : ConcreteProperty<GeometryPerturbations,GeometryPerturbation>(Expression())
+    : ConcreteProperty<GeometryPerturbations, GeometryPerturbation>(Expression())
 {
     if (perturbation.isA<GeometryPerturbations>())
         perts = perturbation.asA<GeometryPerturbations>().perts;
     else
-        perts.append( perturbation );
+        perts.append(perturbation);
 }
 
 /** Construct to hold all of the passed perturbations */
 GeometryPerturbations::GeometryPerturbations(const QList<GeomPertPtr> &perturbations)
-    : ConcreteProperty<GeometryPerturbations,GeometryPerturbation>(Expression())
+    : ConcreteProperty<GeometryPerturbations, GeometryPerturbation>(Expression())
 {
-    for (QList<GeomPertPtr>::const_iterator it = perturbations.constBegin();
-         it != perturbations.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perturbations.constBegin(); it != perturbations.constEnd(); ++it)
     {
-        if ( (*it)->isA<GeometryPerturbations>() )
+        if ((*it)->isA<GeometryPerturbations>())
         {
             perts += (*it)->asA<GeometryPerturbations>().perts;
         }
@@ -318,22 +316,22 @@ GeometryPerturbations::GeometryPerturbations(const QList<GeomPertPtr> &perturbat
 
 /** Copy constructor */
 GeometryPerturbations::GeometryPerturbations(const GeometryPerturbations &other)
-       : ConcreteProperty<GeometryPerturbations,GeometryPerturbation>(other),
-         perts(other.perts)
-{}
+    : ConcreteProperty<GeometryPerturbations, GeometryPerturbation>(other), perts(other.perts)
+{
+}
 
 /** Destructor */
 GeometryPerturbations::~GeometryPerturbations()
-{}
-
-const char* GeometryPerturbations::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<GeometryPerturbations>() );
+}
+
+const char *GeometryPerturbations::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<GeometryPerturbations>());
 }
 
 /** Copy assignment operator */
-GeometryPerturbations&
-GeometryPerturbations::operator=(const GeometryPerturbations &other)
+GeometryPerturbations &GeometryPerturbations::operator=(const GeometryPerturbations &other)
 {
     if (this != &other)
     {
@@ -363,11 +361,11 @@ QString GeometryPerturbations::toString() const
 
     QStringList lines;
 
-    lines.append( QObject::tr("GeometryPerturbations:") );
+    lines.append(QObject::tr("GeometryPerturbations:"));
 
     foreach (GeomPertPtr pert, perts)
     {
-        lines.append( QString("  %1").arg(pert->toString()) );
+        lines.append(QString("  %1").arg(pert->toString()));
     }
 
     return lines.join("\n");
@@ -385,12 +383,9 @@ PerturbationPtr GeometryPerturbations::recreate(const Expression &mapping_functi
 {
     QList<GeomPertPtr> new_perts;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append(
-            it->read().recreate(mapping_function)->asA<GeometryPerturbation>() );
+        new_perts.append(it->read().recreate(mapping_function)->asA<GeometryPerturbation>());
     }
 
     GeometryPerturbations ret(*this);
@@ -405,12 +400,9 @@ PerturbationPtr GeometryPerturbations::recreate(const PropertyMap &map) const
 {
     QList<GeomPertPtr> new_perts;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append(
-            it->read().recreate(map)->asA<GeometryPerturbation>() );
+        new_perts.append(it->read().recreate(map)->asA<GeometryPerturbation>());
     }
 
     GeometryPerturbations ret(*this);
@@ -421,17 +413,13 @@ PerturbationPtr GeometryPerturbations::recreate(const PropertyMap &map) const
 
 /** Return a re-created version of this set of perturbations where all child
     perturbations are changed to use the passed mapping function and property map */
-PerturbationPtr GeometryPerturbations::recreate(const Expression &mapping_function,
-                                                const PropertyMap &map) const
+PerturbationPtr GeometryPerturbations::recreate(const Expression &mapping_function, const PropertyMap &map) const
 {
     QList<GeomPertPtr> new_perts;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append(
-            it->read().recreate(mapping_function,map)->asA<GeometryPerturbation>() );
+        new_perts.append(it->read().recreate(mapping_function, map)->asA<GeometryPerturbation>());
     }
 
     GeometryPerturbations ret(*this);
@@ -450,12 +438,9 @@ PerturbationPtr GeometryPerturbations::substitute(const Identities &identities) 
 {
     QList<GeomPertPtr> new_perts;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
-        new_perts.append(
-            it->read().substitute(identities)->asA<GeometryPerturbation>() );
+        new_perts.append(it->read().substitute(identities)->asA<GeometryPerturbation>());
     }
 
     GeometryPerturbations ret(*this);
@@ -475,9 +460,7 @@ QList<PerturbationPtr> GeometryPerturbations::children() const
 {
     QList<PerturbationPtr> kids;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         kids += it->read().children();
     }
@@ -490,9 +473,7 @@ QSet<Symbol> GeometryPerturbations::requiredSymbols() const
 {
     QSet<Symbol> syms;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         syms += it->read().requiredSymbols();
     }
@@ -506,9 +487,7 @@ QSet<QString> GeometryPerturbations::requiredProperties() const
 {
     QSet<QString> props;
 
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         props += it->read().requiredProperties();
     }
@@ -518,34 +497,28 @@ QSet<QString> GeometryPerturbations::requiredProperties() const
 
 /** Return whether or not these perturbations with the passed values would
     change the molecule 'molecule' */
-bool GeometryPerturbations::wouldChange(const Molecule &molecule,
-                                        const Values &values) const
+bool GeometryPerturbations::wouldChange(const Molecule &molecule, const Values &values) const
 {
     try
     {
-        for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-             it != perts.constEnd();
-             ++it)
+        for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
         {
-            if (it->read().wouldChange(molecule,values))
+            if (it->read().wouldChange(molecule, values))
                 return true;
         }
 
         return false;
     }
-    catch(...)
+    catch (...)
     {
-        //if an error occured, then the molecule won't be changed
+        // if an error occured, then the molecule won't be changed
         return false;
     }
 }
 
-void GeometryPerturbations::perturbMolecule(Mover<Molecule> &molecule,
-                                            const SireCAS::Values &values) const
+void GeometryPerturbations::perturbMolecule(Mover<Molecule> &molecule, const SireCAS::Values &values) const
 {
-    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin();
-         it != perts.constEnd();
-         ++it)
+    for (QList<GeomPertPtr>::const_iterator it = perts.constBegin(); it != perts.constEnd(); ++it)
     {
         it->read().perturbMolecule(molecule, values);
     }
@@ -558,16 +531,14 @@ void GeometryPerturbations::perturbMolecule(Mover<Molecule> &molecule,
 static const RegisterMetaType<BondPerturbation> r_bondpert;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const BondPerturbation &bondpert)
+QDataStream &operator<<(QDataStream &ds, const BondPerturbation &bondpert)
 {
     writeHeader(ds, r_bondpert, 1);
 
     SharedDataStream sds(ds);
 
-    sds << bondpert.bondid << bondpert.start_size.to(angstrom)
-                           << bondpert.end_size.to(angstrom)
-                           << static_cast<const GeometryPerturbation&>(bondpert);
+    sds << bondpert.bondid << bondpert.start_size.to(angstrom) << bondpert.end_size.to(angstrom)
+        << static_cast<const GeometryPerturbation &>(bondpert);
 
     return ds;
 }
@@ -583,8 +554,7 @@ QDataStream &operator>>(QDataStream &ds, BondPerturbation &bondpert)
 
         double start_size, end_size;
 
-        sds >> bondpert.bondid >> start_size >> end_size
-            >> static_cast<GeometryPerturbation&>(bondpert);
+        sds >> bondpert.bondid >> start_size >> end_size >> static_cast<GeometryPerturbation &>(bondpert);
 
         bondpert.start_size = start_size * angstrom;
         bondpert.end_size = end_size * angstrom;
@@ -597,65 +567,62 @@ QDataStream &operator>>(QDataStream &ds, BondPerturbation &bondpert)
 
 /** Constructor */
 BondPerturbation::BondPerturbation()
-                 : ConcreteProperty<BondPerturbation,GeometryPerturbation>(),
-                   start_size(0), end_size(0)
-{}
+    : ConcreteProperty<BondPerturbation, GeometryPerturbation>(), start_size(0), end_size(0)
+{
+}
 
 /** Construct to perturb the bond 'bond' from 'start' to 'end' */
-BondPerturbation::BondPerturbation(const BondID &bond,
-                                   const Length &start, const Length &end,
-                                   const PropertyMap &map)
-                 : ConcreteProperty<BondPerturbation,GeometryPerturbation>(map),
-                   bondid(bond), start_size(start), end_size(end)
-{}
+BondPerturbation::BondPerturbation(const BondID &bond, const Length &start, const Length &end, const PropertyMap &map)
+    : ConcreteProperty<BondPerturbation, GeometryPerturbation>(map), bondid(bond), start_size(start), end_size(end)
+{
+}
 
 /** Construct to perturb the bond 'bond' from 'start' to 'end'
     using the passed mapping function */
-BondPerturbation::BondPerturbation(const BondID &bond,
-                                   const Length &start, const Length &end,
-                                   const Expression &mapping_function,
-                                   const PropertyMap &map)
-     : ConcreteProperty<BondPerturbation,GeometryPerturbation>(mapping_function, map),
-       bondid(bond), start_size(start), end_size(end)
-{}
+BondPerturbation::BondPerturbation(const BondID &bond, const Length &start, const Length &end,
+                                   const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<BondPerturbation, GeometryPerturbation>(mapping_function, map), bondid(bond), start_size(start),
+      end_size(end)
+{
+}
 
 /** Construct to perturb the bond between atoms 'atom0' and 'atom1'
     from 'start' to 'end' */
-BondPerturbation::BondPerturbation(const AtomID &atom0, const AtomID &atom1,
-                                   const Length &start, const Length &end,
+BondPerturbation::BondPerturbation(const AtomID &atom0, const AtomID &atom1, const Length &start, const Length &end,
                                    const PropertyMap &map)
-                 : ConcreteProperty<BondPerturbation,GeometryPerturbation>(map),
-                   bondid(atom0,atom1), start_size(start), end_size(end)
-{}
+    : ConcreteProperty<BondPerturbation, GeometryPerturbation>(map), bondid(atom0, atom1), start_size(start),
+      end_size(end)
+{
+}
 
 /** Construct to perturb the bond between atoms 'atom0' and 'atom1'
     from 'start' to 'end' using the passed mapping function */
-BondPerturbation::BondPerturbation(const AtomID &atom0, const AtomID &atom1,
-                                   const Length &start, const Length &end,
-                                   const Expression &mapping_function,
-                                   const PropertyMap &map)
-      : ConcreteProperty<BondPerturbation,GeometryPerturbation>(mapping_function, map),
-        bondid(atom0,atom1), start_size(start), end_size(end)
-{}
+BondPerturbation::BondPerturbation(const AtomID &atom0, const AtomID &atom1, const Length &start, const Length &end,
+                                   const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<BondPerturbation, GeometryPerturbation>(mapping_function, map), bondid(atom0, atom1),
+      start_size(start), end_size(end)
+{
+}
 
 /** Copy constructor */
 BondPerturbation::BondPerturbation(const BondPerturbation &other)
-                 : ConcreteProperty<BondPerturbation,GeometryPerturbation>(other),
-                   bondid(other.bondid), start_size(other.start_size),
-                   end_size(other.end_size)
-{}
+    : ConcreteProperty<BondPerturbation, GeometryPerturbation>(other), bondid(other.bondid),
+      start_size(other.start_size), end_size(other.end_size)
+{
+}
 
 /** Destructor */
 BondPerturbation::~BondPerturbation()
-{}
+{
+}
 
-const char* BondPerturbation::typeName()
+const char *BondPerturbation::typeName()
 {
     return "SireMol::BondPerturbation";
 }
 
 /** Copy assignment operator */
-BondPerturbation& BondPerturbation::operator=(const BondPerturbation &other)
+BondPerturbation &BondPerturbation::operator=(const BondPerturbation &other)
 {
     if (this != &other)
     {
@@ -672,8 +639,8 @@ BondPerturbation& BondPerturbation::operator=(const BondPerturbation &other)
 /** Comparison operator */
 bool BondPerturbation::operator==(const BondPerturbation &other) const
 {
-    return bondid == other.bondid and start_size == other.start_size and
-           end_size == other.end_size and GeometryPerturbation::operator==(other);
+    return bondid == other.bondid and start_size == other.start_size and end_size == other.end_size and
+           GeometryPerturbation::operator==(other);
 }
 
 /** Comparison operator */
@@ -685,25 +652,25 @@ bool BondPerturbation::operator!=(const BondPerturbation &other) const
 QString BondPerturbation::toString() const
 {
     return QObject::tr("BondPerturbation( %1 from %2 A to %3 A ")
-                .arg(bondid.toString())
-                .arg(start_size.to(angstrom))
-                .arg(end_size.to(angstrom));
+        .arg(bondid.toString())
+        .arg(start_size.to(angstrom))
+        .arg(end_size.to(angstrom));
 }
 
 /** Return the ID that identifies that bond that will be perturbed */
-const BondID& BondPerturbation::bond() const
+const BondID &BondPerturbation::bond() const
 {
     return bondid;
 }
 
 /** Return the start length of the bond */
-const SireUnits::Dimension::Length& BondPerturbation::start() const
+const SireUnits::Dimension::Length &BondPerturbation::start() const
 {
     return start_size;
 }
 
 /** Return the end length of the bond */
-const SireUnits::Dimension::Length& BondPerturbation::end() const
+const SireUnits::Dimension::Length &BondPerturbation::end() const
 {
     return end_size;
 }
@@ -714,16 +681,16 @@ bool BondPerturbation::wouldChange(const Molecule &molecule, const Values &value
 {
     try
     {
-        Values new_vals = values + ( symbols().initial() == start_size.value() ) +
-                                   ( symbols().final() == end_size.value() );
+        Values new_vals =
+            values + (symbols().initial() == start_size.value()) + (symbols().final() == end_size.value());
 
-        Length new_length = Length( mappingFunction().evaluate(new_vals) );
+        Length new_length = Length(mappingFunction().evaluate(new_vals));
 
-        Length old_length( bondid.length(molecule, propertyMap()) );
+        Length old_length(bondid.length(molecule, propertyMap()));
 
         return std::abs(new_length - old_length) > 0.000001;
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -735,16 +702,14 @@ bool BondPerturbation::wouldChange(const Molecule &molecule, const Values &value
     \throw SireError::incompatible_error
     \throw SireError::invalid_cast
 */
-void BondPerturbation::perturbMolecule(Mover<Molecule> &molecule,
-                                       const Values &values) const
+void BondPerturbation::perturbMolecule(Mover<Molecule> &molecule, const Values &values) const
 {
-    //calculate the desired value of the bond
-    Values new_vals = values + ( symbols().initial() == start_size.value() ) +
-                               ( symbols().final() == end_size.value() );
+    // calculate the desired value of the bond
+    Values new_vals = values + (symbols().initial() == start_size.value()) + (symbols().final() == end_size.value());
 
-    Length new_length = Length( mappingFunction().evaluate(new_vals) );
+    Length new_length = Length(mappingFunction().evaluate(new_vals));
 
-    Length old_length( bondid.length(molecule, propertyMap()) );
+    Length old_length(bondid.length(molecule, propertyMap()));
 
     if (std::abs(new_length - old_length) > 0.000001)
         molecule.set(bondid, new_length, propertyMap()).commit();
@@ -757,16 +722,14 @@ void BondPerturbation::perturbMolecule(Mover<Molecule> &molecule,
 static const RegisterMetaType<AnglePerturbation> r_anglepert;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const AnglePerturbation &anglepert)
+QDataStream &operator<<(QDataStream &ds, const AnglePerturbation &anglepert)
 {
     writeHeader(ds, r_anglepert, 1);
 
     SharedDataStream sds(ds);
 
-    sds << anglepert.angleid << anglepert.start_size.to(degrees)
-                             << anglepert.end_size.to(degrees)
-                             << static_cast<const GeometryPerturbation&>(anglepert);
+    sds << anglepert.angleid << anglepert.start_size.to(degrees) << anglepert.end_size.to(degrees)
+        << static_cast<const GeometryPerturbation &>(anglepert);
 
     return ds;
 }
@@ -782,8 +745,7 @@ QDataStream &operator>>(QDataStream &ds, AnglePerturbation &anglepert)
 
         double start_size, end_size;
 
-        sds >> anglepert.angleid >> start_size >> end_size
-            >> static_cast<GeometryPerturbation&>(anglepert);
+        sds >> anglepert.angleid >> start_size >> end_size >> static_cast<GeometryPerturbation &>(anglepert);
 
         anglepert.start_size = start_size * degrees;
         anglepert.end_size = end_size * degrees;
@@ -796,61 +758,56 @@ QDataStream &operator>>(QDataStream &ds, AnglePerturbation &anglepert)
 
 /** Constructor */
 AnglePerturbation::AnglePerturbation()
-                  : ConcreteProperty<AnglePerturbation,GeometryPerturbation>(),
-                    start_size(0), end_size(0)
-{}
+    : ConcreteProperty<AnglePerturbation, GeometryPerturbation>(), start_size(0), end_size(0)
+{
+}
 
 /** Construct to perturb the angle 'angle' from 'start' to 'end' */
-AnglePerturbation::AnglePerturbation(const AngleID &angle,
-                                     const Angle &start, const Angle &end,
-                                     const PropertyMap &map)
-                  : ConcreteProperty<AnglePerturbation,GeometryPerturbation>(map),
-                    angleid(angle), start_size(start), end_size(end)
-{}
+AnglePerturbation::AnglePerturbation(const AngleID &angle, const Angle &start, const Angle &end, const PropertyMap &map)
+    : ConcreteProperty<AnglePerturbation, GeometryPerturbation>(map), angleid(angle), start_size(start), end_size(end)
+{
+}
 
 /** Construct to perturb the angle 'angle' from 'start' to 'end'
     using the passed mapping function */
-AnglePerturbation::AnglePerturbation(const AngleID &angle,
-                                     const Angle &start, const Angle &end,
-                                     const Expression &mapping_function,
-                                     const PropertyMap &map)
-     : ConcreteProperty<AnglePerturbation,GeometryPerturbation>(mapping_function, map),
-       angleid(angle), start_size(start), end_size(end)
-{}
+AnglePerturbation::AnglePerturbation(const AngleID &angle, const Angle &start, const Angle &end,
+                                     const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<AnglePerturbation, GeometryPerturbation>(mapping_function, map), angleid(angle),
+      start_size(start), end_size(end)
+{
+}
 
 /** Construct to perturb the angle between atoms 'atom0', 'atom1' and 'atom2'
     from 'start' to 'end' */
-AnglePerturbation::AnglePerturbation(const AtomID &atom0, const AtomID &atom1,
-                                     const AtomID &atom2,
-                                     const Angle &start, const Angle &end,
-                                     const PropertyMap &map)
-                 : ConcreteProperty<AnglePerturbation,GeometryPerturbation>(map),
-                   angleid(atom0,atom1,atom2), start_size(start), end_size(end)
-{}
+AnglePerturbation::AnglePerturbation(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const Angle &start,
+                                     const Angle &end, const PropertyMap &map)
+    : ConcreteProperty<AnglePerturbation, GeometryPerturbation>(map), angleid(atom0, atom1, atom2), start_size(start),
+      end_size(end)
+{
+}
 
 /** Construct to perturb the angle between atoms 'atom0', 'atom1' and 'atom2'
     from 'start' to 'end' using the passed mapping function */
-AnglePerturbation::AnglePerturbation(const AtomID &atom0, const AtomID &atom1,
-                                     const AtomID &atom2,
-                                     const Angle &start, const Angle &end,
-                                     const Expression &mapping_function,
-                                     const PropertyMap &map)
-      : ConcreteProperty<AnglePerturbation,GeometryPerturbation>(mapping_function, map),
-        angleid(atom0,atom1,atom2), start_size(start), end_size(end)
-{}
+AnglePerturbation::AnglePerturbation(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const Angle &start,
+                                     const Angle &end, const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<AnglePerturbation, GeometryPerturbation>(mapping_function, map), angleid(atom0, atom1, atom2),
+      start_size(start), end_size(end)
+{
+}
 
 /** Copy constructor */
 AnglePerturbation::AnglePerturbation(const AnglePerturbation &other)
-                 : ConcreteProperty<AnglePerturbation,GeometryPerturbation>(other),
-                   angleid(other.angleid), start_size(other.start_size),
-                   end_size(other.end_size)
-{}
+    : ConcreteProperty<AnglePerturbation, GeometryPerturbation>(other), angleid(other.angleid),
+      start_size(other.start_size), end_size(other.end_size)
+{
+}
 
 /** Destructor */
 AnglePerturbation::~AnglePerturbation()
-{}
+{
+}
 
-const char* AnglePerturbation::typeName()
+const char *AnglePerturbation::typeName()
 {
     return "SireMol::AnglePerturbation";
 }
@@ -858,13 +815,13 @@ const char* AnglePerturbation::typeName()
 QString AnglePerturbation::toString() const
 {
     return QObject::tr("AnglePerturbation( %1 from %2° to %3° ")
-                .arg(angleid.toString())
-                .arg(start_size.to(degrees))
-                .arg(end_size.to(degrees));
+        .arg(angleid.toString())
+        .arg(start_size.to(degrees))
+        .arg(end_size.to(degrees));
 }
 
 /** Copy assignment operator */
-AnglePerturbation& AnglePerturbation::operator=(const AnglePerturbation &other)
+AnglePerturbation &AnglePerturbation::operator=(const AnglePerturbation &other)
 {
     if (this != &other)
     {
@@ -881,8 +838,8 @@ AnglePerturbation& AnglePerturbation::operator=(const AnglePerturbation &other)
 /** Comparison operator */
 bool AnglePerturbation::operator==(const AnglePerturbation &other) const
 {
-    return angleid == other.angleid and start_size == other.start_size and
-           end_size == other.end_size and GeometryPerturbation::operator==(other);
+    return angleid == other.angleid and start_size == other.start_size and end_size == other.end_size and
+           GeometryPerturbation::operator==(other);
 }
 
 /** Comparison operator */
@@ -892,19 +849,19 @@ bool AnglePerturbation::operator!=(const AnglePerturbation &other) const
 }
 
 /** Return the ID that identifies that angle that will be perturbed */
-const AngleID& AnglePerturbation::angle() const
+const AngleID &AnglePerturbation::angle() const
 {
     return angleid;
 }
 
 /** Return the start length of the angle */
-const SireUnits::Dimension::Angle& AnglePerturbation::start() const
+const SireUnits::Dimension::Angle &AnglePerturbation::start() const
 {
     return start_size;
 }
 
 /** Return the end length of the angle */
-const SireUnits::Dimension::Angle& AnglePerturbation::end() const
+const SireUnits::Dimension::Angle &AnglePerturbation::end() const
 {
     return end_size;
 }
@@ -915,16 +872,16 @@ bool AnglePerturbation::wouldChange(const Molecule &molecule, const Values &valu
 {
     try
     {
-        Values new_vals = values + ( symbols().initial() == start_size.value() ) +
-                                   ( symbols().final() == end_size.value() );
+        Values new_vals =
+            values + (symbols().initial() == start_size.value()) + (symbols().final() == end_size.value());
 
-        Angle new_size = Angle( mappingFunction().evaluate(new_vals) );
+        Angle new_size = Angle(mappingFunction().evaluate(new_vals));
 
-        Angle old_size( angleid.size(molecule, propertyMap()) );
+        Angle old_size(angleid.size(molecule, propertyMap()));
 
         return std::abs(new_size.value() - old_size.value()) > 0.0001;
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -936,15 +893,13 @@ bool AnglePerturbation::wouldChange(const Molecule &molecule, const Values &valu
     \throw SireError::incompatible_error
     \throw SireError::invalid_cast
 */
-void AnglePerturbation::perturbMolecule(Mover<Molecule> &molecule,
-                                       const Values &values) const
+void AnglePerturbation::perturbMolecule(Mover<Molecule> &molecule, const Values &values) const
 {
-    //calculate the desired value of the angle
-    Values new_vals = values + ( symbols().initial() == start_size.value() ) +
-                               ( symbols().final() == end_size.value() );
+    // calculate the desired value of the angle
+    Values new_vals = values + (symbols().initial() == start_size.value()) + (symbols().final() == end_size.value());
 
-    Angle old_size( angleid.size(molecule, propertyMap()) );
-    Angle new_angle = Angle( mappingFunction().evaluate(new_vals) );
+    Angle old_size(angleid.size(molecule, propertyMap()));
+    Angle new_angle = Angle(mappingFunction().evaluate(new_vals));
 
     if (std::abs(new_angle.value() - old_size.value()) > 0.0001)
         molecule.set(angleid, new_angle, propertyMap()).commit();
@@ -957,16 +912,14 @@ void AnglePerturbation::perturbMolecule(Mover<Molecule> &molecule,
 static const RegisterMetaType<DihedralPerturbation> r_dihedralpert;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                       const DihedralPerturbation &dihedralpert)
+QDataStream &operator<<(QDataStream &ds, const DihedralPerturbation &dihedralpert)
 {
     writeHeader(ds, r_dihedralpert, 1);
 
     SharedDataStream sds(ds);
 
-    sds << dihedralpert.dihedralid << dihedralpert.start_size.to(degrees)
-                        << dihedralpert.end_size.to(degrees)
-                        << static_cast<const GeometryPerturbation&>(dihedralpert);
+    sds << dihedralpert.dihedralid << dihedralpert.start_size.to(degrees) << dihedralpert.end_size.to(degrees)
+        << static_cast<const GeometryPerturbation &>(dihedralpert);
 
     return ds;
 }
@@ -982,8 +935,7 @@ QDataStream &operator>>(QDataStream &ds, DihedralPerturbation &dihedralpert)
 
         double start_size, end_size;
 
-        sds >> dihedralpert.dihedralid >> start_size >> end_size
-            >> static_cast<GeometryPerturbation&>(dihedralpert);
+        sds >> dihedralpert.dihedralid >> start_size >> end_size >> static_cast<GeometryPerturbation &>(dihedralpert);
 
         dihedralpert.start_size = start_size * degrees;
         dihedralpert.end_size = end_size * degrees;
@@ -996,61 +948,60 @@ QDataStream &operator>>(QDataStream &ds, DihedralPerturbation &dihedralpert)
 
 /** Constructor */
 DihedralPerturbation::DihedralPerturbation()
-                     : ConcreteProperty<DihedralPerturbation,GeometryPerturbation>(),
-                       start_size(0), end_size(0)
-{}
+    : ConcreteProperty<DihedralPerturbation, GeometryPerturbation>(), start_size(0), end_size(0)
+{
+}
 
 /** Construct to perturb the dihedral 'dihedral' from 'start' to 'end' */
-DihedralPerturbation::DihedralPerturbation(const DihedralID &dihedral,
-                                     const Angle &start, const Angle &end,
-                                     const PropertyMap &map)
-                     : ConcreteProperty<DihedralPerturbation,GeometryPerturbation>(map),
-                       dihedralid(dihedral), start_size(start), end_size(end)
-{}
+DihedralPerturbation::DihedralPerturbation(const DihedralID &dihedral, const Angle &start, const Angle &end,
+                                           const PropertyMap &map)
+    : ConcreteProperty<DihedralPerturbation, GeometryPerturbation>(map), dihedralid(dihedral), start_size(start),
+      end_size(end)
+{
+}
 
 /** Construct to perturb the dihedral 'dihedral' from 'start' to 'end'
     using the passed mapping function */
-DihedralPerturbation::DihedralPerturbation(const DihedralID &dihedral,
-                                     const Angle &start, const Angle &end,
-                                     const Expression &mapping_function,
-                                     const PropertyMap &map)
-     : ConcreteProperty<DihedralPerturbation,GeometryPerturbation>(mapping_function, map),
-       dihedralid(dihedral), start_size(start), end_size(end)
-{}
+DihedralPerturbation::DihedralPerturbation(const DihedralID &dihedral, const Angle &start, const Angle &end,
+                                           const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<DihedralPerturbation, GeometryPerturbation>(mapping_function, map), dihedralid(dihedral),
+      start_size(start), end_size(end)
+{
+}
 
 /** Construct to perturb the dihedral between atoms 'atom0', 'atom1', 'atom2' and 'atom3'
     from 'start' to 'end' */
-DihedralPerturbation::DihedralPerturbation(const AtomID &atom0, const AtomID &atom1,
-                                     const AtomID &atom2, const AtomID &atom3,
-                                     const Angle &start, const Angle &end,
-                                     const PropertyMap &map)
-                 : ConcreteProperty<DihedralPerturbation,GeometryPerturbation>(map),
-                   dihedralid(atom0,atom1,atom2,atom3), start_size(start), end_size(end)
-{}
+DihedralPerturbation::DihedralPerturbation(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                                           const AtomID &atom3, const Angle &start, const Angle &end,
+                                           const PropertyMap &map)
+    : ConcreteProperty<DihedralPerturbation, GeometryPerturbation>(map), dihedralid(atom0, atom1, atom2, atom3),
+      start_size(start), end_size(end)
+{
+}
 
 /** Construct to perturb the dihedral between atoms 'atom0', 'atom1', 'atom2' and 'atom3'
     from 'start' to 'end' using the passed mapping function */
-DihedralPerturbation::DihedralPerturbation(const AtomID &atom0, const AtomID &atom1,
-                                     const AtomID &atom2, const AtomID &atom3,
-                                     const Angle &start, const Angle &end,
-                                     const Expression &mapping_function,
-                                     const PropertyMap &map)
-    : ConcreteProperty<DihedralPerturbation,GeometryPerturbation>(mapping_function, map),
-      dihedralid(atom0,atom1,atom2,atom3), start_size(start), end_size(end)
-{}
+DihedralPerturbation::DihedralPerturbation(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2,
+                                           const AtomID &atom3, const Angle &start, const Angle &end,
+                                           const Expression &mapping_function, const PropertyMap &map)
+    : ConcreteProperty<DihedralPerturbation, GeometryPerturbation>(mapping_function, map),
+      dihedralid(atom0, atom1, atom2, atom3), start_size(start), end_size(end)
+{
+}
 
 /** Copy constructor */
 DihedralPerturbation::DihedralPerturbation(const DihedralPerturbation &other)
-                 : ConcreteProperty<DihedralPerturbation,GeometryPerturbation>(other),
-                   dihedralid(other.dihedralid), start_size(other.start_size),
-                   end_size(other.end_size)
-{}
+    : ConcreteProperty<DihedralPerturbation, GeometryPerturbation>(other), dihedralid(other.dihedralid),
+      start_size(other.start_size), end_size(other.end_size)
+{
+}
 
 /** Destructor */
 DihedralPerturbation::~DihedralPerturbation()
-{}
+{
+}
 
-const char* DihedralPerturbation::typeName()
+const char *DihedralPerturbation::typeName()
 {
     return "SireMol::DihedralPerturbation";
 }
@@ -1058,13 +1009,13 @@ const char* DihedralPerturbation::typeName()
 QString DihedralPerturbation::toString() const
 {
     return QObject::tr("DihedralPerturbation( %1 from %2° to %3° ")
-                .arg(dihedralid.toString())
-                .arg(start_size.to(degrees))
-                .arg(end_size.to(degrees));
+        .arg(dihedralid.toString())
+        .arg(start_size.to(degrees))
+        .arg(end_size.to(degrees));
 }
 
 /** Copy assignment operator */
-DihedralPerturbation& DihedralPerturbation::operator=(const DihedralPerturbation &other)
+DihedralPerturbation &DihedralPerturbation::operator=(const DihedralPerturbation &other)
 {
     if (this != &other)
     {
@@ -1081,8 +1032,8 @@ DihedralPerturbation& DihedralPerturbation::operator=(const DihedralPerturbation
 /** Comparison operator */
 bool DihedralPerturbation::operator==(const DihedralPerturbation &other) const
 {
-    return dihedralid == other.dihedralid and start_size == other.start_size and
-           end_size == other.end_size and GeometryPerturbation::operator==(other);
+    return dihedralid == other.dihedralid and start_size == other.start_size and end_size == other.end_size and
+           GeometryPerturbation::operator==(other);
 }
 
 /** Comparison operator */
@@ -1092,40 +1043,39 @@ bool DihedralPerturbation::operator!=(const DihedralPerturbation &other) const
 }
 
 /** Return the ID that identifies that dihedral that will be perturbed */
-const DihedralID& DihedralPerturbation::dihedral() const
+const DihedralID &DihedralPerturbation::dihedral() const
 {
     return dihedralid;
 }
 
 /** Return the start length of the dihedral */
-const SireUnits::Dimension::Angle& DihedralPerturbation::start() const
+const SireUnits::Dimension::Angle &DihedralPerturbation::start() const
 {
     return start_size;
 }
 
 /** Return the end length of the dihedral */
-const SireUnits::Dimension::Angle& DihedralPerturbation::end() const
+const SireUnits::Dimension::Angle &DihedralPerturbation::end() const
 {
     return end_size;
 }
 
 /** Return whether or not this perturbation with the passed values would
     change the molecule 'molecule' */
-bool DihedralPerturbation::wouldChange(const Molecule &molecule,
-                                       const Values &values) const
+bool DihedralPerturbation::wouldChange(const Molecule &molecule, const Values &values) const
 {
     try
     {
-        Values new_vals = values + ( symbols().initial() == start_size.value() ) +
-                                   ( symbols().final() == end_size.value() );
+        Values new_vals =
+            values + (symbols().initial() == start_size.value()) + (symbols().final() == end_size.value());
 
-        Angle new_size = Angle( mappingFunction().evaluate(new_vals) );
+        Angle new_size = Angle(mappingFunction().evaluate(new_vals));
 
-        Angle old_size( dihedralid.size(molecule, propertyMap()) );
+        Angle old_size(dihedralid.size(molecule, propertyMap()));
 
         return std::abs(new_size.value() - old_size.value()) > 0.0001;
     }
-    catch(...)
+    catch (...)
     {
         return false;
     }
@@ -1137,14 +1087,12 @@ bool DihedralPerturbation::wouldChange(const Molecule &molecule,
     \throw SireError::incompatible_error
     \throw SireError::invalid_cast
 */
-void DihedralPerturbation::perturbMolecule(Mover<Molecule> &molecule,
-                                       const Values &values) const
+void DihedralPerturbation::perturbMolecule(Mover<Molecule> &molecule, const Values &values) const
 {
-    //calculate the desired value of the dihedral
-    Values new_vals = values + ( symbols().initial() == start_size.value() ) +
-                               ( symbols().final() == end_size.value() );
+    // calculate the desired value of the dihedral
+    Values new_vals = values + (symbols().initial() == start_size.value()) + (symbols().final() == end_size.value());
 
-    Angle new_dihedral = Angle( mappingFunction().evaluate(new_vals) );
+    Angle new_dihedral = Angle(mappingFunction().evaluate(new_vals));
 
     molecule.set(dihedralid, new_dihedral, propertyMap()).commit();
 }

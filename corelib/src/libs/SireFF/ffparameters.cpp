@@ -35,27 +35,26 @@ using namespace SireFF;
 using namespace SireBase;
 using namespace SireStream;
 
-Q_DECLARE_METATYPE( AtomicFFParameters<double> );
-Q_DECLARE_METATYPE( AtomicFFParametersArray<double> );
+Q_DECLARE_METATYPE(AtomicFFParameters<double>);
+Q_DECLARE_METATYPE(AtomicFFParametersArray<double>);
 
 namespace SireFF
 {
     template class AtomicFFParameters<double>;
     template class AtomicFFParametersArray<double>;
-}
+} // namespace SireFF
 
 ////////////
 //////////// Implementation of FFParameters
 ////////////
 
-static const RegisterMetaType<FFParameters> r_ffparams( MAGIC_ONLY,
-                                                        FFParameters::typeName() );
+static const RegisterMetaType<FFParameters> r_ffparams(MAGIC_ONLY, FFParameters::typeName());
 
 QDataStream &operator<<(QDataStream &ds, const FFParameters &ffparams)
 {
     writeHeader(ds, r_ffparams, 1);
 
-    ds << static_cast<const Property&>(ffparams);
+    ds << static_cast<const Property &>(ffparams);
 
     return ds;
 }
@@ -66,7 +65,7 @@ QDataStream &operator>>(QDataStream &ds, FFParameters &ffparams)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(ffparams);
+        ds >> static_cast<Property &>(ffparams);
     }
     else
         throw version_error(v, "1", r_ffparams, CODELOC);
@@ -76,18 +75,21 @@ QDataStream &operator>>(QDataStream &ds, FFParameters &ffparams)
 
 /** Constructor */
 FFParameters::FFParameters() : Property()
-{}
+{
+}
 
 /** Copy constructor */
 FFParameters::FFParameters(const FFParameters &other) : Property(other)
-{}
+{
+}
 
 /** Destructor */
 FFParameters::~FFParameters()
-{}
+{
+}
 
 /** Copy assignment operator */
-FFParameters& FFParameters::operator=(const FFParameters &other)
+FFParameters &FFParameters::operator=(const FFParameters &other)
 {
     Property::operator=(other);
     return *this;
@@ -105,7 +107,7 @@ bool FFParameters::operator!=(const FFParameters &other) const
     return not FFParameters::operator==(other);
 }
 
-const char* FFParameters::typeName()
+const char *FFParameters::typeName()
 {
     return "SireFF::FFParameters";
 }
@@ -119,15 +121,13 @@ NullFFParameters FFParameters::null()
 //////////// Implementation of FFParametersArray
 ////////////
 
-static const RegisterMetaType<FFParametersArray> r_ffparamsarray( MAGIC_ONLY,
-                                                    FFParametersArray::typeName() );
+static const RegisterMetaType<FFParametersArray> r_ffparamsarray(MAGIC_ONLY, FFParametersArray::typeName());
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const FFParametersArray &ffparams)
+QDataStream &operator<<(QDataStream &ds, const FFParametersArray &ffparams)
 {
     writeHeader(ds, r_ffparamsarray, 1);
 
-    ds << static_cast<const Property&>(ffparams);
+    ds << static_cast<const Property &>(ffparams);
 
     return ds;
 }
@@ -138,7 +138,7 @@ QDataStream &operator>>(QDataStream &ds, FFParametersArray &ffparams)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(ffparams);
+        ds >> static_cast<Property &>(ffparams);
     }
     else
         throw version_error(v, "1", r_ffparamsarray, CODELOC);
@@ -148,19 +148,21 @@ QDataStream &operator>>(QDataStream &ds, FFParametersArray &ffparams)
 
 /** Constructor */
 FFParametersArray::FFParametersArray() : Property()
-{}
+{
+}
 
 /** Copy constructor */
-FFParametersArray::FFParametersArray(const FFParametersArray &other)
-                  : Property(other)
-{}
+FFParametersArray::FFParametersArray(const FFParametersArray &other) : Property(other)
+{
+}
 
 /** Destructor */
 FFParametersArray::~FFParametersArray()
-{}
+{
+}
 
 /** Copy assignment operator */
-FFParametersArray& FFParametersArray::operator=(const FFParametersArray &other)
+FFParametersArray &FFParametersArray::operator=(const FFParametersArray &other)
 {
     Property::operator=(other);
     return *this;
@@ -178,7 +180,7 @@ bool FFParametersArray::operator!=(const FFParametersArray &other) const
     return not FFParametersArray::operator==(other);
 }
 
-const char* FFParametersArray::typeName()
+const char *FFParametersArray::typeName()
 {
     return "SireFF::FFParametersArray";
 }
@@ -200,12 +202,11 @@ NullFFParametersArray FFParametersArray::null()
 
 static const RegisterMetaType<NullFFParameters> r_nullffparams;
 
-QDataStream &operator<<(QDataStream &ds,
-                                      const NullFFParameters &nullffparams)
+QDataStream &operator<<(QDataStream &ds, const NullFFParameters &nullffparams)
 {
     writeHeader(ds, r_nullffparams, 1);
 
-    ds << static_cast<const FFParameters&>(nullffparams);
+    ds << static_cast<const FFParameters &>(nullffparams);
 
     return ds;
 }
@@ -216,7 +217,7 @@ QDataStream &operator>>(QDataStream &ds, NullFFParameters &nullffparams)
 
     if (v == 1)
     {
-        ds >> static_cast<FFParameters&>(nullffparams);
+        ds >> static_cast<FFParameters &>(nullffparams);
     }
     else
         throw version_error(v, "1", r_nullffparams, CODELOC);
@@ -225,25 +226,28 @@ QDataStream &operator>>(QDataStream &ds, NullFFParameters &nullffparams)
 }
 
 /** Constructor */
-NullFFParameters::NullFFParameters() : ConcreteProperty<NullFFParameters,FFParameters>()
-{}
+NullFFParameters::NullFFParameters() : ConcreteProperty<NullFFParameters, FFParameters>()
+{
+}
 
 /** Copy constructor */
 NullFFParameters::NullFFParameters(const NullFFParameters &other)
-                 : ConcreteProperty<NullFFParameters,FFParameters>(other)
-{}
+    : ConcreteProperty<NullFFParameters, FFParameters>(other)
+{
+}
 
 /** Destructor */
 NullFFParameters::~NullFFParameters()
-{}
-
-const char* NullFFParameters::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullFFParameters>() );
+}
+
+const char *NullFFParameters::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullFFParameters>());
 }
 
 /** Copy assignment operator */
-NullFFParameters& NullFFParameters::operator=(const NullFFParameters &other)
+NullFFParameters &NullFFParameters::operator=(const NullFFParameters &other)
 {
     FFParameters::operator=(other);
     return *this;
@@ -273,25 +277,22 @@ FFParametersArrayPtr NullFFParameters::toArray() const
 
 static const RegisterMetaType<NullFFParametersArray> r_nullffarray;
 
-
-QDataStream &operator<<(QDataStream &ds,
-                                      const NullFFParametersArray &nullffparams)
+QDataStream &operator<<(QDataStream &ds, const NullFFParametersArray &nullffparams)
 {
     writeHeader(ds, r_nullffarray, 1);
 
-    ds << static_cast<const FFParametersArray&>(nullffparams);
+    ds << static_cast<const FFParametersArray &>(nullffparams);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                      NullFFParametersArray &nullffparams)
+QDataStream &operator>>(QDataStream &ds, NullFFParametersArray &nullffparams)
 {
     VersionID v = readHeader(ds, r_nullffarray);
 
     if (v == 1)
     {
-        ds >> static_cast<FFParametersArray&>(nullffparams);
+        ds >> static_cast<FFParametersArray &>(nullffparams);
     }
     else
         throw version_error(v, "1", r_nullffarray, CODELOC);
@@ -300,27 +301,28 @@ QDataStream &operator>>(QDataStream &ds,
 }
 
 /** Constructor */
-NullFFParametersArray::NullFFParametersArray()
-                      : ConcreteProperty<NullFFParametersArray,FFParametersArray>()
-{}
+NullFFParametersArray::NullFFParametersArray() : ConcreteProperty<NullFFParametersArray, FFParametersArray>()
+{
+}
 
 /** Copy constructor */
 NullFFParametersArray::NullFFParametersArray(const NullFFParametersArray &other)
-                : ConcreteProperty<NullFFParametersArray,FFParametersArray>(other)
-{}
+    : ConcreteProperty<NullFFParametersArray, FFParametersArray>(other)
+{
+}
 
 /** Destructor */
 NullFFParametersArray::~NullFFParametersArray()
-{}
-
-const char* NullFFParametersArray::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullFFParametersArray>() );
+}
+
+const char *NullFFParametersArray::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullFFParametersArray>());
 }
 
 /** Copy assignment operator */
-NullFFParametersArray& NullFFParametersArray::operator=(
-                                                    const NullFFParametersArray &other)
+NullFFParametersArray &NullFFParametersArray::operator=(const NullFFParametersArray &other)
 {
     FFParametersArray::operator=(other);
     return *this;
@@ -356,40 +358,44 @@ bool NullFFParametersArray::isEmpty() const
 */
 FFParametersPtr NullFFParametersArray::operator[](int i) const
 {
-    throw SireError::invalid_index( QObject::tr(
-            "Cannot access element %1 from a NullFFParametersArray.")
-                .arg(i), CODELOC );
+    throw SireError::invalid_index(QObject::tr("Cannot access element %1 from a NullFFParametersArray.").arg(i),
+                                   CODELOC);
 
     return FFParametersPtr();
 }
 
 /** Append the passed set of parameters onto the end of this array */
 void NullFFParametersArray::append(const FFParameters &params)
-{}
+{
+}
 
 /** Append the passed array of parameters onto the end of this array */
 void NullFFParametersArray::append(const FFParametersArray &params)
-{}
+{
+}
 
 /** Update the parameters at index 'idx' so that they equal 'params' */
 void NullFFParametersArray::update(int idx, const FFParameters &params)
-{}
+{
+}
 
 /** Update the parameters with the passed indicies so that they equal
     the values in 'params' */
-void NullFFParametersArray::update(const QVarLengthArray<int> &idxs,
-                                   const FFParametersArray &params)
-{}
+void NullFFParametersArray::update(const QVarLengthArray<int> &idxs, const FFParametersArray &params)
+{
+}
 
 /** Remove the parameters at index 'idx' */
 void NullFFParametersArray::remove(int idx)
-{}
+{
+}
 
 /** Remove the parameters whose indicies are in 'idxs' */
 void NullFFParametersArray::remove(const QVarLengthArray<int> &idxs)
-{}
+{
+}
 
 /** Remove all of the parameters from this array */
 void NullFFParametersArray::removeAll()
-{}
-
+{
+}

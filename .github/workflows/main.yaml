@@ -8,9 +8,11 @@ name: Build
 on:
   workflow_dispatch:
   push:
-    branches: [devel, main]
+    # only devel, as a release is the back merge
+    # from main to devel
+    branches: [devel]
   pull_request:
-    branches: [devel, main]
+    branches: [devel]
 
 jobs:
   build:

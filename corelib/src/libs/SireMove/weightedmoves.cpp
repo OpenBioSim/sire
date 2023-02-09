@@ -28,8 +28,8 @@
 #include "weightedmoves.h"
 #include "move.h"
 
-#include "SireUnits/units.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "SireSystem/system.h"
 
@@ -53,25 +53,24 @@ using boost::tuples::tuple;
 static const RegisterMetaType<WeightedMoves> r_weightedmoves;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const WeightedMoves &weightedmoves)
+QDataStream &operator<<(QDataStream &ds, const WeightedMoves &weightedmoves)
 {
     writeHeader(ds, r_weightedmoves, 3);
 
     SharedDataStream sds(ds);
 
     qint32 nmoves = weightedmoves.mvs.count();
-    const tuple<MovePtr,double> *mvs_array = weightedmoves.mvs.constData();
+    const tuple<MovePtr, double> *mvs_array = weightedmoves.mvs.constData();
 
     sds << nmoves;
 
-    for (int i=0; i<nmoves; ++i)
+    for (int i = 0; i < nmoves; ++i)
     {
         sds << mvs_array[i].get<0>() << mvs_array[i].get<1>();
     }
 
     sds << weightedmoves.avgtimes << weightedmoves.rangenerator << weightedmoves.combined_space
-        << static_cast<const Moves&>(weightedmoves);
+        << static_cast<const Moves &>(weightedmoves);
 
     return ds;
 }
@@ -89,23 +88,22 @@ QDataStream &operator>>(QDataStream &ds, WeightedMoves &weightedmoves)
 
         sds >> nmoves;
 
-        QVector< tuple<MovePtr,double> > mvs(nmoves);
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        QVector<tuple<MovePtr, double>> mvs(nmoves);
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            MovePtr mv; double weight;
+            MovePtr mv;
+            double weight;
 
             sds >> mv >> weight;
-            mvs_array[i] = tuple<MovePtr,double>(mv, weight);
+            mvs_array[i] = tuple<MovePtr, double>(mv, weight);
         }
 
         weightedmoves.mvs = mvs;
 
-        sds >> weightedmoves.avgtimes
-            >> weightedmoves.rangenerator
-            >> weightedmoves.combined_space
-            >> static_cast<Moves&>(weightedmoves);
+        sds >> weightedmoves.avgtimes >> weightedmoves.rangenerator >> weightedmoves.combined_space >>
+            static_cast<Moves &>(weightedmoves);
 
         weightedmoves.recalculateWeights();
     }
@@ -117,15 +115,16 @@ QDataStream &operator>>(QDataStream &ds, WeightedMoves &weightedmoves)
 
         sds >> nmoves;
 
-        QVector< tuple<MovePtr,double> > mvs(nmoves);
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        QVector<tuple<MovePtr, double>> mvs(nmoves);
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            MovePtr mv; double weight;
+            MovePtr mv;
+            double weight;
 
             sds >> mv >> weight;
-            mvs_array[i] = tuple<MovePtr,double>(mv, weight);
+            mvs_array[i] = tuple<MovePtr, double>(mv, weight);
         }
 
         weightedmoves.mvs = mvs;
@@ -137,7 +136,7 @@ QDataStream &operator>>(QDataStream &ds, WeightedMoves &weightedmoves)
         else
             weightedmoves.combined_space = PropertyName();
 
-        sds >> static_cast<Moves&>(weightedmoves);
+        sds >> static_cast<Moves &>(weightedmoves);
 
         weightedmoves.recalculateWeights();
     }
@@ -148,25 +147,24 @@ QDataStream &operator>>(QDataStream &ds, WeightedMoves &weightedmoves)
 }
 
 /** Constructor */
-WeightedMoves::WeightedMoves()
-              : ConcreteProperty<WeightedMoves,Moves>(), maxweight(0)
-{}
+WeightedMoves::WeightedMoves() : ConcreteProperty<WeightedMoves, Moves>(), maxweight(0)
+{
+}
 
 /** Copy constructor */
 WeightedMoves::WeightedMoves(const WeightedMoves &other)
-              : ConcreteProperty<WeightedMoves,Moves>(other),
-                mvs(other.mvs), avgtimes(other.avgtimes),
-                rangenerator(other.rangenerator),
-                combined_space(other.combined_space),
-                maxweight(other.maxweight)
-{}
+    : ConcreteProperty<WeightedMoves, Moves>(other), mvs(other.mvs), avgtimes(other.avgtimes),
+      rangenerator(other.rangenerator), combined_space(other.combined_space), maxweight(other.maxweight)
+{
+}
 
 /** Destructor */
 WeightedMoves::~WeightedMoves()
-{}
+{
+}
 
 /** Copy assignment operator */
-WeightedMoves& WeightedMoves::operator=(const WeightedMoves &other)
+WeightedMoves &WeightedMoves::operator=(const WeightedMoves &other)
 {
     mvs = other.mvs;
     avgtimes = other.avgtimes;
@@ -179,8 +177,8 @@ WeightedMoves& WeightedMoves::operator=(const WeightedMoves &other)
     return *this;
 }
 
-SIRE_ALWAYS_INLINE bool compare( const QVector< boost::tuple<MovePtr,double> > &o1,
-                     const QVector< boost::tuple<MovePtr,double> > &o2 )
+SIRE_ALWAYS_INLINE bool compare(const QVector<boost::tuple<MovePtr, double>> &o1,
+                                const QVector<boost::tuple<MovePtr, double>> &o2)
 {
     if (o1.constData() == o2.constData())
         return true;
@@ -190,7 +188,7 @@ SIRE_ALWAYS_INLINE bool compare( const QVector< boost::tuple<MovePtr,double> > &
 
     else
     {
-        for (int i=0; i<o1.count(); ++i)
+        for (int i = 0; i < o1.count(); ++i)
         {
             if (o1.constData()[i].get<0>() != o2.constData()[i].get<0>() or
                 o1.constData()[i].get<1>() != o2.constData()[i].get<1>())
@@ -204,8 +202,7 @@ SIRE_ALWAYS_INLINE bool compare( const QVector< boost::tuple<MovePtr,double> > &
 /** Comparison operator */
 bool WeightedMoves::operator==(const WeightedMoves &other) const
 {
-    return compare(mvs,other.mvs) and avgtimes == other.avgtimes and
-           combined_space == other.combined_space and
+    return compare(mvs, other.mvs) and avgtimes == other.avgtimes and combined_space == other.combined_space and
            Moves::operator==(other);
 }
 
@@ -220,17 +217,17 @@ QString WeightedMoves::toString() const
 {
     QStringList moves;
 
-    for (int i=0; i<mvs.count(); ++i)
+    for (int i = 0; i < mvs.count(); ++i)
     {
-        moves.append( QObject::tr("  %1 : weight == %2, timing = %3 ms\n"
-                                  "       %4").arg(i+1)
-                          .arg(mvs.at(i).get<1>())
-                          .arg((avgtimes.at(i).average() * nanosecond).to(millisecond))
-                          .arg(mvs.at(i).get<0>()->toString()) );
+        moves.append(QObject::tr("  %1 : weight == %2, timing = %3 ms\n"
+                                 "       %4")
+                         .arg(i + 1)
+                         .arg(mvs.at(i).get<1>())
+                         .arg((avgtimes.at(i).average() * nanosecond).to(millisecond))
+                         .arg(mvs.at(i).get<0>()->toString()));
     }
 
-    return QObject::tr("WeightedMoves{\n%1\n}")
-                .arg(moves.join("\n"));
+    return QObject::tr("WeightedMoves{\n%1\n}").arg(moves.join("\n"));
 }
 
 /** Recalculate all of the weights */
@@ -243,11 +240,11 @@ void WeightedMoves::recalculateWeights()
     if (nmoves == 0)
         return;
 
-    const tuple<MovePtr,double> *mvs_array = mvs.constData();
+    const tuple<MovePtr, double> *mvs_array = mvs.constData();
 
-    for (int i=0; i<nmoves; ++i)
+    for (int i = 0; i < nmoves; ++i)
     {
-        maxweight = qMax( maxweight, mvs_array[i].get<1>() );
+        maxweight = qMax(maxweight, mvs_array[i].get<1>());
     }
 }
 
@@ -257,7 +254,7 @@ void WeightedMoves::setGenerator(const RanGenerator &rangen)
 {
     rangenerator = rangen;
 
-    for (int i=0; i<mvs.count(); ++i)
+    for (int i = 0; i < mvs.count(); ++i)
     {
         mvs[i].get<0>().edit().setGenerator(rangen);
     }
@@ -269,7 +266,7 @@ void WeightedMoves::setGenerator(const RanGenerator &rangen)
 
     weightedmoves.setGenerator( weightedmoves.generator() )
 */
-const RanGenerator& WeightedMoves::generator() const
+const RanGenerator &WeightedMoves::generator() const
 {
     return rangenerator;
 }
@@ -282,9 +279,9 @@ void WeightedMoves::add(const Move &move, double weight)
 
     int nmoves = mvs.count();
 
-    tuple<MovePtr,double> *mvs_array = mvs.data();
+    tuple<MovePtr, double> *mvs_array = mvs.data();
 
-    for (int i=0; i<nmoves; ++i)
+    for (int i = 0; i < nmoves; ++i)
     {
         if (mvs_array[i].get<0>()->equals(move))
         {
@@ -294,8 +291,8 @@ void WeightedMoves::add(const Move &move, double weight)
         }
     }
 
-    mvs.append( tuple<MovePtr,double>(move, weight) );
-    avgtimes.append( Average() );
+    mvs.append(tuple<MovePtr, double>(move, weight));
+    avgtimes.append(Average());
 
     this->recalculateWeights();
 }
@@ -303,10 +300,10 @@ void WeightedMoves::add(const Move &move, double weight)
 /** Completely clear all of the move statistics */
 void WeightedMoves::clearStatistics()
 {
-    tuple<MovePtr,double> *mvs_array = mvs.data();
+    tuple<MovePtr, double> *mvs_array = mvs.data();
     int nmoves = mvs.count();
 
-    for (int i=0; i<nmoves; ++i)
+    for (int i = 0; i < nmoves; ++i)
     {
         mvs_array[i].get<0>().edit().clearStatistics();
     }
@@ -328,7 +325,7 @@ System WeightedMoves::move(const System &system, int nmoves, bool record_stats)
         Moves::preCheck(run_system);
 
         int n = mvs.count();
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
         if (n == 1)
         {
@@ -337,9 +334,9 @@ System WeightedMoves::move(const System &system, int nmoves, bool record_stats)
 
             qint64 ns = t.nsecsElapsed();
 
-            for (int i=0; i<nmoves; ++i)
+            for (int i = 0; i < nmoves; ++i)
             {
-                avgtimes[0].accumulate( (1.0*ns)/nmoves );
+                avgtimes[0].accumulate((1.0 * ns) / nmoves);
             }
 
             Moves::postCheck(run_system);
@@ -347,28 +344,28 @@ System WeightedMoves::move(const System &system, int nmoves, bool record_stats)
             return run_system;
         }
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
-            //use the von Neumann rejection method to choose a random move
-            //using the supplied weights
-            //  rejection method - choose random
-            //  move, then choose random number from 0 to maxweight. If
-            //  probability of the move <= the random number, then accept
-            //  this move, else go back to the beginning and try again...
+            // use the von Neumann rejection method to choose a random move
+            // using the supplied weights
+            //   rejection method - choose random
+            //   move, then choose random number from 0 to maxweight. If
+            //   probability of the move <= the random number, then accept
+            //   this move, else go back to the beginning and try again...
             while (true)
             {
-                quint32 idx = generator().randInt(n-1);
+                quint32 idx = generator().randInt(n - 1);
 
-                tuple<MovePtr,double> &move = mvs_array[idx];
+                tuple<MovePtr, double> &move = mvs_array[idx];
 
-                if ( generator().rand(maxweight) <= move.get<1>() )
+                if (generator().rand(maxweight) <= move.get<1>())
                 {
-                    //use this move
+                    // use this move
                     t.start();
                     move.get<0>().edit().move(run_system, 1, record_stats);
                     qint64 ns = t.nsecsElapsed();
 
-                    avgtimes[idx].accumulate( 1.0*ns );
+                    avgtimes[idx].accumulate(1.0 * ns);
 
                     break;
                 }
@@ -377,7 +374,7 @@ System WeightedMoves::move(const System &system, int nmoves, bool record_stats)
 
         Moves::postCheck(run_system);
     }
-    catch(...)
+    catch (...)
     {
         this->operator=(old_state);
         throw;
@@ -392,11 +389,11 @@ System WeightedMoves::move(const System &system, int nmoves, bool record_stats)
 
     \throw SireError::incompatible_error
 */
-const Symbol& WeightedMoves::energyComponent() const
+const Symbol &WeightedMoves::energyComponent() const
 {
     int nmoves = mvs.count();
 
-    const tuple<MovePtr,double> *mvs_array = mvs.constData();
+    const tuple<MovePtr, double> *mvs_array = mvs.constData();
 
     if (nmoves == 0)
         return Move::null().energyComponent();
@@ -407,24 +404,23 @@ const Symbol& WeightedMoves::energyComponent() const
 
         QSet<Symbol> symbols;
 
-        for (int i=1; i<nmoves; ++i)
+        for (int i = 1; i < nmoves; ++i)
         {
             if (nrg != mvs_array[i].get<0>().read().energyComponent())
             {
                 symbols.insert(nrg);
                 symbols.insert(mvs_array[i].get<0>().read().energyComponent());
 
-                for (int j=i+1; j<nmoves; ++j)
+                for (int j = i + 1; j < nmoves; ++j)
                 {
-                    symbols.insert( mvs_array[j].get<0>().read().energyComponent() );
+                    symbols.insert(mvs_array[j].get<0>().read().energyComponent());
                 }
 
-                throw SireError::incompatible_error( QObject::tr(
-                        "Different moves are sampling from different energy "
-                        "components (%1) so a single energy component cannot "
-                        "be found for %2.")
-                            .arg( Sire::toString(symbols), this->toString() ),
-                                CODELOC );
+                throw SireError::incompatible_error(QObject::tr("Different moves are sampling from different energy "
+                                                                "components (%1) so a single energy component cannot "
+                                                                "be found for %2.")
+                                                        .arg(Sire::toString(symbols), this->toString()),
+                                                    CODELOC);
             }
         }
 
@@ -438,15 +434,15 @@ const Symbol& WeightedMoves::energyComponent() const
 
     \throw SireError::incompatible_error
 */
-const PropertyName& WeightedMoves::spaceProperty() const
+const PropertyName &WeightedMoves::spaceProperty() const
 {
     if (not combined_space.isNull())
-        //we are using a combined space property
+        // we are using a combined space property
         return combined_space;
 
     int nmoves = mvs.count();
 
-    const tuple<MovePtr,double> *mvs_array = mvs.constData();
+    const tuple<MovePtr, double> *mvs_array = mvs.constData();
 
     if (nmoves == 0)
         return Move::null().spaceProperty();
@@ -457,28 +453,26 @@ const PropertyName& WeightedMoves::spaceProperty() const
 
         QList<PropertyName> spaces;
 
-        for (int i=1; i<nmoves; ++i)
+        for (int i = 1; i < nmoves; ++i)
         {
             if (space != mvs_array[i].get<0>().read().spaceProperty())
             {
                 spaces.append(space);
                 spaces.append(mvs_array[i].get<0>().read().spaceProperty());
 
-                for (int j=i+1; j<nmoves; ++j)
+                for (int j = i + 1; j < nmoves; ++j)
                 {
-                    const PropertyName &jspace = mvs_array[j].get<0>()
-                                                             .read().spaceProperty();
+                    const PropertyName &jspace = mvs_array[j].get<0>().read().spaceProperty();
 
                     if (not spaces.contains(jspace))
                         spaces.append(jspace);
                 }
 
-                throw SireError::incompatible_error( QObject::tr(
-                        "Different moves are sampling from different space "
-                        "properties (%1) so a single space property cannot "
-                        "be found for %2.")
-                            .arg( Sire::toString(spaces), this->toString() ),
-                                CODELOC );
+                throw SireError::incompatible_error(QObject::tr("Different moves are sampling from different space "
+                                                                "properties (%1) so a single space property cannot "
+                                                                "be found for %2.")
+                                                        .arg(Sire::toString(spaces), this->toString()),
+                                                    CODELOC);
             }
         }
 
@@ -493,9 +487,9 @@ void WeightedMoves::setEnergyComponent(const Symbol &component)
 
     if (nmoves > 0)
     {
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             if (mvs_array[i].get<0>().read().energyComponent() != component)
             {
@@ -510,16 +504,16 @@ void WeightedMoves::setEnergyComponent(const Symbol &component)
 void WeightedMoves::setSpaceProperty(const PropertyName &spaceproperty)
 {
     if (spaceproperty == combined_space)
-        //nothing needs to be done
+        // nothing needs to be done
         return;
 
     int nmoves = mvs.count();
 
     if (nmoves > 0)
     {
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             if (mvs_array[i].get<0>().read().spaceProperty() != spaceproperty)
             {
@@ -556,9 +550,9 @@ void WeightedMoves::_pvt_setTemperature(const Temperature &temperature)
 
     if (nmoves > 0)
     {
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             if (mvs_array[i].get<0>().read().isConstantTemperature())
             {
@@ -580,9 +574,9 @@ void WeightedMoves::_pvt_setPressure(const Pressure &pressure)
 
     if (nmoves > 0)
     {
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             if (mvs_array[i].get<0>().read().isConstantPressure())
             {
@@ -604,9 +598,9 @@ void WeightedMoves::_pvt_setFugacity(const Pressure &fugacity)
 
     if (nmoves > 0)
     {
-        tuple<MovePtr,double> *mvs_array = mvs.data();
+        tuple<MovePtr, double> *mvs_array = mvs.data();
 
-        for (int i=0; i<nmoves; ++i)
+        for (int i = 0; i < nmoves; ++i)
         {
             if (mvs_array[i].get<0>().read().isConstantFugacity())
             {
@@ -623,13 +617,13 @@ void WeightedMoves::_pvt_setFugacity(const Pressure &fugacity)
 QList<MovePtr> WeightedMoves::moves() const
 {
     int nmoves = mvs.count();
-    const tuple<MovePtr,double> *mvs_array = mvs.constData();
+    const tuple<MovePtr, double> *mvs_array = mvs.constData();
 
     QList<MovePtr> moves;
 
-    for (int i=0; i<nmoves; ++i)
+    for (int i = 0; i < nmoves; ++i)
     {
-        moves.append( mvs_array[i].get<0>() );
+        moves.append(mvs_array[i].get<0>());
     }
 
     return moves;
@@ -640,9 +634,9 @@ QList<SireUnits::Dimension::Time> WeightedMoves::timing() const
 {
     QList<SireUnits::Dimension::Time> times;
 
-    for (int i=0; i<avgtimes.count(); ++i)
+    for (int i = 0; i < avgtimes.count(); ++i)
     {
-        times.append( avgtimes[i].average() * nanosecond );
+        times.append(avgtimes[i].average() * nanosecond);
     }
 
     return times;
@@ -651,13 +645,13 @@ QList<SireUnits::Dimension::Time> WeightedMoves::timing() const
 /** Clear all of the timing information */
 void WeightedMoves::clearTiming()
 {
-    for (int i=0; i<avgtimes.count(); ++i)
+    for (int i = 0; i < avgtimes.count(); ++i)
     {
         avgtimes[i] = Average();
     }
 }
 
-const char* WeightedMoves::typeName()
+const char *WeightedMoves::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<WeightedMoves>() );
+    return QMetaType::typeName(qMetaTypeId<WeightedMoves>());
 }

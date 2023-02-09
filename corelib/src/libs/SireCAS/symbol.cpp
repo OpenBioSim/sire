@@ -25,15 +25,15 @@
   *
 \*********************************************/
 
-#include <QMutex>
 #include <QHash>
+#include <QMutex>
 
+#include "complexvalues.h"
+#include "expressions.h"
+#include "functions.h"
+#include "identities.h"
 #include "symbol.h"
 #include "symbols.h"
-#include "functions.h"
-#include "expressions.h"
-#include "identities.h"
-#include "complexvalues.h"
 #include "values.h"
 
 #include "SireCAS/errors.h"
@@ -50,25 +50,26 @@ using namespace SireCAS;
 ////////
 
 Factor::Factor() : f(1), p(1)
-{}
+{
+}
 
-Factor::Factor(const Symbol &symbol,
-               const Expression &factor, const Expression &power)
-       : s(symbol), f(factor), p(power)
-{}
+Factor::Factor(const Symbol &symbol, const Expression &factor, const Expression &power) : s(symbol), f(factor), p(power)
+{
+}
 
-Factor::Factor(const Symbol &symbol,
-               double factor, double power)
-       : s(symbol), f(factor), p(power)
-{}
+Factor::Factor(const Symbol &symbol, double factor, double power) : s(symbol), f(factor), p(power)
+{
+}
 
 Factor::Factor(const Factor &other) : s(other.s), f(other.f), p(other.p)
-{}
+{
+}
 
 Factor::~Factor()
-{}
+{
+}
 
-Factor& Factor::operator=(const Factor &other)
+Factor &Factor::operator=(const Factor &other)
 {
     f = other.f;
     p = other.p;
@@ -99,8 +100,7 @@ static QString get_string(const Expression &expression)
 
 QString Factor::toString() const
 {
-    return QString("%1 times { %2 }^%3")
-                    .arg(::get_string(f), s.toString(), ::get_string(p));
+    return QString("%1 times { %2 }^%3").arg(::get_string(f), s.toString(), ::get_string(p));
 }
 
 ////////
@@ -109,15 +109,15 @@ QString Factor::toString() const
 
 typedef struct
 {
-QHash<QString,SymbolID> name2id;
-SymbolID lastid;
+    QHash<QString, SymbolID> name2id;
+    SymbolID lastid;
 } SymbolReg;
 
 static SymbolReg *registry = 0;
 
 static QMutex global_reg_mutex;
 
-static SymbolReg& getRegistry()
+static SymbolReg &getRegistry()
 {
     if (registry == 0)
     {
@@ -145,7 +145,7 @@ SymbolID Symbol::getNewID(const QString &rep)
     else
     {
         registry.lastid++;
-        registry.name2id.insert( rep, registry.lastid );
+        registry.name2id.insert(rep, registry.lastid);
         return registry.lastid;
     }
 }
@@ -160,17 +160,14 @@ QString Symbol::getName(SymbolID symid)
 
     SymbolReg &registry = getRegistry();
 
-    for (QHash<QString,SymbolID>::const_iterator it = registry.name2id.constBegin();
-         it != registry.name2id.constEnd();
+    for (QHash<QString, SymbolID>::const_iterator it = registry.name2id.constBegin(); it != registry.name2id.constEnd();
          ++it)
     {
         if (*it == symid)
             return it.key();
     }
 
-    throw SireCAS::invalid_symbol( QObject::tr(
-              "There is no symbol with ID == %1.")
-                  .arg(symid), CODELOC );
+    throw SireCAS::invalid_symbol(QObject::tr("There is no symbol with ID == %1.").arg(symid), CODELOC);
 }
 
 static const RegisterMetaType<Symbol> r_symbol;
@@ -178,15 +175,14 @@ static const RegisterMetaType<Symbol> r_symbol;
 /** Hash a symbol */
 uint Symbol::hash() const
 {
-    //return (r_symbol.magicID() << 16) | (id & 0x0000FFFF);
+    // return (r_symbol.magicID() << 16) | (id & 0x0000FFFF);
     return id;
 }
 
 /** Serialise a Symbol to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Symbol &sym)
 {
-    writeHeader(ds, r_symbol, 1) << sym.stringrep
-                                 << static_cast<const ExBase&>(sym);
+    writeHeader(ds, r_symbol, 1) << sym.stringrep << static_cast<const ExBase &>(sym);
 
     return ds;
 }
@@ -198,9 +194,9 @@ QDataStream &operator>>(QDataStream &ds, Symbol &sym)
 
     if (v == 1)
     {
-        ds >> sym.stringrep >> static_cast<ExBase&>(sym);
+        ds >> sym.stringrep >> static_cast<ExBase &>(sym);
 
-        //get the ID number for this symbol
+        // get the ID number for this symbol
         sym.id = Symbol::getNewID(sym.stringrep);
     }
     else
@@ -211,26 +207,28 @@ QDataStream &operator>>(QDataStream &ds, Symbol &sym)
 
 /** Null constructor */
 Symbol::Symbol() : ExBase(), id(0), stringrep(QString())
-{}
+{
+}
 
 /** Construct a symbol from the passed ID number */
-Symbol::Symbol(SymbolID symid)
-       : ExBase(), id(symid), stringrep( Symbol::getName(symid) )
-{}
+Symbol::Symbol(SymbolID symid) : ExBase(), id(symid), stringrep(Symbol::getName(symid))
+{
+}
 
 /** Construct a new symbol, with string representation 'rep' */
-Symbol::Symbol(const QString &rep)
-       : ExBase(), id( Symbol::getNewID(rep) ), stringrep(rep)
-{}
+Symbol::Symbol(const QString &rep) : ExBase(), id(Symbol::getNewID(rep)), stringrep(rep)
+{
+}
 
 /** Copy constructor */
-Symbol::Symbol(const Symbol &other)
-       : ExBase(), id(other.id), stringrep(other.stringrep)
-{}
+Symbol::Symbol(const Symbol &other) : ExBase(), id(other.id), stringrep(other.stringrep)
+{
+}
 
 /** Destructor */
 Symbol::~Symbol()
-{}
+{
+}
 
 /** Return whether or not the symbol is null */
 bool Symbol::isNull() const
@@ -239,7 +237,7 @@ bool Symbol::isNull() const
 }
 
 /** Assignment operator */
-Symbol& Symbol::operator=(const Symbol &other)
+Symbol &Symbol::operator=(const Symbol &other)
 {
     id = other.id;
     stringrep = other.stringrep;
@@ -247,15 +245,15 @@ Symbol& Symbol::operator=(const Symbol &other)
 }
 
 /** Assignment operator */
-Symbol& Symbol::operator=(SymbolID symid)
+Symbol &Symbol::operator=(SymbolID symid)
 {
-    return this->operator=( Symbol(symid) );
+    return this->operator=(Symbol(symid));
 }
 
 /** Comparison operator */
 bool Symbol::operator==(const ExBase &other) const
 {
-    const Symbol *sym = dynamic_cast<const Symbol*>(&other);
+    const Symbol *sym = dynamic_cast<const Symbol *>(&other);
 
     return sym != 0 and sym->ID() == this->ID();
 }
@@ -322,8 +320,8 @@ Complex Symbol::evaluate(const ComplexValues &values) const
     is 'sym', else it returns 0.0 */
 Expression Symbol::differentiate(const Symbol &sym) const
 {
-    //assume int(true) == 1 and int(false) == 0
-    return Expression( int( sym.ID() == ID() ) );
+    // assume int(true) == 1 and int(false) == 0
+    return Expression(int(sym.ID() == ID()));
 }
 
 /** Integrate this symbol with respect to 'sym'. If 'sym' == this, then
@@ -331,7 +329,7 @@ Expression Symbol::differentiate(const Symbol &sym) const
 Expression Symbol::integrate(const Symbol &sym) const
 {
     if (sym.ID() == ID())
-        return 0.5 * pow(sym,2);
+        return 0.5 * pow(sym, 2);
     else
         return *this * sym;
 }
@@ -371,25 +369,24 @@ QList<Factor> Symbol::expand(const Symbol &symbol) const
 {
     QList<Factor> factors;
 
-    if ( *this == symbol )
+    if (*this == symbol)
     {
-        factors.append( Factor(symbol, 1,1) );
+        factors.append(Factor(symbol, 1, 1));
     }
     else
     {
-        factors.append( Factor(symbol, *this,0) );
+        factors.append(Factor(symbol, *this, 0));
     }
 
     return factors;
 }
 
-const char* Symbol::typeName()
+const char *Symbol::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Symbol>() );
+    return QMetaType::typeName(qMetaTypeId<Symbol>());
 }
 
-Symbol* Symbol::clone() const
+Symbol *Symbol::clone() const
 {
     return new Symbol(*this);
 }
-

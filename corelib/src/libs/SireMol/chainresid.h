@@ -35,89 +35,88 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ChainResID;
+    class ChainResID;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ChainResID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ChainResID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ChainResID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ChainResID &);
 
 namespace SireMol
 {
 
-/** This class holds a combination of a ChainID with a ResID
+    /** This class holds a combination of a ChainID with a ResID
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ChainResID : public ResID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const ChainResID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, ChainResID&);
-
-public:
-    ChainResID();
-
-    ChainResID(const ChainID &chainid, const ResID &resid);
-
-    ChainResID(const ChainResID &other);
-
-    ~ChainResID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ChainResID : public ResID
     {
-        return ChainResID::typeName();
-    }
 
-    ChainResID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const ChainResID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, ChainResID &);
 
-    QString toString() const;
+    public:
+        ChainResID();
 
-    bool operator==(const ChainResID &other) const
-    {
-        return chainid == other.chainid and resid == other.resid;
-    }
+        ChainResID(const ChainID &chainid, const ResID &resid);
 
-    bool operator!=(const ChainResID &other) const
-    {
-        return not this->operator==(other);
-    }
+        ChainResID(const ChainResID &other);
 
-    bool operator==(const SireID::ID &other) const
-    {
-        return SireID::ID::compare<ChainResID>(*this, other);
-    }
+        ~ChainResID();
 
-    using SireID::ID::operator!=;
+        static const char *typeName();
 
-    uint hash() const
-    {
-        return (chainid.hash() << 16) | (resid.hash() & 0x0000FFFF);
-    }
+        const char *what() const
+        {
+            return ChainResID::typeName();
+        }
 
-    bool isNull() const
-    {
-        return chainid.isNull() and resid.isNull();
-    }
+        ChainResID *clone() const;
 
-    QList<ResIdx> map(const MolInfo &molinfo) const;
+        QString toString() const;
 
-private:
-    /** Identifier for the chain */
-    ChainIdentifier chainid;
+        bool operator==(const ChainResID &other) const
+        {
+            return chainid == other.chainid and resid == other.resid;
+        }
 
-    /** Identifier for the residue */
-    ResIdentifier resid;
-};
+        bool operator!=(const ChainResID &other) const
+        {
+            return not this->operator==(other);
+        }
 
-}
+        bool operator==(const SireID::ID &other) const
+        {
+            return SireID::ID::compare<ChainResID>(*this, other);
+        }
+
+        using SireID::ID::operator!=;
+
+        uint hash() const
+        {
+            return (chainid.hash() << 16) | (resid.hash() & 0x0000FFFF);
+        }
+
+        bool isNull() const
+        {
+            return chainid.isNull() and resid.isNull();
+        }
+
+        QList<ResIdx> map(const MolInfo &molinfo) const;
+
+    private:
+        /** Identifier for the chain */
+        ChainIdentifier chainid;
+
+        /** Identifier for the residue */
+        ResIdentifier resid;
+    };
+
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::ChainResID);
 
-SIRE_EXPOSE_CLASS( SireMol::ChainResID )
+SIRE_EXPOSE_CLASS(SireMol::ChainResID)
 
 SIRE_END_HEADER
 
 #endif
-

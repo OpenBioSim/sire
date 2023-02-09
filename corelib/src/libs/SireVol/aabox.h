@@ -36,180 +36,182 @@ SIRE_BEGIN_HEADER
 
 namespace SireVol
 {
-class AABox;
+    class AABox;
 }
 
 class QDataStream;
-SIREVOL_EXPORT QDataStream& operator<<(QDataStream&, const SireVol::AABox&);
-SIREVOL_EXPORT QDataStream& operator>>(QDataStream&, SireVol::AABox&);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::AABox &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::AABox &);
 
 namespace SireMaths
 {
-class Sphere;
+    class Sphere;
 }
 
 namespace SireVol
 {
 
-using SireMaths::Vector;
-using SireMaths::Sphere;
+    using SireMaths::Sphere;
+    using SireMaths::Vector;
 
-class CoordGroupBase;
-class CoordGroupArray;
-class CoordGroupArrayArray;
+    class CoordGroupBase;
+    class CoordGroupArray;
+    class CoordGroupArrayArray;
 
-/**
-An AABox is an axis-aligned bounding box that is the smallest box that is aligned with the three cartesian axes that completely encases a CoordGroup. It is trivial to obtain the bounding sphere from the AABox. The AABox is used by the distance calculators to quickly determine whether two CoordGroups are within the cutoff radius, and to obtain all CoordGroups that are within particular regions of space.
+    /**
+    An AABox is an axis-aligned bounding box that is the smallest box that is aligned with the three cartesian axes that
+    completely encases a CoordGroup. It is trivial to obtain the bounding sphere from the AABox. The AABox is used by the
+    distance calculators to quickly determine whether two CoordGroups are within the cutoff radius, and to obtain all
+    CoordGroups that are within particular regions of space.
 
-@author Christopher Woods
-*/
-class SIREVOL_EXPORT AABox
-{
-
-friend SIREVOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AABox&);
-friend SIREVOL_EXPORT QDataStream& ::operator>>(QDataStream&, AABox&);
-
-friend class CoordGroupPvt;
-
-public:
-    AABox();
-    AABox(const Vector &point);
-    AABox(const Vector &cent, const Vector &extents);
-
-    AABox(const QVector<Vector> &coordinates);
-    AABox(const Vector *coords, int ncoords);
-
-    AABox(const CoordGroupBase &coordgroup);
-    AABox(const CoordGroupArray &cgarray);
-    AABox(const CoordGroupArrayArray &cgarrays);
-
-    ~AABox();
-
-    static const char* typeName();
-
-    const char* what() const
+    @author Christopher Woods
+    */
+    class SIREVOL_EXPORT AABox
     {
-        return AABox::typeName();
-    }
 
-    const AABox& operator=(const AABox &other);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AABox &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, AABox &);
 
-    bool operator==(const AABox &other) const;
-    bool operator!=(const AABox &other) const;
+        friend class CoordGroupPvt;
 
-    AABox& operator+=(const AABox &other);
-    AABox& operator+=(const Vector &point);
-    AABox& operator+=(const QVector<Vector> &points);
+    public:
+        AABox();
+        AABox(const Vector &point);
+        AABox(const Vector &cent, const Vector &extents);
 
-    AABox operator+(const AABox &other) const;
-    AABox operator+(const Vector &point) const;
-    AABox operator+(const QVector<Vector> &points) const;
+        AABox(const QVector<Vector> &coordinates);
+        AABox(const Vector *coords, int ncoords);
 
-    QString toString() const;
+        AABox(const CoordGroupBase &coordgroup);
+        AABox(const CoordGroupArray &cgarray);
+        AABox(const CoordGroupArrayArray &cgarrays);
 
-    bool isEmpty() const;
-    bool isNull() const;
+        ~AABox();
 
-    void add(const AABox &other);
-    void add(const Vector &point);
-    void add(const QVector<Vector> &points);
+        static const char *typeName();
 
-    void recalculate(const CoordGroupBase &coordgroup);
-    void recalculate(const CoordGroupArray &cgarray);
-    void recalculate(const CoordGroupArrayArray &cgarrays);
-    void recalculate(const QVector<Vector> &coordinates);
+        const char *what() const
+        {
+            return AABox::typeName();
+        }
 
-    void translate(const Vector &delta);
+        const AABox &operator=(const AABox &other);
 
-    const Vector& center() const;
-    const Vector& halfExtents() const;
-    Vector maxCoords() const;
-    Vector minCoords() const;
+        bool operator==(const AABox &other) const;
+        bool operator!=(const AABox &other) const;
 
-    double radius() const;
+        AABox &operator+=(const AABox &other);
+        AABox &operator+=(const Vector &point);
+        AABox &operator+=(const QVector<Vector> &points);
 
-    Sphere boundingSphere() const;
+        AABox operator+(const AABox &other) const;
+        AABox operator+(const Vector &point) const;
+        AABox operator+(const QVector<Vector> &points) const;
 
-    bool withinDistance(double dist, const AABox &box) const;
-    bool intersects(const AABox &other) const;
+        QString toString() const;
 
-    bool contains(const AABox &other) const;
-    bool contains(const Vector &point) const;
+        bool isEmpty() const;
+        bool isNull() const;
 
-    static AABox from(const Vector &point);
-    static AABox from(const CoordGroupBase &coordgroup);
-    static AABox from(const CoordGroupArray &cgarray);
-    static AABox from(const CoordGroupArrayArray &cgarrays);
-    static AABox from(const QVector<Vector> &coords);
-    static AABox from(const Vector &mincoords, const Vector &maxcoords);
+        void add(const AABox &other);
+        void add(const Vector &point);
+        void add(const QVector<Vector> &points);
 
-protected:
-    void recalculate(const Vector *coords, int size);
-    void recalculate(const AABox *aaboxes, int size);
+        void recalculate(const CoordGroupBase &coordgroup);
+        void recalculate(const CoordGroupArray &cgarray);
+        void recalculate(const CoordGroupArrayArray &cgarrays);
+        void recalculate(const QVector<Vector> &coordinates);
 
-private:
+        void translate(const Vector &delta);
 
-    /** The coordinates of the center of this box */
-    Vector cent;
+        const Vector &center() const;
+        const Vector &halfExtents() const;
+        Vector maxCoords() const;
+        Vector minCoords() const;
 
-    /** The positive half-extents of this box along the x/y/z axes.
-        The volume of this box runs from cent-halfextent to cent+halfextent */
-    Vector halfextents;
+        double radius() const;
 
-    /** The radius of the smallest sphere that completely contains this box */
-    double rad;
-};
+        Sphere boundingSphere() const;
+
+        bool withinDistance(double dist, const AABox &box) const;
+        bool intersects(const AABox &other) const;
+
+        bool contains(const AABox &other) const;
+        bool contains(const Vector &point) const;
+
+        static AABox from(const Vector &point);
+        static AABox from(const CoordGroupBase &coordgroup);
+        static AABox from(const CoordGroupArray &cgarray);
+        static AABox from(const CoordGroupArrayArray &cgarrays);
+        static AABox from(const QVector<Vector> &coords);
+        static AABox from(const Vector &mincoords, const Vector &maxcoords);
+
+    protected:
+        void recalculate(const Vector *coords, int size);
+        void recalculate(const AABox *aaboxes, int size);
+
+    private:
+        /** The coordinates of the center of this box */
+        Vector cent;
+
+        /** The positive half-extents of this box along the x/y/z axes.
+            The volume of this box runs from cent-halfextent to cent+halfextent */
+        Vector halfextents;
+
+        /** The radius of the smallest sphere that completely contains this box */
+        double rad;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Copy operator */
-SIRE_ALWAYS_INLINE const AABox& AABox::operator=(const AABox &box)
-{
-    cent = box.cent;
-    halfextents = box.halfextents;
-    rad = box.rad;
-    return *this;
-}
+    /** Copy operator */
+    SIRE_ALWAYS_INLINE const AABox &AABox::operator=(const AABox &box)
+    {
+        cent = box.cent;
+        halfextents = box.halfextents;
+        rad = box.rad;
+        return *this;
+    }
 
-/** Return the center of the box */
-SIRE_ALWAYS_INLINE const Vector& AABox::center() const
-{
-    return cent;
-}
+    /** Return the center of the box */
+    SIRE_ALWAYS_INLINE const Vector &AABox::center() const
+    {
+        return cent;
+    }
 
-/** Return the positive half extents of the box */
-SIRE_ALWAYS_INLINE const Vector& AABox::halfExtents() const
-{
-    return halfextents;
-}
+    /** Return the positive half extents of the box */
+    SIRE_ALWAYS_INLINE const Vector &AABox::halfExtents() const
+    {
+        return halfextents;
+    }
 
-/** Return the maximum coordinates of the box */
-SIRE_ALWAYS_INLINE Vector AABox::maxCoords() const
-{
-    return cent + halfextents;
-}
+    /** Return the maximum coordinates of the box */
+    SIRE_ALWAYS_INLINE Vector AABox::maxCoords() const
+    {
+        return cent + halfextents;
+    }
 
-/** Return the minimum coordinates of the box */
-SIRE_ALWAYS_INLINE Vector AABox::minCoords() const
-{
-    return cent - halfextents;
-}
+    /** Return the minimum coordinates of the box */
+    SIRE_ALWAYS_INLINE Vector AABox::minCoords() const
+    {
+        return cent - halfextents;
+    }
 
-/** Return the radius of the smallest sphere that contains this box
-    (the sphere is centered at 'center()', just as the box is) */
-SIRE_ALWAYS_INLINE double AABox::radius() const
-{
-    return rad;
-}
+    /** Return the radius of the smallest sphere that contains this box
+        (the sphere is centered at 'center()', just as the box is) */
+    SIRE_ALWAYS_INLINE double AABox::radius() const
+    {
+        return rad;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireVol
 
 Q_DECLARE_METATYPE(SireVol::AABox)
 Q_DECLARE_TYPEINFO(SireVol::AABox, Q_MOVABLE_TYPE);
 
-SIRE_EXPOSE_CLASS( SireVol::AABox )
+SIRE_EXPOSE_CLASS(SireVol::AABox)
 
 SIRE_END_HEADER
 

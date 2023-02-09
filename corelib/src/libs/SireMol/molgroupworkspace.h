@@ -36,82 +36,85 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class MajorMinorVersion;
+    class MajorMinorVersion;
 }
 
 namespace SireMol
 {
 
-using SireBase::MajorMinorVersion;
+    using SireBase::MajorMinorVersion;
 
-class Molecule;
-class PartialMolecule;
-class ViewsOfMol;
-class MoleculeData;
+    class Molecule;
+    class PartialMolecule;
+    class ViewsOfMol;
+    class MoleculeData;
 
-namespace detail{ class MolGroupWorkspaceData; }
+    namespace detail
+    {
+        class MolGroupWorkspaceData;
+    }
 
-/** This is a utility class that is used by MoleculeGroup as a temporary
-    workspace used when updating molecules held in the group. This class
-    is not part of the public API and is used to allow memory
-    allocation / deallocation to be minimised during a
-    Monte Carlo simulation
+    /** This is a utility class that is used by MoleculeGroup as a temporary
+        workspace used when updating molecules held in the group. This class
+        is not part of the public API and is used to allow memory
+        allocation / deallocation to be minimised during a
+        Monte Carlo simulation
 
-    @author Christopher Woods
-*/
-class MolGroupWorkspace
-{
-public:
-    MolGroupWorkspace();
-    MolGroupWorkspace(const MolGroupWorkspace &other);
+        @author Christopher Woods
+    */
+    class MolGroupWorkspace
+    {
+    public:
+        MolGroupWorkspace();
+        MolGroupWorkspace(const MolGroupWorkspace &other);
 
-    ~MolGroupWorkspace();
+        ~MolGroupWorkspace();
 
-    MolGroupWorkspace& operator=(const MolGroupWorkspace &other);
+        MolGroupWorkspace &operator=(const MolGroupWorkspace &other);
 
-    bool operator==(const MolGroupWorkspace &other) const;
-    bool operator!=(const MolGroupWorkspace &other) const;
+        bool operator==(const MolGroupWorkspace &other) const;
+        bool operator!=(const MolGroupWorkspace &other) const;
 
-    bool isEmpty() const;
+        bool isEmpty() const;
 
-    int count() const;
-    int size() const;
+        int count() const;
+        int size() const;
 
-    Molecule operator[](int i) const;
+        Molecule operator[](int i) const;
 
-    Molecule at(int i) const;
+        Molecule at(int i) const;
 
-    Molecule getitem(int i) const;
+        Molecule getitem(int i) const;
 
-    const SireBase::SharedDataPointer<MoleculeData>* data() const;
-    const SireBase::SharedDataPointer<MoleculeData>* constData() const;
+        const SireBase::SharedDataPointer<MoleculeData> *data() const;
+        const SireBase::SharedDataPointer<MoleculeData> *constData() const;
 
-    void push(const MoleculeData &molecule);
+        void push(const MoleculeData &molecule);
 
-    const ViewsOfMol& getUpdated(const ViewsOfMol &old_molecule) const;
-    PartialMolecule getUpdated(const PartialMolecule &old_molecule) const;
+        const ViewsOfMol &getUpdated(const ViewsOfMol &old_molecule) const;
+        PartialMolecule getUpdated(const PartialMolecule &old_molecule) const;
 
-    int nMolecules() const;
+        int nMolecules() const;
 
-    void clear();
+        void clear();
 
-    MajorMinorVersion version() const;
+        MajorMinorVersion version() const;
 
-    void incrementMinor();
-    void incrementMajor();
+        void incrementMinor();
+        void incrementMajor();
 
-    void setVersion(const MajorMinorVersion &version);
+        void setVersion(const MajorMinorVersion &version);
 
-private:
-    void returnToMemoryPool();
-    void createFromMemoryPool();
+    private:
+        void returnToMemoryPool();
+        void createFromMemoryPool();
 
-    void detach();
+        void detach();
 
-    boost::shared_ptr<detail::MolGroupWorkspaceData> d;
-};
+        boost::shared_ptr<detail::MolGroupWorkspaceData> d;
+    };
 
-}
+} // namespace SireMol
 
 SIRE_END_HEADER
 

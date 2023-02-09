@@ -30,7 +30,6 @@
 #include "partialmolecule.h"
 
 #include "SireStream/datastream.h"
-#include "SireStream/datastream.h"
 
 using namespace SireMol;
 using namespace SireBase;
@@ -44,8 +43,7 @@ QDataStream &operator<<(QDataStream &ds, const Beads &beads)
 
     SharedDataStream sds(ds);
 
-    sds << beads.bdng << beads.beading_property << beads.selected_atoms
-        << static_cast<const MoleculeView&>(beads);
+    sds << beads.bdng << beads.beading_property << beads.selected_atoms << static_cast<const MoleculeView &>(beads);
 
     return ds;
 }
@@ -58,8 +56,7 @@ QDataStream &operator>>(QDataStream &ds, Beads &beads)
     {
         SharedDataStream sds(ds);
 
-        sds >> beads.bdng >> beads.beading_property >> beads.selected_atoms
-            >> static_cast<MoleculeView&>(beads);
+        sds >> beads.bdng >> beads.beading_property >> beads.selected_atoms >> static_cast<MoleculeView &>(beads);
     }
     else
         throw version_error(v, "1", r_beads, CODELOC);
@@ -68,13 +65,13 @@ QDataStream &operator>>(QDataStream &ds, Beads &beads)
 }
 
 /** Null constructor */
-Beads::Beads() : ConcreteProperty<Beads,MoleculeView>()
-{}
+Beads::Beads() : ConcreteProperty<Beads, MoleculeView>()
+{
+}
 
 /** Construct the beads view of the passed molecule, using
     the passed (optional) property map to find the "beading" property */
-Beads::Beads(const MoleculeData &moldata, const PropertyMap &map)
-      : ConcreteProperty<Beads,MoleculeView>(moldata)
+Beads::Beads(const MoleculeData &moldata, const PropertyMap &map) : ConcreteProperty<Beads, MoleculeView>(moldata)
 {
     beading_property = map["beading"];
 
@@ -92,17 +89,18 @@ Beads::Beads(const MoleculeData &moldata, const PropertyMap &map)
 
 /** Copy constructor */
 Beads::Beads(const Beads &other)
-      : ConcreteProperty<Beads,MoleculeView>(other),
-        bdng(other.bdng), beading_property(other.beading_property),
-        selected_atoms(other.selected_atoms)
-{}
+    : ConcreteProperty<Beads, MoleculeView>(other), bdng(other.bdng), beading_property(other.beading_property),
+      selected_atoms(other.selected_atoms)
+{
+}
 
 /** Destructor */
 Beads::~Beads()
-{}
+{
+}
 
 /** Copy assignment operator */
-Beads& Beads::operator=(const Beads &other)
+Beads &Beads::operator=(const Beads &other)
 {
     if (this != &other)
     {
@@ -118,8 +116,7 @@ Beads& Beads::operator=(const Beads &other)
 /** Comparison operator */
 bool Beads::operator==(const Beads &other) const
 {
-    return MoleculeView::operator==(other) and
-           beading_property == other.beading_property;
+    return MoleculeView::operator==(other) and beading_property == other.beading_property;
 }
 
 /** Comparison operator */
@@ -128,12 +125,12 @@ bool Beads::operator!=(const Beads &other) const
     return not Beads::operator==(other);
 }
 
-const char* Beads::typeName()
+const char *Beads::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Beads>() );
+    return QMetaType::typeName(qMetaTypeId<Beads>());
 }
 
-Beads* Beads::clone() const
+Beads *Beads::clone() const
 {
     return new Beads(*this);
 }
@@ -177,9 +174,9 @@ QString Beads::toString() const
         return QObject::tr("Beads::null");
     else
         return QObject::tr("Beads( %1 : nBeads() == %2, beading() == %3 )")
-                    .arg(this->data().name())
-                    .arg(this->nBeads())
-                    .arg(this->beading().toString());
+            .arg(this->data().name())
+            .arg(this->nBeads())
+            .arg(this->beading().toString());
 }
 
 /** Return whether or not this is empty */
@@ -206,7 +203,7 @@ int Beads::nBeads() const
     if (isEmpty())
         return 0;
     else
-        return bdng.read().nBeads( this->data().info() );
+        return bdng.read().nBeads(this->data().info());
 }
 
 /** Return the number of beads */
@@ -269,7 +266,7 @@ QList<AtomIdx> Beads::atomIdxs() const
 }
 
 /** Return the beading function used to create the beads */
-const Beading& Beads::beading() const
+const Beading &Beads::beading() const
 {
     return bdng.read();
 }
@@ -312,8 +309,7 @@ bool Beads::hasMetadata(const PropertyName &metakey) const
 }
 
 /** At the moment, the "Beads" object has no properties or metadata */
-bool Beads::hasMetadata(const PropertyName &key,
-                        const PropertyName &metakey) const
+bool Beads::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return false;
 }

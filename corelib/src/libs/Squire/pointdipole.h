@@ -34,61 +34,61 @@ SIRE_BEGIN_HEADER
 
 namespace Squire
 {
-class PointDipole;
+    class PointDipole;
 }
 
-SQUIRE_EXPORT QDataStream& operator<<(QDataStream&, const Squire::PointDipole&);
-SQUIRE_EXPORT QDataStream& operator>>(QDataStream&, Squire::PointDipole&);
+SQUIRE_EXPORT QDataStream &operator<<(QDataStream &, const Squire::PointDipole &);
+SQUIRE_EXPORT QDataStream &operator>>(QDataStream &, Squire::PointDipole &);
 
 namespace Squire
 {
 
-using SireMaths::Vector;
+    using SireMaths::Vector;
 
-/** This class holds a single point dipole. This class is designed
-    for speed, and is used within the integral program (the dipole
-    is held in internal units, and the point is mapped into the
-    correct space for the QM program)
+    /** This class holds a single point dipole. This class is designed
+        for speed, and is used within the integral program (the dipole
+        is held in internal units, and the point is mapped into the
+        correct space for the QM program)
 
-    @author Christopher Woods
-*/
-class SQUIRE_EXPORT PointDipole
-{
+        @author Christopher Woods
+    */
+    class SQUIRE_EXPORT PointDipole
+    {
 
-friend SQUIRE_EXPORT QDataStream& ::operator<<(QDataStream&, const PointDipole&);
-friend SQUIRE_EXPORT QDataStream& ::operator>>(QDataStream&, PointDipole&);
+        friend SQUIRE_EXPORT QDataStream & ::operator<<(QDataStream &, const PointDipole &);
+        friend SQUIRE_EXPORT QDataStream & ::operator>>(QDataStream &, PointDipole &);
 
-public:
-    PointDipole();
-    PointDipole(const Vector &coords, const Vector &dipole);
+    public:
+        PointDipole();
+        PointDipole(const Vector &coords, const Vector &dipole);
 
-    PointDipole(const PointDipole &other);
+        PointDipole(const PointDipole &other);
 
-    ~PointDipole();
+        ~PointDipole();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    PointDipole& operator=(const PointDipole &other);
+        PointDipole &operator=(const PointDipole &other);
 
-    bool operator==(const PointDipole &other) const;
-    bool operator!=(const PointDipole &other) const;
+        bool operator==(const PointDipole &other) const;
+        bool operator!=(const PointDipole &other) const;
 
-    const Vector& center() const;
-    const Vector& dipole() const;
+        const Vector &center() const;
+        const Vector &dipole() const;
 
-private:
-    /** The location of this dipole, mapped into the correct space */
-    Vector cent;
+    private:
+        /** The location of this dipole, mapped into the correct space */
+        Vector cent;
 
-    /** The dipole, in internal units */
-    Vector dipol;
-};
+        /** The dipole, in internal units */
+        Vector dipol;
+    };
 
-}
+} // namespace Squire
 
-Q_DECLARE_METATYPE( Squire::PointDipole )
+Q_DECLARE_METATYPE(Squire::PointDipole)
 
-SIRE_EXPOSE_CLASS( Squire::PointDipole )
+SIRE_EXPOSE_CLASS(Squire::PointDipole)
 
 SIRE_END_HEADER
 

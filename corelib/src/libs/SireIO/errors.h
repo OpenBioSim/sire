@@ -40,63 +40,70 @@ SIRE_BEGIN_HEADER
 namespace SireIO
 {
 
-/** This is the base class of all SireMM errors */
-class SIREIO_EXPORT sireio_error : public SireError::exception
-{
-public:
-    sireio_error() : exception()
-    {}
-
-    sireio_error(QString err, QString place = QString()) : exception(err,place)
-    {}
-
-    sireio_error(const sireio_error &other) : exception(other)
-    {}
-
-    ~sireio_error() throw()
-    {}
-
-    static const char* typeName()
+    /** This is the base class of all SireMM errors */
+    class SIREIO_EXPORT sireio_error : public SireError::exception
     {
-        return "SireIO::sireio_error";
-    }
-};
+    public:
+        sireio_error() : exception()
+        {
+        }
 
-/** This exception is thrown when there is a non-recoverable error
-    while parsing a file
+        sireio_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-    @author Christopher Woods
-*/
-class SIREIO_EXPORT parse_error : public sireio_error
-{
-public:
-    parse_error() : sireio_error()
-    {}
+        sireio_error(const sireio_error &other) : exception(other)
+        {
+        }
 
-    parse_error(QString err, QString place = QString())
-              : sireio_error(err,place)
-    {}
+        ~sireio_error() throw()
+        {
+        }
 
-    parse_error(const parse_error &other) : sireio_error(other)
-    {}
+        static const char *typeName()
+        {
+            return "SireIO::sireio_error";
+        }
+    };
 
-    ~parse_error() throw()
-    {}
+    /** This exception is thrown when there is a non-recoverable error
+        while parsing a file
 
-    static const char* typeName();
-
-    const char* what() const throw()
+        @author Christopher Woods
+    */
+    class SIREIO_EXPORT parse_error : public sireio_error
     {
-        return parse_error::typeName();
-    }
+    public:
+        parse_error() : sireio_error()
+        {
+        }
 
-    void throwSelf() const
-    {
-        throw parse_error(*this);
-    }
-};
+        parse_error(QString err, QString place = QString()) : sireio_error(err, place)
+        {
+        }
 
-}
+        parse_error(const parse_error &other) : sireio_error(other)
+        {
+        }
+
+        ~parse_error() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return parse_error::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw parse_error(*this);
+        }
+    };
+
+} // namespace SireIO
 
 Q_DECLARE_METATYPE(SireIO::parse_error)
 

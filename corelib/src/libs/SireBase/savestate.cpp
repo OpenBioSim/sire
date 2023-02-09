@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#include <QThreadStorage>
 #include <QMutex>
+#include <QThreadStorage>
 
 #include "savestate.h"
 
@@ -34,49 +34,50 @@
 
 using namespace SireBase;
 
-typedef QThreadStorage< QSet<const void*>* > StateRegistry;
+typedef QThreadStorage<QSet<const void *> *> StateRegistry;
 
 static StateRegistry *state_registry(0);
 
-Q_GLOBAL_STATIC( QMutex, globalMutex )
+Q_GLOBAL_STATIC(QMutex, globalMutex)
 
-static QSet<const void*>& stateRegistry()
+static QSet<const void *> &stateRegistry()
 {
     if (state_registry == 0)
     {
-        QMutexLocker lkr( globalMutex() );
+        QMutexLocker lkr(globalMutex());
 
         if (state_registry == 0)
             state_registry = new StateRegistry();
     }
 
     if (not state_registry->hasLocalData())
-        state_registry->setLocalData( new QSet<const void*>() );
+        state_registry->setLocalData(new QSet<const void *>());
 
     return *(state_registry->localData());
 }
 
 /** Null constructor */
 SaveState::SaveState() : current_state(0), forced_state(false)
-{}
+{
+}
 
 /** Internal constructor */
 SaveState::SaveState(const Property &object, bool force)
-          : old_state( object.clone() ), current_state(&object),
-            forced_state(force)
-{}
+    : old_state(object.clone()), current_state(&object), forced_state(force)
+{
+}
 
 /** Copy constructor */
 SaveState::SaveState(const SaveState &other)
-          : old_state(other.old_state), current_state(other.current_state),
-            forced_state(other.forced_state)
-{}
+    : old_state(other.old_state), current_state(other.current_state), forced_state(other.forced_state)
+{
+}
 
 /** Destructor */
 SaveState::~SaveState()
 {
-    //if the state will be destroyed, then remove the
-    //record from the thread-global dictionary
+    // if the state will be destroyed, then remove the
+    // record from the thread-global dictionary
     if (current_state and not forced_state)
     {
         if (old_state.unique())
@@ -85,7 +86,7 @@ SaveState::~SaveState()
 }
 
 /** Copy assignment operator */
-SaveState& SaveState::operator=(const SaveState &other)
+SaveState &SaveState::operator=(const SaveState &other)
 {
     if (this != &other)
     {
@@ -110,12 +111,14 @@ void SaveState::restore(Property &object)
     if (current_state)
     {
         if (&object != current_state)
-            throw SireError::program_bug( QObject::tr(
-                "An attempt is being made to restore the state of the wrong object! "
-                "%1 vs. %2")
-                    .arg(toInt(&object)).arg(toInt(current_state)), CODELOC );
+            throw SireError::program_bug(
+                QObject::tr("An attempt is being made to restore the state of the wrong object! "
+                            "%1 vs. %2")
+                    .arg(toInt(&object))
+                    .arg(toInt(current_state)),
+                CODELOC);
 
-        object.copy( *old_state );
+        object.copy(*old_state);
     }
 }
 
@@ -129,11 +132,11 @@ bool SaveState::isNull()
     if the state of this object has already been saved */
 SaveState SaveState::save(const Property &object)
 {
-    QSet<const void*> &registry = ::stateRegistry();
+    QSet<const void *> &registry = ::stateRegistry();
 
     if (not registry.contains(&object))
     {
-        registry.insert( &object );
+        registry.insert(&object);
         return SaveState(object);
     }
     else
@@ -145,11 +148,11 @@ SaveState SaveState::save(const Property &object)
     been saved */
 SaveState SaveState::forceSave(const Property &object)
 {
-    QSet<const void*> &registry = ::stateRegistry();
+    QSet<const void *> &registry = ::stateRegistry();
 
     if (not registry.contains(&object))
     {
-        registry.insert( &object );
+        registry.insert(&object);
         return SaveState(object);
     }
     else

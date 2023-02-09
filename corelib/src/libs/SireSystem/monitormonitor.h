@@ -28,97 +28,95 @@
 #ifndef SIRESYSTEM_MONITOR_MONITOR_H
 #define SIRESYSTEM_MONITOR_MONITOR_H
 
-#include "systemmonitor.h"
 #include "monitoridentifier.h"
+#include "systemmonitor.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class MonitorMonitor;
+    class MonitorMonitor;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::MonitorMonitor&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::MonitorMonitor&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MonitorMonitor &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MonitorMonitor &);
 
 namespace SireSystem
 {
 
-/** This is a monitor that can be used to monitor other monitors.
-    It is useful to use to save the current state of a monitor,
-    e.g. snap-shotting the average during the simulation, or
-    snap-shotting the PDB. Equally, it can be used to transfer
-    monitor data between systems, or from a system to a supra-system.
+    /** This is a monitor that can be used to monitor other monitors.
+        It is useful to use to save the current state of a monitor,
+        e.g. snap-shotting the average during the simulation, or
+        snap-shotting the PDB. Equally, it can be used to transfer
+        monitor data between systems, or from a system to a supra-system.
 
-    The MonitorMonitor can be non-destructive (the original monitor
-    is just copied), or destructive (the original monitor is copied,
-    then cleared), or annihilative (the original monitor is copied,
-    then completely removed from the system)
+        The MonitorMonitor can be non-destructive (the original monitor
+        is just copied), or destructive (the original monitor is copied,
+        then cleared), or annihilative (the original monitor is copied,
+        then completely removed from the system)
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT MonitorMonitor
-          : public SireBase::ConcreteProperty<MonitorMonitor,SystemMonitor>
-{
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT MonitorMonitor : public SireBase::ConcreteProperty<MonitorMonitor, SystemMonitor>
+    {
 
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const MonitorMonitor&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, MonitorMonitor&);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const MonitorMonitor &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, MonitorMonitor &);
 
-public:
-    MonitorMonitor();
-    MonitorMonitor(const MonitorID &id, bool clear_original=false,
-                                        bool remove_original=false);
+    public:
+        MonitorMonitor();
+        MonitorMonitor(const MonitorID &id, bool clear_original = false, bool remove_original = false);
 
-    MonitorMonitor(const MonitorMonitor &other);
+        MonitorMonitor(const MonitorMonitor &other);
 
-    ~MonitorMonitor();
+        ~MonitorMonitor();
 
-    MonitorMonitor& operator=(const MonitorMonitor &other);
+        MonitorMonitor &operator=(const MonitorMonitor &other);
 
-    bool operator==(const MonitorMonitor &other) const;
-    bool operator!=(const MonitorMonitor &other) const;
+        bool operator==(const MonitorMonitor &other) const;
+        bool operator!=(const MonitorMonitor &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const SystemMonitor& operator[](int i) const;
+        const SystemMonitor &operator[](int i) const;
 
-    const SystemMonitor& at(int i) const;
+        const SystemMonitor &at(int i) const;
 
-    int size() const;
-    int count() const;
-    int nStates() const;
+        int size() const;
+        int count() const;
+        int nStates() const;
 
-    const QList<SysMonPtr>& states() const;
+        const QList<SysMonPtr> &states() const;
 
-    void setClearOriginal(bool clear);
-    void setRemoveOriginal(bool remove);
+        void setClearOriginal(bool clear);
+        void setRemoveOriginal(bool remove);
 
-    bool clearOriginal() const;
-    bool removeOriginal() const;
+        bool clearOriginal() const;
+        bool removeOriginal() const;
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void monitor(System &system);
+        void monitor(System &system);
 
-private:
-    /** The monitor being monitored */
-    QList<SysMonPtr> monitor_states;
+    private:
+        /** The monitor being monitored */
+        QList<SysMonPtr> monitor_states;
 
-    /** The ID of the monitor to monitor */
-    MonitorIdentifier monitor_id;
+        /** The ID of the monitor to monitor */
+        MonitorIdentifier monitor_id;
 
-    /** Whether or not to clear the original monitor */
-    bool clear_original;
+        /** Whether or not to clear the original monitor */
+        bool clear_original;
 
-    /** Whether or not to remove the original monitor */
-    bool remove_original;
-};
+        /** Whether or not to remove the original monitor */
+        bool remove_original;
+    };
 
-}
+} // namespace SireSystem
 
-Q_DECLARE_METATYPE( SireSystem::MonitorMonitor )
+Q_DECLARE_METATYPE(SireSystem::MonitorMonitor)
 
-SIRE_EXPOSE_CLASS( SireSystem::MonitorMonitor )
+SIRE_EXPOSE_CLASS(SireSystem::MonitorMonitor)
 
 SIRE_END_HEADER
 

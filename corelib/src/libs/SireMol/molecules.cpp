@@ -26,19 +26,19 @@
 \*********************************************/
 
 #include "molecules.h"
+#include "atomselection.h"
 #include "molecule.h"
 #include "partialmolecule.h"
 #include "selector.hpp"
-#include "atomselection.h"
 #include "viewsofmol.h"
 
-#include "mover.hpp"
 #include "editor.hpp"
+#include "mover.hpp"
 
 #include "atom.h"
+#include "chain.h"
 #include "cutgroup.h"
 #include "residue.h"
-#include "chain.h"
 #include "segment.h"
 
 #include "select.h"
@@ -69,8 +69,7 @@ QDataStream &operator<<(QDataStream &ds, const Molecules &mols)
 
     SharedDataStream sds(ds);
 
-    sds << mols.mols
-        << static_cast<const Property&>(mols);
+    sds << mols.mols << static_cast<const Property &>(mols);
 
     return ds;
 }
@@ -84,7 +83,7 @@ QDataStream &operator>>(QDataStream &ds, Molecules &mols)
     {
         SharedDataStream sds(ds);
 
-        sds >> mols.mols >> static_cast<Property&>(mols);
+        sds >> mols.mols >> static_cast<Property &>(mols);
     }
     else if (v == 1)
     {
@@ -109,13 +108,13 @@ void Molecules::add(const MoleculeView &molview)
 
     Molecules::iterator it = mols.find(mol.number());
 
-    if ( it != mols.end() )
+    if (it != mols.end())
     {
         it->add(mol.selection());
     }
     else
     {
-        mols.insert( mol.number(), mol );
+        mols.insert(mol.number(), mol);
     }
 }
 
@@ -132,7 +131,7 @@ bool Molecules::addIfUnique(const MoleculeView &molview)
 
     Molecules::iterator it = mols.find(mol.number());
 
-    if ( it != mols.end() )
+    if (it != mols.end())
     {
         if (it->addIfUnique(mol.selection()))
             return true;
@@ -141,7 +140,7 @@ bool Molecules::addIfUnique(const MoleculeView &molview)
     }
     else
     {
-        mols.insert( mol.number(), mol );
+        mols.insert(mol.number(), mol);
         return true;
     }
 }
@@ -156,13 +155,13 @@ void Molecules::add(const ViewsOfMol &molviews)
 
     Molecules::iterator it = mols.find(molviews.number());
 
-    if ( it != mols.end() )
+    if (it != mols.end())
     {
         it->add(molviews.selections());
     }
     else
     {
-        mols.insert( molviews.number(), molviews );
+        mols.insert(molviews.number(), molviews);
     }
 }
 
@@ -176,7 +175,7 @@ ViewsOfMol Molecules::addIfUnique(const ViewsOfMol &molviews)
 
     Molecules::iterator it = mols.find(molviews.number());
 
-    if ( it != mols.end() )
+    if (it != mols.end())
     {
         QList<AtomSelection> added_views = it->addIfUnique(molviews.selections());
 
@@ -187,7 +186,7 @@ ViewsOfMol Molecules::addIfUnique(const ViewsOfMol &molviews)
     }
     else
     {
-        mols.insert( molviews.number(), molviews );
+        mols.insert(molviews.number(), molviews);
         return molviews;
     }
 }
@@ -207,9 +206,7 @@ void Molecules::add(const Molecules &molecules)
     }
     else
     {
-        for (Molecules::const_iterator it = molecules.mols.constBegin();
-             it != molecules.mols.constEnd();
-             ++it)
+        for (Molecules::const_iterator it = molecules.mols.constBegin(); it != molecules.mols.constEnd(); ++it)
         {
             this->add(it.value());
         }
@@ -223,9 +220,7 @@ QList<ViewsOfMol> Molecules::addIfUnique(const Molecules &molecules)
 {
     QList<ViewsOfMol> added_mols;
 
-    for (Molecules::const_iterator it = molecules.mols.constBegin();
-         it != molecules.mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.mols.constBegin(); it != molecules.mols.constEnd(); ++it)
     {
         ViewsOfMol added_views = this->addIfUnique(*it);
 
@@ -345,9 +340,7 @@ QList<ViewsOfMol> Molecules::remove(const Molecules &molecules)
 
     QList<ViewsOfMol> removed_mols;
 
-    for (Molecules::const_iterator it = molecules.mols.constBegin();
-         it != molecules.mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.mols.constBegin(); it != molecules.mols.constEnd(); ++it)
     {
         ViewsOfMol removed_views = this->remove(*it);
 
@@ -369,9 +362,7 @@ QList<ViewsOfMol> Molecules::removeAll(const Molecules &molecules)
 
     QList<ViewsOfMol> removed_mols;
 
-    for (Molecules::const_iterator it = molecules.mols.constBegin();
-         it != molecules.mols.constEnd();
-         ++it)
+    for (Molecules::const_iterator it = molecules.mols.constBegin(); it != molecules.mols.constEnd(); ++it)
     {
         ViewsOfMol removed_views = this->removeAll(*it);
 
@@ -472,52 +463,45 @@ QList<Molecule> Molecules::update(const Molecules &molecules)
 {
     QList<Molecule> updated_mols;
 
-    //need to do this in a copy
-    Molecules old_version( *this );
+    // need to do this in a copy
+    Molecules old_version(*this);
 
     try
     {
 
-    if (this->count() <= molecules.count())
-    {
-        for (Molecules::iterator it = mols.begin();
-             it != mols.end();
-             ++it)
+        if (this->count() <= molecules.count())
         {
-            Molecules::const_iterator
-                                        mol = molecules.mols.find(it.key());
-
-            if (mol != molecules.mols.constEnd() and
-                mol->data() != it->data())
+            for (Molecules::iterator it = mols.begin(); it != mols.end(); ++it)
             {
-                //this molecule needs to be updated
-                updated_mols.append( Molecule(mol->data()) );
-                it->update(mol->data());
+                Molecules::const_iterator mol = molecules.mols.find(it.key());
+
+                if (mol != molecules.mols.constEnd() and mol->data() != it->data())
+                {
+                    // this molecule needs to be updated
+                    updated_mols.append(Molecule(mol->data()));
+                    it->update(mol->data());
+                }
+            }
+        }
+        else
+        {
+            for (Molecules::const_iterator it = molecules.constBegin(); it != molecules.constEnd(); ++it)
+            {
+                Molecules::const_iterator mol = mols.constFind(it.key());
+
+                if (mol != mols.constEnd() and mol->data() != it->data())
+                {
+                    // this molecule needs to be updated
+                    updated_mols.append(Molecule(it->data()));
+
+                    mols.find(it.key())->update(it->data());
+                }
             }
         }
     }
-    else
+    catch (...)
     {
-        for (Molecules::const_iterator it = molecules.constBegin();
-             it != molecules.constEnd();
-             ++it)
-        {
-            Molecules::const_iterator mol = mols.constFind(it.key());
-
-            if (mol != mols.constEnd() and mol->data() != it->data())
-            {
-                //this molecule needs to be updated
-                updated_mols.append( Molecule(it->data()) );
-
-                mols.find(it.key())->update(it->data());
-            }
-        }
-    }
-
-    }
-    catch(...)
-    {
-        //something went wrong - revert to the original version
+        // something went wrong - revert to the original version
         this->operator=(old_version);
         throw;
     }
@@ -532,9 +516,7 @@ bool Molecules::removeDuplicates()
 {
     bool changed = false;
 
-    for (Molecules::iterator it = mols.begin();
-         it != mols.end();
-         ++it)
+    for (Molecules::iterator it = mols.begin(); it != mols.end(); ++it)
     {
         QList<AtomSelection> removed_views = it->removeDuplicates();
         changed = changed or (not removed_views.isEmpty());
@@ -550,9 +532,7 @@ bool Molecules::uniteViews()
 {
     bool changed = false;
 
-    for (Molecules::iterator it = mols.begin();
-         it != mols.end();
-         ++it)
+    for (Molecules::iterator it = mols.begin(); it != mols.end(); ++it)
     {
         if (not changed)
             changed = it->nViews() > 1;
@@ -564,47 +544,45 @@ bool Molecules::uniteViews()
 }
 
 /** Construct an empty set of molecules */
-Molecules::Molecules() : ConcreteProperty<Molecules,Property>()
-{}
+Molecules::Molecules() : ConcreteProperty<Molecules, Property>()
+{
+}
 
 /** Construct a set that contains only the passed view
     of a molecule */
-Molecules::Molecules(const MoleculeView &molecule)
-          : ConcreteProperty<Molecules,Property>()
+Molecules::Molecules(const MoleculeView &molecule) : ConcreteProperty<Molecules, Property>()
 {
     this->add(molecule);
 }
 
 /** Construct a set that contains the passed views
     of a molecule */
-Molecules::Molecules(const ViewsOfMol &molviews)
-          : ConcreteProperty<Molecules,Property>()
+Molecules::Molecules(const ViewsOfMol &molviews) : ConcreteProperty<Molecules, Property>()
 {
     this->add(molviews);
 }
 
 /** Construct a set that contains the passed search result */
-Molecules::Molecules(const SelectResult &result)
-          : ConcreteProperty<Molecules,Property>()
+Molecules::Molecules(const SelectResult &result) : ConcreteProperty<Molecules, Property>()
 {
     for (const auto &view : result.views())
     {
-        this->add( view.join() );
+        this->add(view.join());
     }
 }
 
 /** Copy constructor */
-Molecules::Molecules(const Molecules &other)
-          : ConcreteProperty<Molecules,Property>(other),
-            mols(other.mols)
-{}
+Molecules::Molecules(const Molecules &other) : ConcreteProperty<Molecules, Property>(other), mols(other.mols)
+{
+}
 
 /** Destructor */
 Molecules::~Molecules()
-{}
+{
+}
 
 /** Copy assignment operator */
-Molecules& Molecules::operator=(const Molecules &other)
+Molecules &Molecules::operator=(const Molecules &other)
 {
     Property::operator=(other);
     mols = other.mols;
@@ -626,8 +604,7 @@ bool Molecules::operator!=(const Molecules &other) const
 /** Return a string representation of this set of molecules */
 QString Molecules::toString() const
 {
-    return QObject::tr("Molecules{ nMolecules() == %1, nViews() == %2 }")
-                .arg(this->nMolecules()).arg(this->nViews());
+    return QObject::tr("Molecules{ nMolecules() == %1, nViews() == %2 }").arg(this->nMolecules()).arg(this->nViews());
 }
 
 /** Return the numbers of all of the molecules in this set */
@@ -644,27 +621,27 @@ QSet<MolNum> Molecules::molNums() const
 void Molecules::assertContains(MolNum molnum) const
 {
     if (not mols.contains(molnum))
-        throw SireMol::missing_molecule( QObject::tr(
-            "The molecule with number %1 is not present in this set "
-            "(that contains the molecules with numbers %2).")
-                .arg(molnum)
-                .arg( Sire::toString(this->molNums()) ), CODELOC );
+        throw SireMol::missing_molecule(QObject::tr("The molecule with number %1 is not present in this set "
+                                                    "(that contains the molecules with numbers %2).")
+                                            .arg(molnum)
+                                            .arg(Sire::toString(this->molNums())),
+                                        CODELOC);
 }
 
 /** Return the view(s) of the molecule that has number 'molnum'
 
     \throw SireMol::missing_molecule
 */
-const ViewsOfMol& Molecules::operator[](MolNum molnum) const
+const ViewsOfMol &Molecules::operator[](MolNum molnum) const
 {
     Molecules::const_iterator it = mols.find(molnum);
 
     if (it == mols.end())
-        throw SireMol::missing_molecule( QObject::tr(
-            "The molecule with number %1 is not present in this set "
-            "(that contains the molecules with numbers %2).")
-                .arg(molnum)
-                .arg( Sire::toString(this->molNums()) ), CODELOC );
+        throw SireMol::missing_molecule(QObject::tr("The molecule with number %1 is not present in this set "
+                                                    "(that contains the molecules with numbers %2).")
+                                            .arg(molnum)
+                                            .arg(Sire::toString(this->molNums())),
+                                        CODELOC);
 
     return *it;
 }
@@ -674,7 +651,7 @@ const ViewsOfMol& Molecules::operator[](MolNum molnum) const
     \throw SireMol::missing_molecule
     \throw SireError::invalid_index
 */
-PartialMolecule Molecules::operator[](const tuple<MolNum,Index> &molviewidx) const
+PartialMolecule Molecules::operator[](const tuple<MolNum, Index> &molviewidx) const
 {
     return this->operator[](molviewidx.get<0>()).valueAt(molviewidx.get<1>());
 }
@@ -683,7 +660,7 @@ PartialMolecule Molecules::operator[](const tuple<MolNum,Index> &molviewidx) con
 
     \throw SireMol::missing_molecule
 */
-const ViewsOfMol& Molecules::at(MolNum molnum) const
+const ViewsOfMol &Molecules::at(MolNum molnum) const
 {
     return this->operator[](molnum);
 }
@@ -693,7 +670,7 @@ const ViewsOfMol& Molecules::at(MolNum molnum) const
     \throw SireMol::missing_molecule
     \throw SireError::invalid_index
 */
-PartialMolecule Molecules::at(const tuple<MolNum,Index> &molviewidx) const
+PartialMolecule Molecules::at(const tuple<MolNum, Index> &molviewidx) const
 {
     return this->operator[](molviewidx);
 }
@@ -741,7 +718,7 @@ Molecules Molecules::operator-(const Molecules &other) const
 
 /** Synonym for Molecules::add(other) (except that
     it returns this set, not the added molecules) */
-Molecules& Molecules::operator+=(const Molecules &other)
+Molecules &Molecules::operator+=(const Molecules &other)
 {
     this->add(other);
     return *this;
@@ -749,7 +726,7 @@ Molecules& Molecules::operator+=(const Molecules &other)
 
 /** Synonym for Molecules::remove(other) (except that
     it returns this set, not the removed molecules) */
-Molecules& Molecules::operator-=(const Molecules &other)
+Molecules &Molecules::operator-=(const Molecules &other)
 {
     this->remove(other);
     return *this;
@@ -759,7 +736,7 @@ Molecules& Molecules::operator-=(const Molecules &other)
 
     \throw SireMol::missing_molecule
 */
-const ViewsOfMol& Molecules::molecule(MolNum molnum) const
+const ViewsOfMol &Molecules::molecule(MolNum molnum) const
 {
     return this->operator[](molnum);
 }
@@ -841,9 +818,7 @@ bool Molecules::contains(const ViewsOfMol &molviews) const
     of all of the molecules in 'molecules' */
 bool Molecules::contains(const Molecules &molecules) const
 {
-    for (Molecules::const_iterator it = molecules.mols.begin();
-         it != molecules.mols.end();
-         ++it)
+    for (Molecules::const_iterator it = molecules.mols.begin(); it != molecules.mols.end(); ++it)
     {
         if (not this->contains(it.value()))
             return false;
@@ -871,9 +846,7 @@ bool Molecules::intersects(const MoleculeView &molview) const
     of the views of any of the molecules in this set */
 bool Molecules::intersects(const Molecules &molecules) const
 {
-    for (Molecules::const_iterator it = molecules.mols.begin();
-         it != molecules.mols.end();
-         ++it)
+    for (Molecules::const_iterator it = molecules.mols.begin(); it != molecules.mols.end(); ++it)
     {
         if (this->intersects(it.value()))
             return true;
@@ -908,9 +881,7 @@ int Molecules::nViews() const
 {
     int nviews = 0;
 
-    for (Molecules::const_iterator it = this->begin();
-         it != this->end();
-         ++it)
+    for (Molecules::const_iterator it = this->begin(); it != this->end(); ++it)
     {
         nviews += it->nViews();
     }
@@ -967,12 +938,10 @@ Molecules::const_iterator Molecules::constFind(MolNum molnum) const
 
     \throw SireError::invalid_index
 */
-const ViewsOfMol& Molecules::first() const
+const ViewsOfMol &Molecules::first() const
 {
     if (mols.isEmpty())
-        throw SireError::invalid_index( QObject::tr(
-            "You cannot access the first molecule of an empty set!"),
-                CODELOC );
+        throw SireError::invalid_index(QObject::tr("You cannot access the first molecule of an empty set!"), CODELOC);
 
     return *(mols.constBegin());
 }
@@ -982,34 +951,32 @@ const ViewsOfMol& Molecules::first() const
 
     \throw SireError::invalid_index
 */
-const ViewsOfMol& Molecules::last() const
+const ViewsOfMol &Molecules::last() const
 {
     if (mols.isEmpty())
-        throw SireError::invalid_index( QObject::tr(
-            "You cannot access the last molecule of an empty set!"),
-                CODELOC );
+        throw SireError::invalid_index(QObject::tr("You cannot access the last molecule of an empty set!"), CODELOC);
 
-    return *( --(mols.constEnd()) );
+    return *(--(mols.constEnd()));
 }
 
 /** STL compatible version of Molecules::first() */
-const ViewsOfMol& Molecules::front() const
+const ViewsOfMol &Molecules::front() const
 {
     return this->first();
 }
 
 /** STL compatible version of Molecules::last() */
-const ViewsOfMol& Molecules::back() const
+const ViewsOfMol &Molecules::back() const
 {
     return this->last();
 }
 
-const char* Molecules::typeName()
+const char *Molecules::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Molecules>() );
+    return QMetaType::typeName(qMetaTypeId<Molecules>());
 }
 
-Molecules* Molecules::clone() const
+Molecules *Molecules::clone() const
 {
     return new Molecules(*this);
 }

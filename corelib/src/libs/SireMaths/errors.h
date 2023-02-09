@@ -35,90 +35,99 @@ SIRE_BEGIN_HEADER
 namespace SireMaths
 {
 
-/** This is the base class of all SireMaths errors */
-class SIREMATHS_EXPORT siremaths_error : public SireError::exception
-{
-public:
-    siremaths_error() : exception()
-    {}
-
-    siremaths_error(QString err, QString place = QString())
-                  : exception(err,place)
-    {}
-
-    siremaths_error(const siremaths_error &other) : exception(other)
-    {}
-
-    ~siremaths_error() throw()
-    {}
-
-    static const char* typeName()
+    /** This is the base class of all SireMaths errors */
+    class SIREMATHS_EXPORT siremaths_error : public SireError::exception
     {
-        return "SireMaths::siremaths_error";
-    }
-};
+    public:
+        siremaths_error() : exception()
+        {
+        }
 
-/** This class represents a general maths error */
-class SIREMATHS_EXPORT math_error : public siremaths_error
-{
-public:
-    math_error() : siremaths_error()
-    {}
+        siremaths_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
 
-    math_error(QString err, QString place = QString())
-              : siremaths_error(err,place)
-    {}
+        siremaths_error(const siremaths_error &other) : exception(other)
+        {
+        }
 
-    math_error(const math_error &other) : siremaths_error(other)
-    {}
+        ~siremaths_error() throw()
+        {
+        }
 
-    ~math_error() throw()
-    {}
+        static const char *typeName()
+        {
+            return "SireMaths::siremaths_error";
+        }
+    };
 
-    static const char* typeName();
-
-    const char* what() const throw()
+    /** This class represents a general maths error */
+    class SIREMATHS_EXPORT math_error : public siremaths_error
     {
-        return math_error::typeName();
-    }
+    public:
+        math_error() : siremaths_error()
+        {
+        }
 
-    void throwSelf() const
+        math_error(QString err, QString place = QString()) : siremaths_error(err, place)
+        {
+        }
+
+        math_error(const math_error &other) : siremaths_error(other)
+        {
+        }
+
+        ~math_error() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return math_error::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw math_error(*this);
+        }
+    };
+
+    /** This class represents a domain error */
+    class SIREMATHS_EXPORT domain_error : public siremaths_error
     {
-        throw math_error(*this);
-    }
-};
+    public:
+        domain_error() : siremaths_error()
+        {
+        }
 
-/** This class represents a domain error */
-class SIREMATHS_EXPORT domain_error : public siremaths_error
-{
-public:
-    domain_error() : siremaths_error()
-    {}
+        domain_error(QString err, QString place = QString()) : siremaths_error(err, place)
+        {
+        }
 
-    domain_error(QString err, QString place = QString())
-              : siremaths_error(err,place)
-    {}
+        domain_error(const domain_error &other) : siremaths_error(other)
+        {
+        }
 
-    domain_error(const domain_error &other) : siremaths_error(other)
-    {}
+        ~domain_error() throw()
+        {
+        }
 
-    ~domain_error() throw()
-    {}
+        static const char *typeName();
 
-    static const char* typeName();
+        const char *what() const throw()
+        {
+            return domain_error::typeName();
+        }
 
-    const char* what() const throw()
-    {
-        return domain_error::typeName();
-    }
+        void throwSelf() const
+        {
+            throw domain_error(*this);
+        }
+    };
 
-    void throwSelf() const
-    {
-        throw domain_error(*this);
-    }
-};
-
-}
+} // namespace SireMaths
 
 Q_DECLARE_METATYPE(SireMaths::math_error)
 Q_DECLARE_METATYPE(SireMaths::domain_error)

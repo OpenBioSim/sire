@@ -36,149 +36,149 @@
 #include "SireMol/molviewproperty.h"
 
 #include "SireCAS/expression.h"
-#include "SireCAS/symbols.h"
 #include "SireCAS/identities.h"
+#include "SireCAS/symbols.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class AtomFunction;
-class AtomFunctions;
-}
+    class AtomFunction;
+    class AtomFunctions;
+} // namespace SireMM
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::AtomFunction&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::AtomFunction&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::AtomFunction &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::AtomFunction &);
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::AtomFunctions&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::AtomFunctions&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::AtomFunctions &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::AtomFunctions &);
 
 namespace SireMol
 {
-class MoleculeData;
+    class MoleculeData;
 }
 
 namespace SireMM
 {
 
-using SireCAS::Symbol;
-using SireCAS::Identities;
-using SireCAS::Expression;
+    using SireCAS::Expression;
+    using SireCAS::Identities;
+    using SireCAS::Symbol;
 
-using SireMol::MoleculeData;
-using SireMol::MoleculeInfoData;
+    using SireMol::MoleculeData;
+    using SireMol::MoleculeInfoData;
 
-/** This is the base class of all objects that hold the raw data
-    for an AtomFunction (a function that acts between
-    a set number of atoms)
+    /** This is the base class of all objects that hold the raw data
+        for an AtomFunction (a function that acts between
+        a set number of atoms)
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT AtomFunction
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomFunction&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, AtomFunction&);
-
-public:
-    ~AtomFunction();
-
-    const SireCAS::Expression& function() const;
-
-protected:
-    AtomFunction();
-    AtomFunction(const SireCAS::Expression &function);
-
-    AtomFunction(const AtomFunction &other);
-
-    AtomFunction& operator=(const AtomFunction &other);
-
-    bool operator==(const AtomFunction &other) const;
-    bool operator!=(const AtomFunction &other) const;
-
-private:
-    /** The function acting between the atoms */
-    SireCAS::Expression func;
-};
-
-/** This is the base class of all of the AtomFunctions molecular
-    properties (these are properties that contain lots of AtomFunction
-    functions for the atoms in a molecule)
-
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT AtomFunctions : public SireMol::MoleculeProperty
-{
-
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomFunctions&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, AtomFunctions&);
-
-public:
-    ~AtomFunctions();
-
-    const QSet<Symbol>& symbols() const;
-
-    bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
-
-protected:
-    AtomFunctions();
-    AtomFunctions(const MoleculeData &moldata);
-    AtomFunctions(const MoleculeInfoData &molinfo);
-
-    AtomFunctions(const AtomFunctions &other);
-
-    AtomFunctions& operator=(const AtomFunctions &other);
-
-    bool operator==(const AtomFunctions &other) const;
-    bool operator!=(const AtomFunctions &other) const;
-
-    const MoleculeInfoData& info() const
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT AtomFunction
     {
-        return *molinfo;
-    }
 
-    void addSymbols(const QSet<Symbol> &symbols);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomFunction &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, AtomFunction &);
 
-    void removeSymbols(const QSet<Symbol> &symbols);
-    void removeSymbols();
+    public:
+        ~AtomFunction();
 
-private:
-    /** The metadata for the molecule that contains these functions */
-    SireBase::SharedDataPointer<MoleculeInfoData> molinfo;
+        const SireCAS::Expression &function() const;
 
-    /** The set of symbols used by the atom functions */
-    QSet<Symbol> symbls;
-};
+    protected:
+        AtomFunction();
+        AtomFunction(const SireCAS::Expression &function);
+
+        AtomFunction(const AtomFunction &other);
+
+        AtomFunction &operator=(const AtomFunction &other);
+
+        bool operator==(const AtomFunction &other) const;
+        bool operator!=(const AtomFunction &other) const;
+
+    private:
+        /** The function acting between the atoms */
+        SireCAS::Expression func;
+    };
+
+    /** This is the base class of all of the AtomFunctions molecular
+        properties (these are properties that contain lots of AtomFunction
+        functions for the atoms in a molecule)
+
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT AtomFunctions : public SireMol::MoleculeProperty
+    {
+
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomFunctions &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, AtomFunctions &);
+
+    public:
+        ~AtomFunctions();
+
+        const QSet<Symbol> &symbols() const;
+
+        bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+
+    protected:
+        AtomFunctions();
+        AtomFunctions(const MoleculeData &moldata);
+        AtomFunctions(const MoleculeInfoData &molinfo);
+
+        AtomFunctions(const AtomFunctions &other);
+
+        AtomFunctions &operator=(const AtomFunctions &other);
+
+        bool operator==(const AtomFunctions &other) const;
+        bool operator!=(const AtomFunctions &other) const;
+
+        const MoleculeInfoData &info() const
+        {
+            return *molinfo;
+        }
+
+        void addSymbols(const QSet<Symbol> &symbols);
+
+        void removeSymbols(const QSet<Symbol> &symbols);
+        void removeSymbols();
+
+    private:
+        /** The metadata for the molecule that contains these functions */
+        SireBase::SharedDataPointer<MoleculeInfoData> molinfo;
+
+        /** The set of symbols used by the atom functions */
+        QSet<Symbol> symbls;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-////////
-//////// Inline functions of AtomFunction
-////////
+    ////////
+    //////// Inline functions of AtomFunction
+    ////////
 
-/** Return the function that acts between the atoms */
-SIRE_ALWAYS_INLINE const Expression& AtomFunction::function() const
-{
-    return func;
-}
+    /** Return the function that acts between the atoms */
+    SIRE_ALWAYS_INLINE const Expression &AtomFunction::function() const
+    {
+        return func;
+    }
 
-////////
-//////// Inline functions of AtomFunctions
-////////
+    ////////
+    //////// Inline functions of AtomFunctions
+    ////////
 
-/** Return all of the symbols used by all of the AtomFunctions in this
-    set */
-SIRE_ALWAYS_INLINE const QSet<Symbol>& AtomFunctions::symbols() const
-{
-    return symbls;
-}
+    /** Return all of the symbols used by all of the AtomFunctions in this
+        set */
+    SIRE_ALWAYS_INLINE const QSet<Symbol> &AtomFunctions::symbols() const
+    {
+        return symbls;
+    }
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMM
 
-SIRE_EXPOSE_CLASS( SireMM::AtomFunction )
-SIRE_EXPOSE_CLASS( SireMM::AtomFunctions )
+SIRE_EXPOSE_CLASS(SireMM::AtomFunction)
+SIRE_EXPOSE_CLASS(SireMM::AtomFunctions)
 
 SIRE_END_HEADER
 

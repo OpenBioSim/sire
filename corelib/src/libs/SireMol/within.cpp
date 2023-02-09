@@ -26,10 +26,10 @@
 \*********************************************/
 
 #include "within.h"
-#include "atomcoords.h"
-#include "moleculeview.h"
-#include "molecule.h"
 #include "atom.h"
+#include "atomcoords.h"
+#include "molecule.h"
+#include "moleculeview.h"
 #include "mover.hpp"
 #include "selector.hpp"
 
@@ -74,38 +74,39 @@ QDataStream &operator>>(QDataStream &ds, Within &within)
 
         sds >> within.atomid >> within.point >> dist;
 
-        within.dist = dist*angstrom;
+        within.dist = dist * angstrom;
     }
     else
-        throw version_error( v, "1", r_within, CODELOC );
+        throw version_error(v, "1", r_within, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 Within::Within() : AtomID(), point(0), dist(0)
-{}
+{
+}
 
 /** Construct to match atoms within 'dist' of 'point' */
-Within::Within(Length distance, const Vector &p)
-       : AtomID(), point(p), dist(distance)
-{}
+Within::Within(Length distance, const Vector &p) : AtomID(), point(p), dist(distance)
+{
+}
 
 /** Construct to match atoms within 'dist' of the atoms
     from the molecule that match 'atomid' */
-Within::Within(Length distance, const AtomID &id)
-       : AtomID(), atomid(id), point(0), dist(distance)
-{}
+Within::Within(Length distance, const AtomID &id) : AtomID(), atomid(id), point(0), dist(distance)
+{
+}
 
 /** Copy constructor */
-Within::Within(const Within &other)
-       : AtomID(other), atomid(other.atomid), point(other.point),
-         dist(other.dist)
-{}
+Within::Within(const Within &other) : AtomID(other), atomid(other.atomid), point(other.point), dist(other.dist)
+{
+}
 
 /** Destructor */
 Within::~Within()
-{}
+{
+}
 
 /** Is this selection null? */
 bool Within::isNull() const
@@ -126,16 +127,14 @@ QString Within::toString() const
         return QObject::tr("Within::null");
 
     else if (atomid.isNull())
-        return QObject::tr("Within( %1 A from %2 )")
-                    .arg(dist.to(angstrom)).arg(point.toString());
+        return QObject::tr("Within( %1 A from %2 )").arg(dist.to(angstrom)).arg(point.toString());
 
     else
-        return QObject::tr("Within( %1 A from %2 )")
-                    .arg(dist.to(angstrom)).arg(atomid.toString());
+        return QObject::tr("Within( %1 A from %2 )").arg(dist.to(angstrom)).arg(atomid.toString());
 }
 
 /** Copy assignment operator */
-Within& Within::operator=(const Within &other)
+Within &Within::operator=(const Within &other)
 {
     if (this != &other)
     {
@@ -156,8 +155,7 @@ bool Within::operator==(const SireID::ID &other) const
 /** Comparison operator */
 bool Within::operator==(const Within &other) const
 {
-    return atomid == other.atomid and point == other.point
-               and dist == other.dist;
+    return atomid == other.atomid and point == other.point and dist == other.dist;
 }
 
 /** Comparison operator */
@@ -173,12 +171,12 @@ bool Within::operator!=(const Within &other) const
 
     \throw SireError::incompatible_error
 */
-QList<AtomIdx> Within::map(const MolInfo&) const
+QList<AtomIdx> Within::map(const MolInfo &) const
 {
-    throw SireError::incompatible_error( QObject::tr(
-            "The ID %1 cannot be used in this context. It has to be "
-            "used to select atoms in a molecule.")
-                .arg(this->toString()), CODELOC );
+    throw SireError::incompatible_error(QObject::tr("The ID %1 cannot be used in this context. It has to be "
+                                                    "used to select atoms in a molecule.")
+                                            .arg(this->toString()),
+                                        CODELOC);
 
     return QList<AtomIdx>();
 }
@@ -197,14 +195,13 @@ QList<AtomIdx> Within::map(const MoleculeView &molview, const PropertyMap &map) 
 
     const MoleculeData &moldata = molview.data();
 
-    const AtomCoords &coords = moldata.property(map["coordinates"])
-                                      .asA<AtomCoords>();
+    const AtomCoords &coords = moldata.property(map["coordinates"]).asA<AtomCoords>();
 
     if (atomid.isNull())
     {
         if (molview.selectedAll())
         {
-            for (AtomIdx i(0); i<coords.nAtoms(); ++i)
+            for (AtomIdx i(0); i < coords.nAtoms(); ++i)
             {
                 if (Vector::distance2(point, coords[moldata.info().cgAtomIdx(i)]) < dist2)
                     atomidxs.append(i);
@@ -221,19 +218,18 @@ QList<AtomIdx> Within::map(const MoleculeView &molview, const PropertyMap &map) 
     }
     else
     {
-        Selector<Atom> atoms = molview.molecule().selectAll(atomid,map);
+        Selector<Atom> atoms = molview.molecule().selectAll(atomid, map);
 
         QVector<Vector> points;
 
-
-        for (int i=0; i<atoms.count(); ++i)
+        for (int i = 0; i < atoms.count(); ++i)
         {
-            points.append( coords[atoms(i).cgAtomIdx()] );
+            points.append(coords[atoms(i).cgAtomIdx()]);
         }
 
         if (molview.selectedAll())
         {
-            for (AtomIdx i(0); i<coords.nAtoms(); ++i)
+            for (AtomIdx i(0); i < coords.nAtoms(); ++i)
             {
                 foreach (const Vector &p, points)
                 {
@@ -262,19 +258,17 @@ QList<AtomIdx> Within::map(const MoleculeView &molview, const PropertyMap &map) 
     }
 
     if (atomidxs.isEmpty())
-        throw SireMol::missing_atom( QObject::tr(
-                "There is no atom that matches %1.").arg(this->toString()),
-                    CODELOC );
+        throw SireMol::missing_atom(QObject::tr("There is no atom that matches %1.").arg(this->toString()), CODELOC);
 
     return atomidxs;
 }
 
-const char* Within::typeName()
+const char *Within::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Within>() );
+    return QMetaType::typeName(qMetaTypeId<Within>());
 }
 
-Within* Within::clone() const
+Within *Within::clone() const
 {
     return new Within(*this);
 }

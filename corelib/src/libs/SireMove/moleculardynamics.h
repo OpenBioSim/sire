@@ -40,142 +40,134 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class MolecularDynamics;
+    class MolecularDynamics;
 }
 
 namespace SireVol
 {
-class Space;
+    class Space;
 }
 
 namespace SireBase
 {
-class PropertyMap;
+    class PropertyMap;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::MolecularDynamics&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::MolecularDynamics&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::MolecularDynamics &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::MolecularDynamics &);
 
 namespace SireMove
 {
 
-using SireMol::MoleculeGroup;
-using SireMol::MolGroupPtr;
+    using SireMol::MoleculeGroup;
+    using SireMol::MolGroupPtr;
 
-using SireFF::ForceTable;
+    using SireFF::ForceTable;
 
-/** This class implements a molecular dynamics move.
+    /** This class implements a molecular dynamics move.
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT MolecularDynamics
-          : public SireBase::ConcreteProperty<MolecularDynamics,Dynamics>
-{
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT MolecularDynamics : public SireBase::ConcreteProperty<MolecularDynamics, Dynamics>
+    {
 
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const MolecularDynamics&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, MolecularDynamics&);
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const MolecularDynamics &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, MolecularDynamics &);
 
-public:
-    MolecularDynamics(const PropertyMap &map = PropertyMap());
+    public:
+        MolecularDynamics(const PropertyMap &map = PropertyMap());
 
-    MolecularDynamics(const MoleculeGroup &molgroup,
-                      const PropertyMap &map = PropertyMap());
+        MolecularDynamics(const MoleculeGroup &molgroup, const PropertyMap &map = PropertyMap());
 
-    MolecularDynamics(const MoleculeGroup &molgroup,
-                      const Integrator &integrator,
-                      const PropertyMap &map = PropertyMap());
+        MolecularDynamics(const MoleculeGroup &molgroup, const Integrator &integrator,
+                          const PropertyMap &map = PropertyMap());
 
-    MolecularDynamics(const MoleculeGroup &molgroup,
-                      SireUnits::Dimension::Time timestep,
-                      const PropertyMap &map = PropertyMap());
+        MolecularDynamics(const MoleculeGroup &molgroup, SireUnits::Dimension::Time timestep,
+                          const PropertyMap &map = PropertyMap());
 
-    MolecularDynamics(const MoleculeGroup &molgroup,
-                      const Integrator &integrator,
-                      SireUnits::Dimension::Time timestep,
-                      const PropertyMap &map = PropertyMap());
+        MolecularDynamics(const MoleculeGroup &molgroup, const Integrator &integrator, SireUnits::Dimension::Time timestep,
+                          const PropertyMap &map = PropertyMap());
 
-    MolecularDynamics(const MolecularDynamics &other);
+        MolecularDynamics(const MolecularDynamics &other);
 
-    ~MolecularDynamics();
+        ~MolecularDynamics();
 
-    MolecularDynamics& operator=(const MolecularDynamics &other);
+        MolecularDynamics &operator=(const MolecularDynamics &other);
 
-    static const char* typeName();
+        static const char *typeName();
 
-    MolecularDynamics* clone() const;
+        MolecularDynamics *clone() const;
 
-    bool operator==(const MolecularDynamics &other) const;
-    bool operator!=(const MolecularDynamics &other) const;
+        bool operator==(const MolecularDynamics &other) const;
+        bool operator!=(const MolecularDynamics &other) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    int nMoves() const;
-    SireUnits::Dimension::Time totalTime() const;
+        int nMoves() const;
+        SireUnits::Dimension::Time totalTime() const;
 
-    const MoleculeGroup& moleculeGroup() const;
-    const Integrator& integrator() const;
+        const MoleculeGroup &moleculeGroup() const;
+        const Integrator &integrator() const;
 
-    void setMoleculeGroup(const MoleculeGroup &molgroup);
-    void setMoleculeGroup(const MoleculeGroup &molgroup,
-                          const PropertyMap &map);
+        void setMoleculeGroup(const MoleculeGroup &molgroup);
+        void setMoleculeGroup(const MoleculeGroup &molgroup, const PropertyMap &map);
 
-    void setIntegrator(const Integrator &integrator);
+        void setIntegrator(const Integrator &integrator);
 
-    void setTimeStep(const SireUnits::Dimension::Time &timestep);
+        void setTimeStep(const SireUnits::Dimension::Time &timestep);
 
-    SireUnits::Dimension::Time timeStep() const;
+        SireUnits::Dimension::Time timeStep() const;
 
-    SireUnits::Dimension::MolarEnergy kineticEnergy() const;
+        SireUnits::Dimension::MolarEnergy kineticEnergy() const;
 
-    SireUnits::Dimension::Temperature temperature() const;
+        SireUnits::Dimension::Temperature temperature() const;
 
-    void setCoordinatesProperty(const PropertyName &value);
-    void setSpaceProperty(const PropertyName &value);
+        void setCoordinatesProperty(const PropertyName &value);
+        void setSpaceProperty(const PropertyName &value);
 
-    void setVelocitiesProperty(const PropertyName &value);
-    void setMassesProperty(const PropertyName &value);
-    void setElementsProperty(const PropertyName &value);
-    void setVelocityGeneratorProperty(const PropertyName &value);
+        void setVelocitiesProperty(const PropertyName &value);
+        void setMassesProperty(const PropertyName &value);
+        void setElementsProperty(const PropertyName &value);
+        void setVelocityGeneratorProperty(const PropertyName &value);
 
-    PropertyName coordinatesProperty() const;
-    PropertyName spaceProperty() const;
+        PropertyName coordinatesProperty() const;
+        PropertyName spaceProperty() const;
 
-    PropertyName velocitiesProperty() const;
-    PropertyName massesProperty() const;
-    PropertyName elementsProperty() const;
-    PropertyName velocityGeneratorProperty() const;
+        PropertyName velocitiesProperty() const;
+        PropertyName massesProperty() const;
+        PropertyName elementsProperty() const;
+        PropertyName velocityGeneratorProperty() const;
 
-    void regenerateVelocities(const System &system,
-                              const VelocityGenerator &generator);
+        void regenerateVelocities(const System &system, const VelocityGenerator &generator);
 
-    void move(System &system, int nmoves, bool record_stats=true);
+        void move(System &system, int nmoves, bool record_stats = true);
 
-    void clearStatistics();
+        void clearStatistics();
 
-    void setGenerator(const RanGenerator &generator);
+        void setGenerator(const RanGenerator &generator);
 
-private:
-    /** The integrator used to solve Newton's laws */
-    IntegratorPtr intgrator;
+    private:
+        /** The integrator used to solve Newton's laws */
+        IntegratorPtr intgrator;
 
-    /** The workspace used to store the intermediates of integration */
-    IntegratorWorkspacePtr wspace;
+        /** The workspace used to store the intermediates of integration */
+        IntegratorWorkspacePtr wspace;
 
-    /** The timestep to use for the integration */
-    SireUnits::Dimension::Time timestep;
+        /** The timestep to use for the integration */
+        SireUnits::Dimension::Time timestep;
 
-    /** The number of moves performed using this object */
-    quint32 num_moves;
+        /** The number of moves performed using this object */
+        quint32 num_moves;
 
-    /** The total amount of time simulated using this move */
-    SireUnits::Dimension::Time total_time;
-};
+        /** The total amount of time simulated using this move */
+        SireUnits::Dimension::Time total_time;
+    };
 
-}
+} // namespace SireMove
 
-Q_DECLARE_METATYPE( SireMove::MolecularDynamics )
+Q_DECLARE_METATYPE(SireMove::MolecularDynamics)
 
-SIRE_EXPOSE_CLASS( SireMove::MolecularDynamics )
+SIRE_EXPOSE_CLASS(SireMove::MolecularDynamics)
 
 SIRE_END_HEADER
 

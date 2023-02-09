@@ -63,25 +63,26 @@ QDataStream &operator>>(QDataStream &ds, ChainResID &chainresid)
         sds >> chainresid.chainid >> chainresid.resid;
     }
     else
-        throw version_error( v, "1", r_chainresid, CODELOC );
+        throw version_error(v, "1", r_chainresid, CODELOC);
 
     return ds;
 }
 
 ChainResID::ChainResID() : ResID()
-{}
+{
+}
 
-ChainResID::ChainResID(const ChainID &chain, const ResID &res)
-           : ResID(), chainid(chain), resid(res)
-{}
+ChainResID::ChainResID(const ChainID &chain, const ResID &res) : ResID(), chainid(chain), resid(res)
+{
+}
 
-ChainResID::ChainResID(const ChainResID &other)
-           : ResID(other),
-             chainid(other.chainid), resid(other.resid)
-{}
+ChainResID::ChainResID(const ChainResID &other) : ResID(other), chainid(other.chainid), resid(other.resid)
+{
+}
 
 ChainResID::~ChainResID()
-{}
+{
+}
 
 QString ChainResID::toString() const
 {
@@ -97,25 +98,21 @@ QList<ResIdx> ChainResID::map(const MolInfo &molinfo) const
     else if (resid.isNull())
         return resid.map(molinfo);
 
-    QList<ResIdx> residxs =
-                MolInfo::intersection(resid.map(molinfo),
-                                      molinfo.getResiduesIn(chainid) );
+    QList<ResIdx> residxs = MolInfo::intersection(resid.map(molinfo), molinfo.getResiduesIn(chainid));
 
     if (residxs.isEmpty())
-        throw SireMol::missing_residue( QObject::tr(
-            "There are no residues that match %1.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_residue(QObject::tr("There are no residues that match %1.").arg(this->toString()),
+                                       CODELOC);
 
     return residxs;
 }
 
-const char* ChainResID::typeName()
+const char *ChainResID::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChainResID>() );
+    return QMetaType::typeName(qMetaTypeId<ChainResID>());
 }
 
-ChainResID* ChainResID::clone() const
+ChainResID *ChainResID::clone() const
 {
     return new ChainResID(*this);
 }
-

@@ -34,76 +34,71 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
-class Supplementary;
+    class Supplementary;
 }
 
-SIREIO_EXPORT QDataStream& operator<<(QDataStream&, const SireIO::Supplementary&);
-SIREIO_EXPORT QDataStream& operator>>(QDataStream&, SireIO::Supplementary&);
+SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::Supplementary &);
+SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::Supplementary &);
 
 namespace SireIO
 {
 
-/** A dunmmy parser class to hold data that is supplementary to a lead parser,
-    e.g. data from a parameter file.
+    /** A dunmmy parser class to hold data that is supplementary to a lead parser,
+        e.g. data from a parameter file.
 
-    @author Lester Hedges
-*/
-class SIREIO_EXPORT Supplementary : public SireBase::ConcreteProperty<Supplementary,MoleculeParser>
-{
+        @author Lester Hedges
+    */
+    class SIREIO_EXPORT Supplementary : public SireBase::ConcreteProperty<Supplementary, MoleculeParser>
+    {
 
-friend SIREIO_EXPORT QDataStream& ::operator<<(QDataStream&, const Supplementary&);
-friend SIREIO_EXPORT QDataStream& ::operator>>(QDataStream&, Supplementary&);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const Supplementary &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, Supplementary &);
 
-public:
-    Supplementary();
-    Supplementary(const QString &filename,
-         const PropertyMap &map = PropertyMap());
+    public:
+        Supplementary();
+        Supplementary(const QString &filename, const PropertyMap &map = PropertyMap());
 
-    Supplementary(const QStringList &lines,
-         const PropertyMap &map = PropertyMap());
+        Supplementary(const QStringList &lines, const PropertyMap &map = PropertyMap());
 
-    Supplementary(const Supplementary &other);
+        Supplementary(const Supplementary &other);
 
-    ~Supplementary();
+        ~Supplementary();
 
-    Supplementary& operator=(const Supplementary &other);
+        Supplementary &operator=(const Supplementary &other);
 
-    bool operator==(const Supplementary &other) const;
-    bool operator!=(const Supplementary &other) const;
+        bool operator==(const Supplementary &other) const;
+        bool operator!=(const Supplementary &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const char* what() const;
+        const char *what() const;
 
-    MoleculeParserPtr construct(const QString &filename,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const QStringList &lines,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
 
-    MoleculeParserPtr construct(const SireSystem::System &system,
-                                const PropertyMap &map) const;
+        MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const;
 
-    QString toString() const;
+        QString toString() const;
 
-    bool isSupplementary() const;
+        bool isSupplementary() const;
 
-    int nAtoms() const;
+        int nAtoms() const;
 
-    QString formatName() const;
-    QString formatDescription() const;
-    QStringList formatSuffix() const;
+        QString formatName() const;
+        QString formatDescription() const;
+        QStringList formatSuffix() const;
 
-private:
-    /** The name of the parsed file (if from a file). */
-    QString filename;
-};
+    private:
+        /** The name of the parsed file (if from a file). */
+        QString filename;
+    };
 
-}
+} // namespace SireIO
 
-Q_DECLARE_METATYPE( SireIO::Supplementary )
+Q_DECLARE_METATYPE(SireIO::Supplementary)
 
-SIRE_EXPOSE_CLASS( SireIO::Supplementary )
+SIRE_EXPOSE_CLASS(SireIO::Supplementary)
 
 SIRE_END_HEADER
 

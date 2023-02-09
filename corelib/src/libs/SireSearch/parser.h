@@ -28,42 +28,42 @@
 #ifndef SIRESEARCH_PARSER_H
 #define SIRESEARCH_PARSER_H
 
-#include "SireMol/select.h"
 #include "SireMol/parser.h"
+#include "SireMol/select.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireSearch
 {
 
-namespace parser
-{
-    void set_token(const QString &token, const QString &selection);
-    void reset_tokens();
-
-    SireMol::parser::SelectEnginePtr parse(const QString &str);
-
-    class SIRESEARCH_EXPORT SearchParser : public SireMol::parser::Parser
+    namespace parser
     {
-    public:
-        SearchParser();
-        ~SearchParser();
-
-        static void install();
-
         void set_token(const QString &token, const QString &selection);
-        bool has_token(const QString &token);
-        QString get_token(const QString &token);
-        void delete_token(const QString &token);
-        void delete_all_tokens();
-
         void reset_tokens();
 
         SireMol::parser::SelectEnginePtr parse(const QString &str);
-    };
-}
 
-}
+        class SIRESEARCH_EXPORT SearchParser : public SireMol::parser::Parser
+        {
+        public:
+            SearchParser();
+            ~SearchParser();
+
+            static void install();
+
+            void set_token(const QString &token, const QString &selection);
+            bool has_token(const QString &token);
+            QString get_token(const QString &token);
+            void delete_token(const QString &token);
+            void delete_all_tokens();
+
+            void reset_tokens();
+
+            SireMol::parser::SelectEnginePtr parse(const QString &str);
+        };
+    } // namespace parser
+
+} // namespace SireSearch
 
 SIRE_END_HEADER
 

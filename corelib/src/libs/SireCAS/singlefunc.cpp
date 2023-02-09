@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "singlefunc.h"
-#include "values.h"
 #include "complexvalues.h"
 #include "identities.h"
+#include "values.h"
 
 #include "SireCAS/errors.h"
 
@@ -37,13 +37,13 @@
 using namespace SireStream;
 using namespace SireCAS;
 
-//register the pure virtual base class
+// register the pure virtual base class
 static const RegisterMetaType<SingleFunc> r_singlefunc(MAGIC_ONLY, "SireCAS::SingleFunc");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const SingleFunc &func)
 {
-    writeHeader(ds, r_singlefunc, 1) << func.ex << static_cast<const ExBase&>(func);
+    writeHeader(ds, r_singlefunc, 1) << func.ex << static_cast<const ExBase &>(func);
 
     return ds;
 }
@@ -55,7 +55,7 @@ QDataStream &operator>>(QDataStream &ds, SingleFunc &func)
 
     if (v == 1)
     {
-        ds >> func.ex >> static_cast<ExBase&>(func);
+        ds >> func.ex >> static_cast<ExBase &>(func);
     }
     else
         throw version_error(v, "1", r_singlefunc, CODELOC);
@@ -65,23 +65,26 @@ QDataStream &operator>>(QDataStream &ds, SingleFunc &func)
 
 /** Null constructor */
 SingleFunc::SingleFunc() : ExBase()
-{}
+{
+}
 
 /** Construct a function that operates on the expression 'expression' */
 SingleFunc::SingleFunc(const Expression &expression) : ExBase(), ex(expression)
-{}
+{
+}
 
 /** Copy constructor */
-SingleFunc::SingleFunc(const SingleFunc &other)
-           : ExBase(), ex(other.ex)
-{}
+SingleFunc::SingleFunc(const SingleFunc &other) : ExBase(), ex(other.ex)
+{
+}
 
 /** Destructor */
 SingleFunc::~SingleFunc()
-{}
+{
+}
 
 /** Copy assignment */
-SingleFunc& SingleFunc::operator=(const SingleFunc &other)
+SingleFunc &SingleFunc::operator=(const SingleFunc &other)
 {
     ExBase::operator=(other);
     ex = other.ex;
@@ -92,7 +95,7 @@ SingleFunc& SingleFunc::operator=(const SingleFunc &other)
 /** Return the conjugate of this function */
 Expression SingleFunc::conjugate() const
 {
-    return functionOf( ex.conjugate() );
+    return functionOf(ex.conjugate());
 }
 
 /** Return if this is a function of 'symbol' */
@@ -125,18 +128,16 @@ QString SingleFunc::toString() const
     return QString("%1(%2)").arg(stringRep(), ex.toString());
 }
 
-
 /** Return a string representation of this function in the OpenMM syntax*/
 QString SingleFunc::toOpenMMString() const
 {
     return QString("%1(%2)").arg(stringRep(), ex.toOpenMMString());
 }
 
-
 /** Substitute into this expression */
 Expression SingleFunc::substitute(const Identities &identities) const
 {
-    return functionOf( ex.substitute(identities) );
+    return functionOf(ex.substitute(identities));
 }
 
 /** Return the symbols used in this function */
@@ -178,9 +179,11 @@ Expression SingleFunc::integrate(const Symbol &symbol) const
 /** Default 'differentiate' function */
 Expression SingleFunc::diff() const
 {
-    throw SireCAS::unavailable_differential(QObject::tr(
-        "The function \"%1\" does not have an available differential. "
-        "(full function = \"%2\")").arg(stringRep()).arg(toString()), CODELOC);
+    throw SireCAS::unavailable_differential(QObject::tr("The function \"%1\" does not have an available differential. "
+                                                        "(full function = \"%2\")")
+                                                .arg(stringRep())
+                                                .arg(toString()),
+                                            CODELOC);
 
     return 0;
 }
@@ -188,9 +191,11 @@ Expression SingleFunc::diff() const
 /** Default 'integrate' function */
 Expression SingleFunc::integ() const
 {
-    throw SireCAS::unavailable_integral(QObject::tr(
-        "The function \"%1\" does not have an available integral. "
-        "(full function = \"%2\")").arg(stringRep()).arg(toString()), CODELOC);
+    throw SireCAS::unavailable_integral(QObject::tr("The function \"%1\" does not have an available integral. "
+                                                    "(full function = \"%2\")")
+                                            .arg(stringRep())
+                                            .arg(toString()),
+                                        CODELOC);
 
     return 0;
 }
@@ -199,14 +204,14 @@ QList<Factor> SingleFunc::expand(const Symbol &symbol) const
 {
     if (this->isFunction(symbol))
     {
-        //we cannot expand a function of this symbol...
-        throw SireCAS::rearrangement_error( QObject::tr(
-            "You cannot expand the function %1 in terms of the symbol %2.")
-                .arg(this->toString(), symbol.toString()), CODELOC );
+        // we cannot expand a function of this symbol...
+        throw SireCAS::rearrangement_error(QObject::tr("You cannot expand the function %1 in terms of the symbol %2.")
+                                               .arg(this->toString(), symbol.toString()),
+                                           CODELOC);
     }
 
     QList<Factor> ret;
-    ret.append( Factor(symbol, *this, 0) );
+    ret.append(Factor(symbol, *this, 0));
 
     return ret;
 }

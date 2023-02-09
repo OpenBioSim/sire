@@ -39,201 +39,197 @@ SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class Move;
-class NullMove;
-}
+    class Move;
+    class NullMove;
+} // namespace SireMove
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::Move&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::Move&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::Move &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::Move &);
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::NullMove&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::NullMove&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::NullMove &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::NullMove &);
 
 namespace SireSystem
 {
-class System;
+    class System;
 }
 
 namespace SireMol
 {
-class PartialMolecule;
-class Molecules;
-}
+    class PartialMolecule;
+    class Molecules;
+} // namespace SireMol
 
 namespace SireMaths
 {
-class RanGenerator;
+    class RanGenerator;
 }
 
 namespace SireMove
 {
 
-class Ensemble;
+    class Ensemble;
 
-using SireCAS::Symbol;
+    using SireCAS::Symbol;
 
-using SireMaths::RanGenerator;
+    using SireMaths::RanGenerator;
 
-using SireSystem::System;
+    using SireSystem::System;
 
-using SireBase::PropertyName;
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
+    using SireBase::PropertyName;
 
-using SireMol::PartialMolecule;
-using SireMol::Molecules;
+    using SireMol::Molecules;
+    using SireMol::PartialMolecule;
 
-/** This is the base class of all of the move classes
+    /** This is the base class of all of the move classes
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT Move : public SireBase::Property
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const Move&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, Move&);
-
-public:
-    Move(const PropertyMap &map = PropertyMap());
-
-    Move(const Move &other);
-
-    virtual ~Move();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT Move : public SireBase::Property
     {
-        return "SireMove::Move";
-    }
 
-    virtual Move* clone() const=0;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const Move &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, Move &);
 
-    virtual void clearStatistics()=0;
+    public:
+        Move(const PropertyMap &map = PropertyMap());
 
-    virtual QString toString() const=0;
+        Move(const Move &other);
 
-    virtual int nMoves() const=0;
+        virtual ~Move();
 
-    virtual void move(System &system, int nmoves, bool record_stats)=0;
+        static const char *typeName()
+        {
+            return "SireMove::Move";
+        }
 
-    void move(System &system);
-    void move(System &system, int nmoves);
+        virtual Move *clone() const = 0;
 
-    virtual SireUnits::Dimension::MolarEnergy energy(System &system) const;
-    virtual SireUnits::Dimension::Volume volume(const System &system) const;
+        virtual void clearStatistics() = 0;
 
-    virtual void setGenerator(const RanGenerator &rangenerator)=0;
+        virtual QString toString() const = 0;
 
-    const Symbol& energyComponent() const;
-    virtual void setEnergyComponent(const Symbol &component);
+        virtual int nMoves() const = 0;
 
-    const PropertyName& coordinatesProperty() const;
-    const PropertyName& spaceProperty() const;
+        virtual void move(System &system, int nmoves, bool record_stats) = 0;
 
-    virtual void setCoordinatesProperty(const PropertyName &coords_property);
-    virtual void setSpaceProperty(const PropertyName &space_property);
+        void move(System &system);
+        void move(System &system, int nmoves);
 
-    const PropertyMap& propertyMap() const;
+        virtual SireUnits::Dimension::MolarEnergy energy(System &system) const;
+        virtual SireUnits::Dimension::Volume volume(const System &system) const;
 
-    virtual Ensemble ensemble() const=0;
+        virtual void setGenerator(const RanGenerator &rangenerator) = 0;
 
-    bool isConstantEnergy() const;
-    bool isConstantTemperature() const;
-    bool isConstantVolume() const;
-    bool isConstantPressure() const;
-    bool isConstantChemicalPotential() const;
-    bool isConstantFugacity() const;
+        const Symbol &energyComponent() const;
+        virtual void setEnergyComponent(const Symbol &component);
 
-    virtual bool isConstantLambda(const Symbol &lam) const;
+        const PropertyName &coordinatesProperty() const;
+        const PropertyName &spaceProperty() const;
 
-    SireUnits::Dimension::Temperature temperature() const;
-    SireUnits::Dimension::Pressure pressure() const;
-    SireUnits::Dimension::Pressure fugacity() const;
-    SireUnits::Dimension::MolarEnergy chemicalPotential() const;
+        virtual void setCoordinatesProperty(const PropertyName &coords_property);
+        virtual void setSpaceProperty(const PropertyName &space_property);
 
-    void setTemperature(const SireUnits::Dimension::Temperature &temperature);
-    void setPressure(const SireUnits::Dimension::Pressure &pressure);
-    void setChemicalPotential(
-                    const SireUnits::Dimension::MolarEnergy &chemical_potential);
-    void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
+        const PropertyMap &propertyMap() const;
 
-    static const NullMove& null();
+        virtual Ensemble ensemble() const = 0;
 
-protected:
-    Move& operator=(const Move &other);
+        bool isConstantEnergy() const;
+        bool isConstantTemperature() const;
+        bool isConstantVolume() const;
+        bool isConstantPressure() const;
+        bool isConstantChemicalPotential() const;
+        bool isConstantFugacity() const;
 
-    bool operator==(const Move &other) const;
-    bool operator!=(const Move &other) const;
+        virtual bool isConstantLambda(const Symbol &lam) const;
 
-    void setProperty(const QString &property, const PropertyName &value);
+        SireUnits::Dimension::Temperature temperature() const;
+        SireUnits::Dimension::Pressure pressure() const;
+        SireUnits::Dimension::Pressure fugacity() const;
+        SireUnits::Dimension::MolarEnergy chemicalPotential() const;
 
-    virtual void _pvt_setTemperature(
-                            const SireUnits::Dimension::Temperature &temperature);
+        void setTemperature(const SireUnits::Dimension::Temperature &temperature);
+        void setPressure(const SireUnits::Dimension::Pressure &pressure);
+        void setChemicalPotential(const SireUnits::Dimension::MolarEnergy &chemical_potential);
+        void setFugacity(const SireUnits::Dimension::Pressure &fugacity);
 
-    virtual void _pvt_setPressure(
-                            const SireUnits::Dimension::Pressure &pressure);
+        static const NullMove &null();
 
-    virtual void _pvt_setFugacity(
-                            const SireUnits::Dimension::Pressure &fugacity);
+    protected:
+        Move &operator=(const Move &other);
 
-private:
-    /** The component of the energy that describes the Hamiltonian
-        that this move samples */
-    Symbol nrgcomponent;
+        bool operator==(const Move &other) const;
+        bool operator!=(const Move &other) const;
 
-    /** The name of the property that contains the Molecule coordinates
-        property. This move will only affect the coordinates that are
-        contained in this property */
-    PropertyName coordsproperty;
+        void setProperty(const QString &property, const PropertyName &value);
 
-    /** The name of the property that contains the System space property.
-        This is necessary as we may have to map the molecules back into
-        the space at the end of the move */
-    PropertyName spaceproperty;
+        virtual void _pvt_setTemperature(const SireUnits::Dimension::Temperature &temperature);
 
-    /** The property map used for this move */
-    PropertyMap map;
-};
+        virtual void _pvt_setPressure(const SireUnits::Dimension::Pressure &pressure);
 
-/** This is a null move - it doesn't change the system at all! */
-class SIREMOVE_EXPORT NullMove : public SireBase::ConcreteProperty<NullMove,Move>
-{
-public:
-    NullMove();
-    NullMove(const NullMove &other);
+        virtual void _pvt_setFugacity(const SireUnits::Dimension::Pressure &fugacity);
 
-    ~NullMove();
+    private:
+        /** The component of the energy that describes the Hamiltonian
+            that this move samples */
+        Symbol nrgcomponent;
 
-    NullMove& operator=(const NullMove &other);
+        /** The name of the property that contains the Molecule coordinates
+            property. This move will only affect the coordinates that are
+            contained in this property */
+        PropertyName coordsproperty;
 
-    bool operator==(const NullMove &other) const;
-    bool operator!=(const NullMove &other) const;
+        /** The name of the property that contains the System space property.
+            This is necessary as we may have to map the molecules back into
+            the space at the end of the move */
+        PropertyName spaceproperty;
 
-    static const char* typeName();
+        /** The property map used for this move */
+        PropertyMap map;
+    };
 
-    NullMove* clone() const;
+    /** This is a null move - it doesn't change the system at all! */
+    class SIREMOVE_EXPORT NullMove : public SireBase::ConcreteProperty<NullMove, Move>
+    {
+    public:
+        NullMove();
+        NullMove(const NullMove &other);
 
-    QString toString() const;
+        ~NullMove();
 
-    int nMoves() const;
+        NullMove &operator=(const NullMove &other);
 
-    void clearStatistics();
+        bool operator==(const NullMove &other) const;
+        bool operator!=(const NullMove &other) const;
 
-    void setGenerator(const RanGenerator &rangenerator);
+        static const char *typeName();
 
-    void move(System &system, int nmoves, bool record_stats);
+        NullMove *clone() const;
 
-    Ensemble ensemble() const;
-};
+        QString toString() const;
 
-typedef SireBase::PropPtr<Move> MovePtr;
+        int nMoves() const;
 
-}
+        void clearStatistics();
 
-Q_DECLARE_METATYPE( SireMove::NullMove )
+        void setGenerator(const RanGenerator &rangenerator);
 
-SIRE_EXPOSE_CLASS( SireMove::Move )
-SIRE_EXPOSE_CLASS( SireMove::NullMove )
+        void move(System &system, int nmoves, bool record_stats);
 
-SIRE_EXPOSE_PROPERTY( SireMove::MovePtr, SireMove::Move )
+        Ensemble ensemble() const;
+    };
+
+    typedef SireBase::PropPtr<Move> MovePtr;
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::NullMove)
+
+SIRE_EXPOSE_CLASS(SireMove::Move)
+SIRE_EXPOSE_CLASS(SireMove::NullMove)
+
+SIRE_EXPOSE_PROPERTY(SireMove::MovePtr, SireMove::Move)
 
 SIRE_END_HEADER
 

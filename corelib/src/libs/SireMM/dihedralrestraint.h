@@ -28,125 +28,116 @@
 #ifndef SIREMM_DIHEDRALRESTRAINT_H
 #define SIREMM_DIHEDRALRESTRAINT_H
 
-#include "restraint.h"
 #include "anglerestraint.h"
+#include "restraint.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMM
 {
-class DihedralRestraint;
+    class DihedralRestraint;
 }
 
-SIREMM_EXPORT QDataStream& operator<<(QDataStream&, const SireMM::DihedralRestraint&);
-SIREMM_EXPORT QDataStream& operator>>(QDataStream&, SireMM::DihedralRestraint&);
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::DihedralRestraint &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::DihedralRestraint &);
 
 namespace SireMM
 {
 
-/** This is a restraint that operates on the dihedral angle between
-    four SireMM::Point objects (e.g. four atoms in a molecule)
+    /** This is a restraint that operates on the dihedral angle between
+        four SireMM::Point objects (e.g. four atoms in a molecule)
 
-    @author Christopher Woods
-*/
-class SIREMM_EXPORT DihedralRestraint
-            : public SireBase::ConcreteProperty<DihedralRestraint,ExpressionRestraint3D>
-{
+        @author Christopher Woods
+    */
+    class SIREMM_EXPORT DihedralRestraint : public SireBase::ConcreteProperty<DihedralRestraint, ExpressionRestraint3D>
+    {
 
-friend SIREMM_EXPORT QDataStream& ::operator<<(QDataStream&, const DihedralRestraint&);
-friend SIREMM_EXPORT QDataStream& ::operator>>(QDataStream&, DihedralRestraint&);
+        friend SIREMM_EXPORT QDataStream & ::operator<<(QDataStream &, const DihedralRestraint &);
+        friend SIREMM_EXPORT QDataStream & ::operator>>(QDataStream &, DihedralRestraint &);
 
-public:
-    DihedralRestraint();
+    public:
+        DihedralRestraint();
 
-    DihedralRestraint(const PointRef &point0, const PointRef &point1,
-                      const PointRef &point2, const PointRef &point3,
-                      const Expression &restraint);
+        DihedralRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                          const Expression &restraint);
 
-    DihedralRestraint(const PointRef &point0, const PointRef &point1,
-                      const PointRef &point2, const PointRef &point3,
-                      const Expression &restraint, const Values &values);
+        DihedralRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                          const Expression &restraint, const Values &values);
 
-    DihedralRestraint(const DihedralRestraint &other);
+        DihedralRestraint(const DihedralRestraint &other);
 
-    ~DihedralRestraint();
+        ~DihedralRestraint();
 
-    DihedralRestraint& operator=(const DihedralRestraint &other);
+        DihedralRestraint &operator=(const DihedralRestraint &other);
 
-    bool operator==(const DihedralRestraint &other) const;
-    bool operator!=(const DihedralRestraint &other) const;
+        bool operator==(const DihedralRestraint &other) const;
+        bool operator!=(const DihedralRestraint &other) const;
 
-    static const char* typeName();
+        static const char *typeName();
 
-    const Point& point(int i) const;
+        const Point &point(int i) const;
 
-    const Point& point0() const;
-    const Point& point1() const;
-    const Point& point2() const;
-    const Point& point3() const;
+        const Point &point0() const;
+        const Point &point1() const;
+        const Point &point2() const;
+        const Point &point3() const;
 
-    int nPoints() const;
+        int nPoints() const;
 
-    static const Symbol& phi();
+        static const Symbol &phi();
 
-    Symbols builtinSymbols() const;
-    Values builtinValues() const;
+        Symbols builtinSymbols() const;
+        Values builtinValues() const;
 
-    RestraintPtr differentiate(const Symbol &symbol) const;
+        RestraintPtr differentiate(const Symbol &symbol) const;
 
-    void setSpace(const Space &space);
+        void setSpace(const Space &space);
 
-    const Expression& differentialRestraintFunction() const;
+        const Expression &differentialRestraintFunction() const;
 
-    void force(MolForceTable &forcetable, double scale_force=1) const;
-    void force(ForceTable &forcetable, double scale_force=1) const;
+        void force(MolForceTable &forcetable, double scale_force = 1) const;
+        void force(ForceTable &forcetable, double scale_force = 1) const;
 
-    void update(const MoleculeData &moldata);
-    void update(const Molecules &molecules);
+        void update(const MoleculeData &moldata);
+        void update(const Molecules &molecules);
 
-    Molecules molecules() const;
+        Molecules molecules() const;
 
-    bool contains(MolNum molnum) const;
-    bool contains(const MolID &molid) const;
+        bool contains(MolNum molnum) const;
+        bool contains(const MolID &molid) const;
 
-    bool usesMoleculesIn(const ForceTable &forcetable) const;
-    bool usesMoleculesIn(const Molecules &molecules) const;
+        bool usesMoleculesIn(const ForceTable &forcetable) const;
+        bool usesMoleculesIn(const Molecules &molecules) const;
 
-    static DihedralRestraint harmonic(
-                                   const PointRef &point0, const PointRef &point1,
-                                   const PointRef &point2, const PointRef &point3,
-                                   const HarmonicAngleForceConstant &force_constant);
+        static DihedralRestraint harmonic(const PointRef &point0, const PointRef &point1, const PointRef &point2,
+                                          const PointRef &point3, const HarmonicAngleForceConstant &force_constant);
 
-    static DihedralRestraint halfHarmonic(
-                                       const PointRef &point0, const PointRef &point1,
-                                       const PointRef &point2, const PointRef &point3,
-                                       const SireUnits::Dimension::Angle &angle,
-                                       const HarmonicAngleForceConstant &force_constant);
+        static DihedralRestraint halfHarmonic(const PointRef &point0, const PointRef &point1, const PointRef &point2,
+                                              const PointRef &point3, const SireUnits::Dimension::Angle &angle,
+                                              const HarmonicAngleForceConstant &force_constant);
 
-protected:
-    DihedralRestraint(const PointRef &point0, const PointRef &point1,
-                      const PointRef &point2, const PointRef &point3,
-                      const Expression &nrg_restraint,
-                      const Expression &force_restraint);
+    protected:
+        DihedralRestraint(const PointRef &point0, const PointRef &point1, const PointRef &point2, const PointRef &point3,
+                          const Expression &nrg_restraint, const Expression &force_restraint);
 
-private:
-    void calculatePhi();
+    private:
+        void calculatePhi();
 
-    /** The four points between which the restraint is calculated */
-    SireFF::PointPtr p[4];
+        /** The four points between which the restraint is calculated */
+        SireFF::PointPtr p[4];
 
-    /** The expression used to calculate the force */
-    Expression force_expression;
+        /** The expression used to calculate the force */
+        Expression force_expression;
 
-    /** Whether or not all four points are within the same molecule */
-    bool intra_molecule_points;
-};
+        /** Whether or not all four points are within the same molecule */
+        bool intra_molecule_points;
+    };
 
-}
+} // namespace SireMM
 
-Q_DECLARE_METATYPE( SireMM::DihedralRestraint )
+Q_DECLARE_METATYPE(SireMM::DihedralRestraint)
 
-SIRE_EXPOSE_CLASS( SireMM::DihedralRestraint )
+SIRE_EXPOSE_CLASS(SireMM::DihedralRestraint)
 
 SIRE_END_HEADER
 

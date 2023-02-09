@@ -36,61 +36,61 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class LengthProperty;
+    class LengthProperty;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::LengthProperty&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::LengthProperty&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::LengthProperty &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::LengthProperty &);
 
 namespace SireBase
 {
 
-using SireUnits::Dimension::Length;
+    using SireUnits::Dimension::Length;
 
-/** This class provides a thin Property wrapper around lengths
+    /** This class provides a thin Property wrapper around lengths
 
-    This class is deprecated, and only kept for compatibility with old S3
-    files.
+        This class is deprecated, and only kept for compatibility with old S3
+        files.
 
-    You should now use GeneralUnitProperty to hold units
+        You should now use GeneralUnitProperty to hold units
 
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT LengthProperty : public ConcreteProperty<LengthProperty,Property>
-{
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT LengthProperty : public ConcreteProperty<LengthProperty, Property>
+    {
 
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const LengthProperty&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, LengthProperty&);
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const LengthProperty &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, LengthProperty &);
 
-public:
-    LengthProperty();
-    LengthProperty(Length value);
+    public:
+        LengthProperty();
+        LengthProperty(Length value);
 
-    LengthProperty(const LengthProperty &other);
-    LengthProperty(const Property &other);
+        LengthProperty(const LengthProperty &other);
+        LengthProperty(const Property &other);
 
-    ~LengthProperty();
+        ~LengthProperty();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    LengthProperty& operator=(const LengthProperty &other);
+        LengthProperty &operator=(const LengthProperty &other);
 
-    bool operator==(const LengthProperty &other) const;
-    bool operator!=(const LengthProperty &other) const;
+        bool operator==(const LengthProperty &other) const;
+        bool operator!=(const LengthProperty &other) const;
 
-    Length value() const;
+        Length value() const;
 
-    QString toString() const;
+        QString toString() const;
 
-private:
-    Length val;
-};
+    private:
+        Length val;
+    };
 
-}
+} // namespace SireBase
 
-Q_DECLARE_METATYPE( SireBase::LengthProperty )
+Q_DECLARE_METATYPE(SireBase::LengthProperty)
 
-SIRE_EXPOSE_CLASS( SireBase::LengthProperty )
+SIRE_EXPOSE_CLASS(SireBase::LengthProperty)
 
 SIRE_END_HEADER
 

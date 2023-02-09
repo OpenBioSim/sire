@@ -44,10 +44,8 @@ static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
 static void assertAligned32(const void *pointer, QString place)
 {
     if (not isAligned32(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiDouble has been created! %1")
-                                         .arg((quintptr)pointer % size_t(32)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiDouble has been created! %1").arg((quintptr)pointer % size_t(32)), place);
 }
 #else
 #ifdef MULTIFLOAT_SSE_IS_AVAILABLE
@@ -59,10 +57,8 @@ static SIRE_ALWAYS_INLINE bool isAligned16(const void *pointer)
 static void assertAligned16(const void *pointer, QString place)
 {
     if (not isAligned16(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiDouble has been created! %1")
-                                         .arg((quintptr)pointer % size_t(16)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiDouble has been created! %1").arg((quintptr)pointer % size_t(16)), place);
 }
 #else
 static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
@@ -73,10 +69,8 @@ static SIRE_ALWAYS_INLINE bool isAligned32(const void *pointer)
 static void assertAligned32(const void *pointer, QString place)
 {
     if (not isAligned32(pointer))
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiDouble has been created! %1")
-                                         .arg((quintptr)pointer % size_t(32)),
-                                     place);
+        throw SireError::program_bug(
+            QObject::tr("An unaligned MultiDouble has been created! %1").arg((quintptr)pointer % size_t(32)), place);
 }
 #endif
 #endif
@@ -84,8 +78,7 @@ static void assertAligned32(const void *pointer, QString place)
 void MultiDouble::assertAligned(const void *ptr, size_t size)
 {
     if ((quintptr)ptr % size != 0)
-        throw SireError::program_bug(QObject::tr(
-                                         "An unaligned MultiDouble has been created! %1, %2, %3")
+        throw SireError::program_bug(QObject::tr("An unaligned MultiDouble has been created! %1, %2, %3")
                                          .arg((quintptr)ptr)
                                          .arg((quintptr)ptr % size)
                                          .arg(size),
@@ -108,9 +101,8 @@ MultiDouble::MultiDouble(const double *array, int size)
 #endif
 
     if (size > MULTIFLOAT_SIZE)
-        throw SireError::unsupported(QObject::tr(
-                                         "Cannot fit an array of size %1 in this MultiDouble, as it is only "
-                                         "capable of holding %2 values...")
+        throw SireError::unsupported(QObject::tr("Cannot fit an array of size %1 in this MultiDouble, as it is only "
+                                                 "capable of holding %2 values...")
                                          .arg(size)
                                          .arg(MULTIFLOAT_SIZE),
                                      CODELOC);
@@ -522,11 +514,9 @@ double MultiDouble::at(int i) const
 
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
-        throw SireError::invalid_index(QObject::tr(
-                                           "Cannot access element %1 of MultiDouble (holds only %2 values)")
-                                           .arg(i)
-                                           .arg(MULTIFLOAT_SIZE),
-                                       CODELOC);
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element %1 of MultiDouble (holds only %2 values)").arg(i).arg(MULTIFLOAT_SIZE),
+            CODELOC);
     }
 
     return v.a[i];
@@ -558,11 +548,9 @@ void MultiDouble::set(int i, double value)
 
     if (i < 0 or i >= MULTIFLOAT_SIZE)
     {
-        throw SireError::invalid_index(QObject::tr(
-                                           "Cannot access element %1 of MultiDouble (holds only %2 values)")
-                                           .arg(i)
-                                           .arg(MULTIFLOAT_SIZE),
-                                       CODELOC);
+        throw SireError::invalid_index(
+            QObject::tr("Cannot access element %1 of MultiDouble (holds only %2 values)").arg(i).arg(MULTIFLOAT_SIZE),
+            CODELOC);
     }
 
     v.a[i] = value;

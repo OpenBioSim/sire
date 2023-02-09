@@ -37,273 +37,246 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-class Properties;
+    class Properties;
 }
 
-SIREBASE_EXPORT QDataStream& operator<<(QDataStream&, const SireBase::Properties&);
-SIREBASE_EXPORT QDataStream& operator>>(QDataStream&, SireBase::Properties&);
+SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::Properties &);
+SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::Properties &);
 
-SIREBASE_EXPORT XMLStream& operator<<(XMLStream&, const SireBase::Properties&);
-SIREBASE_EXPORT XMLStream& operator>>(XMLStream&, SireBase::Properties&);
+SIREBASE_EXPORT XMLStream &operator<<(XMLStream &, const SireBase::Properties &);
+SIREBASE_EXPORT XMLStream &operator>>(XMLStream &, SireBase::Properties &);
 
-SIREBASE_EXPORT QTextStream& operator<<(QTextStream&, const SireBase::Properties&);
+SIREBASE_EXPORT QTextStream &operator<<(QTextStream &, const SireBase::Properties &);
 
 namespace SireBase
 {
 
-namespace detail
-{
-class PropertiesData;
-}
-
-/** This class holds a collection of properties, indexed by name.
-    Each property comes complete with a set of metadata.
-    The metadata is actually another Properties object,
-    and indeed Properties can itself be a Property,
-    so allowing Properties to be nested indefinitely.
-
-    @author Christopher Woods
-*/
-class SIREBASE_EXPORT Properties : public ConcreteProperty<Properties,Property>
-{
-
-friend SIREBASE_EXPORT QDataStream& ::operator<<(QDataStream&, const Properties&);
-friend SIREBASE_EXPORT QDataStream& ::operator>>(QDataStream&, Properties&);
-
-friend SIREBASE_EXPORT XMLStream& ::operator<<(XMLStream&, const Properties&);
-friend SIREBASE_EXPORT XMLStream& ::operator>>(XMLStream&, Properties&);
-
-friend class detail::PropertiesData; // so can call private constructor
-
-public:
-    typedef QHash<QString,PropertyPtr>::const_iterator const_iterator;
-    typedef QHash<QString,PropertyPtr>::const_iterator iterator;
-
-    Properties();
-
-    Properties(const Properties &other);
-
-    ~Properties();
-
-    Properties& operator=(const Properties &other);
-
-    bool operator==(const Properties &other) const;
-    bool operator!=(const Properties &other) const;
-
-    static const char* typeName()
+    namespace detail
     {
-        return "SireBase::Properties";
+        class PropertiesData;
     }
 
-    const Property& operator[](const PropertyName &key) const;
+    /** This class holds a collection of properties, indexed by name.
+        Each property comes complete with a set of metadata.
+        The metadata is actually another Properties object,
+        and indeed Properties can itself be a Property,
+        so allowing Properties to be nested indefinitely.
 
-    bool isEmpty() const;
+        @author Christopher Woods
+    */
+    class SIREBASE_EXPORT Properties : public ConcreteProperty<Properties, Property>
+    {
 
-    QString toString() const;
+        friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const Properties &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, Properties &);
 
-    QStringList propertyKeys() const;
+        friend SIREBASE_EXPORT XMLStream & ::operator<<(XMLStream &, const Properties &);
+        friend SIREBASE_EXPORT XMLStream & ::operator>>(XMLStream &, Properties &);
 
-    QStringList metadataKeys() const;
-    QStringList metadataKeys(const PropertyName &key) const;
+        friend class detail::PropertiesData; // so can call private constructor
 
-    template<class T>
-    QStringList propertyKeysOfType() const;
+    public:
+        typedef QHash<QString, PropertyPtr>::const_iterator const_iterator;
+        typedef QHash<QString, PropertyPtr>::const_iterator iterator;
 
-    template<class T>
-    QStringList metadataKeysOfType() const;
+        Properties();
 
-    template<class T>
-    QStringList metadataKeysOfType(const PropertyName &key) const;
+        Properties(const Properties &other);
 
-    const_iterator begin() const;
-    const_iterator constBegin() const;
+        ~Properties();
 
-    const_iterator find(const QString &key) const;
-    const_iterator constFind(const QString &key) const;
+        Properties &operator=(const Properties &other);
 
-    const_iterator end() const;
-    const_iterator constEnd() const;
+        bool operator==(const Properties &other) const;
+        bool operator!=(const Properties &other) const;
 
-    int count() const;
-    int size() const;
-    int nProperties() const;
+        static const char *typeName()
+        {
+            return "SireBase::Properties";
+        }
 
-    const Property& property(const PropertyName &key) const;
-    const Property& property(const PropertyName &key,
-                             const Property &default_value) const;
+        const Property &operator[](const PropertyName &key) const;
 
-    const Property& metadata(const PropertyName &metakey) const;
-    const Property& metadata(const PropertyName &metakey,
-                             const Property &default_value) const;
+        bool isEmpty() const;
 
-    const Property& metadata(const PropertyName &key,
-                             const PropertyName &metakey) const;
-    const Property& metadata(const PropertyName &key,
-                             const PropertyName &metakey,
-                             const Property &default_value) const;
+        QString toString() const;
 
-    const Properties& allMetadata() const;
-    const Properties& allMetadata(const PropertyName &key) const;
+        QStringList propertyKeys() const;
 
-    void setProperty(const QString &key, const Property &value);
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const PropertyName &key) const;
 
-    void setProperty(const QString &key, const Property &value,
-                     bool clear_metadata);
+        template <class T>
+        QStringList propertyKeysOfType() const;
 
-    void setMetadata(const QString &metakey, const Property &value);
-    void setMetadata(const QString &key,
-                     const QString &metakey, const Property &value);
+        template <class T>
+        QStringList metadataKeysOfType() const;
 
-    void removeProperty(const QString &key);
+        template <class T>
+        QStringList metadataKeysOfType(const PropertyName &key) const;
 
-    void removeMetadata(const QString &metakey);
-    void removeAllMetadata();
+        const_iterator begin() const;
+        const_iterator constBegin() const;
 
-    void removeMetadata(const QString &key, const QString &metakey);
-    void removeAllMetadata(const QString &key);
+        const_iterator find(const QString &key) const;
+        const_iterator constFind(const QString &key) const;
 
-    void clear();
+        const_iterator end() const;
+        const_iterator constEnd() const;
 
-    bool hasProperty(const PropertyName &key) const;
+        int count() const;
+        int size() const;
+        int nProperties() const;
 
-    bool hasMetadata(const PropertyName &metakey) const;
+        const Property &property(const PropertyName &key) const;
+        const Property &property(const PropertyName &key, const Property &default_value) const;
 
-    bool hasMetadata(const PropertyName &key,
-                     const PropertyName &metakey) const;
+        const Property &metadata(const PropertyName &metakey) const;
+        const Property &metadata(const PropertyName &metakey, const Property &default_value) const;
 
-    template<class T>
-    bool hasPropertyOfType(const PropertyName &key) const;
+        const Property &metadata(const PropertyName &key, const PropertyName &metakey) const;
+        const Property &metadata(const PropertyName &key, const PropertyName &metakey, const Property &default_value) const;
 
-    template<class T>
-    bool hasMetadataOfType(const PropertyName &metakey) const;
+        const Properties &allMetadata() const;
+        const Properties &allMetadata(const PropertyName &key) const;
 
-    template<class T>
-    bool hasMetadataOfType(const PropertyName &key,
-                           const PropertyName &metakey) const;
+        void setProperty(const QString &key, const Property &value);
 
-    const char* propertyType(const PropertyName &key) const;
+        void setProperty(const QString &key, const Property &value, bool clear_metadata);
 
-    const char* metadataType(const PropertyName &metakey) const;
-    const char* metadataType(const PropertyName &key,
-                             const PropertyName &metakey) const;
+        void setMetadata(const QString &metakey, const Property &value);
+        void setMetadata(const QString &key, const QString &metakey, const Property &value);
 
-    void assertContainsProperty(const PropertyName &key) const;
+        void removeProperty(const QString &key);
 
-    void assertContainsMetadata(const PropertyName &metakey) const;
-    void assertContainsMetadata(const PropertyName &key,
-                                const PropertyName &metakey) const;
+        void removeMetadata(const QString &metakey);
+        void removeAllMetadata();
 
-private:
-    Properties(bool);
+        void removeMetadata(const QString &key, const QString &metakey);
+        void removeAllMetadata(const QString &key);
 
-    /** Implicitly shared pointer to the data of this object */
-    SharedDataPointer<detail::PropertiesData> d;
-};
+        void clear();
+
+        bool hasProperty(const PropertyName &key) const;
+
+        bool hasMetadata(const PropertyName &metakey) const;
+
+        bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;
+
+        template <class T>
+        bool hasPropertyOfType(const PropertyName &key) const;
+
+        template <class T>
+        bool hasMetadataOfType(const PropertyName &metakey) const;
+
+        template <class T>
+        bool hasMetadataOfType(const PropertyName &key, const PropertyName &metakey) const;
+
+        const char *propertyType(const PropertyName &key) const;
+
+        const char *metadataType(const PropertyName &metakey) const;
+        const char *metadataType(const PropertyName &key, const PropertyName &metakey) const;
+
+        void assertContainsProperty(const PropertyName &key) const;
+
+        void assertContainsMetadata(const PropertyName &metakey) const;
+        void assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const;
+
+    private:
+        Properties(bool);
+
+        /** Implicitly shared pointer to the data of this object */
+        SharedDataPointer<detail::PropertiesData> d;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-/** Return the keys of all properties that are of type T */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QStringList Properties::propertyKeysOfType() const
-{
-    QStringList keys;
-
-    for (Properties::const_iterator it = this->constBegin();
-         it != this->constEnd();
-         ++it)
+    /** Return the keys of all properties that are of type T */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QStringList Properties::propertyKeysOfType() const
     {
-        if (it.value()->isA<T>())
-            keys.append(it.key());
+        QStringList keys;
+
+        for (Properties::const_iterator it = this->constBegin(); it != this->constEnd(); ++it)
+        {
+            if (it.value()->isA<T>())
+                keys.append(it.key());
+        }
+
+        return keys;
     }
 
-    return keys;
-}
-
-/** Return the metakeys of all metadata of type T */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QStringList Properties::metadataKeysOfType() const
-{
-    QStringList metakeys;
-
-    const Properties &metadata = this->allMetadata();
-
-    for (Properties::const_iterator it = metadata.constBegin();
-         it != metadata.constEnd();
-         ++it)
+    /** Return the metakeys of all metadata of type T */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QStringList Properties::metadataKeysOfType() const
     {
-        if (it.value()->isA<T>())
-            metakeys.append(it.key());
+        QStringList metakeys;
+
+        const Properties &metadata = this->allMetadata();
+
+        for (Properties::const_iterator it = metadata.constBegin(); it != metadata.constEnd(); ++it)
+        {
+            if (it.value()->isA<T>())
+                metakeys.append(it.key());
+        }
+
+        return metakeys;
     }
 
-    return metakeys;
-}
+    /** Return the metakeys of all metadata of type T for the property
+        with key 'key'
 
-/** Return the metakeys of all metadata of type T for the property
-    with key 'key'
-
-    \throw SireBase::missing_property
-*/
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-QStringList Properties::metadataKeysOfType(const PropertyName &key) const
-{
-    QStringList metakeys;
-    const Properties &metadata = this->allMetadata(key);
-
-    for (Properties::const_iterator it = metadata.constBegin();
-         it != metadata.constEnd();
-         ++it)
+        \throw SireBase::missing_property
+    */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QStringList Properties::metadataKeysOfType(const PropertyName &key) const
     {
-        if (it.value()->isA<T>())
-            metakeys.append(it.key());
+        QStringList metakeys;
+        const Properties &metadata = this->allMetadata(key);
+
+        for (Properties::const_iterator it = metadata.constBegin(); it != metadata.constEnd(); ++it)
+        {
+            if (it.value()->isA<T>())
+                metakeys.append(it.key());
+        }
+
+        return metakeys;
     }
 
-    return metakeys;
-}
+    /** Return whether or not this molecule has a property called 'key'
+        that is of type 'T' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Properties::hasPropertyOfType(const PropertyName &key) const
+    {
+        return this->hasProperty(key) and this->property(key).isA<T>();
+    }
 
-/** Return whether or not this molecule has a property called 'key'
-    that is of type 'T' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool Properties::hasPropertyOfType(const PropertyName &key) const
-{
-    return this->hasProperty(key) and
-           this->property(key).isA<T>();
-}
+    /** Return whether or not this molecule has some metadata at metakey
+        'metakey' that is of type 'T' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Properties::hasMetadataOfType(const PropertyName &metakey) const
+    {
+        return this->hasMetadata(metakey) and this->metadata(metakey).isA<T>();
+    }
 
-/** Return whether or not this molecule has some metadata at metakey
-    'metakey' that is of type 'T' */
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool Properties::hasMetadataOfType(const PropertyName &metakey) const
-{
-    return this->hasMetadata(metakey) and
-           this->metadata(metakey).isA<T>();
-}
+    /** Return whether or not the property at key 'key' has some metadata
+        at metakey 'metakey' that is of type 'T'
 
-/** Return whether or not the property at key 'key' has some metadata
-    at metakey 'metakey' that is of type 'T'
+        \throw SireBase::missing_property
+    */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Properties::hasMetadataOfType(const PropertyName &key, const PropertyName &metakey) const
+    {
+        return this->hasMetadata(key, metakey) and this->metadata(key, metakey).isA<T>();
+    }
 
-    \throw SireBase::missing_property
-*/
-template<class T>
-SIRE_OUTOFLINE_TEMPLATE
-bool Properties::hasMetadataOfType(const PropertyName &key,
-                                   const PropertyName &metakey) const
-{
-    return this->hasMetadata(key, metakey) and
-           this->metadata(key, metakey).isA<T>();
-}
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-#endif //SIRE_SKIP_INLINE_FUNCTIONS
-
-}
+} // namespace SireBase
 
 Q_DECLARE_METATYPE(SireBase::Properties);
 
-SIRE_EXPOSE_CLASS( SireBase::Properties )
+SIRE_EXPOSE_CLASS(SireBase::Properties)
 
 SIRE_END_HEADER
 

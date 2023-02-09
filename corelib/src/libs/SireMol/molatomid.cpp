@@ -27,14 +27,14 @@
 
 #include "molatomid.h"
 
-#include "selector.hpp"
 #include "atom.h"
+#include "selector.hpp"
 
 #include "moleculegroup.h"
 #include "moleculegroups.h"
 
-#include "SireMol/errors.h"
 #include "SireError/errors.h"
+#include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -72,7 +72,7 @@ QDataStream &operator>>(QDataStream &ds, MolAtomID &molatomid)
         sds >> molatomid.molid >> molatomid.atomid;
     }
     else
-        throw version_error( v, "1", r_molatomid, CODELOC );
+        throw version_error(v, "1", r_molatomid, CODELOC);
 
     return ds;
 }
@@ -80,9 +80,9 @@ QDataStream &operator>>(QDataStream &ds, MolAtomID &molatomid)
 /** Collapse any nested IDs together */
 void MolAtomID::collapse()
 {
-    const MolAtomID *molatomid = dynamic_cast<const MolAtomID*>( &(atomid.base()) );
+    const MolAtomID *molatomid = dynamic_cast<const MolAtomID *>(&(atomid.base()));
 
-    if ( molatomid != 0 )
+    if (molatomid != 0)
     {
         if (not molatomid->molID().isNull())
         {
@@ -90,7 +90,7 @@ void MolAtomID::collapse()
                 molid = molatomid->molID();
 
             else
-                molid = IDAndSet<MolID>( molid, molatomid->molID() );
+                molid = IDAndSet<MolID>(molid, molatomid->molID());
         }
 
         atomid = molatomid->atomID();
@@ -99,40 +99,44 @@ void MolAtomID::collapse()
 
 /** Construct a MolAtomID that matches everything */
 MolAtomID::MolAtomID() : AtomID()
-{}
+{
+}
 
 /** Construct a MolAtomID that matches the atoms identified by 'atomid'
     in the molecules identified by 'molid' */
-MolAtomID::MolAtomID(const MolID &mol_id, const AtomID &atom_id)
-          : AtomID(), molid(mol_id), atomid(atom_id)
-{}
+MolAtomID::MolAtomID(const MolID &mol_id, const AtomID &atom_id) : AtomID(), molid(mol_id), atomid(atom_id)
+{
+}
 
 /** Construct a MolAtomID that matches the atoms identified by 'atomid'
     in the molecules identified by 'molid' */
-MolAtomID::MolAtomID(const AtomID &atom_id, const MolID &mol_id)
-          : AtomID(), molid(mol_id), atomid(atom_id)
-{}
+MolAtomID::MolAtomID(const AtomID &atom_id, const MolID &mol_id) : AtomID(), molid(mol_id), atomid(atom_id)
+{
+}
 
 /** Construct a MolAtomID that matches the specified atoms in the specified
     molecules */
-MolAtomID::MolAtomID(const tuple<MolIdentifier,AtomIdentifier> &molatomid)
-          : AtomID(), molid(molatomid.get<0>()), atomid(molatomid.get<1>())
-{}
+MolAtomID::MolAtomID(const tuple<MolIdentifier, AtomIdentifier> &molatomid)
+    : AtomID(), molid(molatomid.get<0>()), atomid(molatomid.get<1>())
+{
+}
 
 /** Construct a MolAtomID that matches the specified atoms in the specified
     molecules */
-MolAtomID::MolAtomID(const boost::tuple<AtomIdentifier,MolIdentifier> &molatomid)
-          : AtomID(), molid(molatomid.get<1>()), atomid(molatomid.get<0>())
-{}
+MolAtomID::MolAtomID(const boost::tuple<AtomIdentifier, MolIdentifier> &molatomid)
+    : AtomID(), molid(molatomid.get<1>()), atomid(molatomid.get<0>())
+{
+}
 
 /** Copy constructor */
-MolAtomID::MolAtomID(const MolAtomID &other)
-          : AtomID(other), molid(other.molid), atomid(other.atomid)
-{}
+MolAtomID::MolAtomID(const MolAtomID &other) : AtomID(other), molid(other.molid), atomid(other.atomid)
+{
+}
 
 /** Destructor */
 MolAtomID::~MolAtomID()
-{}
+{
+}
 
 /** Return whether or not this is null */
 bool MolAtomID::isNull() const
@@ -156,24 +160,23 @@ QString MolAtomID::toString() const
         return atomid.toString();
 
     else
-        return QObject::tr("%1 and %2")
-                            .arg(molid.toString(), atomid.toString());
+        return QObject::tr("%1 and %2").arg(molid.toString(), atomid.toString());
 }
 
 /** Return the AtomID part of this match */
-const AtomID& MolAtomID::atomID() const
+const AtomID &MolAtomID::atomID() const
 {
     return atomid.base();
 }
 
 /** Return the MolID part of this match */
-const MolID& MolAtomID::molID() const
+const MolID &MolAtomID::molID() const
 {
     return molid.base();
 }
 
 /** Copy assignment operator */
-MolAtomID& MolAtomID::operator=(const MolAtomID &other)
+MolAtomID &MolAtomID::operator=(const MolAtomID &other)
 {
     molid = other.molid;
     atomid = other.atomid;
@@ -205,15 +208,14 @@ bool MolAtomID::operator!=(const MolAtomID &other) const
 */
 QList<AtomIdx> MolAtomID::map(const MolInfo &molinfo) const
 {
-    //there isn't enough information to check that the molecule
-    //matches the MolID part of this ID!!!
+    // there isn't enough information to check that the molecule
+    // matches the MolID part of this ID!!!
     return atomid.map(molinfo);
 }
 
-QHash< MolNum,Selector<Atom> >
-MolAtomID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
+QHash<MolNum, Selector<Atom>> MolAtomID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Atom> > selected_atoms;
+    QHash<MolNum, Selector<Atom>> selected_atoms;
 
     QList<MolNum> molnums = molid.map(molecules);
 
@@ -223,27 +225,26 @@ MolAtomID::selectAllFrom(const Molecules &molecules, const PropertyMap &map) con
 
         try
         {
-            //try to find this atom in this molecule
-            selected_atoms.insert( molnum,
-                                   mol.selectAll(*this,map) );
+            // try to find this atom in this molecule
+            selected_atoms.insert(molnum, mol.selectAll(*this, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_atoms.isEmpty())
-        throw SireMol::missing_atom( QObject::tr(
-            "There was no atom matching the ID \"%1\" in "
-            "the set of molecules.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_atom(QObject::tr("There was no atom matching the ID \"%1\" in "
+                                                "the set of molecules.")
+                                        .arg(this->toString()),
+                                    CODELOC);
 
     return selected_atoms;
 }
 
-QHash< MolNum,Selector<Atom> >
-MolAtomID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
+QHash<MolNum, Selector<Atom>> MolAtomID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Atom> > selected_atoms;
+    QHash<MolNum, Selector<Atom>> selected_atoms;
 
     QList<MolNum> molnums = molid.map(molgroup);
 
@@ -253,27 +254,26 @@ MolAtomID::selectAllFrom(const MoleculeGroup &molgroup, const PropertyMap &map) 
 
         try
         {
-            //try to find this atom in this molecule
-            selected_atoms.insert( molnum,
-                                   mol.selectAll(*this,map) );
+            // try to find this atom in this molecule
+            selected_atoms.insert(molnum, mol.selectAll(*this, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_atoms.isEmpty())
-        throw SireMol::missing_atom( QObject::tr(
-            "There was no atom matching the ID \"%1\" in "
-            "the MoleculeGroup %2.")
-                .arg(this->toString(), molgroup.toString()), CODELOC );
+        throw SireMol::missing_atom(QObject::tr("There was no atom matching the ID \"%1\" in "
+                                                "the MoleculeGroup %2.")
+                                        .arg(this->toString(), molgroup.toString()),
+                                    CODELOC);
 
     return selected_atoms;
 }
 
-QHash< MolNum,Selector<Atom> >
-MolAtomID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
+QHash<MolNum, Selector<Atom>> MolAtomID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map) const
 {
-    QHash< MolNum,Selector<Atom> > selected_atoms;
+    QHash<MolNum, Selector<Atom>> selected_atoms;
 
     QList<MolNum> molnums = molid.map(molgroups);
 
@@ -283,30 +283,29 @@ MolAtomID::selectAllFrom(const MolGroupsBase &molgroups, const PropertyMap &map)
 
         try
         {
-            //try to find this atom in this molecule
-            selected_atoms.insert( molnum,
-                                   mol.selectAll(*this,map) );
+            // try to find this atom in this molecule
+            selected_atoms.insert(molnum, mol.selectAll(*this, map));
         }
-        catch(...)
-        {}
+        catch (...)
+        {
+        }
     }
 
     if (selected_atoms.isEmpty())
-        throw SireMol::missing_atom( QObject::tr(
-            "There was no atom matching the ID \"%1\" in "
-            "the passed MoleculeGroups.")
-                .arg(this->toString()), CODELOC );
+        throw SireMol::missing_atom(QObject::tr("There was no atom matching the ID \"%1\" in "
+                                                "the passed MoleculeGroups.")
+                                        .arg(this->toString()),
+                                    CODELOC);
 
     return selected_atoms;
 }
 
-const char* MolAtomID::typeName()
+const char *MolAtomID::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<MolAtomID>() );
+    return QMetaType::typeName(qMetaTypeId<MolAtomID>());
 }
 
-MolAtomID* MolAtomID::clone() const
+MolAtomID *MolAtomID::clone() const
 {
     return new MolAtomID(*this);
 }
-

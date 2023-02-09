@@ -34,84 +34,83 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class SystemMonitor;
-class NullMonitor;
-}
+    class SystemMonitor;
+    class NullMonitor;
+} // namespace SireSystem
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::SystemMonitor&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::SystemMonitor&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SystemMonitor &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SystemMonitor &);
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::NullMonitor&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::NullMonitor&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::NullMonitor &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::NullMonitor &);
 
 namespace SireSystem
 {
 
-class System;
+    class System;
 
-/** This is the virtual base class of all system monitors. A system
-    monitor is an object that monitors a system during a simulation,
-    e.g. collecting the average energy, saving a radial distribution
-    function etc.
+    /** This is the virtual base class of all system monitors. A system
+        monitor is an object that monitors a system during a simulation,
+        e.g. collecting the average energy, saving a radial distribution
+        function etc.
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SystemMonitor : public SireBase::Property
-{
-public:
-    SystemMonitor();
-
-    SystemMonitor(const SystemMonitor &other);
-
-    virtual ~SystemMonitor();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SystemMonitor : public SireBase::Property
     {
-        return "SireSystem::SystemMonitor";
-    }
+    public:
+        SystemMonitor();
 
-    virtual SystemMonitor* clone() const=0;
+        SystemMonitor(const SystemMonitor &other);
 
-    virtual void clearStatistics()=0;
+        virtual ~SystemMonitor();
 
-    virtual void monitor(System &system)=0;
+        static const char *typeName()
+        {
+            return "SireSystem::SystemMonitor";
+        }
 
-    static const NullMonitor& null();
-};
+        virtual SystemMonitor *clone() const = 0;
 
-/** This is a null monitor that doesn't monitor anything */
-class SIRESYSTEM_EXPORT NullMonitor
-           : public SireBase::ConcreteProperty<NullMonitor,SystemMonitor>
-{
-public:
-    NullMonitor();
+        virtual void clearStatistics() = 0;
 
-    NullMonitor(const NullMonitor &other);
+        virtual void monitor(System &system) = 0;
 
-    ~NullMonitor();
+        static const NullMonitor &null();
+    };
 
-    NullMonitor& operator=(const NullMonitor &other);
+    /** This is a null monitor that doesn't monitor anything */
+    class SIRESYSTEM_EXPORT NullMonitor : public SireBase::ConcreteProperty<NullMonitor, SystemMonitor>
+    {
+    public:
+        NullMonitor();
 
-    bool operator==(const NullMonitor &other) const;
-    bool operator!=(const NullMonitor &other) const;
+        NullMonitor(const NullMonitor &other);
 
-    static const char *typeName();
+        ~NullMonitor();
 
-    void clearStatistics();
+        NullMonitor &operator=(const NullMonitor &other);
 
-    void monitor(System &system);
-};
+        bool operator==(const NullMonitor &other) const;
+        bool operator!=(const NullMonitor &other) const;
 
-typedef SireBase::PropPtr<SystemMonitor> SysMonPtr;
+        static const char *typeName();
 
-}
+        void clearStatistics();
 
-Q_DECLARE_METATYPE( SireSystem::NullMonitor )
+        void monitor(System &system);
+    };
 
-SIRE_EXPOSE_CLASS( SireSystem::SystemMonitor )
-SIRE_EXPOSE_CLASS( SireSystem::NullMonitor )
+    typedef SireBase::PropPtr<SystemMonitor> SysMonPtr;
 
-SIRE_EXPOSE_PROPERTY( SireSystem::SysMonPtr, SireSystem::SystemMonitor )
+} // namespace SireSystem
+
+Q_DECLARE_METATYPE(SireSystem::NullMonitor)
+
+SIRE_EXPOSE_CLASS(SireSystem::SystemMonitor)
+SIRE_EXPOSE_CLASS(SireSystem::NullMonitor)
+
+SIRE_EXPOSE_PROPERTY(SireSystem::SysMonPtr, SireSystem::SystemMonitor)
 
 SIRE_END_HEADER
 

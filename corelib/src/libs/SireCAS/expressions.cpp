@@ -25,25 +25,27 @@
   *
 \*********************************************/
 
-#include "expression.h"
 #include "expressions.h"
+#include "expression.h"
 
 using namespace SireCAS;
 
 Expressions::Expressions() : QList<Expression>()
-{}
+{
+}
 
 Expressions::Expressions(const Expression &expression) : QList<Expression>()
 {
     this->append(expression);
 }
 
-Expressions::Expressions(const QList<Expression> &expressions)
-            : QList<Expression>(expressions)
-{}
+Expressions::Expressions(const QList<Expression> &expressions) : QList<Expression>(expressions)
+{
+}
 
 Expressions::~Expressions()
-{}
+{
+}
 
 Expressions Expressions::differentiate(const Symbol &symbol) const
 {
@@ -51,7 +53,7 @@ Expressions Expressions::differentiate(const Symbol &symbol) const
 
     int sz = count();
 
-    for (int i=0; i<sz; ++i)
+    for (int i = 0; i < sz; ++i)
     {
         Expression diff = at(i).differentiate(symbol);
 
@@ -68,7 +70,7 @@ Expressions Expressions::integrate(const Symbol &symbol) const
 
     int sz = count();
 
-    for (int i=0; i<sz; ++i)
+    for (int i = 0; i < sz; ++i)
     {
         Expression integ = at(i).integrate(symbol);
 

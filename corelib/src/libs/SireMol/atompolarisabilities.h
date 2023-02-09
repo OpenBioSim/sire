@@ -37,13 +37,13 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-typedef AtomProperty< SireUnits::Dimension::Volume > AtomPolarisabilities;
+    typedef AtomProperty<SireUnits::Dimension::Volume> AtomPolarisabilities;
 
 }
 
-Q_DECLARE_METATYPE( SireMol::AtomPolarisabilities );
+Q_DECLARE_METATYPE(SireMol::AtomPolarisabilities);
 
-SIRE_EXPOSE_ATOM_PROPERTY( SireUnits::Dimension::Volume, SireMol::AtomPolarisabilities )
+SIRE_EXPOSE_ATOM_PROPERTY(SireUnits::Dimension::Volume, SireMol::AtomPolarisabilities)
 
 #ifdef SIRE_INSTANTIATE_TEMPLATES
 template class SireMol::AtomProperty<SireUnits::Dimension::Volume>;

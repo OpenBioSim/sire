@@ -28,12 +28,12 @@
 #include "SireSystem/energymonitor.h"
 #include "SireSystem/system.h"
 
-#include "SireMol/partialmolecule.h"
-#include "SireMol/atomcoords.h"
-#include "SireMol/atomcharges.h"
 #include "SireMM/atomljs.h"
 #include "SireMM/ljpair.h"
+#include "SireMol/atomcharges.h"
+#include "SireMol/atomcoords.h"
 #include "SireMol/mgname.h"
+#include "SireMol/partialmolecule.h"
 
 #include "SireBase/array2d.hpp"
 
@@ -57,27 +57,20 @@ using std::pair;
 
 static const RegisterMetaType<EnergyMonitor> r_nrgmonitor;
 
-QDataStream &operator<<(QDataStream &ds,
-                                          const EnergyMonitor &nrgmonitor)
+QDataStream &operator<<(QDataStream &ds, const EnergyMonitor &nrgmonitor)
 {
     writeHeader(ds, r_nrgmonitor, 3);
 
     SharedDataStream sds(ds);
 
-    sds << nrgmonitor.grp0 << nrgmonitor.grp1
-        << nrgmonitor.asgn0 << nrgmonitor.asgn1
-        << nrgmonitor.accum
-        << nrgmonitor.coul_nrgs << nrgmonitor.lj_nrgs
-        << nrgmonitor.alpha_component << nrgmonitor.alfa
-        << nrgmonitor.shift_delta
-        << nrgmonitor.coulomb_power
-        << static_cast<const SystemMonitor&>(nrgmonitor);
+    sds << nrgmonitor.grp0 << nrgmonitor.grp1 << nrgmonitor.asgn0 << nrgmonitor.asgn1 << nrgmonitor.accum
+        << nrgmonitor.coul_nrgs << nrgmonitor.lj_nrgs << nrgmonitor.alpha_component << nrgmonitor.alfa
+        << nrgmonitor.shift_delta << nrgmonitor.coulomb_power << static_cast<const SystemMonitor &>(nrgmonitor);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds,
-                                          EnergyMonitor &nrgmonitor)
+QDataStream &operator>>(QDataStream &ds, EnergyMonitor &nrgmonitor)
 {
     VersionID v = readHeader(ds, r_nrgmonitor);
 
@@ -85,13 +78,9 @@ QDataStream &operator>>(QDataStream &ds,
     {
         SharedDataStream sds(ds);
 
-        sds >> nrgmonitor.grp0 >> nrgmonitor.grp1
-            >> nrgmonitor.asgn0 >> nrgmonitor.asgn1
-            >> nrgmonitor.accum
-            >> nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs
-            >> nrgmonitor.alpha_component >> nrgmonitor.alfa
-            >> nrgmonitor.shift_delta >> nrgmonitor.coulomb_power
-            >> static_cast<SystemMonitor&>(nrgmonitor);
+        sds >> nrgmonitor.grp0 >> nrgmonitor.grp1 >> nrgmonitor.asgn0 >> nrgmonitor.asgn1 >> nrgmonitor.accum >>
+            nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs >> nrgmonitor.alpha_component >> nrgmonitor.alfa >>
+            nrgmonitor.shift_delta >> nrgmonitor.coulomb_power >> static_cast<SystemMonitor &>(nrgmonitor);
     }
     else if (v == 2)
     {
@@ -102,11 +91,8 @@ QDataStream &operator>>(QDataStream &ds,
         nrgmonitor.coulomb_power = 0;
         nrgmonitor.alpha_component = Symbol();
 
-        sds >> nrgmonitor.grp0 >> nrgmonitor.grp1
-            >> nrgmonitor.asgn0 >> nrgmonitor.asgn1
-            >> nrgmonitor.accum
-            >> nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs
-            >> static_cast<SystemMonitor&>(nrgmonitor);
+        sds >> nrgmonitor.grp0 >> nrgmonitor.grp1 >> nrgmonitor.asgn0 >> nrgmonitor.asgn1 >> nrgmonitor.accum >>
+            nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs >> static_cast<SystemMonitor &>(nrgmonitor);
     }
     else if (v == 1)
     {
@@ -117,9 +103,8 @@ QDataStream &operator>>(QDataStream &ds,
         nrgmonitor.coulomb_power = 0;
         nrgmonitor.alpha_component = Symbol();
 
-        sds >> nrgmonitor.grp0 >> nrgmonitor.grp1 >> nrgmonitor.accum
-            >> nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs
-            >> static_cast<SystemMonitor&>(nrgmonitor);
+        sds >> nrgmonitor.grp0 >> nrgmonitor.grp1 >> nrgmonitor.accum >> nrgmonitor.coul_nrgs >> nrgmonitor.lj_nrgs >>
+            static_cast<SystemMonitor &>(nrgmonitor);
     }
     else
         throw version_error(v, "1,2", r_nrgmonitor, CODELOC);
@@ -129,112 +114,102 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 EnergyMonitor::EnergyMonitor()
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), alfa(0), shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in the
     two passed groups. This will accumulate the average and standard deviation
     of each of the energies */
-EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0,
-                             const MoleculeGroup &group1)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                grp0(group0), grp1(group1), accum( AverageAndStddev() ),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0, const MoleculeGroup &group1)
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), grp0(group0), grp1(group1), accum(AverageAndStddev()), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in
     the two passed groups, accumulating the energies using the passed
     accumulator */
-EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0,
-                             const MoleculeGroup &group1,
+EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0, const MoleculeGroup &group1,
                              const SireMaths::Accumulator &accumulator)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                grp0(group0), grp1(group1), accum(accumulator),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), grp0(group0), grp1(group1), accum(accumulator), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in the
     two passed groups. This will accumulate the average and standard deviation
     of each of the energies */
-EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0,
-                             const IDAssigner &group1)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                grp0(group0), asgn1(group1), accum( AverageAndStddev() ),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0, const IDAssigner &group1)
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), grp0(group0), asgn1(group1), accum(AverageAndStddev()), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in
     the two passed groups, accumulating the energies using the passed
     accumulator */
-EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0,
-                             const IDAssigner &group1,
+EnergyMonitor::EnergyMonitor(const MoleculeGroup &group0, const IDAssigner &group1,
                              const SireMaths::Accumulator &accumulator)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                grp0(group0), asgn1(group1), accum(accumulator),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), grp0(group0), asgn1(group1), accum(accumulator), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in the
     two passed groups. This will accumulate the average and standard deviation
     of each of the energies */
-EnergyMonitor::EnergyMonitor(const IDAssigner &group0,
-                             const MoleculeGroup &group1)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                grp1(group1), asgn0(group0), accum( AverageAndStddev() ),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+EnergyMonitor::EnergyMonitor(const IDAssigner &group0, const MoleculeGroup &group1)
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), grp1(group1), asgn0(group0), accum(AverageAndStddev()), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in
     the two passed groups, accumulating the energies using the passed
     accumulator */
-EnergyMonitor::EnergyMonitor(const IDAssigner &group0,
-                             const MoleculeGroup &group1,
+EnergyMonitor::EnergyMonitor(const IDAssigner &group0, const MoleculeGroup &group1,
                              const SireMaths::Accumulator &accumulator)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                grp1(group1), asgn0(group0), accum(accumulator),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), grp1(group1), asgn0(group0), accum(accumulator), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in the
     two passed groups. This will accumulate the average and standard deviation
     of each of the energies */
-EnergyMonitor::EnergyMonitor(const IDAssigner &group0,
-                             const IDAssigner &group1)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                asgn0(group0), asgn1(group1), accum( AverageAndStddev() ),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+EnergyMonitor::EnergyMonitor(const IDAssigner &group0, const IDAssigner &group1)
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), asgn0(group0), asgn1(group1), accum(AverageAndStddev()),
+      alfa(0), shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Construct to monitor the energies between all pairs of molecule views in
     the two passed groups, accumulating the energies using the passed
     accumulator */
-EnergyMonitor::EnergyMonitor(const IDAssigner &group0,
-                             const IDAssigner &group1,
+EnergyMonitor::EnergyMonitor(const IDAssigner &group0, const IDAssigner &group1,
                              const SireMaths::Accumulator &accumulator)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(),
-                asgn0(group0), asgn1(group1), accum(accumulator),
-                alfa(0), shift_delta(0), coulomb_power(0)
-{}
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(), asgn0(group0), asgn1(group1), accum(accumulator), alfa(0),
+      shift_delta(0), coulomb_power(0)
+{
+}
 
 /** Copy constructor */
 EnergyMonitor::EnergyMonitor(const EnergyMonitor &other)
-              : ConcreteProperty<EnergyMonitor,SystemMonitor>(other),
-                grp0(other.grp0), grp1(other.grp1),
-                asgn0(other.asgn0), asgn1(other.asgn1),
-                accum(other.accum),
-                coul_nrgs(other.coul_nrgs), lj_nrgs(other.lj_nrgs),
-                alpha_component(other.alpha_component),
-                alfa(other.alfa), shift_delta(other.shift_delta),
-                coulomb_power(other.coulomb_power)
-{}
+    : ConcreteProperty<EnergyMonitor, SystemMonitor>(other), grp0(other.grp0), grp1(other.grp1), asgn0(other.asgn0),
+      asgn1(other.asgn1), accum(other.accum), coul_nrgs(other.coul_nrgs), lj_nrgs(other.lj_nrgs),
+      alpha_component(other.alpha_component), alfa(other.alfa), shift_delta(other.shift_delta),
+      coulomb_power(other.coulomb_power)
+{
+}
 
 /** Destructor */
 EnergyMonitor::~EnergyMonitor()
-{}
+{
+}
 
 /** Copy assignment operator */
-EnergyMonitor& EnergyMonitor::operator=(const EnergyMonitor &other)
+EnergyMonitor &EnergyMonitor::operator=(const EnergyMonitor &other)
 {
     if (this != &other)
     {
@@ -259,16 +234,10 @@ EnergyMonitor& EnergyMonitor::operator=(const EnergyMonitor &other)
 bool EnergyMonitor::operator==(const EnergyMonitor &other) const
 {
     return this == &other or
-           (grp0 == other.grp0 and grp1 == other.grp1 and
-            asgn0 == other.asgn0 and asgn1 == other.asgn1 and
-            accum == other.accum and
-            coul_nrgs == other.coul_nrgs and
-            lj_nrgs == other.lj_nrgs and
-            alpha_component == other.alpha_component and
-            alfa == other.alfa and
-            shift_delta == other.shift_delta and
-            coulomb_power == other.coulomb_power and
-            SystemMonitor::operator==(other));
+           (grp0 == other.grp0 and grp1 == other.grp1 and asgn0 == other.asgn0 and asgn1 == other.asgn1 and
+            accum == other.accum and coul_nrgs == other.coul_nrgs and lj_nrgs == other.lj_nrgs and
+            alpha_component == other.alpha_component and alfa == other.alfa and shift_delta == other.shift_delta and
+            coulomb_power == other.coulomb_power and SystemMonitor::operator==(other));
 }
 
 /** Comparison operator */
@@ -278,9 +247,9 @@ bool EnergyMonitor::operator!=(const EnergyMonitor &other) const
 }
 
 /** Return the typename of the class */
-const char* EnergyMonitor::typeName()
+const char *EnergyMonitor::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<EnergyMonitor>() );
+    return QMetaType::typeName(qMetaTypeId<EnergyMonitor>());
 }
 
 /** Return the array of all accumulated coulomb energies */
@@ -305,7 +274,7 @@ QVector<SireMol::PartialMolecule> EnergyMonitor::views0() const
 
         QVector<PartialMolecule> views(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             views[i] = grp0->viewAt(i);
         }
@@ -328,7 +297,7 @@ QVector<SireMol::PartialMolecule> EnergyMonitor::views1() const
 
         QVector<PartialMolecule> views(n);
 
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
         {
             views[i] = grp1->viewAt(i);
         }
@@ -344,7 +313,7 @@ QVector<SireMol::PartialMolecule> EnergyMonitor::views1() const
 /** Return the molecule group from which "views0" are drawn. Note that this
     will return the molecule group used by "assigner0" if an assigner is
     used to choose views */
-const SireMol::MoleculeGroup& EnergyMonitor::group0() const
+const SireMol::MoleculeGroup &EnergyMonitor::group0() const
 {
     if (asgn0.isNull())
         return grp0.read();
@@ -355,7 +324,7 @@ const SireMol::MoleculeGroup& EnergyMonitor::group0() const
 /** Return the molecule group from which "views1" are drawn. Note that this
     will return the molecule group used by "assigner1" if an assigner is
     used to choose views */
-const SireMol::MoleculeGroup& EnergyMonitor::group1() const
+const SireMol::MoleculeGroup &EnergyMonitor::group1() const
 {
     if (asgn1.isNull())
         return grp1.read();
@@ -368,12 +337,11 @@ const SireMol::MoleculeGroup& EnergyMonitor::group1() const
 
     \throw SireError::unavailable_resource
 */
-const IDAssigner& EnergyMonitor::assigner0() const
+const IDAssigner &EnergyMonitor::assigner0() const
 {
     if (asgn0.isNull())
-        throw SireError::unavailable_resource( QObject::tr(
-                "An IDAssigner is not used to select the views for \"views0\"."),
-                    CODELOC );
+        throw SireError::unavailable_resource(
+            QObject::tr("An IDAssigner is not used to select the views for \"views0\"."), CODELOC);
 
     return asgn0.read().asA<IDAssigner>();
 }
@@ -383,12 +351,11 @@ const IDAssigner& EnergyMonitor::assigner0() const
 
     \throw SireError::unavailable_resource
 */
-const IDAssigner& EnergyMonitor::assigner1() const
+const IDAssigner &EnergyMonitor::assigner1() const
 {
     if (asgn1.isNull())
-        throw SireError::unavailable_resource( QObject::tr(
-                "An IDAssigner is not used to select the views for \"views1\"."),
-                    CODELOC );
+        throw SireError::unavailable_resource(
+            QObject::tr("An IDAssigner is not used to select the views for \"views1\"."), CODELOC);
 
     return asgn1.read().asA<IDAssigner>();
 }
@@ -400,11 +367,9 @@ void EnergyMonitor::clearStatistics()
     lj_nrgs = Array2D<AccumulatorPtr>();
 }
 
-SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
-                const QVector<Vector> &coords0, const QVector<Charge> &chgs0,
-                const QVector<LJParameter> &ljs0,
-                const QVector<Vector> &coords1, const QVector<Charge> &chgs1,
-                const QVector<LJParameter> &ljs1)
+SIRE_ALWAYS_INLINE pair<double, double> getCLJEnergy(const QVector<Vector> &coords0, const QVector<Charge> &chgs0,
+                                                     const QVector<LJParameter> &ljs0, const QVector<Vector> &coords1,
+                                                     const QVector<Charge> &chgs1, const QVector<LJParameter> &ljs1)
 {
     const int nats0 = coords0.count();
     const int nats1 = coords1.count();
@@ -414,13 +379,13 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
 
     bool arithmetic_combining_rules = true;
 
-    for (int i=0; i<nats0; ++i)
+    for (int i = 0; i < nats0; ++i)
     {
         const Vector &coord0 = coords0.at(i);
         const Charge &chg0 = chgs0.at(i);
         const LJParameter &lj0 = ljs0.at(i);
 
-        for (int j=0; j<nats1; ++j)
+        for (int j = 0; j < nats1; ++j)
         {
             const Vector &coord1 = coords1.at(j);
             const Charge &chg1 = chgs1.at(j);
@@ -440,36 +405,34 @@ SIRE_ALWAYS_INLINE pair<double,double> getCLJEnergy(
 
             ljnrg += ljpair.A() * one_over_r12 - ljpair.B() * one_over_r6;
 
-            cnrg += chg0.value() * chg1.value() * one_over_r
-                        * one_over_four_pi_eps0;
+            cnrg += chg0.value() * chg1.value() * one_over_r * one_over_four_pi_eps0;
         }
     }
 
-    return pair<double,double>(cnrg,ljnrg);
+    return pair<double, double>(cnrg, ljnrg);
 }
 
-SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
-                const QVector<Vector> &coords0, const QVector<Charge> &chgs0,
-                const QVector<LJParameter> &ljs0,
-                const QVector<Vector> &coords1, const QVector<Charge> &chgs1,
-                const QVector<LJParameter> &ljs1,
-                double alpha, double shift_delta, int coulomb_power)
+SIRE_ALWAYS_INLINE pair<double, double> getSoftCLJEnergy(const QVector<Vector> &coords0, const QVector<Charge> &chgs0,
+                                                         const QVector<LJParameter> &ljs0,
+                                                         const QVector<Vector> &coords1, const QVector<Charge> &chgs1,
+                                                         const QVector<LJParameter> &ljs1, double alpha,
+                                                         double shift_delta, int coulomb_power)
 {
-    //this uses the following potentials
-    //           Zacharias and McCammon, J. Chem. Phys., 1994, and also,
-    //           Michel et al., JCTC, 2007
+    // this uses the following potentials
+    //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
+    //            Michel et al., JCTC, 2007
     //
-    //  V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
-    //                          ( sigma^6  / (delta*sigma + r^2)^3 ) ]
+    //   V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
+    //                           ( sigma^6  / (delta*sigma + r^2)^3 ) ]
     //
-    //  delta = shift_delta * alpha
+    //   delta = shift_delta * alpha
     //
-    //  V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
+    //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
     //
-    // This contrasts to Rich T's LJ softcore function, which was;
+    //  This contrasts to Rich T's LJ softcore function, which was;
     //
-    //  V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
-    //                          (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
+    //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
+    //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
 
     double one_minus_alfa_to_n = 1;
     const double delta = shift_delta * alpha;
@@ -485,13 +448,13 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
 
     bool arithmetic_combining_rules = true;
 
-    for (int i=0; i<nats0; ++i)
+    for (int i = 0; i < nats0; ++i)
     {
         const Vector &coord0 = coords0.at(i);
         const Charge &chg0 = chgs0.at(i);
         const LJParameter &lj0 = ljs0.at(i);
 
-        for (int j=0; j<nats1; ++j)
+        for (int j = 0; j < nats1; ++j)
         {
             const Vector &coord1 = coords1.at(j);
             const Charge &chg1 = chgs1.at(j);
@@ -514,20 +477,18 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
             const double sig6 = sig2 * sig2 * sig2;
 
             const double sig6_over_denom = sig6 / lj_denom;
-            const double sig12_over_denom2 = sig6_over_denom *
-                                             sig6_over_denom;
+            const double sig12_over_denom2 = sig6_over_denom * sig6_over_denom;
 
             ljnrg += ljpair.epsilon() * (sig12_over_denom2 - sig6_over_denom);
 
-            cnrg += chg0.value() * chg1.value() * one_over_four_pi_eps0 /
-                          std::sqrt(alpha + r2);
+            cnrg += chg0.value() * chg1.value() * one_over_four_pi_eps0 / std::sqrt(alpha + r2);
         }
     }
 
     cnrg *= one_minus_alfa_to_n;
     ljnrg *= 4;
 
-    return pair<double,double>(cnrg,ljnrg);
+    return pair<double, double>(cnrg, ljnrg);
 }
 
 /** Return whether or not this monitor uses a soft-core potential to
@@ -535,8 +496,7 @@ SIRE_ALWAYS_INLINE pair<double,double> getSoftCLJEnergy(
     molecules in views1() */
 bool EnergyMonitor::usesSoftCore() const
 {
-    return (shift_delta != 0 or coulomb_power != 0) and
-           (alfa != 0);
+    return (shift_delta != 0 or coulomb_power != 0) and (alfa != 0);
 }
 
 /** Set the system component symbol used to get the value of alpha
@@ -618,7 +578,7 @@ void EnergyMonitor::monitor(System &system)
             asgn1.edit().asA<IDAssigner>().update(system);
         }
 
-        //see if we need to update the alpha value
+        // see if we need to update the alpha value
         if (not alpha_component.isNull())
         {
             alfa = system.componentValue(alpha_component);
@@ -635,18 +595,18 @@ void EnergyMonitor::monitor(System &system)
         const int n0 = v0.count();
         const int n1 = v1.count();
 
-        //has the number of views changed?
+        // has the number of views changed?
         if (n0 != coul_nrgs.nRows() or n1 != coul_nrgs.nColumns())
         {
-            Array2D<AccumulatorPtr> coul_nrgs2(n0,n1,accum);
-            Array2D<AccumulatorPtr> lj_nrgs2(n0,n1,accum);
+            Array2D<AccumulatorPtr> coul_nrgs2(n0, n1, accum);
+            Array2D<AccumulatorPtr> lj_nrgs2(n0, n1, accum);
 
-            for (int i=0; i < qMin(n0,coul_nrgs.nRows()); ++i)
+            for (int i = 0; i < qMin(n0, coul_nrgs.nRows()); ++i)
             {
-                for (int j=0; j < qMin(n1,coul_nrgs.nColumns()); ++j)
+                for (int j = 0; j < qMin(n1, coul_nrgs.nColumns()); ++j)
                 {
-                    coul_nrgs2(i,j) = coul_nrgs(i,j);
-                    lj_nrgs2(i,j) = lj_nrgs(i,j);
+                    coul_nrgs2(i, j) = coul_nrgs(i, j);
+                    lj_nrgs2(i, j) = lj_nrgs(i, j);
                 }
             }
 
@@ -654,137 +614,111 @@ void EnergyMonitor::monitor(System &system)
             lj_nrgs = lj_nrgs2;
         }
 
-        QVector< QVector<Vector> > grp0_coords(n0);
-        QVector< QVector<Charge> > grp0_chgs(n0);
-        QVector< QVector<LJParameter> > grp0_ljs(n0);
+        QVector<QVector<Vector>> grp0_coords(n0);
+        QVector<QVector<Charge>> grp0_chgs(n0);
+        QVector<QVector<LJParameter>> grp0_ljs(n0);
 
-        QVector< QVector<Vector> > grp1_coords(n1);
-        QVector< QVector<Charge> > grp1_chgs(n1);
-        QVector< QVector<LJParameter> > grp1_ljs(n1);
+        QVector<QVector<Vector>> grp1_coords(n1);
+        QVector<QVector<Charge>> grp1_chgs(n1);
+        QVector<QVector<LJParameter>> grp1_ljs(n1);
 
-        for (int i=0; i<n0; ++i)
+        for (int i = 0; i < n0; ++i)
         {
             const PartialMolecule &mol0 = v0.constData()[i];
 
             if (mol0.selectedAll())
             {
-                grp0_coords[i] = mol0.property(coords_prop)
-                                     .asA<AtomCoords>()
-                                     .toVector();
+                grp0_coords[i] = mol0.property(coords_prop).asA<AtomCoords>().toVector();
 
-                grp0_chgs[i] = mol0.property(charge_prop)
-                                   .asA<AtomCharges>()
-                                   .toVector();
+                grp0_chgs[i] = mol0.property(charge_prop).asA<AtomCharges>().toVector();
 
-                grp0_ljs[i] = mol0.property(lj_prop)
-                                  .asA<AtomLJs>()
-                                  .toVector();
+                grp0_ljs[i] = mol0.property(lj_prop).asA<AtomLJs>().toVector();
             }
             else
             {
                 const AtomSelection selected_atoms = mol0.selection();
 
-                grp0_coords[i] = mol0.property(coords_prop)
-                                     .asA<AtomCoords>()
-                                     .toVector(selected_atoms);
+                grp0_coords[i] = mol0.property(coords_prop).asA<AtomCoords>().toVector(selected_atoms);
 
-                grp0_chgs[i] = mol0.property(charge_prop)
-                                   .asA<AtomCharges>()
-                                   .toVector(selected_atoms);
+                grp0_chgs[i] = mol0.property(charge_prop).asA<AtomCharges>().toVector(selected_atoms);
 
-                grp0_ljs[i] = mol0.property(lj_prop)
-                                  .asA<AtomLJs>()
-                                  .toVector(selected_atoms);
+                grp0_ljs[i] = mol0.property(lj_prop).asA<AtomLJs>().toVector(selected_atoms);
             }
         }
 
-        for (int i=0; i<n1; ++i)
+        for (int i = 0; i < n1; ++i)
         {
             const PartialMolecule &mol1 = v1.constData()[i];
 
             if (mol1.selectedAll())
             {
-                grp1_coords[i] = mol1.property(coords_prop)
-                                     .asA<AtomCoords>()
-                                     .toVector();
+                grp1_coords[i] = mol1.property(coords_prop).asA<AtomCoords>().toVector();
 
-                grp1_chgs[i] = mol1.property(charge_prop)
-                                   .asA<AtomCharges>()
-                                   .toVector();
+                grp1_chgs[i] = mol1.property(charge_prop).asA<AtomCharges>().toVector();
 
-                grp1_ljs[i] = mol1.property(lj_prop)
-                                  .asA<AtomLJs>()
-                                  .toVector();
+                grp1_ljs[i] = mol1.property(lj_prop).asA<AtomLJs>().toVector();
             }
             else
             {
                 const AtomSelection selected_atoms = mol1.selection();
 
-                grp1_coords[i] = mol1.property(coords_prop)
-                                     .asA<AtomCoords>()
-                                     .toVector(selected_atoms);
+                grp1_coords[i] = mol1.property(coords_prop).asA<AtomCoords>().toVector(selected_atoms);
 
-                grp1_chgs[i] = mol1.property(charge_prop)
-                                   .asA<AtomCharges>()
-                                   .toVector(selected_atoms);
+                grp1_chgs[i] = mol1.property(charge_prop).asA<AtomCharges>().toVector(selected_atoms);
 
-                grp1_ljs[i] = mol1.property(lj_prop)
-                                  .asA<AtomLJs>()
-                                  .toVector(selected_atoms);
+                grp1_ljs[i] = mol1.property(lj_prop).asA<AtomLJs>().toVector(selected_atoms);
             }
         }
 
         if (this->usesSoftCore())
         {
-            //calculate the energy of each view-pair
-            for (int i=0; i<n0; ++i)
+            // calculate the energy of each view-pair
+            for (int i = 0; i < n0; ++i)
             {
                 const QVector<Vector> &mol0_coords = grp0_coords.at(i);
                 const QVector<Charge> &mol0_chgs = grp0_chgs.at(i);
                 const QVector<LJParameter> &mol0_ljs = grp0_ljs.at(i);
 
-                for (int j=0; j<n1; ++j)
+                for (int j = 0; j < n1; ++j)
                 {
                     const QVector<Vector> mol1_coords = grp1_coords.at(j);
                     const QVector<Charge> mol1_chgs = grp1_chgs.at(j);
                     const QVector<LJParameter> mol1_ljs = grp1_ljs.at(j);
 
-                    pair<double,double> cljnrg
-                        = getSoftCLJEnergy(mol0_coords, mol0_chgs, mol0_ljs,
-                                           mol1_coords, mol1_chgs, mol1_ljs,
-                                           alfa, shift_delta, coulomb_power);
+                    pair<double, double> cljnrg =
+                        getSoftCLJEnergy(mol0_coords, mol0_chgs, mol0_ljs, mol1_coords, mol1_chgs, mol1_ljs, alfa,
+                                         shift_delta, coulomb_power);
 
-                    coul_nrgs(i,j).edit().accumulate(cljnrg.first);
-                    lj_nrgs(i,j).edit().accumulate(cljnrg.second);
+                    coul_nrgs(i, j).edit().accumulate(cljnrg.first);
+                    lj_nrgs(i, j).edit().accumulate(cljnrg.second);
                 }
             }
         }
         else
         {
-            //calculate the energy of each view-pair
-            for (int i=0; i<n0; ++i)
+            // calculate the energy of each view-pair
+            for (int i = 0; i < n0; ++i)
             {
                 const QVector<Vector> &mol0_coords = grp0_coords.at(i);
                 const QVector<Charge> &mol0_chgs = grp0_chgs.at(i);
                 const QVector<LJParameter> &mol0_ljs = grp0_ljs.at(i);
 
-                for (int j=0; j<n1; ++j)
+                for (int j = 0; j < n1; ++j)
                 {
                     const QVector<Vector> mol1_coords = grp1_coords.at(j);
                     const QVector<Charge> mol1_chgs = grp1_chgs.at(j);
                     const QVector<LJParameter> mol1_ljs = grp1_ljs.at(j);
 
-                    pair<double,double> cljnrg
-                        = getCLJEnergy(mol0_coords, mol0_chgs, mol0_ljs,
-                                       mol1_coords, mol1_chgs, mol1_ljs);
+                    pair<double, double> cljnrg =
+                        getCLJEnergy(mol0_coords, mol0_chgs, mol0_ljs, mol1_coords, mol1_chgs, mol1_ljs);
 
-                    coul_nrgs(i,j).edit().accumulate(cljnrg.first);
-                    lj_nrgs(i,j).edit().accumulate(cljnrg.second);
+                    coul_nrgs(i, j).edit().accumulate(cljnrg.first);
+                    lj_nrgs(i, j).edit().accumulate(cljnrg.second);
                 }
             }
         }
     }
-    catch(...)
+    catch (...)
     {
         EnergyMonitor::operator=(old_state);
         throw;

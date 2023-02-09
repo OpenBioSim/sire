@@ -34,115 +34,114 @@ SIRE_BEGIN_HEADER
 
 namespace SireSystem
 {
-class SystemMonitors;
+    class SystemMonitors;
 }
 
-SIRESYSTEM_EXPORT QDataStream& operator<<(QDataStream&, const SireSystem::SystemMonitors&);
-SIRESYSTEM_EXPORT QDataStream& operator>>(QDataStream&, SireSystem::SystemMonitors&);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SystemMonitors &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SystemMonitors &);
 
 namespace SireSystem
 {
 
-class MonitorID;
-class MonitorIdx;
-class MonitorName;
+    class MonitorID;
+    class MonitorIdx;
+    class MonitorName;
 
-/** This class holds a set of SystemMonitor objects, and controls
-    when those monitors are evaluated on a system
+    /** This class holds a set of SystemMonitor objects, and controls
+        when those monitors are evaluated on a system
 
-    @author Christopher Woods
-*/
-class SIRESYSTEM_EXPORT SystemMonitors
-{
-
-friend SIRESYSTEM_EXPORT QDataStream& ::operator<<(QDataStream&, const SystemMonitors&);
-friend SIRESYSTEM_EXPORT QDataStream& ::operator>>(QDataStream&, SystemMonitors&);
-
-public:
-    SystemMonitors();
-
-    SystemMonitors(const SystemMonitors &other);
-
-    ~SystemMonitors();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIRESYSTEM_EXPORT SystemMonitors
     {
-        return SystemMonitors::typeName();
-    }
 
-    SystemMonitors& operator=(const SystemMonitors &other);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator<<(QDataStream &, const SystemMonitors &);
+        friend SIRESYSTEM_EXPORT QDataStream & ::operator>>(QDataStream &, SystemMonitors &);
 
-    bool operator==(const SystemMonitors &other) const;
-    bool operator!=(const SystemMonitors &other) const;
+    public:
+        SystemMonitors();
 
-    const SystemMonitor& operator[](const MonitorID &monid) const;
+        SystemMonitors(const SystemMonitors &other);
 
-    const SystemMonitor& at(const MonitorID &monid) const;
+        ~SystemMonitors();
 
-    bool isEmpty() const;
+        static const char *typeName();
 
-    QList<MonitorName> map(const MonitorName &monname) const;
-    QList<MonitorName> map(const MonitorIdx &monidx) const;
-    QList<MonitorName> map(const MonitorID &monid) const;
+        const char *what() const
+        {
+            return SystemMonitors::typeName();
+        }
 
-    MonitorName monitorName(const MonitorID &monid) const;
+        SystemMonitors &operator=(const SystemMonitors &other);
 
-    QList<MonitorName> monitorNames() const;
+        bool operator==(const SystemMonitors &other) const;
+        bool operator!=(const SystemMonitors &other) const;
 
-    QList<MonitorName> names() const;
-    QList<SysMonPtr> list() const;
+        const SystemMonitor &operator[](const MonitorID &monid) const;
 
-    void add(const QString &name, const SystemMonitor &monitor,
-             int frequency = 1);
+        const SystemMonitor &at(const MonitorID &monid) const;
 
-    void add(const SystemMonitors &other);
-    void add(const SystemMonitors &other, int frequency);
+        bool isEmpty() const;
 
-    void remove(const MonitorID &monid);
-    void removeAll();
+        QList<MonitorName> map(const MonitorName &monname) const;
+        QList<MonitorName> map(const MonitorIdx &monidx) const;
+        QList<MonitorName> map(const MonitorID &monid) const;
 
-    void clearStatistics();
-    void clearStatistics(const MonitorID &monid);
+        MonitorName monitorName(const MonitorID &monid) const;
 
-    void setAllFrequency(int frequency);
-    void setFrequency(const MonitorID &monid, int frequency);
+        QList<MonitorName> monitorNames() const;
 
-    int getFrequency(const MonitorID &monid) const;
+        QList<MonitorName> names() const;
+        QList<SysMonPtr> list() const;
 
-    const SystemMonitor& monitor(const MonitorID &monid) const;
+        void add(const QString &name, const SystemMonitor &monitor, int frequency = 1);
 
-    QList<SysMonPtr> monitors(const MonitorID &monid) const;
+        void add(const SystemMonitors &other);
+        void add(const SystemMonitors &other, int frequency);
 
-    QList<SysMonPtr> monitors() const;
+        void remove(const MonitorID &monid);
+        void removeAll();
 
-    int nMonitors() const;
-    int count() const;
-    int size() const;
+        void clearStatistics();
+        void clearStatistics(const MonitorID &monid);
 
-    void monitor(System &system);
+        void setAllFrequency(int frequency);
+        void setFrequency(const MonitorID &monid, int frequency);
 
-private:
-    /** All of the monitors, indexed by name */
-    QHash<MonitorName,SysMonPtr> mons_by_name;
+        int getFrequency(const MonitorID &monid) const;
 
-    /** The names of all of the monitors in the order they
-        appear in this collection */
-    QList<MonitorName> mons_by_idx;
+        const SystemMonitor &monitor(const MonitorID &monid) const;
 
-    /** The frequency of each monitor */
-    QHash< quint32, QList<MonitorName> > mons_by_frequency;
+        QList<SysMonPtr> monitors(const MonitorID &monid) const;
 
-    /** The current step number of this set of monitors */
-    quint32 stepnum;
-};
+        QList<SysMonPtr> monitors() const;
 
-}
+        int nMonitors() const;
+        int count() const;
+        int size() const;
 
-Q_DECLARE_METATYPE( SireSystem::SystemMonitors )
+        void monitor(System &system);
 
-SIRE_EXPOSE_CLASS( SireSystem::SystemMonitors )
+    private:
+        /** All of the monitors, indexed by name */
+        QHash<MonitorName, SysMonPtr> mons_by_name;
+
+        /** The names of all of the monitors in the order they
+            appear in this collection */
+        QList<MonitorName> mons_by_idx;
+
+        /** The frequency of each monitor */
+        QHash<quint32, QList<MonitorName>> mons_by_frequency;
+
+        /** The current step number of this set of monitors */
+        quint32 stepnum;
+    };
+
+} // namespace SireSystem
+
+Q_DECLARE_METATYPE(SireSystem::SystemMonitors)
+
+SIRE_EXPOSE_CLASS(SireSystem::SystemMonitors)
 
 SIRE_END_HEADER
 

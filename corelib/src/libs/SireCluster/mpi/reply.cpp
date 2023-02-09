@@ -27,15 +27,15 @@
 
 #ifdef SIRE_USE_MPI
 
-#include <QTime>
-#include <QMutex>
-#include <QWaitCondition>
 #include <QHash>
+#include <QMutex>
 #include <QSet>
+#include <QTime>
+#include <QWaitCondition>
 
-#include "reply.h"
 #include "messages.h"
 #include "mpicluster.h"
+#include "reply.h"
 
 #include "SireError/errors.h"
 
@@ -50,34 +50,36 @@ using boost::weak_ptr;
 
 namespace SireCluster
 {
-namespace MPI
-{
-namespace detail
-{
+    namespace MPI
+    {
+        namespace detail
+        {
 
-/** Private implementation of Reply */
-class ReplyPvt
-{
-public:
-    ReplyPvt()
-    {}
+            /** Private implementation of Reply */
+            class ReplyPvt
+            {
+            public:
+                ReplyPvt()
+                {
+                }
 
-    ~ReplyPvt()
-    {}
+                ~ReplyPvt()
+                {
+                }
 
-    /** Mutex to protect access to this response */
-    QMutex datamutex;
+                /** Mutex to protect access to this response */
+                QMutex datamutex;
 
-    /** Wait conditions so that we can wait for the response
-        from each process */
-    QHash< int, shared_ptr<QWaitCondition> > waiters;
+                /** Wait conditions so that we can wait for the response
+                    from each process */
+                QHash<int, shared_ptr<QWaitCondition>> waiters;
 
-    /** The responses received so far... */
-    QHash< int, ReplyValue > responses;
-};
+                /** The responses received so far... */
+                QHash<int, ReplyValue> responses;
+            };
 
-} // end of namespace detail
-} // end of namespace MPI
+        } // end of namespace detail
+    }     // end of namespace MPI
 } // end of namespace SireCluster
 
 using namespace SireCluster::MPI::detail;
@@ -88,19 +90,22 @@ using namespace SireCluster::MPI::detail;
 
 /** Null constructor */
 ReplyValue::ReplyValue() : is_error(false)
-{}
+{
+}
 
 /** Copy constructor */
 ReplyValue::ReplyValue(const ReplyValue &other)
-           : result_data(other.result_data), is_error(other.is_error)
-{}
+    : result_data(other.result_data), is_error(other.is_error)
+{
+}
 
 /** Destructor */
 ReplyValue::~ReplyValue()
-{}
+{
+}
 
 /** Copy assignment operator */
-ReplyValue& ReplyValue::operator=(const ReplyValue &other)
+ReplyValue &ReplyValue::operator=(const ReplyValue &other)
 {
     if (this != &other)
     {
@@ -158,10 +163,11 @@ bool ReplyValue::isError() const
 
 /** Null constructor */
 Reply::Reply()
-{}
+{
+}
 
 /** Copy assignment operator */
-Reply& Reply::operator=(const Reply &other)
+Reply &Reply::operator=(const Reply &other)
 {
     d = other.d;
     return *this;
@@ -170,26 +176,29 @@ Reply& Reply::operator=(const Reply &other)
 /** Construct the reply for the message 'message' */
 Reply::Reply(const Message &message)
 {
-    this->operator=( MPICluster::getReply(message) );
+    this->operator=(MPICluster::getReply(message));
 }
 
 /** Construct from the passed pointer */
 Reply::Reply(const ReplyPtr &ptr)
 {
-    this->operator=( ptr.lock() );
+    this->operator=(ptr.lock());
 }
 
 /** Internal constructor */
 Reply::Reply(const shared_ptr<ReplyPvt> &ptr) : d(ptr)
-{}
+{
+}
 
 /** Copy constructor */
 Reply::Reply(const Reply &other) : d(other.d)
-{}
+{
+}
 
 /** Destructor */
 Reply::~Reply()
-{}
+{
+}
 
 /** Comparison operator */
 bool Reply::operator==(const Reply &other) const
@@ -215,16 +224,16 @@ Reply Reply::create(const Message &message)
 {
     Reply reply;
 
-    reply.d.reset( new ReplyPvt() );
+    reply.d.reset(new ReplyPvt());
 
-    QMutexLocker lkr( &(reply.d->datamutex) );
+    QMutexLocker lkr(&(reply.d->datamutex));
 
     QSet<int> recipients = message.recipients();
 
     foreach (int recipient, recipients)
     {
         reply.d->waiters.insert(recipient,
-                                shared_ptr<QWaitCondition>(new QWaitCondition()) );
+                                shared_ptr<QWaitCondition>(new QWaitCondition()));
     }
 
     return reply;
@@ -237,7 +246,7 @@ void Reply::setErrorFrom(int rank, const QByteArray &error_data)
     if (this->isNull())
         return;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     if (d->waiters.contains(rank))
     {
@@ -253,7 +262,7 @@ void Reply::setResultFrom(int rank, const QByteArray &result_data)
     if (this->isNull())
         return;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     if (d->waiters.contains(rank))
     {
@@ -269,20 +278,22 @@ void Reply::setProcessDown(int rank)
     if (this->isNull())
         return;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     if (d->waiters.contains(rank))
     {
         if (not d->responses.contains(rank))
         {
-            SireError::unavailable_resource e( QObject::tr(
-                    "The node with rank %1 has gone down while waiting "
-                    "for a reply.").arg(rank), CODELOC );
+            SireError::unavailable_resource e(QObject::tr(
+                                                  "The node with rank %1 has gone down while waiting "
+                                                  "for a reply.")
+                                                  .arg(rank),
+                                              CODELOC);
 
-            d->responses.insert(rank, ReplyValue::error( e.pack() ));
+            d->responses.insert(rank, ReplyValue::error(e.pack()));
         }
 
-        //wake everyone waiting for this process
+        // wake everyone waiting for this process
         d->waiters.value(rank)->wakeAll();
     }
 }
@@ -293,16 +304,16 @@ void Reply::shutdown()
     if (this->isNull())
         return;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     QList<int> ranks = d->waiters.keys();
 
     if (d->responses.count() != ranks.count())
     {
-        //we need to fill in some missing responses
-        SireError::unavailable_resource e( QObject::tr(
-                "There are no more replies available as we are being shutdown."),
-                    CODELOC );
+        // we need to fill in some missing responses
+        SireError::unavailable_resource e(QObject::tr(
+                                              "There are no more replies available as we are being shutdown."),
+                                          CODELOC);
 
         QByteArray error_data = e.pack();
 
@@ -315,7 +326,7 @@ void Reply::shutdown()
         }
     }
 
-    //make sure everyone is awake
+    // make sure everyone is awake
     foreach (int rank, ranks)
     {
         d->waiters.value(rank)->wakeAll();
@@ -328,7 +339,7 @@ bool Reply::isValidRank(int rank)
     if (this->isNull())
         return false;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
     return d->waiters.contains(rank);
 }
 
@@ -338,13 +349,13 @@ void Reply::waitFrom(int rank)
     if (this->isNull())
         return;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     if (d->waiters.contains(rank))
     {
         if (not d->responses.contains(rank))
         {
-            d->waiters.value(rank)->wait( &(d->datamutex) );
+            d->waiters.value(rank)->wait(&(d->datamutex));
         }
     }
 }
@@ -366,7 +377,7 @@ bool Reply::waitFrom(int rank, int timeout)
     if (this->isNull())
         return true;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     if (d->waiters.contains(rank))
     {
@@ -376,7 +387,7 @@ bool Reply::waitFrom(int rank, int timeout)
             if (timeout < 0)
                 return false;
 
-            return d->waiters.value(rank)->wait( &(d->datamutex), timeout );
+            return d->waiters.value(rank)->wait(&(d->datamutex), timeout);
         }
         else
             return true;
@@ -391,7 +402,7 @@ void Reply::wait()
     if (this->isNull())
         return;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     QList<int> ranks = d->waiters.keys();
 
@@ -399,7 +410,7 @@ void Reply::wait()
     {
         if (not d->responses.contains(rank))
         {
-            d->waiters.value(rank)->wait( &(d->datamutex) );
+            d->waiters.value(rank)->wait(&(d->datamutex));
         }
     }
 }
@@ -421,7 +432,7 @@ bool Reply::wait(int timeout)
     if (this->isNull())
         return true;
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     QList<int> ranks = d->waiters.keys();
 
@@ -435,7 +446,7 @@ bool Reply::wait(int timeout)
             if (timeout < 0)
                 return false;
 
-            if (not d->waiters.value(rank)->wait( &(d->datamutex), timeout ))
+            if (not d->waiters.value(rank)->wait(&(d->datamutex), timeout))
             {
                 return false;
             }
@@ -453,22 +464,25 @@ bool Reply::wait(int timeout)
 ReplyValue Reply::from(int rank)
 {
     if (this->isNull())
-        throw SireError::invalid_arg( QObject::tr(
-            "There is no reply from the process with rank %1 in a null Reply!")
-                .arg(rank), CODELOC );
+        throw SireError::invalid_arg(QObject::tr(
+                                         "There is no reply from the process with rank %1 in a null Reply!")
+                                         .arg(rank),
+                                     CODELOC);
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     if (not d->waiters.contains(rank))
-        throw SireError::invalid_arg( QObject::tr(
-            "There is no reply from the process with rank %1 in this reply. "
-            "We are only waiting for replies from the processes with ranks %2.")
-                .arg(rank).arg(Sire::toString(d->waiters.keys())), CODELOC );
+        throw SireError::invalid_arg(QObject::tr(
+                                         "There is no reply from the process with rank %1 in this reply. "
+                                         "We are only waiting for replies from the processes with ranks %2.")
+                                         .arg(rank)
+                                         .arg(Sire::toString(d->waiters.keys())),
+                                     CODELOC);
 
     while (not d->responses.contains(rank))
     {
-        //we need to wait for a response
-        d->waiters.value(rank)->wait( &(d->datamutex) );
+        // we need to wait for a response
+        d->waiters.value(rank)->wait(&(d->datamutex));
     }
 
     return d->responses.value(rank);
@@ -477,14 +491,14 @@ ReplyValue Reply::from(int rank)
 /** Return the list of all replies indexed by the rank of the
     process that supplied the reply - this blocks until they are
     all available */
-QHash<int,ReplyValue> Reply::replies()
+QHash<int, ReplyValue> Reply::replies()
 {
     if (this->isNull())
-        return QHash<int,ReplyValue>();
+        return QHash<int, ReplyValue>();
 
     this->wait();
 
-    QMutexLocker lkr( &(d->datamutex) );
+    QMutexLocker lkr(&(d->datamutex));
 
     return d->responses;
 }
@@ -495,22 +509,26 @@ QHash<int,ReplyValue> Reply::replies()
 
 /** Construct a null pointer */
 ReplyPtr::ReplyPtr()
-{}
+{
+}
 
 /** Construct to point to the reply 'reply' */
 ReplyPtr::ReplyPtr(const Reply &reply) : d(reply.d)
-{}
+{
+}
 
 /** Copy constructor */
 ReplyPtr::ReplyPtr(const ReplyPtr &other) : d(other.d)
-{}
+{
+}
 
 /** Destructor */
 ReplyPtr::~ReplyPtr()
-{}
+{
+}
 
 /** Copy assignment operator */
-ReplyPtr& ReplyPtr::operator=(const ReplyPtr &other)
+ReplyPtr &ReplyPtr::operator=(const ReplyPtr &other)
 {
     d = other.d;
     return *this;
@@ -526,14 +544,14 @@ bool ReplyPtr::isNull() const
     if this is a null pointer */
 Reply ReplyPtr::operator*() const
 {
-    return Reply( d.lock() );
+    return Reply(d.lock());
 }
 
 /** Return the reply - this will return a null reply
     if this is a null pointer */
 Reply ReplyPtr::lock() const
 {
-    return Reply( d.lock() );
+    return Reply(d.lock());
 }
 
 #endif // SIRE_USE_MPI

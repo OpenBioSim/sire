@@ -49,15 +49,14 @@ using namespace SireStream;
 ///////// Implementation of Accumulator
 /////////
 
-static const RegisterMetaType<Accumulator> r_accum( MAGIC_ONLY,
-                                                    Accumulator::typeName() );
+static const RegisterMetaType<Accumulator> r_accum(MAGIC_ONLY, Accumulator::typeName());
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const Accumulator &accum)
 {
     writeHeader(ds, r_accum, 1);
 
-    ds << accum.nvalues << static_cast<const Property&>(accum);
+    ds << accum.nvalues << static_cast<const Property &>(accum);
 
     return ds;
 }
@@ -69,7 +68,7 @@ QDataStream &operator>>(QDataStream &ds, Accumulator &accum)
 
     if (v == 1)
     {
-        ds >> accum.nvalues >> static_cast<Property&>(accum);
+        ds >> accum.nvalues >> static_cast<Property &>(accum);
     }
     else
         throw version_error(v, "1", r_accum, CODELOC);
@@ -79,16 +78,18 @@ QDataStream &operator>>(QDataStream &ds, Accumulator &accum)
 
 /** Constructor */
 Accumulator::Accumulator() : Property(), nvalues(0)
-{}
+{
+}
 
 /** Copy constructor */
-Accumulator::Accumulator(const Accumulator &other)
-            : Property(other), nvalues(other.nvalues)
-{}
+Accumulator::Accumulator(const Accumulator &other) : Property(other), nvalues(other.nvalues)
+{
+}
 
 /** Destructor */
 Accumulator::~Accumulator()
-{}
+{
+}
 
 /** Return the number of values that have been sampled */
 int Accumulator::nSamples() const
@@ -133,7 +134,7 @@ void Accumulator::add(int nsteps)
 }
 
 /** Internal copy assignment operator */
-Accumulator& Accumulator::operator=(const Accumulator &other)
+Accumulator &Accumulator::operator=(const Accumulator &other)
 {
     nvalues = other.nvalues;
     Property::operator=(other);
@@ -163,7 +164,7 @@ QDataStream &operator<<(QDataStream &ds, const NullAccumulator &null)
 {
     writeHeader(ds, r_null, 1);
 
-    ds << static_cast<const Accumulator&>(null);
+    ds << static_cast<const Accumulator &>(null);
 
     return ds;
 }
@@ -175,7 +176,7 @@ QDataStream &operator>>(QDataStream &ds, NullAccumulator &null)
 
     if (v == 1)
     {
-        ds >> static_cast<Accumulator&>(null);
+        ds >> static_cast<Accumulator &>(null);
     }
     else
         throw version_error(v, "1", r_null, CODELOC);
@@ -184,21 +185,22 @@ QDataStream &operator>>(QDataStream &ds, NullAccumulator &null)
 }
 
 /** Construct an empty average */
-NullAccumulator::NullAccumulator()
-                : ConcreteProperty<NullAccumulator,Accumulator>()
-{}
+NullAccumulator::NullAccumulator() : ConcreteProperty<NullAccumulator, Accumulator>()
+{
+}
 
 /** Copy constructor */
-NullAccumulator::NullAccumulator(const NullAccumulator &other)
-        : ConcreteProperty<NullAccumulator,Accumulator>(other)
-{}
+NullAccumulator::NullAccumulator(const NullAccumulator &other) : ConcreteProperty<NullAccumulator, Accumulator>(other)
+{
+}
 
 /** Destructor */
 NullAccumulator::~NullAccumulator()
-{}
+{
+}
 
 /** Copy assignment operator */
-NullAccumulator& NullAccumulator::operator=(const NullAccumulator &other)
+NullAccumulator &NullAccumulator::operator=(const NullAccumulator &other)
 {
     Accumulator::operator=(other);
     return *this;
@@ -218,14 +220,15 @@ bool NullAccumulator::operator!=(const NullAccumulator &other) const
 
 /** Accumulate the passed value onto the average */
 void NullAccumulator::accumulate(double)
-{}
-
-const char* NullAccumulator::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<NullAccumulator>() );
 }
 
-const NullAccumulator& Accumulator::null()
+const char *NullAccumulator::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullAccumulator>());
+}
+
+const NullAccumulator &Accumulator::null()
 {
     return *(create_shared_null<NullAccumulator>());
 }
@@ -241,7 +244,7 @@ QDataStream &operator<<(QDataStream &ds, const Average &avg)
 {
     writeHeader(ds, r_avg, 1);
 
-    ds << avg.avgval << static_cast<const Accumulator&>(avg);
+    ds << avg.avgval << static_cast<const Accumulator &>(avg);
 
     return ds;
 }
@@ -253,7 +256,7 @@ QDataStream &operator>>(QDataStream &ds, Average &avg)
 
     if (v == 1)
     {
-        ds >> avg.avgval >> static_cast<Accumulator&>(avg);
+        ds >> avg.avgval >> static_cast<Accumulator &>(avg);
     }
     else
         throw version_error(v, "1", r_avg, CODELOC);
@@ -262,20 +265,22 @@ QDataStream &operator>>(QDataStream &ds, Average &avg)
 }
 
 /** Construct an empty average */
-Average::Average() : ConcreteProperty<Average,Accumulator>(), avgval(0)
-{}
+Average::Average() : ConcreteProperty<Average, Accumulator>(), avgval(0)
+{
+}
 
 /** Copy constructor */
-Average::Average(const Average &other)
-        : ConcreteProperty<Average,Accumulator>(other), avgval(other.avgval)
-{}
+Average::Average(const Average &other) : ConcreteProperty<Average, Accumulator>(other), avgval(other.avgval)
+{
+}
 
 /** Destructor */
 Average::~Average()
-{}
+{
+}
 
 /** Copy assignment operator */
-Average& Average::operator=(const Average &other)
+Average &Average::operator=(const Average &other)
 {
     if (this != &other)
     {
@@ -289,8 +294,7 @@ Average& Average::operator=(const Average &other)
 /** Comparison operator */
 bool Average::operator==(const Average &other) const
 {
-    return avgval == other.avgval and
-           Accumulator::operator==(other);
+    return avgval == other.avgval and Accumulator::operator==(other);
 }
 
 /** Comparison operator */
@@ -300,7 +304,7 @@ bool Average::operator!=(const Average &other) const
 }
 
 /** Self-addition operator */
-Average& Average::operator+=(const Average &other)
+Average &Average::operator+=(const Average &other)
 {
     if (nSamples() == 0)
         this->operator=(other);
@@ -345,8 +349,8 @@ void Average::accumulate(double value)
 {
     double nsteps = this->nSamples() + 1;
 
-    //calculate the average as
-    // average = ((n-1)/n) * average + (1/n) * value
+    // calculate the average as
+    //  average = ((n-1)/n) * average + (1/n) * value
 
     double big_ratio = (nsteps - 1) / nsteps;
     double small_ratio = 1.0 / nsteps;
@@ -367,9 +371,9 @@ Average::operator double() const
     return this->average();
 }
 
-const char* Average::typeName()
+const char *Average::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Average>() );
+    return QMetaType::typeName(qMetaTypeId<Average>());
 }
 
 /////////
@@ -379,50 +383,48 @@ const char* Average::typeName()
 static const RegisterMetaType<AverageAndStddev> r_avgstddev;
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                         const AverageAndStddev &avgstddev)
+QDataStream &operator<<(QDataStream &ds, const AverageAndStddev &avgstddev)
 {
     writeHeader(ds, r_avgstddev, 1);
 
-    ds << avgstddev.avgval2 << static_cast<const Average&>(avgstddev);
+    ds << avgstddev.avgval2 << static_cast<const Average &>(avgstddev);
 
     return ds;
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                         AverageAndStddev &avgstddev)
+QDataStream &operator>>(QDataStream &ds, AverageAndStddev &avgstddev)
 {
     VersionID v = readHeader(ds, r_avgstddev);
 
     if (v == 1)
     {
-        ds >> avgstddev.avgval2 >> static_cast<Average&>(avgstddev);
+        ds >> avgstddev.avgval2 >> static_cast<Average &>(avgstddev);
     }
     else
-        throw version_error( v, "1", r_avgstddev, CODELOC );
+        throw version_error(v, "1", r_avgstddev, CODELOC);
 
     return ds;
 }
 
 /** Construct an empty average */
-AverageAndStddev::AverageAndStddev()
-                 : ConcreteProperty<AverageAndStddev,Average>(),
-                   avgval2(0)
-{}
+AverageAndStddev::AverageAndStddev() : ConcreteProperty<AverageAndStddev, Average>(), avgval2(0)
+{
+}
 
 /** Copy constructor */
 AverageAndStddev::AverageAndStddev(const AverageAndStddev &other)
-                 : ConcreteProperty<AverageAndStddev,Average>(other),
-                   avgval2(other.avgval2)
-{}
+    : ConcreteProperty<AverageAndStddev, Average>(other), avgval2(other.avgval2)
+{
+}
 
 /** Destructor */
 AverageAndStddev::~AverageAndStddev()
-{}
+{
+}
 
 /** Copy assignment operator */
-AverageAndStddev& AverageAndStddev::operator=(const AverageAndStddev &other)
+AverageAndStddev &AverageAndStddev::operator=(const AverageAndStddev &other)
 {
     if (this != &other)
     {
@@ -436,8 +438,7 @@ AverageAndStddev& AverageAndStddev::operator=(const AverageAndStddev &other)
 /** Comparison operator */
 bool AverageAndStddev::operator==(const AverageAndStddev &other) const
 {
-    return avgval2 == other.avgval2 and
-           Average::operator==(other);
+    return avgval2 == other.avgval2 and Average::operator==(other);
 }
 
 /** Comparison operator */
@@ -447,7 +448,7 @@ bool AverageAndStddev::operator!=(const AverageAndStddev &other) const
 }
 
 /** Self-addition operator */
-AverageAndStddev& AverageAndStddev::operator+=(const AverageAndStddev &other)
+AverageAndStddev &AverageAndStddev::operator+=(const AverageAndStddev &other)
 {
     if (nSamples() == 0)
         this->operator=(other);
@@ -484,8 +485,7 @@ void AverageAndStddev::clear()
 
 QString AverageAndStddev::toString() const
 {
-    return QObject::tr("AverageAndStddev( %s : %s )")
-                .arg(this->average()).arg(this->stddev());
+    return QObject::tr("AverageAndStddev( %s : %s )").arg(this->average()).arg(this->stddev());
 }
 
 /** Accumulate the average and standard deviation */
@@ -493,8 +493,8 @@ void AverageAndStddev::accumulate(double value)
 {
     double nsteps = this->nSamples() + 1;
 
-    //calculate the average of the squares as
-    // average2 = ((n-1)/n) * average2 + (1/n) * value * value
+    // calculate the average of the squares as
+    //  average2 = ((n-1)/n) * average2 + (1/n) * value * value
 
     double big_ratio = (nsteps - 1) / nsteps;
     double small_ratio = 1.0 / nsteps;
@@ -509,7 +509,7 @@ void AverageAndStddev::accumulate(double value)
      the square of the mean) */
 double AverageAndStddev::stddev() const
 {
-    return std::sqrt( avgval2 - pow_2(this->average()) );
+    return std::sqrt(avgval2 - pow_2(this->average()));
 }
 
 /** Return the standard deviation of the average
@@ -542,9 +542,9 @@ double AverageAndStddev::meanOfSquares() const
     return avgval2;
 }
 
-const char* AverageAndStddev::typeName()
+const char *AverageAndStddev::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<AverageAndStddev>() );
+    return QMetaType::typeName(qMetaTypeId<AverageAndStddev>());
 }
 
 /////////
@@ -558,8 +558,7 @@ QDataStream &operator<<(QDataStream &ds, const ExpAverage &expavg)
 {
     writeHeader(ds, r_expavg, 2);
 
-    ds << expavg.avgval << expavg.avgval2 << expavg.sclfac
-       << static_cast<const Accumulator&>(expavg);
+    ds << expavg.avgval << expavg.avgval2 << expavg.sclfac << static_cast<const Accumulator &>(expavg);
 
     return ds;
 }
@@ -571,15 +570,14 @@ QDataStream &operator>>(QDataStream &ds, ExpAverage &expavg)
 
     if (v == 2)
     {
-        ds >> expavg.avgval >> expavg.avgval2 >> expavg.sclfac
-           >> static_cast<Accumulator&>(expavg);
+        ds >> expavg.avgval >> expavg.avgval2 >> expavg.sclfac >> static_cast<Accumulator &>(expavg);
     }
     else if (v == 1)
     {
-        ds >> expavg.avgval >> expavg.sclfac
-           >> static_cast<Accumulator&>(expavg);
+        ds >> expavg.avgval >> expavg.sclfac >> static_cast<Accumulator &>(expavg);
 
-        expavg.avgval2 = expavg.avgval * expavg.avgval;;
+        expavg.avgval2 = expavg.avgval * expavg.avgval;
+        ;
     }
     else
         throw version_error(v, "1,2", r_expavg, CODELOC);
@@ -592,22 +590,23 @@ QDataStream &operator>>(QDataStream &ds, ExpAverage &expavg)
     \throw SireError::invalid_arg
 */
 ExpAverage::ExpAverage(double scale_factor)
-           : ConcreteProperty<ExpAverage,Accumulator>(),
-             avgval(0), sclfac(scale_factor)
-{}
+    : ConcreteProperty<ExpAverage, Accumulator>(), avgval(0), sclfac(scale_factor)
+{
+}
 
 /** Copy constructor */
 ExpAverage::ExpAverage(const ExpAverage &other)
-        : ConcreteProperty<ExpAverage,Accumulator>(other),
-          avgval(other.avgval), sclfac(other.sclfac)
-{}
+    : ConcreteProperty<ExpAverage, Accumulator>(other), avgval(other.avgval), sclfac(other.sclfac)
+{
+}
 
 /** Destructor */
 ExpAverage::~ExpAverage()
-{}
+{
+}
 
 /** Copy assignment operator */
-ExpAverage& ExpAverage::operator=(const ExpAverage &other)
+ExpAverage &ExpAverage::operator=(const ExpAverage &other)
 {
     if (this != &other)
     {
@@ -622,9 +621,7 @@ ExpAverage& ExpAverage::operator=(const ExpAverage &other)
 /** Comparison operator */
 bool ExpAverage::operator==(const ExpAverage &other) const
 {
-    return avgval == other.avgval and
-           sclfac == other.sclfac and
-           Accumulator::operator==(other);
+    return avgval == other.avgval and sclfac == other.sclfac and Accumulator::operator==(other);
 }
 
 /** Comparison operator */
@@ -634,13 +631,15 @@ bool ExpAverage::operator!=(const ExpAverage &other) const
 }
 
 /** Self-addition operator */
-ExpAverage& ExpAverage::operator+=(const ExpAverage &other)
+ExpAverage &ExpAverage::operator+=(const ExpAverage &other)
 {
     if (sclfac != other.sclfac)
-        throw SireError::incompatible_error( QObject::tr(
-                "Cannot add together these two ExpAverage objects as their scale "
-                "factors are different. %1 vs. %2.")
-                    .arg(sclfac).arg(other.sclfac), CODELOC );
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot add together these two ExpAverage objects as their scale "
+                        "factors are different. %1 vs. %2.")
+                .arg(sclfac)
+                .arg(other.sclfac),
+            CODELOC);
 
     if (nSamples() == 0)
         this->operator=(other);
@@ -683,18 +682,18 @@ QString ExpAverage::toString() const
 /** Accumulate the passed value onto the average */
 void ExpAverage::accumulate(double value)
 {
-    double expvalue = std::exp( sclfac * value );
+    double expvalue = std::exp(sclfac * value);
 
     double nsteps = this->nSamples() + 1;
 
-    //calculate the average as
-    // average = ((n-1)/n) * average + (1/n) * expvalue
+    // calculate the average as
+    //  average = ((n-1)/n) * average + (1/n) * expvalue
 
     double big_ratio = (nsteps - 1) / nsteps;
     double small_ratio = 1.0 / nsteps;
 
     avgval = (big_ratio * avgval) + (small_ratio * expvalue);
-    avgval2 = (big_ratio * avgval) + (small_ratio * expvalue*expvalue);
+    avgval2 = (big_ratio * avgval) + (small_ratio * expvalue * expvalue);
 
     Accumulator::accumulate(value);
 }
@@ -702,13 +701,13 @@ void ExpAverage::accumulate(double value)
 /** Return the average value */
 double ExpAverage::average() const
 {
-    return ( 1.0 / sclfac ) * std::log(avgval);
+    return (1.0 / sclfac) * std::log(avgval);
 }
 
 /** Return the average of the squared value */
 double ExpAverage::average2() const
 {
-    return ( 1.0 / sclfac ) * std::log(std::sqrt(avgval2));
+    return (1.0 / sclfac) * std::log(std::sqrt(avgval2));
 }
 
 /** Allow automatic casting to a double to retrieve the average value */
@@ -723,9 +722,9 @@ double ExpAverage::scaleFactor() const
     return sclfac;
 }
 
-const char* ExpAverage::typeName()
+const char *ExpAverage::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ExpAverage>() );
+    return QMetaType::typeName(qMetaTypeId<ExpAverage>());
 }
 
 /////////
@@ -739,8 +738,7 @@ QDataStream &operator<<(QDataStream &ds, const Median &median)
 {
     writeHeader(ds, r_median, 1);
 
-    ds << median.minval << median.maxval
-       << static_cast<const Accumulator&>(median);
+    ds << median.minval << median.maxval << static_cast<const Accumulator &>(median);
 
     return ds;
 }
@@ -752,8 +750,7 @@ QDataStream &operator>>(QDataStream &ds, Median &median)
 
     if (v == 1)
     {
-        ds >> median.minval >> median.maxval
-           >> static_cast<Accumulator&>(median);
+        ds >> median.minval >> median.maxval >> static_cast<Accumulator &>(median);
     }
     else
         throw version_error(v, "1", r_median, CODELOC);
@@ -763,23 +760,24 @@ QDataStream &operator>>(QDataStream &ds, Median &median)
 
 /** Construct an empty average */
 Median::Median()
-       : ConcreteProperty<Median,Accumulator>(),
-         minval(  std::numeric_limits<double>::max() ),
-         maxval( -std::numeric_limits<double>::max() )
-{}
+    : ConcreteProperty<Median, Accumulator>(), minval(std::numeric_limits<double>::max()),
+      maxval(-std::numeric_limits<double>::max())
+{
+}
 
 /** Copy constructor */
 Median::Median(const Median &other)
-        : ConcreteProperty<Median,Accumulator>(other),
-          minval(other.minval), maxval(other.maxval)
-{}
+    : ConcreteProperty<Median, Accumulator>(other), minval(other.minval), maxval(other.maxval)
+{
+}
 
 /** Destructor */
 Median::~Median()
-{}
+{
+}
 
 /** Copy assignment operator */
-Median& Median::operator=(const Median &other)
+Median &Median::operator=(const Median &other)
 {
     if (this != &other)
     {
@@ -794,9 +792,7 @@ Median& Median::operator=(const Median &other)
 /** Comparison operator */
 bool Median::operator==(const Median &other) const
 {
-    return minval == other.minval and
-           maxval == other.maxval and
-           Accumulator::operator==(other);
+    return minval == other.minval and maxval == other.maxval and Accumulator::operator==(other);
 }
 
 /** Comparison operator */
@@ -833,8 +829,8 @@ void Median::accumulate(double value)
 /** Return the median value */
 double Median::median() const
 {
-    return (0.5 * maxval) + (0.5 * minval);   // the sum of maxval and minval
-                                              // could overflow
+    return (0.5 * maxval) + (0.5 * minval); // the sum of maxval and minval
+                                            // could overflow
 }
 
 /** Allow automatic casting to a double to retrieve the average value */
@@ -867,9 +863,9 @@ double Median::minimum() const
     return this->min();
 }
 
-const char* Median::typeName()
+const char *Median::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Median>() );
+    return QMetaType::typeName(qMetaTypeId<Median>());
 }
 
 /////////
@@ -885,8 +881,7 @@ QDataStream &operator<<(QDataStream &ds, const RecordValues &recval)
 
     SharedDataStream sds(ds);
 
-    sds << recval.vals
-        << static_cast<const Accumulator&>(recval);
+    sds << recval.vals << static_cast<const Accumulator &>(recval);
 
     return ds;
 }
@@ -900,17 +895,15 @@ QDataStream &operator>>(QDataStream &ds, RecordValues &recval)
     {
         SharedDataStream sds(ds);
 
-        sds >> recval.vals
-            >> static_cast<Accumulator&>(recval);
+        sds >> recval.vals >> static_cast<Accumulator &>(recval);
     }
     else if (v == 1)
     {
         QVector<double> vals;
 
-        ds >> vals
-           >> static_cast<Accumulator&>(recval);
+        ds >> vals >> static_cast<Accumulator &>(recval);
 
-        recval.vals = ChunkedVector<double,2048>::fromVector(vals);
+        recval.vals = ChunkedVector<double, 2048>::fromVector(vals);
     }
     else
         throw version_error(v, "1", r_recval, CODELOC);
@@ -919,22 +912,23 @@ QDataStream &operator>>(QDataStream &ds, RecordValues &recval)
 }
 
 /** Construct an empty average */
-RecordValues::RecordValues()
-             : ConcreteProperty<RecordValues,Accumulator>()
-{}
+RecordValues::RecordValues() : ConcreteProperty<RecordValues, Accumulator>()
+{
+}
 
 /** Copy constructor */
 RecordValues::RecordValues(const RecordValues &other)
-             : ConcreteProperty<RecordValues,Accumulator>(other),
-               vals(other.vals)
-{}
+    : ConcreteProperty<RecordValues, Accumulator>(other), vals(other.vals)
+{
+}
 
 /** Destructor */
 RecordValues::~RecordValues()
-{}
+{
+}
 
 /** Copy assignment operator */
-RecordValues& RecordValues::operator=(const RecordValues &other)
+RecordValues &RecordValues::operator=(const RecordValues &other)
 {
     if (this != &other)
     {
@@ -948,8 +942,7 @@ RecordValues& RecordValues::operator=(const RecordValues &other)
 /** Comparison operator */
 bool RecordValues::operator==(const RecordValues &other) const
 {
-    return vals == other.vals and
-           Accumulator::operator==(other);
+    return vals == other.vals and Accumulator::operator==(other);
 }
 
 /** Comparison operator */
@@ -967,8 +960,7 @@ void RecordValues::clear()
 
 QString RecordValues::toString() const
 {
-    return QObject::tr("AverageAndStddev( %s : %s )")
-                .arg(this->mean()).arg(this->stddev());
+    return QObject::tr("AverageAndStddev( %s : %s )").arg(this->mean()).arg(this->stddev());
 }
 
 /** Accumulate the passed value onto the average */
@@ -1007,7 +999,7 @@ double RecordValues::max() const
 
     double maxval = -(std::numeric_limits<double>::max());
 
-    for (int i=0; i<nvals; ++i)
+    for (int i = 0; i < nvals; ++i)
     {
         if (vals[i] > maxval)
             maxval = vals[i];
@@ -1032,7 +1024,7 @@ double RecordValues::min() const
 
     double minval = std::numeric_limits<double>::max();
 
-    for (int i=0; i<nvals; ++i)
+    for (int i = 0; i < nvals; ++i)
     {
         if (vals[i] < minval)
             minval = vals[i];
@@ -1054,7 +1046,7 @@ double RecordValues::sum() const
 
     double sum = 0;
 
-    for (int i=0; i<nvals; ++i)
+    for (int i = 0; i < nvals; ++i)
     {
         sum += vals[i];
     }
@@ -1069,9 +1061,9 @@ double RecordValues::sum2() const
 
     double sum2 = 0;
 
-    for (int i=0; i<nvals; ++i)
+    for (int i = 0; i < nvals; ++i)
     {
-        sum2 += pow_2( vals[i] );
+        sum2 += pow_2(vals[i]);
     }
 
     return sum2;
@@ -1080,8 +1072,8 @@ double RecordValues::sum2() const
 /** Return the median value */
 double RecordValues::median() const
 {
-    return (0.5 * min()) + (0.5 * max());   // the sum of maxval and minval
-                                            // could overflow
+    return (0.5 * min()) + (0.5 * max()); // the sum of maxval and minval
+                                          // could overflow
 }
 
 /** Return the mean value */
@@ -1107,7 +1099,7 @@ double RecordValues::meanOfSquares() const
 /** Return the standard deviation of the values */
 double RecordValues::standardDeviation() const
 {
-    return std::sqrt( this->meanOfSquares() - pow_2(this->mean()) );
+    return std::sqrt(this->meanOfSquares() - pow_2(this->mean()));
 }
 
 /** Return the standard deviation of the values */
@@ -1128,7 +1120,7 @@ QVector<double> RecordValues::values() const
     return vals.toVector();
 }
 
-const char* RecordValues::typeName()
+const char *RecordValues::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<RecordValues>() );
+    return QMetaType::typeName(qMetaTypeId<RecordValues>());
 }

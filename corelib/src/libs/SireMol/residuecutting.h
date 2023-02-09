@@ -34,46 +34,45 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class ResidueCutting;
+    class ResidueCutting;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::ResidueCutting&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::ResidueCutting&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::ResidueCutting &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::ResidueCutting &);
 
 namespace SireMol
 {
 
-/** This is a cutting function that divides up a molecule into
-    CutGroups based on residue - each residue is placed into
-    a different CutGroup
+    /** This is a cutting function that divides up a molecule into
+        CutGroups based on residue - each residue is placed into
+        a different CutGroup
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT ResidueCutting
-        : public SireBase::ConcreteProperty<ResidueCutting,CuttingFunction>
-{
-public:
-    ResidueCutting();
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT ResidueCutting : public SireBase::ConcreteProperty<ResidueCutting, CuttingFunction>
+    {
+    public:
+        ResidueCutting();
 
-    ResidueCutting(const ResidueCutting &other);
+        ResidueCutting(const ResidueCutting &other);
 
-    ~ResidueCutting();
+        ~ResidueCutting();
 
-    static const char* typeName();
+        static const char *typeName();
 
-    ResidueCutting& operator=(const ResidueCutting &other);
+        ResidueCutting &operator=(const ResidueCutting &other);
 
-    bool operator==(const ResidueCutting &other) const;
-    bool operator!=(const ResidueCutting &other) const;
+        bool operator==(const ResidueCutting &other) const;
+        bool operator!=(const ResidueCutting &other) const;
 
-    MolStructureEditor operator()(MolStructureEditor &moleditor) const;
-};
+        MolStructureEditor operator()(MolStructureEditor &moleditor) const;
+    };
 
-}
+} // namespace SireMol
 
-Q_DECLARE_METATYPE( SireMol::ResidueCutting );
+Q_DECLARE_METATYPE(SireMol::ResidueCutting);
 
-SIRE_EXPOSE_CLASS( SireMol::ResidueCutting )
+SIRE_EXPOSE_CLASS(SireMol::ResidueCutting)
 
 SIRE_END_HEADER
 

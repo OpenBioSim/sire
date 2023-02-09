@@ -39,151 +39,129 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-class AngleID;
+    class AngleID;
 }
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AngleID&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AngleID&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AngleID &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AngleID &);
 
 namespace SireMaths
 {
-class Vector;
-class Triangle;
-}
+    class Vector;
+    class Triangle;
+} // namespace SireMaths
 
 namespace SireMol
 {
 
-class MoleculeData;
-class MoleculeInfoData;
-class AtomIdx;
+    class MoleculeData;
+    class MoleculeInfoData;
+    class AtomIdx;
 
-using SireMaths::Vector;
-using SireMaths::Triangle;
+    using SireMaths::Triangle;
+    using SireMaths::Vector;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-using boost::tuple;
+    using boost::tuple;
 
-/** This class provides a generic ID for an angle between
-    three atoms
+    /** This class provides a generic ID for an angle between
+        three atoms
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AngleID : public SireID::ID
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AngleID&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AngleID&);
-
-public:
-    AngleID();
-    AngleID(const AtomID &atom0, const AtomID &atom1,
-            const AtomID &atom2);
-
-    AngleID(const AngleID &other);
-
-    ~AngleID();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AngleID : public SireID::ID
     {
-        return AngleID::typeName();
-    }
 
-    AngleID* clone() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AngleID &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AngleID &);
 
-    uint hash() const;
+    public:
+        AngleID();
+        AngleID(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2);
 
-    QString toString() const;
+        AngleID(const AngleID &other);
 
-    bool isNull() const;
+        ~AngleID();
 
-    AngleID& operator=(const AngleID &other);
+        static const char *typeName();
 
-    bool operator==(const SireID::ID &other) const;
+        const char *what() const
+        {
+            return AngleID::typeName();
+        }
 
-    bool operator==(const AngleID &other) const;
-    bool operator!=(const AngleID &other) const;
+        AngleID *clone() const;
 
-    AngleID mirror() const;
+        uint hash() const;
 
-    const AtomID& operator[](int i) const;
+        QString toString() const;
 
-    tuple<AtomIdx,AtomIdx,AtomIdx> map(const MoleculeInfoData &molinfo) const;
-    tuple<AtomIdx,AtomIdx,AtomIdx> map(const MoleculeInfoData &mol0info,
-                                       const MoleculeInfoData &mol1info,
-                                       const MoleculeInfoData &mol2info) const;
+        bool isNull() const;
 
-    Vector vector(const MoleculeData &moldata,
-                  const PropertyMap &map = PropertyMap()) const;
+        AngleID &operator=(const AngleID &other);
 
-    Vector vector(const MoleculeData &mol0data,
-                  const MoleculeData &mol1data,
-                  const MoleculeData &mol2data,
-                  const PropertyMap &map = PropertyMap()) const;
+        bool operator==(const SireID::ID &other) const;
 
-    Vector vector(const MoleculeData &mol0data,
-                  const PropertyMap &map0,
-                  const MoleculeData &mol1data,
-                  const PropertyMap &map1,
-                  const MoleculeData &mol2data,
-                  const PropertyMap &map2) const;
+        bool operator==(const AngleID &other) const;
+        bool operator!=(const AngleID &other) const;
 
-    Triangle triangle(const MoleculeData &moldata,
+        AngleID mirror() const;
+
+        const AtomID &operator[](int i) const;
+
+        tuple<AtomIdx, AtomIdx, AtomIdx> map(const MoleculeInfoData &molinfo) const;
+        tuple<AtomIdx, AtomIdx, AtomIdx> map(const MoleculeInfoData &mol0info, const MoleculeInfoData &mol1info,
+                                             const MoleculeInfoData &mol2info) const;
+
+        Vector vector(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
+
+        Vector vector(const MoleculeData &mol0data, const MoleculeData &mol1data, const MoleculeData &mol2data,
                       const PropertyMap &map = PropertyMap()) const;
 
-    Triangle triangle(const MoleculeData &mol0data,
-                      const MoleculeData &mol1data,
-                      const MoleculeData &mol2data,
-                      const PropertyMap &map = PropertyMap()) const;
+        Vector vector(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                      const PropertyMap &map1, const MoleculeData &mol2data, const PropertyMap &map2) const;
 
-    Triangle triangle(const MoleculeData &mol0data,
-                      const PropertyMap &map0,
-                      const MoleculeData &mol1data,
-                      const PropertyMap &map1,
-                      const MoleculeData &mol2data,
-                      const PropertyMap &map2) const;
+        Triangle triangle(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
 
-    SireUnits::Dimension::Angle size(const MoleculeData &moldata,
-                                     const PropertyMap &map = PropertyMap()) const;
+        Triangle triangle(const MoleculeData &mol0data, const MoleculeData &mol1data, const MoleculeData &mol2data,
+                          const PropertyMap &map = PropertyMap()) const;
 
-    SireUnits::Dimension::Angle size(const MoleculeData &mol0data,
-                                     const MoleculeData &mol1data,
-                                     const MoleculeData &mol2data,
-                                     const PropertyMap &map = PropertyMap()) const;
+        Triangle triangle(const MoleculeData &mol0data, const PropertyMap &map0, const MoleculeData &mol1data,
+                          const PropertyMap &map1, const MoleculeData &mol2data, const PropertyMap &map2) const;
 
-    SireUnits::Dimension::Angle size(const MoleculeData &mol0data,
-                                     const PropertyMap &map0,
-                                     const MoleculeData &mol1data,
-                                     const PropertyMap &map1,
-                                     const MoleculeData &mol2data,
-                                     const PropertyMap &map2) const;
+        SireUnits::Dimension::Angle size(const MoleculeData &moldata, const PropertyMap &map = PropertyMap()) const;
 
-    const AtomID& atom0() const;
-    const AtomID& atom1() const;
-    const AtomID& atom2() const;
+        SireUnits::Dimension::Angle size(const MoleculeData &mol0data, const MoleculeData &mol1data,
+                                         const MoleculeData &mol2data, const PropertyMap &map = PropertyMap()) const;
 
-private:
-    /** The identifiers of the three atoms */
-    AtomIdentifier atm0,atm1,atm2;
-};
+        SireUnits::Dimension::Angle size(const MoleculeData &mol0data, const PropertyMap &map0,
+                                         const MoleculeData &mol1data, const PropertyMap &map1,
+                                         const MoleculeData &mol2data, const PropertyMap &map2) const;
+
+        const AtomID &atom0() const;
+        const AtomID &atom1() const;
+        const AtomID &atom2() const;
+
+    private:
+        /** The identifiers of the three atoms */
+        AtomIdentifier atm0, atm1, atm2;
+    };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
-SIRE_ALWAYS_INLINE uint qHash(const AngleID &angleid)
-{
-    return angleid.hash();
-}
+    SIRE_ALWAYS_INLINE uint qHash(const AngleID &angleid)
+    {
+        return angleid.hash();
+    }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-}
+} // namespace SireMol
 
 Q_DECLARE_METATYPE(SireMol::AngleID);
 
-SIRE_EXPOSE_CLASS( SireMol::AngleID )
+SIRE_EXPOSE_CLASS(SireMol::AngleID)
 
 SIRE_END_HEADER
 

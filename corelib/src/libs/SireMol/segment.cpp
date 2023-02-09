@@ -30,10 +30,10 @@
 #include "atom.h"
 #include "molecule.h"
 
-#include "mover.hpp"
-#include "selector.hpp"
 #include "evaluator.h"
+#include "mover.hpp"
 #include "segeditor.h"
+#include "selector.hpp"
 
 #include "groupatomids.h"
 
@@ -51,14 +51,12 @@ using namespace SireStream;
 /////// Implementation of SegProp
 ///////
 
-static const RegisterMetaType<SegProp> r_segprop(MAGIC_ONLY,
-                                                 "SireMol::SegProp");
+static const RegisterMetaType<SegProp> r_segprop(MAGIC_ONLY, "SireMol::SegProp");
 
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const SegProp &segprop)
 {
-    writeHeader(ds, r_segprop, 1)
-         << static_cast<const MolViewProperty&>(segprop);
+    writeHeader(ds, r_segprop, 1) << static_cast<const MolViewProperty &>(segprop);
 
     return ds;
 }
@@ -70,7 +68,7 @@ QDataStream &operator>>(QDataStream &ds, SegProp &segprop)
 
     if (v == 1)
     {
-        ds >> static_cast<MolViewProperty&>(segprop);
+        ds >> static_cast<MolViewProperty &>(segprop);
     }
     else
         throw version_error(v, "1", r_segprop, CODELOC);
@@ -79,13 +77,16 @@ QDataStream &operator>>(QDataStream &ds, SegProp &segprop)
 }
 
 SegProp::SegProp() : MolViewProperty()
-{}
+{
+}
 
 SegProp::SegProp(const SegProp &other) : MolViewProperty(other)
-{}
+{
+}
 
 SegProp::~SegProp()
-{}
+{
+}
 
 ///////
 /////// Implementation of Segment
@@ -100,7 +101,7 @@ QDataStream &operator<<(QDataStream &ds, const Segment &seg)
 
     SharedDataStream sds(ds);
 
-    sds << seg.segidx << static_cast<const MoleculeView&>(seg);
+    sds << seg.segidx << static_cast<const MoleculeView &>(seg);
 
     return ds;
 }
@@ -114,7 +115,7 @@ QDataStream &operator>>(QDataStream &ds, Segment &seg)
     {
         SharedDataStream sds(ds);
 
-        sds >> seg.segidx >> static_cast<MoleculeView&>(seg);
+        sds >> seg.segidx >> static_cast<MoleculeView &>(seg);
 
         seg.selected_atoms = AtomSelection(seg.data());
         seg.selected_atoms.selectOnly(seg.segidx);
@@ -126,8 +127,9 @@ QDataStream &operator>>(QDataStream &ds, Segment &seg)
 }
 
 /** Null constructor */
-Segment::Segment() : ConcreteProperty<Segment,MoleculeView>(), segidx( SegIdx::null() )
-{}
+Segment::Segment() : ConcreteProperty<Segment, MoleculeView>(), segidx(SegIdx::null())
+{
+}
 
 /** Construct the Segment at ID 'cgid' in the molecule whose data
     is in 'moldata'
@@ -137,8 +139,7 @@ Segment::Segment() : ConcreteProperty<Segment,MoleculeView>(), segidx( SegIdx::n
     \throw SireError::invalid_index
 */
 Segment::Segment(const MoleculeData &moldata, const SegID &segid)
-      : ConcreteProperty<Segment,MoleculeView>(moldata),
-        segidx( moldata.info().segIdx(segid) )
+    : ConcreteProperty<Segment, MoleculeView>(moldata), segidx(moldata.info().segIdx(segid))
 {
     selected_atoms = AtomSelection(moldata);
     selected_atoms.selectOnly(segidx);
@@ -146,16 +147,17 @@ Segment::Segment(const MoleculeData &moldata, const SegID &segid)
 
 /** Copy constructor */
 Segment::Segment(const Segment &other)
-        : ConcreteProperty<Segment,MoleculeView>(other), segidx(other.segidx),
-          selected_atoms(other.selected_atoms)
-{}
+    : ConcreteProperty<Segment, MoleculeView>(other), segidx(other.segidx), selected_atoms(other.selected_atoms)
+{
+}
 
 /** Destructor */
 Segment::~Segment()
-{}
+{
+}
 
 /** Copy assignment operator */
-Segment& Segment::operator=(const Segment &other)
+Segment &Segment::operator=(const Segment &other)
 {
     MoleculeView::operator=(other);
     segidx = other.segidx;
@@ -166,22 +168,19 @@ Segment& Segment::operator=(const Segment &other)
 /** Comparison operator */
 bool Segment::operator==(const Segment &other) const
 {
-    return segidx == other.segidx and
-           MoleculeView::operator==(other);
+    return segidx == other.segidx and MoleculeView::operator==(other);
 }
 
 /** Comparison operator */
 bool Segment::operator!=(const Segment &other) const
 {
-    return segidx != other.segidx or
-           MoleculeView::operator!=(other);
+    return segidx != other.segidx or MoleculeView::operator!=(other);
 }
 
 /** Return a string representation of this segment */
 QString Segment::toString() const
 {
-    return QObject::tr( "Segment( %1 num_atoms=%2 )" )
-                .arg( this->name() ).arg(this->nAtoms());
+    return QObject::tr("Segment( %1 num_atoms=%2 )").arg(this->name()).arg(this->nAtoms());
 }
 
 /** Return whether or not this segment is empty */
@@ -198,7 +197,7 @@ bool Segment::selectedAll() const
 
 MolViewPtr Segment::toSelector() const
 {
-    return MolViewPtr( Selector<Segment>(*this) );
+    return MolViewPtr(Selector<Segment>(*this));
 }
 
 /** Return the atoms that are in this Segment */
@@ -213,27 +212,28 @@ AtomSelection Segment::selection() const
 */
 void Segment::update(const MoleculeData &moldata)
 {
-    //check that the new data is compatible (has same molecule
-    //number and info ID number)
-    if (d->number() != moldata.number() or
-        d->info().UID() != moldata.info().UID())
+    // check that the new data is compatible (has same molecule
+    // number and info ID number)
+    if (d->number() != moldata.number() or d->info().UID() != moldata.info().UID())
     {
-        throw SireError::incompatible_error( QObject::tr(
-            "You can only update a segment with the molecule data "
-            "for the same molecule (same molecule number) and that "
-            "has a .info() object that has the same UID. You are "
-            "trying to update segment %1 in molecule %2 with UID %3 "
-            "with molecule %4 with UID %5.")
-                .arg(segidx).arg(d->number()).arg(d->info().UID().toString())
-                .arg(moldata.number()).arg(moldata.info().UID().toString()),
-                    CODELOC );
+        throw SireError::incompatible_error(QObject::tr("You can only update a segment with the molecule data "
+                                                        "for the same molecule (same molecule number) and that "
+                                                        "has a .info() object that has the same UID. You are "
+                                                        "trying to update segment %1 in molecule %2 with UID %3 "
+                                                        "with molecule %4 with UID %5.")
+                                                .arg(segidx)
+                                                .arg(d->number())
+                                                .arg(d->info().UID().toString())
+                                                .arg(moldata.number())
+                                                .arg(moldata.info().UID().toString()),
+                                            CODELOC);
     }
 
     d = moldata;
 }
 
 /** Return the name of this Segment */
-const SegName& Segment::name() const
+const SegName &Segment::name() const
 {
     return d->info().name(segidx);
 }
@@ -290,7 +290,7 @@ int Segment::nAtoms() const
 
 /** Return the indicies of the atoms in this segment, in the
     order that they appear in this segment */
-const QList<AtomIdx>& Segment::atomIdxs() const
+const QList<AtomIdx> &Segment::atomIdxs() const
 {
     return d->info().getAtomsIn(segidx);
 }
@@ -347,8 +347,7 @@ bool Segment::hasMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-bool Segment::hasMetadata(const PropertyName &key,
-                       const PropertyName &metakey) const
+bool Segment::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     return d->hasMetadataOfType<SegProp>(key, metakey);
 }
@@ -382,9 +381,8 @@ QStringList Segment::metadataKeys(const PropertyName &key) const
 void Segment::assertContainsProperty(const PropertyName &key) const
 {
     if (not this->hasProperty(key))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no SegProperty at key '%1' for this segment.")
-                .arg(key.toString()), CODELOC );
+        throw SireBase::missing_property(
+            QObject::tr("There is no SegProperty at key '%1' for this segment.").arg(key.toString()), CODELOC);
 }
 
 /** Assert that this segment has an SegProperty piece of metadata
@@ -395,10 +393,10 @@ void Segment::assertContainsProperty(const PropertyName &key) const
 void Segment::assertContainsMetadata(const PropertyName &metakey) const
 {
     if (not this->hasMetadata(metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no SegProperty metadata at metakey '%1' for "
-            "this segment.")
-                .arg(metakey.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no SegProperty metadata at metakey '%1' for "
+                                                     "this segment.")
+                                             .arg(metakey.toString()),
+                                         CODELOC);
 }
 
 /** Assert that the property at key 'key' has an SegProperty
@@ -406,35 +404,32 @@ void Segment::assertContainsMetadata(const PropertyName &metakey) const
 
     \throw SireBase::missing_property
 */
-void Segment::assertContainsMetadata(const PropertyName &key,
-                                     const PropertyName &metakey) const
+void Segment::assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const
 {
     if (not this->hasMetadata(key, metakey))
-        throw SireBase::missing_property( QObject::tr(
-            "There is no SegProperty metadata at metakey '%1' "
-            "for the property at key '%2' for this segment.")
-                .arg(metakey.toString(), key.toString()), CODELOC );
+        throw SireBase::missing_property(QObject::tr("There is no SegProperty metadata at metakey '%1' "
+                                                     "for the property at key '%2' for this segment.")
+                                             .arg(metakey.toString(), key.toString()),
+                                         CODELOC);
 }
 
-const char* Segment::typeName()
+const char *Segment::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<Segment>() );
+    return QMetaType::typeName(qMetaTypeId<Segment>());
 }
 
-bool SireMol::detail::has_property(const Segment*, const MoleculeData &moldata,
-                                                  const PropertyName &key)
+bool SireMol::detail::has_property(const Segment *, const MoleculeData &moldata, const PropertyName &key)
 {
     return moldata.hasPropertyOfType<SegProp>(key);
 }
 
-bool SireMol::detail::has_metadata(const Segment*, const MoleculeData &moldata,
-                                                  const PropertyName &metakey)
+bool SireMol::detail::has_metadata(const Segment *, const MoleculeData &moldata, const PropertyName &metakey)
 {
     return moldata.hasMetadataOfType<SegProp>(metakey);
 }
 
-bool SireMol::detail::has_metadata(const Segment*, const MoleculeData &moldata,
-                                                  const PropertyName &key, const PropertyName &metakey)
+bool SireMol::detail::has_metadata(const Segment *, const MoleculeData &moldata, const PropertyName &key,
+                                   const PropertyName &metakey)
 {
     return moldata.hasMetadataOfType<SegProp>(key, metakey);
 }
@@ -445,5 +440,5 @@ namespace SireMol
     template class Mover<Segment>;
     template class Selector<Segment>;
 
-    template class Mover< Selector<Segment> >;
-}
+    template class Mover<Selector<Segment>>;
+} // namespace SireMol

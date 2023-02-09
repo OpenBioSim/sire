@@ -63,33 +63,34 @@ QDataStream &operator>>(QDataStream &ds, ChainIdentifier &chainid)
         SireStream::loadPolyPointer(ds, chainid.d);
     }
     else
-        throw version_error( v, "1", r_chainid, CODELOC );
+        throw version_error(v, "1", r_chainid, CODELOC);
 
     return ds;
 }
 
 /** Null constructor */
 ChainIdentifier::ChainIdentifier() : ChainID()
-{}
+{
+}
 
 /** Construct from the passed ChainID */
-ChainIdentifier::ChainIdentifier(const ChainID &chainid)
-               : ChainID()
+ChainIdentifier::ChainIdentifier(const ChainID &chainid) : ChainID()
 {
     if (chainid.isA<ChainIdentifier>())
         d = chainid.asA<ChainIdentifier>().d;
     else if (not chainid.isNull())
-        d.reset( chainid.clone() );
+        d.reset(chainid.clone());
 }
 
 /** Copy constructor */
-ChainIdentifier::ChainIdentifier(const ChainIdentifier &other)
-               : ChainID(other), d(other.d)
-{}
+ChainIdentifier::ChainIdentifier(const ChainIdentifier &other) : ChainID(other), d(other.d)
+{
+}
 
 /** Destructor */
 ChainIdentifier::~ChainIdentifier()
-{}
+{
+}
 
 /** Is this selection null? */
 bool ChainIdentifier::isNull() const
@@ -116,7 +117,7 @@ QString ChainIdentifier::toString() const
 }
 
 /** Return the base type of this ID */
-const ChainID& ChainIdentifier::base() const
+const ChainID &ChainIdentifier::base() const
 {
     if (d.get() == 0)
         return *this;
@@ -125,14 +126,14 @@ const ChainID& ChainIdentifier::base() const
 }
 
 /** Copy assignment operator */
-ChainIdentifier& ChainIdentifier::operator=(const ChainIdentifier &other)
+ChainIdentifier &ChainIdentifier::operator=(const ChainIdentifier &other)
 {
     d = other.d;
     return *this;
 }
 
 /** Copy assignment operator */
-ChainIdentifier& ChainIdentifier::operator=(const ChainID &other)
+ChainIdentifier &ChainIdentifier::operator=(const ChainID &other)
 {
     if (other.isA<ChainIdentifier>())
         d = other.asA<ChainIdentifier>().d;
@@ -203,9 +204,9 @@ QList<ChainIdx> ChainIdentifier::map(const MolInfo &molinfo) const
         return d->map(molinfo);
 }
 
-const char* ChainIdentifier::typeName()
+const char *ChainIdentifier::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChainIdentifier>() );
+    return QMetaType::typeName(qMetaTypeId<ChainIdentifier>());
 }
 
 ////////
@@ -219,7 +220,7 @@ QDataStream &operator<<(QDataStream &ds, const ChainIdx &chainidx)
 {
     writeHeader(ds, r_chainidx, 1);
 
-    ds << static_cast<const SireID::Index_T_<ChainIdx>&>(chainidx);
+    ds << static_cast<const SireID::Index_T_<ChainIdx> &>(chainidx);
 
     return ds;
 }
@@ -231,25 +232,29 @@ QDataStream &operator>>(QDataStream &ds, ChainIdx &chainidx)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Index_T_<ChainIdx>&>(chainidx);
+        ds >> static_cast<SireID::Index_T_<ChainIdx> &>(chainidx);
     }
     else
-        throw version_error( v, "1", r_chainidx, CODELOC );
+        throw version_error(v, "1", r_chainidx, CODELOC);
 
     return ds;
 }
 
 ChainIdx::ChainIdx() : SireID::Index_T_<ChainIdx>(), ChainID()
-{}
+{
+}
 
 ChainIdx::ChainIdx(qint32 idx) : SireID::Index_T_<ChainIdx>(idx), ChainID()
-{}
+{
+}
 
 ChainIdx::ChainIdx(const ChainIdx &other) : SireID::Index_T_<ChainIdx>(other), ChainID(other)
-{}
+{
+}
 
 ChainIdx::~ChainIdx()
-{}
+{
+}
 
 ChainIdx ChainIdx::null()
 {
@@ -271,7 +276,7 @@ QString ChainIdx::toString() const
     return QString("ChainIdx(%1)").arg(_idx);
 }
 
-ChainIdx& ChainIdx::operator=(const ChainIdx &other)
+ChainIdx &ChainIdx::operator=(const ChainIdx &other)
 {
     SireID::IndexBase::operator=(other);
     ChainID::operator=(other);
@@ -288,9 +293,9 @@ QList<ChainIdx> ChainIdx::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* ChainIdx::typeName()
+const char *ChainIdx::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChainIdx>() );
+    return QMetaType::typeName(qMetaTypeId<ChainIdx>());
 }
 
 ////////
@@ -304,7 +309,7 @@ QDataStream &operator<<(QDataStream &ds, const ChainName &chainname)
 {
     writeHeader(ds, r_chainname, 1);
 
-    ds << static_cast<const SireID::Name&>(chainname);
+    ds << static_cast<const SireID::Name &>(chainname);
 
     return ds;
 }
@@ -316,29 +321,34 @@ QDataStream &operator>>(QDataStream &ds, ChainName &chainname)
 
     if (v == 1)
     {
-        ds >> static_cast<SireID::Name&>(chainname);
+        ds >> static_cast<SireID::Name &>(chainname);
     }
     else
-        throw version_error( v, "1", r_chainname, CODELOC );
+        throw version_error(v, "1", r_chainname, CODELOC);
 
     return ds;
 }
 
 ChainName::ChainName() : SireID::Name(), ChainID()
-{}
+{
+}
 
 ChainName::ChainName(const QString &name) : SireID::Name(name), ChainID()
-{}
+{
+}
 
 ChainName::ChainName(const QString &name, SireID::CaseSensitivity case_sensitivity)
-          : SireID::Name(name, case_sensitivity), ChainID()
-{}
+    : SireID::Name(name, case_sensitivity), ChainID()
+{
+}
 
 ChainName::ChainName(const ChainName &other) : SireID::Name(other), ChainID(other)
-{}
+{
+}
 
 ChainName::~ChainName()
-{}
+{
+}
 
 bool ChainName::isNull() const
 {
@@ -358,7 +368,7 @@ QString ChainName::toString() const
         return QString("ChainName('%1', isCaseSensitive=False)").arg(_name);
 }
 
-ChainName& ChainName::operator=(const ChainName &other)
+ChainName &ChainName::operator=(const ChainName &other)
 {
     SireID::Name::operator=(other);
     ChainID::operator=(other);
@@ -385,24 +395,22 @@ QList<ChainIdx> ChainName::map(const MolInfo &molinfo) const
     return molinfo.map(*this);
 }
 
-const char* ChainName::typeName()
+const char *ChainName::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<ChainName>() );
+    return QMetaType::typeName(qMetaTypeId<ChainName>());
 }
 
-ChainIdentifier* ChainIdentifier::clone() const
+ChainIdentifier *ChainIdentifier::clone() const
 {
     return new ChainIdentifier(*this);
 }
 
-ChainName* ChainName::clone() const
+ChainName *ChainName::clone() const
 {
     return new ChainName(*this);
 }
 
-
-ChainIdx* ChainIdx::clone() const
+ChainIdx *ChainIdx::clone() const
 {
     return new ChainIdx(*this);
 }
-

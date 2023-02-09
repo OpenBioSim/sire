@@ -30,95 +30,93 @@
 
 #include "SireCluster/workpacket.h"
 
-#include "suprasystem.h"
 #include "supramoves.h"
+#include "suprasystem.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireMove
 {
-class SupraSimPacket;
+    class SupraSimPacket;
 }
 
-SIREMOVE_EXPORT QDataStream& operator<<(QDataStream&, const SireMove::SupraSimPacket&);
-SIREMOVE_EXPORT QDataStream& operator>>(QDataStream&, SireMove::SupraSimPacket&);
+SIREMOVE_EXPORT QDataStream &operator<<(QDataStream &, const SireMove::SupraSimPacket &);
+SIREMOVE_EXPORT QDataStream &operator>>(QDataStream &, SireMove::SupraSimPacket &);
 
 namespace SireMove
 {
 
-/** This is a workpacket that is used to run part of a supra-simulation
+    /** This is a workpacket that is used to run part of a supra-simulation
 
-    @author Christopher Woods
-*/
-class SIREMOVE_EXPORT SupraSimPacket : public SireCluster::WorkPacketBase
-{
-
-friend SIREMOVE_EXPORT QDataStream& ::operator<<(QDataStream&, const SupraSimPacket&);
-friend SIREMOVE_EXPORT QDataStream& ::operator>>(QDataStream&, SupraSimPacket&);
-
-public:
-    SupraSimPacket();
-
-    SupraSimPacket(const SupraSystem &suprasystem,
-                   const SupraMoves &supramoves,
-                   int nmoves, bool record_stats);
-
-    SupraSimPacket(const SupraSimPacket &other);
-
-    ~SupraSimPacket();
-
-    SupraSimPacket& operator=(const SupraSimPacket &other);
-
-    bool operator==(const SupraSimPacket &other) const;
-    bool operator!=(const SupraSimPacket &other) const;
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOVE_EXPORT SupraSimPacket : public SireCluster::WorkPacketBase
     {
-        return SupraSimPacket::typeName();
-    }
 
-    SupraSimPacket* clone() const;
+        friend SIREMOVE_EXPORT QDataStream & ::operator<<(QDataStream &, const SupraSimPacket &);
+        friend SIREMOVE_EXPORT QDataStream & ::operator>>(QDataStream &, SupraSimPacket &);
 
-    bool shouldPack() const;
-    int approximatePacketSize() const;
+    public:
+        SupraSimPacket();
 
-    const SupraSystem& system() const;
-    const SupraMoves& moves() const;
+        SupraSimPacket(const SupraSystem &suprasystem, const SupraMoves &supramoves, int nmoves, bool record_stats);
 
-    int nMoves() const;
-    int nCompleted() const;
+        SupraSimPacket(const SupraSimPacket &other);
 
-    bool recordingStatistics() const;
+        ~SupraSimPacket();
 
-    bool hasFinished() const;
+        SupraSimPacket &operator=(const SupraSimPacket &other);
 
-protected:
-    float chunk();
+        bool operator==(const SupraSimPacket &other) const;
+        bool operator!=(const SupraSimPacket &other) const;
 
-private:
-    /** The supra-system being simulated */
-    SupraSystemPtr supra_system;
+        static const char *typeName();
 
-    /** The moves applied to the supra-system */
-    SupraMovesPtr supra_moves;
+        const char *what() const
+        {
+            return SupraSimPacket::typeName();
+        }
 
-    /** The number of moves to be run on the supra-system */
-    quint32 n_supra_moves;
+        SupraSimPacket *clone() const;
 
-    /** The number of supra-moves already run on the supra-system */
-    quint32 ncompleted;
+        bool shouldPack() const;
+        int approximatePacketSize() const;
 
-    /** Whether or not to record sub statistics */
-    bool record_stats;
-};
+        const SupraSystem &system() const;
+        const SupraMoves &moves() const;
 
-}
+        int nMoves() const;
+        int nCompleted() const;
 
-Q_DECLARE_METATYPE( SireMove::SupraSimPacket )
+        bool recordingStatistics() const;
 
-SIRE_EXPOSE_CLASS( SireMove::SupraSimPacket )
+        bool hasFinished() const;
+
+    protected:
+        float chunk();
+
+    private:
+        /** The supra-system being simulated */
+        SupraSystemPtr supra_system;
+
+        /** The moves applied to the supra-system */
+        SupraMovesPtr supra_moves;
+
+        /** The number of moves to be run on the supra-system */
+        quint32 n_supra_moves;
+
+        /** The number of supra-moves already run on the supra-system */
+        quint32 ncompleted;
+
+        /** Whether or not to record sub statistics */
+        bool record_stats;
+    };
+
+} // namespace SireMove
+
+Q_DECLARE_METATYPE(SireMove::SupraSimPacket)
+
+SIRE_EXPOSE_CLASS(SireMove::SupraSimPacket)
 
 SIRE_END_HEADER
 

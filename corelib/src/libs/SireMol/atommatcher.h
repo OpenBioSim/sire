@@ -41,245 +41,216 @@
 
 namespace SireMol
 {
-class AtomMatcher;
-class AtomIdxMatcher;
-class AtomNameMatcher;
-class AtomResultMatcher;
-class AtomMatchInverter;
-class AtomIDMatcher;
-class AtomMultiMatcher;
-class AtomMCSMatcher;
-class ResIdxAtomNameMatcher;
-class ResIdxAtomMCSMatcher;
-}
+    class AtomMatcher;
+    class AtomIdxMatcher;
+    class AtomNameMatcher;
+    class AtomResultMatcher;
+    class AtomMatchInverter;
+    class AtomIDMatcher;
+    class AtomMultiMatcher;
+    class AtomMCSMatcher;
+    class ResIdxAtomNameMatcher;
+    class ResIdxAtomMCSMatcher;
+} // namespace SireMol
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomMatcher&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomMatcher&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomMatcher &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomMatcher &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomResultMatcher&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomResultMatcher&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomResultMatcher &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomResultMatcher &);
 
-SIREMOL_EXPORT QDataStream& operator<<(QDataStream&, const SireMol::AtomMatchInverter&);
-SIREMOL_EXPORT QDataStream& operator>>(QDataStream&, SireMol::AtomMatchInverter&);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomMatchInverter &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomMatchInverter &);
 
 namespace SireMol
 {
 
-class AtomIdx;
-class AtomName;
-class AtomIdentifier;
-class MoleculeView;
-class MoleculeInfoData;
+    class AtomIdx;
+    class AtomName;
+    class AtomIdentifier;
+    class MoleculeView;
+    class MoleculeInfoData;
 
-using SireBase::PropertyMap;
+    using SireBase::PropertyMap;
 
-/** Virtual base class of all of the functions used to match
-    atoms in one molecule layout with atoms in another layout
+    /** Virtual base class of all of the functions used to match
+        atoms in one molecule layout with atoms in another layout
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomMatcher : public SireBase::Property
-{
-
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomMatcher&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomMatcher&);
-
-public:
-    AtomMatcher();
-    AtomMatcher(const AtomMatcher &other);
-
-    virtual ~AtomMatcher();
-
-    static const char* typeName()
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomMatcher : public SireBase::Property
     {
-        return "SireMol::AtomMatcher";
-    }
 
-    virtual bool isNull() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomMatcher &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomMatcher &);
 
-    AtomMultiMatcher operator+(const AtomMatcher &other) const;
+    public:
+        AtomMatcher();
+        AtomMatcher(const AtomMatcher &other);
 
-    AtomMultiMatcher add(const AtomMatcher &other) const;
+        virtual ~AtomMatcher();
 
-    virtual AtomMatcher* clone() const=0;
+        static const char *typeName()
+        {
+            return "SireMol::AtomMatcher";
+        }
 
-    bool changesOrder(const MoleculeInfoData &molinfo0,
-                      const MoleculeInfoData &molinfo1) const;
+        virtual bool isNull() const;
 
-    bool changesOrder(const MoleculeView &molview0,
-                      const MoleculeView &molview1) const;
+        AtomMultiMatcher operator+(const AtomMatcher &other) const;
 
-    bool changesOrder(const MoleculeView &molview0,
-                      const PropertyMap &map0,
-                      const MoleculeView &molview1,
-                      const PropertyMap &map1) const;
+        AtomMultiMatcher add(const AtomMatcher &other) const;
 
-    bool changesOrder(const MoleculeView &molview0,
-                      const MoleculeView &molview1,
-                      const PropertyMap &map) const;
+        virtual AtomMatcher *clone() const = 0;
 
-    QHash<AtomIdx,AtomIdx> match(const MoleculeInfoData &molinfo0,
-                                 const MoleculeInfoData &molinfo1) const;
+        bool changesOrder(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
 
-    QHash<AtomIdx,AtomIdx> match(const MoleculeView &molview0,
-                                 const PropertyMap &map0,
-                                 const MoleculeView &molview1,
-                                 const PropertyMap &map1) const;
+        bool changesOrder(const MoleculeView &molview0, const MoleculeView &molview1) const;
 
-    QHash<AtomIdx,AtomIdx> match(const MoleculeView &molview0,
-                                 const MoleculeView &molview1) const;
+        bool changesOrder(const MoleculeView &molview0, const PropertyMap &map0, const MoleculeView &molview1,
+                          const PropertyMap &map1) const;
 
-    QHash<AtomIdx,AtomIdx> match(const MoleculeView &molview0,
-                                 const MoleculeView &molview1,
-                                 const PropertyMap &map) const;
+        bool changesOrder(const MoleculeView &molview0, const MoleculeView &molview1, const PropertyMap &map) const;
 
-    static const AtomMultiMatcher& null();
+        QHash<AtomIdx, AtomIdx> match(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
 
-protected:
-    virtual bool pvt_changesOrder(const MoleculeInfoData &molinfo0,
-                                  const MoleculeInfoData &molinfo1) const;
+        QHash<AtomIdx, AtomIdx> match(const MoleculeView &molview0, const PropertyMap &map0, const MoleculeView &molview1,
+                                      const PropertyMap &map1) const;
 
-    virtual bool pvt_changesOrder(const MoleculeView &molview0,
-                                  const MoleculeView &molview1) const;
+        QHash<AtomIdx, AtomIdx> match(const MoleculeView &molview0, const MoleculeView &molview1) const;
 
-    virtual bool pvt_changesOrder(const MoleculeView &molview0,
-                                  const PropertyMap &map0,
-                                  const MoleculeView &molview1,
-                                  const PropertyMap &map1) const;
+        QHash<AtomIdx, AtomIdx> match(const MoleculeView &molview0, const MoleculeView &molview1,
+                                      const PropertyMap &map) const;
 
-    virtual bool pvt_changesOrder(const MoleculeView &molview0,
-                                  const MoleculeView &molview1,
-                                  const PropertyMap &map) const;
+        static const AtomMultiMatcher &null();
 
-    virtual QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeInfoData &molinfo0,
-                                             const MoleculeInfoData &molinfo1) const;
+    protected:
+        virtual bool pvt_changesOrder(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
 
-    virtual QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeView &molview0,
-                                             const PropertyMap &map0,
-                                             const MoleculeView &molview1,
-                                             const PropertyMap &map1) const=0;
+        virtual bool pvt_changesOrder(const MoleculeView &molview0, const MoleculeView &molview1) const;
 
-    virtual QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeView &molview0,
-                                             const MoleculeView &molview1) const;
+        virtual bool pvt_changesOrder(const MoleculeView &molview0, const PropertyMap &map0, const MoleculeView &molview1,
+                                      const PropertyMap &map1) const;
 
-    virtual QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeView &molview0,
-                                             const MoleculeView &molview1,
-                                             const PropertyMap &map) const;
-};
+        virtual bool pvt_changesOrder(const MoleculeView &molview0, const MoleculeView &molview1,
+                                      const PropertyMap &map) const;
 
-typedef SireBase::PropPtr<AtomMatcher> AtomMatcherPtr;
+        virtual QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
 
-/** This is a simple atom matcher that can be used to repeat a match
-    based on a prior result
+        virtual QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const PropertyMap &map0,
+                                                  const MoleculeView &molview1, const PropertyMap &map1) const = 0;
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomResultMatcher
-         : public SireBase::ConcreteProperty<AtomResultMatcher,AtomMatcher>
-{
+        virtual QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const MoleculeView &molview1) const;
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomResultMatcher&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomResultMatcher&);
+        virtual QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const MoleculeView &molview1,
+                                                  const PropertyMap &map) const;
+    };
 
-public:
-    AtomResultMatcher();
-    AtomResultMatcher(const QHash<AtomIdx,AtomIdx> &results, bool invert=false);
+    typedef SireBase::PropPtr<AtomMatcher> AtomMatcherPtr;
 
-    AtomResultMatcher(const AtomResultMatcher &other);
+    /** This is a simple atom matcher that can be used to repeat a match
+        based on a prior result
 
-    ~AtomResultMatcher();
-
-    static const char* typeName();
-
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomResultMatcher : public SireBase::ConcreteProperty<AtomResultMatcher, AtomMatcher>
     {
-        return AtomResultMatcher::typeName();
-    }
 
-    bool isNull() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomResultMatcher &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomResultMatcher &);
 
-    QString toString() const;
+    public:
+        AtomResultMatcher();
+        AtomResultMatcher(const QHash<AtomIdx, AtomIdx> &results, bool invert = false);
 
-    AtomResultMatcher& operator=(const AtomResultMatcher &other);
+        AtomResultMatcher(const AtomResultMatcher &other);
 
-    bool operator==(const AtomResultMatcher &other) const;
-    bool operator!=(const AtomResultMatcher &other) const;
+        ~AtomResultMatcher();
 
-protected:
-    QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeInfoData &molinfo0,
-                                     const MoleculeInfoData &molinfo1) const;
+        static const char *typeName();
 
-    QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeView &molview0,
-                                     const PropertyMap &map0,
-                                     const MoleculeView &molview1,
-                                     const PropertyMap &map1) const;
+        const char *what() const
+        {
+            return AtomResultMatcher::typeName();
+        }
 
-private:
-    /** The result of matching using another AtomMatcher */
-    QHash<AtomIdx,AtomIdx> m;
-};
+        bool isNull() const;
 
-/** This is a atom matcher that inverts the match of the sub-matcher.
-    This is useful when you want to match from molecule 1 to molecule 0
-    as opposed to molecule 0 to molecule 1, and but don't want to change
-    the order of the match at the calling site
+        QString toString() const;
 
-    @author Christopher Woods
-*/
-class SIREMOL_EXPORT AtomMatchInverter
-         : public SireBase::ConcreteProperty<AtomMatchInverter,AtomMatcher>
-{
+        AtomResultMatcher &operator=(const AtomResultMatcher &other);
 
-friend SIREMOL_EXPORT QDataStream& ::operator<<(QDataStream&, const AtomMatchInverter&);
-friend SIREMOL_EXPORT QDataStream& ::operator>>(QDataStream&, AtomMatchInverter&);
+        bool operator==(const AtomResultMatcher &other) const;
+        bool operator!=(const AtomResultMatcher &other) const;
 
-public:
-    AtomMatchInverter();
-    AtomMatchInverter(const AtomMatcher &matcher);
+    protected:
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
 
-    AtomMatchInverter(const AtomMatchInverter &other);
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const PropertyMap &map0,
+                                          const MoleculeView &molview1, const PropertyMap &map1) const;
 
-    ~AtomMatchInverter();
+    private:
+        /** The result of matching using another AtomMatcher */
+        QHash<AtomIdx, AtomIdx> m;
+    };
 
-    static const char* typeName();
+    /** This is a atom matcher that inverts the match of the sub-matcher.
+        This is useful when you want to match from molecule 1 to molecule 0
+        as opposed to molecule 0 to molecule 1, and but don't want to change
+        the order of the match at the calling site
 
-    const char* what() const
+        @author Christopher Woods
+    */
+    class SIREMOL_EXPORT AtomMatchInverter : public SireBase::ConcreteProperty<AtomMatchInverter, AtomMatcher>
     {
-        return AtomMatchInverter::typeName();
-    }
 
-    bool isNull() const;
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomMatchInverter &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomMatchInverter &);
 
-    QString toString() const;
+    public:
+        AtomMatchInverter();
+        AtomMatchInverter(const AtomMatcher &matcher);
 
-    AtomMatchInverter& operator=(const AtomMatchInverter &other);
+        AtomMatchInverter(const AtomMatchInverter &other);
 
-    bool operator==(const AtomMatchInverter &other) const;
-    bool operator!=(const AtomMatchInverter &other) const;
+        ~AtomMatchInverter();
 
-protected:
-    QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeInfoData &molinfo0,
-                                     const MoleculeInfoData &molinfo1) const;
+        static const char *typeName();
 
-    QHash<AtomIdx,AtomIdx> pvt_match(const MoleculeView &molview0,
-                                     const PropertyMap &map0,
-                                     const MoleculeView &molview1,
-                                     const PropertyMap &map1) const;
+        const char *what() const
+        {
+            return AtomMatchInverter::typeName();
+        }
 
-private:
-    /** The matcher used for the forwards match */
-    AtomMatcherPtr m;
-};
+        bool isNull() const;
 
-}
+        QString toString() const;
 
-Q_DECLARE_METATYPE( SireMol::AtomResultMatcher )
-Q_DECLARE_METATYPE( SireMol::AtomMatchInverter )
+        AtomMatchInverter &operator=(const AtomMatchInverter &other);
 
-SIRE_EXPOSE_CLASS( SireMol::AtomMatcher )
-SIRE_EXPOSE_CLASS( SireMol::AtomResultMatcher )
-SIRE_EXPOSE_CLASS( SireMol::AtomMatchInverter )
+        bool operator==(const AtomMatchInverter &other) const;
+        bool operator!=(const AtomMatchInverter &other) const;
 
-SIRE_EXPOSE_PROPERTY( SireMol::AtomMatcherPtr, SireMol::AtomMatcher )
+    protected:
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
+
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const PropertyMap &map0,
+                                          const MoleculeView &molview1, const PropertyMap &map1) const;
+
+    private:
+        /** The matcher used for the forwards match */
+        AtomMatcherPtr m;
+    };
+
+} // namespace SireMol
+
+Q_DECLARE_METATYPE(SireMol::AtomResultMatcher)
+Q_DECLARE_METATYPE(SireMol::AtomMatchInverter)
+
+SIRE_EXPOSE_CLASS(SireMol::AtomMatcher)
+SIRE_EXPOSE_CLASS(SireMol::AtomResultMatcher)
+SIRE_EXPOSE_CLASS(SireMol::AtomMatchInverter)
+
+SIRE_EXPOSE_PROPERTY(SireMol::AtomMatcherPtr, SireMol::AtomMatcher)
 
 #endif

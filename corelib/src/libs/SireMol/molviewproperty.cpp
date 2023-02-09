@@ -26,9 +26,9 @@
 \*********************************************/
 
 #include "molviewproperty.h"
-#include "moleculeinfodata.h"
 #include "atommatcher.h"
 #include "atommatchers.h"
+#include "moleculeinfodata.h"
 
 #include "mover.hpp"
 
@@ -43,16 +43,18 @@ using namespace SireBase;
 
 /** Constructor */
 MolViewProperty::MolViewProperty() : Property()
-{}
+{
+}
 
 /** Copy constructor */
-MolViewProperty::MolViewProperty(const MolViewProperty &other)
-                : Property(other)
-{}
+MolViewProperty::MolViewProperty(const MolViewProperty &other) : Property(other)
+{
+}
 
 /** Destructor */
 MolViewProperty::~MolViewProperty()
-{}
+{
+}
 
 /** Return whether or not this is compatible with the passed molinfo */
 bool MolViewProperty::isCompatibleWith(const MoleculeInfo &molinfo) const
@@ -67,10 +69,11 @@ bool MolViewProperty::isCompatibleWith(const MoleculeInfo &molinfo) const
 void MolViewProperty::assertCompatibleWith(const MoleculeInfoData &molinfo) const
 {
     if (not this->isCompatibleWith(molinfo))
-        throw SireError::incompatible_error( QObject::tr(
-                "The property of type %1 is incompatible with the layout "
-                "with UID %2")
-                    .arg(this->what()).arg(molinfo.UID().toString()), CODELOC );
+        throw SireError::incompatible_error(QObject::tr("The property of type %1 is incompatible with the layout "
+                                                        "with UID %2")
+                                                .arg(this->what())
+                                                .arg(molinfo.UID().toString()),
+                                            CODELOC);
 }
 
 /** Assert that this property is compatible with the MoleculeInfo 'info'
@@ -82,15 +85,14 @@ void MolViewProperty::assertCompatibleWith(const MoleculeInfo &molinfo) const
     this->assertCompatibleWith(molinfo.data());
 }
 
-PropertyPtr MolViewProperty::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                     const AtomMatcher&) const
+PropertyPtr MolViewProperty::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo, const AtomMatcher &) const
 {
     this->assertCompatibleWith(molinfo);
     return *this;
 }
 
 PropertyPtr MolViewProperty::_pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                     const QHash<AtomIdx,AtomIdx>&) const
+                                                     const QHash<AtomIdx, AtomIdx> &) const
 {
     this->assertCompatibleWith(molinfo);
     return *this;
@@ -101,8 +103,7 @@ PropertyPtr MolViewProperty::_pvt_makeCompatibleWith(const MoleculeInfoData &mol
 
     \throw SireError::incompatible_error
 */
-PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                const AtomMatcher &atommatcher) const
+PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeInfoData &molinfo, const AtomMatcher &atommatcher) const
 {
     return this->_pvt_makeCompatibleWith(molinfo, atommatcher);
 }
@@ -113,7 +114,7 @@ PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeInfoData &molinfo,
     \throw SireError::incompatible_error
 */
 PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeInfoData &molinfo,
-                                                const QHash<AtomIdx,AtomIdx> &map) const
+                                                const QHash<AtomIdx, AtomIdx> &map) const
 {
     return this->_pvt_makeCompatibleWith(molinfo, map);
 }
@@ -133,14 +134,12 @@ PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview) con
     return this->makeCompatibleWith(molview.data().info());
 }
 
-PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview,
-                                                const AtomMatcher &atommatcher) const
+PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview, const AtomMatcher &atommatcher) const
 {
     return this->makeCompatibleWith(molview.data().info(), atommatcher);
 }
 
-PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview,
-                                                const QHash<AtomIdx,AtomIdx> &map) const
+PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview, const QHash<AtomIdx, AtomIdx> &map) const
 {
     return this->makeCompatibleWith(molview.data().info(), map);
 }
@@ -150,13 +149,13 @@ PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview,
 /////////
 
 MoleculeProperty::MoleculeProperty() : MolViewProperty()
-{}
+{
+}
 
-MoleculeProperty::MoleculeProperty(const MoleculeProperty &other)
-                 : MolViewProperty(other)
-{}
+MoleculeProperty::MoleculeProperty(const MoleculeProperty &other) : MolViewProperty(other)
+{
+}
 
 MoleculeProperty::~MoleculeProperty()
-{}
-
-
+{
+}

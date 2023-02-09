@@ -44,9 +44,7 @@ static const RegisterMetaType<VariantProperty> r_varprop;
 /** Serialise to a binary data stream */
 QDataStream &operator<<(QDataStream &ds, const VariantProperty &varprop)
 {
-    writeHeader(ds, r_varprop, 1)
-        << static_cast<const Property&>(varprop)
-        << static_cast<const QVariant&>(varprop);
+    writeHeader(ds, r_varprop, 1) << static_cast<const Property &>(varprop) << static_cast<const QVariant &>(varprop);
 
     return ds;
 }
@@ -58,8 +56,7 @@ QDataStream &operator>>(QDataStream &ds, VariantProperty &varprop)
 
     if (v == 1)
     {
-        ds >> static_cast<Property&>(varprop)
-           >> static_cast<QVariant&>(varprop);
+        ds >> static_cast<Property &>(varprop) >> static_cast<QVariant &>(varprop);
     }
     else
         throw version_error(v, "1", r_varprop, CODELOC);
@@ -68,60 +65,62 @@ QDataStream &operator>>(QDataStream &ds, VariantProperty &varprop)
 }
 
 /** Null constructor */
-VariantProperty::VariantProperty()
-                : ConcreteProperty<VariantProperty,Property>(), QVariant()
-{}
+VariantProperty::VariantProperty() : ConcreteProperty<VariantProperty, Property>(), QVariant()
+{
+}
 
 /** Construct a property equal to 'value' */
-VariantProperty::VariantProperty(const QVariant &value)
-                : ConcreteProperty<VariantProperty,Property>(), QVariant(value)
-{}
+VariantProperty::VariantProperty(const QVariant &value) : ConcreteProperty<VariantProperty, Property>(), QVariant(value)
+{
+}
 
 /** Construct from a 'Property' - the property must be able to
  be cast to a VariantProperty
 
  \throw SireError::invalid_cast
  */
-VariantProperty::VariantProperty(const Property &property)
-                : ConcreteProperty<VariantProperty,Property>(), QVariant()
+VariantProperty::VariantProperty(const Property &property) : ConcreteProperty<VariantProperty, Property>(), QVariant()
 {
     *this = property.asA<VariantProperty>();
 }
 
-VariantProperty::VariantProperty(const QString &value)
-                : ConcreteProperty<VariantProperty,Property>(), QVariant(value)
-{}
+VariantProperty::VariantProperty(const QString &value) : ConcreteProperty<VariantProperty, Property>(), QVariant(value)
+{
+}
 
-VariantProperty::VariantProperty(double value)
-                : ConcreteProperty<VariantProperty,Property>(), QVariant(value)
-{}
+VariantProperty::VariantProperty(double value) : ConcreteProperty<VariantProperty, Property>(), QVariant(value)
+{
+}
 
 /** Copy constructor */
 VariantProperty::VariantProperty(const VariantProperty &other)
-: ConcreteProperty<VariantProperty,Property>(other), QVariant(other)
-{}
+    : ConcreteProperty<VariantProperty, Property>(other), QVariant(other)
+{
+}
 
 /** Destructor */
 VariantProperty::~VariantProperty()
-{}
+{
+}
 
 /** Throw an invalid cast error */
 void VariantProperty::throwInvalidCast(const QString &typname) const
 {
-    throw SireError::invalid_cast( QObject::tr(
-                            "Cannot convert an object of type %1 to an object of type %2.")
-                                  .arg(QVariant::typeName()).arg(typname), CODELOC );
+    throw SireError::invalid_cast(QObject::tr("Cannot convert an object of type %1 to an object of type %2.")
+                                      .arg(QVariant::typeName())
+                                      .arg(typname),
+                                  CODELOC);
 }
 
 /** Assignment operator from a QVariant */
-VariantProperty& VariantProperty::operator=(const QVariant &other)
+VariantProperty &VariantProperty::operator=(const QVariant &other)
 {
     QVariant::operator=(other);
     return *this;
 }
 
 /** Assignment operator from a VariantProperty */
-VariantProperty& VariantProperty::operator=(const VariantProperty &other)
+VariantProperty &VariantProperty::operator=(const VariantProperty &other)
 {
     QVariant::operator=(other);
     Property::operator=(other);
@@ -141,9 +140,9 @@ bool VariantProperty::operator!=(const VariantProperty &other) const
     return QVariant::operator!=(other);
 }
 
-const char* VariantProperty::typeName()
+const char *VariantProperty::typeName()
 {
-    return QMetaType::typeName( qMetaTypeId<VariantProperty>() );
+    return QMetaType::typeName(qMetaTypeId<VariantProperty>());
 }
 
 /** String operator */
@@ -153,8 +152,7 @@ QString VariantProperty::toString() const
         return this->asAString();
     else
     {
-        return QString("VariantProperty( %1() )")
-                    .arg(this->typeName());
+        return QString("VariantProperty( %1() )").arg(this->typeName());
     }
 }
 

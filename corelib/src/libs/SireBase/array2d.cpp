@@ -35,12 +35,10 @@
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<Array2DBase> r_array2d( MAGIC_ONLY, NO_ROOT,
-                                                      "SireBase::Array2D<T>" );
+static const RegisterMetaType<Array2DBase> r_array2d(MAGIC_ONLY, NO_ROOT, "SireBase::Array2D<T>");
 
 /** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds,
-                                        const Array2DBase &array2d)
+QDataStream &operator<<(QDataStream &ds, const Array2DBase &array2d)
 {
     writeHeader(ds, r_array2d, 2);
     ds << array2d.nrows << array2d.ncolumns;
@@ -49,8 +47,7 @@ QDataStream &operator<<(QDataStream &ds,
 }
 
 /** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds,
-                                        Array2DBase &array2d)
+QDataStream &operator>>(QDataStream &ds, Array2DBase &array2d)
 {
     VersionID v = readHeader(ds, r_array2d);
 
@@ -74,11 +71,11 @@ QDataStream &operator>>(QDataStream &ds,
 
 /** Null constructor */
 Array2DBase::Array2DBase() : nrows(0), ncolumns(0)
-{}
+{
+}
 
 /** Construct with the specified number of rows and columns */
-Array2DBase::Array2DBase(int nr, int nc)
-            : nrows(nr), ncolumns(nc)
+Array2DBase::Array2DBase(int nr, int nc) : nrows(nr), ncolumns(nc)
 {
     if (nr < 0)
         nrows = 0;
@@ -88,16 +85,17 @@ Array2DBase::Array2DBase(int nr, int nc)
 }
 
 /** Copy constructor */
-Array2DBase::Array2DBase(const Array2DBase &other)
-            : nrows(other.nrows), ncolumns(other.ncolumns)
-{}
+Array2DBase::Array2DBase(const Array2DBase &other) : nrows(other.nrows), ncolumns(other.ncolumns)
+{
+}
 
 /** Destructor */
 Array2DBase::~Array2DBase()
-{}
+{
+}
 
 /** Copy assignment operator */
-Array2DBase& Array2DBase::operator=(const Array2DBase &other)
+Array2DBase &Array2DBase::operator=(const Array2DBase &other)
 {
     nrows = other.nrows;
     ncolumns = other.ncolumns;
@@ -119,8 +117,11 @@ bool Array2DBase::operator!=(const Array2DBase &other) const
 /** Throw an invalid index exception */
 void Array2DBase::throwInvalidIndex(int i, int j) const
 {
-    throw SireError::invalid_index( QObject::tr(
-        "Index (%1,%2) is not valid for this matrix. The "
-        "number of rows is %3, and number of columns is %4.")
-            .arg(i).arg(j).arg(nrows).arg(ncolumns), CODELOC );
+    throw SireError::invalid_index(QObject::tr("Index (%1,%2) is not valid for this matrix. The "
+                                               "number of rows is %3, and number of columns is %4.")
+                                       .arg(i)
+                                       .arg(j)
+                                       .arg(nrows)
+                                       .arg(ncolumns),
+                                   CODELOC);
 }

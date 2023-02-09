@@ -30,7 +30,7 @@
 
 using namespace SireStream;
 
-static const RegisterLibrary *registry = new RegisterLibrary( QString("SireAnalysis"), 1, 1 );
+static const RegisterLibrary *registry = new RegisterLibrary(QString("SireAnalysis"), 1, 1);
 
 /** This library used to be called Soiree */
-static const RegisterLibrary *registry2 = new RegisterLibrary( QString("Soiree"), 1, 1 );
+static const RegisterLibrary *registry2 = new RegisterLibrary(QString("Soiree"), 1, 1);
