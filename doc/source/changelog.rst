@@ -12,6 +12,16 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+
+`2023.1.2 <https://github.com/openbiosim/sire/compare/2023.1.1...2023.1.2>`__ - February 2023
+--------------------------------------------------------------------------------------
+
+* Used clang-format to autoformat all the C++ files.
+* Fixed SDF pickle bug (molecules read from SDF files could not be pickled / unpickled)
+* Fixed the bugs in waterswap that led to incorrect energies being calculated.
+* Fixed bugs in analyse_freenrg that prevented it from running on newly generated simfiles.
+* Fixed a segfault when searching for non-existant atoms in a molecule editor.
+
 `2023.1.1 <https://github.com/openbiosim/sire/compare/2023.1.0...2023.1.1>`__ - January 2023
 --------------------------------------------------------------------------------------
 
