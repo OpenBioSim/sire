@@ -1734,6 +1734,14 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberNBDihPart, qint64>> getD
         qint64 atom2 = 3 * (info.atomIdx(it.key().atom2()).value() + start_idx);
         qint64 atom3 = 3 * (info.atomIdx(it.key().atom3()).value() + start_idx);
 
+        if (atom2 == 0 or atom3 == 0)
+        {
+            // we can't record a negative zero, so we need to invert the
+            // indicies
+            std::swap(atom0, atom3);
+            std::swap(atom1, atom2);
+        }
+
         // is the dihedral marked as including hydrogen?
         if (it.value().second)
         {

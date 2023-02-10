@@ -1780,6 +1780,26 @@ bool CLJIntraFunction::containsProperty(const QString &name) const
     return (name == "connectivity") or CLJCutoffFunction::containsProperty(name);
 }
 
+/** Set the excluded pairs used to find the non-bonded pairs */
+void CLJIntraFunction::setExcludedPairs(const ExcludedPairs &pairs)
+{
+    if (pairs != excl_pairs)
+    {
+        bool must_regen = this->excl_pairs.nExcludedPairs() != 0;
+
+        excl_pairs = pairs;
+
+        if (must_regen)
+            this->regenerateBondMatrix();
+    }
+}
+
+/** Return the excluded pairs used to find the non-bonded pairs */
+const ExcludedPairs &CLJIntraFunction::excludedPairs() const
+{
+    return excl_pairs;
+}
+
 /** Return the connectivity used to find the non-bonded pairs */
 const Connectivity &CLJIntraFunction::connectivity() const
 {
@@ -1792,30 +1812,63 @@ void CLJIntraFunction::setConnectivity(const Connectivity &c)
     if (cty != c)
     {
         cty = c;
-        bond_matrix = cty.getBondMatrix(1, 4);
-
-        if (bond_matrix.count() > 0)
-        {
-            // we now need to pad this with zeroes, as we use AtomIdx(0) to mean a dummy atom
-            bond_matrix.prepend(QVector<bool>(bond_matrix.count() + 1, false));
-
-            bond_matrix[0].squeeze();
-
-            for (int i = 1; i < bond_matrix.count(); ++i)
-            {
-                bond_matrix[i].prepend(false);
-                bond_matrix[i].squeeze();
-            }
-
-            bond_matrix.squeeze();
-        }
+        this->regenerateBondMatrix();
     }
+}
+
+void CLJIntraFunction::regenerateBondMatrix()
+{
+    bond_matrix = cty.getBondMatrix(1, 4);
+
+    if (bond_matrix.count() > 0)
+    {
+        // we now need to pad this with zeroes, as we use AtomIdx(0) to mean a dummy atom
+        bond_matrix.prepend(QVector<bool>(bond_matrix.count() + 1, false));
+
+        bond_matrix[0].squeeze();
+
+        for (int i = 1; i < bond_matrix.count(); ++i)
+        {
+            bond_matrix[i].prepend(false);
+            bond_matrix[i].squeeze();
+        }
+
+        bond_matrix.squeeze();
+    }
+
+    this->excl_pairs.updateBondMatrix(bond_matrix);
 }
 
 /** Set the connectivity by copying the specified property from the passed molecule */
 void CLJIntraFunction::setConnectivity(const MoleculeView &molecule, const PropertyMap &map)
 {
     setConnectivity(molecule.data().property(map["connectivity"]).asA<Connectivity>());
+}
+
+/** Set the excluded pairs by copying the specified property. If it does not exist,
+    then it is calculated based on the connectivity and CLJNBPairs
+*/
+void CLJIntraFunction::setExcludedPairs(const MoleculeView &molecule, const PropertyMap &map)
+{
+    ExcludedPairs pairs;
+    bool found_pairs = false;
+
+    try
+    {
+        pairs = molecule.data().property(map["excluded_pairs"]).asA<ExcludedPairs>();
+        found_pairs = true;
+        return;
+    }
+    catch (...)
+    {
+    }
+
+    if (not found_pairs)
+    {
+        pairs = ExcludedPairs(molecule, map);
+    }
+
+    this->setExcludedPairs(pairs);
 }
 
 /** Return whether or not there are no bonded pairs between the atoms in 'ids0' and 'ids1' */
