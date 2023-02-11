@@ -25,6 +25,10 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMM/angle.h"
+
+#include "SireMM/bond.h"
+
 #include "SireMM/cljnbpairs.h"
 
 #include "SireMM/fouratomfunctions.h"
@@ -42,6 +46,8 @@ namespace bp = boost::python;
 #include "SireMol/bondid.h"
 
 #include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
 
 #include "SireMol/dihedralid.h"
 

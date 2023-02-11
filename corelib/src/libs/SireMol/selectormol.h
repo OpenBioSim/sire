@@ -371,18 +371,6 @@ namespace SireMol
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
 
-#ifdef SIRE_INSTANTIATE_TEMPLATES
-
-#include "selectorm.hpp"
-
-template class SireMol::SelectorM<SireMol::Atom>;
-template class SireMol::SelectorM<SireMol::Residue>;
-template class SireMol::SelectorM<SireMol::Chain>;
-template class SireMol::SelectorM<SireMol::Segment>;
-template class SireMol::SelectorM<SireMol::CutGroup>;
-
-#endif // SIRE_INSTANTIATE_TEMPLATES
-
 SIRE_END_HEADER
 
 #endif

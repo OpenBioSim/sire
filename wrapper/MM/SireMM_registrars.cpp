@@ -3,8 +3,6 @@
 
 #include "SireMM_registrars.h"
 
-
-
 #include "amberparams.h"
 #include "angle.h"
 #include "anglerestraint.h"
@@ -29,6 +27,7 @@
 #include "dihedral.h"
 #include "dihedralrestraint.h"
 #include "distancerestraint.h"
+#include "excludedpairs.h"
 #include "fouratomfunctions.h"
 #include "gridff.h"
 #include "gridff2.h"
@@ -133,6 +132,7 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::DoubleDistanceRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::TripleDistanceRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::HarmonicDistanceForceConstant >();
+    ObjectRegistry::registerConverterFor< SireMM::ExcludedPairs >();
     ObjectRegistry::registerConverterFor< SireMM::FourAtomFunctions >();
     ObjectRegistry::registerConverterFor< SireMM::GridFF >();
     ObjectRegistry::registerConverterFor< SireMM::GridFF2 >();

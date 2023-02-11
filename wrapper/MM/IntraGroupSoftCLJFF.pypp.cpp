@@ -26,7 +26,7 @@ SireFF::Intra2B2G3DFF<SireMM::SoftCLJPotentialInterface<SireMM::IntraSoftCLJPote
 void register_IntraGroupSoftCLJFF_class(){
 
     { //::SireFF::Intra2B2G3DFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >
-        typedef bp::class_< SireFF::Intra2B2G3DFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >, bp::bases< SireFF::FF3D, SireFF::Intra2B2GFF<SireMM::SoftCLJPotentialInterface<SireMM::IntraSoftCLJPotential> >, SireMM::SoftCLJPotentialInterface<SireMM::IntraSoftCLJPotential>, SireMM::CLJPotentialInterface<SireMM::IntraSoftCLJPotential>, SireFF::G2FF, SireFF::FF, SireMol::MolGroupsBase, SireBase::Property > > IntraGroupSoftCLJFF_exposer_t;
+        typedef bp::class_< SireFF::Intra2B2G3DFF< SireMM::SoftCLJPotentialInterface< SireMM::IntraSoftCLJPotential > >, bp::bases< SireFF::FF3D, SireMM::SoftCLJPotentialInterface<SireMM::IntraSoftCLJPotential>, SireMM::CLJPotentialInterface<SireMM::IntraSoftCLJPotential>, SireFF::G2FF, SireFF::FF, SireMol::MolGroupsBase, SireBase::Property > > IntraGroupSoftCLJFF_exposer_t;
         IntraGroupSoftCLJFF_exposer_t IntraGroupSoftCLJFF_exposer = IntraGroupSoftCLJFF_exposer_t( "IntraGroupSoftCLJFF", "", bp::init< >("") );
         bp::scope IntraGroupSoftCLJFF_scope( IntraGroupSoftCLJFF_exposer );
         IntraGroupSoftCLJFF_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );

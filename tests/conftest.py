@@ -1,6 +1,6 @@
-
 import sire as sr
 import pytest
+
 
 @pytest.fixture(scope="session")
 def ala_mols():
@@ -35,3 +35,8 @@ def alanin_mols():
 @pytest.fixture(scope="session")
 def neura_mols():
     return sr.load_test_files("proteinbox.crd", "proteinbox.top")
+
+
+@pytest.fixture(scope="session")
+def excluded_mols():
+    return sr.load_test_files("excluded.rst7", "excluded.prm7")

@@ -3,6 +3,7 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
+#include "Helpers/clone_const_reference.hpp"
 #include "CLJIntraFunction.pypp.hpp"
 
 namespace bp = boost::python;
@@ -88,6 +89,18 @@ void register_CLJIntraFunction_class(){
                 , "Return whether or not this function contains a property called name" );
         
         }
+        { //::SireMM::CLJIntraFunction::excludedPairs
+        
+            typedef ::SireMM::ExcludedPairs const & ( ::SireMM::CLJIntraFunction::*excludedPairs_function_type)(  ) const;
+            excludedPairs_function_type excludedPairs_function_value( &::SireMM::CLJIntraFunction::excludedPairs );
+            
+            CLJIntraFunction_exposer.def( 
+                "excludedPairs"
+                , excludedPairs_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the excluded pairs used to find the non-bonded pairs" );
+        
+        }
         { //::SireMM::CLJIntraFunction::properties
         
             typedef ::SireBase::Properties ( ::SireMM::CLJIntraFunction::*properties_function_type)(  ) const;
@@ -136,6 +149,31 @@ void register_CLJIntraFunction_class(){
                 , setConnectivity_function_value
                 , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Set the connectivity by copying the specified property from the passed molecule" );
+        
+        }
+        { //::SireMM::CLJIntraFunction::setExcludedPairs
+        
+            typedef void ( ::SireMM::CLJIntraFunction::*setExcludedPairs_function_type)( ::SireMM::ExcludedPairs const & ) ;
+            setExcludedPairs_function_type setExcludedPairs_function_value( &::SireMM::CLJIntraFunction::setExcludedPairs );
+            
+            CLJIntraFunction_exposer.def( 
+                "setExcludedPairs"
+                , setExcludedPairs_function_value
+                , ( bp::arg("excluded_pairs") )
+                , bp::release_gil_policy()
+                , "Set the excluded pairs used to find the non-bonded pairs" );
+        
+        }
+        { //::SireMM::CLJIntraFunction::setExcludedPairs
+        
+            typedef void ( ::SireMM::CLJIntraFunction::*setExcludedPairs_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) ;
+            setExcludedPairs_function_type setExcludedPairs_function_value( &::SireMM::CLJIntraFunction::setExcludedPairs );
+            
+            CLJIntraFunction_exposer.def( 
+                "setExcludedPairs"
+                , setExcludedPairs_function_value
+                , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
+                , "Set the excluded pairs by copying the specified property. If it does not exist,\nthen it is calculated based on the connectivity and CLJNBPairs\n" );
         
         }
         { //::SireMM::CLJIntraFunction::setProperty
