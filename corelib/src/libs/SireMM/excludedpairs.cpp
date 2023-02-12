@@ -77,8 +77,47 @@ ExcludedPairs::ExcludedPairs(const MoleculeView &molecule, const PropertyMap &ma
 
     // try to autogenerate the pairs from the CLJNBPairs and
     // connectivity properties
-    const auto &scl = molecule.data().property(map["intrascale"]).asA<CLJNBPairs>();
+    const auto &cljscl = molecule.data().property(map["intrascale"]).asA<CLJNBPairs>();
     const auto &connectivity = molecule.data().property(map["connectivity"]).asA<Connectivity>();
+
+    const auto bond_matrix = connectivity.getBondMatrix(4);
+
+    const int nats = bond_matrix.count();
+
+    for (int i = 0; i < nats - 1; ++i)
+    {
+        const auto row = bond_matrix.constData()[i];
+
+        const AtomIdx atomidx0(i);
+
+        const auto cgatomidx0 = minfo.cgAtomIdx(atomidx0);
+
+        for (int j = i + 1; j < nats; ++j)
+        {
+            if (not row.constData()[j])
+            {
+                // these two atoms are NOT bonded
+
+                // check the scl factor. This should be 1 or 0
+                const AtomIdx atomidx1(j);
+                const auto cgatomidx1 = minfo.cgAtomIdx(atomidx1);
+
+                const auto scl = cljscl.get(cgatomidx0, cgatomidx1);
+
+                if (scl == CLJScaleFactor(0))
+                {
+                    this->excl_pairs.append(i);
+                    this->excl_pairs.append(j);
+                }
+                else if (scl != CLJScaleFactor(1))
+                {
+                    qDebug() << "WARNING: INVALID 1-4 SCALING FACTOR FOR NON-BONDED ATOMS!"
+                             << minfo.name(atomidx0).value()
+                             << minfo.name(atomidx1).value() << scl.toString();
+                }
+            }
+        }
+    }
 }
 
 ExcludedPairs::ExcludedPairs(const ExcludedPairs &other)

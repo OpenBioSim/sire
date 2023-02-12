@@ -8,6 +8,4 @@ def test_excluded(excluded_mols):
 
     e = sr.legacy.MM.ExcludedPairs(mol)
 
-    print(e)
-
-    assert False
+    assert e.num_excluded_pairs() == 0

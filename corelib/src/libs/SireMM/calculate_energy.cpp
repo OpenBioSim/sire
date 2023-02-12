@@ -138,8 +138,11 @@ namespace SireMM
 
         internalff.add(mol, map);
 
+        // this is a single molecule with an infinite space
+        // We should not have a cutoff. Can achieve this using
+        // a very large cutoff ;-)
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, 15 * angstrom));
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, 100000000 * angstrom));
         intraff.add(mol, map);
 
         ffields.add(intraff);
@@ -152,6 +155,8 @@ namespace SireMM
     {
         if (mols.isEmpty())
             return ForceFields();
+        else if (mols.nMolecules() == 1)
+            return create_forcefield(mols.first(), map);
 
         const auto mm = get_mmdetail(*(mols.constBegin()), map);
 
@@ -192,6 +197,11 @@ namespace SireMM
         if (cutoff_prop.hasValue())
         {
             cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
+        }
+        else if (not space.read().isPeriodic())
+        {
+            // disable the cutoff - do this by using a very large cutoff
+            cutoff = 100000000 * angstrom;
         }
 
         InterFF interff("interff");

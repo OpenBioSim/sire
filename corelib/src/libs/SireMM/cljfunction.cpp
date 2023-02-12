@@ -1621,11 +1621,12 @@ static const RegisterMetaType<CLJIntraFunction> r_intra(MAGIC_ONLY, CLJIntraFunc
 
 QDataStream &operator<<(QDataStream &ds, const CLJIntraFunction &func)
 {
-    writeHeader(ds, r_intra, 1);
+    writeHeader(ds, r_intra, 2);
 
     SharedDataStream sds(ds);
 
-    sds << func.cty << static_cast<const CLJCutoffFunction &>(func);
+    sds << func.cty << func.excl_pairs
+        << static_cast<const CLJCutoffFunction &>(func);
 
     return ds;
 }
@@ -1634,11 +1635,27 @@ QDataStream &operator>>(QDataStream &ds, CLJIntraFunction &func)
 {
     VersionID v = readHeader(ds, r_intra);
 
-    if (v == 1)
+    if (v == 2)
     {
         SharedDataStream sds(ds);
         func.bond_matrix.clear();
         func.cty = Connectivity();
+        func.excl_pairs = ExcludedPairs();
+
+        Connectivity connectivity;
+        ExcludedPairs pairs;
+
+        sds >> connectivity >> pairs >> static_cast<CLJCutoffFunction &>(func);
+
+        func.setConnectivity(connectivity);
+        func.setExcludedPairs(pairs);
+    }
+    else if (v == 1)
+    {
+        SharedDataStream sds(ds);
+        func.bond_matrix.clear();
+        func.cty = Connectivity();
+        func.excl_pairs = ExcludedPairs();
 
         Connectivity connectivity;
 
@@ -1647,7 +1664,7 @@ QDataStream &operator>>(QDataStream &ds, CLJIntraFunction &func)
         func.setConnectivity(connectivity);
     }
     else
-        throw version_error(v, "1", r_intra, CODELOC);
+        throw version_error(v, "1, 2", r_intra, CODELOC);
 
     return ds;
 }

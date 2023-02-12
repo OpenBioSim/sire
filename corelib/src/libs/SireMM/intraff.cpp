@@ -127,14 +127,23 @@ namespace SireMM
             /** The connectivity of the molecule */
             Connectivity cty;
 
+            /** The excluded atom pairs for the molecule */
+            ExcludedPairs excl_pairs;
+
             /** All of the energies for this molecule */
             MultiCLJEnergy nrg;
 
             /** The property name of the connectivity property */
             PropertyName connectivity_property;
 
+            /** The property name of the intrascale property */
+            PropertyName intrascale_property;
+
             /** The current version of the connectivity property */
             quint64 connectivity_version;
+
+            /** The current version of the intrascale property */
+            quint64 intrascale_version;
 
             /** Whether or not the energy needs to be calculated */
             bool needs_energy_calc;
@@ -142,7 +151,9 @@ namespace SireMM
             /** Whether or not this group needs accepting */
             bool needs_accepting;
 
-            IntraFFMolData() : RefCountData(), connectivity_version(0), needs_energy_calc(false), needs_accepting(false)
+            IntraFFMolData() : RefCountData(),
+                               connectivity_version(0), intrascale_version(0),
+                               needs_energy_calc(false), needs_accepting(false)
             {
             }
 
@@ -155,13 +166,19 @@ namespace SireMM
                 connectivity_property = map["connectivity"];
                 cty = molview.data().property(connectivity_property).asA<Connectivity>();
                 connectivity_version = molview.data().version(connectivity_property);
+                intrascale_property = map["intrascale"];
+                excl_pairs = ExcludedPairs(molview, map);
 
                 setCLJFunctions(funcs);
             }
 
             IntraFFMolData(const IntraFFMolData &other)
-                : RefCountData(), cljgroup(other.cljgroup), cljfuncs(other.cljfuncs), cty(other.cty), nrg(other.nrg),
-                  connectivity_property(other.connectivity_property), connectivity_version(other.connectivity_version),
+                : RefCountData(), cljgroup(other.cljgroup), cljfuncs(other.cljfuncs), cty(other.cty),
+                  excl_pairs(other.excl_pairs), nrg(other.nrg),
+                  connectivity_property(other.connectivity_property),
+                  intrascale_property(other.intrascale_property),
+                  connectivity_version(other.connectivity_version),
+                  intrascale_version(other.intrascale_version),
                   needs_energy_calc(other.needs_energy_calc), needs_accepting(other.needs_accepting)
             {
             }
@@ -188,26 +205,29 @@ namespace SireMM
 
             void checkForChangeInConnectivity(const MoleculeView &molview)
             {
-                if (molview.data().version(connectivity_property) != connectivity_version)
+                if (molview.data().version(connectivity_property) != connectivity_version or
+                    molview.data().version(intrascale_property) != intrascale_version)
                 {
-                    // the connectivity may have changed
-                    Connectivity new_cty = molview.data().property(connectivity_property).asA<Connectivity>();
-
+                    cty = molview.data().property(connectivity_property).asA<Connectivity>();
                     connectivity_version = molview.data().version(connectivity_property);
 
-                    if (cty != new_cty)
+                    PropertyMap map;
+                    map["connectivity"] = connectivity_property;
+                    map["intrascale"] = intrascale_property;
+
+                    excl_pairs = ExcludedPairs(molview, map);
+
+                    QVector<CLJFunctionPtr> newfuncs = cljfuncs;
+
+                    for (int i = 0; i < newfuncs.count(); ++i)
                     {
-                        QVector<CLJFunctionPtr> newfuncs = cljfuncs;
-
-                        for (int i = 0; i < newfuncs.count(); ++i)
-                        {
-                            newfuncs[i].edit().asA<CLJIntraFunction>().setConnectivity(new_cty);
-                        }
-
-                        cljfuncs = newfuncs;
-                        cty = new_cty;
-                        mustReallyRecalculateFromScratch();
+                        auto &f = newfuncs[i].edit().asA<CLJIntraFunction>();
+                        f.setConnectivity(cty);
+                        f.setExcludedPairs(excl_pairs);
                     }
+
+                    cljfuncs = newfuncs;
+                    mustReallyRecalculateFromScratch();
                 }
             }
 
@@ -217,7 +237,9 @@ namespace SireMM
 
                 for (int i = 0; i < funcs.count(); ++i)
                 {
-                    newfuncs[i].edit().asA<CLJIntraFunction>().setConnectivity(cty);
+                    auto &f = newfuncs[i].edit().asA<CLJIntraFunction>();
+                    f.setConnectivity(cty);
+                    f.setExcludedPairs(excl_pairs);
                 }
 
                 cljfuncs = newfuncs;
