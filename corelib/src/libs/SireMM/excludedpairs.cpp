@@ -36,6 +36,7 @@
 using namespace SireMM;
 using namespace SireMol;
 using namespace SireBase;
+using namespace SireID;
 using namespace SireError;
 using namespace SireStream;
 
@@ -49,6 +50,8 @@ QDataStream &operator<<(QDataStream &ds, const ExcludedPairs &pairs)
 
     sds << pairs.minfo << pairs.excl_pairs
         << static_cast<const MolViewProperty &>(pairs);
+
+    return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, ExcludedPairs &pairs)
@@ -63,6 +66,8 @@ QDataStream &operator>>(QDataStream &ds, ExcludedPairs &pairs)
     }
     else
         throw SireStream::version_error(v, "1", r_pairs, CODELOC);
+
+    return ds;
 }
 
 ExcludedPairs::ExcludedPairs()
@@ -74,47 +79,163 @@ ExcludedPairs::ExcludedPairs(const MoleculeView &molecule, const PropertyMap &ma
     : ConcreteProperty<ExcludedPairs, MolViewProperty>()
 {
     minfo = MoleculeInfo(molecule.data().info());
-    return;
 
     // try to autogenerate the pairs from the CLJNBPairs and
     // connectivity properties
     const auto &cljscl = molecule.data().property(map["intrascale"]).asA<CLJNBPairs>();
     const auto &connectivity = molecule.data().property(map["connectivity"]).asA<Connectivity>();
-
     const auto bond_matrix = connectivity.getBondMatrix(4);
 
     const int nats = bond_matrix.count();
 
-    for (int i = 0; i < nats - 1; ++i)
+    // loop over all the scale factors - this is potentially quite slow
+    const int ncg = cljscl.nGroups();
+
+    for (int igrp = 0; igrp < ncg; ++igrp)
     {
-        const auto row = bond_matrix.constData()[i];
+        const int nats0 = minfo.nAtoms(CGIdx(igrp));
 
-        const AtomIdx atomidx0(i);
-
-        const auto cgatomidx0 = minfo.cgAtomIdx(atomidx0);
-
-        for (int j = i + 1; j < nats; ++j)
+        for (int jgrp = igrp; jgrp < ncg; ++jgrp)
         {
-            if (not row.constData()[j])
+            const auto &pairs = cljscl.get(CGIdx(igrp), CGIdx(jgrp));
+
+            if (pairs.isEmpty())
             {
-                // these two atoms are NOT bonded
-
-                // check the scl factor. This should be 1 or 0
-                const AtomIdx atomidx1(j);
-                const auto cgatomidx1 = minfo.cgAtomIdx(atomidx1);
-
-                const auto scl = cljscl.get(cgatomidx0, cgatomidx1);
+                // all of these pairs have the default value
+                auto scl = pairs.defaultValue();
 
                 if (scl == CLJScaleFactor(0))
                 {
-                    this->excl_pairs.append(i);
-                    this->excl_pairs.append(j);
+                    // check that all of the atoms are bonded
+                    // (any that aren't must be excluded)
+                    if (igrp == jgrp)
+                    {
+                        for (int i = 0; i < nats0 - 1; ++i)
+                        {
+                            qint64 iatm = minfo.atomIdx(CGAtomIdx(CGIdx(igrp), Index(i))).value();
+
+                            const auto &row = bond_matrix.constData()[iatm];
+
+                            for (int j = i + 1; j < nats0; ++j)
+                            {
+                                qint64 jatm = minfo.atomIdx(CGAtomIdx(CGIdx(igrp), Index(j))).value();
+
+                                if (not row.constData()[jatm])
+                                {
+                                    // these atoms aren't bonded - must be excluded
+                                    this->excl_pairs.append(iatm);
+                                    this->excl_pairs.append(jatm);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        const int nats1 = minfo.nAtoms(CGIdx(jgrp));
+
+                        for (int i = 0; i < nats0; ++i)
+                        {
+                            qint64 iatm = minfo.atomIdx(CGAtomIdx(CGIdx(igrp), Index(i))).value();
+
+                            const auto &row = bond_matrix.constData()[iatm];
+
+                            for (int j = 0; j < nats1; ++j)
+                            {
+                                qint64 jatm = minfo.atomIdx(CGAtomIdx(CGIdx(jgrp), Index(j))).value();
+
+                                if (not row.constData()[jatm])
+                                {
+                                    // these atoms aren't bonded - must be excluded
+                                    this->excl_pairs.append(iatm);
+                                    this->excl_pairs.append(jatm);
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (scl != CLJScaleFactor(1))
                 {
-                    qDebug() << "WARNING: INVALID 1-4 SCALING FACTOR FOR NON-BONDED ATOMS!"
-                             << minfo.name(atomidx0).value()
-                             << minfo.name(atomidx1).value() << scl.toString();
+                    // check that all of the atoms are 1-4 bonded...
+                    qDebug() << "WARNING: INVALID 1-4 SCALING FACTOR FOR NON-BONDED GROUPS!"
+                             << igrp << jgrp << scl.toString();
+                }
+                // else scl == CLJScaleFactor(1), meaning they are all bonded
+                // and none of them are excluded
+            }
+            else
+            {
+                // no default value - need to compare each value one by one
+                if (igrp == jgrp)
+                {
+                    for (int i = 0; i < nats0 - 1; ++i)
+                    {
+                        qint64 iatm = minfo.atomIdx(CGAtomIdx(CGIdx(igrp), Index(i))).value();
+
+                        const auto &row = bond_matrix.constData()[iatm];
+
+                        for (int j = i + 1; j < nats0; ++j)
+                        {
+                            const auto &scl = pairs.get(i, j);
+
+                            qint64 jatm = minfo.atomIdx(CGAtomIdx(CGIdx(igrp), Index(j))).value();
+
+                            if (scl == CLJScaleFactor(0))
+                            {
+                                if (not row.constData()[jatm])
+                                {
+                                    // these atoms aren't bonded - must be excluded
+                                    this->excl_pairs.append(iatm);
+                                    this->excl_pairs.append(jatm);
+                                }
+                            }
+                            else if (scl != CLJScaleFactor(1))
+                            {
+                                if (not row.constData()[jatm])
+                                {
+                                    qDebug() << "WARNING: INVALID 1-4 SCALING FACTOR FOR NON-BONDED ATOMS!"
+                                             << minfo.name(AtomIdx(iatm)).value()
+                                             << minfo.name(AtomIdx(jatm)).value() << scl.toString();
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    const int nats1 = minfo.nAtoms(CGIdx(jgrp));
+
+                    for (int i = 0; i < nats0; ++i)
+                    {
+                        qint64 iatm = minfo.atomIdx(CGAtomIdx(CGIdx(igrp), Index(i))).value();
+
+                        const auto &row = bond_matrix.constData()[iatm];
+
+                        for (int j = 0; j < nats1; ++j)
+                        {
+                            const auto &scl = pairs.get(i, j);
+
+                            qint64 jatm = minfo.atomIdx(CGAtomIdx(CGIdx(jgrp), Index(j))).value();
+
+                            if (scl == CLJScaleFactor(0))
+                            {
+                                if (not row.constData()[jatm])
+                                {
+                                    // these atoms aren't bonded - must be excluded
+                                    this->excl_pairs.append(iatm);
+                                    this->excl_pairs.append(jatm);
+                                }
+                            }
+                            else if (scl != CLJScaleFactor(1))
+                            {
+                                if (not row.constData()[jatm])
+                                {
+                                    qDebug() << "WARNING: INVALID 1-4 SCALING FACTOR FOR NON-BONDED ATOMS!"
+                                             << minfo.name(AtomIdx(iatm)).value()
+                                             << minfo.name(AtomIdx(jatm)).value() << scl.toString();
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

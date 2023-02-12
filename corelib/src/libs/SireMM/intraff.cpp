@@ -167,6 +167,7 @@ namespace SireMM
                 cty = molview.data().property(connectivity_property).asA<Connectivity>();
                 connectivity_version = molview.data().version(connectivity_property);
                 intrascale_property = map["intrascale"];
+                intrascale_version = molview.data().version(intrascale_property);
                 excl_pairs = ExcludedPairs(molview, map);
 
                 setCLJFunctions(funcs);

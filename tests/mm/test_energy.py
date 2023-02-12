@@ -292,3 +292,13 @@ def test_neura_energy(neura_mols):
     # if anything has changed the energies
     assert components["coulomb"].value() == pytest.approx(-223.95138492)
     assert components["LJ"].value() == pytest.approx(2.09059, 1e-4)
+
+
+if __name__ == "__main__":
+    import sire as sr
+
+    print("LOADING")
+    neura_mols = sr.load_test_files("proteinbox.crd", "proteinbox.top")
+
+    print("TEST")
+    test_neura_energy(neura_mols)
