@@ -74,6 +74,7 @@ ExcludedPairs::ExcludedPairs(const MoleculeView &molecule, const PropertyMap &ma
     : ConcreteProperty<ExcludedPairs, MolViewProperty>()
 {
     minfo = MoleculeInfo(molecule.data().info());
+    return;
 
     // try to autogenerate the pairs from the CLJNBPairs and
     // connectivity properties

@@ -1,4 +1,3 @@
-
 import pytest
 
 
@@ -7,7 +6,9 @@ def assert_approx_equal(nrg0, nrg1):
 
     for component in nrg0.components():
         try:
-            assert nrg0[component].value() == pytest.approx(nrg1[component].value())
+            assert nrg0[component].value() == pytest.approx(
+                nrg1[component].value()
+            )
         except Exception as e:
             print(f"FAILED {component}")
             print(nrg0.components())
@@ -22,7 +23,7 @@ def test_trajectory_energies(ala_traj):
     from sire.units import angstrom
     from sire.base import create_map
 
-    map = create_map({"cutoff": 10*angstrom})
+    map = create_map({"cutoff": 10 * angstrom})
 
     def assert_same(view):
         from sire import colname
@@ -40,7 +41,9 @@ def test_trajectory_energies(ala_traj):
 
         for idx, v in enumerate(view):
             for i in range(0, 3):
-                assert nrgs0[i][idx].value() == pytest.approx(nrgs1[colname(v, "total")][i])
+                assert nrgs0[i][idx].value() == pytest.approx(
+                    nrgs1[colname(v, "total")][i]
+                )
 
     assert_same(mol.residues())
 
@@ -59,15 +62,21 @@ def test_trajectory_energies(ala_traj):
         other.load_frame(2)
         nrgs0[2] = view.energies(other, map=map)
 
-        nrgs1 = view.trajectory()[0:3].energies(other, to_pandas=False, map=map)
+        nrgs1 = view.trajectory()[0:3].energies(
+            other, to_pandas=False, map=map
+        )
 
         for idx, v in enumerate(view):
             for i in range(0, 3):
-                assert nrgs0[i][idx].value() == pytest.approx(nrgs1[colname(v, "total")][i], 1e-5)
+                assert nrgs0[i][idx].value() == pytest.approx(
+                    nrgs1[colname(v, "total")][i], 1e-5
+                )
 
     assert_same_pair(mol.residues()[0:2], mol.residues()[-1])
     assert_same_pair(mols["water"][0:5], mol)
-    assert_same_pair(mol.atoms(), mols["water and molecule within 5 of molidx 0"])
+    assert_same_pair(
+        mol.atoms(), mols["water and molecule within 5 of molidx 0"]
+    )
 
 
 def test_trajectory_energy(ala_traj):
@@ -77,7 +86,7 @@ def test_trajectory_energy(ala_traj):
     from sire.units import angstrom
     from sire.base import create_map
 
-    map = create_map({"cutoff": 10*angstrom})
+    map = create_map({"cutoff": 10 * angstrom})
 
     def assert_same(view):
         view.load_frame(0)
@@ -117,8 +126,7 @@ def test_trajectory_energy(ala_traj):
         other.load_frame(2)
         nrg02 = view.energy(other, map=map)
 
-        nrgs = view.trajectory()[0:3].energy(other, to_pandas=False,
-                                             map=map)
+        nrgs = view.trajectory()[0:3].energy(other, to_pandas=False, map=map)
 
         def check(n0, n1, i):
             if n0.value() != pytest.approx(n1["total"][i]):
@@ -149,9 +157,15 @@ def test_energy(ala_mols):
     assert_approx_equal(total, mols["molidx 0"].energy())
 
     assert total["bond"].value() == pytest.approx(mol.bonds().energy().value())
-    assert total["angle"].value() == pytest.approx(mol.angles().energy().value())
-    assert total["dihedral"].value() == pytest.approx(mol.dihedrals().energy().value())
-    assert total["improper"].value() == pytest.approx(mol.impropers().energy().value(), rel=1e-5)
+    assert total["angle"].value() == pytest.approx(
+        mol.angles().energy().value()
+    )
+    assert total["dihedral"].value() == pytest.approx(
+        mol.dihedrals().energy().value()
+    )
+    assert total["improper"].value() == pytest.approx(
+        mol.impropers().energy().value(), rel=1e-5
+    )
 
     total0 = mol["element C"].energy()
     total1 = mol["not element C"].energy()
@@ -163,9 +177,15 @@ def test_energy(ala_mols):
 
     assert_approx_equal(total, total0 + total1 + total2)
 
-    assert total0["bond"].value() == pytest.approx(mol.bonds("element C", "element C").energy().value())
-    assert total1["bond"].value() == pytest.approx(mol.bonds("not element C", "not element C").energy().value())
-    assert total2["bond"].value() == pytest.approx(mol.bonds("element C", "not element C").energy().value())
+    assert total0["bond"].value() == pytest.approx(
+        mol.bonds("element C", "element C").energy().value()
+    )
+    assert total1["bond"].value() == pytest.approx(
+        mol.bonds("not element C", "not element C").energy().value()
+    )
+    assert total2["bond"].value() == pytest.approx(
+        mol.bonds("element C", "not element C").energy().value()
+    )
 
     total = mol.residues()[0:2].energy()
 
@@ -211,13 +231,47 @@ def test_energy(ala_mols):
 
     total0 = mols["water and element O"].energy()
     total1 = mols["(not water) and element O"].energy()
-    total2 = mols["water and element O"].energy(mols["(not water) and element O"])
+    total2 = mols["water and element O"].energy(
+        mols["(not water) and element O"]
+    )
 
     assert_approx_equal(total, total0 + total1 + total2)
 
-    total2 = mols["(not water) and element O"].energy(mols["water and element O"])
+    total2 = mols["(not water) and element O"].energy(
+        mols["water and element O"]
+    )
 
 
+def test_compare_pmemd(excluded_mols):
+    mols = excluded_mols
+
+    mol = mols[0]
+
+    from sire.units import kcal_per_mol
+
+    energy = mol.energy()
+
+    assert energy.to(kcal_per_mol) == pytest.approx(83.035, 0.01)
+
+    # Single point energies for this system calculated using pmemd
+    # BOND    =        5.4365  ANGLE   =        5.6564  DIHED      =       11.5328
+    # VDWAALS =        2.8473  EEL     =     -117.6531  HBOND      =        0.0000
+    # 1-4 VDW =        6.2193  1-4 EEL =      168.9963  RESTRAINT  =        0.0000
+
+    c = energy.components()
+
+    assert c["bond"].to(kcal_per_mol) == pytest.approx(5.4365, 0.001)
+    assert c["angle"].to(kcal_per_mol) == pytest.approx(5.6564, 0.001)
+    assert c["dihedral"].to(kcal_per_mol) == pytest.approx(11.5328, 0.001)
+    assert c["1-4_LJ"].to(kcal_per_mol) == pytest.approx(6.2193, 0.001)
+    assert c["1-4_coulomb"].to(kcal_per_mol) == pytest.approx(168.9963, 0.001)
+    assert c["intra_LJ"].to(kcal_per_mol) == pytest.approx(2.8473, 0.001)
+    assert c["intra_coulomb"].to(kcal_per_mol) == pytest.approx(
+        -117.6531, 0.001
+    )
+
+
+@pytest.mark.slow
 def test_neura_energy(neura_mols):
     mols = neura_mols
 
@@ -225,14 +279,14 @@ def test_neura_energy(neura_mols):
 
     # this is an integration test, plus test that 'map' is
     # being interpreted and passed correctly
-    components = mols[0:5].energy(map={"cutoff": 15*angstrom}).components()
+    components = mols[0:5].energy(map={"cutoff": 15 * angstrom}).components()
 
     # these values have been pre-calculated. The test checks
     # if anything has changed the energies
     assert components["coulomb"].value() == pytest.approx(-587.683)
     assert components["LJ"].value() == pytest.approx(-17.15338212, 1e-4)
 
-    components = mols[0:5].energy(map={"cutoff": 5*angstrom}).components()
+    components = mols[0:5].energy(map={"cutoff": 5 * angstrom}).components()
 
     # these values have been pre-calculated. The test checks
     # if anything has changed the energies
