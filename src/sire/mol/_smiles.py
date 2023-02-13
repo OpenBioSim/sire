@@ -15,7 +15,7 @@ except AttributeError as e:
 
 if _has_rdkit:
 
-    def _to_smiles(obj, include_hydrogens=True, map=None):
+    def _to_smiles(obj, include_hydrogens=False, map=None):
         """
         Return this molecule view as a smiles string. Include
         hydrogens in 'include_hydrogens' is True
@@ -25,15 +25,17 @@ if _has_rdkit:
 
         map = create_map(map)
 
-        if not include_hydrogens:
-            obj = obj[("not element H", map)]
-
         if not obj.selected_all():
             from ..legacy.Mol import PartialMolecule
 
             obj = PartialMolecule(obj.molecule(), obj.selection()).extract()
 
         rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
+
+        if not include_hydrogens:
+            from rdkit import Chem
+
+            rdkit_mol = Chem.RemoveHs(rdkit_mol)
 
         return _Chem.MolToSmiles(rdkit_mol)
 
@@ -42,6 +44,7 @@ if _has_rdkit:
         filename: str = None,
         height: int = 300,
         width: int = 900,
+        include_hydrogens: bool = False,
         map=None,
     ):
         """
@@ -64,6 +67,11 @@ if _has_rdkit:
             obj = PartialMolecule(obj.molecule(), obj.selection()).extract()
 
         rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
+
+        if not include_hydrogens:
+            from rdkit.Chem import RemoveHs
+
+            rdkit_mol = RemoveHs(rdkit_mol)
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D
