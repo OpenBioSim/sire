@@ -59,6 +59,9 @@ using namespace SireUnits::Dimension;
 
 namespace SireMM
 {
+    // this (specific) value is the largest we can have on Windows
+    // to still calculate an energy. Anything higher gives and energy of 0...
+    const auto NO_CUTOFF = 347557 * angstrom;
 
     MMDetail get_mmdetail(const MoleculeView &mol, const PropertyMap &map)
     {
@@ -140,13 +143,11 @@ namespace SireMM
 
         auto cutoff_prop = map["cutoff"];
 
-        const auto no_cutoff = 100000000 * angstrom;
-
         // this is a single molecule with an infinite space
         // We should not have a cutoff. Can achieve this using
         // a very large cutoff ;-)
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, no_cutoff));
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, NO_CUTOFF));
         intraff.add(mol, map);
 
         ffields.add(intraff);
@@ -192,17 +193,15 @@ namespace SireMM
 
         auto cutoff_prop = map["cutoff"];
 
-        const auto no_cutoff = 100000000 * angstrom;
-        auto cutoff = 15 * angstrom;
+        auto cutoff = NO_CUTOFF;
 
         if (cutoff_prop.hasValue())
         {
             cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
         }
-        else if (not space.read().isPeriodic())
+        else if (space.read().isPeriodic())
         {
-            // disable the cutoff - do this by using a very large cutoff
-            cutoff = no_cutoff;
+            cutoff = space.read().maximumCutoff();
         }
 
         InterFF interff("interff");
@@ -211,7 +210,7 @@ namespace SireMM
         interff.add(mols, map);
 
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, no_cutoff));
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, NO_CUTOFF));
         intraff.add(mols, map);
 
         ffields.add(interff);
@@ -287,17 +286,15 @@ namespace SireMM
 
         auto cutoff_prop = map["cutoff"];
 
-        const auto no_cutoff = 100000000 * angstrom;
-        auto cutoff = 15 * angstrom;
+        auto cutoff = NO_CUTOFF;
 
         if (cutoff_prop.hasValue())
         {
             cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
         }
-        else if (not space.read().isPeriodic())
+        else if (space.read().isPeriodic())
         {
-            // disable the cutoff - do this by using a very large cutoff
-            cutoff = no_cutoff;
+            cutoff = space.read().maximumCutoff();
         }
 
         InterGroupFF interff("interff");
@@ -311,7 +308,7 @@ namespace SireMM
         }
 
         IntraGroupFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm0, no_cutoff));
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm0, NO_CUTOFF));
         intraff.add(mols0, MGIdx(0), map);
         intraff.add(mols1, MGIdx(1), map);
 
