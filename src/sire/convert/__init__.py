@@ -36,7 +36,9 @@ def supported_formats():
     """
     Return the current supported object formats for conversion
     """
-    return ["sire", "biosimspace", "rdkit", "openmm"]
+    from ..legacy.Convert import supported_formats as _supported_formats
+
+    return _supported_formats()
 
 
 def to(obj, format: str = "sire", map=None):
