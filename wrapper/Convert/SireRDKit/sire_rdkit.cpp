@@ -1,7 +1,7 @@
 
 #include "sire_rdkit.h"
 
-#include "GraphMol/molops.h"
+#include "GraphMol/MolOps.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -45,11 +45,11 @@ RDKit::Atom::ChiralType string_to_chiral(const QString &typ)
         {"CHI_TETRAHEDRAL_CW", RDKit::Atom::CHI_TETRAHEDRAL_CW},
         {"CHI_TETRAHEDRAL_CCW", RDKit::Atom::CHI_TETRAHEDRAL_CCW},
         {"CHI_OTHER", RDKit::Atom::CHI_OTHER},
-        {"CHI_TETRAHEDRAL", RDKit::Atom::CHI_OTHER},
-        {"CHI_ALLENE", RDKit::Atom::CHI_ALLENE},
-        {"CHI_SQUAREPLANAR", RDKit::Atom::CHI_SQUAREPLANAR},
-        {"CHI_TRIGONALBIPYRAMIDAL", RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL},
-        {"CHI_OCTAHEDRAL", RDKit::Atom::CHI_OCTAHEDRAL},
+      //  {"CHI_TETRAHEDRAL", RDKit::Atom::CHI_OTHER},
+      //  {"CHI_ALLENE", RDKit::Atom::CHI_ALLENE},
+      //  {"CHI_SQUAREPLANAR", RDKit::Atom::CHI_SQUAREPLANAR},
+      //  {"CHI_TRIGONALBIPYRAMIDAL", RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL},
+      //  {"CHI_OCTAHEDRAL", RDKit::Atom::CHI_OCTAHEDRAL},
         {"CHI_UNKNOWN", RDKit::Atom::CHI_UNSPECIFIED}};
 
     auto it = types.find(typ);
@@ -72,16 +72,16 @@ QString chiral_to_string(RDKit::Atom::ChiralType typ)
         return "CHI_TETRAHEDRAL_CCW";
     case RDKit::Atom::CHI_OTHER:
         return "CHI_OTHER";
-    case RDKit::Atom::CHI_TETRAHEDRAL:
-        return "CHI_TETRAHEDRAL";
-    case RDKit::Atom::CHI_ALLENE:
-        return "CHI_ALLENE";
-    case RDKit::Atom::CHI_SQUAREPLANAR:
-        return "CHI_SQUAREPLANAR";
-    case RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL:
-        return "CHI_TRIGONALBIPYRAMIDAL";
-    case RDKit::Atom::CHI_OCTAHEDRAL:
-        return "CHI_OCTAHEDRAL";
+ //   case RDKit::Atom::CHI_TETRAHEDRAL:
+ //       return "CHI_TETRAHEDRAL";
+ //   case RDKit::Atom::CHI_ALLENE:
+ //       return "CHI_ALLENE";
+ //   case RDKit::Atom::CHI_SQUAREPLANAR:
+ //       return "CHI_SQUAREPLANAR";
+ //   case RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL:
+ //       return "CHI_TRIGONALBIPYRAMIDAL";
+ //   case RDKit::Atom::CHI_OCTAHEDRAL:
+ //       return "CHI_OCTAHEDRAL";
     default:
         return "CHI_UNKNOWN";
     }
@@ -94,7 +94,7 @@ RDKit::Atom::HybridizationType string_to_hybridization(const QString &typ)
         {"S", RDKit::Atom::S},
         {"SP", RDKit::Atom::SP},
         {"SP2", RDKit::Atom::SP2},
-        {"SP2D", RDKit::Atom::SP2D},
+       // {"SP2D", RDKit::Atom::SP2D},
         {"SP3D", RDKit::Atom::SP3D},
         {"SP3D2", RDKit::Atom::SP3D2},
         {"OTHER", RDKit::Atom::OTHER},
@@ -120,8 +120,8 @@ QString hybridization_to_string(RDKit::Atom::HybridizationType typ)
         return "SP";
     case RDKit::Atom::SP2:
         return "SP2";
-    case RDKit::Atom::SP2D:
-        return "SP2D";
+//    case RDKit::Atom::SP2D:
+//        return "SP2D";
     case RDKit::Atom::SP3D:
         return "SP3D";
     case RDKit::Atom::SP3D2:
