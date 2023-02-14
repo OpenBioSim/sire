@@ -34,7 +34,7 @@
 #include <QString>
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "sireglobal.h"
 
@@ -77,7 +77,7 @@ namespace SireError
             ~FastExceptionFlagData();
         };
 
-        boost::shared_ptr<FastExceptionFlagData> d;
+        std::shared_ptr<FastExceptionFlagData> d;
 
         /** Whether or not fast exceptions are enabled */
         static QAtomicInt enable_fast_exceptions;
@@ -117,7 +117,7 @@ namespace SireError
         exception *clone() const;
 
         QByteArray pack() const;
-        static boost::shared_ptr<SireError::exception> unpack(const QByteArray &data);
+        static std::shared_ptr<SireError::exception> unpack(const QByteArray &data);
 
         static void unpackAndThrow(const QByteArray &errordata);
 

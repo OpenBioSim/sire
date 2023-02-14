@@ -32,7 +32,7 @@
 
 #include "SireBase/properties.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/tuple/tuple.hpp>
 
 SIRE_BEGIN_HEADER
@@ -396,7 +396,7 @@ namespace SireMol
             edits the *same* underlying data - this is to prevent excess
             copying as small incremental changes are made to the same
             molecule */
-        boost::shared_ptr<detail::EditMolData> d;
+        std::shared_ptr<detail::EditMolData> d;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS

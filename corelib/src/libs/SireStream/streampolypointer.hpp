@@ -32,7 +32,7 @@
 #include <QMetaType>
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "SireError/errors.h"
 
@@ -49,7 +49,7 @@ namespace SireStream
     /** Save the object pointed to by the polymorphic point 'ptr' to
         the passed binary datastream */
     template <class T>
-    void savePolyPointer(QDataStream &ds, const boost::shared_ptr<T> &ptr)
+    void savePolyPointer(QDataStream &ds, const std::shared_ptr<T> &ptr)
     {
         // save the version number
         ds << version;
@@ -89,7 +89,7 @@ namespace SireStream
     /** Load the object pointed to by the polymorphic point 'ptr' from
         the passed binary datastream */
     template <class T>
-    void loadPolyPointer(QDataStream &ds, boost::shared_ptr<T> &ptr)
+    void loadPolyPointer(QDataStream &ds, std::shared_ptr<T> &ptr)
     {
         VersionID v;
         ds >> v;

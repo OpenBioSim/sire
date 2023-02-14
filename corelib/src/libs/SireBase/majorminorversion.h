@@ -32,8 +32,8 @@
 #include <QMutex>
 #include <QMutexLocker>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
+#include <memory>
 
 #include "sireglobal.h"
 
@@ -126,7 +126,7 @@ namespace SireBase
     {
     public:
         MajorMinorVersion();
-        MajorMinorVersion(const boost::shared_ptr<detail::MajorMinorVersionData> &other);
+        MajorMinorVersion(const std::shared_ptr<detail::MajorMinorVersionData> &other);
 
         MajorMinorVersion(quint64 vmaj, quint64 vmin);
 
@@ -154,17 +154,17 @@ namespace SireBase
         quint64 majorVersion() const;
         quint64 minorVersion() const;
 
-        operator boost::weak_ptr<detail::MajorMinorVersionData>() const
+        operator std::weak_ptr<detail::MajorMinorVersionData>() const
         {
             return d;
         }
 
     private:
-        static boost::shared_ptr<detail::MajorMinorVersionData> shared_null;
+        static std::shared_ptr<detail::MajorMinorVersionData> shared_null;
 
         /** Shared pointer to the version data of the last incremented
             version object */
-        boost::shared_ptr<detail::MajorMinorVersionData> d;
+        std::shared_ptr<detail::MajorMinorVersionData> d;
 
         /** The major and minor version of this object */
         Version v;
@@ -191,7 +191,7 @@ namespace SireBase
         QMutex registry_mutex;
 
         /** The data for the registry */
-        QHash<T, boost::weak_ptr<detail::MajorMinorVersionData>> registry;
+        QHash<T, std::weak_ptr<detail::MajorMinorVersionData>> registry;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
@@ -311,7 +311,7 @@ namespace SireBase
 
         if (registry.contains(key))
         {
-            boost::shared_ptr<detail::MajorMinorVersionData> d = registry.value(key).lock();
+            std::shared_ptr<detail::MajorMinorVersionData> d = registry.value(key).lock();
 
             if (d.get() != 0)
             {
@@ -331,7 +331,7 @@ namespace SireBase
         {
             // there are exactly a multiple of 100 objects in the registry
             //  - so lets try and clean it up a little
-            QMutableHashIterator<T, boost::weak_ptr<detail::MajorMinorVersionData>> it(registry);
+            QMutableHashIterator<T, std::weak_ptr<detail::MajorMinorVersionData>> it(registry);
 
             while (it.hasNext())
             {

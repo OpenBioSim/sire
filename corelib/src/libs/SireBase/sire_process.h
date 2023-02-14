@@ -32,7 +32,7 @@
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/throw_exception.hpp>
 
 SIRE_BEGIN_HEADER
@@ -106,7 +106,7 @@ namespace SireBase
         void testWait();
 
         /** PIMPL pointer to the data for this process */
-        boost::shared_ptr<detail::ProcessData> d;
+        std::shared_ptr<detail::ProcessData> d;
     };
 
 } // namespace SireBase

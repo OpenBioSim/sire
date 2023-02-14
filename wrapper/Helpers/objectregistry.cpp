@@ -13,7 +13,7 @@ using boost::python::object;
 using boost::python::extract;
 
 using boost::tuples::tuple;
-using boost::shared_ptr;
+using std::shared_ptr;
 
 ObjectRegistry::ObjectRegistry()
 {}

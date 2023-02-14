@@ -313,7 +313,7 @@ QByteArray exception::pack() const
 }
 
 /** Unpack an exception from the raw data in the passed bytearray */
-boost::shared_ptr<SireError::exception> exception::unpack(const QByteArray &data)
+std::shared_ptr<SireError::exception> exception::unpack(const QByteArray &data)
 {
     QDataStream ds(data);
 
@@ -334,7 +334,7 @@ boost::shared_ptr<SireError::exception> exception::unpack(const QByteArray &data
                                       CODELOC);
 
     // construct an exception of this type
-    boost::shared_ptr<exception> ptr(static_cast<exception *>(QMetaType::create(id, 0)));
+    std::shared_ptr<exception> ptr(static_cast<exception *>(QMetaType::create(id, 0)));
 
     // load the object from the datastream
     if (not QMetaType::load(ds, id, ptr.get()))
@@ -348,7 +348,7 @@ boost::shared_ptr<SireError::exception> exception::unpack(const QByteArray &data
     throw that exception */
 void exception::unpackAndThrow(const QByteArray &data)
 {
-    boost::shared_ptr<exception> e = exception::unpack(data);
+    std::shared_ptr<exception> e = exception::unpack(data);
     e->throwSelf();
 }
 

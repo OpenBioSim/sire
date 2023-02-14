@@ -92,7 +92,7 @@ MajorMinorVersion::MajorMinorVersion() : d(create_not_refcounted_shared_null<Maj
 
 /** Construct from a raw data object - this should only be called by
     the registry function */
-MajorMinorVersion::MajorMinorVersion(const boost::shared_ptr<MajorMinorVersionData> &ptr) : d(ptr)
+MajorMinorVersion::MajorMinorVersion(const std::shared_ptr<MajorMinorVersionData> &ptr) : d(ptr)
 {
     QMutexLocker lkr(&(d->version_mutex));
 

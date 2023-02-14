@@ -30,7 +30,7 @@
 
 #include "forcefield.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -66,7 +66,7 @@ namespace SireFF
     namespace detail
     {
         class FFSymbol;
-        typedef boost::shared_ptr<FFSymbol> FFSymbolPtr;
+        typedef std::shared_ptr<FFSymbol> FFSymbolPtr;
     } // namespace detail
 
     /** A ForceFields object contains a collection of forcefields,

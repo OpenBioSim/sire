@@ -44,7 +44,7 @@
 
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "SireBase/shareddatapointer.hpp"
 #include "SireBase/sharedpolypointer.hpp"
@@ -210,7 +210,7 @@ namespace SireStream
         };
 
         /** This is a helper class that helps the loading and saving of a
-            boost::shared_ptr */
+            std::shared_ptr */
         template <class T, class S>
         struct GetBoostSharedPointer
         {
@@ -296,7 +296,7 @@ namespace SireStream
         class SIRESTREAM_EXPORT SharedDataRegistry
         {
         public:
-            static boost::shared_ptr<SharedDataRegistry> construct(QDataStream &ds);
+            static std::shared_ptr<SharedDataRegistry> construct(QDataStream &ds);
 
             ~SharedDataRegistry();
 
@@ -332,7 +332,7 @@ namespace SireStream
 
             /** Actual pointers to the copies of shared data stored in
                 this registry - indexed by registry ID */
-            QHash<quint32, boost::shared_ptr<SharedDataHolder>> objects_by_id;
+            QHash<quint32, std::shared_ptr<SharedDataHolder>> objects_by_id;
 
             /** The keys for each piece of shared data, mapped to the
                 index of that data in the registry. The key is normally the
@@ -376,7 +376,7 @@ namespace SireStream
             if (not objects_by_key.contains(ptr))
             {
                 objects_by_id.insert(quint32(objects_by_id.count() + 1),
-                                     boost::shared_ptr<SharedDataHolder>(new SharedDataHolderT<T>(shared_object)));
+                                     std::shared_ptr<SharedDataHolder>(new SharedDataHolderT<T>(shared_object)));
 
                 objects_by_key.insert(ptr, objects_by_id.count());
             }
@@ -396,7 +396,7 @@ namespace SireStream
                 if (objects_by_id.contains(id))
                     this->throwIDError(id);
 
-                objects_by_id.insert(id, boost::shared_ptr<SharedDataHolder>(new SharedDataHolderT<T>(shared_object)));
+                objects_by_id.insert(id, std::shared_ptr<SharedDataHolder>(new SharedDataHolderT<T>(shared_object)));
 
                 objects_by_key.insert(ptr, id);
             }
@@ -469,7 +469,7 @@ namespace SireStream
 
         /** Shared pointer to the registry of shared objects that
             have already been streamed */
-        boost::shared_ptr<detail::SharedDataRegistry> registry;
+        std::shared_ptr<detail::SharedDataRegistry> registry;
 
         /** Reference to the actual QDataStream that is used to
             stream the data */
@@ -691,17 +691,17 @@ namespace SireStream
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE SharedDataStream &operator<<(SharedDataStream &sds, const boost::shared_ptr<T> &objptr)
+    SIRE_OUTOFLINE_TEMPLATE SharedDataStream &operator<<(SharedDataStream &sds, const std::shared_ptr<T> &objptr)
     {
-        sds.sharedSave<boost::shared_ptr<T>, detail::GetBoostSharedPointer<boost::shared_ptr<T>, T>>(objptr);
+        sds.sharedSave<std::shared_ptr<T>, detail::GetBoostSharedPointer<std::shared_ptr<T>, T>>(objptr);
 
         return sds;
     }
 
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE SharedDataStream &operator>>(SharedDataStream &sds, boost::shared_ptr<T> &objptr)
+    SIRE_OUTOFLINE_TEMPLATE SharedDataStream &operator>>(SharedDataStream &sds, std::shared_ptr<T> &objptr)
     {
-        sds.sharedLoad<boost::shared_ptr<T>, detail::GetBoostSharedPointer<boost::shared_ptr<T>, T>>(objptr);
+        sds.sharedLoad<std::shared_ptr<T>, detail::GetBoostSharedPointer<std::shared_ptr<T>, T>>(objptr);
 
         return sds;
     }

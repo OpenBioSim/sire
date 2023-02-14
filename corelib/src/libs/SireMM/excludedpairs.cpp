@@ -86,8 +86,6 @@ ExcludedPairs::ExcludedPairs(const MoleculeView &molecule, const PropertyMap &ma
     const auto &connectivity = molecule.data().property(map["connectivity"]).asA<Connectivity>();
     const auto bond_matrix = connectivity.getBondMatrix(4);
 
-    const int nats = bond_matrix.count();
-
     // loop over all the scale factors - this is potentially quite slow
     const int ncg = cljscl.nGroups();
 

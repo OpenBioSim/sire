@@ -30,8 +30,8 @@
 
 #include <QMutex>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
+#include <memory>
 
 #include "SireBase/properties.h"
 #include "SireBase/propertymap.h"
@@ -325,10 +325,10 @@ namespace SireMol
             QHash<QString, quint64> property_version;
         };
 
-        static QHash<MolNum, boost::weak_ptr<PropVersions>> version_registry;
+        static QHash<MolNum, std::weak_ptr<PropVersions>> version_registry;
         static QMutex version_registry_mutex;
 
-        static boost::shared_ptr<PropVersions> registerMolecule(MolNum molnum);
+        static std::shared_ptr<PropVersions> registerMolecule(MolNum molnum);
 
         /** The version number of each of the properties in
             this molecule */
@@ -336,7 +336,7 @@ namespace SireMol
 
         /** The incremints that are used to update the version numbers
             of the different parts of this molecule */
-        boost::shared_ptr<PropVersions> vrsns;
+        std::shared_ptr<PropVersions> vrsns;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS

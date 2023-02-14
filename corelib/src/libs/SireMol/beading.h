@@ -31,7 +31,7 @@
 #include "atombeads.h"
 #include "molviewproperty.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -278,7 +278,7 @@ namespace SireMol
         const detail::UserBeadingInfo &getUserBeadingInfo(const MoleculeInfoData &moldata) const;
 
         /** Shared pointer to the UserBeadingInfo registry */
-        boost::shared_ptr<detail::UserBeadingInfoRegistry> registry;
+        std::shared_ptr<detail::UserBeadingInfoRegistry> registry;
     };
 
     /** Null beading function */

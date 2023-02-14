@@ -30,7 +30,7 @@
 
 #include "SireBase/shareddatapointer.hpp"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -111,7 +111,7 @@ namespace SireMol
 
         void detach();
 
-        boost::shared_ptr<detail::MolGroupWorkspaceData> d;
+        std::shared_ptr<detail::MolGroupWorkspaceData> d;
     };
 
 } // namespace SireMol

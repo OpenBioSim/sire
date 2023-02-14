@@ -33,7 +33,7 @@
 #include <QList>
 #include <QUuid>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 

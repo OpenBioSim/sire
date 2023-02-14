@@ -1,0 +1,4 @@
+# Test requirements. These aren't needed by Sire, but if installed, will
+# enable test to run to validate advanced functionality
+
+rdkit

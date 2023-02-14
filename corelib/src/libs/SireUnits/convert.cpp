@@ -31,7 +31,7 @@
 #include <QString>
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 #include "dimensions.h"
@@ -155,7 +155,7 @@ namespace SireUnits
 
         Q_GLOBAL_STATIC(QMutex, globalUnitMutex)
 
-        boost::shared_ptr<QMap<DimensionKey, QPair<double, QString>>> default_strings;
+        std::shared_ptr<QMap<DimensionKey, QPair<double, QString>>> default_strings;
 
         double convert_unspecified_to_internal(double value, int M, int L, int T, int C, int t, int Q, int A)
         {
@@ -239,7 +239,7 @@ namespace SireUnits
 
             if (default_strings == 0)
             {
-                boost::shared_ptr<QMap<DimensionKey, QPair<double, QString>>> strings(
+                std::shared_ptr<QMap<DimensionKey, QPair<double, QString>>> strings(
                     new QMap<DimensionKey, QPair<double, QString>>());
 
                 strings->insert(DimensionKey(kcal_per_mol), QPair<double, QString>(kcal_per_mol, "kcal mol-1"));

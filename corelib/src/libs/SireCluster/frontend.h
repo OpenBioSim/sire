@@ -34,7 +34,7 @@
 #include <QUuid>
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -93,7 +93,7 @@ namespace SireCluster
     {
     public:
         Frontend();
-        Frontend(const boost::shared_ptr<FrontendBase> &ptr);
+        Frontend(const std::shared_ptr<FrontendBase> &ptr);
 
         Frontend(const Backend &backend);
 
@@ -129,7 +129,7 @@ namespace SireCluster
 
     private:
         /** Pointer to the private implementation of this class */
-        boost::shared_ptr<FrontendBase> d;
+        std::shared_ptr<FrontendBase> d;
     };
 
 } // namespace SireCluster

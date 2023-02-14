@@ -30,7 +30,7 @@
 
 #include "chainid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireMol
 {
@@ -92,7 +92,7 @@ namespace SireMol
 
     private:
         /** Pointer to the ChainID */
-        boost::shared_ptr<ChainID> d;
+        std::shared_ptr<ChainID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const ChainIdentifier &chainid)

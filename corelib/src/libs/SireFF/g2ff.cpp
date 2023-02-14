@@ -438,7 +438,7 @@ void G2FF::group_add(quint32 i, const Molecules &molecules, const PropertyMap &m
     }
 
     // save the old state of this forcefield
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -597,7 +597,7 @@ QList<ViewsOfMol> G2FF::group_addIfUnique(quint32 i, const Molecules &molecules,
 
     FFMolGroupPvt old_molgroup = molgroup[i];
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -710,7 +710,7 @@ QList<ViewsOfMol> G2FF::group_remove(quint32 i, const Molecules &molecules)
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -805,7 +805,7 @@ QList<ViewsOfMol> G2FF::group_removeAll(quint32 i, const Molecules &molecules)
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -871,7 +871,7 @@ QList<ViewsOfMol> G2FF::group_remove(quint32 i, const QSet<MolNum> &molnums)
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -983,7 +983,7 @@ bool G2FF::group_setContents(quint32 i, const MoleculeView &molview, const Prope
     if (not allow_overlap_of_atoms)
         this->assertNoOverlap(molgroup[i != 1], molview);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -1020,7 +1020,7 @@ bool G2FF::group_setContents(quint32 i, const ViewsOfMol &molviews, const Proper
         this->assertNoOverlap(molgroup[i != 1], molviews);
     }
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -1062,7 +1062,7 @@ bool G2FF::group_setContents(quint32 i, const Molecules &molecules, const Proper
         this->assertNoOverlap(molgroup[i != 1], molecules);
     }
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -1121,7 +1121,7 @@ bool G2FF::group_setContents(quint32 i, const MoleculeGroup &new_group, const Pr
         this->assertNoOverlap(molgroup[i != 1], new_group.molecules());
     }
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {

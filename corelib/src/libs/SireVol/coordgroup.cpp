@@ -232,6 +232,8 @@ namespace SireVol
             const Vector *coordsData() const;
             const AABox *aaBox() const;
 
+            const Vector *constCoordsData() const;
+
             char *memory();
             Vector *coordsData();
             AABox *aaBox();
@@ -1354,6 +1356,13 @@ const Vector *CGData::coordsData() const
         return (const Vector *)(memory() + coords0);
 }
 
+/** Return a pointer to the coordinates of the first point in this
+    CoordGroup. This returns 0 if there are no points in this CoordGroup */
+const Vector *CGData::constCoordsData() const
+{
+    return this->coordsData();
+}
+
 /** Return a pointer to the AABox that surrounds all of the points
     in this CoordGroup */
 const AABox *CGData::aaBox() const
@@ -2218,11 +2227,14 @@ CoordGroup CoordGroupEditor::commit()
     // return a copy of this CoordGroup
     if (needsupdate)
     {
-        *(d->aaBox()) = AABox(*this);
+        *(d->aaBox()) = AABox(d->constCoordsData(), d->nCoords());
         needsupdate = false;
     }
 
-    return CoordGroup(*this);
+    CoordGroup ret;
+    ret.d = this->d;
+
+    return ret;
 }
 
 const char *CoordGroupEditor::typeName()

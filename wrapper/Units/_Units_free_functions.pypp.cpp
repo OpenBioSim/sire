@@ -31,7 +31,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -53,7 +53,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -75,7 +75,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -97,7 +97,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -119,7 +119,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -141,7 +141,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -163,7 +163,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -185,7 +185,7 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
@@ -207,140 +207,140 @@ namespace bp = boost::python;
 
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "convert.h"
 
 void register_free_functions(){
 
     { //::SireUnits::acute
-    
+
         typedef ::SireUnits::Dimension::Angle ( *acute_function_type )( ::SireUnits::Dimension::Angle );
         acute_function_type acute_function_value( &::SireUnits::acute );
-        
-        bp::def( 
+
+        bp::def(
             "acute"
             , acute_function_value
             , ( bp::arg("angle") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convert
-    
+
         typedef double ( *convert_function_type )( double,::SireUnits::Dimension::TempBase const &,::SireUnits::Dimension::TempBase const & );
         convert_function_type convert_function_value( &::SireUnits::convert );
-        
-        bp::def( 
+
+        bp::def(
             "convert"
             , convert_function_value
             , ( bp::arg("val"), bp::arg("from_units"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convert
-    
+
         typedef double ( *convert_function_type )( double,::SireUnits::Dimension::Unit const &,::SireUnits::Dimension::TempBase const & );
         convert_function_type convert_function_value( &::SireUnits::convert );
-        
-        bp::def( 
+
+        bp::def(
             "convert"
             , convert_function_value
             , ( bp::arg("val"), bp::arg("from_units"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convert
-    
+
         typedef double ( *convert_function_type )( double,::SireUnits::Dimension::Unit const &,::SireUnits::Dimension::Unit const & );
         convert_function_type convert_function_value( &::SireUnits::convert );
-        
-        bp::def( 
+
+        bp::def(
             "convert"
             , convert_function_value
             , ( bp::arg("val"), bp::arg("from_units"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convert
-    
+
         typedef double ( *convert_function_type )( double,::SireUnits::Dimension::TempBase const & );
         convert_function_type convert_function_value( &::SireUnits::convert );
-        
-        bp::def( 
+
+        bp::def(
             "convert"
             , convert_function_value
             , ( bp::arg("val"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convert
-    
+
         typedef double ( *convert_function_type )( double,::SireUnits::Dimension::Unit const & );
         convert_function_type convert_function_value( &::SireUnits::convert );
-        
-        bp::def( 
+
+        bp::def(
             "convert"
             , convert_function_value
             , ( bp::arg("val"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convertFrom
-    
+
         typedef double ( *convertFrom_function_type )( double,::SireUnits::Dimension::TempBase const & );
         convertFrom_function_type convertFrom_function_value( &::SireUnits::convertFrom );
-        
-        bp::def( 
+
+        bp::def(
             "convertFrom"
             , convertFrom_function_value
             , ( bp::arg("val"), bp::arg("from_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convertFrom
-    
+
         typedef double ( *convertFrom_function_type )( double,::SireUnits::Dimension::Unit const & );
         convertFrom_function_type convertFrom_function_value( &::SireUnits::convertFrom );
-        
-        bp::def( 
+
+        bp::def(
             "convertFrom"
             , convertFrom_function_value
             , ( bp::arg("val"), bp::arg("from_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convertTo
-    
+
         typedef double ( *convertTo_function_type )( double,::SireUnits::Dimension::TempBase const & );
         convertTo_function_type convertTo_function_value( &::SireUnits::convertTo );
-        
-        bp::def( 
+
+        bp::def(
             "convertTo"
             , convertTo_function_value
             , ( bp::arg("val"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
     { //::SireUnits::convertTo
-    
+
         typedef double ( *convertTo_function_type )( double,::SireUnits::Dimension::Unit const & );
         convertTo_function_type convertTo_function_value( &::SireUnits::convertTo );
-        
-        bp::def( 
+
+        bp::def(
             "convertTo"
             , convertTo_function_value
             , ( bp::arg("val"), bp::arg("to_units") )
             , "" );
-    
+
     }
 
 }

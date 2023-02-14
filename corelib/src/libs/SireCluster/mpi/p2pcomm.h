@@ -38,7 +38,7 @@
 
 #include "sireglobal.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -133,7 +133,7 @@ namespace SireCluster
             QByteArray _pvt_awaitResponse(bool urgent);
 
             /** Shared pointer to the implementation */
-            boost::shared_ptr<detail::P2PCommPvt> d;
+            std::shared_ptr<detail::P2PCommPvt> d;
         };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS

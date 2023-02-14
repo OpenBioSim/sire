@@ -29,6 +29,7 @@ test:
     - SIRE_DONT_PHONEHOME
   requires:
     - pytest
+    SIRE_TEST_REQUIREMENTS
   imports:
     - sire
     - sire.analysis

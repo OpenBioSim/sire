@@ -40,7 +40,7 @@
 
 using namespace SireCluster;
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 namespace SireCluster
 {

@@ -34,7 +34,7 @@
 #include <QLocale>
 #include <QStringList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/tuple/tuple.hpp>
 
 #include "md5sum.h"
@@ -62,14 +62,14 @@ namespace SireStream
 
         SIRESTREAM_EXPORT QByteArray streamDataSave(const QList<boost::tuple<const void *, const char *>> &objects);
 
-        SIRESTREAM_EXPORT QByteArray streamDataSave(const QList<boost::tuple<boost::shared_ptr<void>, QString>> &objects);
+        SIRESTREAM_EXPORT QByteArray streamDataSave(const QList<boost::tuple<std::shared_ptr<void>, QString>> &objects);
 
         SIRESTREAM_EXPORT void streamDataSave(const void *object, const char *type_name, const QString &filename);
 
         SIRESTREAM_EXPORT void streamDataSave(const QList<boost::tuple<const void *, const char *>> &objects,
                                               const QString &filename);
 
-        SIRESTREAM_EXPORT void streamDataSave(const QList<boost::tuple<boost::shared_ptr<void>, QString>> &objects,
+        SIRESTREAM_EXPORT void streamDataSave(const QList<boost::tuple<std::shared_ptr<void>, QString>> &objects,
                                               const QString &filename);
 
         SIRESTREAM_EXPORT void throwStreamDataInvalidCast(const QString &load_type, const QString &cast_type);
@@ -96,8 +96,8 @@ namespace SireStream
 
     } // namespace detail
 
-    SIRESTREAM_EXPORT QList<boost::tuple<boost::shared_ptr<void>, QString>> load(const QByteArray &data);
-    SIRESTREAM_EXPORT QList<boost::tuple<boost::shared_ptr<void>, QString>> load(const QString &filename);
+    SIRESTREAM_EXPORT QList<boost::tuple<std::shared_ptr<void>, QString>> load(const QByteArray &data);
+    SIRESTREAM_EXPORT QList<boost::tuple<std::shared_ptr<void>, QString>> load(const QString &filename);
 
     /** This class provides metadata about the binary representation
         of an object. This is to allow the owner of the data to identify
@@ -117,7 +117,7 @@ namespace SireStream
 
         friend QByteArray detail::streamDataSave(const QList<boost::tuple<const void *, const char *>> &);
 
-        friend QByteArray detail::streamDataSave(const QList<boost::tuple<boost::shared_ptr<void>, QString>> &);
+        friend QByteArray detail::streamDataSave(const QList<boost::tuple<std::shared_ptr<void>, QString>> &);
 
     public:
         FileHeader();
@@ -245,7 +245,7 @@ namespace SireStream
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE T loadType(const QByteArray &data)
     {
-        QList<boost::tuple<boost::shared_ptr<void>, QString>> new_objs = SireStream::load(data);
+        QList<boost::tuple<std::shared_ptr<void>, QString>> new_objs = SireStream::load(data);
 
         if (new_objs.isEmpty())
         {
@@ -262,7 +262,7 @@ namespace SireStream
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE T loadType(const QString &filename)
     {
-        QList<boost::tuple<boost::shared_ptr<void>, QString>> new_objs = SireStream::load(filename);
+        QList<boost::tuple<std::shared_ptr<void>, QString>> new_objs = SireStream::load(filename);
 
         if (new_objs.isEmpty())
         {

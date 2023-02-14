@@ -30,7 +30,7 @@
 
 #include "ffid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireFF
 {
@@ -93,7 +93,7 @@ namespace SireFF
 
     private:
         /** Pointer to the FFID */
-        boost::shared_ptr<FFID> d;
+        std::shared_ptr<FFID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const FFIdentifier &ffid)

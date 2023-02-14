@@ -37,7 +37,7 @@
 #include <QVector>
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -72,9 +72,9 @@ namespace SireMM
 
     private:
         friend class LJParameterDB;
-        LJDBIOLock(const boost::shared_ptr<detail::LJDBIOLockData> &p);
+        LJDBIOLock(const std::shared_ptr<detail::LJDBIOLockData> &p);
 
-        boost::shared_ptr<detail::LJDBIOLockData> d;
+        std::shared_ptr<detail::LJDBIOLockData> d;
     };
 
     /** This static singleton class holds a complete database of

@@ -27,7 +27,10 @@
 
 #include <QDataStream>
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #include <boost/rational.hpp>
+#pragma clang diagnostic pop
 
 #include "maths.h"
 #include "rational.h"

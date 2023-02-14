@@ -379,7 +379,7 @@ void G1FF::group_add(quint32 i, const Molecules &molecules, const PropertyMap &m
     }
 
     // save the old state of this forcefield
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -538,7 +538,7 @@ QList<ViewsOfMol> G1FF::group_addIfUnique(quint32 i, const Molecules &molecules,
 
     FFMolGroupPvt old_molgroup = molgroup;
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -651,7 +651,7 @@ QList<ViewsOfMol> G1FF::group_remove(quint32 i, const Molecules &molecules)
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -746,7 +746,7 @@ QList<ViewsOfMol> G1FF::group_removeAll(quint32 i, const Molecules &molecules)
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -812,7 +812,7 @@ QList<ViewsOfMol> G1FF::group_remove(quint32 i, const QSet<MolNum> &molnums)
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -909,7 +909,7 @@ bool G1FF::group_setContents(quint32 i, const MoleculeView &molview, const Prope
 {
     assertValidGroup(i);
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -943,7 +943,7 @@ bool G1FF::group_setContents(quint32 i, const ViewsOfMol &molviews, const Proper
     if (not allow_overlap_of_atoms)
         molviews.assertNoOverlap();
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -981,7 +981,7 @@ bool G1FF::group_setContents(quint32 i, const Molecules &molecules, const Proper
         }
     }
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {
@@ -1036,7 +1036,7 @@ bool G1FF::group_setContents(quint32 i, const MoleculeGroup &new_group, const Pr
         }
     }
 
-    boost::shared_ptr<FF> old_state(this->clone());
+    std::shared_ptr<FF> old_state(this->clone());
 
     try
     {

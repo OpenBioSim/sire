@@ -106,11 +106,6 @@ namespace SireBase
             iterator operator++(int);
             iterator &operator+=(int j);
 
-            iterator operator-(int j) const;
-            iterator &operator--();
-            iterator operator--(int);
-            iterator &operator-=(int j);
-
         private:
             /** Pointer to the parent's chunks */
             QVector<QHash<Key, T>> *chunks;
@@ -154,11 +149,6 @@ namespace SireBase
             const_iterator &operator++();
             const_iterator operator++(int);
             const_iterator &operator+=(int j);
-
-            const_iterator operator-(int j) const;
-            const_iterator &operator--();
-            const_iterator operator--(int);
-            const_iterator &operator-=(int j);
 
         private:
             /** Pointer to the parent's chunks */
@@ -410,71 +400,6 @@ namespace SireBase
         return ret;
     }
 
-    /** Pre-decrement operator */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::iterator &ChunkedHash<Key, T, N>::iterator::operator--()
-    {
-        if (chunks == 0)
-            return *this;
-
-        Q_ASSERT(current_chunk < chunks->count());
-
-        while (current_it == (*chunks)[current_chunk].begin())
-        {
-            // are we on the first item?
-            if (current_chunk == 0)
-            {
-                // we are - that's the end of this hash
-                return *this;
-            }
-            else
-            {
-                // move onto the previous chunk
-                --current_chunk;
-
-                current_it = (*chunks)[current_chunk].end();
-            }
-        }
-
-        --current_it;
-
-        return *this;
-    }
-
-    /** Post-decrement operator */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::iterator ChunkedHash<Key, T, N>::iterator::operator--(int)
-    {
-        typename ChunkedHash<Key, T, N>::iterator ret(*this);
-
-        return --ret;
-    }
-
-    /** Decrement this iterator by 'j' steps */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::iterator &ChunkedHash<Key, T, N>::iterator::operator-=(int j)
-    {
-        if (j < 0)
-            return (*this += -j);
-
-        for (int i = 0; i < j; ++i)
-        {
-            --(*this);
-        }
-
-        return *this;
-    }
-
-    /** Return a copy of this iterator that has been stepped back by 'j' steps */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::iterator ChunkedHash<Key, T, N>::iterator::operator-(
-        int j) const
-    {
-        typename ChunkedHash<Key, T, N>::iterator ret(*this);
-        ret += j;
-        return ret;
-    }
-
     ////////////
     //////////// Implementation of ChunkedHash::const_iterator
     ////////////
@@ -642,75 +567,6 @@ namespace SireBase
     template <class Key, class T, int N>
     SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::const_iterator ChunkedHash<
         Key, T, N>::const_iterator::operator+(int j) const
-    {
-        typename ChunkedHash<Key, T, N>::const_iterator ret(*this);
-        ret += j;
-        return ret;
-    }
-
-    /** Pre-decrement operator */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::const_iterator &ChunkedHash<Key, T,
-                                                                                         N>::const_iterator::operator--()
-    {
-        if (chunks == 0)
-            return *this;
-
-        Q_ASSERT(current_chunk < chunks->count());
-
-        while (current_it == (*chunks)[current_chunk].begin())
-        {
-            // are we on the first item?
-            if (current_chunk == 0)
-            {
-                // we are - that's the end of this hash
-                return *this;
-            }
-            else
-            {
-                // move onto the previous chunk
-                --current_chunk;
-
-                current_it = (*chunks)[current_chunk].constEnd();
-            }
-        }
-
-        // this has been deprecated, but I don't see any replacement...
-        --current_it;
-
-        return *this;
-    }
-
-    /** Post-decrement operator */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::const_iterator ChunkedHash<Key, T,
-                                                                                        N>::const_iterator::operator--(int)
-    {
-        typename ChunkedHash<Key, T, N>::const_iterator ret(*this);
-
-        return --ret;
-    }
-
-    /** Decrement this const_iterator by 'j' steps */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::const_iterator &ChunkedHash<
-        Key, T, N>::const_iterator::operator-=(int j)
-    {
-        if (j < 0)
-            return (*this += -j);
-
-        for (int i = 0; i < j; ++i)
-        {
-            --(*this);
-        }
-
-        return *this;
-    }
-
-    /** Return a copy of this const_iterator that has been stepped back by 'j' steps */
-    template <class Key, class T, int N>
-    SIRE_OUTOFLINE_TEMPLATE typename ChunkedHash<Key, T, N>::const_iterator ChunkedHash<
-        Key, T, N>::const_iterator::operator-(int j) const
     {
         typename ChunkedHash<Key, T, N>::const_iterator ret(*this);
         ret += j;

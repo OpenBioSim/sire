@@ -27,6 +27,8 @@
 
 #include "propertymap.h"
 
+#include "SireError/errors.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -102,7 +104,10 @@ PropertyName::PropertyName(const Property &value) : val(value)
 PropertyName::PropertyName(const QString &source, const Property &default_value)
     : src(source), val(default_value), value_is_default(true)
 {
-    BOOST_ASSERT(not source.isEmpty());
+    if (source.isEmpty())
+        throw SireError::program_bug(QObject::tr(
+                                         "You should not create a property with an empty name!"),
+                                     CODELOC);
 }
 
 /** Copy constructor */

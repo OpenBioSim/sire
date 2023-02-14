@@ -29,7 +29,7 @@
 #define SIREMATHS_RANGENERATOR_H
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QVector>
 
@@ -166,7 +166,7 @@ namespace SireMaths
         detail::RanGeneratorPvt &nonconst_d() const;
 
         /** Shared pointer to the actual generator */
-        boost::shared_ptr<detail::RanGeneratorPvt> d;
+        std::shared_ptr<detail::RanGeneratorPvt> d;
     };
 
     /** This is a small locker class that holds a lock on the random

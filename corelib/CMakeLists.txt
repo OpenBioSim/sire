@@ -336,15 +336,23 @@ if (SIRE_HAS_CPP_LIB)
   endif()
 endif()
 
+# We now require C++ 17 to build the RDKit plugin
 if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
   CHECK_CXX_COMPILER_FLAG( "/std:c++14" SIRE_HAS_CPP_14 )
 else()
   CHECK_CXX_COMPILER_FLAG( "-std=c++14" SIRE_HAS_CPP_14 )
 endif()
 
+if ( CMAKE_CXX_COMPILER_ID MATCHES "MSVC" )
+  CHECK_CXX_COMPILER_FLAG( "/std:c++17" SIRE_HAS_CPP_17 )
+else()
+  CHECK_CXX_COMPILER_FLAG( "-std=c++17" SIRE_HAS_CPP_17 )
+endif()
+
 save_sire_variable( "SIRE_HAS_CPP_LIB" "${SIRE_HAS_CPP_LIB}" )
 
 save_sire_variable( "SIRE_HAS_CPP_14" "${SIRE_HAS_CPP_14}" )
+save_sire_variable( "SIRE_HAS_CPP_17" "${SIRE_HAS_CPP_17}" )
 
 option( SIRE_SKIP_LIBC++ "Force Sire to ignore libc++ (e.g. in case of broken clang on linux" OFF )
 
@@ -362,7 +370,44 @@ endif()
 
 set(NEED_UNDEF_STRICT_ANSI FALSE)
 
-if (SIRE_HAS_CPP_14)
+if (SIRE_HAS_CPP_17)
+  message(STATUS "Compiler supports C++ 2017")
+  set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} ${SLASH_HYPHEN}std${COLON_EQUALS}c++17 ${SLASH_HYPHEN}DSIRE_HAS_CPP_17 ${SLASH_HYPHEN}DSIRE_HAS_CPP_14 ${SLASH_HYPHEN}DSIRE_HAS_CPP_1Y ${SLASH_HYPHEN}DSIRE_HAS_CPP_11")
+
+  if (APPLE)
+    # C++ 2017 does not support aligned_alloc on old MacOS - check for this!
+    set(CMAKE_OLD_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+    set(CMAKE_REQUIRED_FLAGS "-O3 -std=c++17")
+    CHECK_CXX_SOURCE_RUNS("
+              #include <cstdio>
+              #include <cstdlib>
+
+              int main()
+              {
+                  int* p1 = static_cast<int*>(std::malloc(10*sizeof *p1));
+                  std::free(p1);
+
+                  int* p2 = static_cast<int*>(std::aligned_alloc(1024, 1024));
+                  std::free(p2);
+              }"
+           CAN_USE_ALIGNED_MALLOC)
+    set(CMAKE_REQUIRED_FLAGS ${CMAKE_OLD_REQUIRED_FLAGS})
+
+    if (CAN_USE_ALIGNED_MALLOC)
+      message(STATUS "Can use aligned memory allocation with C++ 2017")
+    else()
+      message(STATUS "Aligned memory allocation on C++ 2017 is not supported.")
+      message(STATUS "Disabling aligned allocation support with '-fno-aligned-allocation'")
+      set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} -fno-aligned-allocation -U__STRICT_ANSI__")
+    endif()
+
+  endif()
+
+  if (NEED_UNDEF_STRICT_ANSI)
+    message( STATUS "Undefining __STRICT_ANSI__ because of compile problems")
+    set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} -U__STRICT_ANSI__")
+  endif()
+elseif (SIRE_HAS_CPP_14)
   message(STATUS "Compiler supports C++ 2014")
   set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} ${SLASH_HYPHEN}std${COLON_EQUALS}c++14 ${SLASH_HYPHEN}DSIRE_HAS_CPP_14 ${SLASH_HYPHEN}DSIRE_HAS_CPP_1Y ${SLASH_HYPHEN}DSIRE_HAS_CPP_11")
 

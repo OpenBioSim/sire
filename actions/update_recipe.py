@@ -1,4 +1,3 @@
-
 import sys
 import os
 import subprocess
@@ -31,16 +30,21 @@ build_reqs = parse_requirements(os.path.join(srcdir, "requirements_build.txt"))
 print(build_reqs)
 bss_reqs = parse_requirements(os.path.join(srcdir, "requirements_bss.txt"))
 print(bss_reqs)
+test_reqs = parse_requirements(os.path.join(srcdir, "requirements_test.txt"))
+print(test_reqs)
 
 
 def run_cmd(cmd):
     p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE)
     return str(p.stdout.read().decode("utf-8")).lstrip().rstrip()
 
+
 gitdir = os.path.join(srcdir, ".git")
 
 # Get the Sire branch.
-sire_branch = run_cmd(f"git --git-dir={gitdir} --work-tree={srcdir} rev-parse --abbrev-ref HEAD")
+sire_branch = run_cmd(
+    f"git --git-dir={gitdir} --work-tree={srcdir} rev-parse --abbrev-ref HEAD"
+)
 print(sire_branch)
 
 lines = open(template, "r").readlines()
@@ -58,6 +62,7 @@ def dep_lines(deps):
 run_reqs = dep_lines(run_reqs)
 build_reqs = dep_lines(build_reqs)
 bss_reqs = dep_lines(bss_reqs)
+test_reqs = dep_lines(test_reqs)
 
 
 with open(recipe, "w") as FILE:
@@ -68,6 +73,8 @@ with open(recipe, "w") as FILE:
             line = run_reqs
         elif line.find("SIRE_BSS_REQUIREMENTS") != -1:
             line = bss_reqs
+        elif line.find("SIRE_TEST_REQUIREMENTS") != -1:
+            line = test_reqs
         else:
             line = line.replace("SIRE_BRANCH", sire_branch)
 

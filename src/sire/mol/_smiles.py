@@ -141,13 +141,27 @@ if _has_rdkit:
 
 elif _rdkit_import_error is not None:
 
-    def _to_smiles(obj, *args, **kwargs):
+    def _no_rdkit():
         raise ImportError(
             "rdkit cannot be imported. This is because of an error "
             f"when rdkit was loaded ({_rdkit_import_error})."
         )
 
+    def _view2d(obj, *args, **kwargs):
+        _no_rdkit()
+
+    def _to_smiles(obj, *args, **kwargs):
+        _no_rdkit()
+
 else:
+
+    def _view2d(obj, *args, **kwargs):
+        raise ImportError(
+            "You need to install rdkit to be able to generate "
+            "2D views of molecules. Do this by typing, e.g. "
+            "'mamba install -c conda-forge rdkit' and then restarting "
+            "Python and running this script/notebook again."
+        )
 
     def _to_smiles(obj, *args, **kwargs):
         raise ImportError(

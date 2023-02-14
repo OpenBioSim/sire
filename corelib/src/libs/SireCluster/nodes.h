@@ -32,8 +32,8 @@
 
 #include <QUuid>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -113,7 +113,7 @@ namespace SireCluster
         ThisThread borrowThisThread();
 
     protected:
-        Nodes(const boost::shared_ptr<detail::NodesPvt> &ptr); // called by NodesPvt
+        Nodes(const std::shared_ptr<detail::NodesPvt> &ptr); // called by NodesPvt
 
         Nodes(Frontend frontend);                // called by Cluster
         Nodes(const QList<Frontend> &frontends); // called by Cluster
@@ -125,7 +125,7 @@ namespace SireCluster
         Node _pvt_getNode();
 
         /** Private implementation of the Nodes */
-        boost::shared_ptr<detail::NodesPvt> d;
+        std::shared_ptr<detail::NodesPvt> d;
     };
 
     /** This class holds a weak pointer to the Nodes */
@@ -156,7 +156,7 @@ namespace SireCluster
 
     private:
         /** Weak pointer to the nodes */
-        boost::weak_ptr<detail::NodesPvt> d;
+        std::weak_ptr<detail::NodesPvt> d;
     };
 
     /** This simple class is used to allow the current thread
@@ -180,7 +180,7 @@ namespace SireCluster
 
     private:
         /** Pointer to the implementation */
-        boost::shared_ptr<detail::ThisThreadPvt> d;
+        std::shared_ptr<detail::ThisThreadPvt> d;
     };
 
 } // namespace SireCluster

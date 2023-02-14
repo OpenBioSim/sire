@@ -33,7 +33,7 @@
 
 using namespace SireCluster;
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 /////////
 ///////// Implementation of FrontendBase
@@ -158,7 +158,7 @@ Frontend::Frontend()
 }
 
 /** Construct from the passed Frontend pointer */
-Frontend::Frontend(const boost::shared_ptr<FrontendBase> &ptr) : d(ptr)
+Frontend::Frontend(const std::shared_ptr<FrontendBase> &ptr) : d(ptr)
 {
 }
 

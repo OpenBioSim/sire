@@ -1212,8 +1212,6 @@ namespace SireMol
     {
         QList<qint64> matches;
 
-        qint64 start = 0;
-
         for (const auto &view : views)
         {
             const auto m = this->find(view);

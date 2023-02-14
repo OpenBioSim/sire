@@ -30,7 +30,7 @@
 
 #include "monitorid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireSystem
 {
@@ -93,7 +93,7 @@ namespace SireSystem
 
     private:
         /** Pointer to the MonitorID */
-        boost::shared_ptr<MonitorID> d;
+        std::shared_ptr<MonitorID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const MonitorIdentifier &monid)

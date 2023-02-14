@@ -31,7 +31,7 @@
 #include <QList>
 #include <QMutex>
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include "sire_process.h"
 
@@ -68,8 +68,8 @@ static QVector<wchar_t> toWCharVec(const QString &str)
 #include <QDebug>
 
 using namespace SireBase;
-using boost::shared_ptr;
-using boost::weak_ptr;
+using std::shared_ptr;
+using std::weak_ptr;
 
 namespace SireBase
 {

@@ -39,7 +39,7 @@
 #include <QMutex>
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireBase
 {
@@ -68,7 +68,7 @@ namespace SireBase
 
         quint64 runTime();
 
-        static QList<boost::shared_ptr<UnitTest>> tests();
+        static QList<std::shared_ptr<UnitTest>> tests();
 
         static int runAll(bool verbose = false);
 
@@ -90,7 +90,7 @@ namespace SireBase
         quint64 run_time;
 
         /** The set of all tests that have been registered */
-        static QList<boost::shared_ptr<UnitTest>> all_tests;
+        static QList<std::shared_ptr<UnitTest>> all_tests;
     };
 
 #define SIRE_UNITTEST(X) static SireBase::UnitTest _SireBase_UnitTest_register_##X(#X, &X);

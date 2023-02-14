@@ -35,7 +35,7 @@
 #include "SireVol/aabox.h"
 #include "SireVol/gridinfo.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 

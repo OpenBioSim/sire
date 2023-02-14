@@ -30,7 +30,7 @@
 
 #include "id.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -90,7 +90,7 @@ namespace SireID
 
     private:
         /** Pointer to the ID */
-        boost::shared_ptr<ID> d;
+        std::shared_ptr<ID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const Identifier &id)

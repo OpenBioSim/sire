@@ -30,7 +30,7 @@
 
 #include "segid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireMol
 {
@@ -92,7 +92,7 @@ namespace SireMol
 
     private:
         /** Pointer to the SegID */
-        boost::shared_ptr<SegID> d;
+        std::shared_ptr<SegID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const SegIdentifier &segid)

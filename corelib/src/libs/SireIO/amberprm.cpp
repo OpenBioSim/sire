@@ -3641,7 +3641,7 @@ QStringList AmberPrm::flags() const
 }
 
 template <class FUNC, class Exception>
-void live_test(FUNC function, QList<boost::shared_ptr<Exception>> &errors)
+void live_test(FUNC function, QList<std::shared_ptr<Exception>> &errors)
 {
     try
     {
@@ -3649,7 +3649,7 @@ void live_test(FUNC function, QList<boost::shared_ptr<Exception>> &errors)
     }
     catch (const Exception &e)
     {
-        errors.append(boost::shared_ptr<Exception>(e.clone()));
+        errors.append(std::shared_ptr<Exception>(e.clone()));
     }
 }
 
@@ -3658,7 +3658,7 @@ void live_test(FUNC function, QList<boost::shared_ptr<Exception>> &errors)
     then an exception will be thrown */
 void AmberPrm::assertSane() const
 {
-    QList<boost::shared_ptr<SireError::exception>> errors;
+    QList<std::shared_ptr<SireError::exception>> errors;
 
     int natoms = this->nAtoms();
 

@@ -358,7 +358,7 @@ void SimStore::packToDisk(const QString &tempdir)
     if (not dir.exists())
         dir = QDir::temp();
 
-    boost::shared_ptr<QTemporaryFile> tmp;
+    std::shared_ptr<QTemporaryFile> tmp;
 
     tmp.reset(new QTemporaryFile(QString("%1/%2_sire_simstore_XXXXXX.data").arg(dir.absolutePath(), getUserName())));
 
