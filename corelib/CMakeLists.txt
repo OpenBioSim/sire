@@ -395,6 +395,8 @@ if (SIRE_HAS_CPP_17)
 
     if (CAN_USE_ALIGNED_MALLOC)
       message(STATUS "Can use aligned memory allocation with C++ 2017")
+      message(STATUS "But, disabling it anyway!")
+      set(SIRE_CXX_NG_FLAGS "${SIRE_CXX_NG_FLAGS} -fno-aligned-allocation -U__STRICT_ANSI__")
     else()
       message(STATUS "Aligned memory allocation on C++ 2017 is not supported.")
       message(STATUS "Disabling aligned allocation support with '-fno-aligned-allocation'")
