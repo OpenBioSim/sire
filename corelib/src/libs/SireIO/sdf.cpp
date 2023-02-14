@@ -1661,7 +1661,7 @@ void SDF::parseLines(const PropertyMap &map)
         }
     }
 
-    if (nmolecules == 1)
+    if (nmolecules <= 1)
     {
         this->parseMoleculeLines(map, l.toList());
     }
