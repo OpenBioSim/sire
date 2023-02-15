@@ -761,7 +761,7 @@ SelectorMol SelectorMol::molecules(const MolNum &molnum, const PropertyMap &) co
 
 MoleculeGroup SelectorMol::toMoleculeGroup() const
 {
-    MoleculeGroup grp;
+    MoleculeGroup grp("all");
 
     for (const auto &mol : this->mols)
     {

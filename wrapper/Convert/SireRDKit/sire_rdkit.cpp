@@ -1,7 +1,9 @@
 
 #include "sire_rdkit.h"
 
-#include "GraphMol/MolOps.h"
+#include <GraphMol/MolOps.h>
+#include <GraphMol/PeriodicTable.h>
+#include <GraphMol/SmilesParse/SmilesWrite.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -20,14 +22,13 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
 #include "SireBase/stringproperty.h"
 
 #include "SireUnits/units.h"
 
 #include "tostring.h"
-
-#include "GraphMol/PeriodicTable.h"
 
 #include <map>
 
@@ -45,11 +46,11 @@ RDKit::Atom::ChiralType string_to_chiral(const QString &typ)
         {"CHI_TETRAHEDRAL_CW", RDKit::Atom::CHI_TETRAHEDRAL_CW},
         {"CHI_TETRAHEDRAL_CCW", RDKit::Atom::CHI_TETRAHEDRAL_CCW},
         {"CHI_OTHER", RDKit::Atom::CHI_OTHER},
-      //  {"CHI_TETRAHEDRAL", RDKit::Atom::CHI_OTHER},
-      //  {"CHI_ALLENE", RDKit::Atom::CHI_ALLENE},
-      //  {"CHI_SQUAREPLANAR", RDKit::Atom::CHI_SQUAREPLANAR},
-      //  {"CHI_TRIGONALBIPYRAMIDAL", RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL},
-      //  {"CHI_OCTAHEDRAL", RDKit::Atom::CHI_OCTAHEDRAL},
+        //  {"CHI_TETRAHEDRAL", RDKit::Atom::CHI_OTHER},
+        //  {"CHI_ALLENE", RDKit::Atom::CHI_ALLENE},
+        //  {"CHI_SQUAREPLANAR", RDKit::Atom::CHI_SQUAREPLANAR},
+        //  {"CHI_TRIGONALBIPYRAMIDAL", RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL},
+        //  {"CHI_OCTAHEDRAL", RDKit::Atom::CHI_OCTAHEDRAL},
         {"CHI_UNKNOWN", RDKit::Atom::CHI_UNSPECIFIED}};
 
     auto it = types.find(typ);
@@ -72,16 +73,16 @@ QString chiral_to_string(RDKit::Atom::ChiralType typ)
         return "CHI_TETRAHEDRAL_CCW";
     case RDKit::Atom::CHI_OTHER:
         return "CHI_OTHER";
- //   case RDKit::Atom::CHI_TETRAHEDRAL:
- //       return "CHI_TETRAHEDRAL";
- //   case RDKit::Atom::CHI_ALLENE:
- //       return "CHI_ALLENE";
- //   case RDKit::Atom::CHI_SQUAREPLANAR:
- //       return "CHI_SQUAREPLANAR";
- //   case RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL:
- //       return "CHI_TRIGONALBIPYRAMIDAL";
- //   case RDKit::Atom::CHI_OCTAHEDRAL:
- //       return "CHI_OCTAHEDRAL";
+        //   case RDKit::Atom::CHI_TETRAHEDRAL:
+        //       return "CHI_TETRAHEDRAL";
+        //   case RDKit::Atom::CHI_ALLENE:
+        //       return "CHI_ALLENE";
+        //   case RDKit::Atom::CHI_SQUAREPLANAR:
+        //       return "CHI_SQUAREPLANAR";
+        //   case RDKit::Atom::CHI_TRIGONALBIPYRAMIDAL:
+        //       return "CHI_TRIGONALBIPYRAMIDAL";
+        //   case RDKit::Atom::CHI_OCTAHEDRAL:
+        //       return "CHI_OCTAHEDRAL";
     default:
         return "CHI_UNKNOWN";
     }
@@ -94,7 +95,7 @@ RDKit::Atom::HybridizationType string_to_hybridization(const QString &typ)
         {"S", RDKit::Atom::S},
         {"SP", RDKit::Atom::SP},
         {"SP2", RDKit::Atom::SP2},
-       // {"SP2D", RDKit::Atom::SP2D},
+        // {"SP2D", RDKit::Atom::SP2D},
         {"SP3D", RDKit::Atom::SP3D},
         {"SP3D2", RDKit::Atom::SP3D2},
         {"OTHER", RDKit::Atom::OTHER},
@@ -120,8 +121,8 @@ QString hybridization_to_string(RDKit::Atom::HybridizationType typ)
         return "SP";
     case RDKit::Atom::SP2:
         return "SP2";
-//    case RDKit::Atom::SP2D:
-//        return "SP2D";
+        //    case RDKit::Atom::SP2D:
+        //        return "SP2D";
     case RDKit::Atom::SP3D:
         return "SP3D";
     case RDKit::Atom::SP3D2:
@@ -749,12 +750,94 @@ SelectorMol rdkit_to_sire(const QList<ROMOL_SPTR> &mols, const PropertyMap &map)
 
 QList<ROMOL_SPTR> sire_to_rdkit(const SelectorMol &mols, const PropertyMap &map)
 {
-    QList<ROMOL_SPTR> rdkit_mols;
+    const int nmols = mols.count();
 
-    for (const auto &mol : mols)
+    if (nmols == 0)
+        return QList<ROMOL_SPTR>();
+
+    QVector<ROMOL_SPTR> rdkit_mols(mols.count());
+
+    ROMOL_SPTR *rdkit_mols_data = rdkit_mols.data();
+
+    if (nmols > 16)
     {
-        rdkit_mols.append(sire_to_rdkit(mol, map));
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                rdkit_mols_data[i] = sire_to_rdkit(mols[i], map);
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nmols; ++i)
+        {
+            rdkit_mols_data[i] = sire_to_rdkit(mols[i], map);
+        }
     }
 
-    return rdkit_mols;
+    return QList<ROMOL_SPTR>(rdkit_mols.constBegin(), rdkit_mols.constEnd());
+}
+
+QStringList rdkit_to_smiles(const QList<ROMOL_SPTR> &mols, bool ignore_errors)
+{
+    if (mols.isEmpty())
+        return QStringList();
+
+    const int nmols = mols.count();
+
+    QVector<QString> smiles(nmols);
+    QString *smiles_data = smiles.data();
+
+    if (nmols > 16)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                smiles_data[i] = QString::fromStdString(RDKit::MolToSmiles(*(mols[i])));
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < mols.count(); ++i)
+        {
+            smiles_data[i] = QString::fromStdString(RDKit::MolToSmiles(*(mols[i])));
+        }
+    }
+
+    return QStringList(smiles.constBegin(), smiles.constEnd());
+}
+
+QList<ROMOL_SPTR> rdkit_remove_hydrogens(const QList<ROMOL_SPTR> &mols, bool ignore_errors)
+{
+    if (mols.isEmpty())
+        return QList<ROMOL_SPTR>();
+
+    const int nmols = mols.count();
+
+    QVector<ROMOL_SPTR> ret(nmols);
+    ROMOL_SPTR *ret_data = ret.data();
+
+    RDKit::MolOps::RemoveHsParameters params;
+    params.showWarnings = false;
+
+    if (nmols > 16)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                ret_data[i] = ROMOL_SPTR(RDKit::MolOps::removeHs(*(mols[i]), params));
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < mols.count(); ++i)
+        {
+            ret_data[i] = ROMOL_SPTR(RDKit::MolOps::removeHs(*(mols[i]), params));
+        }
+    }
+
+    return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
 }

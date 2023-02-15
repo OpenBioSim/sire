@@ -1,7 +1,12 @@
 __all__ = ["sire_to_rdkit", "rdkit_to_sire", "supported_formats"]
 
 try:
-    from ._SireRDKit import sire_to_rdkit, rdkit_to_sire
+    from ._SireRDKit import (
+        sire_to_rdkit,
+        rdkit_to_sire,
+        rdkit_to_smiles,
+        rdkit_remove_hydrogens,
+    )
 
     _has_rdkit = True
 
@@ -20,6 +25,12 @@ except Exception:
         _no_rdkit()
 
     def rdkit_to_sire(*args, **kwargs):
+        _no_rdkit()
+
+    def rdkit_to_smiles(*args, **kwargs):
+        _no_rdkit()
+
+    def rdkit_remove_hydrogens(*arg, **kwargs):
         _no_rdkit()
 
 

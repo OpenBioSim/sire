@@ -1582,7 +1582,7 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE MoleculeGroup SelectorM<T>::toMoleculeGroup() const
     {
-        MoleculeGroup grp;
+        MoleculeGroup grp("all");
 
         for (const auto &view : this->vws)
         {

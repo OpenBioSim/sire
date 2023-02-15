@@ -1,4 +1,4 @@
-__all__ = ["_to_smiles", "_view2d"]
+__all__ = ["_to_smiles", "_view2d", "_selector_to_smiles", "_selector_view2d"]
 
 _rdkit_import_error = None
 
@@ -15,7 +15,220 @@ except AttributeError as e:
 
 if _has_rdkit:
 
-    def _to_smiles(obj, include_hydrogens=False, map=None):
+    def _selector_to_smiles(
+        obj, include_hydrogens: bool = False, force: bool = False, map=None
+    ):
+        """
+        Return the molecule views in this container as smiles strings. Include
+        hydrogens in 'include_hydrogens' is True. This returns a list
+        of smiles strings, in the same order as the views in the container
+        """
+        from ..convert import sire_to_rdkit, rdkit_to_smiles
+        from ..base import create_map
+
+        map = create_map(map)
+
+        obj = obj.extract()
+
+        try:
+            not_water = obj["not water"]
+        except Exception:
+            from . import SelectorMol
+
+            not_water = SelectorMol()
+
+        rdkit_mols = sire_to_rdkit(not_water, map=map)
+
+        if not include_hydrogens:
+            from ..convert import rdkit_remove_hydrogens
+
+            rdkit_mols = rdkit_remove_hydrogens(rdkit_mols, ignore_errors=True)
+
+        smiles = rdkit_to_smiles(rdkit_mols, ignore_errors=True)
+
+        try:
+            waters = obj["water"]
+        except Exception:
+            from . import SelectorMol
+
+            waters = SelectorMol()
+
+        if len(waters) > 0:
+            # need to combine them all together
+            s = {}
+
+            for mol, smile in zip(not_water, smiles):
+                s[mol.number().value()] = smile
+
+            smiles = []
+
+            for mol in obj:
+                smiles.append(s.get(mol.number().value(), "O"))
+
+        return smiles
+
+    def _selector_view2d(
+        obj,
+        filename: str = None,
+        height: int = 600,
+        width: int = 750,
+        include_hydrogens: bool = False,
+        num_columns: int = 1,
+        force: bool = False,
+        map=None,
+    ):
+        from ..convert import sire_to_rdkit, rdkit_to_smiles
+        from ..base import create_map
+
+        if filename is None:
+            # we need to be in a jupyter notebook or equivalent
+            from IPython.display import SVG
+
+        map = create_map(map)
+
+        obj = obj.extract()
+
+        try:
+            not_water = obj["not water"]
+        except Exception:
+            from . import SelectorMol
+
+            not_water = SelectorMol()
+
+        # we don't view water molecules
+        rdkit_mols = sire_to_rdkit(not_water, map=map)
+
+        if not include_hydrogens:
+            from ..convert import rdkit_remove_hydrogens
+
+            rdkit_mols = rdkit_remove_hydrogens(rdkit_mols, ignore_errors=True)
+
+        smiles = rdkit_to_smiles(rdkit_mols)
+
+        # find the unique structures, and count up the rest
+        unique = {}
+        unique_mols = []
+        ordered_smiles = []
+
+        for smile, rdkit_mol in zip(smiles, rdkit_mols):
+            if smile in unique:
+                unique[smile] += 1
+            else:
+                unique[smile] = 1
+                unique_mols.append(rdkit_mol)
+                ordered_smiles.append(smile)
+
+        legends = []
+
+        for smile in ordered_smiles:
+            legends.append(f"{smile} = {unique[smile]}")
+
+        # now add back the waters (if any)
+        try:
+            num_waters = len(obj["water"])
+        except Exception:
+            num_waters = 0
+
+        if num_waters > 0:
+            from rdkit.Chem import MolFromSmiles
+
+            unique_mols.append(MolFromSmiles("O"))
+            unique["O"] = num_waters
+
+            legends.append(f"O = {num_waters}")
+
+        from rdkit.Chem import rdDepictor
+        from rdkit.Chem.Draw import rdMolDraw2D
+
+        rdDepictor.SetPreferCoordGen(True)
+
+        num_mols = len(unique_mols)
+
+        if num_columns < 1:
+            num_columns = 1
+
+        if num_mols > num_columns:
+            num_cols = num_columns
+            num_rows = num_mols / num_cols
+            if num_mols % num_cols != 0:
+                num_rows += 1
+        else:
+            num_cols = num_mols
+            num_rows = 1
+
+        drawer = rdMolDraw2D.MolDraw2DSVG(
+            width=width,
+            height=height,
+            panelWidth=int(width / num_cols),
+            panelHeight=int(height / num_rows),
+        )
+
+        drawer.DrawMolecules(unique_mols, legends=legends)
+
+        drawer.FinishDrawing()
+        svg = drawer.GetDrawingText()
+
+        if filename is not None:
+            import os
+
+            (basename, format) = os.path.splitext(os.path.abspath(filename))
+
+            while format.startswith("."):
+                format = format[1:]
+
+            if len(format) == 0:
+                format = "svg"
+
+            format = format.lower()
+
+            if format != "svg":
+                try:
+                    import cairosvg
+                except Exception:
+                    from ..utils import Console
+
+                    Console.warning(
+                        "We need the module `cairosvg` to save image files in "
+                        "any other format than SVG. As "
+                        "this is not available, we will save the file as a "
+                        "SVG. To install `cairosvg` run the command "
+                        "'mamba install -c conda-forge cairosvg'"
+                    )
+
+                    format = "svg"
+
+            filename = f"{basename}.{format}"
+
+            if format == "svg":
+                with open(filename, "w") as FILE:
+                    FILE.write(svg)
+
+            elif format == "pdf":
+                cairosvg.svg2pdf(bytestring=svg.encode(), write_to=filename)
+
+            elif format == "png":
+                cairosvg.svg2png(
+                    bytestring=svg.encode(),
+                    write_to=filename,
+                    output_width=width,
+                    output_height=height,
+                )
+
+            else:
+                raise NotImplementedError(
+                    f"Cannot save image as format {format}. This is not yet "
+                    "supported in this code. Please choose 'png', 'pdf' or "
+                    "'svg'."
+                )
+
+            return filename
+
+        else:
+            return SVG(svg)
+
+    def _to_smiles(
+        obj, include_hydrogens: bool = False, force: bool = False, map=None
+    ):
         """
         Return this molecule view as a smiles string. Include
         hydrogens in 'include_hydrogens' is True
@@ -23,14 +236,18 @@ if _has_rdkit:
         from ..convert import sire_to_rdkit
         from ..base import create_map
 
+        if len(obj) > 500 and not force:
+            from ..utils import Console
+
+            Console.warning(
+                "Not converting to smiles as the number of atoms "
+                f"{len(obj)} is greater than 500. If you are sure, "
+                "then re-run this function with 'force=True'"
+            )
+
         map = create_map(map)
 
-        if not obj.selected_all():
-            from ..legacy.Mol import PartialMolecule
-
-            obj = PartialMolecule(obj.molecule(), obj.selection()).extract()
-
-        rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
+        rdkit_mol = sire_to_rdkit(obj.extract(), map=map)
 
         if not include_hydrogens:
             try:
@@ -50,6 +267,7 @@ if _has_rdkit:
         height: int = 300,
         width: int = 900,
         include_hydrogens: bool = False,
+        force: bool = False,
         map=None,
     ):
         """
@@ -60,18 +278,22 @@ if _has_rdkit:
         from ..convert import sire_to_rdkit
         from ..base import create_map
 
+        if len(obj) > 500 and not force:
+            from ..utils import Console
+
+            Console.warning(
+                "Not converting to smiles as the number of atoms "
+                f"{len(obj)} is greater than 500. If you are sure, "
+                "then re-run this function with 'force=True'"
+            )
+
         if filename is None:
             # we need to be in a jupyter notebook or equivalent
             from IPython.display import SVG
 
         map = create_map(map)
 
-        if not obj.selected_all():
-            from ..legacy.Mol import PartialMolecule
-
-            obj = PartialMolecule(obj.molecule(), obj.selection()).extract()
-
-        rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
+        rdkit_mol = sire_to_rdkit(obj.extract(), map=map)
 
         if not include_hydrogens:
             try:
@@ -114,8 +336,10 @@ if _has_rdkit:
 
                     Console.warning(
                         "We need the module `cairosvg` to save image files in "
-                        "any other format than SVG. . As "
-                        "this is not available, we will save the file as a SVG"
+                        "any other format than SVG. As "
+                        "this is not available, we will save the file as a "
+                        "SVG. To install `cairosvg` run the command "
+                        "'mamba install -c conda-forge cairosvg'"
                     )
 
                     format = "svg"
@@ -163,6 +387,12 @@ elif _rdkit_import_error is not None:
     def _to_smiles(obj, *args, **kwargs):
         _no_rdkit()
 
+    def _selector_view2d(obj, *args, **kwargs):
+        _no_rdkit()
+
+    def _selector_to_smiles(obj, *args, **kwargs):
+        _no_rdkit()
+
 else:
 
     def _view2d(obj, *args, **kwargs):
@@ -180,3 +410,9 @@ else:
             "'mamba install -c conda-forge rdkit' and then restarting "
             "Python and running this script/notebook again."
         )
+
+    def _selector_to_smiles(obj, *args, **kwargs):
+        _to_smiles(obj, *args, **kwargs)
+
+    def _selector_view2d(obj, *args, **kwargs):
+        _view2d(obj, *args, **kwargs)

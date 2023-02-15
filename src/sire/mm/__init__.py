@@ -25,6 +25,8 @@ from ..mol import (
     _cursor,
     _cursors,
     _cursorsm,
+    _selector_to_smiles,
+    _selector_view2d,
     _trajectory,
     _viewfunc,
 )
@@ -151,6 +153,16 @@ SelectorDihedral.cursor = _cursors
 Improper.cursor = _cursor
 SelectorImproper.cursor = _cursors
 
+SelectorMBond.cursor = _cursorsm
+SelectorMAngle.cursor = _cursorsm
+SelectorMDihedral.cursor = _cursorsm
+SelectorMImproper.cursor = _cursorsm
+
+SelectorMBond.smiles = _selector_to_smiles
+SelectorMAngle.smiles = _selector_to_smiles
+SelectorMDihedral.smiles = _selector_to_smiles
+SelectorMImproper.smiles = _selector_to_smiles
+
 SelectorMBond.trajectory = _trajectory
 SelectorMAngle.trajectory = _trajectory
 SelectorMDihedral.trajectory = _trajectory
@@ -166,7 +178,7 @@ SelectorMAngle.view = _viewfunc
 SelectorMDihedral.view = _viewfunc
 SelectorMImproper.view = _viewfunc
 
-SelectorMBond.cursor = _cursorsm
-SelectorMAngle.cursor = _cursorsm
-SelectorMDihedral.cursor = _cursorsm
-SelectorMImproper.cursor = _cursorsm
+SelectorMBond.view2d = _selector_view2d
+SelectorMAngle.view2d = _selector_view2d
+SelectorMDihedral.view2d = _selector_view2d
+SelectorMImproper.view2d = _selector_view2d
