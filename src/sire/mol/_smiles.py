@@ -33,9 +33,14 @@ if _has_rdkit:
         rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
 
         if not include_hydrogens:
-            from rdkit import Chem
+            try:
+                from rdkit import Chem
 
-            rdkit_mol = Chem.RemoveHs(rdkit_mol)
+                rdkit_mol = Chem.RemoveHs(rdkit_mol)
+            except Exception as e:
+                from ..utils import Console
+
+                Console.warning(f"Could not remove hydrogens! {e}")
 
         return _Chem.MolToSmiles(rdkit_mol)
 
@@ -69,9 +74,14 @@ if _has_rdkit:
         rdkit_mol = sire_to_rdkit(obj.molecule(), map=map)
 
         if not include_hydrogens:
-            from rdkit.Chem import RemoveHs
+            try:
+                from rdkit.Chem import RemoveHs
 
-            rdkit_mol = RemoveHs(rdkit_mol)
+                rdkit_mol = RemoveHs(rdkit_mol)
+            except Exception as e:
+                from ..utils import Console
+
+                Console.warning(f"Could not remove hydrogens: {e}")
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D

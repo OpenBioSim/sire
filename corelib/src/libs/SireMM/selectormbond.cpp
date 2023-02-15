@@ -31,6 +31,8 @@
 
 #include "SireCAS/expression.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireBase/errors.h"
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -478,6 +480,35 @@ MoleculeGroup SelectorMBond::toMoleculeGroup() const
     }
 
     return grp;
+}
+
+SelectorMol SelectorMBond::extract() const
+{
+    const int nmols = this->count();
+
+    const bool uses_parallel = nmols < 16;
+
+    QVector<Molecule> mols(nmols);
+    Molecule *mols_data = mols.data();
+
+    if (uses_parallel)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                mols_data[i] = this->operator()(i).extract();
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nmols; ++i)
+        {
+            mols_data[i] = this->operator()(i).extract();
+        }
+    }
+
+    return SelectorMol(mols);
 }
 
 bool SelectorMBond::isSelector() const

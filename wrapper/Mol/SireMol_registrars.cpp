@@ -3,8 +3,6 @@
 
 #include "SireMol_registrars.h"
 
-
-
 #include "amberparameters.h"
 #include "angleid.h"
 #include "atom.h"

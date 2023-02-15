@@ -273,6 +273,11 @@ SelectorMol::SelectorMol(const QList<Molecule> &molecules) : ConcreteProperty<Se
     mols = molecules;
 }
 
+SelectorMol::SelectorMol(const QVector<Molecule> &molecules) : ConcreteProperty<SelectorMol, Property>()
+{
+    mols = QList<Molecule>(molecules.constBegin(), molecules.constEnd());
+}
+
 SelectorMol::SelectorMol(const MoleculeGroup &molecules) : ConcreteProperty<SelectorMol, Property>()
 {
     if (not molecules.isEmpty())
@@ -445,6 +450,11 @@ Molecules SelectorMol::toMolecules() const
 SelectResult SelectorMol::toSelectResult() const
 {
     return SelectResult(this->mols);
+}
+
+SelectorMol SelectorMol::extract() const
+{
+    return *this;
 }
 
 bool SelectorMol::isSelector() const

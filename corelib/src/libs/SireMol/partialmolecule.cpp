@@ -273,29 +273,6 @@ QStringList PartialMolecule::propertyKeys() const
     return d->propertyKeys();
 }
 
-/** Extract a copy of this PartialMolecule which contains only the currently
-    selected atoms. This allows the used to pull out parts of a larger molecule,
-    e.g. if they want to have only selected residues in a protein and do not
-    want to have to store or manipulate the larger protein molecule */
-PartialMolecule PartialMolecule::extract() const
-{
-    if (this->isEmpty())
-        return PartialMolecule();
-
-    else if (this->selectedAll())
-        return *this;
-
-    else
-    {
-        PartialMolecule ret;
-
-        ret.d = d->extract(selected_atoms);
-        ret.selected_atoms = AtomSelection(*(ret.d));
-
-        return ret;
-    }
-}
-
 /** Return the keys of all of the metadata contained directly by
     this molecule */
 QStringList PartialMolecule::metadataKeys() const

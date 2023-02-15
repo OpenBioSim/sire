@@ -505,6 +505,18 @@ void register_SelectorMImproper_class(){
                 , "" );
         
         }
+        { //::SireMM::SelectorMImproper::extract
+        
+            typedef ::SireMol::SelectorMol ( ::SireMM::SelectorMImproper::*extract_function_type)(  ) const;
+            extract_function_type extract_function_value( &::SireMM::SelectorMImproper::extract );
+            
+            SelectorMImproper_exposer.def( 
+                "extract"
+                , extract_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::SelectorMImproper::hasMetadata
         
             typedef bool ( ::SireMM::SelectorMImproper::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;

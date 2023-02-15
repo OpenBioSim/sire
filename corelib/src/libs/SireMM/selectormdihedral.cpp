@@ -458,6 +458,35 @@ SelectorMDihedral SelectorMDihedral::operator()(const DihedralID &id) const
     return this->operator[](id);
 }
 
+SelectorMol SelectorMDihedral::extract() const
+{
+    const int nmols = this->count();
+
+    const bool uses_parallel = nmols < 16;
+
+    QVector<Molecule> mols(nmols);
+    Molecule *mols_data = mols.data();
+
+    if (uses_parallel)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                mols_data[i] = this->operator()(i).extract();
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nmols; ++i)
+        {
+            mols_data[i] = this->operator()(i).extract();
+        }
+    }
+
+    return SelectorMol(mols);
+}
+
 bool SelectorMDihedral::isSelector() const
 {
     return true;

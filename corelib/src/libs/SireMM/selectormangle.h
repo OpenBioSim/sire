@@ -140,6 +140,8 @@ namespace SireMM
 
         SireMol::EvaluatorM evaluate() const;
 
+        SireMol::SelectorMol extract() const;
+
         bool isSelector() const;
 
         SireMol::MoleculeGroup toMoleculeGroup() const;

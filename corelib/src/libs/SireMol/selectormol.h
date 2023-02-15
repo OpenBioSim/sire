@@ -92,6 +92,7 @@ namespace SireMol
         SelectorMol(const MolGroupsBase &mols);
         SelectorMol(const SelectResult &mols);
         SelectorMol(const QList<Molecule> &mols);
+        SelectorMol(const QVector<Molecule> &mols);
 
         template <class T>
         SelectorMol(const SelectorM<T> &other);
@@ -156,6 +157,8 @@ namespace SireMol
 
         MoleculeGroup toMoleculeGroup() const;
         SelectResult toSelectResult() const;
+
+        SelectorMol extract() const;
 
         bool isSelector() const;
 

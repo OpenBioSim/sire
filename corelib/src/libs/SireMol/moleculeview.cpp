@@ -1757,6 +1757,24 @@ Selector<Segment> MoleculeView::selectAllSegments() const
     return this->segments();
 }
 
+/** Extract a copy of this view which contains only the currently
+    selected atoms. This allows the used to pull out parts of a larger molecule,
+    e.g. if they want to have only selected residues in a protein and do not
+    want to have to store or manipulate the larger protein molecule */
+Molecule MoleculeView::extract() const
+{
+    if (d->info().nAtoms() == 0 or this->isEmpty())
+        return Molecule();
+
+    else if (this->selectedAll())
+        return Molecule(this->data());
+
+    else
+    {
+        return Molecule(d->extract(this->selection()));
+    }
+}
+
 /** Return whether or not this is a Selector<T> object. This
  *  helps code distinguish between views of single objects,
  *  e.g. Atom, Residue etc., and views of multiple objects,

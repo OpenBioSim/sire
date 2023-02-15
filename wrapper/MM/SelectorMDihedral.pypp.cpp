@@ -505,6 +505,18 @@ void register_SelectorMDihedral_class(){
                 , "" );
         
         }
+        { //::SireMM::SelectorMDihedral::extract
+        
+            typedef ::SireMol::SelectorMol ( ::SireMM::SelectorMDihedral::*extract_function_type)(  ) const;
+            extract_function_type extract_function_value( &::SireMM::SelectorMDihedral::extract );
+            
+            SelectorMDihedral_exposer.def( 
+                "extract"
+                , extract_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::SelectorMDihedral::hasMetadata
         
             typedef bool ( ::SireMM::SelectorMDihedral::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
