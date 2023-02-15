@@ -29,7 +29,7 @@
 #include <QThread>
 #include <QWaitCondition>
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include "backend.h"
 #include "cluster.h"
@@ -44,8 +44,8 @@
 
 using namespace SireCluster;
 
-using boost::shared_ptr;
-using boost::weak_ptr;
+using std::shared_ptr;
+using std::weak_ptr;
 
 namespace SireCluster
 {

@@ -3112,7 +3112,7 @@ void MoleculeGroups::update(const Molecules &molecules, bool auto_commit)
 {
     // we need to do this in a copy, so that we can revert
     // if an error occurs...
-    boost::shared_ptr<MoleculeGroups> old_state(this->clone());
+    std::shared_ptr<MoleculeGroups> old_state(this->clone());
 
     try
     {

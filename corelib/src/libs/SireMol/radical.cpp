@@ -91,7 +91,7 @@ Radical::Radical(const QString &str) : ConcreteProperty<Radical, Property>()
 /** Construct from the the passed number */
 Radical::Radical(int value) : ConcreteProperty<Radical, Property>()
 {
-    if (value >= 0 or value <= 3)
+    if (value >= 0 and value <= 3)
     {
         this->radical_type = value;
     }

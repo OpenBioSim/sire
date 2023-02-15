@@ -26,7 +26,7 @@ SireFF::Inter2B2G3DFF<SireMM::LJPotentialInterface<SireMM::InterLJPotential> > _
 void register_InterGroupLJFF_class(){
 
     { //::SireFF::Inter2B2G3DFF< SireMM::LJPotentialInterface< SireMM::InterLJPotential > >
-        typedef bp::class_< SireFF::Inter2B2G3DFF< SireMM::LJPotentialInterface< SireMM::InterLJPotential > >, bp::bases< SireFF::FF3D, SireFF::Inter2B2GFF<SireMM::LJPotentialInterface<SireMM::InterLJPotential> >, SireMM::LJPotentialInterface<SireMM::InterLJPotential>, SireFF::G2FF, SireFF::FF, SireMol::MolGroupsBase, SireBase::Property > > InterGroupLJFF_exposer_t;
+        typedef bp::class_< SireFF::Inter2B2G3DFF< SireMM::LJPotentialInterface< SireMM::InterLJPotential > >, bp::bases< SireFF::FF3D, SireMM::LJPotentialInterface<SireMM::InterLJPotential>, SireFF::G2FF, SireFF::FF, SireMol::MolGroupsBase, SireBase::Property > > InterGroupLJFF_exposer_t;
         InterGroupLJFF_exposer_t InterGroupLJFF_exposer = InterGroupLJFF_exposer_t( "InterGroupLJFF", "", bp::init< >("") );
         bp::scope InterGroupLJFF_scope( InterGroupLJFF_exposer );
         InterGroupLJFF_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );

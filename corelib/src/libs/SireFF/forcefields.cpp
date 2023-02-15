@@ -65,7 +65,7 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <tbb/tbb.h>
 

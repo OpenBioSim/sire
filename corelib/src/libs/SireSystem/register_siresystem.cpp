@@ -26,7 +26,7 @@
 \*********************************************/
 
 #include "SireStream/streamdata.hpp"
-#include "SireStream/version_error_impl.h"
+
 
 using namespace SireStream;
 

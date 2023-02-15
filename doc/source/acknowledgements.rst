@@ -389,6 +389,17 @@ available https://github.com/charnley/rmsd, and under license;
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         =======================
 
+mdanalysis
+----------
+
+I have written a C++ implementation of the ``_infer_bo_and_charges``
+algorithm from `mdanalysis <https://mdanalysis.org>`__.
+
+The algorithm is `described here <https://blog.matteoferla.com/2020/02/guess-bond-order-in-rdkit-by-number-of.html>`__
+and `here <https://docs.mdanalysis.org/2.0.0/_modules/MDAnalysis/converters/RDKit.html#_infer_bo_and_charges>`__.
+
+The code was written by Matteo Ferla and was released under the GPL.
+
 Python Dependencies
 ===================
 

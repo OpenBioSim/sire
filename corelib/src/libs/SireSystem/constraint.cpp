@@ -231,11 +231,7 @@ bool Constraint::isSatisfied(const System &system) const
 
     else
     {
-#ifdef BOOST_NO_CXX11_SMART_PTR
-        std::auto_ptr<Constraint> copy(this->clone());
-#else
         std::unique_ptr<Constraint> copy(this->clone());
-#endif
 
         copy->setSystem(system);
 

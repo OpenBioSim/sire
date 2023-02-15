@@ -53,6 +53,21 @@ namespace boost
 namespace SireError
 {
 
+    const char *version_error::typeName()
+    {
+        return "SireError::version_error";
+    }
+
+    const char *version_error::what() const throw()
+    {
+        return version_error::typeName();
+    }
+
+}
+
+namespace SireError
+{
+
     /** Now implement the std_exception constructors */
 
     std_exception::std_exception() : exception(QObject::tr("Null std::exception"))

@@ -334,7 +334,7 @@ void FF::add(const MoleculeView &molview, const MGID &mgid, const PropertyMap &m
     {
         // we need to save state as an exception could be thrown
         // when adding to the nth group
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -389,7 +389,7 @@ void FF::add(const ViewsOfMol &molviews, const MGID &mgid, const PropertyMap &ma
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -441,7 +441,7 @@ void FF::add(const Molecules &molecules, const MGID &mgid, const PropertyMap &ma
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -514,7 +514,7 @@ void FF::addIfUnique(const MoleculeView &molview, const MGID &mgid, const Proper
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -569,7 +569,7 @@ void FF::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid, const Propert
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -624,7 +624,7 @@ void FF::addIfUnique(const Molecules &molecules, const MGID &mgid, const Propert
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -722,7 +722,7 @@ bool FF::remove(const MoleculeView &molview, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool removed_mol = false;
 
@@ -785,7 +785,7 @@ bool FF::remove(const ViewsOfMol &molviews, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool removed_mol = false;
 
@@ -857,7 +857,7 @@ bool FF::remove(const Molecules &molecules, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -940,7 +940,7 @@ bool FF::removeAll(const MoleculeView &molview, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1003,7 +1003,7 @@ bool FF::removeAll(const ViewsOfMol &molviews, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1075,7 +1075,7 @@ bool FF::removeAll(const Molecules &molecules, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1155,7 +1155,7 @@ bool FF::remove(MolNum molnum, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1220,7 +1220,7 @@ bool FF::remove(const QSet<MolNum> &molnums, const MGID &mgid)
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         bool mols_removed = false;
 
@@ -1420,7 +1420,7 @@ void FF::setContents(const MGID &mgid, const MoleculeView &molview, const Proper
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -1484,7 +1484,7 @@ void FF::setContents(const MGID &mgid, const ViewsOfMol &molviews, const Propert
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {
@@ -1548,7 +1548,7 @@ void FF::setContents(const MGID &mgid, const Molecules &molecules, const Propert
     }
     else
     {
-        boost::shared_ptr<FF> old_state(this->clone());
+        std::shared_ptr<FF> old_state(this->clone());
 
         try
         {

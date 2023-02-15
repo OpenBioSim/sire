@@ -70,6 +70,7 @@ void register_SelectorMol_class(){
         SelectorMol_exposer.def( bp::init< SireMol::MoleculeGroup const & >(( bp::arg("mols") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::MolGroupsBase const & >(( bp::arg("mols") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectResult const & >(( bp::arg("mols") ), "") );
+        SelectorMol_exposer.def( bp::init< QList< SireMol::Molecule > const & >(( bp::arg("mols") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Residue > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Chain > const & >(( bp::arg("other") ), "") );
@@ -84,6 +85,32 @@ void register_SelectorMol_class(){
             SelectorMol_exposer.def( 
                 "IDs"
                 , IDs_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::append
+        
+            typedef void ( ::SireMol::SelectorMol::*append_function_type)( ::SireMol::Molecule const & ) ;
+            append_function_type append_function_value( &::SireMol::SelectorMol::append );
+            
+            SelectorMol_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("mol") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::append
+        
+            typedef void ( ::SireMol::SelectorMol::*append_function_type)( ::SireMol::SelectorMol const & ) ;
+            append_function_type append_function_value( &::SireMol::SelectorMol::append );
+            
+            SelectorMol_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("mols") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -485,7 +512,7 @@ void register_SelectorMol_class(){
                 , find_function_value
                 , ( bp::arg("view") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the index of view in this list of molecules.\n  Returns an empty list if the view is not in this collection\n" );
         
         }
         { //::SireMol::SelectorMol::find
@@ -498,7 +525,7 @@ void register_SelectorMol_class(){
                 , find_function_value
                 , ( bp::arg("views") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the index of views in this list of molecules.\n  Returns an empty list if none of the views are in this collection\n" );
         
         }
         { //::SireMol::SelectorMol::indexes
@@ -877,6 +904,8 @@ void register_SelectorMol_class(){
         
         }
         SelectorMol_exposer.def( bp::self != bp::self );
+        SelectorMol_exposer.def( bp::self + bp::other< SireMol::Molecule >() );
+        SelectorMol_exposer.def( bp::self + bp::self );
         { //::SireMol::SelectorMol::operator=
         
             typedef ::SireMol::SelectorMol & ( ::SireMol::SelectorMol::*assign_function_type)( ::SireMol::SelectorMol const & ) ;

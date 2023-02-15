@@ -283,7 +283,7 @@ static RanGeneratorPvt *createSharedNull()
     return gen;
 }
 
-static boost::shared_ptr<RanGeneratorPvt> shared_null(::createSharedNull());
+static std::shared_ptr<RanGeneratorPvt> shared_null(::createSharedNull());
 
 /** Create a randomly seeded generator
     (actually a copy of the global, random generator) */

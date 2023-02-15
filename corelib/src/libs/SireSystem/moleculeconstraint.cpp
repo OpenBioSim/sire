@@ -34,7 +34,7 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QDebug>
 

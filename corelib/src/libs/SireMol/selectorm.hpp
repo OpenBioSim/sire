@@ -1212,8 +1212,6 @@ namespace SireMol
     {
         QList<qint64> matches;
 
-        qint64 start = 0;
-
         for (const auto &view : views)
         {
             const auto m = this->find(view);
@@ -2367,6 +2365,16 @@ namespace SireMol
 } // end of namespace SireMol
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
+
+#ifdef SIRE_INSTANTIATE_TEMPLATES
+
+template class SireMol::SelectorM<SireMol::Atom>;
+template class SireMol::SelectorM<SireMol::Residue>;
+template class SireMol::SelectorM<SireMol::Chain>;
+template class SireMol::SelectorM<SireMol::Segment>;
+template class SireMol::SelectorM<SireMol::CutGroup>;
+
+#endif // SIRE_INSTANTIATE_TEMPLATES
 
 SIRE_END_HEADER
 

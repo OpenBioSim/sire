@@ -576,7 +576,7 @@ void MemoryMonitor::run()
 
 Q_GLOBAL_STATIC(QMutex, memMonitorMutex);
 
-static boost::shared_ptr<MemoryMonitor> monitor;
+static std::shared_ptr<MemoryMonitor> monitor;
 
 /** Start a monitor that prints the memory usage of the program
     out to the screen every 'ms' milliseconds */

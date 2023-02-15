@@ -32,8 +32,8 @@
 
 #include "SireError/exception.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
+#include <memory>
 
 #include <QByteArray>
 #include <QDataStream>
@@ -167,10 +167,10 @@ namespace SireCluster
             void shutdown();
 
         private:
-            Reply(const boost::shared_ptr<detail::ReplyPvt> &ptr);
+            Reply(const std::shared_ptr<detail::ReplyPvt> &ptr);
 
             /** Private implementation of this object */
-            boost::shared_ptr<detail::ReplyPvt> d;
+            std::shared_ptr<detail::ReplyPvt> d;
         };
 
         /** This is a weak pointer to a Reply */
@@ -194,7 +194,7 @@ namespace SireCluster
 
         private:
             /** The weak pointer itself */
-            boost::weak_ptr<detail::ReplyPvt> d;
+            std::weak_ptr<detail::ReplyPvt> d;
         };
 
     } // end of namespace MPI

@@ -39,11 +39,11 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
 
-    using SireUnits::Dimension::Force;
+  using SireUnits::Dimension::Force;
 
-    typedef SireMaths::Vector3D<Force> Force3D;
+  typedef SireMaths::Vector3D<Force> Force3D;
 
-    typedef AtomProperty<Force3D> AtomForces;
+  typedef AtomProperty<Force3D> AtomForces;
 
 } // namespace SireMol
 

@@ -1,7 +1,12 @@
 #ifndef SIREBASE_CONVERT_PROPERTY_HPP
 #define SIREBASE_CONVERT_PROPERTY_HPP
 
+// boost/type_traits depends on a depracated function
+// Disabling the warning so it doesn't pollute our build log
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-builtins"
 #include <boost/type_traits.hpp>
+#pragma clang diagnostic pop
 
 #include "generalunitproperty.h"
 #include "property.h"

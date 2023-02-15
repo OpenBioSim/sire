@@ -39,7 +39,7 @@
 
 #include <QMutex>
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include <QDebug>
 
@@ -48,8 +48,8 @@
 using namespace SireStream;
 using namespace SireStream::detail;
 
-using boost::shared_ptr;
-using boost::weak_ptr;
+using std::shared_ptr;
+using std::weak_ptr;
 
 ////////
 //////// Implementation of SharedDataRegistry

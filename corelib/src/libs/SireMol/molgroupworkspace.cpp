@@ -161,7 +161,7 @@ namespace SireMol
     } // namespace detail
 } // namespace SireMol
 
-typedef QVarLengthArray<boost::shared_ptr<SireMol::detail::MolGroupWorkspaceData>, 32> MolGroupWorkspaceCache;
+typedef QVarLengthArray<std::shared_ptr<SireMol::detail::MolGroupWorkspaceData>, 32> MolGroupWorkspaceCache;
 
 static QThreadStorage<MolGroupWorkspaceCache *> cache;
 
@@ -226,7 +226,7 @@ void MolGroupWorkspace::detach()
     {
         if (not d.unique())
         {
-            boost::shared_ptr<detail::MolGroupWorkspaceData> d2 = d;
+            std::shared_ptr<detail::MolGroupWorkspaceData> d2 = d;
 
             d.reset();
             createFromMemoryPool();

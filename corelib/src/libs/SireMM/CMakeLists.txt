@@ -45,6 +45,7 @@ set ( SIREMM_HEADERS
       dihedralrestraint.h
       distancerestraint.h
       errors.h
+      excludedpairs.h
       fouratomfunctions.h
       gridff.h
       gridff2.h
@@ -132,6 +133,7 @@ set ( SIREMM_SOURCES
       dihedralrestraint.cpp
       distancerestraint.cpp
       errors.cpp
+      excludedpairs.cpp
       fouratomfunctions.cpp
       gridff.cpp
       gridff2.cpp

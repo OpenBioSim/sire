@@ -17,7 +17,7 @@
 #include <QDebug>
 
 using boost::tuple;
-using boost::shared_ptr;
+using std::shared_ptr;
 
 using namespace SireMol;
 using namespace SireBase;
@@ -35,23 +35,23 @@ int main(int argc, const char **argv)
 
         qDebug() << "Loading a number...";
 
-        VariantProperty new_v = loadType<VariantProperty>(data);      
+        VariantProperty new_v = loadType<VariantProperty>(data);
 
         qDebug() << new_v.value<int>();
         qDebug() << new_v.toInt();
 
         qDebug() << "Done!";
-        
+
         Molecule mol;
-        
+
         qDebug() << "Saving a molecule...";
-        
+
         data = save(mol);
-        
+
         qDebug() << "Loading a molecule...";
-        
+
         Molecule new_mol = loadType<Molecule>(data);
-        
+
         qDebug() << "Done!";
     }
     catch(const SireError::exception &e)

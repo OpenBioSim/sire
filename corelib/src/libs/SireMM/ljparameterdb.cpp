@@ -92,7 +92,7 @@ LJDBIOLock::LJDBIOLock()
 {
 }
 
-LJDBIOLock::LJDBIOLock(const boost::shared_ptr<LJDBIOLockData> &ptr) : d(ptr)
+LJDBIOLock::LJDBIOLock(const std::shared_ptr<LJDBIOLockData> &ptr) : d(ptr)
 {
 }
 
@@ -115,7 +115,7 @@ LJDBIOLock LJParameterDB::saveParameters(SireStream::SharedDataStream &sds)
         sds << ljdb.ljparams_by_idx;
     }
 
-    return LJDBIOLock(boost::shared_ptr<detail::LJDBIOLockData>(new detail::LJDBIOLockData()));
+    return LJDBIOLock(std::shared_ptr<detail::LJDBIOLockData>(new detail::LJDBIOLockData()));
 }
 
 /** Load the LJParameter database from the datastream */
@@ -136,7 +136,7 @@ LJDBIOLock LJParameterDB::loadParameters(SireStream::SharedDataStream &sds)
         ljdb.unlock();
     }
 
-    return LJDBIOLock(boost::shared_ptr<detail::LJDBIOLockData>(new detail::LJDBIOLockData()));
+    return LJDBIOLock(std::shared_ptr<detail::LJDBIOLockData>(new detail::LJDBIOLockData()));
 }
 
 void LJParameterDB::finishedIO()

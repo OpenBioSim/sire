@@ -46,7 +46,7 @@ SireMM::GridFF __copy__(const SireMM::GridFF &other){ return SireMM::GridFF(othe
 void register_GridFF_class(){
 
     { //::SireMM::GridFF
-        typedef bp::class_< SireMM::GridFF, bp::bases< SireFF::Inter2B2G3DFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >, SireFF::FF3D, SireFF::Inter2B2GFF<SireMM::CLJPotentialInterface<SireMM::InterCLJPotential> >, SireMM::CLJPotentialInterface<SireMM::InterCLJPotential>, SireFF::G2FF, SireFF::FF, SireMol::MolGroupsBase, SireBase::Property > > GridFF_exposer_t;
+        typedef bp::class_< SireMM::GridFF, bp::bases< SireFF::FF3D, SireMM::CLJPotentialInterface<SireMM::InterCLJPotential>, SireFF::G2FF, SireFF::FF, SireMol::MolGroupsBase, SireBase::Property > > GridFF_exposer_t;
         GridFF_exposer_t GridFF_exposer = GridFF_exposer_t( "GridFF", "This class calculates the coulomb and LJ energy between\nall molecules in group 1 and all molecules in group 2.\nThe calculation is optimised, as the molecules in group 2\nare represented using a grid. This is ideal for situations\nwhere the molecules on group 2 move little, or not at all.\n\nAuthor: Christopher Woods\n", bp::init< >("Empty constructor") );
         bp::scope GridFF_scope( GridFF_exposer );
         GridFF_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "Construct a grid forcefield with a specified name") );

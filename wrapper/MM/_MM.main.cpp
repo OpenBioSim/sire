@@ -159,6 +159,8 @@
 
 #include "DoubleDistanceRestraint.pypp.hpp"
 
+#include "ExcludedPairs.pypp.hpp"
+
 #include "FourAtomFunction.pypp.hpp"
 
 #include "FourAtomFunctions.pypp.hpp"
@@ -657,6 +659,8 @@ BOOST_PYTHON_MODULE(_MM){
     register_DistanceRestraint_class();
 
     register_DoubleDistanceRestraint_class();
+
+    register_ExcludedPairs_class();
 
     register_FourAtomFunction_class();
 

@@ -91,6 +91,7 @@ from ._cursor import Cursor, Cursors, CursorsM
 from ._trajectory import TrajectoryIterator
 from ._element import Element
 from ._view import view as _viewfunc
+from ._smiles import _to_smiles, _view2d
 
 # make sure that Vector has units attached
 from ..maths import Vector as _Vector
@@ -1394,6 +1395,8 @@ SelectorM_Segment_.energies = _energies
 SelectorM_CutGroup_.energies = _energies
 
 MoleculeView.view = _viewfunc
+MoleculeView.smiles = _to_smiles
+MoleculeView.view2d = _view2d
 SelectorMol.view = _viewfunc
 Selector_Atom_.view = _viewfunc
 Selector_Residue_.view = _viewfunc

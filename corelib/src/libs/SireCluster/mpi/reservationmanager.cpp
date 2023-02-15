@@ -49,7 +49,7 @@ using namespace SireCluster;
 using namespace SireCluster::MPI;
 using namespace SireCluster::MPI::Messages;
 
-using boost::shared_ptr;
+using std::shared_ptr;
 using boost::tuple;
 
 Q_GLOBAL_STATIC(ReservationManager, reservationManager);

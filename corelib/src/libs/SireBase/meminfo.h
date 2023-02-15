@@ -30,7 +30,7 @@
 
 #include "sireglobal.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -80,7 +80,7 @@ namespace SireBase
 
     private:
         /** PIMPL pointer */
-        boost::shared_ptr<detail::MemInfoPvt> d;
+        std::shared_ptr<detail::MemInfoPvt> d;
     };
 
 } // namespace SireBase

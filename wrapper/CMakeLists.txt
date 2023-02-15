@@ -75,6 +75,10 @@ set( SIRE_INCLUDE_DIR "${SIRE_APP}/include/Sire" )
 set( CONDA_INCLUDE_DIR "${ANACONDA_BASE}/include" )
 message( STATUS "Using CONDA_INCLUDE_DIR = ${CONDA_INCLUDE_DIR}" )
 
+# likely need to "if (WINDOWS)" this as the path is different there
+set( CONDA_LIBRARY_DIR "${ANACONDA_BASE}/lib" )
+message( STATUS "Using CONDA_LIBRARY_DIR = ${CONDA_LIBRARY_DIR}" )
+
 set ( SIRE_COMP_CMAKE "${SIRE_INCLUDE_DIR}/cmake/SireCompileVariables.cmake" )
 
 # Look for the "SireCompileVariables.cmake" file in the install directory
@@ -448,6 +452,7 @@ add_subdirectory (Squire)
 add_subdirectory (System)
 add_subdirectory (Units)
 add_subdirectory (Vol)
+add_subdirectory (Convert)
 
 # also compile Sire's python executable
 add_subdirectory (python)

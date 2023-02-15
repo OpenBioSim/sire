@@ -307,11 +307,7 @@ void RestraintFF::updateRestraints(const MoleculeData &moldata)
     }
     else
     {
-#ifdef BOOST_NO_CXX11_SMART_PTR
-        std::auto_ptr<RestraintFF> old_state(this->clone());
-#else
         std::unique_ptr<RestraintFF> old_state(this->clone());
-#endif
 
         try
         {
@@ -380,11 +376,7 @@ void RestraintFF::updateRestraints(const Molecules &molecules)
     }
     else
     {
-#ifdef BOOST_NO_CXX11_SMART_PTR
-        std::auto_ptr<RestraintFF> old_state(this->clone());
-#else
         std::unique_ptr<RestraintFF> old_state(this->clone());
-#endif
 
         try
         {
@@ -803,12 +795,7 @@ bool RestraintFF::add(const Restraint3D &restraint)
     // now see if we have this restraint already?
     if (not this->contains(new_restraint))
     {
-// we don't - add the new restraint
-#ifdef BOOST_NO_CXX11_SMART_PTR
-        std::auto_ptr<RestraintFF> old_state(this->clone());
-#else
         std::unique_ptr<RestraintFF> old_state(this->clone());
-#endif
 
         try
         {
@@ -862,11 +849,7 @@ void RestraintFF::removeRestraintAt(int i)
 {
     i = Index(i).map(this->nRestraints());
 
-#ifdef BOOST_NO_CXX11_SMART_PTR
-    std::auto_ptr<RestraintFF> old_state(this->clone());
-#else
     std::unique_ptr<RestraintFF> old_state(this->clone());
-#endif
 
     try
     {

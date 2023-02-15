@@ -29,6 +29,7 @@
 #define SIREMM_CLJFUNCTION_H
 
 #include "cljatoms.h"
+#include "excludedpairs.h"
 
 #include "SireMol/atomidx.h"
 #include "SireMol/connectivity.h"
@@ -451,7 +452,11 @@ namespace SireMM
         void setConnectivity(const Connectivity &connectivity);
         void setConnectivity(const MoleculeView &molecule, const PropertyMap &map = PropertyMap());
 
+        void setExcludedPairs(const ExcludedPairs &excluded_pairs);
+        void setExcludedPairs(const MoleculeView &molecule, const PropertyMap &map = PropertyMap());
+
         const Connectivity &connectivity() const;
+        const ExcludedPairs &excludedPairs() const;
 
     protected:
         CLJIntraFunction &operator=(const CLJIntraFunction &other);
@@ -462,6 +467,8 @@ namespace SireMM
         bool isNotBonded(const MultiInt &id0, const MultiInt &id1) const;
         bool isNotBonded(const QVector<MultiInt> &ids0, const QVector<MultiInt> &ids1) const;
 
+        void regenerateBondMatrix();
+
         const QVector<QVector<bool>> &bondMatrix() const;
 
     private:
@@ -471,6 +478,9 @@ namespace SireMM
 
         /** The connectivity used to obtain the bonded matrix */
         Connectivity cty;
+
+        /** The excluded pairs used to obtain the bonded matrix */
+        ExcludedPairs excl_pairs;
 
         /** The matrix of which atoms are bonded, angled or dihedraled together
             (and so should be excluded from the non-bonded calculation) */

@@ -166,17 +166,17 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, MoleculeData &moldata)
     return ds;
 }
 
-QHash<MolNum, boost::weak_ptr<MoleculeData::PropVersions>> MoleculeData::version_registry;
+QHash<MolNum, std::weak_ptr<MoleculeData::PropVersions>> MoleculeData::version_registry;
 
 QMutex MoleculeData::version_registry_mutex;
 
 /** Return the version object that is used to get version numbers
     for the molecule with ID number 'molnum' */
-boost::shared_ptr<MoleculeData::PropVersions> MoleculeData::registerMolecule(MolNum molnum)
+std::shared_ptr<MoleculeData::PropVersions> MoleculeData::registerMolecule(MolNum molnum)
 {
     QMutexLocker lkr(&version_registry_mutex);
 
-    boost::shared_ptr<PropVersions> vrsns = version_registry[molnum].lock();
+    std::shared_ptr<PropVersions> vrsns = version_registry[molnum].lock();
 
     if (not vrsns)
     {
@@ -190,7 +190,7 @@ boost::shared_ptr<MoleculeData::PropVersions> MoleculeData::registerMolecule(Mol
             // up memory, and also may prevent the next malloc of the
             // hash (as the test is based on the remaining capacity
             // of the hash)
-            QMutableHashIterator<MolNum, boost::weak_ptr<PropVersions>> it(version_registry);
+            QMutableHashIterator<MolNum, std::weak_ptr<PropVersions>> it(version_registry);
 
             while (it.hasNext())
             {

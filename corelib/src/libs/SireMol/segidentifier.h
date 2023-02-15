@@ -30,7 +30,7 @@
 
 #include "segid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireMol
 {
@@ -92,7 +92,7 @@ namespace SireMol
 
     private:
         /** Pointer to the SegID */
-        boost::shared_ptr<SegID> d;
+        std::shared_ptr<SegID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const SegIdentifier &segid)
@@ -104,6 +104,15 @@ namespace SireMol
 
 #include "atomidx.h"
 #include "segidx.h"
+
+#ifdef SIRE_INSTANTIATE_TEMPLATES
+template class SireID::Specify<SireMol::SegID>;
+template class SireMol::AtomsIn<SireMol::SegID>;
+template class SireID::IDAndSet<SireMol::SegID>;
+template class SireID::IDOrSet<SireMol::SegID>;
+template class SireID::MatchAll<SireMol::SegID>;
+template class SireID::InvertMatch<SireMol::SegID>;
+#endif
 
 Q_DECLARE_METATYPE(SireID::Specify<SireMol::SegID>);
 Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::SegID>);

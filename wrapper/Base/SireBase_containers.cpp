@@ -310,7 +310,7 @@ void register_PropertyList()
 
 void register_SireBase_containers()
 {
-    register_list< QList< boost::shared_ptr<UnitTest> > >();
+    register_list< QList< std::shared_ptr<UnitTest> > >();
     register_list< QList< PropertyPtr > >();
 
     register_PropertyList();

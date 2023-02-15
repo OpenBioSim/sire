@@ -12,6 +12,7 @@ from ._load import (
     tutorial_url,
     load_test_files,
     supported_formats,
+    smiles,
 )
 
 from ._thumbsup import thumbs_up, get_thumbs_up_info, disable_thumbs_up
@@ -33,6 +34,7 @@ __all__ = [
     "save",
     "save_to_string",
     "segid",
+    "smiles",
     "supported_formats",
     "thumbs_up",
     "tutorial_url",
@@ -43,7 +45,7 @@ __all__ = [
 
 
 # filter out annoying double-wrapped warnings
-_warnings.filterwarnings('ignore', "to-Python converter for")
+_warnings.filterwarnings("ignore", "to-Python converter for")
 
 
 def _fix_openmm_path():
@@ -629,6 +631,7 @@ if _can_lazy_import:
     analysis = _lazy_import.lazy_module("sire.analysis")
     base = _lazy_import.lazy_module("sire.base")
     cas = _lazy_import.lazy_module("sire.cas")
+    convert = _lazy_import.lazy_module("sire.convert")
     cluster = _lazy_import.lazy_module("sire.cluster")
     error = _lazy_import.lazy_module("sire.error")
     ff = _lazy_import.lazy_module("sire.ff")

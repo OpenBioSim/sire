@@ -34,7 +34,7 @@
 
 #include "SireMol/molecules.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -70,7 +70,7 @@ namespace SireMM
         CLJBoxes cljboxes0;
         CLJBoxes cljboxes1;
 
-        boost::shared_ptr<CLJFunction> cljfunc;
+        std::shared_ptr<CLJFunction> cljfunc;
     };
 
 } // namespace SireMM

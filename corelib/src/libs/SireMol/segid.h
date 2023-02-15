@@ -189,15 +189,6 @@ SIRE_EXPOSE_ALIAS(SireID::IDOrSet<SireMol::SegID>, SireMol::IDOrSet_SegID_)
 SIRE_EXPOSE_ALIAS(SireID::MatchAll<SireMol::SegID>, SireMol::MatchAll_SegID_)
 SIRE_EXPOSE_ALIAS(SireID::InvertMatch<SireMol::SegID>, SireMol::InvertMatch_SegID_)
 
-#ifdef SIRE_INSTANTIATE_TEMPLATES
-template class SireID::Specify<SireMol::SegID>;
-template class SireMol::AtomsIn<SireMol::SegID>;
-template class SireID::IDAndSet<SireMol::SegID>;
-template class SireID::IDOrSet<SireMol::SegID>;
-template class SireID::MatchAll<SireMol::SegID>;
-template class SireID::InvertMatch<SireMol::SegID>;
-#endif
-
 SIRE_END_HEADER
 
 #endif

@@ -463,7 +463,7 @@ namespace SireMol
             AtomBeads atom_beads;
 
             /** The actual database of beading infos */
-            QHash<QUuid, boost::shared_ptr<UserBeadingInfo>> reg;
+            QHash<QUuid, std::shared_ptr<UserBeadingInfo>> reg;
 
             /** Lock to protect access to the database */
             QMutex datamutex;
@@ -503,7 +503,7 @@ const UserBeadingInfo &UserBeadingInfoRegistry::getInfoFor(const MoleculeInfoDat
     {
         lkr.unlock();
 
-        boost::shared_ptr<UserBeadingInfo> info(new UserBeadingInfo(atom_beads, moldata));
+        std::shared_ptr<UserBeadingInfo> info(new UserBeadingInfo(atom_beads, moldata));
 
         lkr.relock();
 

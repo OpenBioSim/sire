@@ -1,6 +1,7 @@
-__all__ = ["try_import", "try_import_from"]
+__all__ = ["try_import", "try_import_from", "assert_imported", "have_imported"]
 
 _module_to_package = {}
+_failed_modules = {}
 
 
 def _find_conda():
@@ -95,15 +96,38 @@ def _install_package(name, package_registry):
     )
 
 
+class _ModuleStub:
+    def __init__(self, name: str, install_command: str = None):
+        self._name = name
+
+        if install_command is None:
+            self._install_command = f"mamba install {name}"
+        else:
+            self._install_command = install_command
+
+    def __repr__(self):
+        return f"<stubmodule '{self._name}' from /could/not/be/imported>"
+
+    def __getattr__(self, key):
+        message = (
+            f"Cannot continue as the module '{self._name}' "
+            "has not been installed. To continue, you "
+            "should install the module using the command "
+            f"'{self._install_command}'."
+        )
+
+        raise ModuleNotFoundError(message)
+
+
 def try_import(name, package_registry=_module_to_package):
-    """Try to import the module called 'name', returning
+    """
+    Try to import the module called 'name', returning
     the loaded module as an argument. If the module
     is not available, then it looks up the name of
     the package to install using "package_registry"
     (or if this is not available, using just the name
     of the module). This will then be installed using
-    "conda", then "pip" then "easy_install" (first one
-    that works will return).
+    "mamba", then "conda" (first one that works will return).
 
     For example, use this via
 
@@ -118,19 +142,30 @@ def try_import(name, package_registry=_module_to_package):
     want only specific symbols, e.g.
 
     (argv, stdout) = try_import_from("sys", ["argv","stdout"])
+
+    This will return a _ModuleStub if this package cannot
+    be imported. The _ModuleStub will raise a ModuleNotFoundError
+    if any functonality from the module is used.
     """
+
+    if name in _failed_modules:
+        return _ModuleStub(name)
+
+    error_string = None
 
     try:
         mod = __import__(name)
         return mod
-    except Exception:
-        pass
+    except Exception as e:
+        error_string = str(e)
 
     if not (package_registry is None):
         _install_package(name, package_registry)
         return try_import(name, package_registry=None)
 
-    raise ImportError("Failed to install module %s" % name)
+    _failed_modules[name] = error_string
+
+    return _ModuleStub(name)
 
 
 def try_import_from(name, fromlist, package_registry=_module_to_package):
@@ -178,7 +213,8 @@ def try_import_from(name, fromlist, package_registry=_module_to_package):
             _install_package(name, package_registry)
             return try_import_from(name, fromlist, package_registry=None)
         else:
-            raise ImportError("Failed to install module '%s'" % name)
+            m = " ".join(fromlist)
+            return _ModuleStub(name, f"mamba install {m}")
 
     if nsyms == 1:
         try:
@@ -205,3 +241,21 @@ def try_import_from(name, fromlist, package_registry=_module_to_package):
             )
 
         return ret
+
+
+def assert_imported(module):
+    """
+    Assert that the passed module has indeed been imported.
+    This will raise a ModuleNotFoundError if the module
+    has not been imported, and has instead been stubbed.
+    """
+    if type(module) == _ModuleStub:
+        module.this_will_break()
+
+
+def have_imported(module) -> bool:
+    """
+    Return whether or not the passed module has indeed
+    been imported (and thus is not stubbed).
+    """
+    return type(module) != _ModuleStub

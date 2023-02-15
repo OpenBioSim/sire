@@ -30,7 +30,7 @@
 
 #include "mgid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireMol
 {
@@ -93,7 +93,7 @@ namespace SireMol
 
     private:
         /** Pointer to the MGID */
-        boost::shared_ptr<MGID> d;
+        std::shared_ptr<MGID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const MGIdentifier &mgid)

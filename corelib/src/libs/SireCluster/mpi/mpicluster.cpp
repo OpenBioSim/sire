@@ -56,7 +56,7 @@
 using namespace SireCluster;
 using namespace SireCluster::MPI;
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 #ifndef HAVE_LSEEK64
 //////

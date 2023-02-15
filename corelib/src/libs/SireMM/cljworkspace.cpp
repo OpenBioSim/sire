@@ -507,7 +507,7 @@ QDataStream &operator>>(QDataStream &ds, CLJWorkspace &ws)
     return ds;
 }
 
-typedef QVarLengthArray<boost::shared_ptr<SireMM::detail::CLJWorkspaceData>, 32> CLJWorkspaceCache;
+typedef QVarLengthArray<std::shared_ptr<SireMM::detail::CLJWorkspaceData>, 32> CLJWorkspaceCache;
 static QThreadStorage<CLJWorkspaceCache *> cache;
 
 /** Call this to return the memory allocated in this object back to the memory pool */
@@ -696,7 +696,7 @@ void CLJWorkspace::detach()
     {
         if (not d.unique())
         {
-            boost::shared_ptr<detail::CLJWorkspaceData> d2 = d;
+            std::shared_ptr<detail::CLJWorkspaceData> d2 = d;
             d.reset();
             createFromMemoryPool();
 

@@ -368,7 +368,7 @@ bool Regress::GetEstimate(
             y += (pow(x, static_cast<double>(i)) * factor[i]);
         } // substitute the given value and calculate the estimate
 
-        sprintf(buffer, "%.4f, %.8f", x, y);
+        snprintf(buffer, 80, "%.4f, %.8f", x, y);
         ofs << buffer << endl;
         y = 0.0;
         x += step;

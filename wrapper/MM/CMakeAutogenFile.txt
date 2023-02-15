@@ -76,6 +76,7 @@ set ( PYPP_SOURCES
        DihedralSymbols.pypp.cpp
        DistanceRestraint.pypp.cpp
        DoubleDistanceRestraint.pypp.cpp
+       ExcludedPairs.pypp.cpp
        FourAtomFunction.pypp.cpp
        FourAtomFunctions.pypp.cpp
        FourAtomPerturbation.pypp.cpp

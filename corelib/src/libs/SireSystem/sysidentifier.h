@@ -30,7 +30,7 @@
 
 #include "sysid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireSystem
 {
@@ -93,7 +93,7 @@ namespace SireSystem
 
     private:
         /** Pointer to the SysID */
-        boost::shared_ptr<SysID> d;
+        std::shared_ptr<SysID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const SysIdentifier &sysid)

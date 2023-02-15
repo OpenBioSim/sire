@@ -21,7 +21,7 @@ namespace bp = boost::python;
 
 #include <QDebug>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "moleculeconstraint.h"
 
@@ -38,16 +38,16 @@ void register_MoleculeConstraint_class(){
         MoleculeConstraint_exposer_t MoleculeConstraint_exposer = MoleculeConstraint_exposer_t( "MoleculeConstraint", "This is the base class of all Molecule constraints. These\nare constraints that affect molecules in a system. A molecule\nconstraint works by being updated by a system and returning\nthe molecules that must then be changed to maintain the\nconstraint\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope MoleculeConstraint_scope( MoleculeConstraint_exposer );
         { //::SireSystem::MoleculeConstraint::typeName
-        
+
             typedef char const * ( *typeName_function_type )(  );
             typeName_function_type typeName_function_value( &::SireSystem::MoleculeConstraint::typeName );
-            
-            MoleculeConstraint_exposer.def( 
+
+            MoleculeConstraint_exposer.def(
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
-        
+
         }
         MoleculeConstraint_exposer.staticmethod( "typeName" );
         MoleculeConstraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::MoleculeConstraint >,

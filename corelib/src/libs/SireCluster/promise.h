@@ -95,7 +95,7 @@ namespace SireCluster
         Promise(const Node &node, const WorkPacket &initial_workpacket);
 
         /** Pointer to the private implementation */
-        boost::shared_ptr<detail::PromisePvt> d;
+        std::shared_ptr<detail::PromisePvt> d;
     };
 
 } // namespace SireCluster

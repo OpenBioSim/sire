@@ -9,6 +9,7 @@ __all__ = [
     "tutorial_url",
     "load_test_files",
     "supported_formats",
+    "smiles",
 ]
 
 
@@ -570,3 +571,97 @@ def load_test_files(files: _Union[_List[str], str], *args):
 
     files = expand(tutorial_url, files, suffix=".bz2")
     return load(files, directory=cache_dir, silent=True)
+
+
+def smiles(
+    smiles_string: str,
+    add_hydrogens: bool = True,
+    generate_coordinates: bool = True,
+    map=None,
+):
+    """
+    Return a molecule that has been generated using the passed
+    smiles string. This uses rdkit to create the molecule,
+    so it must be installed.
+
+    Args:
+        smiles_string: str
+            The smiles string to interpret
+        add_hydrogens: bool (default True)
+            Whether or not to automatically add hydrogens
+        generate_coordinates: bool (default True)
+            Whether or not to automatically generate 3D coordinates.
+            Note that generating the coordinates will automatically
+            switch on addition of hydrogens
+        map:
+            Property map if you want to put the molecule properties
+            into different places
+
+    Returns: sire.mol.Molecule
+        The actual molecule
+    """
+    try:
+        from rdkit import Chem
+        from rdkit.Chem import AllChem
+    except Exception:
+        raise ModuleNotFoundError(
+            "Could not generate a molecule from a smiles string because "
+            "rdkit could not be loaded. Please install rdkit, e.g. "
+            "by running 'mamba install -c conda-forge rdkit'"
+        )
+
+    if hasattr(smiles_string, "to_csv"):
+        # convert to tsv from a dataframe
+        smiles_col = "smiles"
+        name_col = "name"
+        smiles_string = smiles_string[[smiles_col, name_col]].to_csv(sep="\t")
+
+    elif type(smiles_string) is not list:
+        smiles_string = [smiles_string]
+
+    if type(smiles_string) is list:
+        # now convert the list to a tsv string so this can be parsed
+        # by the supplier
+        smiles_string = "\n".join([f"{x}\t{x}" for x in smiles_string])
+
+    supplier = Chem.SmilesMolSupplierFromText(
+        text=smiles_string,
+        delimiter="\t",
+        smilesColumn=0,
+        nameColumn=1,
+        titleLine=False,
+        sanitize=True,
+    )
+
+    mols = []
+
+    for mol in supplier:
+        if mol is None:
+            raise SyntaxError(
+                f"Failed to generate from smiles string\n{smiles_string}\n. "
+                "Please check that this is valid and try again."
+            )
+
+        if add_hydrogens or generate_coordinates:
+            try:
+                mol = Chem.AddHs(mol)
+            except Exception as e:
+                from .utils import Console
+
+                Console.warning(f"Could not add hydrogens: {e}")
+                generate_coordinates = False
+
+        if generate_coordinates:
+            try:
+                AllChem.EmbedMolecule(mol)
+                AllChem.UFFOptimizeMolecule(mol)
+            except Exception as e:
+                from .utils import Console
+
+                Console.warning(f"Could not generate coordinates: {e}")
+
+        mols.append(mol)
+
+    from .convert import rdkit_to_sire
+
+    return rdkit_to_sire(mols)

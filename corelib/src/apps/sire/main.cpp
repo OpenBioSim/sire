@@ -210,7 +210,7 @@ void testLoad(const QString &filename)
     }
 
     // unpack the binary data
-    QList<boost::tuple<boost::shared_ptr<void>, QString>> objects = SireStream::load(restart_data);
+    QList<boost::tuple<std::shared_ptr<void>, QString>> objects = SireStream::load(restart_data);
 
     for (int i = 0; i < objects.count(); ++i)
     {
@@ -264,7 +264,7 @@ WorkPacket createWorkPacket(const QString &filename, int nmoves, bool record_sta
     printOut(QObject::tr("Unpacking the data..."));
 
     // unpack the binary data
-    QList<boost::tuple<boost::shared_ptr<void>, QString>> objects = SireStream::load(restart_data);
+    QList<boost::tuple<std::shared_ptr<void>, QString>> objects = SireStream::load(restart_data);
 
     printOut(QObject::tr("Number of loaded objects equals %1").arg(objects.count()));
 

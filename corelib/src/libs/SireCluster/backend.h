@@ -30,7 +30,7 @@
 
 #include "sireglobal.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QUuid>
 
@@ -90,7 +90,7 @@ namespace SireCluster
 
     private:
         /** Private implementation */
-        boost::shared_ptr<detail::BackendPvt> d;
+        std::shared_ptr<detail::BackendPvt> d;
     };
 
     /** This is an active backend - this is what is held and
@@ -137,11 +137,11 @@ namespace SireCluster
 
     private:
         /** Private implementation */
-        boost::shared_ptr<detail::BackendPvt> d;
+        std::shared_ptr<detail::BackendPvt> d;
 
         /** Holder that is used to keep the connection
             to the backend */
-        boost::shared_ptr<detail::BackendLock> d_lock;
+        std::shared_ptr<detail::BackendLock> d_lock;
     };
 
 } // namespace SireCluster

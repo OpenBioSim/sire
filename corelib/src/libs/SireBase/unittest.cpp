@@ -34,7 +34,7 @@
 
 using namespace SireBase;
 
-typedef QList<boost::shared_ptr<UnitTest>> TestRegistry;
+typedef QList<std::shared_ptr<UnitTest>> TestRegistry;
 
 Q_GLOBAL_STATIC(TestRegistry, getTestRegistry);
 Q_GLOBAL_STATIC(QMutex, getTestMutex);
@@ -61,7 +61,7 @@ UnitTest::UnitTest(const QString &name, void (*test_func)(bool))
     if (test_func != 0)
     {
         QMutexLocker lkr(getTestMutex());
-        getTestRegistry()->append(boost::shared_ptr<UnitTest>(new UnitTest(*this)));
+        getTestRegistry()->append(std::shared_ptr<UnitTest>(new UnitTest(*this)));
     }
 }
 
@@ -154,7 +154,7 @@ quint64 UnitTest::runTime()
 }
 
 /** Return all of the tests that have been registered */
-QList<boost::shared_ptr<UnitTest>> UnitTest::tests()
+QList<std::shared_ptr<UnitTest>> UnitTest::tests()
 {
     QMutexLocker lkr(getTestMutex());
     return *(getTestRegistry());
@@ -173,7 +173,7 @@ int UnitTest::runAll(bool verbose)
     const int n = getTestRegistry()->count();
     int nfailed = 0;
 
-    foreach (boost::shared_ptr<UnitTest> test, *(getTestRegistry()))
+    foreach (std::shared_ptr<UnitTest> test, *(getTestRegistry()))
     {
         cerr << QObject::tr("(%1/%2) %3 ").arg(i).arg(n).arg(test->name());
         cerr.flush();
@@ -207,7 +207,7 @@ int UnitTest::runAll(bool verbose)
     {
         cerr << QObject::tr("\n\nA number of tests (%1) failed!!!\n").arg(nfailed);
 
-        foreach (boost::shared_ptr<UnitTest> test, *(getTestRegistry()))
+        foreach (std::shared_ptr<UnitTest> test, *(getTestRegistry()))
         {
             if (test->wasError())
             {

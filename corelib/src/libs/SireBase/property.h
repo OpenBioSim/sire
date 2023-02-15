@@ -36,8 +36,6 @@
 #include <QDebug>
 #include <QVariant>
 
-#include <boost/throw_exception.hpp>
-
 SIRE_BEGIN_HEADER
 
 namespace SireUnits

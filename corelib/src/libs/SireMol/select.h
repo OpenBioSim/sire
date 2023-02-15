@@ -46,7 +46,7 @@
 
 #include "SireMol/errors.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QList>
 
@@ -115,8 +115,8 @@ namespace SireMol
 
         class SelectEngine;
 
-        using SelectEnginePtr = boost::shared_ptr<SelectEngine>;
-        using SelectEngineWeakPtr = boost::weak_ptr<SelectEngine>;
+        using SelectEnginePtr = std::shared_ptr<SelectEngine>;
+        using SelectEngineWeakPtr = std::weak_ptr<SelectEngine>;
 
         /** This is the base class of all of the select objects. It is a private
             object that should only be used by Select

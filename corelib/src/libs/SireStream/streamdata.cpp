@@ -62,7 +62,7 @@
 
 using namespace SireStream;
 
-using boost::shared_ptr;
+using std::shared_ptr;
 using boost::tuple;
 
 namespace SireStream
@@ -1119,12 +1119,7 @@ namespace SireStream
 
                 // version 1 of the format uses Qt 4.2 datastream format
                 ds2.setVersion(QDataStream::Qt_4_2);
-
-#ifdef BOOST_NO_CXX11_SMART_PTR
-                std::auto_ptr<SharedDataStream> sds;
-#else
                 std::unique_ptr<SharedDataStream> sds;
-#endif
 
                 if (nobjects > 1)
                     // create a shared data stream so that sub-objects in
@@ -1236,12 +1231,7 @@ namespace SireStream
 
                 // version 1 of the format uses Qt 4.2 datastream format
                 ds2.setVersion(QDataStream::Qt_4_2);
-
-#ifdef BOOST_NO_CXX11_SMART_PTR
-                std::auto_ptr<SharedDataStream> sds;
-#else
                 std::unique_ptr<SharedDataStream> sds;
-#endif
 
                 if (nobjects > 1)
                     // create a shared data stream so that sub-objects in
@@ -1457,12 +1447,7 @@ namespace SireStream
             ds2.setVersion(QDataStream::Qt_4_2);
 
             int nobjects = header.dataTypes().count();
-
-#ifdef BOOST_NO_CXX11_SMART_PTR
-            std::auto_ptr<SharedDataStream> sds;
-#else
             std::unique_ptr<SharedDataStream> sds;
-#endif
 
             if (nobjects > 1)
                 sds.reset(new SharedDataStream(ds2));

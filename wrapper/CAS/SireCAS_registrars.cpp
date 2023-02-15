@@ -3,7 +3,7 @@
 
 #include "SireCAS_registrars.h"
 
-#include "Helpers/version_error_impl.h"
+
 
 #include "abs.h"
 #include "complexvalues.h"

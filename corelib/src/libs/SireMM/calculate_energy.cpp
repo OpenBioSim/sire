@@ -59,6 +59,9 @@ using namespace SireUnits::Dimension;
 
 namespace SireMM
 {
+    // this (specific) value is the largest we can have on Windows
+    // to still calculate an energy. Anything higher gives and energy of 0...
+    const auto NO_CUTOFF = 347557 * angstrom;
 
     MMDetail get_mmdetail(const MoleculeView &mol, const PropertyMap &map)
     {
@@ -138,8 +141,13 @@ namespace SireMM
 
         internalff.add(mol, map);
 
+        auto cutoff_prop = map["cutoff"];
+
+        // this is a single molecule with an infinite space
+        // We should not have a cutoff. Can achieve this using
+        // a very large cutoff ;-)
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, 15 * angstrom));
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, NO_CUTOFF));
         intraff.add(mol, map);
 
         ffields.add(intraff);
@@ -152,6 +160,8 @@ namespace SireMM
     {
         if (mols.isEmpty())
             return ForceFields();
+        else if (mols.nMolecules() == 1)
+            return create_forcefield(mols.first(), map);
 
         const auto mm = get_mmdetail(*(mols.constBegin()), map);
 
@@ -181,23 +191,27 @@ namespace SireMM
 
         internalff.add(mols, map);
 
-        IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, 15 * angstrom));
-        intraff.add(mols, map);
-
         auto cutoff_prop = map["cutoff"];
 
-        auto cutoff = 7.5 * angstrom;
+        auto cutoff = NO_CUTOFF;
 
         if (cutoff_prop.hasValue())
         {
             cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
+        }
+        else if (space.read().isPeriodic())
+        {
+            cutoff = space.read().maximumCutoff();
         }
 
         InterFF interff("interff");
         interff.setCLJFunction(get_cljfunc<CLJShiftFunction>(mm, get_cutoff(*space, cutoff)));
         interff.setProperty("space", *space);
         interff.add(mols, map);
+
+        IntraFF intraff("intraff");
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, NO_CUTOFF));
+        intraff.add(mols, map);
 
         ffields.add(interff);
         ffields.add(intraff);
@@ -238,19 +252,13 @@ namespace SireMM
         SpacePtr space = Cartesian();
         bool has_property = false;
 
-        for (const auto &mol : mols0)
-        {
-            if (mol.data().hasProperty(space_property))
-            {
-                has_property = true;
-                space = mol.data().property(space_property).asA<Space>();
-                break;
-            }
-        }
+        bool has_single_mol = (mols0.nMolecules() == 1 and mols1.nMolecules() == 1) and
+                              mols0.molNums() == mols1.molNums();
 
-        if (not has_property)
+        if (not has_single_mol)
         {
-            for (const auto &mol : mols1)
+            // only care about the space if we have more than one molecule
+            for (const auto &mol : mols0)
             {
                 if (mol.data().hasProperty(space_property))
                 {
@@ -259,27 +267,48 @@ namespace SireMM
                     break;
                 }
             }
+
+            if (not has_property)
+            {
+                for (const auto &mol : mols1)
+                {
+                    if (mol.data().hasProperty(space_property))
+                    {
+                        has_property = true;
+                        space = mol.data().property(space_property).asA<Space>();
+                        break;
+                    }
+                }
+            }
         }
 
         ForceFields ffields;
 
         auto cutoff_prop = map["cutoff"];
 
-        auto cutoff = 7.5 * angstrom;
+        auto cutoff = NO_CUTOFF;
 
         if (cutoff_prop.hasValue())
         {
             cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
         }
+        else if (space.read().isPeriodic())
+        {
+            cutoff = space.read().maximumCutoff();
+        }
 
         InterGroupFF interff("interff");
-        interff.setCLJFunction(get_cljfunc<CLJShiftFunction>(mm0, get_cutoff(*space, cutoff)));
-        interff.setProperty("space", *space);
-        interff.add(mols0, MGIdx(0), map);
-        interff.add(mols1, MGIdx(1), map);
+
+        if (not has_single_mol)
+        {
+            interff.setCLJFunction(get_cljfunc<CLJShiftFunction>(mm0, get_cutoff(*space, cutoff)));
+            interff.setProperty("space", *space);
+            interff.add(mols0, MGIdx(0), map);
+            interff.add(mols1, MGIdx(1), map);
+        }
 
         IntraGroupFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm0, 15 * angstrom));
+        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm0, NO_CUTOFF));
         intraff.add(mols0, MGIdx(0), map);
         intraff.add(mols1, MGIdx(1), map);
 
@@ -294,7 +323,9 @@ namespace SireMM
         internalff.add(mols0, MGIdx(0), map);
         internalff.add(mols1, MGIdx(1), map);
 
-        ffields.add(interff);
+        if (not has_single_mol)
+            ffields.add(interff);
+
         ffields.add(intraff);
         ffields.add(internalff);
 

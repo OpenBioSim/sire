@@ -30,7 +30,7 @@
 
 #include "resid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireMol
 {
@@ -90,7 +90,7 @@ namespace SireMol
 
     private:
         /** Pointer to the ResID */
-        boost::shared_ptr<ResID> d;
+        std::shared_ptr<ResID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const ResIdentifier &resid)

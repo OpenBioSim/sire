@@ -32,7 +32,7 @@
 
 #include <QUuid>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -126,7 +126,7 @@ namespace SireCluster
 
     private:
         /** Private implementation of Node */
-        boost::shared_ptr<detail::NodePvt> d;
+        std::shared_ptr<detail::NodePvt> d;
     };
 
 } // namespace SireCluster

@@ -956,7 +956,14 @@ const ViewsOfMol &Molecules::last() const
     if (mols.isEmpty())
         throw SireError::invalid_index(QObject::tr("You cannot access the last molecule of an empty set!"), CODELOC);
 
-    return *(--(mols.constEnd()));
+    auto last_it = this->mols.constBegin();
+
+    for (auto it = this->mols.constBegin(); it != this->mols.constEnd(); ++it)
+    {
+        last_it = it;
+    }
+
+    return last_it.value();
 }
 
 /** STL compatible version of Molecules::first() */

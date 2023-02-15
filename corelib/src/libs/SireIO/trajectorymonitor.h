@@ -30,7 +30,7 @@
 
 #include <QList>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "SireSystem/systemmonitor.h"
 
@@ -115,7 +115,7 @@ namespace SireIO
         MGIdentifier mgid;
 
         /** Temporary files containing each frame of the animation */
-        QList<QPair<QString, boost::shared_ptr<QTemporaryFile>>> traj_frames;
+        QList<QPair<QString, std::shared_ptr<QTemporaryFile>>> traj_frames;
 
         /** The system space for each frame of the trajectory */
         QList<SireVol::SpacePtr> space_frames;

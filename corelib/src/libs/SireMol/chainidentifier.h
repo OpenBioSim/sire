@@ -30,7 +30,7 @@
 
 #include "chainid.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace SireMol
 {
@@ -92,7 +92,7 @@ namespace SireMol
 
     private:
         /** Pointer to the ChainID */
-        boost::shared_ptr<ChainID> d;
+        std::shared_ptr<ChainID> d;
     };
 
     SIRE_ALWAYS_INLINE uint qHash(const ChainIdentifier &chainid)
@@ -105,6 +105,16 @@ namespace SireMol
 #include "atomidx.h"
 #include "chainidx.h"
 #include "residx.h"
+
+#ifdef SIRE_INSTANTIATE_TEMPLATES
+template class SireID::Specify<SireMol::ChainID>;
+template class SireMol::AtomsIn<SireMol::ChainID>;
+template class SireMol::ResIn<SireMol::ChainID>;
+template class SireID::IDAndSet<SireMol::ChainID>;
+template class SireID::IDOrSet<SireMol::ChainID>;
+template class SireID::MatchAll<SireMol::ChainID>;
+template class SireID::InvertMatch<SireMol::ChainID>;
+#endif
 
 Q_DECLARE_METATYPE(SireID::Specify<SireMol::ChainID>);
 Q_DECLARE_METATYPE(SireMol::AtomsIn<SireMol::ChainID>);

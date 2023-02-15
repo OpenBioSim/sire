@@ -45,7 +45,7 @@
 
 #include <QDebug>
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 using namespace SireIO;
 using namespace SireSystem;

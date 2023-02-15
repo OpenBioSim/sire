@@ -123,6 +123,18 @@ void register_InternalParameters3D_class(){
                 , "Return the number of CutGroups in the molecule whose parameters are\ncontained in this object" );
         
         }
+        { //::SireMM::InternalParameters3D::nGroups
+        
+            typedef int ( ::SireMM::InternalParameters3D::*nGroups_function_type)(  ) const;
+            nGroups_function_type nGroups_function_value( &::SireMM::InternalParameters3D::nGroups );
+            
+            InternalParameters3D_exposer.def( 
+                "nGroups"
+                , nGroups_function_value
+                , bp::release_gil_policy()
+                , "Return the number of CutGroup in the molecule whose parameters are\ncontained in this object. Synonym as this is used by FFMolecule\n" );
+        
+        }
         InternalParameters3D_exposer.def( bp::self != bp::self );
         { //::SireMM::InternalParameters3D::operator=
         

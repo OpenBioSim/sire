@@ -31,6 +31,7 @@
 #include "dihedral.h"
 #include "dihedralrestraint.h"
 #include "distancerestraint.h"
+#include "excludedpairs.h"
 #include "fouratomfunctions.h"
 #include "gridff.h"
 #include "gridff2.h"

@@ -1734,6 +1734,14 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberNBDihPart, qint64>> getD
         qint64 atom2 = 3 * (info.atomIdx(it.key().atom2()).value() + start_idx);
         qint64 atom3 = 3 * (info.atomIdx(it.key().atom3()).value() + start_idx);
 
+        if (atom2 == 0 or atom3 == 0)
+        {
+            // we can't record a negative zero, so we need to invert the
+            // indicies
+            std::swap(atom0, atom3);
+            std::swap(atom1, atom2);
+        }
+
         // is the dihedral marked as including hydrogen?
         if (it.value().second)
         {
@@ -3633,7 +3641,7 @@ QStringList AmberPrm::flags() const
 }
 
 template <class FUNC, class Exception>
-void live_test(FUNC function, QList<boost::shared_ptr<Exception>> &errors)
+void live_test(FUNC function, QList<std::shared_ptr<Exception>> &errors)
 {
     try
     {
@@ -3641,7 +3649,7 @@ void live_test(FUNC function, QList<boost::shared_ptr<Exception>> &errors)
     }
     catch (const Exception &e)
     {
-        errors.append(boost::shared_ptr<Exception>(e.clone()));
+        errors.append(std::shared_ptr<Exception>(e.clone()));
     }
 }
 
@@ -3650,7 +3658,7 @@ void live_test(FUNC function, QList<boost::shared_ptr<Exception>> &errors)
     then an exception will be thrown */
 void AmberPrm::assertSane() const
 {
-    QList<boost::shared_ptr<SireError::exception>> errors;
+    QList<std::shared_ptr<SireError::exception>> errors;
 
     int natoms = this->nAtoms();
 

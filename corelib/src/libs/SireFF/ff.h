@@ -30,7 +30,7 @@
 
 #include <QUuid>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "ffcomponent.h"
 #include "ffname.h"
@@ -333,7 +333,7 @@ namespace SireFF
 
         /** Pointer to the incremint used to increment the version for
             this forcefield */
-        boost::shared_ptr<SireBase::Incremint> version_ptr;
+        std::shared_ptr<SireBase::Incremint> version_ptr;
 
         /** The name of this forcefield */
         FFName ffname;

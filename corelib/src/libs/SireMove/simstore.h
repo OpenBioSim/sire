@@ -32,7 +32,7 @@
 #include <QMutex>
 #include <QTemporaryFile>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "SireSystem/system.h"
 #include "moves.h"
@@ -134,7 +134,7 @@ namespace SireMove
 
         /** The temporary file used to hold the SimStore when it
             is packed to disk */
-        boost::shared_ptr<QTemporaryFile> packed_file;
+        std::shared_ptr<QTemporaryFile> packed_file;
 
         /** The name of the temporary file */
         QString packed_filename;

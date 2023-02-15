@@ -244,6 +244,7 @@ def use_new_api():
 
     # load up the new console - ensure this is done once
     from .utils import Console as _Console
+
     _Console._get_console()
 
     if _is_using_new_api:
@@ -275,6 +276,7 @@ def use_new_api():
         Base,
         CAS,
         Cluster,
+        Convert,   # does not need pythonizing, but importing will make it visible
         Error,
         ID,
         Maths,

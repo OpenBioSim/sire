@@ -53,16 +53,16 @@ SIRE_BEGIN_HEADER
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
 
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_fusion.hpp>
-#include <boost/spirit/include/phoenix_object.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
-#include <boost/spirit/include/phoenix_stl.hpp>
+#include <boost/phoenix.hpp>
+#include <boost/phoenix/fusion.hpp>
+#include <boost/phoenix/object.hpp>
+#include <boost/phoenix/operator.hpp>
+#include <boost/phoenix/stl.hpp>
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // A lot of the below code is heavily inspired by
 // https://medium.com/@alinakipoglu/parsing-with-spirit-qi-fcaeaf4357b3

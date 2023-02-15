@@ -135,7 +135,7 @@ namespace SireMM
         void detach();
 
         /** Implicitly shared pointer to the data */
-        boost::shared_ptr<detail::CLJWorkspaceData> d;
+        std::shared_ptr<detail::CLJWorkspaceData> d;
 
         /** Whether or not we are recalculating everything from scratch */
         bool recalc_from_scratch;
