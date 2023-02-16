@@ -35,7 +35,7 @@
 #include "beads.h"
 #include "bondhunter.h"
 #include "bondid.h"
-#include "bondtype.h"
+#include "bondorder.h"
 #include "cgatomidx.h"
 #include "cgeditor.h"
 #include "cgidentifier.h"
@@ -98,7 +98,7 @@
 #include "select.h"
 #include "selectormol.h"
 #include "specifymol.h"
-#include "stereoscopy.h"
+#include "stereochemistry.h"
 #include "trajectory.h"
 #include "viewsofmol.h"
 #include "volumemap.h"
@@ -180,7 +180,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::CovalentBondHunter >();
     ObjectRegistry::registerConverterFor< SireMol::ChemicalBondHunter >();
     ObjectRegistry::registerConverterFor< SireMol::BondID >();
-    ObjectRegistry::registerConverterFor< SireMol::BondType >();
+    ObjectRegistry::registerConverterFor< SireMol::BondOrder >();
     ObjectRegistry::registerConverterFor< SireMol::CGAtomIdx >();
     ObjectRegistry::registerConverterFor< SireMol::CGEditor >();
     ObjectRegistry::registerConverterFor< SireMol::CGStructureEditor >();
@@ -317,7 +317,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::SelectorM<SireMol::Segment> >();
     ObjectRegistry::registerConverterFor< SireMol::SelectorM<SireMol::CutGroup> >();
     ObjectRegistry::registerConverterFor< SireMol::SpecifyMol >();
-    ObjectRegistry::registerConverterFor< SireMol::Stereoscopy >();
+    ObjectRegistry::registerConverterFor< SireMol::Stereochemistry >();
     ObjectRegistry::registerConverterFor< SireMol::Trajectory >();
     ObjectRegistry::registerConverterFor< SireMol::Frame >();
     ObjectRegistry::registerConverterFor< SireMol::MolTrajectoryData >();

@@ -3,7 +3,7 @@ __all__ = [
     "AtomIdx",
     "AtomName",
     "AtomNum",
-    "BondType",
+    "BondOrder",
     "Chain",
     "ChainIdx",
     "ChainName",
@@ -31,7 +31,7 @@ __all__ = [
     "SelectorM_Residue_",
     "SelectorM_Segment_",
     "SelectorMol",
-    "Stereoscopy",
+    "Stereochemistry",
     "TrajectoryIterator",
 ]
 
@@ -82,8 +82,8 @@ from ..legacy.Mol import (
     SelectorMol,
     MoleculeView,
     Select,
-    BondType,
-    Stereoscopy,
+    BondOrder,
+    Stereochemistry,
     AtomCoords,
 )
 

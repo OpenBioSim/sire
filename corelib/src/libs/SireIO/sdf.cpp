@@ -46,14 +46,14 @@
 #include "SireMol/atompropertylist.h"
 #include "SireMol/atomradicals.h"
 #include "SireMol/bondid.h"
-#include "SireMol/bondtype.h"
+#include "SireMol/bondorder.h"
 #include "SireMol/connectivity.h"
 #include "SireMol/core.h"
 #include "SireMol/errors.h"
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/radical.h"
-#include "SireMol/stereoscopy.h"
+#include "SireMol/stereochemistry.h"
 #include "SireMol/trajectory.h"
 
 #include "SireBase/propertylist.h"
@@ -125,7 +125,7 @@ namespace SireIO
         class SDFBond
         {
         public:
-            SDFBond() : atom0(0), atom1(0), typ(0), stereoscopy(0)
+            SDFBond() : atom0(0), atom1(0), typ(0), stereochemistry(0)
             {
             }
 
@@ -135,7 +135,7 @@ namespace SireIO
 
             QString toString() const
             {
-                return QString("%1-%2  %3  %4  %5").arg(atom0).arg(atom1).arg(typ).arg(stereoscopy).arg(fields.join(":"));
+                return QString("%1-%2  %3  %4  %5").arg(atom0).arg(atom1).arg(typ).arg(stereochemistry).arg(fields.join(":"));
             }
 
             void completeFields()
@@ -149,7 +149,7 @@ namespace SireIO
             qint32 atom0;
             qint32 atom1;
             qint32 typ;
-            qint32 stereoscopy;
+            qint32 stereochemistry;
             QStringList fields;
         };
 
@@ -559,14 +559,14 @@ QDataStream &operator>>(QDataStream &ds, SireIO::detail::SDFAtom &atom)
 
 QDataStream &operator<<(QDataStream &ds, const SireIO::detail::SDFBond &bond)
 {
-    ds << bond.atom0 << bond.atom1 << bond.typ << bond.stereoscopy << bond.fields;
+    ds << bond.atom0 << bond.atom1 << bond.typ << bond.stereochemistry << bond.fields;
 
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, SireIO::detail::SDFBond &bond)
 {
-    ds >> bond.atom0 >> bond.atom1 >> bond.typ >> bond.stereoscopy >> bond.fields;
+    ds >> bond.atom0 >> bond.atom1 >> bond.typ >> bond.stereochemistry >> bond.fields;
 
     return ds;
 }
@@ -720,7 +720,7 @@ QStringList toLines(const SDFMolecule &molecule)
     for (const auto &bond : molecule.bonds)
     {
         QString bond_line =
-            QString("%1%2%3%4").arg(bond.atom0, 3).arg(bond.atom1, 3).arg(bond.typ, 3).arg(bond.stereoscopy, 3);
+            QString("%1%2%3%4").arg(bond.atom0, 3).arg(bond.atom1, 3).arg(bond.typ, 3).arg(bond.stereochemistry, 3);
 
         if (bond.fields.count() != 3)
         {
@@ -1027,26 +1027,26 @@ SDFMolecule parseMolecule(const Molecule &molecule, QStringList &errors, const P
         sdfbond.atom0 = molinfo.atomIdx(bond.atom0()).value() + 1;
         sdfbond.atom1 = molinfo.atomIdx(bond.atom1()).value() + 1;
 
-        if (connectivity.hasProperty(bond, map["type"]))
+        if (connectivity.hasProperty(bond, map["order"]))
         {
-            auto bond_type = connectivity.property(bond, map["type"]).asA<BondType>();
+            auto bond_type = connectivity.property(bond, map["order"]).asA<BondOrder>();
 
-            sdfbond.typ = bond_type.sdfValue();
+            sdfbond.typ = bond_type.toSDF();
         }
         else
         {
             sdfbond.typ = 1; // assume single for now
         }
 
-        if (connectivity.hasProperty(bond, map["stereoscopy"]))
+        if (connectivity.hasProperty(bond, map["stereochemistry"]))
         {
-            auto stereo = connectivity.property(bond, map["stereoscopy"]).asA<Stereoscopy>();
+            auto stereo = connectivity.property(bond, map["stereochemistry"]).asA<Stereochemistry>();
 
-            sdfbond.stereoscopy = stereo.sdfValue();
+            sdfbond.stereochemistry = stereo.toSDF();
         }
         else
         {
-            sdfbond.stereoscopy = 0; // assume not stereo for now
+            sdfbond.stereochemistry = 0; // assume not stereo for now
         }
 
         if (connectivity.hasProperty(bond, map["sdf_fields"]))
@@ -1551,7 +1551,7 @@ void SDF::parseMoleculeLines(const PropertyMap &map, const QStringList &l)
         if (not assert_ok(ok, i + 1, line, "bond type"))
             return;
 
-        bond.stereoscopy = line.midRef(9, 3).toInt(&ok);
+        bond.stereochemistry = line.midRef(9, 3).toInt(&ok);
 
         if (not assert_ok(ok, i + 1, line, "stereoscopy"))
             return;
@@ -1846,8 +1846,8 @@ MolEditor SDF::getMolecule(int imol, const PropertyMap &map) const
 
             connectivity.connect(atom0, atom1);
 
-            connectivity.setProperty(bondid, map["type"].source(), BondType(bond.typ));
-            connectivity.setProperty(bondid, map["stereoscopy"].source(), Stereoscopy(bond.stereoscopy));
+            connectivity.setProperty(bondid, map["order"].source(), BondOrder::fromSDF(bond.typ));
+            connectivity.setProperty(bondid, map["stereochemistry"].source(), Stereochemistry::fromSDF(bond.stereochemistry));
             connectivity.setProperty(bondid, map["sdf_fields"].source(), SireBase::wrap(bond.fields));
         }
 

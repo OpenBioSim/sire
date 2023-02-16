@@ -209,27 +209,27 @@ name of the property you want.
 
 >>> bond = mol.bonds()[0]
 >>> print(bond.property_keys())
-['type', 'sdf_fields', 'stereoscopy']
->>> print(bond.property("type"))
+['order', 'sdf_fields', 'stereochemistry']
+>>> print(bond.property("order"))
 single
->>> print(bond.property("stereoscopy"))
+>>> print(bond.property("stereochemistry"))
 not stereo
 
 .. note::
 
-    The ``type`` property is of type :class:`sire.mol.BondType`.
-    The ``stereoscopy`` property is of type :class:`sire.mol.Stereoscopy`.
+    The ``order`` property is of type :class:`sire.mol.BondOrder`.
+    The ``stereochemistry`` property is of type :class:`sire.mol.Stereochemistry`.
 
 You can also access the properties via a cursor on the bond, e.g.
 
 >>> cursor = bond.cursor()
->>> print(cursor["type"])
+>>> print(cursor["order"])
 single
 
 You can use the cursor to edit bond properties, just like you did
 for atom, residue, chain, segment and molecule properties.
 
->>> cursor["type"] = sr.mol.BondType.double_bond()
+>>> cursor["order"] = sr.mol.BondOrder.double_bond()
 >>> mol = cursor.molecule().commit()
 >>> print(mol.bonds()[0].property("type"))
 double

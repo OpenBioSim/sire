@@ -32,6 +32,7 @@
 #include "moleculeparser.h"
 #include "supplementary.h"
 #include <QDebug>
+#include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>

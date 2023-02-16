@@ -52,7 +52,7 @@ set ( SIREMOL_HEADERS
       beads.h
       bondhunter.h
       bondid.h
-      bondtype.h
+      bondorder.h
       calculateaxes.hpp
       cgatomidx.h
       cgeditor.h
@@ -142,7 +142,7 @@ set ( SIREMOL_HEADERS
       selectorm.hpp
       selectormol.h
       specifymol.h
-      stereoscopy.h
+      stereochemistry.h
       structureeditor.h
       trajectory.h
       viewsofmol.h
@@ -178,7 +178,7 @@ set ( SIREMOL_SOURCES
       beads.cpp
       bondhunter.cpp
       bondid.cpp
-      bondtype.cpp
+      bondorder.cpp
       cgatomidx.cpp
       cgeditor.cpp
       cgid.cpp
@@ -243,7 +243,7 @@ set ( SIREMOL_SOURCES
       select.cpp
       selectormol.cpp
       specifymol.cpp
-      stereoscopy.cpp
+      stereochemistry.cpp
       structureeditor.cpp
       trajectory.cpp
       viewsofmol.cpp

@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#ifndef SIREMOL_BONDTYPE_H
-#define SIREMOL_BONDTYPE_H
+#ifndef SIREMOL_BONDORDER_H
+#define SIREMOL_BONDORDER_H
 
 #include "SireBase/property.h"
 
@@ -34,11 +34,11 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-    class BondType;
+    class BondOrder;
 }
 
-SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BondType &);
-SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BondType &);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::BondOrder &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::BondOrder &);
 
 namespace SireMol
 {
@@ -47,39 +47,45 @@ namespace SireMol
 
         @author Christopher Woods
     */
-    class SIREMOL_EXPORT BondType : public SireBase::ConcreteProperty<BondType, SireBase::Property>
+    class SIREMOL_EXPORT BondOrder : public SireBase::ConcreteProperty<BondOrder, SireBase::Property>
     {
 
-        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BondType &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BondType &);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const BondOrder &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, BondOrder &);
 
     public:
-        BondType();
+        BondOrder();
 
-        BondType(const QString &s);
-        BondType(int sdf_value);
+        BondOrder(const QString &s);
 
-        BondType(const BondType &other);
+        static BondOrder fromSDF(int value);
+        static BondOrder fromRDKit(const QString &value);
 
-        ~BondType();
+        BondOrder(const BondOrder &other);
 
-        BondType &operator=(const BondType &other);
+        ~BondOrder();
 
-        bool operator==(const BondType &other) const;
-        bool operator!=(const BondType &other) const;
+        BondOrder &operator=(const BondOrder &other);
+
+        bool operator==(const BondOrder &other) const;
+        bool operator!=(const BondOrder &other) const;
 
         static const char *typeName();
 
-        static BondType singleBond();
-        static BondType doubleBond();
-        static BondType tripleBond();
-        static BondType aromaticBond();
-        static BondType undefinedBond();
+        static BondOrder singleBond();
+        static BondOrder doubleBond();
+        static BondOrder tripleBond();
+        static BondOrder aromaticBond();
+        static BondOrder undefinedBond();
 
         QString toString() const;
 
         int value() const;
-        int sdfValue() const;
+
+        double valueAsDouble() const;
+
+        int toSDF() const;
+        QString toRDKit() const;
 
         bool isDefined() const;
         bool isSingle() const;
@@ -94,9 +100,9 @@ namespace SireMol
 
 } // namespace SireMol
 
-Q_DECLARE_METATYPE(SireMol::BondType)
+Q_DECLARE_METATYPE(SireMol::BondOrder)
 
-SIRE_EXPOSE_CLASS(SireMol::BondType)
+SIRE_EXPOSE_CLASS(SireMol::BondOrder)
 
 SIRE_END_HEADER
 

@@ -33,7 +33,7 @@ namespace bp = boost::python;
 
 #include "SireMol/bondid.h"
 
-#include "SireMol/bondtype.h"
+#include "SireMol/bondorder.h"
 
 #include "SireMol/connectivity.h"
 
@@ -47,7 +47,7 @@ namespace bp = boost::python;
 
 #include "SireMol/radical.h"
 
-#include "SireMol/stereoscopy.h"
+#include "SireMol/stereochemistry.h"
 
 #include "SireMol/trajectory.h"
 

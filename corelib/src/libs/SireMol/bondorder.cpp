@@ -25,7 +25,7 @@
   *
 \*********************************************/
 
-#include "bondtype.h"
+#include "bondorder.h"
 
 #include "SireError/errors.h"
 
@@ -38,9 +38,9 @@ using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
 
-static const RegisterMetaType<BondType> r_bondtype;
+static const RegisterMetaType<BondOrder> r_bondtype;
 
-QDataStream &operator<<(QDataStream &ds, const BondType &b)
+QDataStream &operator<<(QDataStream &ds, const BondOrder &b)
 {
     writeHeader(ds, r_bondtype, 1);
 
@@ -49,7 +49,7 @@ QDataStream &operator<<(QDataStream &ds, const BondType &b)
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, BondType &b)
+QDataStream &operator>>(QDataStream &ds, BondOrder &b)
 {
     VersionID v = readHeader(ds, r_bondtype);
 
@@ -64,12 +64,12 @@ QDataStream &operator>>(QDataStream &ds, BondType &b)
 }
 
 /** Constructor (default is an undefined bond) */
-BondType::BondType() : ConcreteProperty<BondType, Property>(), bond_type(0)
+BondOrder::BondOrder() : ConcreteProperty<BondOrder, Property>(), bond_type(0)
 {
 }
 
 /** Construct from the passed string */
-BondType::BondType(const QString &str) : ConcreteProperty<BondType, Property>()
+BondOrder::BondOrder(const QString &str) : ConcreteProperty<BondOrder, Property>()
 {
     auto s = str.trimmed().toLower();
 
@@ -90,53 +90,63 @@ BondType::BondType(const QString &str) : ConcreteProperty<BondType, Property>()
                                      CODELOC);
 }
 
-/** Construct from the the passed number */
-BondType::BondType(int value) : ConcreteProperty<BondType, Property>()
+/** Construct from the the passed SDF number */
+BondOrder BondOrder::fromSDF(int value)
 {
+    BondOrder ret;
+
     if (value < 0 or value > 4)
         throw SireError::invalid_arg(QObject::tr("Invalid bond type '%1'. Should be an integer between "
                                                  "0 and 4.")
                                          .arg(value),
                                      CODELOC);
 
-    this->bond_type = value;
+    ret.bond_type = value;
+    return ret;
+}
+
+/** Construct from a string representation of the RDKit type */
+BondOrder BondOrder::fromRDKit(const QString &value)
+{
+    BondOrder ret;
+    return ret;
 }
 
 /** Copy constructor */
-BondType::BondType(const BondType &other) : ConcreteProperty<BondType, Property>(other), bond_type(other.bond_type)
+BondOrder::BondOrder(const BondOrder &other) : ConcreteProperty<BondOrder, Property>(other), bond_type(other.bond_type)
 {
 }
 
 /** Destructor */
-BondType::~BondType()
+BondOrder::~BondOrder()
 {
 }
 
 /** Copy assignment operator */
-BondType &BondType::operator=(const BondType &other)
+BondOrder &BondOrder::operator=(const BondOrder &other)
 {
     bond_type = other.bond_type;
     return *this;
 }
 
 /** Comparison operator */
-bool BondType::operator==(const BondType &other) const
+bool BondOrder::operator==(const BondOrder &other) const
 {
     return bond_type == other.bond_type;
 }
 
 /** Comparison operator */
-bool BondType::operator!=(const BondType &other) const
+bool BondOrder::operator!=(const BondOrder &other) const
 {
     return not this->operator==(other);
 }
 
-const char *BondType::typeName()
+const char *BondOrder::typeName()
 {
-    return QMetaType::typeName(qMetaTypeId<BondType>());
+    return QMetaType::typeName(qMetaTypeId<BondOrder>());
 }
 
-QString BondType::toString() const
+QString BondOrder::toString() const
 {
     switch (this->bond_type)
     {
@@ -158,73 +168,87 @@ QString BondType::toString() const
 /** Return the bond type (uses SDF values, e.g. 0 is undefined,
     1 is single, 2 is double, 3 is triple and 4 is aromatic)
 */
-int BondType::value() const
+int BondOrder::value() const
 {
     return this->bond_type;
+}
+
+/** Return the bond order as a double precision number. This matches
+ *  the value that would be returned by RDKit
+ */
+double BondOrder::valueAsDouble() const
+{
+    return 0.0;
 }
 
 /** Return the SDF-format value for this bond */
-int BondType::sdfValue() const
+int BondOrder::toSDF() const
 {
     return this->bond_type;
 }
 
-/** Return a single bond */
-BondType BondType::singleBond()
+/** Return as a string representation of a RDKit bond order */
+QString BondOrder::toRDKit() const
 {
-    return BondType(1);
+    return QString();
+}
+
+/** Return a single bond */
+BondOrder BondOrder::singleBond()
+{
+    return BondOrder::fromSDF(1);
 }
 
 /** Return a double bond */
-BondType BondType::doubleBond()
+BondOrder BondOrder::doubleBond()
 {
-    return BondType(2);
+    return BondOrder::fromSDF(2);
 }
 
 /** Return a triple bond */
-BondType BondType::tripleBond()
+BondOrder BondOrder::tripleBond()
 {
-    return BondType(3);
+    return BondOrder::fromSDF(3);
 }
 
 /** Return an aromatic bond */
-BondType BondType::aromaticBond()
+BondOrder BondOrder::aromaticBond()
 {
-    return BondType(4);
+    return BondOrder::fromSDF(4);
 }
 
 /** Return an undefined bond */
-BondType BondType::undefinedBond()
+BondOrder BondOrder::undefinedBond()
 {
-    return BondType(0);
+    return BondOrder::fromSDF(0);
 }
 
 /** Return whether or not the bond type is defined */
-bool BondType::isDefined() const
+bool BondOrder::isDefined() const
 {
     return this->bond_type != 0;
 }
 
 /** Return whether or not this is a single bond */
-bool BondType::isSingle() const
+bool BondOrder::isSingle() const
 {
     return this->bond_type == 1;
 }
 
 /** Return whether or not this is a double bond */
-bool BondType::isDouble() const
+bool BondOrder::isDouble() const
 {
     return this->bond_type == 2;
 }
 
 /** Return whether or not this is a triple bond */
-bool BondType::isTriple() const
+bool BondOrder::isTriple() const
 {
     return this->bond_type == 3;
 }
 
 /** Return whether or not this is an aromatic bond */
-bool BondType::isAromatic() const
+bool BondOrder::isAromatic() const
 {
     return this->bond_type == 4;
 }

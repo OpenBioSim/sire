@@ -20,6 +20,8 @@
 #include "SireMol/atomproperty.hpp"
 #include "SireMol/connectivity.h"
 #include "SireMol/bondid.h"
+#include "SireMol/bondorder.h"
+#include "SireMol/stereochemistry.h"
 
 #include "SireMM/selectorbond.h"
 
@@ -155,6 +157,45 @@ namespace SireRDKit
         default:
             return "UNKNOWN";
         }
+    }
+
+    QString stereo_to_string(RDKit::Bond::BondStereo stereo)
+    {
+        switch (stereo)
+        {
+        case RDKit::Bond::STEREONONE:
+            return "STEREONONE";
+        case RDKit::Bond::STEREOANY:
+            return "STEREOANY";
+        case RDKit::Bond::STEREOZ:
+            return "STEREOZ";
+        case RDKit::Bond::STEREOE:
+            return "STEREOE";
+        case RDKit::Bond::STEREOCIS:
+            return "STEREOCIS";
+        case RDKit::Bond::STEREOTRANS:
+            return "STEREOTRANS";
+        default:
+            return "STEREONONE";
+        }
+    }
+
+    RDKit::Bond::BondStereo string_to_stereo(const QString &stereo)
+    {
+        const static std::map<QString, RDKit::Bond::BondStereo> stereos = {
+            {"STEREONONE", RDKit::Bond::STEREONONE},
+            {"STEREOANY", RDKit::Bond::STEREOANY},
+            {"STEREOZ", RDKit::Bond::STEREOZ},
+            {"STEREOE", RDKit::Bond::STEREOE},
+            {"STEREOCIS", RDKit::Bond::STEREOCIS},
+            {"STEREOTRANS", RDKit::Bond::STEREOTRANS}};
+
+        auto it = stereos.find(stereo);
+
+        if (it == stereos.end())
+            return RDKit::Bond::STEREONONE;
+        else
+            return it->second;
     }
 
     QString bondtype_to_string(RDKit::Bond::BondType typ)
@@ -556,13 +597,22 @@ namespace SireRDKit
             const auto bond = bonds(i);
 
             RDKit::Bond::BondType bondtype = RDKit::Bond::SINGLE;
+            RDKit::Bond::BondStereo stereo = RDKit::Bond::STEREONONE;
 
             try
             {
-                bondtype = string_to_bondtype(bond.property(map["bondtype"]).asAString());
+                bondtype = string_to_bondtype(bond.property(map["order"]).asA<SireMol::BondOrder>().toRDKit());
 
                 // one bond has bond info, so assume that all do
                 has_bond_info = false;
+            }
+            catch (...)
+            {
+            }
+
+            try
+            {
+                stereo = string_to_stereo(bond.property(map["stereochemistry"]).asA<SireMol::Stereochemistry>().toRDKit());
             }
             catch (...)
             {
@@ -576,6 +626,7 @@ namespace SireRDKit
             {
                 // bonds involving dummy atoms
                 bondtype = RDKit::Bond::ZERO;
+                stereo = RDKit::Bond::STEREONONE;
             }
             else if (elements.at(atom0).nProtons() == 1 and
                      elements.at(atom1).nProtons() == 1 and
@@ -584,6 +635,7 @@ namespace SireRDKit
                 // H-H bonds in molecules containing more
                 // bonds than just hydrogens...
                 bondtype = RDKit::Bond::ZERO;
+                stereo = RDKit::Bond::STEREONONE;
             }
 
             molecule.addBond(bond.atom0().index().value(),
@@ -749,8 +801,8 @@ namespace SireRDKit
         {
             auto connectivity = SireMol::Connectivity(molecule.info()).edit();
 
-            const auto bondtype_as_double = map["bondtype_as_double"];
-            const auto bondtype = map["bondtype"];
+            const auto bondorder = map["order"];
+            const auto stereochemistry = map["stereochemistry"];
 
             for (const auto &bond : mol->bonds())
             {
@@ -761,13 +813,13 @@ namespace SireRDKit
 
                 const auto b = SireMol::BondID(atom0, atom1);
 
-                if (bondtype_as_double.hasSource())
-                    connectivity.setProperty(b, bondtype_as_double.source(),
-                                             SireBase::wrap(bond->getBondTypeAsDouble()));
+                if (bondorder.hasSource())
+                    connectivity.setProperty(b, bondorder.source(),
+                                             SireMol::BondOrder::fromRDKit(bondtype_to_string(bond->getBondType())));
 
-                if (bondtype.hasSource())
-                    connectivity.setProperty(b, bondtype.source(),
-                                             SireBase::wrap(bondtype_to_string(bond->getBondType())));
+                if (stereochemistry.hasSource())
+                    connectivity.setProperty(b, stereochemistry.source(),
+                                             SireMol::Stereochemistry::fromRDKit(stereo_to_string(bond->getStereo())));
             }
 
             molecule.setProperty(map["connectivity"], connectivity.commit());

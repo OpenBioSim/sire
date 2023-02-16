@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 #include <QDebug>
 
+#include <QDir>
+
 #include <QElapsedTimer>
 
 #include <QFile>

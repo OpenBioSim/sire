@@ -135,9 +135,9 @@
 
 #include "BondID.pypp.hpp"
 
-#include "BondPerturbation.pypp.hpp"
+#include "BondOrder.pypp.hpp"
 
-#include "BondType.pypp.hpp"
+#include "BondPerturbation.pypp.hpp"
 
 #include "CGAtomID.pypp.hpp"
 
@@ -525,7 +525,7 @@
 
 #include "Specify_SegID_.pypp.hpp"
 
-#include "Stereoscopy.pypp.hpp"
+#include "Stereochemistry.pypp.hpp"
 
 #include "Trajectory.pypp.hpp"
 
@@ -788,9 +788,9 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_BondID_class();
 
-    register_BondPerturbation_class();
+    register_BondOrder_class();
 
-    register_BondType_class();
+    register_BondPerturbation_class();
 
     register_CGAtomIdx_class();
 
@@ -1092,7 +1092,7 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_SpecifyMol_class();
 
-    register_Stereoscopy_class();
+    register_Stereochemistry_class();
 
     register_Trajectory_class();
 
