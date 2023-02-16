@@ -2,8 +2,6 @@ __all__ = [
     "biosimspace_to_sire",
     "openmm_to_sire",
     "rdkit_to_sire",
-    "rdkit_to_smiles",
-    "rdkit_remove_hydrogens",
     "sire_to_biosimspace",
     "sire_to_rdkit",
     "sire_to_openmm",
@@ -319,48 +317,6 @@ def sire_to_openmm(obj, map=None):
         return mols[0]
     else:
         return mols
-
-
-def rdkit_to_smiles(obj, ignore_errors: bool = True):
-    """
-    Convert the passed RDKit Molecule (or list of RDKit molecules)
-    to smiles strings. This will return a list of smiles
-    strings
-    """
-    if type(obj) is not list:
-        obj = [obj]
-
-    try:
-        from ..legacy.Convert import rdkit_to_smiles as _rdkit_to_smiles
-    except Exception:
-        raise ModuleNotFoundError(
-            "rdkit is not available. Please install via "
-            "'mamba install -c conda-forge rdkit'"
-        )
-
-    return _rdkit_to_smiles(obj, ignore_errors)
-
-
-def rdkit_remove_hydrogens(obj, ignore_errors: bool = False):
-    """
-    Ask RDKit to remove unnecessary hydrogens from the passed
-    RDKit molecule (or list of molecules). This returns
-    a list of molecules with hydrogens removed
-    """
-    if type(obj) is not list:
-        obj = [obj]
-
-    try:
-        from ..legacy.Convert import (
-            rdkit_remove_hydrogens as _rdkit_remove_hydrogens,
-        )
-    except Exception:
-        raise ModuleNotFoundError(
-            "rdkit is not available. Please install via "
-            "'mamba install -c conda-forge rdkit'"
-        )
-
-    return _rdkit_remove_hydrogens(obj, ignore_errors)
 
 
 def rdkit_to_sire(obj, map=None):

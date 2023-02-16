@@ -23,7 +23,8 @@ if _has_rdkit:
         hydrogens in 'include_hydrogens' is True. This returns a list
         of smiles strings, in the same order as the views in the container
         """
-        from ..convert import sire_to_rdkit, rdkit_to_smiles
+        from ..convert import sire_to_rdkit
+        from ..legacy.Convert import rdkit_to_smiles
         from ..base import create_map
 
         map = create_map(map)
@@ -31,7 +32,7 @@ if _has_rdkit:
         obj = obj.extract()
 
         try:
-            not_water = obj["not water"]
+            not_water = obj["not water"].molecules()
         except Exception:
             from . import SelectorMol
 
@@ -40,14 +41,14 @@ if _has_rdkit:
         rdkit_mols = sire_to_rdkit(not_water, map=map)
 
         if not include_hydrogens:
-            from ..convert import rdkit_remove_hydrogens
+            from ..legacy.Convert import rdkit_remove_hydrogens
 
-            rdkit_mols = rdkit_remove_hydrogens(rdkit_mols, ignore_errors=True)
+            rdkit_mols = rdkit_remove_hydrogens(rdkit_mols, map)
 
-        smiles = rdkit_to_smiles(rdkit_mols, ignore_errors=True)
+        smiles = rdkit_to_smiles(rdkit_mols, map)
 
         try:
-            waters = obj["water"]
+            waters = obj["water"].molecules()
         except Exception:
             from . import SelectorMol
 
@@ -77,7 +78,8 @@ if _has_rdkit:
         force: bool = False,
         map=None,
     ):
-        from ..convert import sire_to_rdkit, rdkit_to_smiles
+        from ..convert import sire_to_rdkit
+        from ..legacy.Convert import rdkit_to_smiles
         from ..base import create_map
 
         if filename is None:
@@ -89,7 +91,7 @@ if _has_rdkit:
         obj = obj.extract()
 
         try:
-            not_water = obj["not water"]
+            not_water = obj["not water"].molecules()
         except Exception:
             from . import SelectorMol
 
@@ -99,33 +101,38 @@ if _has_rdkit:
         rdkit_mols = sire_to_rdkit(not_water, map=map)
 
         if not include_hydrogens:
-            from ..convert import rdkit_remove_hydrogens
+            from ..legacy.Convert import rdkit_remove_hydrogens
 
-            rdkit_mols = rdkit_remove_hydrogens(rdkit_mols, ignore_errors=True)
+            rdkit_mols = rdkit_remove_hydrogens(rdkit_mols, map)
 
-        smiles = rdkit_to_smiles(rdkit_mols)
+        smiles = rdkit_to_smiles(rdkit_mols, map)
 
         # find the unique structures, and count up the rest
-        unique = {}
-        unique_mols = []
-        ordered_smiles = []
+        if len(not_water) > 1:
+            unique = {}
+            unique_mols = []
+            ordered_smiles = []
 
-        for smile, rdkit_mol in zip(smiles, rdkit_mols):
-            if smile in unique:
-                unique[smile] += 1
-            else:
-                unique[smile] = 1
-                unique_mols.append(rdkit_mol)
-                ordered_smiles.append(smile)
+            for smile, rdkit_mol in zip(smiles, rdkit_mols):
+                if smile in unique:
+                    unique[smile] += 1
+                else:
+                    unique[smile] = 1
+                    unique_mols.append(rdkit_mol)
+                    ordered_smiles.append(smile)
 
-        legends = []
+            legends = []
 
-        for smile in ordered_smiles:
-            legends.append(f"{smile} = {unique[smile]}")
+            for smile in ordered_smiles:
+                legends.append(f"{unique[smile]} x {smile}")
+        else:
+            unique = {smiles: 1}
+            unique_mols = [rdkit_mols]
+            legends = [f"1 x {smiles}"]
 
         # now add back the waters (if any)
         try:
-            num_waters = len(obj["water"])
+            num_waters = len(obj["water"].molecules())
         except Exception:
             num_waters = 0
 
@@ -135,7 +142,7 @@ if _has_rdkit:
             unique_mols.append(MolFromSmiles("O"))
             unique["O"] = num_waters
 
-            legends.append(f"O = {num_waters}")
+            legends.append(f"{num_waters} x O")
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D

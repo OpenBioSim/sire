@@ -1,4 +1,13 @@
-__all__ = ["sire_to_rdkit", "rdkit_to_sire", "supported_formats"]
+__all__ = [
+    "sire_to_rdkit",
+    "rdkit_to_sire",
+    "rdkit_to_smiles",
+    "rdkit_remove_hydrogens",
+    "smiles_to_rdkit",
+    "sire_to_openmm",
+    "openmm_to_sire",
+    "supported_formats",
+]
 
 try:
     from ._SireRDKit import (
@@ -6,6 +15,7 @@ try:
         rdkit_to_sire,
         rdkit_to_smiles,
         rdkit_remove_hydrogens,
+        smiles_to_rdkit,
     )
 
     _has_rdkit = True
@@ -30,7 +40,10 @@ except Exception:
     def rdkit_to_smiles(*args, **kwargs):
         _no_rdkit()
 
-    def rdkit_remove_hydrogens(*arg, **kwargs):
+    def rdkit_remove_hydrogens(*args, **kwargs):
+        _no_rdkit()
+
+    def smiles_to_rdkit(*args, **kwargs):
         _no_rdkit()
 
 
