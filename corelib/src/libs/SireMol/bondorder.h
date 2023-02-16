@@ -94,7 +94,9 @@ namespace SireMol
         bool isAromatic() const;
 
     private:
-        /** The bond type. We use an integer in SDF format */
+        /** The bond type. We use an integer in SDF format,
+         *  plus some RDKit additions...
+         */
         qint32 bond_type;
     };
 

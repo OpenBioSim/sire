@@ -84,10 +84,7 @@ BondOrder::BondOrder(const QString &str) : ConcreteProperty<BondOrder, Property>
     else if (s == "undefined")
         this->bond_type = 0;
     else
-        throw SireError::invalid_arg(QObject::tr("Cannot interpret bond type '%1'. Should be one of "
-                                                 "'single', 'double', 'triple', 'aromatic' or 'undefined'.")
-                                         .arg(str),
-                                     CODELOC);
+        this->operator=(BondOrder::fromRDKit(str.toUpper()));
 }
 
 /** Construct from the the passed SDF number */
@@ -109,6 +106,38 @@ BondOrder BondOrder::fromSDF(int value)
 BondOrder BondOrder::fromRDKit(const QString &value)
 {
     BondOrder ret;
+
+    const static std::map<QString, qint32> types = {
+        {"UNSPECIFIED", 0},
+        {"SINGLE", 1},
+        {"DOUBLE", 2},
+        {"TRIPLE", 3},
+        {"QUADRUPLE", 104},
+        {"QUINTUPLE", 105},
+        {"HEXTUPLE", 106},
+        {"ONEANDAHALF", 107},
+        {"TWOANDAHALF", 108},
+        {"THREEANDAHALF", 109},
+        {"FOURANDAHALF", 110},
+        {"FIVEANDAHALF", 111},
+        {"AROMATIC", 4},
+        {"IONIC", 112},
+        {"HYDROGEN", 113},
+        {"THREECENTER", 114},
+        {"DATIVEONE", 115},
+        {"DATIVE", 116},
+        {"DATIVEL", 117},
+        {"DATIVER", 118},
+        {"OTHER", 119},
+        {"ZERO", 100}};
+
+    auto it = types.find(value);
+
+    if (it == types.end())
+        ret.bond_type = 0;
+    else
+        ret.bond_type = it->second;
+
     return ret;
 }
 
@@ -160,17 +189,98 @@ QString BondOrder::toString() const
         return "triple";
     case 4:
         return "aromatic";
+    case 104:
+        return "quadruple";
+    case 105:
+        return "quintuple";
+    case 106:
+        return "hextuple";
+    case 107:
+        return "oneandahalf";
+    case 108:
+        return "twoandahalf";
+    case 109:
+        return "threeandahalf";
+    case 110:
+        return "fourandahalf";
+    case 111:
+        return "fiveandahalf";
+    case 112:
+        return "ionic";
+    case 113:
+        return "hydrogen";
+    case 114:
+        return "threecenter";
+    case 115:
+        return "dativeone";
+    case 116:
+        return "dative";
+    case 117:
+        return "dativel";
+    case 118:
+        return "dativer";
+    case 119:
+        return "other";
+    case 100:
+        return "zero";
     default:
-        throw SireError::program_bug(QObject::tr("Should not get here: %1").arg(this->bond_type), CODELOC);
+        throw "other";
     }
 }
 
-/** Return the bond type (uses SDF values, e.g. 0 is undefined,
-    1 is single, 2 is double, 3 is triple and 4 is aromatic)
-*/
+/** Return the bond type (0 to number of bonds)
+ */
 int BondOrder::value() const
 {
-    return this->bond_type;
+    switch (this->bond_type)
+    {
+    case 0:
+        return 0;
+    case 1:
+        return 1;
+    case 2:
+        return 2;
+    case 3:
+        return 3;
+    case 4:
+        return 1;
+    case 104:
+        return 4;
+    case 105:
+        return 5;
+    case 106:
+        return 6;
+    case 107:
+        return 1;
+    case 108:
+        return 2;
+    case 109:
+        return 3;
+    case 110:
+        return 4;
+    case 111:
+        return 5;
+    case 112:
+        return 0;
+    case 113:
+        return 0;
+    case 114:
+        return 0;
+    case 115:
+        return 1;
+    case 116:
+        return 1;
+    case 117:
+        return 1;
+    case 118:
+        return 1;
+    case 119:
+        return 1;
+    case 100:
+        return 0;
+    default:
+        return 1;
+    }
 }
 
 /** Return the bond order as a double precision number. This matches
@@ -178,19 +288,163 @@ int BondOrder::value() const
  */
 double BondOrder::valueAsDouble() const
 {
-    return 0.0;
+    switch (this->bond_type)
+    {
+    case 0:
+        return 0.0;
+    case 1:
+        return 1.0;
+    case 2:
+        return 2.0;
+    case 3:
+        return 3.0;
+    case 4:
+        return 1.5;
+    case 104:
+        return 4.0;
+    case 105:
+        return 5.0;
+    case 106:
+        return 6.0;
+    case 107:
+        return 1.5;
+    case 108:
+        return 2.5;
+    case 109:
+        return 3.5;
+    case 110:
+        return 4.5;
+    case 111:
+        return 5.5;
+    case 112:
+        return 0.5;
+    case 113:
+        return 0.5;
+    case 114:
+        return 0.6;
+    case 115:
+        return 1.0;
+    case 116:
+        return 1.0;
+    case 117:
+        return 1.0;
+    case 118:
+        return 1.0;
+    case 119:
+        return 1.0;
+    case 100:
+        return 0.0;
+    default:
+        return 1.0;
+    }
 }
 
 /** Return the SDF-format value for this bond */
 int BondOrder::toSDF() const
 {
-    return this->bond_type;
+    switch (this->bond_type)
+    {
+    case 0:
+        return 0;
+    case 1:
+        return 1;
+    case 2:
+        return 2;
+    case 3:
+        return 3;
+    case 4:
+        return 4;
+    case 104:
+        return 3;
+    case 105:
+        return 3;
+    case 106:
+        return 3;
+    case 107:
+        return 4;
+    case 108:
+        return 4;
+    case 109:
+        return 4;
+    case 110:
+        return 4;
+    case 111:
+        return 4;
+    case 112:
+        return 0;
+    case 113:
+        return 0;
+    case 114:
+        return 0;
+    case 115:
+        return 1;
+    case 116:
+        return 1;
+    case 117:
+        return 1;
+    case 118:
+        return 1;
+    case 119:
+        return 0;
+    case 100:
+        return 0;
+    default:
+        return 1;
+    }
 }
 
 /** Return as a string representation of a RDKit bond order */
 QString BondOrder::toRDKit() const
 {
-    return QString();
+    switch (this->bond_type)
+    {
+    case 0:
+        return "UNSPECIFIED";
+    case 1:
+        return "SINGLE";
+    case 2:
+        return "DOUBLE";
+    case 3:
+        return "TRIPLE";
+    case 4:
+        return "AROMATIC";
+    case 104:
+        return "QUADRUPLE";
+    case 105:
+        return "QUINTUPLE";
+    case 106:
+        return "HEXTUPLE";
+    case 107:
+        return "ONEANDAHALF";
+    case 108:
+        return "TWOANDAHALF";
+    case 109:
+        return "THREEANDAHALF";
+    case 110:
+        return "FOURANDAHALF";
+    case 111:
+        return "FIVEANDAHALF";
+    case 112:
+        return "IONIC";
+    case 113:
+        return "HYDROGEN";
+    case 114:
+        return "THREECENTER";
+    case 115:
+        return "DATIVEONE";
+    case 116:
+        return "DATIVE";
+    case 117:
+        return "DATIVEL";
+    case 118:
+        return "DATIVER";
+    case 119:
+        return "OTHER";
+    case 100:
+        return "ZERO";
+    default:
+        return "OTHER";
+    }
 }
 
 /** Return a single bond */

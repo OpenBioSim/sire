@@ -100,6 +100,13 @@ if _has_rdkit:
         # we don't view water molecules
         rdkit_mols = sire_to_rdkit(not_water, map=map)
 
+        # we also don't want any conformers, as these mess up the 2D view
+        try:
+            for r in rdkit_mols:
+                r.RemoveAllConformers()
+        except Exception:
+            rdkit_mols.RemoveAllConformers()
+
         if not include_hydrogens:
             from ..legacy.Convert import rdkit_remove_hydrogens
 
@@ -299,6 +306,8 @@ if _has_rdkit:
 
         if rdkit_mol is None:
             rdkit_mol = sire_to_rdkit(obj.extract(), map)
+            # remove conformers, as these mess up the 2D view
+            rdkit_mol.RemoveAllConformers()
 
         if not include_hydrogens:
             from ..legacy.Convert import rdkit_remove_hydrogens
