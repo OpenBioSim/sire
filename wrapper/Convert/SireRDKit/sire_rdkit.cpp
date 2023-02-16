@@ -6,7 +6,7 @@
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
-#include <GraphMol/DistGeomHelpers/embedder.h>
+#include <GraphMol/DistGeomHelpers/Embedder.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -477,6 +477,10 @@ namespace SireRDKit
 
         QList<SireMol::Element> elements;
 
+        QVector<SireMaths::Vector> coords(atoms.count());
+        SireMaths::Vector *coords_data = coords.data();
+        bool has_coords = false;
+
         for (int i = 0; i < atoms.count(); ++i)
         {
             const auto atom = atoms(i);
@@ -492,6 +496,15 @@ namespace SireRDKit
             a->setNoImplicit(true);
 
             elements.append(element);
+
+            try
+            {
+                coords_data[i] = atom.property<SireMaths::Vector>(map["coordinates"]);
+                has_coords = true;
+            }
+            catch (...)
+            {
+            }
 
             try
             {
@@ -576,6 +589,31 @@ namespace SireRDKit
             molecule.addBond(bond.atom0().index().value(),
                              bond.atom1().index().value(),
                              bondtype);
+        }
+
+        if (has_coords)
+        {
+            const int nats = coords.count();
+            const SireMaths::Vector *data = coords.constData();
+
+            RDKit::Conformer *conformer = new RDKit::Conformer(nats);
+
+            try
+            {
+                for (int i = 0; i < nats; ++i)
+                {
+                    const SireMaths::Vector &p = data[i];
+                    conformer->setAtomPos(i, RDGeom::Point3D(p.x(), p.y(), p.z()));
+                }
+
+                // the molecule should take over ownership of this pointer now
+                molecule.addConformer(conformer, true);
+            }
+            catch (...)
+            {
+                delete conformer;
+                throw;
+            }
         }
 
         molecule.commitBatchEdit();
