@@ -28,14 +28,18 @@
 #include <QDataStream>
 #include <QElapsedTimer>
 
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wdeprecated-builtins"
+#endif
 #include <boost/assert.hpp>
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/mcgregor_common_subgraphs.hpp>
 #include <boost/graph/properties.hpp>
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 
 #include "atomelements.h"
 #include "atommasses.h"
