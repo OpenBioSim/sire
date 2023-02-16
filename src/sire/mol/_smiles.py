@@ -233,40 +233,34 @@ if _has_rdkit:
         else:
             return SVG(svg)
 
-    def _to_smiles(
-        obj, include_hydrogens: bool = False, force: bool = False, map=None
-    ):
+    def _to_smiles(obj, include_hydrogens: bool = False, map=None):
         """
         Return this molecule view as a smiles string. Include
         hydrogens in 'include_hydrogens' is True
         """
         from ..convert import sire_to_rdkit
+        from ..legacy.Convert import rdkit_to_smiles
         from ..base import create_map
 
-        if len(obj) > 500 and not force:
-            from ..utils import Console
-
-            Console.warning(
-                "Not converting to smiles as the number of atoms "
-                f"{len(obj)} is greater than 500. If you are sure, "
-                "then re-run this function with 'force=True'"
-            )
+        # check if this is a water molecule
+        if obj.selected_all():
+            try:
+                obj = obj["water"]
+                if obj.selected_all():
+                    return "O"
+            except Exception:
+                pass
 
         map = create_map(map)
 
-        rdkit_mol = sire_to_rdkit(obj.extract(), map=map)
+        rdkit_mol = sire_to_rdkit(obj.extract(), map)
 
         if not include_hydrogens:
-            try:
-                from rdkit import Chem
+            from ..legacy.Convert import rdkit_remove_hydrogens
 
-                rdkit_mol = Chem.RemoveHs(rdkit_mol)
-            except Exception as e:
-                from ..utils import Console
+            rdkit_mol = rdkit_remove_hydrogens(rdkit_mol, map)
 
-                Console.warning(f"Could not remove hydrogens! {e}")
-
-        return _Chem.MolToSmiles(rdkit_mol)
+        return rdkit_to_smiles(rdkit_mol, map)
 
     def _view2d(
         obj,
@@ -274,7 +268,6 @@ if _has_rdkit:
         height: int = 300,
         width: int = 900,
         include_hydrogens: bool = False,
-        force: bool = False,
         map=None,
     ):
         """
@@ -285,32 +278,32 @@ if _has_rdkit:
         from ..convert import sire_to_rdkit
         from ..base import create_map
 
-        if len(obj) > 500 and not force:
-            from ..utils import Console
-
-            Console.warning(
-                "Not converting to smiles as the number of atoms "
-                f"{len(obj)} is greater than 500. If you are sure, "
-                "then re-run this function with 'force=True'"
-            )
-
         if filename is None:
             # we need to be in a jupyter notebook or equivalent
             from IPython.display import SVG
 
         map = create_map(map)
 
-        rdkit_mol = sire_to_rdkit(obj.extract(), map=map)
+        rdkit_mol = None
+
+        # check for water
+        if obj.selected_all():
+            try:
+                obj = obj["water"]
+                if obj.selected_all():
+                    from ..legacy.Convert import smiles_to_rdkit
+
+                    rdkit_mol = smiles_to_rdkit("O", "O", map)
+            except Exception:
+                pass
+
+        if rdkit_mol is None:
+            rdkit_mol = sire_to_rdkit(obj.extract(), map)
 
         if not include_hydrogens:
-            try:
-                from rdkit.Chem import RemoveHs
+            from ..legacy.Convert import rdkit_remove_hydrogens
 
-                rdkit_mol = RemoveHs(rdkit_mol)
-            except Exception as e:
-                from ..utils import Console
-
-                Console.warning(f"Could not remove hydrogens: {e}")
+            rdkit_mol = rdkit_remove_hydrogens(rdkit_mol, map)
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D

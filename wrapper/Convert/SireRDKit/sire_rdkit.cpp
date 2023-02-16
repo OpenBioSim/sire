@@ -3,7 +3,10 @@
 
 #include <GraphMol/MolOps.h>
 #include <GraphMol/PeriodicTable.h>
+#include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <GraphMol/ForceFieldHelpers/UFF/uff.h>
+#include <GraphMol/DistGeomHelpers/embedder.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -35,6 +38,7 @@
 #include <QDebug>
 
 using RDKit::ROMOL_SPTR;
+using RDKit::RWMOL_SPTR;
 using SireBase::PropertyMap;
 using SireMol::Molecule;
 using SireMol::SelectorMol;
@@ -802,7 +806,64 @@ namespace SireRDKit
                                const QString &label,
                                const PropertyMap &map)
     {
-        return ROMOL_SPTR();
+        RDKit::SmilesParserParams params;
+        params.debugParse = 0;
+        params.sanitize = true;
+        params.removeHs = false;
+        params.parseName = false;
+
+        RWMOL_SPTR rdkit_mol;
+
+        try
+        {
+            rdkit_mol.reset(RDKit::SmilesToMol(smiles.toStdString(), params));
+        }
+        catch (...)
+        {
+        }
+
+        if (rdkit_mol.get() == 0)
+            return ROMOL_SPTR();
+
+        rdkit_mol->setProp<std::string>("_Name", label.toStdString());
+
+        bool add_hydrogens = true;
+        bool generate_coordinates = true;
+
+        if (map["add_hydrogens"].hasValue())
+            add_hydrogens = map["add_hydrogens"].value().asABoolean();
+
+        if (map["generate_coordinates"].hasValue())
+            generate_coordinates = map["generate_coordinates"].value().asABoolean();
+
+        if (add_hydrogens or generate_coordinates)
+        {
+            try
+            {
+
+                RDKit::MolOps::addHs(*rdkit_mol);
+            }
+            catch (...)
+            {
+                // could not add hydrogens, so also can't generate coords
+                generate_coordinates = false;
+            }
+        }
+
+        if (generate_coordinates)
+        {
+            try
+            {
+                RDKit::DGeomHelpers::EmbedMolecule(*rdkit_mol);
+                RDKit::UFF::UFFOptimizeMolecule(*rdkit_mol);
+            }
+            catch (...)
+            {
+                // ignore errors
+            }
+        }
+
+        return rdkit_mol;
     }
 
     QList<ROMOL_SPTR> smiles_to_rdkit(const QStringList &smiles,

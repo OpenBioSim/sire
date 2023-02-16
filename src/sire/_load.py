@@ -574,7 +574,11 @@ def load_test_files(files: _Union[_List[str], str], *args):
 
 
 def smiles(
-    smiles_string: str,
+    smiles: str,
+    label: str = None,
+    labels: str = None,
+    smiles_column: str = "smiles",
+    labels_column: str = "labels",
     add_hydrogens: bool = True,
     generate_coordinates: bool = True,
     map=None,
@@ -585,8 +589,25 @@ def smiles(
     so it must be installed.
 
     Args:
-        smiles_string: str
-            The smiles string to interpret
+        smiles: str or list[str] or pandas.Dataframe
+            The smiles string to interpret. This can be a single smiles string,
+            a list of smiles strings, or a pandas Dataframe containing
+            a smiles column and a label column (either called this, or
+            use options below to name them yourself)
+        label: str
+            The label for the molecule being created. This can only
+            be a single string. If it is set, then `labels` will be
+            ignored.
+        labels: str or list[str]
+            The label (name) for the molecule that will be created.
+            This should be a single string or a list of strings depending
+            on 'smiles'. Note that this will be ignored if a
+            Dataframe is passed in. Note that if this is not passed in
+            then the label will be taken from the smiles string
+        smiles_column: str
+            The name of the smiles column in the Dataframe (default 'smiles')
+        labels_column: str
+            The name of the labels column in the Dataframe (default 'labels')
         add_hydrogens: bool (default True)
             Whether or not to automatically add hydrogens
         generate_coordinates: bool (default True)
@@ -600,68 +621,42 @@ def smiles(
     Returns: sire.mol.Molecule
         The actual molecule
     """
-    try:
-        from rdkit import Chem
-        from rdkit.Chem import AllChem
-    except Exception:
-        raise ModuleNotFoundError(
-            "Could not generate a molecule from a smiles string because "
-            "rdkit could not be loaded. Please install rdkit, e.g. "
-            "by running 'mamba install -c conda-forge rdkit'"
-        )
+    from .convert import rdkit_to_sire
+    from .legacy.Convert import smiles_to_rdkit
 
-    if hasattr(smiles_string, "to_csv"):
-        # convert to tsv from a dataframe
-        smiles_col = "smiles"
-        name_col = "name"
-        smiles_string = smiles_string[[smiles_col, name_col]].to_csv(sep="\t")
+    if hasattr(smiles, "to_csv"):
+        # convert to a pair of lists from the dataframe
+        labels = smiles[[labels_column]]
+        smiles = smiles[[smiles_column]]
 
-    elif type(smiles_string) is not list:
-        smiles_string = [smiles_string]
+    elif type(smiles) is not list:
+        smiles = [smiles]
 
-    if type(smiles_string) is list:
-        # now convert the list to a tsv string so this can be parsed
-        # by the supplier
-        smiles_string = "\n".join([f"{x}\t{x}" for x in smiles_string])
+    if type(smiles) is list:
+        if label is not None:
+            labels = label
 
-    supplier = Chem.SmilesMolSupplierFromText(
-        text=smiles_string,
-        delimiter="\t",
-        smilesColumn=0,
-        nameColumn=1,
-        titleLine=False,
-        sanitize=True,
-    )
+        if labels is None:
+            labels = smiles
+        elif type(labels) is not list:
+            labels = [labels]
 
-    mols = []
-
-    for mol in supplier:
-        if mol is None:
-            raise SyntaxError(
-                f"Failed to generate from smiles string\n{smiles_string}\n. "
-                "Please check that this is valid and try again."
+        if len(smiles) != len(labels):
+            raise ValueError(
+                f"The number of smiles strings {len(smiles)} must match the "
+                f"number of labels ({len(labels)})"
             )
 
-        if add_hydrogens or generate_coordinates:
-            try:
-                mol = Chem.AddHs(mol)
-            except Exception as e:
-                from .utils import Console
+    from .base import create_map
 
-                Console.warning(f"Could not add hydrogens: {e}")
-                generate_coordinates = False
+    map = create_map(
+        map,
+        {
+            "add_hydrogens": add_hydrogens,
+            "generate_coordinates": generate_coordinates,
+        },
+    )
 
-        if generate_coordinates:
-            try:
-                AllChem.EmbedMolecule(mol)
-                AllChem.UFFOptimizeMolecule(mol)
-            except Exception as e:
-                from .utils import Console
+    rdkit_mols = smiles_to_rdkit(smiles, labels, map)
 
-                Console.warning(f"Could not generate coordinates: {e}")
-
-        mols.append(mol)
-
-    from .convert import rdkit_to_sire
-
-    return rdkit_to_sire(mols)
+    return rdkit_to_sire(rdkit_mols)

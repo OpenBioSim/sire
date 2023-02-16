@@ -119,7 +119,7 @@ if not hasattr(PropertyMap, "__orig__set"):
     PropertyMap.set = __propertymap_set
 
 
-def create_map(values):
+def create_map(values, extras=None):
     """Construct a PropertyMap from the
     passed values. A PropertyMap is a class that lets you either provide
     extra options to some of the C++ functions, or to
@@ -168,5 +168,12 @@ def create_map(values):
             wrapped_values[key] = _Base.PropertyName(value)
         except Exception:
             wrapped_values[key] = _Base.PropertyName(wrap(value))
+
+    if extras is not None:
+        for key, value in extras.items():
+            try:
+                wrapped_values[key] = _Base.PropertyName(value)
+            except Exception:
+                wrapped_values[key] = _Base.PropertyName(wrap(value))
 
     return PropertyMap(wrapped_values)

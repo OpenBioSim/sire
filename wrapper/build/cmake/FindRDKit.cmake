@@ -58,7 +58,6 @@ else()
       find_library(RDGENERAL_LIB NAMES RDGeneral RDKitRDGeneral
                                  HINTS ${RDKIT_LIBRARY_DIR})
 
-      #jhochuli - additional libraries for gninavis
       find_library(SUBSTRUCTMATCH_LIB NAMES SubstructMatch RDKitSubstructMatch
                                  HINTS ${RDKIT_LIBRARY_DIR})
       find_library(SUBGRAPHS_LIB NAMES Subgraphs RDKitSubgraphs
@@ -66,9 +65,15 @@ else()
       find_library(DATASTRUCTS_LIB NAMES DataStructs RDKitDataStructs
                                  HINTS ${RDKIT_LIBRARY_DIR})
 
+      find_library(FORCEFIELD_LIB NAMES ForceField RDKitForceField
+                                  HINTS ${RDKIT_LIBRARY_DIR})
+      find_library(DISTGEOMHELPERS_LIB NAMES DistGeomHelpers RDKitDistGeomHelpers
+                                  HINTS ${RDKIT_LIBRARY_DIR})
+
       set (RDKIT_LIBRARIES ${FILEPARSERS_LIB} ${SMILESPARSE_LIB}
               ${SUBSTRUCTMATCH_LIB} ${GRAPHMOL_LIB} ${RDGEOMETRYLIB_LIB} ${RDGENERAL_LIB}
-              ${SUBGRAPHS_LIB} ${DATASTRUCTS_LIB} ${DEPICTOR_LIB}
+              ${SUBGRAPHS_LIB} ${DATASTRUCTS_LIB} ${DEPICTOR_LIB} ${FORCEFIELD_LIB}
+              ${DISTGEOMHELPERS_LIB}
               )
     endif()
     if(RDKIT_LIBRARIES)
