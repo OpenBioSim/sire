@@ -5,7 +5,7 @@
 #include <GraphMol/PeriodicTable.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
-#include <GraphMol/ForceFieldHelpers/UFF/uff.h>
+#include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/DistGeomHelpers/embedder.h>
 
 #include "SireStream/datastream.h"
