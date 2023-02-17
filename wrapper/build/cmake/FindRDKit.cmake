@@ -27,6 +27,7 @@ else()
     find_path(RDKIT_INCLUDE_DIR GraphMol/RDKitBase.h
               PATHS
               ${CONDA_INCLUDE_DIR}/rdkit
+              ${CONDA_INCLUDE_DIR2}/rdkit
              )
   endif()
 
