@@ -32,7 +32,7 @@ else()
   endif()
 
   if(NOT RDKIT_LIBRARIES)
-    find_library(FILEPARSERS_LIB NAMES FileParsers RDKitFileParsers
+    find_library(GRAPHMOL_LIB NAMES GraphMol RDKitGraphMol
                  PATHS
                  ${CONDA_LIBRARY_DIR}
 
@@ -40,12 +40,11 @@ else()
                  NO_DEFAULT_PATH
                  )
 
-    #run with default paths this time
-    find_library(FILEPARSERS_LIB NAMES FileParsers RDKitFileParsers)
-
-    if(FILEPARSERS_LIB)
-       GET_FILENAME_COMPONENT(RDKIT_LIBRARY_DIR ${FILEPARSERS_LIB} PATH)
-       message(STATUS "Found RDKit libraries at ${RDKIT_LIBRARY_DIR}")
+    # Updated so this only looks for and includes the libraries
+    # that are needed by SireRDKit
+    if(GRAPHMOL_LIB)
+      GET_FILENAME_COMPONENT(RDKIT_LIBRARY_DIR ${GRAPHMOL_LIB} PATH)
+      message(STATUS "Found RDKit libraries at ${RDKIT_LIBRARY_DIR}")
 
       # Note that the order of the following libraries is significant!!
       find_library(SMILESPARSE_LIB NAMES SmilesParse RDKitSmilesParse
@@ -73,11 +72,13 @@ else()
       find_library(DISTGEOMHELPERS_LIB NAMES DistGeomHelpers RDKitDistGeomHelpers
                                   HINTS ${RDKIT_LIBRARY_DIR})
 
-      set (RDKIT_LIBRARIES ${FILEPARSERS_LIB} ${SMILESPARSE_LIB}
-              ${SUBSTRUCTMATCH_LIB} ${GRAPHMOL_LIB} ${RDGEOMETRYLIB_LIB} ${RDGENERAL_LIB}
-              ${SUBGRAPHS_LIB} ${DATASTRUCTS_LIB} ${DEPICTOR_LIB} ${FORCEFIELD_LIB}
-              ${FORCEFIELD_HELPERS_LIB} ${DISTGEOMHELPERS_LIB}
-              )
+      set (RDKIT_LIBRARIES ${GRAPHMOL_LIB}            # RDKit::ROMol et al
+                           ${RDGENERAL_LIB}           # Base RDKit objects
+                           ${SMILESPARSE_LIB}         # Smiles support
+                           ${DISTGEOMHELPERS_LIB}     # Optimize geometries
+                           ${FORCEFIELD_LIB}          # Add forcefields to molecules
+                           ${FORCEFIELD_HELPERS_LIB}  # Add forcefields to molecules
+           )
     endif()
     if(RDKIT_LIBRARIES)
             message(STATUS "Found RDKit library files at ${RDKIT_LIBRARIES}")
