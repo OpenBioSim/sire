@@ -49,6 +49,10 @@ namespace SireRDKit
 {
     bool use_parallel(int n, const SireBase::PropertyMap &map)
     {
+#ifdef Q_OS_WIN
+        // parallel RDKit segfaults on windows!
+        return false;
+#else
         if (n <= 16)
             return false;
 
@@ -58,6 +62,7 @@ namespace SireRDKit
         }
 
         return true;
+#endif
     }
 
     RDKit::Atom::ChiralType string_to_chiral(const QString &typ)

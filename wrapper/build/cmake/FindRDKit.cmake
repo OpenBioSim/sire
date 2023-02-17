@@ -46,23 +46,11 @@ else()
       GET_FILENAME_COMPONENT(RDKIT_LIBRARY_DIR ${GRAPHMOL_LIB} PATH)
       message(STATUS "Found RDKit libraries at ${RDKIT_LIBRARY_DIR}")
 
-      # Note that the order of the following libraries is significant!!
       find_library(SMILESPARSE_LIB NAMES SmilesParse RDKitSmilesParse
                                    HINTS ${RDKIT_LIBRARY_DIR})
-      find_library(DEPICTOR_LIB NAMES Depictor RDKitDepictor
-                                HINTS ${RDKIT_LIBRARY_DIR})
-      find_library(GRAPHMOL_LIB NAMES GraphMol RDKitGraphMol
-                                HINTS ${RDKIT_LIBRARY_DIR})
       find_library(RDGEOMETRYLIB_LIB NAMES RDGeometryLib RDKitRDGeometryLib
                                 HINTS ${RDKIT_LIBRARY_DIR})
       find_library(RDGENERAL_LIB NAMES RDGeneral RDKitRDGeneral
-                                 HINTS ${RDKIT_LIBRARY_DIR})
-
-      find_library(SUBSTRUCTMATCH_LIB NAMES SubstructMatch RDKitSubstructMatch
-                                 HINTS ${RDKIT_LIBRARY_DIR})
-      find_library(SUBGRAPHS_LIB NAMES Subgraphs RDKitSubgraphs
-                                 HINTS ${RDKIT_LIBRARY_DIR})
-      find_library(DATASTRUCTS_LIB NAMES DataStructs RDKitDataStructs
                                  HINTS ${RDKIT_LIBRARY_DIR})
 
       find_library(FORCEFIELD_LIB NAMES ForceField RDKitForceField
@@ -75,6 +63,7 @@ else()
       set (RDKIT_LIBRARIES ${GRAPHMOL_LIB}            # RDKit::ROMol et al
                            ${RDGENERAL_LIB}           # Base RDKit objects
                            ${SMILESPARSE_LIB}         # Smiles support
+                           ${RDGEOMETRYLIB_LIB}       # Point3D class
                            ${DISTGEOMHELPERS_LIB}     # Optimize geometries
                            ${FORCEFIELD_LIB}          # Add forcefields to molecules
                            ${FORCEFIELD_HELPERS_LIB}  # Add forcefields to molecules
