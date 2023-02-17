@@ -194,6 +194,14 @@ int Stereochemistry::toSDF() const
 /** Return a string representation of the RDKit stereo value */
 QString Stereochemistry::toRDKit() const
 {
+    /*        const static std::map<QString, RDKit::Bond::BondStereo> stereos = {
+                {"STEREONONE", RDKit::Bond::STEREONONE},
+                {"STEREOANY", RDKit::Bond::STEREOANY},
+                {"STEREOZ", RDKit::Bond::STEREOZ},
+                {"STEREOE", RDKit::Bond::STEREOE},
+                {"STEREOCIS", RDKit::Bond::STEREOCIS},
+                {"STEREOTRANS", RDKit::Bond::STEREOTRANS}};*/
+
     return QString();
 }
 

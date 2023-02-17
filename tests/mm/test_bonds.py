@@ -1,18 +1,18 @@
-
-
 def test_bond_props(chol_mols):
     mols = chol_mols
     mol = mols[0]
 
     for bond in mol.bonds():
-        assert bond.has_property("type")
+        assert bond.has_property("order")
         assert bond.has_property("sdf_fields")
-        assert bond.has_property("stereoscopy")
+        assert bond.has_property("stereochemistry")
 
     for bond in mol.cursor().bonds():
-        assert bond["type"] == bond.view().property("type")
+        assert bond["order"] == bond.view().property("order")
         assert bond["sdf_fields"] == bond.view().property("sdf_fields")
-        assert bond["stereoscopy"] == bond.view().property("stereoscopy")
+        assert bond["stereochemistry"] == bond.view().property(
+            "stereochemistry"
+        )
 
 
 def test_selector_bonds(ala_mols):
@@ -42,15 +42,17 @@ def test_selector_bonds(ala_mols):
 
     for bond in bonds:
         # at least one carbon
-        assert bond[0].element().num_protons() == 6 or \
-               bond[1].element().num_protons() == 6
+        assert (
+            bond[0].element().num_protons() == 6
+            or bond[1].element().num_protons() == 6
+        )
 
     bonds = mol.bonds("element C", "not element C")
 
     assert len(bonds) == 16
 
     for bond in bonds:
-        # only one carbon
+        # only one carbon
         if bond[0].element().num_protons() == 6:
             assert bond[1].element().num_protons() != 6
         else:
