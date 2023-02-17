@@ -13,4 +13,4 @@ sysroot_linux-64==2.17 ; sys_platform == "linux"
 # These packages are needed to compile
 # the SireRDKit plugin
 rdkit
-rdkit-dev
+rdkit-dev ; sys_platform == "win32"

@@ -211,7 +211,9 @@ save_sire_variable( "SIRE_TEST" "${SIRE_TEST}" )
 # set (CMAKE_VERBOSE_MAKEFILE ON)
 
 # Path to the project's extra cmake files
+message(STATUS "PRE-PATH: ${CMAKE_MODULE_PATH}")
 set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 
 # Options to pass to 'strip' when stripping the libraries
 # (on Linux, AIX and MacOS need to use '-x' to ensure we leave
