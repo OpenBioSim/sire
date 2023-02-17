@@ -67,13 +67,15 @@ else()
 
       find_library(FORCEFIELD_LIB NAMES ForceField RDKitForceField
                                   HINTS ${RDKIT_LIBRARY_DIR})
+      find_library(FORCEFIELD_HELPERS_LIB NAMES ForceFieldHelpers RDKitForceFieldHelpers
+                                  HINTS ${RDKIT_LIBRARY_DIR})
       find_library(DISTGEOMHELPERS_LIB NAMES DistGeomHelpers RDKitDistGeomHelpers
                                   HINTS ${RDKIT_LIBRARY_DIR})
 
       set (RDKIT_LIBRARIES ${FILEPARSERS_LIB} ${SMILESPARSE_LIB}
               ${SUBSTRUCTMATCH_LIB} ${GRAPHMOL_LIB} ${RDGEOMETRYLIB_LIB} ${RDGENERAL_LIB}
               ${SUBGRAPHS_LIB} ${DATASTRUCTS_LIB} ${DEPICTOR_LIB} ${FORCEFIELD_LIB}
-              ${DISTGEOMHELPERS_LIB}
+              ${FORCEFIELD_HELPERS_LIB} ${DISTGEOMHELPERS_LIB}
               )
     endif()
     if(RDKIT_LIBRARIES)
