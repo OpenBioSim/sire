@@ -54,11 +54,16 @@ sys.path.insert(0, os.path.join(curdir, "actions"))
 # We need to verify that this is a Python that is part of a
 # conda installation
 
-# Find the path to the conda or mamba executable
-conda_base = os.path.abspath(os.path.dirname(sys.executable))
+if "PREFIX" in os.environ and "BUILD_PREFIX" in os.environ:
+    print("This a build initiated by conda-build")
+    conda_base = os.environ["PREFIX"]
+    print(f"Setting conda-base to {conda_base}")
+else:
+    # Find the path to the conda or mamba executable
+    conda_base = os.path.abspath(os.path.dirname(sys.executable))
 
-if os.path.basename(conda_base) == "bin":
-    conda_base = os.path.dirname(conda_base)
+    if os.path.basename(conda_base) == "bin":
+        conda_base = os.path.dirname(conda_base)
 
 python_exe = None
 conda = None
@@ -159,11 +164,14 @@ def parse_args():
         else:
             npycores = int((ncores + 1) / 2)
     else:
-        # we need at least 4 GB RAM per core
-        npycores = min(ncores, int(total_memory_gb / 4))
+        # we need at least 3 GB RAM per core
+        npycores = min(ncores, int(total_memory_gb / 3))
 
         if npycores < 1:
             npycores = 1
+
+        print(f"Total memory available: {total_memory_gb} GB")
+        print(f"Number of python compile cores: {npycores}")
 
     parser.add_argument(
         "-C",
