@@ -51,6 +51,16 @@ message(STATUS "Configuring on a machine with number of cores = ${NCORES}")
 
 message( STATUS "Building into an existing conda installation..." )
 
+# "PREFIX" will be set by conda-build - make sure we use this,
+# and don't accidentally try to use "BUILD_PREFIX"
+if ((DEFINED ENV{PREFIX}) AND (DEFINED ENV{BUILD_PREFIX}))
+  message(STATUS "This is a conda build to create a conda package")
+  message(STATUS "PREFIX = $ENV{PREFIX}")
+  message(STATUS "BUILD_PREFIX = $ENV{BUILD_PREFIX}")
+  set( ANACONDA_BASE "$ENV{PREFIX}")
+  message(STATUS "USING ANACONDA_BASE = ${ANACONDA_BASE}")
+endif()
+
 # Where is anaconda installed
 if (NOT DEFINED ANACONDA_BASE)
   set( ANACONDA_BASE "$ENV{HOME}/miniconda3" CACHE PATH

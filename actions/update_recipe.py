@@ -59,20 +59,25 @@ def dep_lines(deps):
     return "".join(lines)
 
 
+def python_reqs():
+    c = f"{sys.version_info.major}.{sys.version_info.minor}"
+    n = f"{sys.version_info.major}.{sys.version_info.minor+1}"
+    return f"    - python>={c},<{n}\n"
+
+
 run_reqs = dep_lines(run_reqs)
 build_reqs = dep_lines(build_reqs)
 bss_reqs = dep_lines(bss_reqs)
 test_reqs = dep_lines(test_reqs)
 
-
 with open(recipe, "w") as FILE:
     for line in lines:
         if line.find("SIRE_BUILD_REQUIREMENTS") != -1:
-            line = build_reqs
+            line = python_reqs() + build_reqs
         elif line.find("SIRE_RUN_REQUIREMENTS") != -1:
-            line = run_reqs
+            line = python_reqs() + run_reqs
         elif line.find("SIRE_BSS_REQUIREMENTS") != -1:
-            line = bss_reqs
+            line = python_reqs() + bss_reqs
         elif line.find("SIRE_TEST_REQUIREMENTS") != -1:
             line = test_reqs
         else:
