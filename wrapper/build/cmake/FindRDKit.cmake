@@ -24,10 +24,13 @@ if(RDKIT_INCLUDE_DIR AND RDKIT_LIBRARIES)
 else()
 
   if(NOT RDKIT_INCLUDE_DIR)
+    message(STATUS "Looking for RDKit in ${CONDA_INCLUDE_DIR}/rdkit, ${CONDA_INCLUDE_DIR2}/rdkit and ${CONDA_INCLUDE_DIR3}/rdkit")
+
     find_path(RDKIT_INCLUDE_DIR GraphMol/RDKitBase.h
               PATHS
               ${CONDA_INCLUDE_DIR}/rdkit
               ${CONDA_INCLUDE_DIR2}/rdkit
+              ${CONDA_INCLUDE_DIR3}/rdkit
              )
   endif()
 
@@ -35,6 +38,7 @@ else()
     find_library(GRAPHMOL_LIB NAMES GraphMol RDKitGraphMol
                  PATHS
                  ${CONDA_LIBRARY_DIR}
+                 ${CONDA_LIBRARY_DIR2}
 
                  #ignore default path, so search starts with above paths
                  NO_DEFAULT_PATH

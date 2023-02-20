@@ -57,7 +57,14 @@ if ((DEFINED ENV{PREFIX}) AND (DEFINED ENV{BUILD_PREFIX}))
   message(STATUS "This is a conda build to create a conda package")
   message(STATUS "PREFIX = $ENV{PREFIX}")
   message(STATUS "BUILD_PREFIX = $ENV{BUILD_PREFIX}")
-  set( ANACONDA_BASE "$ENV{PREFIX}")
+  if (WIN32)
+    # make sure we use Unix path separators, as this will be stored
+    # in the CMake cache, and using Windows path separators will
+    # cause failures due to invalid string escape sequences
+    string(REPLACE "\\" "/" ANACONDA_BASE "$ENV{PREFIX}")
+  else()
+    set( ANACONDA_BASE "$ENV{PREFIX}")
+  endif()
   message(STATUS "USING ANACONDA_BASE = ${ANACONDA_BASE}")
 endif()
 

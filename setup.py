@@ -56,7 +56,7 @@ sys.path.insert(0, os.path.join(curdir, "actions"))
 
 if "PREFIX" in os.environ and "BUILD_PREFIX" in os.environ:
     print("This a build initiated by conda-build")
-    conda_base = os.environ["PREFIX"]
+    conda_base = os.path.abspath(os.environ["PREFIX"])
     print(f"Setting conda-base to {conda_base}")
 else:
     # Find the path to the conda or mamba executable
