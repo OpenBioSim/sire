@@ -82,10 +82,7 @@ Stereochemistry::Stereochemistry(const QString &str) : ConcreteProperty<Stereoch
     else if (s == "undefined")
         this->stereo_type = -1;
     else
-        throw SireError::invalid_arg(QObject::tr("Cannot interpret stereo type '%1'. Should be one of "
-                                                 "'up', 'down', 'not stereo' or 'undefined'.")
-                                         .arg(str),
-                                     CODELOC);
+        this->operator=(Stereochemistry::fromRDKit(str));
 }
 
 /** Construct from the the passed SDF number */
@@ -112,6 +109,44 @@ Stereochemistry Stereochemistry::fromSDF(int value)
 Stereochemistry Stereochemistry::fromRDKit(const QString &value)
 {
     Stereochemistry ret;
+
+    auto v = value.toLower();
+
+    if (v == "stereonone")
+    {
+        // not stereo
+        ret.stereo_type = 0;
+    }
+    else if (v == "stereoany")
+    {
+        // undefined
+        ret.stereo_type = -1;
+    }
+    else if (v == "stereoz")
+    {
+        // RDKit
+        ret.stereo_type = 1000;
+    }
+    else if (v == "stereoe")
+    {
+        // RDKit
+        ret.stereo_type = 1001;
+    }
+    else if (v == "stereocis")
+    {
+        // RDKit
+        ret.stereo_type = 1002;
+    }
+    else if (v == "stereotrans")
+    {
+        // RDKit
+        ret.stereo_type = 1003;
+    }
+    else
+    {
+        // undefined
+        ret.stereo_type = -1;
+    }
 
     return ret;
 }
@@ -164,7 +199,7 @@ QString Stereochemistry::toString() const
     case -1:
         return "undefined";
     default:
-        throw SireError::program_bug(QObject::tr("Should not get here: %1").arg(this->stereo_type), CODELOC);
+        return this->toRDKit();
     }
 }
 
@@ -181,28 +216,38 @@ int Stereochemistry::value() const
  */
 int Stereochemistry::toSDF() const
 {
-    if (this->stereo_type == -1)
+    switch (this->stereo_type)
     {
+    case 1:
+        return 1;
+    case 6:
+        return 6;
+    default:
+        // either undefined or an unsupported RDKit stereo value
         return 0;
-    }
-    else
-    {
-        return this->stereo_type;
     }
 }
 
 /** Return a string representation of the RDKit stereo value */
 QString Stereochemistry::toRDKit() const
 {
-    /*        const static std::map<QString, RDKit::Bond::BondStereo> stereos = {
-                {"STEREONONE", RDKit::Bond::STEREONONE},
-                {"STEREOANY", RDKit::Bond::STEREOANY},
-                {"STEREOZ", RDKit::Bond::STEREOZ},
-                {"STEREOE", RDKit::Bond::STEREOE},
-                {"STEREOCIS", RDKit::Bond::STEREOCIS},
-                {"STEREOTRANS", RDKit::Bond::STEREOTRANS}};*/
-
-    return QString();
+    switch (this->stereo_type)
+    {
+    case -1:
+        return "STEREOANY";
+    case 0:
+        return "STEREONONE";
+    case 1000:
+        return "STEREOZ";
+    case 1001:
+        return "STEREOE";
+    case 1002:
+        return "STEREOCIS";
+    case 1003:
+        return "STEREOTRANS";
+    default:
+        return "STEREOANY";
+    }
 }
 
 /** Return an up Stereochemistry */

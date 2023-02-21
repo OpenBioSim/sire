@@ -8,6 +8,7 @@ set ( PYPP_SOURCES
        Atom.pypp.cpp
        AtomBeads.pypp.cpp
        AtomCharges.pypp.cpp
+       AtomChiralities.pypp.cpp
        AtomCoords.pypp.cpp
        AtomCutting.pypp.cpp
        AtomDoubleArrayProperty.pypp.cpp
@@ -102,6 +103,7 @@ set ( PYPP_SOURCES
        ChainsWithRes.pypp.cpp
        ChargePerturbation.pypp.cpp
        ChemicalBondHunter.pypp.cpp
+       Chirality.pypp.cpp
        Connectivity.pypp.cpp
        ConnectivityBase.pypp.cpp
        ConnectivityEditor.pypp.cpp

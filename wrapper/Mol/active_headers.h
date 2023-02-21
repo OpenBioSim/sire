@@ -56,6 +56,7 @@
 #include "chainproperty.hpp"
 #include "chainresid.h"
 #include "chargeperturbation.h"
+#include "chirality.h"
 #include "connectivity.h"
 #include "cutgroup.h"
 #include "cuttingfunction.h"

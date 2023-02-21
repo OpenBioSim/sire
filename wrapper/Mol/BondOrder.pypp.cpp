@@ -253,7 +253,7 @@ void register_BondOrder_class(){
                 "value"
                 , value_function_value
                 , bp::release_gil_policy()
-                , "Return the bond type (uses SDF values, e.g. 0 is undefined,\n1 is single, 2 is double, 3 is triple and 4 is aromatic)\n" );
+                , "Return the bond type (0 to number of bonds)\n" );
         
         }
         { //::SireMol::BondOrder::valueAsDouble
@@ -265,7 +265,7 @@ void register_BondOrder_class(){
                 "valueAsDouble"
                 , valueAsDouble_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the bond order as a double precision number. This matches\n  the value that would be returned by RDKit\n" );
         
         }
         BondOrder_exposer.staticmethod( "aromaticBond" );

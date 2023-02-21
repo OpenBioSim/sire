@@ -22,6 +22,7 @@
 #include "SireMol/bondid.h"
 #include "SireMol/bondorder.h"
 #include "SireMol/stereochemistry.h"
+#include "SireMol/chirality.h"
 
 #include "SireMM/selectorbond.h"
 
@@ -578,7 +579,7 @@ namespace SireRDKit
 
             try
             {
-                a->setChiralTag(string_to_chiral(atom.property<QString>(map["chiral_tag"])));
+                a->setChiralTag(string_to_chiral(atom.property<SireMol::Chirality>(map["chirality"]).toRDKit()));
             }
             catch (...)
             {
@@ -794,7 +795,7 @@ namespace SireRDKit
             set_prop(a, "is_aromatic", qint64(atom->getIsAromatic()), map);
             set_prop(a, "mass", atom->getMass() * SireUnits::g_per_mol, map);
             set_prop(a, "isotope", qint64(atom->getIsotope()), map);
-            set_prop(a, "chiral_tag", chiral_to_string(atom->getChiralTag()), map);
+            set_prop(a, "chirality", SireMol::Chirality::fromRDKit(chiral_to_string(atom->getChiralTag())), map);
             set_prop(a, "hybridization", hybridization_to_string(atom->getHybridization()), map);
         }
 

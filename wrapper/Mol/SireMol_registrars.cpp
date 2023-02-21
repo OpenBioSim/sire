@@ -48,6 +48,7 @@
 #include "chainname.h"
 #include "chainresid.h"
 #include "chargeperturbation.h"
+#include "chirality.h"
 #include "connectivity.h"
 #include "cutgroup.h"
 #include "dihedralid.h"
@@ -211,6 +212,8 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::ChainName >();
     ObjectRegistry::registerConverterFor< SireMol::ChainResID >();
     ObjectRegistry::registerConverterFor< SireMol::ChargePerturbation >();
+    ObjectRegistry::registerConverterFor< SireMol::Chirality >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomChiralities >();
     ObjectRegistry::registerConverterFor< SireMol::Connectivity >();
     ObjectRegistry::registerConverterFor< SireMol::ConnectivityEditor >();
     ObjectRegistry::registerConverterFor< SireMol::CutGroup >();

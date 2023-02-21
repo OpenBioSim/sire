@@ -23,6 +23,8 @@
 
 #include "AtomCharges.pypp.hpp"
 
+#include "AtomChiralities.pypp.hpp"
+
 #include "AtomCoords.pypp.hpp"
 
 #include "AtomCutting.pypp.hpp"
@@ -210,6 +212,8 @@
 #include "ChargePerturbation.pypp.hpp"
 
 #include "ChemicalBondHunter.pypp.hpp"
+
+#include "Chirality.pypp.hpp"
 
 #include "Connectivity.pypp.hpp"
 
@@ -724,6 +728,8 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_AtomBeads_class();
 
+    register_AtomChiralities_class();
+
     register_AtomElements_class();
 
     register_AtomRadicals_class();
@@ -855,6 +861,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_CovalentBondHunter_class();
 
     register_ChemicalBondHunter_class();
+
+    register_Chirality_class();
 
     register_ConnectivityBase_class();
 

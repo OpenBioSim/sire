@@ -70,6 +70,7 @@ set ( SIREMOL_HEADERS
       chainproperty.hpp
       chainresid.h
       chargeperturbation.h
+      chirality.h
       connectivity.h
       core.h
       cutgroup.h
@@ -191,6 +192,7 @@ set ( SIREMOL_SOURCES
       chainproperty.cpp
       chainresid.cpp
       chargeperturbation.cpp
+      chirality.cpp
       connectivity.cpp
       cutgroup.cpp
       cuttingfunction.cpp
