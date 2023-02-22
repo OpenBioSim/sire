@@ -23,6 +23,7 @@
 #include "SireMol/bondorder.h"
 #include "SireMol/stereochemistry.h"
 #include "SireMol/chirality.h"
+#include "SireMol/hybridization.h"
 
 #include "SireMM/selectorbond.h"
 
@@ -124,6 +125,7 @@ namespace SireRDKit
             {"S", RDKit::Atom::S},
             {"SP", RDKit::Atom::SP},
             {"SP2", RDKit::Atom::SP2},
+            {"SP3", RDKit::Atom::SP3},
             // These don't seem to be supported on older RDKits?
             // {"SP2D", RDKit::Atom::SP2D},
             {"SP3D", RDKit::Atom::SP3D},
@@ -151,6 +153,8 @@ namespace SireRDKit
             return "SP";
         case RDKit::Atom::SP2:
             return "SP2";
+        case RDKit::Atom::SP3:
+            return "SP3";
             // These don't seem to be supported on older RDKits?
             //    case RDKit::Atom::SP2D:
             //        return "SP2D";
@@ -587,7 +591,7 @@ namespace SireRDKit
 
             try
             {
-                a->setHybridization(string_to_hybridization(atom.property<QString>(map["hybridization"])));
+                a->setHybridization(string_to_hybridization(atom.property<SireMol::Hybridization>(map["hybridization"]).toRDKit()));
             }
             catch (...)
             {
@@ -796,7 +800,7 @@ namespace SireRDKit
             set_prop(a, "mass", atom->getMass() * SireUnits::g_per_mol, map);
             set_prop(a, "isotope", qint64(atom->getIsotope()), map);
             set_prop(a, "chirality", SireMol::Chirality::fromRDKit(chiral_to_string(atom->getChiralTag())), map);
-            set_prop(a, "hybridization", hybridization_to_string(atom->getHybridization()), map);
+            set_prop(a, "hybridization", SireMol::Hybridization::fromRDKit(hybridization_to_string(atom->getHybridization())), map);
         }
 
         // we've built the main structure now - just need to add other

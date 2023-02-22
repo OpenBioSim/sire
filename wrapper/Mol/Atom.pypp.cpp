@@ -92,6 +92,8 @@ namespace bp = boost::python;
 
 #include <QDebug>
 
+#include "hybridization.h"
+
 #include "SireBase/propertylist.h"
 
 #include "SireMaths/vector.h"
@@ -218,6 +220,13 @@ const SireMol::Chirality& get_Metadata_SireMol_AtomChiralities_function1(const S
 const SireMol::Chirality& get_Metadata_SireMol_AtomChiralities_function2(const SireMol::Atom &atom,
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireMol::Chirality >(key, metakey); }
+
+const SireMol::Hybridization& get_Metadata_SireMol_AtomHybridizations_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMol::Hybridization >(metakey); }
+
+const SireMol::Hybridization& get_Metadata_SireMol_AtomHybridizations_function2(const SireMol::Atom &atom,
+                                   const QString &key, const QString &metakey){
+                                        return atom.metadata< SireMol::Hybridization >(key, metakey); }
 
 const QString& get_Metadata_SireMol_AtomStringProperty_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< QString >(metakey); }
@@ -783,6 +792,9 @@ void register_Atom_class(){
         Atom_exposer.def( "_get_property_SireMol_AtomChiralities", &SireMol::Atom::property< SireMol::Chirality >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomChiralities", get_Metadata_SireMol_AtomChiralities_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomChiralities", &get_Metadata_SireMol_AtomChiralities_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomHybridizations", &SireMol::Atom::property< SireMol::Hybridization >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomHybridizations", get_Metadata_SireMol_AtomHybridizations_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomHybridizations", &get_Metadata_SireMol_AtomHybridizations_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomStringProperty", &SireMol::Atom::property< QString >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomStringProperty", get_Metadata_SireMol_AtomStringProperty_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomStringProperty", &get_Metadata_SireMol_AtomStringProperty_function2, bp::return_value_policy<bp::copy_const_reference>());

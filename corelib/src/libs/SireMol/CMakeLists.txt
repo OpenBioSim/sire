@@ -87,6 +87,7 @@ set ( SIREMOL_HEADERS
       geometryperturbation.h
       groupatomids.h
       groupgroupids.h
+      hybridization.h
       mgid.h
       mgidentifier.h
       mgidsandmaps.h
@@ -206,6 +207,7 @@ set ( SIREMOL_SOURCES
       geometryperturbation.cpp
       groupatomids.cpp
       groupgroupids.cpp
+      hybridization.cpp
       mgid.cpp
       mgidentifier.cpp
       mgidsandmaps.cpp
