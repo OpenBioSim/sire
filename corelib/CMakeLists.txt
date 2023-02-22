@@ -51,6 +51,23 @@ message(STATUS "Configuring on a machine with number of cores = ${NCORES}")
 
 message( STATUS "Building into an existing conda installation..." )
 
+# "PREFIX" will be set by conda-build - make sure we use this,
+# and don't accidentally try to use "BUILD_PREFIX"
+if ((DEFINED ENV{PREFIX}) AND (DEFINED ENV{BUILD_PREFIX}))
+  message(STATUS "This is a conda build to create a conda package")
+  message(STATUS "PREFIX = $ENV{PREFIX}")
+  message(STATUS "BUILD_PREFIX = $ENV{BUILD_PREFIX}")
+  if (WIN32)
+    # make sure we use Unix path separators, as this will be stored
+    # in the CMake cache, and using Windows path separators will
+    # cause failures due to invalid string escape sequences
+    string(REPLACE "\\" "/" ANACONDA_BASE "$ENV{PREFIX}")
+  else()
+    set( ANACONDA_BASE "$ENV{PREFIX}")
+  endif()
+  message(STATUS "USING ANACONDA_BASE = ${ANACONDA_BASE}")
+endif()
+
 # Where is anaconda installed
 if (NOT DEFINED ANACONDA_BASE)
   set( ANACONDA_BASE "$ENV{HOME}/miniconda3" CACHE PATH
@@ -211,7 +228,9 @@ save_sire_variable( "SIRE_TEST" "${SIRE_TEST}" )
 # set (CMAKE_VERBOSE_MAKEFILE ON)
 
 # Path to the project's extra cmake files
+message(STATUS "PRE-PATH: ${CMAKE_MODULE_PATH}")
 set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/build/cmake)
+message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 
 # Options to pass to 'strip' when stripping the libraries
 # (on Linux, AIX and MacOS need to use '-x' to ensure we leave

@@ -71,6 +71,7 @@ void register_SelectorMol_class(){
         SelectorMol_exposer.def( bp::init< SireMol::MolGroupsBase const & >(( bp::arg("mols") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectResult const & >(( bp::arg("mols") ), "") );
         SelectorMol_exposer.def( bp::init< QList< SireMol::Molecule > const & >(( bp::arg("mols") ), "") );
+        SelectorMol_exposer.def( bp::init< QVector< SireMol::Molecule > const & >(( bp::arg("mols") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Residue > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Chain > const & >(( bp::arg("other") ), "") );
@@ -498,6 +499,18 @@ void register_SelectorMol_class(){
             SelectorMol_exposer.def( 
                 "evaluate"
                 , evaluate_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::extract
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::SelectorMol::*extract_function_type)(  ) const;
+            extract_function_type extract_function_value( &::SireMol::SelectorMol::extract );
+            
+            SelectorMol_exposer.def( 
+                "extract"
+                , extract_function_value
                 , bp::release_gil_policy()
                 , "" );
         

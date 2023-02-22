@@ -293,19 +293,37 @@ class System:
         return self._system.property_keys()
 
     def cursor(self):
-        """Return a sire.mol.Cursor that can be used to edit
+        """
+        Return a sire.mol.Cursor that can be used to edit
         the molecules in this System
         """
         from ..mol._cursor import CursorsM
 
         return CursorsM(self)
 
+    def smiles(self, *args, **kwargs):
+        """
+        Return the molecule views in this container as smiles strings. Include
+        hydrogens in 'include_hydrogens' is True. This returns a list
+        of smiles strings, in the same order as the views in the container
+        """
+        return self.molecules().smiles(*args, **kwargs)
+
     def view(self, *args, **kwargs):
-        """View this System (or the matching index/search subset)
+        """
+        View this System (or the matching index/search subset)
         via a nglview viewer. Only works in an interactive
         notebook session, e.g. in a Jupyter notebook
         """
         return self.molecules().view(*args, **kwargs)
+
+    def view2d(self, *args, **kwargs):
+        """
+        Create a 2D representation of the molecules in this system.
+        If 'filename' is set then this will be written to that file. Otherwise
+        this will be returned for visualisation in a jupyter notebook.
+        """
+        return self.molecules().view2d(*args, **kwargs)
 
     def update(self, value):
         """Update the molecules in this system so that they have

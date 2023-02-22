@@ -3,8 +3,6 @@
 
 #include "SireMol_registrars.h"
 
-
-
 #include "amberparameters.h"
 #include "angleid.h"
 #include "atom.h"
@@ -37,7 +35,7 @@
 #include "beads.h"
 #include "bondhunter.h"
 #include "bondid.h"
-#include "bondtype.h"
+#include "bondorder.h"
 #include "cgatomidx.h"
 #include "cgeditor.h"
 #include "cgidentifier.h"
@@ -50,6 +48,7 @@
 #include "chainname.h"
 #include "chainresid.h"
 #include "chargeperturbation.h"
+#include "chirality.h"
 #include "connectivity.h"
 #include "cutgroup.h"
 #include "dihedralid.h"
@@ -100,7 +99,7 @@
 #include "select.h"
 #include "selectormol.h"
 #include "specifymol.h"
-#include "stereoscopy.h"
+#include "stereochemistry.h"
 #include "trajectory.h"
 #include "viewsofmol.h"
 #include "volumemap.h"
@@ -182,7 +181,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::CovalentBondHunter >();
     ObjectRegistry::registerConverterFor< SireMol::ChemicalBondHunter >();
     ObjectRegistry::registerConverterFor< SireMol::BondID >();
-    ObjectRegistry::registerConverterFor< SireMol::BondType >();
+    ObjectRegistry::registerConverterFor< SireMol::BondOrder >();
     ObjectRegistry::registerConverterFor< SireMol::CGAtomIdx >();
     ObjectRegistry::registerConverterFor< SireMol::CGEditor >();
     ObjectRegistry::registerConverterFor< SireMol::CGStructureEditor >();
@@ -213,6 +212,8 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::ChainName >();
     ObjectRegistry::registerConverterFor< SireMol::ChainResID >();
     ObjectRegistry::registerConverterFor< SireMol::ChargePerturbation >();
+    ObjectRegistry::registerConverterFor< SireMol::Chirality >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomChiralities >();
     ObjectRegistry::registerConverterFor< SireMol::Connectivity >();
     ObjectRegistry::registerConverterFor< SireMol::ConnectivityEditor >();
     ObjectRegistry::registerConverterFor< SireMol::CutGroup >();
@@ -319,7 +320,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::SelectorM<SireMol::Segment> >();
     ObjectRegistry::registerConverterFor< SireMol::SelectorM<SireMol::CutGroup> >();
     ObjectRegistry::registerConverterFor< SireMol::SpecifyMol >();
-    ObjectRegistry::registerConverterFor< SireMol::Stereoscopy >();
+    ObjectRegistry::registerConverterFor< SireMol::Stereochemistry >();
     ObjectRegistry::registerConverterFor< SireMol::Trajectory >();
     ObjectRegistry::registerConverterFor< SireMol::Frame >();
     ObjectRegistry::registerConverterFor< SireMol::MolTrajectoryData >();

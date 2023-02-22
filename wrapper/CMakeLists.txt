@@ -49,6 +49,8 @@ if (NCORES EQUAL 0)
 endif()
 message(STATUS "Configuring on a machine with number of cores = ${NCORES}")
 
+message(STATUS, "CHANGED")
+
 message( STATUS "Building into an existing conda installation..." )
 
 # Where is anaconda installed
@@ -75,9 +77,28 @@ set( SIRE_INCLUDE_DIR "${SIRE_APP}/include/Sire" )
 set( CONDA_INCLUDE_DIR "${ANACONDA_BASE}/include" )
 message( STATUS "Using CONDA_INCLUDE_DIR = ${CONDA_INCLUDE_DIR}" )
 
+set( CONDA_INCLUDE_DIR2 "${ANACONDA_BASE}/Library/include" )
+
+# "PREFIX" will be set by conda-build - make sure we use this,
+# and don't accidentally try to use "BUILD_PREFIX"
+if ((DEFINED ENV{PREFIX}) AND (DEFINED ENV{BUILD_PREFIX}))
+  message(STATUS "This is a conda build to create a conda package")
+  message(STATUS "BUILD_PREFIX = $ENV{BUILD_PREFIX}")
+  string(REPLACE "\\" "/" ANACONDA_BUILD "$ENV{BUILD_PREFIX}")
+
+  set( CONDA_INCLUDE_DIR3 "${ANACONDA_BUILD}/Library/include" )
+else()
+  set( CONDA_INCLUDE_DIR3 "${ANACONDA_BASE}/Library/include" )
+endif()
+
+message( STATUS "Using CONDA_INCLUDE_DIR2 = ${CONDA_INCLUDE_DIR2}" )
+message( STATUS "Using CONDA_INCLUDE_DIR3 = ${CONDA_INCLUDE_DIR3}" )
+
 # likely need to "if (WINDOWS)" this as the path is different there
 set( CONDA_LIBRARY_DIR "${ANACONDA_BASE}/lib" )
 message( STATUS "Using CONDA_LIBRARY_DIR = ${CONDA_LIBRARY_DIR}" )
+set( CONDA_LIBRARY_DIR2 "${ANACONDA_BASE}/Library/lib" )
+message( STATUS "USING CONDA_LIBRARY_DIR2 = ${CONDA_LIBRARY_DIR2}")
 
 set ( SIRE_COMP_CMAKE "${SIRE_INCLUDE_DIR}/cmake/SireCompileVariables.cmake" )
 

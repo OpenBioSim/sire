@@ -17,8 +17,14 @@ if (SIRE_HAS_CPP_17)
 
     # Third Party dependencies of this module
     include_directories( ${BOOST_INCLUDE_DIR}
-                        ${PYTHON_INCLUDE_DIR}
-                        ${RDKIT_INCLUDE_DIR} )
+                         ${PYTHON_INCLUDE_DIR}
+                         ${RDKIT_INCLUDE_DIR} )
+
+    if (WIN32)
+      # RDKit needs this definition set on Windows
+      add_definitions(-DWIN32)
+      add_definitions(-DRDKIT_DYN_LINK)
+    endif()
 
     # Sire include paths
     include_directories( BEFORE ${SIRE_INCLUDE_DIR} )

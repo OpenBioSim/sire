@@ -29,6 +29,8 @@
 
 #include "SireID/index.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireCAS/expression.h"
 
 #include "SireBase/errors.h"
@@ -456,6 +458,35 @@ SelectorMImproper SelectorMImproper::operator()(const QList<qint64> &idxs) const
 SelectorMImproper SelectorMImproper::operator()(const ImproperID &id) const
 {
     return this->operator[](id);
+}
+
+SelectorMol SelectorMImproper::extract() const
+{
+    const int nmols = this->count();
+
+    const bool uses_parallel = nmols < 16;
+
+    QVector<Molecule> mols(nmols);
+    Molecule *mols_data = mols.data();
+
+    if (uses_parallel)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                mols_data[i] = this->operator()(i).extract();
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nmols; ++i)
+        {
+            mols_data[i] = this->operator()(i).extract();
+        }
+    }
+
+    return SelectorMol(mols);
 }
 
 bool SelectorMImproper::isSelector() const

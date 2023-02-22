@@ -27,7 +27,6 @@ def __get_property__(molview, key):
 
 
 def __get_metadata__(molview, *args):
-
     if len(args) == 1:
         metakey = args[0]
         if hasattr(molview, "metadata_type"):
@@ -189,7 +188,6 @@ def __set_bond_property__(connectivity, bond, key, property):
 
 
 def __set_metadata__(molview, *args):
-
     if len(args) == 2:
         metakey = args[0]
         property = args[1]
@@ -319,6 +317,7 @@ def _pvt_property_cludge_fix(C):
 
 __props = [
     AtomCharges,
+    AtomChiralities,
     AtomElements,
     AtomStringArrayProperty,
     AtomPropertyList,

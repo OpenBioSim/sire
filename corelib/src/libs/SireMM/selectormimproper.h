@@ -136,6 +136,8 @@ namespace SireMM
         SelectorMImproper operator()(const QList<qint64> &idxs) const;
         SelectorMImproper operator()(const SireMol::ImproperID &id) const;
 
+        SireMol::SelectorMol extract() const;
+
         bool isSelector() const;
 
         QList<SireMol::MolViewPtr> toList() const;

@@ -25,8 +25,8 @@
   *
 \*********************************************/
 
-#ifndef SIREMOL_STEREOSCOPY_H
-#define SIREMOL_STEREOSCOPY_H
+#ifndef SIREMOL_STEREOCHEMISTRY_H
+#define SIREMOL_STEREOCHEMISTRY_H
 
 #include "SireBase/property.h"
 
@@ -34,51 +34,54 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
-    class Stereoscopy;
+    class Stereochemistry;
 }
 
-SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Stereoscopy &);
-SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Stereoscopy &);
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::Stereochemistry &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::Stereochemistry &);
 
 namespace SireMol
 {
 
-    /** This class represents a bond type (e.g. single, double etc.)
+    /** This class represents a bond's stereochemistry
 
         @author Christopher Woods
     */
-    class SIREMOL_EXPORT Stereoscopy : public SireBase::ConcreteProperty<Stereoscopy, SireBase::Property>
+    class SIREMOL_EXPORT Stereochemistry : public SireBase::ConcreteProperty<Stereochemistry, SireBase::Property>
     {
 
-        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Stereoscopy &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Stereoscopy &);
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Stereochemistry &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, Stereochemistry &);
 
     public:
-        Stereoscopy();
+        Stereochemistry();
 
-        Stereoscopy(const QString &s);
-        Stereoscopy(int sdf_value);
+        Stereochemistry(const QString &s);
 
-        Stereoscopy(const Stereoscopy &other);
+        Stereochemistry(const Stereochemistry &other);
 
-        ~Stereoscopy();
+        ~Stereochemistry();
 
-        Stereoscopy &operator=(const Stereoscopy &other);
+        static Stereochemistry fromSDF(int val);
+        static Stereochemistry fromRDKit(const QString &value);
 
-        bool operator==(const Stereoscopy &other) const;
-        bool operator!=(const Stereoscopy &other) const;
+        Stereochemistry &operator=(const Stereochemistry &other);
+
+        bool operator==(const Stereochemistry &other) const;
+        bool operator!=(const Stereochemistry &other) const;
 
         static const char *typeName();
 
-        static Stereoscopy up();
-        static Stereoscopy down();
-        static Stereoscopy notStereo();
-        static Stereoscopy undefined();
+        static Stereochemistry up();
+        static Stereochemistry down();
+        static Stereochemistry notStereo();
+        static Stereochemistry undefined();
 
         QString toString() const;
 
         int value() const;
-        int sdfValue() const;
+        int toSDF() const;
+        QString toRDKit() const;
 
         bool isDefined() const;
         bool isUp() const;
@@ -92,9 +95,9 @@ namespace SireMol
 
 } // namespace SireMol
 
-Q_DECLARE_METATYPE(SireMol::Stereoscopy)
+Q_DECLARE_METATYPE(SireMol::Stereochemistry)
 
-SIRE_EXPOSE_CLASS(SireMol::Stereoscopy)
+SIRE_EXPOSE_CLASS(SireMol::Stereochemistry)
 
 SIRE_END_HEADER
 

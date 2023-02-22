@@ -136,6 +136,8 @@ namespace SireMol
 
         bool isSelector() const;
 
+        SelectorMol extract() const;
+
         QList<qint64> find(const T &view) const;
         QList<qint64> find(const Selector<T> &views) const;
         QList<qint64> find(const SelectorM<T> &views) const;
@@ -1232,6 +1234,36 @@ namespace SireMol
     }
 
     template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorMol SelectorM<T>::extract() const
+    {
+        const int nmols = this->count();
+
+        const bool uses_parallel = nmols < 16;
+
+        QVector<Molecule> mols(nmols);
+        Molecule *mols_data = mols.data();
+
+        if (uses_parallel)
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                              {
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    mols_data[i] = this->operator()(i).extract();
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < nmols; ++i)
+            {
+                mols_data[i] = this->operator()(i).extract();
+            }
+        }
+
+        return SelectorMol(mols);
+    }
+
+    template <class T>
     SIRE_OUTOFLINE_TEMPLATE bool SelectorM<T>::isSelector() const
     {
         return true;
@@ -1550,7 +1582,7 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE MoleculeGroup SelectorM<T>::toMoleculeGroup() const
     {
-        MoleculeGroup grp;
+        MoleculeGroup grp("all");
 
         for (const auto &view : this->vws)
         {

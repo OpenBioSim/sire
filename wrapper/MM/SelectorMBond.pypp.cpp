@@ -503,6 +503,18 @@ void register_SelectorMBond_class(){
                 , "" );
         
         }
+        { //::SireMM::SelectorMBond::extract
+        
+            typedef ::SireMol::SelectorMol ( ::SireMM::SelectorMBond::*extract_function_type)(  ) const;
+            extract_function_type extract_function_value( &::SireMM::SelectorMBond::extract );
+            
+            SelectorMBond_exposer.def( 
+                "extract"
+                , extract_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::SelectorMBond::hasMetadata
         
             typedef bool ( ::SireMM::SelectorMBond::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;

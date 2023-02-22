@@ -10,4 +10,7 @@ make ; sys_platform == "linux"
 libtool ; sys_platform == "linux"
 sysroot_linux-64==2.17 ; sys_platform == "linux"
 
-cmake
+# These packages are needed to compile
+# the SireRDKit plugin
+rdkit
+rdkit-dev

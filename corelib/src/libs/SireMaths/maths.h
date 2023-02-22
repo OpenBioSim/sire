@@ -35,13 +35,17 @@
 #ifndef GCCXML_PARSE
 // some versions of GCCXML don't like these headers...
 // also, need to disable warnings about sprintf being dangerous
+#ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#ifdef __clang__
 #pragma clang diagnostic pop
+#endif
 #endif // GCCXML_PARSE
 
 #include <gsl/gsl_sys.h>

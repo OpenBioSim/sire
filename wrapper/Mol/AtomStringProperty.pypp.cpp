@@ -29,6 +29,10 @@ namespace bp = boost::python;
 
 #include "atomproperty.hpp"
 
+#include "atompropertylist.h"
+
+#include "atomradicals.h"
+
 #include "atomradii.h"
 
 #include "atomvelocities.h"

@@ -3,7 +3,7 @@ __all__ = [
     "AtomIdx",
     "AtomName",
     "AtomNum",
-    "BondType",
+    "BondOrder",
     "Chain",
     "ChainIdx",
     "ChainName",
@@ -31,7 +31,7 @@ __all__ = [
     "SelectorM_Residue_",
     "SelectorM_Segment_",
     "SelectorMol",
-    "Stereoscopy",
+    "Stereochemistry",
     "TrajectoryIterator",
 ]
 
@@ -82,8 +82,8 @@ from ..legacy.Mol import (
     SelectorMol,
     MoleculeView,
     Select,
-    BondType,
-    Stereoscopy,
+    BondOrder,
+    Stereochemistry,
     AtomCoords,
 )
 
@@ -91,7 +91,7 @@ from ._cursor import Cursor, Cursors, CursorsM
 from ._trajectory import TrajectoryIterator
 from ._element import Element
 from ._view import view as _viewfunc
-from ._smiles import _to_smiles, _view2d
+from ._smiles import _to_smiles, _view2d, _selector_to_smiles, _selector_view2d
 
 # make sure that Vector has units attached
 from ..maths import Vector as _Vector
@@ -1398,16 +1398,28 @@ MoleculeView.view = _viewfunc
 MoleculeView.smiles = _to_smiles
 MoleculeView.view2d = _view2d
 SelectorMol.view = _viewfunc
+SelectorMol.view2d = _selector_view2d
+SelectorMol.smiles = _selector_to_smiles
 Selector_Atom_.view = _viewfunc
 Selector_Residue_.view = _viewfunc
 Selector_Chain_.view = _viewfunc
 Selector_Segment_.view = _viewfunc
 Selector_CutGroup_.view = _viewfunc
 SelectorM_Atom_.view = _viewfunc
+SelectorM_Atom_.view2d = _selector_view2d
+SelectorM_Atom_.smiles = _selector_to_smiles
 SelectorM_Residue_.view = _viewfunc
+SelectorM_Residue_.view2d = _selector_view2d
+SelectorM_Residue_.smiles = _selector_to_smiles
 SelectorM_Chain_.view = _viewfunc
+SelectorM_Chain_.view2d = _selector_view2d
+SelectorM_Chain_.smiles = _selector_to_smiles
 SelectorM_Segment_.view = _viewfunc
+SelectorM_Segment_.view2d = _selector_view2d
+SelectorM_Segment_.smiles = _selector_to_smiles
 SelectorM_CutGroup_.view = _viewfunc
+SelectorM_CutGroup_.view2d = _selector_view2d
+SelectorM_CutGroup_.smiles = _selector_to_smiles
 
 if not hasattr(SelectorMol, "__orig__find__"):
 

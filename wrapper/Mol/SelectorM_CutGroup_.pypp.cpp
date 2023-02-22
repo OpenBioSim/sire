@@ -580,6 +580,19 @@ void register_SelectorM_CutGroup__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::extract
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef ::SireMol::SelectorMol ( ::SireMol::SelectorM< SireMol::CutGroup >::*extract_function_type)(  ) const;
+            extract_function_type extract_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::extract );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "extract"
+                , extract_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::CutGroup >::find
         
             typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;

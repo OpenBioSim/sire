@@ -3,8 +3,6 @@
 
 #include "SireIO_registrars.h"
 
-
-
 #include "amber.h"
 #include "amberprm.h"
 #include "amberrst.h"

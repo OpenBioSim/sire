@@ -225,32 +225,48 @@ def biosimspace_to_sire(obj, map=None):
             return obj
 
 
+_BSS = None
+
+
 def sire_to_biosimspace(obj, map=None):
     """
     Convert the passed sire object (either a molecule or list
     of molecules) to a BioSimSpace equivalent
     """
-    obj = _to_selectormol(obj)
+    import sys
 
-    try:
-        import BioSimSpace as BSS
-    except (ImportError, ModuleNotFoundError):
+    if "BioSimSpace" not in sys.modules:
         raise ModuleNotFoundError(
-            "BioSimSpace is not available. Please install via "
-            "'mamba install -c openbiosim biosimspace'"
+            "BioSimSpace is not available. Please make sure you have "
+            "imported BioSimSpace before `sire`, e.g. have run "
+            "`import BioSimSpace as BSS` in your script before "
+            "importing sire"
         )
-    except Exception as e:
-        raise ImportError(
-            "There was an error importing BioSimSpace. This can occur "
-            "if you import BioSimSpace after sire. Please import "
-            "BioSimSpace first and try again. For info, the error "
-            f"was {e}"
-        )
+
+    global _BSS
+
+    if _BSS is None:
+        # are we using the sandbox or vanilla BSS?
+        if "BioSimSpace.Sandpit" in sys.modules:
+            sandpit = None
+            for key in sys.modules.keys():
+                if key.startswith("BioSimSpace.Sandpit."):
+                    sandpit = ".".join(key.split(".")[0:3])
+                    break
+
+            if sandpit is not None:
+                _BSS = sys.modules[sandpit]
+            else:
+                _BSS = sys.modules["BioSimSpace"]
+        else:
+            _BSS = sys.modules["BioSimSpace"]
+
+    obj = _to_selectormol(obj)
 
     converted = []
 
     for mol in obj:
-        converted.append(BSS._SireWrappers.Molecule(mol))
+        converted.append(_BSS._SireWrappers.Molecule(mol))
 
     if len(converted) == 0:
         return None

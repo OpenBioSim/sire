@@ -75,18 +75,6 @@ void register_PartialMolecule_class(){
                 , "Return an evaluator that can evaluate properties\nover all of the atoms in this view" );
         
         }
-        { //::SireMol::PartialMolecule::extract
-        
-            typedef ::SireMol::PartialMolecule ( ::SireMol::PartialMolecule::*extract_function_type)(  ) const;
-            extract_function_type extract_function_value( &::SireMol::PartialMolecule::extract );
-            
-            PartialMolecule_exposer.def( 
-                "extract"
-                , extract_function_value
-                , bp::release_gil_policy()
-                , "Extract a copy of this PartialMolecule which contains only the currently\nselected atoms. This allows the used to pull out parts of a larger molecule,\ne.g. if they want to have only selected residues in a protein and do not\nwant to have to store or manipulate the larger protein molecule" );
-        
-        }
         { //::SireMol::PartialMolecule::hasMetadata
         
             typedef bool ( ::SireMol::PartialMolecule::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
