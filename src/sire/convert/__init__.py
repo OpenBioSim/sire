@@ -68,8 +68,7 @@ def to(obj, format: str = "sire", map=None):
         return to_openmm(obj, map=map)
     else:
         raise ValueError(
-            f"Cannot convert {obj} as the format '{format}' is "
-            "not recognised."
+            f"Cannot convert {obj} as the format '{format}' is " "not recognised."
         )
 
 
@@ -245,21 +244,22 @@ def sire_to_biosimspace(obj, map=None):
 
     global _BSS
 
-    if _BSS is None:
-        # are we using the sandbox or vanilla BSS?
-        if "BioSimSpace.Sandpit" in sys.modules:
-            sandpit = None
-            for key in sys.modules.keys():
-                if key.startswith("BioSimSpace.Sandpit."):
-                    sandpit = ".".join(key.split(".")[0:3])
-                    break
+    # Try to inspect the stack to work out the module from which this
+    # function was called.
+    try:
+        frame = sys._getframe()
+        for frame_idx in range(0, 3):
+            frame = frame.f_back
+        module = frame.f_globals["__name__"]
+    except:
+        module = None
 
-            if sandpit is not None:
-                _BSS = sys.modules[sandpit]
-            else:
-                _BSS = sys.modules["BioSimSpace"]
-        else:
-            _BSS = sys.modules["BioSimSpace"]
+    # Was this function called from a BioSmSpace Sandpit?
+    if module and module.startswith("BioSimSpace.Sandpit."):
+        sandpit = ".".join(module.split(".")[0:3])
+        _BSS = sys.modules[sandpit]
+    else:
+        _BSS = sys.modules["BioSimSpace"]
 
     obj = _to_selectormol(obj)
 
