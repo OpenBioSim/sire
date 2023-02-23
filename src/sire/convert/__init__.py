@@ -244,18 +244,19 @@ def sire_to_biosimspace(obj, map=None):
 
     global _BSS
 
-    import inspect
-
-    # Try to inspect the stack to work out the file from which this
+    # Try to inspect the stack to work out the module from which this
     # function was called.
     try:
-        filename = inspect.stack()[3].filename
+        frame = sys._getframe()
+        for frame_idx in range(0, 3):
+            frame = frame.f_back
+        module = frame.f_globals["__name__"]
     except:
-        filename = None
+        module = None
 
     # Was this function called from a BioSmSpace Sandpit?
-    if filename and "Sandpit" in filename:
-        sandpit = "BioSimSpace.Sandpit." + filename.split("Sandpit")[1].split("/")[1]
+    if module and module.startswith("BioSimSpace.Sandpit."):
+        sandpit = ".".join(module.split(".")[0:3])
         _BSS = sys.modules[sandpit]
     else:
         _BSS = sys.modules["BioSimSpace"]
