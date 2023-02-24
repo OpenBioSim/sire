@@ -162,8 +162,13 @@ Frame AmberRst::_getFrame(int i) const
 
     SireVol::SpacePtr space = SireVol::Cartesian();
 
+    if (rst.box_angs[0].isZero() or rst.box_dims[0].isZero())
+    {
+        // this is a null box - assume it is an infinite Cartesian space
+        space = SireVol::Cartesian();
+    }
     // PeriodicBox.
-    if (rst.box_angs[0] == cubic_angs)
+    else if (rst.box_angs[0] == cubic_angs)
     {
         space = SireVol::PeriodicBox(rst.box_dims[0]);
     }

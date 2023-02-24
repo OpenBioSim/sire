@@ -31,6 +31,8 @@
 
 #include "axisset.h"
 
+#include <QDebug>
+
 using namespace SireMaths;
 using namespace SireStream;
 
@@ -65,8 +67,18 @@ AxisSet::AxisSet() : mat(), invmat(), orgn()
 }
 
 /** Construct an AxisSet using matrix 'matrx', and origin 'orign' */
-AxisSet::AxisSet(const Matrix &matrx, Vector vec) : mat(matrx), invmat(mat.inverse()), orgn(vec)
+AxisSet::AxisSet(const Matrix &matrx, Vector vec) : mat(matrx), orgn(vec)
 {
+    try
+    {
+        invmat = mat.inverse();
+    }
+    catch (const SireError::exception &)
+    {
+        qDebug() << "FAILED TO INVERT MATRIX";
+        qDebug() << mat.toString();
+        invmat = mat;
+    }
 }
 
 /** Copy constructor */
