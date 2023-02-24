@@ -3955,9 +3955,6 @@ def printComponents(comps, FILE):
     """This function prints out all of the free energy components in the passed object"""
     print("RESIDUE    TOTAL    COULOMB    LJ", file=FILE)
     for i in range(0, comps.nComponents()):
-        print(comps)
-        print(comps.nComponents())
-
         try:
             res = comps.viewAt(i).residue()
         except Exception:

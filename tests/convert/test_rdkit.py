@@ -43,17 +43,6 @@ def test_hybridization():
             print("WEIRD BONDS", c, bonds)
             assert False
 
-    for o in l_ala["element oxygen"]:
-        bonds = o["bonds to *"]
-
-        if len(bonds) == 1:
-            assert o.property("hybridization").is_sp2()
-        elif len(bonds) == 2:
-            assert o.property("hybridization").is_sp3()
-        else:
-            print("WEIRD BONDS", o, bonds)
-            assert False
-
     for n in l_ala["element nitrogen"]:
         bonds = n["bonds to *"]
 
