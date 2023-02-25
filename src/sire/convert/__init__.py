@@ -68,7 +68,8 @@ def to(obj, format: str = "sire", map=None):
         return to_openmm(obj, map=map)
     else:
         raise ValueError(
-            f"Cannot convert {obj} as the format '{format}' is " "not recognised."
+            f"Cannot convert {obj} as the format '{format}' is "
+            "not recognised."
         )
 
 
@@ -278,12 +279,8 @@ def sire_to_biosimspace(obj, map=None):
 
 def openmm_to_sire(obj, map=None):
     """
-    Convert the passed OpenMM object (either a molecule or
-    list of molecules) to the sire equivalent
+    Convert the passed OpenMM.System to the sire equivalent
     """
-    if type(obj) is not list:
-        obj = [obj]
-
     try:
         from ..legacy.Convert import openmm_to_sire as _openmm_to_sire
     except Exception:
