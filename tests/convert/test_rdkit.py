@@ -53,3 +53,27 @@ def test_hybridization():
         else:
             print("WEIRD BONDS", n, bonds)
             assert False
+
+
+def test_hybridization2():
+    mol = sr.smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
+
+    expected = [
+        "SP3",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP2",
+        "SP3",
+        "SP3",
+    ]
+
+    for atom, e in zip(mol.atoms(), expected):
+        assert atom.property("hybridization").to_rdkit() == e

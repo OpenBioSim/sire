@@ -89,6 +89,9 @@ def _pythonize(C, delete_old: bool = True) -> None:
         # converted to _mcs_matches by the code below)
         new_attr = new_attr.replace("MCSmatches", "Mcs_matches")
 
+        # change "RDKit" to "Rdkit"
+        new_attr = new_attr.replace("RDKit", "Rdkit")
+
         # change "MCS" into "Mcs" (it will then be converted to _mcs by
         # the code below)
         new_attr = new_attr.replace("MCS", "Mcs")
@@ -140,7 +143,7 @@ def _pythonize_modules(modules, delete_old: bool = True):
         import inspect
 
         try:
-            for (key, cls) in inspect.getmembers(MOD, inspect.isclass):
+            for key, cls in inspect.getmembers(MOD, inspect.isclass):
                 _pythonize(cls, delete_old=delete_old)
         except Exception as e:
             print(e)
@@ -276,7 +279,7 @@ def use_new_api():
         Base,
         CAS,
         Cluster,
-        Convert,   # does not need pythonizing, but importing will make it visible
+        Convert,  # does not need pythonizing, but importing will make it visible
         Error,
         ID,
         Maths,
