@@ -27,3 +27,29 @@ def test_chirality():
 
     assert d_ala["C2"].property("chirality").is_clockwise()
     assert l_ala["C2"].property("chirality").is_counter_clockwise()
+
+
+def test_hybridization():
+    l_ala = sr.smiles("C[C@H](N)C(=O)O")
+
+    for c in l_ala["element carbon"]:
+        bonds = c["bonds to *"]
+
+        if len(bonds) == 3:
+            assert c.property("hybridization").is_sp2()
+        elif len(bonds) == 4:
+            assert c.property("hybridization").is_sp3()
+        else:
+            print("WEIRD BONDS", c, bonds)
+            assert False
+
+    for n in l_ala["element nitrogen"]:
+        bonds = n["bonds to *"]
+
+        if len(bonds) == 2:
+            assert n.property("hybridization").is_sp2()
+        elif len(bonds) == 3:
+            assert n.property("hybridization").is_sp3()
+        else:
+            print("WEIRD BONDS", n, bonds)
+            assert False

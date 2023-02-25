@@ -512,7 +512,7 @@ class TrajectoryIterator:
                     indexes[idx] = frame.frame_index()
                     progress.update(task, completed=idx)
         else:
-            colnames.append(colname(view))
+            colnames.append(colname(self._view))
             column = np.zeros(nframes, dtype=float)
 
             with Console.progress() as progress:

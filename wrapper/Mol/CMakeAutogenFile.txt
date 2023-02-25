@@ -18,6 +18,7 @@ set ( PYPP_SOURCES
        AtomEnergies.pypp.cpp
        AtomFloatProperty.pypp.cpp
        AtomForces.pypp.cpp
+       AtomHybridizations.pypp.cpp
        AtomID.pypp.cpp
        AtomIDMatcher.pypp.cpp
        AtomIdx.pypp.cpp
@@ -121,6 +122,7 @@ set ( PYPP_SOURCES
        GeometryPerturbation.pypp.cpp
        GeometryPerturbations.pypp.cpp
        GroupAtomIDBase.pypp.cpp
+       Hybridization.pypp.cpp
        IDAndSet_AtomID_.pypp.cpp
        IDAndSet_CGID_.pypp.cpp
        IDAndSet_ChainID_.pypp.cpp

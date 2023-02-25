@@ -319,6 +319,7 @@ __props = [
     AtomCharges,
     AtomChiralities,
     AtomElements,
+    AtomHybridizations,
     AtomStringArrayProperty,
     AtomPropertyList,
     AtomDoubleArrayProperty,

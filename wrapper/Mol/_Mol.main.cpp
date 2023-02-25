@@ -43,6 +43,8 @@
 
 #include "AtomForces.pypp.hpp"
 
+#include "AtomHybridizations.pypp.hpp"
+
 #include "AtomID.pypp.hpp"
 
 #include "AtomIDMatcher.pypp.hpp"
@@ -248,6 +250,8 @@
 #include "GeometryPerturbations.pypp.hpp"
 
 #include "GroupAtomIDBase.pypp.hpp"
+
+#include "Hybridization.pypp.hpp"
 
 #include "IDAndSet_AtomID_.pypp.hpp"
 
@@ -732,6 +736,8 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_AtomElements_class();
 
+    register_AtomHybridizations_class();
+
     register_AtomRadicals_class();
 
     register_AtomCharges_class();
@@ -917,6 +923,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_SegChainID_class();
 
     register_SegResID_class();
+
+    register_Hybridization_class();
 
     register_ImproperID_class();
 

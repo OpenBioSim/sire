@@ -58,6 +58,7 @@
 #include "geometryperturbation.h"
 #include "groupatomids.h"
 #include "groupgroupids.h"
+#include "hybridization.h"
 #include "improperid.h"
 #include "mgidentifier.h"
 #include "mgidsandmaps.h"
@@ -238,6 +239,8 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::SegCGID >();
     ObjectRegistry::registerConverterFor< SireMol::CGResID >();
     ObjectRegistry::registerConverterFor< SireMol::CGChainID >();
+    ObjectRegistry::registerConverterFor< SireMol::Hybridization >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomHybridizations >();
     ObjectRegistry::registerConverterFor< SireMol::ImproperID >();
     ObjectRegistry::registerConverterFor< SireID::IDAndSet<SireMol::MGID> >();
     ObjectRegistry::registerConverterFor< SireID::IDOrSet<SireMol::MGID> >();

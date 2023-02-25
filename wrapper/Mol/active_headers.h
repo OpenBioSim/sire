@@ -67,6 +67,7 @@
 #include "geometryperturbation.h"
 #include "groupatomids.h"
 #include "groupgroupids.h"
+#include "hybridization.h"
 #include "improperid.h"
 #include "mgid.h"
 #include "mgidentifier.h"
