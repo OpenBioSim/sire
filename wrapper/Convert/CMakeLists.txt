@@ -5,6 +5,7 @@
 ########################################
 
 add_subdirectory (SireRDKit)
+add_subdirectory (SireOpenMM)
 
 # installation
 set( INSTALLDIR ${SIRE_PYTHON}/sire/legacy/Convert )
