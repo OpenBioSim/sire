@@ -55,10 +55,11 @@ namespace SireOpenMM
         return SelectorMol();
     }
 
-    OpenMM::System sire_to_openmm(const SelectorMol &mols,
-                                  const PropertyMap &map)
+    void sire_to_openmm(OpenMM::System &system,
+                        const SelectorMol &mols,
+                        const PropertyMap &map)
     {
-        return OpenMM::System();
+        system.addParticle(3.0);
     }
 
 } // end of namespace SireOpenMM

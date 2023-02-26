@@ -48,9 +48,18 @@ except Exception:
 
 
 try:
-    from ._SireOpenMM import sire_to_openmm, openmm_to_sire
+    from ._SireOpenMM import _sire_to_openmm_interface, openmm_to_sire
 
     _has_openmm = True
+
+    def sire_to_openmm(mols, map):
+        import openmm
+
+        system = openmm.System()
+
+        _sire_to_openmm_interface(system, mols, map)
+
+        return system
 
 except Exception:
     # OpenMM support is not available

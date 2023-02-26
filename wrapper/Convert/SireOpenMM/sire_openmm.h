@@ -13,8 +13,9 @@ namespace SireOpenMM
     SireMol::SelectorMol openmm_to_sire(const OpenMM::System &mols,
                                         const SireBase::PropertyMap &map);
 
-    OpenMM::System sire_to_openmm(const SireMol::SelectorMol &mols,
-                                  const SireBase::PropertyMap &map);
+    void sire_to_openmm(OpenMM::System &system,
+                        const SireMol::SelectorMol &mols,
+                        const SireBase::PropertyMap &map);
 }
 
 #endif

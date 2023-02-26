@@ -324,12 +324,7 @@ def sire_to_openmm(obj, map=None):
 
     mols = _sire_to_openmm(obj, map=create_map(map))
 
-    if mols is None:
-        return None
-    elif len(mols) == 1:
-        return mols[0]
-    else:
-        return mols
+    return mols
 
 
 def rdkit_to_sire(obj, map=None):
