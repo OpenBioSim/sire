@@ -63,16 +63,16 @@ namespace SireOpenMM
     class OpenMMMolecule
     {
     public:
-        OpenMMMolecule() : nats(0)
+        OpenMMMolecule()
         {
         }
 
         OpenMMMolecule(const Molecule &mol, const PropertyMap &map)
         {
             const auto &moldata = mol.data();
-            const auto &molinfo = moldata.info();
+            molinfo = mol.info();
 
-            nats = molinfo.nAtoms();
+            const int nats = molinfo.nAtoms();
 
             if (nats <= 0)
             {
@@ -170,8 +170,9 @@ namespace SireOpenMM
         {
         }
 
-        int nats;
+        SireMol::MoleculeInfo molinfo;
         SireMM::AmberParams params;
+
         QVector<OpenMM::Vec3> coords;
         QVector<OpenMM::Vec3> vels;
         QVector<double> masses;
@@ -253,6 +254,7 @@ namespace SireOpenMM
         // it has to be done in serial?
         int openmm_index = 0;
 
+        // (will deal with restraints, light atoms and virtual sites later)
         for (int i = 0; i < nmols; ++i)
         {
             auto &mol = openmm_mols_data[i];
@@ -263,12 +265,41 @@ namespace SireOpenMM
             auto mol_sigmas = mol.sigmas.constData();
             auto mol_epsilons = mol.epsilons.constData();
 
-            for (int j = 0; j < mol.nats; ++j)
+            // first the atom parameters
+            for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
                 mol_indexes[j] = openmm_index;
                 openmm_index += 1;
                 system.addParticle(mol_masses[j]);
                 cljff->addParticle(mol_charges[j], mol_sigmas[j], mol_epsilons[j]);
+            }
+
+            const auto &params = mol.params;
+
+            // now the bonds
+            const double bond_k_to_openmm = (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
+            const double bond_r0_to_openmm = 2.0 * (SireUnits::angstrom).to(SireUnits::nanometer);
+
+            for (auto it = params.bonds().constBegin();
+                 it != params.bonds().constEnd();
+                 ++it)
+            {
+                const auto &bondid = it.key().map(mol.molinfo);
+                const auto &bondparam = it.value().first;
+                const auto includes_h = it.value().second;
+
+                const int atom0 = bondid.get<0>().value();
+                const int atom1 = bondid.get<1>().value();
+
+                const int atom0_index = mol_indexes[atom0];
+                const int atom1_index = mol_indexes[atom1];
+
+                const double k = bondparam.k() * bond_k_to_openmm;
+                const double r0 = bondparam.r0() * bond_r0_to_openmm;
+
+                // add this as a standard bond - will deal with this
+                // being a bond with hydrogen (or a light atom) later
+                bondff->addBond(atom0_index, atom1_index, r0, k);
             }
         }
     }
