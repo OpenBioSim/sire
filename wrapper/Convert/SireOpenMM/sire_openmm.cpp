@@ -20,6 +20,7 @@
 
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
+#include "SireMM/amberparams.h"
 
 #include "SireMaths/vector.h"
 
@@ -40,6 +41,22 @@ using SireMol::SelectorMol;
 
 namespace SireOpenMM
 {
+    OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
+    {
+        const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+
+        return OpenMM::Vec3(internal_to_nm * coords.x(),
+                            internal_to_nm * coords.y(),
+                            internal_to_nm * coords.z());
+    }
+
+    OpenMM::Vec3 to_vec3(const SireMol::Velocity3D &vel)
+    {
+        return OpenMM::Vec3(vel.x().to(SireUnits::nanometers_per_ps),
+                            vel.y().to(SireUnits::nanometers_per_ps),
+                            vel.z().to(SireUnits::nanometers_per_ps));
+    }
+
     /** Internal class used to hold all of the extracted information
      *  of an OpenMM Molecule
      */
@@ -50,23 +67,103 @@ namespace SireOpenMM
         {
         }
 
-        OpenMMMolecule(int num_atoms)
+        OpenMMMolecule(const Molecule &mol, const PropertyMap &map)
         {
-            if (num_atoms <= 0)
+            const auto &moldata = mol.data();
+            const auto &molinfo = moldata.info();
+
+            nats = molinfo.nAtoms();
+
+            if (nats <= 0)
             {
-                nats = 0;
                 return;
             }
 
-            nats = num_atoms;
+            coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
+            vels = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
+            masses = QVector<double>(nats, 0.0);
+            charges = QVector<double>(nats, 0.0);
+            sigmas = QVector<double>(nats, 0.0);
+            epsilons = QVector<double>(nats, 0.0);
+            indexes = QVector<int>(nats, -1);
 
-            coords = QVector<OpenMM::Vec3>(nats);
-            vels = QVector<OpenMM::Vec3>(nats);
-            masses = QVector<double>(nats);
-            charges = QVector<double>(nats);
-            sigmas = QVector<double>(nats);
-            epsilons = QVector<double>(nats);
-            indexes = QVector<int>(nats);
+            params = SireMM::AmberParams(mol, map);
+
+            auto idx_to_cgatomidx = QVector<SireMol::CGAtomIdx>(nats);
+            auto idx_to_cgatomidx_data = idx_to_cgatomidx.data();
+
+            for (int i = 0; i < nats; ++i)
+            {
+                idx_to_cgatomidx_data[i] = molinfo.cgAtomIdx(SireMol::AtomIdx(i));
+            }
+
+            const auto coords_prop = map["coordinates"];
+
+            if (moldata.hasProperty(coords_prop))
+            {
+                const auto &coords = moldata.property(coords_prop).asA<SireMol::AtomCoords>();
+                auto mol_coords = this->coords.data();
+
+                for (int i = 0; i < nats; ++i)
+                {
+                    mol_coords[i] = to_vec3(coords.at(idx_to_cgatomidx_data[i]));
+                }
+            }
+
+            const auto vels_prop = map["velocities"];
+
+            if (moldata.hasProperty(vels_prop))
+            {
+                const auto &vels = moldata.property(vels_prop).asA<SireMol::AtomVelocities>();
+                auto mol_vels = this->vels.data();
+
+                for (int i = 0; i < nats; ++i)
+                {
+                    mol_vels[i] = to_vec3(vels.at(idx_to_cgatomidx_data[i]));
+                }
+            }
+
+            const auto params_masses = params.masses();
+            auto mol_masses = this->masses.data();
+
+            for (int i = 0; i < nats; ++i)
+            {
+                mol_masses[i] = params_masses.at(idx_to_cgatomidx_data[i]).to(SireUnits::g_per_mol);
+
+                if (mol_masses[i] < 0.05)
+                {
+                    mol_masses[i] = 0.0;
+                }
+
+                if (mol_masses[i] < 0.5)
+                {
+                    this->virtual_sites.append(i);
+                }
+                else if (mol_masses[i] < 2.5)
+                {
+                    this->light_atoms.append(i);
+                }
+            }
+
+            const auto params_charges = params.charges();
+            auto mol_charges = this->charges.data();
+
+            for (int i = 0; i < nats; ++i)
+            {
+                mol_charges[i] = params_charges.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
+            }
+
+            const auto params_ljs = params.ljs();
+            auto mol_sigmas = this->sigmas.data();
+            auto mol_epsilons = this->epsilons.data();
+
+            for (int i = 0; i < nats; ++i)
+            {
+                const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
+
+                mol_sigmas[i] = lj.sigma().to(SireUnits::nanometer);
+                mol_epsilons[i] = lj.epsilon().to(SireUnits::kJ_per_mol);
+            }
         }
 
         ~OpenMMMolecule()
@@ -74,6 +171,7 @@ namespace SireOpenMM
         }
 
         int nats;
+        SireMM::AmberParams params;
         QVector<OpenMM::Vec3> coords;
         QVector<OpenMM::Vec3> vels;
         QVector<double> masses;
@@ -108,22 +206,6 @@ namespace SireOpenMM
         return SelectorMol();
     }
 
-    OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
-    {
-        const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
-
-        return OpenMM::Vec3(internal_to_nm * coords.x(),
-                            internal_to_nm * coords.y(),
-                            internal_to_nm * coords.z());
-    }
-
-    OpenMM::Vec3 to_vec3(const SireMol::Velocity3D &vel)
-    {
-        return OpenMM::Vec3(vel.x().to(SireUnits::nanometers_per_ps),
-                            vel.y().to(SireUnits::nanometers_per_ps),
-                            vel.z().to(SireUnits::nanometers_per_ps));
-    }
-
     void sire_to_openmm(OpenMM::System &system,
                         const SelectorMol &mols,
                         const PropertyMap &map)
@@ -131,168 +213,6 @@ namespace SireOpenMM
         // we can assume that an empty system has been passed to us
 
         // we will get parameters from the map (e.g. cutoffs etc)
-
-        // get all the names of the atom properties
-        const auto chg_prop = map["charge"];
-        const auto lj_prop = map["LJ"];
-        const auto elem_prop = map["element"];
-        const auto mass_prop = map["mass"];
-        const auto coords_prop = map["coordinates"];
-        const auto vels_prop = map["velocities"];
-        const auto conn_prop = map["connectivity"];
-
-        // extract all of the properties into an intermediate format
-        auto to_openmm_mol = [&](const Molecule &molecule)
-        {
-            const auto &moldata = molecule.data();
-            const auto &molinfo = moldata.info();
-
-            const int nats = molinfo.nAtoms();
-
-            QVector<SireMol::CGAtomIdx> idx_to_cgatomidx(nats);
-            auto idx_to_cgatomidx_data = idx_to_cgatomidx.data();
-
-            for (int i = 0; i < nats; ++i)
-            {
-                idx_to_cgatomidx_data[i] = molinfo.cgAtomIdx(SireMol::AtomIdx(i));
-            }
-
-            OpenMMMolecule mol(nats);
-
-            try
-            {
-                const auto &coords = moldata.property(coords_prop).asA<SireMol::AtomCoords>();
-                auto mol_coords = mol.coords.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_coords[i] = to_vec3(coords.at(idx_to_cgatomidx_data[i]));
-                }
-            }
-            catch (...)
-            {
-                auto mol_coords = mol.coords.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_coords[i] = OpenMM::Vec3(0, 0, 0);
-                }
-            }
-
-            try
-            {
-                const auto &vels = moldata.property(vels_prop).asA<SireMol::AtomVelocities>();
-                auto mol_vels = mol.vels.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_vels[i] = to_vec3(vels.at(idx_to_cgatomidx_data[i]));
-                }
-            }
-            catch (...)
-            {
-                auto mol_vels = mol.vels.data();
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_vels[i] = OpenMM::Vec3(0, 0, 0);
-                }
-            }
-
-            auto mol_masses = mol.masses.data();
-
-            try
-            {
-                const auto &masses = moldata.property(mass_prop).asA<SireMol::AtomMasses>();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_masses[i] = masses.at(idx_to_cgatomidx_data[i]).to(SireUnits::g_per_mol);
-                }
-            }
-            catch (...)
-            {
-                try
-                {
-                    const auto &elems = moldata.property(elem_prop).asA<SireMol::AtomElements>();
-
-                    for (int i = 0; i < nats; ++i)
-                    {
-                        mol_masses[i] = elems.at(idx_to_cgatomidx_data[i]).mass().to(SireUnits::g_per_mol);
-                    }
-                }
-                catch (...)
-                {
-                    for (int i = 0; i < nats; ++i)
-                        mol_masses[i] = 0.0;
-                }
-            }
-
-            // check for light atoms or virtual sites
-            for (int i = 0; i < nats; ++i)
-            {
-                if (mol_masses[i] < 0.05)
-                {
-                    mol_masses[i] = 0.0;
-                }
-
-                if (mol_masses[i] < 0.5)
-                {
-                    mol.virtual_sites.append(i);
-                }
-                else if (mol_masses[i] < 2.5)
-                {
-                    mol.light_atoms.append(i);
-                }
-            }
-
-            try
-            {
-                const auto &chgs = moldata.property(chg_prop).asA<SireMol::AtomCharges>();
-                auto mol_charges = mol.charges.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_charges[i] = chgs.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
-                }
-            }
-            catch (...)
-            {
-                auto mol_charges = mol.charges.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol.charges[i] = 0.0;
-                }
-            }
-
-            try
-            {
-                const auto &ljs = moldata.property(lj_prop).asA<SireMM::AtomLJs>();
-                auto mol_sigmas = mol.sigmas.data();
-                auto mol_epsilons = mol.epsilons.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    const auto &lj = ljs.at(idx_to_cgatomidx_data[i]);
-
-                    mol_sigmas[i] = lj.sigma().to(SireUnits::nanometer);
-                    mol_epsilons[i] = lj.epsilon().to(SireUnits::kJ_per_mol);
-                }
-            }
-            catch (...)
-            {
-                auto mol_sigmas = mol.sigmas.data();
-                auto mol_epsilons = mol.epsilons.data();
-
-                for (int i = 0; i < nats; ++i)
-                {
-                    mol_sigmas[i] = 0;
-                    mol_epsilons[i] = 0;
-                }
-            }
-
-            return mol;
-        };
 
         // extract the data from all of the molecules
         const int nmols = mols.count();
@@ -305,14 +225,14 @@ namespace SireOpenMM
                               {
                 for (int i=r.begin(); i<r.end(); ++i)
                 {
-                    openmm_mols_data[i] = to_openmm_mol(mols[i]);
+                    openmm_mols_data[i] = OpenMMMolecule(mols[i], map);
                 } });
         }
         else
         {
             for (int i = 0; i < nmols; ++i)
             {
-                openmm_mols_data[i] = to_openmm_mol(mols[i]);
+                openmm_mols_data[i] = OpenMMMolecule(mols[i], map);
             }
         }
 
