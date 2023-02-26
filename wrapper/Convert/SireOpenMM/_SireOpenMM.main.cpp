@@ -7,6 +7,8 @@
 
 #include "Helpers/convertlist.hpp"
 
+#include <QDebug>
+
 namespace bp = boost::python;
 
 using namespace SireOpenMM;
@@ -46,12 +48,12 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     sire_to_openmm_function_type sire_to_openmm_function_value(&sire_to_openmm);
     openmm_to_sire_function_type openmm_to_sire_function_value(&openmm_to_sire);
 
-    bp::def("_sire_to_openmm_interface",
+    bp::def("_sire_to_openmm_system",
             sire_to_openmm_function_value,
             (bp::arg("system"), bp::arg("mols"), bp::arg("map")),
             "Convert sire molecules to an OpenMM::System");
 
-    bp::def("openmm_to_sire",
+    bp::def("_openmm_system_to_sire",
             openmm_to_sire_function_value,
             (bp::arg("mols"), bp::arg("map")),
             "Convert an OpenMM::System to sire molecules");

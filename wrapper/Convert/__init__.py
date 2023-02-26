@@ -48,16 +48,33 @@ except Exception:
 
 
 try:
-    from ._SireOpenMM import _sire_to_openmm_interface, openmm_to_sire
+    from ._SireOpenMM import (
+        _sire_to_openmm_system,
+        _openmm_system_to_sire,
+    )
 
     _has_openmm = True
+
+    def openmm_to_sire(mols, map):
+        import openmm
+
+        if type(mols) is not openmm.System:
+            raise TypeError(
+                "You can only convert an openmm.System to sire, not "
+                f"a {type(mols)}."
+            )
+
+        # Need to be sure that 'mols' is an openmm.System or else
+        # we will crash!
+        return _openmm_system_to_sire(mols, map)
 
     def sire_to_openmm(mols, map):
         import openmm
 
         system = openmm.System()
 
-        _sire_to_openmm_interface(system, mols, map)
+        # system must be an openmm.System() or else we will crash!
+        _sire_to_openmm_system(system, mols, map)
 
         return system
 

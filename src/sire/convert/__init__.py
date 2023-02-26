@@ -27,7 +27,12 @@ def _to_selectormol(obj):
     if hasattr(obj, "molecules"):
         return obj.molecules()
     elif type(obj) is list:
-        raise ValueError()
+        mols = []
+
+        for o in obj:
+            mols.append(_to_selectormol(o))
+
+        return _SelectorMol(mols)
     else:
         return _SelectorMol(obj)
 
@@ -281,6 +286,9 @@ def openmm_to_sire(obj, map=None):
     """
     Convert the passed OpenMM.System to the sire equivalent
     """
+    if type(obj) is not list:
+        obj = [obj]
+
     try:
         from ..legacy.Convert import openmm_to_sire as _openmm_to_sire
     except Exception:
@@ -291,7 +299,14 @@ def openmm_to_sire(obj, map=None):
 
     from ..base import create_map
 
-    mols = _openmm_to_sire(obj, map=create_map(map))
+    results = []
+
+    map = create_map(map)
+
+    for o in obj:
+        results.append(_openmm_to_sire(o, map))
+
+    mols = _to_selectormol(results)
 
     if mols is None:
         return None

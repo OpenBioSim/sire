@@ -106,6 +106,9 @@ namespace SireMol
         template <class T>
         SelectorMol(const SelectorM<T> &other, const MolID &molid);
 
+        SelectorMol(const QList<SelectorMol> &others);
+        SelectorMol(const QVector<SelectorMol> &others);
+
         SelectorMol(const SelectorMol &other);
 
         virtual ~SelectorMol();

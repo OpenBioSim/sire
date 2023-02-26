@@ -77,6 +77,8 @@ void register_SelectorMol_class(){
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Chain > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Segment > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::CutGroup > const & >(( bp::arg("other") ), "") );
+        SelectorMol_exposer.def( bp::init< QList< SireMol::SelectorMol > const & >(( bp::arg("others") ), "") );
+        SelectorMol_exposer.def( bp::init< QVector< SireMol::SelectorMol > const & >(( bp::arg("others") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorMol const & >(( bp::arg("other") ), "") );
         { //::SireMol::SelectorMol::IDs
         

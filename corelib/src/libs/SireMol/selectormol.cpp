@@ -319,6 +319,19 @@ SelectorMol::SelectorMol(const SelectResult &molecules) : ConcreteProperty<Selec
     }
 }
 
+SelectorMol::SelectorMol(const QList<SelectorMol> &other) : ConcreteProperty<SelectorMol, Property>()
+{
+    for (const auto &o : other)
+    {
+        this->mols += o.mols;
+    }
+}
+
+SelectorMol::SelectorMol(const QVector<SelectorMol> &other) : ConcreteProperty<SelectorMol, Property>()
+{
+    this->operator=(SelectorMol(QList<SelectorMol>(other.constBegin(), other.constEnd())));
+}
+
 SelectorMol::SelectorMol(const SelectorMol &other) : ConcreteProperty<SelectorMol, Property>(), mols(other.mols)
 {
 }

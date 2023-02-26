@@ -69,7 +69,7 @@ void register_Hybridization_class(){
                 "isOther"
                 , isOther_function_value
                 , bp::release_gil_policy()
-                , "Return whether or not this is an other chirality" );
+                , "" );
         
         }
         { //::SireMol::Hybridization::isUnknown
@@ -168,7 +168,7 @@ void register_Hybridization_class(){
                 "other"
                 , other_function_value
                 , bp::release_gil_policy()
-                , "Return an other Hybridization" );
+                , "" );
         
         }
         { //::SireMol::Hybridization::s
