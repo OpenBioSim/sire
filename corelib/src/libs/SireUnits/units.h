@@ -249,6 +249,7 @@ namespace SireUnits
     const Dimension::Velocity akma_velocity(1);
 
     const Dimension::Velocity angstroms_per_fs(angstrom / femtosecond);
+    const Dimension::Velocity nanometers_per_ps(nanometer / picosecond);
     const Dimension::Velocity meters_per_second(meter / second);
     const Dimension::Velocity kilometers_per_hour(kilometer / hour);
     const Dimension::Velocity miles_per_hour(mile / hour);
