@@ -12,6 +12,48 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.1.3 <https://github.com/openbiosim/sire/compare/2023.1.2...2023.1.3>`__ - February 2023
+--------------------------------------------------------------------------------------
+
+* Added the beginnings of the new :mod:`sire.convert` framework for converting
+  between different molecule object formats. Created initial converters for RDKit,
+  so that we can convert sire molecules to RDKit molecules. This is still considered
+  experimental. It will be cleaned up fully for 2023.2.0. It has been added now
+  to let others play with this code, to refine a workable API.
+
+* Used the RDKit code to create a :func:`sire.smiles` function to create molecules
+  from smiles strings. This is still considered experimental. It will be cleaned
+  up fully for 2023.2.0. It has been added to let others begin to explore
+  how this capability could be useful.
+
+* Used the RDKit code to create a :func:`~sire.mol.SelectorMol.view2d` function for 
+  quickly creating 2D views of molecules (or all molecules in a container / system).
+  Again, this is considered experimental. It will be cleaned up fully for 2023.2.0.
+  It has been added to let others beging to explore how this capability could be
+  useful.
+
+* Fixed the SDF bug reported in `issue #8 <https://github.com/OpenBioSim/sire/issues/8>`__.
+
+* Fixed a bug in writing Amber PRMTOP files, where atoms with index zero should not 
+  be written to the third or fourth column of dihedral / improper entries.
+
+* Adjusted the cutoffs and schemes so that the `.energy()` function gives energies
+  that closely agree with those reported by pmemd. Added a unit test that validates
+  this.
+
+* Added an :func:`~sire.mol.MoleculeView.extract` function so that it is easy
+  to create a new molecule as a subset of another molecule (and the same for 
+  molecule containers)
+
+* Switched fully to need a C++ 2017 compiler, and adapted the code to fully
+  support C++ 2017. Added guards to reduce the number of spurious compiler
+  warnings emitted by dependencies of sire during a compile.
+
+* Fixed bugs related to null space parameters specified for triclinic spaces.
+
+* Added classes at the C++ level to represent Stereochemistry, Hybridization
+  Chirality, and BondOrder. These are used by the RDKit code and the SDF parser.
+  These will be fully exposed in a later release.
 
 `2023.1.2 <https://github.com/openbiosim/sire/compare/2023.1.1...2023.1.2>`__ - February 2023
 --------------------------------------------------------------------------------------
