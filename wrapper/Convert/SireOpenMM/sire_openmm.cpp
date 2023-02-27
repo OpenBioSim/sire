@@ -250,9 +250,21 @@ namespace SireOpenMM
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
         system.addForce(dihff);
 
+        // set the default 1-4 scaling factors. Eventually we may
+        // want to loop over the molecules and find the most popular
+        // scaling factors. For now, we are assuming everything is amber
+
+        double coul_14_scale = 1.0 / 1.2; // the default amber value
+        double lj_14_scale = 1.0 / 1.2;   // the default amber value
+
         // now place this data into the OpenMM system - this looks like
         // it has to be done in serial?
         int openmm_index = 0;
+        std::vector<std::pair<int, int>> bond_pairs;
+        QVector<std::tuple<int, int, double, double, double>> custom_pairs;
+
+        // assume arithmetic combining rules...
+        auto combining_rules = SireMM::LJParameter::ARITHMETIC;
 
         // (will deal with restraints, light atoms and virtual sites later)
         for (int i = 0; i < nmols; ++i)
@@ -284,7 +296,7 @@ namespace SireOpenMM
                  it != params.bonds().constEnd();
                  ++it)
             {
-                const auto &bondid = it.key().map(mol.molinfo);
+                const auto bondid = it.key().map(mol.molinfo);
                 const auto &bondparam = it.value().first;
                 const auto includes_h = it.value().second;
 
@@ -300,7 +312,153 @@ namespace SireOpenMM
                 // add this as a standard bond - will deal with this
                 // being a bond with hydrogen (or a light atom) later
                 bondff->addBond(atom0_index, atom1_index, r0, k);
+
+                bond_pairs.push_back(std::make_pair(atom0_index, atom1_index));
             }
+
+            // now the angles
+            const double angle_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+
+            for (auto it = params.angles().constBegin();
+                 it != params.angles().constEnd();
+                 ++it)
+            {
+                const auto angid = it.key().map(mol.molinfo);
+                const auto &angparam = it.value().first;
+                const auto includes_h = it.value().second;
+
+                const int atom0 = angid.get<0>().value();
+                const int atom1 = angid.get<1>().value();
+                const int atom2 = angid.get<2>().value();
+
+                const int atom0_index = mol_indexes[atom0];
+                const int atom1_index = mol_indexes[atom1];
+                const int atom2_index = mol_indexes[atom2];
+
+                const double k = angparam.k() * angle_k_to_openmm;
+                const double theta0 = angparam.theta0(); // already in radians
+
+                // add this as a standard angle - will deal with H angle
+                // constraints later
+                angff->addAngle(atom0_index, atom1_index, atom2_index,
+                                theta0, k);
+            }
+
+            // now the dihedrals
+            const double dihedral_k_to_openmm = (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
+
+            for (auto it = params.dihedrals().constBegin();
+                 it != params.dihedrals().constEnd();
+                 ++it)
+            {
+                const auto dihid = it.key().map(mol.molinfo);
+                const auto &dihparam = it.value().first;
+                const auto includes_h = it.value().second;
+
+                const int atom0 = dihid.get<0>().value();
+                const int atom1 = dihid.get<1>().value();
+                const int atom2 = dihid.get<2>().value();
+                const int atom3 = dihid.get<3>().value();
+
+                const int atom0_index = mol_indexes[atom0];
+                const int atom1_index = mol_indexes[atom1];
+                const int atom2_index = mol_indexes[atom2];
+                const int atom3_index = mol_indexes[atom3];
+
+                for (const auto &term : dihparam.terms())
+                {
+                    const double v = term.k() * dihedral_k_to_openmm;
+                    const double phase = term.phase();             // already in radians
+                    const double periodicity = term.periodicity(); // already in correct units
+
+                    dihff->addTorsion(atom0_index, atom1_index,
+                                      atom2_index, atom3_index,
+                                      periodicity, phase, v);
+                }
+            }
+
+            // now the impropers
+            for (auto it = params.impropers().constBegin();
+                 it != params.impropers().constEnd();
+                 ++it)
+            {
+                const auto impid = it.key().map(mol.molinfo);
+                const auto &impparam = it.value().first;
+                const auto includes_h = it.value().second;
+
+                const int atom0 = impid.get<0>().value();
+                const int atom1 = impid.get<0>().value();
+                const int atom2 = impid.get<0>().value();
+                const int atom3 = impid.get<0>().value();
+
+                const int atom0_index = mol_indexes[atom0];
+                const int atom1_index = mol_indexes[atom1];
+                const int atom2_index = mol_indexes[atom2];
+                const int atom3_index = mol_indexes[atom3];
+
+                for (const auto &term : impparam.terms())
+                {
+                    const double v = term.k() * dihedral_k_to_openmm;
+                    const double phase = term.phase();             // already in radians
+                    const double periodicity = term.periodicity(); // already in correct units
+
+                    dihff->addTorsion(atom0_index, atom1_index,
+                                      atom2_index, atom3_index,
+                                      periodicity, phase, v);
+                }
+            }
+
+            // now find all of the 1-4 pairs that don't have these values
+            for (auto it = params.nb14s().constBegin();
+                 it != params.nb14s().constEnd();
+                 ++it)
+            {
+                const double cscl = it.value().cscl();
+                const double ljscl = it.value().ljscl();
+
+                if (std::abs(cscl - coul_14_scale) > 0.0001 or
+                    std::abs(ljscl - lj_14_scale) > 0.0001)
+                {
+                    const auto nbid = it.key().map(mol.molinfo);
+
+                    const int atom0 = nbid.get<0>().value();
+                    const int atom1 = nbid.get<1>().value();
+
+                    const int atom0_index = mol_indexes[atom0];
+                    const int atom1_index = mol_indexes[atom1];
+
+                    const auto cgatomidx0 = mol.molinfo.cgAtomIdx(nbid.get<0>());
+                    const auto cgatomidx1 = mol.molinfo.cgAtomIdx(nbid.get<1>());
+
+                    const auto chg0 = params.charges().at(cgatomidx0).to(SireUnits::mod_electron);
+                    const auto chg1 = params.charges().at(cgatomidx1).to(SireUnits::mod_electron);
+
+                    const auto lj0 = params.ljs().at(cgatomidx0);
+                    const auto lj1 = params.ljs().at(cgatomidx1);
+
+                    double charge_pair = cscl * chg0 * chg1;
+
+                    // Amber, so assume arithmetic combining rules - this should really
+                    // be got from the molecule / forcefield or something...
+                    auto lj_pair = lj0.combine(lj1, combining_rules);
+
+                    double sig_pair = lj_pair.sigma().to(SireUnits::nanometer);
+                    double eps_pair = lj_pair.epsilon().to(SireUnits::kJ_per_mol);
+
+                    custom_pairs.append(std::make_tuple(
+                        atom0_index, atom1_index, charge_pair, sig_pair, eps_pair));
+                }
+            }
+        }
+
+        // add exclusions based on the bonding of this molecule
+        cljff->createExceptionsFromBonds(bond_pairs, coul_14_scale, lj_14_scale);
+
+        for (const auto &p : custom_pairs)
+        {
+            cljff->addException(std::get<0>(p), std::get<1>(p),
+                                std::get<2>(p), std::get<3>(p),
+                                std::get<4>(p), true);
         }
     }
 
