@@ -9,13 +9,43 @@
 
 namespace SireOpenMM
 {
+    /** This is a read-only container for an array of
+     *  OpenMM::Vec3 objects (e.g. coordinates or velocities).
+     *
+     *  This is used internally to return coordinate and velocity
+     *  data up to Python, so that it can be passed back down
+     *  again to populate the openmm.Context
+     */
+    class CoordsAndVelocities
+    {
+    public:
+        CoordsAndVelocities();
+        CoordsAndVelocities(std::shared_ptr<std::vector<OpenMM::Vec3>> coords,
+                            std::shared_ptr<std::vector<OpenMM::Vec3>> vels);
+        ~CoordsAndVelocities();
 
-    SireMol::SelectorMol openmm_to_sire(const OpenMM::System &mols,
-                                        const SireBase::PropertyMap &map);
+        bool hasCoordinates() const;
+        bool hasVelocities() const;
 
-    void sire_to_openmm(OpenMM::System &system,
-                        const SireMol::SelectorMol &mols,
-                        const SireBase::PropertyMap &map);
+        const std::vector<OpenMM::Vec3> &coordinates() const;
+        const std::vector<OpenMM::Vec3> &velocities() const;
+
+    private:
+        std::shared_ptr<std::vector<OpenMM::Vec3>> coords;
+        std::shared_ptr<std::vector<OpenMM::Vec3>> vels;
+    };
+
+    SireMol::SelectorMol openmm_system_to_sire(const OpenMM::System &mols,
+                                               const SireBase::PropertyMap &map);
+
+    CoordsAndVelocities sire_to_openmm_system(OpenMM::System &system,
+                                              const SireMol::SelectorMol &mols,
+                                              const SireBase::PropertyMap &map);
+
+    void set_openmm_coordinates_and_velocities(OpenMM::Context &context,
+                                               const CoordsAndVelocities &coords_and_velocities);
+
+    SireUnits::Dimension::MolarEnergy get_potential_energy(OpenMM::Context &context);
 }
 
 #endif

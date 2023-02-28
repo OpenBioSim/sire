@@ -51,6 +51,7 @@ try:
     from ._SireOpenMM import (
         _sire_to_openmm_system,
         _openmm_system_to_sire,
+        _set_openmm_coordinates_and_velocities,
     )
 
     _has_openmm = True
@@ -58,25 +59,56 @@ try:
     def openmm_to_sire(mols, map):
         import openmm
 
-        if type(mols) is not openmm.System:
+        if type(mols) is not openmm.Context:
             raise TypeError(
-                "You can only convert an openmm.System to sire, not "
+                "You can only convert an openmm.Context to sire, not "
                 f"a {type(mols)}."
             )
 
         # Need to be sure that 'mols' is an openmm.System or else
         # we will crash!
-        return _openmm_system_to_sire(mols, map)
+        system = mols.getSystem()
+
+        if type(system) is not openmm.System:
+            raise TypeError(
+                "You can only convert an openmm.System to sire, not "
+                f"a {type(system)}"
+            )
+
+        sire_mols = _openmm_system_to_sire(system, map)
+
+        # now set the coordinates and velocities...
+        # mols.getState()... state.getCoordinates()... state.getVelocities()
+
+        return sire_mols
 
     def sire_to_openmm(mols, map):
         import openmm
 
+        # OpenMM has system data spread over several objects.
+        # The forces / parameters are in an openmm.System.
+        # We create this first...
         system = openmm.System()
 
         # system must be an openmm.System() or else we will crash!
-        _sire_to_openmm_system(system, mols, map)
+        coords_and_vels = _sire_to_openmm_system(system, mols, map)
 
-        return system
+        # Next, we need to create an openmm.Integrator, so that we can
+        # then create an openmm.Context, into which the coordinate
+        # and velocity data can be placed
+        integrator = openmm.VerletIntegrator(0.001)
+
+        context = openmm.Context(system, integrator)
+
+        # place the coordinates and velocities into the context
+        _set_openmm_coordinates_and_velocities(context, coords_and_vels)
+
+        # Then there is the OpenMM Topology and Simulation, that
+        # hold the above data together with some metadata about the
+        # system being simulated. I will need to think about how
+        # I should handle this...
+
+        return context
 
 except Exception:
     # OpenMM support is not available

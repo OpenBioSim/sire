@@ -29,6 +29,7 @@ if (${SIRE_USE_OPENMM})
 
           _SireOpenMM.main.cpp
 
+          openmmmolecule.cpp
           sire_openmm.cpp
 
       )
