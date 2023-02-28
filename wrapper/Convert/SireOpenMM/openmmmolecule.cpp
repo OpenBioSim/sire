@@ -201,8 +201,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
     auto bond_pair = bond_pairs.data();
 
     // now the bonds
-    const double bond_k_to_openmm = (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
-    const double bond_r0_to_openmm = 2.0 * (SireUnits::angstrom).to(SireUnits::nanometer);
+    const double bond_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
+    const double bond_r0_to_openmm = SireUnits::angstrom.to(SireUnits::nanometer);
 
     for (auto it = params.bonds().constBegin();
          it != params.bonds().constEnd();
