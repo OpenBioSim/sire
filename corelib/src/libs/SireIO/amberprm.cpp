@@ -2949,7 +2949,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             {
                 // NB14 must be computed only the first dihedral found that has this pair,
                 // otherwise we would risk Amber double-counting this parameter
-                const QPair<qint64, qint64> nb14pair(dihs[i], dihs[i + 3]);
+                QPair<qint64, qint64> nb14pair(dihs[i], dihs[i + 3]);
+
+                if (dihs[i] > dihs[i + 3])
+                {
+                    // must ensure a consistent ordering, so that we catch
+                    // A-*-*-B and B-*-*-A
+                    nb14pair = QPair<qint64, qint64>(dihs[i + 3], dihs[i]);
+                }
 
                 if (seen_dihedrals.contains(nb14pair))
                 {
