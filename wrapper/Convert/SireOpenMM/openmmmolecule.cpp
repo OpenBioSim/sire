@@ -293,9 +293,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const auto includes_h = it.value().second;
 
         const int atom0 = impid.get<0>().value();
-        const int atom1 = impid.get<0>().value();
-        const int atom2 = impid.get<0>().value();
-        const int atom3 = impid.get<0>().value();
+        const int atom1 = impid.get<1>().value();
+        const int atom2 = impid.get<2>().value();
+        const int atom3 = impid.get<3>().value();
 
         for (const auto &term : impparam.terms())
         {

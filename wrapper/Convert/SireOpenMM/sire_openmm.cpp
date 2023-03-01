@@ -151,13 +151,13 @@ namespace SireOpenMM
 
         // create all the OpenMM forcefields - ownership is taken by 'system'
         OpenMM::NonbondedForce *cljff = new OpenMM::NonbondedForce();
-        // system.addForce(cljff);
+        system.addForce(cljff);
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
-        // system.addForce(bondff);
+        system.addForce(bondff);
 
         OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
-        // system.addForce(angff);
+        system.addForce(angff);
 
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
         system.addForce(dihff);
