@@ -7,13 +7,22 @@ def pytest_addoption(parser):
         "--runslow", action="store_true", default=False, help="run slow tests"
     )
     parser.addoption(
-        "--runveryslow", action="store_true", default=False, help="run slow and veryslow tests"
+        "--runveryslow",
+        action="store_true",
+        default=False,
+        help="run slow and veryslow tests",
     )
 
 
 def pytest_configure(config):
-    config.addinivalue_line("markers", "slow: mark tests as slow to run (takes more than a couple of seconds")
-    config.addinivalue_line("markers", "veryslow: mark tests as veryslow to run (takes more than 5-10 seconds to run")
+    config.addinivalue_line(
+        "markers",
+        "slow: mark tests as slow to run (takes more than a couple of seconds",
+    )
+    config.addinivalue_line(
+        "markers",
+        "veryslow: mark tests as veryslow to run (takes more than 5-10 seconds to run",
+    )
 
 
 def pytest_collection_modifyitems(config, items):
@@ -22,7 +31,7 @@ def pytest_collection_modifyitems(config, items):
 
     if config.getoption("--runslow"):
         runslow = True
-    
+
     if config.getoption("--runveryslow"):
         runslow = True
         runveryslow = True
@@ -34,7 +43,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_slow)
 
     if not runveryslow:
-        skip_veryslow = pytest.mark.skip(reason="need --runveryslow option to run")
+        skip_veryslow = pytest.mark.skip(
+            reason="need --runveryslow option to run"
+        )
         for item in items:
             if "veryslow" in item.keywords:
                 item.add_marker(skip_veryslow)
@@ -78,3 +89,10 @@ def neura_mols():
 @pytest.fixture(scope="session")
 def excluded_mols():
     return sr.load_test_files("excluded.rst7", "excluded.prm7")
+
+
+@pytest.fixture(scope="session")
+def openmm_interchange_mols():
+    return sr.load_test_files(
+        "openmm_interchange.rst7", "openmm_interchange.prm7"
+    )
