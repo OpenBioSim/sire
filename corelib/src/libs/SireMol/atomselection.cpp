@@ -105,6 +105,17 @@ QDataStream &operator>>(QDataStream &ds, AtomSelection &selection)
     else
         throw version_error(v, "1,2", r_selection, CODELOC);
 
+    // go through and make sure that the residues are selected
+    if (not(selection.selectedAll() or selection.selectedNone()))
+    {
+        const auto &molinfo = selection.d.read();
+
+        for (const auto &atom : selection.selectedAtoms())
+        {
+            selection.selected_residues.insert(molinfo.parentResidue(atom));
+        }
+    }
+
     return ds;
 }
 
