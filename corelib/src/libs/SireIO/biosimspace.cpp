@@ -210,7 +210,7 @@ namespace SireIO
         // Copy across all properties that are unique to the original molecule.
         for (const auto &prop : molecule.propertyKeys())
         {
-            if (not molecule.hasProperty(prop))
+            if (not water.hasProperty(prop))
             {
                 edit_mol = edit_mol.setProperty(prop, molecule.property(prop)).molecule();
             }
@@ -432,7 +432,7 @@ namespace SireIO
         // Copy across all properties that are unique to the original molecule.
         for (const auto &prop : molecule.propertyKeys())
         {
-            if (not molecule.hasProperty(prop))
+            if (not water.hasProperty(prop))
             {
                 edit_mol = edit_mol.setProperty(prop, molecule.property(prop)).molecule();
             }
