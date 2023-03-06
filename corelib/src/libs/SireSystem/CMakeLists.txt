@@ -26,6 +26,7 @@ set ( SIRESYSTEM_HEADERS
       distancecomponent.h
       energymonitor.h
       errors.h
+      forcefieldinfo.h
       freeenergymonitor.h
       geometrycomponent.h
       idassigner.h
@@ -69,6 +70,7 @@ set ( SIRESYSTEM_SOURCES
       distancecomponent.cpp
       energymonitor.cpp
       errors.cpp
+      forcefieldinfo.cpp
       freeenergymonitor.cpp
       geometrycomponent.cpp
       idassigner.cpp

@@ -13,6 +13,7 @@
 #include "dihedralcomponent.h"
 #include "distancecomponent.h"
 #include "energymonitor.h"
+#include "forcefieldinfo.h"
 #include "freeenergymonitor.h"
 #include "geometrycomponent.h"
 #include "idassigner.h"

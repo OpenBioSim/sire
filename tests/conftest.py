@@ -82,6 +82,11 @@ def alanin_mols():
 
 
 @pytest.fixture(scope="session")
+def kigaki_mols():
+    return sr.load_test_files("kigaki.gro", "kigaki.top")
+
+
+@pytest.fixture(scope="session")
 def neura_mols():
     return sr.load_test_files("proteinbox.crd", "proteinbox.top")
 

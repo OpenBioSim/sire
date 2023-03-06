@@ -127,6 +127,10 @@ namespace SireOpenMM
             return CoordsAndVelocities();
         }
 
+        // get the system properties - this is the non-bonded cutoff,
+        // space, cutoff type etc.
+        auto cutoff_type = OpenMM::NonbondedForce::NoCutoff;
+
         // Extract all of the data needed by OpenMM from the Sire
         // molecules into some temporary OpenMMMolecule objects
         QVector<OpenMMMolecule> openmm_mols(nmols);

@@ -12,6 +12,7 @@ set ( PYPP_SOURCES
        DistanceComponent.pypp.cpp
        DoubleDistanceComponent.pypp.cpp
        EnergyMonitor.pypp.cpp
+       ForceFieldInfo.pypp.cpp
        FreeEnergyMonitor.pypp.cpp
        GeometryComponent.pypp.cpp
        IDAndSet_MonitorID_.pypp.cpp

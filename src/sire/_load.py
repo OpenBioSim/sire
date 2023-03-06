@@ -570,7 +570,7 @@ def load_test_files(files: _Union[_List[str], str], *args):
             cache_dir = os.path.join(d, "cache")
 
     files = expand(tutorial_url, files, suffix=".bz2")
-    return load(files, directory=cache_dir, silent=True)
+    return load(files, directory=cache_dir, silent=True, show_warnings=False)
 
 
 def smiles(
