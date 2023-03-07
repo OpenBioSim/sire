@@ -53,6 +53,47 @@ using namespace SireUnits;
 
 static const RegisterMetaType<ForceFieldInfo> r_ffinfo;
 
+ForceFieldInfo::CUTOFF_TYPE ForceFieldInfo::string_to_cutoff_type(QString s)
+{
+    s = s.toUpper();
+
+    static std::map<QString, ForceFieldInfo::CUTOFF_TYPE> types = {
+        {"NO_CUTOFF", ForceFieldInfo::NO_CUTOFF},
+        {"CUTOFF", ForceFieldInfo::CUTOFF},
+        {"EWALD", ForceFieldInfo::EWALD},
+        {"PME", ForceFieldInfo::PME},
+        {"REACTION_FIELD", ForceFieldInfo::REACTION_FIELD},
+        {"SHIFT_ELECTROSTATICS", ForceFieldInfo::SHIFT_ELECTROSTATICS}};
+
+    auto it = types.find(s);
+
+    if (it == types.end())
+        return ForceFieldInfo::CUTOFF;
+    else
+        return it->second;
+}
+
+QString ForceFieldInfo::cutoff_type_to_string(ForceFieldInfo::CUTOFF_TYPE typ)
+{
+    switch (typ)
+    {
+    case ForceFieldInfo::NO_CUTOFF:
+        return "NO_CUTOFF";
+    case ForceFieldInfo::CUTOFF:
+        return "CUTOFF";
+    case ForceFieldInfo::EWALD:
+        return "EWALD";
+    case ForceFieldInfo::PME:
+        return "PME";
+    case ForceFieldInfo::REACTION_FIELD:
+        return "REACTION_FIELD";
+    case ForceFieldInfo::SHIFT_ELECTROSTATICS:
+        return "SHIFT_ELECTROSTATICS";
+    default:
+        return "CUTOFF";
+    }
+}
+
 QDataStream &operator<<(QDataStream &ds, const ForceFieldInfo &ffinfo)
 {
     writeHeader(ds, r_ffinfo, 1);
@@ -60,7 +101,8 @@ QDataStream &operator<<(QDataStream &ds, const ForceFieldInfo &ffinfo)
     SharedDataStream sds(ds);
 
     sds << ffinfo.spc << ffinfo.params
-        << ffinfo.ctff_typ << ffinfo.ctff.to(SireUnits::angstrom);
+        << ffinfo.ctff.to(SireUnits::angstrom)
+        << ForceFieldInfo::cutoff_type_to_string(ffinfo.ctff_typ);
 
     return ds;
 }
@@ -74,10 +116,12 @@ QDataStream &operator>>(QDataStream &ds, ForceFieldInfo &ffinfo)
         SharedDataStream sds(ds);
 
         double l;
+        QString cutoff_type;
 
-        sds >> ffinfo.spc >> ffinfo.params >> ffinfo.ctff_typ >> l;
+        sds >> ffinfo.spc >> ffinfo.params >> l >> cutoff_type;
 
         ffinfo.ctff = l * SireUnits::angstrom;
+        ffinfo.ctff_typ = ForceFieldInfo::string_to_cutoff_type(cutoff_type);
     }
     else
         throw version_error(v, "1", r_ffinfo, CODELOC);
@@ -85,11 +129,13 @@ QDataStream &operator>>(QDataStream &ds, ForceFieldInfo &ffinfo)
     return ds;
 }
 
-const QString NO_CUTOFF = "NO_CUTOFF";
+// this (specific) value is the largest we can have on Windows
+// to still calculate an energy. Anything higher gives and energy of 0...
+const auto MAX_CUTOFF = 347557 * angstrom;
 
 ForceFieldInfo::ForceFieldInfo()
     : ConcreteProperty<ForceFieldInfo, Property>(),
-      spc(Cartesian()), ctff_typ(NO_CUTOFF), ctff(0)
+      spc(Cartesian()), ctff(MAX_CUTOFF), ctff_typ(NO_CUTOFF)
 {
 }
 
@@ -110,7 +156,19 @@ ForceFieldInfo::ForceFieldInfo(const System &system,
         this->setSpace(system.property(space_property.source()).asA<Space>());
     }
 
-    // construct from the system
+    const auto cutoff_prop = map["cutoff"];
+
+    if (cutoff_prop.hasValue())
+    {
+        this->setCutoff(cutoff_prop.value().asA<GeneralUnitProperty>().toUnit<Length>());
+    }
+
+    const auto cutoff_type = map["cutoff_type"];
+
+    if (cutoff_type.hasSource() and cutoff_type.source() != "cutoff_type")
+    {
+        this->setCutoffType(cutoff_type.source(), map);
+    }
 }
 
 ForceFieldInfo::ForceFieldInfo(const SireMol::MoleculeView &mol,
@@ -166,8 +224,8 @@ ForceFieldInfo::ForceFieldInfo(const SireMol::SelectorMol &mols,
 
 ForceFieldInfo::ForceFieldInfo(const ForceFieldInfo &other)
     : ConcreteProperty<ForceFieldInfo, Property>(other),
-      spc(other.spc), params(other.params), ctff_typ(other.ctff_typ),
-      ctff(other.ctff)
+      spc(other.spc), params(other.params),
+      ctff(other.ctff), ctff_typ(other.ctff_typ)
 {
 }
 
@@ -181,8 +239,8 @@ ForceFieldInfo &ForceFieldInfo::operator=(const ForceFieldInfo &other)
     {
         spc = other.spc;
         params = other.params;
-        ctff_typ = other.ctff_typ;
         ctff = other.ctff;
+        ctff_typ = other.ctff_typ;
     }
 
     return *this;
@@ -204,7 +262,7 @@ QString ForceFieldInfo::toString() const
     QStringList parts;
 
     parts.append(QObject::tr("space=%1").arg(spc.read().toString()));
-    parts.append(QObject::tr("cutoff_type=%1").arg(ctff_typ));
+    parts.append(QObject::tr("cutoff_type=%1").arg(cutoff_type_to_string(ctff_typ)));
 
     if (this->hasCutoff())
         parts.append(QObject::tr("cutoff=%1").arg(ctff.toString()));
@@ -256,13 +314,30 @@ void ForceFieldInfo::setCutoff(SireUnits::Dimension::Length length)
 {
     if (length.value() <= 0)
     {
-        ctff = Length(0);
+        ctff = MAX_CUTOFF;
         ctff_typ = NO_CUTOFF;
     }
-    else if (ctff_typ == NO_CUTOFF)
+    else
     {
-        ctff_typ = "CUTOFF";
+        if (this->space().isPeriodic())
+        {
+            if (length > this->space().maximumCutoff())
+            {
+                throw SireError::incompatible_error(QObject::tr(
+                                                        "You cannot set a cutoff (%1) that is larger than "
+                                                        "the maximum possible cutoff (%2) for the periodic "
+                                                        "space %3.")
+                                                        .arg(length.toString())
+                                                        .arg(this->space().maximumCutoff().toString())
+                                                        .arg(this->space().toString()),
+                                                    CODELOC);
+            }
+        }
+
         ctff = length;
+
+        if (ctff_typ == NO_CUTOFF)
+            ctff_typ = CUTOFF;
     }
 }
 
@@ -280,29 +355,101 @@ void ForceFieldInfo::setLargestCutoff()
 
 bool ForceFieldInfo::hasCutoff() const
 {
-    return ctff.value() > 0;
+    return not this->hasNoCutoff();
 }
 
 bool ForceFieldInfo::hasNoCutoff() const
 {
-    return ctff.value() == 0;
+    return ctff.value() == 0 or ctff == MAX_CUTOFF;
 }
 
 void ForceFieldInfo::setNoCutoff()
 {
-    ctff = Length(0);
+    ctff = MAX_CUTOFF;
     ctff_typ = NO_CUTOFF;
 }
 
 QString ForceFieldInfo::cutoffType() const
 {
-    return ctff_typ;
+    return cutoff_type_to_string(ctff_typ);
 }
 
-void ForceFieldInfo::setCutoffType(const QString &cutoff_type)
+void ForceFieldInfo::setCutoffType(QString cutoff_type)
 {
-    // will likely want to validate this...
+    this->setCutoffType(cutoff_type, PropertyMap());
+}
+
+void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
+                                   const PropertyMap &map)
+{
+    auto cutoff_type = string_to_cutoff_type(s_cutoff_type);
+
+    if (cutoff_type == NO_CUTOFF)
+    {
+        if (this->space().isPeriodic())
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "You cannot disable the cutoff when using a periodic space: %1")
+                                                    .arg(this->space().toString()),
+                                                CODELOC);
+        }
+
+        params.clear();
+        ctff = MAX_CUTOFF;
+    }
+    else
+    {
+        params.clear();
+
+        if (ctff.value() == 0 or ctff == MAX_CUTOFF)
+        {
+            this->setLargestCutoff();
+        }
+
+        if (cutoff_type == EWALD or cutoff_type == PME)
+        {
+            // set the EWALD parameters
+            const auto tolerance_prop = map["tolerance"];
+
+            if (tolerance_prop.hasValue())
+            {
+                this->setParameter("tolerance", GeneralUnit(tolerance_prop.value().asADouble()));
+            }
+            else
+            {
+                this->setParameter("tolerance", GeneralUnit(0.0001));
+            }
+        }
+        else if (cutoff_type == REACTION_FIELD)
+        {
+            const auto dielectric_prop = map["dielectric"];
+
+            if (dielectric_prop.hasValue())
+            {
+                this->setParameter("dielectric", GeneralUnit(dielectric_prop.value().asADouble()));
+            }
+            else
+            {
+                this->setParameter("dielectric", GeneralUnit(78.3));
+            }
+        }
+    }
+
     ctff_typ = cutoff_type;
+}
+
+QStringList ForceFieldInfo::cutoffTypes()
+{
+    QStringList types;
+
+    types.append(cutoff_type_to_string(NO_CUTOFF));
+    types.append(cutoff_type_to_string(CUTOFF));
+    types.append(cutoff_type_to_string(EWALD));
+    types.append(cutoff_type_to_string(PME));
+    types.append(cutoff_type_to_string(REACTION_FIELD));
+    types.append(cutoff_type_to_string(SHIFT_ELECTROSTATICS));
+
+    return types;
 }
 
 GeneralUnit ForceFieldInfo::getParameter(const QString &parameter) const

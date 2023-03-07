@@ -72,6 +72,18 @@ void register_ForceFieldInfo_class(){
                 , "" );
         
         }
+        { //::SireSystem::ForceFieldInfo::cutoffTypes
+        
+            typedef ::QStringList ( *cutoffTypes_function_type )(  );
+            cutoffTypes_function_type cutoffTypes_function_value( &::SireSystem::ForceFieldInfo::cutoffTypes );
+            
+            ForceFieldInfo_exposer.def( 
+                "cutoffTypes"
+                , cutoffTypes_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireSystem::ForceFieldInfo::getParameter
         
             typedef ::SireUnits::Dimension::GeneralUnit ( ::SireSystem::ForceFieldInfo::*getParameter_function_type)( ::QString const & ) const;
@@ -151,13 +163,26 @@ void register_ForceFieldInfo_class(){
         }
         { //::SireSystem::ForceFieldInfo::setCutoffType
         
-            typedef void ( ::SireSystem::ForceFieldInfo::*setCutoffType_function_type)( ::QString const & ) ;
+            typedef void ( ::SireSystem::ForceFieldInfo::*setCutoffType_function_type)( ::QString ) ;
             setCutoffType_function_type setCutoffType_function_value( &::SireSystem::ForceFieldInfo::setCutoffType );
             
             ForceFieldInfo_exposer.def( 
                 "setCutoffType"
                 , setCutoffType_function_value
                 , ( bp::arg("cutoff_type") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::ForceFieldInfo::setCutoffType
+        
+            typedef void ( ::SireSystem::ForceFieldInfo::*setCutoffType_function_type)( ::QString,::SireBase::PropertyMap const & ) ;
+            setCutoffType_function_type setCutoffType_function_value( &::SireSystem::ForceFieldInfo::setCutoffType );
+            
+            ForceFieldInfo_exposer.def( 
+                "setCutoffType"
+                , setCutoffType_function_value
+                , ( bp::arg("cutoff_type"), bp::arg("parameters") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -260,6 +285,7 @@ void register_ForceFieldInfo_class(){
                 , "" );
         
         }
+        ForceFieldInfo_exposer.staticmethod( "cutoffTypes" );
         ForceFieldInfo_exposer.staticmethod( "typeName" );
         ForceFieldInfo_exposer.def( "__copy__", &__copy__);
         ForceFieldInfo_exposer.def( "__deepcopy__", &__copy__);

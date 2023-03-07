@@ -106,7 +106,12 @@ namespace SireSystem
         void setNoCutoff();
 
         QString cutoffType() const;
-        void setCutoffType(const QString &cutoff_type);
+        void setCutoffType(QString cutoff_type);
+
+        void setCutoffType(QString cutoff_type,
+                           const SireBase::PropertyMap &parameters);
+
+        static QStringList cutoffTypes();
 
         SireUnits::Dimension::GeneralUnit getParameter(const QString &parameter) const;
         void setParameter(const QString &parameter,
@@ -115,17 +120,30 @@ namespace SireSystem
         SireBase::Properties parameters() const;
 
     private:
+        enum CUTOFF_TYPE
+        {
+            NO_CUTOFF = 0,
+            CUTOFF = 1,
+            EWALD = 2,
+            PME = 3,
+            REACTION_FIELD = 4,
+            SHIFT_ELECTROSTATICS = 5
+        };
+
+        static CUTOFF_TYPE string_to_cutoff_type(QString s);
+        static QString cutoff_type_to_string(CUTOFF_TYPE type);
+
         /** The system space */
         SireVol::SpacePtr spc;
 
         /** Any extra parameters */
         SireBase::Properties params;
 
-        /** The type of cutoff, e.g. PME etc. */
-        QString ctff_typ;
-
         /** The cutoff - this is zero if there is no cutoff */
         SireUnits::Dimension::Length ctff;
+
+        /** The type of cutoff, e.g. PME etc. */
+        CUTOFF_TYPE ctff_typ;
     };
 
 }
