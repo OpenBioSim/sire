@@ -19,11 +19,8 @@ requirements:
   host:
     SIRE_RUN_REQUIREMENTS
     SIRE_BSS_REQUIREMENTS
-    - openblas
   run:
     SIRE_RUN_REQUIREMENTS
-    - libblas * *openblas
-    - openblas
 
 test:
   script_env:

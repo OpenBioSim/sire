@@ -3,6 +3,7 @@
 boost
 gsl
 lazy_import
+libcblas
 libnetcdf
 openmm
 qt
