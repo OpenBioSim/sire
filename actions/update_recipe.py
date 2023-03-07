@@ -60,8 +60,9 @@ def dep_lines(deps):
 
     return "".join(lines)
 
-run_reqs = dep_lines(run_reqs)
 build_reqs = dep_lines(build_reqs)
+host_reqs = dep_lines(host_reqs)
+run_reqs = dep_lines(run_reqs)
 bss_reqs = dep_lines(bss_reqs)
 test_reqs = dep_lines(test_reqs)
 
