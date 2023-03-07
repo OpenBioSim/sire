@@ -395,7 +395,7 @@ def install_requires(install_bss_reqs=False):
             )
             raise e
 
-    reqs = parse_requirements("requirements.txt")
+    reqs = parse_requirements("requirements_host.txt")
     build_reqs = parse_requirements("requirements_build.txt")
 
     if install_bss_reqs:
