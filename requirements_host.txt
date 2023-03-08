@@ -1,15 +1,17 @@
-# Runtime requirements for Sire.
+# Host requirements for Sire.
 
 boost
 gsl
 lazy_import
+libcblas
 libnetcdf
 openmm
-qt
+pandas
+python
+qt-main
+rich
 tbb
 tbb-devel
-rich
-pandas
 
 # This is not available on aarch64 Linux
 pymbar<4; platform_machine != "aarch64"

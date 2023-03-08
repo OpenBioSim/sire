@@ -59,15 +59,25 @@ namespace SireIO
 
     bool isWater(const Molecule &molecule, const PropertyMap &map)
     {
-        if (molecule.nAtoms() > 5)
+        // Store the number of atoms in the molecule.
+        const auto nats = molecule.nAtoms();
+
+        // Early exit if this definitely isn't a water topology.
+        if (nats < 3 or nats > 5)
             return false;
 
         // Get the "element" property from the user map.
         auto elem_prop = map["element"];
 
-        // Zero counters for number of hydrogen and oxygen atoms.
+        // Zero counters for number of hydrogen, oxygen, and dummy atoms.
         unsigned num_hydrogen = 0;
         unsigned num_oxygen = 0;
+        unsigned num_dummy = 0;
+
+        // Store the elements we need to check.
+        const auto hydrogen = Element("H");
+        const auto oxygen = Element("O");
+        const auto dummy = Element("Xx");
 
         // Loop over all atoms in the molecule.
         for (int i = 0; i < molecule.nAtoms(); ++i)
@@ -78,10 +88,18 @@ namespace SireIO
             {
                 const auto element = atom.property<Element>(elem_prop);
 
-                if (element == Element("H"))
+                if (element == hydrogen)
+                {
                     num_hydrogen++;
-                else if (element == Element("O"))
+                }
+                else if (element == oxygen)
+                {
                     num_oxygen++;
+                }
+                else if (element == dummy)
+                {
+                    num_dummy++;
+                }
             }
             catch (...)
             {
@@ -94,17 +112,60 @@ namespace SireIO
                 // Try to infer the element from the atom name.
                 const auto element = Element::biologicalElement(name);
 
-                if (element == Element("H"))
+                if (element == hydrogen)
+                {
                     num_hydrogen++;
-                else if (element == Element("O"))
+                }
+                else if (element == oxygen)
+                {
                     num_oxygen++;
+                }
+                else if (element == dummy)
+                {
+                    num_dummy++;
+                }
             }
         }
 
-        if (num_hydrogen == 2 and num_oxygen == 1)
-            return true;
+        // Check that we found the correct number of elements associated
+        // with 3-, 4-, and 5-point water models.
+        if (nats == 3)
+        {
+            if (num_hydrogen == 2 and num_oxygen == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if (nats == 4)
+        {
+            if (num_hydrogen == 2 and num_oxygen == 1 and num_dummy == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else if (nats == 5)
+        {
+            if (num_hydrogen == 2 and num_oxygen == 1 and num_dummy == 2)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
         else
+        {
             return false;
+        }
     }
 
     bool isAmberWater(const Molecule &molecule, const PropertyMap &map)
