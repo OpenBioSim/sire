@@ -62,7 +62,8 @@ namespace SireIO
         // Store the number of atoms in the molecule.
         const auto nats = molecule.nAtoms();
 
-        if (nats > 5)
+        // Early exit if this definitely isn't a water topology.
+        if (nats < 3 or nats > 5)
             return false;
 
         // Get the "element" property from the user map.
