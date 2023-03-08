@@ -411,8 +411,6 @@
 
 #include "UreyBradleyParameterName.pypp.hpp"
 
-#include "_MM_free_functions.pypp.hpp"
-
 namespace bp = boost::python;
 
 #include "SireMM_containers.h"
@@ -828,10 +826,8 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_Mover_SelectorDihedral__class();
 
-    register_Mover_SelectorImproper__class();
-
     register_SireMM_properties();
 
-    register_free_functions();
+    register_Mover_SelectorImproper__class();
 }
 

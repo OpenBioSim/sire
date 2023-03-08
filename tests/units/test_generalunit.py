@@ -65,7 +65,7 @@ def test_generalunit():
 
     assert g.to(angstrom) == l.value()
 
-    with pytest.raises(UserWarning):
+    with pytest.raises(ValueError):
         g.to(kcal_per_mol)
 
     assert g.value() == l.value()
@@ -89,7 +89,7 @@ def test_generalunit():
 
     assert g.to(kcal_per_mol) == e.value()
 
-    with pytest.raises(UserWarning):
+    with pytest.raises(ValueError):
         g.to(angstrom)
 
     assert g.value() == e.value()
@@ -139,7 +139,7 @@ def test_generalunit_components():
     # not compare the components of the energies
     assert v.get_component("bond") == 5 * kcal_per_mol
 
-    with pytest.raises(UserWarning):
+    with pytest.raises(ValueError):
         v.set_component("angle", 3 * angstrom)
 
     v.add_component("angle", 3 * kcal_per_mol)
@@ -193,7 +193,7 @@ def test_generalunit_components():
 
     assert v.get_component("bond") == 5 * angstrom
 
-    with pytest.raises(UserWarning):
+    with pytest.raises(ValueError):
         v.set_component("angle", 3 * kcal_per_mol)
 
     v = GeneralUnit()

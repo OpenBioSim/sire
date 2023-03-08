@@ -114,7 +114,7 @@ def _pythonize(C, delete_old: bool = True) -> None:
         # now change anyCapitalLetter into any_capital_letter
         new_attr = "_".join(_upper_split(new_attr)).lower()
 
-        if new_attr != attr and not hasattr(C, new_attr):
+        if new_attr != attr:
             try:
                 setattr(C, new_attr, getattr(C, attr))
 

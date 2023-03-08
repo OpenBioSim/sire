@@ -71,7 +71,11 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
     # use all of the molecules
     mols = kigaki_mols
 
-    map = {"space": sr.vol.Cartesian(), "cutoff": 1000 * sr.units.angstrom}
+    map = {
+        "space": sr.vol.Cartesian(),
+        "cutoff": 1000 * sr.units.angstrom,
+        "cutoff_type": "REACTION_FIELD",
+    }
 
     omm = sr.convert.to(mols, "openmm", map=map)
 
@@ -82,7 +86,8 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
     # get this as a float in kJ mol-1
     energy = energy.value_in_unit(energy.unit)
 
-    # these won't be exactly the same - this is -35,225.5 +/- 0.5
+    # THIS SHOULD BREAK AS WE NEED TO SET CUTOFFS ETC
+
     assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
         energy, abs=0.5
     )

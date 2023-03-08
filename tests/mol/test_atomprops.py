@@ -1,4 +1,3 @@
-
 import pytest
 
 
@@ -33,11 +32,23 @@ def test_atomcharges(ala_mols):
 
     from sire.units import mod_electron
 
-    mol = mol[0].edit().set_property("charge2", 0*mod_electron).molecule().commit()
-    assert mol[0].property("charge2") == 0*mod_electron
+    mol = (
+        mol[0]
+        .edit()
+        .set_property("charge2", 0 * mod_electron)
+        .molecule()
+        .commit()
+    )
+    assert mol[0].property("charge2") == 0 * mod_electron
 
-    mol = mol[0].edit().set_property("charge", 0*mod_electron).molecule().commit()
-    assert mol[0].property("charge") == 0*mod_electron
+    mol = (
+        mol[0]
+        .edit()
+        .set_property("charge", 0 * mod_electron)
+        .molecule()
+        .commit()
+    )
+    assert mol[0].property("charge") == 0 * mod_electron
 
 
 def test_atomljs(ala_mols):
@@ -58,6 +69,8 @@ def test_atomljs(ala_mols):
 def test_atomelements(ala_mols):
     mols = ala_mols
 
+    print(mols["element C"].__class__)
+
     for e in mols["element C"].property("element"):
         assert e.num_protons() == 6
 
@@ -70,7 +83,9 @@ def test_atomelements(ala_mols):
     for e in mols["element N"].apply(lambda atom: atom.element()):
         assert e.num_protons() == 7
 
-    for e in mols["element C"].apply(lambda atom, key : atom.property(key), "element"):
+    for e in mols["element C"].apply(
+        lambda atom, key: atom.property(key), "element"
+    ):
         assert e.num_protons() == 6
 
     with pytest.raises(AttributeError):

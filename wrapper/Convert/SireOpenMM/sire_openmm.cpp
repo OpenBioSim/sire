@@ -6,6 +6,8 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
+#include "SireSystem/forcefieldinfo.h"
+
 #include "SireMol/core.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/atomelements.h"
@@ -40,6 +42,7 @@
 using SireBase::PropertyMap;
 using SireMol::Molecule;
 using SireMol::SelectorMol;
+using SireSystem::ForceFieldInfo;
 
 namespace SireOpenMM
 {
@@ -117,6 +120,9 @@ namespace SireOpenMM
         // we can assume that an empty system has been passed to us
 
         // we will get parameters from the map (e.g. cutoffs etc)
+        ForceFieldInfo ffinfo(mols, map);
+
+        qDebug() << ffinfo.toString();
 
         // extract the data from all of the molecules
         const int nmols = mols.count();
@@ -126,10 +132,6 @@ namespace SireOpenMM
             // nothing to do
             return CoordsAndVelocities();
         }
-
-        // get the system properties - this is the non-bonded cutoff,
-        // space, cutoff type etc.
-        auto cutoff_type = OpenMM::NonbondedForce::NoCutoff;
 
         // Extract all of the data needed by OpenMM from the Sire
         // molecules into some temporary OpenMMMolecule objects
@@ -155,6 +157,86 @@ namespace SireOpenMM
 
         // create all the OpenMM forcefields - ownership is taken by 'system'
         OpenMM::NonbondedForce *cljff = new OpenMM::NonbondedForce();
+
+        // maybe should let people set this manually?
+        cljff->setUseDispersionCorrection(false);
+
+        if (ffinfo.space().isPeriodic())
+        {
+            // need a function to get the box vectors from the space...
+            // THESE ARE THE WRONG VECTORS!
+            system.setDefaultPeriodicBoxVectors(OpenMM::Vec3(4, 0, 0), OpenMM::Vec3(0, 5, 0), OpenMM::Vec3(0, 0, 6));
+        }
+
+        if (ffinfo.hasCutoff())
+        {
+            const auto typ = ffinfo.cutoffType();
+
+            if (typ == "PME" or typ == "EWALD")
+            {
+                if (not ffinfo.space().isPeriodic())
+                {
+                    throw SireError::incompatible_error(QObject::tr(
+                                                            "You cannot use Ewald or PME with the non-periodic space %1.")
+                                                            .arg(ffinfo.space().toString()),
+                                                        CODELOC);
+                }
+
+                if (typ == "PME")
+                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::PME);
+                else
+                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::Ewald);
+
+                double tolerance = ffinfo.getParameter("tolerance").value();
+
+                if (tolerance <= 0)
+                    tolerance = 0.001;
+
+                cljff->setEwaldErrorTolerance(tolerance);
+            }
+            else if (typ == "REACTION_FIELD")
+            {
+                if (ffinfo.space().isPeriodic())
+                {
+                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::CutoffPeriodic);
+                }
+                else
+                {
+                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::CutoffNonPeriodic);
+                }
+
+                cljff->setReactionFieldDielectric(ffinfo.getParameter("dielectric").value());
+            }
+            else if (typ == "CUTOFF")
+            {
+                // use reaction field for non-periodic spaces, and PME for periodic
+                if (ffinfo.space().isPeriodic())
+                {
+                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::PME);
+
+                    double tolerance = ffinfo.getParameter("tolerance").value();
+
+                    if (tolerance <= 0)
+                        tolerance = 0.001;
+
+                    cljff->setEwaldErrorTolerance(tolerance);
+                }
+                else
+                {
+                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::CutoffNonPeriodic);
+
+                    double dielectric = ffinfo.getParameter("dielectric").value();
+
+                    if (dielectric <= 0)
+                        dielectric = 78.3;
+
+                    cljff->setReactionFieldDielectric(dielectric);
+                }
+            }
+
+            cljff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
+        }
+
         system.addForce(cljff);
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();

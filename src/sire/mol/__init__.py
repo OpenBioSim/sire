@@ -271,6 +271,14 @@ def __from_select_result(obj):
 
         return obj
 
+    if Atom.typename() != "SireMol::Atom":
+        raise AssertionError(
+            "The typename of an atom should be 'SireMol::Atom', but it "
+            f"is instead {Atom.typename()}. The mro is {Atom.mro()}. "
+            "This suggests something is broken with the boost wrappers, "
+            "and that further strange bugs will be present!"
+        )
+
     if typ == Molecule.typename():
         return SelectorMol(obj)
     elif typ == Atom.typename():
@@ -303,6 +311,18 @@ def __from_select_result(obj):
 
         if SelectorImproper in type(obj.list_at(0)).mro():
             return SelectorMImproper(obj)
+
+        # We really shouldn't get here, and if we do, then difficult
+        # to diagnose errors will propogate
+        from ..utils import Console
+
+        Console.warning(
+            f"Unrecognised type {typ}. "
+            "Expecting an Atom, Residue or other MoleculeView "
+            "type. Something may be wrong with the wrappers, and "
+            "further bugs from this point onwards are likely. "
+            f"Here is the container: {type(obj)}"
+        )
 
         # return this as a raw list
         return obj.to_list()
@@ -1245,7 +1265,7 @@ def _energy(obj, other=None, map=None):
         Returns an energy, with attached components for the
         sub-components (if any) for this energy.
     """
-    from ..mm import calculate_energy
+    from ..system import calculate_energy
 
     if map is None:
         if other is None:
@@ -1308,11 +1328,11 @@ def _atom_energy(obj, other=None, map=None):
 
         return GeneralUnit(0)
     elif map is None:
-        from ..mm import calculate_energy
+        from ..system import calculate_energy
 
         return calculate_energy(obj, _to_molecules(other))
     else:
-        from ..mm import calculate_energy
+        from ..system import calculate_energy
 
         return calculate_energy(obj, _to_molecules(other), map=map)
 
@@ -1346,7 +1366,7 @@ def _total_energy(obj, other=None, map=None):
         mols = MoleculeGroup("all")
         mols.add(obj)
 
-    from ..mm import calculate_energy
+    from ..system import calculate_energy
 
     if map is None:
         if other is None:

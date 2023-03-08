@@ -28,6 +28,7 @@
 #include "calculate_energy.h"
 
 #include "SireMM/cljshiftfunction.h"
+#include "SireMM/cljrffunction.h"
 #include "SireMM/interff.h"
 #include "SireMM/intergroupff.h"
 #include "SireMM/internalff.h"
@@ -41,10 +42,13 @@
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/parallel.h"
 
+#include "SireSystem/forcefieldinfo.h"
+
 #include "SireUnits/units.h"
 
 #include "SireMol/core.h"
 
+using namespace SireSystem;
 using namespace SireMM;
 using namespace SireFF;
 using namespace SireMol;
@@ -57,34 +61,18 @@ using namespace SireUnits::Dimension;
 
 #include <QDebug>
 
-namespace SireMM
+namespace SireSystem
 {
-    // this (specific) value is the largest we can have on Windows
-    // to still calculate an energy. Anything higher gives and energy of 0...
-    const auto NO_CUTOFF = 347557 * angstrom;
-
-    MMDetail get_mmdetail(const MoleculeView &mol, const PropertyMap &map)
+    ForceFieldInfo get_ffinfo(const MoleculeView &mol, const PropertyMap &map)
     {
-        try
-        {
-            return mol.data().property(map["forcefield"]).asA<MMDetail>();
-        }
-        catch (const SireError::exception &e)
-        {
-            throw SireError::incompatible_error(QObject::tr("Cannot calculate the energy as the molecule %1 does not "
-                                                            "contain the necessary metadata describing its forcefield. "
-                                                            "You may need to parameterise the molecule first. The "
-                                                            "error was %2, %3.")
-                                                    .arg(mol.toString())
-                                                    .arg(e.what())
-                                                    .arg(e.error()),
-                                                CODELOC);
-        }
+        return ForceFieldInfo(mol, map);
     }
 
     template <class T>
-    T get_cljfunc(const MMDetail &mm, SireUnits::Dimension::Length cutoff)
+    T get_cljfunc(const ForceFieldInfo &ffinfo)
     {
+        const auto &mm = ffinfo.detail().asA<MMDetail>();
+
         if (not(mm.isAmberStyle() or mm.isOPLS()))
         {
             throw SireError::incompatible_error(QObject::tr("Calculating energies of forcefields that are not Amber- or "
@@ -94,7 +82,7 @@ namespace SireMM
                                                 CODELOC);
         }
 
-        T cljfunc(cutoff);
+        T cljfunc(ffinfo.cutoff());
 
         if (mm.usesArithmeticCombiningRules())
             cljfunc.setArithmeticCombiningRules(true);
@@ -104,29 +92,62 @@ namespace SireMM
         return cljfunc;
     }
 
-    SireUnits::Dimension::Length get_cutoff(const Space &space, SireUnits::Dimension::Length cutoff)
+    CLJFunctionPtr get_intra_cljfunc(const ForceFieldInfo &ffinfo)
     {
-        if (cutoff.value() < 0)
-            return SireUnits::Dimension::Length(0);
+        const auto cutoff_type = ffinfo.cutoffType();
 
-        else if (space.isPeriodic())
+        if (cutoff_type == "CUTOFF" or cutoff_type == "NO_CUTOFF" or cutoff_type == "SHIFT_ELECTROSTATICS")
         {
-            auto max_cutoff = space.maximumCutoff();
-
-            if (cutoff > max_cutoff)
-            {
-                qDebug() << "Requested cutoff" << cutoff.toString() << "is too big for the space" << space.toString()
-                         << "so it has been reduced to" << max_cutoff.toString();
-                cutoff = max_cutoff;
-            }
+            return CLJFunctionPtr(get_cljfunc<CLJIntraShiftFunction>(ffinfo));
         }
-
-        return cutoff;
+        else if (cutoff_type == "REACTION_FIELD")
+        {
+            auto func = get_cljfunc<CLJIntraRFFunction>(ffinfo);
+            func.setDielectric(ffinfo.getParameter("dielectric").value());
+            return CLJFunctionPtr(func);
+        }
+        else
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Cannot calculate energy as cutoff type %1 is not supported.")
+                                                    .arg(cutoff_type),
+                                                CODELOC);
+        }
     }
 
-    SIREMM_EXPORT ForceFields create_forcefield(const MoleculeView &mol, const PropertyMap &map)
+    CLJFunctionPtr get_inter_cljfunc(const ForceFieldInfo &ffinfo)
     {
-        const auto mm = get_mmdetail(mol, map);
+        const auto cutoff_type = ffinfo.cutoffType();
+
+        if (cutoff_type == "CUTOFF" or cutoff_type == "NO_CUTOFF" or cutoff_type == "SHIFT_ELECTROSTATICS")
+        {
+            return CLJFunctionPtr(get_cljfunc<CLJShiftFunction>(ffinfo));
+        }
+        else if (cutoff_type == "REACTION_FIELD")
+        {
+            auto func = get_cljfunc<CLJRFFunction>(ffinfo);
+            func.setDielectric(ffinfo.getParameter("dielectric").value());
+            return CLJFunctionPtr(func);
+        }
+        else
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Cannot calculate energy as cutoff type %1 is not supported.")
+                                                    .arg(cutoff_type),
+                                                CODELOC);
+        }
+    }
+
+    SireUnits::Dimension::Length get_cutoff(const ForceFieldInfo &ffinfo)
+    {
+        return ffinfo.cutoff();
+    }
+
+    SIRESYSTEM_EXPORT ForceFields create_forcefield(const MoleculeView &mol, const PropertyMap &map)
+    {
+        auto ffinfo = get_ffinfo(mol, map);
+
+        const auto &mm = ffinfo.detail().asA<MMDetail>();
 
         ForceFields ffields;
 
@@ -141,13 +162,11 @@ namespace SireMM
 
         internalff.add(mol, map);
 
-        auto cutoff_prop = map["cutoff"];
+        // internal calculation, so should not use a cutoff?
+        ffinfo.setNoCutoff();
 
-        // this is a single molecule with an infinite space
-        // We should not have a cutoff. Can achieve this using
-        // a very large cutoff ;-)
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, NO_CUTOFF));
+        intraff.setCLJFunction(get_intra_cljfunc(ffinfo).read().asA<CLJIntraFunction>());
         intraff.add(mol, map);
 
         ffields.add(intraff);
@@ -156,29 +175,21 @@ namespace SireMM
         return ffields;
     }
 
-    SIREMM_EXPORT ForceFields create_forcefield(const SireMol::Molecules &mols, const SireBase::PropertyMap &map)
+    SIRESYSTEM_EXPORT ForceFields create_forcefield(const SireMol::Molecules &mols, const SireBase::PropertyMap &map)
     {
         if (mols.isEmpty())
             return ForceFields();
         else if (mols.nMolecules() == 1)
             return create_forcefield(mols.first(), map);
 
-        const auto mm = get_mmdetail(*(mols.constBegin()), map);
+        const auto ffinfo = get_ffinfo(*(mols.constBegin()), map);
+
+        auto intra_ffinfo = ffinfo;
+        intra_ffinfo.setNoCutoff();
+
+        const auto &mm = ffinfo.detail().asA<MMDetail>();
 
         ForceFields ffields;
-
-        // set the space from the first one we can find from the molecules
-        const auto space_property = map["space"];
-        SpacePtr space = Cartesian();
-
-        for (const auto &mol : mols)
-        {
-            if (mol.data().hasProperty(space_property))
-            {
-                space = mol.data().property(space_property).asA<Space>();
-                break;
-            }
-        }
 
         InternalFF internalff("internal");
         internalff.setStrict(true);
@@ -191,26 +202,13 @@ namespace SireMM
 
         internalff.add(mols, map);
 
-        auto cutoff_prop = map["cutoff"];
-
-        auto cutoff = NO_CUTOFF;
-
-        if (cutoff_prop.hasValue())
-        {
-            cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
-        }
-        else if (space.read().isPeriodic())
-        {
-            cutoff = space.read().maximumCutoff();
-        }
-
         InterFF interff("interff");
-        interff.setCLJFunction(get_cljfunc<CLJShiftFunction>(mm, get_cutoff(*space, cutoff)));
-        interff.setProperty("space", *space);
+        interff.setCLJFunction(get_inter_cljfunc(ffinfo).read());
+        interff.setProperty("space", ffinfo.space());
         interff.add(mols, map);
 
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm, NO_CUTOFF));
+        intraff.setCLJFunction(get_intra_cljfunc(intra_ffinfo).read().asA<CLJIntraFunction>());
         intraff.add(mols, map);
 
         ffields.add(interff);
@@ -220,23 +218,26 @@ namespace SireMM
         return ffields;
     }
 
-    SIREMM_EXPORT ForceFields create_forcefield(const MoleculeView &mol0, const MoleculeView &mol1, const PropertyMap &map)
+    SIRESYSTEM_EXPORT ForceFields create_forcefield(const MoleculeView &mol0, const MoleculeView &mol1, const PropertyMap &map)
     {
         return create_forcefield(Molecules(mol0), Molecules(mol1), map);
     }
 
-    SIREMM_EXPORT ForceFields create_forcefield(const MoleculeView &mol0, const Molecules &mols1, const PropertyMap &map)
+    SIRESYSTEM_EXPORT ForceFields create_forcefield(const MoleculeView &mol0, const Molecules &mols1, const PropertyMap &map)
     {
         return create_forcefield(Molecules(mol0), mols1, map);
     }
 
-    SIREMM_EXPORT ForceFields create_forcefield(const Molecules &mols0, const Molecules &mols1, const PropertyMap &map)
+    SIRESYSTEM_EXPORT ForceFields create_forcefield(const Molecules &mols0, const Molecules &mols1, const PropertyMap &map)
     {
         if (mols0.isEmpty() or mols1.isEmpty())
             return ForceFields();
 
-        const auto mm0 = get_mmdetail(*(mols0.constBegin()), map);
-        const auto mm1 = get_mmdetail(*(mols1.constBegin()), map);
+        auto ffinfo0 = get_ffinfo(*(mols0.constBegin()), map);
+        auto ffinfo1 = get_ffinfo(*(mols1.constBegin()), map);
+
+        const auto &mm0 = ffinfo0.detail().asA<MMDetail>();
+        const auto &mm1 = ffinfo1.detail().asA<MMDetail>();
 
         if (not mm0.isCompatibleWith(mm1))
         {
@@ -247,68 +248,33 @@ namespace SireMM
                                                 CODELOC);
         }
 
-        // set the space from the first one we can find from the molecules
-        const auto space_property = map["space"];
-        SpacePtr space = Cartesian();
-        bool has_property = false;
-
-        bool has_single_mol = (mols0.nMolecules() == 1 and mols1.nMolecules() == 1) and
-                              mols0.molNums() == mols1.molNums();
-
-        if (not has_single_mol)
-        {
-            // only care about the space if we have more than one molecule
-            for (const auto &mol : mols0)
-            {
-                if (mol.data().hasProperty(space_property))
-                {
-                    has_property = true;
-                    space = mol.data().property(space_property).asA<Space>();
-                    break;
-                }
-            }
-
-            if (not has_property)
-            {
-                for (const auto &mol : mols1)
-                {
-                    if (mol.data().hasProperty(space_property))
-                    {
-                        has_property = true;
-                        space = mol.data().property(space_property).asA<Space>();
-                        break;
-                    }
-                }
-            }
-        }
-
         ForceFields ffields;
-
-        auto cutoff_prop = map["cutoff"];
-
-        auto cutoff = NO_CUTOFF;
-
-        if (cutoff_prop.hasValue())
-        {
-            cutoff = cutoff_prop.value().asA<GeneralUnitProperty>();
-        }
-        else if (space.read().isPeriodic())
-        {
-            cutoff = space.read().maximumCutoff();
-        }
 
         InterGroupFF interff("interff");
 
-        if (not has_single_mol)
+        // check to see if this is a pure intramolecular energy
+        const auto molnums0 = mols0.molNums();
+        const auto molnums1 = mols1.molNums();
+
+        const bool is_single_mol = (molnums0.count() == 1 and molnums1.count() == 1 and molnums0 == molnums1);
+
+        if (is_single_mol)
         {
-            interff.setCLJFunction(get_cljfunc<CLJShiftFunction>(mm0, get_cutoff(*space, cutoff)));
-            interff.setProperty("space", *space);
+            ffinfo0.setNoCutoff();
+        }
+        else
+        {
+            interff.setCLJFunction(get_inter_cljfunc(ffinfo0).read());
+            interff.setProperty("space", ffinfo0.space());
             interff.add(mols0, MGIdx(0), map);
             interff.add(mols1, MGIdx(1), map);
         }
 
+        auto intra_ffinfo = ffinfo0;
+        intra_ffinfo.setNoCutoff();
+
         IntraGroupFF intraff("intraff");
-        intraff.setCLJFunction(get_cljfunc<CLJIntraShiftFunction>(mm0, NO_CUTOFF));
+        intraff.setCLJFunction(get_intra_cljfunc(intra_ffinfo).read().asA<CLJIntraFunction>());
         intraff.add(mols0, MGIdx(0), map);
         intraff.add(mols1, MGIdx(1), map);
 
@@ -323,7 +289,7 @@ namespace SireMM
         internalff.add(mols0, MGIdx(0), map);
         internalff.add(mols1, MGIdx(1), map);
 
-        if (not has_single_mol)
+        if (not is_single_mol)
             ffields.add(interff);
 
         ffields.add(intraff);
@@ -332,7 +298,7 @@ namespace SireMM
         return ffields;
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(ForceFields &ffields)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(ForceFields &ffields)
     {
         auto nrgs = ffields.energies();
 
@@ -390,66 +356,66 @@ namespace SireMM
         return nrg;
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol)
     {
         return calculate_energy(mol, PropertyMap());
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol, const SireBase::PropertyMap &map)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol, const SireBase::PropertyMap &map)
     {
         auto ff = create_forcefield(mol, map);
         return calculate_energy(ff);
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols)
     {
         return calculate_energy(mols, PropertyMap());
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols, const SireBase::PropertyMap &map)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols, const SireBase::PropertyMap &map)
     {
         auto ff = create_forcefield(mols, map);
         return calculate_energy(ff);
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::MoleculeView &mol1)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::MoleculeView &mol1)
     {
         return calculate_energy(mol0, mol1, PropertyMap());
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::MoleculeView &mol1,
-                                               const SireBase::PropertyMap &map)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::MoleculeView &mol1,
+                                                   const SireBase::PropertyMap &map)
     {
         auto ff = create_forcefield(mol0, mol1, map);
         return calculate_energy(ff);
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::Molecules &mols1)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::Molecules &mols1)
     {
         return calculate_energy(mol0, mols1, PropertyMap());
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::Molecules &mols1,
-                                               const SireBase::PropertyMap &map)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::MoleculeView &mol0, const SireMol::Molecules &mols1,
+                                                   const SireBase::PropertyMap &map)
     {
         auto ff = create_forcefield(mol0, mols1, map);
         return calculate_energy(ff);
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols0, const SireMol::Molecules &mols1)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols0, const SireMol::Molecules &mols1)
     {
         return calculate_energy(mols0, mols1, PropertyMap());
     }
 
-    SIREMM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols0, const SireMol::Molecules &mols1,
-                                               const SireBase::PropertyMap &map)
+    SIRESYSTEM_EXPORT GeneralUnit calculate_energy(const SireMol::Molecules &mols0, const SireMol::Molecules &mols1,
+                                                   const SireBase::PropertyMap &map)
     {
         auto ff = create_forcefield(mols0, mols1, map);
         return calculate_energy(ff);
     }
 
-    SIREMM_EXPORT QVector<GeneralUnit> calculate_trajectory_energy(const ForceFields &ff, const QList<qint64> &frames,
-                                                                   const PropertyMap &map)
+    SIRESYSTEM_EXPORT QVector<GeneralUnit> calculate_trajectory_energy(const ForceFields &ff, const QList<qint64> &frames,
+                                                                       const PropertyMap &map)
     {
         QVector<GeneralUnit> nrgs;
 
@@ -476,9 +442,9 @@ namespace SireMM
         return nrgs;
     }
 
-    SIREMM_EXPORT QVector<QVector<GeneralUnit>> calculate_trajectory_energies(const QVector<ForceFields> &ffs,
-                                                                              const QList<qint64> &frames,
-                                                                              const PropertyMap &map)
+    SIRESYSTEM_EXPORT QVector<QVector<GeneralUnit>> calculate_trajectory_energies(const QVector<ForceFields> &ffs,
+                                                                                  const QList<qint64> &frames,
+                                                                                  const PropertyMap &map)
     {
         QVector<QVector<GeneralUnit>> nrgs;
 

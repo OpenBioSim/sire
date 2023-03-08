@@ -45,6 +45,8 @@
 
 using namespace SireSystem;
 using namespace SireMol;
+using namespace SireMM;
+using namespace SireFF;
 using namespace SireVol;
 using namespace SireBase;
 using namespace SireStream;
@@ -100,7 +102,7 @@ QDataStream &operator<<(QDataStream &ds, const ForceFieldInfo &ffinfo)
 
     SharedDataStream sds(ds);
 
-    sds << ffinfo.spc << ffinfo.params
+    sds << ffinfo.spc << ffinfo.params << ffinfo.dtl
         << ffinfo.ctff.to(SireUnits::angstrom)
         << ForceFieldInfo::cutoff_type_to_string(ffinfo.ctff_typ);
 
@@ -118,7 +120,7 @@ QDataStream &operator>>(QDataStream &ds, ForceFieldInfo &ffinfo)
         double l;
         QString cutoff_type;
 
-        sds >> ffinfo.spc >> ffinfo.params >> l >> cutoff_type;
+        sds >> ffinfo.spc >> ffinfo.params >> ffinfo.dtl >> l >> cutoff_type;
 
         ffinfo.ctff = l * SireUnits::angstrom;
         ffinfo.ctff_typ = ForceFieldInfo::string_to_cutoff_type(cutoff_type);
@@ -135,7 +137,7 @@ const auto MAX_CUTOFF = 347557 * angstrom;
 
 ForceFieldInfo::ForceFieldInfo()
     : ConcreteProperty<ForceFieldInfo, Property>(),
-      spc(Cartesian()), ctff(MAX_CUTOFF), ctff_typ(NO_CUTOFF)
+      spc(Cartesian()), dtl(MMDetail()), ctff(MAX_CUTOFF), ctff_typ(NO_CUTOFF)
 {
 }
 
@@ -145,15 +147,25 @@ ForceFieldInfo::ForceFieldInfo(const System &system,
 {
     this->operator=(ForceFieldInfo());
 
-    const auto space_property = map["space"];
+    const auto mols = system.molecules();
 
-    if (space_property.hasValue())
+    if (mols.count() <= 1)
     {
-        this->setSpace(space_property.value().asA<Space>());
+        // no space for single molecules
+        this->setSpace(Cartesian());
     }
-    else if (system.containsProperty(space_property.source()))
+    else
     {
-        this->setSpace(system.property(space_property.source()).asA<Space>());
+        const auto space_property = map["space"];
+
+        if (space_property.hasValue())
+        {
+            this->setSpace(space_property.value().asA<Space>());
+        }
+        else if (system.containsProperty(space_property.source()))
+        {
+            this->setSpace(system.property(space_property.source()).asA<Space>());
+        }
     }
 
     const auto cutoff_prop = map["cutoff"];
@@ -168,6 +180,43 @@ ForceFieldInfo::ForceFieldInfo(const System &system,
     if (cutoff_type.hasSource() and cutoff_type.source() != "cutoff_type")
     {
         this->setCutoffType(cutoff_type.source(), map);
+    }
+
+    const auto ff_prop = map["forcefield"];
+
+    if (ff_prop.hasValue())
+    {
+        dtl = ff_prop.value().asA<FFDetail>();
+    }
+    else
+    {
+        // find the first FFDetail object
+        auto it = mols.constBegin();
+
+        for (; it != mols.constEnd(); ++it)
+        {
+            const auto &data = it.value().data();
+
+            if (data.hasProperty(ff_prop.source()))
+            {
+                dtl = data.property(ff_prop.source()).asA<FFDetail>();
+                ++it;
+                break;
+            }
+        }
+
+        const auto &ffdetail = dtl.read().asA<FFDetail>();
+
+        // now check that any other forcefields are compatible
+        for (; it != mols.constEnd(); ++it)
+        {
+            const auto &data = it.value().data();
+
+            if (data.hasProperty(ff_prop.source()))
+            {
+                data.property(ff_prop.source()).asA<FFDetail>().assertCompatibleWith(ffdetail);
+            }
+        }
     }
 }
 
@@ -224,7 +273,7 @@ ForceFieldInfo::ForceFieldInfo(const SireMol::SelectorMol &mols,
 
 ForceFieldInfo::ForceFieldInfo(const ForceFieldInfo &other)
     : ConcreteProperty<ForceFieldInfo, Property>(other),
-      spc(other.spc), params(other.params),
+      spc(other.spc), params(other.params), dtl(other.dtl),
       ctff(other.ctff), ctff_typ(other.ctff_typ)
 {
 }
@@ -239,6 +288,7 @@ ForceFieldInfo &ForceFieldInfo::operator=(const ForceFieldInfo &other)
     {
         spc = other.spc;
         params = other.params;
+        dtl = other.dtl;
         ctff = other.ctff;
         ctff_typ = other.ctff_typ;
     }
@@ -248,7 +298,7 @@ ForceFieldInfo &ForceFieldInfo::operator=(const ForceFieldInfo &other)
 
 bool ForceFieldInfo::operator==(const ForceFieldInfo &other) const
 {
-    return spc == other.spc and params == other.params and
+    return spc == other.spc and params == other.params and dtl == other.dtl and
            ctff_typ == other.ctff_typ and ctff == other.ctff;
 }
 
@@ -271,6 +321,8 @@ QString ForceFieldInfo::toString() const
     {
         parts.append(QObject::tr("params=%1").arg(params.toString()));
     }
+
+    parts.append(QObject::tr("detail=%1").arg(dtl.read().toString()));
 
     return QObject::tr("ForceFieldInfo(\n  %1\n)").arg(parts.join(",\n  "));
 }
@@ -469,4 +521,14 @@ void ForceFieldInfo::setParameter(const QString &parameter,
 SireBase::Properties ForceFieldInfo::parameters() const
 {
     return params;
+}
+
+void ForceFieldInfo::setDetail(const FFDetail &d)
+{
+    dtl = d;
+}
+
+const FFDetail &ForceFieldInfo::detail() const
+{
+    return dtl.read().asA<FFDetail>();
 }

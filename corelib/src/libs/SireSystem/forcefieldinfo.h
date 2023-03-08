@@ -35,6 +35,8 @@
 
 #include "SireVol/space.h"
 
+#include "SireMM/mmdetail.h"
+
 #include "SireUnits/dimensions.h"
 
 SIRE_BEGIN_HEADER
@@ -114,10 +116,14 @@ namespace SireSystem
         static QStringList cutoffTypes();
 
         SireUnits::Dimension::GeneralUnit getParameter(const QString &parameter) const;
+
         void setParameter(const QString &parameter,
                           const SireUnits::Dimension::GeneralUnit &value);
 
         SireBase::Properties parameters() const;
+
+        void setDetail(const SireFF::FFDetail &details);
+        const SireFF::FFDetail &detail() const;
 
     private:
         enum CUTOFF_TYPE
@@ -138,6 +144,9 @@ namespace SireSystem
 
         /** Any extra parameters */
         SireBase::Properties params;
+
+        /** The forcefield detail */
+        SireBase::PropertyPtr dtl;
 
         /** The cutoff - this is zero if there is no cutoff */
         SireUnits::Dimension::Length ctff;

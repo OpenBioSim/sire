@@ -4,6 +4,7 @@
 #ifdef GCCXML_PARSE
 
 #include "anglecomponent.h"
+#include "calculate_energy.h"
 #include "chargeconstraint.h"
 #include "checkpoint.h"
 #include "closemols.h"

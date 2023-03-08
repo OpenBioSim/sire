@@ -84,6 +84,18 @@ void register_ForceFieldInfo_class(){
                 , "" );
         
         }
+        { //::SireSystem::ForceFieldInfo::detail
+        
+            typedef ::SireFF::FFDetail const & ( ::SireSystem::ForceFieldInfo::*detail_function_type)(  ) const;
+            detail_function_type detail_function_value( &::SireSystem::ForceFieldInfo::detail );
+            
+            ForceFieldInfo_exposer.def( 
+                "detail"
+                , detail_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
         { //::SireSystem::ForceFieldInfo::getParameter
         
             typedef ::SireUnits::Dimension::GeneralUnit ( ::SireSystem::ForceFieldInfo::*getParameter_function_type)( ::QString const & ) const;
@@ -183,6 +195,19 @@ void register_ForceFieldInfo_class(){
                 "setCutoffType"
                 , setCutoffType_function_value
                 , ( bp::arg("cutoff_type"), bp::arg("parameters") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::ForceFieldInfo::setDetail
+        
+            typedef void ( ::SireSystem::ForceFieldInfo::*setDetail_function_type)( ::SireFF::FFDetail const & ) ;
+            setDetail_function_type setDetail_function_value( &::SireSystem::ForceFieldInfo::setDetail );
+            
+            ForceFieldInfo_exposer.def( 
+                "setDetail"
+                , setDetail_function_value
+                , ( bp::arg("details") )
                 , bp::release_gil_policy()
                 , "" );
         
