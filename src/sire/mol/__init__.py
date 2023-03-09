@@ -1174,10 +1174,13 @@ Molecule.connectivity = lambda x: x.property("connectivity")
 
 
 def _cursor(view, map=None):
-    """Return a Cursor that can be used to edit the properties
+    """
+    Return a Cursor that can be used to edit the properties
     of this view
     """
-    return Cursor(view, map=map)
+    from ..base import create_map
+
+    return Cursor(view, map=create_map(map))
 
 
 Atom.cursor = _cursor
@@ -1185,6 +1188,24 @@ Residue.cursor = _cursor
 Chain.cursor = _cursor
 Segment.cursor = _cursor
 Molecule.cursor = _cursor
+
+
+def _dynamics(view, map=None):
+    """
+    Return a Dynamics object that can be used to minimise or perform
+    dynamics of this view
+    """
+    from ..base import create_map
+    from ._dynamics import Dynamics
+
+    return Dynamics(view, map=create_map(map))
+
+
+Atom.dynamics = _dynamics
+Residue.dynamics = _dynamics
+Chain.dynamics = _dynamics
+Segment.dynamics = _dynamics
+Molecule.dynamics = _dynamics
 
 
 def _cursors(views, map=None):

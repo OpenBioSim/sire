@@ -24,6 +24,9 @@
 #include "SireMM/selectorbond.h"
 #include "SireMM/amberparams.h"
 
+#include "SireVol/periodicbox.h"
+#include "SireVol/triclinicbox.h"
+
 #include "SireMaths/vector.h"
 
 #include "SireBase/parallel.h"
@@ -64,8 +67,9 @@ namespace SireOpenMM
     }
 
     CoordsAndVelocities::CoordsAndVelocities(std::shared_ptr<std::vector<OpenMM::Vec3>> c,
-                                             std::shared_ptr<std::vector<OpenMM::Vec3>> v)
-        : coords(c), vels(v)
+                                             std::shared_ptr<std::vector<OpenMM::Vec3>> v,
+                                             std::shared_ptr<std::vector<OpenMM::Vec3>> b)
+        : coords(c), vels(v), boxvecs(b)
     {
     }
 
@@ -81,6 +85,11 @@ namespace SireOpenMM
     bool CoordsAndVelocities::hasVelocities() const
     {
         return vels.get() != 0;
+    }
+
+    bool CoordsAndVelocities::hasBoxVectors() const
+    {
+        return boxvecs.get() != 0;
     }
 
     const std::vector<OpenMM::Vec3> &CoordsAndVelocities::coordinates() const
@@ -103,6 +112,16 @@ namespace SireOpenMM
         return *vels;
     }
 
+    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::boxVectors() const
+    {
+        if (boxvecs.get() == 0)
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "There are no box vectors available!"),
+                                                CODELOC);
+
+        return *boxvecs;
+    }
+
     SelectorMol openmm_system_to_sire(const OpenMM::System &mols,
                                       const PropertyMap &map)
     {
@@ -121,8 +140,6 @@ namespace SireOpenMM
 
         // we will get parameters from the map (e.g. cutoffs etc)
         ForceFieldInfo ffinfo(mols, map);
-
-        qDebug() << ffinfo.toString();
 
         // extract the data from all of the molecules
         const int nmols = mols.count();
@@ -161,11 +178,54 @@ namespace SireOpenMM
         // maybe should let people set this manually?
         cljff->setUseDispersionCorrection(false);
 
+        // create the periodic box vectors
+        std::shared_ptr<std::vector<OpenMM::Vec3>> boxvecs;
+
         if (ffinfo.space().isPeriodic())
         {
-            // need a function to get the box vectors from the space...
-            // THESE ARE THE WRONG VECTORS!
-            system.setDefaultPeriodicBoxVectors(OpenMM::Vec3(4, 0, 0), OpenMM::Vec3(0, 5, 0), OpenMM::Vec3(0, 0, 6));
+            boxvecs.reset(new std::vector<OpenMM::Vec3>(3));
+            auto boxvecs_data = boxvecs->data();
+
+            if (ffinfo.space().isA<SireVol::PeriodicBox>())
+            {
+                const auto &space = ffinfo.space().asA<SireVol::PeriodicBox>();
+
+                const double x = space.dimensions()[0] * OpenMM::NmPerAngstrom;
+                const double y = space.dimensions()[1] * OpenMM::NmPerAngstrom;
+                const double z = space.dimensions()[2] * OpenMM::NmPerAngstrom;
+
+                boxvecs_data[0] = OpenMM::Vec3(x, 0, 0);
+                boxvecs_data[1] = OpenMM::Vec3(0, y, 0);
+                boxvecs_data[2] = OpenMM::Vec3(0, 0, z);
+            }
+            else if (ffinfo.space().isA<SireVol::TriclinicBox>())
+            {
+                const auto &space = ffinfo.space().asA<SireVol::TriclinicBox>();
+
+                // Get the three triclinic box vectors.
+                const auto v0 = space.vector0();
+                const auto v1 = space.vector1();
+                const auto v2 = space.vector2();
+
+                // Get cell matrix components in nm.
+                const double xx = v0.x() * OpenMM::NmPerAngstrom;
+                const double xy = v0.y() * OpenMM::NmPerAngstrom;
+                const double xz = v0.z() * OpenMM::NmPerAngstrom;
+                const double yx = v1.x() * OpenMM::NmPerAngstrom;
+                const double yy = v1.y() * OpenMM::NmPerAngstrom;
+                const double yz = v1.z() * OpenMM::NmPerAngstrom;
+                const double zx = v2.x() * OpenMM::NmPerAngstrom;
+                const double zy = v2.y() * OpenMM::NmPerAngstrom;
+                const double zz = v2.z() * OpenMM::NmPerAngstrom;
+
+                boxvecs_data[0] = OpenMM::Vec3(xx, xy, xz);
+                boxvecs_data[1] = OpenMM::Vec3(yx, yy, yz);
+                boxvecs_data[2] = OpenMM::Vec3(zx, zy, zz);
+            }
+
+            system.setDefaultPeriodicBoxVectors(boxvecs_data[0],
+                                                boxvecs_data[1],
+                                                boxvecs_data[2]);
         }
 
         if (ffinfo.hasCutoff())
@@ -386,7 +446,7 @@ namespace SireOpenMM
             }
         }
 
-        return CoordsAndVelocities(coords, vels);
+        return CoordsAndVelocities(coords, vels, boxvecs);
     }
 
     void set_openmm_coordinates_and_velocities(OpenMM::Context &context,
@@ -400,6 +460,13 @@ namespace SireOpenMM
         if (coords_and_velocities.hasVelocities())
         {
             context.setVelocities(coords_and_velocities.velocities());
+        }
+
+        if (coords_and_velocities.hasBoxVectors())
+        {
+            const auto boxvecs = coords_and_velocities.boxVectors();
+
+            context.setPeriodicBoxVectors(boxvecs[0], boxvecs[1], boxvecs[2]);
         }
     }
 

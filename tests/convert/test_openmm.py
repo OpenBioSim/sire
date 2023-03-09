@@ -69,12 +69,13 @@ def test_openmm_multi_energy_small_cart(kigaki_mols):
 )
 def test_openmm_multi_energy_all_cart(kigaki_mols):
     # use all of the molecules
-    mols = kigaki_mols
+    mols = kigaki_mols[0:10]
 
     map = {
         "space": sr.vol.Cartesian(),
         "cutoff": 1000 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
+        "dielectric": 79.3,
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)

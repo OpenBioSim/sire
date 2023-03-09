@@ -8,6 +8,7 @@
 set ( SCRIPTS
         __init__.py
         _cursor.py
+        _dynamics.py
         _element.py
         _smiles.py
         _trajectory.py
