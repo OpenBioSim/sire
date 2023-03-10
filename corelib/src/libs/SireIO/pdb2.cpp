@@ -797,37 +797,11 @@ PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
     // Lines for different PDB data records (one for each molecule).
     QVector<QVector<QString>> atom_lines(nmols);
 
-    if (usesParallel())
+    // Now parse the rest of the molecular data, i.e. atoms, residues, etc.
+    int offset = 0;
+    for (int i = 0; i < nmols; ++i)
     {
-        QMutex mutex;
-
-        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> r)
-                          {
-            // Create local data objects.
-            QStringList local_errors;
-
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                // Now parse the rest of the molecular data, i.e. atoms, residues, etc.
-                parseMolecule(system[molnums[i]], atom_lines[i], local_errors, map);
-            }
-
-            if (not local_errors.isEmpty())
-            {
-                // Acquire a lock.
-                QMutexLocker lkr(&mutex);
-
-                // Update the warning messages.
-                parse_warnings += local_errors;
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < nmols; ++i)
-        {
-            // Now parse the rest of the molecular data, i.e. atoms, residues, etc.
-            parseMolecule(system[molnums[i]], atom_lines[i], parse_warnings, map);
-        }
+        offset = parseMolecule(system[molnums[i]], atom_lines[i], parse_warnings, map, offset);
     }
 
     // Whether the object contains MODEL records (trajectory frames).
@@ -2172,8 +2146,8 @@ MolEditor PDB2::getMolecule(int imol, const PropertyMap &map) const
 
 /** Internal function used to parse a Sire molecule view into a PDB ATOM records using
     the parameters in the property map. */
-void PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> &atom_lines, QStringList &errors,
-                         const SireBase::PropertyMap &map)
+int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> &atom_lines, QStringList &errors,
+                        const SireBase::PropertyMap &map, int offset)
 {
     // get the selected atoms - only selected atoms will be
     // written to the file
@@ -2186,7 +2160,7 @@ void PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString>
 
     // Early exit.
     if (num_atoms == 0 or selected_atoms.selectedNone())
-        return;
+        return 0;
 
     // TODO: Do we want a hard limit on the number of atoms?
     if (num_atoms > 99999)
@@ -2195,7 +2169,7 @@ void PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString>
                                   " the PDB file format limit (99999)!")
                           .arg(num_atoms));
 
-        return;
+        return 0;
     }
 
     // Whether each atom is a terminal atom, i.e. the end of a chain.
@@ -2251,7 +2225,7 @@ void PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString>
     }
 
     // Line index.
-    int iline = 0;
+    int iline = offset;
 
     // Whether the previous record was a TER.
     bool prev_ter = false;
@@ -2330,6 +2304,8 @@ void PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString>
     // Now append all of the post-TER records.
     for (auto &line : post_ter_lines)
         atom_lines.append(line.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' ')));
+
+    return iline;
 }
 
 /** Internal function used to parse a add PDB coordinate data to an existing
