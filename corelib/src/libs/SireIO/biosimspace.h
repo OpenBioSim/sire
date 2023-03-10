@@ -206,6 +206,19 @@ namespace SireIO
      */
     SIREIO_EXPORT SireSystem::System updateAndPreserveOrder(const SireSystem::System &system, const Molecule &molecule, unsigned index);
 
+    //! Remove a named property from all molecules in a system.
+    /*!
+        \param system
+            The molecular system of interest.
+
+        \param property
+            The name of the property to be removed.
+
+        \retval system
+            The system with renumbered constituents.
+     */
+    SIREIO_EXPORT SireSystem::System removeProperty(SireSystem::System &system, const QString &property);
+
     //! Redistribute mass of heavy atoms connected to bonded hydrogens into
     /*! the hydrogen atoms. This allows use of larger simulation integration
         time steps without encountering instabilities related to high-frequency
@@ -305,14 +318,15 @@ namespace SireIO
     Vector cross(const Vector &v0, const Vector &v1);
 } // namespace SireIO
 
-SIRE_EXPOSE_FUNCTION(SireIO::isWater)
 SIRE_EXPOSE_FUNCTION(SireIO::isAmberWater)
 SIRE_EXPOSE_FUNCTION(SireIO::isGromacsWater)
+SIRE_EXPOSE_FUNCTION(SireIO::isWater)
+SIRE_EXPOSE_FUNCTION(SireIO::removeProperty)
+SIRE_EXPOSE_FUNCTION(SireIO::renumberConstituents)
+SIRE_EXPOSE_FUNCTION(SireIO::repartitionHydrogenMass)
 SIRE_EXPOSE_FUNCTION(SireIO::setAmberWater)
 SIRE_EXPOSE_FUNCTION(SireIO::setGromacsWater)
-SIRE_EXPOSE_FUNCTION(SireIO::renumberConstituents)
 SIRE_EXPOSE_FUNCTION(SireIO::updateAndPreserveOrder)
-SIRE_EXPOSE_FUNCTION(SireIO::repartitionHydrogenMass)
 SIRE_EXPOSE_FUNCTION(SireIO::updateCoordinatesAndVelocities)
 
 SIRE_END_HEADER
