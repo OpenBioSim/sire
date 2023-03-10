@@ -1062,6 +1062,45 @@ AmberRst::AmberRst(const System &system, const PropertyMap &map)
 
         if (::hasData(all_vels))
         {
+            // check the edge case that some molecules had velocities defined, but some didn't
+            bool none_have_velocities = true;
+            bool all_have_velocities = true;
+            bool some_have_velocities = false;
+
+            for (const auto &vels : all_vels)
+            {
+                if (vels.isEmpty())
+                {
+                    all_have_velocities = false;
+                }
+                else
+                {
+                    none_have_velocities = false;
+                }
+
+                if (all_have_velocities == false and none_have_velocities == false)
+                {
+                    // ok, only some have velocities...
+                    some_have_velocities = true;
+                    break;
+                }
+            }
+
+            if (some_have_velocities)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &vels = all_vels[i];
+
+                    if (vels.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        vels = QVector<Vector>(natoms, Vector(0));
+                    }
+                }
+            }
+
             vels.append(collapse(all_vels));
         }
 

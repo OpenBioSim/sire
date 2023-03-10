@@ -17,7 +17,7 @@ requirements:
     - {{ compiler('cxx') }}
     SIRE_BUILD_REQUIREMENTS
   host:
-    SIRE_RUN_REQUIREMENTS
+    SIRE_HOST_REQUIREMENTS
     SIRE_BSS_REQUIREMENTS
   run:
     SIRE_RUN_REQUIREMENTS
