@@ -459,6 +459,38 @@ namespace bp = boost::python;
 
 #include "biosimspace.h"
 
+#include "SireBase/getinstalldir.h"
+
+#include "SireError/errors.h"
+
+#include "SireMol/atomelements.h"
+
+#include "SireMol/atommasses.h"
+
+#include "SireMol/connectivity.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/mgname.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireMol/molidx.h"
+
+#include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
+
+#include "SireVol/periodicbox.h"
+
+#include "SireVol/triclinicbox.h"
+
+#include "biosimspace.h"
+
+#include "moleculeparser.h"
+
+#include "biosimspace.h"
+
 void register_free_functions(){
 
     { //::SireIO::getCoordsArray
@@ -536,6 +568,19 @@ void register_free_functions(){
             , isWater_function_value
             , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
             , "Test whether the passed water molecule matches standard water\ntopologies.\n\nPar:am molecule\nThe molecule to test.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: is_water\nWhether the molecule is a water.\n" );
+    
+    }
+
+    { //::SireIO::removeProperty
+    
+        typedef ::SireSystem::System ( *removeProperty_function_type )( ::SireSystem::System &,::QString const & );
+        removeProperty_function_type removeProperty_function_value( &::SireIO::removeProperty );
+        
+        bp::def( 
+            "removeProperty"
+            , removeProperty_function_value
+            , ( bp::arg("system"), bp::arg("property") )
+            , "Remove a named property from all molecules in a system.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am property\nThe name of the property to be removed.\n\nRetval: system\nThe system with renumbered constituents.\n" );
     
     }
 
