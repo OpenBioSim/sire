@@ -2172,140 +2172,172 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
         return 0;
     }
 
-    // Whether each atom is a terminal atom, i.e. the end of a chain.
-    QVector<bool> is_ter(num_atoms, false);
-
-    // Work out the index of the terminal atom.
-    if (not sire_mol.hasProperty(map["is_ter"]))
+    // Whether to use the existing atom numbers for the PDB records.
+    bool use_atom_numbers;
+    try
     {
-        // Store the number of chains in the molecule - this returns
-        // all of the chains that hold selected atoms
-        Selector<Chain> chains;
-
-        try
-        {
-            chains = sire_mol.chains();
-        }
-        catch (const SireError::exception &)
-        {
-            // there are no chains
-        }
-
-        int num_chains = chains.count();
-
-        // Loop over the chains.
-        for (int i = 0; i < num_chains; ++i)
-        {
-            // Extract the chain.
-            const auto &chain = chains(i);
-
-            // Extract the atoms from the chain.
-            const auto &chain_atoms = chain.atoms();
-
-            // Extract the number of the last atom in the chain
-            int terminal_atom = chain_atoms[atoms.count() - 1].read().asA<SireMol::Atom>().index().value();
-
-            // Set the terminal atom.
-            is_ter[terminal_atom] = true;
-        }
+        use_atom_numbers = map["use_atom_numbers"].value().asA<BooleanProperty>().value();
     }
-    // Use the existing is_ter property.
+    catch(...)
+    {
+        use_atom_numbers = false;
+    }
+
+    if (use_atom_numbers)
+    {
+        for (int i=0; i<num_atoms; ++i)
+        {
+            const auto atomidx = AtomIdx(i);
+
+            if (selected_atoms.selected(atomidx))
+            {
+                // Initalise a PDBAtom.
+                PDBAtom atom(molecule.atom(atomidx), false, map, errors);
+
+                // Generate a PDB atom data record.
+                atom_lines.append(atom.toPDBRecord());
+            }
+        }
+
+        return 0;
+    }
     else
     {
-        for (int i = 0; i < num_atoms; ++i)
-        {
-            const auto atom = molecule.atom(AtomIdx(i));
+        // Whether each atom is a terminal atom, i.e. the end of a chain.
+        QVector<bool> is_ter(num_atoms, false);
 
-            if (atom.hasProperty(map["is_ter"]))
+        // Work out the index of the terminal atom.
+        if (not sire_mol.hasProperty(map["is_ter"]))
+        {
+            // Store the number of chains in the molecule - this returns
+            // all of the chains that hold selected atoms
+            Selector<Chain> chains;
+
+            try
             {
-                if (atom.property<QString>(map["is_ter"]) == "True")
-                    is_ter[i] = true;
+                chains = sire_mol.chains();
+            }
+            catch (const SireError::exception &)
+            {
+                // there are no chains
+            }
+
+            int num_chains = chains.count();
+
+            // Loop over the chains.
+            for (int i = 0; i < num_chains; ++i)
+            {
+                // Extract the chain.
+                const auto &chain = chains(i);
+
+                // Extract the atoms from the chain.
+                const auto &chain_atoms = chain.atoms();
+
+                // Extract the number of the last atom in the chain
+                int terminal_atom = chain_atoms[atoms.count() - 1].read().asA<SireMol::Atom>().index().value();
+
+                // Set the terminal atom.
+                is_ter[terminal_atom] = true;
             }
         }
-    }
-
-    // Line index.
-    int iline = offset;
-
-    // Whether the previous record was a TER.
-    bool prev_ter = false;
-
-    // The previous chain identifier.
-    QString prev_chain = " ";
-
-    // A vector to store post-TER (likely HETATM) records.
-    QVector<QString> post_ter_lines;
-
-    QString last_record;
-    PDBAtom last_atom;
-
-    // Loop over all of the atoms.
-    for (int i = 0; i < num_atoms; ++i)
-    {
-        const auto atomidx = AtomIdx(i);
-
-        if (selected_atoms.selected(atomidx))
+        // Use the existing is_ter property.
+        else
         {
-            // Initalise a PDBAtom.
-            PDBAtom atom(molecule.atom(atomidx), is_ter[i], map, errors);
-            last_atom = atom;
-
-            // Generate a PDB atom data record.
-            auto record = atom.toPDBRecord();
-            record.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' '));
-            last_record = record;
-
-            // If this record follows a TER, yet belongs to the same chain, then
-            // assume it is a HETATM record, which we'll place at the end of the file.
-            const auto id = atom.getChainID();
-            if (prev_ter and (not id.isSpace()) and (id == prev_chain))
+            for (int i = 0; i < num_atoms; ++i)
             {
-                post_ter_lines.append(record);
-            }
-            else
-            {
-                atom_lines.append(record);
-                prev_ter = false;
+                const auto atom = molecule.atom(AtomIdx(i));
 
-                // Add a TER record for this atom.
-                if (is_ter[i])
+                if (atom.hasProperty(map["is_ter"]))
                 {
-                    atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                          .arg(iline + 1, 5)
-                                          .arg(record.mid(17, 3))
-                                          .arg(record.at(21))
-                                          .arg(record.mid(22, 4))
-                                          .arg(record.at(26)));
-
-                    prev_ter = true;
-                    prev_chain = atom.getChainID();
+                    if (atom.property<QString>(map["is_ter"]) == "True")
+                        is_ter[i] = true;
                 }
             }
         }
-        else if (is_ter[i])
+
+        // Line index.
+        int iline = offset;
+
+        // Whether the previous record was a TER.
+        bool prev_ter = false;
+
+        // The previous chain identifier.
+        QString prev_chain = " ";
+
+        // A vector to store post-TER (likely HETATM) records.
+        QVector<QString> post_ter_lines;
+
+        QString last_record;
+        PDBAtom last_atom;
+
+        // Loop over all of the atoms.
+        for (int i = 0; i < num_atoms; ++i)
         {
-            // we've skipped over a TER atom. We likely(?) need to write
-            // a TER now?
-            if (last_record.isEmpty())
-                atom_lines.append("TER");
-            else
-                atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                      .arg(iline + 1, 5)
-                                      .arg(last_record.mid(17, 3))
-                                      .arg(last_record.at(21))
-                                      .arg(last_record.mid(22, 4))
-                                      .arg(last_record.at(26)));
+            const auto atomidx = AtomIdx(i);
 
-            prev_ter = true;
-            prev_chain = last_atom.getChainID();
+            if (selected_atoms.selected(atomidx))
+            {
+                // Initalise a PDBAtom.
+                PDBAtom atom(molecule.atom(atomidx), is_ter[i], map, errors);
+                last_atom = atom;
+
+                // Generate a PDB atom data record.
+                auto record = atom.toPDBRecord();
+                record.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' '));
+                last_record = record;
+
+                // If this record follows a TER, yet belongs to the same chain, then
+                // assume it is a HETATM record, which we'll place at the end of the file.
+                const auto id = atom.getChainID();
+                if (prev_ter and (not id.isSpace()) and (id == prev_chain))
+                {
+                    post_ter_lines.append(record);
+                }
+                else
+                {
+                    atom_lines.append(record);
+                    prev_ter = false;
+
+                    // Add a TER record for this atom.
+                    if (is_ter[i])
+                    {
+                        atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
+                                            .arg(iline + 1, 5)
+                                            .arg(record.mid(17, 3))
+                                            .arg(record.at(21))
+                                            .arg(record.mid(22, 4))
+                                            .arg(record.at(26)));
+
+                        prev_ter = true;
+                        prev_chain = atom.getChainID();
+                    }
+                }
+            }
+            else if (is_ter[i])
+            {
+                // we've skipped over a TER atom. We likely(?) need to write
+                // a TER now?
+                if (last_record.isEmpty())
+                    atom_lines.append("TER");
+                else
+                    atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
+                                        .arg(iline + 1, 5)
+                                        .arg(last_record.mid(17, 3))
+                                        .arg(last_record.at(21))
+                                        .arg(last_record.mid(22, 4))
+                                        .arg(last_record.at(26)));
+
+                prev_ter = true;
+                prev_chain = last_atom.getChainID();
+            }
         }
+
+        // Now append all of the post-TER records.
+        for (auto &line : post_ter_lines)
+            atom_lines.append(line.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' ')));
+
+        return iline;
     }
-
-    // Now append all of the post-TER records.
-    for (auto &line : post_ter_lines)
-        atom_lines.append(line.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' ')));
-
-    return iline;
 }
 
 /** Internal function used to parse a add PDB coordinate data to an existing
