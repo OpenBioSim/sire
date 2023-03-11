@@ -2581,7 +2581,7 @@ def runFreeNrg():
         outfile.write(
             bytes(
                 "#For more information visit: "
-                "https://github.com/michellab/Sire\n#\n",
+                "https://github.com/openbiosim/sire\n#\n",
                 "UTF-8",
             )
         )
