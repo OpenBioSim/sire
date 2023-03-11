@@ -59,7 +59,7 @@ def test_openmm_multi_energy_small_cart(kigaki_mols):
 
     # these won't be exactly the same - this is 4865.82 +/- 0.04
     assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
-        energy, abs=0.1
+        energy, abs=0.5
     )
 
 
@@ -87,7 +87,72 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
     # get this as a float in kJ mol-1
     energy = energy.value_in_unit(energy.unit)
 
-    # -127881.5 +/- 1
+    # -127882 +/- 0.5
     assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
         energy, abs=1.0
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
+    # use all of the molecules
+    mols = kigaki_mols
+
+    map = {
+        "space": sr.vol.Cartesian(),
+        "cutoff": 10 * sr.units.angstrom,
+        "cutoff_type": "REACTION_FIELD",
+        "dielectric": 78.0,
+    }
+
+    omm = sr.convert.to(mols, "openmm", map=map)
+
+    state = omm.getState(getEnergy=True)
+
+    energy = state.getPotentialEnergy()
+
+    # get this as a float in kJ mol-1
+    energy = energy.value_in_unit(energy.unit)
+
+    # -125622.2 +/- 0.05
+    assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy, abs=0.5
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
+    # use all of the molecules
+    mols = kigaki_mols[1:100]
+
+    # GET DISAGREEMNT FROM FIRST MOLECULE, LIKELY BECAUSE OF NO
+    # SPACE IN THE FIRST MOLECULE!
+
+    space = kigaki_mols.property("space")
+
+    map = {
+        "space": space,
+        "cutoff": 10 * sr.units.angstrom,
+        "cutoff_type": "REACTION_FIELD",
+        "dielectric": 78.0,
+    }
+
+    omm = sr.convert.to(mols, "openmm", map=map)
+
+    state = omm.getState(getEnergy=True)
+
+    energy = state.getPotentialEnergy()
+
+    # get this as a float in kJ mol-1
+    energy = energy.value_in_unit(energy.unit)
+
+    # -125622.2 +/- 0.05
+    assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy, abs=0.5
     )

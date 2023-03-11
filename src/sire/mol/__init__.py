@@ -951,16 +951,41 @@ def _add_evals(obj):
     obj.z = lambda x, map=None: x.coordinates(map=map).z()
 
 
-def _get_property(x, key):
-    try:
-        return x.__orig__property(key)
-    except Exception as e:
-        saved_exception = e
+def _get_container_property(x, key):
+    vals = []
 
-    mol = x.molecule()
+    for v in x:
+        prop = _get_property(v, key)
+
+        if type(prop) is list:
+            vals += prop
+        else:
+            vals.append(prop)
+
+    return vals
+
+
+def _get_property(x, key):
+    if hasattr(x, "__orig__property"):
+        # get the property directly
+        try:
+            return x.__orig__property(key)
+        except Exception as e:
+            saved_exception = e
+    else:
+        saved_exception = None
+
+    # we couldn't get the property directly, so get
+    # the property at the molecule level...
+    try:
+        mol = x.molecule()
+    except Exception:
+        # this must be a SelectorMol or other container
+        return _get_container_property(x, key)
 
     prop = mol.property(key)
 
+    # Now extract the bits we want
     import sire
 
     if issubclass(prop.__class__, sire.legacy.Mol.AtomProp):
@@ -969,8 +994,30 @@ def _get_property(x, key):
             vals.append(atom.property(key))
 
         return vals
-    else:
+    elif issubclass(prop.__class__, sire.legacy.Mol.ResProp):
+        vals = []
+        for res in x.residues():
+            vals.append(res.property(key))
+
+        return vals
+    elif issubclass(prop.__class__, sire.legacy.Mol.ChainProp):
+        vals = []
+        for chain in x.chains():
+            vals.append(chain.property(key))
+
+        return vals
+    elif issubclass(prop.__class__, sire.legacy.Mol.SegProp):
+        vals = []
+        for seg in x.segments():
+            vals.append(seg.property(key))
+
+        return vals
+    elif issubclass(prop.__class__, sire.legacy.Mol.MolViewProperty):
+        return prop
+    elif saved_exception is not None:
         raise saved_exception
+    else:
+        raise KeyError(f"Could not find property {key} in {x}")
 
 
 def _apply(objs, func, *args, **kwargs):

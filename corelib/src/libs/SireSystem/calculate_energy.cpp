@@ -162,9 +162,6 @@ namespace SireSystem
 
         internalff.add(mol, map);
 
-        // internal calculation, so should not use a cutoff?
-        ffinfo.setNoCutoff();
-
         IntraFF intraff("intraff");
         intraff.setCLJFunction(get_intra_cljfunc(ffinfo).read().asA<CLJIntraFunction>());
         intraff.add(mol, map);
@@ -183,9 +180,6 @@ namespace SireSystem
             return create_forcefield(mols.first(), map);
 
         const auto ffinfo = get_ffinfo(*(mols.constBegin()), map);
-
-        auto intra_ffinfo = ffinfo;
-        intra_ffinfo.setNoCutoff();
 
         const auto &mm = ffinfo.detail().asA<MMDetail>();
 
@@ -208,7 +202,7 @@ namespace SireSystem
         interff.add(mols, map);
 
         IntraFF intraff("intraff");
-        intraff.setCLJFunction(get_intra_cljfunc(intra_ffinfo).read().asA<CLJIntraFunction>());
+        intraff.setCLJFunction(get_intra_cljfunc(ffinfo).read().asA<CLJIntraFunction>());
         intraff.add(mols, map);
 
         ffields.add(interff);
@@ -258,11 +252,7 @@ namespace SireSystem
 
         const bool is_single_mol = (molnums0.count() == 1 and molnums1.count() == 1 and molnums0 == molnums1);
 
-        if (is_single_mol)
-        {
-            ffinfo0.setNoCutoff();
-        }
-        else
+        if (not is_single_mol)
         {
             interff.setCLJFunction(get_inter_cljfunc(ffinfo0).read());
             interff.setProperty("space", ffinfo0.space());
@@ -270,11 +260,8 @@ namespace SireSystem
             interff.add(mols1, MGIdx(1), map);
         }
 
-        auto intra_ffinfo = ffinfo0;
-        intra_ffinfo.setNoCutoff();
-
         IntraGroupFF intraff("intraff");
-        intraff.setCLJFunction(get_intra_cljfunc(intra_ffinfo).read().asA<CLJIntraFunction>());
+        intraff.setCLJFunction(get_intra_cljfunc(ffinfo0).read().asA<CLJIntraFunction>());
         intraff.add(mols0, MGIdx(0), map);
         intraff.add(mols1, MGIdx(1), map);
 
