@@ -827,6 +827,22 @@ namespace SireIO
         return result;
     }
 
+    System removeProperty(System &system, const QString &property)
+    {
+        // Loop over all molecules in the system and remove the property from each.
+        for (auto &molview : system.molecules())
+        {
+            auto mol = molview.molecule();
+
+            if (mol.hasProperty(property))
+            {
+                system.update(mol.edit().removeProperty(property).molecule().commit());
+            }
+        }
+
+        return system;
+    }
+
     System renumberConstituents(const System &system, unsigned mol_offset)
     {
         // Create a new system object.
