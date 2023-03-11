@@ -536,7 +536,7 @@ def writeSystemData(system, moves, Trajectory, block, softcore_lambda=False):
                 )
 
     # Write a PDB coordinate file each cycle.
-    pdb = Sire.IO.PDB2(system)
+    pdb = Sire.IO.PDB2(system, {"use_atom_numbers" : Sire.Base.wrap(True)})
     pdb.writeToFile("latest.pdb")
 
     moves_file = open("moves.dat", "w")
@@ -2581,7 +2581,7 @@ def runFreeNrg():
         outfile.write(
             bytes(
                 "#For more information visit: "
-                "https://github.com/michellab/Sire\n#\n",
+                "https://github.com/openbiosim/sire\n#\n",
                 "UTF-8",
             )
         )

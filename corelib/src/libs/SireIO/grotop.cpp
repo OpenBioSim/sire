@@ -428,6 +428,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             nme = mol.residue(ResIdx(0)).name();
         }
 
+        // replace any strings in the name with underscores
+        nme = nme.simplified().replace(" ", "_");
+
         // get the forcefields for this molecule
         try
         {
@@ -921,6 +924,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
         {
             nme = mol.residue(ResIdx(0)).name();
         }
+
+        // replace any strings in the name with underscores
+        nme = nme.simplified().replace(" ", "_");
 
         // get the forcefield for this molecule
         try
