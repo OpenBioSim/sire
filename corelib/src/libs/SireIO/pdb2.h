@@ -267,8 +267,8 @@ namespace SireIO
         void assertSane() const;
         void parseLines(const PropertyMap &map);
 
-        void parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> &atom_lines, QStringList &errors,
-                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        int parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> &atom_lines, QStringList &errors,
+                          const SireBase::PropertyMap &map = SireBase::PropertyMap(), int offset=0);
 
         SireMol::Molecule updateMolecule(const SireMol::Molecule &sire_mol, QVector<bool> &used_atoms,
                                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
