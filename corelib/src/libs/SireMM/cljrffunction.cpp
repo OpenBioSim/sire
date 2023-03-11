@@ -519,7 +519,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                            tmp = one_over_r + k_rf * r2 - c_rf;
+                            tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * q1[j];
 
                             // apply the cutoff - compare r against Rc. This will
@@ -557,7 +557,7 @@ void CLJRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                            tmp = one_over_r + k_rf * r2 - c_rf;
+                            tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * q1[j];
 
                             // apply the cutoff - compare r against Rc. This will
@@ -726,7 +726,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &box_di
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -853,7 +853,7 @@ void CLJRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms &ato
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * q1[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -963,7 +963,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                            tmp = one_over_r + k_rf * r2 - c_rf;
+                            tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * qa[j];
 
                             // apply the cutoff - compare r against Rc. This will
@@ -1006,7 +1006,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, double
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                            tmp = one_over_r + k_rf * r2 - c_rf;
+                            tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * qa[j];
 
                             // apply the cutoff - compare r against Rc. This will
@@ -1167,7 +1167,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                            tmp = one_over_r + k_rf * r2 - c_rf;
+                            tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * q1[j];
 
                             // apply the cutoff - compare r against Rc. This will
@@ -1205,7 +1205,7 @@ void CLJRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                            tmp = one_over_r + k_rf * r2 - c_rf;
+                            tmp = one_over_r + (k_rf * r2) - c_rf;
                             tmp *= q * q1[j];
 
                             // apply the cutoff - compare r against Rc. This will
@@ -1357,7 +1357,7 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms) const
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -1441,7 +1441,7 @@ double CLJRFFunction::calcVacCoulombEnergyAri(const CLJAtoms &atoms0, const CLJA
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * q1[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -1710,7 +1710,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &box_di
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -1840,7 +1840,7 @@ void CLJRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms &ato
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * q1[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -1941,7 +1941,7 @@ void CLJRFFunction::calcVacGrid(const CLJAtoms &atoms, const GridInfo &grid_info
             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-            tmp = one_over_r + k_rf * r2 - c_rf;
+            tmp = one_over_r + (k_rf * r2) - c_rf;
 
             // exclude dummy atoms when building the grid
             tmp *= q[j].logicalAndNot(id[j].compareEqual(dummy_id));
@@ -2022,7 +2022,7 @@ void CLJRFFunction::calcBoxGrid(const CLJAtoms &atoms, const GridInfo &grid_info
             // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
             // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
             // c = (1/r_c) * (3 eps)/(2 eps + 1)
-            tmp = one_over_r + k_rf * r2 - c_rf;
+            tmp = one_over_r + (k_rf * r2) - c_rf;
 
             // exclude dummy atoms when building the grid
             tmp *= q[j].logicalAndNot(id[j].compareEqual(dummy_id));
@@ -4280,7 +4280,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms, double &cnrg, d
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -4401,7 +4401,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -4480,7 +4480,7 @@ void CLJIntraRFFunction::calcVacEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -4613,7 +4613,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms, const Vector &b
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -4752,7 +4752,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -4839,7 +4839,7 @@ void CLJIntraRFFunction::calcBoxEnergyGeo(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -4953,7 +4953,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms, double &cnrg, d
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -5077,7 +5077,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -5160,7 +5160,7 @@ void CLJIntraRFFunction::calcVacEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -5298,7 +5298,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms, const Vector &b
                     // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                     // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                     // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                    tmp = one_over_r + k_rf * r2 - c_rf;
+                    tmp = one_over_r + (k_rf * r2) - c_rf;
                     tmp *= q * qa[j];
 
                     // apply the cutoff - compare r against Rc. This will
@@ -5440,7 +5440,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will
@@ -5532,7 +5532,7 @@ void CLJIntraRFFunction::calcBoxEnergyAri(const CLJAtoms &atoms0, const CLJAtoms
                         // E = (q1 q2 / 4 pi eps_0) * ( 1/r + k r^2 - c )
                         // where k = (1 / r_c^3) * (eps - 1)/(2 eps + 1)
                         // c = (1/r_c) * (3 eps)/(2 eps + 1)
-                        tmp = one_over_r + k_rf * r2 - c_rf;
+                        tmp = one_over_r + (k_rf * r2) - c_rf;
                         tmp *= q * q1[j];
 
                         // apply the cutoff - compare r against Rc. This will

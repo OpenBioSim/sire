@@ -363,6 +363,17 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
                 atom0, atom1, charge_pair, sig_pair, eps_pair));
         }
     }
+
+    // finally, add in all of the excluded atoms
+    excl_pairs = ExcludedPairs(mol, map);
+
+    for (int i = 0; i < excl_pairs.count(); ++i)
+    {
+        auto pair = excl_pairs[i];
+
+        custom_pairs.append(std::make_tuple(
+            std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0, 0.0));
+    }
 }
 
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const

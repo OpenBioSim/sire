@@ -7,6 +7,7 @@
 #include "SireMol/core.h"
 
 #include "SireMM/mmdetail.h"
+#include "SireMM/excludedpairs.h"
 
 SIRE_BEGIN_HEADER
 
@@ -36,6 +37,9 @@ namespace SireOpenMM
 
         /** The molecule info that contains metadata about the molecule */
         SireMol::MoleculeInfo molinfo;
+
+        /** All of the excluded atom pairs */
+        SireMM::ExcludedPairs excl_pairs;
 
         /** The forcefield info that contains metadata about the parameters */
         SireMM::MMDetail ffinfo;

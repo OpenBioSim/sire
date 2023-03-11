@@ -84,6 +84,24 @@ ExcludedPairs::ExcludedPairs(const MoleculeView &molecule, const PropertyMap &ma
     // connectivity properties
     const auto &cljscl = molecule.data().property(map["intrascale"]).asA<CLJNBPairs>();
     const auto &connectivity = molecule.data().property(map["connectivity"]).asA<Connectivity>();
+
+    // if the connectivity is empty then we have to assume that all pairs are excluded
+    if (connectivity.nConnections() == 0 and minfo.nAtoms() > 1)
+    {
+        const int nats = minfo.nAtoms();
+
+        for (int i = 0; i < nats - 1; ++i)
+        {
+            for (int j = i + 1; j < nats; ++j)
+            {
+                this->excl_pairs.append(i);
+                this->excl_pairs.append(j);
+            }
+        }
+
+        return;
+    }
+
     const auto bond_matrix = connectivity.getBondMatrix(4);
 
     // loop over all the scale factors - this is potentially quite slow
@@ -291,6 +309,19 @@ int ExcludedPairs::nExcludedPairs() const
     return this->excl_pairs.count() / 2;
 }
 
+int ExcludedPairs::count() const
+{
+    return this->nExcludedPairs();
+}
+
+std::tuple<AtomIdx, AtomIdx> ExcludedPairs::operator[](int i) const
+{
+    i = Index(i).map(this->count());
+
+    return std::make_tuple(AtomIdx(this->excl_pairs[2 * i]),
+                           AtomIdx(this->excl_pairs[(2 * i) + 1]));
+}
+
 QString ExcludedPairs::toString() const
 {
     if (this->excl_pairs.isEmpty())
@@ -361,10 +392,10 @@ int ExcludedPairs::getIndex(qint64 atom0, qint64 atom1) const
         qint64 p1 = this->excl_pairs[i + 1];
 
         if ((atom0 == p0 and atom1 == p1) or (atom0 == p1 and atom1 == p0))
-            return true;
+            return i;
     }
 
-    return false;
+    return -1;
 }
 
 bool ExcludedPairs::areExcluded(const AtomID &atom0, const AtomID &atom1) const

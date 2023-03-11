@@ -71,6 +71,10 @@ namespace SireMM
         bool operator==(const ExcludedPairs &other) const;
         bool operator!=(const ExcludedPairs &other) const;
 
+        int count() const;
+
+        std::tuple<SireMol::AtomIdx, SireMol::AtomIdx> operator[](int i) const;
+
         ExcludedPairs *clone() const;
 
         QString toString() const;
