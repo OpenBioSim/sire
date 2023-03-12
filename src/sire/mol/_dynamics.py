@@ -29,9 +29,6 @@ class Dynamics:
     def __init__(self, molecules=None, map=None):
         self._d = DynamicsData(molecules=molecules, map=map)
 
-    def minimise(self, max_steps=1000):
-        return self
-
     def run(self, time):
         return self
 

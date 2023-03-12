@@ -10,7 +10,9 @@ __all__ = [
     "Cursor",
     "Cursors",
     "CursorsM",
+    "Dynamics",
     "Element",
+    "Minimisation",
     "ResIdx",
     "ResName",
     "ResNum",
@@ -88,6 +90,8 @@ from ..legacy.Mol import (
 )
 
 from ._cursor import Cursor, Cursors, CursorsM
+from ._minimisation import Minimisation
+from ._dynamics import Dynamics
 from ._trajectory import TrajectoryIterator
 from ._element import Element
 from ._view import view as _viewfunc
@@ -1239,20 +1243,35 @@ Molecule.cursor = _cursor
 
 def _dynamics(view, map=None):
     """
-    Return a Dynamics object that can be used to minimise or perform
-    dynamics of this view
+    Return a Dynamics object that can be used to perform
+    dynamics of the molecule(s) in this view
     """
-    from ..base import create_map
-    from ._dynamics import Dynamics
-
-    return Dynamics(view, map=create_map(map))
+    return Dynamics(view, map=map)
 
 
-Atom.dynamics = _dynamics
-Residue.dynamics = _dynamics
-Chain.dynamics = _dynamics
-Segment.dynamics = _dynamics
-Molecule.dynamics = _dynamics
+def _minimisation(view, map=None):
+    """
+    Return a Minimisation object that can be used to minimise the energy
+    of the molecule(s) in this view.
+    """
+    return Minimisation(view, map=map)
+
+
+MoleculeView.dynamics = _dynamics
+SelectorM_Atom_.dynamics = _dynamics
+SelectorM_Residue_.dynamics = _dynamics
+SelectorM_Chain_.dynamics = _dynamics
+SelectorM_Segment_.dynamics = _dynamics
+SelectorM_CutGroup_.dynamics = _dynamics
+SelectorMol.dynamics = _dynamics
+
+MoleculeView.minimisation = _minimisation
+SelectorM_Atom_.minimisation = _minimisation
+SelectorM_Residue_.minimisation = _minimisation
+SelectorM_Chain_.minimisation = _minimisation
+SelectorM_Segment_.minimisation = _minimisation
+SelectorM_CutGroup_.minimisation = _minimisation
+SelectorMol.minimisation = _minimisation
 
 
 def _cursors(views, map=None):

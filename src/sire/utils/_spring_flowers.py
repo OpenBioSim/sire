@@ -132,10 +132,7 @@ class SpringFlowers:
         frames = []
         frames.append("")
 
-        if Console.supports_emojis():
-            bar = "👉 👉 👉 😷  😷  😷 👌 👍 👏 👏 👏 👏 👏 "
-        else:
-            bar = "-> -> -> #WearAMask :-) :-) :-)  "
+        bar = "->->->->->->->->->->->"
 
         for i in range(1, len(bar), 1):
             frames.append(bar[0:i])

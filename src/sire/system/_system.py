@@ -238,6 +238,24 @@ class System:
         """Return an iterator over the trajectory of frames for this System"""
         return self.molecules().trajectory()
 
+    def minimisation(self, map=None):
+        """
+        Return a Minimisation object that can be used to minimise the energy
+        of the molecule(s) in this view.
+        """
+        from ..mol import Minimisation
+
+        return Minimisation(self, map=map)
+
+    def dynamics(self, map=None):
+        """
+        Return a Dynamics object that can be used to perform
+        dynamics of the molecule(s) in this view
+        """
+        from ..mol import Dynamics
+
+        return Dynamics(self, map=map)
+
     def energy(self, *args, **kwargs):
         """Calculate and return the energy of this System
         (or of the matching index/search subset of this System)

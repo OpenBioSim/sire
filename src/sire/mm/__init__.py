@@ -23,6 +23,8 @@ from ..mol import (
     _cursor,
     _cursors,
     _cursorsm,
+    _dynamics,
+    _minimisation,
     _selector_to_smiles,
     _selector_view2d,
     _trajectory,
@@ -102,6 +104,16 @@ SelectorMBond.cursor = _cursorsm
 SelectorMAngle.cursor = _cursorsm
 SelectorMDihedral.cursor = _cursorsm
 SelectorMImproper.cursor = _cursorsm
+
+SelectorMBond.dynamics = _dynamics
+SelectorMAngle.dynamics = _dynamics
+SelectorMDihedral.dynamics = _dynamics
+SelectorMImproper.dynamics = _dynamics
+
+SelectorMBond.minimisation = _minimisation
+SelectorMAngle.minimisation = _minimisation
+SelectorMDihedral.minimisation = _minimisation
+SelectorMImproper.minimisation = _minimisation
 
 SelectorMBond.smiles = _selector_to_smiles
 SelectorMAngle.smiles = _selector_to_smiles
