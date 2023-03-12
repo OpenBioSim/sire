@@ -149,23 +149,15 @@ ForceFieldInfo::ForceFieldInfo(const System &system,
 
     const auto mols = system.molecules();
 
-    if (mols.count() <= 1)
-    {
-        // no space for single molecules
-        this->setSpace(Cartesian());
-    }
-    else
-    {
-        const auto space_property = map["space"];
+    const auto space_property = map["space"];
 
-        if (space_property.hasValue())
-        {
-            this->setSpace(space_property.value().asA<Space>());
-        }
-        else if (system.containsProperty(space_property.source()))
-        {
-            this->setSpace(system.property(space_property.source()).asA<Space>());
-        }
+    if (space_property.hasValue())
+    {
+        this->setSpace(space_property.value().asA<Space>());
+    }
+    else if (system.containsProperty(space_property.source()))
+    {
+        this->setSpace(system.property(space_property.source()).asA<Space>());
     }
 
     const auto cutoff_prop = map["cutoff"];

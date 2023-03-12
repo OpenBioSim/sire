@@ -164,6 +164,7 @@ namespace SireSystem
 
         IntraFF intraff("intraff");
         intraff.setCLJFunction(get_intra_cljfunc(ffinfo).read().asA<CLJIntraFunction>());
+        intraff.setProperty("space", ffinfo.space());
         intraff.add(mol, map);
 
         ffields.add(intraff);
@@ -203,6 +204,7 @@ namespace SireSystem
 
         IntraFF intraff("intraff");
         intraff.setCLJFunction(get_intra_cljfunc(ffinfo).read().asA<CLJIntraFunction>());
+        intraff.setProperty("space", ffinfo.space());
         intraff.add(mols, map);
 
         ffields.add(interff);
@@ -262,6 +264,7 @@ namespace SireSystem
 
         IntraGroupFF intraff("intraff");
         intraff.setCLJFunction(get_intra_cljfunc(ffinfo0).read().asA<CLJIntraFunction>());
+        intraff.setProperty("space", ffinfo0.space());
         intraff.add(mols0, MGIdx(0), map);
         intraff.add(mols1, MGIdx(1), map);
 

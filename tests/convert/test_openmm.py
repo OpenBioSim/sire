@@ -11,7 +11,9 @@ def test_openmm_single_energy(kigaki_mols):
 
     mol = mols[0]
 
-    omm = sr.convert.to(mol, "openmm")
+    map = {"space": sr.vol.Cartesian()}
+
+    omm = sr.convert.to(mol, "openmm", map=map)
 
     state = omm.getState(getPositions=True, getEnergy=True)
 
@@ -33,7 +35,7 @@ def test_openmm_single_energy(kigaki_mols):
     energy = energy.value_in_unit(energy.unit)
 
     # these won't be exactly the same - this is 5227 +/- 0.1 kJ mol-1
-    assert mol.energy().to(sr.units.kJ_per_mol) == pytest.approx(
+    assert mol.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
         energy, abs=0.1
     )
 
@@ -129,15 +131,13 @@ def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
 )
 def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     # use all of the molecules
-    mols = kigaki_mols[1:100]
+    mols = kigaki_mols
 
     # GET DISAGREEMNT FROM FIRST MOLECULE, LIKELY BECAUSE OF NO
     # SPACE IN THE FIRST MOLECULE!
 
-    space = kigaki_mols.property("space")
-
     map = {
-        "space": space,
+        "space": mols.property("space"),
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
@@ -152,7 +152,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     # get this as a float in kJ mol-1
     energy = energy.value_in_unit(energy.unit)
 
-    # -125622.2 +/- 0.05
+    # -74975.9 +/- 0.5
     assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
         energy, abs=0.5
     )
