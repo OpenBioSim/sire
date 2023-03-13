@@ -25,6 +25,8 @@ SireMM::ExcludedPairs __copy__(const SireMM::ExcludedPairs &other){ return SireM
 
 #include "Helpers/release_gil_policy.hpp"
 
+#include "Helpers/len.hpp"
+
 void register_ExcludedPairs_class(){
 
     { //::SireMM::ExcludedPairs
@@ -42,6 +44,18 @@ void register_ExcludedPairs_class(){
                 "areExcluded"
                 , areExcluded_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::ExcludedPairs::count
+        
+            typedef int ( ::SireMM::ExcludedPairs::*count_function_type)(  ) const;
+            count_function_type count_function_value( &::SireMM::ExcludedPairs::count );
+            
+            ExcludedPairs_exposer.def( 
+                "count"
+                , count_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -98,6 +112,18 @@ void register_ExcludedPairs_class(){
         
         }
         ExcludedPairs_exposer.def( bp::self == bp::self );
+        { //::SireMM::ExcludedPairs::operator[]
+        
+            typedef ::std::tuple< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMM::ExcludedPairs::*__getitem___function_type)( int ) const;
+            __getitem___function_type __getitem___function_value( &::SireMM::ExcludedPairs::operator[] );
+            
+            ExcludedPairs_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("i") )
+                , "" );
+        
+        }
         { //::SireMM::ExcludedPairs::setExcluded
         
             typedef void ( ::SireMM::ExcludedPairs::*setExcluded_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,bool ) ;
@@ -171,6 +197,7 @@ void register_ExcludedPairs_class(){
         ExcludedPairs_exposer.def_pickle(sire_pickle_suite< ::SireMM::ExcludedPairs >());
         ExcludedPairs_exposer.def( "__str__", &__str__< ::SireMM::ExcludedPairs > );
         ExcludedPairs_exposer.def( "__repr__", &__str__< ::SireMM::ExcludedPairs > );
+        ExcludedPairs_exposer.def( "__len__", &__len_count< ::SireMM::ExcludedPairs > );
     }
 
 }

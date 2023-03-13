@@ -201,7 +201,9 @@ namespace SireMol
 
         bool update(const MoleculeData &moldata);
         bool update(const MoleculeView &molview);
+
         QList<Molecule> update(const Molecules &molecules);
+        QList<Molecule> update(const SelectorMol &molecules);
 
     private:
         template <class T>

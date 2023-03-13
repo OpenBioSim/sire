@@ -482,19 +482,6 @@ void register_CutGroup_class(){
                 , "" );
         
         }
-        { //::SireMol::CutGroup::update
-        
-            typedef void ( ::SireMol::CutGroup::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMol::CutGroup::update );
-            
-            CutGroup_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("moldata") )
-                , bp::release_gil_policy()
-                , "Update this CutGroup with the passed molecule data.\nThrow: SireError::incompatible_error\n" );
-        
-        }
         CutGroup_exposer.staticmethod( "typeName" );
         CutGroup_exposer.def( "_get_property_SireMol_CGStringProperty", &SireMol::CutGroup::property< QString >, bp::return_value_policy<bp::copy_const_reference>());
         CutGroup_exposer.def( "_get_metadata_SireMol_CGStringProperty", get_Metadata_SireMol_CGStringProperty_function1, bp::return_value_policy<bp::copy_const_reference>());

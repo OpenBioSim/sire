@@ -537,19 +537,6 @@ void register_Molecule_class(){
                 , "" );
         
         }
-        { //::SireMol::Molecule::update
-        
-            typedef void ( ::SireMol::Molecule::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMol::Molecule::update );
-            
-            Molecule_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("moldata") )
-                , bp::release_gil_policy()
-                , "Update this molecule with the passed molecule data.\nThrow: SireError::incompatible_error\n" );
-        
-        }
         { //::SireMol::Molecule::version
         
             typedef ::quint64 ( ::SireMol::Molecule::*version_function_type)(  ) const;

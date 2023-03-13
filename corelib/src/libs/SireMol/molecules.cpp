@@ -31,6 +31,7 @@
 #include "partialmolecule.h"
 #include "selector.hpp"
 #include "viewsofmol.h"
+#include "selectormol.h"
 
 #include "editor.hpp"
 #include "mover.hpp"
@@ -507,6 +508,11 @@ QList<Molecule> Molecules::update(const Molecules &molecules)
     }
 
     return updated_mols;
+}
+
+QList<Molecule> Molecules::update(const SelectorMol &molecules)
+{
+    return this->update(molecules.toMolecules());
 }
 
 /** This removes all duplicated views from this set. This returns

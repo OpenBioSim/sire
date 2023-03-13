@@ -205,32 +205,6 @@ AtomSelection CutGroup::selection() const
     return selected_atoms;
 }
 
-/** Update this CutGroup with the passed molecule data.
-
-    \throw SireError::incompatible_error
-*/
-void CutGroup::update(const MoleculeData &moldata)
-{
-    // check that the new data is compatible (has same molecule
-    // number and info ID number)
-    if (d->number() != moldata.number() or d->info().UID() != moldata.info().UID())
-    {
-        throw SireError::incompatible_error(QObject::tr("You can only update a CutGroup with the molecule data "
-                                                        "for the same molecule (same molecule number) and that "
-                                                        "has a .info() object that has the same UID. You are "
-                                                        "trying to update CutGroup %1 in molecule %2 with UID %3 "
-                                                        "with molecule %4 with UID %5.")
-                                                .arg(cgidx)
-                                                .arg(d->number())
-                                                .arg(d->info().UID().toString())
-                                                .arg(moldata.number())
-                                                .arg(moldata.info().UID().toString()),
-                                            CODELOC);
-    }
-
-    d = moldata;
-}
-
 /** Return the name of this CutGroup */
 const CGName &CutGroup::name() const
 {

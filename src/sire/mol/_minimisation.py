@@ -53,6 +53,17 @@ class MinimisationData:
 
             spinner.success()
 
+    def commit(self):
+        from ..legacy.Convert import openmm_extract_coordinates
+
+        state = self._omm_mols.getState(getPositions=True)
+
+        mols = openmm_extract_coordinates(
+            state, self._sire_mols.molecules(), self._map
+        )
+
+        self._sire_mols.update(mols.to_molecules())
+
 
 class Minimisation:
     """

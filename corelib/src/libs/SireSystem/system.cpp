@@ -49,6 +49,7 @@
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molecules.h"
 #include "SireMol/partialmolecule.h"
+#include "SireMol/selectormol.h"
 
 #include "SireBase/savestate.h"
 
@@ -2827,6 +2828,11 @@ void System::update(const MoleculeData &moldata, bool auto_commit)
     }
 }
 
+void System::update(const MoleculeView &molview, bool auto_commit)
+{
+    this->update(molview.data(), auto_commit);
+}
+
 /** Update this system so that it uses the same version of the molecules
     present in 'molecules'
 
@@ -2849,6 +2855,11 @@ void System::update(const Molecules &molecules, bool auto_commit)
         delta = Delta();
         this->accept();
     }
+}
+
+void System::update(const SelectorMol &molecules, bool auto_commit)
+{
+    this->update(molecules.toMolecules(), auto_commit);
 }
 
 /** Update this system so that it uses the same version of the molecules

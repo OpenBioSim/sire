@@ -1489,7 +1489,46 @@ void register_SelectorMDihedral_class(){
         }
         { //::SireMM::SelectorMDihedral::update
         
+            typedef void ( ::SireMM::SelectorMDihedral::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMDihedral::update );
+            
+            SelectorMDihedral_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecule") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMDihedral::update
+        
+            typedef void ( ::SireMM::SelectorMDihedral::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMDihedral::update );
+            
+            SelectorMDihedral_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMDihedral::update
+        
             typedef void ( ::SireMM::SelectorMDihedral::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMDihedral::update );
+            
+            SelectorMDihedral_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMDihedral::update
+        
+            typedef void ( ::SireMM::SelectorMDihedral::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMM::SelectorMDihedral::update );
             
             SelectorMDihedral_exposer.def( 

@@ -46,6 +46,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectormol.h"
+
 #include "trajectory.h"
 
 #include <QDebug>
@@ -1716,12 +1718,38 @@ void register_MoleculeView_class(){
                 , update_function_value
                 , ( bp::arg("moldata") )
                 , bp::release_gil_policy()
-                , "Update this view with a new version of the molecule. You\ncan only update the molecule if it has the same layout UID\n(so same atoms, residues, cutgroups etc.)\nThrow: SireError::incompatible_error\n" );
+                , "Update this view with a new version of the molecule.\n  This will only update if the molecules match and\n  have the same layouts.\n\n  If the number matches but the layout (info) is different\n  then this will raise a SireError::incompatible_error\n" );
+        
+        }
+        { //::SireMol::MoleculeView::update
+        
+            typedef void ( ::SireMol::MoleculeView::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMol::MoleculeView::update );
+            
+            MoleculeView_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molview") )
+                , bp::release_gil_policy()
+                , "Update this view with a new version of the molecule.\n  This will only update if the molecules match and\n  have the same layouts.\n\n  If the number matches but the layout (info) is different\n  then this will raise a SireError::incompatible_error\n" );
         
         }
         { //::SireMol::MoleculeView::update
         
             typedef void ( ::SireMol::MoleculeView::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMol::MoleculeView::update );
+            
+            MoleculeView_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "Update this view with a new version of the molecule\nfrom molecules (assuming this molecule is in molecules).\nYou can only update the molecule if it has the same layout UID\n(so same atoms, residues, cutgroups etc.)\nThrow: SireError::incompatible_error\n" );
+        
+        }
+        { //::SireMol::MoleculeView::update
+        
+            typedef void ( ::SireMol::MoleculeView::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMol::MoleculeView::update );
             
             MoleculeView_exposer.def( 

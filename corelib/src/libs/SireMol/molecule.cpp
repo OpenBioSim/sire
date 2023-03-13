@@ -287,27 +287,6 @@ MolEditor Molecule::edit() const
     return MolEditor(*this);
 }
 
-/** Update this molecule with the passed molecule data.
-
-    \throw SireError::incompatible_error
-*/
-void Molecule::update(const MoleculeData &moldata)
-{
-    // check that the new data is compatible (has same molecule
-    // number)
-    if (d->number() != moldata.number())
-    {
-        throw SireError::incompatible_error(QObject::tr("You can only update a molecule with the molecule data "
-                                                        "for the same molecule (same molecule number) You are "
-                                                        "trying to update molecule %1 with molecule %2.")
-                                                .arg(d->number())
-                                                .arg(moldata.number()),
-                                            CODELOC);
-    }
-
-    d = moldata;
-}
-
 /** Return all of the properties of this molecule */
 const Properties &Molecule::properties() const
 {

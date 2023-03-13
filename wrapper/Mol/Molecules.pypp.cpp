@@ -39,6 +39,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectormol.h"
+
 #include "tostring.h"
 
 #include "viewsofmol.h"
@@ -838,6 +840,19 @@ void register_Molecules_class(){
         { //::SireMol::Molecules::update
         
             typedef ::QList< SireMol::Molecule > ( ::SireMol::Molecules::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMol::Molecules::update );
+            
+            Molecules_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "Update the views in this set so that they have the\nsame molecule versions as the molecules in molecules.\nThis returns the molecules that have been updated." );
+        
+        }
+        { //::SireMol::Molecules::update
+        
+            typedef ::QList< SireMol::Molecule > ( ::SireMol::Molecules::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMol::Molecules::update );
             
             Molecules_exposer.def( 

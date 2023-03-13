@@ -45,10 +45,15 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     typedef SireMol::SelectorMol (*openmm_system_to_sire_function_type)(const OpenMM::System &, SireBase::PropertyMap const &);
     typedef CoordsAndVelocities (*sire_to_openmm_system_function_type)(OpenMM::System &, const SireMol::SelectorMol &, SireBase::PropertyMap const &);
     typedef void (*set_openmm_coordinates_and_velocities_function_type)(OpenMM::Context &, const CoordsAndVelocities &);
+    typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
+    typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
+    typedef SireMol::SelectorMol (*extract_coordinates_and_velocities_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
 
     openmm_system_to_sire_function_type openmm_system_to_sire_function_value(&openmm_system_to_sire);
     sire_to_openmm_system_function_type sire_to_openmm_system_function_value(&sire_to_openmm_system);
     set_openmm_coordinates_and_velocities_function_type set_openmm_coordinates_and_velocities_function_value(&set_openmm_coordinates_and_velocities);
+    extract_coordinates_function_type extract_coordinates_function_value(&extract_coordinates);
+    extract_coordinates_and_velocities_function_type extract_coordinates_and_velocities_function_value(&extract_coordinates_and_velocities);
 
     bp::class_<CoordsAndVelocities> CoordsAndVelocities_exposer_t("CoordsAndVelocities",
                                                                   "Internal class used to hold OpenMM coordinates and velocities data");
@@ -68,6 +73,18 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             (bp::arg("context"), bp::arg("coords_and_velocities")),
             "Set the coordinates and velocities in a context");
 
+    bp::def("_openmm_extract_coordinates",
+            extract_coordinates_function_value,
+            (bp::arg("state"), bp::arg("mols"), bp::arg("map")),
+            "Extract the coordinates from 'state' and copy then into the passed 'mols'");
+
+    bp::def("_openmm_extract_coordinates_and_velocities",
+            extract_coordinates_and_velocities_function_value,
+            (bp::arg("state"), bp::arg("mols"), bp::arg("map")),
+            "Extract the coordinates and velocities from 'state' and copy then into the passed 'mols'");
+
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::System>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Context>());
+    bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::State>());
+    bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Integrator>());
 }

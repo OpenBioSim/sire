@@ -6,6 +6,7 @@ __all__ = [
     "smiles_to_rdkit",
     "sire_to_openmm",
     "openmm_to_sire",
+    "openmm_extract_coordinates",
     "supported_formats",
 ]
 
@@ -52,6 +53,8 @@ try:
         _sire_to_openmm_system,
         _openmm_system_to_sire,
         _set_openmm_coordinates_and_velocities,
+        _openmm_extract_coordinates,
+        _openmm_extract_coordinates_and_velocities,
     )
 
     _has_openmm = True
@@ -110,6 +113,12 @@ try:
 
         return context
 
+    def openmm_extract_coordinates(state, mols, map):
+        return _openmm_extract_coordinates(state, mols, map)
+
+    def openmm_extract_coordinates_and_velocities(state, mols, map):
+        return _openmm_extract_coordinates_and_velocities(state, mols, map)
+
 except Exception:
     # OpenMM support is not available
     def _no_openmm():
@@ -124,6 +133,12 @@ except Exception:
         _no_openmm()
 
     def openmm_to_sire(*args, **kwargs):
+        _no_openmm()
+
+    def openmm_extract_coordinates(state, mols, map):
+        _no_openmm()
+
+    def openmm_extract_coordinates_and_velocities(state, mols, map):
         _no_openmm()
 
 

@@ -140,6 +140,7 @@
 #include "segment.h"
 #include "select.h"
 #include "selector.hpp"
+#include "selectormol.h"
 #include "trajectory.h"
 #include <QDebug>
 #include "moleculeview.h"

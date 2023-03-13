@@ -44,6 +44,8 @@ namespace bp = boost::python;
 
 #include "SireMol/partialmolecule.h"
 
+#include "SireMol/selectormol.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -2377,6 +2379,18 @@ void register_System_class(){
         }
         { //::SireSystem::System::update
         
+            typedef void ( ::SireSystem::System::*update_function_type)( ::SireMol::MoleculeView const &,bool ) ;
+            update_function_type update_function_value( &::SireSystem::System::update );
+            
+            System_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molview"), bp::arg("auto_commit")=(bool)(true) )
+                , "Update this system so that it uses the same version of the molecules\npresent in molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+        
+        }
+        { //::SireSystem::System::update
+        
             typedef void ( ::SireSystem::System::*update_function_type)( ::SireMol::Molecules const &,bool ) ;
             update_function_type update_function_value( &::SireSystem::System::update );
             
@@ -2397,6 +2411,18 @@ void register_System_class(){
                 , update_function_value
                 , ( bp::arg("molgroup"), bp::arg("auto_commit")=(bool)(true) )
                 , "Update this system so that it uses the same version of the molecules\npresent in the molecule group molgroup\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+        
+        }
+        { //::SireSystem::System::update
+        
+            typedef void ( ::SireSystem::System::*update_function_type)( ::SireMol::SelectorMol const &,bool ) ;
+            update_function_type update_function_value( &::SireSystem::System::update );
+            
+            System_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules"), bp::arg("auto_commit")=(bool)(true) )
+                , "Update this system so that it uses the same version of the molecules\npresent in molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
         
         }
         { //::SireSystem::System::userProperties

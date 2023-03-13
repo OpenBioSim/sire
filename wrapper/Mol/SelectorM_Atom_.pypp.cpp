@@ -1620,7 +1620,49 @@ void register_SelectorM_Atom__class(){
         { //::SireMol::SelectorM< SireMol::Atom >::update
         
             typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Atom >::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Atom >::update );
+            
+            SelectorM_Atom__exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molview") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::update
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Atom >::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Atom >::update );
+            
+            SelectorM_Atom__exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::update
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
             typedef void ( ::SireMol::SelectorM< SireMol::Atom >::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Atom >::update );
+            
+            SelectorM_Atom__exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::update
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Atom >::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Atom >::update );
             
             SelectorM_Atom__exposer.def( 

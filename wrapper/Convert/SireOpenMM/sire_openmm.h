@@ -50,6 +50,14 @@ namespace SireOpenMM
                                                const CoordsAndVelocities &coords_and_velocities);
 
     SireUnits::Dimension::MolarEnergy get_potential_energy(OpenMM::Context &context);
+
+    SireMol::SelectorMol extract_coordinates(const OpenMM::State &state,
+                                             const SireMol::SelectorMol &mols,
+                                             const SireBase::PropertyMap &map);
+
+    SireMol::SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,
+                                                            const SireMol::SelectorMol &mols,
+                                                            const SireBase::PropertyMap &map);
 }
 
 #endif

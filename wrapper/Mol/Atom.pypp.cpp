@@ -727,19 +727,6 @@ void register_Atom_class(){
                 , "" );
         
         }
-        { //::SireMol::Atom::update
-        
-            typedef void ( ::SireMol::Atom::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMol::Atom::update );
-            
-            Atom_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("other") )
-                , bp::release_gil_policy()
-                , "Update this atom with the passed molecule data.\nThrow: SireError::incompatible_error\n" );
-        
-        }
         Atom_exposer.staticmethod( "typeName" );
         Atom_exposer.def( "_get_property_SireMM_AtomLJs", &SireMol::Atom::property< SireMM::LJParameter >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMM_AtomLJs", get_Metadata_SireMM_AtomLJs_function1, bp::return_value_policy<bp::copy_const_reference>());
