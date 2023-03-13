@@ -4,7 +4,7 @@ __all__ = ["Minimisation"]
 class MinimisationData:
     """
     Internal class that is designed to only be used by the Minimisation
-    class. This holds the shared state for a minimisation on a set
+    class. This holds the shared state for minimisation on a set
     of molecule(s).
     """
 

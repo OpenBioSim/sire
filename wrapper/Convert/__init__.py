@@ -93,13 +93,95 @@ try:
         # We create this first...
         system = openmm.System()
 
-        # system must be an openmm.System() or else we will crash!
-        coords_and_vels = _sire_to_openmm_system(system, mols, map)
-
         # Next, we need to create an openmm.Integrator, so that we can
         # then create an openmm.Context, into which the coordinate
         # and velocity data can be placed
-        integrator = openmm.VerletIntegrator(0.001)
+
+        from ...units import femtosecond, picosecond, kelvin
+        from ...move import Ensemble
+
+        if map.specified("timestep"):
+            timestep = map["timestep"]
+        else:
+            timestep = 2 * femtosecond
+
+        if not timestep.has_same_units(femtosecond):
+            raise TypeError(
+                "The timestep should be in units of time. You cannot use "
+                f"'{timestep}'"
+            )
+
+        timestep = timestep.to(picosecond) * openmm.unit.picosecond
+
+        ensemble = Ensemble(map=map)
+
+        if map.specified("integrator"):
+            integrator = map["integrator"]
+        else:
+            integrator = None
+
+        if map.specified("friction"):
+            friction = map["friction"]
+        else:
+            friction = 1.0 / picosecond
+
+        friction = friction.to(1.0 / picosecond) / openmm.unit.picosecond
+
+        if integrator is None:
+            if ensemble.is_nve():
+                integrator = openmm.VerletIntegrator(timestep)
+            else:
+                integrator = openmm.LangevinMiddleIntegrator(
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin,
+                    friction,
+                    timestep,
+                )
+
+        elif type(integrator) is str:
+            integrator = integrator.lower()
+
+            if integrator == "verlet":
+                if not ensemble.is_nve():
+                    raise ValueError(
+                        "You cannot use a verlet integrator with the "
+                        f"ensemble {ensemble}"
+                    )
+                integrator = openmm.VerletIntegrator(timestep)
+
+            else:
+                temperature = (
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
+                )
+
+                if ensemble.is_nve():
+                    raise ValueError(
+                        f"You cannot use a {integrator} integrator "
+                        f"with the ensemble {ensemble}"
+                    )
+
+                if integrator == "langevin_middle":
+                    integrator = openmm.LangevinMiddleIntegrator(
+                        temperature, friction, timestep
+                    )
+
+                elif integrator == "langevin":
+                    integrator = openmm.LangevinIntegrator(
+                        temperature, friction, timestep
+                    )
+
+                else:
+                    raise ValueError(f"Unrecognised integrator {integrator}")
+
+        elif openmm.Integrator not in type(integrator).mro():
+            raise TypeError(
+                f"Cannot cast the integrator {integrator} to the correct "
+                "type. It should be a string or an openmm.Integrator object"
+            )
+
+        # Next, convert the sire system to an openmm system
+
+        # system must be an openmm.System() or else we will crash!
+        coords_and_vels = _sire_to_openmm_system(system, mols, map)
 
         context = openmm.Context(system, integrator)
 

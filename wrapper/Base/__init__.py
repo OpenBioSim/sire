@@ -1,19 +1,19 @@
-
-from ..Units import _Units # Need to import so that we have GeneralUnit
+from ..Units import _Units  # Need to import so that we have GeneralUnit
 from ._Base import *
 
 _wrap_functions = []
 
 _base_wrap = wrap
 
+
 def wrap(value):
     """Wrap the passed value into a :class:`~sire.base.Property`
-       object. This works recursively, wrapping all items in
-       a container, such that the returned value is derived
-       from :class:`~sire.base.Property` and can be passed to
-       the C++ code in sire. Note that you normally don't
-       need to call this yourself, as wrapping is handled
-       automatically.
+    object. This works recursively, wrapping all items in
+    a container, such that the returned value is derived
+    from :class:`~sire.base.Property` and can be passed to
+    the C++ code in sire. Note that you normally don't
+    need to call this yourself, as wrapping is handled
+    automatically.
     """
     if isinstance(value, bool):
         return BooleanProperty(value)
@@ -35,6 +35,10 @@ def wrap(value):
             return DoubleArrayProperty(value)
         except Exception:
             pass
+
+    elif _Units.TempBase in type(value).mro():
+        # this is a temperature
+        return wrap(_Units.GeneralUnit(value))
 
     for func in _wrap_functions:
         try:
@@ -58,19 +62,25 @@ def wrap(value):
     else:
         return PropertyList(value)
 
+
 _original_wrap = wrap
+
 
 def _add_wrap_function(func):
     _wrap_functions.append(func)
     return _original_wrap
 
+
 # cludgy quick fix for an anaconda install
 _getBundledLibDir = getBundledLibDir
+
+
 def getBundledLibDir():
     try:
         return _getBundledLibDir()
     except:
         return "%s/lib" % getInstallDir()
+
 
 def __set_property__(obj, key, property):
     try:
@@ -80,6 +90,7 @@ def __set_property__(obj, key, property):
             return obj.__setProperty__(key, wrap(property))
         else:
             raise e
+
 
 def __getitem__(props, i):
     try:
@@ -92,6 +103,7 @@ def __getitem__(props, i):
         else:
             raise e
 
+
 def __properties_values__(props):
     vals = []
 
@@ -100,6 +112,7 @@ def __properties_values__(props):
 
     return vals
 
+
 def __properties_items__(props):
     items = []
 
@@ -107,6 +120,7 @@ def __properties_items__(props):
         items.append((key, props.property(key)))
 
     return items
+
 
 Properties.__setProperty__ = Properties.setProperty
 Properties.setProperty = __set_property__
