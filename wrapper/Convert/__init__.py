@@ -210,7 +210,83 @@ try:
             pressure = ensemble.pressure().to(atm) * openmm.unit.atmosphere
             system.addForce(openmm.MonteCarloBarostat(pressure, temperature))
 
-        context = openmm.Context(system, integrator)
+        platform = None
+
+        if map.specified("platform"):
+            desired_platform = map["platform"].source()
+
+            platform = None
+            platforms = []
+
+            for i in range(0, openmm.Platform.getNumPlatforms()):
+                p = openmm.Platform.getPlatform(i)
+
+                if p.getName() == desired_platform:
+                    platform = p
+                    break
+                else:
+                    platforms.append(p.getName())
+
+            if platform is None:
+                platforms = ", ".join(platforms)
+                raise ValueError(
+                    f"Cannot create the openmm platform {desired_platform} "
+                    "as this is not supported by this installation of "
+                    f"openmm. Available platforms are [{platforms}]"
+                )
+        else:
+            # just find the fastest platform
+            speed = 0
+            for i in range(0, openmm.Platform.getNumPlatforms()):
+                p = openmm.Platform.getPlatform(i)
+
+                if p.getSpeed() > speed:
+                    platform = p
+                    speed = platform.getSpeed()
+
+            if platform is None:
+                raise ValueError(
+                    "This installation of openmm is broken, as there "
+                    "are no available platforms!"
+                )
+
+        platform_name = platform.getName()
+
+        if platform_name in ["OpenCL", "Cuda"]:
+            if map.specified("precision"):
+                precision = map["precision"].source().lower()
+
+                if precision not in ["single", "double"]:
+                    raise ValueError(
+                        f"Cannot use precision {precision} as only "
+                        "value 'single' and 'double' are supported."
+                    )
+            else:
+                precision = "single"
+
+            if (
+                precision == "double"
+                and not platform.supportsDoublePrecision()
+            ):
+                raise ValueError(
+                    f"The platform {platform.getName()} does not support "
+                    "double precision arithmatic"
+                )
+
+            platform.setPropertyDefaultValue(
+                f"{platform_name}Precision", precision
+            )
+
+            if map.specified("device"):
+                device = map["device"].value().as_integer()
+            else:
+                device = 0
+
+            platform.setPropertyDefaultValue(
+                f"{platform_name}DeviceIndex", str(device)
+            )
+
+        context = openmm.Context(system, integrator, platform)
 
         # place the coordinates and velocities into the context
         _set_openmm_coordinates_and_velocities(context, coords_and_vels)
