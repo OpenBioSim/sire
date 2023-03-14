@@ -139,10 +139,16 @@ def _set_property(molview, key, property):
                 from ..Units import mod_electron
 
                 value = mod_electron
+
             elif orig_typename.endswith("Masses"):
                 from ..Units import g_per_mol
 
                 value = g_per_mol
+
+            elif orig_typename.endswith("Radii"):
+                from ..Units import angstrom
+
+                value = angstrom
 
             if value is not None:
                 (typename, value) = __get_typename__(value)
