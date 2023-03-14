@@ -97,13 +97,13 @@ try:
         # then create an openmm.Context, into which the coordinate
         # and velocity data can be placed
 
-        from ...units import femtosecond, picosecond, kelvin
+        from ...units import femtosecond, picosecond, kelvin, atm
         from ...move import Ensemble
 
         if map.specified("timestep"):
             timestep = map["timestep"]
         else:
-            timestep = 2 * femtosecond
+            timestep = 1 * femtosecond
 
         if not timestep.has_same_units(femtosecond):
             raise TypeError(
@@ -137,15 +137,20 @@ try:
                     timestep,
                 )
 
+                temperature = (
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
+                )
+
         elif type(integrator) is str:
             integrator = integrator.lower()
 
-            if integrator == "verlet":
+            if integrator == "verlet" or integrator == "leapfrog":
                 if not ensemble.is_nve():
                     raise ValueError(
                         "You cannot use a verlet integrator with the "
                         f"ensemble {ensemble}"
                     )
+
                 integrator = openmm.VerletIntegrator(timestep)
 
             else:
@@ -169,6 +174,16 @@ try:
                         temperature, friction, timestep
                     )
 
+                elif integrator == "nose_hoover":
+                    integrator = openmm.NoseHooverIntegrator(
+                        temperature, friction, timestep
+                    )
+
+                elif integrator == "brownian":
+                    integrator = openmm.BrownianIntegrator(
+                        temperature, friction, timstep
+                    )
+
                 else:
                     raise ValueError(f"Unrecognised integrator {integrator}")
 
@@ -183,15 +198,22 @@ try:
         # system must be an openmm.System() or else we will crash!
         coords_and_vels = _sire_to_openmm_system(system, mols, map)
 
+        # If we want NPT and this is periodic then we have to
+        # add the barostat to the system
+        if ensemble.is_npt():
+            if not system.usesPeriodicBoundaryConditions():
+                raise ValueError(
+                    "You cannot run a constant pressure simulation "
+                    "on a system with a non-periodic space."
+                )
+
+            pressure = ensemble.pressure().to(atm) * openmm.unit.atmosphere
+            system.addForce(openmm.MonteCarloBarostat(pressure, temperature))
+
         context = openmm.Context(system, integrator)
 
         # place the coordinates and velocities into the context
         _set_openmm_coordinates_and_velocities(context, coords_and_vels)
-
-        # Then there is the OpenMM Topology and Simulation, that
-        # hold the above data together with some metadata about the
-        # system being simulated. I will need to think about how
-        # I should handle this...
 
         return context
 

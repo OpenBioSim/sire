@@ -412,6 +412,20 @@ namespace SireOpenMM
                                 std::get<4>(p), false);
         }
 
+        // see if we want to remove COM motion
+        const auto com_remove_prop = map["com_reset_frequency"];
+
+        if (com_remove_prop.hasValue())
+        {
+            const int freq = com_remove_prop.value().asAnInteger();
+
+            if (freq > 0)
+            {
+                OpenMM::CMMotionRemover *com_remover = new OpenMM::CMMotionRemover(freq);
+                system.addForce(com_remover);
+            }
+        }
+
         // now get the coordinates and velocities
         std::shared_ptr<std::vector<OpenMM::Vec3>> coords, vels;
 

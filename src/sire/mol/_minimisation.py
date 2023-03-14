@@ -44,7 +44,7 @@ class MinimisationData:
                 self._omm_mols, maxIterations=max_its
             )
 
-        with Console.spinner("Minimisation") as spinner:
+        with Console.spinner("minimisation") as spinner:
             with ThreadPoolExecutor() as pool:
                 r = pool.submit(runfunc, max_iterations)
 
