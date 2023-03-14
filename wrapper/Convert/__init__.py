@@ -181,7 +181,7 @@ try:
 
                 elif integrator == "brownian":
                     integrator = openmm.BrownianIntegrator(
-                        temperature, friction, timstep
+                        temperature, friction, timestep
                     )
 
                 else:
@@ -250,41 +250,38 @@ try:
                     "are no available platforms!"
                 )
 
-        platform_name = platform.getName()
+        supported_properties = platform.getPropertyNames()
 
-        if platform_name in ["OpenCL", "Cuda"]:
-            if map.specified("precision"):
-                precision = map["precision"].source().lower()
+        if "Precision" in supported_properties and map.specified("precision"):
+            precision = map["precision"].source()
+            platform.setPropertyDefaultValue("Precision", precision)
 
-                if precision not in ["single", "double"]:
-                    raise ValueError(
-                        f"Cannot use precision {precision} as only "
-                        "value 'single' and 'double' are supported."
-                    )
-            else:
-                precision = "single"
+        if map.specified("device"):
+            device_index = None
+            device_name = None
+
+            try:
+                device_index = map["device"].value().as_integer()
+            except Exception:
+                device_name = map["device"].source()
 
             if (
-                precision == "double"
-                and not platform.supportsDoublePrecision()
+                "DeviceIndex" in supported_properties
+                and device_index is not None
             ):
-                raise ValueError(
-                    f"The platform {platform.getName()} does not support "
-                    "double precision arithmatic"
+                platform.setPropertyDefaultValue(
+                    "DeviceIndex", str(device_index)
                 )
 
-            platform.setPropertyDefaultValue(
-                f"{platform_name}Precision", precision
-            )
+            elif (
+                "DeviceName" in supported_properties
+                and device_name is not None
+            ):
+                platform.setPropertyDefaultValue("DeviceName", device_name)
 
-            if map.specified("device"):
-                device = map["device"].value().as_integer()
-            else:
-                device = 0
-
-            platform.setPropertyDefaultValue(
-                f"{platform_name}DeviceIndex", str(device)
-            )
+        if map.specified("cpu_pme") and "UseCpuPme" in supported_properties:
+            usecpu = int(map["cpu_pme"].value().as_boolean())
+            platform.setPropertyDefaultValue("UseCpuPme", str(usecpu))
 
         context = openmm.Context(system, integrator, platform)
 
