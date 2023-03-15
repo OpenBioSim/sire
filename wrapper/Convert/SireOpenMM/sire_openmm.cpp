@@ -518,6 +518,60 @@ namespace SireOpenMM
         }
     }
 
+    SireVol::SpacePtr extract_space(const OpenMM::State &state)
+    {
+        OpenMM::Vec3 a, b, c;
+
+        try
+        {
+            state.getPeriodicBoxVectors(a, b, c);
+        }
+        catch (...)
+        {
+            return SireVol::SpacePtr(SireVol::Cartesian());
+        }
+
+        const double nm_to_internal = (1 * SireUnits::nanometer).to(SireUnits::angstrom);
+
+        SireMaths::Vector x(a[0] * nm_to_internal,
+                            a[1] * nm_to_internal,
+                            a[2] * nm_to_internal);
+
+        SireMaths::Vector y(b[0] * nm_to_internal,
+                            b[1] * nm_to_internal,
+                            b[2] * nm_to_internal);
+
+        SireMaths::Vector z(c[0] * nm_to_internal,
+                            c[1] * nm_to_internal,
+                            c[2] * nm_to_internal);
+
+        SireVol::TriclinicBox triclinic;
+
+        try
+        {
+            triclinic = SireVol::TriclinicBox(x, y, z);
+        }
+        catch (...)
+        {
+            // this is not a valid space - could be an infinite space
+            return SireVol::SpacePtr(SireVol::Cartesian());
+        }
+
+        if (triclinic.alpha() == 90 and triclinic.beta() == 90 and triclinic.gamma() == 90)
+        {
+            // this is a PeriodicBox?
+            SireVol::PeriodicBox pbox(x.max(y).max(z) - x.min(y).min(z));
+
+            if (std::abs(pbox.volume().value() - triclinic.volume().value()) < 0.001)
+            {
+                // yes - periodic box
+                return SireVol::SpacePtr(pbox);
+            }
+        }
+
+        return SireVol::SpacePtr(triclinic);
+    }
+
     SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,
                                                    const SelectorMol &mols,
                                                    const PropertyMap &map)

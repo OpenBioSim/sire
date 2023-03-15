@@ -48,12 +48,14 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
     typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
     typedef SireMol::SelectorMol (*extract_coordinates_and_velocities_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
+    typedef SireVol::SpacePtr (*extract_space_function_type)(OpenMM::State const &);
 
     openmm_system_to_sire_function_type openmm_system_to_sire_function_value(&openmm_system_to_sire);
     sire_to_openmm_system_function_type sire_to_openmm_system_function_value(&sire_to_openmm_system);
     set_openmm_coordinates_and_velocities_function_type set_openmm_coordinates_and_velocities_function_value(&set_openmm_coordinates_and_velocities);
     extract_coordinates_function_type extract_coordinates_function_value(&extract_coordinates);
     extract_coordinates_and_velocities_function_type extract_coordinates_and_velocities_function_value(&extract_coordinates_and_velocities);
+    extract_space_function_type extract_space_function_value(&extract_space);
 
     bp::class_<CoordsAndVelocities> CoordsAndVelocities_exposer_t("CoordsAndVelocities",
                                                                   "Internal class used to hold OpenMM coordinates and velocities data");
@@ -82,6 +84,11 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             extract_coordinates_and_velocities_function_value,
             (bp::arg("state"), bp::arg("mols"), bp::arg("map")),
             "Extract the coordinates and velocities from 'state' and copy then into the passed 'mols'");
+
+    bp::def("_openmm_extract_space",
+            extract_space_function_value,
+            (bp::arg("state")),
+            "Extract and return the space from 'state'");
 
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::System>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Context>());

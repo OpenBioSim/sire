@@ -10,12 +10,50 @@ class DynamicsData:
 
     def __init__(self, mols=None, map=None):
         if mols is not None:
-            # eventually want to call 'extract' on this?
-            self._sire_mols = mols
-
             from ..base import create_map
 
             self._map = create_map(map)
+
+            # get the forcefield info from the passed parameters
+            # and from whatever we can glean from the molecules
+            from ..system import ForceFieldInfo
+
+            self._ffinfo = ForceFieldInfo(mols, map=self._map)
+
+            # We want to store the molecules as a System so that
+            # we can more easily track the space and time properties
+            from ..system import System, ForceFieldInfo
+
+            if type(mols) is System:
+                # work on our own copy of the system
+                self._sire_mols = mols.clone()
+            else:
+                # create a system to work on
+                self._sire_mols = System()
+                self._sire_mols._system.add(
+                    mols.molecules().to_molecule_group()
+                )
+                self._sire_mols._system.set_property(
+                    "space", self._ffinfo.space()
+                )
+
+            from ..units import nanosecond
+
+            try:
+                current_time = (
+                    self._sire_mols.property(self._map["time"]).to(nanosecond)
+                    * nanosecond
+                )
+            except Exception:
+                current_time = 0 * nanosecond
+
+            self._sire_mols.set_property("time", current_time)
+
+            self._current_time = current_time
+            self._current_step = 0
+            self._elapsed_time = 0 * nanosecond
+            self._walltime = 0 * nanosecond
+            self._is_running = None
 
             from ..convert import to
 
@@ -23,12 +61,18 @@ class DynamicsData:
             self._omm_state = None
             self._omm_state_has_cv = False
 
+            if self._ffinfo.space().is_periodic():
+                self._enforce_periodic_box = True
+
+                if self._map.specified("enforce_periodic_box"):
+                    self._enforce_periodic_box = (
+                        self._map["enforce_periodic_box"].value().as_boolean()
+                    )
+            else:
+                self._enforce_periodic_box = False
+
         else:
             self._sire_mols = None
-            self._map = None
-            self._omm_mols = None
-            self._omm_state = None
-            self._omm_state_has_cv = False
 
     def is_null(self):
         return self._sire_mols is None
@@ -37,17 +81,89 @@ class DynamicsData:
         self._omm_state = None
         self._omm_state_has_cv = False
 
-    def _get_current_state(self, coords_and_vels=False):
-        if self._omm_state is not None:
-            if self._omm_state_has_cv or (coords_and_vels == False):
-                return self._omm_state
+    def _update_from(self, state):
+        if self.is_null():
+            return
 
-        if self._omm_mols is None:
-            return None
+        from ..legacy.Convert import (
+            openmm_extract_coordinates_and_velocities,
+            openmm_extract_space,
+        )
+
+        mols = openmm_extract_coordinates_and_velocities(
+            state, self._sire_mols.molecules(), self._map
+        )
+
+        space = openmm_extract_space(state)
+
+        self._sire_mols.update(mols.to_molecules())
+        self._sire_mols.set_property("space", space)
+        self._sire_mols.set_property("time", self._current_time)
+        self._ffinfo.set_space(space)
+
+    def _start_dynamics_block(self):
+        if self._is_running is not None:
+            raise SystemError(
+                "Cannot start dynamics while it is already running!"
+            )
+
+        import datetime
+
+        self._is_running = datetime.datetime.now().timestamp()
+        self._omm_state = None
+        self._omm_state_has_cv = False
+
+    def _end_dynamics_block(self, coords_and_vels=False):
+        if self._is_running is None:
+            raise SystemError("Cannot stop dynamics that is not running!")
+
+        import datetime
+        import openmm
+        from ..units import second, nanosecond
+
+        self._walltime += (
+            datetime.datetime.now().timestamp() - self._is_running
+        ) * second
 
         if coords_and_vels:
             self._omm_state = self._omm_mols.getState(
-                getEnergy=True, getPositions=True, getVelocities=True
+                getEnergy=True,
+                getPositions=True,
+                getVelocities=True,
+                enforcePeriodicBox=self._enforce_periodic_box,
+            )
+        else:
+            self._omm_state = self._omm_mols.getState(getEnergy=True)
+
+        self._omm_state_has_cv = coords_and_vels
+
+        self._current_step = self._omm_state.getStepCount()
+
+        current_time = (
+            self._omm_state.getTime().value_in_unit(openmm.unit.nanosecond)
+            * nanosecond
+        )
+
+        self._elapsed_time += current_time - self._current_time
+        self._current_time = current_time
+
+        self._is_running = None
+
+        return self._omm_state
+
+    def _get_current_state(self, coords_and_vels=False):
+        if self._omm_state is not None:
+            if self._omm_state_has_cv or (coords_and_vels is False):
+                return self._omm_state
+
+        # we need to get this again as either it doesn't exist,
+        # or we now want velocities as well
+        if coords_and_vels:
+            self._omm_state = self._omm_mols.getState(
+                getEnergy=True,
+                getPositions=True,
+                getVelocities=True,
+                enforcePeriodicBox=self._enforce_periodic_box,
             )
         else:
             self._omm_state = self._omm_mols.getState(getEnergy=True)
@@ -75,20 +191,47 @@ class DynamicsData:
 
             return Ensemble(map=self._map)
 
+    def info(self):
+        if self.is_null():
+            return None
+        else:
+            return self._ffinfo
+
     def current_step(self):
         if self.is_null():
             return 0
         else:
-            return self._omm_mols.getStepCount()
+            return self._current_step
 
     def current_time(self):
         if self.is_null():
             return 0
         else:
-            from openmm.unit import picosecond as _omm_ps
-            from ..units import picosecond as _sire_ps
+            return self._current_time
 
-            return self._omm_mols.getTime().value_in_unit(_omm_ps) * _sire_ps
+    def current_space(self):
+        if self.is_null():
+            return None
+        else:
+            return self._ffinfo.space()
+
+    def current_walltime(self):
+        if self.is_null():
+            return 0
+        else:
+            return self._walltime
+
+    def elapsed_time(self):
+        if self.is_null():
+            return 0
+        else:
+            return self._elapsed_time
+
+    def walltime(self):
+        if self.is_null():
+            return 0
+        else:
+            return self._walltime
 
     def current_energy(self):
         if self.is_null():
@@ -172,14 +315,19 @@ class DynamicsData:
                     else:
                         nrun = block_size
 
-                    self._clear_state()
+                    self._start_dynamics_block()
                     # run the current block in the background
                     r = pool.submit(runfunc, nrun)
 
                     # process the last block in the foreground
                     if state is not None:
                         self._update_from(state)
-                        self._sire_mols.save_frame()
+                        self._sire_mols.save_frame(
+                            map={
+                                "space": self.current_space(),
+                                "time": self.current_time(),
+                            }
+                        )
                         saved_last_frame = True
 
                     while not r.done():
@@ -196,23 +344,17 @@ class DynamicsData:
                         raise result
 
                     # get the state, including coordinates and velocities
-                    state = self._get_current_state(coords_and_vels=True)
+                    state = self._end_dynamics_block(coords_and_vels=True)
+                    saved_last_frame = False
 
         if state is not None and not saved_last_frame:
             self._update_from(state)
-            self._sire_mols.save_frame()
-
-    def _update_from(self, state):
-        if self.is_null():
-            return
-
-        from ..legacy.Convert import openmm_extract_coordinates_and_velocities
-
-        mols = openmm_extract_coordinates_and_velocities(
-            state, self._sire_mols.molecules(), self._map
-        )
-
-        self._sire_mols.update(mols.to_molecules())
+            self._sire_mols.save_frame(
+                map={
+                    "space": self.current_space(),
+                    "time": self.current_time(),
+                }
+            )
 
     def commit(self):
         if self.is_null():
@@ -232,6 +374,10 @@ class Dynamics:
     def __init__(self, mols=None, map=None):
         self._d = DynamicsData(mols=mols, map=map)
 
+        # Save the original view too, as this is the view that
+        # will be returned to the user
+        self._view = mols
+
     def run(self, steps: int):
         """
         Perform dynamics on the molecules
@@ -246,6 +392,13 @@ class Dynamics:
         Return the ensemble in which the simulation is being performed
         """
         return self._d.ensemble()
+
+    def info(self):
+        """
+        Return the information that describes the forcefield that will
+        be used for dynamics
+        """
+        return self._d.info()
 
     def timestep(self):
         """
@@ -264,6 +417,68 @@ class Dynamics:
         Return the current amount of completed time of dynamics
         """
         return self._d.current_time()
+
+    def elapsed_time(self):
+        """
+        Return the total amount of elapsed time of dynamics. This
+        will be the same as the current_time if this run started
+        from time=0. Otherwise this will be the difference between
+        the start time and the current time.
+        """
+        return self._d.elapsed_time()
+
+    def walltime(self):
+        """
+        Return the walltime (real actual runtime) of dynamics, i.e.
+        how much real time has been consumed by the simulation
+        """
+        return self._d.walltime()
+
+    def step_speed(self, time_unit=None):
+        """
+        Return the speed of this simulation in number of steps per second
+        """
+        if time_unit is None:
+            from ..units import second
+
+            time_unit = second
+
+        nsteps = self.current_step()
+        time = self.walltime().to(time_unit)
+
+        if time < 0.000001:
+            return 0
+        else:
+            return nsteps / time
+
+    def time_speed(self, elapsed_unit=None, time_unit=None):
+        """
+        Return the speed of this simulation in simulation time per
+        real time (e.g. nanoseconds simulated per day)
+        """
+        if elapsed_unit is None:
+            from ..units import nanosecond
+
+            elapsed_unit = nanosecond
+
+        if time_unit is None:
+            from ..units import day
+
+            time_unit = day
+
+        elapsed = self.elapsed_time().to(elapsed_unit)
+        time = self.walltime().to(time_unit)
+
+        if time < 0.000001:
+            return 0
+        else:
+            return elapsed / time
+
+    def current_space(self):
+        """
+        Return the current space in which the simulation is being performed
+        """
+        return self._d.current_space()
 
     def current_energy(self):
         """

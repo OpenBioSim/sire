@@ -105,15 +105,19 @@ class System:
         self._system.load_frame(i)
         self._molecules = None
 
-    def save_frame(self, i=None):
+    def save_frame(self, i=None, map=None):
         """Save the current coordinates to the ith frame of this System.
         If i is not specfied then this adds the frame onto the
         end of the trajectory
         """
+        from ..base import create_map
+
+        map = create_map(map)
+
         if i is None:
-            self._system.save_frame()
+            self._system.save_frame(map=map)
         else:
-            self._system.save_frame(i)
+            self._system.save_frame(i, map=map)
 
         self._molecules = None
 

@@ -7,6 +7,8 @@ __all__ = [
     "sire_to_openmm",
     "openmm_to_sire",
     "openmm_extract_coordinates",
+    "openmm_extract_coordinates_and_velocities",
+    "openmm_extract_space",
     "supported_formats",
 ]
 
@@ -55,6 +57,7 @@ try:
         _set_openmm_coordinates_and_velocities,
         _openmm_extract_coordinates,
         _openmm_extract_coordinates_and_velocities,
+        _openmm_extract_space,
     )
 
     _has_openmm = True
@@ -296,6 +299,9 @@ try:
     def openmm_extract_coordinates_and_velocities(state, mols, map):
         return _openmm_extract_coordinates_and_velocities(state, mols, map)
 
+    def openmm_extract_space(state):
+        return _openmm_extract_space(state)
+
 except Exception:
     # OpenMM support is not available
     def _no_openmm():
@@ -316,6 +322,9 @@ except Exception:
         _no_openmm()
 
     def openmm_extract_coordinates_and_velocities(state, mols, map):
+        _no_openmm()
+
+    def openmm_extract_space(state):
         _no_openmm()
 
 

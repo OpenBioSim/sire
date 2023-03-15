@@ -4,6 +4,7 @@
 #include <OpenMM.h>
 
 #include "SireMol/selectormol.h"
+#include "SireVol/space.h"
 
 #include "SireBase/propertymap.h"
 
@@ -58,6 +59,8 @@ namespace SireOpenMM
     SireMol::SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,
                                                             const SireMol::SelectorMol &mols,
                                                             const SireBase::PropertyMap &map);
+
+    SireVol::SpacePtr extract_space(const OpenMM::State &state);
 }
 
 #endif
