@@ -20,7 +20,7 @@ _theme = None
 class _NullProgress:
     """Null progress to use if user disables progress"""
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         pass
 
     def __enter__(self, *args, **kwargs):
@@ -37,7 +37,7 @@ class _NullProgress:
 
 
 class _Progress:
-    def __init__(self, show_limit: int = 50):
+    def __init__(self, show_limit: int = 50, transient: bool = True):
         from rich.progress import Progress, BarColumn, TimeRemainingColumn
 
         self._progress = Progress(
@@ -50,6 +50,7 @@ class _Progress:
             "[progress.percentage]{task.percentage:>3.0f}%",
             TimeRemainingColumn(),
             auto_refresh=False,
+            transient=transient,
         )
         self._last_update = _datetime.now()
         self._show_limit = show_limit
@@ -554,11 +555,13 @@ class Console:
         console._use_progress = use_progress
 
     @staticmethod
-    def progress(visible: bool = True, show_limit: int = 50):
+    def progress(
+        visible: bool = True, show_limit: int = 50, transient: bool = True
+    ):
         console = Console._get_console()
 
         if visible and console._use_progress:
-            return _Progress(show_limit=show_limit)
+            return _Progress(show_limit=show_limit, transient=transient)
         else:
             return _NullProgress()
 

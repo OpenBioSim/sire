@@ -104,7 +104,7 @@ try:
         from ...move import Ensemble
 
         if map.specified("timestep"):
-            timestep = map["timestep"]
+            timestep = map["timestep"].value()
         else:
             timestep = 1 * femtosecond
 

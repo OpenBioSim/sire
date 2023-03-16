@@ -10,9 +10,7 @@ class DynamicsData:
 
     def __init__(self, mols=None, map=None):
         if mols is not None:
-            from ..base import create_map
-
-            self._map = create_map(map)
+            self._map = map  # this is already a PropertyMap
 
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
@@ -36,6 +34,8 @@ class DynamicsData:
                 self._sire_mols._system.set_property(
                     "space", self._ffinfo.space()
                 )
+
+            self._num_atoms = len(self._sire_mols.atoms())
 
             from ..units import nanosecond
 
@@ -272,14 +272,24 @@ class DynamicsData:
 
             return nrg.value_in_unit(_omm_kcal_mol) * _sire_kcal_mol
 
-    def run(self, steps: int):
+    def run(self, time, save_frequency):
         if self.is_null():
             return
 
         from concurrent.futures import ThreadPoolExecutor
-        import time
+        import openmm
 
         from ..utils import Console
+        from ..units import picosecond
+
+        try:
+            steps = int(time.to(picosecond) / self.timestep().to(picosecond))
+        except Exception:
+            # passed in the number of steps instead
+            steps = int(time)
+
+        if steps < 1:
+            steps = 1
 
         if steps <= 0:
             return
@@ -292,62 +302,7 @@ class DynamicsData:
             except Exception as e:
                 return e
 
-        completed = 0
-
-        if self._map.specified("block_size"):
-            block_size = self._map["block_size"].value().as_integer()
-
-            if block_size < 1:
-                block_size = 1
-        else:
-            block_size = 100
-
-        state = None
-        saved_last_frame = False
-
-        with Console.progress() as progress:
-            t = progress.add_task("dynamics", steps)
-
-            with ThreadPoolExecutor() as pool:
-                while completed < steps:
-                    if steps - completed < block_size:
-                        nrun = steps - completed
-                    else:
-                        nrun = block_size
-
-                    self._start_dynamics_block()
-                    # run the current block in the background
-                    r = pool.submit(runfunc, nrun)
-
-                    # process the last block in the foreground
-                    if state is not None:
-                        self._update_from(state)
-                        self._sire_mols.save_frame(
-                            map={
-                                "space": self.current_space(),
-                                "time": self.current_time(),
-                            }
-                        )
-                        saved_last_frame = True
-
-                    while not r.done():
-                        try:
-                            result = r.result(timeout=0.5)
-                        except Exception:
-                            pass
-
-                    if result == 0:
-                        completed += nrun
-                        progress.update(t, completed=completed)
-                    else:
-                        # something went wrong - re-raise the exception
-                        raise result
-
-                    # get the state, including coordinates and velocities
-                    state = self._end_dynamics_block(coords_and_vels=True)
-                    saved_last_frame = False
-
-        if state is not None and not saved_last_frame:
+        def process_block(state):
             self._update_from(state)
             self._sire_mols.save_frame(
                 map={
@@ -356,11 +311,120 @@ class DynamicsData:
                 }
             )
 
+        completed = 0
+
+        if save_frequency is None:
+            if self._map.specified("save_frequency"):
+                save_frequency = (
+                    self._map["save_frequency"].value().to(picosecond)
+                )
+            else:
+                save_frequency = 25
+        else:
+            save_frequency = save_frequency.to(picosecond)
+
+        save_size = int(save_frequency / self.timestep().to(picosecond))
+
+        block_size = 50
+
+        state = None
+        saved_last_frame = False
+
+        with Console.progress(transient=True) as progress:
+            t = progress.add_task("dynamics", total=steps)
+
+            with ThreadPoolExecutor() as pool:
+                while completed < steps:
+                    if steps - completed < save_size:
+                        nrun_till_save = steps - completed
+                    else:
+                        nrun_till_save = save_size
+
+                    self._start_dynamics_block()
+
+                    # process the last block in the foreground
+                    if state is not None:
+                        process_promise = pool.submit(process_block, state)
+                    else:
+                        process_promise = None
+
+                    while nrun_till_save > 0:
+                        nrun = block_size
+
+                        if 2 * nrun > nrun_till_save:
+                            nrun = nrun_till_save
+
+                        # run the current block in the background
+                        run_promise = pool.submit(runfunc, nrun)
+
+                        while not run_promise.done():
+                            try:
+                                result = run_promise.result(timeout=1.0)
+                            except Exception:
+                                pass
+
+                        if result == 0:
+                            completed += nrun
+                            nrun_till_save -= nrun
+                            progress.update(t, completed=completed)
+                            run_promise = None
+                        else:
+                            # make sure we finish processing the last block
+                            if process_promise is not None:
+                                try:
+                                    process_promise.result()
+                                except Exception:
+                                    pass
+
+                            # something went wrong - re-raise the exception
+                            raise result
+
+                    # make sure we've finished processing the last block
+                    if process_promise is not None:
+                        process_promise.result()
+                        process_promise = None
+                        saved_last_frame = True
+
+                    # get the state, including coordinates and velocities
+                    state = self._end_dynamics_block(coords_and_vels=True)
+                    saved_last_frame = False
+
+                    kinetic_energy = state.getKineticEnergy().value_in_unit(
+                        openmm.unit.kilocalorie_per_mole
+                    )
+
+                    ke_per_atom = kinetic_energy / self._num_atoms
+
+                    if ke_per_atom > 1000:
+                        # The system has blown up!
+                        state = None
+                        saved_last_frame = True
+
+                        raise RuntimeError(
+                            "The kinetic energy has exceeded 100 kcal mol-1 "
+                            f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
+                            f" and {kinetic_energy} kcal mol-1 total). This "
+                            "suggests that the simulation has become "
+                            "unstable. Try reducing the timestep and run "
+                            "again."
+                        )
+
+                    saved_last_frame = False
+
+        if state is not None and not saved_last_frame:
+            # we can process the last block in the main thread
+            process_block(state)
+
     def commit(self):
         if self.is_null():
             return
 
         self._update_from(self._get_current_state(coords_and_vels=True))
+
+
+def _add_extra(extras, key, value):
+    if value is not None:
+        extras[key] = value
 
 
 class Dynamics:
@@ -371,19 +435,52 @@ class Dynamics:
     you want to simulate
     """
 
-    def __init__(self, mols=None, map=None):
+    def __init__(
+        self,
+        mols=None,
+        map=None,
+        cutoff=None,
+        cutoff_type=None,
+        timestep=None,
+        save_frequency=None,
+    ):
+        from ..base import create_map
+
+        extras = {}
+
+        _add_extra(extras, "cutoff", cutoff)
+        _add_extra(extras, "cutoff_type", cutoff_type)
+        _add_extra(extras, "timestep", timestep)
+        _add_extra(extras, "save_frequency", save_frequency)
+
+        map = create_map(map, extras)
+
         self._d = DynamicsData(mols=mols, map=map)
 
         # Save the original view too, as this is the view that
         # will be returned to the user
         self._view = mols
 
-    def run(self, steps: int):
+    def __str__(self):
+        speed = self.time_speed()
+
+        if speed == 0:
+            return f"Dynamics(completed=0)"
+        else:
+            return (
+                f"Dynamics(completed={self.current_time()}, "
+                f"energy={self.current_energy()}, speed={speed:.1f} ns day-1)"
+            )
+
+    def __repr__(self):
+        return self.__str__()
+
+    def run(self, time, save_frequency=None):
         """
         Perform dynamics on the molecules
         """
         if not self._d.is_null():
-            self._d.run(steps=steps)
+            self._d.run(time=time, save_frequency=save_frequency)
 
         return self
 

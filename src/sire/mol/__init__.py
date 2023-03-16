@@ -1241,12 +1241,48 @@ Segment.cursor = _cursor
 Molecule.cursor = _cursor
 
 
-def _dynamics(view, map=None):
+def _dynamics(
+    view,
+    map=None,
+    cutoff=None,
+    cutoff_type=None,
+    timestep=None,
+    save_frequency=None
+):
     """
     Return a Dynamics object that can be used to perform
     dynamics of the molecule(s) in this view
     """
-    return Dynamics(view, map=map)
+    if map is None:
+        map = {}
+
+    # Set default values if these have not been set
+    if cutoff is None and "cutoff" not in map:
+        from ..units import angstrom
+
+        cutoff = 7.5 * angstrom
+
+    if cutoff_type is None and "cutoff_type" not in map:
+        cutoff_type = "PME"
+
+    if timestep is None and "timestep" not in map:
+        from ..units import femtosecond
+
+        timestep = 1 * femtosecond
+
+    if save_frequency is None and "save_frequency" not in map:
+        from ..units import picosecond
+
+        save_frequency = 25 * picosecond
+
+    return Dynamics(
+        view,
+        cutoff=cutoff,
+        cutoff_type=cutoff_type,
+        timestep=timestep,
+        save_frequency=save_frequency,
+        map=map,
+    )
 
 
 def _minimisation(view, map=None):

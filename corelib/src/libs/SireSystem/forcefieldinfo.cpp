@@ -57,7 +57,18 @@ static const RegisterMetaType<ForceFieldInfo> r_ffinfo;
 
 ForceFieldInfo::CUTOFF_TYPE ForceFieldInfo::string_to_cutoff_type(QString s)
 {
-    s = s.toUpper();
+    s = s.toUpper().simplified().replace(" ", "_");
+
+    if (s == "PARTICLE_MESH_EWALD")
+        s = "PME";
+    else if (s.isEmpty() or s == "NONE")
+        s = "NO_CUTOFF";
+    else if (s == "RF")
+        s = "REACTION_FIELD";
+    else if (s == "SHIFT")
+        s = "SHIFT_ELECTROSTATICS";
+    else if (s == "DEFAULT")
+        s = "CUTOFF";
 
     static std::map<QString, ForceFieldInfo::CUTOFF_TYPE> types = {
         {"NO_CUTOFF", ForceFieldInfo::NO_CUTOFF},
@@ -70,7 +81,20 @@ ForceFieldInfo::CUTOFF_TYPE ForceFieldInfo::string_to_cutoff_type(QString s)
     auto it = types.find(s);
 
     if (it == types.end())
+    {
+        throw SireError::invalid_key(QObject::tr(
+                                         "Unsupported cutoff type '%1'. Supported types are (case-insensitive): "
+                                         "* PME / PARTICLE MESH EWALD / PARTICLE_MESH_EWALD * or "
+                                         "* EWALD * or "
+                                         "* REACTION FIELD / REACTION_FIELD / RF * or "
+                                         "* SHIFT / SHIFT ELECTROSTATICS / SHIFT_ELECTROSTATICS * or "
+                                         "* NONE / NO CUTOFF / NO_CUTOFF * or "
+                                         "* DEFAULT / CUTOFF")
+                                         .arg(s),
+                                     CODELOC);
+
         return ForceFieldInfo::CUTOFF;
+    }
     else
         return it->second;
 }
