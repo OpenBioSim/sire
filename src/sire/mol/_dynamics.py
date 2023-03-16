@@ -191,6 +191,15 @@ class DynamicsData:
 
             return Ensemble(map=self._map)
 
+    def constraint(self):
+        if self.is_null():
+            return None
+        else:
+            if self._map.specified("constraint"):
+                return self._map["constraint"].source()
+            else:
+                return "none"
+
     def info(self):
         if self.is_null():
             return None
@@ -443,6 +452,7 @@ class Dynamics:
         cutoff_type=None,
         timestep=None,
         save_frequency=None,
+        constraint=None,
     ):
         from ..base import create_map
 
@@ -452,6 +462,7 @@ class Dynamics:
         _add_extra(extras, "cutoff_type", cutoff_type)
         _add_extra(extras, "timestep", timestep)
         _add_extra(extras, "save_frequency", save_frequency)
+        _add_extra(extras, "constraint", constraint)
 
         map = create_map(map, extras)
 
@@ -489,6 +500,13 @@ class Dynamics:
         Return the ensemble in which the simulation is being performed
         """
         return self._d.ensemble()
+
+    def constraint(self):
+        """
+        Return the constraint used for the dynamics (e.g. constraining
+        bonds involving hydrogens etc.)
+        """
+        return self._d.constraint()
 
     def info(self):
         """

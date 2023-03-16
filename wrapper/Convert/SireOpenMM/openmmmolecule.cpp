@@ -28,6 +28,8 @@
 
 #include "tostring.h"
 
+#include <QSet>
+
 #include <QDebug>
 
 using namespace SireOpenMM;
@@ -52,6 +54,45 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     }
 
     ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+
+    if (map.specified("constraint"))
+    {
+        const auto c = map["constraint"].source().toLower().simplified();
+
+        if (c == "none")
+        {
+            constraint_type = CONSTRAIN_NONE;
+        }
+        else if (c == "h-bonds")
+        {
+            constraint_type = CONSTRAIN_HBONDS;
+        }
+        else if (c == "bonds")
+        {
+            constraint_type = CONSTRAIN_BONDS;
+        }
+        else if (c == "h-bonds-h-angles")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_ANGLES;
+        }
+        else if (c == "bonds-h-angles")
+        {
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_ANGLES;
+        }
+        else
+        {
+            throw SireError::invalid_key(QObject::tr(
+                                             "Unrecognised constraint type '%1'. Valid values are "
+                                             "'none', 'h-bonds', 'bonds', 'h-bonds-h-angles' or "
+                                             "'bonds-h-angles',")
+                                             .arg(c),
+                                         CODELOC);
+        }
+    }
+    else
+    {
+        constraint_type = CONSTRAIN_NONE;
+    }
 
     if (ffinfo.isAmberStyle())
     {
@@ -88,6 +129,14 @@ OpenMM::Vec3 to_vec3(const SireMol::Velocity3D &vel)
     return OpenMM::Vec3(vel.x().to(SireUnits::nanometers_per_ps),
                         vel.y().to(SireUnits::nanometers_per_ps),
                         vel.z().to(SireUnits::nanometers_per_ps));
+}
+
+inline qint64 to_pair(qint64 x, qint64 y)
+{
+    if (y < x)
+        return to_pair(y, x);
+    else
+        return x << 32 | y & 0x00000000FFFFFFFF;
 }
 
 void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &map)
@@ -192,10 +241,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         cljs_data[i] = std::make_tuple(chg, sig, eps);
     }
 
-    bond_params = QVector<std::tuple<int, int, double, double>>(params.bonds().count(),
-                                                                std::make_tuple(0, 0, 0.0, 0.0));
-    bond_pairs = QVector<std::pair<int, int>>(params.bonds().count(),
-                                              std::make_tuple(0, 0));
+    bond_pairs.clear();
+    bond_params.clear();
+    constraints.clear();
 
     auto bond_param = bond_params.data();
     auto bond_pair = bond_pairs.data();
@@ -203,6 +251,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
     // now the bonds
     const double bond_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
     const double bond_r0_to_openmm = SireUnits::angstrom.to(SireUnits::nanometer);
+
+    QSet<qint64> constrained_pairs;
 
     for (auto it = params.bonds().constBegin();
          it != params.bonds().constEnd();
@@ -218,19 +268,26 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
 
-        *bond_param = std::make_tuple(atom0, atom1, r0, k);
-        *bond_pair = std::make_pair(atom0, atom1);
+        const bool has_light_atom = includes_h or (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
+        const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
-        bond_param += 1;
-        bond_pair += 1;
+        bond_pairs.append(std::make_pair(atom0, atom1));
+
+        if ((not has_massless_atom) and ((constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (constraint_type & CONSTRAIN_HBONDS))))
+        {
+            constraints.append(std::make_tuple(atom0, atom1, r0));
+            constrained_pairs.insert(to_pair(atom0, atom1));
+        }
+        else
+        {
+            bond_params.append(std::make_tuple(atom0, atom1, r0, k));
+        }
     }
 
     // now the angles
     const double angle_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol).to(SireUnits::kJ_per_mol);
 
-    ang_params = QVector<std::tuple<int, int, int, double, double>>(params.angles().count(),
-                                                                    std::make_tuple(0, 0, 0, 0.0, 0.0));
-    auto ang_param = ang_params.data();
+    ang_params.clear();
 
     for (auto it = params.angles().constBegin();
          it != params.angles().constEnd();
@@ -247,10 +304,25 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
 
-        *ang_param = std::make_tuple(atom0, atom1, atom2,
-                                     theta0, k);
+        const bool is_h_x_h = includes_h and (masses_data[atom0] < 2.5 and masses_data[atom2] < 2.5);
 
-        ang_param += 1;
+        if (not constrained_pairs.contains(to_pair(atom0, atom2)))
+        {
+            // only include the angle X-y-Z if X-Z are not already constrained
+            if ((constraint_type & CONSTRAIN_ANGLES) and is_h_x_h)
+            {
+                const auto delta = coords[atom2] - coords[atom0];
+                const auto length = std::sqrt((delta[0] * delta[0]) +
+                                              (delta[1] * delta[1]) +
+                                              (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(atom0, atom2, length));
+            }
+            else
+            {
+                ang_params.append(std::make_tuple(atom0, atom1, atom2,
+                                                  theta0, k));
+            }
+        }
     }
 
     // now the dihedrals

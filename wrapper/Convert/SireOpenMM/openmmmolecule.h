@@ -20,6 +20,14 @@ namespace SireOpenMM
     class OpenMMMolecule
     {
     public:
+        enum CONSTRAIN_TYPE
+        {
+            CONSTRAIN_NONE = 0x0000,
+            CONSTRAIN_BONDS = 0x0001,
+            CONSTRAIN_HBONDS = 0x0010,
+            CONSTRAIN_ANGLES = 0x0100
+        };
+
         OpenMMMolecule();
         OpenMMMolecule(const SireMol::Molecule &mol,
                        const SireBase::PropertyMap &map);
@@ -76,6 +84,12 @@ namespace SireOpenMM
 
         /** All the dihedral and improper parameters */
         QVector<std::tuple<int, int, int, int, double, double, double>> dih_params;
+
+        /** All the constraints */
+        QVector<std::tuple<int, int, double>> constraints;
+
+        /** What type of constraint to use */
+        qint32 constraint_type;
 
     private:
         void constructFromAmber(const SireMol::Molecule &mol,

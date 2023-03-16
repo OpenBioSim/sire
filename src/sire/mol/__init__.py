@@ -1247,7 +1247,8 @@ def _dynamics(
     cutoff=None,
     cutoff_type=None,
     timestep=None,
-    save_frequency=None
+    save_frequency=None,
+    constraint=None,
 ):
     """
     Return a Dynamics object that can be used to perform
@@ -1275,12 +1276,31 @@ def _dynamics(
 
         save_frequency = 25 * picosecond
 
+    if constraint is None and "constraint" not in map:
+        from ..units import femtosecond
+
+        if timestep is None:
+            timestep = map["timestep"].value()
+
+        if timestep > 2 * femtosecond:
+            # need constraint on everything
+            constraint = "bonds-h-angles"
+
+        elif timestep > 1 * femtosecond:
+            # need it just on H bonds and angles
+            constraint = "h-bonds-h-angles"
+
+        else:
+            # can get away with no constraints
+            constraint = "none"
+
     return Dynamics(
         view,
         cutoff=cutoff,
         cutoff_type=cutoff_type,
         timestep=timestep,
         save_frequency=save_frequency,
+        constraint=constraint,
         map=map,
     )
 

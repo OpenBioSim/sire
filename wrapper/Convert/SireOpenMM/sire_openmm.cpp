@@ -397,6 +397,14 @@ namespace SireOpenMM
                                   std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
             }
 
+            // now constraints
+            for (const auto &constraint : mol.constraints)
+            {
+                system.addConstraint(std::get<0>(constraint) + start_index,
+                                     std::get<1>(constraint) + start_index,
+                                     std::get<2>(constraint));
+            }
+
             start_index += mol.masses.count();
         }
 
