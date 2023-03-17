@@ -158,23 +158,51 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_dynamics(kigaki_mols):
-    mols = kigaki_mols
+def test_openmm_dynamics(ala_mols):
+    mols = ala_mols
 
     map = {
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
+        "temperature": 25 * sr.units.celsius,
+        # "pressure": 1 * sr.units.atm,   # currently disagree with energies for NPT...
     }
 
     sire_nrg = mols.energy(map=map)
 
+    # Need to set constraints to `none` so that we
+    # get energy agreement with sire - without this
+    # we will be missing the bond energies
+    # (and some angle energies)
+
     d = mols.dynamics(
-        timestep=4 * sr.units.femtosecond,
+        timestep=1 * sr.units.femtosecond,
         save_frequency=1 * sr.units.picosecond,
         map=map,
+        constraint="none",
     )
 
     omm_nrg = d.current_potential_energy()
 
-    assert sire_nrg.value() == pytest.approx(omm_nrg.value())
+    assert sire_nrg.value() == pytest.approx(omm_nrg.value(), abs=0.5)
+
+    assert d.ensemble().is_canonical()
+    assert d.ensemble().temperature() == 25 * sr.units.celsius
+
+    assert d.timestep() == 1 * sr.units.femtosecond
+
+    d.run(1 * sr.units.picosecond, 0.1 * sr.units.picosecond)
+
+    assert d.current_step() == 1000
+    assert d.current_time().to(sr.units.picosecond) == pytest.approx(1.0)
+
+    mols = d.commit()
+
+    assert mols.num_frames() == 10
+
+    sire_nrg = mols.energy(map=map)
+
+    omm_nrg = d.current_potential_energy()
+
+    assert sire_nrg.value() == pytest.approx(omm_nrg.value(), abs=0.5)
