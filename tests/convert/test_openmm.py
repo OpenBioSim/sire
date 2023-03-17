@@ -133,11 +133,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     # use all of the molecules
     mols = kigaki_mols
 
-    # GET DISAGREEMNT FROM FIRST MOLECULE, LIKELY BECAUSE OF NO
-    # SPACE IN THE FIRST MOLECULE!
-
     map = {
-        "space": mols.property("space"),
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
@@ -145,7 +141,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
 
     omm = sr.convert.to(mols, "openmm", map=map)
 
-    state = omm.getState(getEnergy=True)
+    state = omm.getState(getEnergy=True, enforcePeriodicBox=True)
 
     energy = state.getPotentialEnergy()
 
@@ -156,3 +152,29 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     assert mols.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
         energy, abs=0.5
     )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_dynamics(kigaki_mols):
+    mols = kigaki_mols
+
+    map = {
+        "cutoff": 10 * sr.units.angstrom,
+        "cutoff_type": "REACTION_FIELD",
+        "dielectric": 78.0,
+    }
+
+    sire_nrg = mols.energy(map=map)
+
+    d = mols.dynamics(
+        timestep=4 * sr.units.femtosecond,
+        save_frequency=1 * sr.units.picosecond,
+        map=map,
+    )
+
+    omm_nrg = d.current_potential_energy()
+
+    assert sire_nrg.value() == pytest.approx(omm_nrg.value())

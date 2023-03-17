@@ -251,14 +251,14 @@ class System:
 
         return Minimisation(self, map=map)
 
-    def dynamics(self, map=None):
+    def dynamics(self, *args, **kwargs):
         """
         Return a Dynamics object that can be used to perform
         dynamics of the molecule(s) in this view
         """
-        from ..mol import Dynamics
+        from ..mol import _dynamics
 
-        return Dynamics(self, map=map)
+        return _dynamics(self, *args, **kwargs)
 
     def energy(self, *args, **kwargs):
         """Calculate and return the energy of this System
