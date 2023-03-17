@@ -316,6 +316,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
                                               (delta[1] * delta[1]) +
                                               (delta[2] * delta[2]));
                 constraints.append(std::make_tuple(atom0, atom2, length));
+                constrained_pairs.insert(to_pair(atom0, atom2));
             }
             else
             {
@@ -439,12 +440,43 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
     // finally, add in all of the excluded atoms
     excl_pairs = ExcludedPairs(mol, map);
 
-    for (int i = 0; i < excl_pairs.count(); ++i)
+    if (excl_pairs.count() > 0)
     {
-        auto pair = excl_pairs[i];
+        for (int i = 0; i < excl_pairs.count(); ++i)
+        {
+            auto pair = excl_pairs[i];
 
-        custom_pairs.append(std::make_tuple(
-            std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0, 0.0));
+            custom_pairs.append(std::make_tuple(
+                std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0, 0.0));
+        }
+
+        // and finally (finally!) find any atoms that are not bonded to
+        // anything else and make sure that they are constrained. These
+        // atoms will be excluded atoms (by definition) so just look
+        // through those
+        const auto &connectivity = mol.property(map["connectivity"]).asA<Connectivity>();
+
+        for (int i = 0; i < excl_pairs.count(); ++i)
+        {
+            auto pair = excl_pairs[i];
+
+            const int atom0 = std::get<0>(pair).value();
+            const int atom1 = std::get<1>(pair).value();
+
+            if (not constrained_pairs.contains(to_pair(atom0, atom1)))
+            {
+                if (connectivity.nConnections(std::get<0>(pair)) == 0 or
+                    connectivity.nConnections(std::get<1>(pair)) == 0)
+                {
+                    const auto delta = coords[atom1] - coords[atom0];
+                    const auto length = std::sqrt((delta[0] * delta[0]) +
+                                                  (delta[1] * delta[1]) +
+                                                  (delta[2] * delta[2]));
+                    constraints.append(std::make_tuple(atom0, atom1, length));
+                    constrained_pairs.insert(to_pair(atom0, atom1));
+                }
+            }
+        }
     }
 }
 
