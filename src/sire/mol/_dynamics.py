@@ -281,7 +281,47 @@ class DynamicsData:
 
             return nrg.value_in_unit(_omm_kcal_mol) * _sire_kcal_mol
 
-    def run(self, time, save_frequency):
+    def _rebuild_and_minimise(self):
+        if self.is_null():
+            return
+
+        from concurrent.futures import ThreadPoolExecutor
+        from ..utils import Console
+        import openmm
+
+        def runfunc(max_its):
+            openmm.LocalEnergyMinimizer.minimize(
+                self._omm_mols, maxIterations=max_its
+            )
+
+        Console.warning(
+            "Something went wrong when running dynamics. Since no steps "
+            "were completed, it is likely that the system needs minimising. "
+            "The system will be minimised, and then dynamics will be "
+            "attempted again. If an error still occurs, then it is likely "
+            "that the step size is too large, the molecules are "
+            "over-constrained, or there is something more fundemental "
+            "going wrong..."
+        )
+
+        # rebuild the molecules
+        from ..convert import to
+
+        self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
+
+        with Console.spinner("minimisation") as spinner:
+            with ThreadPoolExecutor() as pool:
+                run_promise = pool.submit(runfunc, 0)
+
+                while not run_promise.done():
+                    try:
+                        run_promise.result(timeout=1.0)
+                    except Exception:
+                        pass
+
+            spinner.success()
+
+    def run(self, time, save_frequency, auto_fix_minimise: bool = True):
         if self.is_null():
             return
 
@@ -339,90 +379,114 @@ class DynamicsData:
         state = None
         saved_last_frame = False
 
-        with Console.progress(transient=True) as progress:
-            t = progress.add_task("dynamics", total=steps)
+        class NeedsMinimiseError(Exception):
+            pass
 
-            with ThreadPoolExecutor() as pool:
-                while completed < steps:
-                    if steps - completed < save_size:
-                        nrun_till_save = steps - completed
-                    else:
-                        nrun_till_save = save_size
+        try:
+            with Console.progress(transient=True) as progress:
+                t = progress.add_task("dynamics", total=steps)
 
-                    self._start_dynamics_block()
-
-                    # process the last block in the foreground
-                    if state is not None:
-                        process_promise = pool.submit(process_block, state)
-                    else:
-                        process_promise = None
-
-                    while nrun_till_save > 0:
-                        nrun = block_size
-
-                        if 2 * nrun > nrun_till_save:
-                            nrun = nrun_till_save
-
-                        # run the current block in the background
-                        run_promise = pool.submit(runfunc, nrun)
-
-                        while not run_promise.done():
-                            try:
-                                result = run_promise.result(timeout=1.0)
-                            except Exception:
-                                pass
-
-                        if result == 0:
-                            completed += nrun
-                            nrun_till_save -= nrun
-                            progress.update(t, completed=completed)
-                            run_promise = None
+                with ThreadPoolExecutor() as pool:
+                    while completed < steps:
+                        if steps - completed < save_size:
+                            nrun_till_save = steps - completed
                         else:
-                            # make sure we finish processing the last block
-                            if process_promise is not None:
+                            nrun_till_save = save_size
+
+                        self._start_dynamics_block()
+
+                        # process the last block in the foreground
+                        if state is not None:
+                            process_promise = pool.submit(process_block, state)
+                        else:
+                            process_promise = None
+
+                        while nrun_till_save > 0:
+                            nrun = block_size
+
+                            if 2 * nrun > nrun_till_save:
+                                nrun = nrun_till_save
+
+                            # run the current block in the background
+                            run_promise = pool.submit(runfunc, nrun)
+
+                            while not run_promise.done():
                                 try:
-                                    process_promise.result()
+                                    result = run_promise.result(timeout=1.0)
                                 except Exception:
                                     pass
 
-                            # something went wrong - re-raise the exception
-                            raise result
+                            if result == 0:
+                                completed += nrun
+                                nrun_till_save -= nrun
+                                progress.update(t, completed=completed)
+                                run_promise = None
+                            else:
+                                # make sure we finish processing the last block
+                                if process_promise is not None:
+                                    try:
+                                        process_promise.result()
+                                    except Exception:
+                                        pass
 
-                    # make sure we've finished processing the last block
-                    if process_promise is not None:
-                        process_promise.result()
-                        process_promise = None
-                        saved_last_frame = True
+                                if completed == 0 and auto_fix_minimise:
+                                    raise NeedsMinimiseError()
 
-                    # get the state, including coordinates and velocities
-                    state = self._end_dynamics_block(coords_and_vels=True)
-                    saved_last_frame = False
+                                # something went wrong - re-raise the exception
+                                raise result
 
-                    kinetic_energy = state.getKineticEnergy().value_in_unit(
-                        openmm.unit.kilocalorie_per_mole
-                    )
+                        # make sure we've finished processing the last block
+                        if process_promise is not None:
+                            process_promise.result()
+                            process_promise = None
+                            saved_last_frame = True
 
-                    ke_per_atom = kinetic_energy / self._num_atoms
+                        # get the state, including coordinates and velocities
+                        state = self._end_dynamics_block(coords_and_vels=True)
+                        saved_last_frame = False
 
-                    if ke_per_atom > 1000:
-                        # The system has blown up!
-                        state = None
-                        saved_last_frame = True
-
-                        raise RuntimeError(
-                            "The kinetic energy has exceeded 100 kcal mol-1 "
-                            f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
-                            f" and {kinetic_energy} kcal mol-1 total). This "
-                            "suggests that the simulation has become "
-                            "unstable. Try reducing the timestep and run "
-                            "again."
+                        kinetic_energy = (
+                            state.getKineticEnergy().value_in_unit(
+                                openmm.unit.kilocalorie_per_mole
+                            )
                         )
 
-                    saved_last_frame = False
+                        ke_per_atom = kinetic_energy / self._num_atoms
 
-        if state is not None and not saved_last_frame:
-            # we can process the last block in the main thread
-            process_block(state)
+                        if ke_per_atom > 1000:
+                            # The system has blown up!
+                            state = None
+                            saved_last_frame = True
+
+                            if completed == 0 and auto_fix_minimise:
+                                raise NeedsMinimiseError()
+
+                            raise RuntimeError(
+                                "The kinetic energy has exceeded 100 kcal mol-1 "
+                                f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
+                                f" and {kinetic_energy} kcal mol-1 total). This "
+                                "suggests that the simulation has become "
+                                "unstable. Try reducing the timestep and/or "
+                                "minimising the system and run again."
+                            )
+
+            if state is not None and not saved_last_frame:
+                # we can process the last block in the main thread
+                process_block(state)
+
+        except NeedsMinimiseError:
+            # try to fix this problem by minimising,
+            # then running again
+            self._is_running = None
+            self._omm_state = None
+            self._omm_state_has_cv = False
+            self._rebuild_and_minimise()
+            self.run(
+                time=time,
+                save_frequency=save_frequency * picosecond,
+                auto_fix_minimise=False,
+            )
+            return
 
     def commit(self):
         if self.is_null():

@@ -32,7 +32,6 @@ class MinimisationData:
     def run(self, max_iterations: int):
         from openmm import LocalEnergyMinimizer
         from concurrent.futures import ThreadPoolExecutor
-        import time
 
         if max_iterations <= 0:
             max_iterations = 0
@@ -46,10 +45,13 @@ class MinimisationData:
 
         with Console.spinner("minimisation") as spinner:
             with ThreadPoolExecutor() as pool:
-                r = pool.submit(runfunc, max_iterations)
+                run_promise = pool.submit(runfunc, max_iterations)
 
-                while not r.done():
-                    time.sleep(0.2)
+                while not run_promise.done():
+                    try:
+                        run_promise.result(timeout=1.0)
+                    except Exception:
+                        pass
 
             spinner.success()
 
