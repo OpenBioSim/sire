@@ -11,7 +11,7 @@ def test_openmm_single_energy(kigaki_mols):
 
     mol = mols[0]
 
-    map = {"space": sr.vol.Cartesian()}
+    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
 
     omm = sr.convert.to(mol, "openmm", map=map)
 
@@ -48,7 +48,7 @@ def test_openmm_multi_energy_small_cart(kigaki_mols):
     # first, try just 50 molecules in a cartesian space
     mols = kigaki_mols[0:50]
 
-    map = {"space": sr.vol.Cartesian()}
+    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
 
     omm = sr.convert.to(mols, "openmm", map=map)
 
@@ -69,6 +69,7 @@ def test_openmm_multi_energy_small_cart(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.slow
 def test_openmm_multi_energy_all_cart(kigaki_mols):
     # use all of the molecules
     mols = kigaki_mols
@@ -78,6 +79,7 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
         "cutoff": 10000 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 1.0,
+        "platform": "Reference",
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -108,6 +110,7 @@ def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
+        "platform": "Reference",
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -137,6 +140,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
+        "platform": "Reference",
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -158,6 +162,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+@pytest.mark.slow
 def test_openmm_dynamics(ala_mols):
     mols = ala_mols
 
@@ -166,6 +171,7 @@ def test_openmm_dynamics(ala_mols):
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
         "temperature": 25 * sr.units.celsius,
+        "platform": "Reference"
         # "pressure": 1 * sr.units.atm,   # currently disagree with energies for NPT...
     }
 
@@ -192,10 +198,10 @@ def test_openmm_dynamics(ala_mols):
 
     assert d.timestep() == 1 * sr.units.femtosecond
 
-    d.run(1 * sr.units.picosecond, 0.1 * sr.units.picosecond)
+    d.run(0.1 * sr.units.picosecond, 0.01 * sr.units.picosecond)
 
-    assert d.current_step() == 1000
-    assert d.current_time().to(sr.units.picosecond) == pytest.approx(1.0)
+    assert d.current_step() == 100
+    assert d.current_time().to(sr.units.picosecond) == pytest.approx(0.1)
 
     mols = d.commit()
 

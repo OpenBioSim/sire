@@ -50,6 +50,7 @@ if (${SIRE_USE_OPENMM})
                           SirePython
                           SIRE_SireMol
                           SIRE_SireMM
+                          SIRE_SireSystem
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
