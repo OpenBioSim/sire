@@ -81,7 +81,7 @@ class DynamicsData:
         self._omm_state = None
         self._omm_state_has_cv = False
 
-    def _update_from(self, state):
+    def _update_from(self, state, nsteps_completed):
         if self.is_null():
             return
 
@@ -95,6 +95,8 @@ class DynamicsData:
         )
 
         space = openmm_extract_space(state)
+
+        self._current_step = nsteps_completed
 
         self._sire_mols.update(mols.to_molecules())
         self._sire_mols.set_property("space", space)
@@ -136,8 +138,6 @@ class DynamicsData:
             self._omm_state = self._omm_mols.getState(getEnergy=True)
 
         self._omm_state_has_cv = coords_and_vels
-
-        self._current_step = self._omm_state.getStepCount()
 
         current_time = (
             self._omm_state.getTime().value_in_unit(openmm.unit.nanosecond)
@@ -351,8 +351,8 @@ class DynamicsData:
             except Exception as e:
                 return e
 
-        def process_block(state):
-            self._update_from(state)
+        def process_block(state, nsteps_completed):
+            self._update_from(state, nsteps_completed)
             self._sire_mols.save_frame(
                 map={
                     "space": self.current_space(),
@@ -382,6 +382,8 @@ class DynamicsData:
         class NeedsMinimiseError(Exception):
             pass
 
+        nsteps_before_run = self._current_step
+
         try:
             with Console.progress(transient=True) as progress:
                 t = progress.add_task("dynamics", total=steps)
@@ -397,7 +399,11 @@ class DynamicsData:
 
                         # process the last block in the foreground
                         if state is not None:
-                            process_promise = pool.submit(process_block, state)
+                            process_promise = pool.submit(
+                                process_block,
+                                state,
+                                nsteps_before_run + completed,
+                            )
                         else:
                             process_promise = None
 
@@ -472,7 +478,7 @@ class DynamicsData:
 
             if state is not None and not saved_last_frame:
                 # we can process the last block in the main thread
-                process_block(state)
+                process_block(state, nsteps_before_run + completed)
 
         except NeedsMinimiseError:
             # try to fix this problem by minimising,
@@ -492,7 +498,9 @@ class DynamicsData:
         if self.is_null():
             return
 
-        self._update_from(self._get_current_state(coords_and_vels=True))
+        self._update_from(
+            self._get_current_state(coords_and_vels=True), self._current_step
+        )
 
 
 def _add_extra(extras, key, value):
