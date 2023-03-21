@@ -43,7 +43,7 @@ def wrap(value):
     for func in _wrap_functions:
         try:
             return func(value)
-        except:
+        except Exception:
             pass
 
     try:

@@ -1,24 +1,27 @@
-=======================================
-Part 5 - Creating and Editing Molecules
-=======================================
+============================================
+Part 5 - Interconverting with other Packages
+============================================
 
-Another powerful feature of :mod:`sire` is the ability to create and
-edit molecules. For example, you can add or remove atoms, bonds etc
-from existing molecules, or you can create molecules from, e.g.
-`smiles strings <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`__,
-or assemble molecules from fragments.
+Another powerful feature of :mod:`sire` is the ability to interconvert
+and work with other molecular modelling python packages.
 
 You can also convert molecules between the :mod:`sire` format and
 the format of other popular molecular packages, e.g.
 `rdkit <https://www.rdkit.org>`__, `openmm <https://openmm.org>`_ and
-`BioSimSpace <https://biosimspace.openbiosim.org>`__, and can use
-the functions in those packages for molecular editing.
+`BioSimSpace <https://biosimspace.openbiosim.org>`__.
 
-This chapter will teach you how to do all of the above, starting from the
-simplest point, of creating a molecule from a
-`smiles string <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`__.
+This chapter will teach you how to do the conversion, and also how
+this conversion is used in :mod:`sire` to add functionality such as:
+
+* Creation of molecules from smiles strings.
+* Rendering two-dimensional structure views of molecules.
+* Performing molecular dynamics and minimisation.
+* Parameterising and solvating molecules.
 
 .. toctree::
    :maxdepth: 1
 
-   part05/01_smiles
+   part05/01_convert
+   part05/02_view
+   part05/03_smiles
+   part05/04_dynamics

@@ -936,6 +936,9 @@ namespace SireRDKit
         if (map["generate_coordinates"].hasValue())
             generate_coordinates = map["generate_coordinates"].value().asABoolean();
 
+        if (not add_hydrogens)
+            generate_coordinates = false;
+
         if (add_hydrogens or generate_coordinates)
         {
             try

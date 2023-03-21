@@ -15,9 +15,7 @@ except AttributeError as e:
 
 if _has_rdkit:
 
-    def _selector_to_smiles(
-        obj, include_hydrogens: bool = False, force: bool = False, map=None
-    ):
+    def _selector_to_smiles(obj, include_hydrogens: bool = False, map=None):
         """
         Return the molecule views in this container as smiles strings. Include
         hydrogens in 'include_hydrogens' is True. This returns a list
@@ -47,6 +45,9 @@ if _has_rdkit:
 
         smiles = rdkit_to_smiles(rdkit_mols, map)
 
+        if len(not_water) == 1:
+            smiles = [smiles]
+
         try:
             waters = obj["water"].molecules()
         except Exception:
@@ -63,8 +64,13 @@ if _has_rdkit:
 
             smiles = []
 
+            if include_hydrogens:
+                water = "[H]O[H]"
+            else:
+                water = "O"
+
             for mol in obj:
-                smiles.append(s.get(mol.number().value(), "O"))
+                smiles.append(s.get(mol.number().value(), water))
 
         return smiles
 
@@ -254,7 +260,10 @@ if _has_rdkit:
             try:
                 obj = obj["water"]
                 if obj.selected_all():
-                    return "O"
+                    if include_hydrogens:
+                        return "[H]O[H]"
+                    else:
+                        return "O"
             except Exception:
                 pass
 

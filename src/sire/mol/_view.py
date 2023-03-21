@@ -130,7 +130,7 @@ if _has_nglview:
                 "spacefill",
                 "surface",
                 "trace",
-                "tube"
+                "tube",
             ]
 
             self.rest = set(range(0, len(self.atoms)))
@@ -176,28 +176,30 @@ if _has_nglview:
             for key, value in self.reps.items():
                 self._add_rep(view, key, value)
 
-    def view(obj,
-             no_default: bool = False,
-             orthographic: bool = True,
-             protein:str ="cartoon",
-             water:str="line",
-             ions:str="spacefill",
-             rest:str="licorice",
-             all:str=None,
-             ball_and_stick:str=None,
-             cartoon:str=None,
-             licorice:str=None,
-             line:str=None,
-             point:str=None,
-             ribbon:str=None,
-             rocket:str=None,
-             rope:str=None,
-             spacefill:str=None,
-             surface:str=None,
-             trace:str=None,
-             tube:str=None,
-             stage_parameters:str=None,
-             map=None):
+    def view(
+        obj,
+        no_default: bool = False,
+        orthographic: bool = True,
+        protein: str = "cartoon",
+        water: str = "line",
+        ions: str = "spacefill",
+        rest: str = "licorice",
+        all: str = None,
+        ball_and_stick: str = None,
+        cartoon: str = None,
+        licorice: str = None,
+        line: str = None,
+        point: str = None,
+        ribbon: str = None,
+        rocket: str = None,
+        rope: str = None,
+        spacefill: str = None,
+        surface: str = None,
+        trace: str = None,
+        tube: str = None,
+        stage_parameters: str = None,
+        map=None,
+    ):
         """
         Return an NGLView viewer for this view. The returned
         viewer can be passed directly to, e.g. a Jupyter notebook
@@ -289,8 +291,8 @@ if _has_nglview:
                 clipNear=0,
                 clipFar=100,
                 clipDist=0,
-                fogNear=0,
-                fogFar=100,
+                fogNear=100,
+                fogFar=1000,
                 backgroundColor="black",
             )
         else:
