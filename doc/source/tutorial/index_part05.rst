@@ -11,12 +11,10 @@ the format of other popular molecular packages, e.g.
 `BioSimSpace <https://biosimspace.openbiosim.org>`__.
 
 This chapter will teach you how to do the conversion, and also how
-this conversion is used in :mod:`sire` to add functionality such as:
-
-* Creation of molecules from smiles strings.
-* Rendering two-dimensional structure views of molecules.
-* Performing molecular dynamics and minimisation.
-* Parameterising and solvating molecules.
+this conversion is used in :mod:`sire` to add functionality such as creation
+of molecules from smiles strings, rendering two-dimensional structure
+views of molecules, performing molecular dynamics and minimisation,
+and parameterising and solvating molecules.
 
 .. toctree::
    :maxdepth: 1
