@@ -25,9 +25,22 @@ class System:
                     f"not a {type(system)}"
                 )
 
-            self._system = system
+            if type(system) == System:
+                self._system == system._system
+            else:
+                self._system = system
 
         self._molecules = None
+
+    @staticmethod
+    def is_system(obj):
+        """
+        Return whether the passed object is a System class
+        (either a new or legacy System)
+        """
+        from ..legacy.System import System as _System
+
+        return type(obj) == System or type(obj) == _System
 
     def __copy__(self):
         other = System()

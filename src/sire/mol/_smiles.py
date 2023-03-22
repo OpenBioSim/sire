@@ -106,11 +106,31 @@ if _has_rdkit:
         # we don't view water molecules
         rdkit_mols = sire_to_rdkit(not_water, map=map)
 
-        # we also don't want any conformers, as these mess up the 2D view
+        # assign stereochemistry to the rest, and also remove
+        # 3D conformers as they mess up the 2D view
         try:
             for r in rdkit_mols:
+                # assign the stereochemistry from the structure
+                try:
+                    from rdkit.Chem.rdmolops import AssignStereochemistryFrom3D
+
+                    AssignStereochemistryFrom3D(r)
+                except Exception:
+                    # does not matter if this fails
+                    pass
+
+                # we also don't want any conformers,
+                # as these mess up the 2D view
                 r.RemoveAllConformers()
         except Exception:
+            try:
+                from rdkit.Chem.rdmolops import AssignStereochemistryFrom3D
+
+                AssignStereochemistryFrom3D(rdkit_mols)
+            except Exception:
+                # does not matter if this fails
+                pass
+
             rdkit_mols.RemoveAllConformers()
 
         if not include_hydrogens:
@@ -315,6 +335,16 @@ if _has_rdkit:
 
         if rdkit_mol is None:
             rdkit_mol = sire_to_rdkit(obj.extract(), map)
+
+            # assign the stereochemistry from the structure
+            try:
+                from rdkit.Chem.rdmolops import AssignStereochemistryFrom3D
+
+                AssignStereochemistryFrom3D(rdkit_mol)
+            except Exception:
+                # does not matter if this fails
+                pass
+
             # remove conformers, as these mess up the 2D view
             rdkit_mol.RemoveAllConformers()
 
@@ -325,6 +355,7 @@ if _has_rdkit:
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D
+        from rdkit.Chem.Draw import IPythonConsole
 
         rdDepictor.SetPreferCoordGen(True)
 
