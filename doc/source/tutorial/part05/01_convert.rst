@@ -255,7 +255,7 @@ using the ``omm.getSystem()`` or ``omm.getIntegrator()`` to extract these
 objects and then recombine them with the platform or integrator of your choice.
 
 More detail on how you can control what platform and integrator is chosen
-for this conversion is :doc:`available here <../../cheatsheet/openmm.rst>`.
+for this conversion is :doc:`available here <../../cheatsheet/openmm>`.
 
 You can convert a single molecule, list of molecules or an entire
 :class:`~sire.system.System` to an OpenMM context in the same way, e.g.
