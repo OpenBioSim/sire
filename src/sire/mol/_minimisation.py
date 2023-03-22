@@ -78,6 +78,12 @@ class Minimisation:
     def __init__(self, mols=None, map=None):
         self._d = MinimisationData(mols=mols, map=map)
 
+    def __str__(self):
+        return f"Minimisation()"
+
+    def __repr__(self):
+        return self.__str__()
+
     def run(self, max_iterations: int = 1000):
         """
         Perform minimisation on the molecules, running a maximum
