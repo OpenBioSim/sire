@@ -1254,32 +1254,34 @@ def _dynamics(
     Return a Dynamics object that can be used to perform
     dynamics of the molecule(s) in this view
     """
-    if map is None:
-        map = {}
+    from ..base import create_map
+
+    map = create_map(map)
 
     # Set default values if these have not been set
-    if cutoff is None and "cutoff" not in map:
+    if cutoff is None and not map.specified("cutoff"):
         from ..units import angstrom
 
         cutoff = 7.5 * angstrom
 
-    if cutoff_type is None and "cutoff_type" not in map:
+    if cutoff_type is None and not map.specified("cutoff_type"):
         cutoff_type = "PME"
 
-    if timestep is None and "timestep" not in map:
+    if timestep is None and not map.specified("timestep"):
         from ..units import femtosecond
 
         timestep = 1 * femtosecond
 
-    if save_frequency is None and "save_frequency" not in map:
+    if save_frequency is None and not map.specified("save_frequency"):
         from ..units import picosecond
 
         save_frequency = 25 * picosecond
 
-    if constraint is None and "constraint" not in map:
+    if constraint is None and not map.specified("constraint"):
         from ..units import femtosecond
 
         if timestep is None:
+            # it must be in the map
             timestep = map["timestep"].value()
 
         if timestep > 2 * femtosecond:

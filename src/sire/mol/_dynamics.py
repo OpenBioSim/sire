@@ -144,8 +144,10 @@ class DynamicsData:
             * nanosecond
         )
 
-        self._elapsed_time += current_time - self._current_time
-        self._current_time = current_time
+        delta = current_time - self._elapsed_time
+
+        self._elapsed_time = current_time
+        self._current_time += delta
 
         self._is_running = None
 
@@ -362,17 +364,22 @@ class DynamicsData:
 
         completed = 0
 
-        if save_frequency is None:
-            if self._map.specified("save_frequency"):
-                save_frequency = (
-                    self._map["save_frequency"].value().to(picosecond)
-                )
+        if save_frequency != 0:
+            if save_frequency is None:
+                if self._map.specified("save_frequency"):
+                    save_frequency = (
+                        self._map["save_frequency"].value().to(picosecond)
+                    )
+                else:
+                    save_frequency = 25
             else:
-                save_frequency = 25
-        else:
-            save_frequency = save_frequency.to(picosecond)
+                save_frequency = save_frequency.to(picosecond)
 
-        save_size = int(save_frequency / self.timestep().to(picosecond))
+        if save_frequency <= 0:
+            # don't save any intermediate frames
+            save_size = steps
+        else:
+            save_size = int(save_frequency / self.timestep().to(picosecond))
 
         block_size = 50
 
