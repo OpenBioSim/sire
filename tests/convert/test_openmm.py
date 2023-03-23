@@ -201,7 +201,8 @@ def test_openmm_dynamics(ala_mols):
     d.run(0.1 * sr.units.picosecond, 0.01 * sr.units.picosecond)
 
     assert d.current_step() == 100
-    assert d.current_time().to(sr.units.picosecond) == pytest.approx(0.1)
+    # the molecules started from 6 ns
+    assert d.current_time().to(sr.units.picosecond) == pytest.approx(6000.1)
 
     mols = d.commit()
 
