@@ -120,11 +120,16 @@ try:
 
         if map.specified("integrator"):
             integrator = map["integrator"]
+
+            if integrator.has_value():
+                integrator = integrator.value()
+            else:
+                integrator = integrator.source()
         else:
             integrator = None
 
         if map.specified("friction"):
-            friction = map["friction"]
+            friction = map["friction"].value()
         else:
             friction = 1.0 / picosecond
 
@@ -151,7 +156,7 @@ try:
                 if not ensemble.is_nve():
                     raise ValueError(
                         "You cannot use a verlet integrator with the "
-                        f"ensemble {ensemble}"
+                        f"{ensemble}"
                     )
 
                 integrator = openmm.VerletIntegrator(timestep)

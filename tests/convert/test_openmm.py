@@ -212,3 +212,32 @@ def test_openmm_dynamics(ala_mols):
     omm_nrg = d.current_potential_energy()
 
     assert sire_nrg.value() == pytest.approx(omm_nrg.value(), abs=0.5)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_options(ala_mols):
+    mols = ala_mols
+
+    mol = mols[0]
+
+    m = {
+        "integrator": "langevin_middle",
+        "temperature": 25 * sr.units.celsius,
+        "pressure": 1 * sr.units.atm,
+        "friction": 5 / sr.units.picosecond,
+        "platform": "Reference",
+    }
+
+    omm = sr.convert.to(mol, "openmm", map=m)
+
+    for platform in ["CPU", "OpenCL", "CUDA"]:
+        m["platform"] = platform
+
+        try:
+            omm = sr.convert.to(mol, "openmm", map=m)
+        except ValueError:
+            # maybe OpenCL or CUDA are not supported
+            pass
