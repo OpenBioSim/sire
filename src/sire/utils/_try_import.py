@@ -56,7 +56,7 @@ def _find_conda():
         return conda
 
 
-def _install_package(name, package_registry):
+def _install_package(name, package_registry, version=None):
     """
     Internal function used to install the module
     called 'name', using the passed 'package_registry'
@@ -78,6 +78,15 @@ def _install_package(name, package_registry):
     import os
 
     try:
+        if version is not None:
+            try:
+                _v = float(version)
+                version = "==%s" % version
+            except Exception:
+                pass
+
+            package = "'%s%s'" % (package, version)
+
         print(
             "\nTrying to install %s from package %s using %s...\n"
             % (name, package, conda)
@@ -119,7 +128,7 @@ class _ModuleStub:
         raise ModuleNotFoundError(message)
 
 
-def try_import(name, package_registry=_module_to_package):
+def try_import(name, package_registry=_module_to_package, version=None):
     """
     Try to import the module called 'name', returning
     the loaded module as an argument. If the module
@@ -160,7 +169,7 @@ def try_import(name, package_registry=_module_to_package):
         error_string = str(e)
 
     if not (package_registry is None):
-        _install_package(name, package_registry)
+        _install_package(name, package_registry, version=version)
         return try_import(name, package_registry=None)
 
     _failed_modules[name] = error_string
@@ -168,7 +177,9 @@ def try_import(name, package_registry=_module_to_package):
     return _ModuleStub(name)
 
 
-def try_import_from(name, fromlist, package_registry=_module_to_package):
+def try_import_from(
+    name, fromlist, package_registry=_module_to_package, version=None
+):
     """Try to import from the module called 'name' the passed symbol
     (or list of symbols) contained in 'fromlist', returning
     the symbol (or list of symbols).
@@ -210,7 +221,7 @@ def try_import_from(name, fromlist, package_registry=_module_to_package):
 
     if not is_loaded:
         if not (package_registry is None):
-            _install_package(name, package_registry)
+            _install_package(name, package_registry, version=version)
             return try_import_from(name, fromlist, package_registry=None)
         else:
             m = " ".join(fromlist)

@@ -10,6 +10,3 @@ python
 qt-main
 rich
 tbb
-
-# This is not available on aarch64 Linux
-pymbar<4; platform_machine != "aarch64"
