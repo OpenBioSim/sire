@@ -1,4 +1,5 @@
 import pytest
+import sire as sr
 
 
 def assert_approx_equal(nrg0, nrg1):
@@ -23,7 +24,9 @@ def test_trajectory_energies(ala_traj):
     from sire.units import angstrom
     from sire.base import create_map
 
-    map = create_map({"cutoff": 10 * angstrom})
+    # Need to use a fixed cartesian space as the space for the trajectory
+    # is not updated for each frame
+    map = create_map({"cutoff": 10 * angstrom, "space": sr.vol.Cartesian()})
 
     def assert_same(view):
         from sire import colname
@@ -86,7 +89,9 @@ def test_trajectory_energy(ala_traj):
     from sire.units import angstrom
     from sire.base import create_map
 
-    map = create_map({"cutoff": 10 * angstrom})
+    # Need to use a fixed cartesian space as the space for the trajectory
+    # is not updated for each frame
+    map = create_map({"cutoff": 10 * angstrom, "space": sr.vol.Cartesian()})
 
     def assert_same(view):
         view.load_frame(0)

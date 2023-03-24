@@ -127,7 +127,10 @@ namespace SireMol
         int count() const;
         int size() const;
 
+        void update(const MoleculeView &molview);
+        void update(const MoleculeData &moldata);
         void update(const Molecules &molecules);
+        void update(const SelectorMol &molecules);
 
         EvaluatorM evaluate() const;
 
@@ -1541,8 +1544,45 @@ namespace SireMol
             while (it != molnum_to_idx.constEnd() && it.key() == molnum)
             {
                 this->vws[it.value()].update(mol.data());
+                ++it;
             }
         }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::update(const MoleculeData &moldata)
+    {
+        QList<int> idx;
+
+        const auto molnum = moldata.number();
+
+        int i = 0;
+        for (const auto &view : this->vws)
+        {
+            if (view.data().number() == molnum)
+            {
+                idx.append(i);
+            }
+
+            i += 1;
+        }
+
+        for (auto i : idx)
+        {
+            this->vws[i].update(moldata);
+        }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::update(const SelectorMol &molecules)
+    {
+        this->update(molecules.toMolecules());
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::update(const MoleculeView &molview)
+    {
+        this->update(molview.data());
     }
 
     template <class T>

@@ -535,8 +535,41 @@ void SelectorMImproper::update(const Molecules &molecules)
         while (it != molnum_to_idx.constEnd() && it.key() == molnum)
         {
             this->imps[it.value()].update(mol.data());
+            ++it;
         }
     }
+}
+
+void SelectorMImproper::update(const SelectorMol &molecules)
+{
+    this->update(molecules.toMolecules());
+}
+
+void SelectorMImproper::update(const MoleculeData &moldata)
+{
+    QList<int> idx;
+
+    const auto molnum = moldata.number();
+
+    int i = 0;
+    for (const auto &mol : this->imps)
+    {
+        if (mol.data().number() == molnum)
+        {
+            idx.append(i);
+        }
+        i += 1;
+    }
+
+    for (auto i : idx)
+    {
+        this->imps[i].update(moldata);
+    }
+}
+
+void SelectorMImproper::update(const MoleculeView &molview)
+{
+    this->update(molview.data());
 }
 
 int SelectorMImproper::count() const

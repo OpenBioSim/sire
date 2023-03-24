@@ -113,7 +113,93 @@ if _has_nglview:
 
             return coords
 
-    def view(obj, representations=None, stage_parameters=None, map=None):
+    class _Representations:
+        def __init__(self, view):
+            self.view = view
+            self.atoms = view.atoms()
+            self.reps = {}
+            self.supported_reps = [
+                "ball_and_stick",
+                "cartoon",
+                "licorice",
+                "line",
+                "point",
+                "ribbon",
+                "rocket",
+                "rope",
+                "spacefill",
+                "surface",
+                "trace",
+                "tube",
+            ]
+
+            self.rest = set(range(0, len(self.atoms)))
+
+        def add(self, selection, rep):
+            if type(selection) is not list:
+                selection = [selection]
+
+            for s in selection:
+                try:
+                    a = self.atoms.find(self.view[s].atoms())
+                except Exception:
+                    continue
+
+                if rep not in self.reps:
+                    self.reps[rep] = set()
+
+                self.reps[rep] = self.reps[rep].union(a)
+                self.rest = self.rest.difference(a)
+
+        def _add_rep(self, view, typ, atoms):
+            typ = typ.strip().lstrip().rstrip().lower()
+
+            if typ not in self.supported_reps:
+                s = ", ".join(self.supported_reps)
+
+                raise KeyError(
+                    f"Unsupported representation '{typ}'. "
+                    f"Available representations are: [ {s} ]."
+                )
+
+            if typ == "ball_and_stick":
+                typ = "ball+stick"
+
+            atoms = list(atoms)
+
+            view.add_representation(typ, selection=atoms)
+
+        def populate(self, view, rest=None):
+            if rest is not None:
+                self._add_rep(view, rest, self.rest)
+
+            for key, value in self.reps.items():
+                self._add_rep(view, key, value)
+
+    def view(
+        obj,
+        no_default: bool = False,
+        orthographic: bool = True,
+        protein: str = "cartoon",
+        water: str = "line",
+        ions: str = "spacefill",
+        rest: str = "licorice",
+        all: str = None,
+        ball_and_stick: str = None,
+        cartoon: str = None,
+        licorice: str = None,
+        line: str = None,
+        point: str = None,
+        ribbon: str = None,
+        rocket: str = None,
+        rope: str = None,
+        spacefill: str = None,
+        surface: str = None,
+        trace: str = None,
+        tube: str = None,
+        stage_parameters: str = None,
+        map=None,
+    ):
         """
         Return an NGLView viewer for this view. The returned
         viewer can be passed directly to, e.g. a Jupyter notebook
@@ -125,13 +211,6 @@ if _has_nglview:
         on how to configure the viewer.
 
         https://nglviewer.org/#nglview
-
-        representations: list
-             An optional dictionary that will be passed directly
-             to the NGLView object to control the representations
-             that will be used. If this is not passed then the
-             molecule(s) will be rendered using a licorice
-             representation.
 
          stage_parameters: dict
              An optional dictionary that will be passed directly
@@ -145,23 +224,81 @@ if _has_nglview:
         struc_traj = _SireStructureTrajectory(obj, map=map)
         view = _nglview.NGLWidget(struc_traj)
 
-        if representations is None:
-            view.clear_representations()
-            view.add_representation("licorice")
+        if orthographic:
+            view.camera = "orthographic"
         else:
-            view.representations = representations
+            view.camera = "perspective"
+
+        view.clear_representations()
+
+        atoms = obj.atoms()
+
+        reps = _Representations(obj)
+
+        if no_default:
+            protein = None
+            water = None
+            ions = None
+            rest = None
+
+        if protein is not None:
+            reps.add("protein", protein)
+
+        if water is not None:
+            reps.add("water", water)
+
+        if ions is not None:
+            reps.add("molecules with count(atoms) == 1", ions)
+
+        if ball_and_stick is not None:
+            reps.add(ball_and_stick, "ball_and_stick")
+
+        if cartoon is not None:
+            reps.add(cartoon, "cartoon")
+
+        if licorice is not None:
+            reps.add(licorice, "licorice")
+
+        if line is not None:
+            reps.add(line, "line")
+
+        if point is not None:
+            reps.add(point, "point")
+
+        if ribbon is not None:
+            reps.add(ribbon, "ribbon")
+
+        if rope is not None:
+            reps.add(rope, "rope")
+
+        if spacefill is not None:
+            reps.add(spacefill, "spacefill")
+
+        if surface is not None:
+            reps.add(surface, "surface")
+
+        if trace is not None:
+            reps.add(trace, "trace")
+
+        if tube is not None:
+            reps.add(tube, "tube")
+
+        if all is not None:
+            reps.add("all", all)
 
         if stage_parameters is None:
             view.stage.set_parameters(
                 clipNear=0,
                 clipFar=100,
                 clipDist=0,
-                fogNear=0,
-                fogFar=100,
+                fogNear=100,
+                fogFar=1000,
                 backgroundColor="black",
             )
         else:
             view.stage.set_parameters(**stage_parameters)
+
+        reps.populate(view, rest=rest)
 
         view.center()
 

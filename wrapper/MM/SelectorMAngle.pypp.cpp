@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/errors.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireCAS/expression.h"
 
 #include "SireError/errors.h"
@@ -1488,7 +1490,46 @@ void register_SelectorMAngle_class(){
         }
         { //::SireMM::SelectorMAngle::update
         
+            typedef void ( ::SireMM::SelectorMAngle::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMAngle::update );
+            
+            SelectorMAngle_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecule") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMAngle::update
+        
+            typedef void ( ::SireMM::SelectorMAngle::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMAngle::update );
+            
+            SelectorMAngle_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMAngle::update
+        
             typedef void ( ::SireMM::SelectorMAngle::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMAngle::update );
+            
+            SelectorMAngle_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMAngle::update
+        
+            typedef void ( ::SireMM::SelectorMAngle::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMM::SelectorMAngle::update );
             
             SelectorMAngle_exposer.def( 

@@ -22,7 +22,6 @@ set ( SIREMM_HEADERS
       atomljs.h
       atompairs.hpp
       bond.h
-      calculate_energy.h
       clj14group.h
       cljatoms.h
       cljboxes.h
@@ -110,7 +109,6 @@ set ( SIREMM_SOURCES
       atomfunctions.cpp
       atomljs.cpp
       bond.cpp
-      calculate_energy.cpp
       clj14group.cpp
       cljatoms.cpp
       cljboxes.cpp

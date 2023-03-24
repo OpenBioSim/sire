@@ -112,8 +112,6 @@ namespace SireMol
         bool isEmpty() const;
         bool selectedAll() const;
 
-        void update(const MoleculeData &other);
-
         MolViewPtr toSelector() const;
 
         AtomName name() const;

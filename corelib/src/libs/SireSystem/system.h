@@ -82,6 +82,7 @@ namespace SireSystem
     using SireMol::MolGroupsPtr;
     using SireMol::MolID;
     using SireMol::MolNum;
+    using SireMol::SelectorMol;
     using SireMol::ViewsOfMol;
 
     using SireVol::Space;
@@ -390,8 +391,10 @@ namespace SireSystem
         bool remove(const QSet<MolNum> &molnums, const MGID &mgid);
 
         void update(const MoleculeData &moldata, bool auto_commit = true);
+        void update(const MoleculeView &molview, bool auto_commit = true);
         void update(const Molecules &molecules, bool auto_commit = true);
         void update(const MoleculeGroup &molgroup, bool auto_commit = true);
+        void update(const SelectorMol &molecules, bool auto_commit = true);
 
         void setContents(const MGID &mgid, const MoleculeView &molview, const PropertyMap &map);
         void setContents(const MGID &mgid, const ViewsOfMol &molviews, const PropertyMap &map);

@@ -478,19 +478,6 @@ void register_Segment_class(){
                 , "" );
         
         }
-        { //::SireMol::Segment::update
-        
-            typedef void ( ::SireMol::Segment::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMol::Segment::update );
-            
-            Segment_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("moldata") )
-                , bp::release_gil_policy()
-                , "Update this segment with the passed molecule data.\nThrow: SireError::incompatible_error\n" );
-        
-        }
         Segment_exposer.staticmethod( "typeName" );
         Segment_exposer.def( "_get_property_SireMol_SegStringProperty", &SireMol::Segment::property< QString >, bp::return_value_policy<bp::copy_const_reference>());
         Segment_exposer.def( "_get_metadata_SireMol_SegStringProperty", get_Metadata_SireMol_SegStringProperty_function1, bp::return_value_policy<bp::copy_const_reference>());

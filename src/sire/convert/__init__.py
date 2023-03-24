@@ -27,7 +27,12 @@ def _to_selectormol(obj):
     if hasattr(obj, "molecules"):
         return obj.molecules()
     elif type(obj) is list:
-        raise ValueError()
+        mols = []
+
+        for o in obj:
+            mols.append(_to_selectormol(o))
+
+        return _SelectorMol(mols)
     else:
         return _SelectorMol(obj)
 
@@ -68,7 +73,8 @@ def to(obj, format: str = "sire", map=None):
         return to_openmm(obj, map=map)
     else:
         raise ValueError(
-            f"Cannot convert {obj} as the format '{format}' is " "not recognised."
+            f"Cannot convert {obj} as the format '{format}' is "
+            "not recognised."
         )
 
 
@@ -120,21 +126,30 @@ def to_sire(obj, map=None):
 
     converted = []
 
+    from ..system import System
+
     for typ in typed_objs:
+        c = None
+
         if typ[0] == "sire":
-            converted.append(typ[1].molecules())
+            c = typ[1]
 
         elif typ[0] == "biosimspace":
-            converted.append(biosimspace_to_sire(typ[1], map=map).molecules())
+            c = biosimspace_to_sire(typ[1], map=map)
 
         elif typ[0] == "rdkit":
-            converted.append(rdkit_to_sire(typ[1], map=map).molecules())
+            c = rdkit_to_sire(typ[1], map=map)
 
         elif typ[0] == "openmm":
-            converted.append(openmm_to_sire(typ[1], map=map).molecules())
+            c = openmm_to_sire(typ[1], map=map)
 
         else:
             raise TypeError(f"Unrecognised type {typ[0]}")
+
+        if type(c) != System:
+            c = c.molecules()
+
+        converted.append(c)
 
     if len(converted) == 0:
         return None
@@ -145,7 +160,9 @@ def to_sire(obj, map=None):
         for i in range(1, len(converted)):
             mols += converted[i]
 
-    if len(mols) == 1:
+    if type(mols) == System:
+        return mols
+    elif len(mols) == 1:
         return mols[0]
     else:
         return mols
@@ -180,7 +197,8 @@ def biosimspace_to_sire(obj, map=None):
     Convert the passed BioSimSpace object (either a Molecule or list
     of Molecules) to a sire equivalent
     """
-    # will eventually support System too...
+    from ..system import System
+
     if type(obj) is list:
         if len(obj) == 0:
             return None
@@ -188,6 +206,9 @@ def biosimspace_to_sire(obj, map=None):
             return biosimspace_to_sire(obj[0], map=map)
         else:
             converted = biosimspace_to_sire(obj[0], map=map)
+
+            if System.is_system(converted):
+                converted = System(converted)
 
             if converted is not None:
                 converted = converted.molecules()
@@ -214,7 +235,12 @@ def biosimspace_to_sire(obj, map=None):
                 "sire object. Supported objects are Molecule."
             )
 
-        obj = obj._sire_object.molecules()
+        obj = obj._sire_object
+
+        if System.is_system(obj):
+            return System(obj)
+
+        obj = obj.molecules()
 
         if obj.num_molecules() == 1:
             return obj[0]
@@ -251,7 +277,7 @@ def sire_to_biosimspace(obj, map=None):
         for frame_idx in range(0, 3):
             frame = frame.f_back
         module = frame.f_globals["__name__"]
-    except:
+    except Exception:
         module = None
 
     # Was this function called from a BioSmSpace Sandpit?
@@ -260,6 +286,11 @@ def sire_to_biosimspace(obj, map=None):
         _BSS = sys.modules[sandpit]
     else:
         _BSS = sys.modules["BioSimSpace"]
+
+    from ..system import System
+
+    if type(obj) == System:
+        return _BSS._SireWrappers.System(obj._system)
 
     obj = _to_selectormol(obj)
 
@@ -278,8 +309,7 @@ def sire_to_biosimspace(obj, map=None):
 
 def openmm_to_sire(obj, map=None):
     """
-    Convert the passed OpenMM object (either a molecule or
-    list of molecules) to the sire equivalent
+    Convert the passed OpenMM.System to the sire equivalent
     """
     if type(obj) is not list:
         obj = [obj]
@@ -294,7 +324,14 @@ def openmm_to_sire(obj, map=None):
 
     from ..base import create_map
 
-    mols = _openmm_to_sire(obj, map=create_map(map))
+    results = []
+
+    map = create_map(map)
+
+    for o in obj:
+        results.append(_openmm_to_sire(o, map))
+
+    mols = _to_selectormol(results)
 
     if mols is None:
         return None
@@ -327,12 +364,7 @@ def sire_to_openmm(obj, map=None):
 
     mols = _sire_to_openmm(obj, map=create_map(map))
 
-    if mols is None:
-        return None
-    elif len(mols) == 1:
-        return mols[0]
-    else:
-        return mols
+    return mols
 
 
 def rdkit_to_sire(obj, map=None):

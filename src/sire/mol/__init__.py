@@ -10,7 +10,9 @@ __all__ = [
     "Cursor",
     "Cursors",
     "CursorsM",
+    "Dynamics",
     "Element",
+    "Minimisation",
     "ResIdx",
     "ResName",
     "ResNum",
@@ -88,6 +90,8 @@ from ..legacy.Mol import (
 )
 
 from ._cursor import Cursor, Cursors, CursorsM
+from ._minimisation import Minimisation
+from ._dynamics import Dynamics
 from ._trajectory import TrajectoryIterator
 from ._element import Element
 from ._view import view as _viewfunc
@@ -271,6 +275,14 @@ def __from_select_result(obj):
 
         return obj
 
+    if Atom.typename() != "SireMol::Atom":
+        raise AssertionError(
+            "The typename of an atom should be 'SireMol::Atom', but it "
+            f"is instead {Atom.typename()}. The mro is {Atom.mro()}. "
+            "This suggests something is broken with the boost wrappers, "
+            "and that further strange bugs will be present!"
+        )
+
     if typ == Molecule.typename():
         return SelectorMol(obj)
     elif typ == Atom.typename():
@@ -303,6 +315,18 @@ def __from_select_result(obj):
 
         if SelectorImproper in type(obj.list_at(0)).mro():
             return SelectorMImproper(obj)
+
+        # We really shouldn't get here, and if we do, then difficult
+        # to diagnose errors will propogate
+        from ..utils import Console
+
+        Console.warning(
+            f"Unrecognised type {typ}. "
+            "Expecting an Atom, Residue or other MoleculeView "
+            "type. Something may be wrong with the wrappers, and "
+            "further bugs from this point onwards are likely. "
+            f"Here is the container: {type(obj)}"
+        )
 
         # return this as a raw list
         return obj.to_list()
@@ -931,16 +955,41 @@ def _add_evals(obj):
     obj.z = lambda x, map=None: x.coordinates(map=map).z()
 
 
-def _get_property(x, key):
-    try:
-        return x.__orig__property(key)
-    except Exception as e:
-        saved_exception = e
+def _get_container_property(x, key):
+    vals = []
 
-    mol = x.molecule()
+    for v in x:
+        prop = _get_property(v, key)
+
+        if type(prop) is list:
+            vals += prop
+        else:
+            vals.append(prop)
+
+    return vals
+
+
+def _get_property(x, key):
+    if hasattr(x, "__orig__property"):
+        # get the property directly
+        try:
+            return x.__orig__property(key)
+        except Exception as e:
+            saved_exception = e
+    else:
+        saved_exception = None
+
+    # we couldn't get the property directly, so get
+    # the property at the molecule level...
+    try:
+        mol = x.molecule()
+    except Exception:
+        # this must be a SelectorMol or other container
+        return _get_container_property(x, key)
 
     prop = mol.property(key)
 
+    # Now extract the bits we want
     import sire
 
     if issubclass(prop.__class__, sire.legacy.Mol.AtomProp):
@@ -949,8 +998,30 @@ def _get_property(x, key):
             vals.append(atom.property(key))
 
         return vals
-    else:
+    elif issubclass(prop.__class__, sire.legacy.Mol.ResProp):
+        vals = []
+        for res in x.residues():
+            vals.append(res.property(key))
+
+        return vals
+    elif issubclass(prop.__class__, sire.legacy.Mol.ChainProp):
+        vals = []
+        for chain in x.chains():
+            vals.append(chain.property(key))
+
+        return vals
+    elif issubclass(prop.__class__, sire.legacy.Mol.SegProp):
+        vals = []
+        for seg in x.segments():
+            vals.append(seg.property(key))
+
+        return vals
+    elif issubclass(prop.__class__, sire.legacy.Mol.MolViewProperty):
+        return prop
+    elif saved_exception is not None:
         raise saved_exception
+    else:
+        raise KeyError(f"Could not find property {key} in {x}")
 
 
 def _apply(objs, func, *args, **kwargs):
@@ -1154,10 +1225,13 @@ Molecule.connectivity = lambda x: x.property("connectivity")
 
 
 def _cursor(view, map=None):
-    """Return a Cursor that can be used to edit the properties
+    """
+    Return a Cursor that can be used to edit the properties
     of this view
     """
-    return Cursor(view, map=map)
+    from ..base import create_map
+
+    return Cursor(view, map=create_map(map))
 
 
 Atom.cursor = _cursor
@@ -1165,6 +1239,97 @@ Residue.cursor = _cursor
 Chain.cursor = _cursor
 Segment.cursor = _cursor
 Molecule.cursor = _cursor
+
+
+def _dynamics(
+    view,
+    map=None,
+    cutoff=None,
+    cutoff_type=None,
+    timestep=None,
+    save_frequency=None,
+    constraint=None,
+):
+    """
+    Return a Dynamics object that can be used to perform
+    dynamics of the molecule(s) in this view
+    """
+    from ..base import create_map
+
+    map = create_map(map)
+
+    # Set default values if these have not been set
+    if cutoff is None and not map.specified("cutoff"):
+        from ..units import angstrom
+
+        cutoff = 7.5 * angstrom
+
+    if cutoff_type is None and not map.specified("cutoff_type"):
+        cutoff_type = "PME"
+
+    if timestep is None and not map.specified("timestep"):
+        from ..units import femtosecond
+
+        timestep = 1 * femtosecond
+
+    if save_frequency is None and not map.specified("save_frequency"):
+        from ..units import picosecond
+
+        save_frequency = 25 * picosecond
+
+    if constraint is None and not map.specified("constraint"):
+        from ..units import femtosecond
+
+        if timestep is None:
+            # it must be in the map
+            timestep = map["timestep"].value()
+
+        if timestep > 2 * femtosecond:
+            # need constraint on everything
+            constraint = "bonds-h-angles"
+
+        elif timestep > 1 * femtosecond:
+            # need it just on H bonds and angles
+            constraint = "h-bonds-h-angles"
+
+        else:
+            # can get away with no constraints
+            constraint = "none"
+
+    return Dynamics(
+        view,
+        cutoff=cutoff,
+        cutoff_type=cutoff_type,
+        timestep=timestep,
+        save_frequency=save_frequency,
+        constraint=constraint,
+        map=map,
+    )
+
+
+def _minimisation(view, map=None):
+    """
+    Return a Minimisation object that can be used to minimise the energy
+    of the molecule(s) in this view.
+    """
+    return Minimisation(view, map=map)
+
+
+MoleculeView.dynamics = _dynamics
+SelectorM_Atom_.dynamics = _dynamics
+SelectorM_Residue_.dynamics = _dynamics
+SelectorM_Chain_.dynamics = _dynamics
+SelectorM_Segment_.dynamics = _dynamics
+SelectorM_CutGroup_.dynamics = _dynamics
+SelectorMol.dynamics = _dynamics
+
+MoleculeView.minimisation = _minimisation
+SelectorM_Atom_.minimisation = _minimisation
+SelectorM_Residue_.minimisation = _minimisation
+SelectorM_Chain_.minimisation = _minimisation
+SelectorM_Segment_.minimisation = _minimisation
+SelectorM_CutGroup_.minimisation = _minimisation
+SelectorMol.minimisation = _minimisation
 
 
 def _cursors(views, map=None):
@@ -1245,7 +1410,7 @@ def _energy(obj, other=None, map=None):
         Returns an energy, with attached components for the
         sub-components (if any) for this energy.
     """
-    from ..mm import calculate_energy
+    from ..system import calculate_energy
 
     if map is None:
         if other is None:
@@ -1308,11 +1473,11 @@ def _atom_energy(obj, other=None, map=None):
 
         return GeneralUnit(0)
     elif map is None:
-        from ..mm import calculate_energy
+        from ..system import calculate_energy
 
         return calculate_energy(obj, _to_molecules(other))
     else:
-        from ..mm import calculate_energy
+        from ..system import calculate_energy
 
         return calculate_energy(obj, _to_molecules(other), map=map)
 
@@ -1346,7 +1511,7 @@ def _total_energy(obj, other=None, map=None):
         mols = MoleculeGroup("all")
         mols.add(obj)
 
-    from ..mm import calculate_energy
+    from ..system import calculate_energy
 
     if map is None:
         if other is None:

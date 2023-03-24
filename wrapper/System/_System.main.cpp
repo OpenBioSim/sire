@@ -31,6 +31,8 @@
 
 #include "EnergyMonitor.pypp.hpp"
 
+#include "ForceFieldInfo.pypp.hpp"
+
 #include "FreeEnergyMonitor.pypp.hpp"
 
 #include "GeometryComponent.pypp.hpp"
@@ -163,6 +165,8 @@ BOOST_PYTHON_MODULE(_System){
     register_SystemMonitor_class();
 
     register_EnergyMonitor_class();
+
+    register_ForceFieldInfo_class();
 
     register_FreeEnergyMonitor_class();
 

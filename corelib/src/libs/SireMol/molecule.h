@@ -159,8 +159,6 @@ namespace SireMol
         Evaluator evaluate() const;
         MolEditor edit() const;
 
-        void update(const MoleculeData &moldata);
-
         bool hasProperty(const PropertyName &key) const;
         bool hasMetadata(const PropertyName &metakey) const;
         bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;

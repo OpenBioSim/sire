@@ -15,9 +15,7 @@ except AttributeError as e:
 
 if _has_rdkit:
 
-    def _selector_to_smiles(
-        obj, include_hydrogens: bool = False, force: bool = False, map=None
-    ):
+    def _selector_to_smiles(obj, include_hydrogens: bool = False, map=None):
         """
         Return the molecule views in this container as smiles strings. Include
         hydrogens in 'include_hydrogens' is True. This returns a list
@@ -47,6 +45,9 @@ if _has_rdkit:
 
         smiles = rdkit_to_smiles(rdkit_mols, map)
 
+        if len(not_water) == 1:
+            smiles = [smiles]
+
         try:
             waters = obj["water"].molecules()
         except Exception:
@@ -63,8 +64,13 @@ if _has_rdkit:
 
             smiles = []
 
+            if include_hydrogens:
+                water = "[H]O[H]"
+            else:
+                water = "O"
+
             for mol in obj:
-                smiles.append(s.get(mol.number().value(), "O"))
+                smiles.append(s.get(mol.number().value(), water))
 
         return smiles
 
@@ -100,11 +106,31 @@ if _has_rdkit:
         # we don't view water molecules
         rdkit_mols = sire_to_rdkit(not_water, map=map)
 
-        # we also don't want any conformers, as these mess up the 2D view
+        # assign stereochemistry to the rest, and also remove
+        # 3D conformers as they mess up the 2D view
         try:
             for r in rdkit_mols:
+                # assign the stereochemistry from the structure
+                try:
+                    from rdkit.Chem.rdmolops import AssignStereochemistryFrom3D
+
+                    AssignStereochemistryFrom3D(r)
+                except Exception:
+                    # does not matter if this fails
+                    pass
+
+                # we also don't want any conformers,
+                # as these mess up the 2D view
                 r.RemoveAllConformers()
         except Exception:
+            try:
+                from rdkit.Chem.rdmolops import AssignStereochemistryFrom3D
+
+                AssignStereochemistryFrom3D(rdkit_mols)
+            except Exception:
+                # does not matter if this fails
+                pass
+
             rdkit_mols.RemoveAllConformers()
 
         if not include_hydrogens:
@@ -254,7 +280,10 @@ if _has_rdkit:
             try:
                 obj = obj["water"]
                 if obj.selected_all():
-                    return "O"
+                    if include_hydrogens:
+                        return "[H]O[H]"
+                    else:
+                        return "O"
             except Exception:
                 pass
 
@@ -306,6 +335,16 @@ if _has_rdkit:
 
         if rdkit_mol is None:
             rdkit_mol = sire_to_rdkit(obj.extract(), map)
+
+            # assign the stereochemistry from the structure
+            try:
+                from rdkit.Chem.rdmolops import AssignStereochemistryFrom3D
+
+                AssignStereochemistryFrom3D(rdkit_mol)
+            except Exception:
+                # does not matter if this fails
+                pass
+
             # remove conformers, as these mess up the 2D view
             rdkit_mol.RemoveAllConformers()
 
@@ -316,6 +355,7 @@ if _has_rdkit:
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D
+        from rdkit.Chem.Draw import IPythonConsole
 
         rdDepictor.SetPreferCoordGen(True)
 

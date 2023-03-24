@@ -77,6 +77,8 @@ void register_SelectorMol_class(){
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Chain > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::Segment > const & >(( bp::arg("other") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorM< SireMol::CutGroup > const & >(( bp::arg("other") ), "") );
+        SelectorMol_exposer.def( bp::init< QList< SireMol::SelectorMol > const & >(( bp::arg("others") ), "") );
+        SelectorMol_exposer.def( bp::init< QVector< SireMol::SelectorMol > const & >(( bp::arg("others") ), "") );
         SelectorMol_exposer.def( bp::init< SireMol::SelectorMol const & >(( bp::arg("other") ), "") );
         { //::SireMol::SelectorMol::IDs
         
@@ -1408,7 +1410,46 @@ void register_SelectorMol_class(){
         }
         { //::SireMol::SelectorMol::update
         
+            typedef void ( ::SireMol::SelectorMol::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorMol::update );
+            
+            SelectorMol_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molview") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::update
+        
+            typedef void ( ::SireMol::SelectorMol::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorMol::update );
+            
+            SelectorMol_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::update
+        
             typedef void ( ::SireMol::SelectorMol::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorMol::update );
+            
+            SelectorMol_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::update
+        
+            typedef void ( ::SireMol::SelectorMol::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMol::SelectorMol::update );
             
             SelectorMol_exposer.def( 

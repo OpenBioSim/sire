@@ -144,8 +144,8 @@ class TrajectoryIterator:
 
         import numpy as np
 
-        from ..mm import create_forcefield
-        from ..legacy.MM import calculate_trajectory_energies
+        from ..system import create_forcefield
+        from ..legacy.System import calculate_trajectory_energies
         from .._colname import colname
         from . import _to_molecules
         from ..base import create_map
@@ -316,8 +316,8 @@ class TrajectoryIterator:
 
         import numpy as np
 
-        from ..mm import create_forcefield
-        from ..legacy.MM import calculate_trajectory_energy
+        from ..system import create_forcefield
+        from ..legacy.System import calculate_trajectory_energy
         from ..base import create_map
 
         map = self._map.merge(create_map(map))

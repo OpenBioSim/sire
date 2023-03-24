@@ -533,8 +533,41 @@ void SelectorMDihedral::update(const Molecules &molecules)
         while (it != molnum_to_idx.constEnd() && it.key() == molnum)
         {
             this->dihs[it.value()].update(mol.data());
+            ++it;
         }
     }
+}
+
+void SelectorMDihedral::update(const SelectorMol &molecules)
+{
+    this->update(molecules.toMolecules());
+}
+
+void SelectorMDihedral::update(const MoleculeData &moldata)
+{
+    QList<int> idx;
+
+    const auto molnum = moldata.number();
+
+    int i = 0;
+    for (const auto &mol : this->dihs)
+    {
+        if (mol.data().number() == molnum)
+        {
+            idx.append(i);
+        }
+        i += 1;
+    }
+
+    for (auto i : idx)
+    {
+        this->dihs[i].update(moldata);
+    }
+}
+
+void SelectorMDihedral::update(const MoleculeView &molview)
+{
+    this->update(molview.data());
 }
 
 int SelectorMDihedral::count() const

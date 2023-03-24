@@ -503,8 +503,41 @@ void SelectorMAngle::update(const Molecules &molecules)
         while (it != molnum_to_idx.constEnd() && it.key() == molnum)
         {
             this->angs[it.value()].update(mol.data());
+            ++it;
         }
     }
+}
+
+void SelectorMAngle::update(const SelectorMol &molecules)
+{
+    this->update(molecules.toMolecules());
+}
+
+void SelectorMAngle::update(const MoleculeData &moldata)
+{
+    QList<int> idx;
+
+    const auto molnum = moldata.number();
+
+    int i = 0;
+    for (const auto &mol : this->angs)
+    {
+        if (mol.data().number() == molnum)
+        {
+            idx.append(i);
+        }
+        i += 1;
+    }
+
+    for (auto i : idx)
+    {
+        this->angs[i].update(moldata);
+    }
+}
+
+void SelectorMAngle::update(const MoleculeView &molview)
+{
+    this->update(molview.data());
 }
 
 int SelectorMAngle::count() const

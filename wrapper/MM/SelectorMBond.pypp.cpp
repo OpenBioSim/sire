@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/errors.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireCAS/expression.h"
 
 #include "SireError/errors.h"
@@ -1487,7 +1489,46 @@ void register_SelectorMBond_class(){
         }
         { //::SireMM::SelectorMBond::update
         
+            typedef void ( ::SireMM::SelectorMBond::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMBond::update );
+            
+            SelectorMBond_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecule") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMBond::update
+        
+            typedef void ( ::SireMM::SelectorMBond::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMBond::update );
+            
+            SelectorMBond_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMBond::update
+        
             typedef void ( ::SireMM::SelectorMBond::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMM::SelectorMBond::update );
+            
+            SelectorMBond_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMBond::update
+        
+            typedef void ( ::SireMM::SelectorMBond::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMM::SelectorMBond::update );
             
             SelectorMBond_exposer.def( 

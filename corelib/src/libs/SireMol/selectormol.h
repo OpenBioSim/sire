@@ -106,6 +106,9 @@ namespace SireMol
         template <class T>
         SelectorMol(const SelectorM<T> &other, const MolID &molid);
 
+        SelectorMol(const QList<SelectorMol> &others);
+        SelectorMol(const QVector<SelectorMol> &others);
+
         SelectorMol(const SelectorMol &other);
 
         virtual ~SelectorMol();
@@ -142,7 +145,10 @@ namespace SireMol
         int count() const;
         int size() const;
 
+        void update(const MoleculeView &molview);
+        void update(const MoleculeData &moldata);
         void update(const Molecules &molecules);
+        void update(const SelectorMol &molecules);
 
         SelectorMol operator+(const Molecule &mol) const;
         SelectorMol operator+(const SelectorMol &mols) const;

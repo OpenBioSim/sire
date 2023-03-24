@@ -105,8 +105,6 @@ namespace SireMol
 
         MolViewPtr toSelector() const;
 
-        void update(const MoleculeData &moldata);
-
         ResName name() const;
         ResNum number() const;
         ResIdx index() const;

@@ -319,6 +319,19 @@ SelectorMol::SelectorMol(const SelectResult &molecules) : ConcreteProperty<Selec
     }
 }
 
+SelectorMol::SelectorMol(const QList<SelectorMol> &other) : ConcreteProperty<SelectorMol, Property>()
+{
+    for (const auto &o : other)
+    {
+        this->mols += o.mols;
+    }
+}
+
+SelectorMol::SelectorMol(const QVector<SelectorMol> &other) : ConcreteProperty<SelectorMol, Property>()
+{
+    this->operator=(SelectorMol(QList<SelectorMol>(other.constBegin(), other.constEnd())));
+}
+
 SelectorMol::SelectorMol(const SelectorMol &other) : ConcreteProperty<SelectorMol, Property>(), mols(other.mols)
 {
 }
@@ -528,8 +541,40 @@ void SelectorMol::update(const Molecules &molecules)
         while (it != molnum_to_idx.constEnd() && it.key() == molnum)
         {
             mols[it.value()].update(mol.data());
+            ++it;
         }
     }
+}
+
+void SelectorMol::update(const MoleculeView &molview)
+{
+    this->update(molview.data());
+}
+
+void SelectorMol::update(const MoleculeData &moldata)
+{
+    const auto molnum = moldata.number();
+
+    QList<int> idx;
+
+    int i = 0;
+    for (const auto &mol : mols)
+    {
+        if (mol.number() == molnum)
+            idx.append(i);
+
+        i += 1;
+    }
+
+    for (auto i : idx)
+    {
+        mols[i].update(moldata);
+    }
+}
+
+void SelectorMol::update(const SelectorMol &molecules)
+{
+    this->update(molecules.toMolecules());
 }
 
 EvaluatorM SelectorMol::evaluate() const

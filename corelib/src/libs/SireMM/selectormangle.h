@@ -136,7 +136,10 @@ namespace SireMM
         int count() const;
         int size() const;
 
+        void update(const SireMol::MoleculeView &molecule);
+        void update(const SireMol::MoleculeData &moldata);
         void update(const SireMol::Molecules &molecules);
+        void update(const SireMol::SelectorMol &molecules);
 
         SireMol::EvaluatorM evaluate() const;
 

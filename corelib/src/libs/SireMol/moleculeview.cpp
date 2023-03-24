@@ -37,6 +37,7 @@
 #include "select.h"
 #include "selector.hpp"
 #include "trajectory.h"
+#include "selectormol.h"
 
 #include "SireVol/space.h"
 
@@ -343,18 +344,45 @@ void MoleculeView::assertSameMolecule(const MoleculeView &other) const
     this->assertSameMolecule(other.data());
 }
 
-/** Update this view with a new version of the molecule. You
-    can only update the molecule if it has the same layout UID
-    (so same atoms, residues, cutgroups etc.)
-
-    \throw SireError::incompatible_error
-*/
+/** Update this view with a new version of the molecule.
+ *  This will only update if the molecules match and
+ *  have the same layouts.
+ *
+ *  If the number matches but the layout (info) is different
+ *  then this will raise a SireError::incompatible_error
+ */
 void MoleculeView::update(const MoleculeData &moldata)
 {
-    this->assertSameMolecule(moldata);
-    d->info().assertEqualTo(moldata.info());
+    if (moldata.number() == this->data().number())
+    {
+        if (moldata.info().UID() != this->data().info().UID())
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Cannot update molecule %1 because the layout for the new "
+                                                    "version of the molecule (%2) is different. This is likely "
+                                                    "because the molecule has been edited and the layout of "
+                                                    "atoms, residues etc has been changed. To update this molecule "
+                                                    "you will need to replace it in the container.")
+                                                    .arg(this->molecule().toString())
+                                                    .arg(Molecule(moldata).toString()),
+                                                CODELOC);
+        }
 
-    d = moldata;
+        // this is the same molecule with the same molecular layout
+        d = moldata;
+    }
+}
+
+/** Update this view with a new version of the molecule.
+ *  This will only update if the molecules match and
+ *  have the same layouts.
+ *
+ *  If the number matches but the layout (info) is different
+ *  then this will raise a SireError::incompatible_error
+ */
+void MoleculeView::update(const MoleculeView &mol)
+{
+    this->update(mol.data());
 }
 
 /** Update this view with a new version of the molecule
@@ -371,6 +399,30 @@ void MoleculeView::update(const Molecules &molecules)
     if (it != molecules.constEnd())
     {
         this->update(it.value().data());
+    }
+}
+
+/** Update this view with a new version of the molecule
+    from 'molecules' (assuming this molecule is in molecules).
+    You can only update the molecule if it has the same layout UID
+    (so same atoms, residues, cutgroups etc.)
+
+    \throw SireError::incompatible_error
+*/
+void MoleculeView::update(const SelectorMol &molecules)
+{
+    const auto molnum = this->data().number();
+
+    for (int i = 0; i < molecules.count(); ++i)
+    {
+        const auto &mol = molecules[i];
+
+        if (mol.data().number() == molnum)
+        {
+            // only update from the first copy of the molecule
+            this->update(mol.data());
+            break;
+        }
     }
 }
 

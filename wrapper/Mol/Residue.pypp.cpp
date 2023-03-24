@@ -495,19 +495,6 @@ void register_Residue_class(){
                 , "" );
         
         }
-        { //::SireMol::Residue::update
-        
-            typedef void ( ::SireMol::Residue::*update_function_type)( ::SireMol::MoleculeData const & ) ;
-            update_function_type update_function_value( &::SireMol::Residue::update );
-            
-            Residue_exposer.def( 
-                "update"
-                , update_function_value
-                , ( bp::arg("moldata") )
-                , bp::release_gil_policy()
-                , "Update this residue with the passed molecule data.\nThrow: SireError::incompatible_error\n" );
-        
-        }
         Residue_exposer.staticmethod( "typeName" );
         Residue_exposer.def( "_get_property_SireMol_ResStringProperty", &SireMol::Residue::property< QString >, bp::return_value_policy<bp::copy_const_reference>());
         Residue_exposer.def( "_get_metadata_SireMol_ResStringProperty", get_Metadata_SireMol_ResStringProperty_function1, bp::return_value_policy<bp::copy_const_reference>());

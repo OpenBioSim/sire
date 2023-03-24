@@ -15,6 +15,7 @@ include_directories(${CMAKE_SOURCE_DIR}/src/libs)
 # Define the headers in SireSystem
 set ( SIRESYSTEM_HEADERS
       anglecomponent.h
+      calculate_energy.h
       chargeconstraint.h
       closemols.h
       constraint.h
@@ -26,6 +27,7 @@ set ( SIRESYSTEM_HEADERS
       distancecomponent.h
       energymonitor.h
       errors.h
+      forcefieldinfo.h
       freeenergymonitor.h
       geometrycomponent.h
       idassigner.h
@@ -58,6 +60,7 @@ set ( SIRESYSTEM_SOURCES
       register_siresystem.cpp
 
       anglecomponent.cpp
+      calculate_energy.cpp
       chargeconstraint.cpp
       closemols.cpp
       constraint.cpp
@@ -69,6 +72,7 @@ set ( SIRESYSTEM_SOURCES
       distancecomponent.cpp
       energymonitor.cpp
       errors.cpp
+      forcefieldinfo.cpp
       freeenergymonitor.cpp
       geometrycomponent.cpp
       idassigner.cpp

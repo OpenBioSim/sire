@@ -570,7 +570,7 @@ def load_test_files(files: _Union[_List[str], str], *args):
             cache_dir = os.path.join(d, "cache")
 
     files = expand(tutorial_url, files, suffix=".bz2")
-    return load(files, directory=cache_dir, silent=True)
+    return load(files, directory=cache_dir, silent=True, show_warnings=False)
 
 
 def smiles(
@@ -609,11 +609,13 @@ def smiles(
         labels_column: str
             The name of the labels column in the Dataframe (default 'labels')
         add_hydrogens: bool (default True)
-            Whether or not to automatically add hydrogens
+            Whether or not to automatically add hydrogens. Note that
+            not adding hydrogens will automatically disable the
+            generation of coordinates.
         generate_coordinates: bool (default True)
             Whether or not to automatically generate 3D coordinates.
-            Note that generating the coordinates will automatically
-            switch on addition of hydrogens
+            Note that generating coordinates requires that
+            hydrogens are automatically added.
         map:
             Property map if you want to put the molecule properties
             into different places

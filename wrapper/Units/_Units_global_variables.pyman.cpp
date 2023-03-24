@@ -224,6 +224,8 @@ void register_man_global_variables()
 
     scope().attr("angstroms_per_fs") = angstroms_per_fs;
 
+    scope().attr("nanometers_per_ps") = nanometers_per_ps;
+
     scope().attr("meters_per_second") = meters_per_second;
 
     scope().attr("kilometers_per_hour") = kilometers_per_hour;
@@ -301,6 +303,4 @@ void register_man_global_variables()
     scope().attr("celsius") = celsius;
 
     scope().attr("fahrenheit") = fahrenheit;
-
 }
-

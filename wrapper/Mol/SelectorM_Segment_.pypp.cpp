@@ -1620,7 +1620,49 @@ void register_SelectorM_Segment__class(){
         { //::SireMol::SelectorM< SireMol::Segment >::update
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Segment >::update );
+            
+            SelectorM_Segment__exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molview") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::update
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Segment >::update );
+            
+            SelectorM_Segment__exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::update
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
             typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Segment >::update );
+            
+            SelectorM_Segment__exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::update
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*update_function_type)( ::SireMol::SelectorMol const & ) ;
             update_function_type update_function_value( &::SireMol::SelectorM< SireMol::Segment >::update );
             
             SelectorM_Segment__exposer.def( 

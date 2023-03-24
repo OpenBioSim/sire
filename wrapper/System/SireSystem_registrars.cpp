@@ -3,8 +3,6 @@
 
 #include "SireSystem_registrars.h"
 
-
-
 #include "anglecomponent.h"
 #include "checkpoint.h"
 #include "closemols.h"
@@ -13,6 +11,7 @@
 #include "dihedralcomponent.h"
 #include "distancecomponent.h"
 #include "energymonitor.h"
+#include "forcefieldinfo.h"
 #include "freeenergymonitor.h"
 #include "idassigner.h"
 #include "identityconstraint.h"
@@ -52,6 +51,7 @@ void register_SireSystem_objects()
     ObjectRegistry::registerConverterFor< SireSystem::DoubleDistanceComponent >();
     ObjectRegistry::registerConverterFor< SireSystem::TripleDistanceComponent >();
     ObjectRegistry::registerConverterFor< SireSystem::EnergyMonitor >();
+    ObjectRegistry::registerConverterFor< SireSystem::ForceFieldInfo >();
     ObjectRegistry::registerConverterFor< SireSystem::FreeEnergyMonitor >();
     ObjectRegistry::registerConverterFor< SireSystem::AssignerGroup >();
     ObjectRegistry::registerConverterFor< SireSystem::IDAssigner >();

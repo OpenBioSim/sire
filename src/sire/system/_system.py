@@ -25,9 +25,22 @@ class System:
                     f"not a {type(system)}"
                 )
 
-            self._system = system
+            if type(system) == System:
+                self._system == system._system
+            else:
+                self._system = system
 
         self._molecules = None
+
+    @staticmethod
+    def is_system(obj):
+        """
+        Return whether the passed object is a System class
+        (either a new or legacy System)
+        """
+        from ..legacy.System import System as _System
+
+        return type(obj) == System or type(obj) == _System
 
     def __copy__(self):
         other = System()
@@ -105,15 +118,19 @@ class System:
         self._system.load_frame(i)
         self._molecules = None
 
-    def save_frame(self, i=None):
+    def save_frame(self, i=None, map=None):
         """Save the current coordinates to the ith frame of this System.
         If i is not specfied then this adds the frame onto the
         end of the trajectory
         """
+        from ..base import create_map
+
+        map = create_map(map)
+
         if i is None:
-            self._system.save_frame()
+            self._system.save_frame(map=map)
         else:
-            self._system.save_frame(i)
+            self._system.save_frame(i, map=map)
 
         self._molecules = None
 
@@ -237,6 +254,24 @@ class System:
     def trajectory(self):
         """Return an iterator over the trajectory of frames for this System"""
         return self.molecules().trajectory()
+
+    def minimisation(self, map=None):
+        """
+        Return a Minimisation object that can be used to minimise the energy
+        of the molecule(s) in this view.
+        """
+        from ..mol import Minimisation
+
+        return Minimisation(self, map=map)
+
+    def dynamics(self, *args, **kwargs):
+        """
+        Return a Dynamics object that can be used to perform
+        dynamics of the molecule(s) in this view
+        """
+        from ..mol import _dynamics
+
+        return _dynamics(self, *args, **kwargs)
 
     def energy(self, *args, **kwargs):
         """Calculate and return the energy of this System

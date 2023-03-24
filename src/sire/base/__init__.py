@@ -153,27 +153,34 @@ def create_map(values, extras=None):
     You can map as many properties, and provide as many
     extra options as you want.
     """
-    if values is None:
+    if values is None and extras is None:
         return PropertyMap()
+    elif values is None:
+        return create_map(extras)
 
     try:
-        return PropertyMap(values)
+        map = PropertyMap(values)
     except Exception:
-        pass
+        map = None
 
-    wrapped_values = {}
+    if map is None:
+        wrapped_values = {}
 
-    for key, value in values.items():
-        try:
-            wrapped_values[key] = _Base.PropertyName(value)
-        except Exception:
-            wrapped_values[key] = _Base.PropertyName(wrap(value))
-
-    if extras is not None:
-        for key, value in extras.items():
+        for key, value in values.items():
             try:
                 wrapped_values[key] = _Base.PropertyName(value)
             except Exception:
-                wrapped_values[key] = _Base.PropertyName(wrap(value))
+                try:
+                    wrapped_values[key] = _Base.PropertyName(wrap(value))
+                except Exception:
+                    raise ValueError(
+                        f"Unable to set the property {key} to {value} "
+                        "because we cannot convert this to a C++ type."
+                    )
 
-    return PropertyMap(wrapped_values)
+        map = PropertyMap(wrapped_values)
+
+    if extras is not None:
+        return map + create_map(extras)
+    else:
+        return map

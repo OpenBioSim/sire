@@ -59,6 +59,7 @@ namespace SireMol
 
     class Molecule;
     class Molecules;
+    class SelectorMol;
     class Segment;
     class Chain;
     class Residue;
@@ -278,8 +279,10 @@ namespace SireMol
 
         Molecule extract() const;
 
-        virtual void update(const MoleculeData &moldata);
-        virtual void update(const Molecules &molecules);
+        void update(const MoleculeData &moldata);
+        void update(const MoleculeView &molview);
+        void update(const Molecules &molecules);
+        void update(const SelectorMol &molecules);
 
         /** Return whether or not this view has the property at key 'key'
              - note that this returns true only if there is a property,

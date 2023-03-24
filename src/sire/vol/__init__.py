@@ -8,3 +8,4 @@ _use_new_api()
 
 PeriodicBox = _Vol.PeriodicBox
 Cartesian = _Vol.Cartesian
+TriclinicBox = _Vol.TriclinicBox

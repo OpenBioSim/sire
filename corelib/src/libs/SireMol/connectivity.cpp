@@ -2942,6 +2942,16 @@ QVector<QVector<bool>> ConnectivityBase::getBondMatrix(int start, int end) const
 
     const int nats = minfo.nAtoms();
 
+    if (this->nConnections() == 0)
+    {
+        // there are no internal connections - we have to assume that
+        // everything is bonded to everything else. This is because
+        // we are likely to be an empty connectivity for, e.g.
+        // a solvent molecule
+        ret = QVector<QVector<bool>>(nats, QVector<bool>(nats, true));
+        return ret;
+    }
+
     if (nats == 0)
         return ret;
 

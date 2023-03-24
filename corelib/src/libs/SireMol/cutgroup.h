@@ -106,8 +106,6 @@ namespace SireMol
 
         MolViewPtr toSelector() const;
 
-        void update(const MoleculeData &moldata);
-
         const CGName &name() const;
         CGIdx index() const;
         CGIdx number() const;

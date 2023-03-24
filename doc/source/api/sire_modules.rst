@@ -7,6 +7,7 @@ Sub-modules
 
    index_base
    index_cas
+   index_convert
    index_io
    index_maths
    index_mm
