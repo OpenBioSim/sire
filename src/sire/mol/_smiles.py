@@ -81,7 +81,6 @@ if _has_rdkit:
         width: int = 750,
         include_hydrogens: bool = False,
         num_columns: int = 1,
-        force: bool = False,
         map=None,
     ):
         from ..convert import sire_to_rdkit
@@ -302,8 +301,9 @@ if _has_rdkit:
         obj,
         filename: str = None,
         height: int = 300,
-        width: int = 900,
+        width: int = 750,
         include_hydrogens: bool = False,
+        num_columns: int = 1,  # included for compatibilty with selector_view2d
         map=None,
     ):
         """

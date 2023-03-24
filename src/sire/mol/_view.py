@@ -139,17 +139,21 @@ if _has_nglview:
             if type(selection) is not list:
                 selection = [selection]
 
+            if type(rep) is not list:
+                rep = [rep]
+
             for s in selection:
                 try:
                     a = self.atoms.find(self.view[s].atoms())
                 except Exception:
                     continue
 
-                if rep not in self.reps:
-                    self.reps[rep] = set()
+                for r in rep:
+                    if r not in self.reps:
+                        self.reps[r] = set()
 
-                self.reps[rep] = self.reps[rep].union(a)
-                self.rest = self.rest.difference(a)
+                    self.reps[r] = self.reps[r].union(a)
+                    self.rest = self.rest.difference(a)
 
         def _add_rep(self, view, typ, atoms):
             typ = typ.strip().lstrip().rstrip().lower()
@@ -180,10 +184,10 @@ if _has_nglview:
         obj,
         no_default: bool = False,
         orthographic: bool = True,
-        protein: str = "cartoon",
-        water: str = "line",
-        ions: str = "spacefill",
-        rest: str = "licorice",
+        protein: str = None,
+        water: str = None,
+        ions: str = None,
+        rest: str = None,
         all: str = None,
         ball_and_stick: str = None,
         cartoon: str = None,
@@ -231,15 +235,29 @@ if _has_nglview:
 
         view.clear_representations()
 
-        atoms = obj.atoms()
-
         reps = _Representations(obj)
 
-        if no_default:
-            protein = None
-            water = None
-            ions = None
-            rest = None
+        if all is not None:
+            # don't have any default representations if the user
+            # has asked that all atoms have a particular
+            # representation
+            no_default = True
+
+        if not no_default:
+            # Add the defaults here so that the user can
+            # override them, and also so that we can
+            # disable defaults if needed
+            if protein is None:
+                protein = "cartoon"
+
+            if water is None:
+                water = "line"
+
+            if ions is None:
+                ions = "spacefill"
+
+            if rest is None:
+                rest = "licorice"
 
         if protein is not None:
             reps.add("protein", protein)
@@ -267,6 +285,9 @@ if _has_nglview:
 
         if ribbon is not None:
             reps.add(ribbon, "ribbon")
+
+        if rocket is not None:
+            reps.add(rocket, "rocket")
 
         if rope is not None:
             reps.add(rope, "rope")

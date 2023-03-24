@@ -80,6 +80,14 @@ System( name=cholesterol num_molecules=1 num_residues=1 num_atoms=74 )
 .. image:: images/cholesterol.jpg
    :alt: Picture of cholesterol viewed in NGLView
 
+or viewed as a 2D structure...
+
+>>> mols.view2d()
+
+.. image:: images/cholesterol_2d.png
+   :alt: Picture of cholesterol viewed in NGLView
+
+
 Accessing the molecules
 =======================
 
