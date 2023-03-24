@@ -613,10 +613,11 @@ if "SIRE_NO_LAZY_IMPORT" not in _os.environ:
 
         _lazy_import.logging.disable(_lazy_import.logging.DEBUG)
 
-        # ignore warnings, as a lot are printed from the frozenlib
-        import warnings
+        # Previously needed to filter to remove excessive warnings
+        # from 'frozen importlib' when lazy loading.
+        #import warnings
+        #warnings.filterwarnings("ignore")
 
-        warnings.filterwarnings("ignore")
         _can_lazy_import = True
 
     except Exception as e:
