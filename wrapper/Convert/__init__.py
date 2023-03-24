@@ -291,7 +291,14 @@ try:
             usecpu = int(map["cpu_pme"].value().as_boolean())
             platform.setPropertyDefaultValue("UseCpuPme", str(usecpu))
 
-        context = openmm.Context(system, integrator, platform)
+        try:
+            context = openmm.Context(system, integrator, platform)
+        except Exception as e:
+            raise ValueError(
+                "There was a problem creating the OpenMM context. Perhaps "
+                "the platform was not supported for this system, options "
+                f"or on this computer? The error message is: {e}"
+            )
 
         # place the coordinates and velocities into the context
         _set_openmm_coordinates_and_velocities(context, coords_and_vels)
