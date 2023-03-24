@@ -10,6 +10,22 @@ molecular (predominantly biomolecular) systems.
   :doc:`molecular file formats <tutorial/part01/06_supported_file_formats>`.
   This includes Amber, CHARMM and GROMACS files.
 * This includes :doc:`loading trajectory files <tutorial/part04/02_trajectory>`!
+* :doc:`View molecules <tutorial/part04/04_energy_trajectories>`
+  (or subsets) using `nglviewer <https://nglviewer.org>`__. This
+  includes creating complex :doc:`multi-representation views <cheatsheet/view>`.
+* :doc:`Create 2D structure views of molecules <cheatsheet/view>`,
+  including automatically deriving bond orders, formal charges and
+  stereochemistries from molecules where that information is not
+  present.
+* :doc:`Convert molecules to and from RDKit <tutorial/part05/01_convert>`,
+  and easily :doc:`create molecules from smiles strings <tutorial/part05/03_smiles>`
+  or :doc:`generate smiles strings from molecules <tutorial/part05/03_smiles>`.
+* :doc:`Convert molecules to OpenMM <tutorial/part05/01_convert>`, and
+  run molecular dynamics and minimisation
+  :doc:`via an intuitive interface <tutorial/part05/04_dynamics>`.
+* :doc:`Convert molecules to and from BioSimSpace <tutorial/part05/01_convert>`,
+  thereby opening the way for automatic parameterisation of ligands,
+  solvation of molecules, and running of complex simulation workflows.
 * :doc:`Edit molecules <tutorial/part03/02_cursors>`,
   :doc:`move them <tutorial/part04/05_movement>`, recombine them into
   new molecular systems.
@@ -18,8 +34,6 @@ molecular (predominantly biomolecular) systems.
   parameters read from the input files. Calculate
   :doc:`energies across trajectories <tutorial/part04/04_energy_trajectories>`
   (or subsets of trajectories).
-* :doc:`View molecules <tutorial/part04/04_energy_trajectories>`
-  (or subsets) using `nglviewer <https://nglviewer.org>`__.
 * :doc:`Measure distances, angles, dihedrals etc <tutorial/part04/01_measure>`,
   including across
   :doc:`frames of trajectories <tutorial/part04/02_trajectory>`
