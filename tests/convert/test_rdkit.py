@@ -21,6 +21,10 @@ def test_rdkit(smiles):
     assert mol.smiles() == smiles
 
 
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
 def test_chirality():
     l_ala = sr.smiles("C[C@H](N)C(=O)O")
     d_ala = sr.smiles("C[C@@H](N)C(=O)O")
@@ -29,6 +33,10 @@ def test_chirality():
     assert l_ala["C2"].property("chirality").is_counter_clockwise()
 
 
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
 def test_hybridization():
     l_ala = sr.smiles("C[C@H](N)C(=O)O")
 
@@ -55,6 +63,10 @@ def test_hybridization():
             assert False
 
 
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
 def test_hybridization2():
     mol = sr.smiles("CN1C=NC2=C1C(=O)N(C(=O)N2C)C")
 
