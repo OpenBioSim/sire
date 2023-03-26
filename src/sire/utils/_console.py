@@ -117,7 +117,7 @@ class _Progress:
 
 
 class _NullSpinner:
-    """Null spinner to use if yaspin is not available
+    """Null spinner to use if a spinner is not available -
     disables spinners"""
 
     def __init__(self):
@@ -129,10 +129,7 @@ class _NullSpinner:
     def __exit__(self, *args, **kwargs):
         return False
 
-    def success(self):
-        pass
-
-    def failure(self):
+    def update(self, *args, **kwargs):
         pass
 
 
@@ -567,31 +564,14 @@ class Console:
 
     @staticmethod
     def spinner(text: str = ""):
-        try:
-            from yaspin import yaspin, Spinner
-
-            have_yaspin = True
-        except ImportError:
-            have_yaspin = False
-
-        if not have_yaspin:
-            return _NullSpinner()
-
         console = Console._get_console()
 
         if console._use_spinner:
-            theme = Console._get_theme()
-            frames, delay = theme.get_frames(
-                width=console.width - len(text) - 10
-            )
-            sp = Spinner(frames, delay)
-
-            y = yaspin(sp, text=text, side="right")
-
-            y.success = lambda: theme.spinner_success(y)
-            y.failure = lambda: theme.spinner_failure(y)
-
-            return y
+            try:
+                theme = Console._get_theme()
+                return theme.spinner(text=text)
+            except Exception:
+                return _NullSpinner()
         else:
             return _NullSpinner()
 

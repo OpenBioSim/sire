@@ -3,6 +3,8 @@ from dataclasses import field as _field
 from typing import List as _List
 from typing import Dict as _Dict
 
+from ._console import Console
+
 __all__ = ["Simple"]
 
 
@@ -50,34 +52,12 @@ class Simple:
     def info_text(self):
         return f"bold {self.info()}"
 
-    def spinner_success(self, spinner):
-        spinner.ok("Success")
-
-    def spinner_failure(self, spinner):
-        spinner.fail("Failure")
+    def spinner(self, text: str):
+        console = Console._get_console()
+        return console.status(text, spinner="dots")
 
     def rule(self, style):
         return "white"
 
     def panel(self, style):
         return "white"
-
-    def get_frames(self, width: int = 80):
-        """Return the frames used to animate a spinner in a console
-        of specified width
-
-        This returns the list of frames plus the timeout between
-        the list
-        """
-        if width in self.frames:
-            return self.frames[width]
-
-        frames = []
-
-        for i in range(0, width):
-            frame = (i * "-") + ">" + ((width - i - 1) * " ")
-            frames.append(frame)
-
-        self.frames[width] = (frames, 50)
-
-        return self.frames[width]

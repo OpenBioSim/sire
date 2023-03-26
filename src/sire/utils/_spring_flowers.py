@@ -46,17 +46,9 @@ class SpringFlowers:
     def info(self):
         return "cyan"
 
-    def spinner_success(self, spinner):
-        if Console.supports_emojis():
-            spinner.green.ok("✔")
-        else:
-            spinner.green.ok("Success")
-
-    def spinner_failure(self, spinner):
-        if Console.supports_emojis():
-            spinner.red.fail("✘")
-        else:
-            spinner.red.fail("Failed")
+    def spinner(self, text: str):
+        console = Console._get_console()
+        return console.status(text, spinner="aesthetic")
 
     def rule(self, style):
         if style is None:
@@ -118,25 +110,3 @@ class SpringFlowers:
 
         else:
             return "on black"
-
-    def get_frames(self, width: int = 80):
-        """Return the frames used to animate a spinner in a console
-        of specified width
-
-        This returns the list of frames plus the timeout between
-        the list
-        """
-        if width in self.frames:
-            return self.frames[width]
-
-        frames = []
-        frames.append("")
-
-        bar = "->->->->->->->->->->->"
-
-        for i in range(1, len(bar), 1):
-            frames.append(bar[0:i])
-
-        self.frames[width] = (frames, 50)
-
-        return self.frames[width]

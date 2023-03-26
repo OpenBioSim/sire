@@ -43,17 +43,21 @@ class MinimisationData:
                 self._omm_mols, maxIterations=max_its
             )
 
-        with Console.spinner("minimisation") as spinner:
+        from datetime import datetime
+
+        start_time = datetime.now().timestamp()
+
+        with Console.spinner("minimisation: 0.0s") as spinner:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, max_iterations)
 
                 while not run_promise.done():
                     try:
-                        run_promise.result(timeout=1.0)
+                        run_promise.result(timeout=0.2)
                     except Exception:
+                        delta = datetime.now().timestamp() - start_time
+                        spinner.update("minimisation: %.1f s" % delta)
                         pass
-
-            spinner.success()
 
     def commit(self):
         from ..legacy.Convert import openmm_extract_coordinates

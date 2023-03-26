@@ -311,17 +311,21 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        with Console.spinner("minimisation") as spinner:
+        from datetime import datetime
+
+        start_time = datetime.now().timestamp()
+
+        with Console.spinner("minimisation: 0.0s") as spinner:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, 0)
 
                 while not run_promise.done():
                     try:
-                        run_promise.result(timeout=1.0)
+                        run_promise.result(timeout=0.2)
                     except Exception:
+                        delta = datetime.now().timestamp() - start_time
+                        spinner.update("minimisation: %.1f s" % delta)
                         pass
-
-            spinner.success()
 
     def run(self, time, save_frequency, auto_fix_minimise: bool = True):
         if self.is_null():
