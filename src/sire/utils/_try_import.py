@@ -75,7 +75,7 @@ def _install_package(name, package_registry, version=None):
     if package in package_registry:
         package = package_registry[name]
 
-    import os
+    import subprocess
 
     try:
         if version is not None:
@@ -91,9 +91,12 @@ def _install_package(name, package_registry, version=None):
             "\nTrying to install %s from package %s using %s...\n"
             % (name, package, conda)
         )
-        ok = os.system("%s install %s -y" % (conda, package))
 
-        if ok == 0:
+        args = [conda, "install", package, "-y"]
+
+        result = subprocess.run(args)
+
+        if result.returncode == 0:
             # installed ok
             return
     except Exception:
