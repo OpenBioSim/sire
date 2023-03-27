@@ -58,6 +58,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   of pinned dependencies for :mod:`sire`. This included fixing the way we
   specify ``blas`` so that we don't force a pin to ``openblas``,
   removing the requirement for ``watchdog`` as it is not used any more,
+  removing ``pypdb`` from the BioSimSpace run requirements,
   and switching to ``qt-main`` rather than the entire ``qt`` package. Our run
   dependencies are now just ``boost``, ``gsl``, ``lazy_import``,
   ``libnetcdf``, ``openmm``, ``pandas``, ``qt-main``, ``rich`` and ``tbb``.

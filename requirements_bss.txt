@@ -26,7 +26,6 @@ parmed
 py3dmol
 pydot
 pygtail
-pypdb
 pyyaml
 rdkit
 
