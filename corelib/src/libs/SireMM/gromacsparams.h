@@ -235,6 +235,8 @@ namespace SireMM
         GromacsAngle(int function_type, const QList<double> &params);
 
         GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta);
+        GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta,
+                     const SireCAS::Expression &ub, const SireCAS::Symbol &r);
 
         GromacsAngle(const GromacsAngle &other);
 

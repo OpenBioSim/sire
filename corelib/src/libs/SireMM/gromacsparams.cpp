@@ -1040,6 +1040,34 @@ GromacsAngle::GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symb
                                      CODELOC);
 }
 
+/** Construct from the passed angle plus urey-bradley term */
+GromacsAngle::GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta,
+                           const SireCAS::Expression &ub, const SireCAS::Symbol &r)
+    : func_type(0)
+{
+    // interpret the angle component first
+    this->operator=(GromacsAngle(angle, theta));
+
+    if (not ub.isZero())
+    {
+        // now extract the UB component
+        auto bond = GromacsBond(ub, r);
+
+        if (not(bond.isHarmonic() and this->isHarmonic()))
+            throw SireError::incomplete_code(QObject::tr(
+                                                 "Sire cannot yet interpret non-harmonic angles with "
+                                                 "non-harmonic Urey-Bradley terms! %1 + %2")
+                                                 .arg(angle.toString())
+                                                 .arg(ub.toString()),
+                                             CODELOC);
+
+        // k[2] is r0 and k[3] is k for the Urey-Bradley - function type is 5
+        func_type = 5;
+        k[2] = bond[0];
+        k[3] = bond[1];
+    }
+}
+
 static void assert_valid_angle_function(int func_type)
 {
     if (func_type < 1 or func_type > 10 or func_type == 7 or func_type == 9)
