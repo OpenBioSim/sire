@@ -12,8 +12,109 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.2.0 <https://github.com/openbiosim/sire/compare/2023.1.3...2023.2.0>`__ - March 2023
+------------------------------------------------------------------------------------------
+
+* Completed the :mod:`sire.convert` framework for interconverting :mod:`sire`
+  objects with `BioSimSpace <https://biosimspace.openbiosim.org>`__,
+  `RDKit <https://rdkit.org>`__ and `OpenMM <https://openmm.org>`__.
+  This is now :doc:`fully documented in a tutorial <tutorial/part05/01_convert>`.
+
+* Added support for creating molecules from smiles strings, or generating
+  smiles strings from molecules, based on the RDKit integration. Have
+  also added a :func:`~sire.mol.SelectorMol.view2d` function that generates
+  two-dimensional structure views of molecules. These have infered bond orders,
+  formal charges and stereochemistries. This is documented in
+  :doc:`two <tutorial/part05/02_view>` :doc:`tutorials <tutorial/part05/03_smiles>`.
+
+* Added new support to the 3D view code to give control over the representation
+  used to view the molecule (e.g. licorice, spacefill, cartoon etc). This is
+  documented in full (together with more detail about 2D views) in
+  a :doc:`detailed guide <cheatsheet/view>`.
+
+* Added support for performing minimisation and molecular dynamics simulations
+  based on the OpenMM integration. This is documented in full via both
+  :doc:`a tutorial <tutorial/part05/04_dynamics>` and a
+  :doc:`detailed guide <cheatsheet/openmm>`.
+
+* Fixed the Amber PRMTOP `dihedral ring bug <https://github.com/OpenBioSim/sire/commit/397271f4229f3cbed6a4c3b425e4baaf4aae4ec5>`__.
+
+* Fixed the bug regarding preservation of water properties when
+  `changing topology <https://github.com/michellab/BioSimSpace/issues/247>`__.
+
+* Fixed the bug that caused simulation restarts from short ``waterswap``
+  jobs `to fail <https://github.com/OpenBioSim/sire/issues/11>`__.
+
+* Added versioned package support to :func:`sire.utils.try_import`. Now the version
+  of the package to be installed can be specified.
+
+* Moved ``pymbar`` from a ``run`` to ``host`` dependency, and switched
+  ``analyse_freenrg`` to use :func:`~sire.utils.try_import` to import
+  the module. :mod:`sire` now doesn't depend on ``pymbar<4``. Instead,
+  ``pymbar`` will be installed at run-time if ``analyse_freenrg`` is
+  used in ``mbar`` mode.
+
+* Updated the list of build, run and host dependencies to reduce the number
+  of pinned dependencies for :mod:`sire`. This included fixing the way we
+  specify ``blas`` so that we don't force a pin to ``openblas``,
+  removing the requirement for ``watchdog`` as it is not used any more,
+  and switching to ``qt-main`` rather than the entire ``qt`` package. Our run
+  dependencies are now just ``boost``, ``gsl``, ``lazy_import``,
+  ``libnetcdf``, ``openmm``, ``pandas``, ``qt-main``, ``rich`` and ``tbb``.
+
+* Updated the name of the `TIP4P template <https://github.com/OpenBioSim/sire/commit/60cb5827635de0abc7f88419b596586c0e8c185f>`__
+  to match convention.
+
+* Added a utility function used by BioSimSpace to remove specified named
+  properties from all molecules in a collection.
+
+* Fixed `the bug in the Gro87 parser <https://github.com/OpenBioSim/sire/issues/21>`__
+  whereby garbage velocities were written for molecules that didn't have
+  a velocity property. These will now be given a default velocity of zero.
+
+* Added an option that can be used to fix an
+  `atom numbering issue <https://github.com/OpenBioSim/sire/issues/23>`__ when
+  writing PDB files that involve ``TER`` records and multiple molecules.
+
+* Added a fix to `replace spaces <https://github.com/OpenBioSim/sire/commit/6cb7df19721799ff771f235606350bba96bd6e4b>`__
+  in GROMACS molecular topology names with underscores, so that topology files
+  written by :mod:`sire` can be read by GROMACS.
+
+* Added the :class:`sire.system.ForceFieldInfo` class to hold and report
+  metadata related to the forcefields used to calculate energies and
+  perform molecular dynamics. This is now used to parse and interpret
+  this metadata, giving consistency between the new OpenMM-based
+  dynamics code and the energy functions that used the
+  in-built molecular mechanics engine.
+
+* Added `a fix <https://github.com/OpenBioSim/sire/commit/71fcf9a0345f9e07b3ec9f56fe4f33b1aada6d4b>`__
+  for better handling of :class:`~sire.mol.AtomRadii`-based properties.  This
+  helps ensure that radii will be given lengths by default, even if they
+  are initialised with zero values.
+
+* Removed the global warnings filter as this was no longer needed.
+  :mod:`sire` will now not automatically filter out all warnings.
+
+* Updated :class:`~sire.utils.Console` to use the in-built spinner from
+  `rich <https://rich.readthedocs.io>`__ rather than one based on ``yaspin``.
+  This removes a dependency and also better integrates the spinner code.
+
+* Added Python 3.10 support and now build Python 3.10 packages. This is now
+  the default version of Python for :mod:`sire`, and the version we
+  recommend for new workflows. Note that we will drop automatic building
+  of Python 3.8 packages later this year (likely Q3 or Q4). This will be
+  timed to co-incide with when we add Python 3.11 support, and when
+  (we anticipate) conda-forge will drop Python 3.8. Our aim is to only
+  build packages for a maximum of 3 Python versions at a time.
+
+* Added the ``future`` branch for feature branches that are accepted,
+  but not yet ready for the next release. Adopting a more
+  :doc:`regular release and bugfix process <contributing/roadmap>`
+  based on a quarterly release cycle.
+
+
 `2023.1.3 <https://github.com/openbiosim/sire/compare/2023.1.2...2023.1.3>`__ - February 2023
---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 
 * Added the beginnings of the new :mod:`sire.convert` framework for converting
   between different molecule object formats. Created initial converters for RDKit,
@@ -26,7 +127,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   up fully for 2023.2.0. It has been added to let others begin to explore
   how this capability could be useful.
 
-* Used the RDKit code to create a :func:`~sire.mol.SelectorMol.view2d` function for 
+* Used the RDKit code to create a :func:`~sire.mol.SelectorMol.view2d` function for
   quickly creating 2D views of molecules (or all molecules in a container / system).
   Again, this is considered experimental. It will be cleaned up fully for 2023.2.0.
   It has been added to let others beging to explore how this capability could be
@@ -34,7 +135,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed the SDF bug reported in `issue #8 <https://github.com/OpenBioSim/sire/issues/8>`__.
 
-* Fixed a bug in writing Amber PRMTOP files, where atoms with index zero should not 
+* Fixed a bug in writing Amber PRMTOP files, where atoms with index zero should not
   be written to the third or fourth column of dihedral / improper entries.
 
 * Adjusted the cutoffs and schemes so that the `.energy()` function gives energies
@@ -42,7 +143,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   this.
 
 * Added an :func:`~sire.mol.MoleculeView.extract` function so that it is easy
-  to create a new molecule as a subset of another molecule (and the same for 
+  to create a new molecule as a subset of another molecule (and the same for
   molecule containers)
 
 * Switched fully to need a C++ 2017 compiler, and adapted the code to fully
@@ -56,7 +157,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   These will be fully exposed in a later release.
 
 `2023.1.2 <https://github.com/openbiosim/sire/compare/2023.1.1...2023.1.2>`__ - February 2023
---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 
 * Used clang-format to autoformat all the C++ files.
 * Fixed SDF pickle bug (molecules read from SDF files could not be pickled / unpickled)
@@ -65,7 +166,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a segfault when searching for non-existant atoms in a molecule editor.
 
 `2023.1.1 <https://github.com/openbiosim/sire/compare/2023.1.0...2023.1.1>`__ - January 2023
---------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 * Fix incompatibility between the updated code and the Boresch restraint code.
 * Fixes try_import so that it works within a conda environment, and so that

@@ -108,16 +108,16 @@ And then... Install sire into a new environment
 We recommend that :mod:`sire` is installed into a new (clean) environment.
 This minimises the risk of failures caused by incompatible dependencies.
 
-Sire is currently packaged for Python 3.8 and Python 3.9. We will start
-by creating a Python 3.9 environment that we will call ``openbiosim``.
+Sire is currently packaged for Python 3.8, 3.9 and Python 3.10. We will start
+by creating a Python 3.10 environment that we will call ``openbiosim``.
 
 .. code-block:: bash
 
-   $ mamba create -n openbiosim "python<3.10"
+   $ mamba create -n openbiosim "python<3.11"
 
 .. note::
 
-   We use ``python<3.10`` as this will install the most recent 3.9
+   We use ``python<3.11`` as this will install the most recent 3.10
    release of python.
 
 We can now install :mod:`sire` into that environment by typing
@@ -233,7 +233,7 @@ branch if you are a developer).
 You compile :mod:`sire` into an existing anaconda / miniconda environment.
 Please create and activate an environment, e.g. by following
 `the instructions <_Install_Mambaforge>` to install a fresh ``mambaforge`` and
-then creating and activating Python 3.9 environment called
+then creating and activating Python 3.10 environment called
 ``openbiosim``.
 
 Next, download the source code. You could download the latest development
