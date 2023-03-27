@@ -7363,6 +7363,7 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
 {
     try
     {
+        const auto R = InternalPotential::symbols().bond().r();
         const auto THETA = InternalPotential::symbols().angle().theta();
 
         QStringList errors;
@@ -7370,7 +7371,12 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
         // add in all of the angle functions
         ThreeAtomFunctions angfuncs(molinfo);
 
+        // also any additional bond functions from cross-terms
+        TwoAtomFunctions bndfuncs(molinfo);
+
         const auto angles = moltype.angles();
+
+        bool has_cross_bonds = false;
 
         for (auto it = angles.constBegin(); it != angles.constEnd(); ++it)
         {
@@ -7416,6 +7422,34 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
                 potential = new_potential;
             }
 
+            if (potential.isBondAngleCrossTerm())
+            {
+                // extract and add the bond term between the 0-2 atoms
+                auto bondpot = potential.toBondTerm();
+
+                auto exp = bondpot.toExpression(R);
+
+                if (not exp.isZero())
+                {
+                    has_cross_bonds = true;
+
+                    auto oldfunc = bndfuncs.potential(idx0, idx2);
+
+                    if (not oldfunc.isZero())
+                    {
+                        bndfuncs.set(idx0, idx2, exp + oldfunc);
+                    }
+                    else
+                    {
+                        bndfuncs.set(idx0, idx2, exp);
+                    }
+                }
+
+                // we will only add the angle part here - we will
+                // need to add the bond part somewhere else
+                potential = potential.toAngleTerm();
+            }
+
             // now create the angle expression
             auto exp = potential.toExpression(THETA);
 
@@ -7437,6 +7471,9 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
 
         Properties props;
         props.setProperty("angle", angfuncs);
+
+        if (has_cross_bonds)
+            props.setProperty("bond", bndfuncs);
 
         return std::make_tuple(props, errors);
     }
@@ -7651,6 +7688,37 @@ Molecule GroTop::createMolecule(QString moltype_name, QStringList &errors, const
         {
             props_data[i] = funcs.at(i)();
         }
+    }
+
+    // now merge any cross-terms together
+    auto ang_props = std::get<0>(props_data[2]);
+
+    if (ang_props.hasProperty("bond"))
+    {
+        auto &bnd_props = std::get<0>(props_data[1]);
+
+        const auto &funcs = ang_props.property("bond").asA<TwoAtomFunctions>();
+
+        auto bonds = bnd_props.property("bond").asA<TwoAtomFunctions>();
+
+        for (const auto &func : funcs.potentials())
+        {
+            const auto &atom0 = func.atom0();
+            const auto &atom1 = func.atom1();
+
+            auto oldfunc = bonds.potential(atom0, atom1);
+
+            if (not oldfunc.isZero())
+            {
+                bonds.set(atom0, atom1, func.function() + oldfunc);
+            }
+            else
+            {
+                bonds.set(atom0, atom1, func.function());
+            }
+        }
+
+        bnd_props.setProperty("bond", bonds);
     }
 
     // assemble all of the properties together
