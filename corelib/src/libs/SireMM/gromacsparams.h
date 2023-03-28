@@ -322,7 +322,9 @@ namespace SireMM
         GromacsDihedral(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
 
         static QList<GromacsDihedral> construct(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
-        static QList<GromacsDihedral> constructImproper(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
+        static QList<GromacsDihedral> constructImproper(const SireCAS::Expression &dihedral,
+                                                        const SireCAS::Symbol &phi,
+                                                        const SireCAS::Symbol &theta);
 
         GromacsDihedral(const GromacsDihedral &other);
 
