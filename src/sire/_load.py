@@ -36,7 +36,8 @@ _range = range
 
 
 def supported_formats():
-    """Return a string that describes all of the molecular file formats
+    """
+    Return a string that describes all of the molecular file formats
     that are supported by Sire
     """
     from .legacy.IO import MoleculeParser
@@ -319,7 +320,17 @@ def expand(base: str, path: _Union[str, _List[str]], *args, **kwargs):
     return expanded
 
 
-def load(path: _Union[str, _List[str]], *args, show_warnings=True, **kwargs):
+def load(
+    path: _Union[str, _List[str]],
+    *args,
+    show_warnings=True,
+    silent: bool = False,
+    directory: str = ".",
+    gromacs_path: str = None,
+    parallel: bool = True,
+    map=None,
+    **kwargs,
+):
     """
     Load the molecular system at 'path'. This can be a filename
     of a URL. If it is a URL, then the file will be downloaded
@@ -333,20 +344,28 @@ def load(path: _Union[str, _List[str]], *args, show_warnings=True, **kwargs):
         across multiple files. Multiple paths can also be passed
         as multiple arguments to this function.
 
-     log (dict):
-        Optional dictionary that you can pass in that will be populated
-        with any error messages or warnings from the parsers as they
-        attempt to load in the molecular data. This can be helpful
-        in diagnosing why your file wasn't loaded.
-
      show_warnings (bool):
         Whether or not to print out any warnings that are encountered
         when loading your file(s). This is default True, and may lead
         to noisy output. Set `show_warnings=False` to silence this output.
 
+     silent (bool):
+        Whether or not to silence all output (including any warnings)
+
      directory (str):
         Optional directory which will be used when creating any
-        files (e.g. as a download from a URL or which unzipping files)
+        files (e.g. as a download from a URL or when unzipping files)
+
+     gromacs_path (str):
+        Path to the directory containing gromacs parameters. If this
+        is not set then the gromacs parameters installed with
+        sire will be used.
+
+     parallel (bool):
+        Whether or not to load files in parallel (using multiple cores).
+        You normally do want to do this. Only switch this to False
+        if debugging or if you don't want to use all the cores
+        in your computer.
 
     Returns:
         sire.system.System:
@@ -361,11 +380,6 @@ def load(path: _Union[str, _List[str]], *args, show_warnings=True, **kwargs):
          >>> mols = load("ala.crd", "ala.top")
 
          >>> mols = load("https://something")
-
-         >>> log = []
-         >>> mols = load("caffeine.pdb", log=log)
-         Exception
-         (look at 'log' to find out what went wrong in detail)
     """
     if type(path) is not list:
         paths = [path]
@@ -375,20 +389,8 @@ def load(path: _Union[str, _List[str]], *args, show_warnings=True, **kwargs):
     for arg in args:
         paths.append(arg)
 
-    if "log" in kwargs:
-        log = kwargs["log"]
-    else:
-        log = {}
-
-    if "directory" in kwargs:
-        directory = kwargs["directory"]
-    else:
-        directory = "."
-
-    if "silent" in kwargs:
-        silent = kwargs["silent"]
-    else:
-        silent = False
+    if silent:
+        show_warnings = False
 
     p = []
 
@@ -404,7 +406,21 @@ def load(path: _Union[str, _List[str]], *args, show_warnings=True, **kwargs):
     from .io import load_molecules
     from .base import create_map
 
-    map = {"GROMACS_PATH": _get_gromacs_dir(), "show_warnings": show_warnings}
+    if gromacs_path is None:
+        gromacs_path = _get_gromacs_dir()
+
+    m = {
+        "GROMACS_PATH": _get_gromacs_dir(),
+        "show_warnings": show_warnings,
+        "parallel": parallel,
+    }
+
+    for key in kwargs.keys():
+        m[key] = kwargs[key]
+
+    from .base import create_map
+
+    map = create_map(map, m)
 
     return load_molecules(paths, map=create_map(map))
 
@@ -437,8 +453,17 @@ def _to_legacy_system(molecules):
     return s
 
 
-def save_to_string(molecules, format: str, log={}, map=None) -> _List[str]:
-    """Save the passed molecules to an in-memory list of lines.
+def save_to_string(
+    molecules,
+    format: str,
+    show_warnings=True,
+    silent: bool = False,
+    parallel: bool = True,
+    map=None,
+    **kwargs,
+) -> _List[str]:
+    """
+    Save the passed molecules to an in-memory list of lines.
     This will write the molecule(s) in the format specified
     to memory, thereby avoiding writing any data to a text file
 
@@ -448,17 +473,31 @@ def save_to_string(molecules, format: str, log={}, map=None) -> _List[str]:
     from .base import create_map
     from .legacy.IO import MoleculeParser
 
+    if silent:
+        show_warnings = False
+
+    m = {"parallel": parallel, "show_warnings": show_warnings}
+
+    for key in kwargs.keys():
+        m[key] = kwargs[key]
+
+    map = create_map(map, m)
+
     molecules = _to_legacy_system(molecules)
 
-    return MoleculeParser.parse(molecules, format, map=create_map(map)).lines()
+    return MoleculeParser.parse(molecules, format, map=map).lines()
 
 
 def save(
     molecules,
     filename: str,
     format: _Union[str, _List[str]] = None,
-    log={},
+    show_warnings=True,
+    silent: bool = False,
+    directory: str = ".",
+    parallel: bool = True,
     map=None,
+    **kwargs,
 ) -> _List[str]:
     """Save the passed molecules to a file called 'filename'. If the format
     is not specified, then the format will be guessed from the
@@ -488,11 +527,19 @@ def save(
          based on the formats used to load the molecule originally.
          If it still isn't available, then PDB will be used.
 
-     log (dict):
-         Optional dictionary that you can pass in that will be populated
-         with any error messages or warnings from the parsers as they
-         attempt to write the molecular data. This can be helpful
-         in diagnosing why your file wasn't saved.
+      show_warnings (bool):
+         Whether or not to write out any warnings that occur during save
+
+      silent (bool):
+         Whether or not to silence all output during the save
+
+      directory (str):
+         If supplied, the directory in which to save the files.
+
+      parallel (bool):
+         Whether or not to save in parallel (using multiple cores).
+         You normally want this switched on, unless you are debugging
+         or want to restrict sire to a single core.
 
     Returns:
          list[str]:
@@ -507,19 +554,33 @@ def save(
 
          >>> save(mols, "ala", format=["top", "crd"])
          ["/path/to/ala.top", "/path/to/ala.crd"]
-
-         >>> log = {}
-         >>> save(mols, "broken.top", log=log)
-         Exception
-         (look at `log` to find in detail what went wrong)
     """
     from .legacy.IO import MoleculeParser
     from .base import create_map
 
-    map = create_map(map)
+    if silent:
+        show_warnings = False
+
+    m = {"parallel": parallel, "show_warnings": show_warnings}
+
+    for key in kwargs.keys():
+        m[key] = kwargs[key]
+
+    map = create_map(map, m)
 
     if hasattr(filename, "strpath"):
         filename = filename.strpath
+
+    if directory is not None:
+        if hasattr(directory, "strpath"):
+            directory = directory.strpath
+
+        import os
+
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        filename = os.path.join(directory, filename)
 
     if format is not None:
         if type(format) is str:
