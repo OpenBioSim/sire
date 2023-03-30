@@ -1,21 +1,14 @@
-name: Release Main
+name: Pull-Request
 
 # Note that push and pull-request builds are automatically
 # now skipped by GitHub if
 # [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
 # are in the commit message. We don't need to check for this ourselves.
 
-# Only allow this action to run on a manual run.
-# We should specify when run whether or not we want
-# to upload the packages at the end. We may not want to,
-# as we need to wait for a major or patch release
 on:
-  workflow_dispatch:
-    inputs:
-      upload_packages:
-        description: "Upload packages to anaconda (yes/no)?"
-        required: true
-        default: "no"
+  pull_request:
+    branches: [devel]
+
 jobs:
   build:
     name: build (${{ matrix.python-version }}, ${{ matrix.platform.name }})
@@ -29,6 +22,13 @@ jobs:
           - { name: "windows", os: "windows-latest", shell: "pwsh" }
           - { name: "linux", os: "ubuntu-latest", shell: "bash -l {0}" }
           - { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
+        exclude:
+          # Exclude all but the latest Python from all
+          # but Linux
+          - os: macos-latest
+            python-version: ["3.8", "3.9"]
+          - os: windows-latest
+            python-version: ["3.8", "3.9"]
     environment:
       name: sire-build
     defaults:
@@ -54,7 +54,7 @@ jobs:
           miniforge-variant: Mambaforge
           use-mamba: true
       #
-      - name: Clone the main branch (push to main)
+      - name: Clone the feature branch (pull request to devel)
         run: git clone -b ${{ github.head_ref }} --single-branch https://github.com/${{ env.REPO }}
       #
       - name: Setup Conda
@@ -68,11 +68,3 @@ jobs:
       #
       - name: Build Conda package using mamba build
         run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
-      #
-      - name: Upload Conda package
-        # maybe add logic here to tag the packages as 'main'?
-        run: python ${{ github.workspace }}/sire/actions/upload_package.py
-        env:
-          SRC_DIR: ${{ github.workspace }}/sire
-          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-        if: github.event.inputs.upload_packages == 'yes'
