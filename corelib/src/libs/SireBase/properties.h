@@ -43,9 +43,6 @@ namespace SireBase
 SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::Properties &);
 SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::Properties &);
 
-SIREBASE_EXPORT XMLStream &operator<<(XMLStream &, const SireBase::Properties &);
-SIREBASE_EXPORT XMLStream &operator>>(XMLStream &, SireBase::Properties &);
-
 SIREBASE_EXPORT QTextStream &operator<<(QTextStream &, const SireBase::Properties &);
 
 namespace SireBase
@@ -69,9 +66,6 @@ namespace SireBase
 
         friend SIREBASE_EXPORT QDataStream & ::operator<<(QDataStream &, const Properties &);
         friend SIREBASE_EXPORT QDataStream & ::operator>>(QDataStream &, Properties &);
-
-        friend SIREBASE_EXPORT XMLStream & ::operator<<(XMLStream &, const Properties &);
-        friend SIREBASE_EXPORT XMLStream & ::operator>>(XMLStream &, Properties &);
 
         friend class detail::PropertiesData; // so can call private constructor
 
