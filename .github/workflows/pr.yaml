@@ -25,13 +25,15 @@ jobs:
         exclude:
           # Exclude all but the latest Python from all
           # but Linux
-          - platform.os: macos-latest
+          - platform:
+              { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
             python-version: "3.8"
-          - platform.os: windows-latest
+          - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
             python-version: "3.8"
-          - platform.os: macos-latest
+          - platform:
+              { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
             python-version: "3.9"
-          - platform.os: windows-latest
+          - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
             python-version: "3.9"
     environment:
       name: sire-build
