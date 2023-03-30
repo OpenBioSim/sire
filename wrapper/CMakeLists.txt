@@ -412,6 +412,12 @@ set (Boost_USE_STATIC_RUNTIME OFF)
 set (Boost_DEBUG ON)  # this gives a nice print out in the cmake list to debug how boost is found and linked
 find_package( Boost 1.7 COMPONENTS python REQUIRED )
 
+# Need to define this with C++17 so that
+# boost::hash does not use std::unary_function
+# (which was deprecated in C++11 and removed in C++17)
+# See https://github.com/boostorg/container_hash/issues/22
+add_definitions( -DBOOST_NO_CXX98_FUNCTION_BASE )
+
 include_directories( ${PYTHON_INCLUDE_DIR} )
 
 message( STATUS "boost::python library ${Boost_LIBRARIES}" )

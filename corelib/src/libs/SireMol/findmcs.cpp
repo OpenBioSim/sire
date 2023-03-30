@@ -28,6 +28,8 @@
 #include <QDataStream>
 #include <QElapsedTimer>
 
+#include "sireglobal.h"
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
