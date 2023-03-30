@@ -92,13 +92,13 @@ void register_GromacsDihedral_class(){
         }
         { //::SireMM::GromacsDihedral::constructImproper
         
-            typedef ::QList< SireMM::GromacsDihedral > ( *constructImproper_function_type )( ::SireCAS::Expression const &,::SireCAS::Symbol const & );
+            typedef ::QList< SireMM::GromacsDihedral > ( *constructImproper_function_type )( ::SireCAS::Expression const &,::SireCAS::Symbol const &,::SireCAS::Symbol const & );
             constructImproper_function_type constructImproper_function_value( &::SireMM::GromacsDihedral::constructImproper );
             
             GromacsDihedral_exposer.def( 
                 "constructImproper"
                 , constructImproper_function_value
-                , ( bp::arg("dihedral"), bp::arg("phi") )
+                , ( bp::arg("dihedral"), bp::arg("phi"), bp::arg("theta") )
                 , bp::release_gil_policy()
                 , "Construct from the passed improper, using phi as the symbol for the phi value" );
         

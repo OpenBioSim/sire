@@ -51,6 +51,7 @@ void register_GromacsAngle_class(){
         GromacsAngle_exposer.def( bp::init< int, double, bp::optional< double, double, double, double, double > >(( bp::arg("function_type"), bp::arg("k0"), bp::arg("k1")=0, bp::arg("k2")=0, bp::arg("k3")=0, bp::arg("k4")=0, bp::arg("k5")=0 ), "Construct an angle of the specified function type with specified parameters\n(the order should be the same as in the Gromacs Manual, table 5.5)") );
         GromacsAngle_exposer.def( bp::init< int, QList< double > const & >(( bp::arg("function_type"), bp::arg("params") ), "Construct an angle of the specified function type by interpreting the parameter\ndata from the passed list of parameter values. These should be in the\nsame order as in the Gromacs Manual, table 5.5") );
         GromacsAngle_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Symbol const & >(( bp::arg("angle"), bp::arg("theta") ), "Construct from the passed angle, using theta as the symbol for the theta value") );
+        GromacsAngle_exposer.def( bp::init< SireCAS::Expression const &, SireCAS::Symbol const &, SireCAS::Expression const &, SireCAS::Symbol const & >(( bp::arg("angle"), bp::arg("theta"), bp::arg("ub"), bp::arg("r") ), "Construct from the passed angle plus urey-bradley term") );
         GromacsAngle_exposer.def( bp::init< SireMM::GromacsAngle const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::GromacsAngle::assertResolved
         

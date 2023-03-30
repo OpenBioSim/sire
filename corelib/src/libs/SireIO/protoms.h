@@ -221,7 +221,7 @@ namespace SireIO
         /** Return the name of the property that will contain the
             Urey-Bradley parameters
 
-            default == "Urey-Bradley"
+            default == "urey-bradley"
         */
         const PropertyName &ureyBradley() const
         {
