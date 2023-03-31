@@ -158,6 +158,30 @@ if _has_nglview:
         def _add_rep(self, view, typ, atoms):
             typ = typ.strip().lstrip().rstrip().lower()
 
+            parts = typ.split(":")
+
+            if len(parts) == 1:
+                colour = None
+                opacity = None
+            elif len(parts) == 2:
+                typ = parts[0]
+
+                try:
+                    opacity = float(parts[1])
+                    colour = None
+                except Exception:
+                    opacity = None
+                    colour = parts[1]
+            else:
+                typ = parts[0]
+
+                try:
+                    opacity = float(parts[1])
+                    colour = parts[2]
+                except Exception:
+                    opacity = float(parts[2])
+                    colour = parts[1]
+
             if typ not in self.supported_reps:
                 s = ", ".join(self.supported_reps)
 
@@ -171,7 +195,16 @@ if _has_nglview:
 
             atoms = list(atoms)
 
-            view.add_representation(typ, selection=atoms)
+            if colour is None and opacity is None:
+                view.add_representation(typ, selection=atoms)
+            elif opacity is None:
+                view.add_representation(typ, selection=atoms, color=colour)
+            elif colour is None:
+                view.add_representation(typ, selection=atoms, opacity=opacity)
+            else:
+                view.add_representation(
+                    typ, selection=atoms, color=colour, opacity=opacity
+                )
 
         def populate(self, view, rest=None):
             if rest is not None:
@@ -268,41 +301,61 @@ if _has_nglview:
         if ions is not None:
             reps.add("molecules with count(atoms) == 1", ions)
 
+        def _split(rep):
+            parts = rep.split(":")
+
+            if len(parts) == 1:
+                return rep, None
+            else:
+                return parts[0], ":".join(parts[1:])
+
         if ball_and_stick is not None:
-            reps.add(ball_and_stick, "ball_and_stick")
+            ball_and_stick, colours = _split(ball_and_stick)
+            reps.add(ball_and_stick, f"ball_and_stick{colours}")
 
         if cartoon is not None:
-            reps.add(cartoon, "cartoon")
+            cartoon, colours = _split(cartoon)
+            reps.add(cartoon, f"cartoon{colours}")
 
         if licorice is not None:
-            reps.add(licorice, "licorice")
+            licorice, colours = _split(licorice)
+            reps.add(licorice, f"licorice{colours}")
 
         if line is not None:
-            reps.add(line, "line")
+            line, colours = _split(line)
+            reps.add(line, f"line{colours}")
 
         if point is not None:
-            reps.add(point, "point")
+            point, colours = _split(point)
+            reps.add(point, f"point{colours}")
 
         if ribbon is not None:
-            reps.add(ribbon, "ribbon")
+            ribbon, colours = _split(ribbon)
+            reps.add(ribbon, f"ribbon{colours}")
 
         if rocket is not None:
-            reps.add(rocket, "rocket")
+            rocket, colours = _split(rocket)
+            reps.add(rocket, f"rocket{colours}")
 
         if rope is not None:
-            reps.add(rope, "rope")
+            rope, colours = _split(rope)
+            reps.add(rope, f"rope{colours}")
 
         if spacefill is not None:
-            reps.add(spacefill, "spacefill")
+            spacefill, colours = _split(spacefill)
+            reps.add(spacefill, f"spacefill{colours}")
 
         if surface is not None:
-            reps.add(surface, "surface")
+            surface, colours = _split(surface)
+            reps.add(surface, f"surface{colours}")
 
         if trace is not None:
-            reps.add(trace, "trace")
+            trace, colours = _split(trace)
+            reps.add(trace, f"trace{colours}")
 
         if tube is not None:
-            reps.add(tube, "tube")
+            tube, colours = _split(tube)
+            reps.add(tube, f"tube{colours}")
 
         if all is not None:
             reps.add("all", all)
