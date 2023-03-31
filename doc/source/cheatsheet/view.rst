@@ -161,6 +161,9 @@ view by passing ``orthographic=False``, e.g.
 .. image:: images/view_09.jpg
    :alt: 3D perspective view of aladip
 
+Choosing the 3D representation
+------------------------------
+
 You can control the representation used for the view via the additional
 arguments of the function.
 
@@ -252,13 +255,52 @@ to the rest of the water molecules in the box.
    based views (e.g. ``surface="molidx 0"``) with search based views
    (e.g. ``rest="line"``).
 
-Currently there isn't an ability to control the colour or opacity
-(transparency) of the different views. This is something that we would
-like to add. Please get in touch if you have a good idea of how this
-could be expressed in the API, or if you would like to have a go at
-implementing this functionality.
+Choosing colors and opacities
+-----------------------------
 
-Also, we don't yet properly expose the
+You can set the color and opacity used for a particular representation
+by passing these as additional terms to the representation or search
+term, separated by colons. For example, to set the color of a
+representation to ``blue`` we could pass this as an addition ``:blue``
+to the representation or search term argument.
+
+>>> mol = mols[0]
+>>> mol.view(all="licorice:blue")
+
+.. image:: images/view_14.jpg
+   :alt: Blue licorice view of aladip
+
+Here all of the atoms are rendered in blue licorice. Or...
+
+>>> mol.view(all="licorice:blue", ball_and_stick="element C:red")
+
+.. image:: images/view_15.jpg
+   :alt: Blue licorice inside red ball and stick
+
+You can use any color name supported by NGLView. These include
+colors (e.g. ``red``, ``blue`` etc) and coloring schemes, e.g.
+
+* Options!
+
+You also specify the opacity (transparency) of the representation
+by adding a number between 0 (fully transparent) and 1 (fully opaque).
+You can use any order of color and opacity, e.g.
+
+>>> mol.view(all=["licorice", "spacefill:0.8", "surface:red:0.2"])
+
+.. image:: images/view_16.jpg
+   :alt: licorice in transparent spacefill in transparent red surface
+
+>>> mol.view(all=["ball_and_stick", "surface:0.9:electrostatic"])
+
+.. image:: images/view_17.jpg
+   :alt: Ball and stick inside transparent electrostatic surface
+
+
+Closer integration with NGLView
+-------------------------------
+
+We don't yet properly expose the
 `NGLView stage parameters <https://github.com/nglviewer/nglview/blob/master/README.md#properties>`__.
 Currently you can pass in a dictionary of parameters via the
 ``stage_parameters`` argument, which are straight passed to the

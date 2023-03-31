@@ -307,7 +307,7 @@ if _has_nglview:
             if len(parts) == 1:
                 return rep, None
             else:
-                return parts[0], ":".join(parts[1:])
+                return parts[0], ":" + ":".join(parts[1:])
 
         if ball_and_stick is not None:
             ball_and_stick, colours = _split(ball_and_stick)
