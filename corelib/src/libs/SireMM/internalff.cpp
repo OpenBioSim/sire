@@ -85,7 +85,7 @@ PropertyName BondParameterName::bond_param("bond", Property::null());
 PropertyName AngleParameterName::angle_param("angle", Property::null());
 PropertyName DihedralParameterName::dihedral_param("dihedral", Property::null());
 PropertyName ImproperParameterName::improper_param("improper", Property::null());
-PropertyName UreyBradleyParameterName::ub_param("Urey-Bradley", Property::null());
+PropertyName UreyBradleyParameterName::ub_param("urey-bradley", Property::null());
 PropertyName StretchStretchParameterName::ss_param("stretch-stretch", Property::null());
 PropertyName StretchBendParameterName::sb_param("stretch-bend", Property::null());
 PropertyName BendBendParameterName::bb_param("bend-bend", Property::null());

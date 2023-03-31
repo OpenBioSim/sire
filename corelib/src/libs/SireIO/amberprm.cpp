@@ -313,8 +313,7 @@ void AmberPrm::rebuildBADIndicies()
 
     // now index the connectivity - find the start index and number of bonds/angles/dihedrals
     // for each molecule
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_invoke(
             [&]()
@@ -438,8 +437,7 @@ void AmberPrm::rebuildLJParameters()
         }
     };
 
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, ntypes), [&](tbb::blocked_range<int> r)
                           {
@@ -720,8 +718,7 @@ void AmberPrm::rebuildAfterReload()
     // first need to create the map of all of the atom numbers in each molecule
     this->rebuildMolNumToAtomNums();
 
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_invoke(
             // now we have to build the LJ parameters (Amber stores them weirdly!)
@@ -937,8 +934,7 @@ double AmberPrm::processAllFlags()
         }
     };
 
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, flags.count()), [&](tbb::blocked_range<int> r)
                           {
@@ -3292,8 +3288,7 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
     // generate the AmberParams object for each molecule in the system
     QVector<AmberParams> params(molnums.count());
 
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
                           {
@@ -3327,8 +3322,8 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
     int num_dummies = system.search("element Xx").count();
 
     // now convert these into text lines that can be written as the file
-    // QStringList lines = ::toLines(params, space, this->usesParallel(), &errors);
-    QStringList lines = ::toLines(params, space, num_dummies, false, &errors);
+    QStringList lines = ::toLines(params, space, num_dummies,
+                                  this->usesParallel(), &errors);
 
     if (not errors.isEmpty())
     {
@@ -3584,8 +3579,7 @@ QVector<int> AmberPrm::getAtomIndexToMolIndex() const
 
     const int nmols = molnum_to_atomnums.count() - 1; // 1 indexed
 
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
                           {
@@ -4115,8 +4109,7 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
     AmberParams params(molinfo);
 
     // assign all of the parameters
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         AmberParams atoms, bonds, angles, dihedrals, excluded;
 
@@ -4331,8 +4324,7 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     QVector<Molecule> mols(nmols);
     Molecule *mols_array = mols.data();
 
-    // if (usesParallel())
-    if (false)
+    if (usesParallel())
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
                           {

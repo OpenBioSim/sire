@@ -802,6 +802,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             FourAtomFunctions funcs;
 
             const auto phi = InternalPotential::symbols().dihedral().phi();
+            const auto theta = InternalPotential::symbols().improper().theta();
 
             try
             {
@@ -871,7 +872,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
                     AtomIdx atom3 = molinfo.atomIdx(improper.atom3());
 
                     // get all of the dihedral terms (could be a lot)
-                    auto parts = GromacsDihedral::constructImproper(improper.function(), phi);
+                    auto parts = GromacsDihedral::constructImproper(improper.function(), phi, theta);
 
                     DihedralID impid(atom0, atom1, atom2, atom3);
 
@@ -1200,15 +1201,27 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
         auto extract_angles = [&]()
         {
             bool has_funcs(false);
+            bool has_ubfuncs(false);
 
             ThreeAtomFunctions funcs;
+            TwoAtomFunctions ubfuncs;
 
             const auto theta = InternalPotential::symbols().angle().theta();
+            const auto r = InternalPotential::symbols().ureyBradley().r();
 
             try
             {
                 funcs = mol.property(map["angle"]).asA<ThreeAtomFunctions>();
                 has_funcs = true;
+            }
+            catch (...)
+            {
+            }
+
+            try
+            {
+                ubfuncs = mol.property(map["urey-bradley"]).asA<TwoAtomFunctions>();
+                has_ubfuncs = true;
             }
             catch (...)
             {
@@ -1225,7 +1238,17 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
                     if (atom0 > atom2)
                         qSwap(atom0, atom2);
 
-                    angs0.insert(AngleID(atom0, atom1, atom2), GromacsAngle(angle.function(), theta));
+                    if (has_ubfuncs)
+                    {
+                        angs0.insert(AngleID(atom0, atom1, atom2),
+                                     GromacsAngle(angle.function(), theta,
+                                                  ubfuncs.potential(atom0, atom2), r));
+                    }
+                    else
+                    {
+                        angs0.insert(AngleID(atom0, atom1, atom2),
+                                     GromacsAngle(angle.function(), theta));
+                    }
                 }
             }
         };
@@ -1238,6 +1261,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             FourAtomFunctions funcs;
 
             const auto phi = InternalPotential::symbols().dihedral().phi();
+            const auto theta = InternalPotential::symbols().improper().theta();
 
             try
             {
@@ -1290,6 +1314,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
 
             if (has_imps)
             {
+
                 for (const auto &improper : imps.potentials())
                 {
                     AtomIdx atom0 = molinfo.atomIdx(improper.atom0());
@@ -1298,7 +1323,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
                     AtomIdx atom3 = molinfo.atomIdx(improper.atom3());
 
                     // get all of the dihedral terms (could be a lot)
-                    auto parts = GromacsDihedral::constructImproper(improper.function(), phi);
+                    auto parts = GromacsDihedral::constructImproper(improper.function(), phi, theta);
 
                     DihedralID impid(atom0, atom1, atom2, atom3);
 
@@ -4860,6 +4885,14 @@ QString GroTop::searchForDihType(const QString &atm0, const QString &atm1, const
         return key;
     }
 
+    // look for atm0-*-*-atm3 or atm3-*-*-atm0
+    key = get_dihedral_id(atm0, wild, wild, atm3, func_type);
+
+    if (dih_potentials.contains(key))
+    {
+        return key;
+    }
+
     // finally look for *-*-*-*
     key = get_dihedral_id(wild, wild, wild, wild, func_type);
 
@@ -7363,6 +7396,7 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
 {
     try
     {
+        const auto R = InternalPotential::symbols().ureyBradley().r();
         const auto THETA = InternalPotential::symbols().angle().theta();
 
         QStringList errors;
@@ -7370,7 +7404,12 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
         // add in all of the angle functions
         ThreeAtomFunctions angfuncs(molinfo);
 
+        // also any additional Urey-Bradley functions
+        TwoAtomFunctions ubfuncs(molinfo);
+
         const auto angles = moltype.angles();
+
+        bool has_ub = false;
 
         for (auto it = angles.constBegin(); it != angles.constEnd(); ++it)
         {
@@ -7416,6 +7455,34 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
                 potential = new_potential;
             }
 
+            if (potential.isBondAngleCrossTerm())
+            {
+                // extract and add the Urey Bradley term between the 0-2 atoms
+                auto bondpot = potential.toBondTerm();
+
+                auto exp = bondpot.toExpression(R);
+
+                if (not exp.isZero())
+                {
+                    has_ub = true;
+
+                    auto oldfunc = ubfuncs.potential(idx0, idx2);
+
+                    if (not oldfunc.isZero())
+                    {
+                        ubfuncs.set(idx0, idx2, exp + oldfunc);
+                    }
+                    else
+                    {
+                        ubfuncs.set(idx0, idx2, exp);
+                    }
+                }
+
+                // we will only add the angle part here - we will
+                // need to add the bond part somewhere else
+                potential = potential.toAngleTerm();
+            }
+
             // now create the angle expression
             auto exp = potential.toExpression(THETA);
 
@@ -7437,6 +7504,9 @@ GroTop::PropsAndErrors GroTop::getAngleProperties(const MoleculeInfo &molinfo, c
 
         Properties props;
         props.setProperty("angle", angfuncs);
+
+        if (has_ub)
+            props.setProperty("urey-bradley", ubfuncs);
 
         return std::make_tuple(props, errors);
     }
@@ -7465,13 +7535,17 @@ GroTop::PropsAndErrors GroTop::getDihedralProperties(const MoleculeInfo &molinfo
     try
     {
         const auto PHI = InternalPotential::symbols().dihedral().phi();
+        const auto THETA = InternalPotential::symbols().improper().theta();
 
         QStringList errors;
 
         // add in all of the dihedral and improper functions
         FourAtomFunctions dihfuncs(molinfo);
+        FourAtomFunctions impfuncs(molinfo);
 
         const auto dihedrals = moltype.dihedrals();
+
+        bool has_any_impropers = false;
 
         for (auto it = dihedrals.constBegin(); it != dihedrals.constEnd(); ++it)
         {
@@ -7490,6 +7564,7 @@ GroTop::PropsAndErrors GroTop::getDihedralProperties(const MoleculeInfo &molinfo
             }
 
             Expression exp;
+            bool is_improper = false;
 
             // do we need to resolve this dihedral parameter (look up the parameters)?
             if (not potential.isResolved())
@@ -7527,34 +7602,72 @@ GroTop::PropsAndErrors GroTop::getDihedralProperties(const MoleculeInfo &molinfo
                 {
                     if (r.isResolved())
                     {
-                        exp += r.toExpression(PHI);
+                        if (r.isImproperAngleTerm())
+                        {
+                            is_improper = true;
+                            exp += r.toImproperExpression(THETA);
+                        }
+                        else
+                        {
+                            exp += r.toExpression(PHI);
+                        }
                     }
                 }
             }
             else
             {
                 // we have a fully-resolved dihedral potential
-                exp = potential.toExpression(PHI);
+                if (potential.isImproperAngleTerm())
+                {
+                    exp = potential.toImproperExpression(THETA);
+                    is_improper = true;
+                }
+                else
+                {
+                    exp = potential.toExpression(PHI);
+                }
             }
 
             if (not exp.isZero())
             {
-                // add this expression onto any existing expression
-                auto oldfunc = dihfuncs.potential(idx0, idx1, idx2, idx3);
-
-                if (not oldfunc.isZero())
+                if (is_improper)
                 {
-                    dihfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
+                    has_any_impropers = true;
+
+                    // add this expression onto any existing expression
+                    auto oldfunc = impfuncs.potential(idx0, idx1, idx2, idx3);
+
+                    if (not oldfunc.isZero())
+                    {
+                        impfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
+                    }
+                    else
+                    {
+                        impfuncs.set(idx0, idx1, idx2, idx3, exp);
+                    }
                 }
                 else
                 {
-                    dihfuncs.set(idx0, idx1, idx2, idx3, exp);
+                    // add this expression onto any existing expression
+                    auto oldfunc = dihfuncs.potential(idx0, idx1, idx2, idx3);
+
+                    if (not oldfunc.isZero())
+                    {
+                        dihfuncs.set(idx0, idx1, idx2, idx3, exp + oldfunc);
+                    }
+                    else
+                    {
+                        dihfuncs.set(idx0, idx1, idx2, idx3, exp);
+                    }
                 }
             }
         }
 
         Properties props;
         props.setProperty("dihedral", dihfuncs);
+
+        if (has_any_impropers)
+            props.setProperty("improper", impfuncs);
 
         return std::make_tuple(props, errors);
     }
