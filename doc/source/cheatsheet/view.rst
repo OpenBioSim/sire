@@ -277,6 +277,9 @@ Here all of the atoms are rendered in blue licorice. Or...
 .. image:: images/view_15.jpg
    :alt: Blue licorice inside red ball and stick
 
+all of the atoms are rendered in blue licorice, but the carbon atoms are
+represented as red balls and sticks.
+
 You can use any color name supported by NGLView. These include
 colors (e.g. ``red``, ``blue`` etc) and coloring schemes, e.g.
 
@@ -291,11 +294,20 @@ You can use any order of color and opacity, e.g.
 .. image:: images/view_16.jpg
    :alt: licorice in transparent spacefill in transparent red surface
 
+has rendered the molecule using three representations; a licorice in
+default colors (colored by element), spacefill in default colors,
+but with opacity 0.8, and a red-colored surface with opacity 0.2.
+
+Or...
+
 >>> mol.view(all=["ball_and_stick", "surface:0.9:electrostatic"])
 
 .. image:: images/view_17.jpg
    :alt: Ball and stick inside transparent electrostatic surface
 
+has rendered the molecule with two representations; a ball and stick with
+default colors and a surface colored using electrostatic potential, with
+opacity 0.9.
 
 Closer integration with NGLView
 -------------------------------
