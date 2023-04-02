@@ -120,9 +120,13 @@ if _has_nglview:
             self.reps = {}
             self.supported_reps = [
                 "ball_and_stick",
+                "base",
                 "cartoon",
+                "distance",
+                "hyperball",
                 "licorice",
                 "line",
+                "none",
                 "point",
                 "ribbon",
                 "rocket",
@@ -135,9 +139,20 @@ if _has_nglview:
 
             self.rest = set(range(0, len(self.atoms)))
 
+        def get_selection_string(self, selection):
+            try:
+                s = self.atoms.find(self.view[selection].atoms())
+                s = [str(x) for x in s]
+                return "@" + ",".join(s)
+            except Exception as e:
+                return "*"
+
         def add(self, selection, rep):
             if type(selection) is not list:
                 selection = [selection]
+
+            if rep is None:
+                rep = "none"
 
             if type(rep) is not list:
                 rep = [rep]
@@ -157,6 +172,9 @@ if _has_nglview:
 
         def _add_rep(self, view, typ, atoms):
             typ = typ.strip().lstrip().rstrip().lower()
+
+            if len(typ) == 0:
+                typ = "none"
 
             parts = typ.split(":")
 
@@ -190,6 +208,10 @@ if _has_nglview:
                     f"Available representations are: [ {s} ]."
                 )
 
+            if typ == "none":
+                # don't display anything
+                return
+
             if typ == "ball_and_stick":
                 typ = "ball+stick"
 
@@ -215,25 +237,29 @@ if _has_nglview:
 
     def view(
         obj,
+        default: bool = True,
         no_default: bool = False,
         orthographic: bool = True,
-        protein: str = None,
-        water: str = None,
-        ions: str = None,
-        rest: str = None,
-        all: str = None,
-        ball_and_stick: str = None,
-        cartoon: str = None,
-        licorice: str = None,
-        line: str = None,
-        point: str = None,
-        ribbon: str = None,
-        rocket: str = None,
-        rope: str = None,
-        spacefill: str = None,
-        surface: str = None,
-        trace: str = None,
-        tube: str = None,
+        protein: str = "",
+        water: str = "",
+        ions: str = "",
+        rest: str = "",
+        all: str = "",
+        ball_and_stick: str = "",
+        base: str = "",
+        cartoon: str = "",
+        hyperball: str = "",
+        licorice: str = "",
+        line: str = "",
+        point: str = "",
+        ribbon: str = "",
+        rocket: str = "",
+        rope: str = "",
+        spacefill: str = "",
+        surface: str = "",
+        trace: str = "",
+        tube: str = "",
+        center: str = None,
         stage_parameters: str = None,
         map=None,
     ):
@@ -270,36 +296,64 @@ if _has_nglview:
 
         reps = _Representations(obj)
 
-        if all is not None:
+        if all is None or all is False or default is None or default is False:
+            # User has turned off all representations
+            no_default = True
+            default = False
+
+        elif len(all) > 0:
             # don't have any default representations if the user
             # has asked that all atoms have a particular
             # representation
             no_default = True
+            default = False
 
-        if not no_default:
+        try:
+            # Allow the user to use `default` to mean `rest`
+            if len(default) != 0:
+                rest = default
+                default = True
+        except Exception:
+            pass
+
+        if default and (not no_default):
             # Add the defaults here so that the user can
             # override them, and also so that we can
             # disable defaults if needed
-            if protein is None:
-                protein = "cartoon"
+            if (protein is not None) and (protein is not False):
+                if len(protein) == 0:
+                    protein = "cartoon:sstruc"
 
-            if water is None:
-                water = "line"
+            if (water is not None) and (water is not False):
+                if len(water) == 0:
+                    water = "line:0.5"
 
-            if ions is None:
-                ions = "spacefill"
+            if (ions is not None) and (ions is not False):
+                if len(ions) == 0:
+                    # use this, as the spheres are smaller than spacefill
+                    ions = "ball_and_stick"
 
-            if rest is None:
-                rest = "licorice"
+            if (rest is not None) and (rest is not False):
+                if len(rest) == 0:
+                    rest = "hyperball"
 
-        if protein is not None:
-            reps.add("protein", protein)
+        if (protein is not None) and (protein is not False):
+            if len(protein) > 0:
+                reps.add("protein", protein)
+        else:
+            reps.add("protein", None)
 
-        if water is not None:
-            reps.add("water", water)
+        if (water is not None) and (water is not False):
+            if len(water) > 0:
+                reps.add("water", water)
+        else:
+            reps.add("water", None)
 
-        if ions is not None:
-            reps.add("molecules with count(atoms) == 1", ions)
+        if (ions is not None) and (ions is not False):
+            if len(ions) > 0:
+                reps.add("molecules with count(atoms) == 1", ions)
+        else:
+            reps.add("ions", None)
 
         def _split(rep):
             parts = rep.split(":")
@@ -309,9 +363,36 @@ if _has_nglview:
             else:
                 return parts[0], ":" + ":".join(parts[1:])
 
+        def _check(rep):
+            if (rep is not None) and (rep is not False):
+                if len(rep) > 0:
+                    return rep
+
+            return None
+
+        ball_and_stick = _check(ball_and_stick)
+        base = _check(base)
+        cartoon = _check(cartoon)
+        licorice = _check(licorice)
+        hyperball = _check(hyperball)
+        line = _check(line)
+        point = _check(point)
+        ribbon = _check(ribbon)
+        rocket = _check(rocket)
+        rope = _check(rope)
+        spacefill = _check(spacefill)
+        surface = _check(surface)
+        trace = _check(trace)
+        tube = _check(tube)
+        all = _check(all)
+
         if ball_and_stick is not None:
             ball_and_stick, colours = _split(ball_and_stick)
             reps.add(ball_and_stick, f"ball_and_stick{colours}")
+
+        if base is not None:
+            base, colours = _split(base)
+            reps.add(base, f"base{colours}")
 
         if cartoon is not None:
             cartoon, colours = _split(cartoon)
@@ -320,6 +401,10 @@ if _has_nglview:
         if licorice is not None:
             licorice, colours = _split(licorice)
             reps.add(licorice, f"licorice{colours}")
+
+        if hyperball is not None:
+            hyperball, colours = _split(hyperball)
+            reps.add(hyperball, f"hyperball{colours}")
 
         if line is not None:
             line, colours = _split(line)
@@ -372,9 +457,15 @@ if _has_nglview:
         else:
             view.stage.set_parameters(**stage_parameters)
 
+        if (rest is None) or (rest is False):
+            rest = None
+
         reps.populate(view, rest=rest)
 
-        view.center()
+        if center is not None:
+            view.center(selection=reps.get_selection_string(center))
+        else:
+            view.center()
 
         return view
 

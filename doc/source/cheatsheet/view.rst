@@ -175,10 +175,14 @@ arguments of the function.
 You can also force all molecules to use the same representation by
 setting the ``all`` option.
 
-There are several representations that you can use. These are:
+NGLView provides
+`several representations that you can use <https://nglviewer.org/ngl/api/manual/usage/molecular-representations.html>`__.
+These are:
 
 * ``ball_and_stick`` - a ball and stick view
+* ``base`` - simplified DNA/RNA base view
 * ``cartoon`` - traditional "cartoon" view of a protein
+* ``hyperball`` - smoothly-connected ball and stick view
 * ``licorice`` - prettier line view
 * ``line`` - simple line view
 * ``point`` - simple point for each atom
@@ -280,10 +284,16 @@ Here all of the atoms are rendered in blue licorice. Or...
 all of the atoms are rendered in blue licorice, but the carbon atoms are
 represented as red balls and sticks.
 
-You can use any color name supported by NGLView. These include
-colors (e.g. ``red``, ``blue`` etc) and coloring schemes, e.g.
-
-* Options!
+You can use any color name supported by NGLView. These include named
+colors (e.g. ``red``, ``green``, ``blue``, ``yellow``, including any
+`CSS named color <https://www.w3schools.com/cssref/css_colors.php>`__ supported
+by your browser, e.g. ``orchid``, ``sienna``, ``wheat`` etc.), colors
+specified as a red-green-blue hex values (e.g. ``#FF0000``, ``#00FF00``,
+``#0000FF`` etc.), colors specified as red-green-blue triples
+(e.g. ``rgb(255,0,0)``, ``rgb(0,255,0)``, ``rgb(0,0,255)`` etc.) or any of the
+`coloring schemes supported by NGLView <https://nglviewer.org/ngl/api/manual/usage/coloring.html>`__
+(e.g. ``atomindex``, ``bfactor``, ``electrostatic``, ``element``,
+``hydrophobicity``, ``random`` or ``sstruc``).
 
 You also specify the opacity (transparency) of the representation
 by adding a number between 0 (fully transparent) and 1 (fully opaque).
