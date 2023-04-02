@@ -170,10 +170,14 @@ arguments of the function.
 * ``protein`` - set the representation used for protein molecules
 * ``water`` - set the representation used for water molecules
 * ``ion`` - set the representation used for single-atom ions
-* ``rest`` - set the representation used for all other molecules (e.g. ligands)
+* ``default`` or ``rest`` - set the representation used for all other molecules (e.g. ligands)
 
 You can also force all molecules to use the same representation by
 setting the ``all`` option.
+
+Setting any of the above to ``None``, ``False`` or the string ``none`` will
+switch off that view. Setting ``default`` to ``None`` or ``False``, or
+setting ``no_default`` to ``True`` will disable all default views.
 
 NGLView provides
 `several representations that you can use <https://nglviewer.org/ngl/api/manual/usage/molecular-representations.html>`__.
@@ -200,14 +204,26 @@ all atoms using a ``spacefill`` representation etc.
 
 The following default representations will be used:
 
-* ``protein`` - ``cartoon``
-* ``water`` - ``line``
+* ``protein`` - ``cartoon:sstruc``
+* ``water`` - ``line:0.5``
 * ``ion`` - ``spacefill``
-* ``rest`` - ``licorice``
+* ``default`` - ``hyperball``
+
+.. note::
+
+   The ``sstruc`` and ``0.5`` values refer to colors, which are described
+   in the next section.
+
+.. note::
+
+   We use ``default`` to refer to any other molecule, e.g. typically
+   ligands.
 
 You can switch off the default representations by passing
 ``no_default=True``, e.g. ``mols.view(no_default=True, protein="surface")``
-would show only the surface view of a protein.
+would show only the surface view of a protein. You can also switch off
+all default representations by passing ``default=False``, ``default=None``,
+``all=False`` or ``all=None``.
 
 You can also pass multiple representations per view by passing in a
 list of representations, e.g.
@@ -318,6 +334,22 @@ Or...
 has rendered the molecule with two representations; a ball and stick with
 default colors and a surface colored using electrostatic potential, with
 opacity 0.9.
+
+Centering the view
+------------------
+
+You can center the view on any selection using the ``center`` option, e.g.
+
+>>> mols.view(center="molidx 0")
+
+would center the view on the first molecule, or,
+
+>>> mols.view(center="not (water or protein")
+
+would center the view on all none (water, protein) molecules, i.e.
+likely any ligands or ions. Remember that you can create your own
+:doc:`custom selections <search>` to set search terms that refer to
+ligands or ions more specifically.
 
 Closer integration with NGLView
 -------------------------------

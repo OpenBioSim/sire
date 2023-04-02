@@ -35,6 +35,8 @@ e.g.
     ``mamba install nglview`` at the command line.
 
 This uses `nglviewer <https://nglviewer.org>`__ to view the molecule.
+There are lots of options to the :func:`~sire.mol.SelectorMol.view`
+function, which are :doc:`described in full here <../../cheatsheet/view>`.
 
 Loading from Alphafold using a Uniprot code
 ===========================================

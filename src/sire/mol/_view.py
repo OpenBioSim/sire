@@ -145,6 +145,11 @@ if _has_nglview:
                 s = [str(x) for x in s]
                 return "@" + ",".join(s)
             except Exception as e:
+                from ..utils import Console
+
+                Console.warning(
+                    f"Unrecognised selection '{selection}'\n" f"Error is {e}"
+                )
                 return "*"
 
         def add(self, selection, rep):
@@ -230,7 +235,11 @@ if _has_nglview:
 
         def populate(self, view, rest=None):
             if rest is not None:
-                self._add_rep(view, rest, self.rest)
+                if type(rest) is not list:
+                    rest = [rest]
+
+                for r in rest:
+                    self._add_rep(view, r, self.rest)
 
             for key, value in self.reps.items():
                 self._add_rep(view, key, value)
@@ -270,19 +279,49 @@ if _has_nglview:
         in a variable so that it's NGLViewer member functions
         can be called to edit the viewer before display.
 
-        See the NGLView documentation for more information
-        on how to configure the viewer.
+        Full instructions on how to use this view are in
+        the cheatsheet (https://sire.openbiosim.org/cheatsheet/view)
 
-        https://nglviewer.org/#nglview
+        center:
+          Pass in a selection string to select the atoms to center
+          in the view. By default no atoms are centered
 
-         stage_parameters: dict
-             An optional dictionary that will be passed directly
-             to the NGLView object to set the stage parameters.
+        orthographic:
+          Set to False to use a perspective view, or accept the default
+          (True) for an orthographic view
 
-         map: dict or sire.base.PropertyMap
-             An optional property map that can be used to control
-             which properties are used to get the molecular data
-             to be viewed.
+        default:
+          The default representation / color for the view. If this
+          is set to False or None or "none" then default views
+          are disabled.
+
+        no_default:
+          Set to False to disable all default views
+
+        protein, water, ions:
+          Set the default views for protein, water and ion molecules.
+          Set to False, None or "none" to disable these default views.
+
+        rest:
+          Synonym for "default", but does not disable all default views
+          if set to None, False or "none"
+
+        all:
+          Set the representation for all atoms. Set to None, False or "none"
+          to disable all views.
+
+        ball_and_stick, base, cartoon etc.
+          Set the selection strings for atoms that should be represented
+          with these views.
+
+        stage_parameters: dict
+          An optional dictionary that will be passed directly
+          to the NGLView object to set the stage parameters.
+
+        map: dict or sire.base.PropertyMap
+          An optional property map that can be used to control
+          which properties are used to get the molecular data
+          to be viewed.
         """
         struc_traj = _SireStructureTrajectory(obj, map=map)
         view = _nglview.NGLWidget(struc_traj)
@@ -359,7 +398,7 @@ if _has_nglview:
             parts = rep.split(":")
 
             if len(parts) == 1:
-                return rep, None
+                return rep, ""
             else:
                 return parts[0], ":" + ":".join(parts[1:])
 
