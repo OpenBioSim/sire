@@ -32,6 +32,8 @@
 
 #include "core.h"
 
+#include "SireMaths/align.h"
+
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
 
@@ -55,6 +57,13 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::SelectorM<T> &);
 
 namespace SireMol
 {
+    namespace detail
+    {
+        SireMaths::Transform _getAlignment(const SelectorM<Atom> &atoms0,
+                                           const SelectorM<Atom> &atoms1,
+                                           const SireBase::PropertyMap &map0,
+                                           const SireBase::PropertyMap &map1);
+    }
 
     /** This is an analogue of the Selector<T> class that is designed
         to hold views from multiple molecules
@@ -158,6 +167,13 @@ namespace SireMol
         SelectorM<T> intersection(const T &view) const;
 
         SelectorM<T> invert() const;
+
+        SireMaths::Transform getAlignment(const SelectorM<T> &other,
+                                          const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
+        SireMaths::Transform getAlignment(const SelectorM<T> &other,
+                                          const SireBase::PropertyMap &map0,
+                                          const SireBase::PropertyMap &map1) const;
 
         bool intersects(const SelectorM<T> &other) const;
         bool intersects(const Selector<T> &view) const;
@@ -1234,6 +1250,23 @@ namespace SireMol
     QList<qint64> Selector<T>::find(const SelectorM<T> &views) const
     {
         return SelectorM<T>(*this).find(views);
+    }
+
+    template <class T>
+    SireMaths::Transform SelectorM<T>::getAlignment(const SelectorM<T> &other,
+                                                    const SireBase::PropertyMap &map0,
+                                                    const SireBase::PropertyMap &map1) const
+    {
+        return SireMol::detail::_getAlignment(this->atoms(),
+                                              other.atoms(),
+                                              map0, map1);
+    }
+
+    template <class T>
+    SireMaths::Transform SelectorM<T>::getAlignment(const SelectorM<T> &other,
+                                                    const SireBase::PropertyMap &map) const
+    {
+        return this->getAlignment(other, map, map);
     }
 
     template <class T>

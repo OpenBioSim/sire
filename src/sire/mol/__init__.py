@@ -35,6 +35,7 @@ __all__ = [
     "SelectorMol",
     "Stereochemistry",
     "TrajectoryIterator",
+    "get_alignment",
 ]
 
 
@@ -42,6 +43,12 @@ from ..legacy import Mol as _Mol
 from .. import use_new_api as _use_new_api
 
 from ..legacy import Base as _Base
+
+try:
+    get_alignment = _Mol.getAlignment
+except Exception:
+    get_alignment = _Mol.get_alignment
+
 
 from ..legacy.Mol import (
     AtomName,
@@ -1347,10 +1354,10 @@ Selector_Chain_.cursor = _cursors
 Selector_Segment_.cursor = _cursors
 
 
-def _trajectory(obj, map=None):
+def _trajectory(obj, align=None, map=None):
     from ._trajectory import TrajectoryIterator
 
-    return TrajectoryIterator(obj, map=map)
+    return TrajectoryIterator(obj, align=align, map=map)
 
 
 MoleculeView.trajectory = _trajectory
