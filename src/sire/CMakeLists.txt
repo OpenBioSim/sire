@@ -16,6 +16,8 @@ set (S_VERSION_MAJOR ${CMAKE_MATCH_1})
 set (S_VERSION_MINOR ${CMAKE_MATCH_2})
 set (S_VERSION_PATCH ${CMAKE_MATCH_3})
 
+set (SIRE_VERSION "${S_VERSION_MAJOR}.${S_VERSION_MINOR}.${S_VERSION_PATCH}")
+
 message( STATUS "Building Sire Python Module ${SIRE_VERSION}")
 
 # use loose loop syntax in CMakeLists files
