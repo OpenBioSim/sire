@@ -12,13 +12,27 @@ cmake_policy(VERSION 3.3)
 # Read the version number (so we can set it once in one place)
 file (STRINGS "../version.txt" SIRE_VERSION)
 
+string(FIND ${SIRE_VERSION} ".dev" SIRE_DEV_BUILD)
+
 string(REGEX MATCH "([0-9]*).([0-9]*).([0-9]*)" _ ${SIRE_VERSION})
 
 set (S_VERSION_MAJOR ${CMAKE_MATCH_1})
 set (S_VERSION_MINOR ${CMAKE_MATCH_2})
 set (S_VERSION_PATCH ${CMAKE_MATCH_3})
 
+set (SIRE_VERSION "${S_VERSION_MAJOR}.${S_VERSION_MINOR}.${S_VERSION_PATCH}")
+
 message( STATUS "Building Sire Wrappers ${SIRE_VERSION}")
+
+if ( ${SIRE_DEV_BUILD} STREQUAL "-1" )
+  set(SIRE_DEV_BUILD FALSE)
+  set(SIRE_VERSION_DEV "")
+  message(STATUS "This is a production build.")
+else()
+  set(SIRE_DEV_BUILD TRUE)
+  set(SIRE_VERSION_DEV ".dev")
+  message(STATUS "This is a development build.")
+endif()
 
 ############
 ############ SETTING INITIAL SIRE VARIABLES

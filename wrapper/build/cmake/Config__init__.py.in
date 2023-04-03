@@ -20,4 +20,4 @@ sire_repository_branch = _Base.getRepositoryBranch()
 sire_python_repository_url = r"@SVN_REPOSITORY_URL@"
 sire_python_repository_version = r"@SVN_VERSION_NUMBER@"
 
-__version__ = r"@SIRE_VERSION_MAJOR@.@SIRE_VERSION_MINOR@.@SIRE_VERSION_PATCH@"
+__version__ = r"@SIRE_VERSION_MAJOR@.@SIRE_VERSION_MINOR@.@SIRE_VERSION_PATCH@@SIRE_VERSION_DEV@"
