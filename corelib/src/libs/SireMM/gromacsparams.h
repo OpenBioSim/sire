@@ -235,6 +235,8 @@ namespace SireMM
         GromacsAngle(int function_type, const QList<double> &params);
 
         GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta);
+        GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta,
+                     const SireCAS::Expression &ub, const SireCAS::Symbol &r);
 
         GromacsAngle(const GromacsAngle &other);
 
@@ -320,7 +322,9 @@ namespace SireMM
         GromacsDihedral(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
 
         static QList<GromacsDihedral> construct(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
-        static QList<GromacsDihedral> constructImproper(const SireCAS::Expression &dihedral, const SireCAS::Symbol &phi);
+        static QList<GromacsDihedral> constructImproper(const SireCAS::Expression &dihedral,
+                                                        const SireCAS::Symbol &phi,
+                                                        const SireCAS::Symbol &theta);
 
         GromacsDihedral(const GromacsDihedral &other);
 

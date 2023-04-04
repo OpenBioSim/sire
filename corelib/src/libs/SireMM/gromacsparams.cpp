@@ -37,6 +37,7 @@
 #include "SireCAS/conditional.h"
 #include "SireCAS/exp.h"
 #include "SireCAS/sum.h"
+#include "SireCAS/values.h"
 #include "SireCAS/trigfuncs.h"
 
 #include "SireStream/datastream.h"
@@ -1040,6 +1041,34 @@ GromacsAngle::GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symb
                                      CODELOC);
 }
 
+/** Construct from the passed angle plus urey-bradley term */
+GromacsAngle::GromacsAngle(const SireCAS::Expression &angle, const SireCAS::Symbol &theta,
+                           const SireCAS::Expression &ub, const SireCAS::Symbol &r)
+    : func_type(0)
+{
+    // interpret the angle component first
+    this->operator=(GromacsAngle(angle, theta));
+
+    if (not ub.isZero())
+    {
+        // now extract the UB component
+        auto bond = GromacsBond(ub, r);
+
+        if (not(bond.isHarmonic() and this->isHarmonic()))
+            throw SireError::incomplete_code(QObject::tr(
+                                                 "Sire cannot yet interpret non-harmonic angles with "
+                                                 "non-harmonic Urey-Bradley terms! %1 + %2")
+                                                 .arg(angle.toString())
+                                                 .arg(ub.toString()),
+                                             CODELOC);
+
+        // k[2] is r0 and k[3] is k for the Urey-Bradley - function type is 5
+        func_type = 5;
+        k[2] = bond[0];
+        k[3] = bond[1];
+    }
+}
+
 static void assert_valid_angle_function(int func_type)
 {
     if (func_type < 1 or func_type > 10 or func_type == 7 or func_type == 9)
@@ -1765,15 +1794,131 @@ QList<GromacsDihedral> GromacsDihedral::construct(const Expression &dihedral, co
 }
 
 /** Construct from the passed 'improper', using 'phi' as the symbol for the phi value */
-QList<GromacsDihedral> GromacsDihedral::constructImproper(const Expression &dihedral, const Symbol &phi)
+QList<GromacsDihedral> GromacsDihedral::constructImproper(const Expression &dihedral,
+                                                          const Symbol &phi,
+                                                          const Symbol &theta)
 {
-    auto parts = GromacsDihedral::construct(dihedral, phi);
+    QList<GromacsDihedral> parts;
 
-    for (auto &part : parts)
+    const auto symbols = dihedral.symbols();
+
+    if (symbols.contains(theta))
     {
-        if (part.functionType() == 1 or part.functionType() == 9)
+        if (symbols.contains(phi))
+            throw SireError::incomplete_code(QObject::tr(
+                                                 "We haven't yet written the code that support improper terms "
+                                                 "that contain both phi and theta: %1")
+                                                 .arg(dihedral.toString()),
+                                             CODELOC);
+
+        // expression should be of the form "k (theta - theta0)^2". We need to get the
+        // factors of theta
+        auto factors = dihedral.expand(theta);
+        bool has_k = false;
+
+        QStringList errors;
+
+        double k = 0.0;
+        double ktheta0_2 = 0.0;
+        double ktheta0 = 0.0;
+
+        for (const auto &factor : factors)
         {
-            part.func_type = 4;
+            if (factor.symbol() == theta)
+            {
+                if (not factor.power().isConstant())
+                {
+                    errors.append(QObject::tr("Power of theta must be constant, not %1").arg(factor.power().toString()));
+                    continue;
+                }
+
+                if (not factor.factor().isConstant())
+                {
+                    errors.append(QObject::tr("The value of K in K (theta - theta0)^2 must be constant. "
+                                              "Here it is %1")
+                                      .arg(factor.factor().toString()));
+                    continue;
+                }
+
+                double power = factor.power().evaluate(Values());
+
+                if (power == 0.0)
+                {
+                    // this is the constant
+                    ktheta0_2 += factor.factor().evaluate(Values());
+                }
+                else if (power == 1.0)
+                {
+                    // this is the -ktheta0 term
+                    ktheta0 = factor.factor().evaluate(Values());
+                }
+                else if (power == 2.0)
+                {
+                    // this is the R^2 term
+                    if (has_k)
+                    {
+                        // we cannot have two R2 factors?
+                        errors.append(QObject::tr("Cannot have two theta^2 factors!"));
+                        continue;
+                    }
+
+                    k = factor.factor().evaluate(Values());
+                    has_k = true;
+                }
+                else
+                {
+                    errors.append(QObject::tr("Power of theta^2 must equal 2.0, 1.0 or 0.0, not %1").arg(power));
+                    continue;
+                }
+            }
+            else
+            {
+                errors.append(
+                    QObject::tr("Cannot have a factor that does not include theta. %1").arg(factor.symbol().toString()));
+            }
+        }
+
+        double _k = k;
+        double _theta0 = std::sqrt(ktheta0_2 / k);
+
+        // kr0 should be equal to -2 k r0
+        if (std::abs(_k * _theta0 + 0.5 * ktheta0) > 0.001)
+        {
+            errors.append(QObject::tr("How can the power of theta be %1. It should be 2 x %2 x %3 = %4.")
+                              .arg(ktheta0)
+                              .arg(_k)
+                              .arg(_theta0)
+                              .arg(2 * _k * _theta0));
+        }
+
+        if (not errors.isEmpty())
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("Cannot extract a harmonic improper with function K ( %1 - theta0 )^2 from the "
+                            "expression %2, because\n%3")
+                    .arg(theta.toString())
+                    .arg(dihedral.toString())
+                    .arg(errors.join("\n")),
+                CODELOC);
+        }
+
+        const double kj_per_mol_per_rad2 = ((kJ_per_mol) / (radian * radian)).value();
+        const double deg = degree.value();
+
+        // add the GromacsDihedral for a harmonic improper
+        parts.append(GromacsDihedral(2, _theta0 / deg, _k / kj_per_mol_per_rad2));
+    }
+    else
+    {
+        // this depends only on phi, so should fit the normal form
+        parts = GromacsDihedral::construct(dihedral, phi);
+
+        for (auto &part : parts)
+        {
+            if (part.functionType() == 1 or part.functionType() == 9)
+            {
+                part.func_type = 4;
+            }
         }
     }
 
