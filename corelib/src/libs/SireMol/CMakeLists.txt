@@ -147,6 +147,7 @@ set ( SIREMOL_HEADERS
       stereochemistry.h
       structureeditor.h
       trajectory.h
+      trajectoryaligner.h
       viewsofmol.h
       volumemap.h
       weightfunction.h
@@ -250,6 +251,7 @@ set ( SIREMOL_SOURCES
       stereochemistry.cpp
       structureeditor.cpp
       trajectory.cpp
+      trajectoryaligner.cpp
       viewsofmol.cpp
       volumemap.cpp
       weightfunction.cpp

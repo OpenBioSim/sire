@@ -265,6 +265,7 @@ set ( PYPP_SOURCES
        Specify_SegID_.pypp.cpp
        Stereochemistry.pypp.cpp
        Trajectory.pypp.cpp
+       TrajectoryAligner.pypp.cpp
        UserBeading.pypp.cpp
        Velocity3D.pypp.cpp
        VolumeMap.pypp.cpp

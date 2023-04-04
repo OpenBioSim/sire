@@ -537,6 +537,8 @@
 
 #include "Trajectory.pypp.hpp"
 
+#include "TrajectoryAligner.pypp.hpp"
+
 #include "UserBeading.pypp.hpp"
 
 #include "Velocity3D.pypp.hpp"
@@ -1111,6 +1113,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_Stereochemistry_class();
 
     register_Trajectory_class();
+
+    register_TrajectoryAligner_class();
 
     register_UserBeading_class();
 

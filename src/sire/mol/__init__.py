@@ -35,7 +35,6 @@ __all__ = [
     "SelectorMol",
     "Stereochemistry",
     "TrajectoryIterator",
-    "get_alignment",
 ]
 
 
@@ -43,11 +42,6 @@ from ..legacy import Mol as _Mol
 from .. import use_new_api as _use_new_api
 
 from ..legacy import Base as _Base
-
-try:
-    get_alignment = _Mol.getAlignment
-except Exception:
-    get_alignment = _Mol.get_alignment
 
 
 from ..legacy.Mol import (

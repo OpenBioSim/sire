@@ -635,6 +635,48 @@ void register_SelectorM_Atom__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Atom >::hasMetadata
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Atom >::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
+            hasMetadata_function_type hasMetadata_function_value( &::SireMol::SelectorM< SireMol::Atom >::hasMetadata );
+            
+            SelectorM_Atom__exposer.def( 
+                "hasMetadata"
+                , hasMetadata_function_value
+                , ( bp::arg("metakey") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::hasMetadata
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Atom >::*hasMetadata_function_type)( ::SireBase::PropertyName const &,::SireBase::PropertyName const & ) const;
+            hasMetadata_function_type hasMetadata_function_value( &::SireMol::SelectorM< SireMol::Atom >::hasMetadata );
+            
+            SelectorM_Atom__exposer.def( 
+                "hasMetadata"
+                , hasMetadata_function_value
+                , ( bp::arg("key"), bp::arg("metakey") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::hasProperty
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Atom >::*hasProperty_function_type)( ::SireBase::PropertyName const & ) const;
+            hasProperty_function_type hasProperty_function_value( &::SireMol::SelectorM< SireMol::Atom >::hasProperty );
+            
+            SelectorM_Atom__exposer.def( 
+                "hasProperty"
+                , hasProperty_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Atom >::indexes
         
             typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
@@ -795,6 +837,33 @@ void register_SelectorM_Atom__class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::metadataKeys
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::QStringList ( ::SireMol::SelectorM< SireMol::Atom >::*metadataKeys_function_type)(  ) const;
+            metadataKeys_function_type metadataKeys_function_value( &::SireMol::SelectorM< SireMol::Atom >::metadataKeys );
+            
+            SelectorM_Atom__exposer.def( 
+                "metadataKeys"
+                , metadataKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::metadataKeys
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::QStringList ( ::SireMol::SelectorM< SireMol::Atom >::*metadataKeys_function_type)( ::SireBase::PropertyName const & ) const;
+            metadataKeys_function_type metadataKeys_function_value( &::SireMol::SelectorM< SireMol::Atom >::metadataKeys );
+            
+            SelectorM_Atom__exposer.def( 
+                "metadataKeys"
+                , metadataKeys_function_value
+                , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -1164,6 +1233,19 @@ void register_SelectorM_Atom__class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("id") )
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::propertyKeys
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::QStringList ( ::SireMol::SelectorM< SireMol::Atom >::*propertyKeys_function_type)(  ) const;
+            propertyKeys_function_type propertyKeys_function_value( &::SireMol::SelectorM< SireMol::Atom >::propertyKeys );
+            
+            SelectorM_Atom__exposer.def( 
+                "propertyKeys"
+                , propertyKeys_function_value
+                , bp::release_gil_policy()
                 , "" );
         
         }

@@ -102,6 +102,7 @@
 #include "specifymol.h"
 #include "stereochemistry.h"
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 #include "viewsofmol.h"
 #include "volumemap.h"
 #include "weightfunction.h"
@@ -327,6 +328,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::Trajectory >();
     ObjectRegistry::registerConverterFor< SireMol::Frame >();
     ObjectRegistry::registerConverterFor< SireMol::MolTrajectoryData >();
+    ObjectRegistry::registerConverterFor< SireMol::TrajectoryAligner >();
     ObjectRegistry::registerConverterFor< SireMol::ViewsOfMol >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::ViewsOfMol> >();
     ObjectRegistry::registerConverterFor< SireMol::VolumeMap >();

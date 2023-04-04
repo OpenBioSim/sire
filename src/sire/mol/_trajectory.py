@@ -21,16 +21,6 @@ class TrajectoryIterator:
             self._iter = None
             self._frame = None
             self._align = align
-            self._aligned_atoms = None
-            self._aligned_indexes = None
-
-            if align is not None:
-                self._aligned_atoms = view[align].atoms()
-                self._aligned_indexes = view.atoms().find(self._aligned_atoms)
-
-                if len(self._aligned_atoms) == 0:
-                    self._aligned_atoms = None
-                    self._aligned_indexes = None
         else:
             self._view = None
             self._values = []
@@ -39,8 +29,6 @@ class TrajectoryIterator:
             self._map = None
             self._frame = None
             self._align = None
-            self._aligned_atoms = None
-            self._aligned_indexes = None
 
     def __iter__(self):
         return self
@@ -104,19 +92,6 @@ class TrajectoryIterator:
         ret = self._view.clone()
 
         ret.load_frame(self._frame, map=self._map)
-
-        if self._aligned_atoms is not None:
-            align_to = self._aligned_atoms.clone()
-            align_to.update(self._aligned_atoms)
-
-            from . import get_alignment
-
-            transform = get_alignment(
-                self._aligned_atoms,
-                to_align,
-                map=self._map,
-                fit=True,
-            )
 
         try:
             mol = ret.molecule()
