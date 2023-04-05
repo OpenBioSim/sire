@@ -60,6 +60,11 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::TrajectoryData &)
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolTrajectoryData &);
 SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolTrajectoryData &);
 
+namespace SireMaths
+{
+    class Transform;
+}
+
 namespace SireMol
 {
 
@@ -117,6 +122,10 @@ namespace SireMol
 
         const SireVol::Space &space() const;
         SireUnits::Dimension::Time time() const;
+
+        Frame transform(const SireMaths::Transform &transform) const;
+
+        static Frame smooth(const QList<Frame> &frames);
 
         int nAtoms() const;
 
@@ -299,6 +308,10 @@ namespace SireMol
         int nAtoms() const;
 
         Frame getFrame(int i) const;
+        Frame getFrame(int i, int smooth) const;
+        Frame getFrame(int i, const SireMaths::Transform &transform) const;
+        Frame getFrame(int i, int smooth,
+                       const SireMaths::Transform &transform) const;
 
         Frame operator[](int i) const;
         QList<Frame> operator[](const QList<qint64> &idxs) const;

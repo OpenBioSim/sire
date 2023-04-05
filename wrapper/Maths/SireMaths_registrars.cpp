@@ -3,8 +3,6 @@
 
 #include "SireMaths_registrars.h"
 
-
-
 #include "accumulator.h"
 #include "align.h"
 #include "axisset.h"

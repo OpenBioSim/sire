@@ -42,6 +42,7 @@
 #include "tostring.h"
 
 using namespace SireMaths;
+using namespace SireBase;
 using namespace SireStream;
 
 /////////
@@ -74,17 +75,23 @@ QDataStream &operator>>(QDataStream &ds, Transform &trans)
 }
 
 /** Constructor (no transformation) */
-Transform::Transform() : delta(0), rotcent(0), rotmat(Quaternion::identity())
+Transform::Transform()
+    : ConcreteProperty<Transform, Property>(),
+      delta(0), rotcent(0), rotmat(Quaternion::identity())
 {
 }
 
 /** Construct to only translate by 'delta' */
-Transform::Transform(const Vector &del) : delta(del), rotcent(0), rotmat(Quaternion::identity())
+Transform::Transform(const Vector &del)
+    : ConcreteProperty<Transform, Property>(),
+      delta(del), rotcent(0), rotmat(Quaternion::identity())
 {
 }
 
 /** Construct to only rotate using 'rotmat' around the rotation center 'center' */
-Transform::Transform(const Quaternion &mat, const Vector &center) : delta(0), rotcent(center), rotmat(mat)
+Transform::Transform(const Quaternion &mat, const Vector &center)
+    : ConcreteProperty<Transform, Property>(),
+      delta(0), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -93,7 +100,9 @@ Transform::Transform(const Quaternion &mat, const Vector &center) : delta(0), ro
 }
 
 /** Construct to only rotate using 'rotmat' around the rotation center 'center' */
-Transform::Transform(const Matrix &mat, const Vector &center) : delta(0), rotcent(center), rotmat(mat)
+Transform::Transform(const Matrix &mat, const Vector &center)
+    : ConcreteProperty<Transform, Property>(),
+      delta(0), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -104,7 +113,8 @@ Transform::Transform(const Matrix &mat, const Vector &center) : delta(0), rotcen
 /** Construct to translate by delta and to rotate using 'rotmat' around the rotation
     center 'center' */
 Transform::Transform(const Vector &del, const Quaternion &mat, const Vector &center)
-    : delta(del), rotcent(center), rotmat(mat)
+    : ConcreteProperty<Transform, Property>(),
+      delta(del), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -115,7 +125,8 @@ Transform::Transform(const Vector &del, const Quaternion &mat, const Vector &cen
 /** Construct to translate by delta and to rotate using 'rotmat' around the rotation
     center 'center' */
 Transform::Transform(const Vector &del, const Matrix &mat, const Vector &center)
-    : delta(del), rotcent(center), rotmat(mat)
+    : ConcreteProperty<Transform, Property>(),
+      delta(del), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -124,7 +135,9 @@ Transform::Transform(const Vector &del, const Matrix &mat, const Vector &center)
 }
 
 /** Copy constructor */
-Transform::Transform(const Transform &other) : delta(other.delta), rotcent(other.rotcent), rotmat(other.rotmat)
+Transform::Transform(const Transform &other)
+    : ConcreteProperty<Transform, Property>(),
+      delta(other.delta), rotcent(other.rotcent), rotmat(other.rotmat)
 {
 }
 
@@ -156,6 +169,11 @@ bool Transform::operator==(const Transform &other) const
 bool Transform::operator!=(const Transform &other) const
 {
     return not operator==(other);
+}
+
+Transform *Transform::clone() const
+{
+    return new Transform(*this);
 }
 
 const char *Transform::typeName()

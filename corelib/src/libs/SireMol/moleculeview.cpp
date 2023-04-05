@@ -237,7 +237,21 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     auto traj = d->property(traj_prop).asA<Trajectory>();
 
-    this->_fromFrame(traj[frame], map);
+    SireMaths::Transform transform;
+
+    if (map.specified("transform"))
+    {
+        transform = map["transform"].value().asA<SireMaths::Transform>();
+    }
+
+    int smooth = 1;
+
+    if (map.specified("smooth"))
+    {
+        smooth = map["smooth"].value().asAnInteger();
+    }
+
+    this->_fromFrame(traj.getFrame(frame, smooth, transform), map);
 }
 
 void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)

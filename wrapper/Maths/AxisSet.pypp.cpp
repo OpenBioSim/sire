@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 #include <QDataStream>
 
+#include <QDebug>
+
 #include "axisset.h"
 
 SireMaths::AxisSet __copy__(const SireMaths::AxisSet &other){ return SireMaths::AxisSet(other); }

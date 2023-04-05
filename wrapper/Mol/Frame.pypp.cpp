@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireID/index.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMol/core.h"
 
 #include "SireStream/datastream.h"
@@ -176,6 +178,19 @@ void register_Frame_class(){
         
         }
         Frame_exposer.def( bp::self == bp::self );
+        { //::SireMol::Frame::smooth
+        
+            typedef ::SireMol::Frame ( *smooth_function_type )( ::QList< SireMol::Frame > const & );
+            smooth_function_type smooth_function_value( &::SireMol::Frame::smooth );
+            
+            Frame_exposer.def( 
+                "smooth"
+                , smooth_function_value
+                , ( bp::arg("frames") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::Frame::space
         
             typedef ::SireVol::Space const & ( ::SireMol::Frame::*space_function_type)(  ) const;
@@ -225,6 +240,19 @@ void register_Frame_class(){
                 , "" );
         
         }
+        { //::SireMol::Frame::transform
+        
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*transform_function_type)( ::SireMaths::Transform const & ) const;
+            transform_function_type transform_function_value( &::SireMol::Frame::transform );
+            
+            Frame_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::Frame::typeName
         
             typedef char const * ( *typeName_function_type )(  );
@@ -261,6 +289,7 @@ void register_Frame_class(){
                 , "" );
         
         }
+        Frame_exposer.staticmethod( "smooth" );
         Frame_exposer.staticmethod( "typeName" );
         Frame_exposer.def( "__copy__", &__copy__);
         Frame_exposer.def( "__deepcopy__", &__copy__);

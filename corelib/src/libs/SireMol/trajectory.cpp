@@ -33,6 +33,8 @@
 
 #include "SireMol/core.h"
 
+#include "SireMaths/align.h"
+
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
 
@@ -754,6 +756,72 @@ Frame Trajectory::getFrame(int i) const
         return frame.subset(start_atom, natoms);
 }
 
+Frame Trajectory::getFrame(int i, int smooth) const
+{
+    if (smooth <= 1)
+        return this->getFrame(i);
+    else
+        return this->getFrame(i, smooth, Transform());
+}
+
+Frame Trajectory::getFrame(int i, const Transform &transform) const
+{
+    if (transform.isNull())
+        return this->getFrame(i);
+    else
+        return this->getFrame(i, 1, transform);
+}
+
+Frame Trajectory::getFrame(int i, int smooth, const Transform &transform) const
+{
+    if (smooth < 1)
+        smooth = 1;
+
+    const auto nframes = this->nFrames();
+
+    i = Index(i).map(nframes);
+
+    if (smooth > nframes)
+        smooth = nframes;
+
+    Frame frame;
+
+    if (smooth > 1)
+    {
+        int half = int(smooth / 2);
+        int start_frame = i - half;
+        int end_frame = i + half + 1;
+
+        if (smooth % 2 == 1)
+            end_frame += 1;
+
+        if (start_frame < 0)
+        {
+            start_frame = 0;
+        }
+
+        if (end_frame > nframes)
+        {
+            end_frame = nframes;
+        }
+
+        QList<Frame> frames;
+
+        // make sure that the reference frame is first
+        frames.append(this->getFrame(i));
+
+        for (int j = start_frame; j < end_frame; ++j)
+        {
+            if (i != j)
+                frames.append(this->getFrame(j));
+        }
+
+        frame = Frame::smooth(frames);
+    }
+
+    return frame.transform(transform);
+}
+
 TrajectoryData &Trajectory::_makeEditable(int &frame)
 {
     frame = Index(frame).map(this->nFrames());
@@ -1140,6 +1208,64 @@ QString Frame::toString() const
 bool Frame::isEmpty() const
 {
     return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty();
+}
+
+Frame Frame::transform(const Transform &transform) const
+{
+    Frame ret(*this);
+    ret.coords = transform(ret.coords);
+    return ret;
+}
+
+/** Return the frame which has the average (smoothed) coordinates
+ *  from all the passed frames. All other information will be taken
+ *  from the first frame in this list.
+ */
+Frame Frame::smooth(const QList<Frame> &frames)
+{
+    if (frames.isEmpty())
+    {
+        return Frame();
+    }
+    else if (frames.count() == 1)
+    {
+        return frames.at(0);
+    }
+    else
+    {
+        const double weight = 1.0 / frames.count();
+
+        // all frames must have the same number of atoms...
+        const int nats = frames.at(0).coords.count();
+
+        QVector<Vector> smoothed(nats);
+        auto smoothed_data = smoothed.data();
+
+        for (int i = 0; i < frames.count(); ++i)
+        {
+            const auto &c = frames.at(i).coords;
+
+            if (c.count() != nats)
+            {
+                throw SireError::incompatible_error(
+                    QObject::tr(
+                        "Cannot smooth a trajectory if the number of "
+                        "atoms / coordinates per frame changes."),
+                    CODELOC);
+            }
+
+            const auto coords_data = c.constData();
+
+            for (int j = 0; j < nats; ++j)
+            {
+                smoothed_data[j] += weight * coords_data[j];
+            }
+        }
+
+        Frame ret(frames.at(0));
+        ret.coords = smoothed;
+        return ret;
+    }
 }
 
 bool Frame::hasCoordinates() const

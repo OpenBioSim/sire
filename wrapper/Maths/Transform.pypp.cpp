@@ -42,7 +42,7 @@ SireMaths::Transform __copy__(const SireMaths::Transform &other){ return SireMat
 void register_Transform_class(){
 
     { //::SireMaths::Transform
-        typedef bp::class_< SireMaths::Transform > Transform_exposer_t;
+        typedef bp::class_< SireMaths::Transform, bp::bases< SireBase::Property > > Transform_exposer_t;
         Transform_exposer_t Transform_exposer = Transform_exposer_t( "Transform", "This class holds everything needed to apply a transformation on a set\nof points. This holds the amount by which to translate the points, together\nwith the center of rotation and amount by which to rotate\n\nAuthor: Christopher Woods\n", bp::init< >("Constructor (no transformation)") );
         bp::scope Transform_scope( Transform_exposer );
         Transform_exposer.def( bp::init< SireMaths::Vector const & >(( bp::arg("delta") ), "Construct to only translate by delta") );

@@ -10,7 +10,7 @@ class TrajectoryIterator:
     are accessed or processed.
     """
 
-    def __init__(self, view=None, align=None, map=None):
+    def __init__(self, view=None, align=None, smooth=None, map=None):
         if view is not None:
             from ..base import create_map
 
@@ -20,7 +20,19 @@ class TrajectoryIterator:
             self._times = None
             self._iter = None
             self._frame = None
-            self._align = align
+
+            if align is not None:
+                from ..legacy.Mol import TrajectoryAligner
+
+                self._align = TrajectoryAligner(view[align].atoms())
+
+            if smooth is not None:
+                self._smooth = int(smooth)
+
+                if self._smooth <= 1:
+                    self._smooth = None
+            else:
+                self._smooth = None
         else:
             self._view = None
             self._values = []
@@ -29,6 +41,7 @@ class TrajectoryIterator:
             self._map = None
             self._frame = None
             self._align = None
+            self._smooth = None
 
     def __iter__(self):
         return self
@@ -90,6 +103,14 @@ class TrajectoryIterator:
             self._frame = self._values[0]
 
         ret = self._view.clone()
+
+        m = self._map.clone()
+
+        if self._align is not None:
+            m.set("transform", self._align[self._frame])
+
+        if self._smooth is not None:
+            m.set("smooth", int(self._smooth))
 
         ret.load_frame(self._frame, map=self._map)
 
