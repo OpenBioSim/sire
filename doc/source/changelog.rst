@@ -12,6 +12,31 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.2.1 <https://github.com/openbiosim/sire/compare/2023.2.0...2023.2.1>`__ - April 2023
+------------------------------------------------------------------------------------------
+
+* Added in ``openmmtools`` as a host requirement. This allows it to be installed in the 
+  same environment as :mod:`sire`. Note that this changes the dependencies of :mod:`sire`
+  to use an older version of ``libnetcdf``. `PR 34 <https://github.com/OpenBioSim/sire/pull/34>`__
+
+* Reactivated the parallel processing code in the Amber parameter/topology parser. 
+  This significantly speeds up reading and writing of Amber parameter/topology files.
+
+* Fixed compile issues with some MacOS compilers using the C++ 2017 standard, when 
+  ``std::unary_function`` has been removed.
+
+* Fixed the lookup of Gromacs wildcard dihedrals of the form ``A-*-*-D``.
+
+* Added full support for Urey-Bradley terms in the Gromacs topology parser.
+
+* Added full support for harmonic improper angles in the Gromacs topology parser.
+  Note that we don't yet have support for these in the molecular mechanic engine
+  or the openmm converter, so they can only currently be read and written.
+
+* Added a developer check for when the version number has changed, so that 
+  people compiling manually know when they have to rebuild from scratch.
+
+
 `2023.2.0 <https://github.com/openbiosim/sire/compare/2023.1.3...2023.2.0>`__ - March 2023
 ------------------------------------------------------------------------------------------
 
