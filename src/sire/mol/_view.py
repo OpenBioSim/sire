@@ -47,7 +47,7 @@ if _has_nglview:
 
     @_nglview.register_backend("sire")
     class _SireStructureTrajectory(_nglview.Trajectory, _nglview.Structure):
-        def __init__(self, obj=None, map=None):
+        def __init__(self, obj=None, align=None, smooth=None, map=None):
             if type(obj) is _SireStructureTrajectory:
                 self._traj = obj._traj
                 self._map = obj._map
@@ -58,9 +58,17 @@ if _has_nglview:
                 self._map = create_map(map)
 
                 if type(obj) is TrajectoryIterator:
+                    if align is not None:
+                        obj = obj.align(align=align)
+
+                    if smooth not in [False, None, 0]:
+                        obj = obj.smooth(smooth=smooth)
+
                     self._traj = obj
                 else:
-                    self._traj = obj.trajectory(self._map)
+                    self._traj = obj.trajectory(
+                        align=align, smooth=smooth, map=self._map
+                    )
             else:
                 self._traj = None
                 self._map = None
@@ -269,6 +277,8 @@ if _has_nglview:
         trace: str = "",
         tube: str = "",
         center: str = None,
+        align: str = None,
+        smooth=False,
         stage_parameters: str = None,
         map=None,
     ):
@@ -285,6 +295,17 @@ if _has_nglview:
         center:
           Pass in a selection string to select the atoms to center
           in the view. By default no atoms are centered
+
+        align:
+          Pass in a selection string to select atoms against which
+          every frame will be aligned. These atoms will be moved
+          to the center of the periodic box (if a periodic box
+          is used)
+
+        smooth:
+          Pass in the number of frames to smooth (average) the view
+          over. If 'True' is passed, then the recommended number
+          of frames will be averaged over
 
         orthographic:
           Set to False to use a perspective view, or accept the default
@@ -323,7 +344,10 @@ if _has_nglview:
           which properties are used to get the molecular data
           to be viewed.
         """
-        struc_traj = _SireStructureTrajectory(obj, map=map)
+        struc_traj = _SireStructureTrajectory(
+            obj, align=align, smooth=smooth, map=map
+        )
+
         view = _nglview.NGLWidget(struc_traj)
 
         if orthographic:

@@ -24,13 +24,29 @@ class TrajectoryIterator:
             if align is not None:
                 from ..legacy.Mol import TrajectoryAligner
 
-                self._align = TrajectoryAligner(view[align].atoms())
+                atoms = view[align].atoms()
 
-            if smooth is not None:
-                self._smooth = int(smooth)
+                print(atoms.evaluate().center())
 
-                if self._smooth <= 1:
-                    self._smooth = None
+                # translate these atoms so that they are centered on the origin
+                atoms = (
+                    atoms.move().translate(-atoms.evaluate().center()).commit()
+                )
+
+                print(atoms.evaluate().center())
+
+                self._align = TrajectoryAligner(atoms)
+            else:
+                self._align = None
+
+            if smooth not in [None, False, 0]:
+                if smooth is True:
+                    self._smooth = 5
+                else:
+                    self._smooth = int(smooth)
+
+                    if self._smooth <= 1:
+                        self._smooth = None
             else:
                 self._smooth = None
         else:
@@ -64,6 +80,8 @@ class TrajectoryIterator:
         it = TrajectoryIterator()
         it._view = self._view
         it._map = self._map
+        it._align = self._align
+        it._smooth = self._smooth
 
         if type(val) is int:
             it._values = [self._values[val]]
@@ -89,6 +107,18 @@ class TrajectoryIterator:
         """
         t = TrajectoryIterator(view=self._view, align=align, map=self._map)
         t._values = self._values
+        t._smooth = self._smooth
+        return t
+
+    def smooth(self, smooth):
+        """
+        Return a copy of this trajectory where each frame will be smoothed
+        over the specified number of frames (or the recommended number
+        if 'smooth' is set to 'True')
+        """
+        t = TrajectoryIterator(view=self._view, smooth=smooth, map=self._map)
+        t._values = self._values
+        t._align = self._align
         return t
 
     def num_frames(self):
@@ -112,7 +142,9 @@ class TrajectoryIterator:
         if self._smooth is not None:
             m.set("smooth", int(self._smooth))
 
-        ret.load_frame(self._frame, map=self._map)
+        m.set("autowrap", True)
+
+        ret.load_frame(self._frame, map=m)
 
         try:
             mol = ret.molecule()

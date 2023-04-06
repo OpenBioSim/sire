@@ -784,7 +784,7 @@ Frame Trajectory::getFrame(int i, int smooth, const Transform &transform) const
     if (smooth > nframes)
         smooth = nframes;
 
-    Frame frame;
+    Frame frame = this->getFrame(i);
 
     if (smooth > 1)
     {
@@ -807,16 +807,13 @@ Frame Trajectory::getFrame(int i, int smooth, const Transform &transform) const
 
         QList<Frame> frames;
 
-        // make sure that the reference frame is first
-        frames.append(this->getFrame(i));
-
         for (int j = start_frame; j < end_frame; ++j)
         {
             if (i != j)
                 frames.append(this->getFrame(j));
         }
 
-        frame = Frame::smooth(frames);
+        frame = frame.smooth(frames);
     }
 
     return frame.transform(transform);
@@ -1210,62 +1207,84 @@ bool Frame::isEmpty() const
     return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty();
 }
 
-Frame Frame::transform(const Transform &transform) const
+Frame Frame::transform(const Transform &tform) const
 {
     Frame ret(*this);
-    ret.coords = transform(ret.coords);
+    ret.coords = tform(ret.coords);
     return ret;
 }
 
-/** Return the frame which has the average (smoothed) coordinates
- *  from all the passed frames. All other information will be taken
- *  from the first frame in this list.
+/** Return the frame which has this frame smoothed with the coordinates
+ *  from all of the other frames. The other frames will be moved into
+ *  the same simulation box as this frame, and then averaged onto
+ *  this frames coordinates. The result will be returned
  */
-Frame Frame::smooth(const QList<Frame> &frames)
+Frame Frame::smooth(const QList<Frame> &frames) const
 {
-    if (frames.isEmpty())
+    if (frames.isEmpty() or this->coords.isEmpty())
     {
-        return Frame();
+        return *this;
     }
-    else if (frames.count() == 1)
+
+    Frame ret(*this);
+
+    const double weight = 1.0 / (1 + frames.count());
+
+    // all frames must have the same number of atoms...
+    const int nats = this->coords.count();
+
+    QVector<Vector> smoothed(nats);
+    auto smoothed_data = smoothed.data();
+
+    Vector mincoords = this->coords[0];
+    Vector maxcoords = this->coords[0];
+
+    for (int i = 0; i < nats; ++i)
     {
-        return frames.at(0);
+        const auto &c = this->coords[i];
+
+        mincoords.setMin(c);
+        maxcoords.setMax(c);
+
+        smoothed_data[i] = weight * c;
     }
-    else
+
+    Vector center = mincoords + (0.5 * (maxcoords - mincoords));
+
+    const bool is_periodic = this->space().isPeriodic();
+
+    for (int i = 0; i < frames.count(); ++i)
     {
-        const double weight = 1.0 / frames.count();
+        auto c = frames.at(i).coords;
 
-        // all frames must have the same number of atoms...
-        const int nats = frames.at(0).coords.count();
-
-        QVector<Vector> smoothed(nats);
-        auto smoothed_data = smoothed.data();
-
-        for (int i = 0; i < frames.count(); ++i)
+        if (c.count() != nats)
         {
-            const auto &c = frames.at(i).coords;
-
-            if (c.count() != nats)
-            {
-                throw SireError::incompatible_error(
-                    QObject::tr(
-                        "Cannot smooth a trajectory if the number of "
-                        "atoms / coordinates per frame changes."),
-                    CODELOC);
-            }
-
-            const auto coords_data = c.constData();
-
-            for (int j = 0; j < nats; ++j)
-            {
-                smoothed_data[j] += weight * coords_data[j];
-            }
+            throw SireError::incompatible_error(
+                QObject::tr(
+                    "Cannot smooth a trajectory if the number of "
+                    "atoms / coordinates per frame changes."),
+                CODELOC);
         }
 
-        Frame ret(frames.at(0));
-        ret.coords = smoothed;
-        return ret;
+        if (is_periodic)
+        {
+            // map these coordinates as a single group into the
+            // same simulation box as the first frame
+            auto cg = CoordGroup(c);
+            cg = this->space().getMinimumImage(cg, center);
+            c = cg.toVector();
+        }
+
+        const auto coords_data = c.constData();
+
+        for (int j = 0; j < nats; ++j)
+        {
+            smoothed_data[j] += weight * coords_data[j];
+        }
     }
+
+    ret.coords = smoothed;
+    return ret;
 }
 
 bool Frame::hasCoordinates() const

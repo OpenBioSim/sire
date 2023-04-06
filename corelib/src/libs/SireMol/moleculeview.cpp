@@ -174,7 +174,23 @@ void MoleculeView::_fromFrame(const Frame &frame, const SireBase::PropertyMap &m
     if (frame.hasCoordinates() and coords_prop.hasSource())
     {
         auto coords = AtomCoords(d->info());
+
+        bool autowrap = true;
+
+        if (map.specified("autowrap"))
+        {
+            autowrap = map["autowrap"].value().asABoolean();
+        }
+
+        /*if (autowrap and frame.space().isPeriodic())
+        {
+            CoordGroup cg(frame.coordinates());
+            cg = frame.space().getMinimumImage(cg, Vector(0));
+            coords.copyFrom(cg.toVector());
+        }
+        else*/
         coords.copyFrom(frame.coordinates());
+
         d->setProperty(coords_prop.source(), coords);
     }
 

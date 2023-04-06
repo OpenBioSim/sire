@@ -180,7 +180,7 @@ void register_Frame_class(){
         Frame_exposer.def( bp::self == bp::self );
         { //::SireMol::Frame::smooth
         
-            typedef ::SireMol::Frame ( *smooth_function_type )( ::QList< SireMol::Frame > const & );
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*smooth_function_type)( ::QList< SireMol::Frame > const & ) const;
             smooth_function_type smooth_function_value( &::SireMol::Frame::smooth );
             
             Frame_exposer.def( 
@@ -289,7 +289,6 @@ void register_Frame_class(){
                 , "" );
         
         }
-        Frame_exposer.staticmethod( "smooth" );
         Frame_exposer.staticmethod( "typeName" );
         Frame_exposer.def( "__copy__", &__copy__);
         Frame_exposer.def( "__deepcopy__", &__copy__);

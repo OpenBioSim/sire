@@ -125,7 +125,7 @@ namespace SireMol
 
         Frame transform(const SireMaths::Transform &transform) const;
 
-        static Frame smooth(const QList<Frame> &frames);
+        Frame smooth(const QList<Frame> &frames) const;
 
         int nAtoms() const;
 
