@@ -329,6 +329,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::Frame >();
     ObjectRegistry::registerConverterFor< SireMol::MolTrajectoryData >();
     ObjectRegistry::registerConverterFor< SireMol::TrajectoryAligner >();
+    ObjectRegistry::registerConverterFor< SireMol::FrameTransform >();
     ObjectRegistry::registerConverterFor< SireMol::ViewsOfMol >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMol::ViewsOfMol> >();
     ObjectRegistry::registerConverterFor< SireMol::VolumeMap >();

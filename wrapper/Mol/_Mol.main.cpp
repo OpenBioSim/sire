@@ -245,6 +245,8 @@
 
 #include "Frame.pypp.hpp"
 
+#include "FrameTransform.pypp.hpp"
+
 #include "GeometryPerturbation.pypp.hpp"
 
 #include "GeometryPerturbations.pypp.hpp"
@@ -903,6 +905,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_EvaluatorM_class();
 
     register_Frame_class();
+
+    register_FrameTransform_class();
 
     register_GeometryPerturbations_class();
 

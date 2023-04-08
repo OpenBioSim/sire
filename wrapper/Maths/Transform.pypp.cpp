@@ -140,6 +140,32 @@ void register_Transform_class(){
         
         }
         Transform_exposer.def( bp::self == bp::self );
+        { //::SireMaths::Transform::reverse
+        
+            typedef ::SireMaths::Vector ( ::SireMaths::Transform::*reverse_function_type)( ::SireMaths::Vector const & ) const;
+            reverse_function_type reverse_function_value( &::SireMaths::Transform::reverse );
+            
+            Transform_exposer.def( 
+                "reverse"
+                , reverse_function_value
+                , ( bp::arg("point") )
+                , bp::release_gil_policy()
+                , "Apply the inverse of this transformation to the passed point, returning the result" );
+        
+        }
+        { //::SireMaths::Transform::reverse
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireMaths::Transform::*reverse_function_type)( ::QVector< SireMaths::Vector > const & ) const;
+            reverse_function_type reverse_function_value( &::SireMaths::Transform::reverse );
+            
+            Transform_exposer.def( 
+                "reverse"
+                , reverse_function_value
+                , ( bp::arg("points") )
+                , bp::release_gil_policy()
+                , "Apply this transformation to all of the passed points, returning the results" );
+        
+        }
         { //::SireMaths::Transform::rotationCenter
         
             typedef ::SireMaths::Vector ( ::SireMaths::Transform::*rotationCenter_function_type)(  ) const;

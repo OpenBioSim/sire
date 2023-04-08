@@ -103,6 +103,11 @@ namespace SireMaths
 
         Vector *apply(Vector *coords, int sz) const;
 
+        Vector reverse(const Vector &point) const;
+        QVector<Vector> reverse(const QVector<Vector> &points) const;
+
+        Vector *reverse(Vector *coords, int sz) const;
+
         Vector translationDelta() const;
 
         Vector rotationCenter() const;

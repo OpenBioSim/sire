@@ -3,8 +3,6 @@
 
 #include "SireVol_registrars.h"
 
-
-
 #include "aabox.h"
 #include "cartesian.h"
 #include "combinedspace.h"

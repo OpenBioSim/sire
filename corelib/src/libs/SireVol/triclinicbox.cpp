@@ -35,6 +35,7 @@
 #include "coordgroup.h"
 #include "triclinicbox.h"
 
+#include "SireMaths/align.h"
 #include "SireMaths/rangenerator.h"
 
 #include "SireError/errors.h"
@@ -1054,12 +1055,46 @@ double TriclinicBox::minimumDistance(const CoordGroup &group0, const CoordGroup 
     return std::sqrt(mindist2);
 }
 
+SpacePtr TriclinicBox::transform(const Transform &tform, bool forwards) const
+{
+    // eventually return a TransformedSpace(*this);
+    return SpacePtr(*this);
+}
+
+QVector<Vector> TriclinicBox::getMinimumImage(const QVector<Vector> &coords,
+                                              const Vector &center) const
+{
+    if (coords.isEmpty())
+        return coords;
+
+    Vector wrapdelta = wrapDelta(AABox(coords.constData(), coords.count()).center(),
+                                 center);
+
+    if (wrapdelta.isZero())
+    {
+        return coords;
+    }
+    else
+    {
+        QVector<Vector> ret = coords;
+
+        auto ret_data = ret.data();
+
+        for (int i = 0; i < ret.count(); ++i)
+        {
+            ret_data[i] += wrapdelta;
+        }
+
+        return ret;
+    }
+}
+
 /** Return the copy of the point 'point' which is the closest minimum image
     to 'center' */
 Vector TriclinicBox::getMinimumImage(const Vector &point, const Vector &center) const
 {
     // Calculate the position of point in "box" space.
-    auto point_box = this->cell_matrix_inverse * point;
+    // auto point_box = this->cell_matrix_inverse * point;
 
     // Get the box shift.
     auto wrapdelta = this->wrapDelta(point, center);

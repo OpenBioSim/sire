@@ -72,6 +72,8 @@ namespace SireMol
 
     using SireMaths::Vector;
 
+    class FrameTransform;
+
     /** This is a single trajectory frame. */
     class SIREMOL_EXPORT Frame : public SireBase::ConcreteProperty<Frame, MoleculeProperty>
     {
@@ -123,7 +125,8 @@ namespace SireMol
         const SireVol::Space &space() const;
         SireUnits::Dimension::Time time() const;
 
-        Frame transform(const SireMaths::Transform &transform) const;
+        Frame transform(const FrameTransform &transform) const;
+        Frame reverse(const FrameTransform &transform) const;
 
         Frame smooth(const QList<Frame> &frames) const;
 
@@ -308,10 +311,7 @@ namespace SireMol
         int nAtoms() const;
 
         Frame getFrame(int i) const;
-        Frame getFrame(int i, int smooth) const;
-        Frame getFrame(int i, const SireMaths::Transform &transform) const;
-        Frame getFrame(int i, int smooth,
-                       const SireMaths::Transform &transform) const;
+        Frame getFrame(int i, const FrameTransform &transform) const;
 
         Frame operator[](int i) const;
         QList<Frame> operator[](const QList<qint64> &idxs) const;

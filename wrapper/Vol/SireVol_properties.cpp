@@ -19,6 +19,7 @@
 #include "patching.h"
 #include "patching.h"
 #include "SireError/errors.h"
+#include "SireMaths/align.h"
 #include "SireMaths/rangenerator.h"
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"

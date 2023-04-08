@@ -11,6 +11,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -358,6 +360,19 @@ void register_Cartesian_class(){
         }
         { //::SireVol::Cartesian::getMinimumImage
         
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Cartesian::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::Cartesian::getMinimumImage );
+            
+            Cartesian_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "A cartesian space is not periodic, so this just returns the input point" );
+        
+        }
+        { //::SireVol::Cartesian::getMinimumImage
+        
             typedef ::SireVol::CoordGroup ( ::SireVol::Cartesian::*getMinimumImage_function_type)( ::SireVol::CoordGroup const &,::SireMaths::Vector const & ) const;
             getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::Cartesian::getMinimumImage );
             
@@ -534,6 +549,18 @@ void register_Cartesian_class(){
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this space" );
+        
+        }
+        { //::SireVol::Cartesian::transform
+        
+            typedef ::SireVol::SpacePtr ( ::SireVol::Cartesian::*transform_function_type)( ::SireMaths::Transform const &,bool ) const;
+            transform_function_type transform_function_value( &::SireVol::Cartesian::transform );
+            
+            Cartesian_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform"), bp::arg("forwards")=(bool)(true) )
+                , "" );
         
         }
         { //::SireVol::Cartesian::typeName

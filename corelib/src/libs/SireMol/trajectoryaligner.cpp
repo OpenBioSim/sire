@@ -30,6 +30,8 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireBase/numberproperty.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -37,6 +39,260 @@ using namespace SireMol;
 using namespace SireMaths;
 using namespace SireBase;
 using namespace SireStream;
+
+/////////
+///////// Implementation of FrameTransform
+////////
+
+static const RegisterMetaType<FrameTransform> r_ft;
+
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds,
+                                       const FrameTransform &ft)
+{
+    writeHeader(ds, r_ft, 1);
+
+    SharedDataStream sds(ds);
+
+    sds << ft.tform << ft.cent << ft.old_space << ft.new_space
+        << ft.smooth << ft.autowrap;
+
+    return ds;
+}
+
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds,
+                                       FrameTransform &ft)
+{
+    VersionID v = readHeader(ds, r_ft);
+
+    if (v == 1)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> ft.tform >> ft.cent >> ft.old_space >> ft.new_space >> ft.smooth >> ft.autowrap;
+    }
+    else
+        throw version_error(v, "1", r_ft, CODELOC);
+
+    return ds;
+}
+
+FrameTransform::FrameTransform()
+    : ConcreteProperty<FrameTransform, Property>(),
+      cent(0), smooth(1), autowrap(false)
+{
+}
+
+FrameTransform::FrameTransform(const SireMaths::Transform &transform,
+                               const SireMaths::Vector &center,
+                               const SireVol::Space &space,
+                               int sm,
+                               bool wrap)
+    : ConcreteProperty<FrameTransform, Property>(),
+      tform(transform), cent(center), old_space(space),
+      smooth(sm), autowrap(wrap)
+{
+    if (tform.isNull())
+        new_space = old_space;
+    else
+        new_space = old_space.read().transform(tform);
+
+    if (smooth < 1)
+        smooth = 1;
+}
+
+FrameTransform::FrameTransform(const FrameTransform &other)
+    : ConcreteProperty<FrameTransform, Property>(),
+      tform(other.tform), cent(other.cent),
+      old_space(other.old_space), new_space(other.new_space),
+      smooth(other.smooth), autowrap(other.autowrap)
+{
+}
+
+FrameTransform::~FrameTransform()
+{
+}
+
+FrameTransform &FrameTransform::operator=(const FrameTransform &other)
+{
+    if (this != &other)
+    {
+        tform = other.tform;
+        cent = other.cent;
+        old_space = other.old_space;
+        new_space = other.new_space;
+        smooth = other.smooth;
+        autowrap = other.autowrap;
+    }
+
+    return *this;
+}
+
+bool FrameTransform::operator==(const FrameTransform &other) const
+{
+    return this == &other or
+           (tform == other.tform and cent == other.cent and
+            old_space == other.old_space and new_space == other.new_space and
+            smooth == other.smooth and autowrap == other.autowrap);
+}
+
+bool FrameTransform::operator!=(const FrameTransform &other) const
+{
+    return not this->operator==(other);
+}
+
+FrameTransform *FrameTransform::clone() const
+{
+    return new FrameTransform(*this);
+}
+
+const char *FrameTransform::what() const
+{
+    return FrameTransform::typeName();
+}
+
+const char *FrameTransform::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<FrameTransform>());
+}
+
+QString FrameTransform::toString() const
+{
+    return QObject::tr("FrameTransform( %1, nSmooth=%2, wrap=%3 )")
+        .arg(this->transform().toString())
+        .arg(this->nSmooth())
+        .arg(this->wrap());
+}
+
+SireVol::SpacePtr FrameTransform::apply(const SireVol::Space &space) const
+{
+    if (this->transform().isNull())
+    {
+        return space;
+    }
+    else if (this->old_space.read().equals(space))
+    {
+        return this->new_space.read();
+    }
+    else
+    {
+        return space.transform(this->transform(), true);
+    }
+}
+
+SireMaths::Vector FrameTransform::apply(const SireMaths::Vector &coords) const
+{
+    Vector ret = coords;
+
+    if (this->wrap())
+    {
+        ret = this->space().getMinimumImage(ret, this->center());
+    }
+
+    return this->transform().apply(ret);
+}
+
+QVector<SireMaths::Vector> FrameTransform::apply(const QVector<Vector> &coords) const
+{
+    QVector<Vector> ret = coords;
+
+    if (this->wrap())
+    {
+        // wrap these coordinates into the old space before we
+        // perform the transfrom
+        ret = this->space().getMinimumImage(ret, this->center());
+    }
+
+    // now perform the transformation
+    this->transform().apply(ret.data(), ret.count());
+
+    return ret;
+}
+
+Frame FrameTransform::apply(const Frame &frame) const
+{
+    return frame.transform(*this);
+}
+
+SireVol::SpacePtr FrameTransform::reverse(const SireVol::Space &space) const
+{
+    if (this->transform().isNull())
+    {
+        return space;
+    }
+    else if (this->new_space.read().equals(space))
+    {
+        return this->old_space.read();
+    }
+    else
+    {
+        return space.transform(this->transform(), false);
+    }
+}
+
+SireMaths::Vector FrameTransform::reverse(const SireMaths::Vector &coords) const
+{
+    Vector ret = coords;
+
+    if (this->wrap())
+    {
+        ret = this->new_space.read().getMinimumImage(ret, this->center());
+    }
+
+    return this->transform().reverse(ret);
+}
+
+QVector<SireMaths::Vector> FrameTransform::reverse(const QVector<SireMaths::Vector> &coords) const
+{
+    QVector<Vector> ret = coords;
+
+    if (this->wrap())
+    {
+        ret = this->new_space.read().getMinimumImage(ret, this->center());
+    }
+
+    this->transform().reverse(ret.data(), ret.count());
+
+    return ret;
+}
+
+Frame FrameTransform::reverse(const Frame &frame) const
+{
+    return frame.reverse(*this);
+}
+
+const SireMaths::Transform &FrameTransform::transform() const
+{
+    return this->tform;
+}
+
+const SireMaths::Vector &FrameTransform::center() const
+{
+    return this->cent;
+}
+
+const SireVol::Space &FrameTransform::space() const
+{
+    return this->old_space.read();
+}
+
+int FrameTransform::nSmooth() const
+{
+    return this->smooth;
+}
+
+bool FrameTransform::wrap() const
+{
+    return this->autowrap;
+}
+
+bool FrameTransform::isCompatibleWith(const MoleculeInfoData &) const
+{
+    return true;
+}
+
+/////////
+///////// Implementation of TrajectoryAligner
+/////////
 
 static const RegisterMetaType<TrajectoryAligner> r_ta;
 
@@ -46,7 +302,7 @@ SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds,
     writeHeader(ds, r_ta, 1);
 
     SharedDataStream sds(ds);
-    sds << ta.atms << ta.refcoords;
+    sds << ta.atms << ta.refcoords << ta.cent << ta.nsmooth << ta.map;
 
     return ds;
 }
@@ -59,7 +315,7 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, TrajectoryAligner &ta)
     {
         SharedDataStream sds(ds);
 
-        sds >> ta.atms >> ta.refcoords;
+        sds >> ta.atms >> ta.refcoords >> ta.cent >> ta.nsmooth >> ta.map;
     }
     else
         throw version_error(v, "1", r_ta, CODELOC);
@@ -67,25 +323,79 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, TrajectoryAligner &ta)
     return ds;
 }
 
-TrajectoryAligner::TrajectoryAligner()
+TrajectoryAligner::TrajectoryAligner() : nsmooth(0), autowrap(false)
 {
+}
+
+void TrajectoryAligner::_populate(const PropertyMap &m)
+{
+    this->map = m;
+
+    if (this->map.specified("smooth"))
+    {
+        this->nsmooth = this->map["smooth"].value().asAnInteger();
+
+        if (this->nsmooth < 1)
+            this->nsmooth = 1;
+    }
+
+    if (this->map.specified("wrap"))
+    {
+        this->autowrap = this->map["wrap"].value().asABoolean();
+    }
+
+    // now modify the map that is used to get the reference frame
+    // to save the number of frames to smooth over, and to turn off
+    // wrapping (as we don't want to wrap when we get the reference
+    // coordinates)
+    this->map.set("smooth", NumberProperty(qint64(this->nsmooth)));
+    this->map.set("wrap", BooleanProperty(false));
+}
+
+TrajectoryAligner::TrajectoryAligner(const SireMaths::Vector &center,
+                                     const PropertyMap &m)
+    : ConcreteProperty<TrajectoryAligner, Property>(),
+      cent(0), nsmooth(1), autowrap(true)
+{
+    cent = center;
+    this->_populate(m);
 }
 
 TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
                                      const PropertyMap &m)
     : ConcreteProperty<TrajectoryAligner, Property>(),
-      atms(atoms), map(m)
+      atms(atoms), cent(0), nsmooth(1), map(m), autowrap(true)
 {
     if (atms.count() > 0)
     {
         const auto c = atms.property<Vector>(map["coordinates"]);
         refcoords = QVector<Vector>(c.begin(), c.end());
+
+        cent = refcoords[0];
+
+        if (refcoords.count() > 1)
+        {
+            Vector mincoords = cent;
+            Vector maxcoords = cent;
+
+            for (int i = 1; i < refcoords.count(); ++i)
+            {
+                mincoords.setMin(refcoords[i]);
+                maxcoords.setMax(refcoords[i]);
+            }
+
+            cent = mincoords + 0.5 * (maxcoords - mincoords);
+        }
     }
+
+    this->_populate(m);
 }
 
 TrajectoryAligner::TrajectoryAligner(const TrajectoryAligner &other)
     : ConcreteProperty<TrajectoryAligner, Property>(other),
-      atms(other.atms), refcoords(other.refcoords), map(other.map)
+      atms(other.atms), refcoords(other.refcoords),
+      cent(other.cent), nsmooth(other.nsmooth), map(other.map),
+      autowrap(other.autowrap)
 {
 }
 
@@ -99,7 +409,10 @@ TrajectoryAligner &TrajectoryAligner::operator=(const TrajectoryAligner &other)
     {
         atms = other.atms;
         refcoords = other.refcoords;
+        cent = other.cent;
+        nsmooth = other.nsmooth;
         map = other.map;
+        autowrap = other.autowrap;
     }
 
     return *this;
@@ -108,7 +421,8 @@ TrajectoryAligner &TrajectoryAligner::operator=(const TrajectoryAligner &other)
 bool TrajectoryAligner::operator==(const TrajectoryAligner &other) const
 {
     return atms == other.atms and refcoords == other.refcoords and
-           map == other.map;
+           cent == other.cent and nsmooth == other.nsmooth and
+           map == other.map and autowrap == other.autowrap;
 }
 
 bool TrajectoryAligner::operator!=(const TrajectoryAligner &other) const
@@ -133,7 +447,28 @@ const char *TrajectoryAligner::typeName()
 
 QString TrajectoryAligner::toString() const
 {
-    return QObject::tr("TrajectoryAligner()");
+    if (this->nSmooth() > 1)
+        return QObject::tr("TrajectoryAligner(center=%1, nSmooth=%2)")
+            .arg(this->center().toString())
+            .arg(this->nSmooth());
+    else
+        return QObject::tr("TrajectoryAligner(center=%1)")
+            .arg(this->center().toString());
+}
+
+int TrajectoryAligner::nSmooth() const
+{
+    return this->nsmooth;
+}
+
+Vector TrajectoryAligner::center() const
+{
+    return this->cent;
+}
+
+bool TrajectoryAligner::wrap() const
+{
+    return this->autowrap;
 }
 
 const SelectorM<Atom> &TrajectoryAligner::atoms() const
@@ -141,14 +476,42 @@ const SelectorM<Atom> &TrajectoryAligner::atoms() const
     return atms;
 }
 
-Transform TrajectoryAligner::operator[](int i) const
+FrameTransform TrajectoryAligner::operator[](int i) const
 {
     // get the coordinates for this frame
     const auto nframes = this->count();
 
+    const auto space_property = map["space"];
+
+    SireVol::SpacePtr space = SireVol::Cartesian();
+
     if (atms.count() == 0 or nframes <= 1)
-        // no alignment possible
-        return Transform();
+    {
+        // use the first space that we find
+        if (this->wrap() and (atms.count() > 0))
+        {
+            const auto mols = atms.molecules();
+
+            for (int i = 0; i < mols.count(); ++i)
+            {
+                const auto &mol = mols[i];
+
+                if (mol.data().hasProperty(space_property))
+                {
+                    space = mol.data().property(space_property).asA<Space>();
+                    break;
+                }
+            }
+        }
+
+        // no alignment possible - just potential for mapping into
+        // the space
+        return FrameTransform(SireMaths::Transform(),
+                              this->center(),
+                              space.read(),
+                              this->nSmooth(),
+                              this->wrap());
+    }
 
     // make sure that we cap if we run out of frames
     if (i >= nframes)
@@ -160,18 +523,40 @@ Transform TrajectoryAligner::operator[](int i) const
 
     // the below part could be cached :-)
     auto c = SelectorM<Atom>(atms);
-    c.loadFrame(i, map);
+
+    c.loadFrame(i, this->map);
+
+    // use the first space that we find
+    if (this->wrap() and (c.count() > 0))
+    {
+        const auto mols = c.molecules();
+
+        for (int i = 0; i < mols.count(); ++i)
+        {
+            const auto &mol = mols[i];
+
+            if (mol.data().hasProperty(space_property))
+            {
+                space = mol.data().property(space_property).asA<Space>();
+                break;
+            }
+        }
+    }
 
     const auto coords = c.property<Vector>(map["coordinates"]);
 
-    return SireMaths::getAlignment(refcoords,
-                                   QVector<Vector>(coords.begin(), coords.end()),
-                                   true);
+    return FrameTransform(SireMaths::getAlignment(refcoords,
+                                                  QVector<Vector>(coords.begin(), coords.end()),
+                                                  true),
+                          this->center(),
+                          space.read(),
+                          this->nSmooth(),
+                          this->wrap());
 }
 
-QList<Transform> TrajectoryAligner::operator[](const QList<qint64> &idxs) const
+QList<FrameTransform> TrajectoryAligner::operator[](const QList<qint64> &idxs) const
 {
-    QList<Transform> ret;
+    QList<FrameTransform> ret;
 
     for (const auto &idx : idxs)
     {
@@ -181,9 +566,9 @@ QList<Transform> TrajectoryAligner::operator[](const QList<qint64> &idxs) const
     return ret;
 }
 
-QList<Transform> TrajectoryAligner::operator[](const SireBase::Slice &slice) const
+QList<FrameTransform> TrajectoryAligner::operator[](const SireBase::Slice &slice) const
 {
-    QList<Transform> ret;
+    QList<FrameTransform> ret;
 
     for (auto it = slice.begin(this->nFrames()); not it.atEnd(); it.next())
     {

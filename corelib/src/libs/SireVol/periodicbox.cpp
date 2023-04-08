@@ -42,6 +42,7 @@
 #include "periodicbox.h"
 
 #include "SireMaths/rangenerator.h"
+#include "SireMaths/align.h"
 
 #include "SireBase/countflops.h"
 
@@ -1025,6 +1026,40 @@ double PeriodicBox::minimumDistance(const CoordGroup &group0, const CoordGroup &
 
     // return the minimum distance
     return sqrt(mindist2);
+}
+
+SpacePtr PeriodicBox::transform(const Transform &tform, bool forwards) const
+{
+    // eventually return a TransformedSpace(*this);
+    return SpacePtr(*this);
+}
+
+QVector<Vector> PeriodicBox::getMinimumImage(const QVector<Vector> &coords,
+                                             const Vector &center) const
+{
+    if (coords.isEmpty())
+        return coords;
+
+    Vector wrapdelta = wrapDelta(AABox(coords.constData(), coords.count()).center(),
+                                 center);
+
+    if (wrapdelta.isZero())
+    {
+        return coords;
+    }
+    else
+    {
+        QVector<Vector> ret = coords;
+
+        auto ret_data = ret.data();
+
+        for (int i = 0; i < ret.count(); ++i)
+        {
+            ret_data[i] += wrapdelta;
+        }
+
+        return ret;
+    }
 }
 
 /** Return the closest periodic copy of 'group' to the point 'point',

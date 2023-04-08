@@ -31,6 +31,7 @@
 #include "cartesian.h"
 #include "space.h"
 
+#include "SireMaths/align.h"
 #include "SireMaths/rangenerator.h"
 
 #include "SireError/errors.h"

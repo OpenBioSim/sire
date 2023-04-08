@@ -119,6 +119,7 @@ set ( PYPP_SOURCES
        EvaluatorM.pypp.cpp
        Force3D.pypp.cpp
        Frame.pypp.cpp
+       FrameTransform.pypp.cpp
        GeometryPerturbation.pypp.cpp
        GeometryPerturbations.pypp.cpp
        GroupAtomIDBase.pypp.cpp

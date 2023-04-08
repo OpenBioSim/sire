@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -346,7 +348,7 @@ void register_Space_class(){
                 , getCopiesWithin_function_value
                 , ( bp::arg("group"), bp::arg("center"), bp::arg("dist") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return a list of copies of CoordGroup group that are within\ndistance of the CoordGroup center, translating group so that\nit has the right coordinates to be around center. Note that multiple\ncopies of group may be returned if this is a periodic space and\nthere are multiple periodic replicas of group within dist of\ncenter. The copies of group are returned together with the\nminimum distance between that periodic replica and center.\n\nIf there are no periodic replicas of group that are within\ndist of center, then an empty list is returned.\n" );
         
         }
         { //::SireVol::Space::getImagesWithin
@@ -360,6 +362,19 @@ void register_Space_class(){
                 , ( bp::arg("point"), bp::arg("center"), bp::arg("dist") )
                 , bp::release_gil_policy()
                 , "Return all periodic images of point with respect to center within\ndist distance of center" );
+        
+        }
+        { //::SireVol::Space::getMinimumImage
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Space::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::Space::getMinimumImage );
+            
+            Space_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "Return the minimum image copy of coords with respect to center.\nFor periodic spaces, this translates group into the box that\nhas its center at center (i.e. returns the closest copy of\ngroup to center according to the minimum image convention).\nNote that this will treat all of the points as a single group\n(i.e. image them all as a single unit)" );
         
         }
         { //::SireVol::Space::getMinimumImage
@@ -574,6 +589,18 @@ void register_Space_class(){
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this space" );
+        
+        }
+        { //::SireVol::Space::transform
+        
+            typedef ::SireVol::SpacePtr ( ::SireVol::Space::*transform_function_type)( ::SireMaths::Transform const &,bool ) const;
+            transform_function_type transform_function_value( &::SireVol::Space::transform );
+            
+            Space_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform"), bp::arg("forwards")=(bool)(true) )
+                , "Return this space transformed by the passed Transform.\nReturn the forward transform if forwards is true, else\nreturn the reverse transform\n" );
         
         }
         { //::SireVol::Space::typeName

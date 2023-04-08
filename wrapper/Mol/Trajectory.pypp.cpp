@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 #include "trajectory.h"
 
+#include "trajectoryaligner.h"
+
 #include "trajectory.h"
 
 SireMol::Trajectory __copy__(const SireMol::Trajectory &other){ return SireMol::Trajectory(other); }
@@ -107,39 +109,13 @@ void register_Trajectory_class(){
         }
         { //::SireMol::Trajectory::getFrame
         
-            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,int ) const;
-            getFrame_function_type getFrame_function_value( &::SireMol::Trajectory::getFrame );
-            
-            Trajectory_exposer.def( 
-                "getFrame"
-                , getFrame_function_value
-                , ( bp::arg("i"), bp::arg("smooth") )
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
-        { //::SireMol::Trajectory::getFrame
-        
-            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,::SireMaths::Transform const & ) const;
+            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,::SireMol::FrameTransform const & ) const;
             getFrame_function_type getFrame_function_value( &::SireMol::Trajectory::getFrame );
             
             Trajectory_exposer.def( 
                 "getFrame"
                 , getFrame_function_value
                 , ( bp::arg("i"), bp::arg("transform") )
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
-        { //::SireMol::Trajectory::getFrame
-        
-            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,int,::SireMaths::Transform const & ) const;
-            getFrame_function_type getFrame_function_value( &::SireMol::Trajectory::getFrame );
-            
-            Trajectory_exposer.def( 
-                "getFrame"
-                , getFrame_function_value
-                , ( bp::arg("i"), bp::arg("smooth"), bp::arg("transform") )
                 , bp::release_gil_policy()
                 , "" );
         

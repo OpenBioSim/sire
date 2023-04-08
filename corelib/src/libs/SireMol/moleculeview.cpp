@@ -37,6 +37,7 @@
 #include "select.h"
 #include "selector.hpp"
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 #include "selectormol.h"
 
 #include "SireVol/space.h"
@@ -174,23 +175,7 @@ void MoleculeView::_fromFrame(const Frame &frame, const SireBase::PropertyMap &m
     if (frame.hasCoordinates() and coords_prop.hasSource())
     {
         auto coords = AtomCoords(d->info());
-
-        bool autowrap = true;
-
-        if (map.specified("autowrap"))
-        {
-            autowrap = map["autowrap"].value().asABoolean();
-        }
-
-        /*if (autowrap and frame.space().isPeriodic())
-        {
-            CoordGroup cg(frame.coordinates());
-            cg = frame.space().getMinimumImage(cg, Vector(0));
-            coords.copyFrom(cg.toVector());
-        }
-        else*/
         coords.copyFrom(frame.coordinates());
-
         d->setProperty(coords_prop.source(), coords);
     }
 
@@ -253,21 +238,15 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     auto traj = d->property(traj_prop).asA<Trajectory>();
 
-    SireMaths::Transform transform;
-
     if (map.specified("transform"))
     {
-        transform = map["transform"].value().asA<SireMaths::Transform>();
+        const auto &transform = map["transform"].value().asA<FrameTransform>();
+        this->_fromFrame(traj.getFrame(frame, transform), map);
     }
-
-    int smooth = 1;
-
-    if (map.specified("smooth"))
+    else
     {
-        smooth = map["smooth"].value().asAnInteger();
+        this->_fromFrame(traj.getFrame(frame), map);
     }
-
-    this->_fromFrame(traj.getFrame(frame, smooth, transform), map);
 }
 
 void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)

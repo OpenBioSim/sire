@@ -223,7 +223,9 @@ QString Transform::toString() const
 /** Apply this transformation to the passed point, returning the result */
 Vector Transform::operator()(const Vector &point) const
 {
-    return delta + rotcent + rotmat.rotate(point - rotcent);
+    Vector p = point;
+    this->apply(&p, 1);
+    return p;
 }
 
 /** Apply this transformation to all of the passed points. Note that this
@@ -301,6 +303,83 @@ Vector Transform::apply(const Vector &point) const
 QVector<Vector> Transform::apply(const QVector<Vector> &points) const
 {
     return this->operator()(points);
+}
+
+/** Apply the inverse of this transformation to all of the passed points. Note that this
+    modifies the points themselves and returns a pointer to the same array */
+Vector *Transform::reverse(Vector *points, int sz) const
+{
+    if (sz == 0 or (delta.isZero() and rotmat.isIdentity()))
+        return points;
+
+    else
+    {
+        if (rotmat.isIdentity())
+        {
+            for (int i = 0; i < sz; ++i)
+            {
+                points[i] -= delta;
+            }
+        }
+        else if (delta.isZero())
+        {
+            const auto invmat = rotmat.inverse();
+
+            if (rotcent.isZero())
+            {
+                for (int i = 0; i < sz; ++i)
+                {
+                    points[i] = invmat.rotate(points[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < sz; ++i)
+                {
+                    points[i] = rotcent + invmat.rotate(points[i] - rotcent);
+                }
+            }
+        }
+        else if (rotcent.isZero())
+        {
+            const auto invmat = rotmat.inverse();
+
+            for (int i = 0; i < sz; ++i)
+            {
+                points[i] = invmat.rotate(points[i]) - delta;
+            }
+        }
+        else
+        {
+            const auto invmat = rotmat.inverse();
+
+            for (int i = 0; i < sz; ++i)
+            {
+                points[i] = rotcent + invmat.rotate(points[i] - rotcent) - delta;
+            }
+        }
+
+        return points;
+    }
+}
+
+/** Apply the inverse of this transformation to the passed point, returning the result */
+Vector Transform::reverse(const Vector &point) const
+{
+    Vector p = point;
+    this->reverse(&p, 1);
+    return p;
+}
+
+/** Apply this transformation to all of the passed points, returning the results */
+QVector<Vector> Transform::reverse(const QVector<Vector> &points) const
+{
+    QVector<Vector> ret = points;
+
+    if (ret.count() > 0)
+        this->reverse(ret.data(), ret.count());
+
+    return ret;
 }
 
 /** Return the amount by which to translate */

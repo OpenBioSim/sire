@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -356,6 +358,19 @@ void register_TriclinicBox_class(){
         }
         { //::SireVol::TriclinicBox::getMinimumImage
         
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::TriclinicBox::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::TriclinicBox::getMinimumImage );
+            
+            TriclinicBox_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "Return the copy of the point point which is the closest minimum image\nto center" );
+        
+        }
+        { //::SireVol::TriclinicBox::getMinimumImage
+        
             typedef ::SireMaths::Vector ( ::SireVol::TriclinicBox::*getMinimumImage_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const & ) const;
             getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::TriclinicBox::getMinimumImage );
             
@@ -556,6 +571,18 @@ void register_TriclinicBox_class(){
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this space" );
+        
+        }
+        { //::SireVol::TriclinicBox::transform
+        
+            typedef ::SireVol::SpacePtr ( ::SireVol::TriclinicBox::*transform_function_type)( ::SireMaths::Transform const &,bool ) const;
+            transform_function_type transform_function_value( &::SireVol::TriclinicBox::transform );
+            
+            TriclinicBox_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform"), bp::arg("forwards")=(bool)(true) )
+                , "" );
         
         }
         { //::SireVol::TriclinicBox::truncatedOctahedron

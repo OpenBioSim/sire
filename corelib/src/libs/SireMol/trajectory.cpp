@@ -26,6 +26,7 @@
 \*********************************************/
 
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 
 #include "SireID/index.h"
 
@@ -756,30 +757,13 @@ Frame Trajectory::getFrame(int i) const
         return frame.subset(start_atom, natoms);
 }
 
-Frame Trajectory::getFrame(int i, int smooth) const
+Frame Trajectory::getFrame(int i, const FrameTransform &transform) const
 {
-    if (smooth <= 1)
-        return this->getFrame(i);
-    else
-        return this->getFrame(i, smooth, Transform());
-}
-
-Frame Trajectory::getFrame(int i, const Transform &transform) const
-{
-    if (transform.isNull())
-        return this->getFrame(i);
-    else
-        return this->getFrame(i, 1, transform);
-}
-
-Frame Trajectory::getFrame(int i, int smooth, const Transform &transform) const
-{
-    if (smooth < 1)
-        smooth = 1;
-
     const auto nframes = this->nFrames();
 
     i = Index(i).map(nframes);
+
+    auto smooth = transform.nSmooth();
 
     if (smooth > nframes)
         smooth = nframes;
@@ -1207,10 +1191,19 @@ bool Frame::isEmpty() const
     return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty();
 }
 
-Frame Frame::transform(const Transform &tform) const
+Frame Frame::transform(const FrameTransform &tform) const
 {
     Frame ret(*this);
-    ret.coords = tform(ret.coords);
+    ret.coords = tform.apply(ret.coords);
+    ret.spc = tform.apply(ret.spc.read());
+    return ret;
+}
+
+Frame Frame::reverse(const FrameTransform &tform) const
+{
+    Frame ret(*this);
+    ret.coords = tform.reverse(ret.coords);
+    ret.spc = tform.reverse(ret.spc.read());
     return ret;
 }
 
@@ -1251,8 +1244,6 @@ Frame Frame::smooth(const QList<Frame> &frames) const
 
     Vector center = mincoords + (0.5 * (maxcoords - mincoords));
 
-    const bool is_periodic = this->space().isPeriodic();
-
     for (int i = 0; i < frames.count(); ++i)
     {
         auto c = frames.at(i).coords;
@@ -1264,15 +1255,6 @@ Frame Frame::smooth(const QList<Frame> &frames) const
                     "Cannot smooth a trajectory if the number of "
                     "atoms / coordinates per frame changes."),
                 CODELOC);
-        }
-
-        if (is_periodic)
-        {
-            // map these coordinates as a single group into the
-            // same simulation box as the first frame
-            auto cg = CoordGroup(c);
-            cg = this->space().getMinimumImage(cg, center);
-            c = cg.toVector();
         }
 
         const auto coords_data = c.constData();

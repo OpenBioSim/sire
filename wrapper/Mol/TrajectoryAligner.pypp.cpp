@@ -32,8 +32,9 @@ void register_TrajectoryAligner_class(){
 
     { //::SireMol::TrajectoryAligner
         typedef bp::class_< SireMol::TrajectoryAligner, bp::bases< SireBase::Property > > TrajectoryAligner_exposer_t;
-        TrajectoryAligner_exposer_t TrajectoryAligner_exposer = TrajectoryAligner_exposer_t( "TrajectoryAligner", "This class can be used to generate the SireMaths::Transform object\nneeded to align each frame of a trajectory.\n", bp::init< >("") );
+        TrajectoryAligner_exposer_t TrajectoryAligner_exposer = TrajectoryAligner_exposer_t( "TrajectoryAligner", "This class can be used to generate the FrameTransform object\nneeded to align each frame of a trajectory.\n", bp::init< >("") );
         bp::scope TrajectoryAligner_scope( TrajectoryAligner_exposer );
+        TrajectoryAligner_exposer.def( bp::init< SireMaths::Vector const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() ), "") );
         TrajectoryAligner_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atoms"), bp::arg("map")=SireBase::PropertyMap() ), "") );
         TrajectoryAligner_exposer.def( bp::init< SireMol::TrajectoryAligner const & >(( bp::arg("other") ), "") );
         { //::SireMol::TrajectoryAligner::atoms
@@ -45,6 +46,18 @@ void register_TrajectoryAligner_class(){
                 "atoms"
                 , atoms_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
+        { //::SireMol::TrajectoryAligner::center
+        
+            typedef ::SireMaths::Vector ( ::SireMol::TrajectoryAligner::*center_function_type)(  ) const;
+            center_function_type center_function_value( &::SireMol::TrajectoryAligner::center );
+            
+            TrajectoryAligner_exposer.def( 
+                "center"
+                , center_function_value
+                , bp::release_gil_policy()
                 , "" );
         
         }
@@ -85,6 +98,18 @@ void register_TrajectoryAligner_class(){
                 , "" );
         
         }
+        { //::SireMol::TrajectoryAligner::nSmooth
+        
+            typedef int ( ::SireMol::TrajectoryAligner::*nSmooth_function_type)(  ) const;
+            nSmooth_function_type nSmooth_function_value( &::SireMol::TrajectoryAligner::nSmooth );
+            
+            TrajectoryAligner_exposer.def( 
+                "nSmooth"
+                , nSmooth_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         TrajectoryAligner_exposer.def( bp::self != bp::self );
         { //::SireMol::TrajectoryAligner::operator=
         
@@ -102,7 +127,7 @@ void register_TrajectoryAligner_class(){
         TrajectoryAligner_exposer.def( bp::self == bp::self );
         { //::SireMol::TrajectoryAligner::operator[]
         
-            typedef ::SireMaths::Transform ( ::SireMol::TrajectoryAligner::*__getitem___function_type)( int ) const;
+            typedef ::SireMol::FrameTransform ( ::SireMol::TrajectoryAligner::*__getitem___function_type)( int ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::TrajectoryAligner::operator[] );
             
             TrajectoryAligner_exposer.def( 
@@ -114,7 +139,7 @@ void register_TrajectoryAligner_class(){
         }
         { //::SireMol::TrajectoryAligner::operator[]
         
-            typedef ::QList< SireMaths::Transform > ( ::SireMol::TrajectoryAligner::*__getitem___function_type)( ::QList< long long > const & ) const;
+            typedef ::QList< SireMol::FrameTransform > ( ::SireMol::TrajectoryAligner::*__getitem___function_type)( ::QList< long long > const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::TrajectoryAligner::operator[] );
             
             TrajectoryAligner_exposer.def( 
@@ -126,7 +151,7 @@ void register_TrajectoryAligner_class(){
         }
         { //::SireMol::TrajectoryAligner::operator[]
         
-            typedef ::QList< SireMaths::Transform > ( ::SireMol::TrajectoryAligner::*__getitem___function_type)( ::SireBase::Slice const & ) const;
+            typedef ::QList< SireMol::FrameTransform > ( ::SireMol::TrajectoryAligner::*__getitem___function_type)( ::SireBase::Slice const & ) const;
             __getitem___function_type __getitem___function_value( &::SireMol::TrajectoryAligner::operator[] );
             
             TrajectoryAligner_exposer.def( 
@@ -180,6 +205,18 @@ void register_TrajectoryAligner_class(){
             TrajectoryAligner_exposer.def( 
                 "what"
                 , what_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::TrajectoryAligner::wrap
+        
+            typedef bool ( ::SireMol::TrajectoryAligner::*wrap_function_type)(  ) const;
+            wrap_function_type wrap_function_value( &::SireMol::TrajectoryAligner::wrap );
+            
+            TrajectoryAligner_exposer.def( 
+                "wrap"
+                , wrap_function_value
                 , bp::release_gil_policy()
                 , "" );
         

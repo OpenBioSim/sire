@@ -42,6 +42,7 @@
 #include "SireBase/countflops.h"
 
 #include "SireMaths/rangenerator.h"
+#include "SireMaths/align.h"
 
 #include "SireError/errors.h"
 #include "SireVol/errors.h"
@@ -993,6 +994,17 @@ double Cartesian::minimumDistance(const CoordGroup &group) const
     }
 
     return sqrt(mindist2);
+}
+
+SpacePtr Cartesian::transform(const Transform &tform, bool) const
+{
+    return SpacePtr(*this);
+}
+
+QVector<Vector> Cartesian::getMinimumImage(const QVector<Vector> &coords,
+                                           const Vector &) const
+{
+    return coords;
 }
 
 /** Return the minimum image copy of 'group' with respect to 'center'.
