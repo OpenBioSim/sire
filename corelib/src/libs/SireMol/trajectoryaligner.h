@@ -61,6 +61,7 @@ namespace SireMol
 
     public:
         FrameTransform();
+        FrameTransform(const SireBase::PropertyMap &map);
         FrameTransform(const SireMaths::Transform &transform,
                        const SireMaths::Vector &center,
                        const SireVol::Space &space,

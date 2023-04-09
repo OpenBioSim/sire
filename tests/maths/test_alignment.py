@@ -89,3 +89,21 @@ def test_trajectory_alignment(ala_traj):
         rmsd = mol.evaluate().rmsd(mol2)
 
         assert unaligned_rmsds[i] == pytest.approx(rmsd.value())
+
+
+def test_smooth_alignment(ala_traj):
+    mols = ala_traj
+
+    smoothed = mols.trajectory(align="element C", smooth=20)
+    aligned = mols.trajectory(align="element C")
+
+    smoothed_mol = smoothed[0].current()[0]
+    aligned_mol = aligned[0].current()[0]
+
+    for s, a in zip(smoothed[1:11], aligned[1:11]):
+        rmsd_s = smoothed_mol.evaluate().rmsd(s[0])
+        rmsd_a = aligned_mol.evaluate().rmsd(a[0])
+
+        # the smoothed RMSDs will be significantly less than the
+        # aligned RMSDs
+        assert rmsd_s.value() < 0.5 * rmsd_a.value()

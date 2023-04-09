@@ -251,9 +251,9 @@ class System:
         """Return the improper that matches the passed index/search"""
         return self.molecules().improper(*args, **kwargs)
 
-    def trajectory(self):
+    def trajectory(self, *args, **kwargs):
         """Return an iterator over the trajectory of frames for this System"""
-        return self.molecules().trajectory()
+        return self.molecules().trajectory(*args, **kwargs)
 
     def minimisation(self, map=None):
         """

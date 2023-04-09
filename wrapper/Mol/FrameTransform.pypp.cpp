@@ -32,6 +32,7 @@ void register_FrameTransform_class(){
         typedef bp::class_< SireMol::FrameTransform, bp::bases< SireBase::Property > > FrameTransform_exposer_t;
         FrameTransform_exposer_t FrameTransform_exposer = FrameTransform_exposer_t( "FrameTransform", "This class represents a transformation that is needed to be\nperformed for a specific frame of a trajectory\n", bp::init< >("") );
         bp::scope FrameTransform_scope( FrameTransform_exposer );
+        FrameTransform_exposer.def( bp::init< SireBase::PropertyMap const & >(( bp::arg("map") ), "") );
         FrameTransform_exposer.def( bp::init< SireMaths::Transform const &, SireMaths::Vector const &, SireVol::Space const &, int, bool >(( bp::arg("transform"), bp::arg("center"), bp::arg("space"), bp::arg("nsmooth"), bp::arg("wrap") ), "") );
         FrameTransform_exposer.def( bp::init< SireMol::FrameTransform const & >(( bp::arg("other") ), "") );
         { //::SireMol::FrameTransform::apply
@@ -69,6 +70,32 @@ void register_FrameTransform_class(){
                 "apply"
                 , apply_function_value
                 , ( bp::arg("coords") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::FrameTransform::apply
+        
+            typedef ::SireMaths::Vector ( ::SireMol::FrameTransform::*apply_function_type)( ::SireMaths::Vector const &,::SireVol::Space const & ) const;
+            apply_function_type apply_function_value( &::SireMol::FrameTransform::apply );
+            
+            FrameTransform_exposer.def( 
+                "apply"
+                , apply_function_value
+                , ( bp::arg("coords"), bp::arg("space") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::FrameTransform::apply
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireMol::FrameTransform::*apply_function_type)( ::QVector< SireMaths::Vector > const &,::SireVol::Space const & ) const;
+            apply_function_type apply_function_value( &::SireMol::FrameTransform::apply );
+            
+            FrameTransform_exposer.def( 
+                "apply"
+                , apply_function_value
+                , ( bp::arg("coords"), bp::arg("space") )
                 , bp::release_gil_policy()
                 , "" );
         

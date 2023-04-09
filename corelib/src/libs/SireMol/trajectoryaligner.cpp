@@ -82,6 +82,21 @@ FrameTransform::FrameTransform()
 {
 }
 
+FrameTransform::FrameTransform(const SireBase::PropertyMap &map)
+    : ConcreteProperty<FrameTransform, Property>(),
+      cent(0), smooth(1), autowrap(false)
+{
+    if (map.specified("wrap"))
+    {
+        autowrap = map["wrap"].value().asABoolean();
+    }
+
+    if (map.specified("smooth"))
+    {
+        smooth = map["smooth"].value().asAnInteger();
+    }
+}
+
 FrameTransform::FrameTransform(const SireMaths::Transform &transform,
                                const SireMaths::Vector &center,
                                const SireVol::Space &space,
@@ -568,6 +583,8 @@ FrameTransform TrajectoryAligner::operator[](int i) const
     // the below part could be cached :-)
     auto c = SelectorM<Atom>(atms);
 
+    // this will load the frame - smoothing the coordinates
+    // if needed
     c.loadFrame(i, this->map);
 
     // use the first space that we find

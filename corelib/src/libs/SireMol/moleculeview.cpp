@@ -245,7 +245,7 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
     }
     else
     {
-        this->_fromFrame(traj.getFrame(frame), map);
+        this->_fromFrame(traj.getFrame(frame, FrameTransform(map)), map);
     }
 }
 
