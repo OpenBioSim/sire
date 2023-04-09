@@ -22,6 +22,14 @@ class TrajectoryIterator:
             self._times = None
             self._iter = None
             self._frame = None
+
+            if align is True:
+                # passing in 'True' means align against everything
+                align = "*"
+            elif align is False:
+                # passing in 'False" means don't align anything
+                align = None
+
             self._align = align
 
             # Get the values of smooth and wrap from either the
@@ -29,7 +37,7 @@ class TrajectoryIterator:
             if (smooth is None) and self._map.specified("smooth"):
                 smooth = self._map["smooth"].value().as_integer()
 
-            if (wrap is None) and self._map.specified("wrap"):
+            if wrap is None and self._map.specified("wrap"):
                 wrap = self._map["wrap"].value().as_boolean()
 
             if smooth not in [None, False, 0]:
@@ -52,11 +60,10 @@ class TrajectoryIterator:
             self._map.set("smooth", smooth)
             self._map.set("wrap", wrap)
 
+            from ..legacy.Mol import TrajectoryAligner
+
             if align is not None:
-                from ..legacy.Mol import TrajectoryAligner
-
                 atoms = view[align].atoms()
-
                 self._aligner = TrajectoryAligner(atoms, map=self._map)
             elif wrap or (smooth != 1):
                 self._aligner = TrajectoryAligner(

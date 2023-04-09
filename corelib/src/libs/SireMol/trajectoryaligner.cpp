@@ -208,6 +208,37 @@ QVector<SireMaths::Vector> FrameTransform::apply(const QVector<Vector> &coords) 
     return ret;
 }
 
+SireMaths::Vector FrameTransform::apply(const SireMaths::Vector &coords,
+                                        const SireVol::Space &spc) const
+{
+    Vector ret = coords;
+
+    if (this->wrap())
+    {
+        ret = spc.getMinimumImage(ret, this->center());
+    }
+
+    return this->transform().apply(ret);
+}
+
+QVector<SireMaths::Vector> FrameTransform::apply(const QVector<Vector> &coords,
+                                                 const SireVol::Space &spc) const
+{
+    QVector<Vector> ret = coords;
+
+    if (this->wrap())
+    {
+        // wrap these coordinates into the old space before we
+        // perform the transfrom
+        ret = spc.getMinimumImage(ret, this->center());
+    }
+
+    // now perform the transformation
+    this->transform().apply(ret.data(), ret.count());
+
+    return ret;
+}
+
 Frame FrameTransform::apply(const Frame &frame) const
 {
     return frame.transform(*this);
@@ -448,12 +479,25 @@ const char *TrajectoryAligner::typeName()
 QString TrajectoryAligner::toString() const
 {
     if (this->nSmooth() > 1)
-        return QObject::tr("TrajectoryAligner(center=%1, nSmooth=%2)")
-            .arg(this->center().toString())
-            .arg(this->nSmooth());
+    {
+        if (this->wrap())
+            return QObject::tr("TrajectoryAligner(center=%1, nSmooth=%2, wrapped)")
+                .arg(this->center().toString())
+                .arg(this->nSmooth());
+        else
+            return QObject::tr("TrajectoryAligner(center=%1, nSmooth=%2)")
+                .arg(this->center().toString())
+                .arg(this->nSmooth());
+    }
     else
-        return QObject::tr("TrajectoryAligner(center=%1)")
-            .arg(this->center().toString());
+    {
+        if (this->wrap())
+            return QObject::tr("TrajectoryAligner(center=%1, wrapped)")
+                .arg(this->center().toString());
+        else
+            return QObject::tr("TrajectoryAligner(center=%1)")
+                .arg(this->center().toString());
+    }
 }
 
 int TrajectoryAligner::nSmooth() const

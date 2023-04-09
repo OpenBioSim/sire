@@ -47,7 +47,9 @@ if _has_nglview:
 
     @_nglview.register_backend("sire")
     class _SireStructureTrajectory(_nglview.Trajectory, _nglview.Structure):
-        def __init__(self, obj=None, align=None, smooth=None, map=None):
+        def __init__(
+            self, obj=None, align=None, smooth=None, wrap=None, map=None
+        ):
             if type(obj) is _SireStructureTrajectory:
                 self._traj = obj._traj
                 self._map = obj._map
@@ -58,16 +60,24 @@ if _has_nglview:
                 self._map = create_map(map)
 
                 if type(obj) is TrajectoryIterator:
+                    if align is True:
+                        align = "*"
+                    elif align is False:
+                        align = None
+
                     if align is not None:
                         obj = obj.align(align=align)
 
                     if smooth not in [False, None, 0]:
                         obj = obj.smooth(smooth=smooth)
 
+                    if wrap is True:
+                        obj = obj.wrap()
+
                     self._traj = obj
                 else:
                     self._traj = obj.trajectory(
-                        align=align, smooth=smooth, map=self._map
+                        align=align, smooth=smooth, wrap=wrap, map=self._map
                     )
             else:
                 self._traj = None
@@ -279,6 +289,7 @@ if _has_nglview:
         center: str = None,
         align: str = None,
         smooth=False,
+        wrap=True,
         stage_parameters: str = None,
         map=None,
     ):
@@ -300,12 +311,16 @@ if _has_nglview:
           Pass in a selection string to select atoms against which
           every frame will be aligned. These atoms will be moved
           to the center of the periodic box (if a periodic box
-          is used)
+          is used). If "True" is passed, then this will attempt
+          to align *ALL* of the coordinates in the view.
 
         smooth:
           Pass in the number of frames to smooth (average) the view
           over. If 'True' is passed, then the recommended number
           of frames will be averaged over
+
+        wrap: bool
+          Whether or not to wrap the coordinates into the periodic box.
 
         orthographic:
           Set to False to use a perspective view, or accept the default
@@ -345,7 +360,7 @@ if _has_nglview:
           to be viewed.
         """
         struc_traj = _SireStructureTrajectory(
-            obj, align=align, smooth=smooth, map=map
+            obj, align=align, smooth=smooth, wrap=wrap, map=map
         )
 
         view = _nglview.NGLWidget(struc_traj)

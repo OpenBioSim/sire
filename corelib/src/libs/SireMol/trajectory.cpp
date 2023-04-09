@@ -1194,7 +1194,7 @@ bool Frame::isEmpty() const
 Frame Frame::transform(const FrameTransform &tform) const
 {
     Frame ret(*this);
-    ret.coords = tform.apply(ret.coords);
+    ret.coords = tform.apply(ret.coords, ret.spc.read());
     ret.spc = tform.apply(ret.spc.read());
     return ret;
 }

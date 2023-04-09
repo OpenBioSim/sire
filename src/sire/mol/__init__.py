@@ -1355,7 +1355,7 @@ Selector_Chain_.cursor = _cursors
 Selector_Segment_.cursor = _cursors
 
 
-def _trajectory(obj, align=None, smooth=None, map=None):
+def _trajectory(obj, align=None, smooth=None, wrap=None, map=None):
     """
     Return an iterator over the trajectory of frames of this view.
 
@@ -1363,16 +1363,23 @@ def _trajectory(obj, align=None, smooth=None, map=None):
       Pass in a selection string to select atoms against which
       every frame will be aligned. These atoms will be moved
       to the center of the periodic box (if a periodic box
-      is used)
+      is used). If 'True' is passed then this will align
+      against all of the atoms in the view.
 
     smooth:
       Pass in the number of frames to smooth (average) the view
       over. If 'True' is passed, then the recommended number
       of frames will be averaged over
+
+    wrap: bool
+      Whether or not to wrap the coordinates into the periodic box
+
     """
     from ._trajectory import TrajectoryIterator
 
-    return TrajectoryIterator(obj, align=align, smooth=smooth, map=map)
+    return TrajectoryIterator(
+        obj, align=align, smooth=smooth, wrap=wrap, map=map
+    )
 
 
 MoleculeView.trajectory = _trajectory

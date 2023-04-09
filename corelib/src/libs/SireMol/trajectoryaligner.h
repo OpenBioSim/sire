@@ -89,6 +89,11 @@ namespace SireMol
         SireMaths::Vector apply(const SireMaths::Vector &coords) const;
         QVector<SireMaths::Vector> apply(const QVector<SireMaths::Vector> &coords) const;
 
+        SireMaths::Vector apply(const SireMaths::Vector &coords,
+                                const SireVol::Space &space) const;
+        QVector<SireMaths::Vector> apply(const QVector<SireMaths::Vector> &coords,
+                                         const SireVol::Space &space) const;
+
         Frame apply(const Frame &frame) const;
 
         SireVol::SpacePtr reverse(const SireVol::Space &space) const;
