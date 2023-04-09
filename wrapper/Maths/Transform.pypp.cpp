@@ -77,6 +77,18 @@ void register_Transform_class(){
                 , "Apply this transformation to all of the passed points, returning the results" );
         
         }
+        { //::SireMaths::Transform::inverse
+        
+            typedef ::SireMaths::Transform ( ::SireMaths::Transform::*inverse_function_type)(  ) const;
+            inverse_function_type inverse_function_value( &::SireMaths::Transform::inverse );
+            
+            Transform_exposer.def( 
+                "inverse"
+                , inverse_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMaths::Transform::isNull
         
             typedef bool ( ::SireMaths::Transform::*isNull_function_type)(  ) const;

@@ -1,4 +1,5 @@
 __all__ = [
+    "get_alignment",
     "Atom",
     "AtomIdx",
     "AtomName",
@@ -102,6 +103,12 @@ from ._smiles import _to_smiles, _view2d, _selector_to_smiles, _selector_view2d
 from ..maths import Vector as _Vector
 
 _use_new_api()
+
+
+try:
+    get_alignment = _Mol.getAlignment
+except AttributeError:
+    get_alignment = _Mol.get_alignment
 
 
 # Here I will define some functions that make accessing

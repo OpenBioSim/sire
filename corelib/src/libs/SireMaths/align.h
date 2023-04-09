@@ -95,6 +95,8 @@ namespace SireMaths
         bool isNull() const;
         bool isZero() const;
 
+        Transform inverse() const;
+
         Vector operator()(const Vector &point) const;
         QVector<Vector> operator()(const QVector<Vector> &point) const;
 

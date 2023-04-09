@@ -1464,7 +1464,8 @@ class Cursor:
         return self
 
     def translate(self, *args, map=None):
-        """Translate all of the atoms operated on by this cursor
+        """
+        Translate all of the atoms operated on by this cursor
         by the passed arguments (these are converted automatically
         to a sr.maths.Vector). Use 'map' to specify the property
         map to use to find the coordinates property
@@ -1547,6 +1548,22 @@ class Cursor:
             center = Vector(center)
 
         view = view.move().rotate(quaternion, center, map=map).commit()
+
+        self._d.molecule = view.molecule().edit()
+        self._update()
+
+        return self
+
+    def transform(self, transform, map=None):
+        """
+        Move all of the atoms operated on by this cursor by the
+        passed transformation (a sr.maths.Transform object).
+        Use 'map' to specify the property map used to find the
+        coordinates property.
+        """
+        map = self._d.merge(map)
+        view = self.commit()
+        view = view.move().transform(transform, map=map).commit()
 
         self._d.molecule = view.molecule().edit()
         self._update()
@@ -2567,6 +2584,18 @@ class Cursors:
 
         for cursor in self._cursors:
             cursor.rotate(quaternion=quaternion, center=center, map=map)
+
+        return self
+
+    def transform(self, transform, map=None):
+        """
+        Move all of the atoms operated on by this cursor by the
+        passed transformation (a sr.maths.Transform object).
+        Use 'map' to specify the property map used to find the
+        coordinates property.
+        """
+        for cursor in self._cursors:
+            cursor.transform(transform=transform, map=map)
 
         return self
 
@@ -3699,5 +3728,17 @@ class CursorsM:
 
         for cursor in self._cursors:
             cursor.rotate(quaternion=quaternion, center=center, map=map)
+
+        return self
+
+    def transform(self, transform, map=None):
+        """
+        Move all of the atoms operated on by this cursor by the
+        passed transformation (a sr.maths.Transform object).
+        Use 'map' to specify the property map used to find the
+        coordinates property.
+        """
+        for cursor in self._cursors:
+            cursor.transform(transform=transform, map=map)
 
         return self

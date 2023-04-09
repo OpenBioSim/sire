@@ -228,6 +228,18 @@ Vector Transform::operator()(const Vector &point) const
     return p;
 }
 
+/** Return the inverse of this transformation */
+Transform Transform::inverse() const
+{
+    Transform ret(*this);
+
+    ret.delta = -ret.delta;
+    ret.rotcent = ret.rotcent - ret.delta;
+    ret.rotmat = ret.rotmat.inverse();
+
+    return ret;
+}
+
 /** Apply this transformation to all of the passed points. Note that this
     modifies the points themselves and returns a pointer to the same array */
 Vector *Transform::apply(Vector *points, int sz) const
@@ -272,6 +284,10 @@ Vector *Transform::apply(Vector *points, int sz) const
         {
             for (int i = 0; i < sz; ++i)
             {
+                // x = d + [ dC-p rotate theta ]
+                // x - d = dC-p rotate theta
+                // (x - d) rotate -theta = dC - p
+                // rotcent +
                 points[i] = delta + rotcent + rotmat.rotate(points[i] - rotcent);
             }
         }
@@ -309,58 +325,7 @@ QVector<Vector> Transform::apply(const QVector<Vector> &points) const
     modifies the points themselves and returns a pointer to the same array */
 Vector *Transform::reverse(Vector *points, int sz) const
 {
-    if (sz == 0 or (delta.isZero() and rotmat.isIdentity()))
-        return points;
-
-    else
-    {
-        if (rotmat.isIdentity())
-        {
-            for (int i = 0; i < sz; ++i)
-            {
-                points[i] -= delta;
-            }
-        }
-        else if (delta.isZero())
-        {
-            const auto invmat = rotmat.inverse();
-
-            if (rotcent.isZero())
-            {
-                for (int i = 0; i < sz; ++i)
-                {
-                    points[i] = invmat.rotate(points[i]);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < sz; ++i)
-                {
-                    points[i] = rotcent + invmat.rotate(points[i] - rotcent);
-                }
-            }
-        }
-        else if (rotcent.isZero())
-        {
-            const auto invmat = rotmat.inverse();
-
-            for (int i = 0; i < sz; ++i)
-            {
-                points[i] = invmat.rotate(points[i]) - delta;
-            }
-        }
-        else
-        {
-            const auto invmat = rotmat.inverse();
-
-            for (int i = 0; i < sz; ++i)
-            {
-                points[i] = rotcent + invmat.rotate(points[i] - rotcent) - delta;
-            }
-        }
-
-        return points;
-    }
+    return this->inverse().apply(points, sz);
 }
 
 /** Apply the inverse of this transformation to the passed point, returning the result */
