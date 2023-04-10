@@ -1055,12 +1055,6 @@ double TriclinicBox::minimumDistance(const CoordGroup &group0, const CoordGroup 
     return std::sqrt(mindist2);
 }
 
-SpacePtr TriclinicBox::transform(const Transform &tform, bool forwards) const
-{
-    // eventually return a TransformedSpace(*this);
-    return SpacePtr(*this);
-}
-
 QVector<Vector> TriclinicBox::getMinimumImage(const QVector<Vector> &coords,
                                               const Vector &center) const
 {

@@ -523,12 +523,6 @@ double CombinedSpace::minimumDistance(const CoordGroup &group) const
     return spces.at(0).read().minimumDistance(group);
 }
 
-SpacePtr CombinedSpace::transform(const Transform &tform, bool forwards) const
-{
-    // eventually return a TransformedSpace(*this);
-    return SpacePtr(*this);
-}
-
 QVector<Vector> CombinedSpace::getMinimumImage(const QVector<Vector> &coords,
                                                const Vector &center) const
 {

@@ -12,6 +12,7 @@
 #include "gridinfo.h"
 #include "patching.h"
 #include "periodicbox.h"
+#include "transformedspace.h"
 #include "triclinicbox.h"
 
 #include "Helpers/objectregistry.hpp"
@@ -34,6 +35,7 @@ void register_SireVol_objects()
     ObjectRegistry::registerConverterFor< SireVol::NullPatching >();
     ObjectRegistry::registerConverterFor< SireVol::BoxPatching >();
     ObjectRegistry::registerConverterFor< SireVol::PeriodicBox >();
+    ObjectRegistry::registerConverterFor< SireVol::TransformedSpace >();
     ObjectRegistry::registerConverterFor< SireVol::TriclinicBox >();
 
 }

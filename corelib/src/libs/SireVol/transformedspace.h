@@ -2,7 +2,7 @@
   *
   *  Sire - Molecular Simulation Framework
   *
-  *  Copyright (C) 2006  Christopher Woods
+  *  Copyright (C) 2023  Christopher Woods
   *
   *  This program is free software; you can redistribute it and/or modify
   *  it under the terms of the GNU General Public License as published by
@@ -21,58 +21,59 @@
   *  For full details of the license please see the COPYING file
   *  that should have come with this distribution.
   *
-  *  You can contact the authors at https://sire.openbiosim.org
+  *  You can contact the authors via the website
+  *  at http://sire.openbiosim.org
   *
 \*********************************************/
 
-#ifndef SIREVOL_CARTESIAN_H
-#define SIREVOL_CARTESIAN_H
+#ifndef SIREVOL_TRANSFORMEDSPACE_H
+#define SIREVOL_TRANSFORMEDSPACE_H
 
 #include "space.h"
+
+#include "SireMaths/align.h"
 
 SIRE_BEGIN_HEADER
 
 namespace SireVol
 {
-    class Cartesian;
+    class TransformedSpace;
 }
 
-SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::Cartesian &);
-SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::Cartesian &);
+SIREVOL_EXPORT QDataStream &operator<<(QDataStream &, const SireVol::TransformedSpace &);
+SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::TransformedSpace &);
 
 namespace SireVol
 {
 
     /**
-    This class overloads SimVolume to provide an infinite Cartesian
-    (3-dimensional, orthoganol dimensions) volume. This corresponds to
-    a traditional gas-phase or no-boundary system.
-
-    @author Christopher Woods
+    This class overloads Space to provide a transformed (translated and/or
+    rotated) version of any of the other Space classes
     */
-    class SIREVOL_EXPORT Cartesian : public SireBase::ConcreteProperty<Cartesian, Space>
+    class SIREVOL_EXPORT TransformedSpace : public SireBase::ConcreteProperty<TransformedSpace, Space>
     {
 
-        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const Cartesian &);
-        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, Cartesian &);
+        friend SIREVOL_EXPORT QDataStream & ::operator<<(QDataStream &, const TransformedSpace &);
+        friend SIREVOL_EXPORT QDataStream & ::operator>>(QDataStream &, TransformedSpace &);
 
     public:
-        Cartesian();
-        Cartesian(const Cartesian &other);
+        TransformedSpace();
+        TransformedSpace(const Space &space, const SireMaths::Transform &transform);
+        TransformedSpace(const TransformedSpace &other);
 
-        virtual ~Cartesian();
+        virtual ~TransformedSpace();
 
-        Cartesian &operator=(const Cartesian &other);
+        TransformedSpace &operator=(const TransformedSpace &other);
 
-        bool operator==(const Cartesian &other) const;
-        bool operator!=(const Cartesian &other) const;
+        bool operator==(const TransformedSpace &other) const;
+        bool operator!=(const TransformedSpace &other) const;
 
         static const char *typeName();
 
         QString toString() const;
 
-        bool isPeriodic() const;
         bool isCartesian() const;
+        bool isPeriodic() const;
 
         SireUnits::Dimension::Volume volume() const;
         SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
@@ -142,13 +143,23 @@ namespace SireVol
 
         QList<boost::tuple<double, CoordGroup>> getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
                                                                 double dist) const;
+
+    private:
+        /** The transformation to apply to the space */
+        SireMaths::Transform tform;
+
+        /** The inverse of the transformation to go back from the space */
+        SireMaths::Transform inv_tform;
+
+        /** The actual space being transformed */
+        SpacePtr spc;
     };
 
 } // namespace SireVol
 
-Q_DECLARE_METATYPE(SireVol::Cartesian)
+Q_DECLARE_METATYPE(SireVol::TransformedSpace)
 
-SIRE_EXPOSE_CLASS(SireVol::Cartesian)
+SIRE_EXPOSE_CLASS(SireVol::TransformedSpace)
 
 SIRE_END_HEADER
 

@@ -25,6 +25,7 @@ set ( SIREVOL_HEADERS
       patching.h
       periodicbox.h
       space.h
+      transformedspace.h
       triclinicbox.h
     )
 
@@ -44,6 +45,7 @@ set ( SIREVOL_SOURCES
       patching.cpp
       periodicbox.cpp
       space.cpp
+      transformedspace.cpp
       triclinicbox.cpp
 
       ${SIREVOL_HEADERS}

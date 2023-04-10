@@ -1208,9 +1208,7 @@ Frame Frame::reverse(const FrameTransform &tform) const
 }
 
 /** Return the frame which has this frame smoothed with the coordinates
- *  from all of the other frames. The other frames will be moved into
- *  the same simulation box as this frame, and then averaged onto
- *  this frames coordinates. The result will be returned
+ *  from all of the other frames. The result will be returned
  */
 Frame Frame::smooth(const QList<Frame> &frames) const
 {
@@ -1259,9 +1257,51 @@ Frame Frame::smooth(const QList<Frame> &frames) const
 
         const auto coords_data = c.constData();
 
-        for (int j = 0; j < nats; ++j)
+        Vector delta = coords_data[0] - this->coords[0];
+
+        if (delta.length2() > 30)
         {
-            smoothed_data[j] += weight * coords_data[j];
+            // the first atom has jumped by 5-6 A. This suggests that this
+            // frame may have been wrapped. We will now check the delta
+            // between the centers of the two frames...
+            mincoords = coords_data[0];
+            maxcoords = mincoords;
+
+            for (int j = 1; j < nats; ++j)
+            {
+                mincoords.setMin(coords_data[j]);
+                maxcoords.setMax(coords_data[j]);
+            }
+
+            Vector frame_center = mincoords + (0.5 * (maxcoords - mincoords));
+
+            delta = center - frame_center;
+
+            if (delta.length2() > 30)
+            {
+                // Yes - the center has moved too - suggests a frame offset
+                // Translate to remove the center offset
+                for (int j = 0; j < nats; ++j)
+                {
+                    smoothed_data[j] += weight * (coords_data[j] + delta);
+                }
+            }
+            else
+            {
+                // No - not enough of a change - just use the
+                // original coordinates
+                for (int j = 0; j < nats; ++j)
+                {
+                    smoothed_data[j] += weight * coords_data[j];
+                }
+            }
+        }
+        else
+        {
+            for (int j = 0; j < nats; ++j)
+            {
+                smoothed_data[j] += weight * coords_data[j];
+            }
         }
     }
 

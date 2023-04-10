@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 #include "space.h"
 
+#include "transformedspace.h"
+
 #include <QMutex>
 
 #include <limits>

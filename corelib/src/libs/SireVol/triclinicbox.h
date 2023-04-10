@@ -129,9 +129,6 @@ namespace SireVol
 
         double minimumDistance(const AABox &box0, const AABox &box1) const;
 
-        SpacePtr transform(const SireMaths::Transform &transform,
-                           bool forwards = true) const;
-
         QVector<Vector> getMinimumImage(const QVector<Vector> &coords,
                                         const Vector &center) const;
 

@@ -46,6 +46,7 @@ SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::AABox &);
 namespace SireMaths
 {
     class Sphere;
+    class Transform;
 }
 
 namespace SireVol
@@ -123,6 +124,8 @@ namespace SireVol
         void recalculate(const QVector<Vector> &coordinates);
 
         void translate(const Vector &delta);
+
+        void transform(const SireMaths::Transform &transform);
 
         const Vector &center() const;
         const Vector &halfExtents() const;

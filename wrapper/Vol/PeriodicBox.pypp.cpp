@@ -536,18 +536,6 @@ void register_PeriodicBox_class(){
                 , "Return a string representation of this space" );
         
         }
-        { //::SireVol::PeriodicBox::transform
-        
-            typedef ::SireVol::SpacePtr ( ::SireVol::PeriodicBox::*transform_function_type)( ::SireMaths::Transform const &,bool ) const;
-            transform_function_type transform_function_value( &::SireVol::PeriodicBox::transform );
-            
-            PeriodicBox_exposer.def( 
-                "transform"
-                , transform_function_value
-                , ( bp::arg("transform"), bp::arg("forwards")=(bool)(true) )
-                , "" );
-        
-        }
         { //::SireVol::PeriodicBox::typeName
         
             typedef char const * ( *typeName_function_type )(  );

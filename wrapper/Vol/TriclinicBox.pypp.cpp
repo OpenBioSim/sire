@@ -573,18 +573,6 @@ void register_TriclinicBox_class(){
                 , "Return a string representation of this space" );
         
         }
-        { //::SireVol::TriclinicBox::transform
-        
-            typedef ::SireVol::SpacePtr ( ::SireVol::TriclinicBox::*transform_function_type)( ::SireMaths::Transform const &,bool ) const;
-            transform_function_type transform_function_value( &::SireVol::TriclinicBox::transform );
-            
-            TriclinicBox_exposer.def( 
-                "transform"
-                , transform_function_value
-                , ( bp::arg("transform"), bp::arg("forwards")=(bool)(true) )
-                , "" );
-        
-        }
         { //::SireVol::TriclinicBox::truncatedOctahedron
         
             typedef ::SireVol::TriclinicBox ( *truncatedOctahedron_function_type )( double );

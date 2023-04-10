@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/sphere.h"
 
 #include "SireStream/datastream.h"
@@ -372,6 +374,19 @@ void register_AABox_class(){
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this AABox" );
+        
+        }
+        { //::SireVol::AABox::transform
+        
+            typedef void ( ::SireVol::AABox::*transform_function_type)( ::SireMaths::Transform const & ) ;
+            transform_function_type transform_function_value( &::SireVol::AABox::transform );
+            
+            AABox_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform") )
+                , bp::release_gil_policy()
+                , "Transform this box by transform" );
         
         }
         { //::SireVol::AABox::translate

@@ -25,6 +25,7 @@
 #include "SireStream/shareddatastream.h"
 #include "cartesian.h"
 #include "space.h"
+#include "transformedspace.h"
 #include <QMutex>
 #include <limits>
 #include "space.h"

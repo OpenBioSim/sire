@@ -996,11 +996,6 @@ double Cartesian::minimumDistance(const CoordGroup &group) const
     return sqrt(mindist2);
 }
 
-SpacePtr Cartesian::transform(const Transform &tform, bool) const
-{
-    return SpacePtr(*this);
-}
-
 QVector<Vector> Cartesian::getMinimumImage(const QVector<Vector> &coords,
                                            const Vector &) const
 {

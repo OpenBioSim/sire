@@ -617,18 +617,6 @@ void register_CombinedSpace_class(){
                 , "Return a string representation of this space" );
         
         }
-        { //::SireVol::CombinedSpace::transform
-        
-            typedef ::SireVol::SpacePtr ( ::SireVol::CombinedSpace::*transform_function_type)( ::SireMaths::Transform const &,bool ) const;
-            transform_function_type transform_function_value( &::SireVol::CombinedSpace::transform );
-            
-            CombinedSpace_exposer.def( 
-                "transform"
-                , transform_function_value
-                , ( bp::arg("transform"), bp::arg("forwards")=(bool)(true) )
-                , "" );
-        
-        }
         { //::SireVol::CombinedSpace::typeName
         
             typedef char const * ( *typeName_function_type )(  );

@@ -300,7 +300,7 @@ namespace SireVol
          *  return the reverse transform
          */
         virtual SpacePtr transform(const SireMaths::Transform &transform,
-                                   bool forwards = true) const = 0;
+                                   bool forwards = true) const;
 
         /** Return the minimum image copy of 'coords' with respect to 'center'.
             For periodic spaces, this translates 'group' into the box that
