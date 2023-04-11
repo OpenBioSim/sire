@@ -71,8 +71,8 @@ if _has_nglview:
                     if smooth not in [False, None, 0]:
                         obj = obj.smooth(smooth=smooth)
 
-                    if wrap is True:
-                        obj = obj.wrap()
+                    if wrap in [True, False]:
+                        obj = obj.wrap(wrap)
 
                     self._traj = obj
                 else:
@@ -133,6 +133,11 @@ if _has_nglview:
 
     class _Representations:
         def __init__(self, view):
+            from . import TrajectoryIterator
+
+            if type(view) is TrajectoryIterator:
+                view = view.current()
+
             self.view = view
             self.atoms = view.atoms()
             self.reps = {}

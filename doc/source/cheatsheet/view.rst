@@ -351,6 +351,136 @@ likely any ligands or ions. Remember that you can create your own
 :doc:`custom selections <search>` to set search terms that refer to
 ligands or ions more specifically.
 
+Viewing trajectories
+--------------------
+
+If the molecules being viewed have a trajectory, then you will also see
+play controls in the bottom left. These will let you play, pause and
+scroll through the trajectory. Click the play button multiple times to
+speed up playback.
+
+You can choose a subset of frames to play, e.g. here we will play a movie
+of the first 10 frames of the trajectory.
+
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.traj"))
+>>> mols.trajectory()[0:10].view()
+
+Or here we can view every 25 frames of the trajectory.
+
+>>> mols.trajectory()[0::25].view()
+
+Or here we can view all of the frames in reverse order
+
+>>> mols.trajectory()[::-1].view()
+
+Wrapping molecules into the current box
+---------------------------------------
+
+You can control whether or not molecules are wrapped into the same
+periodic box using the ``wrap`` option. If this is ``True`` (the default),
+then the molecules are wrapped into the same box. If this is ``False``
+then the wrapping will be whatever was loaded from the trajectory
+file (or generated via the simulation). For example, the trajectory
+is not wrapped, and so the water molecules will gradually drift out
+into neighboring boxes. You can see this by passing in ``wrap=False``,
+e.g.
+
+>>> mols.trajectory()[-1].view(wrap=False)
+
+.. image:: images/view_18.jpg
+   :alt: Unwrapped view of the trajectory.
+
+This compares to
+
+>>> mols.trajectory()[-1].view(wrap=True)
+
+.. image:: images/view_19.jpg
+   :alt: View of the trajectory with all molecules wrapped into the same box
+
+.. note::
+
+   We are viewing the last frame here, as this is the one that shows
+   the maximum amount of drift from the central box.
+
+Trajectory Alignment
+--------------------
+
+You can align the frames in a trajectory by passing in a search string
+via the ``align`` keyword. For example, here we could align every frame
+against all of the carbon atoms.
+
+>>> mols.view(align="element C")
+
+.. image:: images/view_19.jpg
+   :alt: View of the trajectory with all molecules wrapped into the same box
+
+If ``wrap`` is ``True`` (as is the default) then all molecules will be wrapped
+such that the aligned atoms are at the center of the box.
+
+You can use any search string to find the atoms to align. If you pass
+``align=True`` then this will align against all atoms. This can be useful
+when you are viewing individual molecules, e.g.
+
+>>> mols[0].view(align=True)
+
+Trajectory Smoothing
+--------------------
+
+Molecular dynamics trajectories can be difficult to view because there is a
+lot of high frequency random motion that can obscure the low frequency
+conformational changes that are often of more interest. One way to view
+these events is to average the coordinates of atoms over several frames.
+You can do this using the ``smooth`` option, e.g.
+
+>>> mols.view(align="element C", smooth=50)
+
+Would align the trajectory using all carbon atoms, and would average
+the coordinates of each atom over 50 neighboring frames.
+
+.. note::
+
+   The smoothing number, ``s`` is divided by two, with each frame being
+   averaged over the previous ``(s/2)-1`` preceeding frames and ``(s/2)+x``
+   following frames (where ``x`` is zero if ``s`` is even, and one
+   otherwise).
+
+Integration with trajectories
+-----------------------------
+
+Note that all of the above options can be passed to the
+:func:`~SelectorMol.trajectory` function, e.g.
+
+>>> mols.trajectory(align="element C", smooth=50).view()
+
+would give the same view as
+
+>>> mols.view(align="element C", smooth=50)
+
+This is because ``mols.view(...)`` is creating its own
+``mols.trajectory(...)`` with those options, and is viewing those.
+
+While you can do this, and it is useful for, e.g. saving trajectories,
+there are lots of edge cases that could trip you up. We recommend that
+you pass the options to the ``view`` function and don't pass them to
+the ``trajectory`` function when you want to view.
+
+.. note::
+
+   The options passed to ``view`` will override those passed to
+   ``trajectory``, e.g. ``mols.trajectory(smooth=10).view(smooth=50)``
+   will use a ``smooth`` value of ``50``.
+
+.. note::
+
+   The value of ``wrap`` in the ``view`` function defaults to ``True``.
+   This means that ``mols.trajectory(wrap=False).view()`` will wrap
+   the coordinates, as the value of ``wrap`` in the ``view`` function
+   defaults to ``True`` and overrides the value in ``trajectory``.
+   To show unwrapped, you would need to use
+   ``mols.trajectory(wrap=False).view(wrap=False)``, or the much easier
+   ``mols.trajectory().view(wrap=False)``, or the easiest
+   ``mols.view(wrap=False)``.
+
 Closer integration with NGLView
 -------------------------------
 
@@ -373,3 +503,41 @@ which you can manipulate as if you had created it yourself, e.g.
 
 .. image:: images/view_13.jpg
    :alt: Customised view created by manipulating NGLView directly
+
+Saving 3D views to files
+------------------------
+
+NGLView is not really designed to render frames via a script. Instead, it
+needs to be run within a Jupyter notebook so that it has access to the
+WebGL view in the web browser to perform the rendering.
+`This FAQ answer <https://github.com/nglviewer/nglview/blob/master/docs/FAQ.md#how-to-make-nglview-view-object-write-png-file>`__
+shows how you could automate rendering images to files. Note that you need
+to get the handle to the `NGLView.NGLWidget <https://nglviewer.org/nglview/latest/api.html#nglview.NGLWidget>`__,
+as above, and then call ``render_image`` to get the image. You will need
+to actually view the object in a code cell, and will need to wait for the
+image to render, e.g. in one code cell
+
+>>> v = mols.view()
+>>> v
+
+Then in the next
+
+>>> def render(view, filename):
+...    import time
+...    image = view.render_image()
+...
+...    while not image.value:
+...        time.sleep(0.1)
+...
+...    with open(filename, "wb") as f:
+...        f.write(image.value)
+
+and then finally, to call this function in a background thread...
+
+>>> import threading
+... thread = threading.Thread(
+...     target=render,
+...     args=(v, "image.png")
+... )
+>>> thread.daemon = True
+>>> thread.start()

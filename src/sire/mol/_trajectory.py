@@ -137,11 +137,8 @@ class TrajectoryIterator:
         over the specified number of frames (or the recommended number
         if 'smooth' is set to 'True')
         """
-        map = self._map.clone()
-        map.set("smooth", smooth)
-
         t = TrajectoryIterator(
-            view=self._view, align=self._align, map=self._map
+            view=self._view, align=self._align, smooth=smooth, map=self._map
         )
         t._values = self._values
         return t
@@ -151,11 +148,8 @@ class TrajectoryIterator:
         Return a copy of this trajectory where each frame will be auto-wrapped
         into the current space
         """
-        map = self._map.clone()
-        map.set("wrap", autowrap)
-
         t = TrajectoryIterator(
-            view=self._view, align=self._align, map=self._map
+            view=self._view, align=self._align, wrap=autowrap, map=self._map
         )
         t._values = self._values
         return t
