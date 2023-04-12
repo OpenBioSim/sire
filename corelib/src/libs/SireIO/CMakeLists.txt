@@ -29,6 +29,7 @@ set ( SIREIO_HEADERS
       amberprm.h
       amberrst.h
       amberrst7.h
+      ambertraj.h
       biosimspace.h
       charmmpsf.h
       cube.h
@@ -65,6 +66,7 @@ set ( SIREIO_SOURCES
       amberprm.cpp
       amberrst.cpp
       amberrst7.cpp
+      ambertraj.cpp
       biosimspace.cpp
       charmmpsf.cpp
       cube.cpp

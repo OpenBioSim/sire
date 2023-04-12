@@ -15,6 +15,8 @@
 
 #include "AmberRst7.pypp.hpp"
 
+#include "AmberTraj.pypp.hpp"
+
 #include "BrokenParser.pypp.hpp"
 
 #include "CharmmPSF.pypp.hpp"
@@ -101,6 +103,8 @@ BOOST_PYTHON_MODULE(_IO){
     register_AmberRst_class();
 
     register_AmberRst7_class();
+
+    register_AmberTraj_class();
 
     register_BrokenParser_class();
 

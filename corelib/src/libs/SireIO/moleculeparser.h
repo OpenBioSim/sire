@@ -162,6 +162,15 @@ namespace SireIO
 
         virtual MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const = 0;
 
+        virtual QStringList saveTrajectory(const SireSystem::System &system,
+                                           const QString &filename,
+                                           const PropertyMap &map) const;
+
+        virtual QStringList saveTrajectory(const SireSystem::System &system,
+                                           const QList<qint32> &frames,
+                                           const QString &filename,
+                                           const PropertyMap &map) const;
+
         static QString supportedFormats();
 
         static MoleculeParserPtr parse(const QString &filename, const PropertyMap &map);

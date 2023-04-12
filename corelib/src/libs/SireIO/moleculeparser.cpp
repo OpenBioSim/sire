@@ -1904,6 +1904,44 @@ QStringList MoleculeParser::save(const System &system, const QStringList &filena
     return save(system, filenames, PropertyMap());
 }
 
+/** Save all of the trajectory frames for this system to the specified
+ *  file. This raises an exception if this parser does not support
+ *  writing trajectories. Returns the absolute filename of the
+ *  file written.
+ */
+QStringList MoleculeParser::saveTrajectory(const System &system,
+                                           const QString &filename,
+                                           const PropertyMap &map) const
+{
+    QList<qint32> frames;
+
+    for (qint32 i = 0; i < system.nFrames(); ++i)
+    {
+        frames.append(i);
+    }
+
+    return this->saveTrajectory(system, frames, filename, map);
+}
+
+/** Save the specified trajectory frames for this system to the specified
+ *  file. This raises an exception if this parser does not support
+ *  writing trajectories. Returns the absolute filename(s) of the
+ *  file(s) written (multiple files may be written if this is
+ *  requested of the parser).
+ */
+QStringList MoleculeParser::saveTrajectory(const System &system,
+                                           const QList<qint32> &frames,
+                                           const QString &filename,
+                                           const PropertyMap &map) const
+{
+    throw SireError::unsupported(QObject::tr(
+                                     "The parser %1 does not support the writing of trajectories.")
+                                     .arg(this->toString()),
+                                 CODELOC);
+
+    return QStringList();
+}
+
 /** Return the System that is constructed from the data in this parser */
 System MoleculeParser::toSystem() const
 {
