@@ -210,6 +210,7 @@ void AmberTraj::parse()
         const auto length = line.count();
 
         // read each line - this is a 10F8.3 format
+        nvals_per_line = 0;
         for (int j = 0; j < 10; ++j)
         {
             int pos = j * 8;
@@ -228,12 +229,14 @@ void AmberTraj::parse()
 
             if (not ok)
             {
-                nvals_per_line = j;
                 break;
             }
 
             linevals[j] = val;
+            nvals_per_line += 1;
         }
+
+        nvalues += nvals_per_line;
 
         if (nvals_per_line == 10)
         {
