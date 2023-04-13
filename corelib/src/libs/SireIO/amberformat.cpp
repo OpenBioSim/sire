@@ -211,7 +211,12 @@ namespace SireIO
 
                 int nvalues = format.numValues(line);
 
-                if (errors and nvalues < format.numValues() and i != end - 1)
+                if (nvalues == 0 and data.isEmpty())
+                {
+                    // this is an empty set of data
+                    break;
+                }
+                else if (errors and nvalues < format.numValues() and i != end - 1)
                 {
                     // one of the data lines has too little data
                     errors->append(QObject::tr("Too few data values on line %1: "
@@ -352,7 +357,12 @@ namespace SireIO
 
                 int nvalues = format.numValues(line);
 
-                if (errors and nvalues < format.numValues() and i != end - 1)
+                if (nvalues == 0 and data.isEmpty())
+                {
+                    // this is an empty set of data
+                    break;
+                }
+                else if (errors and nvalues < format.numValues() and i != end - 1)
                 {
                     // one of the data lines has too little data
                     errors->append(QObject::tr("Too few data values on line %1: "
@@ -496,7 +506,12 @@ namespace SireIO
 
                 int nvalues = format.numValues(line);
 
-                if (errors and nvalues < format.numValues() and i != end - 1)
+                if (nvalues == 0 and data.isEmpty())
+                {
+                    // this is an empty set of data
+                    break;
+                }
+                else if (errors and nvalues < format.numValues() and i != end - 1)
                 {
                     // one of the data lines has too little data
                     errors->append(QObject::tr("Too few data values on line %1: "

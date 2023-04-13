@@ -253,15 +253,23 @@ void AmberTraj::parse()
                 // happens to have 3 space on the last line of the frame.
                 // This line is the periodic box, and the previous line
                 // is the end of the frame
+                nvals_per_line = 0;
                 end_of_frame();
+                nvals_per_line = 3;
                 has_box_dims = true;
+
+                if (natoms == 1)
+                    throw SireIO::parse_error(QObject::tr(
+                                                  "This parser does not support the reading of single-atom "
+                                                  "trajectories in Amber Traj format."),
+                                              CODELOC);
             }
             else if (nvals_last_line == 10)
             {
                 // this is the edge case where the number of coordinates
                 // happens to fill the whole line (10 values) and this
                 // line is the periodic box
-                nvals_per_line = 10;
+                nvals_per_line = 0;
                 end_of_frame();
                 nvals_per_line = 3;
                 has_box_dims = true;
@@ -466,6 +474,20 @@ AmberTraj::AmberTraj(const System &system, const PropertyMap &map)
 
         lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FLOAT, 3, 8, 3), &errors, false, 'f');
     }
+    else if (space.read().isA<Cartesian>())
+    {
+        // write an infinite box as three zero-length box dimensions
+        QVector<double> boxdims(3, 0.0);
+        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FLOAT, 3, 8, 3), &errors, false, 'f');
+    }
+    else
+    {
+        throw SireIO::parse_error(QObject::tr(
+                                      "The Amber Traj format only supports the infinite cartesian or standard periodic box "
+                                      "spaces. It doesn't support writing a system in the space %1")
+                                      .arg(space.read().toString()),
+                                  CODELOC);
+    }
 
     if (not errors.isEmpty())
     {
@@ -650,7 +672,15 @@ Frame AmberTraj::getFrame(int frame) const
                         values_data[(3 * natoms) + 1],
                         values_data[(3 * natoms) + 2]);
 
-        return Frame(coords, PeriodicBox(box_dims), SireUnits::Dimension::Time(0));
+        if (box_dims.isZero())
+        {
+            // this is the infinite cartesian space
+            return Frame(coords, Cartesian(), SireUnits::Dimension::Time(0));
+        }
+        else
+        {
+            return Frame(coords, PeriodicBox(box_dims), SireUnits::Dimension::Time(0));
+        }
     }
     else
     {
