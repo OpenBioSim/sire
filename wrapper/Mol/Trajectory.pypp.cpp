@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireID/index.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMol/core.h"
 
 #include "SireStream/datastream.h"
@@ -28,6 +30,8 @@ namespace bp = boost::python;
 #include "SireVol/space.h"
 
 #include "trajectory.h"
+
+#include "trajectoryaligner.h"
 
 #include "trajectory.h"
 
@@ -99,6 +103,19 @@ void register_Trajectory_class(){
                 "getFrame"
                 , getFrame_function_value
                 , ( bp::arg("i") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Trajectory::getFrame
+        
+            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,::SireMol::FrameTransform const & ) const;
+            getFrame_function_type getFrame_function_value( &::SireMol::Trajectory::getFrame );
+            
+            Trajectory_exposer.def( 
+                "getFrame"
+                , getFrame_function_value
+                , ( bp::arg("i"), bp::arg("transform") )
                 , bp::release_gil_policy()
                 , "" );
         

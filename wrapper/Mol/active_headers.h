@@ -120,6 +120,7 @@
 #include "specifymol.h"
 #include "stereochemistry.h"
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 #include "viewsofmol.h"
 #include "volumemap.h"
 #include "weightfunction.h"

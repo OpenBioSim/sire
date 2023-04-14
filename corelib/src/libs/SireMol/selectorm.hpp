@@ -282,6 +282,23 @@ namespace SireMol
 
         virtual QString toString() const;
 
+        bool hasProperty(const PropertyName &key) const;
+        bool hasMetadata(const PropertyName &metakey) const;
+        bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;
+
+        QStringList propertyKeys() const;
+        QStringList metadataKeys() const;
+        QStringList metadataKeys(const PropertyName &key) const;
+
+        template <class V>
+        QList<V> property(const PropertyName &key) const;
+
+        template <class V>
+        QList<V> metadata(const PropertyName &metakey) const;
+
+        template <class V>
+        QList<V> metadata(const PropertyName &key, const PropertyName &metakey) const;
+
     protected:
         void _append(const T &view);
 
@@ -2358,6 +2375,189 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE typename SelectorM<T>::const_iterator SelectorM<T>::constEnd() const
     {
         return this->vws.constEnd();
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool SelectorM<T>::hasProperty(const PropertyName &key) const
+    {
+        for (const auto &vw : this->vws)
+        {
+            if (vw.hasProperty(key))
+                return true;
+        }
+
+        return false;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool SelectorM<T>::hasMetadata(const PropertyName &metakey) const
+    {
+        for (const auto &vw : this->vws)
+        {
+            if (vw.hasMetadata(metakey))
+                return true;
+        }
+
+        return false;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool SelectorM<T>::hasMetadata(const PropertyName &key, const PropertyName &metakey) const
+    {
+        for (const auto &vw : this->vws)
+        {
+            if (vw.hasMetadata(key, metakey))
+                return true;
+        }
+
+        return false;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QStringList SelectorM<T>::propertyKeys() const
+    {
+        QSet<QString> keys;
+
+        for (const auto &vw : this->vws)
+        {
+            for (const auto &k : vw.propertyKeys())
+            {
+                keys.insert(k);
+            }
+        }
+
+        return QStringList(keys.constBegin(), keys.constEnd());
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QStringList SelectorM<T>::metadataKeys() const
+    {
+        QSet<QString> keys;
+
+        for (const auto &vw : this->vws)
+        {
+            for (const auto &k : vw.metadataKeys())
+            {
+                keys.insert(k);
+            }
+        }
+
+        return QStringList(keys.constBegin(), keys.constEnd());
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QStringList SelectorM<T>::metadataKeys(const PropertyName &key) const
+    {
+        QSet<QString> keys;
+
+        for (const auto &vw : this->vws)
+        {
+            for (const auto &k : vw.metadataKeys(key))
+            {
+                keys.insert(k);
+            }
+        }
+
+        return QStringList(keys.constBegin(), keys.constEnd());
+    }
+
+    template <class T>
+    template <class V>
+    SIRE_OUTOFLINE_TEMPLATE QList<V> SelectorM<T>::property(const PropertyName &key) const
+    {
+        QList<V> ret;
+
+        if (vws.isEmpty())
+            return ret;
+
+        bool have_some = false;
+
+        for (const auto &vw : this->vws)
+        {
+            if (vw.hasProperty(key))
+            {
+                ret += vw.template property<V>(key);
+                have_some = true;
+            }
+            else
+            {
+                for (int i = 0; i < vw.count(); ++i)
+                {
+                    ret.append(V());
+                }
+            }
+        }
+
+        if (not have_some)
+            return vws.at(0).template property<V>(key);
+
+        return ret;
+    }
+
+    template <class T>
+    template <class V>
+    SIRE_OUTOFLINE_TEMPLATE QList<V> SelectorM<T>::metadata(const PropertyName &metakey) const
+    {
+        QList<V> ret;
+
+        if (vws.isEmpty())
+            return ret;
+
+        bool have_some = false;
+
+        for (const auto &vw : this->vws)
+        {
+            if (vw.hasMetadata(metakey))
+            {
+                ret += vw.template metadata<V>(metakey);
+                have_some = true;
+            }
+            else
+            {
+                for (int i = 0; i < vw.count(); ++i)
+                {
+                    ret.append(V());
+                }
+            }
+        }
+
+        if (not have_some)
+            return vws.at(0).template metadata<V>(metakey);
+
+        return ret;
+    }
+
+    template <class T>
+    template <class V>
+    SIRE_OUTOFLINE_TEMPLATE QList<V> SelectorM<T>::metadata(const PropertyName &key, const PropertyName &metakey) const
+    {
+        QList<V> ret;
+
+        if (vws.isEmpty())
+            return ret;
+
+        bool have_some = false;
+
+        for (const auto &vw : this->vws)
+        {
+            if (vw.hasMetadata(key, metakey))
+            {
+                ret += vw.template metadata<V>(key, metakey);
+                have_some = true;
+            }
+            else
+            {
+                for (int i = 0; i < vw.count(); ++i)
+                {
+                    ret.append(V());
+                }
+            }
+        }
+
+        if (not have_some)
+            return vws.at(0).template metadata<V>(key, metakey);
+
+        return ret;
     }
 
     template <class T>

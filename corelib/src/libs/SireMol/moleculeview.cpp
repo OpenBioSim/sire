@@ -37,6 +37,7 @@
 #include "select.h"
 #include "selector.hpp"
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 #include "selectormol.h"
 
 #include "SireVol/space.h"
@@ -237,7 +238,15 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     auto traj = d->property(traj_prop).asA<Trajectory>();
 
-    this->_fromFrame(traj[frame], map);
+    if (map.specified("transform"))
+    {
+        const auto &transform = map["transform"].value().asA<FrameTransform>();
+        this->_fromFrame(traj.getFrame(frame, transform), map);
+    }
+    else
+    {
+        this->_fromFrame(traj.getFrame(frame, FrameTransform(map)), map);
+    }
 }
 
 void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)

@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireID/index.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMol/core.h"
 
 #include "SireStream/datastream.h"
@@ -29,6 +31,8 @@ namespace bp = boost::python;
 #include "SireVol/space.h"
 
 #include "trajectory.h"
+
+#include "trajectoryaligner.h"
 
 #include "trajectory.h"
 
@@ -176,6 +180,32 @@ void register_Frame_class(){
         
         }
         Frame_exposer.def( bp::self == bp::self );
+        { //::SireMol::Frame::reverse
+        
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*reverse_function_type)( ::SireMol::FrameTransform const & ) const;
+            reverse_function_type reverse_function_value( &::SireMol::Frame::reverse );
+            
+            Frame_exposer.def( 
+                "reverse"
+                , reverse_function_value
+                , ( bp::arg("transform") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::smooth
+        
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*smooth_function_type)( ::QList< SireMol::Frame > const & ) const;
+            smooth_function_type smooth_function_value( &::SireMol::Frame::smooth );
+            
+            Frame_exposer.def( 
+                "smooth"
+                , smooth_function_value
+                , ( bp::arg("frames") )
+                , bp::release_gil_policy()
+                , "Return the frame which has this frame smoothed with the coordinates\n  from all of the other frames. The other frames will be moved into\n  the same simulation box as this frame, and then averaged onto\n  this frames coordinates. The result will be returned\n" );
+        
+        }
         { //::SireMol::Frame::space
         
             typedef ::SireVol::Space const & ( ::SireMol::Frame::*space_function_type)(  ) const;
@@ -221,6 +251,19 @@ void register_Frame_class(){
             Frame_exposer.def( 
                 "toString"
                 , toString_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::transform
+        
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*transform_function_type)( ::SireMol::FrameTransform const & ) const;
+            transform_function_type transform_function_value( &::SireMol::Frame::transform );
+            
+            Frame_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform") )
                 , bp::release_gil_policy()
                 , "" );
         

@@ -161,27 +161,35 @@ void AmberPrm::rebuildExcludedAtoms()
                                   CODELOC);
     }
 
+    const auto nnb_per_atom_data = nnb_per_atom.constData();
+    const auto inb_data = inb.constData();
+
     excl_atoms = QVector<QVector<QVector<int>>>(nmols);
+    auto excl_atoms_data = excl_atoms.data();
     int nnbidx = 0;
 
     // we need to loop through the excluded atoms in atomnum order, not molidx order.
     // This is because a single molecule can be spread over several non-contiguous blocks
     // of atom numbers!
     QVector<QPair<int, int>> atomnum_to_molnum_atomidx(natoms + 1);
+    auto atomnum_to_molnum_atomidx_data = atomnum_to_molnum_atomidx.data();
+
+    const auto &const_molnum_to_atomnums = molnum_to_atomnums;
 
     // get the molecule number and index of the atom in that molecule for every
     // atom identified by its atom number
     for (int molnum = 1; molnum <= nmols; ++molnum)
     {
-        const auto atomnums_in_mol = molnum_to_atomnums.at(molnum);
+        const auto &atomnums_in_mol = const_molnum_to_atomnums.at(molnum);
+        const auto atomnums_in_mol_data = atomnums_in_mol.constData();
 
         for (int iat = 0; iat < atomnums_in_mol.count(); ++iat)
         {
-            const int atomnum = atomnums_in_mol[iat];
-            atomnum_to_molnum_atomidx[atomnum] = QPair<int, int>(molnum, iat);
+            const int atomnum = atomnums_in_mol_data[iat];
+            atomnum_to_molnum_atomidx_data[atomnum] = QPair<int, int>(molnum, iat);
         }
 
-        excl_atoms[molnum - 1] = QVector<QVector<int>>(atomnums_in_mol.count());
+        excl_atoms_data[molnum - 1] = QVector<QVector<int>>(atomnums_in_mol.count());
     }
 
     // now loop over the atoms in sequence, looking up their excluded atoms (as these
@@ -190,12 +198,13 @@ void AmberPrm::rebuildExcludedAtoms()
     // molecule
     for (int atomnum = 1; atomnum <= natoms; ++atomnum)
     {
-        int molnum = atomnum_to_molnum_atomidx[atomnum].first;
-        int atomidx = atomnum_to_molnum_atomidx[atomnum].second;
+        int molnum = atomnum_to_molnum_atomidx_data[atomnum].first;
+        int atomidx = atomnum_to_molnum_atomidx_data[atomnum].second;
 
-        const int nnb = nnb_per_atom[atomnum - 1]; // atomnum is 1-indexed
+        const int nnb = nnb_per_atom_data[atomnum - 1]; // atomnum is 1-indexed
 
         QVector<int> ex(nnb);
+        auto ex_data = ex.data();
 
         for (int k = 0; k < nnb; ++k)
         {
@@ -208,11 +217,11 @@ void AmberPrm::rebuildExcludedAtoms()
                     CODELOC);
             }
 
-            ex[k] = inb[nnbidx];
+            ex_data[k] = inb_data[nnbidx];
             nnbidx += 1;
         }
 
-        excl_atoms[molnum - 1][atomidx] = ex; // molnum is 1-indexed
+        excl_atoms_data[molnum - 1][atomidx] = ex; // molnum is 1-indexed
     }
 }
 
@@ -221,12 +230,16 @@ void AmberPrm::rebuildExcludedAtoms()
 QVector<QVector<int>> indexBonds(const QVector<qint64> &bonds, const QVector<int> &atom_to_mol, const int nmols)
 {
     QVector<QVector<int>> molbonds(nmols);
+    auto molbonds_data = molbonds.data();
+
+    const auto bonds_data = bonds.constData();
+    const auto atom_to_mol_data = atom_to_mol.constData();
 
     for (int i = 0; i < bonds.count(); i += 3)
     {
         // format is atom0-atom1-parameter
-        int mol0 = atom_to_mol[bonds[i] / 3];     // divide by three as index is
-        int mol1 = atom_to_mol[bonds[i + 1] / 3]; // into the coordinate array
+        int mol0 = atom_to_mol_data[bonds_data[i] / 3];     // divide by three as index is
+        int mol1 = atom_to_mol_data[bonds_data[i + 1] / 3]; // into the coordinate array
 
         if (mol0 != mol1)
             throw SireIO::parse_error(QObject::tr("Something went wrong as there is a bond between two different "
@@ -235,7 +248,7 @@ QVector<QVector<int>> indexBonds(const QVector<qint64> &bonds, const QVector<int
                                           .arg(mol1),
                                       CODELOC);
 
-        molbonds[mol0].append(i);
+        molbonds_data[mol0].append(i);
     }
 
     return molbonds;
@@ -246,13 +259,17 @@ QVector<QVector<int>> indexBonds(const QVector<qint64> &bonds, const QVector<int
 QVector<QVector<int>> indexAngles(const QVector<qint64> &angs, const QVector<int> &atom_to_mol, const int nmols)
 {
     QVector<QVector<int>> molangs(nmols);
+    auto molangs_data = molangs.data();
+
+    const auto angs_data = angs.constData();
+    const auto atom_to_mol_data = atom_to_mol.constData();
 
     for (int i = 0; i < angs.count(); i += 4)
     {
         // format is atom0-atom1-atom2-parameter
-        int mol0 = atom_to_mol[angs[i] / 3];     // divide by three as index is
-        int mol1 = atom_to_mol[angs[i + 1] / 3]; // into the coordinate array
-        int mol2 = atom_to_mol[angs[i + 2] / 3];
+        int mol0 = atom_to_mol_data[angs_data[i] / 3];     // divide by three as index is
+        int mol1 = atom_to_mol_data[angs_data[i + 1] / 3]; // into the coordinate array
+        int mol2 = atom_to_mol_data[angs_data[i + 2] / 3];
 
         if (mol0 != mol1 or mol0 != mol2)
             throw SireIO::parse_error(
@@ -263,7 +280,7 @@ QVector<QVector<int>> indexAngles(const QVector<qint64> &angs, const QVector<int
                     .arg(mol2),
                 CODELOC);
 
-        molangs[mol0].append(i);
+        molangs_data[mol0].append(i);
     }
 
     return molangs;
@@ -274,14 +291,18 @@ QVector<QVector<int>> indexAngles(const QVector<qint64> &angs, const QVector<int
 QVector<QVector<int>> indexDihedrals(const QVector<qint64> &dihs, const QVector<int> &atom_to_mol, const int nmols)
 {
     QVector<QVector<int>> moldihs(nmols);
+    auto moldihs_data = moldihs.data();
+
+    const auto dihs_data = dihs.constData();
+    const auto atom_to_mol_data = atom_to_mol.constData();
 
     for (int i = 0; i < dihs.count(); i += 5)
     {
         // format is atom0-atom1-atom2-atom3-parameter
-        int mol0 = atom_to_mol[dihs[i] / 3];     // divide by three as index is
-        int mol1 = atom_to_mol[dihs[i + 1] / 3]; // into the coordinate array
-        int mol2 = atom_to_mol[std::abs(dihs[i + 2] / 3)];
-        int mol3 = atom_to_mol[std::abs(dihs[i + 3] / 3)];
+        int mol0 = atom_to_mol_data[dihs_data[i] / 3];     // divide by three as index is
+        int mol1 = atom_to_mol_data[dihs_data[i + 1] / 3]; // into the coordinate array
+        int mol2 = atom_to_mol_data[std::abs(dihs_data[i + 2] / 3)];
+        int mol3 = atom_to_mol_data[std::abs(dihs_data[i + 3] / 3)];
 
         if (mol0 != mol1 or mol0 != mol2 or mol0 != mol3)
             throw SireIO::parse_error(
@@ -293,7 +314,7 @@ QVector<QVector<int>> indexDihedrals(const QVector<qint64> &dihs, const QVector<
                     .arg(mol3),
                 CODELOC);
 
-        moldihs[mol0].append(i);
+        moldihs_data[mol0].append(i);
     }
 
     return moldihs;
@@ -309,7 +330,7 @@ void AmberPrm::rebuildBADIndicies()
         return;
 
     // get the lookup table to go from atom index to molecule index
-    auto atom_to_mol = this->getAtomIndexToMolIndex();
+    const auto atom_to_mol = this->getAtomIndexToMolIndex();
 
     // now index the connectivity - find the start index and number of bonds/angles/dihedrals
     // for each molecule
@@ -348,23 +369,25 @@ void AmberPrm::rebuildLJParameters()
     if (pointers.count() < 20)
         return;
 
-    const int ntypes = pointers[1]; // number of distinct atom types
+    const auto pointers_data = pointers.constData();
+
+    const int ntypes = pointers_data[1]; // number of distinct atom types
 
     if (ntypes <= 0)
         return;
 
-    const int nphb = pointers[19]; // number of distinct 10-12 hydrogen bond pair types
+    const int nphb = pointers_data[19]; // number of distinct 10-12 hydrogen bond pair types
 
     lj_data = QVector<LJParameter>(ntypes);
     auto lj_data_array = lj_data.data();
 
-    auto acoeffs = float_data.value("LENNARD_JONES_ACOEF");
-    auto bcoeffs = float_data.value("LENNARD_JONES_BCOEF");
+    const auto acoeffs = float_data.value("LENNARD_JONES_ACOEF");
+    const auto bcoeffs = float_data.value("LENNARD_JONES_BCOEF");
 
-    auto hbond_acoeffs = float_data.value("HBOND_ACOEF");
-    auto hbond_bcoeffs = float_data.value("HBOND_BCOEF");
+    const auto hbond_acoeffs = float_data.value("HBOND_ACOEF");
+    const auto hbond_bcoeffs = float_data.value("HBOND_BCOEF");
 
-    auto nb_parm_index = int_data.value("NONBONDED_PARM_INDEX");
+    const auto nb_parm_index = int_data.value("NONBONDED_PARM_INDEX");
 
     if (acoeffs.count() != bcoeffs.count() or acoeffs.count() != (ntypes * (ntypes + 1)) / 2)
     {
@@ -399,15 +422,18 @@ void AmberPrm::rebuildLJParameters()
                                   CODELOC);
     }
 
-    auto acoeffs_array = acoeffs.constData();
-    auto bcoeffs_array = bcoeffs.constData();
+    const auto acoeffs_data = acoeffs.constData();
+    const auto bcoeffs_data = bcoeffs.constData();
+    const auto hbond_acoeffs_data = hbond_acoeffs.constData();
+    const auto hbond_bcoeffs_data = hbond_bcoeffs.constData();
+    const auto nb_parm_index_data = nb_parm_index.constData();
 
     auto build_lj = [&](int i)
     {
         // amber stores the A and B coefficients as the product of all
         // possible combinations. We need to find the values from the
         //  LJ_i * LJ_i values
-        int idx = nb_parm_index[ntypes * i + i];
+        int idx = nb_parm_index_data[ntypes * i + i];
 
         if (idx < 0)
         {
@@ -418,8 +444,8 @@ void AmberPrm::rebuildLJParameters()
         }
         else
         {
-            double acoeff = acoeffs_array[idx - 1];
-            double bcoeff = bcoeffs_array[idx - 1];
+            double acoeff = acoeffs_data[idx - 1];
+            double bcoeff = bcoeffs_data[idx - 1];
 
             double sigma = 0;
             double epsilon = 0;
@@ -464,12 +490,12 @@ void AmberPrm::rebuildLJParameters()
     {
         for (int j = i + 1; j < ntypes; ++j)
         {
-            int idx = nb_parm_index[ntypes * i + j];
+            int idx = nb_parm_index_data[ntypes * i + j];
 
             if (idx < 0)
             {
-                auto a = hbond_acoeffs[idx];
-                auto b = hbond_bcoeffs[idx];
+                auto a = hbond_acoeffs_data[idx];
+                auto b = hbond_bcoeffs_data[idx];
 
                 if ((a > 1e-6) and (b > 1e-6))
                 {
@@ -574,6 +600,9 @@ void AmberPrm::rebuildMolNumToAtomNums()
     const auto bonds_exc_h = this->intData("BONDS_WITHOUT_HYDROGEN");
     const auto bonds_inc_h = this->intData("BONDS_INC_HYDROGEN");
 
+    const auto bonds_exc_h_data = bonds_exc_h.constData();
+    const auto bonds_inc_h_data = bonds_inc_h.constData();
+
     // first, create a hash showing which atoms are bonded to each other
 
     // NOTE: the atom numbers in the following arrays that describe bonds
@@ -588,16 +617,16 @@ void AmberPrm::rebuildMolNumToAtomNums()
 
     for (int j = 0; j < bonds_exc_h.count(); j = j + 3)
     {
-        int atom0 = bonds_exc_h[j] / 3 + 1;
-        int atom1 = bonds_exc_h[j + 1] / 3 + 1;
+        int atom0 = bonds_exc_h_data[j] / 3 + 1;
+        int atom1 = bonds_exc_h_data[j + 1] / 3 + 1;
         bonded_atoms.insert(atom0, atom1);
         bonded_atoms.insert(atom1, atom0);
     }
 
     for (int j = 0; j < bonds_inc_h.count(); j = j + 3)
     {
-        int atom0 = bonds_inc_h[j] / 3 + 1;
-        int atom1 = bonds_inc_h[j + 1] / 3 + 1;
+        int atom0 = bonds_inc_h_data[j] / 3 + 1;
+        int atom1 = bonds_inc_h_data[j + 1] / 3 + 1;
         bonded_atoms.insert(atom0, atom1);
         bonded_atoms.insert(atom1, atom0);
     }
@@ -608,15 +637,16 @@ void AmberPrm::rebuildMolNumToAtomNums()
 
     QHash<int, int> atom_to_mol;
 
-    molnum_to_atomnums.clear();
-
     // remove the 0th index as Amber is 1-indexed
-    molnum_to_atomnums.append(QVector<int>());
+    QVector<QVector<int>> new_molnum_to_atomnums;
+
+    new_molnum_to_atomnums.append(QVector<int>());
 
     QList<qint64> atoms_per_mol;
 
     // this is how many atoms the amber file says are in each molecule...
     const auto a_per_m = int_data.value("ATOMS_PER_MOLECULE");
+    const auto a_per_m_data = a_per_m.constData();
 
     for (int i = 1; i <= natoms; i++)
     {
@@ -637,7 +667,7 @@ void AmberPrm::rebuildMolNumToAtomNums()
             }
 
             // the number of atoms we should expect in this molecule...
-            int expected_nats = a_per_m.at(nmols - 1);
+            int expected_nats = a_per_m_data[nmols - 1];
 
             // this is the first atom in the new molecule
             atom_to_mol[i] = nmols;
@@ -689,9 +719,11 @@ void AmberPrm::rebuildMolNumToAtomNums()
             auto atms = atoms_in_mol.values();
             std::sort(atms.begin(), atms.end());
 
-            molnum_to_atomnums.append(atms.toVector());
+            new_molnum_to_atomnums.append(atms.toVector());
         }
     }
+
+    molnum_to_atomnums = new_molnum_to_atomnums;
 
     // now have all of the atomidxs (1-indexed) for molecule i (1-indexed)
     // in the array molidx_to_atomidxs. Guaranteed to be sorted into AtomNum order
@@ -894,37 +926,43 @@ double AmberPrm::processAllFlags()
 
     double score = 0;
 
-    const QStringList flags = flag_to_line.keys();
+    const auto const_flag_to_line = flag_to_line;
+
+    const QVector<QString> flags = flag_to_line.keys().toVector();
+    const auto flags_data = flags.constData();
 
     QStringList global_errors;
 
+    const auto &l = lines();
+    const auto lines_data = l.constData();
+
     auto process_flag = [&](int i, QStringList &errors, double &scr)
     {
-        const QString &flag = flags[i];
-        const QPair<qint64, qint64> index = flag_to_line.value(flag);
+        const QString &flag = flags_data[i];
+        const QPair<qint64, qint64> index = const_flag_to_line.value(flag);
 
         // the format for the data is on the preceeding line
-        const AmberFormat format(lines()[index.first - 1]);
+        const AmberFormat format(lines_data[index.first - 1]);
 
         switch (format.flagType())
         {
         case INTEGER:
         {
-            QVector<qint64> data = readIntData(lines(), format, index, &scr, &errors);
+            QVector<qint64> data = readIntData(l, format, index, &scr, &errors);
             QMutexLocker lkr(&int_mutex);
             int_data.insert(flag, data);
             break;
         }
         case FLOAT:
         {
-            QVector<double> data = readFloatData(lines(), format, index, &scr, &errors);
+            QVector<double> data = readFloatData(l, format, index, &scr, &errors);
             QMutexLocker lkr(&float_mutex);
             float_data.insert(flag, data);
             break;
         }
         case STRING:
         {
-            QVector<QString> data = readStringData(lines(), format, index, &scr, &errors);
+            QVector<QString> data = readStringData(l, format, index, &scr, &errors);
             QMutexLocker lkr(&string_mutex);
             string_data.insert(flag, data);
             break;
@@ -1241,7 +1279,7 @@ QVector<QString> getAtomTreeChains(const AmberParams &params)
 }
 
 /** Internal function used to get the amber atom types of each atom */
-QVector<QString> getAmberTypes(const AmberParams &params, QHash<QString, int> &unique_names, QMutex &name_mutex)
+QVector<QString> getAmberTypes(const AmberParams &params, QHash<QString, int> &unique_names)
 {
     const auto info = params.info();
 
@@ -1257,8 +1295,6 @@ QVector<QString> getAmberTypes(const AmberParams &params, QHash<QString, int> &u
         {
             // we need to shorten the atom type name to 4 characters. Do this by
             // creating a unique name...
-            QMutexLocker lkr(&name_mutex);
-
             int index = 0;
 
             if (unique_names.contains(atomtype))
@@ -1844,13 +1880,15 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     // before we start, validate that all of the parameters are ok
     bool ok = true;
 
+    const auto params_data = params.constData();
+
     if (use_parallel)
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, params.count()), [&](const tbb::blocked_range<int> &r)
                           {
             for (int i = r.begin(); i < r.end(); ++i)
             {
-                QStringList errors = params[i].validate();
+                QStringList errors = params_data[i].validate();
 
                 if (not errors.isEmpty())
                 {
@@ -1871,7 +1909,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     {
         for (int i = 0; i < params.count(); ++i)
         {
-            QStringList errors = params[i].validate();
+            QStringList errors = params_data[i].validate();
 
             if (not errors.isEmpty())
             {
@@ -1896,6 +1934,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     // now set up the 'pointers' array, which forms the header of the output
     // file and gives information about the number of atoms etc.
     QVector<qint64> pointers(33, 0);
+    auto pointers_data = pointers.data();
 
     // first, count up the number of atoms, and get the start index of each
     // atom (the atoms count sequentially upwards)
@@ -1904,12 +1943,12 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     {
         int natoms = 0;
 
-        _tmp_natoms_per_molecule[0] = params.constData()[0].info().nAtoms();
+        _tmp_natoms_per_molecule[0] = params_data[0].info().nAtoms();
         natoms = _tmp_natoms_per_molecule[0];
 
         for (int i = 1; i < params.count(); ++i)
         {
-            const int nats = params.constData()[i].info().nAtoms();
+            const int nats = params_data[i].info().nAtoms();
             _tmp_natoms_per_molecule[i] = nats;
             _tmp_atom_start_index[i] = natoms;
 
@@ -1923,6 +1962,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     // const functions to access the data
     const QVector<qint64> natoms_per_molecule = _tmp_natoms_per_molecule;
     const QVector<qint64> atom_start_index = _tmp_atom_start_index;
+
+    const auto atom_start_index_data = atom_start_index.constData();
 
     // save the number of atoms to be written to the file
     const int total_natoms = pointers[0];
@@ -1944,6 +1985,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllAtomNames = [&]()
     {
         QVector<QVector<QString>> atom_names(params.count());
+        auto atom_names_data = atom_names.data();
 
         if (use_parallel)
         {
@@ -1951,14 +1993,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_names[i] = getAtomNames(params[i]);
+                    atom_names_data[i] = getAtomNames(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_names[i] = getAtomNames(params[i]);
+                atom_names_data[i] = getAtomNames(params_data[i]);
             }
         }
 
@@ -1966,13 +2008,13 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         // molecule. Solvent molecules are those that have the same number
         // of atoms as the last molecule, and that have the same atom names
         {
-            const auto last_molinfo = params.last().info();
+            const auto last_molinfo = params_data[params.count() - 1].info();
 
             int first_solvent = params.count() - 1;
 
             for (int i = params.count() - 2; i >= 0; --i)
             {
-                const auto molinfo = params[i].info();
+                const auto molinfo = params_data[i].info();
 
                 // compare the number of atoms in this molecule to that of
                 // the last molecule - if different, then this is not the solvent
@@ -1998,7 +2040,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             // now count up the number of residues in the "solute" molecules
             for (int i = 0; i < first_solvent; ++i)
             {
-                last_solute_residue += params[i].info().nResidues();
+                last_solute_residue += params_data[i].info().nResidues();
             }
         }
 
@@ -2025,6 +2067,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllAtomCharges = [&]()
     {
         QVector<QVector<double>> atom_charges(params.count());
+        auto atom_charges_data = atom_charges.data();
 
         if (use_parallel)
         {
@@ -2032,14 +2075,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_charges[i] = getAtomCharges(params[i]);
+                    atom_charges_data[i] = getAtomCharges(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_charges[i] = getAtomCharges(params[i]);
+                atom_charges_data[i] = getAtomCharges(params_data[i]);
             }
         }
 
@@ -2066,6 +2109,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllAtomNumbers = [&]()
     {
         QVector<QVector<qint64>> atom_numbers(params.count());
+        auto atom_numbers_data = atom_numbers.data();
 
         if (use_parallel)
         {
@@ -2073,14 +2117,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_numbers[i] = getAtomNumbers(params[i]);
+                    atom_numbers_data[i] = getAtomNumbers(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_numbers[i] = getAtomNumbers(params[i]);
+                atom_numbers_data[i] = getAtomNumbers(params_data[i]);
             }
         }
 
@@ -2107,6 +2151,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllAtomMasses = [&]()
     {
         QVector<QVector<double>> atom_masses(params.count());
+        auto atom_masses_data = atom_masses.data();
 
         if (use_parallel)
         {
@@ -2114,14 +2159,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_masses[i] = getAtomMasses(params[i]);
+                    atom_masses_data[i] = getAtomMasses(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_masses[i] = getAtomMasses(params[i]);
+                atom_masses_data[i] = getAtomMasses(params_data[i]);
             }
         }
 
@@ -2148,6 +2193,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllRadii = [&]()
     {
         QVector<QVector<double>> atom_radii(params.count());
+        auto atom_radii_data = atom_radii.data();
 
         if (use_parallel)
         {
@@ -2155,14 +2201,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_radii[i] = getAtomRadii(params[i]);
+                    atom_radii_data[i] = getAtomRadii(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_radii[i] = getAtomRadii(params[i]);
+                atom_radii_data[i] = getAtomRadii(params_data[i]);
             }
         }
 
@@ -2189,6 +2235,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllScreening = [&]()
     {
         QVector<QVector<double>> atom_screening(params.count());
+        auto atom_screening_data = atom_screening.data();
 
         if (use_parallel)
         {
@@ -2196,14 +2243,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_screening[i] = getAtomScreening(params[i]);
+                    atom_screening_data[i] = getAtomScreening(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_screening[i] = getAtomScreening(params[i]);
+                atom_screening_data[i] = getAtomScreening(params_data[i]);
             }
         }
 
@@ -2231,6 +2278,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllTreeChains = [&]()
     {
         QVector<QVector<QString>> atom_treechains(params.count());
+        auto atom_treechains_data = atom_treechains.data();
 
         if (use_parallel)
         {
@@ -2238,14 +2286,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    atom_treechains[i] = getAtomTreeChains(params[i]);
+                    atom_treechains_data[i] = getAtomTreeChains(params_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                atom_treechains[i] = getAtomTreeChains(params[i]);
+                atom_treechains_data[i] = getAtomTreeChains(params_data[i]);
             }
         }
 
@@ -2273,51 +2321,29 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllAmberTypes = [&]()
     {
         QVector<QVector<QString>> amber_types(params.count());
+        auto amber_types_data = amber_types.data();
 
         QHash<QString, int> unique_types;  // Unique types in a molecule.
         QSet<QString> system_unique_types; // Unique types in the system.
-        QMutex unique_mutex;
 
-        if (use_parallel)
+        for (int i = 0; i < params.count(); ++i)
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, params.count()), [&](const tbb::blocked_range<int> r)
-                              {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    amber_types[i] = getAmberTypes(params[i], unique_types, unique_mutex);
+            amber_types_data[i] = getAmberTypes(params_data[i], unique_types);
 
-                    // Store the unique types for the entire system.
-                    for (const auto &type : amber_types[i])
-                    {
-                        // We haven't seen this type in any molecule.
-                        if (not system_unique_types.contains(type))
-                        {
-                            system_unique_types.insert(type);
-                        }
-                    }
-                } });
-        }
-        else
-        {
-            for (int i = 0; i < params.count(); ++i)
+            // Store the unique types for the entire system.
+            for (const auto &type : amber_types_data[i])
             {
-                amber_types[i] = getAmberTypes(params[i], unique_types, unique_mutex);
-
-                // Store the unique types for the entire system.
-                for (const auto &type : amber_types[i])
+                // We haven't seen this type in any molecule.
+                if (not system_unique_types.contains(type))
                 {
-                    // We haven't seen this type in any molecule.
-                    if (not system_unique_types.contains(type))
-                    {
-                        system_unique_types.insert(type);
-                    }
+                    system_unique_types.insert(type);
                 }
             }
         }
 
         // Record the NATYP flag.
         const int ntypes_system = system_unique_types.count();
-        pointers[18] = ntypes_system;
+        pointers_data[18] = ntypes_system;
 
         if (all_errors)
         {
@@ -2345,13 +2371,15 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         // is unique
         QVector<LJParameter> ljparams;
         QVector<QVector<qint64>> atom_types(params.count());
+        auto atom_types_data = atom_types.data();
 
         for (int i = 0; i < params.count(); ++i)
         {
-            const auto info = params.constData()[i].info();
-            const auto ljs = params.constData()[i].ljs();
+            const auto info = params_data[i].info();
+            const auto ljs = params_data[i].ljs();
 
             QVector<qint64> mol_atom_types(info.nAtoms());
+            auto mol_atom_types_data = mol_atom_types.data();
 
             for (int j = 0; j < info.nAtoms(); ++j)
             {
@@ -2362,31 +2390,37 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                 if (idx == -1)
                 {
                     ljparams.append(lj);
-                    mol_atom_types[j] = ljparams.count();
+                    mol_atom_types_data[j] = ljparams.count();
                 }
                 else
                 {
-                    mol_atom_types[j] = idx + 1;
+                    mol_atom_types_data[j] = idx + 1;
                 }
             }
 
-            atom_types[i] = mol_atom_types;
+            atom_types_data[i] = mol_atom_types;
         }
 
         // We now have all of the atom types - create the acoeff and bcoeff arrays.
         const int ntypes = ljparams.count();
 
-        pointers[1] = ntypes;
+        pointers_data[1] = ntypes;
 
         QVector<qint64> ico(ntypes * ntypes);
         QVector<double> cn1((ntypes * (ntypes + 1)) / 2);
         QVector<double> cn2((ntypes * (ntypes + 1)) / 2);
 
+        auto ico_data = ico.data();
+        auto cn1_data = cn1.data();
+        auto cn2_data = cn2.data();
+
+        const auto ljparams_data = ljparams.constData();
+
         int lj_idx = 0;
 
         for (int i = 0; i < ntypes; ++i)
         {
-            const auto lj0 = ljparams.constData()[i];
+            const auto &lj0 = ljparams_data[i];
 
             // now we need to (wastefully) save the A/B parameters for
             // all mixed LJ parameters i+j
@@ -2394,22 +2428,22 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             {
                 LJParameter lj01 = lj0.combineArithmetic(ljparams.constData()[j]);
 
-                cn1[lj_idx] = lj01.A();
-                cn2[lj_idx] = lj01.B();
+                cn1_data[lj_idx] = lj01.A();
+                cn2_data[lj_idx] = lj01.B();
 
                 lj_idx += 1;
 
                 // now save the index for i,j and j,i into the ico array
-                ico[i * ntypes + j] = lj_idx;
-                ico[j * ntypes + i] = lj_idx;
+                ico_data[i * ntypes + j] = lj_idx;
+                ico_data[j * ntypes + i] = lj_idx;
             }
 
             // now save the A/B parameters for the ith parameter type
-            cn1[lj_idx] = lj0.A();
-            cn2[lj_idx] = lj0.B();
+            cn1_data[lj_idx] = lj0.A();
+            cn2_data[lj_idx] = lj0.B();
 
             lj_idx += 1;
-            ico[i * ntypes + i] = lj_idx;
+            ico_data[i * ntypes + i] = lj_idx;
         }
 
         // now return all of the arrays
@@ -2423,6 +2457,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllExcludedAtoms = [&]()
     {
         QVector<QVector<QVector<qint64>>> excluded_atoms(params.count());
+        auto excluded_atoms_data = excluded_atoms.data();
 
         if (use_parallel)
         {
@@ -2430,14 +2465,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    excluded_atoms[i] = getExcludedAtoms(params[i], atom_start_index[i], true);
+                    excluded_atoms_data[i] = getExcludedAtoms(params_data[i], atom_start_index_data[i], true);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                excluded_atoms[i] = getExcludedAtoms(params[i], atom_start_index[i]);
+                excluded_atoms_data[i] = getExcludedAtoms(params_data[i], atom_start_index_data[i]);
             }
         }
 
@@ -2446,7 +2481,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
         for (int i = 0; i < excluded_atoms.count(); ++i)
         {
-            const auto mol_excluded_atoms = excluded_atoms[i];
+            const auto mol_excluded_atoms = excluded_atoms_data[i];
 
             for (int j = 0; j < mol_excluded_atoms.count(); ++j)
             {
@@ -2489,6 +2524,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllResidueInfo = [&]()
     {
         QVector<std::tuple<QVector<QString>, QVector<qint64>>> all_res_data(params.count());
+        auto all_res_data_data = all_res_data.data();
 
         // get all of the residue info - this is the name and the atom range
         if (use_parallel)
@@ -2497,14 +2533,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    all_res_data[i] = getResidueData(params[i], atom_start_index[i]);
+                    all_res_data_data[i] = getResidueData(params_data[i], atom_start_index_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                all_res_data[i] = getResidueData(params[i], atom_start_index[i]);
+                all_res_data_data[i] = getResidueData(params_data[i], atom_start_index_data[i]);
             }
         }
 
@@ -2538,6 +2574,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllBonds = [&]()
     {
         QVector<std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberBond, qint64>>> all_bond_data(params.count());
+        auto all_bond_data_data = all_bond_data.data();
 
         // get all of the bond information from each molecule
         if (use_parallel)
@@ -2546,14 +2583,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    all_bond_data[i] = getBondData(params[i], atom_start_index[i]);
+                    all_bond_data_data[i] = getBondData(params_data[i], atom_start_index_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                all_bond_data[i] = getBondData(params[i], atom_start_index[i]);
+                all_bond_data_data[i] = getBondData(params_data[i], atom_start_index_data[i]);
             }
         }
 
@@ -2580,7 +2617,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         // combine all parameters into a single set, with a unique index
         for (int i = 0; i < params.count(); ++i)
         {
-            const auto bond_to_idx = std::get<2>(all_bond_data[i]);
+            const auto bond_to_idx = std::get<2>(all_bond_data_data[i]);
 
             // first, find all unique bonds
             for (auto it = bond_to_idx.constBegin(); it != bond_to_idx.constEnd(); ++it)
@@ -2618,7 +2655,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             QHash<qint64, qint64> idx_to_idx;
 
             // get all of the bond parameters
-            const auto bond_to_idx = std::get<2>(all_bond_data[i]);
+            const auto bond_to_idx = std::get<2>(all_bond_data_data[i]);
 
             // for each one, get the global parameter index, save the parameters to
             // the k and r0 arrays, and update the mapping from local to global indicies
@@ -2629,8 +2666,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
             // now run through the bonds updating their local indicies to
             // global indicies
-            const auto bonds_inc_h = std::get<0>(all_bond_data[i]);
-            const auto bonds_exc_h = std::get<1>(all_bond_data[i]);
+            const auto bonds_inc_h = std::get<0>(all_bond_data_data[i]);
+            const auto bonds_exc_h = std::get<1>(all_bond_data_data[i]);
 
             for (int j = 0; j < bonds_inc_h.count(); j += 3)
             {
@@ -2663,6 +2700,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     auto getAllAngles = [&]()
     {
         QVector<std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberAngle, qint64>>> all_ang_data(params.count());
+        auto all_ang_data_data = all_ang_data.data();
 
         // get all of the angle information from each molecule
         if (use_parallel)
@@ -2671,14 +2709,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    all_ang_data[i] = getAngleData(params[i], atom_start_index[i]);
+                    all_ang_data_data[i] = getAngleData(params_data[i], atom_start_index_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                all_ang_data[i] = getAngleData(params[i], atom_start_index[i]);
+                all_ang_data_data[i] = getAngleData(params_data[i], atom_start_index_data[i]);
             }
         }
 
@@ -2705,7 +2743,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         // combine all parameters into a single set, with a unique index
         for (int i = 0; i < params.count(); ++i)
         {
-            const auto ang_to_idx = std::get<2>(all_ang_data[i]);
+            const auto ang_to_idx = std::get<2>(all_ang_data_data[i]);
 
             // first, find all unique angles
             for (auto it = ang_to_idx.constBegin(); it != ang_to_idx.constEnd(); ++it)
@@ -2743,7 +2781,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             QHash<qint64, qint64> idx_to_idx;
 
             // get all of the angle parameters
-            const auto ang_to_idx = std::get<2>(all_ang_data[i]);
+            const auto ang_to_idx = std::get<2>(all_ang_data_data[i]);
 
             // for each one, get the global parameter index, save the parameters to
             // the k and t0 arrays, and update the mapping from local to global indicies
@@ -2754,8 +2792,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
             // now run through the angles updating their local indicies to
             // global indicies
-            const auto angs_inc_h = std::get<0>(all_ang_data[i]);
-            const auto angs_exc_h = std::get<1>(all_ang_data[i]);
+            const auto angs_inc_h = std::get<0>(all_ang_data_data[i]);
+            const auto angs_exc_h = std::get<1>(all_ang_data_data[i]);
 
             for (int j = 0; j < angs_inc_h.count(); j += 4)
             {
@@ -2792,6 +2830,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         QVector<std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberNBDihPart, qint64>>> all_dih_data(
             params.count());
 
+        auto all_dih_data_data = all_dih_data.data();
+
         // get all of the dihedral information from each molecule
         if (use_parallel)
         {
@@ -2799,14 +2839,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    all_dih_data[i] = getDihedralData(params[i], atom_start_index[i]);
+                    all_dih_data_data[i] = getDihedralData(params_data[i], atom_start_index_data[i]);
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                all_dih_data[i] = getDihedralData(params[i], atom_start_index[i]);
+                all_dih_data_data[i] = getDihedralData(params_data[i], atom_start_index_data[i]);
             }
         }
 
@@ -2816,9 +2856,9 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         int nparams = 0;
         for (int i = 0; i < params.count(); ++i)
         {
-            ndihs_inc_h += std::get<0>(all_dih_data[i]).count();
-            ndihs_exc_h += std::get<1>(all_dih_data[i]).count();
-            nparams += std::get<2>(all_dih_data[i]).count();
+            ndihs_inc_h += std::get<0>(all_dih_data_data[i]).count();
+            ndihs_exc_h += std::get<1>(all_dih_data_data[i]).count();
+            nparams += std::get<2>(all_dih_data_data[i]).count();
         }
 
         QVector<qint64> all_dihs_inc_h, all_dihs_exc_h;
@@ -2833,7 +2873,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         // combine all parameters into a single set, with a unique index
         for (int i = 0; i < params.count(); ++i)
         {
-            const auto dih_to_idx = std::get<2>(all_dih_data[i]);
+            const auto dih_to_idx = std::get<2>(all_dih_data_data[i]);
 
             // first, find all unique dihedrals
             for (auto it = dih_to_idx.constBegin(); it != dih_to_idx.constEnd(); ++it)
@@ -2893,7 +2933,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             QHash<qint64, qint64> idx_to_idx;
 
             // get all of the dihedral parameters
-            const auto dih_to_idx = std::get<2>(all_dih_data[i]);
+            const auto dih_to_idx = std::get<2>(all_dih_data_data[i]);
 
             // for each one, get the global parameter index, save the parameters to
             // the parameter arrays, and update the mapping from local to global indicies
@@ -2904,8 +2944,8 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
             // now run through the dihedrals updating their local indicies to
             // global indicies
-            const auto dihs_inc_h = std::get<0>(all_dih_data[i]);
-            const auto dihs_exc_h = std::get<1>(all_dih_data[i]);
+            const auto dihs_inc_h = std::get<0>(all_dih_data_data[i]);
+            const auto dihs_exc_h = std::get<1>(all_dih_data_data[i]);
 
             for (int j = 0; j < dihs_inc_h.count(); j += 5)
             {
@@ -3277,6 +3317,7 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
     // get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order
     const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
+    const auto molnums_data = molnums.constData();
 
     if (molnums.isEmpty())
     {
@@ -3287,6 +3328,7 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
 
     // generate the AmberParams object for each molecule in the system
     QVector<AmberParams> params(molnums.count());
+    auto params_data = params.data();
 
     if (usesParallel())
     {
@@ -3294,14 +3336,14 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
                           {
             for (int i = r.begin(); i < r.end(); ++i)
             {
-                params[i] = AmberParams(system[molnums[i]], map);
+                params_data[i] = AmberParams(system[molnums_data[i]], map);
             } });
     }
     else
     {
         for (int i = 0; i < molnums.count(); ++i)
         {
-            params[i] = AmberParams(system[molnums[i]], map);
+            params_data[i] = AmberParams(system[molnums_data[i]], map);
         }
     }
 
@@ -3730,12 +3772,32 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
     // the layout of cutgroups, residues and atoms
     MolStructureEditor mol;
 
-    const auto atom_names = this->stringData("ATOM_NAME");
+    auto atom_names = this->stringData("ATOM_NAME");
+
+    while (atom_names.count() < natoms)
+    {
+        // we are missing some atom names - give a default
+        // name of "UNK", which tends to be used for "UNKNOWN" atoms.
+        // see
+        // https://www.rcsb.org/ligand/UNX
+        // for this convention
+        atom_names.append("UNK");
+    }
 
     // locate the residue pointers for this molecule - note that the
     // residue pointers are 1-indexed (i.e. from atom 1 to atom N)
     const auto res_pointers = this->intData("RESIDUE_POINTER");
-    const auto res_names = this->stringData("RESIDUE_LABEL");
+    auto res_names = this->stringData("RESIDUE_LABEL");
+
+    while (res_names.count() < res_pointers.count())
+    {
+        // we are missing some residue names - give a default
+        // name of "UNK", which tends to be used for "UNKNOWN" residues
+        // see
+        // http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_37.html
+        // for this convention
+        res_names.append("UNK");
+    }
 
     for (int i = 0; i < res_pointers.count(); ++i)
     {

@@ -658,3 +658,11 @@ You can, of course, plot this just as you did for simple measurements.
 
 .. image:: images/04_02_06.jpg
    :alt: Graph of the first two bonds against time
+
+.. note::
+
+   You can learn more about trajectories, including how to align frames of
+   a trajectory against arbitrary atoms, how to wrap molecules into the
+   same periodic box, and how to smooth (average) coordinates across
+   frames in :doc:`this cheatsheet guide <../../cheatsheet/view>`
+   (in the section on viewing 3D trajectories).

@@ -635,6 +635,48 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Segment >::hasMetadata
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Segment >::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
+            hasMetadata_function_type hasMetadata_function_value( &::SireMol::SelectorM< SireMol::Segment >::hasMetadata );
+            
+            SelectorM_Segment__exposer.def( 
+                "hasMetadata"
+                , hasMetadata_function_value
+                , ( bp::arg("metakey") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::hasMetadata
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Segment >::*hasMetadata_function_type)( ::SireBase::PropertyName const &,::SireBase::PropertyName const & ) const;
+            hasMetadata_function_type hasMetadata_function_value( &::SireMol::SelectorM< SireMol::Segment >::hasMetadata );
+            
+            SelectorM_Segment__exposer.def( 
+                "hasMetadata"
+                , hasMetadata_function_value
+                , ( bp::arg("key"), bp::arg("metakey") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::hasProperty
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Segment >::*hasProperty_function_type)( ::SireBase::PropertyName const & ) const;
+            hasProperty_function_type hasProperty_function_value( &::SireMol::SelectorM< SireMol::Segment >::hasProperty );
+            
+            SelectorM_Segment__exposer.def( 
+                "hasProperty"
+                , hasProperty_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Segment >::indexes
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
@@ -795,6 +837,33 @@ void register_SelectorM_Segment__class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::metadataKeys
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QStringList ( ::SireMol::SelectorM< SireMol::Segment >::*metadataKeys_function_type)(  ) const;
+            metadataKeys_function_type metadataKeys_function_value( &::SireMol::SelectorM< SireMol::Segment >::metadataKeys );
+            
+            SelectorM_Segment__exposer.def( 
+                "metadataKeys"
+                , metadataKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::metadataKeys
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QStringList ( ::SireMol::SelectorM< SireMol::Segment >::*metadataKeys_function_type)( ::SireBase::PropertyName const & ) const;
+            metadataKeys_function_type metadataKeys_function_value( &::SireMol::SelectorM< SireMol::Segment >::metadataKeys );
+            
+            SelectorM_Segment__exposer.def( 
+                "metadataKeys"
+                , metadataKeys_function_value
+                , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -1164,6 +1233,19 @@ void register_SelectorM_Segment__class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("id") )
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::propertyKeys
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::QStringList ( ::SireMol::SelectorM< SireMol::Segment >::*propertyKeys_function_type)(  ) const;
+            propertyKeys_function_type propertyKeys_function_value( &::SireMol::SelectorM< SireMol::Segment >::propertyKeys );
+            
+            SelectorM_Segment__exposer.def( 
+                "propertyKeys"
+                , propertyKeys_function_value
+                , bp::release_gil_policy()
                 , "" );
         
         }

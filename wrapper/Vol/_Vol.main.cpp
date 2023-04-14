@@ -45,6 +45,8 @@
 
 #include "Space.pypp.hpp"
 
+#include "TransformedSpace.pypp.hpp"
+
 #include "TriclinicBox.pypp.hpp"
 
 namespace bp = boost::python;
@@ -103,6 +105,8 @@ BOOST_PYTHON_MODULE(_Vol){
     register_PeriodicBox_class();
 
     register_RegularGrid_class();
+
+    register_TransformedSpace_class();
 
     register_SireVol_properties();
 

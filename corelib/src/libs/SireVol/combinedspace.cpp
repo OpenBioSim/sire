@@ -32,6 +32,7 @@
 #include "SireID/index.h"
 
 #include "SireMaths/rangenerator.h"
+#include "SireMaths/align.h"
 
 #include "SireError/errors.h"
 #include "SireVol/errors.h"
@@ -520,6 +521,13 @@ double CombinedSpace::minimumDistance(const CoordGroup &group) const
 {
     this->assertSameSpace("Cannot calculate minimum distances", CODELOC);
     return spces.at(0).read().minimumDistance(group);
+}
+
+QVector<Vector> CombinedSpace::getMinimumImage(const QVector<Vector> &coords,
+                                               const Vector &center) const
+{
+    this->assertSameSpace("Cannot get minimum images", CODELOC);
+    return spces.at(0).read().getMinimumImage(coords, center);
 }
 
 /** Return the minimum image copy of 'group' with respect to 'center'.

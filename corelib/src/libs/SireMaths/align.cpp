@@ -42,6 +42,7 @@
 #include "tostring.h"
 
 using namespace SireMaths;
+using namespace SireBase;
 using namespace SireStream;
 
 /////////
@@ -74,17 +75,23 @@ QDataStream &operator>>(QDataStream &ds, Transform &trans)
 }
 
 /** Constructor (no transformation) */
-Transform::Transform() : delta(0), rotcent(0), rotmat(Quaternion::identity())
+Transform::Transform()
+    : ConcreteProperty<Transform, Property>(),
+      delta(0), rotcent(0), rotmat(Quaternion::identity())
 {
 }
 
 /** Construct to only translate by 'delta' */
-Transform::Transform(const Vector &del) : delta(del), rotcent(0), rotmat(Quaternion::identity())
+Transform::Transform(const Vector &del)
+    : ConcreteProperty<Transform, Property>(),
+      delta(del), rotcent(0), rotmat(Quaternion::identity())
 {
 }
 
 /** Construct to only rotate using 'rotmat' around the rotation center 'center' */
-Transform::Transform(const Quaternion &mat, const Vector &center) : delta(0), rotcent(center), rotmat(mat)
+Transform::Transform(const Quaternion &mat, const Vector &center)
+    : ConcreteProperty<Transform, Property>(),
+      delta(0), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -93,7 +100,9 @@ Transform::Transform(const Quaternion &mat, const Vector &center) : delta(0), ro
 }
 
 /** Construct to only rotate using 'rotmat' around the rotation center 'center' */
-Transform::Transform(const Matrix &mat, const Vector &center) : delta(0), rotcent(center), rotmat(mat)
+Transform::Transform(const Matrix &mat, const Vector &center)
+    : ConcreteProperty<Transform, Property>(),
+      delta(0), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -104,7 +113,8 @@ Transform::Transform(const Matrix &mat, const Vector &center) : delta(0), rotcen
 /** Construct to translate by delta and to rotate using 'rotmat' around the rotation
     center 'center' */
 Transform::Transform(const Vector &del, const Quaternion &mat, const Vector &center)
-    : delta(del), rotcent(center), rotmat(mat)
+    : ConcreteProperty<Transform, Property>(),
+      delta(del), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -115,7 +125,8 @@ Transform::Transform(const Vector &del, const Quaternion &mat, const Vector &cen
 /** Construct to translate by delta and to rotate using 'rotmat' around the rotation
     center 'center' */
 Transform::Transform(const Vector &del, const Matrix &mat, const Vector &center)
-    : delta(del), rotcent(center), rotmat(mat)
+    : ConcreteProperty<Transform, Property>(),
+      delta(del), rotcent(center), rotmat(mat)
 {
     if (rotmat.isIdentity())
     {
@@ -124,7 +135,9 @@ Transform::Transform(const Vector &del, const Matrix &mat, const Vector &center)
 }
 
 /** Copy constructor */
-Transform::Transform(const Transform &other) : delta(other.delta), rotcent(other.rotcent), rotmat(other.rotmat)
+Transform::Transform(const Transform &other)
+    : ConcreteProperty<Transform, Property>(),
+      delta(other.delta), rotcent(other.rotcent), rotmat(other.rotmat)
 {
 }
 
@@ -156,6 +169,11 @@ bool Transform::operator==(const Transform &other) const
 bool Transform::operator!=(const Transform &other) const
 {
     return not operator==(other);
+}
+
+Transform *Transform::clone() const
+{
+    return new Transform(*this);
 }
 
 const char *Transform::typeName()
@@ -205,7 +223,21 @@ QString Transform::toString() const
 /** Apply this transformation to the passed point, returning the result */
 Vector Transform::operator()(const Vector &point) const
 {
-    return delta + rotcent + rotmat.rotate(point - rotcent);
+    Vector p = point;
+    this->apply(&p, 1);
+    return p;
+}
+
+/** Return the inverse of this transformation */
+Transform Transform::inverse() const
+{
+    Transform ret(*this);
+
+    ret.delta = -ret.delta;
+    ret.rotcent = ret.rotcent - ret.delta;
+    ret.rotmat = ret.rotmat.inverse();
+
+    return ret;
 }
 
 /** Apply this transformation to all of the passed points. Note that this
@@ -252,6 +284,10 @@ Vector *Transform::apply(Vector *points, int sz) const
         {
             for (int i = 0; i < sz; ++i)
             {
+                // x = d + [ dC-p rotate theta ]
+                // x - d = dC-p rotate theta
+                // (x - d) rotate -theta = dC - p
+                // rotcent +
                 points[i] = delta + rotcent + rotmat.rotate(points[i] - rotcent);
             }
         }
@@ -283,6 +319,32 @@ Vector Transform::apply(const Vector &point) const
 QVector<Vector> Transform::apply(const QVector<Vector> &points) const
 {
     return this->operator()(points);
+}
+
+/** Apply the inverse of this transformation to all of the passed points. Note that this
+    modifies the points themselves and returns a pointer to the same array */
+Vector *Transform::reverse(Vector *points, int sz) const
+{
+    return this->inverse().apply(points, sz);
+}
+
+/** Apply the inverse of this transformation to the passed point, returning the result */
+Vector Transform::reverse(const Vector &point) const
+{
+    Vector p = point;
+    this->reverse(&p, 1);
+    return p;
+}
+
+/** Apply this transformation to all of the passed points, returning the results */
+QVector<Vector> Transform::reverse(const QVector<Vector> &points) const
+{
+    QVector<Vector> ret = points;
+
+    if (ret.count() > 0)
+        this->reverse(ret.data(), ret.count());
+
+    return ret;
 }
 
 /** Return the amount by which to translate */

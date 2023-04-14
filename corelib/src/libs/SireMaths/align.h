@@ -33,6 +33,8 @@
 #include "SireMaths/quaternion.h"
 #include "SireMaths/vector.h"
 
+#include "SireBase/property.h"
+
 #include <QList>
 #include <QVector>
 
@@ -58,7 +60,7 @@ namespace SireMaths
 
         @author Christopher Woods
     */
-    class SIREMATHS_EXPORT Transform
+    class SIREMATHS_EXPORT Transform : public SireBase::ConcreteProperty<Transform, SireBase::Property>
     {
 
         friend SIREMATHS_EXPORT QDataStream & ::operator<<(QDataStream &, const Transform &);
@@ -88,8 +90,12 @@ namespace SireMaths
 
         QString toString() const;
 
+        virtual Transform *clone() const;
+
         bool isNull() const;
         bool isZero() const;
+
+        Transform inverse() const;
 
         Vector operator()(const Vector &point) const;
         QVector<Vector> operator()(const QVector<Vector> &point) const;
@@ -98,6 +104,11 @@ namespace SireMaths
         QVector<Vector> apply(const QVector<Vector> &points) const;
 
         Vector *apply(Vector *coords, int sz) const;
+
+        Vector reverse(const Vector &point) const;
+        QVector<Vector> reverse(const QVector<Vector> &points) const;
+
+        Vector *reverse(Vector *coords, int sz) const;
 
         Vector translationDelta() const;
 

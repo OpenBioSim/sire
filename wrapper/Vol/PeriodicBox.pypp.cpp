@@ -11,6 +11,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -307,6 +309,19 @@ void register_PeriodicBox_class(){
         }
         { //::SireVol::PeriodicBox::getMinimumImage
         
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::PeriodicBox::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::PeriodicBox::getMinimumImage );
+            
+            PeriodicBox_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "Return the copy of the point point which is the closest minimum image\nto center" );
+        
+        }
+        { //::SireVol::PeriodicBox::getMinimumImage
+        
             typedef ::SireVol::CoordGroup ( ::SireVol::PeriodicBox::*getMinimumImage_function_type)( ::SireVol::CoordGroup const &,::SireMaths::Vector const & ) const;
             getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::PeriodicBox::getMinimumImage );
             
@@ -480,7 +495,7 @@ void register_PeriodicBox_class(){
                 , setDimensions_function_value
                 , ( bp::arg("dimensions") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the dimensions of this box to dimensions (the lengths of the\nthree sides of this box)" );
         
         }
         { //::SireVol::PeriodicBox::setDimensions

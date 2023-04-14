@@ -161,21 +161,32 @@ view by passing ``orthographic=False``, e.g.
 .. image:: images/view_09.jpg
    :alt: 3D perspective view of aladip
 
+Choosing the 3D representation
+------------------------------
+
 You can control the representation used for the view via the additional
 arguments of the function.
 
 * ``protein`` - set the representation used for protein molecules
 * ``water`` - set the representation used for water molecules
 * ``ion`` - set the representation used for single-atom ions
-* ``rest`` - set the representation used for all other molecules (e.g. ligands)
+* ``default`` or ``rest`` - set the representation used for all other molecules (e.g. ligands)
 
 You can also force all molecules to use the same representation by
 setting the ``all`` option.
 
-There are several representations that you can use. These are:
+Setting any of the above to ``None``, ``False`` or the string ``none`` will
+switch off that view. Setting ``default`` to ``None`` or ``False``, or
+setting ``no_default`` to ``True`` will disable all default views.
+
+NGLView provides
+`several representations that you can use <https://nglviewer.org/ngl/api/manual/usage/molecular-representations.html>`__.
+These are:
 
 * ``ball_and_stick`` - a ball and stick view
+* ``base`` - simplified DNA/RNA base view
 * ``cartoon`` - traditional "cartoon" view of a protein
+* ``hyperball`` - smoothly-connected ball and stick view
 * ``licorice`` - prettier line view
 * ``line`` - simple line view
 * ``point`` - simple point for each atom
@@ -193,14 +204,26 @@ all atoms using a ``spacefill`` representation etc.
 
 The following default representations will be used:
 
-* ``protein`` - ``cartoon``
-* ``water`` - ``line``
+* ``protein`` - ``cartoon:sstruc``
+* ``water`` - ``line:0.5``
 * ``ion`` - ``spacefill``
-* ``rest`` - ``licorice``
+* ``default`` - ``hyperball``
+
+.. note::
+
+   The ``sstruc`` and ``0.5`` values refer to colors, which are described
+   in the next section.
+
+.. note::
+
+   We use ``default`` to refer to any other molecule, e.g. typically
+   ligands.
 
 You can switch off the default representations by passing
 ``no_default=True``, e.g. ``mols.view(no_default=True, protein="surface")``
-would show only the surface view of a protein.
+would show only the surface view of a protein. You can also switch off
+all default representations by passing ``default=False``, ``default=None``,
+``all=False`` or ``all=None``.
 
 You can also pass multiple representations per view by passing in a
 list of representations, e.g.
@@ -252,13 +275,216 @@ to the rest of the water molecules in the box.
    based views (e.g. ``surface="molidx 0"``) with search based views
    (e.g. ``rest="line"``).
 
-Currently there isn't an ability to control the colour or opacity
-(transparency) of the different views. This is something that we would
-like to add. Please get in touch if you have a good idea of how this
-could be expressed in the API, or if you would like to have a go at
-implementing this functionality.
+Choosing colors and opacities
+-----------------------------
 
-Also, we don't yet properly expose the
+You can set the color and opacity used for a particular representation
+by passing these as additional terms to the representation or search
+term, separated by colons. For example, to set the color of a
+representation to ``blue`` we could pass this as an addition ``:blue``
+to the representation or search term argument.
+
+>>> mol = mols[0]
+>>> mol.view(all="licorice:blue")
+
+.. image:: images/view_14.jpg
+   :alt: Blue licorice view of aladip
+
+Here all of the atoms are rendered in blue licorice. Or...
+
+>>> mol.view(all="licorice:blue", ball_and_stick="element C:red")
+
+.. image:: images/view_15.jpg
+   :alt: Blue licorice inside red ball and stick
+
+all of the atoms are rendered in blue licorice, but the carbon atoms are
+represented as red balls and sticks.
+
+You can use any color name supported by NGLView. These include named
+colors (e.g. ``red``, ``green``, ``blue``, ``yellow``, including any
+`CSS named color <https://www.w3schools.com/cssref/css_colors.php>`__ supported
+by your browser, e.g. ``orchid``, ``sienna``, ``wheat`` etc.), colors
+specified as a red-green-blue hex values (e.g. ``#FF0000``, ``#00FF00``,
+``#0000FF`` etc.), colors specified as red-green-blue triples
+(e.g. ``rgb(255,0,0)``, ``rgb(0,255,0)``, ``rgb(0,0,255)`` etc.) or any of the
+`coloring schemes supported by NGLView <https://nglviewer.org/ngl/api/manual/usage/coloring.html>`__
+(e.g. ``atomindex``, ``bfactor``, ``electrostatic``, ``element``,
+``hydrophobicity``, ``random`` or ``sstruc``).
+
+You also specify the opacity (transparency) of the representation
+by adding a number between 0 (fully transparent) and 1 (fully opaque).
+You can use any order of color and opacity, e.g.
+
+>>> mol.view(all=["licorice", "spacefill:0.8", "surface:red:0.2"])
+
+.. image:: images/view_16.jpg
+   :alt: licorice in transparent spacefill in transparent red surface
+
+has rendered the molecule using three representations; a licorice in
+default colors (colored by element), spacefill in default colors,
+but with opacity 0.8, and a red-colored surface with opacity 0.2.
+
+Or...
+
+>>> mol.view(all=["ball_and_stick", "surface:0.9:electrostatic"])
+
+.. image:: images/view_17.jpg
+   :alt: Ball and stick inside transparent electrostatic surface
+
+has rendered the molecule with two representations; a ball and stick with
+default colors and a surface colored using electrostatic potential, with
+opacity 0.9.
+
+Centering the view
+------------------
+
+You can center the view on any selection using the ``center`` option, e.g.
+
+>>> mols.view(center="molidx 0")
+
+would center the view on the first molecule, or,
+
+>>> mols.view(center="not (water or protein")
+
+would center the view on all none (water, protein) molecules, i.e.
+likely any ligands or ions. Remember that you can create your own
+:doc:`custom selections <search>` to set search terms that refer to
+ligands or ions more specifically.
+
+Viewing trajectories
+--------------------
+
+If the molecules being viewed have a trajectory, then you will also see
+play controls in the bottom left. These will let you play, pause and
+scroll through the trajectory. Click the play button multiple times to
+speed up playback.
+
+You can choose a subset of frames to play, e.g. here we will play a movie
+of the first 10 frames of the trajectory.
+
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.traj"))
+>>> mols.trajectory()[0:10].view()
+
+Or here we can view every 25 frames of the trajectory.
+
+>>> mols.trajectory()[0::25].view()
+
+Or here we can view all of the frames in reverse order
+
+>>> mols.trajectory()[::-1].view()
+
+Wrapping molecules into the current box
+---------------------------------------
+
+You can control whether or not molecules are wrapped into the same
+periodic box using the ``wrap`` option. If this is ``True`` (the default),
+then the molecules are wrapped into the same box. If this is ``False``
+then the wrapping will be whatever was loaded from the trajectory
+file (or generated via the simulation). For example, the trajectory
+is not wrapped, and so the water molecules will gradually drift out
+into neighboring boxes. You can see this by passing in ``wrap=False``,
+e.g.
+
+>>> mols.trajectory()[-1].view(wrap=False)
+
+.. image:: images/view_18.jpg
+   :alt: Unwrapped view of the trajectory.
+
+This compares to
+
+>>> mols.trajectory()[-1].view(wrap=True)
+
+.. image:: images/view_19.jpg
+   :alt: View of the trajectory with all molecules wrapped into the same box
+
+.. note::
+
+   We are viewing the last frame here, as this is the one that shows
+   the maximum amount of drift from the central box.
+
+Trajectory Alignment
+--------------------
+
+You can align the frames in a trajectory by passing in a search string
+via the ``align`` keyword. For example, here we could align every frame
+against all of the carbon atoms.
+
+>>> mols.view(align="element C")
+
+.. image:: images/view_19.jpg
+   :alt: View of the trajectory with all molecules wrapped into the same box
+
+If ``wrap`` is ``True`` (as is the default) then all molecules will be wrapped
+such that the aligned atoms are at the center of the box.
+
+You can use any search string to find the atoms to align. If you pass
+``align=True`` then this will align against all atoms. This can be useful
+when you are viewing individual molecules, e.g.
+
+>>> mols[0].view(align=True)
+
+Trajectory Smoothing
+--------------------
+
+Molecular dynamics trajectories can be difficult to view because there is a
+lot of high frequency random motion that can obscure the low frequency
+conformational changes that are often of more interest. One way to view
+these events is to average the coordinates of atoms over several frames.
+You can do this using the ``smooth`` option, e.g.
+
+>>> mols.view(align="element C", smooth=50)
+
+Would align the trajectory using all carbon atoms, and would average
+the coordinates of each atom over 50 neighboring frames.
+
+.. note::
+
+   The smoothing number, ``s`` is divided by two, with each frame being
+   averaged over the previous ``(s/2)-1`` preceeding frames and ``(s/2)+x``
+   following frames (where ``x`` is zero if ``s`` is even, and one
+   otherwise).
+
+Integration with trajectories
+-----------------------------
+
+Note that all of the above options can be passed to the
+:func:`~SelectorMol.trajectory` function, e.g.
+
+>>> mols.trajectory(align="element C", smooth=50).view()
+
+would give the same view as
+
+>>> mols.view(align="element C", smooth=50)
+
+This is because ``mols.view(...)`` is creating its own
+``mols.trajectory(...)`` with those options, and is viewing those.
+
+While you can do this, and it is useful for, e.g. saving trajectories,
+there are lots of edge cases that could trip you up. We recommend that
+you pass the options to the ``view`` function and don't pass them to
+the ``trajectory`` function when you want to view.
+
+.. note::
+
+   The options passed to ``view`` will override those passed to
+   ``trajectory``, e.g. ``mols.trajectory(smooth=10).view(smooth=50)``
+   will use a ``smooth`` value of ``50``.
+
+.. note::
+
+   The value of ``wrap`` in the ``view`` function defaults to ``True``.
+   This means that ``mols.trajectory(wrap=False).view()`` will wrap
+   the coordinates, as the value of ``wrap`` in the ``view`` function
+   defaults to ``True`` and overrides the value in ``trajectory``.
+   To show unwrapped, you would need to use
+   ``mols.trajectory(wrap=False).view(wrap=False)``, or the much easier
+   ``mols.trajectory().view(wrap=False)``, or the easiest
+   ``mols.view(wrap=False)``.
+
+Closer integration with NGLView
+-------------------------------
+
+We don't yet properly expose the
 `NGLView stage parameters <https://github.com/nglviewer/nglview/blob/master/README.md#properties>`__.
 Currently you can pass in a dictionary of parameters via the
 ``stage_parameters`` argument, which are straight passed to the
@@ -277,3 +503,41 @@ which you can manipulate as if you had created it yourself, e.g.
 
 .. image:: images/view_13.jpg
    :alt: Customised view created by manipulating NGLView directly
+
+Saving 3D views to files
+------------------------
+
+NGLView is not really designed to render frames via a script. Instead, it
+needs to be run within a Jupyter notebook so that it has access to the
+WebGL view in the web browser to perform the rendering.
+`This FAQ answer <https://github.com/nglviewer/nglview/blob/master/docs/FAQ.md#how-to-make-nglview-view-object-write-png-file>`__
+shows how you could automate rendering images to files. Note that you need
+to get the handle to the `NGLView.NGLWidget <https://nglviewer.org/nglview/latest/api.html#nglview.NGLWidget>`__,
+as above, and then call ``render_image`` to get the image. You will need
+to actually view the object in a code cell, and will need to wait for the
+image to render, e.g. in one code cell
+
+>>> v = mols.view()
+>>> v
+
+Then in the next
+
+>>> def render(view, filename):
+...    import time
+...    image = view.render_image()
+...
+...    while not image.value:
+...        time.sleep(0.1)
+...
+...    with open(filename, "wb") as f:
+...        f.write(image.value)
+
+and then finally, to call this function in a background thread...
+
+>>> import threading
+... thread = threading.Thread(
+...     target=render,
+...     args=(v, "image.png")
+... )
+>>> thread.daemon = True
+>>> thread.start()

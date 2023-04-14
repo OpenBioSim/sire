@@ -11,6 +11,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -354,6 +356,19 @@ void register_Cartesian_class(){
                 , ( bp::arg("point"), bp::arg("center"), bp::arg("dist") )
                 , bp::release_gil_policy()
                 , "Return all periodic images of point with respect to center within\ndist distance of center" );
+        
+        }
+        { //::SireVol::Cartesian::getMinimumImage
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Cartesian::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::Cartesian::getMinimumImage );
+            
+            Cartesian_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "A cartesian space is not periodic, so this just returns the input point" );
         
         }
         { //::SireVol::Cartesian::getMinimumImage

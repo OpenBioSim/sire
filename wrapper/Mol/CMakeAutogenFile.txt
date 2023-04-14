@@ -119,6 +119,7 @@ set ( PYPP_SOURCES
        EvaluatorM.pypp.cpp
        Force3D.pypp.cpp
        Frame.pypp.cpp
+       FrameTransform.pypp.cpp
        GeometryPerturbation.pypp.cpp
        GeometryPerturbations.pypp.cpp
        GroupAtomIDBase.pypp.cpp
@@ -265,6 +266,7 @@ set ( PYPP_SOURCES
        Specify_SegID_.pypp.cpp
        Stereochemistry.pypp.cpp
        Trajectory.pypp.cpp
+       TrajectoryAligner.pypp.cpp
        UserBeading.pypp.cpp
        Velocity3D.pypp.cpp
        VolumeMap.pypp.cpp

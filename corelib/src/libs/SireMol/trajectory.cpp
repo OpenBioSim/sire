@@ -26,12 +26,15 @@
 \*********************************************/
 
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 
 #include "SireID/index.h"
 
 #include "SireVol/space.h"
 
 #include "SireMol/core.h"
+
+#include "SireMaths/align.h"
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/units.h"
@@ -754,6 +757,52 @@ Frame Trajectory::getFrame(int i) const
         return frame.subset(start_atom, natoms);
 }
 
+Frame Trajectory::getFrame(int i, const FrameTransform &transform) const
+{
+    const auto nframes = this->nFrames();
+
+    i = Index(i).map(nframes);
+
+    auto smooth = transform.nSmooth();
+
+    if (smooth > nframes)
+        smooth = nframes;
+
+    Frame frame = this->getFrame(i);
+
+    if (smooth > 1)
+    {
+        int half = int(smooth / 2);
+        int start_frame = i - half;
+        int end_frame = i + half + 1;
+
+        if (smooth % 2 == 1)
+            end_frame += 1;
+
+        if (start_frame < 0)
+        {
+            start_frame = 0;
+        }
+
+        if (end_frame > nframes)
+        {
+            end_frame = nframes;
+        }
+
+        QList<Frame> frames;
+
+        for (int j = start_frame; j < end_frame; ++j)
+        {
+            if (i != j)
+                frames.append(this->getFrame(j));
+        }
+
+        frame = frame.smooth(frames);
+    }
+
+    return frame.transform(transform);
+}
+
 TrajectoryData &Trajectory::_makeEditable(int &frame)
 {
     frame = Index(frame).map(this->nFrames());
@@ -1140,6 +1189,124 @@ QString Frame::toString() const
 bool Frame::isEmpty() const
 {
     return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty();
+}
+
+Frame Frame::transform(const FrameTransform &tform) const
+{
+    Frame ret(*this);
+    ret.coords = tform.apply(ret.coords, ret.spc.read());
+    ret.spc = tform.apply(ret.spc.read());
+    return ret;
+}
+
+Frame Frame::reverse(const FrameTransform &tform) const
+{
+    Frame ret(*this);
+    ret.coords = tform.reverse(ret.coords);
+    ret.spc = tform.reverse(ret.spc.read());
+    return ret;
+}
+
+/** Return the frame which has this frame smoothed with the coordinates
+ *  from all of the other frames. The result will be returned
+ */
+Frame Frame::smooth(const QList<Frame> &frames) const
+{
+    if (frames.isEmpty() or this->coords.isEmpty())
+    {
+        return *this;
+    }
+
+    Frame ret(*this);
+
+    const double weight = 1.0 / (1 + frames.count());
+
+    // all frames must have the same number of atoms...
+    const int nats = this->coords.count();
+
+    QVector<Vector> smoothed(nats);
+    auto smoothed_data = smoothed.data();
+
+    Vector mincoords = this->coords[0];
+    Vector maxcoords = this->coords[0];
+
+    for (int i = 0; i < nats; ++i)
+    {
+        const auto &c = this->coords[i];
+
+        mincoords.setMin(c);
+        maxcoords.setMax(c);
+
+        smoothed_data[i] = weight * c;
+    }
+
+    Vector center = mincoords + (0.5 * (maxcoords - mincoords));
+
+    for (int i = 0; i < frames.count(); ++i)
+    {
+        auto c = frames.at(i).coords;
+
+        if (c.count() != nats)
+        {
+            throw SireError::incompatible_error(
+                QObject::tr(
+                    "Cannot smooth a trajectory if the number of "
+                    "atoms / coordinates per frame changes."),
+                CODELOC);
+        }
+
+        const auto coords_data = c.constData();
+
+        Vector delta = coords_data[0] - this->coords[0];
+
+        if (delta.length2() > 30)
+        {
+            // the first atom has jumped by 5-6 A. This suggests that this
+            // frame may have been wrapped. We will now check the delta
+            // between the centers of the two frames...
+            mincoords = coords_data[0];
+            maxcoords = mincoords;
+
+            for (int j = 1; j < nats; ++j)
+            {
+                mincoords.setMin(coords_data[j]);
+                maxcoords.setMax(coords_data[j]);
+            }
+
+            Vector frame_center = mincoords + (0.5 * (maxcoords - mincoords));
+
+            delta = center - frame_center;
+
+            if (delta.length2() > 30)
+            {
+                // Yes - the center has moved too - suggests a frame offset
+                // Translate to remove the center offset
+                for (int j = 0; j < nats; ++j)
+                {
+                    smoothed_data[j] += weight * (coords_data[j] + delta);
+                }
+            }
+            else
+            {
+                // No - not enough of a change - just use the
+                // original coordinates
+                for (int j = 0; j < nats; ++j)
+                {
+                    smoothed_data[j] += weight * coords_data[j];
+                }
+            }
+        }
+        else
+        {
+            for (int j = 0; j < nats; ++j)
+            {
+                smoothed_data[j] += weight * coords_data[j];
+            }
+        }
+    }
+
+    ret.coords = smoothed;
+    return ret;
 }
 
 bool Frame::hasCoordinates() const

@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -352,6 +354,19 @@ void register_TriclinicBox_class(){
                 , ( bp::arg("point"), bp::arg("center"), bp::arg("dist") )
                 , bp::release_gil_policy()
                 , "Return all periodic images of point with respect to center within\ndist distance of center" );
+        
+        }
+        { //::SireVol::TriclinicBox::getMinimumImage
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::TriclinicBox::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::TriclinicBox::getMinimumImage );
+            
+            TriclinicBox_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "Return the copy of the point point which is the closest minimum image\nto center" );
         
         }
         { //::SireVol::TriclinicBox::getMinimumImage

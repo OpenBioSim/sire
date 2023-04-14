@@ -245,6 +245,8 @@
 
 #include "Frame.pypp.hpp"
 
+#include "FrameTransform.pypp.hpp"
+
 #include "GeometryPerturbation.pypp.hpp"
 
 #include "GeometryPerturbations.pypp.hpp"
@@ -536,6 +538,8 @@
 #include "Stereochemistry.pypp.hpp"
 
 #include "Trajectory.pypp.hpp"
+
+#include "TrajectoryAligner.pypp.hpp"
 
 #include "UserBeading.pypp.hpp"
 
@@ -902,6 +906,8 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_Frame_class();
 
+    register_FrameTransform_class();
+
     register_GeometryPerturbations_class();
 
     register_GroupAtomIDBase_class();
@@ -1111,6 +1117,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_Stereochemistry_class();
 
     register_Trajectory_class();
+
+    register_TrajectoryAligner_class();
 
     register_UserBeading_class();
 

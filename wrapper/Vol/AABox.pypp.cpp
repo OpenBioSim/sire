@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/sphere.h"
 
 #include "SireStream/datastream.h"
@@ -31,7 +33,7 @@ void register_AABox_class(){
 
     { //::SireVol::AABox
         typedef bp::class_< SireVol::AABox > AABox_exposer_t;
-        AABox_exposer_t AABox_exposer = AABox_exposer_t( "AABox", "\nAn AABox is an axis-aligned bounding box that is the smallest box that is aligned with the three cartesian axes that completely encases a CoordGroup. It is trivial to obtain the bounding sphere from the AABox. The AABox is used by the distance calculators to quickly determine whether two CoordGroups are within the cutoff radius, and to obtain all CoordGroups that are within particular regions of space.\n\nAuthor: Christopher Woods\n", bp::init< >("Construct an empty AABox") );
+        AABox_exposer_t AABox_exposer = AABox_exposer_t( "AABox", "\nAn AABox is an axis-aligned bounding box that is the smallest box that is aligned with the three cartesian axes that\ncompletely encases a CoordGroup. It is trivial to obtain the bounding sphere from the AABox. The AABox is used by the\ndistance calculators to quickly determine whether two CoordGroups are within the cutoff radius, and to obtain all\nCoordGroups that are within particular regions of space.\n\nAuthor: Christopher Woods\n", bp::init< >("Construct an empty AABox") );
         bp::scope AABox_scope( AABox_exposer );
         AABox_exposer.def( bp::init< SireMaths::Vector const & >(( bp::arg("point") ), "Construct an AABox that completely encloses the point point") );
         AABox_exposer.def( bp::init< SireMaths::Vector const &, SireMaths::Vector const & >(( bp::arg("cent"), bp::arg("extents") ), "Construct an AABox with center at cent, and half-extents extents") );
@@ -372,6 +374,19 @@ void register_AABox_class(){
                 , toString_function_value
                 , bp::release_gil_policy()
                 , "Return a string representation of this AABox" );
+        
+        }
+        { //::SireVol::AABox::transform
+        
+            typedef void ( ::SireVol::AABox::*transform_function_type)( ::SireMaths::Transform const & ) ;
+            transform_function_type transform_function_value( &::SireVol::AABox::transform );
+            
+            AABox_exposer.def( 
+                "transform"
+                , transform_function_value
+                , ( bp::arg("transform") )
+                , bp::release_gil_policy()
+                , "Transform this box by transform" );
         
         }
         { //::SireVol::AABox::translate

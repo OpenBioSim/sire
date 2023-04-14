@@ -129,6 +129,9 @@ namespace SireVol
 
         double minimumDistance(const AABox &box0, const AABox &box1) const;
 
+        QVector<Vector> getMinimumImage(const QVector<Vector> &coords,
+                                        const Vector &center) const;
+
         Vector getMinimumImage(const Vector &point, const Vector &center) const;
 
         CoordGroup getMinimumImage(const CoordGroup &group, const Vector &center) const;

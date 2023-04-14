@@ -19,11 +19,13 @@
 #include "patching.h"
 #include "patching.h"
 #include "SireError/errors.h"
+#include "SireMaths/align.h"
 #include "SireMaths/rangenerator.h"
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 #include "cartesian.h"
 #include "space.h"
+#include "transformedspace.h"
 #include <QMutex>
 #include <limits>
 #include "space.h"

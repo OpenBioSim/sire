@@ -19,6 +19,7 @@ set ( PYPP_SOURCES
        PeriodicBox.pypp.cpp
        RegularGrid.pypp.cpp
        Space.pypp.cpp
+       TransformedSpace.pypp.cpp
        TriclinicBox.pypp.cpp
        SireVol_containers.cpp
        SireVol_properties.cpp

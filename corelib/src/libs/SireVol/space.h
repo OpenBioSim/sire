@@ -56,6 +56,7 @@ SIREVOL_EXPORT QDataStream &operator>>(QDataStream &, SireVol::Space &);
 namespace SireMaths
 {
     class RanGenerator;
+    class Transform;
 }
 
 namespace SireVol
@@ -293,6 +294,21 @@ namespace SireVol
         virtual Vector getRandomPoint(const RanGenerator &generator) const;
 
         virtual Vector getRandomPoint() const;
+
+        /** Return this space transformed by the passed Transform.
+         *  Return the forward transform if 'forwards' is true, else
+         *  return the reverse transform
+         */
+        virtual SpacePtr transform(const SireMaths::Transform &transform,
+                                   bool forwards = true) const;
+
+        /** Return the minimum image copy of 'coords' with respect to 'center'.
+            For periodic spaces, this translates 'group' into the box that
+            has its center at 'center' (i.e. returns the closest copy of
+            'group' to 'center' according to the minimum image convention).
+            Note that this will treat all of the points as a single group
+            (i.e. image them all as a single unit) */
+        virtual QVector<Vector> getMinimumImage(const QVector<Vector> &coords, const Vector &center) const = 0;
 
         /** Return the minimum image copy of 'group' with respect to 'center'.
             For periodic spaces, this translates 'group' into the box that

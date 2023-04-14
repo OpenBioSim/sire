@@ -126,6 +126,9 @@ namespace SireVol
         Vector getBoxCenter(const Vector &p) const;
         Vector getBoxCenter(const Vector &p, const Vector &center) const;
 
+        QVector<Vector> getMinimumImage(const QVector<Vector> &coords,
+                                        const Vector &center) const;
+
         CoordGroup getMinimumImage(const CoordGroup &group, const Vector &center) const;
 
         CoordGroupArray getMinimumImage(const CoordGroupArray &groups, const Vector &center,

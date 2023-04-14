@@ -1,15 +1,20 @@
 __all__ = [
+    "align",
     "create_quaternion",
+    "get_alignment",
+    "kabasch",
+    "kabasch_fit",
     "Matrix",
     "pi",
     "Sphere",
     "Torsion",
+    "Transform",
     "Triangle",
     "Vector",
 ]
 
 from ..legacy import Maths as _Maths
-from ..legacy.Maths import Matrix, Quaternion, Triangle, Torsion, pi
+from ..legacy.Maths import Matrix, Quaternion, Triangle, Transform, Torsion, pi
 
 from ._vector import Vector
 from ._sphere import Sphere
@@ -17,6 +22,18 @@ from ._sphere import Sphere
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
+
+
+try:
+    kabasch_fit = _Maths.kabaschFit
+    get_alignment = _Maths.getAlignment
+except AttributeError:
+    kabasch_fit = _Maths.kabasch_fit
+    get_alignment = _Maths.get_alignment
+
+
+kabasch = _Maths.kabasch
+align = _Maths.align
 
 
 def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):

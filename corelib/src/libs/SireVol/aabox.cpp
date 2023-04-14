@@ -28,6 +28,7 @@
 #include "aabox.h"
 #include "coordgroup.h"
 
+#include "SireMaths/align.h"
 #include "SireMaths/sphere.h"
 
 #include <QDebug>
@@ -341,6 +342,13 @@ bool AABox::contains(const Vector &point) const
 void AABox::translate(const Vector &delta)
 {
     cent += delta;
+}
+
+/** Transform this box by 'transform' */
+void AABox::transform(const Transform &transform)
+{
+    this->operator=(AABox::from(transform(this->minCoords()),
+                                transform(this->maxCoords())));
 }
 
 /** Add another AABox to this one - this forms the union of both of the

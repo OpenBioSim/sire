@@ -12,6 +12,8 @@ namespace bp = boost::python;
 
 #include "SireID/index.h"
 
+#include "SireMaths/align.h"
+
 #include "SireMaths/rangenerator.h"
 
 #include "SireStream/datastream.h"
@@ -384,6 +386,19 @@ void register_CombinedSpace_class(){
                 , ( bp::arg("point"), bp::arg("center"), bp::arg("dist") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireVol::CombinedSpace::getMinimumImage
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::CombinedSpace::*getMinimumImage_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            getMinimumImage_function_type getMinimumImage_function_value( &::SireVol::CombinedSpace::getMinimumImage );
+            
+            CombinedSpace_exposer.def( 
+                "getMinimumImage"
+                , getMinimumImage_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "A cartesian space is not periodic, so this just returns the input point" );
         
         }
         { //::SireVol::CombinedSpace::getMinimumImage

@@ -60,12 +60,19 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::TrajectoryData &)
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::MolTrajectoryData &);
 SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MolTrajectoryData &);
 
+namespace SireMaths
+{
+    class Transform;
+}
+
 namespace SireMol
 {
 
     typedef SireBase::SharedPolyPointer<TrajectoryData> TrajectoryDataPtr;
 
     using SireMaths::Vector;
+
+    class FrameTransform;
 
     /** This is a single trajectory frame. */
     class SIREMOL_EXPORT Frame : public SireBase::ConcreteProperty<Frame, MoleculeProperty>
@@ -117,6 +124,11 @@ namespace SireMol
 
         const SireVol::Space &space() const;
         SireUnits::Dimension::Time time() const;
+
+        Frame transform(const FrameTransform &transform) const;
+        Frame reverse(const FrameTransform &transform) const;
+
+        Frame smooth(const QList<Frame> &frames) const;
 
         int nAtoms() const;
 
@@ -299,6 +311,7 @@ namespace SireMol
         int nAtoms() const;
 
         Frame getFrame(int i) const;
+        Frame getFrame(int i, const FrameTransform &transform) const;
 
         Frame operator[](int i) const;
         QList<Frame> operator[](const QList<qint64> &idxs) const;

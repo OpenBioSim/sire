@@ -47,7 +47,9 @@ if _has_nglview:
 
     @_nglview.register_backend("sire")
     class _SireStructureTrajectory(_nglview.Trajectory, _nglview.Structure):
-        def __init__(self, obj=None, map=None):
+        def __init__(
+            self, obj=None, align=None, smooth=None, wrap=None, map=None
+        ):
             if type(obj) is _SireStructureTrajectory:
                 self._traj = obj._traj
                 self._map = obj._map
@@ -58,9 +60,25 @@ if _has_nglview:
                 self._map = create_map(map)
 
                 if type(obj) is TrajectoryIterator:
+                    if align is True:
+                        align = "*"
+                    elif align is False:
+                        align = None
+
+                    if align is not None:
+                        obj = obj.align(align=align)
+
+                    if smooth not in [False, None, 0]:
+                        obj = obj.smooth(smooth=smooth)
+
+                    if wrap in [True, False]:
+                        obj = obj.wrap(wrap)
+
                     self._traj = obj
                 else:
-                    self._traj = obj.trajectory(self._map)
+                    self._traj = obj.trajectory(
+                        align=align, smooth=smooth, wrap=wrap, map=self._map
+                    )
             else:
                 self._traj = None
                 self._map = None
@@ -115,14 +133,23 @@ if _has_nglview:
 
     class _Representations:
         def __init__(self, view):
+            from . import TrajectoryIterator
+
+            if type(view) is TrajectoryIterator:
+                view = view.current()
+
             self.view = view
             self.atoms = view.atoms()
             self.reps = {}
             self.supported_reps = [
                 "ball_and_stick",
+                "base",
                 "cartoon",
+                "distance",
+                "hyperball",
                 "licorice",
                 "line",
+                "none",
                 "point",
                 "ribbon",
                 "rocket",
@@ -135,9 +162,25 @@ if _has_nglview:
 
             self.rest = set(range(0, len(self.atoms)))
 
+        def get_selection_string(self, selection):
+            try:
+                s = self.atoms.find(self.view[selection].atoms())
+                s = [str(x) for x in s]
+                return "@" + ",".join(s)
+            except Exception as e:
+                from ..utils import Console
+
+                Console.warning(
+                    f"Unrecognised selection '{selection}'\n" f"Error is {e}"
+                )
+                return "*"
+
         def add(self, selection, rep):
             if type(selection) is not list:
                 selection = [selection]
+
+            if rep is None:
+                rep = "none"
 
             if type(rep) is not list:
                 rep = [rep]
@@ -158,6 +201,33 @@ if _has_nglview:
         def _add_rep(self, view, typ, atoms):
             typ = typ.strip().lstrip().rstrip().lower()
 
+            if len(typ) == 0:
+                typ = "none"
+
+            parts = typ.split(":")
+
+            if len(parts) == 1:
+                colour = None
+                opacity = None
+            elif len(parts) == 2:
+                typ = parts[0]
+
+                try:
+                    opacity = float(parts[1])
+                    colour = None
+                except Exception:
+                    opacity = None
+                    colour = parts[1]
+            else:
+                typ = parts[0]
+
+                try:
+                    opacity = float(parts[1])
+                    colour = parts[2]
+                except Exception:
+                    opacity = float(parts[2])
+                    colour = parts[1]
+
             if typ not in self.supported_reps:
                 s = ", ".join(self.supported_reps)
 
@@ -166,41 +236,65 @@ if _has_nglview:
                     f"Available representations are: [ {s} ]."
                 )
 
+            if typ == "none":
+                # don't display anything
+                return
+
             if typ == "ball_and_stick":
                 typ = "ball+stick"
 
             atoms = list(atoms)
 
-            view.add_representation(typ, selection=atoms)
+            if colour is None and opacity is None:
+                view.add_representation(typ, selection=atoms)
+            elif opacity is None:
+                view.add_representation(typ, selection=atoms, color=colour)
+            elif colour is None:
+                view.add_representation(typ, selection=atoms, opacity=opacity)
+            else:
+                view.add_representation(
+                    typ, selection=atoms, color=colour, opacity=opacity
+                )
 
         def populate(self, view, rest=None):
             if rest is not None:
-                self._add_rep(view, rest, self.rest)
+                if type(rest) is not list:
+                    rest = [rest]
+
+                for r in rest:
+                    self._add_rep(view, r, self.rest)
 
             for key, value in self.reps.items():
                 self._add_rep(view, key, value)
 
     def view(
         obj,
+        default: bool = True,
         no_default: bool = False,
         orthographic: bool = True,
-        protein: str = None,
-        water: str = None,
-        ions: str = None,
-        rest: str = None,
-        all: str = None,
-        ball_and_stick: str = None,
-        cartoon: str = None,
-        licorice: str = None,
-        line: str = None,
-        point: str = None,
-        ribbon: str = None,
-        rocket: str = None,
-        rope: str = None,
-        spacefill: str = None,
-        surface: str = None,
-        trace: str = None,
-        tube: str = None,
+        protein: str = "",
+        water: str = "",
+        ions: str = "",
+        rest: str = "",
+        all: str = "",
+        ball_and_stick: str = "",
+        base: str = "",
+        cartoon: str = "",
+        hyperball: str = "",
+        licorice: str = "",
+        line: str = "",
+        point: str = "",
+        ribbon: str = "",
+        rocket: str = "",
+        rope: str = "",
+        spacefill: str = "",
+        surface: str = "",
+        trace: str = "",
+        tube: str = "",
+        center: str = None,
+        align: str = None,
+        smooth=False,
+        wrap=True,
         stage_parameters: str = None,
         map=None,
     ):
@@ -211,21 +305,69 @@ if _has_nglview:
         in a variable so that it's NGLViewer member functions
         can be called to edit the viewer before display.
 
-        See the NGLView documentation for more information
-        on how to configure the viewer.
+        Full instructions on how to use this view are in
+        the cheatsheet (https://sire.openbiosim.org/cheatsheet/view)
 
-        https://nglviewer.org/#nglview
+        center:
+          Pass in a selection string to select the atoms to center
+          in the view. By default no atoms are centered
 
-         stage_parameters: dict
-             An optional dictionary that will be passed directly
-             to the NGLView object to set the stage parameters.
+        align:
+          Pass in a selection string to select atoms against which
+          every frame will be aligned. These atoms will be moved
+          to the center of the periodic box (if a periodic box
+          is used). If "True" is passed, then this will attempt
+          to align *ALL* of the coordinates in the view.
 
-         map: dict or sire.base.PropertyMap
-             An optional property map that can be used to control
-             which properties are used to get the molecular data
-             to be viewed.
+        smooth:
+          Pass in the number of frames to smooth (average) the view
+          over. If 'True' is passed, then the recommended number
+          of frames will be averaged over
+
+        wrap: bool
+          Whether or not to wrap the coordinates into the periodic box.
+
+        orthographic:
+          Set to False to use a perspective view, or accept the default
+          (True) for an orthographic view
+
+        default:
+          The default representation / color for the view. If this
+          is set to False or None or "none" then default views
+          are disabled.
+
+        no_default:
+          Set to False to disable all default views
+
+        protein, water, ions:
+          Set the default views for protein, water and ion molecules.
+          Set to False, None or "none" to disable these default views.
+
+        rest:
+          Synonym for "default", but does not disable all default views
+          if set to None, False or "none"
+
+        all:
+          Set the representation for all atoms. Set to None, False or "none"
+          to disable all views.
+
+        ball_and_stick, base, cartoon etc.
+          Set the selection strings for atoms that should be represented
+          with these views.
+
+        stage_parameters: dict
+          An optional dictionary that will be passed directly
+          to the NGLView object to set the stage parameters.
+
+        map: dict or sire.base.PropertyMap
+          An optional property map that can be used to control
+          which properties are used to get the molecular data
+          to be viewed.
         """
-        struc_traj = _SireStructureTrajectory(obj, map=map)
+        struc_traj = _SireStructureTrajectory(
+            obj, align=align, smooth=smooth, wrap=wrap, map=map
+        )
+
         view = _nglview.NGLWidget(struc_traj)
 
         if orthographic:
@@ -237,72 +379,151 @@ if _has_nglview:
 
         reps = _Representations(obj)
 
-        if all is not None:
+        if all is None or all is False or default is None or default is False:
+            # User has turned off all representations
+            no_default = True
+            default = False
+
+        elif len(all) > 0:
             # don't have any default representations if the user
             # has asked that all atoms have a particular
             # representation
             no_default = True
+            default = False
 
-        if not no_default:
+        try:
+            # Allow the user to use `default` to mean `rest`
+            if len(default) != 0:
+                rest = default
+                default = True
+        except Exception:
+            pass
+
+        if default and (not no_default):
             # Add the defaults here so that the user can
             # override them, and also so that we can
             # disable defaults if needed
-            if protein is None:
-                protein = "cartoon"
+            if (protein is not None) and (protein is not False):
+                if len(protein) == 0:
+                    protein = "cartoon:sstruc"
 
-            if water is None:
-                water = "line"
+            if (water is not None) and (water is not False):
+                if len(water) == 0:
+                    water = "line:0.5"
 
-            if ions is None:
-                ions = "spacefill"
+            if (ions is not None) and (ions is not False):
+                if len(ions) == 0:
+                    # use this, as the spheres are smaller than spacefill
+                    ions = "ball_and_stick"
 
-            if rest is None:
-                rest = "licorice"
+            if (rest is not None) and (rest is not False):
+                if len(rest) == 0:
+                    rest = "hyperball"
 
-        if protein is not None:
-            reps.add("protein", protein)
+        if (protein is not None) and (protein is not False):
+            if len(protein) > 0:
+                reps.add("protein", protein)
+        else:
+            reps.add("protein", None)
 
-        if water is not None:
-            reps.add("water", water)
+        if (water is not None) and (water is not False):
+            if len(water) > 0:
+                reps.add("water", water)
+        else:
+            reps.add("water", None)
 
-        if ions is not None:
-            reps.add("molecules with count(atoms) == 1", ions)
+        if (ions is not None) and (ions is not False):
+            if len(ions) > 0:
+                reps.add("molecules with count(atoms) == 1", ions)
+        else:
+            reps.add("ions", None)
+
+        def _split(rep):
+            parts = rep.split(":")
+
+            if len(parts) == 1:
+                return rep, ""
+            else:
+                return parts[0], ":" + ":".join(parts[1:])
+
+        def _check(rep):
+            if (rep is not None) and (rep is not False):
+                if len(rep) > 0:
+                    return rep
+
+            return None
+
+        ball_and_stick = _check(ball_and_stick)
+        base = _check(base)
+        cartoon = _check(cartoon)
+        licorice = _check(licorice)
+        hyperball = _check(hyperball)
+        line = _check(line)
+        point = _check(point)
+        ribbon = _check(ribbon)
+        rocket = _check(rocket)
+        rope = _check(rope)
+        spacefill = _check(spacefill)
+        surface = _check(surface)
+        trace = _check(trace)
+        tube = _check(tube)
+        all = _check(all)
 
         if ball_and_stick is not None:
-            reps.add(ball_and_stick, "ball_and_stick")
+            ball_and_stick, colours = _split(ball_and_stick)
+            reps.add(ball_and_stick, f"ball_and_stick{colours}")
+
+        if base is not None:
+            base, colours = _split(base)
+            reps.add(base, f"base{colours}")
 
         if cartoon is not None:
-            reps.add(cartoon, "cartoon")
+            cartoon, colours = _split(cartoon)
+            reps.add(cartoon, f"cartoon{colours}")
 
         if licorice is not None:
-            reps.add(licorice, "licorice")
+            licorice, colours = _split(licorice)
+            reps.add(licorice, f"licorice{colours}")
+
+        if hyperball is not None:
+            hyperball, colours = _split(hyperball)
+            reps.add(hyperball, f"hyperball{colours}")
 
         if line is not None:
-            reps.add(line, "line")
+            line, colours = _split(line)
+            reps.add(line, f"line{colours}")
 
         if point is not None:
-            reps.add(point, "point")
+            point, colours = _split(point)
+            reps.add(point, f"point{colours}")
 
         if ribbon is not None:
-            reps.add(ribbon, "ribbon")
+            ribbon, colours = _split(ribbon)
+            reps.add(ribbon, f"ribbon{colours}")
 
         if rocket is not None:
-            reps.add(rocket, "rocket")
+            rocket, colours = _split(rocket)
+            reps.add(rocket, f"rocket{colours}")
 
         if rope is not None:
-            reps.add(rope, "rope")
+            rope, colours = _split(rope)
+            reps.add(rope, f"rope{colours}")
 
         if spacefill is not None:
-            reps.add(spacefill, "spacefill")
+            spacefill, colours = _split(spacefill)
+            reps.add(spacefill, f"spacefill{colours}")
 
         if surface is not None:
-            reps.add(surface, "surface")
+            surface, colours = _split(surface)
+            reps.add(surface, f"surface{colours}")
 
         if trace is not None:
-            reps.add(trace, "trace")
+            trace, colours = _split(trace)
+            reps.add(trace, f"trace{colours}")
 
         if tube is not None:
-            reps.add(tube, "tube")
+            tube, colours = _split(tube)
+            reps.add(tube, f"tube{colours}")
 
         if all is not None:
             reps.add("all", all)
@@ -319,9 +540,15 @@ if _has_nglview:
         else:
             view.stage.set_parameters(**stage_parameters)
 
+        if (rest is None) or (rest is False):
+            rest = None
+
         reps.populate(view, rest=rest)
 
-        view.center()
+        if center is not None:
+            view.center(selection=reps.get_selection_string(center))
+        else:
+            view.center()
 
         return view
 

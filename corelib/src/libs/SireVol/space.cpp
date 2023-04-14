@@ -30,7 +30,9 @@
 
 #include "cartesian.h"
 #include "space.h"
+#include "transformedspace.h"
 
+#include "SireMaths/align.h"
 #include "SireMaths/rangenerator.h"
 
 #include "SireError/errors.h"
@@ -138,6 +140,14 @@ void Space::assertCompatible(const Space &other) const
                                                 .arg(this->what())
                                                 .arg(other.what()),
                                             CODELOC);
+}
+
+SpacePtr Space::transform(const Transform &tform, bool forwards) const
+{
+    if (forwards)
+        return SpacePtr(new TransformedSpace(*this, tform));
+    else
+        return SpacePtr(new TransformedSpace(*this, tform.inverse()));
 }
 
 Q_GLOBAL_STATIC(Cartesian, nullCartesian)
