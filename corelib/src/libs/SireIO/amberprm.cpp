@@ -3730,12 +3730,32 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
     // the layout of cutgroups, residues and atoms
     MolStructureEditor mol;
 
-    const auto atom_names = this->stringData("ATOM_NAME");
+    auto atom_names = this->stringData("ATOM_NAME");
+
+    while (atom_names.count() < natoms)
+    {
+        // we are missing some atom names - give a default
+        // name of "UNK", which tends to be used for "UNKNOWN" atoms.
+        // see
+        // https://www.rcsb.org/ligand/UNX
+        // for this convention
+        atom_names.append("UNK");
+    }
 
     // locate the residue pointers for this molecule - note that the
     // residue pointers are 1-indexed (i.e. from atom 1 to atom N)
     const auto res_pointers = this->intData("RESIDUE_POINTER");
-    const auto res_names = this->stringData("RESIDUE_LABEL");
+    auto res_names = this->stringData("RESIDUE_LABEL");
+
+    while (res_names.count() < res_pointers.count())
+    {
+        // we are missing some residue names - give a default
+        // name of "UNK", which tends to be used for "UNKNOWN" residues
+        // see
+        // http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_37.html
+        // for this convention
+        res_names.append("UNK");
+    }
 
     for (int i = 0; i < res_pointers.count(); ++i)
     {
