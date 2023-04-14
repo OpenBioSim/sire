@@ -31,6 +31,7 @@
 #include "moleculegroups.h"
 #include "molecules.h"
 #include "selectorm.hpp"
+#include "selector.hpp"
 
 #include "atomid.h"
 #include "cgid.h"
@@ -56,11 +57,16 @@ using namespace SireMol;
 using namespace SireID;
 
 RegisterMetaType<SelectorMol> r_smol;
-RegisterMetaType<SelectorM<Atom>> r_satm;
-RegisterMetaType<SelectorM<Residue>> r_sres;
-RegisterMetaType<SelectorM<Chain>> r_schn;
-RegisterMetaType<SelectorM<Segment>> r_sseg;
-RegisterMetaType<SelectorM<CutGroup>> r_scg;
+RegisterMetaType<SelectorM<Atom>> r_smatm;
+RegisterMetaType<SelectorM<Residue>> r_smres;
+RegisterMetaType<SelectorM<Chain>> r_smchn;
+RegisterMetaType<SelectorM<Segment>> r_smseg;
+RegisterMetaType<SelectorM<CutGroup>> r_smcg;
+RegisterMetaType<Selector<Atom>> r_satm;
+RegisterMetaType<Selector<Residue>> r_sres;
+RegisterMetaType<Selector<Chain>> r_schn;
+RegisterMetaType<Selector<Segment>> r_sseg;
+RegisterMetaType<Selector<CutGroup>> r_scg;
 
 /** Serialise to a binary datastream */
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const SelectorMol &mols)

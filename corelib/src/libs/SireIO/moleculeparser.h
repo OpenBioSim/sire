@@ -283,6 +283,9 @@ namespace SireIO
 
         void removeCommentLines(const QString &comment_flag);
 
+        SireMol::Frame createFrame(const SireSystem::System &system, const PropertyMap &map) const;
+        void copyFromFrame(const SireMol::Frame &frame, SireSystem::System &system, const PropertyMap &map) const;
+
         virtual SireSystem::System startSystem(const PropertyMap &map) const;
         virtual SireSystem::System startSystem(const QVector<QString> &lines, const PropertyMap &map) const;
         virtual void addToSystem(SireSystem::System &system, const PropertyMap &map) const;

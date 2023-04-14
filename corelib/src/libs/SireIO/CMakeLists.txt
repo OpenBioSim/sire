@@ -53,6 +53,8 @@ set ( SIREIO_HEADERS
       supplementary.h
       tinker.h
       trajectorymonitor.h
+      trr.h
+      xdrfile.h
       zmatrixmaker.h
     )
 
@@ -96,6 +98,8 @@ set ( SIREIO_SOURCES
       supplementary.cpp
       tinker.cpp
       trajectorymonitor.cpp
+      trr.cpp
+      xdrfile.cpp
       zmatrixmaker.cpp
 
       ${SIREIO_HEADERS}

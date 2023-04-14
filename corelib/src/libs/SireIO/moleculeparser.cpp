@@ -43,8 +43,15 @@
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/trajectory.h"
+#include "SireMol/mgname.h"
+#include "SireMol/mgnum.h"
+#include "SireMol/molidx.h"
+
+#include "SireBase/timeproperty.h"
 
 #include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
 
 #include "SireError/errors.h"
 
@@ -61,6 +68,8 @@
 
 using namespace SireIO;
 using namespace SireSystem;
+using namespace SireMaths;
+using namespace SireMol;
 using namespace SireFF;
 using namespace SireBase;
 using namespace SireStream;
@@ -642,6 +651,431 @@ MoleculeParser::MoleculeParser(const MoleculeParser &other)
 /** Destructor */
 MoleculeParser::~MoleculeParser()
 {
+}
+
+static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &coords_property)
+{
+    if (not mol.hasProperty(coords_property))
+    {
+        return QVector<Vector>();
+    }
+
+    QVector<Vector> coords(mol.nAtoms());
+
+    const auto molcoords = mol.property(coords_property).asA<AtomCoords>();
+
+    const auto molinfo = mol.info();
+
+    for (int i = 0; i < mol.nAtoms(); ++i)
+    {
+        coords[i] = molcoords.at(molinfo.cgAtomIdx(AtomIdx(i)));
+    }
+
+    return coords;
+}
+
+static QVector<Velocity3D> getVelocities(const Molecule &mol, const PropertyName &vels_property)
+{
+    if (not mol.hasProperty(vels_property))
+    {
+        return QVector<Velocity3D>();
+    }
+
+    try
+    {
+        const auto molvels = mol.property(vels_property).asA<AtomVelocities>();
+        const auto molinfo = mol.info();
+
+        QVector<Velocity3D> vels(mol.nAtoms());
+
+        for (int i = 0; i < mol.nAtoms(); ++i)
+        {
+            vels[i] = molvels.at(molinfo.cgAtomIdx(AtomIdx(i)));
+        }
+
+        return vels;
+    }
+    catch (...)
+    {
+        return QVector<Velocity3D>();
+    }
+}
+
+static QVector<Force3D> getForces(const Molecule &mol, const PropertyName &forces_property)
+{
+    if (not mol.hasProperty(forces_property))
+    {
+        return QVector<Force3D>();
+    }
+
+    try
+    {
+        const auto molforces = mol.property(forces_property).asA<AtomForces>();
+        const auto molinfo = mol.info();
+
+        QVector<Force3D> forces(mol.nAtoms());
+
+        for (int i = 0; i < mol.nAtoms(); ++i)
+        {
+            forces[i] = molforces.at(molinfo.cgAtomIdx(AtomIdx(i)));
+        }
+
+        return forces;
+    }
+    catch (...)
+    {
+        return QVector<Force3D>();
+    }
+}
+
+template <class T>
+static bool hasData(const QVector<QVector<T>> &array)
+{
+    const auto array_data = array.constData();
+
+    for (int i = 0; i < array.count(); ++i)
+    {
+        if (not array_data[i].isEmpty())
+            return true;
+    }
+
+    return false;
+}
+
+/** Internal function used to collapse an array of arrays of type T into
+    a single array of type T */
+template <class T>
+static QVector<T> collapse(const QVector<QVector<T>> &arrays)
+{
+    int nvals = 0;
+
+    for (const auto array : arrays)
+    {
+        nvals += array.count();
+    }
+
+    if (nvals == 0)
+    {
+        return QVector<T>();
+    }
+
+    QVector<T> values;
+    values.reserve(nvals);
+
+    for (const auto array : arrays)
+    {
+        values += array;
+    }
+
+    return values;
+}
+
+/** Convenience function that converts the passed System into a Frame */
+Frame MoleculeParser::createFrame(const System &system,
+                                  const PropertyMap &map) const
+{
+    // get the MolNums of each molecule in the System - this returns the
+    // numbers in MolIdx order
+    const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
+    const auto molnums_data = molnums.constData();
+
+    if (molnums.isEmpty())
+    {
+        // no molecules in the system
+        return Frame();
+    }
+
+    QVector<Vector> coords;
+    QVector<Velocity3D> vels;
+    QVector<Force3D> frcs;
+
+    // get the coordinates (and velocities if available) for each molecule in the system
+    {
+        QVector<QVector<Vector>> all_coords(molnums.count());
+        QVector<QVector<Velocity3D>> all_vels(molnums.count());
+        QVector<QVector<Force3D>> all_forces(molnums.count());
+
+        auto all_coords_data = all_coords.data();
+        auto all_vels_data = all_vels.data();
+        auto all_forces_data = all_forces.data();
+
+        const auto coords_property = map["coordinates"];
+        const auto vels_property = map["velocity"];
+        const auto forces_property = map["force"];
+
+        if (usesParallel())
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
+                {
+                    const auto mol = system[molnums_data[i]].molecule();
+
+                    tbb::parallel_invoke([&]() { all_coords_data[i] = ::getCoordinates(mol, coords_property); },
+                                         [&]() { all_vels_data[i] = ::getVelocities(mol, vels_property); },
+                                         [&]() { all_forces_data[i] = ::getForces(mol, forces_property); });
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < molnums.count(); ++i)
+            {
+                const auto mol = system[molnums_data[i]].molecule();
+
+                all_coords_data[i] = ::getCoordinates(mol, coords_property);
+                all_vels_data[i] = ::getVelocities(mol, vels_property);
+                all_forces_data[i] = ::getForces(mol, forces_property);
+            }
+        }
+
+        if (::hasData(all_coords))
+        {
+            coords = collapse(all_coords);
+        }
+
+        if (::hasData(all_vels))
+        {
+            // check the edge case that some molecules had velocities defined, but some didn't
+            bool none_have_velocities = true;
+            bool all_have_velocities = true;
+            bool some_have_velocities = false;
+
+            for (const auto &vels : all_vels)
+            {
+                if (vels.isEmpty())
+                {
+                    all_have_velocities = false;
+                }
+                else
+                {
+                    none_have_velocities = false;
+                }
+
+                if (all_have_velocities == false and none_have_velocities == false)
+                {
+                    // ok, only some have velocities...
+                    some_have_velocities = true;
+                    break;
+                }
+            }
+
+            if (some_have_velocities)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &vels_i = all_vels_data[i];
+
+                    if (vels.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        vels_i = QVector<Velocity3D>(natoms, Velocity3D(0));
+                    }
+                }
+            }
+
+            vels = collapse(all_vels);
+        }
+
+        if (::hasData(all_forces))
+        {
+            frcs = collapse(all_forces);
+        }
+    }
+
+    SireVol::SpacePtr space;
+    SireUnits::Dimension::Time time(0);
+
+    const auto space_property = map["space"];
+    if (system.containsProperty(space_property))
+    {
+        space = system.property(space_property).asA<SireVol::Space>();
+    }
+
+    const auto time_property = map["time"];
+    if (system.containsProperty(time_property))
+    {
+        try
+        {
+            const Property &prop = system.property(time_property);
+
+            SireUnits::Dimension::Time time;
+
+            if (prop.isA<TimeProperty>())
+                time = prop.asA<TimeProperty>().value();
+            else
+                time = prop.asA<GeneralUnitProperty>().toUnit<SireUnits::Dimension::Time>();
+        }
+        catch (...)
+        {
+        }
+    }
+
+    return SireMol::Frame(coords, vels, frcs, space.read(), time);
+}
+
+void MoleculeParser::copyFromFrame(const Frame &frame, System &system, const PropertyMap &map) const
+{
+    // first, we are going to work with the group of all molecules, which should
+    // be called "all". We have to assume that the molecules are ordered in "all"
+    // in the same order as they are in this restart file, with the data
+    // in MolIdx/AtomIdx order (this should be the default for all parsers!)
+    MoleculeGroup allmols = system[MGName("all")];
+
+    const int nmols = allmols.nMolecules();
+
+    QVector<int> atom_pointers(nmols + 1, -1);
+
+    int natoms = 0;
+
+    for (int i = 0; i < nmols; ++i)
+    {
+        atom_pointers[i] = natoms;
+        const int nats = allmols[MolIdx(i)].data().info().nAtoms();
+        natoms += nats;
+    }
+
+    atom_pointers[nmols] = natoms;
+
+    if (natoms != frame.nAtoms())
+    {
+        // disagreement caused by us inferring the wrong number of atoms
+        // when reading the trajectory. We will need to infer the right
+        // number at a higher level...
+        throw SireIO::parse_error(QObject::tr("Incompatibility between the files, as this trajectory file contains data "
+                                              "for %1 atom(s), while the other file(s) have created a system with "
+                                              "%2 atom(s)")
+                                      .arg(frame.nAtoms())
+                                      .arg(natoms),
+                                  CODELOC);
+    }
+
+    // next, copy the coordinates into the molecules
+    QVector<Molecule> mols(nmols);
+    Molecule *mols_array = mols.data();
+
+    const Vector *coords_array = 0;
+
+    if (frame.hasCoordinates())
+        coords_array = frame.coordinates().constData();
+
+    const PropertyName coords_property = map["coordinates"];
+
+    const Velocity3D *vels_array = 0;
+
+    if (frame.hasVelocities())
+        vels_array = frame.velocities().constData();
+
+    const PropertyName vels_property = map["velocity"];
+
+    const Force3D *frcs_array = 0;
+
+    if (frame.hasForces())
+        frcs_array = frame.forces().constData();
+
+    const PropertyName frcs_property = map["force"];
+
+    auto add_data = [&](int i)
+    {
+        const int atom_start_idx = atom_pointers.constData()[i];
+        auto mol = system[MolIdx(i)].molecule().edit();
+        const auto molinfo = mol.data().info();
+
+        if (coords_array != 0)
+        {
+            // create space for the coordinates
+            auto coords = QVector<QVector<Vector>>(molinfo.nCutGroups());
+
+            for (int j = 0; j < molinfo.nCutGroups(); ++j)
+            {
+                coords[j] = QVector<Vector>(molinfo.nAtoms(CGIdx(j)));
+            }
+
+            for (int j = 0; j < mol.nAtoms(); ++j)
+            {
+                auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
+
+                const int atom_idx = atom_start_idx + j;
+
+                coords[cgatomidx.cutGroup()][cgatomidx.atom()] = coords_array[atom_idx];
+            }
+
+            mol.setProperty(coords_property, AtomCoords(CoordGroupArray(coords)));
+        }
+
+        if (vels_array != 0)
+        {
+            auto vels = AtomVelocities(molinfo);
+
+            for (int j = 0; j < mol.nAtoms(); ++j)
+            {
+                auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
+
+                const int atom_idx = atom_start_idx + j;
+
+                vels.set(cgatomidx, vels_array[atom_idx]);
+            }
+
+            mol.setProperty(vels_property, vels).commit();
+        }
+
+        if (frcs_array != 0)
+        {
+            auto forces = AtomForces(molinfo);
+
+            for (int j = 0; j < mol.nAtoms(); ++j)
+            {
+                auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
+
+                const int atom_idx = atom_start_idx + j;
+
+                forces.set(cgatomidx, frcs_array[atom_idx]);
+            }
+
+            mol.setProperty(frcs_property, forces).commit();
+        }
+
+        mols_array[i] = mol.commit();
+    };
+
+    if (usesParallel())
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                add_data(i);
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nmols; ++i)
+        {
+            add_data(i);
+        }
+    }
+
+    system.update(Molecules(mols));
+
+    PropertyName space_property = map["space"];
+    if (space_property.hasValue())
+    {
+        system.setProperty("space", space_property.value());
+    }
+    else
+    {
+        system.setProperty(space_property.source(), frame.space());
+    }
+
+    PropertyName time_property = map["time"];
+    if (time_property.hasValue())
+    {
+        system.setProperty("time", time_property.value());
+    }
+    else
+    {
+        system.setProperty(time_property.source(), GeneralUnitProperty(frame.time()));
+    }
 }
 
 /** Remove any comment lines (those that start with 'comment_flag')
