@@ -70,8 +70,8 @@ jobs:
         run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
       #
       - name: Upload Conda package
-        # maybe add logic here to tag the packages as 'main'?
-        run: python ${{ github.workspace }}/sire/actions/upload_package.py
+        # upload to the 'test' channel
+        run: python ${{ github.workspace }}/sire/actions/upload_package.py test
         env:
           SRC_DIR: ${{ github.workspace }}/sire
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}

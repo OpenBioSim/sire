@@ -4,11 +4,17 @@ import glob
 
 script = os.path.abspath(sys.argv[0])
 
+try:
+    channel = sys.argv[1]
+except:
+    channel = "dev"
+
 # go up one directories to get the source directory
 # (this script is in Sire/actions/)
 srcdir = os.path.dirname(os.path.dirname(script))
 
 print(f"sire source is in {srcdir}\n")
+print(f"upload channel is {channel}\n")
 
 # Get the anaconda token to authorise uploads
 if "ANACONDA_TOKEN" in os.environ:
@@ -50,14 +56,17 @@ gitdir = os.path.join(srcdir, ".git")
 
 tag = run_cmd(f"git --git-dir={gitdir} --work-tree={srcdir} tag --contains")
 
-# If the tag is not empty, then set the label to main (this is a release)
-if tag is not None and tag.lstrip().rstrip() != "":
-    print(f"\nTag {tag} is set. This is a 'main' release.")
-    label = "--label main --label dev"
-else:
-    # this is a development release
-    print("\nNo tag is set. This is a 'devel' release.")
-    label = "--label dev"
+# The channel has been specified as an extra argument
+# This will either be 'test' for main releases, or 
+# 'dev' for dev releases (the default)
+channel = channel.lstrip().rstrip().replace(" ","_").lower()
+
+if len(channel) == 0:
+    channel = "dev"
+
+print(f"\nUploading to the '{channel}' channel")
+
+label = f"--label {channel}"
 
 # Upload the packages to the openbiosim channel on Anaconda Cloud.
 cmd = f"anaconda --token {conda_token} upload --user openbiosim {label} --force {packages}"

@@ -12,17 +12,31 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.2.2 <https://github.com/openbiosim/sire/compare/2023.2.1...2023.2.2>`__ - April 2023
+------------------------------------------------------------------------------------------
+
+* Fixed random crashes when loading Amber PRMTOP files when parallelisation
+  was enabled. `PR 45 - fix_44 <https://github.com/OpenBioSim/sire/pull/45>`__
+
+* Fixed failure to read an Amber PRMTOP file when no atom names or residues names
+  are set. `PR 43 - fix_42 <https://github.com/OpenBioSim/sire/pull/43>`__
+
+* Edited GitHub Actions workflow so that builds of ``devel`` automatically
+  upload to the ``dev`` channel, while builds of ``main`` automatically
+  upload to the ``test`` channel (for testing before being re-labelled
+  to the ``main`` channel)
+
 `2023.2.1 <https://github.com/openbiosim/sire/compare/2023.2.0...2023.2.1>`__ - April 2023
 ------------------------------------------------------------------------------------------
 
-* Added in ``openmmtools`` as a host requirement. This allows it to be installed in the 
+* Added in ``openmmtools`` as a host requirement. This allows it to be installed in the
   same environment as :mod:`sire`. Note that this changes the dependencies of :mod:`sire`
   to use an older version of ``libnetcdf``. `PR 34 <https://github.com/OpenBioSim/sire/pull/34>`__
 
-* Reactivated the parallel processing code in the Amber parameter/topology parser. 
+* Reactivated the parallel processing code in the Amber parameter/topology parser.
   This significantly speeds up reading and writing of Amber parameter/topology files.
 
-* Fixed compile issues with some MacOS compilers using the C++ 2017 standard, when 
+* Fixed compile issues with some MacOS compilers using the C++ 2017 standard, when
   ``std::unary_function`` has been removed.
 
 * Fixed the lookup of Gromacs wildcard dihedrals of the form ``A-*-*-D``.
@@ -33,7 +47,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   Note that we don't yet have support for these in the molecular mechanic engine
   or the openmm converter, so they can only currently be read and written.
 
-* Added a developer check for when the version number has changed, so that 
+* Added a developer check for when the version number has changed, so that
   people compiling manually know when they have to rebuild from scratch.
 
 
