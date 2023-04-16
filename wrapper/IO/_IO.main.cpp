@@ -69,6 +69,8 @@
 
 #include "Supplementary.pypp.hpp"
 
+#include "TRR.pypp.hpp"
+
 #include "Tinker.pypp.hpp"
 
 #include "TinkerParameters.pypp.hpp"
@@ -155,6 +157,8 @@ BOOST_PYTHON_MODULE(_IO){
     register_SDF_class();
 
     register_Supplementary_class();
+
+    register_TRR_class();
 
     register_Tinker_class();
 

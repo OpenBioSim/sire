@@ -56,6 +56,8 @@
 
 #include "SireStream/shareddatastream.h"
 
+#include <QDebug>
+
 using namespace SireIO;
 using namespace SireIO::detail;
 using namespace SireMaths;
@@ -134,30 +136,27 @@ bool TRR::isTextFile() const
  */
 void TRR::parse()
 {
+    // open the XDR file and extract the data for the first frame
+    TRRFile trr(this->filename());
+
+    trr.open(QIODevice::ReadOnly);
+
+    // read in the first frame - also find out how many frames there
+    // are, and potentially build an index?
+
+    trr.close();
+
     this->setScore(0);
 }
 
 /** Construct by parsing the passed file */
 TRR::TRR(const QString &filename, const PropertyMap &map)
-    : ConcreteProperty<TRR, MoleculeParser>(filename, map),
+    : ConcreteProperty<TRR, MoleculeParser>(map),
       nframes(0), frame_idx(0)
 {
     // this gets the absolute file path
     this->setFilename(filename);
-
-    // open the XDR file and extract the data for the first frame
-    XDRFile xdr(filename);
-
-    try
-    {
-        this->parse(xdr, map);
-        xdr.close();
-    }
-    catch (...)
-    {
-        xdr.close();
-        throw;
-    }
+    this->parse();
 }
 
 /** Construct by parsing the data in the passed text lines */

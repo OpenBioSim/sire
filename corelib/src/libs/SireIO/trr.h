@@ -31,9 +31,7 @@
 
 #include "moleculeparser.h"
 
-#include "SireMaths/vector.h"
-
-#include "SireVol/space.h"
+#include "SireMol/trajectory.h"
 
 SIRE_BEGIN_HEADER
 
@@ -94,8 +92,6 @@ namespace SireIO
 
         SireMol::Frame getFrame(int i) const;
 
-        QString title() const;
-
         int nAtoms() const;
 
         bool isTextFile() const;
@@ -107,7 +103,7 @@ namespace SireIO
         void parse();
 
         /** The current frame */
-        Frame current_frame;
+        SireMol::Frame current_frame;
 
         /** Any warnings that were raised when reading the file */
         QStringList parse_warnings;

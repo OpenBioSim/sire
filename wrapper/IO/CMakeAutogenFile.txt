@@ -31,6 +31,7 @@ set ( PYPP_SOURCES
        ProtoMSParameters.pypp.cpp
        SDF.pypp.cpp
        Supplementary.pypp.cpp
+       TRR.pypp.cpp
        Tinker.pypp.cpp
        TinkerParameters.pypp.cpp
        TrajectoryMonitor.pypp.cpp

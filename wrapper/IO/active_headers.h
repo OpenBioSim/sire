@@ -28,6 +28,7 @@
 #include "supplementary.h"
 #include "tinker.h"
 #include "trajectorymonitor.h"
+#include "trr.h"
 #include "zmatrixmaker.h"
 
 #endif
