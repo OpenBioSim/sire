@@ -29,6 +29,7 @@
 #include "xdrfile.h"
 
 #include <QDebug>
+#include <QMutexLocker>
 #include <QFileInfo>
 
 #include "SireIO/errors.h"
@@ -44,7 +45,9 @@ using namespace SireIO;
 //////// Implementation of XDRFile
 ////////
 
-XDRFile::XDRFile() : boost::noncopyable(), f(0), sz(0)
+XDRFile::XDRFile()
+    : boost::noncopyable(),
+      f(0), sz(0)
 {
 }
 
@@ -69,6 +72,14 @@ QString XDRFile::filename() const
 
 bool XDRFile::open(QIODevice::OpenMode mode)
 {
+    QMutexLocker lkr(&mutex);
+    return this->_lkr_open(mode);
+}
+
+bool XDRFile::_lkr_open(QIODevice::OpenMode mode)
+{
+    this->_lkr_close();
+
     QFileInfo fullname(this->filename());
 
     sz = 0;
@@ -179,6 +190,12 @@ bool XDRFile::open(QIODevice::OpenMode mode)
 
 void XDRFile::close()
 {
+    QMutexLocker lkr(&mutex);
+    this->_lkr_close();
+}
+
+void XDRFile::_lkr_close()
+{
     if (f)
     {
         xdrfile_close(f);
@@ -189,6 +206,7 @@ void XDRFile::close()
 
 qint64 XDRFile::size() const
 {
+    QMutexLocker lkr(const_cast<QMutex *>(&mutex));
     return sz;
 }
 
@@ -217,7 +235,7 @@ TRRFile::~TRRFile()
     delete[] frcs_buffer;
 }
 
-void TRRFile::reset()
+void TRRFile::_lkr_reset()
 {
     delete[] coords_buffer;
     delete[] vels_buffer;
@@ -233,10 +251,18 @@ void TRRFile::reset()
 
 bool TRRFile::open(QIODevice::OpenMode mode)
 {
-    if (not XDRFile::open(mode))
+    QMutexLocker lkr(&mutex);
+
+    this->_lkr_reset();
+
+    if (not this->_lkr_open(mode))
         return false;
 
-    qDebug() << "OPENED" << this->size();
+    if (mode != QIODevice::ReadOnly)
+    {
+        // we only want to write, and so this should be an empty file
+        return true;
+    }
 
     // read the first header to see if this is really a TRR file
     t_trnheader header;
@@ -245,7 +271,7 @@ bool TRRFile::open(QIODevice::OpenMode mode)
 
     if (ok != exdrOK)
     {
-        this->close();
+        this->_lkr_close();
         throw SireIO::parse_error(QObject::tr(
                                       "The file '%1' is not a valid TRR file. The error message is '%2'")
                                       .arg(this->filename())
@@ -267,7 +293,7 @@ bool TRRFile::open(QIODevice::OpenMode mode)
     // protect against a memory DDOS or file corruption
     if (natoms > 2048 * 2048)
     {
-        this->close();
+        this->_lkr_close();
         qint64 natoms_tmp = natoms;
         natoms = 0;
         nframes = 0;
@@ -284,7 +310,7 @@ bool TRRFile::open(QIODevice::OpenMode mode)
 
     if (ok != exdrOK)
     {
-        this->close();
+        this->_lkr_close();
         natoms = 0;
         nframes = 0;
         throw SireError::file_error(QObject::tr(
@@ -299,6 +325,9 @@ bool TRRFile::open(QIODevice::OpenMode mode)
     frcs_buffer = new rvec[natoms];
 
     current_frame = -1;
+
+    int pos = xdr_tell(f);
+    int delta = 0;
 
     while (true)
     {
@@ -319,12 +348,17 @@ bool TRRFile::open(QIODevice::OpenMode mode)
 
         qDebug() << "READ" << current_frame << step << t;
 
-        qDebug() << "POSITION" << xdr_tell(f);
+        int new_pos = xdr_tell(f);
+        delta = new_pos - pos;
+
+        qDebug() << "POSITION" << new_pos << delta;
+        pos = new_pos;
     }
 
     nframes = current_frame + 1;
 
     qDebug() << "number of frames equals" << nframes;
+    qDebug() << sz << nframes * delta;
 
     return true;
 }

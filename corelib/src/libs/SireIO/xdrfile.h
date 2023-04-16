@@ -32,6 +32,7 @@
 #include "sireglobal.h"
 
 #include <QIODevice>
+#include <QMutex>
 
 #include <boost/noncopyable.hpp>
 
@@ -60,9 +61,9 @@ namespace SireIO
 
         XDRFile(const QString &filename);
 
-        ~XDRFile();
+        virtual ~XDRFile();
 
-        bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
+        virtual bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
         void close();
 
@@ -71,8 +72,14 @@ namespace SireIO
         qint64 size() const;
 
     protected:
+        bool _lkr_open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
+        void _lkr_close();
+
         /** The name of the file */
         QString fname;
+
+        /** Mutex to serialise access to this file */
+        QMutex mutex;
 
         /** Handle to the XDR file */
         XDRFILE *f;
@@ -97,7 +104,7 @@ namespace SireIO
         qint64 nFrames() const;
 
     private:
-        void reset();
+        void _lkr_reset();
 
         rvec *coords_buffer;
         rvec *vels_buffer;
