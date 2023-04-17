@@ -63,7 +63,6 @@ set ( SIREIO_SOURCES
 
       register_sireio.cpp
 
-      third_party/trr_seek.c
       third_party/xdrfile_trr.c
       third_party/xdrfile_xtc.c
       third_party/xdrfile.c

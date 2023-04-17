@@ -90,6 +90,18 @@ void register_CombinedSpace_class(){
                 , "Return whether or not two groups enclosed by the AABoxes aabox0\nand aabox1 are definitely beyond the cutoff distance" );
         
         }
+        { //::SireVol::CombinedSpace::boxMatrix
+        
+            typedef ::SireMaths::Matrix ( ::SireVol::CombinedSpace::*boxMatrix_function_type)(  ) const;
+            boxMatrix_function_type boxMatrix_function_value( &::SireVol::CombinedSpace::boxMatrix );
+            
+            CombinedSpace_exposer.def( 
+                "boxMatrix"
+                , boxMatrix_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::CombinedSpace::calcAngle
         
             typedef ::SireUnits::Dimension::Angle ( ::SireVol::CombinedSpace::*calcAngle_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const &,::SireMaths::Vector const & ) const;

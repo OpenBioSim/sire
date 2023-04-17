@@ -918,11 +918,12 @@ static const RegisterMetaType<Frame> r_frame;
 
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const Frame &frame)
 {
-    writeHeader(ds, r_frame, 1);
+    writeHeader(ds, r_frame, 2);
 
     SharedDataStream sds(ds);
 
-    sds << frame.coords << frame.vels << frame.frcs << frame.spc << frame.t.to(picosecond);
+    sds << frame.coords << frame.vels << frame.frcs << frame.spc
+        << frame.t.to(picosecond) << frame.props;
 
     return ds;
 }
@@ -931,7 +932,18 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
 {
     VersionID v = readHeader(ds, r_frame);
 
-    if (v == 1)
+    if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> frame.coords >> frame.vels >> frame.frcs >> frame.spc >> frame.props;
+
+        double time;
+        sds >> time;
+
+        frame.t = time * picosecond;
+    }
+    else if (v == 1)
     {
         SharedDataStream sds(ds);
 
@@ -941,6 +953,8 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
         sds >> time;
 
         frame.t = time * picosecond;
+
+        frame.props = Properties();
     }
     else
         throw version_error(v, "1", r_frame, CODELOC);
@@ -1074,9 +1088,17 @@ Frame::Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velo
     this->assertSane();
 }
 
+Frame::Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocities, const QVector<Force3D> &forces,
+             const Space &space, Time time, const Properties &properties)
+    : ConcreteProperty<Frame, MoleculeProperty>(), coords(coordinates), vels(velocities),
+      frcs(forces), spc(space), t(time), props(properties)
+{
+    this->assertSane();
+}
+
 Frame::Frame(const Frame &other)
     : ConcreteProperty<Frame, MoleculeProperty>(), coords(other.coords), vels(other.vels), frcs(other.frcs),
-      spc(other.spc), t(other.t)
+      spc(other.spc), t(other.t), props(other.props)
 {
 }
 
@@ -1093,6 +1115,7 @@ Frame &Frame::operator=(const Frame &other)
         frcs = other.frcs;
         spc = other.spc;
         t = other.t;
+        props = other.props;
     }
 
     return *this;
@@ -1101,7 +1124,7 @@ Frame &Frame::operator=(const Frame &other)
 bool Frame::operator==(const Frame &other) const
 {
     return (this == &other) or
-           (coords == other.coords and vels == other.vels and frcs == other.frcs and spc == other.spc and t == other.t);
+           (coords == other.coords and vels == other.vels and frcs == other.frcs and spc == other.spc and t == other.t and props == other.props);
 }
 
 bool Frame::operator!=(const Frame &other) const
@@ -1177,6 +1200,9 @@ QString Frame::toString() const
     if (this->hasForces())
         c.append("F");
 
+    if (this->hasProperties())
+        c.append("P");
+
     if (c.isEmpty())
         return QObject::tr("Frame::null");
 
@@ -1188,7 +1214,7 @@ QString Frame::toString() const
 
 bool Frame::isEmpty() const
 {
-    return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty();
+    return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty() and props.isEmpty();
 }
 
 Frame Frame::transform(const FrameTransform &tform) const
@@ -1324,6 +1350,11 @@ bool Frame::hasForces() const
     return not frcs.isEmpty();
 }
 
+bool Frame::hasProperties() const
+{
+    return not props.isEmpty();
+}
+
 QVector<Vector> Frame::coordinates() const
 {
     return coords;
@@ -1347,6 +1378,27 @@ SireUnits::Dimension::Time Frame::time() const
 const Space &Frame::space() const
 {
     return *spc;
+}
+
+const Properties &Frame::properties() const
+{
+    return props;
+}
+
+bool Frame::hasProperty(const PropertyName &key) const
+{
+    return props.hasProperty(key);
+}
+
+const Property &Frame::property(const PropertyName &key) const
+{
+    return props.property(key);
+}
+
+const Property &Frame::property(const SireBase::PropertyName &key,
+                                const SireBase::Property &default_value) const
+{
+    return props.property(key, default_value);
 }
 
 int Frame::numBytes() const

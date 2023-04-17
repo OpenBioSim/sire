@@ -45,6 +45,8 @@ SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::TRR &);
 
 namespace SireIO
 {
+    class TRRFile;
+
     /** This class represents a Gromacs TRR (XDR file) trajectory.
      */
     class SIREIO_EXPORT TRR : public SireBase::ConcreteProperty<TRR, MoleculeParser>
@@ -72,6 +74,8 @@ namespace SireIO
 
         const char *what() const;
 
+        TRR operator[](int i) const;
+
         MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
         MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
@@ -89,12 +93,16 @@ namespace SireIO
         bool isFrame() const;
 
         int nFrames() const;
+        int count() const;
+        int size() const;
 
         SireMol::Frame getFrame(int i) const;
 
         int nAtoms() const;
 
         bool isTextFile() const;
+
+        void writeToFile(const QString &filename) const;
 
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
@@ -113,6 +121,9 @@ namespace SireIO
 
         /** The current frame index */
         qint64 frame_idx;
+
+        /** Pointer to the underlying file */
+        std::shared_ptr<TRRFile> f;
     };
 
 } // namespace SireIO

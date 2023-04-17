@@ -40,13 +40,16 @@
 
 SIRE_BEGIN_HEADER
 
-/** This is the XDRFILE struct defined in third_party/xdrfile.h */
+namespace SireMol
+{
+    class Frame;
+}
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
     typedef struct XDRFILE XDRFILE;
-    typedef float rvec[3];
 #ifdef __cplusplus
 }
 #endif
@@ -57,6 +60,14 @@ namespace SireIO
     class SIREIO_EXPORT XDRFile : public boost::noncopyable
     {
     public:
+        enum FrameDataType
+        {
+            COORDINATES = 0x0001,
+            VELOCITIES = 0x0010,
+            FORCES = 0x0100,
+            BOX = 0x1000
+        };
+
         XDRFile();
 
         XDRFile(const QString &filename);
@@ -74,6 +85,7 @@ namespace SireIO
     protected:
         bool _lkr_open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
         void _lkr_close();
+        qint64 _lkr_size() const;
 
         /** The name of the file */
         QString fname;
@@ -88,6 +100,11 @@ namespace SireIO
         qint64 sz;
     };
 
+    namespace detail
+    {
+        class TRRFrameBuffer;
+    }
+
     /** This class builds on the XDRFile to provide a higher-level
      *  interface for TRR files
      */
@@ -100,15 +117,21 @@ namespace SireIO
 
         bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
-        qint64 nAtoms() const;
-        qint64 nFrames() const;
+        SireMol::Frame readFrame(int i, bool use_parallel = true) const;
+        void writeFrame(const SireMol::Frame &frame,
+                        bool use_parallel = true);
+
+        int nAtoms() const;
+        int nFrames() const;
 
     private:
         void _lkr_reset();
+        void _lkr_reindexFrames();
+        void _lkr_readFrameIntoBuffer(int i);
+        void _lkr_writeBufferToFile();
 
-        rvec *coords_buffer;
-        rvec *vels_buffer;
-        rvec *frcs_buffer;
+        /** The current frame that has been read into the buffer */
+        std::shared_ptr<detail::TRRFrameBuffer> frame_buffer;
 
         /** The number of atoms in the frame - we assume all
          *  frames have the same number of atoms
@@ -118,10 +141,18 @@ namespace SireIO
         /** The number of frames in the file */
         qint64 nframes;
 
-        /** The index of the current read frame.
-         *  This is -1 if no frames have been read
+        /** The seek position of each frame - this is only
+         *  used if the frames have different sizes
          */
-        qint64 current_frame;
+        QList<std::tuple<qint64, qint32>> seek_frame;
+
+        /** The size, in bytes, of each frame. This is 0
+         *  if each frame has a different number of bytes
+         */
+        qint64 bytes_per_frame;
+
+        /** The data type if all frames are the same */
+        qint32 frame_type;
     };
 
 } // namespace SireIO

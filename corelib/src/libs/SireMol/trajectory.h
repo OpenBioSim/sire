@@ -37,6 +37,7 @@
 
 #include "SireBase/refcountdata.h"
 #include "SireBase/sharedpolypointer.hpp"
+#include "SireBase/properties.h"
 
 SIRE_BEGIN_HEADER
 
@@ -95,6 +96,10 @@ namespace SireMol
         Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocites, const QVector<Force3D> &forces,
               const Space &space, SireUnits::Dimension::Time time);
 
+        Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocites, const QVector<Force3D> &forces,
+              const Space &space, SireUnits::Dimension::Time time,
+              const SireBase::Properties &props);
+
         Frame(const Frame &other);
 
         ~Frame();
@@ -118,12 +123,22 @@ namespace SireMol
         bool hasVelocities() const;
         bool hasForces() const;
 
+        bool hasProperties() const;
+
         QVector<Vector> coordinates() const;
         QVector<Velocity3D> velocities() const;
         QVector<Force3D> forces() const;
 
         const SireVol::Space &space() const;
         SireUnits::Dimension::Time time() const;
+
+        const SireBase::Properties &properties() const;
+
+        bool hasProperty(const SireBase::PropertyName &key) const;
+        const SireBase::Property &property(const SireBase::PropertyName &key) const;
+
+        const SireBase::Property &property(const SireBase::PropertyName &key,
+                                           const SireBase::Property &default_value) const;
 
         Frame transform(const FrameTransform &transform) const;
         Frame reverse(const FrameTransform &transform) const;
@@ -147,6 +162,7 @@ namespace SireMol
         QVector<Force3D> frcs;
         SireVol::SpacePtr spc;
         SireUnits::Dimension::Time t;
+        SireBase::Properties props;
     };
 
     /** This is the virtual base class of all TrajectoryData objects.

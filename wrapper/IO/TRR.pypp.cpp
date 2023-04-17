@@ -53,6 +53,8 @@ namespace bp = boost::python;
 
 #include "trr.h"
 
+#include <QDebug>
+
 #include "trr.h"
 
 SireIO::TRR __copy__(const SireIO::TRR &other){ return SireIO::TRR(other); }
@@ -62,6 +64,8 @@ SireIO::TRR __copy__(const SireIO::TRR &other){ return SireIO::TRR(other); }
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
+
+#include "Helpers/len.hpp"
 
 void register_TRR_class(){
 
@@ -110,6 +114,18 @@ void register_TRR_class(){
                 , ( bp::arg("system"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return this parser constructed from the passed SireSystem::System" );
+        
+        }
+        { //::SireIO::TRR::count
+        
+            typedef int ( ::SireIO::TRR::*count_function_type)(  ) const;
+            count_function_type count_function_value( &::SireIO::TRR::count );
+            
+            TRR_exposer.def( 
+                "count"
+                , count_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireIO::TRR::formatDescription
@@ -224,6 +240,18 @@ void register_TRR_class(){
         
         }
         TRR_exposer.def( bp::self == bp::self );
+        { //::SireIO::TRR::operator[]
+        
+            typedef ::SireIO::TRR ( ::SireIO::TRR::*__getitem___function_type)( int ) const;
+            __getitem___function_type __getitem___function_value( &::SireIO::TRR::operator[] );
+            
+            TRR_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("i") )
+                , "" );
+        
+        }
         { //::SireIO::TRR::parse
         
             typedef ::SireIO::TRR ( *parse_function_type )( ::QString const & );
@@ -235,6 +263,18 @@ void register_TRR_class(){
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Parse from the passed file" );
+        
+        }
+        { //::SireIO::TRR::size
+        
+            typedef int ( ::SireIO::TRR::*size_function_type)(  ) const;
+            size_function_type size_function_value( &::SireIO::TRR::size );
+            
+            TRR_exposer.def( 
+                "size"
+                , size_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireIO::TRR::toString
@@ -273,6 +313,19 @@ void register_TRR_class(){
                 , "" );
         
         }
+        { //::SireIO::TRR::writeToFile
+        
+            typedef void ( ::SireIO::TRR::*writeToFile_function_type)( ::QString const & ) const;
+            writeToFile_function_type writeToFile_function_value( &::SireIO::TRR::writeToFile );
+            
+            TRR_exposer.def( 
+                "writeToFile"
+                , writeToFile_function_value
+                , ( bp::arg("filename") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         TRR_exposer.staticmethod( "parse" );
         TRR_exposer.staticmethod( "typeName" );
         TRR_exposer.def( "__copy__", &__copy__);
@@ -285,6 +338,7 @@ void register_TRR_class(){
         TRR_exposer.def_pickle(sire_pickle_suite< ::SireIO::TRR >());
         TRR_exposer.def( "__str__", &__str__< ::SireIO::TRR > );
         TRR_exposer.def( "__repr__", &__str__< ::SireIO::TRR > );
+        TRR_exposer.def( "__len__", &__len_size< ::SireIO::TRR > );
     }
 
 }

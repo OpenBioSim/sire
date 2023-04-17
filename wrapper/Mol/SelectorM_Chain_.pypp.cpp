@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 #include "segid.h"
 
+#include "selector.hpp"
+
 #include "selectorm.hpp"
 
 #include "selectormol.h"

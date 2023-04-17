@@ -78,7 +78,9 @@ QDataStream &operator<<(QDataStream &ds, const TRR &traj)
 
     SharedDataStream sds(ds);
 
-    sds << static_cast<const MoleculeParser &>(traj);
+    sds << traj.current_frame << traj.parse_warnings
+        << traj.nframes << traj.frame_idx
+        << static_cast<const MoleculeParser &>(traj);
 
     return ds;
 }
@@ -91,7 +93,7 @@ QDataStream &operator>>(QDataStream &ds, TRR &traj)
     {
         SharedDataStream sds(ds);
 
-        sds >> static_cast<MoleculeParser &>(traj);
+        sds >> traj.current_frame >> traj.parse_warnings >> traj.nframes >> traj.frame_idx >> static_cast<MoleculeParser &>(traj);
     }
     else
         throw version_error(v, "1", r_traj, CODELOC);
@@ -131,22 +133,33 @@ bool TRR::isTextFile() const
     return false;
 }
 
-/** Scan the file to work out how many values there are,
- *  and to extrat the title
- */
+/** Open the file and read in all the metadata */
 void TRR::parse()
 {
-    // open the XDR file and extract the data for the first frame
-    TRRFile trr(this->filename());
+    f.reset(new TRRFile(this->filename()));
 
-    trr.open(QIODevice::ReadOnly);
+    try
+    {
+        if (not f->open(QIODevice::ReadOnly))
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Failed to open TRRFile %1")
+                                          .arg(this->filename()),
+                                      CODELOC);
+        }
 
-    // read in the first frame - also find out how many frames there
-    // are, and potentially build an index?
+        nframes = f->nFrames();
+        current_frame = f->readFrame(0, this->usesParallel());
+        frame_idx = 0;
 
-    trr.close();
-
-    this->setScore(0);
+        this->setScore(f->nFrames() * current_frame.nAtoms());
+    }
+    catch (...)
+    {
+        this->setScore(0);
+        f.reset();
+        throw;
+    }
 }
 
 /** Construct by parsing the passed file */
@@ -179,8 +192,7 @@ TRR::TRR(const System &system, const PropertyMap &map)
 TRR::TRR(const TRR &other)
     : ConcreteProperty<TRR, MoleculeParser>(other),
       current_frame(other.current_frame), parse_warnings(other.parse_warnings),
-      nframes(other.nframes), frame_idx(other.frame_idx)
-
+      nframes(other.nframes), frame_idx(other.frame_idx), f(other.f)
 {
 }
 
@@ -197,6 +209,7 @@ TRR &TRR::operator=(const TRR &other)
         parse_warnings = other.parse_warnings;
         nframes = other.nframes;
         frame_idx = other.frame_idx;
+        f = other.f;
 
         MoleculeParser::operator=(other);
     }
@@ -234,6 +247,16 @@ int TRR::nFrames() const
     return nframes;
 }
 
+int TRR::count() const
+{
+    return this->nFrames();
+}
+
+int TRR::size() const
+{
+    return this->nFrames();
+}
+
 Frame TRR::getFrame(int frame) const
 {
     frame = SireID::Index(frame).map(this->nFrames());
@@ -244,7 +267,26 @@ Frame TRR::getFrame(int frame) const
     if (frame == frame_idx)
         return current_frame;
 
-    return Frame();
+    if (f.get() == 0)
+    {
+        throw SireError::file_error(QObject::tr(
+                                        "Somehow we don't have access to the underlying TRR file?"),
+                                    CODELOC);
+    }
+
+    return f->readFrame(frame, this->usesParallel());
+}
+
+TRR TRR::operator[](int i) const
+{
+    i = SireID::Index(i).map(this->nFrames());
+
+    TRR ret(*this);
+
+    ret.current_frame = this->getFrame(i);
+    ret.frame_idx = i;
+
+    return ret;
 }
 
 QString TRR::toString() const
@@ -322,4 +364,26 @@ MoleculeParserPtr TRR::construct(const SireSystem::System &system, const Propert
 {
     // don't construct from a pointer as it could leak
     return MoleculeParserPtr(TRR(system, map));
+}
+
+/** Write this binary file 'filename'. This will write out only the currently
+ *  loadad frame to the file. You need to use 'saveTrajectory' to save
+ *  a whole trajectory of frames
+ */
+void TRR::writeToFile(const QString &filename) const
+{
+    if (this->nFrames() == 0 or this->nAtoms() == 0)
+        return;
+
+    TRRFile outfile(filename);
+
+    if (not outfile.open(QIODevice::WriteOnly))
+        throw SireError::file_error(QObject::tr(
+                                        "Could not open %1 to write the TRR file.")
+                                        .arg(filename),
+                                    CODELOC);
+
+    outfile.writeFrame(current_frame, usesParallel());
+
+    outfile.close();
 }

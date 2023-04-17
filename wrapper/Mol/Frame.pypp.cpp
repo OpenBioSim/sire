@@ -55,6 +55,7 @@ void register_Frame_class(){
         Frame_exposer.def( bp::init< QVector< SireMaths::Vector > const &, SireVol::Space const &, SireUnits::Dimension::Time >(( bp::arg("coordinates"), bp::arg("space"), bp::arg("time") ), "") );
         Frame_exposer.def( bp::init< QVector< SireMaths::Vector > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > const &, SireVol::Space const &, SireUnits::Dimension::Time >(( bp::arg("coordinates"), bp::arg("velocities"), bp::arg("space"), bp::arg("time") ), "") );
         Frame_exposer.def( bp::init< QVector< SireMaths::Vector > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Force > > const &, SireVol::Space const &, SireUnits::Dimension::Time >(( bp::arg("coordinates"), bp::arg("velocites"), bp::arg("forces"), bp::arg("space"), bp::arg("time") ), "") );
+        Frame_exposer.def( bp::init< QVector< SireMaths::Vector > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > const &, QVector< SireMaths::Vector3D< SireUnits::Dimension::Force > > const &, SireVol::Space const &, SireUnits::Dimension::Time, SireBase::Properties const & >(( bp::arg("coordinates"), bp::arg("velocites"), bp::arg("forces"), bp::arg("space"), bp::arg("time"), bp::arg("props") ), "") );
         Frame_exposer.def( bp::init< SireMol::Frame const & >(( bp::arg("other") ), "") );
         { //::SireMol::Frame::coordinates
         
@@ -100,6 +101,31 @@ void register_Frame_class(){
             Frame_exposer.def( 
                 "hasForces"
                 , hasForces_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::hasProperties
+        
+            typedef bool ( ::SireMol::Frame::*hasProperties_function_type)(  ) const;
+            hasProperties_function_type hasProperties_function_value( &::SireMol::Frame::hasProperties );
+            
+            Frame_exposer.def( 
+                "hasProperties"
+                , hasProperties_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::hasProperty
+        
+            typedef bool ( ::SireMol::Frame::*hasProperty_function_type)( ::SireBase::PropertyName const & ) const;
+            hasProperty_function_type hasProperty_function_value( &::SireMol::Frame::hasProperty );
+            
+            Frame_exposer.def( 
+                "hasProperty"
+                , hasProperty_function_value
+                , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -180,6 +206,44 @@ void register_Frame_class(){
         
         }
         Frame_exposer.def( bp::self == bp::self );
+        { //::SireMol::Frame::properties
+        
+            typedef ::SireBase::Properties const & ( ::SireMol::Frame::*properties_function_type)(  ) const;
+            properties_function_type properties_function_value( &::SireMol::Frame::properties );
+            
+            Frame_exposer.def( 
+                "properties"
+                , properties_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::property
+        
+            typedef ::SireBase::Property const & ( ::SireMol::Frame::*property_function_type)( ::SireBase::PropertyName const & ) const;
+            property_function_type property_function_value( &::SireMol::Frame::property );
+            
+            Frame_exposer.def( 
+                "property"
+                , property_function_value
+                , ( bp::arg("key") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
+        { //::SireMol::Frame::property
+        
+            typedef ::SireBase::Property const & ( ::SireMol::Frame::*property_function_type)( ::SireBase::PropertyName const &,::SireBase::Property const & ) const;
+            property_function_type property_function_value( &::SireMol::Frame::property );
+            
+            Frame_exposer.def( 
+                "property"
+                , property_function_value
+                , ( bp::arg("key"), bp::arg("default_value") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
         { //::SireMol::Frame::reverse
         
             typedef ::SireMol::Frame ( ::SireMol::Frame::*reverse_function_type)( ::SireMol::FrameTransform const & ) const;
@@ -203,7 +267,7 @@ void register_Frame_class(){
                 , smooth_function_value
                 , ( bp::arg("frames") )
                 , bp::release_gil_policy()
-                , "Return the frame which has this frame smoothed with the coordinates\n  from all of the other frames. The other frames will be moved into\n  the same simulation box as this frame, and then averaged onto\n  this frames coordinates. The result will be returned\n" );
+                , "Return the frame which has this frame smoothed with the coordinates\n  from all of the other frames. The result will be returned\n" );
         
         }
         { //::SireMol::Frame::space

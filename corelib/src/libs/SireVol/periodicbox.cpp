@@ -266,6 +266,13 @@ SireUnits::Dimension::Volume PeriodicBox::volume() const
     return SireUnits::Dimension::Volume(boxlength.x() * boxlength.y() * boxlength.z());
 }
 
+Matrix PeriodicBox::boxMatrix() const
+{
+    return Matrix(boxlength.x(), 0, 0,
+                  0, boxlength.y(), 0,
+                  0, 0, boxlength.z());
+}
+
 /** Return a copy of this space with the volume of set to 'volume'
     - this will scale the space uniformly, keeping the center at
     the same location, to achieve this volume */

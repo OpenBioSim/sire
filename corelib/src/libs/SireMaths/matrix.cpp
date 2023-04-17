@@ -379,6 +379,20 @@ bool Matrix::isIdentity() const
            zx() == 0 and zy() == 0;
 }
 
+/** Return whether or not this is a diagonal matrix */
+bool Matrix::isDiagonal() const
+{
+    return xy() == 0 and xz() == 0 and
+           yx() == 0 and yz() == 0 and
+           zx() == 0 and zy() == 0;
+}
+
+/** Return the diagonal of this matrix */
+Vector Matrix::diagonal() const
+{
+    return Vector(xx(), yy(), zz());
+}
+
 /** Copy assignment operator */
 Matrix &Matrix::operator=(const Matrix &other)
 {

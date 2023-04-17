@@ -85,6 +85,8 @@ namespace SireVol
         SireUnits::Dimension::Volume volume() const;
         SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
 
+        Matrix boxMatrix() const;
+
         void setDimensions(const Vector &dimensions);
         void setDimensions(const Vector &mincoords, const Vector &maxcoords);
 

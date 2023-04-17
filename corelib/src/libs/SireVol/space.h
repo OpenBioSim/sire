@@ -142,6 +142,8 @@ namespace SireVol
             volume of this space (e.g. it is an infinite space!) */
         virtual SireUnits::Dimension::Volume volume() const = 0;
 
+        virtual SireMaths::Matrix boxMatrix() const;
+
         /** Return a copy of this space with the volume of set to 'volume'
             - this will scale the space uniformly, keeping the center at
             the same location, to achieve this volume */

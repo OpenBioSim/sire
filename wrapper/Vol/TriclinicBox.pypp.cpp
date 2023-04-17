@@ -98,6 +98,18 @@ void register_TriclinicBox_class(){
                 , "Return whether or not these two groups are definitely beyond the cutoff distance." );
         
         }
+        { //::SireVol::TriclinicBox::boxMatrix
+        
+            typedef ::SireMaths::Matrix ( ::SireVol::TriclinicBox::*boxMatrix_function_type)(  ) const;
+            boxMatrix_function_type boxMatrix_function_value( &::SireVol::TriclinicBox::boxMatrix );
+            
+            TriclinicBox_exposer.def( 
+                "boxMatrix"
+                , boxMatrix_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::TriclinicBox::calcAngle
         
             typedef ::SireUnits::Dimension::Angle ( ::SireVol::TriclinicBox::*calcAngle_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const &,::SireMaths::Vector const & ) const;

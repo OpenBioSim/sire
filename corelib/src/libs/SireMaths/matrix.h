@@ -153,6 +153,10 @@ namespace SireMaths
 
         bool isIdentity() const;
 
+        bool isDiagonal() const;
+
+        Vector diagonal() const;
+
         static Matrix identity();
         static Matrix zero();
 

@@ -86,6 +86,8 @@ namespace SireVol
         /** Set the volume of the triclinic box. */
         SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
 
+        Matrix boxMatrix() const;
+
         static const char *typeName();
 
         /** Whether the triclinic cell has been rotated to comply with the contraints

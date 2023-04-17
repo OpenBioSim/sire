@@ -98,6 +98,19 @@ SireUnits::Dimension::Length Space::maximumCutoff() const
     return SireUnits::Dimension::Length(std::numeric_limits<double>::max());
 }
 
+/** Return the matrix that describes this box - these are the
+ *  three box vectors. This raises an exception if this is
+ *  not a periodic space
+ */
+Matrix Space::boxMatrix() const
+{
+    throw SireError::incompatible_error(QObject::tr(
+                                            "The space '%1' is not a periodic space, and so does not have "
+                                            "a box matrix")
+                                            .arg(this->toString()),
+                                        CODELOC);
+}
+
 /** Change the volume of this space by 'delta' */
 SpacePtr Space::changeVolume(SireUnits::Dimension::Volume delta) const
 {

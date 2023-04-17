@@ -74,6 +74,18 @@ void register_PeriodicBox_class(){
                 , "Return whether or not these two groups are definitely beyond the cutoff distance." );
         
         }
+        { //::SireVol::PeriodicBox::boxMatrix
+        
+            typedef ::SireMaths::Matrix ( ::SireVol::PeriodicBox::*boxMatrix_function_type)(  ) const;
+            boxMatrix_function_type boxMatrix_function_value( &::SireVol::PeriodicBox::boxMatrix );
+            
+            PeriodicBox_exposer.def( 
+                "boxMatrix"
+                , boxMatrix_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::PeriodicBox::calcAngle
         
             typedef ::SireUnits::Dimension::Angle ( ::SireVol::PeriodicBox::*calcAngle_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const &,::SireMaths::Vector const & ) const;

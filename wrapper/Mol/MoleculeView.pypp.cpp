@@ -50,6 +50,8 @@ namespace bp = boost::python;
 
 #include "trajectory.h"
 
+#include "trajectoryaligner.h"
+
 #include <QDebug>
 
 #include "moleculeview.h"
