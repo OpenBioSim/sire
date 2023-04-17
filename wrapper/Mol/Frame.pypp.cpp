@@ -167,6 +167,18 @@ void register_Frame_class(){
                 , "" );
         
         }
+        { //::SireMol::Frame::join
+        
+            typedef ::SireMol::Frame ( *join_function_type )( ::QVector< SireMol::Frame > const &,bool );
+            join_function_type join_function_value( &::SireMol::Frame::join );
+            
+            Frame_exposer.def( 
+                "join"
+                , join_function_value
+                , ( bp::arg("frames"), bp::arg("use_parallel")=(bool)(true) )
+                , "" );
+        
+        }
         { //::SireMol::Frame::nAtoms
         
             typedef int ( ::SireMol::Frame::*nAtoms_function_type)(  ) const;
@@ -368,6 +380,7 @@ void register_Frame_class(){
                 , "" );
         
         }
+        Frame_exposer.staticmethod( "join" );
         Frame_exposer.staticmethod( "typeName" );
         Frame_exposer.def( "__copy__", &__copy__);
         Frame_exposer.def( "__deepcopy__", &__copy__);

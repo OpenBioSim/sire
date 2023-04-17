@@ -1458,3 +1458,139 @@ bool Frame::isCompatibleWith(const MoleculeInfoData &molinfo) const
 {
     return this->nAtoms() == molinfo.nAtoms();
 }
+
+/** Join the vector of passed frames into a single frame. The
+ *  frames are joined in order, e.g. from the first atom in
+ *  the first frame to the last atom in the last frame
+ */
+Frame Frame::join(const QVector<Frame> &frames,
+                  bool use_parallel)
+{
+    if (frames.isEmpty())
+    {
+        return Frame();
+    }
+    else if (frames.count() == 1)
+    {
+        return frames.at(0);
+    }
+
+    const int nframes = frames.count();
+    const Frame *frames_data = frames.constData();
+
+    QVector<int> start_idxs;
+    start_idxs.reserve(nframes);
+
+    bool have_coords = false;
+    bool have_vels = false;
+    bool have_frcs = false;
+
+    int natoms = 0;
+
+    for (const auto &frame : frames)
+    {
+        start_idxs.append(natoms);
+
+        natoms += frame.nAtoms();
+
+        if (frame.hasCoordinates())
+            have_coords = true;
+
+        if (frame.hasVelocities())
+            have_vels = true;
+
+        if (frame.hasForces())
+            have_frcs = true;
+    }
+
+    const int *start_idxs_data = start_idxs.constData();
+
+    // take all of the global data from the values
+    // of the first frame
+    Frame ret(frames.at(0));
+
+    Vector *coords_data = 0;
+    Velocity3D *vels_data = 0;
+    Force3D *frcs_data = 0;
+
+    if (have_coords)
+    {
+        ret.coords = QVector<Vector>(natoms, Vector(0));
+        coords_data = ret.coords.data();
+    }
+    else
+    {
+        ret.coords = QVector<Vector>();
+    }
+
+    if (have_vels)
+    {
+        ret.vels = QVector<Velocity3D>(natoms, Velocity3D(0));
+        vels_data = ret.vels.data();
+    }
+    else
+    {
+        ret.vels = QVector<Velocity3D>();
+    }
+
+    if (have_frcs)
+    {
+        ret.frcs = QVector<Force3D>(natoms, Force3D(0));
+        frcs_data = ret.frcs.data();
+    }
+    else
+    {
+        ret.frcs = QVector<Force3D>();
+    }
+
+    if (use_parallel)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                const Frame &frame = frames_data[i];
+                const int start_idx = start_idxs_data[i];
+
+                if (have_coords and frame.hasCoordinates())
+                    std::memcpy(coords_data + start_idx,
+                                frame.coordinates().constData(),
+                                frame.nAtoms() * sizeof(Vector));
+
+                if (have_vels and frame.hasVelocities())
+                    std::memcpy(vels_data + start_idx,
+                                frame.velocities().constData(),
+                                frame.nAtoms() * sizeof(Velocity3D));
+
+                if (have_frcs and frame.hasForces())
+                    std::memcpy(frcs_data + start_idx,
+                                frame.forces().constData(),
+                                frame.nAtoms() * sizeof(Force3D));
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nframes; ++i)
+        {
+            const Frame &frame = frames_data[i];
+            const int start_idx = start_idxs_data[i];
+
+            if (have_coords and frame.hasCoordinates())
+                std::memcpy(coords_data + start_idx,
+                            frame.coordinates().constData(),
+                            frame.nAtoms() * sizeof(Vector));
+
+            if (have_vels and frame.hasVelocities())
+                std::memcpy(vels_data + start_idx,
+                            frame.velocities().constData(),
+                            frame.nAtoms() * sizeof(Velocity3D));
+
+            if (have_frcs and frame.hasForces())
+                std::memcpy(frcs_data + start_idx,
+                            frame.forces().constData(),
+                            frame.nAtoms() * sizeof(Force3D));
+        }
+    }
+
+    return ret;
+}

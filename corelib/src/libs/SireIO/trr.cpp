@@ -387,3 +387,59 @@ void TRR::writeToFile(const QString &filename) const
 
     outfile.close();
 }
+
+bool _use_parallel(const PropertyMap &map, int nvals)
+{
+    if (nvals < 8)
+        return false;
+    else
+    {
+        const auto p = map["parallel"];
+
+        if (p.hasValue())
+            return p.value().asABoolean();
+        else
+            return true;
+    }
+}
+
+/** Save the specified trajectory frames for this system to the specified
+ *  file. Returns the absolute filename(s) of the
+ *  file(s) written (multiple files may be written if this is
+ *  requested of the parser).
+ */
+QStringList TRR::saveTrajectory(const SireSystem::System &system,
+                                const QList<qint32> &frames,
+                                const QString &filename,
+                                const PropertyMap &map) const
+{
+    QStringList output_files;
+
+    if (system.isEmpty())
+        return output_files;
+
+    System local_system(system);
+
+    TRRFile outfile(filename);
+    output_files.append(outfile.filename());
+
+    if (not outfile.open(QIODevice::WriteOnly))
+        throw SireError::file_error(QObject::tr(
+                                        "Could not open %1 to write the TRR file.")
+                                        .arg(filename),
+                                    CODELOC);
+
+    const bool uses_parallel = should_run_in_parallel(system.nAtoms(), map);
+
+    for (const auto frame_idx : frames)
+    {
+        local_system.loadFrame(frame_idx);
+
+        auto frame = this->createFrame(local_system, map);
+        outfile.writeFrame(frame, uses_parallel);
+    }
+
+    outfile.close();
+
+    return output_files;
+}

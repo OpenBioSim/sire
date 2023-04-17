@@ -48,6 +48,7 @@
 #include "SireMol/molidx.h"
 
 #include "SireBase/timeproperty.h"
+#include "SireBase/parallel.h"
 
 #include "SireSystem/system.h"
 
@@ -803,7 +804,7 @@ Frame MoleculeParser::createFrame(const System &system,
         const auto vels_property = map["velocity"];
         const auto forces_property = map["force"];
 
-        if (usesParallel())
+        if (should_run_in_parallel(molnums.count(), map))
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
                               {

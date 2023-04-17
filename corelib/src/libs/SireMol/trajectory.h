@@ -153,6 +153,9 @@ namespace SireMol
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 
+        static Frame join(const QVector<Frame> &frames,
+                          bool use_parallel = true);
+
     protected:
         void assertSane() const;
 
