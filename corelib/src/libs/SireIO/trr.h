@@ -104,11 +104,6 @@ namespace SireIO
 
         void writeToFile(const QString &filename) const;
 
-        QStringList saveTrajectory(const SireSystem::System &system,
-                                   const QList<qint32> &frames,
-                                   const QString &filename,
-                                   const PropertyMap &map) const;
-
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
 

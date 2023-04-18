@@ -128,6 +128,14 @@ void IndexBase::throwInvalidIndex(qint32 n) const
             QObject::tr("No item at index %1. Index range is from %2 to %3.").arg(_idx).arg(-n).arg(n - 1), CODELOC);
 }
 
+/** Return whether or not this index can be mapped into a container
+ *  of 'n' elements
+ */
+bool IndexBase::canMap(qint32 n) const
+{
+    return (_idx >= 0 and _idx < n) or (_idx < 0 and _idx >= -n);
+}
+
 /** Map this index into the container of 'n' elements - this
     maps the index (with negative indexing, e.g. -1 is the last
     element), and throws an exception if the index is out

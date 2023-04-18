@@ -32,6 +32,8 @@
 
 #include "SireMol/residuecutting.h"
 
+#include "SireSystem/system.h"
+
 #include <functional>
 #include <memory>
 
@@ -139,6 +141,8 @@ namespace SireIO
 
     public:
         MoleculeParser(const PropertyMap &map = PropertyMap());
+        MoleculeParser(const SireSystem::System &system, const PropertyMap &map);
+
         MoleculeParser(const QString &filename, const PropertyMap &map);
         MoleculeParser(const QStringList &lines, const PropertyMap &map);
 
@@ -161,15 +165,6 @@ namespace SireIO
         virtual MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const = 0;
 
         virtual MoleculeParserPtr construct(const SireSystem::System &system, const PropertyMap &map) const = 0;
-
-        virtual QStringList saveTrajectory(const SireSystem::System &system,
-                                           const QString &filename,
-                                           const PropertyMap &map) const;
-
-        virtual QStringList saveTrajectory(const SireSystem::System &system,
-                                           const QList<qint32> &frames,
-                                           const QString &filename,
-                                           const PropertyMap &map) const;
 
         static QString supportedFormats();
 
@@ -298,6 +293,10 @@ namespace SireIO
 
         virtual SireBase::PropertyPtr getForceField(const SireSystem::System &system, const PropertyMap &map) const;
 
+        bool writingTrajectory() const;
+        QList<qint32> framesToWrite() const;
+        SireMol::Frame createFrame(qint32 frame_index) const;
+
     private:
         static MoleculeParserPtr _pvt_parse(const QString &filename, const PropertyMap &map);
 
@@ -309,6 +308,15 @@ namespace SireIO
 
         /** All of the lines in the file */
         QVector<QString> lnes;
+
+        /** The System being written */
+        SireSystem::System saved_system;
+
+        /** The frames of this system to save */
+        QList<qint32> frames_to_write;
+
+        /** The property map used when saving this System */
+        SireBase::PropertyMap propmap;
 
         /** The score associated with the parser. The higher the score,
             the better the file was parsed */

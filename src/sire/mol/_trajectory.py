@@ -18,7 +18,9 @@ class TrajectoryIterator:
 
             self._map = create_map(map)
             self._view = view
-            self._values = range(0, max(1, self._view.num_frames(self._map)))
+            self._values = list(
+                range(0, max(1, self._view.num_frames(self._map)))
+            )
             self._times = None
             self._iter = None
             self._frame = None
@@ -122,6 +124,15 @@ class TrajectoryIterator:
         else:
             return f"Trajectory({self._view}, num_frames={len(self._values)})"
 
+    def frame_indexes(self):
+        """
+        Return the indexes of the frames in this trajectory that
+        will be viewed
+        """
+        from copy import copy
+
+        return copy(self._values)
+
     def align(self, align):
         """
         Return a copy of this trajectory where each frame will be aligned
@@ -193,6 +204,31 @@ class TrajectoryIterator:
         ret.frame_index = lambda: self._frame
 
         return ret
+
+    def _populate_map(self, map):
+        """
+        Internal function called by sire.save to populate the
+        property map that will be used by MoleculeParser to
+        extract each frame from this trajectory.
+
+        Note that this populates a copy of the map, which is
+        returned
+        """
+        from ..base import create_map
+
+        # do it this way around, so that 'map' overwrites
+        # anything in this trajectory's map
+        map = create_map(self._map, map)
+
+        # now add in the frames to save
+        frames_to_write = self.frame_indexes()
+        map.set("frames_to_write", frames_to_write)
+
+        # and the aligner
+        if self._aligner is not None:
+            map.set("frame_aligner", self._aligner)
+
+        return map
 
     def first(self):
         """Return the first frame in the trajectory"""

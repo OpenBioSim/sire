@@ -89,6 +89,8 @@
 
 #include "Process.pypp.hpp"
 
+#include "ProgressBar.pypp.hpp"
+
 #include "Properties.pypp.hpp"
 
 #include "Property.pypp.hpp"
@@ -229,6 +231,8 @@ BOOST_PYTHON_MODULE(_Base){
     register_PackedArray2D_int__class();
 
     register_Process_class();
+
+    register_ProgressBar_class();
 
     register_Properties_class();
 

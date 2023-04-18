@@ -29,6 +29,19 @@ void register_IndexBase_class(){
         typedef bp::class_< SireID::IndexBase, boost::noncopyable > IndexBase_exposer_t;
         IndexBase_exposer_t IndexBase_exposer = IndexBase_exposer_t( "IndexBase", "This is the base class of all Index objects. An Index object\nprovides the index of an object in an indexable list or array (or indeed\nany container that holds objects in a linear, numerical indexed\nmanner (e.g. atoms in a Molecule, Molecules in a group)\n\nThis class cannot be instantiated on its own - it must be\ninherited by a derived class to be used.\n\nAuthor: Christopher Woods\n", bp::no_init );
         bp::scope IndexBase_scope( IndexBase_exposer );
+        { //::SireID::IndexBase::canMap
+        
+            typedef bool ( ::SireID::IndexBase::*canMap_function_type)( ::qint32 ) const;
+            canMap_function_type canMap_function_value( &::SireID::IndexBase::canMap );
+            
+            IndexBase_exposer.def( 
+                "canMap"
+                , canMap_function_value
+                , ( bp::arg("n") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireID::IndexBase::hash
         
             typedef ::uint ( ::SireID::IndexBase::*hash_function_type)(  ) const;

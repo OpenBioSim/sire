@@ -265,19 +265,6 @@ void register_TRR_class(){
                 , "Parse from the passed file" );
         
         }
-        { //::SireIO::TRR::saveTrajectory
-        
-            typedef ::QStringList ( ::SireIO::TRR::*saveTrajectory_function_type)( ::SireSystem::System const &,::QList< int > const &,::QString const &,::SireBase::PropertyMap const & ) const;
-            saveTrajectory_function_type saveTrajectory_function_value( &::SireIO::TRR::saveTrajectory );
-            
-            TRR_exposer.def( 
-                "saveTrajectory"
-                , saveTrajectory_function_value
-                , ( bp::arg("system"), bp::arg("frames"), bp::arg("filename"), bp::arg("map") )
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
         { //::SireIO::TRR::size
         
             typedef int ( ::SireIO::TRR::*size_function_type)(  ) const;

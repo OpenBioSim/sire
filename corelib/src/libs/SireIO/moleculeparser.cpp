@@ -46,9 +46,11 @@
 #include "SireMol/mgname.h"
 #include "SireMol/mgnum.h"
 #include "SireMol/molidx.h"
+#include "SireMol/trajectoryaligner.h"
 
 #include "SireBase/timeproperty.h"
 #include "SireBase/parallel.h"
+#include "SireBase/propertylist.h"
 
 #include "SireSystem/system.h"
 
@@ -492,10 +494,14 @@ static const RegisterMetaType<MoleculeParser> r_parser(MAGIC_ONLY, MoleculeParse
 
 QDataStream &operator<<(QDataStream &ds, const MoleculeParser &parser)
 {
-    writeHeader(ds, r_parser, 2);
+    writeHeader(ds, r_parser, 3);
 
     SharedDataStream sds(ds);
-    sds << parser.fname << parser.lnes << parser.scr << parser.run_parallel << static_cast<const Property &>(parser);
+    sds << parser.fname << parser.lnes
+        << parser.saved_system
+        << parser.frames_to_write
+        << parser.propmap
+        << parser.scr << parser.run_parallel << static_cast<const Property &>(parser);
 
     return ds;
 }
@@ -504,7 +510,12 @@ QDataStream &operator>>(QDataStream &ds, MoleculeParser &parser)
 {
     VersionID v = readHeader(ds, r_parser);
 
-    if (v == 2)
+    if (v == 3)
+    {
+        SharedDataStream sds(ds);
+        sds >> parser.fname >> parser.lnes >> parser.saved_system >> parser.frames_to_write >> parser.propmap >> parser.scr >> parser.run_parallel >> static_cast<Property &>(parser);
+    }
+    else if (v == 2)
     {
         SharedDataStream sds(ds);
         sds >> parser.fname >> parser.lnes >> parser.scr >> parser.run_parallel >> static_cast<Property &>(parser);
@@ -523,11 +534,46 @@ QDataStream &operator>>(QDataStream &ds, MoleculeParser &parser)
 }
 
 /** Constructor */
-MoleculeParser::MoleculeParser(const PropertyMap &map) : Property(), scr(0), run_parallel(true)
+MoleculeParser::MoleculeParser(const PropertyMap &map) : Property(), propmap(map), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
         run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+}
+
+/** Constructor */
+MoleculeParser::MoleculeParser(const System &system, const PropertyMap &map)
+    : Property(), saved_system(system), propmap(map), scr(0), run_parallel(true)
+{
+    if (map["parallel"].hasValue())
+    {
+        run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+
+    if (map["frames_to_write"].hasValue())
+    {
+        const qint32 num_frames = system.nFrames();
+
+        auto frames = map["frames_to_write"].value().asAnArray();
+
+        for (int i = 0; i < frames.count(); ++i)
+        {
+            qint32 frame_idx = frames[i].asAnInteger();
+
+            // make sure this is a valid frame
+            if (not Index(frame_idx).canMap(num_frames))
+            {
+                throw SireError::invalid_index(QObject::tr(
+                                                   "Cannot save trajectory frame '%1' as the number of "
+                                                   "frames is only '%2'")
+                                                   .arg(frame_idx)
+                                                   .arg(num_frames),
+                                               CODELOC);
+            }
+
+            frames_to_write.append(frame_idx);
+        }
     }
 }
 
@@ -617,7 +663,7 @@ QVector<QString> MoleculeParser::readTextFile(QString filename)
 
 /** Construct the parser, parsing in all of the lines in the file
     with passed filename */
-MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) : Property(), scr(0), run_parallel(true)
+MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) : Property(), propmap(map), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
@@ -630,7 +676,7 @@ MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) 
 
 /** Construct the parser, parsing in all of the passed text lines */
 MoleculeParser::MoleculeParser(const QStringList &lines, const PropertyMap &map)
-    : Property(), scr(0), run_parallel(true)
+    : Property(), propmap(map), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
@@ -645,7 +691,9 @@ MoleculeParser::MoleculeParser(const QStringList &lines, const PropertyMap &map)
 
 /** Copy constructor */
 MoleculeParser::MoleculeParser(const MoleculeParser &other)
-    : Property(other), fname(other.fname), lnes(other.lnes), scr(other.scr), run_parallel(other.run_parallel)
+    : Property(other), fname(other.fname), lnes(other.lnes),
+      saved_system(other.saved_system), frames_to_write(other.frames_to_write),
+      propmap(other.propmap), scr(other.scr), run_parallel(other.run_parallel)
 {
 }
 
@@ -1135,6 +1183,9 @@ MoleculeParser &MoleculeParser::operator=(const MoleculeParser &other)
     {
         fname = other.fname;
         lnes = other.lnes;
+        saved_system = other.saved_system;
+        frames_to_write = other.frames_to_write;
+        propmap = other.propmap;
         scr = other.scr;
         run_parallel = other.run_parallel;
         Property::operator=(other);
@@ -1146,6 +1197,7 @@ MoleculeParser &MoleculeParser::operator=(const MoleculeParser &other)
 bool MoleculeParser::operator==(const MoleculeParser &other) const
 {
     return fname == other.fname and lnes == other.lnes and scr == other.scr and run_parallel == other.run_parallel and
+           saved_system == other.saved_system and frames_to_write == other.frames_to_write and propmap == other.propmap and
            Property::operator==(other);
 }
 
@@ -2339,44 +2391,6 @@ QStringList MoleculeParser::save(const System &system, const QStringList &filena
     return save(system, filenames, PropertyMap());
 }
 
-/** Save all of the trajectory frames for this system to the specified
- *  file. This raises an exception if this parser does not support
- *  writing trajectories. Returns the absolute filename of the
- *  file written.
- */
-QStringList MoleculeParser::saveTrajectory(const System &system,
-                                           const QString &filename,
-                                           const PropertyMap &map) const
-{
-    QList<qint32> frames;
-
-    for (qint32 i = 0; i < system.nFrames(); ++i)
-    {
-        frames.append(i);
-    }
-
-    return this->saveTrajectory(system, frames, filename, map);
-}
-
-/** Save the specified trajectory frames for this system to the specified
- *  file. This raises an exception if this parser does not support
- *  writing trajectories. Returns the absolute filename(s) of the
- *  file(s) written (multiple files may be written if this is
- *  requested of the parser).
- */
-QStringList MoleculeParser::saveTrajectory(const System &system,
-                                           const QList<qint32> &frames,
-                                           const QString &filename,
-                                           const PropertyMap &map) const
-{
-    throw SireError::unsupported(QObject::tr(
-                                     "The parser %1 does not support the writing of trajectories.")
-                                     .arg(this->toString()),
-                                 CODELOC);
-
-    return QStringList();
-}
-
 /** Return the System that is constructed from the data in this parser */
 System MoleculeParser::toSystem() const
 {
@@ -2600,6 +2614,35 @@ QHash<QString, QList<MoleculeParserPtr>> MoleculeParser::sortParsers(const QList
     ret["supplementary"] = supplementary;
 
     return ret;
+}
+
+bool MoleculeParser::writingTrajectory() const
+{
+    return not frames_to_write.isEmpty();
+}
+
+QList<qint32> MoleculeParser::framesToWrite() const
+{
+    return frames_to_write;
+}
+
+SireMol::Frame MoleculeParser::createFrame(qint32 frame_index) const
+{
+    PropertyMap map(propmap);
+
+    frame_index = Index(frame_index).map(saved_system.nFrames());
+
+    if (map["frame_aligner"].hasValue())
+    {
+        map.set("transform",
+                map["frame_aligner"].value().asA<TrajectoryAligner>()[frame_index]);
+    }
+
+    System local_system(saved_system);
+
+    local_system.loadFrame(frame_index, map);
+
+    return this->createFrame(local_system, map);
 }
 
 Q_GLOBAL_STATIC(NullParser, nullParser)

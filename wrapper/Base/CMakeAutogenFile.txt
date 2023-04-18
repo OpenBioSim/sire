@@ -40,6 +40,7 @@ set ( PYPP_SOURCES
        PackedArray2D_int_.pypp.cpp
        PackedArray2D_int_Array.pypp.cpp
        Process.pypp.cpp
+       ProgressBar.pypp.cpp
        Properties.pypp.cpp
        Property.pypp.cpp
        PropertyList.pypp.cpp

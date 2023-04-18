@@ -588,6 +588,13 @@ def save(
 
         map.set("fileformat", ",".join(format))
 
+    from .mol import TrajectoryIterator
+
+    if type(molecules) is TrajectoryIterator:
+        # we are saving a trajectory - not just the molecules
+        map = molecules._populate_map(map)
+        molecules = molecules.current()
+
     molecules = _to_legacy_system(molecules)
 
     return MoleculeParser.save(molecules, filename, map=map)

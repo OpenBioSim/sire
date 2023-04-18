@@ -658,32 +658,6 @@ void register_MoleculeParser_class(){
                 , "Synonym of MoleculeParser::write" );
         
         }
-        { //::SireIO::MoleculeParser::saveTrajectory
-        
-            typedef ::QStringList ( ::SireIO::MoleculeParser::*saveTrajectory_function_type)( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const & ) const;
-            saveTrajectory_function_type saveTrajectory_function_value( &::SireIO::MoleculeParser::saveTrajectory );
-            
-            MoleculeParser_exposer.def( 
-                "saveTrajectory"
-                , saveTrajectory_function_value
-                , ( bp::arg("system"), bp::arg("filename"), bp::arg("map") )
-                , bp::release_gil_policy()
-                , "Save all of the trajectory frames for this system to the specified\n  file. This raises an exception if this parser does not support\n  writing trajectories. Returns the absolute filename of the\n  file written.\n" );
-        
-        }
-        { //::SireIO::MoleculeParser::saveTrajectory
-        
-            typedef ::QStringList ( ::SireIO::MoleculeParser::*saveTrajectory_function_type)( ::SireSystem::System const &,::QList< int > const &,::QString const &,::SireBase::PropertyMap const & ) const;
-            saveTrajectory_function_type saveTrajectory_function_value( &::SireIO::MoleculeParser::saveTrajectory );
-            
-            MoleculeParser_exposer.def( 
-                "saveTrajectory"
-                , saveTrajectory_function_value
-                , ( bp::arg("system"), bp::arg("frames"), bp::arg("filename"), bp::arg("map") )
-                , bp::release_gil_policy()
-                , "Save the specified trajectory frames for this system to the specified\n  file. This raises an exception if this parser does not support\n  writing trajectories. Returns the absolute filename(s) of the\n  file(s) written (multiple files may be written if this is\n  requested of the parser).\n" );
-        
-        }
         { //::SireIO::MoleculeParser::score
         
             typedef double ( ::SireIO::MoleculeParser::*score_function_type)(  ) const;

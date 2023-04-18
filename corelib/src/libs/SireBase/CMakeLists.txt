@@ -52,6 +52,7 @@ set ( SIREBASE_HEADERS
       sire_process.h
       parallel.h
       podproperty.hpp
+      progressbar.h
       properties.h
       property.h
       propertylist.h
@@ -101,6 +102,7 @@ set ( SIREBASE_SOURCES
       packedarray2d.cpp
       parallel.cpp
       process.cpp
+      progressbar.cpp
       properties.cpp
       property.cpp
       propertylist.cpp
