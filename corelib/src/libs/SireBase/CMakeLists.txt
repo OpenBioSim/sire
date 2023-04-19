@@ -59,6 +59,7 @@ set ( SIREBASE_HEADERS
       propertymap.h
       quickcopy.hpp
       qvariant_metatype.h
+      releasegil.h
       savestate.h
       shareddatapointer.hpp
       sharedpolypointer.hpp
@@ -110,6 +111,7 @@ set ( SIREBASE_SOURCES
       range.cpp
       ranges.cpp
       refcountdata.cpp
+      releasegil.cpp
       savestate.cpp
       sharedpolypointer.cpp
       slice.cpp

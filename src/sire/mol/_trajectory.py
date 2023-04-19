@@ -333,9 +333,11 @@ class TrajectoryIterator:
 
         cpu_count = os.cpu_count()
 
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through frames", total=nframes)
+        from ..base import ProgressBar
 
+        with ProgressBar(
+            total=nframes, text="Looping through frames"
+        ) as progress:
             num_per_chunk = cpu_count
 
             i = 0
@@ -383,7 +385,7 @@ class TrajectoryIterator:
                                 components[k] = np.zeros(nframes, dtype=float)
                                 components[k][idx] = nrg[key].to_default()
 
-                    progress.update(task, completed=idx)
+                    progress.set_progress(idx)
 
                 delta = time.time() - start_time
 
@@ -488,9 +490,11 @@ class TrajectoryIterator:
 
         cpu_count = os.cpu_count()
 
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through frames", total=nframes)
+        from ..base import ProgressBar
 
+        with ProgressBar(
+            total=nframes, text="Looping through frames"
+        ) as progress:
             num_per_chunk = cpu_count
 
             i = 0
@@ -523,7 +527,7 @@ class TrajectoryIterator:
                             components[key] = np.zeros(nframes, dtype=float)
                             components[key][idx] = nrg[key].to_default()
 
-                    progress.update(task, completed=idx)
+                    progress.set_progress(idx)
 
                 delta = time.time() - start_time
 
@@ -610,18 +614,16 @@ class TrajectoryIterator:
         time_unit = None
         measure_unit = None
 
-        from ..utils import Console
+        from ..base import ProgressBar
 
         if uses_measures:
             for view in self._view:
                 colnames.append(colname(view))
                 columns.append(np.zeros(nframes, dtype=float))
 
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for idx, frame in enumerate(self.__iter__()):
                     for i, measure in enumerate(frame.measures(map=self._map)):
                         columns[i][idx] = measure.to_default()
@@ -639,16 +641,14 @@ class TrajectoryIterator:
                                 time_unit = time.get_default().unit_string()
 
                     indexes[idx] = frame.frame_index()
-                    progress.update(task, completed=idx)
+                    progress.set_progress(idx)
         else:
             colnames.append(colname(self._view))
             column = np.zeros(nframes, dtype=float)
 
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for idx, frame in enumerate(self.__iter__()):
                     measure = frame.measure(map=self._map)
                     column[idx] = measure.to_default()
@@ -664,7 +664,7 @@ class TrajectoryIterator:
                             time_unit = time.get_default().unit_string()
 
                     indexes[idx] = frame.frame_index()
-                    progress.update(task, completed=idx)
+                    progress.set_progress(idx)
 
             columns = [column]
 
@@ -733,9 +733,9 @@ class TrajectoryIterator:
 
         from ..utils import Console
 
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through frames", total=nframes)
-
+        with ProgressBar(
+            total=nframes, text="Looping through frames"
+        ) as progress:
             for idx, frame in enumerate(self.__iter__()):
                 for i, f in enumerate(func.values()):
                     measure = f(frame)
@@ -752,7 +752,7 @@ class TrajectoryIterator:
                             time_unit = time.get_default().unit_string()
 
                 indexes[idx] = frame.frame_index()
-                progress.update(task, completed=idx)
+                progress.set_progress(idx)
 
         data = {}
 
@@ -823,33 +823,29 @@ class TrajectoryIterator:
         """
         result = []
 
-        from ..utils import Console
+        from ..base import ProgressBar
 
         nframes = len(self)
 
         if str(func) == func:
             # we calling a named function
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for i in range(0, nframes):
                     obj = self.__getitem__(i).current()
                     result.append(getattr(obj, func)(*args, **kwargs))
-                    progress.update(task, completed=i + 1)
+                    progress.set_progress(i + 1)
 
         else:
             # we have been passed the function to call
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for i in range(0, nframes):
                     obj = self.__getitem__(i).current()
                     result.append(func(obj, *args, **kwargs))
-                    progress.update(task, completed=i + 1)
+                    progress.set_progress(i + 1)
 
         return result
 

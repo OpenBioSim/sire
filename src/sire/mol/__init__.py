@@ -1056,25 +1056,25 @@ def _apply(objs, func, *args, **kwargs):
     """
     result = []
 
-    from ..utils import Console
+    from ..base import ProgressBar
 
     if str(func) == func:
         # we calling a named function
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through views", total=len(objs))
-
+        with ProgressBar(
+            total=len(objs), text="Looping through views"
+        ) as progress:
             for i, obj in enumerate(objs):
                 result.append(getattr(obj, func)(*args, **kwargs))
-                progress.update(task, completed=i + 1)
+                progress.set_progress(i + 1)
 
     else:
         # we have been passed the function to call
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through views", total=len(objs))
-
+        with ProgressBar(
+            total=len(objs), text="Looping through views"
+        ) as progress:
             for i, obj in enumerate(objs):
                 result.append(func(obj, *args, **kwargs))
-                progress.update(task, completed=i + 1)
+                progress.set_progress(i + 1)
 
     return result
 

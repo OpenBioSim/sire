@@ -36,7 +36,7 @@ class MinimisationData:
         if max_iterations <= 0:
             max_iterations = 0
 
-        from ..utils import Console
+        from ..base import ProgressBar
 
         def runfunc(max_its):
             LocalEnergyMinimizer.minimize(
@@ -47,7 +47,7 @@ class MinimisationData:
 
         start_time = datetime.now().timestamp()
 
-        with Console.spinner("minimisation: 0.0s") as spinner:
+        with ProgressBar(text="minimisation: 0.0s") as spinner:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, max_iterations)
 
@@ -56,7 +56,7 @@ class MinimisationData:
                         run_promise.result(timeout=0.2)
                     except Exception:
                         delta = datetime.now().timestamp() - start_time
-                        spinner.update("minimisation: %.1f s" % delta)
+                        spinner.tick("minimisation: %.1f s" % delta)
                         pass
 
     def commit(self):

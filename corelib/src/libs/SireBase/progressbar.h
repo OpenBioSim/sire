@@ -43,8 +43,11 @@ SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::ProgressBar &);
 
 namespace indicators
 {
-    class BlockProgressBar;
-    class ProgressSpinner;
+    class ProgressBar;
+    class IndeterminateProgressBar;
+
+    typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
+    typedef std::shared_ptr<IndeterminateProgressBar> SpinnerPtr;
 }
 
 namespace SireBase
@@ -78,35 +81,45 @@ namespace SireBase
         const char *what() const;
 
         void tick();
+        void tick(const QString &text);
 
         void setProgress(qint64 value);
-        void setText(const QString &text);
+        void setProgress(qint64 value, const QString &text);
+
+        void setCompleted();
+
+        const char *text() const;
+        int barSize() const;
 
         bool isDeterministic() const;
+
+        bool showTime() const;
 
         ProgressBar enter() const;
         void exit();
 
-        static void setTheme(const QString &theme);
+        static void setTheme(QString theme);
         static void setSilent();
-
-        static void set_fileno(int fileno);
 
     private:
         bool isActive() const;
         bool isProgress() const;
         bool isSpinner() const;
 
+        static int current_theme;
+
         qint64 total_value;
 
         QByteArray progress_text;
 
-        std::shared_ptr<indicators::BlockProgressBar> progress_ptr;
-        std::shared_ptr<indicators::ProgressSpinner> spinner_ptr;
+        indicators::ProgressBarPtr progress_ptr;
+        indicators::SpinnerPtr spinner_ptr;
 
         qint64 start_ms;
 
         bool show_time;
+        bool has_displayed;
+        bool has_completed;
     };
 }
 

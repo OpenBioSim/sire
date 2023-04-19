@@ -32,11 +32,19 @@
 
 #include <QDateTime>
 
+#include "SireError/errors.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
 using namespace SireBase;
 using namespace SireStream;
+
+using namespace indicators::option;
+using typename indicators::Color;
+using typename indicators::FontStyle;
+using typename indicators::ProgressBarPtr;
+using typename indicators::SpinnerPtr;
 
 static const RegisterMetaType<ProgressBar> r_bar;
 
@@ -70,13 +78,15 @@ QDataStream &operator>>(QDataStream &ds, ProgressBar &bar)
 
 ProgressBar::ProgressBar()
     : ConcreteProperty<ProgressBar, Property>(),
-      total_value(0), start_ms(0), show_time(true)
+      total_value(0), start_ms(0), show_time(true),
+      has_displayed(false), has_completed(true)
 {
 }
 
 ProgressBar::ProgressBar(qint64 total, bool time)
     : ConcreteProperty<ProgressBar, Property>(),
-      total_value(total), start_ms(0), show_time(time)
+      total_value(total), start_ms(0), show_time(time),
+      has_displayed(false), has_completed(true)
 {
     if (total_value < 0)
         total_value = 0;
@@ -84,7 +94,8 @@ ProgressBar::ProgressBar(qint64 total, bool time)
 
 ProgressBar::ProgressBar(qint64 total, const QString &text, bool time)
     : ConcreteProperty<ProgressBar, Property>(),
-      total_value(total), start_ms(0), show_time(time)
+      total_value(total), start_ms(0), show_time(time),
+      has_displayed(false), has_completed(true)
 {
     if (total_value < 0)
         total_value = 0;
@@ -94,7 +105,8 @@ ProgressBar::ProgressBar(qint64 total, const QString &text, bool time)
 
 ProgressBar::ProgressBar(const QString &text)
     : ConcreteProperty<ProgressBar, Property>(),
-      total_value(0), start_ms(0), show_time(false)
+      total_value(0), start_ms(0), show_time(false),
+      has_displayed(false), has_completed(true)
 {
     progress_text = text.toUtf8();
 }
@@ -106,12 +118,15 @@ ProgressBar::ProgressBar(const ProgressBar &other)
       progress_ptr(other.progress_ptr),
       spinner_ptr(other.spinner_ptr),
       start_ms(other.start_ms),
-      show_time(other.show_time)
+      show_time(other.show_time),
+      has_displayed(other.has_displayed),
+      has_completed(other.has_completed)
 {
 }
 
 ProgressBar::~ProgressBar()
 {
+    this->exit();
 }
 
 ProgressBar *ProgressBar::clone() const
@@ -129,6 +144,8 @@ ProgressBar &ProgressBar::operator=(const ProgressBar &other)
         spinner_ptr = other.spinner_ptr;
         start_ms = other.start_ms;
         show_time = other.show_time;
+        has_displayed = other.has_displayed;
+        has_completed = other.has_completed;
     }
 
     return *this;
@@ -172,49 +189,133 @@ bool ProgressBar::isSpinner() const
     return spinner_ptr.get() != 0;
 }
 
+// minimum amount of time to wait between updates
+static const int CONSOLE_TICK_DELAY_TIME = 100;
+static const int JUPYTER_TICK_DELAY_TIME = 250;
+
+static int TICK_DELAY_TIME = CONSOLE_TICK_DELAY_TIME;
+
 void ProgressBar::tick()
 {
+    this->tick(QString());
+}
+
+void ProgressBar::tick(const QString &text)
+{
+    const bool update_text = not text.isNull();
+
     if (this->isProgress())
     {
+        if (has_completed)
+            return;
+
         auto ms = QDateTime::currentMSecsSinceEpoch();
 
-        if (ms < start_ms)
+        if ((not update_text) and ms < start_ms)
             return;
+
+        if (update_text)
+            progress_ptr->set_option(PostfixText{text.toUtf8().constData()});
+
+        if (not has_displayed)
+        {
+            indicators::show_console_cursor(false);
+            has_displayed = true;
+        }
 
         progress_ptr->tick();
 
-        // make we don't do more than 10 updates per second
-        start_ms = ms + 100;
+        start_ms = ms + TICK_DELAY_TIME;
     }
     else if (this->isSpinner())
     {
+        if (has_completed)
+            return;
+
         auto ms = QDateTime::currentMSecsSinceEpoch();
 
-        if (ms < start_ms)
+        if ((not update_text) and ms < start_ms)
             return;
+
+        if (update_text)
+            spinner_ptr->set_option(PostfixText{text.toUtf8().constData()});
+
+        if (not has_displayed)
+        {
+            indicators::show_console_cursor(false);
+            has_displayed = true;
+        }
 
         spinner_ptr->tick();
 
-        // make we don't do more than 10 updates per second
-        start_ms = ms + 100;
+        start_ms = ms + TICK_DELAY_TIME;
     }
+}
+
+void ProgressBar::setCompleted()
+{
+    // qDebug() << "setCompleted" << this << has_displayed << has_completed << this->isProgress() << this->isSpinner();
+
+    if (has_completed)
+        return;
+
+    if (not has_displayed)
+    {
+        // no need to show anything as nothing has yet been displayed
+        has_completed = true;
+        return;
+    }
+
+    if (this->isProgress())
+    {
+        // qDebug() << this << "clear_progress";
+        //  calling function I added to actually clear the bar
+        //  progress_ptr->clear_at_end();
+    }
+
+    if (this->isSpinner())
+    {
+        // qDebug() << this << "clear_spinner";
+        //  calling function I added to actually clear the spinner
+        spinner_ptr->reset_at_end();
+    }
+
+    has_completed = true;
 }
 
 void ProgressBar::setProgress(qint64 value)
 {
+    this->setProgress(value, QString());
+}
+
+void ProgressBar::setProgress(qint64 value, const QString &text)
+{
+    const bool update_text = not text.isNull();
+
     if (this->isProgress())
     {
+        if (has_completed)
+            return;
+
         auto ms = QDateTime::currentMSecsSinceEpoch();
 
         if (value >= total_value)
         {
+            if (not has_displayed)
+            {
+                // we will never display
+                has_completed = true;
+                return;
+            }
+
+            if (update_text)
+                progress_ptr->set_option(PostfixText{text.toUtf8().constData()});
+
             progress_ptr->set_progress(100);
-            progress_ptr->mark_as_completed();
-            start_ms = ms + 3600000;
             return;
         }
 
-        if (ms < start_ms)
+        if ((not update_text) and ms < start_ms)
             return;
 
         int percent = (100 * value) / total_value;
@@ -222,37 +323,52 @@ void ProgressBar::setProgress(qint64 value)
         if (value < 0)
             percent = 0;
 
+        if (update_text)
+            progress_ptr->set_option(PostfixText{text.toUtf8().constData()});
+
+        if (not has_displayed)
+        {
+            indicators::show_console_cursor(false);
+            has_displayed = true;
+        }
+
         progress_ptr->set_progress(percent);
 
-        // make we don't do more than 10 updates per second
-        start_ms = ms + 100;
+        start_ms = ms + TICK_DELAY_TIME;
     }
     else if (this->isSpinner())
     {
+        if (has_completed)
+            return;
+
         auto ms = QDateTime::currentMSecsSinceEpoch();
 
-        if (ms < start_ms)
+        if ((not update_text) and ms < start_ms)
             return;
+
+        if (update_text)
+            spinner_ptr->set_option(PostfixText{text.toUtf8().constData()});
+
+        if (not has_displayed)
+        {
+            indicators::show_console_cursor(false);
+            has_displayed = true;
+        }
 
         spinner_ptr->tick();
 
-        // make we don't do more than 10 updates per second
-        start_ms = ms + 100;
+        start_ms = ms + TICK_DELAY_TIME;
     }
 }
 
-void ProgressBar::setText(const QString &text)
+const char *ProgressBar::text() const
 {
-    progress_text = text.toUtf8();
+    return progress_text.constData();
+}
 
-    if (this->isActive())
-    {
-        if (this->isSpinner())
-            spinner_ptr->set_option(indicators::option::PostfixText{progress_text.constData()});
-
-        else if (this->isProgress())
-            progress_ptr->set_option(indicators::option::PostfixText{progress_text.constData()});
-    }
+bool ProgressBar::showTime() const
+{
+    return show_time;
 }
 
 bool ProgressBar::isDeterministic() const
@@ -260,58 +376,168 @@ bool ProgressBar::isDeterministic() const
     return total_value > 0;
 }
 
-static int output_fileno = STDOUT_FILENO;
+int ProgressBar::barSize() const
+{
+    return std::max(20, 50 - progress_text.count());
+}
+
+void jupyter_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
+{
+    if (p.isDeterministic())
+    {
+        bar.reset(new indicators::ProgressBar(
+            PostfixText{p.text()},
+            BarWidth{p.barSize()},
+            Start{"■"},
+            Fill{"■"},
+            Lead{"▶"},
+            Remainder{" "},
+            End{" "},
+            ShowElapsedTime{p.showTime()},
+            ShowRemainingTime{p.showTime()}));
+    }
+    else
+    {
+        spinner.reset(new indicators::IndeterminateProgressBar(
+            PostfixText{p.text()},
+            BarWidth{10},
+            Start{" "},
+            Fill{" "},
+            Lead{"◀■▶"},
+            End{" "}));
+    }
+}
+
+void color_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
+{
+    if (p.isDeterministic())
+    {
+        bar.reset(new indicators::ProgressBar(
+            PostfixText{p.text()},
+            BarWidth{p.barSize()},
+            Start{"■"},
+            Fill{"■"},
+            Lead{"▶"},
+            Remainder{" "},
+            End{" "},
+            ForegroundColor{Color::green},
+            ShowElapsedTime{p.showTime()},
+            ShowRemainingTime{p.showTime()}));
+    }
+    else
+    {
+        spinner.reset(new indicators::IndeterminateProgressBar(
+            PostfixText{p.text()},
+            BarWidth{10},
+            Start{" "},
+            Fill{" "},
+            Lead{"◀■▶"},
+            End{" "},
+            ForegroundColor{Color::green},
+            FontStyles{std::vector<FontStyle>{FontStyle::bold}}));
+    }
+}
+
+void simple_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
+{
+    if (p.isDeterministic())
+    {
+        bar.reset(new indicators::ProgressBar(
+            PostfixText{p.text()},
+            BarWidth{p.barSize()},
+            Start{"["},
+            Fill{"="},
+            Lead{">"},
+            Remainder{" "},
+            End{"]"},
+            ForegroundColor{Color::white},
+            ShowElapsedTime{p.showTime()},
+            ShowRemainingTime{p.showTime()},
+            FontStyles{std::vector<FontStyle>{FontStyle::bold}}));
+    }
+    else
+    {
+        spinner.reset(new indicators::IndeterminateProgressBar(
+            PostfixText{p.text()},
+            BarWidth{10},
+            Start{"["},
+            Fill{" "},
+            Lead{"<=>"},
+            End{"]"},
+            ForegroundColor{Color::white},
+            FontStyles{std::vector<FontStyle>{FontStyle::bold}}));
+    }
+}
 
 ProgressBar ProgressBar::enter() const
 {
     ProgressBar ret(*this);
+    ret.has_displayed = false;
+    ret.has_completed = false;
 
-    if (this->isDeterministic())
-    {
-        ret.progress_ptr.reset(new indicators::BlockProgressBar(
-            indicators::option::PostfixText{this->progress_text.constData()},
-            indicators::option::ForegroundColor{indicators::Color::white},
-            indicators::option::ShowElapsedTime{show_time},
-            indicators::option::ShowRemainingTime{show_time},
-            indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}));
-    }
-    else
-    {
-        ret.spinner_ptr.reset(new indicators::ProgressSpinner(
-            indicators::option::PostfixText{this->progress_text.constData()},
-            indicators::option::ForegroundColor{indicators::Color::yellow},
-            indicators::option::SpinnerStates{std::vector<std::string>{"⠈", "⠐", "⠠", "⢀", "⡀", "⠄", "⠂", "⠁"}},
-            indicators::option::FontStyles{std::vector<indicators::FontStyle>{indicators::FontStyle::bold}}));
-    }
+    if (current_theme == 1)
+        simple_theme(ret, ret.progress_ptr, ret.spinner_ptr);
+    else if (current_theme == 2)
+        color_theme(ret, ret.progress_ptr, ret.spinner_ptr);
+    else if (current_theme == 3)
+        jupyter_theme(ret, ret.progress_ptr, ret.spinner_ptr);
 
-    ret.start_ms = QDateTime::currentMSecsSinceEpoch();
+    // start this after a delay of 500 ms
+    ret.start_ms = QDateTime::currentMSecsSinceEpoch() + 500;
 
     return ret;
 }
 
 void ProgressBar::exit()
 {
-    if (this->isProgress())
+    // qDebug() << "exit" << this << has_displayed << has_completed << this->isProgress() << this->isSpinner();
+
+    this->setCompleted();
+
+    progress_ptr.reset();
+    spinner_ptr.reset();
+
+    if (has_displayed)
     {
-        progress_ptr.reset();
-    }
-    else if (this->isSpinner())
-    {
-        spinner_ptr.reset();
+        // qDebug() << this << "reshow_console_cursor";
+        indicators::show_console_cursor(true);
+        has_displayed = false;
     }
 
     start_ms = 0;
 }
 
-void ProgressBar::setTheme(const QString &theme)
+// Default to the 'color' theme
+int ProgressBar::current_theme(2);
+
+void ProgressBar::setTheme(QString theme)
 {
+    theme = theme.toLower().simplified();
+
+    TICK_DELAY_TIME = CONSOLE_TICK_DELAY_TIME;
+
+    if (theme == "simple")
+        current_theme = 1;
+    else if (theme == "color" or theme == "colour")
+        current_theme = 2;
+    else if (theme == "silent" or theme == "quiet")
+        current_theme = 0;
+    else if (theme == "jupyter")
+    {
+        current_theme = 3;
+        TICK_DELAY_TIME = JUPYTER_TICK_DELAY_TIME;
+    }
+    else
+    {
+        throw SireError::invalid_key(QObject::tr(
+                                         "Unrecognised progress bar theme '%1'. Recognised themes are "
+                                         "'silent', 'simple' or 'color'")
+                                         .arg(theme),
+                                     CODELOC);
+    }
 }
 
 void ProgressBar::setSilent()
 {
-}
-
-void ProgressBar::set_fileno(int fileno)
-{
-    output_fileno = fileno;
+    current_theme = 0;
 }

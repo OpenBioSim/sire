@@ -2214,6 +2214,18 @@ namespace indicators
         }
 
     public:
+        void clear_at_end()
+        {
+            std::lock_guard<std::mutex> lock{mutex_};
+
+            auto &os = get_value<details::ProgressBarOption::stream>();
+
+            move_up(1);
+            erase_line();
+
+            os << termcolor::reset << std::endl;
+        }
+
         void print_progress(bool from_multi_progress = false)
         {
             std::lock_guard<std::mutex> lock{mutex_};
@@ -2836,6 +2848,16 @@ namespace indicators
         }
 
     public:
+        void reset_at_end()
+        {
+            std::lock_guard<std::mutex> lock{mutex_};
+
+            auto &os = get_value<details::ProgressBarOption::stream>();
+
+            os << termcolor::reset << std::endl;
+            os.flush();
+        }
+
         void print_progress(bool from_multi_progress = false)
         {
             std::lock_guard<std::mutex> lock{mutex_};

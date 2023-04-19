@@ -51,6 +51,7 @@
 #include "SireBase/timeproperty.h"
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
+#include "SireBase/releasegil.h"
 
 #include "SireSystem/system.h"
 

@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireError/errors.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -35,6 +37,18 @@ void register_ProgressBar_class(){
         ProgressBar_exposer.def( bp::init< qint64, QString const &, bp::optional< bool > >(( bp::arg("total"), bp::arg("text"), bp::arg("show_time")=(bool)(true) ), "") );
         ProgressBar_exposer.def( bp::init< QString const & >(( bp::arg("text") ), "") );
         ProgressBar_exposer.def( bp::init< SireBase::ProgressBar const & >(( bp::arg("other") ), "") );
+        { //::SireBase::ProgressBar::barSize
+        
+            typedef int ( ::SireBase::ProgressBar::*barSize_function_type)(  ) const;
+            barSize_function_type barSize_function_value( &::SireBase::ProgressBar::barSize );
+            
+            ProgressBar_exposer.def( 
+                "barSize"
+                , barSize_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::ProgressBar::enter
         
             typedef ::SireBase::ProgressBar ( ::SireBase::ProgressBar::*enter_function_type)(  ) const;
@@ -86,6 +100,18 @@ void register_ProgressBar_class(){
         
         }
         ProgressBar_exposer.def( bp::self == bp::self );
+        { //::SireBase::ProgressBar::setCompleted
+        
+            typedef void ( ::SireBase::ProgressBar::*setCompleted_function_type)(  ) ;
+            setCompleted_function_type setCompleted_function_value( &::SireBase::ProgressBar::setCompleted );
+            
+            ProgressBar_exposer.def( 
+                "setCompleted"
+                , setCompleted_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::ProgressBar::setProgress
         
             typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::qint64 ) ;
@@ -95,6 +121,19 @@ void register_ProgressBar_class(){
                 "setProgress"
                 , setProgress_function_value
                 , ( bp::arg("value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::setProgress
+        
+            typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::qint64,::QString const & ) ;
+            setProgress_function_type setProgress_function_value( &::SireBase::ProgressBar::setProgress );
+            
+            ProgressBar_exposer.def( 
+                "setProgress"
+                , setProgress_function_value
+                , ( bp::arg("value"), bp::arg("text") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -111,22 +150,9 @@ void register_ProgressBar_class(){
                 , "" );
         
         }
-        { //::SireBase::ProgressBar::setText
-        
-            typedef void ( ::SireBase::ProgressBar::*setText_function_type)( ::QString const & ) ;
-            setText_function_type setText_function_value( &::SireBase::ProgressBar::setText );
-            
-            ProgressBar_exposer.def( 
-                "setText"
-                , setText_function_value
-                , ( bp::arg("text") )
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
         { //::SireBase::ProgressBar::setTheme
         
-            typedef void ( *setTheme_function_type )( ::QString const & );
+            typedef void ( *setTheme_function_type )( ::QString );
             setTheme_function_type setTheme_function_value( &::SireBase::ProgressBar::setTheme );
             
             ProgressBar_exposer.def( 
@@ -137,15 +163,26 @@ void register_ProgressBar_class(){
                 , "" );
         
         }
-        { //::SireBase::ProgressBar::set_fileno
+        { //::SireBase::ProgressBar::showTime
         
-            typedef void ( *set_fileno_function_type )( int );
-            set_fileno_function_type set_fileno_function_value( &::SireBase::ProgressBar::set_fileno );
+            typedef bool ( ::SireBase::ProgressBar::*showTime_function_type)(  ) const;
+            showTime_function_type showTime_function_value( &::SireBase::ProgressBar::showTime );
             
             ProgressBar_exposer.def( 
-                "set_fileno"
-                , set_fileno_function_value
-                , ( bp::arg("fileno") )
+                "showTime"
+                , showTime_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::text
+        
+            typedef char const * ( ::SireBase::ProgressBar::*text_function_type)(  ) const;
+            text_function_type text_function_value( &::SireBase::ProgressBar::text );
+            
+            ProgressBar_exposer.def( 
+                "text"
+                , text_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -158,6 +195,19 @@ void register_ProgressBar_class(){
             ProgressBar_exposer.def( 
                 "tick"
                 , tick_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::tick
+        
+            typedef void ( ::SireBase::ProgressBar::*tick_function_type)( ::QString const & ) ;
+            tick_function_type tick_function_value( &::SireBase::ProgressBar::tick );
+            
+            ProgressBar_exposer.def( 
+                "tick"
+                , tick_function_value
+                , ( bp::arg("text") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -188,7 +238,6 @@ void register_ProgressBar_class(){
         }
         ProgressBar_exposer.staticmethod( "setSilent" );
         ProgressBar_exposer.staticmethod( "setTheme" );
-        ProgressBar_exposer.staticmethod( "set_fileno" );
         ProgressBar_exposer.staticmethod( "typeName" );
         ProgressBar_exposer.def( "__copy__", &__copy__);
         ProgressBar_exposer.def( "__deepcopy__", &__copy__);

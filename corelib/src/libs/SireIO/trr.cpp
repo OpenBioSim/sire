@@ -51,6 +51,7 @@
 #include "SireBase/stringproperty.h"
 #include "SireBase/timeproperty.h"
 #include "SireBase/progressbar.h"
+#include "SireBase/releasegil.h"
 
 #include "SireIO/errors.h"
 #include "SireError/errors.h"
@@ -377,6 +378,8 @@ void TRR::writeToFile(const QString &filename) const
 {
     if (this->nFrames() == 0 or this->nAtoms() == 0)
         return;
+
+    auto gil = SireBase::release_gil();
 
     TRRFile outfile(filename);
 

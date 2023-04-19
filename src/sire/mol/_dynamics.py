@@ -315,7 +315,9 @@ class DynamicsData:
 
         start_time = datetime.now().timestamp()
 
-        with Console.spinner("minimisation: 0.0s") as spinner:
+        from ..base import ProgressBar
+
+        with ProgressBar(text="minimisation: 0.0 s") as spinner:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, 0)
 
@@ -324,8 +326,10 @@ class DynamicsData:
                         run_promise.result(timeout=0.2)
                     except Exception:
                         delta = datetime.now().timestamp() - start_time
-                        spinner.update("minimisation: %.1f s" % delta)
+                        spinner.tick("minimisation: %.1f s" % delta)
                         pass
+
+                spinner.set_completed()
 
     def run(self, time, save_frequency, auto_fix_minimise: bool = True):
         if self.is_null():
@@ -334,7 +338,6 @@ class DynamicsData:
         from concurrent.futures import ThreadPoolExecutor
         import openmm
 
-        from ..utils import Console
         from ..units import picosecond
 
         try:
@@ -395,10 +398,10 @@ class DynamicsData:
 
         nsteps_before_run = self._current_step
 
-        try:
-            with Console.progress(transient=True) as progress:
-                t = progress.add_task("dynamics", total=steps)
+        from ..base import ProgressBar
 
+        try:
+            with ProgressBar(total=steps, text="dynamics") as progress:
                 with ThreadPoolExecutor() as pool:
                     while completed < steps:
                         if steps - completed < save_size:
@@ -436,7 +439,7 @@ class DynamicsData:
                             if result == 0:
                                 completed += nrun
                                 nrun_till_save -= nrun
-                                progress.update(t, completed=completed)
+                                progress.set_progress(completed)
                                 run_promise = None
                             else:
                                 # make sure we finish processing the last block
@@ -559,7 +562,13 @@ class Dynamics:
         speed = self.time_speed()
 
         if speed == 0:
-            return f"Dynamics(completed=0)"
+            if self.current_step() > 0:
+                return (
+                    f"Dynamics(completed={self.current_time()}, "
+                    f"energy={self.current_energy()}, speed=FAST ns day-1)"
+                )
+            else:
+                return f"Dynamics(completed=0)"
         else:
             return (
                 f"Dynamics(completed={self.current_time()}, "

@@ -157,6 +157,8 @@ namespace bp = boost::python;
 
 void autoconvert_Slice();
 
+#include "releasegil_impl.h"
+
 BOOST_PYTHON_MODULE(_Base){
     register_SireBase_objects();
 
@@ -305,6 +307,8 @@ BOOST_PYTHON_MODULE(_Base){
     bp::implicitly_convertible< SireBase::IntegerArrayProperty, SireBase::PropertyList >();
 
     bp::implicitly_convertible< SireBase::StringArrayProperty, SireBase::PropertyList >();
+
+    register_releasegil();
 
     autoconvert_Slice();
 
