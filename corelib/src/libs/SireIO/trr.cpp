@@ -370,10 +370,7 @@ MoleculeParserPtr TRR::construct(const SireSystem::System &system, const Propert
     return MoleculeParserPtr(TRR(system, map));
 }
 
-/** Write this binary file 'filename'. This will write out only the currently
- *  loadad frame to the file. You need to use 'saveTrajectory' to save
- *  a whole trajectory of frames
- */
+/** Write this binary file 'filename' */
 void TRR::writeToFile(const QString &filename) const
 {
     if (this->nFrames() == 0 or this->nAtoms() == 0)

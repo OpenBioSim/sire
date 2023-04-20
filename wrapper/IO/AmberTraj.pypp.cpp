@@ -11,6 +11,10 @@ namespace bp = boost::python;
 
 #include "SireBase/parallel.h"
 
+#include "SireBase/progressbar.h"
+
+#include "SireBase/releasegil.h"
+
 #include "SireBase/stringproperty.h"
 
 #include "SireBase/timeproperty.h"
@@ -22,6 +26,8 @@ namespace bp = boost::python;
 #include "SireIO/ambertraj.h"
 
 #include "SireIO/errors.h"
+
+#include "SireIO/textfile.h"
 
 #include "SireMol/atomcoords.h"
 
@@ -53,6 +59,10 @@ namespace bp = boost::python;
 
 #include "ambertraj.h"
 
+#include <QFile>
+
+#include <QTextStream>
+
 #include "ambertraj.h"
 
 SireIO::AmberTraj __copy__(const SireIO::AmberTraj &other){ return SireIO::AmberTraj(other); }
@@ -69,7 +79,7 @@ void register_AmberTraj_class(){
         typedef bp::class_< SireIO::AmberTraj, bp::bases< SireIO::MoleculeParser, SireBase::Property > > AmberTraj_exposer_t;
         AmberTraj_exposer_t AmberTraj_exposer = AmberTraj_exposer_t( "AmberTraj", "This class represents an Amber-format trajectory file (ascii)\ncurrently supporting these files from Amber7 to Amber16.\n\nThis file holds either coordinates OR velocities (but not both).\nIt can hold box information, but not time information.\n\nIt holds the coordinates or velocities as a dense block of\nascii numbers. It is described in the amber manual under\nAMBER trajectory (coordinate or velocity) file specification\n\nhttps:ambermd.orgFileFormats.php#trajectory\n", bp::init< >("Constructor") );
         bp::scope AmberTraj_scope( AmberTraj_exposer );
-        AmberTraj_exposer.def( bp::init< QString const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("filename"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by parsing the passed file") );
+        AmberTraj_exposer.def( bp::init< QString const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("filename"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by parsing the data in the passed text lines") );
         AmberTraj_exposer.def( bp::init< QStringList const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("lines"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by parsing the data in the passed text lines") );
         AmberTraj_exposer.def( bp::init< SireSystem::System const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("system"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by extracting the necessary data from the passed System") );
         AmberTraj_exposer.def( bp::init< SireIO::AmberTraj const & >(( bp::arg("other") ), "Copy constructor") );
@@ -110,18 +120,6 @@ void register_AmberTraj_class(){
                 , ( bp::arg("system"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "Return this parser constructed from the passed SireSystem::System" );
-        
-        }
-        { //::SireIO::AmberTraj::coordinates
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberTraj::*coordinates_function_type)(  ) const;
-            coordinates_function_type coordinates_function_value( &::SireIO::AmberTraj::coordinates );
-            
-            AmberTraj_exposer.def( 
-                "coordinates"
-                , coordinates_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed coordinate data" );
         
         }
         { //::SireIO::AmberTraj::formatDescription
@@ -185,6 +183,18 @@ void register_AmberTraj_class(){
                 , "" );
         
         }
+        { //::SireIO::AmberTraj::isTextFile
+        
+            typedef bool ( ::SireIO::AmberTraj::*isTextFile_function_type)(  ) const;
+            isTextFile_function_type isTextFile_function_value( &::SireIO::AmberTraj::isTextFile );
+            
+            AmberTraj_exposer.def( 
+                "isTextFile"
+                , isTextFile_function_value
+                , bp::release_gil_policy()
+                , "This is not a text file that should be cached\n  (it is potentially massive)\n" );
+        
+        }
         { //::SireIO::AmberTraj::nAtoms
         
             typedef int ( ::SireIO::AmberTraj::*nAtoms_function_type)(  ) const;
@@ -224,6 +234,18 @@ void register_AmberTraj_class(){
         
         }
         AmberTraj_exposer.def( bp::self == bp::self );
+        { //::SireIO::AmberTraj::operator[]
+        
+            typedef ::SireIO::AmberTraj ( ::SireIO::AmberTraj::*__getitem___function_type)( int ) const;
+            __getitem___function_type __getitem___function_value( &::SireIO::AmberTraj::operator[] );
+            
+            AmberTraj_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("i") )
+                , "" );
+        
+        }
         { //::SireIO::AmberTraj::parse
         
             typedef ::SireIO::AmberTraj ( *parse_function_type )( ::QString const & );
@@ -235,18 +257,6 @@ void register_AmberTraj_class(){
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
                 , "Parse from the passed file" );
-        
-        }
-        { //::SireIO::AmberTraj::space
-        
-            typedef ::SireVol::SpacePtr ( ::SireIO::AmberTraj::*space_function_type)(  ) const;
-            space_function_type space_function_value( &::SireIO::AmberTraj::space );
-            
-            AmberTraj_exposer.def( 
-                "space"
-                , space_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed simulation box" );
         
         }
         { //::SireIO::AmberTraj::title
@@ -295,6 +305,19 @@ void register_AmberTraj_class(){
                 , what_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireIO::AmberTraj::writeToFile
+        
+            typedef void ( ::SireIO::AmberTraj::*writeToFile_function_type)( ::QString const & ) const;
+            writeToFile_function_type writeToFile_function_value( &::SireIO::AmberTraj::writeToFile );
+            
+            AmberTraj_exposer.def( 
+                "writeToFile"
+                , writeToFile_function_value
+                , ( bp::arg("filename") )
+                , bp::release_gil_policy()
+                , "Write this to the file filename" );
         
         }
         AmberTraj_exposer.staticmethod( "parse" );

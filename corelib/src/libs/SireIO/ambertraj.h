@@ -33,7 +33,11 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireMol/trajectory.h"
+
 #include "SireVol/space.h"
+
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
@@ -45,9 +49,10 @@ namespace SireIO
 SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::AmberTraj &);
 SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::AmberTraj &);
 
+class AmberTrajFile;
+
 namespace SireIO
 {
-
     /** This class represents an Amber-format trajectory file (ascii)
         currently supporting these files from Amber7 to Amber16.
 
@@ -97,6 +102,8 @@ namespace SireIO
         QString formatDescription() const;
         QStringList formatSuffix() const;
 
+        AmberTraj operator[](int i) const;
+
         static AmberTraj parse(const QString &filename);
 
         bool isFrame() const;
@@ -109,9 +116,9 @@ namespace SireIO
 
         int nAtoms() const;
 
-        QVector<SireMaths::Vector> coordinates() const;
+        bool isTextFile() const;
 
-        SireVol::SpacePtr space() const;
+        void writeToFile(const QString &filename) const;
 
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
@@ -122,17 +129,17 @@ namespace SireIO
         /** The title of the file */
         QString ttle;
 
-        /** The number of atoms in the file */
-        qint32 natoms;
+        /** The current frame */
+        SireMol::Frame current_frame;
 
-        /** The number of frames in the file */
-        qint32 nframes;
+        /** The number of frames */
+        qint64 nframes;
 
-        /** The number of values in the file */
-        qint32 nvalues;
+        /** The current frame index */
+        qint64 frame_idx;
 
-        /** Whether or not this has box data */
-        bool has_box_dims;
+        /** Pointer to the underlying file */
+        std::shared_ptr<::AmberTrajFile> f;
     };
 
 } // namespace SireIO

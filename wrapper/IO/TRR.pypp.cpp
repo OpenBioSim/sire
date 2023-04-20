@@ -11,6 +11,10 @@ namespace bp = boost::python;
 
 #include "SireBase/parallel.h"
 
+#include "SireBase/progressbar.h"
+
+#include "SireBase/releasegil.h"
+
 #include "SireBase/stringproperty.h"
 
 #include "SireBase/timeproperty.h"
@@ -50,6 +54,8 @@ namespace bp = boost::python;
 #include "SireVol/periodicbox.h"
 
 #include "SireVol/triclinicbox.h"
+
+#include "tostring.h"
 
 #include "trr.h"
 
@@ -323,7 +329,7 @@ void register_TRR_class(){
                 , writeToFile_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Write this binary file filename" );
         
         }
         TRR_exposer.staticmethod( "parse" );

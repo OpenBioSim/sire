@@ -26,52 +26,65 @@
   *
 \*********************************************/
 
-#ifndef SIREBASE_RELEASEGIL_H
-#define SIREBASE_RELEASEGIL_H
+#ifndef SIREIO_TEXTFILE_H
+#define SIREIO_TEXTFILE_H
 
 #include "sireglobal.h"
+
+#include <boost/noncopyable.hpp>
+
+#include <QFile>
+#include <QTextStream>
+#include <QMutex>
+
 #include <memory>
 
 SIRE_BEGIN_HEADER
 
-namespace SireBase
+namespace SireIO
 {
-    namespace detail
+    /** This is a handle for a text file that is designed to
+     *  make it fast to access in a line-by-line way. The lines
+     *  are cached. There are functions that let you quickly
+     *  skip ahead to a specified line
+     */
+    class TextFile : public boost::noncopyable
     {
-        class ReleaseGILBase;
-    }
+    public:
+        TextFile();
+        TextFile(const QString &filename);
 
-    typedef std::shared_ptr<detail::ReleaseGILBase> GILHandle;
+        ~TextFile();
 
-    SIREBASE_EXPORT GILHandle release_gil();
+        bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
-    namespace detail
-    {
-        /** This is the base class that will be sub-classed in the
-         *  Python wrapper to provide the real code to release
-         *  (and re-aquire) the GIL. We have to do this as
-         *  the C++ libraries DO NOT link directly to Python. Only
-         *  the wrappers link to Python.
-         */
-        class SIREBASE_EXPORT ReleaseGILBase
-        {
-            friend SIREBASE_EXPORT GILHandle SireBase::release_gil();
+        void close();
 
-        public:
-            ReleaseGILBase();
-            virtual ~ReleaseGILBase();
+        QString filename() const;
 
-        protected:
-            static void registerReleaseGIL(ReleaseGILBase *handle);
-            virtual GILHandle releaseGIL() const = 0;
+        qint64 size() const;
 
-        private:
-            /** Pointer to the concrete class that is registered by
-             *  the wrappers
-             */
-            static ReleaseGILBase *handle;
-        };
-    }
+    protected:
+        bool _lkr_open(QIODevice::OpenMode mode);
+        void _lkr_close();
+        qint64 _lkr_size() const;
+
+        /** The name of the file */
+        QString fname;
+
+        /** Mutex to serialise access to this file */
+        QMutex mutex;
+
+        /** Handle to the text file */
+        QFile *f;
+
+        /** The QTextStream used to read the file */
+        QTextStream *ts;
+
+        /** The size of the file, in bytes */
+        qint64 sz;
+    };
+
 }
 
 SIRE_END_HEADER

@@ -51,6 +51,7 @@ set ( SIREIO_HEADERS
       protoms.h
       sdf.h
       supplementary.h
+      textfile.h
       tinker.h
       trajectorymonitor.h
       trr.h
@@ -95,6 +96,7 @@ set ( SIREIO_SOURCES
       protoms.cpp
       sdf.cpp
       supplementary.cpp
+      textfile.cpp
       tinker.cpp
       trajectorymonitor.cpp
       trr.cpp

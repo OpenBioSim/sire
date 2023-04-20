@@ -37,6 +37,7 @@
 #include <boost/noncopyable.hpp>
 
 #include <functional>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 

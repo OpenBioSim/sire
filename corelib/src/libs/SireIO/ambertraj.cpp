@@ -28,6 +28,7 @@
 
 #include "SireIO/ambertraj.h"
 #include "SireIO/amberformat.h"
+#include "SireIO/textfile.h"
 
 #include "SireSystem/system.h"
 
@@ -50,11 +51,16 @@
 #include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
 #include "SireBase/timeproperty.h"
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
 
 #include "SireIO/errors.h"
 #include "SireError/errors.h"
 
 #include "SireStream/shareddatastream.h"
+
+#include <QFile>
+#include <QTextStream>
 
 using namespace SireIO;
 using namespace SireIO::detail;
@@ -67,6 +73,577 @@ using namespace SireUnits;
 using namespace SireUnits::Dimension;
 using namespace SireStream;
 
+static QStringList toLines(const QVector<Vector> &all_coords,
+                           bool uses_parallel)
+{
+    const qint64 nats = all_coords.count();
+    QVector<double> coords(nats * 3, 0.0);
+
+    auto coords_data = coords.data();
+    const auto all_coords_data = all_coords.constData();
+
+    if (uses_parallel)
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nats), [&](const tbb::blocked_range<int> &r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                const Vector &atomcoords = all_coords_data[i];
+                coords_data[(3 * i) + 0] = atomcoords.x();
+                coords_data[(3 * i) + 1] = atomcoords.y();
+                coords_data[(3 * i) + 2] = atomcoords.z();
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nats; ++i)
+        {
+            const Vector &atomcoords = all_coords_data[i];
+            coords_data[(3 * i) + 0] = atomcoords.x();
+            coords_data[(3 * i) + 1] = atomcoords.y();
+            coords_data[(3 * i) + 2] = atomcoords.z();
+        }
+    }
+
+    return writeFloatData(coords, AmberFormat(AmberPrm::FLOAT, 10, 8, 3), 0, false, 'f');
+}
+
+static void writeFrame(QTextStream &ts, const SireMol::Frame &frame, bool uses_parallel)
+{
+}
+
+/** This is a specialisation of TextFile for AmberTraj files */
+class AmberTrajFile : public TextFile
+{
+public:
+    AmberTrajFile() : TextFile(),
+                      start_frame_pos(0), bytes_per_frame(0),
+                      lines_per_frame(0),
+                      nvalues(0), natoms(0),
+                      nframes(0), has_box_dims(false)
+    {
+    }
+
+    AmberTrajFile(const QString &filename)
+        : TextFile(filename),
+          start_frame_pos(0), bytes_per_frame(0),
+          lines_per_frame(0), nvalues(0), natoms(0),
+          nframes(0), has_box_dims(false)
+    {
+    }
+
+    ~AmberTrajFile()
+    {
+    }
+
+    bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly)
+    {
+        QMutexLocker lkr(&mutex);
+        this->_lkr_reset();
+
+        if (not this->_lkr_open(mode))
+            return false;
+
+        if (f == 0 or ts == 0)
+            throw SireError::program_bug(QObject::tr(
+                "The file handle should not be null if the file opened correctly..."));
+
+        if ((mode & QIODevice::ReadOnly) == 0)
+        {
+            // we only want to write, and so this should be an empty file
+            return true;
+        }
+
+        // go to the start of the file...
+        if (not ts->seek(0))
+            throw SireIO::parse_error(QObject::tr(
+                                          "Can't seek to the start of the file?"),
+                                      CODELOC);
+
+        if (ts->atEnd())
+            throw SireIO::parse_error(QObject::tr(
+                                          "An empty file is not a valid AmberTraj! %1")
+                                          .arg(this->filename()),
+                                      CODELOC);
+
+        ttle = ts->readLine().simplified();
+
+        if (ts->atEnd())
+            throw SireIO::parse_error(QObject::tr(
+                                          "There was only the title line in %1. This is not a valid TRAJ file.")
+                                          .arg(this->filename()),
+                                      CODELOC);
+
+        // this is the position of the first frame
+        start_frame_pos = ts->pos();
+
+        // now read in the first frame, trying to work out how big it is...
+        nvalues = 0;
+        natoms = 0;
+        nframes = 0;
+        bytes_per_frame = 0;
+        has_box_dims = false;
+
+        double linevals[8];
+
+        for (int i = 0; i < 8; ++i)
+        {
+            linevals[i] = 0;
+        }
+
+        int nvals_per_line = 0;
+        int nvals_last_line = -1;
+        int nvals_per_frame = 0;
+
+        auto end_of_frame = [&]()
+        {
+            // we must have read in the last line of what can only be
+            // coordinate data for this frame
+            nvals_per_frame += nvals_per_line;
+
+            if (nvals_per_frame % 3 != 0)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "This does not look like a valid Amber Traj file as the "
+                                              "number of values in the frame (%1) is not divisible "
+                                              "by three.")
+                                              .arg(nvals_per_frame),
+                                          CODELOC);
+            }
+
+            if (natoms <= 0)
+            {
+                natoms = nvals_per_frame / 3;
+            }
+            else if (nvals_per_frame / 3 != natoms)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "This does not look like a valid Amber Traj file as the number "
+                                              "of atoms in the first frame (%1) does not equal the number "
+                                              "of atoms in a subsequent frame (%2)")
+                                              .arg(natoms)
+                                              .arg(nvals_per_frame / natoms),
+                                          CODELOC);
+            }
+
+            nvals_per_frame = 0;
+
+            nframes += 1;
+        };
+
+        // we will read the data, using the fact it is laid out in
+        // blocks of 10 F8.3 values, with different blocks for the
+        // atom coordinates (which must be 3 x atoms long) and
+        // then box dimensions (a line of 3 x values long), repeating
+        // for the number of frames, to work out the number of frame,
+        // whether or not there are box dimensions, and the number
+        // of atoms. This is not foolproof - there are edge cases
+        // where we will read this as one big frame of a large number
+        // of atoms, or we will count an atom as being a periodic
+        // box (as we will lean towards interpreting a line with
+        // three values as the box dimensions). In either of these
+        // cases, we can fix the issue when we convert to a System
+
+        lines_per_frame = 0;
+
+        while (not ts->atEnd())
+        {
+            const auto line = ts->readLine();
+            const auto length = line.count();
+
+            lines_per_frame += 1;
+
+            // read each line - this is a 10F8.3 format
+            nvals_per_line = 0;
+            for (int j = 0; j < 10; ++j)
+            {
+                int pos = j * 8;
+
+                bool ok = true;
+                double val = 0;
+
+                if (pos + 8 > length)
+                {
+                    ok = false;
+                }
+                else
+                {
+                    val = line.midRef(pos, 8).toDouble(&ok);
+                }
+
+                if (not ok)
+                {
+                    break;
+                }
+
+                linevals[j] = val;
+                nvals_per_line += 1;
+            }
+
+            nvalues += nvals_per_line;
+
+            if (nvals_per_line == 10)
+            {
+                // we have read in a full set of what can only be coordinate data
+                nvals_per_frame += 10;
+            }
+            else if (nvals_per_line == 3)
+            {
+                // we must have either reached the end of a frame, or are
+                // reading in the periodic box dimensions
+                if (nvals_last_line == 3)
+                {
+                    // this is the edge case where the number of coordinates
+                    // happens to have 3 space on the last line of the frame.
+                    // This line is the periodic box, and the previous line
+                    // is the end of the frame
+                    nvals_per_line = 0;
+                    end_of_frame();
+                    nvals_per_line = 3;
+                    has_box_dims = true;
+
+                    if (natoms == 1)
+                        throw SireIO::parse_error(QObject::tr(
+                                                      "This parser does not support the reading of single-atom "
+                                                      "trajectories in Amber Traj format."),
+                                                  CODELOC);
+
+                    break;
+                }
+                else if (nvals_last_line == 10)
+                {
+                    // this is the edge case where the number of coordinates
+                    // happens to fill the whole line (10 values) and this
+                    // line is the periodic box
+                    nvals_per_line = 0;
+                    end_of_frame();
+                    nvals_per_line = 3;
+                    has_box_dims = true;
+                    break;
+                }
+                else
+                {
+                    // we must have already finished a frame
+                    if (nvals_per_frame != 0)
+                        throw SireIO::parse_error(QObject::tr(
+                                                      "This does not look like a valid Amber Traj file as the "
+                                                      "number of consecutive lines without 10 values looks wrong."),
+                                                  CODELOC);
+
+                    has_box_dims = true;
+                }
+            }
+            else
+            {
+                end_of_frame();
+                break;
+            }
+
+            nvals_last_line = nvals_per_line;
+        }
+
+        // we have now finished reading in the first frame
+        bytes_per_frame = ts->pos() - start_frame_pos;
+
+        // how many frames do we think we have?
+        nframes = (this->_lkr_size() - start_frame_pos) / bytes_per_frame;
+
+        qDebug() << "LOADED" << natoms << nframes;
+        qDebug() << bytes_per_frame << lines_per_frame;
+
+        return true;
+    }
+
+    SireMol::Frame readFrame(int i, bool use_parallel = true) const
+    {
+        AmberTrajFile *nonconst_this = const_cast<AmberTrajFile *>(this);
+
+        QMutexLocker lkr(&(nonconst_this->mutex));
+
+        nonconst_this->_lkr_readFrameIntoBuffer(i);
+
+        QStringList lines = frame_buffer;
+
+        int nvalues_per_frame = 3 * natoms;
+
+        if (has_box_dims)
+            nvalues_per_frame += 3;
+
+        lkr.unlock();
+
+        if (lines.count() != lines_per_frame)
+            throw SireIO::parse_error(QObject::tr(
+                                          "Unexpected number of line for frame %1 from file %2. "
+                                          "Expected %3 lines, but got %4.")
+                                          .arg(i)
+                                          .arg(this->filename())
+                                          .arg(lines_per_frame)
+                                          .arg(lines.count()),
+                                      CODELOC);
+
+        // this is a very simple format - just lots of doubles written
+        // in a 10F8.3 format (not necessarily 10 numbers per line)
+        // We will read them until we get to the specified start value,
+        // and will then try to interpret them based on what we need
+
+        QVector<double> values;
+
+        values.reserve(nvalues_per_frame);
+
+        for (const auto &line : lines)
+        {
+            const auto length = line.count();
+
+            bool line_ok = false;
+
+            for (int j = 0; j < 10; ++j)
+            {
+                int pos = j * 8;
+
+                if (pos + 8 > length)
+                    // nothing left on this line to read
+                    break;
+
+                bool ok = false;
+                double val = line.midRef(pos, 8).toDouble(&ok);
+
+                if (not ok)
+                    // assume the rest of the line is corrupted
+                    break;
+
+                values.append(val);
+
+                // we have read at least one value from this line
+                line_ok = true;
+            }
+
+            if (not line_ok)
+                break;
+        }
+
+        if (values.count() != nvalues_per_frame)
+            throw SireIO::parse_error(QObject::tr(
+                                          "Could not read the expected amount of data (%1) for frame %2 "
+                                          "from the TRAJ file %3. Number of values read was only %4.")
+                                          .arg(nvalues_per_frame)
+                                          .arg(i)
+                                          .arg(this->filename())
+                                          .arg(values.count()),
+                                      CODELOC);
+
+        // ok, we now have the raw values - interpret them as coordinates
+        auto coords = QVector<Vector>(natoms);
+        auto coords_data = coords.data();
+
+        const double *values_data = values.constData();
+
+        for (int i = 0; i < natoms; ++i)
+        {
+            coords_data[i] = Vector(values_data[(3 * i) + 0],
+                                    values_data[(3 * i) + 1],
+                                    values_data[(3 * i) + 2]);
+        }
+
+        if (has_box_dims)
+        {
+            Vector box_dims(values_data[(3 * natoms) + 0],
+                            values_data[(3 * natoms) + 1],
+                            values_data[(3 * natoms) + 2]);
+
+            if (box_dims.isZero())
+            {
+                // this is the infinite cartesian space
+                return Frame(coords, Cartesian(), SireUnits::Dimension::Time(0));
+            }
+            else
+            {
+                return Frame(coords, PeriodicBox(box_dims), SireUnits::Dimension::Time(0));
+            }
+        }
+        else
+        {
+            return Frame(coords, Cartesian(), SireUnits::Dimension::Time(0));
+        }
+    }
+
+    void writeFrame(const SireMol::Frame &frame, bool use_parallel = true)
+    {
+        // convert the frame into a set of lines that are in TRAJ format
+        auto lines = toLines(frame.coordinates(), use_parallel);
+
+        QVector<double> box_data;
+
+        if (frame.space().isA<Cartesian>())
+        {
+            box_data = QVector<double>(3, 0.0);
+        }
+        else if (frame.space().isA<PeriodicBox>())
+        {
+            const auto box = frame.space().asA<PeriodicBox>().dimensions();
+
+            box_data = QVector<double>(3);
+            box_data[0] = box.x();
+            box_data[1] = box.y();
+            box_data[2] = box.z();
+        }
+        else
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "You can only write PeriodicBox or Cartesian space information "
+                                                    "to a AmberTraj file. You cannot write a %1.")
+                                                    .arg(frame.space().toString()),
+                                                CODELOC);
+        }
+
+        lines += writeFloatData(box_data, AmberFormat(AmberPrm::FLOAT, 10, 8, 3), 0, false, 'f');
+
+        QMutexLocker lkr(&mutex);
+        frame_buffer = lines;
+        this->_lkr_writeBufferToFile();
+    }
+
+    int nAtoms() const
+    {
+        return natoms;
+    }
+
+    int nFrames() const
+    {
+        return nframes;
+    }
+
+private:
+    void _lkr_reset()
+    {
+        frame_buffer.clear();
+
+        natoms = 0;
+        nframes = 0;
+
+        bytes_per_frame = 0;
+
+        ttle = QString();
+
+        seek_frame.clear();
+    }
+
+    void _lkr_reindexFrames()
+    {
+    }
+
+    void _lkr_readFrameIntoBuffer(int i)
+    {
+        if (i < 0 or i >= nframes)
+        {
+            throw SireError::invalid_index(QObject::tr(
+                                               "Cannot read frame %1 as the number of frames is %2.")
+                                               .arg(i)
+                                               .arg(nframes),
+                                           CODELOC);
+        }
+
+        if (f == 0)
+        {
+            throw SireError::io_error(QObject::tr(
+                                          "Unaable to read frame %1 for file %2 as the file is not open?")
+                                          .arg(i)
+                                          .arg(this->filename()),
+                                      CODELOC);
+        }
+
+        if (ts == 0)
+            ts = new QTextStream(f);
+
+        int start_bytes = 0;
+
+        if (bytes_per_frame > 0)
+        {
+            // there are the same number of bytes per frame,
+            // so easy to calculate the seek position
+            start_bytes = start_frame_pos + (i * bytes_per_frame);
+        }
+        else
+        {
+            start_bytes = seek_frame.at(i);
+        }
+
+        if (not ts->seek(start_bytes))
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Unable to seek to position %1 in TRAJ file %2. "
+                                          "File size is %3.")
+                                          .arg(this->filename())
+                                          .arg(start_bytes)
+                                          .arg(f->size()),
+                                      CODELOC);
+        }
+
+        // now read in the required number of lines to the buffer
+        frame_buffer.clear();
+
+        for (int j = 0; j < lines_per_frame; ++j)
+        {
+            if (ts->atEnd())
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unable to read line %1 of frame %2 from TRAJ file %3.")
+                                              .arg(j)
+                                              .arg(i)
+                                              .arg(this->filename()),
+                                          CODELOC);
+
+            frame_buffer.append(ts->readLine());
+        }
+    }
+
+    void _lkr_writeBufferToFile()
+    {
+        for (const auto &line : frame_buffer)
+        {
+            *ts << line << "\n";
+        }
+    }
+
+    /** The title of this file */
+    QString ttle;
+
+    /** The current frame that has been read into the buffer */
+    QStringList frame_buffer;
+
+    /** The seek position of each frame - this is only
+     *  used if the frames have different sizes
+     */
+    QList<qint64> seek_frame;
+
+    /** The position in bytes in the file of the first frame */
+    qint64 start_frame_pos;
+
+    /** The size, in bytes, of each frame. This is 0
+     *  if each frame has a different number of bytes
+     */
+    qint64 bytes_per_frame;
+
+    /** The number of lines for each frame. The format requires
+     *  that this is a constant
+     */
+    qint64 lines_per_frame;
+
+    /** The number of values in the file in total */
+    qint32 nvalues;
+
+    /** The number of atoms */
+    qint64 natoms;
+
+    /** The number of frames */
+    qint64 nframes;
+
+    /** Whether or not this has box data */
+    bool has_box_dims;
+};
+
+///////
+///////
+///////
+
 static const RegisterMetaType<AmberTraj> r_traj;
 const RegisterParser<AmberTraj> register_traj;
 
@@ -76,7 +653,8 @@ QDataStream &operator<<(QDataStream &ds, const AmberTraj &traj)
 
     SharedDataStream sds(ds);
 
-    sds << traj.ttle << traj.natoms << traj.nframes << traj.nvalues << traj.has_box_dims
+    sds << traj.current_frame
+        << traj.nframes << traj.frame_idx
         << static_cast<const MoleculeParser &>(traj);
 
     return ds;
@@ -90,7 +668,7 @@ QDataStream &operator>>(QDataStream &ds, AmberTraj &traj)
     {
         SharedDataStream sds(ds);
 
-        sds >> traj.ttle >> traj.natoms >> traj.nframes >> traj.nvalues >> traj.has_box_dims >> static_cast<MoleculeParser &>(traj);
+        sds >> traj.current_frame >> traj.nframes >> traj.frame_idx >> static_cast<MoleculeParser &>(traj);
     }
     else
         throw version_error(v, "1", r_traj, CODELOC);
@@ -101,7 +679,7 @@ QDataStream &operator>>(QDataStream &ds, AmberTraj &traj)
 /** Constructor */
 AmberTraj::AmberTraj()
     : ConcreteProperty<AmberTraj, MoleculeParser>(),
-      natoms(0), nframes(0), nvalues(0), has_box_dims(false)
+      nframes(0), frame_idx(0)
 {
 }
 
@@ -126,386 +704,68 @@ QString AmberTraj::formatDescription() const
 }
 
 /** Scan the file to work out how many values there are,
- *  and to extrat the title
+ *  and to extract the title
  */
 void AmberTraj::parse()
 {
-    const auto &l = lines();
+    f.reset(new AmberTrajFile(this->filename()));
 
-    if (l.count() < 2)
-        // there is nothing in the file
-        return;
-
-    // read in the title FORMAT(20A4)
-    ttle = l[0].simplified();
-
-    nvalues = 0;
-    natoms = 0;
-    nframes = 0;
-    has_box_dims = false;
-
-    double linevals[8];
-
-    for (int i = 0; i < 8; ++i)
+    try
     {
-        linevals[i] = 0;
-    }
-
-    int nvals_per_line = 0;
-    int nvals_last_line = -1;
-    int nvals_per_frame = 0;
-
-    auto end_of_frame = [&]()
-    {
-        // we must have read in the last line of what can only be
-        // coordinate data for this frame
-        nvals_per_frame += nvals_per_line;
-
-        if (nvals_per_frame % 3 != 0)
+        if (not f->open(QIODevice::ReadOnly))
         {
             throw SireIO::parse_error(QObject::tr(
-                                          "This does not look like a valid Amber Traj file as the "
-                                          "number of values in the frame (%1) is not divisible "
-                                          "by three.")
-                                          .arg(nvals_per_frame),
+                                          "Failed to open Amber TRAJ %1")
+                                          .arg(this->filename()),
                                       CODELOC);
         }
 
-        if (natoms <= 0)
-        {
-            natoms = nvals_per_frame / 3;
-        }
-        else if (nvals_per_frame / 3 != natoms)
-        {
-            throw SireIO::parse_error(QObject::tr(
-                                          "This does not look like a valid Amber Traj file as the number "
-                                          "of atoms in the first frame (%1) does not equal the number "
-                                          "of atoms in a subsequent frame (%2)")
-                                          .arg(natoms)
-                                          .arg(nvals_per_frame / natoms),
-                                      CODELOC);
-        }
+        nframes = f->nFrames();
+        current_frame = f->readFrame(0, this->usesParallel());
+        frame_idx = 0;
 
-        nvals_per_frame = 0;
-
-        nframes += 1;
-    };
-
-    // we will read the data, using the fact it is laid out in
-    // blocks of 10 F8.3 values, with different blocks for the
-    // atom coordinates (which must be 3 x atoms long) and
-    // then box dimensions (a line of 3 x values long), repeating
-    // for the number of frames, to work out the number of frame,
-    // whether or not there are box dimensions, and the number
-    // of atoms. This is not foolproof - there are edge cases
-    // where we will read this as one big frame of a large number
-    // of atoms, or we will count an atom as being a periodic
-    // box (as we will lean towards interpreting a line with
-    // three values as the box dimensions). In either of these
-    // cases, we can fix the issue when we convert to a System
-
-    for (int i = 1; i < l.count(); ++i)
-    {
-        const auto &line = l[i];
-        const auto length = line.count();
-
-        // read each line - this is a 10F8.3 format
-        nvals_per_line = 0;
-        for (int j = 0; j < 10; ++j)
-        {
-            int pos = j * 8;
-
-            bool ok = true;
-            double val = 0;
-
-            if (pos + 8 > length)
-            {
-                ok = false;
-            }
-            else
-            {
-                val = line.midRef(pos, 8).toDouble(&ok);
-            }
-
-            if (not ok)
-            {
-                break;
-            }
-
-            linevals[j] = val;
-            nvals_per_line += 1;
-        }
-
-        nvalues += nvals_per_line;
-
-        if (nvals_per_line == 10)
-        {
-            // we have read in a full set of what can only be coordinate data
-            nvals_per_frame += 10;
-        }
-        else if (nvals_per_line == 3)
-        {
-            // we must have either reached the end of a frame, or are
-            // reading in the periodic box dimensions
-            if (nvals_last_line == 3)
-            {
-                // this is the edge case where the number of coordinates
-                // happens to have 3 space on the last line of the frame.
-                // This line is the periodic box, and the previous line
-                // is the end of the frame
-                nvals_per_line = 0;
-                end_of_frame();
-                nvals_per_line = 3;
-                has_box_dims = true;
-
-                if (natoms == 1)
-                    throw SireIO::parse_error(QObject::tr(
-                                                  "This parser does not support the reading of single-atom "
-                                                  "trajectories in Amber Traj format."),
-                                              CODELOC);
-            }
-            else if (nvals_last_line == 10)
-            {
-                // this is the edge case where the number of coordinates
-                // happens to fill the whole line (10 values) and this
-                // line is the periodic box
-                nvals_per_line = 0;
-                end_of_frame();
-                nvals_per_line = 3;
-                has_box_dims = true;
-            }
-            else
-            {
-                // we must have already finished a frame
-                if (nvals_per_frame != 0)
-                    throw SireIO::parse_error(QObject::tr(
-                                                  "This does not look like a valid Amber Traj file as the "
-                                                  "number of consecutive lines without 10 values looks wrong."),
-                                              CODELOC);
-
-                has_box_dims = true;
-            }
-        }
-        else
-        {
-            end_of_frame();
-        }
-
-        nvals_last_line = nvals_per_line;
+        this->setScore(f->nFrames() * current_frame.nAtoms());
     }
-
-    this->setScore(natoms * nframes);
+    catch (...)
+    {
+        this->setScore(0);
+        f.reset();
+        throw;
+    }
 }
 
 /** Construct by parsing the passed file */
-AmberTraj::AmberTraj(const QString &filename, const PropertyMap &map)
-    : ConcreteProperty<AmberTraj, MoleculeParser>(filename, map),
-      natoms(0), nframes(0), nvalues(0), has_box_dims(false)
+AmberTraj::AmberTraj(const QString &f, const PropertyMap &map)
+    : ConcreteProperty<AmberTraj, MoleculeParser>(map),
+      nframes(0), frame_idx(-1)
 {
+    this->setFilename(f);
     this->parse();
 }
 
 /** Construct by parsing the data in the passed text lines */
 AmberTraj::AmberTraj(const QStringList &lines, const PropertyMap &map)
-    : ConcreteProperty<AmberTraj, MoleculeParser>(lines, map),
-      natoms(0), nframes(0), nvalues(0), has_box_dims(false)
+    : ConcreteProperty<AmberTraj, MoleculeParser>(map),
+      nframes(0), frame_idx(-1)
 {
-    this->parse();
-}
-
-static QStringList toLines(const QVector<QVector<Vector>> &all_coords,
-                           QStringList *errors,
-                           bool uses_parallel)
-{
-    // now find the start index of each molecule
-    QVector<qint64> start_idx;
-    start_idx.reserve(all_coords.count());
-
-    qint64 last_idx = 0;
-
-    for (const auto &molcoords : all_coords)
-    {
-        start_idx.append(last_idx);
-        last_idx += 3 * molcoords.count();
-    }
-
-    const qint64 nats = last_idx / 3;
-    QVector<double> coords(nats * 3, 0.0);
-
-    if (uses_parallel)
-    {
-        tbb::parallel_for(tbb::blocked_range<int>(0, all_coords.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                const qint64 idx = start_idx.constData()[i];
-                const auto molcoords = all_coords.constData()[i];
-
-                for (int j = 0; j < molcoords.count(); ++j)
-                {
-                    const Vector &atomcoords = molcoords[j];
-                    coords[idx + 3 * j + 0] = atomcoords.x();
-                    coords[idx + 3 * j + 1] = atomcoords.y();
-                    coords[idx + 3 * j + 2] = atomcoords.z();
-                }
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < all_coords.count(); ++i)
-        {
-            const qint64 idx = start_idx.constData()[i];
-            const auto molcoords = all_coords.constData()[i];
-
-            for (int j = 0; j < molcoords.count(); ++j)
-            {
-                const Vector &atomcoords = molcoords[j];
-                coords[idx + 3 * j + 0] = atomcoords.x();
-                coords[idx + 3 * j + 1] = atomcoords.y();
-                coords[idx + 3 * j + 2] = atomcoords.z();
-            }
-        }
-    }
-
-    QStringList lines = writeFloatData(coords, AmberFormat(AmberPrm::FLOAT, 10, 8, 3), errors, false, 'f');
-
-    return lines;
-}
-
-static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &coords_property)
-{
-    if (not mol.hasProperty(coords_property))
-    {
-        return QVector<Vector>();
-    }
-
-    QVector<Vector> coords(mol.nAtoms());
-
-    const auto molcoords = mol.property(coords_property).asA<AtomCoords>();
-
-    const auto molinfo = mol.info();
-
-    for (int i = 0; i < mol.nAtoms(); ++i)
-    {
-        // coords are already in angstroms :-)
-        coords[i] = molcoords.at(molinfo.cgAtomIdx(AtomIdx(i)));
-    }
-
-    return coords;
+    throw SireIO::parse_error(QObject::tr("You cannot create a Amber Traj file from a set of text lines!"),
+                              CODELOC);
 }
 
 /** Construct by extracting the necessary data from the passed System */
 AmberTraj::AmberTraj(const System &system, const PropertyMap &map)
-    : ConcreteProperty<AmberTraj, MoleculeParser>(),
-      natoms(0), nframes(0), nvalues(0), has_box_dims(false)
+    : ConcreteProperty<AmberTraj, MoleculeParser>(system, map),
+      nframes(1), frame_idx(0)
 {
-    // get the MolNums of each molecule in the System - this returns the
-    // numbers in MolIdx order
-    const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
-
-    if (molnums.isEmpty())
-    {
-        // no molecules in the system
-        this->operator=(AmberTraj());
-        return;
-    }
-
-    // get the coordinates (and velocities if available) for each molecule in the system
-    QVector<QVector<Vector>> all_coords(molnums.count());
-
-    const auto coords_property = map["coordinates"];
-
-    if (usesParallel())
-    {
-        tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                const auto mol = system[molnums[i]].molecule();
-                all_coords[i] = ::getCoordinates(mol, coords_property);
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < molnums.count(); ++i)
-        {
-            const auto mol = system[molnums[i]].molecule();
-
-            all_coords[i] = ::getCoordinates(mol, coords_property);
-        }
-    }
-
-    QStringList errors;
-
-    // extract the space of the system
-    SpacePtr space;
-
-    try
-    {
-        space = system.property(map["space"]).asA<Space>();
-    }
-    catch (...)
-    {
-    }
-
-    // now convert these into text lines that can be written as the file
-    QStringList lines = ::toLines(all_coords, &errors, usesParallel());
-
-    if (not errors.isEmpty())
-    {
-        throw SireIO::parse_error(
-            QObject::tr("Errors converting the system to a Amber Traj format...\n%1").arg(errors.join("\n")), CODELOC);
-    }
-
-    // we don't need the coords and vels data any more, so free the memory
-    all_coords.clear();
-
-    lines.prepend(system.name().value());
-
-    // finally add on the box dimensions and angles
-    if (space.read().isA<PeriodicBox>())
-    {
-        Vector dims = space.read().asA<PeriodicBox>().dimensions();
-
-        QVector<double> boxdims(3);
-        boxdims[0] = dims.x();
-        boxdims[1] = dims.y();
-        boxdims[2] = dims.z();
-
-        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FLOAT, 3, 8, 3), &errors, false, 'f');
-    }
-    else if (space.read().isA<Cartesian>())
-    {
-        // write an infinite box as three zero-length box dimensions
-        QVector<double> boxdims(3, 0.0);
-        lines += writeFloatData(boxdims, AmberFormat(AmberPrm::FLOAT, 3, 8, 3), &errors, false, 'f');
-    }
-    else
-    {
-        throw SireIO::parse_error(QObject::tr(
-                                      "The Amber Traj format only supports the infinite cartesian or standard periodic box "
-                                      "spaces. It doesn't support writing a system in the space %1")
-                                      .arg(space.read().toString()),
-                                  CODELOC);
-    }
-
-    if (not errors.isEmpty())
-    {
-        throw SireIO::parse_error(
-            QObject::tr("Errors converting the system to a Amber Rst7 format...\n%1").arg(errors.join("\n")), CODELOC);
-    }
-
-    // now generate this object by re-reading these lines
-    AmberTraj parsed(lines, map);
-
-    this->operator=(parsed);
+    current_frame = MoleculeParser::createFrame(system, map);
 }
 
 /** Copy constructor */
 AmberTraj::AmberTraj(const AmberTraj &other)
     : ConcreteProperty<AmberTraj, MoleculeParser>(other),
-      ttle(other.ttle), natoms(other.natoms), nframes(other.nframes),
-      nvalues(other.nvalues), has_box_dims(other.has_box_dims)
+      ttle(other.ttle), current_frame(other.current_frame),
+      nframes(other.nframes), frame_idx(other.frame_idx),
+      f(other.f)
 {
 }
 
@@ -519,10 +779,10 @@ AmberTraj &AmberTraj::operator=(const AmberTraj &other)
     if (this != &other)
     {
         ttle = other.ttle;
-        natoms = other.natoms;
+        current_frame = other.current_frame;
         nframes = other.nframes;
-        nvalues = other.nvalues;
-        has_box_dims = other.has_box_dims;
+        frame_idx = other.frame_idx;
+        f = other.f;
 
         MoleculeParser::operator=(other);
     }
@@ -564,128 +824,32 @@ Frame AmberTraj::getFrame(int frame) const
 {
     frame = SireID::Index(frame).map(this->nFrames());
 
-    if (natoms <= 0)
-        return Frame();
-
     if (frame < 0)
         frame = 0;
 
-    // sanity check what we inferred when parsing
-    qint32 nvalues_per_frame = natoms * 3;
+    if (frame == frame_idx)
+        return current_frame;
 
-    if (has_box_dims)
+    if (f.get() == 0)
     {
-        nvalues_per_frame += 3;
+        throw SireError::file_error(QObject::tr(
+                                        "Somehow we don't have access to the underlying TRAJ text file?"),
+                                    CODELOC);
     }
 
-    if (nframes * nvalues_per_frame != nvalues)
-    {
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The number of values in this trajectory (%1) is not "
-                                                "compatible with the specified number of atoms (%2) and "
-                                                "number of frames (%3).")
-                                                .arg(nvalues)
-                                                .arg(natoms)
-                                                .arg(nframes),
-                                            CODELOC);
-    }
+    return f->readFrame(frame, this->usesParallel());
+}
 
-    qint32 start_idx = nvalues_per_frame * frame;
-    qint32 end_idx = start_idx + nvalues_per_frame;
+AmberTraj AmberTraj::operator[](int i) const
+{
+    i = SireID::Index(i).map(this->nFrames());
 
-    if (end_idx > nvalues)
-        throw SireError::invalid_index(QObject::tr(
-                                           "It is not possible to read frame %1 as the total number of "
-                                           "frames is only %2.")
-                                           .arg(frame)
-                                           .arg(nframes),
-                                       CODELOC);
+    AmberTraj ret(*this);
 
-    const auto &l = lines();
+    ret.current_frame = this->getFrame(i);
+    ret.frame_idx = i;
 
-    // this is a very simple format - just lots of doubles written
-    // in a 10F8.3 format (not necessarily 10 numbers per line)
-    // We will read them until we get to the specified start value,
-    // and will then try to interpret them based on what we need
-
-    int idx = 0;
-
-    QVector<double> values;
-    values.reserve(end_idx - start_idx);
-
-    for (int i = 1; i < l.count(); ++i)
-    {
-        const auto &line = l[i];
-        const auto length = line.count();
-
-        bool line_ok = false;
-
-        for (int j = 0; j < 10; ++j)
-        {
-            int pos = j * 8;
-
-            if (pos + 8 > length)
-                // nothing left on this line to read
-                break;
-
-            bool ok = false;
-            double val = line.midRef(pos, 8).toDouble(&ok);
-
-            if (not ok)
-                // assume the rest of the line is corrupted
-                break;
-
-            if (idx >= start_idx and idx < end_idx)
-                values.append(val);
-
-            idx += 1;
-            if (idx >= end_idx)
-            {
-                line_ok = false;
-                break;
-            }
-
-            // we have read at least one value from this line
-            line_ok = true;
-        }
-
-        if (not line_ok)
-            break;
-    }
-
-    // ok, we now have the raw values - interpret them as coordinates
-    auto coords = QVector<Vector>(natoms);
-    auto coords_data = coords.data();
-
-    const double *values_data = values.constData();
-
-    for (int i = 0; i < natoms; ++i)
-    {
-        coords_data[i] = Vector(values_data[(3 * i) + 0],
-                                values_data[(3 * i) + 1],
-                                values_data[(3 * i) + 2]);
-    }
-
-    if (has_box_dims)
-    {
-        Vector box_dims(values_data[(3 * natoms) + 0],
-                        values_data[(3 * natoms) + 1],
-                        values_data[(3 * natoms) + 2]);
-
-        if (box_dims.isZero())
-        {
-            // this is the infinite cartesian space
-            return Frame(coords, Cartesian(), SireUnits::Dimension::Time(0));
-        }
-        else
-        {
-            return Frame(coords, PeriodicBox(box_dims), SireUnits::Dimension::Time(0));
-        }
-    }
-    else
-    {
-        return Frame(coords, Cartesian(), SireUnits::Dimension::Time(0));
-    }
+    return ret;
 }
 
 QString AmberTraj::toString() const
@@ -712,103 +876,7 @@ AmberTraj AmberTraj::parse(const QString &filename)
 /** Internal function used to add the data from this parser into the passed System */
 void AmberTraj::addToSystem(System &system, const PropertyMap &map) const
 {
-    // first, we are going to work with the group of all molecules, which should
-    // be called "all". We have to assume that the molecules are ordered in "all"
-    // in the same order as they are in this restart file, with the data
-    // in MolIdx/AtomIdx order (this should be the default for all parsers!)
-    MoleculeGroup allmols = system[MGName("all")];
-
-    const int nmols = allmols.nMolecules();
-
-    QVector<int> atom_pointers(nmols + 1, -1);
-
-    int natoms = 0;
-
-    for (int i = 0; i < nmols; ++i)
-    {
-        atom_pointers[i] = natoms;
-        const int nats = allmols[MolIdx(i)].data().info().nAtoms();
-        natoms += nats;
-    }
-
-    atom_pointers[nmols] = natoms;
-
-    Frame frame = this->getFrame(0);
-
-    if (natoms != frame.nAtoms())
-    {
-        // disagreement caused by us inferring the wrong number of atoms
-        // when reading the trajectory. We will need to infer the right
-        // number at a higher level...
-        throw SireIO::parse_error(QObject::tr("Incompatibility between the files, as this trajectory file contains data "
-                                              "for %1 atom(s), while the other file(s) have created a system with "
-                                              "%2 atom(s)")
-                                      .arg(frame.nAtoms())
-                                      .arg(natoms),
-                                  CODELOC);
-    }
-
-    // next, copy the coordinates into the molecules
-    QVector<Molecule> mols(nmols);
-    Molecule *mols_array = mols.data();
-    const Vector *coords_array = frame.coordinates().constData();
-
-    const PropertyName coords_property = map["coordinates"];
-
-    auto add_coords = [&](int i)
-    {
-        const int atom_start_idx = atom_pointers.constData()[i];
-        auto mol = system[MolIdx(i)].molecule();
-        const auto molinfo = mol.data().info();
-
-        // create space for the coordinates
-        auto coords = QVector<QVector<Vector>>(molinfo.nCutGroups());
-
-        for (int j = 0; j < molinfo.nCutGroups(); ++j)
-        {
-            coords[j] = QVector<Vector>(molinfo.nAtoms(CGIdx(j)));
-        }
-
-        for (int j = 0; j < mol.nAtoms(); ++j)
-        {
-            auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
-
-            const int atom_idx = atom_start_idx + j;
-
-            coords[cgatomidx.cutGroup()][cgatomidx.atom()] = coords_array[atom_idx];
-        }
-
-        mols_array[i] = mol.edit().setProperty(coords_property, AtomCoords(CoordGroupArray(coords))).commit();
-    };
-
-    if (usesParallel())
-    {
-        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
-                          {
-            for (int i = r.begin(); i < r.end(); ++i)
-            {
-                add_coords(i);
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < nmols; ++i)
-        {
-            add_coords(i);
-        }
-    }
-
-    system.update(Molecules(mols));
-
-    PropertyName space_property = map["space"];
-    if (space_property.hasValue())
-    {
-        system.setProperty("space", space_property.value());
-    }
-    else
-    {
-        system.setProperty(space_property.source(), frame.space());
-    }
+    MoleculeParser::copyFromFrame(current_frame, system, map);
 
     // update the System fileformat property to record that it includes
     // data from this file format
@@ -844,19 +912,7 @@ QString AmberTraj::title() const
 /** Return the number of atoms whose coordinates are contained in this restart file */
 int AmberTraj::nAtoms() const
 {
-    return natoms;
-}
-
-/** Return the parsed coordinate data */
-QVector<SireMaths::Vector> AmberTraj::coordinates() const
-{
-    return this->getFrame(0).coordinates();
-}
-
-/** Return the parsed simulation box */
-SireVol::SpacePtr AmberTraj::space() const
-{
-    return this->getFrame(0).space();
+    return current_frame.nAtoms();
 }
 
 /** Return this parser constructed from the passed filename */
@@ -878,4 +934,55 @@ MoleculeParserPtr AmberTraj::construct(const SireSystem::System &system, const P
 {
     // don't construct from a pointer as it could leak
     return MoleculeParserPtr(AmberTraj(system, map));
+}
+
+/** This is not a text file that should be cached
+ *  (it is potentially massive)
+ */
+bool AmberTraj::isTextFile() const
+{
+    return false;
+}
+
+/** Write this to the file 'filename' */
+void AmberTraj::writeToFile(const QString &filename) const
+{
+    if (this->nFrames() == 0 or this->nAtoms() == 0)
+        return;
+
+    qDebug() << "AmberTraj::writeToFile" << filename;
+
+    auto gil = SireBase::release_gil();
+
+    AmberTrajFile outfile(filename);
+
+    if (not outfile.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        throw SireError::file_error(QObject::tr(
+                                        "Could not open %1 to write the Amber TRAJ file.")
+                                        .arg(filename),
+                                    CODELOC);
+
+    if (this->writingTrajectory())
+    {
+        const auto frames = this->framesToWrite();
+
+        ProgressBar bar(frames.count());
+
+        bar = bar.enter();
+
+        for (int i = 0; i < frames.count(); ++i)
+        {
+            const auto frame = this->createFrame(frames[i]);
+            outfile.writeFrame(frame, usesParallel());
+            bar.setProgress(i + 1);
+        }
+
+        bar.exit();
+    }
+    else
+    {
+        outfile.writeFrame(current_frame, usesParallel());
+    }
+
+    outfile.close();
 }

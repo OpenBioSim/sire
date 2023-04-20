@@ -381,8 +381,39 @@ int ProgressBar::barSize() const
     return std::max(20, 50 - progress_text.count());
 }
 
+void simple_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
+{
+    if (p.isDeterministic())
+    {
+        bar.reset(new indicators::ProgressBar(
+            PostfixText{p.text()},
+            BarWidth{p.barSize()},
+            Start{"["},
+            Fill{"="},
+            Lead{">"},
+            Remainder{" "},
+            End{"]"},
+            ShowElapsedTime{p.showTime()},
+            ShowRemainingTime{p.showTime()}));
+    }
+    else
+    {
+        spinner.reset(new indicators::IndeterminateProgressBar(
+            PostfixText{p.text()},
+            BarWidth{10},
+            Start{"["},
+            Fill{" "},
+            Lead{"<=>"},
+            End{"]"}));
+    }
+}
+
 void jupyter_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
 {
+#ifdef Q_OS_WIN
+    // windows can't handle unicode on its console...
+    simple_theme(p, bar, spinner);
+#else
     if (p.isDeterministic())
     {
         bar.reset(new indicators::ProgressBar(
@@ -406,10 +437,15 @@ void jupyter_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinne
             Lead{"◀■▶"},
             End{" "}));
     }
+#endif
 }
 
 void color_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
 {
+#ifdef Q_OS_WIN
+    // windows can't handle unicode on its console...
+    simple_theme(p, bar, spinner);
+#else
     if (p.isDeterministic())
     {
         bar.reset(new indicators::ProgressBar(
@@ -436,37 +472,7 @@ void color_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
             ForegroundColor{Color::green},
             FontStyles{std::vector<FontStyle>{FontStyle::bold}}));
     }
-}
-
-void simple_theme(const ProgressBar &p, ProgressBarPtr &bar, SpinnerPtr &spinner)
-{
-    if (p.isDeterministic())
-    {
-        bar.reset(new indicators::ProgressBar(
-            PostfixText{p.text()},
-            BarWidth{p.barSize()},
-            Start{"["},
-            Fill{"="},
-            Lead{">"},
-            Remainder{" "},
-            End{"]"},
-            ForegroundColor{Color::white},
-            ShowElapsedTime{p.showTime()},
-            ShowRemainingTime{p.showTime()},
-            FontStyles{std::vector<FontStyle>{FontStyle::bold}}));
-    }
-    else
-    {
-        spinner.reset(new indicators::IndeterminateProgressBar(
-            PostfixText{p.text()},
-            BarWidth{10},
-            Start{"["},
-            Fill{" "},
-            Lead{"<=>"},
-            End{"]"},
-            ForegroundColor{Color::white},
-            FontStyles{std::vector<FontStyle>{FontStyle::bold}}));
-    }
+#endif
 }
 
 ProgressBar ProgressBar::enter() const
