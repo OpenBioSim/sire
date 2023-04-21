@@ -108,10 +108,6 @@ static QStringList toLines(const QVector<Vector> &all_coords,
     return writeFloatData(coords, AmberFormat(AmberPrm::FLOAT, 10, 8, 3), 0, false, 'f');
 }
 
-static void writeFrame(QTextStream &ts, const SireMol::Frame &frame, bool uses_parallel)
-{
-}
-
 /** This is a specialisation of TextFile for AmberTraj files */
 class AmberTrajFile : public TextFile
 {
@@ -246,10 +242,16 @@ public:
 
         lines_per_frame = 0;
 
+        int nread_bytes = 0;
+        int end_frame_pos = -1;
+
+        bool check_one_more_line = false;
+
         while (not ts->atEnd())
         {
             const auto line = ts->readLine();
-            const auto length = line.count();
+            const auto length = line.count() + 1; // + 1 as need to include the newline ;-)
+            nread_bytes += length;
 
             lines_per_frame += 1;
 
@@ -285,6 +287,28 @@ public:
             if (nvals_per_line == 10)
             {
                 // we have read in a full set of what can only be coordinate data
+                if (nframes > 0)
+                {
+                    // but this is the start of the next frame
+                    nread_bytes -= length;
+                    lines_per_frame -= 1;
+                    end_frame_pos = ts->pos() - length;
+                    break;
+                }
+                else if (check_one_more_line)
+                {
+                    // this was either coordinates followed by space,
+                    // or just a block of coordinates. We will assume there
+                    // is a space
+                    nvals_per_line = -3;
+                    end_of_frame();
+                    has_box_dims = true;
+                    nread_bytes -= length;
+                    lines_per_frame -= 1;
+                    end_frame_pos = ts->pos() - length;
+                    break;
+                }
+
                 nvals_per_frame += 10;
             }
             else if (nvals_per_line == 3)
@@ -308,18 +332,19 @@ public:
                                                       "trajectories in Amber Traj format."),
                                                   CODELOC);
 
+                    end_frame_pos = ts->pos();
                     break;
                 }
                 else if (nvals_last_line == 10)
                 {
                     // this is the edge case where the number of coordinates
                     // happens to fill the whole line (10 values) and this
-                    // line is the periodic box
-                    nvals_per_line = 0;
-                    end_of_frame();
-                    nvals_per_line = 3;
-                    has_box_dims = true;
-                    break;
+                    // line is the periodic box, OR the end of the line.
+
+                    // We will only be able to tell if the next line
+                    // has 3 or 10 values...
+                    check_one_more_line = true;
+                    nvals_per_frame += 3;
                 }
                 else
                 {
@@ -331,25 +356,65 @@ public:
                                                   CODELOC);
 
                     has_box_dims = true;
+                    end_frame_pos = ts->pos();
+                    break;
                 }
             }
             else
             {
+                if (nframes > 0)
+                {
+                    // this is the next frame for a small system!
+                    nread_bytes -= length;
+                    lines_per_frame -= 1;
+                    break;
+                }
+                else if (check_one_more_line)
+                {
+                    nvals_per_frame = -3;
+                    nread_bytes -= length;
+                    lines_per_frame -= 1;
+                    end_of_frame();
+                    end_frame_pos = ts->pos() - length;
+                    break;
+                }
+
                 end_of_frame();
-                break;
+                // we may need to read the space from the next line...
             }
 
             nvals_last_line = nvals_per_line;
         }
 
         // we have now finished reading in the first frame
-        bytes_per_frame = ts->pos() - start_frame_pos;
+        bytes_per_frame = end_frame_pos - start_frame_pos;
+
+        if (nread_bytes != bytes_per_frame)
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Disagreement over the number of read bytes... %1 vs %2. "
+                                          "This indicates a program bug or IO error.")
+                                          .arg(nread_bytes)
+                                          .arg(bytes_per_frame),
+                                      CODELOC);
+        }
 
         // how many frames do we think we have?
         nframes = (this->_lkr_size() - start_frame_pos) / bytes_per_frame;
 
-        qDebug() << "LOADED" << natoms << nframes;
-        qDebug() << bytes_per_frame << lines_per_frame;
+        if (this->_lkr_size() != (nframes * bytes_per_frame) + start_frame_pos)
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Strange file size (%1) for the Amber Traj file. It is not a clean "
+                                          "multiple of the number of frames (%2) times the bytes per frame "
+                                          "(%3) plus the title size (%4) = (%5)")
+                                          .arg(this->_lkr_size())
+                                          .arg(nframes)
+                                          .arg(bytes_per_frame)
+                                          .arg(start_frame_pos)
+                                          .arg((nframes * bytes_per_frame) + start_frame_pos),
+                                      CODELOC);
+        }
 
         return true;
     }
@@ -473,11 +538,7 @@ public:
 
         QVector<double> box_data;
 
-        if (frame.space().isA<Cartesian>())
-        {
-            box_data = QVector<double>(3, 0.0);
-        }
-        else if (frame.space().isA<PeriodicBox>())
+        if (frame.space().isA<PeriodicBox>())
         {
             const auto box = frame.space().asA<PeriodicBox>().dimensions();
 
@@ -485,6 +546,10 @@ public:
             box_data[0] = box.x();
             box_data[1] = box.y();
             box_data[2] = box.z();
+        }
+        else if (frame.space().isA<Cartesian>())
+        {
+            box_data = QVector<double>(3, 0.0);
         }
         else
         {
@@ -510,6 +575,21 @@ public:
     int nFrames() const
     {
         return nframes;
+    }
+
+    QString title() const
+    {
+        return ttle;
+    }
+
+    void writeLine(const QString &line)
+    {
+        QMutexLocker lkr(&mutex);
+
+        if (f != 0 and ts != 0)
+        {
+            *ts << line << "\n";
+        }
     }
 
 private:
@@ -591,7 +671,8 @@ private:
                                               .arg(this->filename()),
                                           CODELOC);
 
-            frame_buffer.append(ts->readLine());
+            const auto line = ts->readLine();
+            frame_buffer.append(line);
         }
     }
 
@@ -723,6 +804,7 @@ void AmberTraj::parse()
         nframes = f->nFrames();
         current_frame = f->readFrame(0, this->usesParallel());
         frame_idx = 0;
+        ttle = f->title();
 
         this->setScore(f->nFrames() * current_frame.nAtoms());
     }
@@ -757,6 +839,13 @@ AmberTraj::AmberTraj(const System &system, const PropertyMap &map)
     : ConcreteProperty<AmberTraj, MoleculeParser>(system, map),
       nframes(1), frame_idx(0)
 {
+    ttle = system.name().value();
+
+    if (ttle.length() > 128)
+        ttle.truncate(128);
+    else if (ttle.isEmpty())
+        ttle = "TRAJ file create by sire";
+
     current_frame = MoleculeParser::createFrame(system, map);
 }
 
@@ -950,8 +1039,6 @@ void AmberTraj::writeToFile(const QString &filename) const
     if (this->nFrames() == 0 or this->nAtoms() == 0)
         return;
 
-    qDebug() << "AmberTraj::writeToFile" << filename;
-
     auto gil = SireBase::release_gil();
 
     AmberTrajFile outfile(filename);
@@ -961,6 +1048,9 @@ void AmberTraj::writeToFile(const QString &filename) const
                                         "Could not open %1 to write the Amber TRAJ file.")
                                         .arg(filename),
                                     CODELOC);
+
+    // write the title (only once at the top of the file)
+    outfile.writeLine(ttle);
 
     if (this->writingTrajectory())
     {
