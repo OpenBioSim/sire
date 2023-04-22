@@ -506,6 +506,12 @@ namespace SireIO
 
                 int nvalues = format.numValues(line);
 
+                if (nvalues * format.width() < line.length())
+                {
+                    // we can actually read one extra, truncated string value
+                    nvalues += 1;
+                }
+
                 if (nvalues == 0 and data.isEmpty())
                 {
                     // this is an empty set of data
