@@ -949,8 +949,6 @@ Frame MoleculeParser::createFrame(const System &system,
         {
             const Property &prop = system.property(time_property);
 
-            SireUnits::Dimension::Time time;
-
             if (prop.isA<TimeProperty>())
                 time = prop.asA<TimeProperty>().value();
             else
