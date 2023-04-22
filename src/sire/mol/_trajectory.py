@@ -124,6 +124,21 @@ class TrajectoryIterator:
         else:
             return f"Trajectory({self._view}, num_frames={len(self._values)})"
 
+    def _is_trajectory_iterator(self):
+        """
+        Return that this is a TrajectoryIterator
+        """
+        return True
+
+    def _to_legacy_system(self):
+        """
+        Internal function used to convert the contained view into a
+        legacy.Sire.System
+        """
+        from .._load import _to_legacy_system
+
+        return _to_legacy_system(self.current())
+
     def frame_indexes(self):
         """
         Return the indexes of the frames in this trajectory that

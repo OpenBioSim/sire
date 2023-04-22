@@ -426,18 +426,14 @@ def load(
 
 
 def _to_legacy_system(molecules):
-    """Internal function to convert the passed set of molecule views
+    """
+    Internal function to convert the passed set of molecule views
     into a sire.legacy.System.System
     """
+    if hasattr(molecules, "_to_legacy_system"):
+        return molecules._to_legacy_system()
+
     from .legacy.System import System as LegacySystem
-
-    if type(molecules) is LegacySystem:
-        return molecules
-
-    from .system import System as NewSystem
-
-    if type(molecules) is NewSystem:
-        return molecules._system
 
     s = LegacySystem()
 
@@ -588,12 +584,14 @@ def save(
 
         map.set("fileformat", ",".join(format))
 
-    from .mol import TrajectoryIterator
-
-    if type(molecules) is TrajectoryIterator:
-        # we are saving a trajectory - not just the molecules
-        map = molecules._populate_map(map)
-        molecules = molecules.current()
+    if hasattr(molecules, "_is_trajectory_iterator"):
+        # Doing it this way rather that using type(molecules)
+        # as type(molecules) randomly fails, and because
+        # this way is more pythonic
+        if molecules._is_trajectory_iterator():
+            # we are saving a trajectory - not just the molecules
+            map = molecules._populate_map(map)
+            molecules = molecules.current()
 
     molecules = _to_legacy_system(molecules)
 

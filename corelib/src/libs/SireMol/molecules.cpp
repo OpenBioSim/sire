@@ -1015,8 +1015,9 @@ int Molecules::nFrames(const SireBase::PropertyMap &map) const
         }
     }
 
-    if (nframes < 0)
-        return 0;
+    if (nframes < 1)
+        // there is always at least one frame (the current coordinates)
+        return 1;
     else
         return nframes;
 }

@@ -247,10 +247,19 @@ public:
 
         bool check_one_more_line = false;
 
+        int newline_length = -1;
+
         while (not ts->atEnd())
         {
             const auto line = ts->readLine();
-            const auto length = line.count() + 1; // + 1 as need to include the newline ;-)
+
+            if (newline_length == -1)
+            {
+                // how many bytes for a newline (\n or \r\n?)
+                newline_length = ts->pos() - start_frame_pos - line.count();
+            }
+
+            const auto length = line.count() + newline_length;
             nread_bytes += length;
 
             lines_per_frame += 1;
@@ -384,6 +393,25 @@ public:
             }
 
             nvals_last_line = nvals_per_line;
+        }
+
+        if (nframes == 0)
+        {
+            // we haven't finished the number of frames yet
+            if (check_one_more_line)
+            {
+                // this was either coordinates followed by space,
+                // or just a block of coordinates. We will assume there
+                // is a space
+                nvals_per_line = -3;
+                end_of_frame();
+                has_box_dims = true;
+                end_frame_pos = ts->pos();
+            }
+            else
+            {
+                end_of_frame();
+            }
         }
 
         // we have now finished reading in the first frame
@@ -605,10 +633,6 @@ private:
         ttle = QString();
 
         seek_frame.clear();
-    }
-
-    void _lkr_reindexFrames()
-    {
     }
 
     void _lkr_readFrameIntoBuffer(int i)

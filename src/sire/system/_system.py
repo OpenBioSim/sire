@@ -42,6 +42,12 @@ class System:
 
         return type(obj) == System or type(obj) == _System
 
+    def _to_legacy_system(self):
+        """
+        Internal function used to convert this back to a legacy system
+        """
+        return self._system
+
     def __copy__(self):
         other = System()
         other._system = self._system.clone()
@@ -109,13 +115,17 @@ class System:
         """Return the numbers of all of the molecules in this System"""
         return self.molecules().numbers()
 
-    def num_frames(self):
+    def num_frames(self, map=None):
         """Return the number of trajectory frames for this System"""
-        return self._system.num_frames()
+        from ..base import create_map
 
-    def load_frame(self, i):
+        return self._system.num_frames(map=create_map(map))
+
+    def load_frame(self, i, map=None):
         """Load the ith frame into this System"""
-        self._system.load_frame(i)
+        from ..base import create_map
+
+        self._system.load_frame(i, map=create_map(map))
         self._molecules = None
 
     def save_frame(self, i=None, map=None):
@@ -134,9 +144,11 @@ class System:
 
         self._molecules = None
 
-    def delete_frame(self, i):
+    def delete_frame(self, i, map=None):
         """Delete the ith frame from the trajectory"""
-        self._system.delete_frame(i)
+        from ..base import create_map
+
+        self._system.delete_frame(i, map=create_map(map))
         self._molecules = None
 
     def to_molecule_group(self):
@@ -252,8 +264,28 @@ class System:
         return self.molecules().improper(*args, **kwargs)
 
     def trajectory(self, *args, **kwargs):
-        """Return an iterator over the trajectory of frames for this System"""
-        return self.molecules().trajectory(*args, **kwargs)
+        """
+        Return an iterator over the trajectory of frames of this view.
+
+        align:
+            Pass in a selection string to select atoms against which
+            every frame will be aligned. These atoms will be moved
+            to the center of the periodic box (if a periodic box
+            is used). If 'True' is passed then this will align
+            against all of the atoms in the view.
+
+        smooth:
+            Pass in the number of frames to smooth (average) the view
+            over. If 'True' is passed, then the recommended number
+            of frames will be averaged over
+
+        wrap: bool
+            Whether or not to wrap the coordinates into the periodic box
+
+        """
+        from ..mol._trajectory import TrajectoryIterator
+
+        return TrajectoryIterator(self, *args, **kwargs)
 
     def minimisation(self, map=None):
         """
