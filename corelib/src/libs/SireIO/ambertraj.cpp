@@ -162,7 +162,10 @@ public:
                                           .arg(this->filename()),
                                       CODELOC);
 
-        ttle = ts->readLine().simplified();
+        // read in the title - this should not be more than 1024 characters
+        // (using a large number to protect against issues, while also
+        //  checking against deliberate attempts to break this parser)
+        ttle = ts->readLine(1024).simplified();
 
         if (ts->atEnd())
             throw SireIO::parse_error(QObject::tr(
@@ -249,9 +252,15 @@ public:
 
         int newline_length = -1;
 
+        // lines are a maximum of 80 characters - we will use
+        // a buffer that is a power of 2 above that
+        const int max_line_length = 128;
+        QString line;
+        line.reserve(max_line_length);
+
         while (not ts->atEnd())
         {
-            const auto line = ts->readLine();
+            ts->readLineInto(&line, max_line_length);
 
             if (newline_length == -1)
             {
@@ -443,6 +452,8 @@ public:
                                           .arg((nframes * bytes_per_frame) + start_frame_pos),
                                       CODELOC);
         }
+
+        qDebug() << CODELOC;
 
         return true;
     }
@@ -685,6 +696,8 @@ private:
         // now read in the required number of lines to the buffer
         frame_buffer.clear();
 
+        const int max_line_length = 128;
+
         for (int j = 0; j < lines_per_frame; ++j)
         {
             if (ts->atEnd())
@@ -695,7 +708,7 @@ private:
                                               .arg(this->filename()),
                                           CODELOC);
 
-            const auto line = ts->readLine();
+            const auto line = ts->readLine(max_line_length);
             frame_buffer.append(line);
         }
     }
@@ -817,23 +830,30 @@ void AmberTraj::parse()
 
     try
     {
+        qDebug() << CODELOC;
         if (not f->open(QIODevice::ReadOnly))
         {
+            qDebug() << CODELOC;
             throw SireIO::parse_error(QObject::tr(
                                           "Failed to open Amber TRAJ %1")
                                           .arg(this->filename()),
                                       CODELOC);
         }
+        qDebug() << CODELOC;
 
         nframes = f->nFrames();
+        qDebug() << nframes;
         current_frame = f->readFrame(0, this->usesParallel());
+        qDebug() << current_frame.toString();
         frame_idx = 0;
         ttle = f->title();
+        qDebug() << CODELOC;
 
         this->setScore(f->nFrames() * current_frame.nAtoms());
     }
     catch (...)
     {
+        qDebug() << CODELOC;
         this->setScore(0);
         f.reset();
         throw;

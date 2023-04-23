@@ -150,6 +150,8 @@ bool TextFile::_lkr_open(QIODevice::OpenMode mode)
     }
 
     ts = new QTextStream(f);
+    ts->setCodec("UTF-8");
+    ts->setAutoDetectUnicode(true);
 
     return true;
 }

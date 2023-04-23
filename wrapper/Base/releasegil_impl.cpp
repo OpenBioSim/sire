@@ -5,6 +5,13 @@
 
 #include <QDebug>
 
+static void print_to_python_stdout(const char *text)
+{
+    PyGILState_STATE gilstate = PyGILState_Ensure();
+    PySys_WriteStdout(text);
+    PyGILState_Release(gilstate);
+}
+
 class ReleaseGIL : public SireBase::detail::ReleaseGILBase
 {
 public:
@@ -32,6 +39,24 @@ public:
     }
 
 protected:
+    void print(const QString &text) const
+    {
+        QByteArray bytes = text.toUtf8();
+
+        // need to split into chunks of 1000 characters
+        // because python can only cope with 1000 characters at once
+        while (bytes.length() > 1000)
+        {
+            auto start = bytes.left(999);
+            start.append('\0');
+            print_to_python_stdout(start.constData());
+            bytes = bytes.right(bytes.length() - 999);
+        }
+
+        if (bytes.length() > 0)
+            print_to_python_stdout(bytes.constData());
+    }
+
     SireBase::GILHandle releaseGIL() const
     {
         // qDebug() << "Release GIL";

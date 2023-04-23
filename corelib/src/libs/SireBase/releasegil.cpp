@@ -28,6 +28,8 @@
 
 #include "releasegil.h"
 
+#include <QTextStream>
+
 namespace SireBase
 {
     /** Release the GIL. This returns a handle which, when destroyed,
@@ -42,6 +44,23 @@ namespace SireBase
         else
         {
             return GILHandle();
+        }
+    }
+
+    /** Print the passed string on the Python STDOUT. This is needed
+     *  when STDOUT is a different stream or buffered, e.g. when running
+     *  in a Jupyter notebook cell
+     */
+    void print_to_python(const QString &text)
+    {
+        if (detail::ReleaseGILBase::handle != 0)
+        {
+            detail::ReleaseGILBase::handle->print(text);
+        }
+        else
+        {
+            static QTextStream ts(stdout);
+            ts << text;
         }
     }
 
