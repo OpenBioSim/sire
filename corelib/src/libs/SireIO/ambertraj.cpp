@@ -453,8 +453,6 @@ public:
                                       CODELOC);
         }
 
-        qDebug() << CODELOC;
-
         return true;
     }
 
@@ -830,30 +828,23 @@ void AmberTraj::parse()
 
     try
     {
-        qDebug() << CODELOC;
         if (not f->open(QIODevice::ReadOnly))
         {
-            qDebug() << CODELOC;
             throw SireIO::parse_error(QObject::tr(
                                           "Failed to open Amber TRAJ %1")
                                           .arg(this->filename()),
                                       CODELOC);
         }
-        qDebug() << CODELOC;
 
         nframes = f->nFrames();
-        qDebug() << nframes;
         current_frame = f->readFrame(0, this->usesParallel());
-        qDebug() << current_frame.toString();
         frame_idx = 0;
         ttle = f->title();
-        qDebug() << CODELOC;
 
         this->setScore(f->nFrames() * current_frame.nAtoms());
     }
     catch (...)
     {
-        qDebug() << CODELOC;
         this->setScore(0);
         f.reset();
         throw;

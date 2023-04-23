@@ -44,7 +44,7 @@ namespace SireBase
     typedef std::shared_ptr<detail::ReleaseGILBase> GILHandle;
 
     SIREBASE_EXPORT GILHandle release_gil();
-    SIREBASE_EXPORT void print_to_python(const QString &text);
+    SIREBASE_EXPORT void print_to_python(const QString &text, bool flush = false);
 
     namespace detail
     {
@@ -57,14 +57,14 @@ namespace SireBase
         class SIREBASE_EXPORT ReleaseGILBase
         {
             friend SIREBASE_EXPORT GILHandle SireBase::release_gil();
-            friend SIREBASE_EXPORT void print_to_python(const QString &text);
+            friend SIREBASE_EXPORT void SireBase::print_to_python(const QString &text, bool flush);
 
         public:
             ReleaseGILBase();
             virtual ~ReleaseGILBase();
 
         protected:
-            virtual void print(const QString &text) const;
+            virtual void print(const QString &text, bool flush) const = 0;
             static void registerReleaseGIL(ReleaseGILBase *handle);
             virtual GILHandle releaseGIL() const = 0;
 

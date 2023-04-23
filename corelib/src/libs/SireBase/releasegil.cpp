@@ -51,16 +51,19 @@ namespace SireBase
      *  when STDOUT is a different stream or buffered, e.g. when running
      *  in a Jupyter notebook cell
      */
-    void print_to_python(const QString &text)
+    void print_to_python(const QString &text, bool flush)
     {
         if (detail::ReleaseGILBase::handle != 0)
         {
-            detail::ReleaseGILBase::handle->print(text);
+            detail::ReleaseGILBase::handle->print(text, flush);
         }
         else
         {
             static QTextStream ts(stdout);
             ts << text;
+
+            if (flush)
+                ts.flush();
         }
     }
 
