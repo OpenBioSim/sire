@@ -5,12 +5,36 @@
 
 #include <QDebug>
 
-static void print_to_python_stdout(const char *text)
+static void print_to_python_stdout(const char *text, bool flush)
 {
     // thanks to https://github.com/osqp/osqp/blob/25b6b39247954b74bba17667863fe19e9a8b1ade/include/glob_opts.h#L139
     // and https://stackoverflow.com/questions/35745541/how-to-get-printed-output-from-ctypes-c-functions-into-jupyter-ipython-notebook
     PyGILState_STATE gilstate = PyGILState_Ensure();
     PySys_WriteStdout(text);
+
+    if (flush)
+    {
+        // copied from the python code
+        // https://github.com/python/cpython/blob/f25f2e2e8c8e48490d22b0cdf67f575608701f6f/Python/pylifecycle.c#L1589
+        // Thanks to https://stackoverflow.com/questions/69247396/python-c-api-how-to-flush-stdout-and-stderr
+        PyObject *fout = PySys_GetObject("__stdout__");
+        PyObject *tmp;
+        int status = 0;
+
+        if (fout != NULL && fout != Py_None)
+        {
+            tmp = PyObject_CallMethod(fout, "flush", 0);
+
+            if (tmp == NULL)
+            {
+                PyErr_WriteUnraisable(fout);
+                status = -1;
+            }
+            else
+                Py_DECREF(tmp);
+        }
+    }
+
     PyGILState_Release(gilstate);
 }
 
@@ -51,34 +75,12 @@ protected:
         {
             auto start = bytes.left(999);
             start.append('\0');
-            print_to_python_stdout(start.constData());
+            print_to_python_stdout(start.constData(), false);
             bytes = bytes.right(bytes.length() - 999);
         }
 
         if (bytes.length() > 0)
-            print_to_python_stdout(bytes.constData());
-
-        if (flush)
-        {
-            // copied from the python code
-            // https://github.com/python/cpython/blob/f25f2e2e8c8e48490d22b0cdf67f575608701f6f/Python/pylifecycle.c#L1589
-            // Thanks to https://stackoverflow.com/questions/69247396/python-c-api-how-to-flush-stdout-and-stderr
-            PyObject *fout = _PySys_GetObjectId(&PyId_stdout);
-            PyObject *tmp;
-            int status = 0;
-
-            if (fout != NULL && fout != Py_None && !file_is_closed(fout))
-            {
-                tmp = _PyObject_CallMethodIdNoArgs(fout, &PyId_flush);
-                if (tmp == NULL)
-                {
-                    PyErr_WriteUnraisable(fout);
-                    status = -1;
-                }
-                else
-                    Py_DECREF(tmp);
-            }
-        }
+            print_to_python_stdout(bytes.constData(), flush);
     }
 
     SireBase::GILHandle releaseGIL() const

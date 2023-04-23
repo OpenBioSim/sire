@@ -1097,6 +1097,7 @@ void AmberTraj::writeToFile(const QString &filename) const
 
         for (int i = 0; i < frames.count(); ++i)
         {
+            SireBase::print_to_python(QString("Write frame %1").arg(i + 1), true);
             const auto frame = this->createFrame(frames[i]);
             outfile.writeFrame(frame, usesParallel());
             bar.setProgress(i + 1);
