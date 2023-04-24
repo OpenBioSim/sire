@@ -183,9 +183,9 @@ public:
         bytes_per_frame = 0;
         has_box_dims = false;
 
-        double linevals[8];
+        double linevals[10];
 
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < 10; ++i)
         {
             linevals[i] = 0;
         }
@@ -1091,19 +1091,19 @@ void AmberTraj::writeToFile(const QString &filename) const
     {
         const auto frames = this->framesToWrite();
 
-        ProgressBar bar(frames.count());
+        ProgressBar bar("Save TRAJ", frames.count());
+        bar.setSpeedUnit("frames / s");
 
         bar = bar.enter();
 
         for (int i = 0; i < frames.count(); ++i)
         {
-            SireBase::print_to_python(QString("Write frame %1").arg(i + 1), true);
             const auto frame = this->createFrame(frames[i]);
             outfile.writeFrame(frame, usesParallel());
             bar.setProgress(i + 1);
         }
 
-        bar.exit();
+        bar.success();
     }
     else
     {

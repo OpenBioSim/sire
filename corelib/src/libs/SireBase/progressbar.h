@@ -41,17 +41,13 @@ namespace SireBase
 SIREBASE_EXPORT QDataStream &operator<<(QDataStream &, const SireBase::ProgressBar &);
 SIREBASE_EXPORT QDataStream &operator>>(QDataStream &, SireBase::ProgressBar &);
 
-namespace indicators
-{
-    class ProgressBar;
-    class IndeterminateProgressBar;
-
-    typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
-    typedef std::shared_ptr<IndeterminateProgressBar> SpinnerPtr;
-}
-
 namespace SireBase
 {
+    namespace detail
+    {
+        class BarManager;
+        class BarData;
+    }
 
     /** This is a progress bar */
     class SIREBASE_EXPORT ProgressBar : public SireBase::ConcreteProperty<ProgressBar, Property>
@@ -59,10 +55,13 @@ namespace SireBase
         friend QDataStream & ::operator<<(QDataStream &, const ProgressBar &);
         friend QDataStream & ::operator>>(QDataStream &, ProgressBar &);
 
+        friend class detail::BarManager;
+
     public:
         ProgressBar();
-        ProgressBar(qint64 total, bool show_time = true);
-        ProgressBar(qint64 total, const QString &text, bool show_time = true);
+        ProgressBar(quint32 total);
+        ProgressBar(quint32 total, const QString &text);
+        ProgressBar(const QString &text, quint32 total);
 
         ProgressBar(const QString &text);
 
@@ -80,20 +79,26 @@ namespace SireBase
         static const char *typeName();
         const char *what() const;
 
+        QString message() const;
+        QString speedUnit() const;
+
+        void setSpeedUnit(const QString &unit);
+
         void tick();
         void tick(const QString &text);
 
-        void setProgress(qint64 value);
-        void setProgress(qint64 value, const QString &text);
+        void setProgress(quint32 value);
+        void setProgress(quint32 value, const QString &text);
+        void setProgress(const QString &text, quint32 value);
 
-        void setCompleted();
+        void success();
+        void success(const QString &message);
 
-        const char *text() const;
-        int barSize() const;
+        void failure();
+        void failure(const QString &message);
 
-        bool isDeterministic() const;
-
-        bool showTime() const;
+        quint32 total() const;
+        quint32 current() const;
 
         ProgressBar enter() const;
         void exit();
@@ -102,24 +107,9 @@ namespace SireBase
         static void setSilent();
 
     private:
-        bool isActive() const;
-        bool isProgress() const;
-        bool isSpinner() const;
-
-        static int current_theme;
-
-        qint64 total_value;
-
-        QByteArray progress_text;
-
-        indicators::ProgressBarPtr progress_ptr;
-        indicators::SpinnerPtr spinner_ptr;
-
-        qint64 start_ms;
-
-        bool show_time;
-        bool has_displayed;
-        bool has_completed;
+        std::shared_ptr<detail::BarData> d;
+        QString msg;
+        QString speed_unit;
     };
 }
 

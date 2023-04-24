@@ -390,7 +390,8 @@ void TRR::writeToFile(const QString &filename) const
     {
         const auto frames = this->framesToWrite();
 
-        ProgressBar bar(frames.count());
+        ProgressBar bar("Save TRR", frames.count());
+        bar.setSpeedUnit("frames / s");
 
         bar = bar.enter();
 
@@ -401,7 +402,7 @@ void TRR::writeToFile(const QString &filename) const
             bar.setProgress(i + 1);
         }
 
-        bar.exit();
+        bar.success();
     }
     else
     {

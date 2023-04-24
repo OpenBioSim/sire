@@ -43,11 +43,9 @@ class MinimisationData:
                 self._omm_mols, maxIterations=max_its
             )
 
-        from datetime import datetime
+        with ProgressBar(text="minimisation") as spinner:
+            spinner.set_speed_unit("checks / s")
 
-        start_time = datetime.now().timestamp()
-
-        with ProgressBar(text="minimisation: 0.0s") as spinner:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, max_iterations)
 
@@ -55,8 +53,7 @@ class MinimisationData:
                     try:
                         run_promise.result(timeout=0.2)
                     except Exception:
-                        delta = datetime.now().timestamp() - start_time
-                        spinner.tick("minimisation: %.1f s" % delta)
+                        spinner.tick()
                         pass
 
     def commit(self):

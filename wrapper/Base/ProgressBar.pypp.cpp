@@ -15,7 +15,11 @@ namespace bp = boost::python;
 
 #include "progressbar.h"
 
+#include <QAtomicInteger>
+
 #include <QDateTime>
+
+#include <boost/noncopyable.hpp>
 
 #include "progressbar.h"
 
@@ -33,18 +37,19 @@ void register_ProgressBar_class(){
         typedef bp::class_< SireBase::ProgressBar, bp::bases< SireBase::Property > > ProgressBar_exposer_t;
         ProgressBar_exposer_t ProgressBar_exposer = ProgressBar_exposer_t( "ProgressBar", "This is a progress bar", bp::init< >("") );
         bp::scope ProgressBar_scope( ProgressBar_exposer );
-        ProgressBar_exposer.def( bp::init< qint64, bp::optional< bool > >(( bp::arg("total"), bp::arg("show_time")=(bool)(true) ), "") );
-        ProgressBar_exposer.def( bp::init< qint64, QString const &, bp::optional< bool > >(( bp::arg("total"), bp::arg("text"), bp::arg("show_time")=(bool)(true) ), "") );
+        ProgressBar_exposer.def( bp::init< quint32 >(( bp::arg("total") ), "") );
+        ProgressBar_exposer.def( bp::init< quint32, QString const & >(( bp::arg("total"), bp::arg("text") ), "") );
+        ProgressBar_exposer.def( bp::init< QString const &, quint32 >(( bp::arg("text"), bp::arg("total") ), "") );
         ProgressBar_exposer.def( bp::init< QString const & >(( bp::arg("text") ), "") );
         ProgressBar_exposer.def( bp::init< SireBase::ProgressBar const & >(( bp::arg("other") ), "") );
-        { //::SireBase::ProgressBar::barSize
+        { //::SireBase::ProgressBar::current
         
-            typedef int ( ::SireBase::ProgressBar::*barSize_function_type)(  ) const;
-            barSize_function_type barSize_function_value( &::SireBase::ProgressBar::barSize );
+            typedef ::quint32 ( ::SireBase::ProgressBar::*current_function_type)(  ) const;
+            current_function_type current_function_value( &::SireBase::ProgressBar::current );
             
             ProgressBar_exposer.def( 
-                "barSize"
-                , barSize_function_value
+                "current"
+                , current_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -73,14 +78,39 @@ void register_ProgressBar_class(){
                 , "" );
         
         }
-        { //::SireBase::ProgressBar::isDeterministic
+        { //::SireBase::ProgressBar::failure
         
-            typedef bool ( ::SireBase::ProgressBar::*isDeterministic_function_type)(  ) const;
-            isDeterministic_function_type isDeterministic_function_value( &::SireBase::ProgressBar::isDeterministic );
+            typedef void ( ::SireBase::ProgressBar::*failure_function_type)(  ) ;
+            failure_function_type failure_function_value( &::SireBase::ProgressBar::failure );
             
             ProgressBar_exposer.def( 
-                "isDeterministic"
-                , isDeterministic_function_value
+                "failure"
+                , failure_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::failure
+        
+            typedef void ( ::SireBase::ProgressBar::*failure_function_type)( ::QString const & ) ;
+            failure_function_type failure_function_value( &::SireBase::ProgressBar::failure );
+            
+            ProgressBar_exposer.def( 
+                "failure"
+                , failure_function_value
+                , ( bp::arg("message") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::message
+        
+            typedef ::QString ( ::SireBase::ProgressBar::*message_function_type)(  ) const;
+            message_function_type message_function_value( &::SireBase::ProgressBar::message );
+            
+            ProgressBar_exposer.def( 
+                "message"
+                , message_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -100,21 +130,9 @@ void register_ProgressBar_class(){
         
         }
         ProgressBar_exposer.def( bp::self == bp::self );
-        { //::SireBase::ProgressBar::setCompleted
-        
-            typedef void ( ::SireBase::ProgressBar::*setCompleted_function_type)(  ) ;
-            setCompleted_function_type setCompleted_function_value( &::SireBase::ProgressBar::setCompleted );
-            
-            ProgressBar_exposer.def( 
-                "setCompleted"
-                , setCompleted_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
         { //::SireBase::ProgressBar::setProgress
         
-            typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::qint64 ) ;
+            typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::quint32 ) ;
             setProgress_function_type setProgress_function_value( &::SireBase::ProgressBar::setProgress );
             
             ProgressBar_exposer.def( 
@@ -127,13 +145,26 @@ void register_ProgressBar_class(){
         }
         { //::SireBase::ProgressBar::setProgress
         
-            typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::qint64,::QString const & ) ;
+            typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::quint32,::QString const & ) ;
             setProgress_function_type setProgress_function_value( &::SireBase::ProgressBar::setProgress );
             
             ProgressBar_exposer.def( 
                 "setProgress"
                 , setProgress_function_value
                 , ( bp::arg("value"), bp::arg("text") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::setProgress
+        
+            typedef void ( ::SireBase::ProgressBar::*setProgress_function_type)( ::QString const &,::quint32 ) ;
+            setProgress_function_type setProgress_function_value( &::SireBase::ProgressBar::setProgress );
+            
+            ProgressBar_exposer.def( 
+                "setProgress"
+                , setProgress_function_value
+                , ( bp::arg("text"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -146,6 +177,19 @@ void register_ProgressBar_class(){
             ProgressBar_exposer.def( 
                 "setSilent"
                 , setSilent_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::setSpeedUnit
+        
+            typedef void ( ::SireBase::ProgressBar::*setSpeedUnit_function_type)( ::QString const & ) ;
+            setSpeedUnit_function_type setSpeedUnit_function_value( &::SireBase::ProgressBar::setSpeedUnit );
+            
+            ProgressBar_exposer.def( 
+                "setSpeedUnit"
+                , setSpeedUnit_function_value
+                , ( bp::arg("unit") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -163,26 +207,39 @@ void register_ProgressBar_class(){
                 , "" );
         
         }
-        { //::SireBase::ProgressBar::showTime
+        { //::SireBase::ProgressBar::speedUnit
         
-            typedef bool ( ::SireBase::ProgressBar::*showTime_function_type)(  ) const;
-            showTime_function_type showTime_function_value( &::SireBase::ProgressBar::showTime );
+            typedef ::QString ( ::SireBase::ProgressBar::*speedUnit_function_type)(  ) const;
+            speedUnit_function_type speedUnit_function_value( &::SireBase::ProgressBar::speedUnit );
             
             ProgressBar_exposer.def( 
-                "showTime"
-                , showTime_function_value
+                "speedUnit"
+                , speedUnit_function_value
                 , bp::release_gil_policy()
                 , "" );
         
         }
-        { //::SireBase::ProgressBar::text
+        { //::SireBase::ProgressBar::success
         
-            typedef char const * ( ::SireBase::ProgressBar::*text_function_type)(  ) const;
-            text_function_type text_function_value( &::SireBase::ProgressBar::text );
+            typedef void ( ::SireBase::ProgressBar::*success_function_type)(  ) ;
+            success_function_type success_function_value( &::SireBase::ProgressBar::success );
             
             ProgressBar_exposer.def( 
-                "text"
-                , text_function_value
+                "success"
+                , success_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::success
+        
+            typedef void ( ::SireBase::ProgressBar::*success_function_type)( ::QString const & ) ;
+            success_function_type success_function_value( &::SireBase::ProgressBar::success );
+            
+            ProgressBar_exposer.def( 
+                "success"
+                , success_function_value
+                , ( bp::arg("message") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -208,6 +265,18 @@ void register_ProgressBar_class(){
                 "tick"
                 , tick_function_value
                 , ( bp::arg("text") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::ProgressBar::total
+        
+            typedef ::quint32 ( ::SireBase::ProgressBar::*total_function_type)(  ) const;
+            total_function_type total_function_value( &::SireBase::ProgressBar::total );
+            
+            ProgressBar_exposer.def( 
+                "total"
+                , total_function_value
                 , bp::release_gil_policy()
                 , "" );
         

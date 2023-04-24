@@ -35,16 +35,14 @@ def _force_jupyter():
 
 
 class ProgressBar:
-    def __init__(self, total=None, text=None, show_time=True, _bar=None):
+    def __init__(self, total=None, text=None, _bar=None):
         _force_jupyter()
 
         if _bar is not None:
             self._bar = _bar
         elif total is not None:
             if text is not None:
-                self._bar = _ProgressBar(
-                    total=total, text=text, show_time=show_time
-                )
+                self._bar = _ProgressBar(total=total, text=text)
             else:
                 self._bar = _ProgressBar(total=total)
         else:
@@ -66,14 +64,26 @@ class ProgressBar:
         else:
             self._bar.tick()
 
+    def set_speed_unit(self, unit):
+        self._bar.set_speed_unit(unit)
+
     def set_progress(self, progress, text=None):
         if text is not None:
             self._bar.set_progress(progress, text)
         else:
             self._bar.set_progress(progress)
 
-    def set_completed(self):
-        self._bar.set_completed()
+    def success(self, text=None):
+        if text is None:
+            self._bar.success()
+        else:
+            self._bar.success(text)
+
+    def failure(self, text=None):
+        if text is None:
+            self._bar.failure()
+        else:
+            self._bar.failure(text)
 
     @staticmethod
     def set_theme(theme):

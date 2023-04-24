@@ -311,13 +311,11 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        from datetime import datetime
-
-        start_time = datetime.now().timestamp()
-
         from ..base import ProgressBar
 
-        with ProgressBar(text="minimisation: 0.0 s") as spinner:
+        with ProgressBar(text="minimisation") as spinner:
+            spinner.set_speed_unit("checks / s")
+
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, 0)
 
@@ -325,8 +323,7 @@ class DynamicsData:
                     try:
                         run_promise.result(timeout=0.2)
                     except Exception:
-                        delta = datetime.now().timestamp() - start_time
-                        spinner.tick("minimisation: %.1f s" % delta)
+                        spinner.tick()
                         pass
 
                 spinner.set_completed()
@@ -402,6 +399,8 @@ class DynamicsData:
 
         try:
             with ProgressBar(total=steps, text="dynamics") as progress:
+                progress.set_speed_unit("steps / s")
+
                 with ThreadPoolExecutor() as pool:
                     while completed < steps:
                         if steps - completed < save_size:
