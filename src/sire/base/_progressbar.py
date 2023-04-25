@@ -19,25 +19,19 @@ def _in_notebook():
     return True
 
 
-_forced_jupyter = False
+_checked_for_jupyter = False
 
-
-def _force_jupyter():
-    global _forced_jupyter
-
-    if _forced_jupyter:
-        return
-
+if not _checked_for_jupyter:
     if _in_notebook():
-        _ProgressBar.set_theme("jupyter")
+        from ..legacy.Base import set_is_ipython
 
-    _forced_jupyter = True
+        set_is_ipython(True)
+
+    _checked_for_jupyter = True
 
 
 class ProgressBar:
     def __init__(self, total=None, text=None, _bar=None):
-        _force_jupyter()
-
         if _bar is not None:
             self._bar = _bar
         elif total is not None:
@@ -87,8 +81,7 @@ class ProgressBar:
 
     @staticmethod
     def set_theme(theme):
-        if (not _in_notebook()) or (theme.lower().find("silent") != -1):
-            _ProgressBar.set_theme(theme)
+        _ProgressBar.set_theme(theme)
 
     @staticmethod
     def set_silent():

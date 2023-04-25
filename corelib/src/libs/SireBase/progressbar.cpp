@@ -34,6 +34,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <iostream>
+
 #include "SireBase/releasegil.h"
 
 #include "SireError/errors.h"
@@ -44,55 +46,6 @@
 using namespace SireBase;
 
 using namespace SireStream;
-
-/////////
-///////// Functions copied from
-/////////
-
-#if defined(_MSC_VER)
-#if !defined(NOMINMAX)
-#define NOMINMAX
-#endif
-#include <io.h>
-#include <windows.h>
-#else
-#include <iostream>
-#endif
-
-#ifdef _MSC_VER
-
-static inline void move(int x, int y)
-{
-    auto hStdout = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (!hStdout)
-        return;
-
-    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
-    GetConsoleScreenBufferInfo(hStdout, &csbiInfo);
-
-    COORD cursor;
-
-    cursor.X = csbiInfo.dwCursorPosition.X + x;
-    cursor.Y = csbiInfo.dwCursorPosition.Y + y;
-    SetConsoleCursorPosition(hStdout, cursor);
-}
-
-static inline void move_up(int lines) { move(0, -lines); }
-static inline void move_down(int lines) { move(0, -lines); }
-static inline void move_right(int cols) { move(cols, 0); }
-static inline void move_left(int cols) { move(-cols, 0); }
-
-#else
-
-static inline void move_up(int lines)
-{
-    std::cout << "\033[" << lines << "A";
-}
-static inline void move_down(int lines) { std::cout << "\033[" << lines << "B"; }
-static inline void move_right(int cols) { std::cout << "\033[" << cols << "C"; }
-static inline void move_left(int cols) { std::cout << "\033[" << cols << "D"; }
-
-#endif
 
 /////////
 ///////// Implementation of SireBase::detail::BarData
@@ -607,10 +560,10 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
         {
             int percent = int((100.0 * c) / float(t));
 
-            bar = QString("%1% : %2 s : %3")
+            bar = QString("%1%% : %2 s : %3")
                       .arg(percent, 2)
                       .arg(secs, 0, 'F', 1)
-                      .arg(speed, 0);
+                      .arg(speed);
         }
     }
     else
@@ -628,7 +581,7 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
         bar = QString("%1 : %2 s : %3")
                   .arg(part)
                   .arg(secs, 0, 'F', 1)
-                  .arg(speed, 0);
+                  .arg(speed);
     }
 
     if (text.length() > 0)
@@ -653,27 +606,24 @@ void SireBase::detail::print_bars(const QStringList &bars, int n_move_up)
     {
         if (bar.length() > bar_width)
         {
-            to_print += bar.left(bar_width);
+            to_print += bar.left(bar_width) + "\n";
         }
         else if (bar.length() < bar_width)
         {
             QString b = bar;
             b.resize(bar_width, ' ');
-            to_print += b;
+            to_print += b + "\n";
         }
         else
         {
-            to_print += bar;
+            to_print += bar + "\n";
         }
     }
 
-    to_print += "\n";
-
     if (n_move_up > 0)
-        move_up(n_move_up);
+        SireBase::sys_stdout_move_up(n_move_up);
 
-    std::cout << to_print.toUtf8().constData();
-    std::cout.flush();
+    SireBase::sys_stdout_write(to_print, true);
 }
 
 QStringList SireBase::detail::BarManager::_lkr_printBars()

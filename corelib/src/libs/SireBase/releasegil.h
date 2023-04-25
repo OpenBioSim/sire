@@ -44,7 +44,39 @@ namespace SireBase
     typedef std::shared_ptr<detail::ReleaseGILBase> GILHandle;
 
     SIREBASE_EXPORT GILHandle release_gil();
-    SIREBASE_EXPORT void print_to_python(const QString &text, bool flush = false);
+
+    SIREBASE_EXPORT void ipython_clear_output(bool wait = true);
+
+    SIREBASE_EXPORT bool sys_stdout_is_ipython();
+    SIREBASE_EXPORT void sys_stdout_write(const QString &text, bool flush = false);
+    SIREBASE_EXPORT void sys_stdout_move_up(int n);
+
+    struct ANSI
+    {
+        enum Color
+        {
+            BLACK = 30,
+            RED = 31,
+            GREEN = 32,
+            YELLOW = 33,
+            BLUE = 34,
+            MAGENTA = 35,
+            CYAN = 36,
+            WHITE = 37,
+            DEFAULT = 39,
+            BRIGHT_BLACK = 90,
+            BRIGHT_RED = 91,
+            BRIGHT_GREEN = 92,
+            BRIGHT_YELLOW = 93,
+            BRIGHT_BLUE = 94,
+            BRIGHT_MAGENTA = 95,
+            BRIGHT_CYAN = 96,
+            BRIGHT_WHITE = 97
+        };
+    };
+
+    SIREBASE_EXPORT QString esc_color(ANSI::Color fg, ANSI::Color bg = ANSI::DEFAULT, bool bold = false, bool underline = false);
+    SIREBASE_EXPORT QString esc_reset();
 
     namespace detail
     {
@@ -57,14 +89,22 @@ namespace SireBase
         class SIREBASE_EXPORT ReleaseGILBase
         {
             friend SIREBASE_EXPORT GILHandle SireBase::release_gil();
-            friend SIREBASE_EXPORT void SireBase::print_to_python(const QString &text, bool flush);
+
+            friend SIREBASE_EXPORT void SireBase::ipython_clear_output(bool wait);
+            friend SIREBASE_EXPORT void SireBase::sys_stdout_write(const QString &text, bool flush);
+            friend SIREBASE_EXPORT bool SireBase::sys_stdout_is_ipython();
+            friend SIREBASE_EXPORT void SireBase::sys_stdout_move_up(int n);
 
         public:
             ReleaseGILBase();
             virtual ~ReleaseGILBase();
 
         protected:
-            virtual void print(const QString &text, bool flush) const = 0;
+            virtual void stdout_write(const QString &text, bool flush) const = 0;
+            virtual bool is_ipython() const = 0;
+            virtual void ipython_clear(bool wait) const = 0;
+            virtual void move_up(int n) const = 0;
+
             static void registerReleaseGIL(ReleaseGILBase *handle);
             virtual GILHandle releaseGIL() const = 0;
 

@@ -29,6 +29,9 @@
 #include "releasegil.h"
 
 #include <QTextStream>
+#include <QMutex>
+
+#include <QDebug>
 
 namespace SireBase
 {
@@ -51,11 +54,11 @@ namespace SireBase
      *  when STDOUT is a different stream or buffered, e.g. when running
      *  in a Jupyter notebook cell
      */
-    void print_to_python(const QString &text, bool flush)
+    void sys_stdout_write(const QString &text, bool flush)
     {
         if (detail::ReleaseGILBase::handle != 0)
         {
-            detail::ReleaseGILBase::handle->print(text, flush);
+            detail::ReleaseGILBase::handle->stdout_write(text, flush);
         }
         else
         {
@@ -65,6 +68,64 @@ namespace SireBase
             if (flush)
                 ts.flush();
         }
+    }
+
+    void ipython_clear_output(bool wait)
+    {
+        if (sys_stdout_is_ipython() and detail::ReleaseGILBase::handle != 0)
+        {
+            detail::ReleaseGILBase::handle->ipython_clear(wait);
+        }
+    }
+
+    bool sys_stdout_is_ipython()
+    {
+        if (detail::ReleaseGILBase::handle != 0)
+        {
+            return detail::ReleaseGILBase::handle->is_ipython();
+        }
+        else
+            return false;
+    }
+
+    void sys_stdout_move_up(int n)
+    {
+        if (n <= 0)
+            return;
+        else if (n > 3200)
+            n = 3200;
+
+        if (sys_stdout_is_ipython())
+        {
+            // we don't have cursor control, so all we can do is
+            // completely clear the cell
+            detail::ReleaseGILBase::handle->ipython_clear(true);
+        }
+        else
+        {
+            sys_stdout_write(QString("\x1b[%1A").arg(n));
+        }
+    }
+
+    QString esc_color(ANSI::Color fg, ANSI::Color bg, bool bold, bool underline)
+    {
+        QString code = QString::number(int(fg));
+
+        if (bg != ANSI::DEFAULT)
+            code += QString(";%1").arg(int(bg) + 10);
+
+        if (bold)
+            code += ";1";
+
+        if (underline)
+            code += ";4";
+
+        return QString("\x1b[%1m").arg(code);
+    }
+
+    QString esc_reset()
+    {
+        return QString("\x1b[0m");
     }
 
     namespace detail

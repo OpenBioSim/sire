@@ -35,6 +35,7 @@
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
+#include "SireBase/releasegil.h"
 
 #include "SireFF/ffdetail.h"
 #include "SireMM/mmdetail.h"
@@ -1786,6 +1787,9 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
                                          .arg(fileformats.count()),
                                      CODELOC);
     }
+
+    // release the GIL here so that progress bars can be displayed
+    auto handle = SireBase::release_gil();
 
     QVector<QFileInfo> fileinfos(filenames.count());
 
