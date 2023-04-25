@@ -76,6 +76,7 @@ namespace SireBase
     };
 
     SIREBASE_EXPORT QString esc_color(ANSI::Color fg, ANSI::Color bg = ANSI::DEFAULT, bool bold = false, bool underline = false);
+    SIREBASE_EXPORT QString esc_color(ANSI::Color fg, bool bold, bool underline = false);
     SIREBASE_EXPORT QString esc_reset();
 
     namespace detail

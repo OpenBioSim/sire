@@ -123,6 +123,11 @@ namespace SireBase
         return QString("\x1b[%1m").arg(code);
     }
 
+    QString esc_color(ANSI::Color fg, bool bold, bool underline)
+    {
+        return esc_color(fg, ANSI::DEFAULT, bold, underline);
+    }
+
     QString esc_reset()
     {
         return QString("\x1b[0m");

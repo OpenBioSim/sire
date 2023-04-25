@@ -243,6 +243,8 @@ namespace SireBase
                         break;
                     }
 
+                    auto start_print_time = QDateTime::currentMSecsSinceEpoch();
+
                     int attempt = 0;
 
                     while (true)
@@ -304,7 +306,13 @@ namespace SireBase
                         break;
                     }
 
-                    QThread::msleep(sleep_time);
+                    auto time_to_sleep = sleep_time - (QDateTime::currentMSecsSinceEpoch() - start_print_time);
+
+                    if (time_to_sleep > sleep_time)
+                        time_to_sleep = sleep_time;
+
+                    if (time_to_sleep > 5)
+                        QThread::msleep(time_to_sleep);
                 }
             }
 
@@ -522,28 +530,94 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
 {
     static int frame_counter = 0;
 
-    QString bar;
     bool finished = false;
 
     quint32 c = this->current;
     quint32 t = this->total;
 
-    const float secs = 0.001 * elapsed;
-    QString speed;
+    bool use_color = true;
 
-    if (secs > 0)
+    QString start_text = text;
+    QString end_text;
+
+    if (not start_text.isEmpty())
     {
-        if (speed_unit.length() == 0)
-            speed = QString("%1 its / s").arg(float(c) / secs, 0, 'F', 1);
+        if (start_text.length() < 10)
+        {
+            start_text.resize(10, ' ');
+        }
         else
-            speed = QString("%1 %2").arg(float(c) / secs, 0, 'F', 1).arg(speed_unit);
+        {
+            // pad it to a 4 character boundary - this will help things line up
+            start_text.resize(start_text.length() + (start_text.length() % 4), ' ');
+        }
+
+        start_text += " ";
     }
+
+    if (elapsed > 0)
+    {
+        const float secs = 0.001 * elapsed;
+
+        QString speed;
+
+        if (speed_unit.length() == 0)
+            speed = QString("%1 its / s").arg(float(c) / secs, 6, 'F', 1);
+        else
+            speed = QString("%1 %2").arg(float(c) / secs, 6, 'F', 1).arg(speed_unit);
+
+        int time_precision = 1;
+
+        if (secs > 10)
+        {
+            time_precision = 0;
+        }
+
+        QString time = QString("%1 s").arg(secs, 5, 'F', time_precision);
+
+        if (use_color)
+        {
+            speed = esc_color(ANSI::CYAN) + speed + esc_reset();
+            time = esc_color(ANSI::MAGENTA) + time + esc_reset();
+        }
+
+        end_text = " " + time + " " + speed;
+    }
+
+    // fill up with the progress bar
+    int bar_size = 11;
+
+    QString bar;
+
+    auto center_justify = [&](const QString &message, int size)
+    {
+        if (message.length() >= size)
+            return message;
+
+        int diff = bar_size - message.length();
+
+        int left_half = diff / 2;
+        int right_half = left_half;
+
+        if (diff % 2 == 1)
+        {
+            right_half += 1;
+        }
+
+        return QString(" ").repeated(left_half) + message + QString(" ").repeated(right_half);
+    };
 
     if (this->failed)
     {
-        bar = QString("Failed : %1 s : %2")
-                  .arg(secs, 0, 'F', 1)
-                  .arg(speed);
+        if (use_color)
+        {
+            bar = esc_color(ANSI::BLACK, ANSI::RED) + QString(" ").repeated(bar_size) + esc_reset();
+        }
+        else
+        {
+            bar = QString("X").repeated(bar_size);
+        }
+
         finished = true;
     }
     else if (t > 0)
@@ -551,43 +625,144 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
         // progress bar
         if (c >= t)
         {
-            bar = QString("Completed : %1 s : %2")
-                      .arg(secs, 0, 'F', 1)
-                      .arg(speed);
+            bar = center_justify("Succeeded", bar_size);
+
+            if (use_color)
+            {
+                bar = esc_color(ANSI::WHITE, ANSI::GREEN) + QString(" ").repeated(bar_size) + esc_reset();
+            }
+            else
+            {
+                bar = QString("=").repeated(bar_size);
+            }
+
             finished = true;
         }
         else
         {
-            int percent = int((100.0 * c) / float(t));
+            int percent = (100.0 * c) / float(t);
 
-            bar = QString("%1%% : %2 s : %3")
-                      .arg(percent, 2)
-                      .arg(secs, 0, 'F', 1)
-                      .arg(speed);
+            if (use_color)
+            {
+                bool has_reset = false;
+
+                auto bar_char = [&](int percent, int compare, QString c)
+                {
+                    if (percent < compare and not has_reset)
+                    {
+                        has_reset = true;
+                        return esc_reset() + c;
+                    }
+                    else
+                    {
+                        return c;
+                    }
+                };
+
+                bar = esc_color(ANSI::BLACK, ANSI::CYAN);
+
+                bar += " ";
+
+                for (int i = 10; i <= 30; i += 10)
+                {
+                    bar += bar_char(percent, i, " ");
+                }
+
+                if (percent < 10)
+                {
+                    bar += " ";
+                }
+                else
+                {
+                    bar += bar_char(percent, 40, QString::number(int(percent / 10)));
+                }
+
+                bar += bar_char(percent, 50, QString::number(percent % 10));
+
+                bar += bar_char(percent, 60, QString("%%"));
+
+                for (int i = 70; i <= 100; i += 10)
+                {
+                    bar += bar_char(percent, i, " ");
+                }
+
+                if (not has_reset)
+                    bar += esc_reset();
+
+                bar += " ";
+            }
+            else
+            {
+                auto bar_char = [](int percent, int compare)
+                {
+                    if (percent < compare)
+                        return " ";
+                    else
+                        return "=";
+                };
+
+                bar += bar_char(1, 0);
+
+                for (int i = 10; i <= 30; i += 10)
+                {
+                    bar += bar_char(percent, i);
+                }
+
+                if (percent < 10)
+                {
+                    bar += " ";
+                }
+                else
+                {
+                    bar += QString::number(int(percent / 10));
+                }
+
+                bar += QString::number(percent % 10);
+
+                bar += QString("%%");
+
+                for (int i = 70; i <= 100; i += 10)
+                {
+                    bar += bar_char(percent, i);
+                }
+
+                bar += " ";
+            }
         }
     }
     else
     {
-        int frame = frame_counter % 9;
+        int frame = frame_counter % 16;
         frame_counter += 1;
 
-        QString part = ".  ";
+        int start_blanks = frame;
 
-        if (frame >= 3 and frame < 6)
-            part = " . ";
-        else if (frame >= 6)
-            part = "  .";
+        if (frame > 8)
+        {
+            start_blanks = 8 - (frame - 8);
+        }
 
-        bar = QString("%1 : %2 s : %3")
-                  .arg(part)
-                  .arg(secs, 0, 'F', 1)
-                  .arg(speed);
+        int end_blanks = 11 - 3 - start_blanks;
+
+        if (use_color)
+        {
+            bar += esc_color(ANSI::BLACK, ANSI::BLUE);
+            bar += QString(" ").repeated(start_blanks);
+            bar += esc_color(ANSI::BLACK, ANSI::CYAN);
+            bar += QString("   ");
+            bar += esc_color(ANSI::BLACK, ANSI::BLUE);
+            bar += QString(" ").repeated(end_blanks);
+            bar += esc_reset();
+        }
+        else
+        {
+            bar += QString(" ").repeated(start_blanks);
+            bar += QString("<=>");
+            bar += QString(" ").repeated(end_blanks);
+        }
     }
 
-    if (text.length() > 0)
-    {
-        bar = QString("%1 : %2").arg(text).arg(bar);
-    }
+    bar = start_text + bar + end_text;
 
     return std::make_tuple(bar, finished);
 }
@@ -597,27 +772,11 @@ void SireBase::detail::print_bars(const QStringList &bars, int n_move_up)
     if (bars.isEmpty())
         return;
 
-    // construct the bars - cap at 80 columns wide
-    const int bar_width = 80;
-
     QString to_print;
 
     for (const auto &bar : bars)
     {
-        if (bar.length() > bar_width)
-        {
-            to_print += bar.left(bar_width) + "\n";
-        }
-        else if (bar.length() < bar_width)
-        {
-            QString b = bar;
-            b.resize(bar_width, ' ');
-            to_print += b + "\n";
-        }
-        else
-        {
-            to_print += bar + "\n";
-        }
+        to_print += bar + "\n";
     }
 
     if (n_move_up > 0)
