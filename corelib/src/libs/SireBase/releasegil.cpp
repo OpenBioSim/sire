@@ -88,22 +88,21 @@ namespace SireBase
             return false;
     }
 
-    void sys_stdout_move_up(int n)
+    bool sys_stdout_is_atty()
     {
-        if (n <= 0)
-            return;
-        else if (n > 3200)
-            n = 3200;
-
-        if (sys_stdout_is_ipython())
+        if (detail::ReleaseGILBase::handle != 0)
         {
-            // we don't have cursor control, so all we can do is
-            // completely clear the cell
-            detail::ReleaseGILBase::handle->ipython_clear(true);
+            return detail::ReleaseGILBase::handle->stdout_is_atty();
         }
         else
+            return false;
+    }
+
+    void sys_stdout_move_up(int n)
+    {
+        if (detail::ReleaseGILBase::handle != 0)
         {
-            sys_stdout_write(QString("\x1b[%1A").arg(n));
+            return detail::ReleaseGILBase::handle->move_up(n);
         }
     }
 

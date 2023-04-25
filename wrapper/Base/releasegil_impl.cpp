@@ -7,7 +7,66 @@
 
 #include <QDebug>
 
+static bool _is_ipython = false;
+
+bool is_ipython()
+{
+    return _is_ipython;
+}
+
+void set_is_ipython(bool value)
+{
+    _is_ipython = value;
+}
+
 static PyObject *sys_stdout = 0;
+
+static bool sys_stdout_is_atty()
+{
+    if (is_ipython())
+        // ipython uses a weird sys.stdout, which is not a tty, but should
+        // be treated as interactive
+        return true;
+
+    PyGILState_STATE gilstate = PyGILState_Ensure();
+
+    // copied from the python code
+    // https://github.com/python/cpython/blob/f25f2e2e8c8e48490d22b0cdf67f575608701f6f/Python/pylifecycle.c#L1589
+    // Thanks to https://stackoverflow.com/questions/69247396/python-c-api-how-to-flush-stdout-and-stderr
+    if (sys_stdout == 0)
+    {
+        sys_stdout = PySys_GetObject("__stdout__");
+
+        if (sys_stdout == 0)
+        {
+            qWarning() << "CANNOT ACCESS SYS_STDOUT!";
+            PyGILState_Release(gilstate);
+            return false;
+        }
+    }
+
+    bool ret = false;
+
+    if (sys_stdout != 0 and sys_stdout != Py_None)
+    {
+        PyObject *result = PyObject_CallMethod(sys_stdout, "isatty", 0);
+
+        if (result == 0)
+        {
+            qWarning() << "UNABLE TO DETERMINE IF STDOUT IS A TTY";
+            ret = false;
+        }
+        else
+        {
+            ret = (result == Py_True);
+            Py_DECREF(result);
+        }
+    }
+
+    PyGILState_Release(gilstate);
+
+    return ret;
+}
 
 static void sys_stdout_write(const char *text, bool flush)
 {
@@ -121,18 +180,6 @@ static void ipython_display_clear(bool wait)
     PyGILState_Release(gilstate);
 }
 
-static bool _is_ipython = false;
-
-bool is_ipython()
-{
-    return _is_ipython;
-}
-
-void set_is_ipython(bool value)
-{
-    _is_ipython = value;
-}
-
 class ReleaseGIL : public SireBase::detail::ReleaseGILBase
 {
 public:
@@ -186,6 +233,11 @@ protected:
         {
             ::sys_stdout_write(QString("\x1b[%1A").arg(n).toUtf8().constData(), false);
         }
+    }
+
+    bool stdout_is_atty() const
+    {
+        return ::sys_stdout_is_atty();
     }
 
     void stdout_write(const QString &text, bool flush) const

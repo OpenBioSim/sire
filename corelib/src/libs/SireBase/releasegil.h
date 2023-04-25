@@ -48,6 +48,7 @@ namespace SireBase
     SIREBASE_EXPORT void ipython_clear_output(bool wait = true);
 
     SIREBASE_EXPORT bool sys_stdout_is_ipython();
+    SIREBASE_EXPORT bool sys_stdout_is_atty();
     SIREBASE_EXPORT void sys_stdout_write(const QString &text, bool flush = false);
     SIREBASE_EXPORT void sys_stdout_move_up(int n);
 
@@ -95,12 +96,14 @@ namespace SireBase
             friend SIREBASE_EXPORT void SireBase::sys_stdout_write(const QString &text, bool flush);
             friend SIREBASE_EXPORT bool SireBase::sys_stdout_is_ipython();
             friend SIREBASE_EXPORT void SireBase::sys_stdout_move_up(int n);
+            friend SIREBASE_EXPORT bool SireBase::sys_stdout_is_atty();
 
         public:
             ReleaseGILBase();
             virtual ~ReleaseGILBase();
 
         protected:
+            virtual bool stdout_is_atty() const = 0;
             virtual void stdout_write(const QString &text, bool flush) const = 0;
             virtual bool is_ipython() const = 0;
             virtual void ipython_clear(bool wait) const = 0;

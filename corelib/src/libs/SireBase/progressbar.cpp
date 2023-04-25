@@ -57,6 +57,13 @@ namespace SireBase
     {
         class BarManager;
 
+        enum Theme
+        {
+            SILENT = 0,
+            SIMPLE = 1,
+            COLOR = 2
+        };
+
         class BarData : boost::noncopyable
         {
         public:
@@ -96,7 +103,8 @@ namespace SireBase
 
             std::tuple<QString, bool> toString(qint64 elapsed_ms,
                                                const QString &message,
-                                               const QString &speed_unit) const;
+                                               const QString &speed_unit,
+                                               SireBase::detail::Theme theme) const;
 
             void exit();
 
@@ -216,8 +224,11 @@ namespace SireBase
 
                     global_manager = manager;
 
-                    global_thread = QThread::create(&manager_event_loop);
-                    global_thread->start();
+                    if (theme != SILENT and sys_stdout_is_atty())
+                    {
+                        global_thread = QThread::create(&manager_event_loop);
+                        global_thread->start();
+                    }
                 }
 
                 return manager;
@@ -225,6 +236,10 @@ namespace SireBase
 
             static void eventLoop()
             {
+                if (theme == SILENT)
+                    // we don't print anything
+                    return;
+
                 // don't print anything for the first 250 ms
                 for (int i = 0; i < 5; ++i)
                 {
@@ -264,6 +279,13 @@ namespace SireBase
                         }
 
                         attempt += 1;
+                    }
+
+                    if (theme == SILENT)
+                    {
+                        // stop printing
+                        mutex.unlock();
+                        return;
                     }
 
                     auto manager = global_manager.lock();
@@ -384,12 +406,15 @@ namespace SireBase
                     {
                         auto current_time = QDateTime::currentMSecsSinceEpoch();
                         auto result = d->toString(current_time - bar.start_time,
-                                                  bar.message, bar.speed_unit);
+                                                  bar.message, bar.speed_unit,
+                                                  theme);
                         bar.last_string = std::get<0>(result);
                         return;
                     }
                 }
             }
+
+            static void setTheme(const QString &theme);
 
         private:
             QStringList _lkr_printBars();
@@ -398,6 +423,8 @@ namespace SireBase
             static QMutex mutex;
             static std::weak_ptr<BarManager> global_manager;
             static quint64 sleep_time;
+
+            static Theme theme;
 
             QList<Bar> bars;
 
@@ -416,6 +443,8 @@ namespace SireBase
         }
 
         QMutex BarManager::mutex;
+
+        Theme BarManager::theme(COLOR);
 
         QThread *BarManager::global_thread(0);
 
@@ -516,26 +545,65 @@ void SireBase::detail::BarData::setSpeedUnit(const QString &unit)
         manager->setSpeedUnit(this, unit);
 }
 
+void SireBase::detail::BarManager::setTheme(const QString &t)
+{
+    QMutexLocker lkr(&mutex);
+
+    static QStringList themes = {"silent", "simple", "color"};
+
+    int idx = themes.indexOf(t.toLower().simplified());
+
+    if (idx == -1)
+    {
+        throw SireError::invalid_key(QObject::tr(
+                                         "Unrecognised theme '%1'. Available theses are [ %2 ].")
+                                         .arg(t)
+                                         .arg(themes.join(", ")),
+                                     CODELOC);
+    }
+
+    switch (idx)
+    {
+    case SireBase::detail::SILENT:
+        theme = SireBase::detail::SILENT;
+        break;
+    case SireBase::detail::SIMPLE:
+        theme = SireBase::detail::SIMPLE;
+        break;
+    case SireBase::detail::COLOR:
+        theme = SireBase::detail::COLOR;
+        break;
+    default:
+        theme = SireBase::detail::COLOR;
+    }
+}
+
 void ProgressBar::setTheme(QString theme)
 {
+    SireBase::detail::BarManager::setTheme(theme);
 }
 
 void ProgressBar::setSilent()
 {
+    SireBase::detail::BarManager::setTheme("silent");
 }
 
 std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
                                                               const QString &text,
-                                                              const QString &speed_unit) const
+                                                              const QString &speed_unit,
+                                                              SireBase::detail::Theme theme) const
 {
-    static int frame_counter = 0;
-
     bool finished = false;
 
     quint32 c = this->current;
     quint32 t = this->total;
 
     bool use_color = true;
+
+    if (theme == SireBase::detail::SIMPLE)
+    {
+        use_color = false;
+    }
 
     QString start_text = text;
     QString end_text;
@@ -589,24 +657,6 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
 
     QString bar;
 
-    auto center_justify = [&](const QString &message, int size)
-    {
-        if (message.length() >= size)
-            return message;
-
-        int diff = bar_size - message.length();
-
-        int left_half = diff / 2;
-        int right_half = left_half;
-
-        if (diff % 2 == 1)
-        {
-            right_half += 1;
-        }
-
-        return QString(" ").repeated(left_half) + message + QString(" ").repeated(right_half);
-    };
-
     if (this->failed)
     {
         if (use_color)
@@ -625,8 +675,6 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
         // progress bar
         if (c >= t)
         {
-            bar = center_justify("Succeeded", bar_size);
-
             if (use_color)
             {
                 bar = esc_color(ANSI::WHITE, ANSI::GREEN) + QString(" ").repeated(bar_size) + esc_reset();
@@ -723,15 +771,12 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
                 {
                     bar += bar_char(percent, i);
                 }
-
-                bar += " ";
             }
         }
     }
     else
     {
-        int frame = frame_counter % 16;
-        frame_counter += 1;
+        int frame = int(16.0 * (elapsed % 2000) / 2000.0);
 
         int start_blanks = frame;
 
@@ -813,7 +858,8 @@ QStringList SireBase::detail::BarManager::_lkr_printBars()
         if (b.get() != 0)
         {
             auto result = b->toString(current_time - bar.start_time,
-                                      bar.message, bar.speed_unit);
+                                      bar.message, bar.speed_unit,
+                                      theme);
 
             auto bar_string = std::get<0>(result);
             bar_strings.append(bar_string);

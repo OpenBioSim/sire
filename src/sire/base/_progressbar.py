@@ -3,20 +3,43 @@ __all__ = ["ProgressBar"]
 from ..legacy.Base import ProgressBar as _ProgressBar
 
 
+_cached_in_notebook = None
+
+
 def _in_notebook():
     """
     https://stackoverflow.com/questions/15411967/how-can-i-check-if-code-is-executed-in-the-ipython-notebook
     """
+    global _cached_in_notebook
+
+    if _cached_in_notebook is not None:
+        return _cached_in_notebook
+
     try:
         from IPython import get_ipython
 
         if "IPKernelApp" not in get_ipython().config:  # pragma: no cover
-            return False
+            _cached_in_notebook = False
     except ImportError:
-        return False
+        _cached_in_notebook = False
     except AttributeError:
+        _cached_in_notebook = False
+
+    if _cached_in_notebook is False:
+        return _cached_in_notebook
+
+    _cached_in_notebook = True
+
+    return _cached_in_notebook
+
+
+def _stdout_is_a_file():
+    if _in_notebook():
         return False
-    return True
+    else:
+        import sys
+
+        return not sys.stdout.isatty()
 
 
 _checked_for_jupyter = False
@@ -46,8 +69,11 @@ class ProgressBar:
                 self._bar = _ProgressBar()
 
     def __enter__(self):
-        self._bar = self._bar.enter()
-        return self
+        if _stdout_is_a_file():
+            return self
+        else:
+            self._bar = self._bar.enter()
+            return self
 
     def __exit__(self, type, value, tb):
         self._bar.exit()
