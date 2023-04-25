@@ -688,8 +688,6 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
 
                 if (not has_reset)
                     bar += esc_reset();
-
-                bar += " ";
             }
             else
             {
@@ -762,7 +760,7 @@ std::tuple<QString, bool> SireBase::detail::BarData::toString(qint64 elapsed,
         }
     }
 
-    bar = start_text + bar + end_text;
+    bar = start_text + bar + end_text + "          ";
 
     return std::make_tuple(bar, finished);
 }
