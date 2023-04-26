@@ -197,6 +197,14 @@ namespace bp = boost::python;
 
 #include "getinstalldir.h"
 
+#include "parallel.h"
+
+#include <QMutex>
+
+#include <tbb/global_control.h>
+
+#include "parallel.h"
+
 #include "increment.h"
 
 #include "increment.h"
@@ -216,6 +224,30 @@ namespace bp = boost::python;
 #include <QFileInfo>
 
 #include "getinstalldir.h"
+
+#include "parallel.h"
+
+#include <QMutex>
+
+#include <tbb/global_control.h>
+
+#include "parallel.h"
+
+#include "parallel.h"
+
+#include <QMutex>
+
+#include <tbb/global_control.h>
+
+#include "parallel.h"
+
+#include "parallel.h"
+
+#include <QMutex>
+
+#include <tbb/global_control.h>
+
+#include "parallel.h"
 
 #include "SireBase/generalunitproperty.h"
 
@@ -1147,6 +1179,18 @@ void register_free_functions(){
     
     }
 
+    { //::SireBase::get_max_num_threads
+    
+        typedef int ( *get_max_num_threads_function_type )(  );
+        get_max_num_threads_function_type get_max_num_threads_function_value( &::SireBase::get_max_num_threads );
+        
+        bp::def( 
+            "get_max_num_threads"
+            , get_max_num_threads_function_value
+            , "" );
+    
+    }
+
     { //::SireBase::increment
     
         typedef ::QString ( *increment_function_type )( ::QString );
@@ -1169,6 +1213,44 @@ void register_free_functions(){
             "setInstallDir"
             , setInstallDir_function_value
             , ( bp::arg("dir") )
+            , "" );
+    
+    }
+
+    { //::SireBase::set_default_num_threads
+    
+        typedef void ( *set_default_num_threads_function_type )(  );
+        set_default_num_threads_function_type set_default_num_threads_function_value( &::SireBase::set_default_num_threads );
+        
+        bp::def( 
+            "set_default_num_threads"
+            , set_default_num_threads_function_value
+            , "" );
+    
+    }
+
+    { //::SireBase::set_max_num_threads
+    
+        typedef void ( *set_max_num_threads_function_type )( int );
+        set_max_num_threads_function_type set_max_num_threads_function_value( &::SireBase::set_max_num_threads );
+        
+        bp::def( 
+            "set_max_num_threads"
+            , set_max_num_threads_function_value
+            , ( bp::arg("n") )
+            , "" );
+    
+    }
+
+    { //::SireBase::should_run_in_parallel
+    
+        typedef bool ( *should_run_in_parallel_function_type )( int,::SireBase::PropertyMap const & );
+        should_run_in_parallel_function_type should_run_in_parallel_function_value( &::SireBase::should_run_in_parallel );
+        
+        bp::def( 
+            "should_run_in_parallel"
+            , should_run_in_parallel_function_value
+            , ( bp::arg("count"), bp::arg("map")=SireBase::PropertyMap() )
             , "" );
     
     }

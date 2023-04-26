@@ -15,18 +15,21 @@ from ._load import (
     smiles,
 )
 
-from ._thumbsup import thumbs_up, get_thumbs_up_info, disable_thumbs_up
 from ._measure import measure
 from ._colname import colname, colnames
+from ._parallel import (
+    get_max_num_threads,
+    set_max_num_threads,
+    set_default_num_threads,
+)
 
 __all__ = [
     "atomid",
     "chainid",
     "colname",
     "colnames",
-    "disable_thumbs_up",
     "expand",
-    "get_thumbs_up_info",
+    "get_max_num_threads",
     "load",
     "load_test_files",
     "measure",
@@ -34,9 +37,10 @@ __all__ = [
     "save",
     "save_to_string",
     "segid",
+    "set_default_num_threads",
+    "set_max_num_threads",
     "smiles",
     "supported_formats",
-    "thumbs_up",
     "tutorial_url",
     "use_mixed_api",
     "use_new_api",
@@ -615,8 +619,8 @@ if "SIRE_NO_LAZY_IMPORT" not in _os.environ:
 
         # Previously needed to filter to remove excessive warnings
         # from 'frozen importlib' when lazy loading.
-        #import warnings
-        #warnings.filterwarnings("ignore")
+        # import warnings
+        # warnings.filterwarnings("ignore")
 
         _can_lazy_import = True
 

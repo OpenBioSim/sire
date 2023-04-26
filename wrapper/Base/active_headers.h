@@ -22,6 +22,7 @@
 #include "meminfo.h"
 #include "numberproperty.h"
 #include "packedarrays.h"
+#include "parallel.h"
 #include "progressbar.h"
 #include "properties.h"
 #include "property.h"

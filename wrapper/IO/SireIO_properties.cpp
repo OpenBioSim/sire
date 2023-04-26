@@ -16,6 +16,7 @@
 #include "iobase.h"
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
+#include "SireBase/progressbar.h"
 #include "SireBase/propertylist.h"
 #include "SireBase/releasegil.h"
 #include "SireBase/stringproperty.h"

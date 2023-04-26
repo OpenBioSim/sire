@@ -247,7 +247,8 @@ namespace SireIO
         void enableParallel();
         void disableParallel();
         void setUseParallel(bool on);
-        bool usesParallel() const;
+
+        bool usesParallel(int n = -1) const;
 
         SireSystem::System toSystem(const PropertyMap &map) const;
 
@@ -454,12 +455,6 @@ namespace SireIO
     SIRE_ALWAYS_INLINE bool MoleculeParser::isEmpty() const
     {
         return this->isTextFile() and lnes.isEmpty();
-    }
-
-    /** Return whether or not this parser runs in parallel */
-    SIRE_ALWAYS_INLINE bool MoleculeParser::usesParallel() const
-    {
-        return run_parallel;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

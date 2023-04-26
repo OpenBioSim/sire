@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/releasegil.h"
+
 #include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
@@ -19,7 +21,11 @@ namespace bp = boost::python;
 
 #include <QDateTime>
 
+#include <QThread>
+
 #include <boost/noncopyable.hpp>
+
+#include <iostream>
 
 #include "progressbar.h"
 

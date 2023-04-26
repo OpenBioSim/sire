@@ -741,6 +741,27 @@ MoleculeParser::~MoleculeParser()
 {
 }
 
+/** Return whether or not this parser runs in parallel - this will depend
+ *  on whether parallel was enabled for parsing, we have more than
+ *  one thread available, and the number of items (n) makes it worth
+ *  parsing in parallel. Pass in n<=0 if you don't want to check the
+ *  last condition.
+ */
+bool MoleculeParser::usesParallel(int n) const
+{
+    if (n > 0 and n < 8)
+    {
+        // don't parallelise for 8 items
+        return false;
+    }
+
+    // how many threads are available
+    if (get_max_num_threads() <= 1)
+        return false;
+
+    return run_parallel;
+}
+
 static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &coords_property)
 {
     if (not mol.hasProperty(coords_property))
@@ -1449,29 +1470,72 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
         // including the list of frames to write
         auto d = this->propmap.toDict();
         d.remove("frames_to_write");
-        PropertyMap m(d);
+        const PropertyMap m(d);
 
-        ProgressBar bar(QString("Save %1").arg(this->formatName()), frames_to_write.count());
+        const int nframes = frames_to_write.count();
+
+        ProgressBar bar(QString("Save %1").arg(this->formatName()), nframes);
         bar.setSpeedUnit("frames / s");
 
         bar = bar.enter();
 
-        for (int i = 0; i < frames_to_write.count(); ++i)
+        // find the largest frame so that we can pad with leading zeroes
+        const int largest_frame = *std::max_element(frames_to_write.constBegin(),
+                                                    frames_to_write.constEnd());
+
+        const int padding = QString::number(largest_frame).length();
+
+        if (this->usesParallel())
         {
-            const auto frame = frames_to_write[i];
+            QVector<QStringList> wfile(nframes);
+            auto wfile_data = wfile.data();
 
-            // load the specified frame
-            s.loadFrame(frame, this->propmap);
+            tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](tbb::blocked_range<int> r)
+                              {
+                System thread_s(s);
 
-            // construct a copy of this parser for this frame
-            auto parser = this->construct(s, m);
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    const auto frame = frames_to_write[i];
 
-            // now write it to the file, numbered by the frame number
-            QString frame_filename = QString("%1_%2.%3").arg(basename).arg(frame).arg(suffix);
+                    // load the specified frame
+                    thread_s.loadFrame(frame, m);
 
-            written_files += parser.read().writeToFile(frame_filename);
+                    // construct a copy of this parser for this frame
+                    auto parser = this->construct(thread_s, m);
 
-            bar.setProgress(i + 1);
+                    // now write it to the file, numbered by the frame number
+                    QString frame_filename = basename + "_" + QString::number(i).rightJustified(padding, '0') + "." + suffix;
+
+                    wfile_data[i] = parser.read().writeToFile(frame_filename);
+
+                    bar.tick();
+                } });
+
+            for (const auto &w : wfile)
+            {
+                written_files += w;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < nframes; ++i)
+            {
+                const auto frame = frames_to_write[i];
+
+                // load the specified frame
+                s.loadFrame(frame, m);
+
+                // construct a copy of this parser for this frame
+                auto parser = this->construct(s, m);
+
+                // now write it to the file, numbered by the frame number
+                QString frame_filename = QString("%1_%2.%3").arg(basename).arg(frame).arg(suffix);
+
+                written_files += parser.read().writeToFile(frame_filename);
+
+                bar.setProgress(i + 1);
+            }
         }
 
         bar.success();
