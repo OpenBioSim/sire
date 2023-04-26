@@ -1728,7 +1728,7 @@ MoleculeParserPtr AmberRst::construct(const SireSystem::System &system, const Pr
 
 /** Write this AmberRst to a file called 'filename'. This will write out
     the data in this object to the Amber NetCDF format */
-void AmberRst::writeToFile(const QString &filename) const
+QStringList AmberRst::writeToFile(const QString &filename) const
 {
     // create the hash of all global data
     QHash<QString, QString> globals;
@@ -2002,4 +2002,6 @@ void AmberRst::writeToFile(const QString &filename) const
 
     QMutexLocker lkr(NetCDFFile::globalMutex());
     NetCDFFile::write(filename, globals, data);
+
+    return QStringList(filename);
 }

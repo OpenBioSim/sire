@@ -184,7 +184,7 @@ namespace SireIO
 
         QStringList warnings() const;
 
-        void writeToFile(const QString &filename) const;
+        QStringList writeToFile(const QString &filename) const;
 
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;

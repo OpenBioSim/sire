@@ -913,7 +913,8 @@ MoleculeParserPtr DCD::construct(const SireSystem::System &system, const Propert
 
 /** Write this DCD to a file called 'filename'. This will write out
     the data in this object to the DCD format */
-void DCD::writeToFile(const QString &filename) const
+QStringList DCD::writeToFile(const QString &filename) const
 {
     // (write all types to files, as needed)
+    return QStringList();
 }

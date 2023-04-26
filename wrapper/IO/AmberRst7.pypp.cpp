@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 #include "SireIO/errors.h"
 
+#include "SireIO/textfile.h"
+
 #include "SireMol/atomcoords.h"
 
 #include "SireMol/atomvelocities.h"
@@ -80,7 +82,7 @@ void register_AmberRst7_class(){
                 "boxAngles"
                 , boxAngles_function_value
                 , bp::release_gil_policy()
-                , "Return the parsed box angles" );
+                , "" );
         
         }
         { //::SireIO::AmberRst7::boxDimensions
@@ -92,7 +94,7 @@ void register_AmberRst7_class(){
                 "boxDimensions"
                 , boxDimensions_function_value
                 , bp::release_gil_policy()
-                , "Return the parsed box dimensions" );
+                , "" );
         
         }
         { //::SireIO::AmberRst7::construct
@@ -143,7 +145,7 @@ void register_AmberRst7_class(){
                 "coordinates"
                 , coordinates_function_value
                 , bp::release_gil_policy()
-                , "Return the parsed coordinate data" );
+                , "" );
         
         }
         { //::SireIO::AmberRst7::formatDescription
@@ -204,7 +206,7 @@ void register_AmberRst7_class(){
                 "hasVelocities"
                 , hasVelocities_function_value
                 , bp::release_gil_policy()
-                , "Return whether or not this restart file also provides velocities" );
+                , "" );
         
         }
         { //::SireIO::AmberRst7::isFrame
@@ -280,7 +282,7 @@ void register_AmberRst7_class(){
                 "time"
                 , time_function_value
                 , bp::release_gil_policy()
-                , "Return the current time of the simulation from which this restart\nfile was written in picoseconds.\nThis is a negative number if the time has not been set" );
+                , "" );
         
         }
         { //::SireIO::AmberRst7::title
@@ -328,7 +330,7 @@ void register_AmberRst7_class(){
                 "velocities"
                 , velocities_function_value
                 , bp::release_gil_policy()
-                , "Return the parsed coordinate data" );
+                , "" );
         
         }
         { //::SireIO::AmberRst7::what

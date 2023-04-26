@@ -261,7 +261,7 @@ namespace SireIO
 
         SireSystem::System toSystem(const QList<MoleculeParserPtr> &others) const;
 
-        virtual void writeToFile(const QString &filename) const;
+        virtual QStringList writeToFile(const QString &filename) const;
 
         virtual bool isTextFile() const;
         virtual bool isBinaryFile() const;
@@ -296,6 +296,9 @@ namespace SireIO
         bool writingTrajectory() const;
         QList<qint32> framesToWrite() const;
         SireMol::Frame createFrame(qint32 frame_index) const;
+
+        void setParsedSystem(const SireSystem::System &system,
+                             const PropertyMap &map);
 
     private:
         static MoleculeParserPtr _pvt_parse(const QString &filename, const PropertyMap &map);

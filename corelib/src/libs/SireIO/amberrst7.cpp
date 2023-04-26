@@ -655,7 +655,7 @@ static QVector<Vector> getVelocities(const Molecule &mol, const PropertyName &ve
 
 /** Construct by extracting the necessary data from the passed System */
 AmberRst7::AmberRst7(const System &system, const PropertyMap &map)
-    : ConcreteProperty<AmberRst7, MoleculeParser>(), current_time(0), box_dims(0), box_angs(cubic_angs)
+    : ConcreteProperty<AmberRst7, MoleculeParser>(system, map), current_time(0), box_dims(0), box_angs(cubic_angs)
 {
     // get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order
@@ -799,6 +799,7 @@ AmberRst7::AmberRst7(const System &system, const PropertyMap &map)
     AmberRst7 parsed(lines, map);
 
     this->operator=(parsed);
+    this->setParsedSystem(system, map);
 }
 
 /** Copy constructor */

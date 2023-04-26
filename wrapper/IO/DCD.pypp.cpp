@@ -354,7 +354,7 @@ void register_DCD_class(){
         }
         { //::SireIO::DCD::writeToFile
         
-            typedef void ( ::SireIO::DCD::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::DCD::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::DCD::writeToFile );
             
             DCD_exposer.def( 

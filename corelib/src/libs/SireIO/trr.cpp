@@ -371,10 +371,10 @@ MoleculeParserPtr TRR::construct(const SireSystem::System &system, const Propert
 }
 
 /** Write this binary file 'filename' */
-void TRR::writeToFile(const QString &filename) const
+QStringList TRR::writeToFile(const QString &filename) const
 {
     if (this->nFrames() == 0 or this->nAtoms() == 0)
-        return;
+        return QStringList();
 
     auto gil = SireBase::release_gil();
 
@@ -410,4 +410,6 @@ void TRR::writeToFile(const QString &filename) const
     }
 
     outfile.close();
+
+    return QStringList(filename);
 }

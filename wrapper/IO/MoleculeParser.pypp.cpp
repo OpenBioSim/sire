@@ -894,7 +894,7 @@ void register_MoleculeParser_class(){
         }
         { //::SireIO::MoleculeParser::writeToFile
         
-            typedef void ( ::SireIO::MoleculeParser::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::MoleculeParser::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::MoleculeParser::writeToFile );
             
             MoleculeParser_exposer.def( 

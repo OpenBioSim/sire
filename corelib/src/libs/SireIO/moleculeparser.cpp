@@ -53,6 +53,7 @@
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
 #include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
 
 #include "SireSystem/system.h"
 
@@ -542,6 +543,42 @@ MoleculeParser::MoleculeParser(const PropertyMap &map) : Property(), propmap(map
     {
         run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
     }
+}
+
+void MoleculeParser::setParsedSystem(const System &system, const PropertyMap &map)
+{
+    if (map["parallel"].hasValue())
+    {
+        run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+
+    if (map["frames_to_write"].hasValue())
+    {
+        const qint32 num_frames = system.nFrames();
+
+        auto frames = map["frames_to_write"].value().asAnArray();
+
+        for (int i = 0; i < frames.count(); ++i)
+        {
+            qint32 frame_idx = frames[i].asAnInteger();
+
+            // make sure this is a valid frame
+            if (not Index(frame_idx).canMap(num_frames))
+            {
+                throw SireError::invalid_index(QObject::tr(
+                                                   "Cannot save trajectory frame '%1' as the number of "
+                                                   "frames is only '%2'")
+                                                   .arg(frame_idx)
+                                                   .arg(num_frames),
+                                               CODELOC);
+            }
+
+            frames_to_write.append(frame_idx);
+        }
+    }
+
+    saved_system = system;
+    propmap = map;
 }
 
 /** Constructor */
@@ -1378,11 +1415,14 @@ PropertyPtr MoleculeParser::getForceField(const System &system, const PropertyMa
 }
 
 /** Write the parsed data back to the file called 'filename'. This will
-    overwrite the file if it exists already, so be careful! */
-void MoleculeParser::writeToFile(const QString &filename) const
+    overwrite the file if it exists already, so be careful! Note that
+    this will write this to multiple files if trajectory writing
+    is requested and this is a frame parser
+*/
+QStringList MoleculeParser::writeToFile(const QString &filename) const
 {
     if (lnes.isEmpty())
-        return;
+        return QStringList();
 
     if (not this->isTextFile())
         throw SireError::program_bug(
@@ -1392,21 +1432,72 @@ void MoleculeParser::writeToFile(const QString &filename) const
                 .arg(this->what()),
             CODELOC);
 
-    QFile f(filename);
+    auto gil = SireBase::release_gil();
 
-    if (not f.open(QIODevice::WriteOnly | QIODevice::Text))
+    QStringList written_files;
+
+    if (this->writingTrajectory() and this->isFrame())
     {
-        throw SireError::file_error(f, CODELOC);
+        auto fileinfo = QFileInfo(filename);
+
+        const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
+        const auto suffix = fileinfo.completeSuffix();
+
+        System s = this->saved_system;
+
+        // construct a copy of our property map, but without
+        // including the list of frames to write
+        auto d = this->propmap.toDict();
+        d.remove("frames_to_write");
+        PropertyMap m(d);
+
+        ProgressBar bar(QString("Save %1").arg(this->formatName()), frames_to_write.count());
+        bar.setSpeedUnit("frames / s");
+
+        bar = bar.enter();
+
+        for (int i = 0; i < frames_to_write.count(); ++i)
+        {
+            const auto frame = frames_to_write[i];
+
+            // load the specified frame
+            s.loadFrame(frame, this->propmap);
+
+            // construct a copy of this parser for this frame
+            auto parser = this->construct(s, m);
+
+            // now write it to the file, numbered by the frame number
+            QString frame_filename = QString("%1_%2.%3").arg(basename).arg(frame).arg(suffix);
+
+            written_files += parser.read().writeToFile(frame_filename);
+
+            bar.setProgress(i + 1);
+        }
+
+        bar.success();
+    }
+    else
+    {
+        QFile f(filename);
+
+        if (not f.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            throw SireError::file_error(f, CODELOC);
+        }
+
+        QTextStream ts(&f);
+
+        for (const QString &line : lnes)
+        {
+            ts << line << '\n';
+        }
+
+        f.close();
+
+        written_files.append(filename);
     }
 
-    QTextStream ts(&f);
-
-    for (const QString &line : lnes)
-    {
-        ts << line << '\n';
-    }
-
-    f.close();
+    return written_files;
 }
 
 /** Internal function that actually tries to parse the supplied file with name
@@ -1777,7 +1868,7 @@ QString MoleculeParser::supportedFormats()
     return getParserFactory()->supportedFormats();
 }
 
-QStringList pvt_write(const System &system, const QStringList &filenames, const QStringList &fileformats,
+QStringList pvt_write(System system, const QStringList &filenames, const QStringList &fileformats,
                       const PropertyMap &map)
 {
     if (filenames.count() != fileformats.count())
@@ -1791,6 +1882,10 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
     // release the GIL here so that progress bars can be displayed
     auto handle = SireBase::release_gil();
 
+    // check that the files can be written - note that this won't
+    // check that numbered trajectory filenames are writable...
+    // It also won't catch race conditions if things change before
+    // we actually write the files...
     QVector<QFileInfo> fileinfos(filenames.count());
 
     QStringList errors;
@@ -1824,7 +1919,7 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
     // now get all of the parsers
     const auto factories = getParserFactory()->getFactories(fileformats);
 
-    QVector<QString> written_files(filenames.count());
+    QVector<QStringList> written_files(filenames.count());
 
     // should we write the files in parallel?
     bool run_parallel = true;
@@ -1848,8 +1943,7 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
 
                     try
                     {
-                        written_files[i] = filename;
-                        factories[i].construct(system, map).read().writeToFile(filename);
+                        written_files[i] = factories[i].construct(system, map).read().writeToFile(filename);
                     }
                     catch (const SireError::exception &e)
                     {
@@ -1872,8 +1966,7 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
 
             try
             {
-                written_files[i] = filename;
-                factories[i].construct(system, map).read().writeToFile(filename);
+                written_files[i] = factories[i].construct(system, map).read().writeToFile(filename);
             }
             catch (const SireError::exception &e)
             {
@@ -1894,7 +1987,14 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
                                   CODELOC);
     }
 
-    return written_files.toList();
+    QStringList w;
+
+    for (const auto &wf : written_files)
+    {
+        w += wf;
+    }
+
+    return w;
 }
 
 /** Save the passed System to the file called 'filename'. First, the 'fileformat'

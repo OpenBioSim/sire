@@ -309,7 +309,7 @@ void register_AmberTraj_class(){
         }
         { //::SireIO::AmberTraj::writeToFile
         
-            typedef void ( ::SireIO::AmberTraj::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::AmberTraj::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::AmberTraj::writeToFile );
             
             AmberTraj_exposer.def( 

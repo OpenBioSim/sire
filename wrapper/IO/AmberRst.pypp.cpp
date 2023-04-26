@@ -593,7 +593,7 @@ void register_AmberRst_class(){
         }
         { //::SireIO::AmberRst::writeToFile
         
-            typedef void ( ::SireIO::AmberRst::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::AmberRst::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::AmberRst::writeToFile );
             
             AmberRst_exposer.def( 

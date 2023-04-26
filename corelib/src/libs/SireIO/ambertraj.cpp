@@ -1069,10 +1069,10 @@ bool AmberTraj::isTextFile() const
 }
 
 /** Write this to the file 'filename' */
-void AmberTraj::writeToFile(const QString &filename) const
+QStringList AmberTraj::writeToFile(const QString &filename) const
 {
     if (this->nFrames() == 0 or this->nAtoms() == 0)
-        return;
+        return QStringList();
 
     auto gil = SireBase::release_gil();
 
@@ -1111,4 +1111,6 @@ void AmberTraj::writeToFile(const QString &filename) const
     }
 
     outfile.close();
+
+    return QStringList(filename);
 }

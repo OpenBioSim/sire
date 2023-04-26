@@ -309,7 +309,7 @@ static QVector<Vector> getVelocities(const Selector<Atom> &atoms, const Property
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
-Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<Gro87, MoleculeParser>(map)
+Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<Gro87, MoleculeParser>(system, map)
 {
     // get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order
@@ -591,9 +591,10 @@ Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : Concret
     }
 
     // now generate this object by re-reading these lines
-    Gro87 parsed(lines.toList());
+    Gro87 parsed(lines.toList(), map);
 
     this->operator=(parsed);
+    this->setParsedSystem(system, map);
 }
 
 /** Copy constructor */

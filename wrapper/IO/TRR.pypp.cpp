@@ -321,7 +321,7 @@ void register_TRR_class(){
         }
         { //::SireIO::TRR::writeToFile
         
-            typedef void ( ::SireIO::TRR::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::TRR::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::TRR::writeToFile );
             
             TRR_exposer.def( 
