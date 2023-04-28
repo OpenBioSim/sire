@@ -227,13 +227,9 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
      */
 
     // Perform the reduction.
-    auto new_v1 = this->v1 - std::round(this->v1.x() / this->v0.x()) * this->v0;
-    auto tmp = this->v2 - std::round(this->v2.y() / this->v1.y()) * this->v1;
-    auto new_v2 = tmp - std::round(tmp.x() / this->v0.x()) * this->v0;
-
-    // Update the lattice vectors.
-    this->v1 = new_v1;
-    this->v2 = new_v2;
+    this->v2 = this->v2 - this->v1*std::round(this->v2.y() / this->v1.y());
+    this->v2 = this->v2 - this->v0*std::round(this->v2.x() / this->v0.x());
+    this->v1 = this->v1 - this->v0*std::round(this->v1.x() / this->v0.x());
 
     // Store the cell matrix and its inverse.
     this->cell_matrix = Matrix(this->v0, this->v1, this->v2).transpose();
