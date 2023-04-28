@@ -36,6 +36,8 @@
 
 #include <iostream>
 
+#include <signal.h>
+
 #include "SireBase/releasegil.h"
 
 #include "SireError/errors.h"
@@ -46,6 +48,109 @@
 using namespace SireBase;
 
 using namespace SireStream;
+
+/////////
+///////// Code to install a signal handler so that SIGINT will
+///////// cause long-running loops to exit
+/////////
+
+static bool RECEIVED_SIGINT(false);
+static bool RECEIVED_SIGHUP(false);
+
+// code based on this excellent stackoverflow post
+// https://stackoverflow.com/questions/32389905/sigaction-and-porting-linux-code-to-windows
+
+void signal_handler(int signal)
+{
+    switch (signal)
+    {
+#ifdef Q_OS_WIN
+    case SIGTERM:
+    case SIGABRT:
+    case SIGBREAK:
+#else
+    case SIGHUP:
+#endif
+        RECEIVED_SIGHUP = true;
+        break;
+    case SIGINT:
+        RECEIVED_SIGINT = true;
+        break;
+    }
+}
+
+void disconnect_handler()
+{
+#ifdef _WIN32
+    signal(SIGINT, SIG_DFL);
+    signal(SIGTERM, SIG_DFL);
+    signal(SIGABRT, SIG_DFL);
+#else
+    struct sigaction sig_action;
+    // Setup the sighub handler
+    sig_action.sa_handler = SIG_DFL;
+    // Restart the system call, if at all possible
+    sig_action.sa_flags = SA_RESTART;
+    // Block every signal during the handler
+    sigfillset(&sig_action.sa_mask);
+    // Intercept SIGHUP and SIGINT
+    sigaction(SIGHUP, &sig_action, NULL);
+    sigaction(SIGINT, &sig_action, NULL);
+#endif
+
+    RECEIVED_SIGHUP = false;
+    RECEIVED_SIGINT = false;
+}
+
+class HandlerRAII
+{
+public:
+    HandlerRAII()
+    {
+    }
+
+    ~HandlerRAII()
+    {
+        disconnect_handler();
+    }
+};
+
+static std::weak_ptr<HandlerRAII> shared_handler;
+
+// This is not thread safe, but it is designed to only be called
+// from the single event loop thread, so this is ok ;-)
+std::shared_ptr<HandlerRAII> connect_handler()
+{
+    auto h = shared_handler.lock();
+
+    if (h.get() != 0)
+        return h;
+
+    h = std::shared_ptr<HandlerRAII>(new HandlerRAII());
+    shared_handler = h;
+
+#ifdef _WIN32
+    signal(SIGINT, handle_signal);
+    signal(SIGTERM, handle_signal);
+    signal(SIGABRT, handle_signal);
+#else
+    struct sigaction sig_action;
+
+    sig_action.sa_handler = &signal_handler;
+
+    // Restart the system call, if at all possible
+    sig_action.sa_flags = SA_RESTART;
+
+    // Block every signal during the handler
+    sigfillset(&sig_action.sa_mask);
+
+    // Intercept SIGHUP and SIGINT
+    sigaction(SIGHUP, &sig_action, NULL);
+    sigaction(SIGINT, &sig_action, NULL);
+#endif
+
+    return h;
+}
 
 /////////
 ///////// Implementation of SireBase::detail::BarData
@@ -239,6 +344,9 @@ namespace SireBase
                 if (theme == SILENT)
                     // we don't print anything
                     return;
+
+                // install the signal handler for the duration of this thread
+                auto h = connect_handler();
 
                 // don't print anything for the first 250 ms
                 for (int i = 0; i < 5; ++i)
@@ -1035,14 +1143,30 @@ void ProgressBar::setSpeedUnit(const QString &unit)
         d->setSpeedUnit(unit);
 }
 
+static void check_raise_interrupt()
+{
+    if (RECEIVED_SIGHUP)
+    {
+        throw SireError::interrupt_error(QObject::tr("Received SIGHUP"), CODELOC);
+    }
+    else if (RECEIVED_SIGINT)
+    {
+        throw SireError::interrupt_error(QObject::tr("Received SIGINT"), CODELOC);
+    }
+}
+
 void ProgressBar::tick()
 {
+    check_raise_interrupt();
+
     if (d.get() != 0)
         d->tick();
 }
 
 void ProgressBar::tick(const QString &text)
 {
+    check_raise_interrupt();
+
     if (d.get() != 0)
         d->tick(text);
 
@@ -1079,12 +1203,16 @@ void ProgressBar::failure(const QString &message)
 
 void ProgressBar::setProgress(quint32 value)
 {
+    check_raise_interrupt();
+
     if (d.get() != 0)
         d->setProgress(value);
 }
 
 void ProgressBar::setProgress(quint32 value, const QString &text)
 {
+    check_raise_interrupt();
+
     if (d.get() != 0)
         d->setProgress(value, text);
 
@@ -1093,6 +1221,8 @@ void ProgressBar::setProgress(quint32 value, const QString &text)
 
 void ProgressBar::setProgress(const QString &text, quint32 value)
 {
+    check_raise_interrupt();
+
     if (d.get() != 0)
         d->setProgress(value, text);
 
