@@ -130,9 +130,9 @@ std::shared_ptr<HandlerRAII> connect_handler()
     shared_handler = h;
 
 #ifdef _WIN32
-    signal(SIGINT, handle_signal);
-    signal(SIGTERM, handle_signal);
-    signal(SIGABRT, handle_signal);
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGABRT, signal_handler);
 #else
     struct sigaction sig_action;
 
