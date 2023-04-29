@@ -286,6 +286,8 @@ namespace SireIO
         virtual SireSystem::System startSystem(const QVector<QString> &lines, const PropertyMap &map) const;
         virtual void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
 
+        void createDirectoryForFile(const QString &filename) const;
+
         void setLines(const QVector<QString> &lines);
 
         void setFilename(const QString &filename);

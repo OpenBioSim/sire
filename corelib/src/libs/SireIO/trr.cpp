@@ -378,6 +378,8 @@ QStringList TRR::writeToFile(const QString &filename) const
 
     auto gil = SireBase::release_gil();
 
+    createDirectoryForFile(filename);
+
     TRRFile outfile(filename);
 
     if (not outfile.open(QIODevice::WriteOnly))

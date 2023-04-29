@@ -1076,6 +1076,8 @@ QStringList AmberTraj::writeToFile(const QString &filename) const
 
     auto gil = SireBase::release_gil();
 
+    createDirectoryForFile(filename);
+
     AmberTrajFile outfile(filename);
 
     if (not outfile.open(QIODevice::WriteOnly | QIODevice::Truncate))

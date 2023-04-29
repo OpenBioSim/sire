@@ -1435,6 +1435,34 @@ PropertyPtr MoleculeParser::getForceField(const System &system, const PropertyMa
     return ffield.read().asA<FFDetail>();
 }
 
+/** Create a directory for the passed file (if it doesn't already exist) */
+void MoleculeParser::createDirectoryForFile(const QString &filename) const
+{
+    const auto fileinfo = QFileInfo(filename);
+
+    const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
+    const auto basedir = fileinfo.absoluteDir();
+
+    static QMutex create_dir_mutex;
+
+    QMutexLocker lkr(&create_dir_mutex);
+
+    if (not basedir.exists())
+    {
+        // create this directory
+        if (not basedir.mkpath("."))
+        {
+            throw SireError::file_error(QObject::tr(
+                                            "Could not create the directory '%1' into which the file "
+                                            "'%2' will be written. Make sure there is enough space "
+                                            "and you have the right permissions.")
+                                            .arg(basedir.absolutePath())
+                                            .arg(fileinfo.fileName()),
+                                        CODELOC);
+        }
+    }
+}
+
 /** Write the parsed data back to the file called 'filename'. This will
     overwrite the file if it exists already, so be careful! Note that
     this will write this to multiple files if trajectory writing
@@ -1457,13 +1485,10 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
 
     QStringList written_files;
 
+    createDirectoryForFile(filename);
+
     if (this->writingTrajectory() and this->isFrame())
     {
-        auto fileinfo = QFileInfo(filename);
-
-        const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
-        const auto suffix = fileinfo.completeSuffix();
-
         System s = this->saved_system;
 
         // construct a copy of our property map, but without
@@ -1484,6 +1509,11 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
                                                     frames_to_write.constEnd());
 
         const int padding = QString::number(largest_frame).length();
+
+        const auto fileinfo = QFileInfo(filename);
+
+        const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
+        const auto suffix = fileinfo.completeSuffix();
 
         if (this->usesParallel())
         {
