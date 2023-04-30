@@ -79,6 +79,7 @@ using namespace SireMol;
 using namespace SireFF;
 using namespace SireBase;
 using namespace SireStream;
+using namespace SireUnits;
 
 //////////////
 ////////////// Implementation of ParserFactory and ParserFactoryHelper
@@ -879,6 +880,30 @@ static QVector<T> collapse(const QVector<QVector<T>> &arrays)
     return values;
 }
 
+static SireUnits::Dimension::Time get_time_from_system(const System &system,
+                                                       const PropertyName &time_property)
+{
+    SireUnits::Dimension::Time time(0);
+
+    if (system.containsProperty(time_property))
+    {
+        try
+        {
+            const Property &prop = system.property(time_property);
+
+            if (prop.isA<TimeProperty>())
+                time = prop.asA<TimeProperty>().value();
+            else
+                time = prop.asA<GeneralUnitProperty>().toUnit<SireUnits::Dimension::Time>();
+        }
+        catch (...)
+        {
+        }
+    }
+
+    return time;
+}
+
 /** Convenience function that converts the passed System into a Frame */
 Frame MoleculeParser::createFrame(const System &system,
                                   const PropertyMap &map) const
@@ -993,7 +1018,6 @@ Frame MoleculeParser::createFrame(const System &system,
     }
 
     SireVol::SpacePtr space;
-    SireUnits::Dimension::Time time(0);
 
     const auto space_property = map["space"];
     if (system.containsProperty(space_property))
@@ -1001,22 +1025,7 @@ Frame MoleculeParser::createFrame(const System &system,
         space = system.property(space_property).asA<SireVol::Space>();
     }
 
-    const auto time_property = map["time"];
-    if (system.containsProperty(time_property))
-    {
-        try
-        {
-            const Property &prop = system.property(time_property);
-
-            if (prop.isA<TimeProperty>())
-                time = prop.asA<TimeProperty>().value();
-            else
-                time = prop.asA<GeneralUnitProperty>().toUnit<SireUnits::Dimension::Time>();
-        }
-        catch (...)
-        {
-        }
-    }
+    auto time = get_time_from_system(system, map["time"]);
 
     return SireMol::Frame(coords, vels, frcs, space.read(), time);
 }
@@ -1443,6 +1452,11 @@ void MoleculeParser::createDirectoryForFile(const QString &filename) const
     const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
     const auto basedir = fileinfo.absoluteDir();
 
+    if (basedir.exists())
+        return;
+
+    // need to use a mutex to minimise chance of a race condition
+
     static QMutex create_dir_mutex;
 
     QMutexLocker lkr(&create_dir_mutex);
@@ -1461,6 +1475,38 @@ void MoleculeParser::createDirectoryForFile(const QString &filename) const
                                         CODELOC);
         }
     }
+}
+
+void _check_and_remove_frame_dir(const QFileInfo &fileinfo)
+{
+    // we will only remove directories that only contain 'frame_XXX' files
+    auto dir = QDir(fileinfo.absoluteFilePath());
+
+    bool ok_to_delete = true;
+
+    for (const auto &subfile : dir.entryInfoList(QDir::Files))
+    {
+        if (not subfile.fileName().startsWith("frame_"))
+        {
+            ok_to_delete = false;
+            break;
+        }
+    }
+
+    if (not ok_to_delete)
+        return;
+
+    // now try to remove the files...
+    for (const auto &subfile : dir.entryInfoList(QDir::Files))
+    {
+        if (subfile.fileName().startsWith("frame_"))
+        {
+            dir.remove(subfile.fileName());
+        }
+    }
+
+    dir = QDir(fileinfo.absolutePath());
+    dir.rmdir(fileinfo.fileName());
 }
 
 /** Write the parsed data back to the file called 'filename'. This will
@@ -1510,16 +1556,58 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
 
         const int padding = QString::number(largest_frame).length();
 
-        const auto fileinfo = QFileInfo(filename);
+        // in this case, we are going to create a directory named after the
+        // filename, into which all the frames will be written
+        auto fileinfo = QFileInfo(filename);
 
-        const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
+        if (fileinfo.exists())
+        {
+            // by default, we support overwriting of files - so remove this if it is a file
+            if (fileinfo.isDir())
+            {
+                _check_and_remove_frame_dir(fileinfo);
+
+                // rebuild so it is not cached
+                fileinfo = QFileInfo(filename);
+
+                if (fileinfo.exists())
+                    throw SireError::file_error(QObject::tr(
+                                                    "Could not write the trajectory for file '%1' as there "
+                                                    "is already a directory with this name that contains "
+                                                    "files that don't appear to have been created by sire.")
+                                                    .arg(filename),
+                                                CODELOC);
+            }
+            else
+            {
+                auto dir = fileinfo.absoluteDir();
+
+                if (not dir.remove(fileinfo.fileName()))
+                    throw SireError::file_error(QObject::tr(
+                                                    "Could not write the trajectory for file '%1' as "
+                                                    "we don't have permission to remove the existing "
+                                                    "file with this name.")
+                                                    .arg(filename),
+                                                CODELOC);
+            }
+        }
+
+        QDir framedir(fileinfo.absoluteFilePath());
+
+        if (not framedir.mkpath("."))
+            throw SireError::file_error(QObject::tr(
+                                            "Could not create the directory into which to write the "
+                                            "trajectory for '%1'. Check that there is enough space "
+                                            "and you have the correct permissions.")
+                                            .arg(framedir.absolutePath()),
+                                        CODELOC);
+
         const auto suffix = fileinfo.completeSuffix();
+
+        const auto time_property = m["time"];
 
         if (this->usesParallel())
         {
-            QVector<QStringList> wfile(nframes);
-            auto wfile_data = wfile.data();
-
             tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](tbb::blocked_range<int> r)
                               {
                 System thread_s(s);
@@ -1531,21 +1619,26 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
                     // load the specified frame
                     thread_s.loadFrame(frame, m);
 
+                    auto time = get_time_from_system(thread_s, time_property).to(picosecond);
+
+                    if (time < 0)
+                        time = 0;
+
                     // construct a copy of this parser for this frame
                     auto parser = this->construct(thread_s, m);
 
-                    // now write it to the file, numbered by the frame number
-                    QString frame_filename = basename + "_" + QString::number(i).rightJustified(padding, '0') + "." + suffix;
+                    // now write it to the file, numbered by the frame number and time
+                    QString frame_filename = framedir.filePath(
+                        "frame_" +
+                        QString::number(i).rightJustified(padding, '0') +
+                        "_" +
+                        QString::number(time).replace(".", "-") +
+                        "." + suffix);
 
-                    wfile_data[i] = parser.read().writeToFile(frame_filename);
+                    parser.read().writeToFile(frame_filename);
 
                     bar.tick();
                 } });
-
-            for (const auto &w : wfile)
-            {
-                written_files += w;
-            }
         }
         else
         {
@@ -1556,19 +1649,30 @@ QStringList MoleculeParser::writeToFile(const QString &filename) const
                 // load the specified frame
                 s.loadFrame(frame, m);
 
+                auto time = get_time_from_system(s, time_property).to(picosecond);
+
                 // construct a copy of this parser for this frame
                 auto parser = this->construct(s, m);
 
                 // now write it to the file, numbered by the frame number
-                QString frame_filename = QString("%1_%2.%3").arg(basename).arg(frame).arg(suffix);
+                QString frame_filename = framedir.filePath(
+                    "frame_" +
+                    QString::number(i).rightJustified(padding, '0') +
+                    "_" +
+                    QString::number(time).replace(".", "-") +
+                    "." + suffix);
 
-                written_files += parser.read().writeToFile(frame_filename);
+                parser.read().writeToFile(frame_filename);
 
-                bar.setProgress(i + 1);
+                bar.tick();
             }
         }
 
         bar.success();
+
+        // only return the directory name, as we can handle
+        // reading all the frames contained therein
+        written_files.append(framedir.absolutePath());
     }
     else
     {
@@ -1976,10 +2080,7 @@ QStringList pvt_write(System system, const QStringList &filenames, const QString
     // release the GIL here so that progress bars can be displayed
     auto handle = SireBase::release_gil();
 
-    // check that the files can be written - note that this won't
-    // check that numbered trajectory filenames are writable...
-    // It also won't catch race conditions if things change before
-    // we actually write the files...
+    // check that the files can be written
     QVector<QFileInfo> fileinfos(filenames.count());
 
     QStringList errors;
@@ -1992,8 +2093,14 @@ QStringList pvt_write(System system, const QStringList &filenames, const QString
         {
             if (fileinfos[i].isDir())
             {
-                errors.append(QObject::tr("The file %1 is actually a directory, and not writable!")
-                                  .arg(fileinfos[i].absoluteFilePath()));
+                _check_and_remove_frame_dir(fileinfos[i]);
+
+                // rebuild this, so this isn't cached
+                fileinfos[i] = QFileInfo(filenames[i]);
+
+                if (fileinfos[i].exists())
+                    errors.append(QObject::tr("The file %1 is actually a directory, and not writable!")
+                                      .arg(fileinfos[i].absoluteFilePath()));
             }
             else if (not fileinfos[i].isWritable())
             {

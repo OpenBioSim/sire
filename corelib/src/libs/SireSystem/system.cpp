@@ -52,6 +52,7 @@
 #include "SireMol/selectormol.h"
 
 #include "SireBase/savestate.h"
+#include "SireBase/timeproperty.h"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -3289,26 +3290,46 @@ void System::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+static SireUnits::Dimension::Time get_time_from_property(const Property &prop)
+{
+    try
+    {
+        if (prop.isA<TimeProperty>())
+            return prop.asA<TimeProperty>().value();
+        else
+            return prop.asA<GeneralUnitProperty>().toUnit<SireUnits::Dimension::Time>();
+    }
+    catch (...)
+    {
+        return SireUnits::Dimension::Time(0);
+    }
+}
+
 void System::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     this->accept();
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::loadFrame(frame, map);
 
-    // we must get the space property
+    // we must get the space property and a time property
     SpacePtr old_space;
+    SireUnits::Dimension::Time old_time;
 
     const auto space_property = map["space"];
+    const auto time_property = map["time"];
 
-    if (not space_property.hasSource())
-    {
-        // nothing to do
-        return;
-    }
+    QString time_property_source("time");
+    QString space_property_source("space");
+
+    if (time_property.hasSource())
+        time_property_source = QString(time_property.source());
+
+    if (space_property.hasSource())
+        space_property_source = QString(space_property.source());
 
     try
     {
-        old_space = this->property(space_property.source()).asA<Space>();
+        old_space = this->property(space_property_source).asA<Space>();
     }
     catch (...)
     {
@@ -3316,36 +3337,78 @@ void System::loadFrame(int frame, const SireBase::PropertyMap &map)
         old_space = Cartesian();
     }
 
-    SpacePtr new_space = Cartesian();
+    try
+    {
+        old_time = get_time_from_property(this->property(time_property_source));
+    }
+    catch (const std::exception &e)
+    {
+        old_time = SireUnits::Dimension::Time(0);
+    }
+
+    SpacePtr new_space;
+    SireUnits::Dimension::Time new_time;
+    bool found_space = false;
+    bool found_time = false;
 
     const auto groups = this->getGroups();
 
+    if (space_property.hasValue())
+    {
+        new_space = space_property.value().asA<Space>();
+        found_space = true;
+    }
+
+    if (time_property.hasValue())
+    {
+        new_time = get_time_from_property(time_property.value());
+        found_time = true;
+    }
+
     for (auto it = groups.constBegin(); it != groups.constEnd(); ++it)
     {
-        bool found = false;
-
         for (const auto &mol : (*it)->molecules())
         {
-            try
+            if (not found_space)
             {
-                new_space = mol.data().property(space_property.source()).asA<Space>();
-                found = true;
-            }
-            catch (...)
-            {
+                try
+                {
+                    new_space = mol.data().property(space_property_source).asA<Space>();
+                    found_space = true;
+                }
+                catch (...)
+                {
+                }
             }
 
-            if (found)
+            if (not found_time)
+            {
+                try
+                {
+                    new_time = get_time_from_property(mol.data().property(time_property_source));
+                    found_time = true;
+                }
+                catch (...)
+                {
+                }
+            }
+
+            if (found_space and found_time)
                 break;
         }
 
-        if (found)
+        if (found_space and found_time)
             break;
     }
 
-    if (not old_space.read().equals(*new_space))
+    if (found_space and (new_time != old_time))
     {
-        this->setProperty(space_property.source(), new_space);
+        this->setProperty(time_property_source, GeneralUnitProperty(new_time));
+    }
+
+    if (found_space and (not old_space.read().equals(*new_space)))
+    {
+        this->setProperty(space_property_source, new_space);
     }
 }
 
