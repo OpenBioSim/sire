@@ -72,6 +72,8 @@ namespace SireIO
 
     typedef SireBase::PropPtr<MoleculeParser> MoleculeParserPtr;
 
+    class FileTrajectoryParser;
+
     namespace detail
     {
         /** Base class of the parser registers */
@@ -138,6 +140,9 @@ namespace SireIO
 
         friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const MoleculeParser &);
         friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, MoleculeParser &);
+
+        // this needs to be able to call the protected functions
+        friend class FileTrajectoryParser;
 
     public:
         MoleculeParser(const PropertyMap &map = PropertyMap());
@@ -302,6 +307,8 @@ namespace SireIO
 
         void setParsedSystem(const SireSystem::System &system,
                              const PropertyMap &map);
+
+        const SireBase::PropertyMap &propertyMap() const;
 
     private:
         static MoleculeParserPtr _pvt_parse(const QString &filename, const PropertyMap &map);

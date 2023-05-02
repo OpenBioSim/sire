@@ -41,6 +41,8 @@
 
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/parallel.h"
+#include "SireBase/progressbar.h"
+#include "SireBase/releasegil.h"
 
 #include "SireSystem/forcefieldinfo.h"
 
@@ -412,12 +414,19 @@ namespace SireSystem
         if (frames.isEmpty())
             return nrgs;
 
+        // release the GIL here so that progress bars can be displayed
+        auto handle = SireBase::release_gil();
+
         nrgs.resize(frames.count());
 
         auto nrgs_data = nrgs.data();
 
         QVector<qint64> local_frames = frames.toVector();
         auto frames_data = local_frames.constData();
+
+        SireBase::ProgressBar bar(frames.count(), "Calculate energy");
+
+        bar = bar.enter();
 
         tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()), [&](const tbb::blocked_range<int> &r)
                           {
@@ -427,7 +436,10 @@ namespace SireSystem
         {
             local_ff.loadFrame(frames_data[i], map);
             nrgs_data[i] = calculate_energy(local_ff);
+            bar.tick();
         } });
+
+        bar.success();
 
         return nrgs;
     }
@@ -436,40 +448,50 @@ namespace SireSystem
                                                                                   const QList<qint64> &frames,
                                                                                   const PropertyMap &map)
     {
-        QVector<QVector<GeneralUnit>> nrgs;
-
         if (frames.isEmpty() or ffs.isEmpty())
-            return nrgs;
+            return QVector<QVector<GeneralUnit>>();
 
-        nrgs.resize(ffs.count());
-
-        auto nrgs_data = nrgs.data();
-
-        auto local_ffs = ffs.constData();
+        // release the GIL here so that progress bars can be displayed
+        auto handle = SireBase::release_gil();
 
         QVector<qint64> local_frames = frames.toVector();
         auto frame_data = local_frames.constData();
         const int nframes = local_frames.count();
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, ffs.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-        for (int i = r.begin(); i < r.end(); ++i)
+        auto local_ffs = ffs.constData();
+        const auto nffs = ffs.count();
+
+        QVector<QVector<GeneralUnit>> nrgs(nffs);
+
+        QVector<GeneralUnit *> nrgs_ptr(nffs);
+
+        for (int i = 0; i < nffs; ++i)
         {
-            QVector<GeneralUnit> ff_nrgs(nframes);
-            auto ff_nrgs_data = ff_nrgs.data();
+            nrgs[i] = QVector<GeneralUnit>(nframes);
+            nrgs_ptr[i] = nrgs[i].data();
+        }
 
-            tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](const tbb::blocked_range<int> &r2) {
-                ForceFields local_ff = local_ffs[i];
+        auto nrgs_data = nrgs_ptr.data();
 
-                for (int j = r2.begin(); j < r2.end(); ++j)
+        SireBase::ProgressBar bar(frames.count(), "Calculate energies");
+
+        bar = bar.enter();
+
+        tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](const tbb::blocked_range<int> &r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                for (int j=0; j<nffs; ++j)
                 {
-                    local_ff.loadFrame(frame_data[j], map);
-                    ff_nrgs_data[j] = calculate_energy(local_ff);
+                    ForceFields local_ff = local_ffs[j];
+                    local_ff.loadFrame(frame_data[i], map);
+                    nrgs_data[j][i] = calculate_energy(local_ff);
                 }
-            });
 
-            nrgs_data[i] = ff_nrgs;
-        } });
+                bar.tick();
+            } });
+
+        bar.success();
 
         return nrgs;
     }

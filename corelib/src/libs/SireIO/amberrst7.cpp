@@ -865,7 +865,41 @@ Frame AmberRst7::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    return SireMol::Frame();
+    SpacePtr space;
+
+    if (box_angs == cubic_angs)
+    {
+        space = SireVol::PeriodicBox(box_dims);
+    }
+    // TriclinicBox.
+    else
+    {
+        space = SireVol::TriclinicBox(box_dims.x(), box_dims.y(), box_dims.z(), box_angs.x() * degrees,
+                                      box_angs.y() * degrees, box_angs.z() * degrees);
+    }
+
+    QVector<Velocity3D> velocities;
+
+    if (not this->vels.isEmpty())
+    {
+        const int nats = this->vels.count();
+
+        velocities = QVector<Velocity3D>(nats);
+
+        auto velocities_data = velocities.data();
+        const auto vels_data = this->vels.constData();
+
+        // velocity is Angstroms per 1/20.455 ps
+        const auto vel_unit = (1.0 / 20.455) * angstrom / picosecond;
+
+        for (int i = 0; i < nats; ++i)
+        {
+            const Vector &vel = vels_data[i];
+            velocities_data[i] = Velocity3D(vel.x() * vel_unit, vel.y() * vel_unit, vel.z() * vel_unit);
+        }
+    }
+
+    return SireMol::Frame(this->coords, velocities, space.read(), current_time * SireUnits::picosecond);
 }
 
 QString AmberRst7::toString() const

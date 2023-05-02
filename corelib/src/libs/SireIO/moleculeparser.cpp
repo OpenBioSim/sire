@@ -27,6 +27,7 @@
 
 #include "moleculeparser.h"
 #include "filetrajectory.h"
+#include "filetrajectoryparser.h"
 #include "supplementary.h"
 
 #include "SireError/errors.h"
@@ -1713,9 +1714,16 @@ MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename, const Prop
 
     QFileInfo info(filename);
 
-    if (not(info.isFile() and info.isReadable()))
+    if (not info.isReadable())
     {
-        throw SireError::file_error(QObject::tr("There is no file readable called '%1'.").arg(filename), CODELOC);
+        throw SireError::file_error(QObject::tr("There is nothing readable called '%1'.").arg(filename), CODELOC);
+    }
+
+    if (info.isDir())
+    {
+        // this is a directory containing (potentially) multiple
+        // files representing multiple frames
+        return MoleculeParserPtr(FileTrajectoryParser(filename, map));
     }
 
     // try to find the right parser based on the suffix
@@ -2947,6 +2955,11 @@ SireMol::Frame MoleculeParser::createFrame(qint32 frame_index) const
     local_system.loadFrame(frame_index, map);
 
     return this->createFrame(local_system, map);
+}
+
+const PropertyMap &MoleculeParser::propertyMap() const
+{
+    return propmap;
 }
 
 Q_GLOBAL_STATIC(NullParser, nullParser)

@@ -36,6 +36,7 @@ set ( SIREIO_HEADERS
       dcd.h
       errors.h
       filetrajectory.h
+      filetrajectoryparser.h
       flexibilitylibrary.h
       fortranfile.h
       getcoordsarray.h
@@ -81,6 +82,7 @@ set ( SIREIO_SOURCES
       dcd.cpp
       errors.cpp
       filetrajectory.cpp
+      filetrajectoryparser.cpp
       flexibilitylibrary.cpp
       fortranfile.cpp
       getcoordsarray.cpp

@@ -342,77 +342,41 @@ class TrajectoryIterator:
 
         components = {}
 
-        from ..utils import Console
+        ff_nrgs = calculate_trajectory_energies(
+            forcefields, self._values, map=map
+        )
 
-        import os
+        for ff_idx in range(0, len(forcefields)):
+            nrg = ff_nrgs[ff_idx][0]
 
-        cpu_count = os.cpu_count()
+            if ff_idx == 0:
+                energy_unit = nrg.get_default().unit_string()
 
-        from ..base import ProgressBar
+            components[colname(colnames[ff_idx], "total")] = np.zeros(
+                nframes, dtype=float
+            )
 
-        with ProgressBar(
-            total=nframes, text="Looping through frames"
-        ) as progress:
-            num_per_chunk = cpu_count
-
-            i = 0
-
-            import time
-
-            while i < nframes:
-                start_time = time.time()
-                j = min(i + num_per_chunk, nframes)
-
-                ff_nrgs = calculate_trajectory_energies(
-                    forcefields, list(self._values[i:j]), map=map
+            for key in nrg.components().keys():
+                components[colname(colnames[ff_idx], key)] = np.zeros(
+                    nframes, dtype=float
                 )
 
-                if i == 0:
-                    for ff_idx in range(0, len(forcefields)):
-                        nrg = ff_nrgs[ff_idx][0]
+        for i in range(0, nframes):
+            for ff_idx in range(0, len(forcefields)):
+                nrg = ff_nrgs[ff_idx][idx - i]
+                components[colname(colnames[ff_idx], "total")][
+                    idx
+                ] = nrg.to_default()
 
-                        if ff_idx == 0:
-                            energy_unit = nrg.get_default().unit_string()
-
-                        components[
-                            colname(colnames[ff_idx], "total")
-                        ] = np.zeros(nframes, dtype=float)
-
-                        for key in nrg.components().keys():
-                            components[
-                                colname(colnames[ff_idx], key)
-                            ] = np.zeros(nframes, dtype=float)
-
-                for idx in range(i, j):
-                    for ff_idx in range(0, len(forcefields)):
-                        nrg = ff_nrgs[ff_idx][idx - i]
-                        components[colname(colnames[ff_idx], "total")][
-                            idx
-                        ] = nrg.to_default()
-
-                        for key, value in nrg.components().items():
-                            try:
-                                components[colname(colnames[ff_idx], key)][
-                                    idx
-                                ] = nrg[key].to_default()
-                            except KeyError:
-                                k = colname(colnames[ff_idx], key)
-                                components[k] = np.zeros(nframes, dtype=float)
-                                components[k][idx] = nrg[key].to_default()
-
-                    progress.set_progress(idx)
-
-                delta = time.time() - start_time
-
-                if delta > 0.8:
-                    # we want about 0.8 seconds between updates
-                    num_per_chunk = int(num_per_chunk / 2)
-                    if num_per_chunk < cpu_count:
-                        num_per_chunk = cpu_count
-                elif delta < 0.25:
-                    num_per_chunk = num_per_chunk + int(0.5 * num_per_chunk)
-
-                i = j
+                for key in nrg.components().keys():
+                    try:
+                        components[colname(colnames[ff_idx], key)][idx] = nrg[
+                            key
+                        ].to_default()
+                    except KeyError:
+                        k = colname(colnames[ff_idx], key)
+                        components[k] = np.zeros(nframes, dtype=float)
+                        components[k][idx] = nrg[key].to_default()
 
         data = {}
 
@@ -497,64 +461,28 @@ class TrajectoryIterator:
         time_unit = t[0].get_default().unit_string()
         energy_unit = None
 
+        # calculate all the energies
+        nrgs = calculate_trajectory_energy(ff, self._values, map)
+
+        # convert the result into a pandas dataframe
         components = {}
 
-        from ..utils import Console
+        nrg = nrgs[0]
+        energy_unit = nrg.get_default().unit_string()
+        components["total"] = np.zeros(nframes, dtype=float)
+        for key in nrg.components().keys():
+            components[key] = np.zeros(nframes, dtype=float)
 
-        import os
+        for i in range(0, nframes):
+            nrg = nrgs[i]
+            components["total"][i] = nrg.to_default()
 
-        cpu_count = os.cpu_count()
-
-        from ..base import ProgressBar
-
-        with ProgressBar(
-            total=nframes, text="Looping through frames"
-        ) as progress:
-            num_per_chunk = cpu_count
-
-            i = 0
-
-            import time
-
-            while i < nframes:
-                start_time = time.time()
-                j = min(i + num_per_chunk, nframes)
-
-                nrgs = calculate_trajectory_energy(
-                    ff, list(self._values[i:j]), map
-                )
-
-                if i == 0:
-                    nrg = nrgs[0]
-                    energy_unit = nrg.get_default().unit_string()
-                    components["total"] = np.zeros(nframes, dtype=float)
-                    for key in nrg.components().keys():
-                        components[key] = np.zeros(nframes, dtype=float)
-
-                for idx in range(i, j):
-                    nrg = nrgs[idx - i]
-                    components["total"][idx] = nrg.to_default()
-
-                    for key, value in nrg.components().items():
-                        try:
-                            components[key][idx] = nrg[key].to_default()
-                        except KeyError:
-                            components[key] = np.zeros(nframes, dtype=float)
-                            components[key][idx] = nrg[key].to_default()
-
-                    progress.set_progress(idx)
-
-                delta = time.time() - start_time
-
-                if delta > 0.8:
-                    # we want about 0.8 seconds between updates
-                    num_per_chunk = int(num_per_chunk / 2)
-                    if num_per_chunk < cpu_count:
-                        num_per_chunk = cpu_count
-                elif delta < 0.25:
-                    num_per_chunk = num_per_chunk + int(0.5 * num_per_chunk)
-
-                i = j
+            for key in nrg.components().keys():
+                try:
+                    components[key][i] = nrg[key].to_default()
+                except KeyError:
+                    components[key] = np.zeros(nframes, dtype=float)
+                    components[key][i] = nrg[key].to_default()
 
         data = {}
 

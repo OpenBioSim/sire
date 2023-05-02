@@ -113,7 +113,12 @@ def _resolve_path(path, directory, silent=False):
     if hasattr(directory, "strpath"):
         directory = directory.strpath
 
-    if os.path.exists(path) and os.path.isfile(path):
+    if os.path.isdir(path):
+        # we need to process this as a trajectory directory - return
+        # this as a directory
+        return [path]
+
+    elif os.path.exists(path) and os.path.isfile(path):
         if path.endswith(".gz"):
             # unzip the file first
             unzipped = path[0:-3]
