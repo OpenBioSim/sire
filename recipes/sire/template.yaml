@@ -21,6 +21,8 @@ requirements:
     SIRE_BSS_REQUIREMENTS
   run:
     SIRE_RUN_REQUIREMENTS
+  run_constrained:
+    - {{ pin_compatible('rdkit', max_pin='x.x') }}
 
 test:
   script_env:
