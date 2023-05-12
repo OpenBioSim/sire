@@ -1,5 +1,3 @@
-
-
 def test_selector_impropers(ala_mols):
     mols = ala_mols
 

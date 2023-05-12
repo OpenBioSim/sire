@@ -1,10 +1,9 @@
-
 import pytest
 
 
 def test_search_property_map(ala_mols):
     """Tests that searches that involve properties can be mapped to
-       different properties by passing in a property map
+    different properties by passing in a property map
     """
     mols = ala_mols.clone()
 
@@ -28,20 +27,20 @@ def test_search_property_map(ala_mols):
     with pytest.raises(KeyError):
         mol["atom charge > 10"]
 
-    assert mol[("atom charge > 10", {"charge":"charge2"})] == mol["atom charge > 0.01"]
-    assert mol[("atom charge < 10", {"charge":"charge2"})] == mol["atom charge < 0.01"]
+    assert mol[("atom charge > 10", {"charge": "charge2"})] == mol["atom charge > 0.01"]
+    assert mol[("atom charge < 10", {"charge": "charge2"})] == mol["atom charge < 0.01"]
 
-    assert mol[("atom mass > 10", {"mass":"mass2"})] == mol["atom mass > 0.01"]
+    assert mol[("atom mass > 10", {"mass": "mass2"})] == mol["atom mass > 0.01"]
 
     with pytest.raises(KeyError):
-        mol[("bonds to element C", {"connectivity":"connectivity2"})]
+        mol[("bonds to element C", {"connectivity": "connectivity2"})]
 
     assert len(mol["bonds to element C"]) > 0
 
     with pytest.raises(KeyError):
         mols["property kitten"]
 
-    assert mols[("property kitten", {"kitten":"charge"})] == mols.molecules()
+    assert mols[("property kitten", {"kitten": "charge"})] == mols.molecules()
 
     cursor[5]["find_atom"] = True
 
@@ -143,6 +142,3 @@ def test_search_property_exists(ala_mols):
 
     with pytest.raises(KeyError):
         mols["property metadata == else"]
-
-
-
