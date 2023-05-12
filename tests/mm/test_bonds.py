@@ -10,9 +10,7 @@ def test_bond_props(chol_mols):
     for bond in mol.cursor().bonds():
         assert bond["order"] == bond.view().property("order")
         assert bond["sdf_fields"] == bond.view().property("sdf_fields")
-        assert bond["stereochemistry"] == bond.view().property(
-            "stereochemistry"
-        )
+        assert bond["stereochemistry"] == bond.view().property("stereochemistry")
 
 
 def test_selector_bonds(ala_mols):
@@ -43,8 +41,7 @@ def test_selector_bonds(ala_mols):
     for bond in bonds:
         # at least one carbon
         assert (
-            bond[0].element().num_protons() == 6
-            or bond[1].element().num_protons() == 6
+            bond[0].element().num_protons() == 6 or bond[1].element().num_protons() == 6
         )
 
     bonds = mol.bonds("element C", "not element C")

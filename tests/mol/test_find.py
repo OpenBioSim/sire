@@ -2,7 +2,6 @@ import pytest
 
 
 def test_find(ala_mols):
-
     mols = ala_mols
 
     assert mols.atoms().find(mols.atoms()[0]) == 0

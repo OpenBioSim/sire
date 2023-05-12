@@ -35,9 +35,7 @@ def test_openmm_single_energy(kigaki_mols):
     energy = energy.value_in_unit(energy.unit)
 
     # these won't be exactly the same - this is 5227 +/- 0.1 kJ mol-1
-    assert mol.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
-        energy, abs=0.1
-    )
+    assert mol.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(energy, abs=0.1)
 
 
 @pytest.mark.skipif(

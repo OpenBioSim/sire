@@ -1,4 +1,3 @@
-
 import pytest
 
 
@@ -64,7 +63,7 @@ def test_index_mols_bonds(ala_mols):
     bnds = mols["bonds from element O to element H"]
 
     assert len(bnds) == 2 * (mols.num_molecules() - 1)
-    assert len(bnds) == 1260  # just in case something else failed!
+    assert len(bnds) == 1260  # just in case something else failed!
 
     assert bnds.num_molecules() == mols.num_molecules() - 1
     assert bnds.num_atoms() == bnds.num_molecules() * 3
@@ -82,11 +81,11 @@ def test_index_mols_bonds(ala_mols):
         assert bond.atom1().name().value() in ["O", "H1"]
 
     # mols[1:] are the water molecules
-    assert mols["bonds from element O to element H"].mass().value() == \
-	pytest.approx((mols[1:]["element O"].mass() + mols[1:]["element H"].mass()).value(), 0.0001)
+    assert mols["bonds from element O to element H"].mass().value() == pytest.approx(
+        (mols[1:]["element O"].mass() + mols[1:]["element H"].mass()).value(), 0.0001
+    )
+
 
 if __name__ == "__main__":
     test_index_bonds()
     test_index_mols_bonds()
-
-

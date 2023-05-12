@@ -60,9 +60,7 @@ def test_nullbonds(tmpdir, ala_mols):
     assert func.k() == 0
     assert func.r0() == pytest.approx(bond.length().to(sr.units.angstrom))
 
-    f = sr.save(
-        mol, d.join("skip"), format="PRM7", map={"keep_null_bonds": False}
-    )
+    f = sr.save(mol, d.join("skip"), format="PRM7", map={"keep_null_bonds": False})
 
     mol2 = sr.load(f[0])[0]
 

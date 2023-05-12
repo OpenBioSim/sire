@@ -39,9 +39,7 @@ def test_nullangles(tmpdir, ala_mols):
         mol, map=sr.base.create_map({"keep_null_angles": False})
     )
 
-    assert (
-        params.angle_functions().num_functions() == angles.num_functions() - 1
-    )
+    assert params.angle_functions().num_functions() == angles.num_functions() - 1
 
     # this will be a default-constructed empty angle
     func = params.get_parameter(angle.id())
@@ -62,16 +60,12 @@ def test_nullangles(tmpdir, ala_mols):
     assert func.k() == 0
     assert func.theta0() == pytest.approx(angle.size().to(sr.units.radians))
 
-    f = sr.save(
-        mol, d.join("skip"), format="PRM7", map={"keep_null_angles": False}
-    )
+    f = sr.save(mol, d.join("skip"), format="PRM7", map={"keep_null_angles": False})
 
     mol2 = sr.load(f[0])[0]
 
     params = mol2.property("parameters")
-    assert (
-        params.angle_functions().num_functions() == angles.num_functions() - 1
-    )
+    assert params.angle_functions().num_functions() == angles.num_functions() - 1
     func = params.get_parameter(angle.id())
     assert func.k() == 0
     assert func.theta0() == 0
