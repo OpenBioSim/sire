@@ -40,8 +40,7 @@ def test_reduction_vectors(box):
 def test_reduction_angles(box):
     """
     Test that repeat lattice reductions give consistent box dimensions
-    and angles when the triclinic space is instantiated from box dimension
-    vectors.
+    and angles when the triclinic space is instantiated from box angles.
     """
 
     # Store the initial values.
