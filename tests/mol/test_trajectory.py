@@ -1,5 +1,3 @@
-
-
 def test_trajectory(ala_mols):
     mols = ala_mols
     mol = mols[0]

@@ -1,4 +1,3 @@
-
 import pytest
 
 
@@ -6,8 +5,9 @@ def test_cursor(ala_mols):
     mols = ala_mols
     mol = mols[0]
 
-    mol = mol.cursor().atoms("element O").apply(
-                    lambda a: a.set("special", True)).commit()
+    mol = (
+        mol.cursor().atoms("element O").apply(lambda a: a.set("special", True)).commit()
+    )
 
     assert len(mol.property("special")) == mol.num_atoms()
 
@@ -134,10 +134,10 @@ def test_cursors(ala_mols):
 
     assert cursors[-1].name == mol.atom(-1).name().value()
 
-    idxs = range(0,5)
+    idxs = range(0, 5)
     cs = cursors[0:5]
 
-    for i in range(0,5):
+    for i in range(0, 5):
         assert cs[i].id() == cursors[idxs[i]].id()
 
     idxs = [0, 2, 4]
@@ -169,11 +169,13 @@ def test_cursor_renaming(ala_mols):
         assert atom.name().value() != f"{atom.index().value()}"
         assert atom.number().value() != atom.index().value()
 
-    mol = mol.cursor().atoms().apply(
-        lambda atom: atom.set_name(f"{atom.index}")
-    ).apply(
-        lambda atom: atom.set_number(atom.index)
-    ).commit()
+    mol = (
+        mol.cursor()
+        .atoms()
+        .apply(lambda atom: atom.set_name(f"{atom.index}"))
+        .apply(lambda atom: atom.set_number(atom.index))
+        .commit()
+    )
 
     for atom in mol.atoms():
         assert atom.name().value() == f"{atom.index().value()}"

@@ -1,8 +1,13 @@
-
-
 def _get_dims(u):
-    return [u.angle(), u.charge(), u.length(), u.mass(),
-            u.quantity(), u.temperature(), u.time()]
+    return [
+        u.angle(),
+        u.charge(),
+        u.length(),
+        u.mass(),
+        u.quantity(),
+        u.temperature(),
+        u.time(),
+    ]
 
 
 def test_pickling():
@@ -27,4 +32,3 @@ def test_pickling():
 
 if __name__ == "__main__":
     test_pickling()
-
