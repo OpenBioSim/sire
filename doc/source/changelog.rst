@@ -12,6 +12,19 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.2.3 <https://github.com/openbiosim/sire/compare/2023.2.2...2023.2.3>`__ - May 2023
+----------------------------------------------------------------------------------------
+
+* Fixed numerical precision issues caused by lattice reduction of triclinic
+  lattice box vectors to prevent oscillation of the box angles. This is caused
+  by the fixed-width format for box dimensions and angles used in the molecular
+  input files. `PR 51 - fix_49_50 <https://github.com/OpenBioSim/sire/pull/51>`__
+
+* Added a ``run_constrained`` entry for the optional ``rdkit`` dependency in our
+  conda recipe using a minor level pin. This ensures that the correct version of
+  ``rdkit`` is installed alongside ``sire``, i.e. one that is compatible with the
+  version that ``sire`` was built against. `PR 51 - fix_49_50 <https://github.com/OpenBioSim/sire/pull/51>`__
+
 `2023.2.2 <https://github.com/openbiosim/sire/compare/2023.2.1...2023.2.2>`__ - April 2023
 ------------------------------------------------------------------------------------------
 
