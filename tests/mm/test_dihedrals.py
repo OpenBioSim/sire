@@ -1,5 +1,3 @@
-
-
 def test_selector_dihedrals(ala_mols):
     mols = ala_mols
 
@@ -13,8 +11,9 @@ def test_selector_dihedrals(ala_mols):
         for atom in dihedral:
             assert atom.residue().number().value() == 1
 
-    dihedrals = mol.dihedrals("not element C", "element C",
-                              "element C", "not element C")
+    dihedrals = mol.dihedrals(
+        "not element C", "element C", "element C", "not element C"
+    )
 
     assert len(dihedrals) == 16
 

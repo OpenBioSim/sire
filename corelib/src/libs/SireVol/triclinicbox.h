@@ -49,10 +49,22 @@ namespace SireVol
     using SireMaths::Vector;
 
     /**
-    A TriclinicBox is a volume  that represents standard periodic boundary conditions
+    A TriclinicBox is a volume that represents standard periodic boundary conditions
     (a 3D box replicated to infinity along all three dimensions).
 
-    @author Christopher Woods
+    To support triclinic boxes that work across a range of molecular simulation
+    engines, e.g. AMBER, GROMACS, OpenMM, we represent the triclinic space in
+    reduced form, using the approach documented in Appendix A of Chapter 3 from
+    "Molecular dynamics of sense and sensibility in processing and analysis of data"
+    by Tsjerk A. Wassenaar.
+
+    However, due to the fixed-width format used to represent box dimensions and angles
+    in the various molecular input files, repeated reading and writing can lead to
+    oscillation of the box angles on reduction due to rounding precision errors.
+    To account for this, we add a small bias so that we always round in a consistent
+    direction.
+
+    @author Lester Hedges
     */
     class SIREVOL_EXPORT TriclinicBox : public SireBase::ConcreteProperty<TriclinicBox, Cartesian>
     {

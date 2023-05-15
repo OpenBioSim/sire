@@ -1,4 +1,3 @@
-
 import pytest
 
 
@@ -8,7 +7,7 @@ def test_cursor_direct(ala_mols):
 
     cursor = mol.cursor()
 
-    cursor.atoms()["coordinates"] = (0,0,0)
+    cursor.atoms()["coordinates"] = (0, 0, 0)
 
     mol = cursor.commit()
 
@@ -17,19 +16,19 @@ def test_cursor_direct(ala_mols):
             assert v0[0].value() == v1[0]
 
     for atom in mol.atoms():
-        assert_equal(atom.coordinates(), (0,0,0))
+        assert_equal(atom.coordinates(), (0, 0, 0))
 
-    cursor.atoms("element H")["coordinates"] = (1,2,3)
+    cursor.atoms("element H")["coordinates"] = (1, 2, 3)
 
     mol = cursor.commit()
 
     for atom in mol.atoms():
         if atom.element().num_protons() == 1:
-            assert_equal(atom.coordinates(), (1,2,3))
+            assert_equal(atom.coordinates(), (1, 2, 3))
         else:
-            assert_equal(atom.coordinates(), (0,0,0))
+            assert_equal(atom.coordinates(), (0, 0, 0))
 
-    coords = [(5,6,7), (7,8,9), (10,11,12)]
+    coords = [(5, 6, 7), (7, 8, 9), (10, 11, 12)]
 
     cursor.atoms("element C")["coordinates"][0:3] = coords
 
@@ -39,15 +38,15 @@ def test_cursor_direct(ala_mols):
 
     for atom in mol.atoms():
         if atom.element().num_protons() == 1:
-            assert_equal(atom.coordinates(), (1,2,3))
+            assert_equal(atom.coordinates(), (1, 2, 3))
         elif atom.element().num_protons() == 12:
             if i < len(coords):
                 assert_equal(atom.coordinates(), coords[i])
                 i += 1
             else:
-                assert_equal(atom.coordinates(), (0,0,0))
+                assert_equal(atom.coordinates(), (0, 0, 0))
         else:
-            assert_equal(atom.coordinates(), (0,0,0))
+            assert_equal(atom.coordinates(), (0, 0, 0))
 
 
 def test_cursor_translate(ala_mols):
@@ -62,16 +61,16 @@ def test_cursor_translate(ala_mols):
 
     for i in range(0, len(coords)):
         c0 = coords[i]
-        c1 = cursor["coordinates"][i] - (1,0,0)
+        c1 = cursor["coordinates"][i] - (1, 0, 0)
         assert c0[0].value() == pytest.approx(c1[0].value())
         assert c0[1] == c1[1]
         assert c0[2] == c1[2]
 
-    cursor.translate((2,3,4))
+    cursor.translate((2, 3, 4))
 
     for i in range(0, len(coords)):
         c0 = coords[i]
-        c1 = cursor["coordinates"][i] - (3,3,4)
+        c1 = cursor["coordinates"][i] - (3, 3, 4)
         assert c0[0].value() == pytest.approx(c1[0].value())
         assert c0[1].value() == pytest.approx(c1[1].value())
         assert c0[2].value() == pytest.approx(c1[2].value())
@@ -80,11 +79,12 @@ def test_cursor_translate(ala_mols):
 
     coords = mol.property("coordinates")
 
-    cursor.translate((2,3,4))
+    cursor.translate((2, 3, 4))
 
     mol = cursor.commit()
 
     from sire.mol import Element
+
     carbon = Element("Carbon")
 
     for i in range(0, len(coords)):
@@ -92,7 +92,7 @@ def test_cursor_translate(ala_mols):
         c0 = coords[i]
 
         if atom.element() == carbon:
-            c1 = atom.coordinates() - (2,3,4)
+            c1 = atom.coordinates() - (2, 3, 4)
         else:
             c1 = atom.coordinates()
 
@@ -103,7 +103,8 @@ def test_cursor_translate(ala_mols):
     cursor = mols.cursor()
 
     from sire.maths import Vector
-    cursor.translate(Vector(2, 3, 4), map={"coordinates":"coordinates"})
+
+    cursor.translate(Vector(2, 3, 4), map={"coordinates": "coordinates"})
 
     mol100 = mols[100]
     c100 = cursor[100]
@@ -216,16 +217,14 @@ def test_cursor_angle_moves(ala_mols):
 
     cursor = mols.cursor()
 
-    cursor["water"][0:10].angles(
-                "element H", "element O", "element H").change_size(10)
+    cursor["water"][0:10].angles("element H", "element O", "element H").change_size(10)
 
     mols = cursor.commit()
 
     ref_water = mols["water"][10]
     ref_angle = ref_water.angle("element H", "element O", "element H").size()
 
-    for s in mols["water"][0:10].angles(
-            "element H", "element O", "element H").sizes():
+    for s in mols["water"][0:10].angles("element H", "element O", "element H").sizes():
         assert s.to(degrees) == pytest.approx(ref_angle.to(degrees) + 10.0)
 
 
@@ -249,31 +248,34 @@ def test_cursor_dihedral_moves(ala_mols):
 
         return ang
 
-    for i in range(0,6):
+    for i in range(0, 6):
         assert mol2.dihedrals()[i].size().to(degrees) == pytest.approx(
-                wrap(mol.dihedrals()[i].size().to(degrees) + 60))
+            wrap(mol.dihedrals()[i].size().to(degrees) + 60)
+        )
 
     for i in range(6, len(mol.dihedrals())):
         assert mol2.dihedrals()[i].size().to(degrees) == pytest.approx(
-                mol.dihedrals()[i].size().to(degrees))
+            mol.dihedrals()[i].size().to(degrees)
+        )
 
     mol = mols[0]
 
     # this should change this dihedral only
     cursor = mol.cursor()
 
-    cursor.dihedrals()[0].change_size(60, move_all=False,
-                                      weighting="absolute_mass")
+    cursor.dihedrals()[0].change_size(60, move_all=False, weighting="absolute_mass")
 
     mol2 = cursor.commit()
 
     print(mol.dihedrals().sizes())
     print(mol2.dihedrals().sizes())
 
-    for i in [0,3]:
+    for i in [0, 3]:
         assert mol2.dihedrals()[i].size().to(degrees) == pytest.approx(
-                wrap(mol.dihedrals()[i].size().to(degrees) + 60))
+            wrap(mol.dihedrals()[i].size().to(degrees) + 60)
+        )
 
-    for i in [1,2] + list(range(4,len(mol.dihedrals()))):
+    for i in [1, 2] + list(range(4, len(mol.dihedrals()))):
         assert mol2.dihedrals()[i].size().to(degrees) == pytest.approx(
-                mol.dihedrals()[i].size().to(degrees))
+            mol.dihedrals()[i].size().to(degrees)
+        )

@@ -1,18 +1,20 @@
-
 import pytest
 
 
 def test_broken_searches(ala_mols):
     """Use this test to collect together any searches that are found
-       to be broken, and to then fix them
+    to be broken, and to then fix them
     """
 
     mols = ala_mols.clone()
 
     # noticed this was broken
-    assert mols["molecules within 2 of resname ALA"] == mols["residues within 2 of resname ALA"].molecules()
+    assert (
+        mols["molecules within 2 of resname ALA"]
+        == mols["residues within 2 of resname ALA"].molecules()
+    )
 
-    assert mols["(element C[0]) or (element C[-1])"] == mols["element C"][ [0,-1] ]
+    assert mols["(element C[0]) or (element C[-1])"] == mols["element C"][[0, -1]]
 
     assert mols["((element C[0]) or (element C[-1]))[-1]"] == mols["element C"][-1]
 
@@ -27,17 +29,27 @@ def test_broken_searches(ala_mols):
 
     assert mols["resname ALA in molidx 0"] == mols[0]["resname ALA"]
 
-    assert mols["atomname CA in molecules with count(atoms) > 3"] == mols[0]["atomname CA"]
+    assert (
+        mols["atomname CA in molecules with count(atoms) > 3"] == mols[0]["atomname CA"]
+    )
 
     assert mols["molecules with count(residues) > 1"] == mols[0]
 
-    assert mols["residues with count(element C) > 1"] == mols[0].residues([0,1])
+    assert mols["residues with count(element C) > 1"] == mols[0].residues([0, 1])
 
-    assert mols["atoms in residues with count(element C) > 1"] == mols[0].residues([0,1]).atoms()
+    assert (
+        mols["atoms in residues with count(element C) > 1"]
+        == mols[0].residues([0, 1]).atoms()
+    )
 
     assert mols["atoms in molecules with count(residues) > 1"] == mols[0].atoms()
 
-    assert mols["(molecules with count(element O) == 1) and (molecules with count(element H) == 2) and (molecules with count(atoms) == 3)"] == mols["water"]
+    assert (
+        mols[
+            "(molecules with count(element O) == 1) and (molecules with count(element H) == 2) and (molecules with count(atoms) == 3)"
+        ]
+        == mols["water"]
+    )
 
     mol = mols[0]
     cursor = mol.cursor()
@@ -47,6 +59,7 @@ def test_broken_searches(ala_mols):
     cursor[-1]["final_atomtype"] = "DU"
 
     import sire
+
     cursor[2]["radius"] = 0.8 * sire.units.angstrom
 
     mol = cursor.commit()
@@ -73,9 +86,21 @@ def test_broken_searches(ala_mols):
 
     assert mols["property is_perturbable"] == mol
 
-    assert mols["(atoms with property atomtype == DU) in (molecules with property is_perturbable)"] == mol[0]
-    assert mols[("(atoms with property atomtype == DU) in (molecules with property is_perturbable)",
-                 {"atomtype": "final_atomtype"})] == mol[-1]
+    assert (
+        mols[
+            "(atoms with property atomtype == DU) in (molecules with property is_perturbable)"
+        ]
+        == mol[0]
+    )
+    assert (
+        mols[
+            (
+                "(atoms with property atomtype == DU) in (molecules with property is_perturbable)",
+                {"atomtype": "final_atomtype"},
+            )
+        ]
+        == mol[-1]
+    )
 
 
 def test_distance_searching(ala_mols):
@@ -113,42 +138,60 @@ def test_res_property_searching(ala_mols):
 
     res = mols[0]["residx 0"]
 
-    mols.update(res.edit()
-                    .set_property("is_perturbable", True)
-                    .set_property("test property", "cat goes meow")
-                    .set_property("number", -3.5).molecule().commit()
-               )
+    mols.update(
+        res.edit()
+        .set_property("is_perturbable", True)
+        .set_property("test property", "cat goes meow")
+        .set_property("number", -3.5)
+        .molecule()
+        .commit()
+    )
 
     assert mols["residue property is_perturbable"] == mols[0]["residx 0"]
-    assert mols["residue property 'test property' == 'cat goes meow'"] == mols[0]["residx 0"]
+    assert (
+        mols["residue property 'test property' == 'cat goes meow'"]
+        == mols[0]["residx 0"]
+    )
     assert mols["residue property number < -3.4"] == mols[0]["residx 0"]
 
 
 def test_atom_property_searching(ala_mols):
     mols = ala_mols.clone()
 
-    mols.update(mols[0][0].edit().set_property("is_perturbable", True).molecule().commit())
-    mols.update(mols[0][1].edit().set_property("test property", "cat goes meow").molecule().commit())
-    mols.update(mols[0][2].edit().set_property("is_perturbable", True).molecule().commit())
+    mols.update(
+        mols[0][0].edit().set_property("is_perturbable", True).molecule().commit()
+    )
+    mols.update(
+        mols[0][1]
+        .edit()
+        .set_property("test property", "cat goes meow")
+        .molecule()
+        .commit()
+    )
+    mols.update(
+        mols[0][2].edit().set_property("is_perturbable", True).molecule().commit()
+    )
     mols.update(mols[0][3].edit().set_property("number", 5.4).molecule().commit())
 
-    assert mols["atom property is_perturbable"] == mols[0][ [0,2] ]
+    assert mols["atom property is_perturbable"] == mols[0][[0, 2]]
     assert mols["atom property 'test property' == 'cat goes meow'"] == mols[0][1]
     assert mols["atom property number > 5.3"] == mols[0][3]
     assert len(mols["atom property number < 5.4"]) == mols[0].num_atoms() - 1
 
 
-
 def test_property_searching(ala_mols):
     mols = ala_mols.clone()
 
-    mols.update(mols[0].edit()
-                       .set_property("test property", "cat goes meow")
-                       .set_property("is_perturbable", True)
-                       .set_property("false_property", False)
-                       .set_property("number", 5.4)
-                       .set_property("val", -42)
-                       .commit())
+    mols.update(
+        mols[0]
+        .edit()
+        .set_property("test property", "cat goes meow")
+        .set_property("is_perturbable", True)
+        .set_property("false_property", False)
+        .set_property("number", 5.4)
+        .set_property("val", -42)
+        .commit()
+    )
 
     assert mols["property 'test property' == 'cat goes meow'"] == mols[0]
 
@@ -194,7 +237,7 @@ def test_basic_indexing(ala_mols):
     assert len(mols["atomidx 0"]) == mols.num_molecules()
     assert len(mols["atomidx 0,1"]) == 2 * mols.num_molecules()
     assert len(mols["atomidx 0:3"]) == 3 * mols.num_molecules()
-    assert len(mols["atomidx 0:4"]) == 4 + (3 * (mols.num_molecules()-1))
+    assert len(mols["atomidx 0:4"]) == 4 + (3 * (mols.num_molecules() - 1))
 
     assert len(mols["atomnum 1"]) == 1
     assert len(mols["atomnum 1,2"]) == 2
@@ -216,25 +259,38 @@ def test_search_indexing(ala_mols):
 def test_logical_indexing(ala_mols):
     mols = ala_mols
 
-    assert len(mols["element C or element O"]) == len(mols["element C"]) + len(mols["element O"])
+    assert len(mols["element C or element O"]) == len(mols["element C"]) + len(
+        mols["element O"]
+    )
 
     assert len(mols["resname ALA or resname ACE"]) == len(mols["resname ALA,ACE"])
 
     assert len(mols["not resname ALA"]) == mols.num_residues() - 1
 
-    assert len(mols["resname ALA and element C"]) == len(mols["resname ALA"]["element C"])
+    assert len(mols["resname ALA and element C"]) == len(
+        mols["resname ALA"]["element C"]
+    )
 
     assert mols["resname ALA and element C"] == mols["element C and resname ALA"]
 
     assert len(mols["not molidx 0"]) == mols.num_molecules() - 1
 
-    assert len(mols["atomname HH31 or atomname HH32 or atomname HH33"]) == len(mols["atomname HH31, HH32, HH33"])
+    assert len(mols["atomname HH31 or atomname HH32 or atomname HH33"]) == len(
+        mols["atomname HH31, HH32, HH33"]
+    )
 
-    assert len(mols["(element C or element O) and (element O or element H)"]) == len(mols["element O"])
+    assert len(mols["(element C or element O) and (element O or element H)"]) == len(
+        mols["element O"]
+    )
 
-    assert len(mols["not element C"]) == len(mols["element H or element O or element N"])
+    assert len(mols["not element C"]) == len(
+        mols["element H or element O or element N"]
+    )
 
-    assert len(mols["(not element C) and (not element O) and (not element H)"]) == len(mols["element N"])
+    assert len(mols["(not element C) and (not element O) and (not element H)"]) == len(
+        mols["element N"]
+    )
+
 
 def test_complex_indexing(p38_mols):
     import sire as sr
@@ -274,7 +330,7 @@ def test_complex_indexing(p38_mols):
     assert s[0].name().value() == "GLU"
 
     for i in range(0, 10):
-        assert s[i].number().value() == i+1
+        assert s[i].number().value() == i + 1
 
     assert s == mol["resnum <= 10"]
     assert s == mol["resnum 1, 2, 3, 4, 5, 6, 7, 8, 9, 10"]
@@ -292,7 +348,13 @@ def test_complex_indexing(p38_mols):
 
     from sire.mol import AtomName, AtomNum
 
-    names = [AtomName('N'), AtomName('CA'), AtomName('C'), AtomName('O'), AtomName('CB')]
+    names = [
+        AtomName("N"),
+        AtomName("CA"),
+        AtomName("C"),
+        AtomName("O"),
+        AtomName("CB"),
+    ]
 
     assert mol[0:5].names() == names
     assert mol[4::-1].names() == names[4::-1]
@@ -313,7 +375,7 @@ def test_complex_indexing(p38_mols):
     assert len(s) == 6
 
     for i in range(0, 6):
-        assert s[i].number().value() == i+5
+        assert s[i].number().value() == i + 5
 
     s = mol[sr.resid(idx=0)]["atomname C, CA"]
 
@@ -333,6 +395,7 @@ def test_complex_indexing(p38_mols):
 
 def test_single_select_is_right(alanin_mols):
     import sire as sr
+
     mols = alanin_mols
 
     mol = mols[0]
@@ -378,7 +441,9 @@ def test_search_terms(ala_mols):
 
     check_mass = mols[0][0].mass().value()
 
-    atoms = mols[0][f"atom mass >= {check_mass-0.001} and atom mass <= {check_mass+0.001}"]
+    atoms = mols[0][
+        f"atom mass >= {check_mass-0.001} and atom mass <= {check_mass+0.001}"
+    ]
 
     assert len(atoms) > 0
 
@@ -394,7 +459,9 @@ def test_search_terms(ala_mols):
 
     check_charge = mols[0][1].charge().value()
 
-    atoms = mols[0][f"atom charge >= {check_charge-0.001} and atom charge <= {check_charge+0.001}"]
+    atoms = mols[0][
+        f"atom charge >= {check_charge-0.001} and atom charge <= {check_charge+0.001}"
+    ]
 
     assert len(atoms) > 0
 
@@ -409,11 +476,12 @@ def test_search_terms(ala_mols):
         assert atom.charge().value() == pytest.approx(check_charge)
 
     import sire.search
+
     old_eps = sire.search.get_approx_epsilon()
 
     sire.search.set_approx_epsilon(1e-130)
 
-    #with pytest.raises(KeyError):
+    # with pytest.raises(KeyError):
     #    print(mols[0][f"charge =~ {check_charge}"])
 
     sire.search.set_approx_epsilon(old_eps)
@@ -428,20 +496,32 @@ def test_in_searches(ala_mols):
     assert len(mols["residues in *"]) == mols.num_residues()
 
     assert len(mols["atoms in resname ACE"]) == mols["resname ACE"].num_atoms()
-    assert len(mols["atoms in (molecules with count(element O) > 1)"]) == mols[0].num_atoms()
+    assert (
+        len(mols["atoms in (molecules with count(element O) > 1)"])
+        == mols[0].num_atoms()
+    )
     assert len(mols["atoms in (molecules with resname ALA)"]) == mols[0].num_atoms()
 
     with pytest.raises(SyntaxError):
-        assert len(mols["(atoms in molecules) with resname ALA"]) == mols["resname ALA"].num_atoms()
+        assert (
+            len(mols["(atoms in molecules) with resname ALA"])
+            == mols["resname ALA"].num_atoms()
+        )
 
-    assert len(mols["(atoms in molecules) in resname ALA"]) == mols["resname ALA"].num_atoms()
+    assert (
+        len(mols["(atoms in molecules) in resname ALA"])
+        == mols["resname ALA"].num_atoms()
+    )
 
     assert mols["atoms in molidx 0"] == mols[0]["atoms"]
     assert mols["atoms in molidx -1"] == mols[-1]["atoms"]
 
-    # check precedence - want "atoms in molecules with resname ALA" to
-    # be "atoms in (molecules with resname ALA)"
-    assert mols["atoms in molecules with resname ALA"] == mols["atoms in (molecules with resname ALA)"]
+    # check precedence - want "atoms in molecules with resname ALA" to
+    # be "atoms in (molecules with resname ALA)"
+    assert (
+        mols["atoms in molecules with resname ALA"]
+        == mols["atoms in (molecules with resname ALA)"]
+    )
 
 
 def test_with_searches(ala_mols):
@@ -450,12 +530,12 @@ def test_with_searches(ala_mols):
     import sire as sr
 
     for mol in mols["molecules with count(atoms) >= 3"]:
-        assert(mol.num_atoms() >= 3)
+        assert mol.num_atoms() >= 3
 
     for res in mols["residues with count(atoms) >= 3"]:
-        assert(res.num_atoms() >= 3)
+        assert res.num_atoms() >= 3
 
-    # single residue match
+    # single residue match
     res = mols["residues with count(atoms) > 6"]
 
     assert res.name().value() == "ALA"
@@ -477,7 +557,7 @@ def test_with_searches(ala_mols):
         mols["residues with count(element O) > 1"]
 
     # all but one molecule contains at one oxygen
-    assert len(mols["molecules with count(element O) == 1"]) == len(mols)-1
+    assert len(mols["molecules with count(element O) == 1"]) == len(mols) - 1
 
     with pytest.raises(SyntaxError):
         assert mols["atoms with molidx 0"] == mols[0]["atoms"]
@@ -513,4 +593,3 @@ def test_count_searches(ala_mols):
 
     mol = mols["molecules with count(residues) == 3"]
     assert mol.num_residues() == 3
-
