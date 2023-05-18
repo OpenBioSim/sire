@@ -1,5 +1,3 @@
-
-
 def test_search_order(ala_mols):
     mols = ala_mols
 
@@ -35,6 +33,7 @@ def test_search_order(ala_mols):
     assert result == mol1
 
     from sire.legacy.Mol import MGName
+
     mols._system.add(mol0, MGName("all"))
     mols._molecules = None
 

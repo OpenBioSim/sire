@@ -1,5 +1,3 @@
-
-
 def test_selector_angles(ala_mols):
     mols = ala_mols
 
@@ -67,7 +65,9 @@ def test_multi_angles(ala_mols):
 
     mol = mols[4]
 
-    angs = SelectorMAngle(mol.atoms("element H"), mol.atoms("element O"), mol.atoms("element H"))
+    angs = SelectorMAngle(
+        mol.atoms("element H"), mol.atoms("element O"), mol.atoms("element H")
+    )
 
     for ang in angs:
         assert ang[0].element().num_protons() == 1

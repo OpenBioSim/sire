@@ -1,5 +1,3 @@
-
-
 def test_dcd(h7n9_mols):
     mols = h7n9_mols
     mol = mols[0]
