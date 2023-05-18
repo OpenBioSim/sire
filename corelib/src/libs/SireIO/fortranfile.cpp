@@ -43,6 +43,56 @@ using namespace SireIO;
 ////// Implementatin of FortranFile
 //////
 
+class FortranFileHandle
+{
+public:
+    FortranFileHandle(const QString &filename, QIODevice::OpenMode mode = QIODevice::ReadOnly)
+    {
+        f.reset(new QFile(filename));
+
+        if (not f->open(QIODevice::ReadOnly))
+        {
+            throw SireError::io_error(
+                QObject::tr("Could not open file %1. Please check it exists and is readable.").arg(filename), CODELOC);
+        }
+
+        ds.reset(new QDataStream(f.get()));
+        current_pos = 0;
+    }
+
+    ~FortranFileHandle()
+    {
+    }
+
+    qint64 _lkr_skip_to(qint64 position)
+    {
+        if (position > current_pos)
+        {
+            current_pos += ds->skipRawData(position - current_pos);
+        }
+        else if (position < current_pos)
+        {
+            // re-read from the beginning
+            ds.reset(new QDataStream(f.get()));
+            current_pos = ds->skipRawData(position);
+        }
+
+        return current_pos;
+    }
+
+    qint64 _lkr_read(char *data, qint64 size)
+    {
+        int read = ds->readRawData(data, size);
+        current_pos += read;
+        return read;
+    }
+
+    std::shared_ptr<QFile> f;
+    std::shared_ptr<QDataStream> ds;
+    QMutex mutex;
+    qint64 current_pos;
+};
+
 FortranFile::FortranFile() : int_size(4), is_little_endian(true)
 {
 }
@@ -143,6 +193,11 @@ bool FortranFile::try_read()
         read_count += start_size + int_size;
     }
 
+    file.close();
+
+    // we can read it - so return a handle to the file
+    f.reset(new FortranFileHandle(abs_filename));
+
     return true;
 }
 
@@ -187,7 +242,7 @@ FortranFile::FortranFile(const QString &filename) : int_size(4), is_little_endia
 
 FortranFile::FortranFile(const FortranFile &other)
     : abs_filename(other.abs_filename), record_pointers(other.record_pointers), record_sizes(other.record_sizes),
-      int_size(other.int_size), is_little_endian(other.is_little_endian)
+      f(other.f), int_size(other.int_size), is_little_endian(other.is_little_endian)
 {
 }
 
@@ -202,6 +257,7 @@ FortranFile &FortranFile::operator=(const FortranFile &other)
         abs_filename = other.abs_filename;
         record_pointers = other.record_pointers;
         record_sizes = other.record_sizes;
+        f = other.f;
         int_size = other.int_size;
         is_little_endian = other.is_little_endian;
     }
@@ -214,21 +270,21 @@ int FortranFile::nRecords() const
     return record_pointers.count();
 }
 
-FortranRecord FortranFile::operator[](int i) const
+FortranRecord FortranFile::operator[](int i)
 {
     i = SireID::Index(i).map(this->nRecords());
 
-    QFile file(this->abs_filename);
-
-    if (!file.open(QIODevice::ReadOnly))
+    if (f.get() == 0)
+    {
         throw SireError::io_error(
-            QObject::tr("Problem opening file '%1'. Please make sure it is readable.").arg(abs_filename), CODELOC);
+            QObject::tr("Problem opening file '%1'. File pointer has been closed?").arg(abs_filename), CODELOC);
+    }
 
-    QDataStream ds(&file);
+    QMutexLocker lkr(&(f->mutex));
 
-    qint64 pointer = this->record_pointers[i];
+    auto pointer = this->record_pointers[i];
 
-    int skipped = ds.skipRawData(pointer);
+    auto skipped = f->_lkr_skip_to(pointer);
 
     if (pointer != skipped)
     {
@@ -244,7 +300,7 @@ FortranRecord FortranFile::operator[](int i) const
 
     QByteArray array(size, 0);
 
-    int read = ds.readRawData(array.data(), size);
+    int read = f->_lkr_read(array.data(), size);
 
     if (size != read)
     {
@@ -255,6 +311,8 @@ FortranRecord FortranFile::operator[](int i) const
                                       .arg(read),
                                   CODELOC);
     }
+
+    lkr.unlock();
 
     return FortranRecord(array, is_little_endian);
 }

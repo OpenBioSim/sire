@@ -34,6 +34,8 @@
 
 SIRE_BEGIN_HEADER
 
+class FortranFileHandle;
+
 namespace SireIO
 {
 
@@ -92,7 +94,7 @@ namespace SireIO
 
         int nRecords() const;
 
-        FortranRecord operator[](int i) const;
+        FortranRecord operator[](int i);
 
     private:
         bool try_read();
@@ -101,6 +103,8 @@ namespace SireIO
 
         QVector<qint64> record_pointers;
         QVector<qint64> record_sizes;
+
+        std::shared_ptr<FortranFileHandle> f;
 
         int int_size;
 
