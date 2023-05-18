@@ -569,8 +569,11 @@ namespace SireBase
                 this->setSuccess();
             }
 
-            manager->reprint(this);
-            manager.reset();
+            if (manager.get() != 0)
+            {
+                manager->reprint(this);
+                manager.reset();
+            }
         }
 
         void BarData::success()
@@ -1275,7 +1278,8 @@ QString ProgressBar::message() const
 void ProgressBar::exit()
 {
     if (d.get() != 0)
+    {
         d->exit();
-
-    d.reset();
+        d.reset();
+    }
 }

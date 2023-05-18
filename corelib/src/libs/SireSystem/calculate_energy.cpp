@@ -428,16 +428,30 @@ namespace SireSystem
 
         bar = bar.enter();
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()), [&](const tbb::blocked_range<int> &r)
-                          {
-        ForceFields local_ff = ff;
-
-        for (int i = r.begin(); i < r.end(); ++i)
+        if (should_run_in_parallel(frames.count(), map))
         {
-            local_ff.loadFrame(frames_data[i], map);
-            nrgs_data[i] = calculate_energy(local_ff);
-            bar.tick();
-        } });
+            tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()), [&](const tbb::blocked_range<int> &r)
+                              {
+            ForceFields local_ff = ff;
+
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                local_ff.loadFrame(frames_data[i], map);
+                nrgs_data[i] = calculate_energy(local_ff);
+                bar.tick();
+            } });
+        }
+        else
+        {
+            ForceFields local_ff = ff;
+
+            for (int i = 0; i < frames.count(); ++i)
+            {
+                local_ff.loadFrame(frames_data[i], map);
+                nrgs_data[i] = calculate_energy(local_ff);
+                bar.tick();
+            }
+        }
 
         bar.success();
 
@@ -455,7 +469,7 @@ namespace SireSystem
         auto handle = SireBase::release_gil();
 
         QVector<qint64> local_frames = frames.toVector();
-        auto frame_data = local_frames.constData();
+        const auto frame_data = local_frames.constData();
         const int nframes = local_frames.count();
 
         auto local_ffs = ffs.constData();
@@ -477,8 +491,10 @@ namespace SireSystem
 
         bar = bar.enter();
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](const tbb::blocked_range<int> &r)
-                          {
+        if (should_run_in_parallel(nframes, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](const tbb::blocked_range<int> &r)
+                              {
             for (int i = r.begin(); i < r.end(); ++i)
             {
                 for (int j=0; j<nffs; ++j)
@@ -490,6 +506,21 @@ namespace SireSystem
 
                 bar.tick();
             } });
+        }
+        else
+        {
+            for (int i = 0; i < nframes; ++i)
+            {
+                for (int j = 0; j < nffs; ++j)
+                {
+                    ForceFields local_ff = local_ffs[j];
+                    local_ff.loadFrame(frame_data[i], map);
+                    nrgs_data[j][i] = calculate_energy(local_ff);
+                }
+
+                bar.tick();
+            }
+        }
 
         bar.success();
 

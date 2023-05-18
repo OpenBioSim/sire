@@ -363,20 +363,20 @@ class TrajectoryIterator:
 
         for i in range(0, nframes):
             for ff_idx in range(0, len(forcefields)):
-                nrg = ff_nrgs[ff_idx][idx - i]
+                nrg = ff_nrgs[ff_idx][i]
                 components[colname(colnames[ff_idx], "total")][
-                    idx
+                    i
                 ] = nrg.to_default()
 
                 for key in nrg.components().keys():
                     try:
-                        components[colname(colnames[ff_idx], key)][idx] = nrg[
+                        components[colname(colnames[ff_idx], key)][i] = nrg[
                             key
                         ].to_default()
                     except KeyError:
                         k = colname(colnames[ff_idx], key)
                         components[k] = np.zeros(nframes, dtype=float)
-                        components[k][idx] = nrg[key].to_default()
+                        components[k][i] = nrg[key].to_default()
 
         data = {}
 
