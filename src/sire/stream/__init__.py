@@ -19,6 +19,11 @@ def save(obj, filename=None):
     If 'filename' is passed then the data is written to this file.
     Otherwise the data is returned as a binary array.
     """
+    from ..system import System
+
+    if System.is_system(obj):
+        obj = obj._system
+
     if filename is None:
         return _Stream.save(obj)
     else:
@@ -32,7 +37,14 @@ def load(data):
     file. Otherwise, it will assume data is a binary array,
     so will load the data directly from that.
     """
-    return _Stream.load(data)
+    obj = _Stream.load(data)
+
+    from ..system import System
+
+    if System.is_system(obj):
+        return System(obj)
+    else:
+        return obj
 
 
 def get_data_header(data):
@@ -52,6 +64,9 @@ def get_data_header(data):
 
 def _to_binary(value):
     """Internal function to creata a binary array from 'value'"""
+    if value is None:
+        return ""
+
     import pickle
 
     return pickle.dumps(value).hex()
@@ -59,6 +74,12 @@ def _to_binary(value):
 
 def _from_binary(data):
     """Internal function to create a value from the passed binary data"""
+    if data is None:
+        return None
+
+    elif type(data) is str and len(data) == 0:
+        return None
+
     import pickle
 
     return pickle.loads(bytes.fromhex(data))

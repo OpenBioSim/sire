@@ -392,7 +392,11 @@ namespace SireStream
     SIRESTREAM_EXPORT void setHeaderProperty(const QString &key, const QString &value)
     {
         QMutexLocker lkr(detail::dataMutex());
-        header_properties[key] = value;
+
+        if (value.isEmpty() or value.isNull())
+            header_properties.remove(key);
+        else
+            header_properties[key] = value;
     }
 
     SIRESTREAM_EXPORT QString getHeaderProperty(const QString &key)
