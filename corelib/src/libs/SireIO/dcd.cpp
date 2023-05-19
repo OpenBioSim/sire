@@ -55,6 +55,8 @@
 #include "SireBase/stringproperty.h"
 #include "SireBase/timeproperty.h"
 #include "SireBase/unittest.h"
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
 
 #include "SireIO/errors.h"
 
@@ -96,14 +98,25 @@ public:
     bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
     SireMol::Frame readFrame(int i, bool use_parallel = true) const;
-    void writeFrame(const SireMol::Frame &frame,
-                    bool use_parallel = true);
+    void writeFrame(const SireMol::Frame &frame, bool use_parallel = true);
 
     int nAtoms() const;
     int nFrames() const;
 
+    QString getTitle() const;
+    void setTitle(QString title);
+
+    SireUnits::Dimension::Time getTimeStep() const;
+    void setTimeStep(const SireUnits::Dimension::Time &timestep);
+
+    void close();
+
 private:
     void readHeader();
+
+    SpacePtr readSpace(int frame) const;
+    QVector<Vector> readCoordinates(int frame) const;
+    SireUnits::Dimension::Time readTime(int frame) const;
 
     void _lkr_reset();
     void _lkr_reindexFrames();
@@ -112,6 +125,8 @@ private:
 
     /** The current frame that has been read into the buffer */
     FortranFile f;
+
+    QString filename;
 
     QStringList title;
 
@@ -135,6 +150,8 @@ private:
 
     qint64 first_frame_line;
 
+    QVector<Vector> first_frame;
+
     bool CHARMM_FORMAT;
     bool HAS_EXTRA_BLOCK;
     bool HAS_FOUR_DIMS;
@@ -148,21 +165,42 @@ DCDFile::DCDFile()
 {
 }
 
-DCDFile::DCDFile(const QString &filename)
-    : natoms(0), nframes(0), timestep(0), istart(0), nsavc(0), nfixed(0), first_frame_line(0), CHARMM_FORMAT(false),
+DCDFile::DCDFile(const QString &fname)
+    : filename(fname), natoms(0), nframes(0), timestep(0), istart(0), nsavc(0), nfixed(0), first_frame_line(0), CHARMM_FORMAT(false),
       HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
 {
-    fFortranFile(filename);
-    this->readHeader();
 }
 
 DCDFile::~DCDFile()
 {
 }
 
-void SireIO::detail::DCDFile::readHeader(FortranFile &file)
+bool DCDFile::open(QIODevice::OpenMode mode)
 {
-    auto line = file[0];
+    QString fname = this->filename;
+
+    this->close();
+
+    this->filename = fname;
+
+    f = FortranFile(this->filename, mode);
+
+    if (mode == QIODevice::ReadOnly)
+    {
+        this->readHeader();
+    }
+
+    return true;
+}
+
+void DCDFile::close()
+{
+    this->operator=(DCDFile());
+}
+
+void DCDFile::readHeader()
+{
+    auto line = f[0];
 
     auto typ = line.readChar(4);
 
@@ -201,7 +239,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
         timestep = line.readFloat64At(40);
     }
 
-    line = file[1];
+    line = f[1];
 
     int ntitle = line.readInt32(1)[0];
 
@@ -213,7 +251,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
             title.append(t);
     }
 
-    line = file[2];
+    line = f[2];
 
     natoms = line.readInt32(1)[0];
 
@@ -221,7 +259,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
     if (nfixed != 0)
     {
-        line = file[linenum];
+        line = f[linenum];
         linenum += 1;
 
         fixed_atoms = line.readInt32(nfixed);
@@ -230,7 +268,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
     first_frame_line = linenum;
 
     // now read in the space
-    spc = this->readSpace(file, 0);
+    spc = this->readSpace(0);
 
     if (nfixed != 0)
     {
@@ -238,21 +276,21 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
         // hold the fixed atoms as well as the movable atoms
         if (CHARMM_FORMAT and HAS_EXTRA_BLOCK)
         {
-            line = file[linenum];
+            line = f[linenum];
             linenum += 1;
 
             line.readFloat64(6);
         }
 
-        line = file[linenum];
+        line = f[linenum];
         linenum += 1;
         auto x = line.readFloat32(natoms);
 
-        line = file[linenum];
+        line = f[linenum];
         linenum += 1;
         auto y = line.readFloat32(natoms);
 
-        line = file[linenum];
+        line = f[linenum];
         linenum += 1;
         auto z = line.readFloat32(natoms);
 
@@ -279,57 +317,32 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
     if (nframes != 0)
     {
-        if (file.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
+        if (f.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
         {
             throw SireIO::parse_error(QObject::tr("Wrong number of records in the DCD file. Expect to have %1 "
                                                   "for %2 frames, but actually have %3.")
                                           .arg(first_frame_line + (num_lines_per_frame * nframes))
                                           .arg(nframes)
-                                          .arg(file.nRecords()),
+                                          .arg(f.nRecords()),
                                       CODELOC);
         }
     }
     else
     {
         // we need to calculate nframes
-        nframes = (file.nRecords() - first_frame_line) / num_lines_per_frame;
+        nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
     }
+
+    qDebug() << "READ HEADER";
+    qDebug() << natoms << nframes << num_lines_per_frame << nfixed << this->getTitle();
 }
 
-double SireIO::detail::DCDFile::getTimeAtFrame(int frame) const
+SireUnits::Dimension::Time DCDFile::readTime(int frame) const
 {
-    return (istart * timestep) + (frame * timestep);
+    return ((istart * timestep) + (frame * timestep)) * picosecond;
 }
 
-double SireIO::detail::DCDFile::getCurrentTime() const
-{
-    return getTimeAtFrame(0);
-}
-
-void SireIO::detail::DCDFile::setCurrentTime(double time)
-{
-    if (timestep != 0)
-    {
-        istart = int(time / timestep);
-    }
-    else
-    {
-        timestep = time;
-        istart = 1;
-    }
-}
-
-void SireIO::detail::DCDFile::setSpace(const Space &s)
-{
-    spc = s;
-}
-
-const Space &SireIO::detail::DCDFile::getSpace() const
-{
-    return *spc;
-}
-
-SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
+SpacePtr DCDFile::readSpace(int frame) const
 {
     if (frame < 0 or frame >= nframes)
     {
@@ -350,7 +363,7 @@ SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
 
         int linenum = first_frame_line + (frame * num_lines_per_frame);
 
-        auto line = file[linenum];
+        auto line = f[linenum];
 
         auto boxinfo = line.readFloat64(6);
 
@@ -361,7 +374,7 @@ SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
     return SpacePtr();
 }
 
-QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int frame) const
+QVector<Vector> DCDFile::readCoordinates(int frame) const
 {
     if (frame < 0 or frame >= nframes)
     {
@@ -385,21 +398,28 @@ QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int 
 
     int linenum = first_frame_line + (frame * num_lines_per_frame) + skip_unitcell;
 
+    qDebug() << "READ LINE" << frame << linenum;
+
     if (nfixed == 0)
     {
         // read in the x, y, and z data
-        auto line = file[linenum];
+        auto line = f[linenum];
         auto x = line.readFloat32(natoms);
-        line = file[linenum + 1];
+        line = f[linenum + 1];
         auto y = line.readFloat32(natoms);
-        line = file[linenum + 2];
+        line = f[linenum + 2];
         auto z = line.readFloat32(natoms);
 
         QVector<Vector> coords(natoms);
 
+        auto coords_data = coords.data();
+        const auto x_data = x.constData();
+        const auto y_data = y.constData();
+        const auto z_data = z.constData();
+
         for (int i = 0; i < natoms; ++i)
         {
-            coords[i] = Vector(x[i], y[i], z[i]);
+            coords_data[i] = Vector(x_data[i], y_data[i], z_data[i]);
         }
 
         return coords;
@@ -413,26 +433,39 @@ QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int 
         // read the coordinates and map them into a copy of first_frame
         QVector<Vector> frame = first_frame;
 
+        // TODO
+        throw SireError::incomplete_code(QObject::tr(
+                                             "Need to write the code to read DCD frames with fixed atoms!"),
+                                         CODELOC);
+
         return frame;
     }
 }
 
-Frame SireIO::detail::DCDFile::readFrame(FortranFile &file, int frame) const
+Frame DCDFile::readFrame(int frame, bool use_parallel) const
 {
     frame = SireID::Index(frame).map(nframes);
 
-    auto space = this->readSpace(file, frame);
-    auto coords = this->readCoordinates(file, frame);
+    auto space = this->readSpace(frame);
+    auto coords = this->readCoordinates(frame);
+    auto time = this->readTime(frame);
 
-    return Frame(coords, space, getTimeAtFrame(frame) * picosecond);
+    return Frame(this->readCoordinates(frame),
+                 this->readSpace(frame).read(),
+                 this->readTime(frame));
 }
 
-QString SireIO::detail::DCDFile::getTitle() const
+void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
+{
+    // this will be fun...
+}
+
+QString DCDFile::getTitle() const
 {
     return title.join("");
 }
 
-void SireIO::detail::DCDFile::setTitle(QString t)
+void DCDFile::setTitle(QString t)
 {
     // need to split into blocks of 32 characters
     title.clear();
@@ -449,27 +482,22 @@ void SireIO::detail::DCDFile::setTitle(QString t)
     }
 }
 
-double SireIO::detail::DCDFile::getTimeStep() const
+SireUnits::Dimension::Time DCDFile::getTimeStep() const
 {
-    return timestep;
+    return timestep * picosecond;
 }
 
-qint64 SireIO::detail::DCDFile::getFrameStart() const
+void DCDFile::setTimeStep(const SireUnits::Dimension::Time &t)
 {
-    return istart;
+    timestep = t.to(picosecond);
 }
 
-qint64 SireIO::detail::DCDFile::getFrameDelta() const
-{
-    return nsavc;
-}
-
-qint64 SireIO::detail::DCDFile::nAtoms() const
+int DCDFile::nAtoms() const
 {
     return natoms;
 }
 
-qint64 SireIO::detail::DCDFile::nFrames() const
+int DCDFile::nFrames() const
 {
     return nframes;
 }
@@ -481,31 +509,31 @@ qint64 SireIO::detail::DCDFile::nFrames() const
 static const RegisterMetaType<DCD> r_dcd;
 const RegisterParser<DCD> register_dcd;
 
-QDataStream &operator<<(QDataStream &ds, const DCD &traj)
+QDataStream &operator<<(QDataStream &ds, const DCD &dcd)
 {
-    writeHeader(ds, r_traj, 1);
+    writeHeader(ds, r_dcd, 1);
 
     SharedDataStream sds(ds);
 
-    sds << traj.current_frame << traj.parse_warnings
-        << traj.nframes << traj.frame_idx
-        << static_cast<const MoleculeParser &>(traj);
+    sds << dcd.current_frame << dcd.parse_warnings
+        << dcd.nframes << dcd.frame_idx
+        << static_cast<const MoleculeParser &>(dcd);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, DCD &traj)
+QDataStream &operator>>(QDataStream &ds, DCD &dcd)
 {
-    VersionID v = readHeader(ds, r_traj);
+    VersionID v = readHeader(ds, r_dcd);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
 
-        sds >> traj.current_frame >> traj.parse_warnings >> traj.nframes >> traj.frame_idx >> static_cast<MoleculeParser &>(traj);
+        sds >> dcd.current_frame >> dcd.parse_warnings >> dcd.nframes >> dcd.frame_idx >> static_cast<MoleculeParser &>(dcd);
     }
     else
-        throw version_error(v, "1", r_traj, CODELOC);
+        throw version_error(v, "1", r_dcd, CODELOC);
 
     return ds;
 }

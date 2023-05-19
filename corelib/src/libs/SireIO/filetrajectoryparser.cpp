@@ -476,6 +476,12 @@ int FileTrajectoryParser::nAtoms() const
     return frame_parser.read().nAtoms();
 }
 
+/** Return the title */
+QString FileTrajectoryParser::title() const
+{
+    return QString();
+}
+
 /** Return this parser constructed from the passed filename */
 MoleculeParserPtr FileTrajectoryParser::construct(const QString &filename, const PropertyMap &map) const
 {

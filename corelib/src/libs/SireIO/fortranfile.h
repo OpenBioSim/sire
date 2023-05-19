@@ -31,6 +31,7 @@
 #include "sireglobal.h"
 
 #include <QByteArray>
+#include <QFile>
 
 SIRE_BEGIN_HEADER
 
@@ -54,6 +55,7 @@ namespace SireIO
         FortranRecord &operator=(const FortranRecord &other);
 
         int size() const;
+        const char *constData() const;
 
         QString readChar(int n);
         QVector<double> readFloat64(int n);
@@ -86,7 +88,8 @@ namespace SireIO
     {
     public:
         FortranFile();
-        FortranFile(const QString &filename);
+        FortranFile(const QString &filename,
+                    QIODevice::OpenMode mode = QIODevice::ReadOnly);
         FortranFile(const FortranFile &other);
         ~FortranFile();
 
@@ -94,7 +97,21 @@ namespace SireIO
 
         int nRecords() const;
 
-        FortranRecord operator[](int i);
+        FortranRecord operator[](int i) const;
+
+        void write(const FortranRecord &record);
+
+        void write(const QByteArray &values);
+
+        void write(double value);
+        void write(float value);
+        void write(qint32 value);
+        void write(qint64 value);
+
+        void write(const QVector<double> &values);
+        void write(const QVector<float> &values);
+        void write(const QVector<qint32> &values);
+        void write(const QVector<qint64> &values);
 
     private:
         bool try_read();

@@ -11,6 +11,7 @@
 #include "charmmpsf.h"
 #include "dcd.h"
 #include "filetrajectory.h"
+#include "filetrajectoryparser.h"
 #include "flexibilitylibrary.h"
 #include "gro87.h"
 #include "grotop.h"
@@ -43,6 +44,7 @@ void register_SireIO_objects()
     ObjectRegistry::registerConverterFor< SireIO::CharmmPSF >();
     ObjectRegistry::registerConverterFor< SireIO::DCD >();
     ObjectRegistry::registerConverterFor< SireIO::FileTrajectory >();
+    ObjectRegistry::registerConverterFor< SireIO::FileTrajectoryParser >();
     ObjectRegistry::registerConverterFor< SireIO::FlexibilityLibrary >();
     ObjectRegistry::registerConverterFor< SireIO::FlexibilityTemplate >();
     ObjectRegistry::registerConverterFor< SireIO::Gro87 >();

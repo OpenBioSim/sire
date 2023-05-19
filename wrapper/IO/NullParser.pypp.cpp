@@ -55,6 +55,8 @@ namespace bp = boost::python;
 
 #include "filetrajectory.h"
 
+#include "filetrajectoryparser.h"
+
 #include "moleculeparser.h"
 
 #include "supplementary.h"

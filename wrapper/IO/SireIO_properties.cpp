@@ -38,6 +38,7 @@
 #include "SireSystem/system.h"
 #include "SireUnits/units.h"
 #include "filetrajectory.h"
+#include "filetrajectoryparser.h"
 #include "moleculeparser.h"
 #include "supplementary.h"
 #include <QDebug>

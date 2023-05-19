@@ -39,21 +39,15 @@ SIRE_BEGIN_HEADER
 namespace SireIO
 {
     class DCD;
-
-    namespace detail
-    {
-        class DCDFile;
-    }
-
-} // namespace SireIO
+}
 
 SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::DCD &);
 SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::DCD &);
 
+class DCDFile;
+
 namespace SireIO
 {
-    class DCDFile;
-
     /** This class represents a DCD file reader.
 
         The format is described here

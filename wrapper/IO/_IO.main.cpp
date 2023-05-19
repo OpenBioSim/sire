@@ -5,8 +5,6 @@
 
 #include "boost/python.hpp"
 
-#include "Helpers/clone_const_reference.hpp"
-
 #include "Amber.pypp.hpp"
 
 #include "AmberPrm.pypp.hpp"
@@ -24,6 +22,8 @@
 #include "Cube.pypp.hpp"
 
 #include "DCD.pypp.hpp"
+
+#include "FileTrajectoryParser.pypp.hpp"
 
 #include "FlexibilityLibrary.pypp.hpp"
 
@@ -115,6 +115,8 @@ BOOST_PYTHON_MODULE(_IO){
     register_Cube_class();
 
     register_DCD_class();
+
+    register_FileTrajectoryParser_class();
 
     register_FlexibilityLibrary_class();
 

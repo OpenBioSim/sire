@@ -13,6 +13,7 @@
 #include "cube.h"
 #include "dcd.h"
 #include "filetrajectory.h"
+#include "filetrajectoryparser.h"
 #include "flexibilitylibrary.h"
 #include "getcoordsarray.h"
 #include "gro87.h"
