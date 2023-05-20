@@ -113,7 +113,7 @@ public:
 
 private:
     void readHeader();
-    void writeHeader(int natoms);
+    void writeHeader(int natoms, bool has_periodic_space);
 
     SpacePtr readSpace(int frame) const;
     QVector<Vector> readCoordinates(int frame) const;
@@ -191,13 +191,6 @@ bool DCDFile::open(QIODevice::OpenMode mode)
     if (mode == QIODevice::ReadOnly)
     {
         this->readHeader();
-    }
-    else
-    {
-        // we will write in CHARMM format without an EXTRA block
-        CHARMM_FORMAT = true;
-        HAS_EXTRA_BLOCK = false;
-        HAS_FOUR_DIMS = false;
     }
 
     return true;
@@ -277,7 +270,41 @@ void DCDFile::readHeader()
 
     first_frame_line = linenum;
 
-    // now read in the space
+    // now sanity check the rest of the file
+    int num_lines_per_frame = 3;
+
+    if (HAS_FOUR_DIMS)
+    {
+        num_lines_per_frame += 1;
+    }
+
+    if (CHARMM_FORMAT and HAS_EXTRA_BLOCK)
+    {
+        num_lines_per_frame += 1;
+    }
+
+    if (nframes != 0)
+    {
+        if (f.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
+        {
+            throw SireIO::parse_error(QObject::tr("Wrong number of records in the DCD file. Expect to have %1 "
+                                                  "for %2 frames, but actually have %3.")
+                                          .arg(first_frame_line + (num_lines_per_frame * nframes))
+                                          .arg(nframes)
+                                          .arg(f.nRecords()),
+                                      CODELOC);
+        }
+    }
+    else
+    {
+        // we need to calculate nframes
+        qDebug() << "CALCULATE NFRAMES";
+        qDebug() << f.nRecords() << first_frame_line << num_lines_per_frame;
+        nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
+    }
+
+    // now read in the first frame, in case we have to do any merging
+    // with the fixed atoms - start by reading the space
     spc = this->readSpace(0);
 
     if (nfixed != 0)
@@ -311,40 +338,9 @@ void DCDFile::readHeader()
             first_frame[i] = Vector(x[i], y[i], z[i]);
         }
     }
-
-    // now sanity check the rest of the file
-    int num_lines_per_frame = 3;
-
-    if (HAS_FOUR_DIMS)
-    {
-        num_lines_per_frame += 1;
-    }
-
-    if (CHARMM_FORMAT and HAS_EXTRA_BLOCK)
-    {
-        num_lines_per_frame += 1;
-    }
-
-    if (nframes != 0)
-    {
-        if (f.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
-        {
-            throw SireIO::parse_error(QObject::tr("Wrong number of records in the DCD file. Expect to have %1 "
-                                                  "for %2 frames, but actually have %3.")
-                                          .arg(first_frame_line + (num_lines_per_frame * nframes))
-                                          .arg(nframes)
-                                          .arg(f.nRecords()),
-                                      CODELOC);
-        }
-    }
-    else
-    {
-        // we need to calculate nframes
-        nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
-    }
 }
 
-void DCDFile::writeHeader(int natoms)
+void DCDFile::writeHeader(int natoms, bool has_periodic_space)
 {
     if (have_written_header)
         return;
@@ -370,7 +366,18 @@ void DCDFile::writeHeader(int natoms)
     line.writeFloat32(timestep);
 
     // bytes 44 to 47
-    line.writeInt32(0); // no extra block
+    if (has_periodic_space)
+    {
+        qDebug() << "HAS PERIODIC SPACE";
+        HAS_EXTRA_BLOCK = true;
+        line.writeInt32(1); // has an extra block
+    }
+    else
+    {
+        qDebug() << "HAS CARTESIAN SPACE";
+        HAS_EXTRA_BLOCK = false;
+        line.writeInt32(0); // no extra block
+    }
 
     // bytes 48-51
     line.writeInt32(0); // not four dimensions
@@ -379,7 +386,11 @@ void DCDFile::writeHeader(int natoms)
     line.writeInt32(ints, 9);
 
     // bytes 80-83
-    line.writeInt32(1); // 1 as we are in CHARMM format
+    line.writeInt32(1); // 1 as we are in CHARMM format - we need this to write space info
+    CHARMM_FORMAT = true;
+
+    // we will only write 3D coordinates
+    HAS_FOUR_DIMS = false;
 
     f.write(line);
 
@@ -409,8 +420,7 @@ void DCDFile::writeHeader(int natoms)
     have_written_header = true;
 }
 
-SireUnits::Dimension::Time
-DCDFile::readTime(int frame) const
+SireUnits::Dimension::Time DCDFile::readTime(int frame) const
 {
     return ((istart * timestep) + (frame * timestep)) * picosecond;
 }
@@ -440,11 +450,23 @@ SpacePtr DCDFile::readSpace(int frame) const
 
         auto boxinfo = line.readFloat64(6);
 
-        // construct from the above boxinfo
-        return SpacePtr();
+        if (boxinfo[3] == 90 and boxinfo[4] == 90 and boxinfo[5] == 90)
+        {
+            // this is a PeriodicBox
+            return SpacePtr(new PeriodicBox(Vector(boxinfo[0], boxinfo[1], boxinfo[2])));
+        }
+        else
+        {
+            // this is a triclinic space
+            return SpacePtr(new TriclinicBox(boxinfo[0], boxinfo[1], boxinfo[2],
+                                             boxinfo[3] * degrees,
+                                             boxinfo[4] * degrees,
+                                             boxinfo[5] * degrees));
+        }
     }
 
-    return SpacePtr();
+    // this is an infinite cartesian space
+    return SpacePtr(new Cartesian());
 }
 
 QVector<Vector> DCDFile::readCoordinates(int frame) const
@@ -530,12 +552,85 @@ void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
 {
     const int natoms = frame.nAtoms();
 
-    if (natoms <= 0)
+    if (natoms <= 0 or (not frame.hasCoordinates()))
         return;
 
-    this->writeHeader(natoms);
+    bool has_periodic_space = frame.space().isPeriodic();
 
-    // this will be fun...
+    this->writeHeader(natoms, has_periodic_space);
+
+    // now write the space
+    if (has_periodic_space)
+    {
+        FortranRecord line(f.isLittleEndian());
+
+        if (frame.space().isA<PeriodicBox>())
+        {
+            const auto dims = frame.space().asA<PeriodicBox>().dimensions();
+
+            line.writeFloat32(dims.x());
+            line.writeFloat32(dims.y());
+            line.writeFloat32(dims.z());
+
+            line.writeFloat32(90.0);
+            line.writeFloat32(90.0);
+            line.writeFloat32(90.0);
+        }
+        else
+        {
+            TriclinicBox box;
+
+            if (frame.space().isA<TriclinicBox>())
+                box = frame.space().asA<TriclinicBox>();
+            else
+            {
+                auto matrix = frame.space().boxMatrix();
+                box = TriclinicBox(matrix.column0(), matrix.column1(), matrix.column2());
+            }
+
+            line.writeFloat32(box.vector0().magnitude());
+            line.writeFloat32(box.vector1().magnitude());
+            line.writeFloat32(box.vector2().magnitude());
+
+            line.writeFloat32(box.alpha());
+            line.writeFloat32(box.beta());
+            line.writeFloat32(box.gamma());
+        }
+
+        f.write(line);
+    }
+
+    // now write the x, y and z coordinates
+    QVector<float> x(natoms);
+    QVector<float> y(natoms);
+    QVector<float> z(natoms);
+
+    auto x_data = x.data();
+    auto y_data = y.data();
+    auto z_data = z.data();
+
+    const auto coords_data = frame.coordinates().constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        const auto &c = coords_data[i];
+
+        x_data[i] = c.x();
+        y_data[i] = c.y();
+        z_data[i] = c.z();
+    }
+
+    FortranRecord line(f.isLittleEndian());
+    line.writeFloat32(x, natoms);
+    f.write(line);
+
+    line = FortranRecord(f.isLittleEndian());
+    line.writeFloat32(y, natoms);
+    f.write(line);
+
+    line = FortranRecord(f.isLittleEndian());
+    line.writeFloat32(z, natoms);
+    f.write(line);
 }
 
 QString DCDFile::getTitle() const

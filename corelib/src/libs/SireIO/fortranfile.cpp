@@ -49,10 +49,9 @@ class FortranFileHandle
 public:
     FortranFileHandle(const QString &filename, QIODevice::OpenMode mode = QIODevice::ReadOnly) : f(filename)
     {
-        if (not f.open(QIODevice::ReadOnly))
+        if (not f.open(mode))
         {
-            throw SireError::io_error(
-                QObject::tr("Could not open file %1. Please check it exists and is readable.").arg(filename), CODELOC);
+            throw SireError::file_error(f, CODELOC);
         }
     }
 
@@ -160,6 +159,39 @@ void FortranFile::write(const FortranRecord &record)
 
     // now write the record
     f->_lkr_write(record.constData(), record.size());
+
+    // now write the size of the record again (it is written
+    // at the start and end of the record)
+    if (int_size == 4)
+    {
+        qint32 sz;
+
+        if (is_little_endian)
+        {
+            sz = qToLittleEndian<qint32>(record.size());
+        }
+        else
+        {
+            sz = qToBigEndian<qint32>(record.size());
+        }
+
+        f->_lkr_write(reinterpret_cast<char *>(&sz), int_size);
+    }
+    else
+    {
+        qint64 sz;
+
+        if (is_little_endian)
+        {
+            sz = qToLittleEndian<qint64>(record.size());
+        }
+        else
+        {
+            sz = qToBigEndian<qint64>(record.size());
+        }
+
+        f->_lkr_write(reinterpret_cast<char *>(&sz), int_size);
+    }
 }
 
 bool FortranFile::try_read()
@@ -274,28 +306,28 @@ FortranFile::FortranFile(const QString &filename,
 
     if (mode == QIODevice::ReadOnly)
     {
-        // try to read using 4 byte header and native endian
+        // try to read using 4 byte header and little endian
         int_size = 4;
         is_little_endian = true;
 
         if (try_read())
             return;
 
-        // try to read using 8 byte header and native endian
+        // try to read using 8 byte header and little endian
         int_size = 8;
         is_little_endian = true;
 
         if (try_read())
             return;
 
-        // try to read using 4 byte header and swapped endian
+        // try to read using 4 byte header and big endian
         int_size = 4;
         is_little_endian = false;
 
         if (try_read())
             return;
 
-        // try to read using 8 byte header and swapped endian
+        // try to read using 8 byte header and big endian
         int_size = 8;
         is_little_endian = false;
 
@@ -414,6 +446,10 @@ bool FortranFile::isLittleEndian() const
 FortranRecord::FortranRecord() : cursor(0)
 {
     is_little_endian = true;
+}
+
+FortranRecord::FortranRecord(bool le) : cursor(0), is_little_endian(le)
+{
 }
 
 FortranRecord::FortranRecord(const QByteArray &d, bool le) : data(d), cursor(0), is_little_endian(le)
