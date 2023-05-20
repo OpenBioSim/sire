@@ -48,6 +48,7 @@ namespace SireIO
     {
     public:
         FortranRecord();
+        FortranRecord(bool is_little_endian);
         FortranRecord(const QByteArray &data, bool is_little_endian);
         FortranRecord(const FortranRecord &other);
 
@@ -69,6 +70,18 @@ namespace SireIO
         float readFloat32At(int pos) const;
         qint32 readInt32At(int pos) const;
         qint64 readInt64At(int pos) const;
+
+        void writeChar(const QString &text, int n);
+
+        void writeFloat64(const QVector<double> &values, int n);
+        void writeFloat32(const QVector<float> &values, int n);
+        void writeInt32(const QVector<qint32> &values, int n);
+        void writeInt64(const QVector<qint64> &values, int n);
+
+        void writeFloat64(double value);
+        void writeFloat32(float value);
+        void writeInt32(qint32 value);
+        void writeInt64(qint64 value);
 
     private:
         void _assertPosValid(int pos, int size) const;
@@ -102,17 +115,7 @@ namespace SireIO
 
         void write(const FortranRecord &record);
 
-        void write(const QByteArray &values);
-
-        void write(double value);
-        void write(float value);
-        void write(qint32 value);
-        void write(qint64 value);
-
-        void write(const QVector<double> &values);
-        void write(const QVector<float> &values);
-        void write(const QVector<qint32> &values);
-        void write(const QVector<qint64> &values);
+        bool isLittleEndian() const;
 
     private:
         bool try_read();

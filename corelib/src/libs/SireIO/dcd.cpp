@@ -113,6 +113,7 @@ public:
 
 private:
     void readHeader();
+    void writeHeader(int natoms);
 
     SpacePtr readSpace(int frame) const;
     QVector<Vector> readCoordinates(int frame) const;
@@ -155,19 +156,21 @@ private:
     bool CHARMM_FORMAT;
     bool HAS_EXTRA_BLOCK;
     bool HAS_FOUR_DIMS;
+
+    bool have_written_header;
 };
 
 //// DCDFile
 
 DCDFile::DCDFile()
     : natoms(0), nframes(0), timestep(0), istart(0), nsavc(0), nfixed(0), first_frame_line(0), CHARMM_FORMAT(false),
-      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
+      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false), have_written_header(false)
 {
 }
 
 DCDFile::DCDFile(const QString &fname)
     : filename(fname), natoms(0), nframes(0), timestep(0), istart(0), nsavc(0), nfixed(0), first_frame_line(0), CHARMM_FORMAT(false),
-      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
+      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false), have_written_header(false)
 {
 }
 
@@ -188,6 +191,13 @@ bool DCDFile::open(QIODevice::OpenMode mode)
     if (mode == QIODevice::ReadOnly)
     {
         this->readHeader();
+    }
+    else
+    {
+        // we will write in CHARMM format without an EXTRA block
+        CHARMM_FORMAT = true;
+        HAS_EXTRA_BLOCK = false;
+        HAS_FOUR_DIMS = false;
     }
 
     return true;
@@ -332,12 +342,75 @@ void DCDFile::readHeader()
         // we need to calculate nframes
         nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
     }
-
-    qDebug() << "READ HEADER";
-    qDebug() << natoms << nframes << num_lines_per_frame << nfixed << this->getTitle();
 }
 
-SireUnits::Dimension::Time DCDFile::readTime(int frame) const
+void DCDFile::writeHeader(int natoms)
+{
+    if (have_written_header)
+        return;
+
+    FortranRecord line(f.isLittleEndian());
+
+    // bytes 0 to 3
+    line.writeChar("CORD", 4);
+
+    // first values are 9 integers, initialised to zero
+    QVector<qint32> ints(9, 0);
+
+    // every value is zero, as we don't know what they are
+    // ints[0] = 0; // nframes - we don't know this yet...
+    // ints[1] = 0; // index of the first frame - we don't know this either...
+    // ints[2] = 0; // nsavc - should be zero?
+    // ints[8] = 0; // nfixed is zero - everything will be treated as moving
+
+    // bytes 4 to 39
+    line.writeInt32(ints, 9);
+
+    // bytes 40 to 43
+    line.writeFloat32(timestep);
+
+    // bytes 44 to 47
+    line.writeInt32(0); // no extra block
+
+    // bytes 48-51
+    line.writeInt32(0); // not four dimensions
+
+    // bytes 52-79 - should all be zero - can re-use ints
+    line.writeInt32(ints, 9);
+
+    // bytes 80-83
+    line.writeInt32(1); // 1 as we are in CHARMM format
+
+    f.write(line);
+
+    // now write the title
+    line = FortranRecord(f.isLittleEndian());
+
+    if (title.isEmpty())
+    {
+        title.append("WRITTEN BY SIRE");
+    }
+
+    line.writeInt32(title.count());
+
+    for (const auto &t : title)
+    {
+        line.writeChar(t, 32);
+    }
+
+    f.write(line);
+
+    // now write the number of atoms
+    line = FortranRecord(f.isLittleEndian());
+    line.writeInt32(natoms);
+
+    f.write(line);
+
+    have_written_header = true;
+}
+
+SireUnits::Dimension::Time
+DCDFile::readTime(int frame) const
 {
     return ((istart * timestep) + (frame * timestep)) * picosecond;
 }
@@ -398,8 +471,6 @@ QVector<Vector> DCDFile::readCoordinates(int frame) const
 
     int linenum = first_frame_line + (frame * num_lines_per_frame) + skip_unitcell;
 
-    qDebug() << "READ LINE" << frame << linenum;
-
     if (nfixed == 0)
     {
         // read in the x, y, and z data
@@ -457,6 +528,13 @@ Frame DCDFile::readFrame(int frame, bool use_parallel) const
 
 void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
 {
+    const int natoms = frame.nAtoms();
+
+    if (natoms <= 0)
+        return;
+
+    this->writeHeader(natoms);
+
     // this will be fun...
 }
 
