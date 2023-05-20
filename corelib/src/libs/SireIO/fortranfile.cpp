@@ -36,6 +36,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QtEndian>
+#include <QMutex>
 
 using namespace SireIO;
 
@@ -401,7 +402,7 @@ void FortranFile::write(const QVector<double> &values)
         throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-64bit doubles..."),
                                          CODELOC);
 
-    QByteArray data('\0', 8 * n);
+    QByteArray data(8 * n, char('\0'));
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
     if (is_little_endian)
@@ -443,7 +444,7 @@ void FortranFile::write(const QVector<float> &values)
         throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-32bit floats..."),
                                          CODELOC);
 
-    QByteArray data('\0', 4 * n);
+    QByteArray data(4 * n, char('\0'));
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
     if (is_little_endian)
@@ -481,7 +482,7 @@ void FortranFile::write(const QVector<qint32> &values)
     if (n <= 0)
         return;
 
-    QByteArray data('\0', n * 4);
+    QByteArray data(4 * n, char('\0'));
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
     if (is_little_endian)
@@ -531,7 +532,7 @@ void FortranFile::write(const QVector<qint64> &values)
     if (n <= 0)
         return;
 
-    QByteArray data('\0', n * 8);
+    QByteArray data(8 * n, char('\0'));
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
     if (is_little_endian)
