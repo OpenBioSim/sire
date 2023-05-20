@@ -32,6 +32,7 @@
 
 #include <QByteArray>
 #include <QFile>
+#include <memory>
 
 SIRE_BEGIN_HEADER
 
