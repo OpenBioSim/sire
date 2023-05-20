@@ -62,8 +62,8 @@
 
 using namespace SireStream;
 
-using std::shared_ptr;
 using boost::tuple;
+using std::shared_ptr;
 
 namespace SireStream
 {
@@ -377,6 +377,40 @@ namespace SireStream
         }
 
     } // end of namespace detail
+
+    static QHash<QString, QString> header_properties;
+
+    static QHash<QString, QString> getHeaderProperties()
+    {
+        QMutexLocker lkr(detail::dataMutex());
+
+        auto local_props = header_properties;
+
+        return local_props;
+    }
+
+    SIRESTREAM_EXPORT void setHeaderProperty(const QString &key, const QString &value)
+    {
+        QMutexLocker lkr(detail::dataMutex());
+
+        if (value.isEmpty() or value.isNull())
+            header_properties.remove(key);
+        else
+            header_properties[key] = value;
+    }
+
+    SIRESTREAM_EXPORT QString getHeaderProperty(const QString &key)
+    {
+        QMutexLocker lkr(detail::dataMutex());
+
+        auto it = header_properties.constFind(key);
+
+        if (it == header_properties.constEnd())
+            return QByteArray();
+        else
+            return it.value();
+    }
+
 } // end of namespace SireStream
 
 /////////
@@ -388,7 +422,7 @@ QDataStream &operator<<(QDataStream &ds, const FileHeader &header)
 {
     ds << header.version();
 
-    // versions 1 and 2 uses the Qt 4.2 data format
+    // versions 1, 2 and 3 uses the Qt 4.2 data format
     ds.setVersion(QDataStream::Qt_4_2);
 
     QByteArray data;
@@ -396,9 +430,14 @@ QDataStream &operator<<(QDataStream &ds, const FileHeader &header)
 
     ds2.setVersion(QDataStream::Qt_4_2);
 
+    if (header.version() == 3)
+    {
+        ds2 << header.props;
+    }
+
     ds2 << header.created_by << header.created_when << header.created_where << header.system_info;
 
-    if (header.version() == 2)
+    if (header.version() == 2 or header.version() == 3)
         ds2 << header.type_names;
 
     else if (header.version() == 1)
@@ -426,7 +465,27 @@ QDataStream &operator>>(QDataStream &ds, FileHeader &header)
     quint32 version;
     ds >> version;
 
-    if (version == 2)
+    if (version == 3)
+    {
+        // Version 3 uses the Qt 4.2 data format
+        ds.setVersion(QDataStream::Qt_4_2);
+
+        QByteArray data;
+        ds >> data;
+
+        data = qUncompress(data);
+
+        QDataStream ds2(data);
+
+        ds2.setVersion(QDataStream::Qt_4_2);
+
+        ds2 >> header.props >> header.created_by >> header.created_when >> header.created_where >> header.system_info >>
+            header.type_names >> header.build_repository >> header.build_version >> header.required_libraries >>
+            header.system_locale >> header.data_digest >> header.compressed_size >> header.uncompressed_size;
+
+        header.version_number = version;
+    }
+    else if (version == 2)
     {
         // Version 2 uses the Qt 4.2 data format
         ds.setVersion(QDataStream::Qt_4_2);
@@ -445,6 +504,7 @@ QDataStream &operator>>(QDataStream &ds, FileHeader &header)
             header.system_locale >> header.data_digest >> header.compressed_size >> header.uncompressed_size;
 
         header.version_number = version;
+        header.props.clear();
     }
     else if (version == 1)
     {
@@ -470,10 +530,11 @@ QDataStream &operator>>(QDataStream &ds, FileHeader &header)
         header.type_names.append(type_name);
 
         header.version_number = version;
+        header.props.clear();
     }
     else
         throw version_error(QObject::tr("The header version (%1) is not recognised. Only header version "
-                                        "1+2 are supported in this program.")
+                                        "1, 2 and 3 are supported in this program.")
                                 .arg(version),
                             CODELOC);
 
@@ -684,8 +745,12 @@ static const QString &getSystemInfo()
     lines.append("Compiler: Green Hills Optimizing C++ Compiler");
 #endif
 
+#ifdef Q_CC_CLANG
+    lines.append(QString("Compiler: CLANG C++ (%1.%2.%3)").arg(__clang_major__).arg(__clang_minor__).arg(__clang_patchlevel__));
+#else
 #ifdef Q_CC_GNU
     lines.append(QString("Compiler: GNU C++ (%1.%2.%3)").arg(__GNUC__).arg(__GNUC_MINOR__).arg(__GNUC_PATCHLEVEL__));
+#endif
 #endif
 
 #ifdef Q_CC_HIGHC
@@ -804,11 +869,13 @@ FileHeader::FileHeader(const QStringList &typ_names, const QByteArray &compresse
     uncompressed_size = raw_data.count();
 
     system_info = getSystemInfo();
+
+    props = getHeaderProperties();
 }
 
 /** Copy constructor */
 FileHeader::FileHeader(const FileHeader &other)
-    : created_by(other.created_by), created_when(other.created_when), created_where(other.created_where),
+    : props(other.props), created_by(other.created_by), created_when(other.created_when), created_where(other.created_where),
       system_info(other.system_info), type_names(other.type_names), build_repository(other.build_repository),
       build_version(other.build_version), required_libraries(other.required_libraries),
       system_locale(other.system_locale), data_digest(other.data_digest), compressed_size(other.compressed_size),
@@ -826,6 +893,7 @@ FileHeader &FileHeader::operator=(const FileHeader &other)
 {
     if (this != &other)
     {
+        props = other.props;
         created_by = other.created_by;
         created_when = other.created_when;
         created_where = other.created_where;
@@ -867,6 +935,38 @@ QString FileHeader::toString() const
         .arg(double(compressed_size) / 1024.0)
         .arg(double(uncompressed_size) / 1024.0)
         .arg(QLocale::countryToString(system_locale.country()), QLocale::languageToString(system_locale.language()));
+}
+
+/** Return the property associated with the passed key. Raises an exception
+ *  if this property doesn't exist
+ */
+const QString &FileHeader::property(const QString &key) const
+{
+    auto it = this->props.constFind(key);
+
+    if (it == this->props.constEnd())
+        throw SireError::invalid_key(QObject::tr(
+                                         "There is no header property associated with the key '%1'. Available keys are : [ %2 ]")
+                                         .arg(key)
+                                         .arg(this->props.keys().join(", ")),
+                                     CODELOC);
+
+    return it.value();
+}
+
+const QString &FileHeader::property(const QString &key, const QString &default_value) const
+{
+    auto it = this->props.constFind(key);
+
+    if (it == this->props.constEnd())
+        return default_value;
+    else
+        return it.value();
+}
+
+bool FileHeader::hasProperty(const QString &key) const
+{
+    return this->props.contains(key);
 }
 
 /** Return the username of whoever created this data */
@@ -1036,10 +1136,10 @@ void FileHeader::assertNotCorrupted(const QByteArray &compressed_data) const
     is changed only when the file format is completely changed (e.g. we
     move away from using a compressed header, then the compressed object)
 
-    Currently, we only use version 1, which has this format;
+    Currently, we only use version 1, 2 or 3, which has this format;
 
     SIRE_MAGIC_NUMBER  (quint32 = 251785387)
-    VERSION_NUMBER     (quint32 = 2)
+    VERSION_NUMBER     (quint32 = 3)
     QByteArray         (compressed array containing the file header)
     QByteArray         (compressed array containing the saved object)
 
@@ -1049,8 +1149,8 @@ quint32 FileHeader::version() const
 {
     if (version_number == 0)
         // the version has not been set - so use the latest version
-        // available - which is '2' in this case
-        return 2;
+        // available - which is '3' in this case
+        return 3;
     else
         return version_number;
 }
@@ -1093,7 +1193,7 @@ namespace SireStream
         {
             FileHeader header;
 
-            if (header.version() == 1 or header.version() == 2)
+            if (header.version() == 1 or header.version() == 2 or header.version() == 3)
             {
                 int nobjects = objects.count();
 
@@ -1205,7 +1305,7 @@ namespace SireStream
         {
             FileHeader header;
 
-            if (header.version() == 1 or header.version() == 2)
+            if (header.version() == 1 or header.version() == 2 or header.version() == 3)
             {
                 int nobjects = objects.count();
 
@@ -1424,7 +1524,7 @@ namespace SireStream
             return loaded_objects;
         }
 
-        if (header.version() == 1 or header.version() == 2)
+        if (header.version() == 1 or header.version() == 2 or header.version() == 3)
         {
             // read in the binary data containing all of the objects
             QByteArray compressed_data;

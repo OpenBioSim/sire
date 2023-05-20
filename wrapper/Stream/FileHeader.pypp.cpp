@@ -183,6 +183,19 @@ void register_FileHeader_class(){
                 , "Return the digest of the data - this is used to check\nfor any data corruption" );
         
         }
+        { //::SireStream::FileHeader::hasProperty
+        
+            typedef bool ( ::SireStream::FileHeader::*hasProperty_function_type)( ::QString const & ) const;
+            hasProperty_function_type hasProperty_function_value( &::SireStream::FileHeader::hasProperty );
+            
+            FileHeader_exposer.def( 
+                "hasProperty"
+                , hasProperty_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireStream::FileHeader::locale
         
             typedef ::QLocale const & ( ::SireStream::FileHeader::*locale_function_type)(  ) const;
@@ -205,6 +218,32 @@ void register_FileHeader_class(){
                 , assign_function_value
                 , ( bp::arg("other") )
                 , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireStream::FileHeader::property
+        
+            typedef ::QString const & ( ::SireStream::FileHeader::*property_function_type)( ::QString const & ) const;
+            property_function_type property_function_value( &::SireStream::FileHeader::property );
+            
+            FileHeader_exposer.def( 
+                "property"
+                , property_function_value
+                , ( bp::arg("key") )
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "Return the property associated with the passed key. Raises an exception\n  if this property doesnt exist\n" );
+        
+        }
+        { //::SireStream::FileHeader::property
+        
+            typedef ::QString const & ( ::SireStream::FileHeader::*property_function_type)( ::QString const &,::QString const & ) const;
+            property_function_type property_function_value( &::SireStream::FileHeader::property );
+            
+            FileHeader_exposer.def( 
+                "property"
+                , property_function_value
+                , ( bp::arg("key"), bp::arg("default_value") )
+                , bp::return_value_policy< bp::copy_const_reference >()
                 , "" );
         
         }
