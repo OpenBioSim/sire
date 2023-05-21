@@ -298,8 +298,6 @@ void DCDFile::readHeader()
     else
     {
         // we need to calculate nframes
-        qDebug() << "CALCULATE NFRAMES";
-        qDebug() << f.nRecords() << first_frame_line << num_lines_per_frame;
         nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
     }
 
@@ -368,13 +366,11 @@ void DCDFile::writeHeader(int natoms, bool has_periodic_space)
     // bytes 44 to 47
     if (has_periodic_space)
     {
-        qDebug() << "HAS PERIODIC SPACE";
         HAS_EXTRA_BLOCK = true;
         line.writeInt32(1); // has an extra block
     }
     else
     {
-        qDebug() << "HAS CARTESIAN SPACE";
         HAS_EXTRA_BLOCK = false;
         line.writeInt32(0); // no extra block
     }
@@ -383,7 +379,7 @@ void DCDFile::writeHeader(int natoms, bool has_periodic_space)
     line.writeInt32(0); // not four dimensions
 
     // bytes 52-79 - should all be zero - can re-use ints
-    line.writeInt32(ints, 9);
+    line.writeInt32(ints, 7);
 
     // bytes 80-83
     line.writeInt32(1); // 1 as we are in CHARMM format - we need this to write space info
@@ -588,13 +584,13 @@ void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
                 box = TriclinicBox(matrix.column0(), matrix.column1(), matrix.column2());
             }
 
-            line.writeFloat32(box.vector0().magnitude());
-            line.writeFloat32(box.vector1().magnitude());
-            line.writeFloat32(box.vector2().magnitude());
+            line.writeFloat64(box.vector0().magnitude());
+            line.writeFloat64(box.vector1().magnitude());
+            line.writeFloat64(box.vector2().magnitude());
 
-            line.writeFloat32(box.alpha());
-            line.writeFloat32(box.beta());
-            line.writeFloat32(box.gamma());
+            line.writeFloat64(box.alpha());
+            line.writeFloat64(box.beta());
+            line.writeFloat64(box.gamma());
         }
 
         f.write(line);
