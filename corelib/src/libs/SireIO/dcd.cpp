@@ -83,6 +83,7 @@ using namespace SireStream;
 //// Thanks to the MDAnalysis parser
 //// (https://github.com/MDAnalysis/mdanalysis/blob/develop/package/MDAnalysis/lib/formats/include/readdcd.h)
 //// which really helped with the reverse engineering of the DCD fileformat
+//// ESPECIALLY(!) the weird handling of the periodic box info!
 
 /** This class provides a low-level interface to reading and writing
  *  a DCD file. It is designed to be used only with the
@@ -203,6 +204,13 @@ void DCDFile::close()
 
 void DCDFile::readHeader()
 {
+    if (f.nRecords() == 0)
+    {
+        nframes = 0;
+        natoms = 0;
+        return;
+    }
+
     auto line = f[0];
 
     auto typ = line.readChar(4);
@@ -287,18 +295,27 @@ void DCDFile::readHeader()
     {
         if (f.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
         {
-            throw SireIO::parse_error(QObject::tr("Wrong number of records in the DCD file. Expect to have %1 "
-                                                  "for %2 frames, but actually have %3.")
-                                          .arg(first_frame_line + (num_lines_per_frame * nframes))
-                                          .arg(nframes)
-                                          .arg(f.nRecords()),
-                                      CODELOC);
+            // we need to calculate nframes?
+            qDebug() << QObject::tr("WARNING: Wrong number of records in the DCD file. Expect to have %1 "
+                                    "for %2 frames, but actually have %3.")
+                            .arg(first_frame_line + (num_lines_per_frame * nframes))
+                            .arg(nframes)
+                            .arg(f.nRecords());
+
+            nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
         }
     }
     else
     {
         // we need to calculate nframes
         nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
+    }
+
+    if (nframes == 0)
+    {
+        // this is an empty file!
+        spc = SpacePtr(new Cartesian());
+        return;
     }
 
     // now read in the first frame, in case we have to do any merging
@@ -446,18 +463,62 @@ SpacePtr DCDFile::readSpace(int frame) const
 
         auto boxinfo = line.readFloat64(6);
 
-        if (boxinfo[3] == 90 and boxinfo[4] == 90 and boxinfo[5] == 90)
+        // there isn't a well-defined standard for the box info
+
+        // first check for Charmm or NAMD > 2.5 format. This has the data
+        // written as [A, gamma, B, beta, alpha, C] (yes, really!)
+
+        auto A = boxinfo[0];
+        auto B = boxinfo[2];
+        auto C = boxinfo[5];
+
+        auto alpha = boxinfo[4];
+        auto beta = boxinfo[3];
+        auto gamma = boxinfo[1];
+
+        if (A == 0 and B == 0 and C == 0)
         {
-            // this is a PeriodicBox
-            return SpacePtr(new PeriodicBox(Vector(boxinfo[0], boxinfo[1], boxinfo[2])));
+            // this is an infinite cartesian space
+            return SpacePtr(new Cartesian());
         }
-        else
+
+        try
         {
-            // this is a triclinic space
-            return SpacePtr(new TriclinicBox(boxinfo[0], boxinfo[1], boxinfo[2],
-                                             boxinfo[3] * degrees,
-                                             boxinfo[4] * degrees,
-                                             boxinfo[5] * degrees));
+            if (alpha <= 1.0 and alpha >= -1.0 and beta <= 1.0 and beta >= -1.0 and gamma <= 1.0 and gamma >= -1.0)
+            {
+                // the angle cosines have been saved
+                alpha = 90 - ((std::asin(alpha)) * radians).to(degrees);
+                beta = 90 - ((std::asin(beta)) * radians).to(degrees);
+                gamma = 90 - ((std::asin(gamma)) * radians).to(degrees);
+            }
+            else if (alpha < 0 or beta < 0 or gamma < 0 or A < 0 or B < 0 or C < 0 or
+                     alpha > 180 or beta > 180 or gamma > 180)
+            {
+                // new CHARMM format - these are the box vectors
+                return SpacePtr(new TriclinicBox(Vector(boxinfo[0], boxinfo[1], boxinfo[3]),
+                                                 Vector(boxinfo[1], boxinfo[2], boxinfo[4]),
+                                                 Vector(boxinfo[3], boxinfo[4], boxinfo[5])));
+            }
+
+            if (alpha == 90 and beta == 90 and gamma == 90)
+            {
+                // this is a PeriodicBox
+                return SpacePtr(new PeriodicBox(Vector(A, B, C)));
+            }
+            else
+            {
+                // this is a triclinic space
+                return SpacePtr(new TriclinicBox(A, B, C,
+                                                 alpha * degrees,
+                                                 beta * degrees,
+                                                 gamma * degrees));
+            }
+        }
+        catch (const SireError::exception &e)
+        {
+            qDebug() << "WARNING - cannot interpret the space information for the DCD file.";
+            qDebug() << "WARNING - data is" << Sire::toString(boxinfo);
+            qDebug() << "WARNING - error is" << e.what() << ":" << e.why();
         }
     }
 
@@ -558,19 +619,19 @@ void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
     // now write the space
     if (has_periodic_space)
     {
-        FortranRecord line(f.isLittleEndian());
+        double A, B, C, alpha, beta, gamma;
 
         if (frame.space().isA<PeriodicBox>())
         {
             const auto dims = frame.space().asA<PeriodicBox>().dimensions();
 
-            line.writeFloat32(dims.x());
-            line.writeFloat32(dims.y());
-            line.writeFloat32(dims.z());
+            A = dims.x();
+            B = dims.y();
+            C = dims.z();
 
-            line.writeFloat32(90.0);
-            line.writeFloat32(90.0);
-            line.writeFloat32(90.0);
+            alpha = 90.0;
+            beta = 90.0;
+            gamma = 90.0;
         }
         else
         {
@@ -584,14 +645,26 @@ void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
                 box = TriclinicBox(matrix.column0(), matrix.column1(), matrix.column2());
             }
 
-            line.writeFloat64(box.vector0().magnitude());
-            line.writeFloat64(box.vector1().magnitude());
-            line.writeFloat64(box.vector2().magnitude());
+            A = box.vector0().magnitude();
+            B = box.vector1().magnitude();
+            C = box.vector2().magnitude();
 
-            line.writeFloat64(box.alpha());
-            line.writeFloat64(box.beta());
-            line.writeFloat64(box.gamma());
+            alpha = box.alpha();
+            beta = box.beta();
+            gamma = box.gamma();
         }
+
+        FortranRecord line(f.isLittleEndian());
+
+        // we will only write values in CHARMM format
+        // [A, gamma, B, beta, alpha, C]
+
+        line.writeFloat64(A);
+        line.writeFloat64(gamma);
+        line.writeFloat64(B);
+        line.writeFloat64(beta);
+        line.writeFloat64(alpha);
+        line.writeFloat64(C);
 
         f.write(line);
     }
@@ -756,6 +829,17 @@ void DCD::parse()
         }
 
         nframes = f->nFrames();
+
+        if (nframes == 0)
+        {
+            this->setScore(0);
+            f.reset();
+            throw SireIO::parse_error(QObject::tr(
+                                          "Failed to read any frames from DCDFile %1. Is the file empty?")
+                                          .arg(this->filename()),
+                                      CODELOC);
+        }
+
         current_frame = f->readFrame(0, this->usesParallel());
         frame_idx = 0;
 
