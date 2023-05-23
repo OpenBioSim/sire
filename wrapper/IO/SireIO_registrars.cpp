@@ -27,6 +27,7 @@
 #include "tinker.h"
 #include "trajectorymonitor.h"
 #include "trr.h"
+#include "xtc.h"
 #include "zmatrixmaker.h"
 
 #include "Helpers/objectregistry.hpp"
@@ -71,6 +72,7 @@ void register_SireIO_objects()
     ObjectRegistry::registerConverterFor< SireIO::Tinker >();
     ObjectRegistry::registerConverterFor< SireIO::TrajectoryMonitor >();
     ObjectRegistry::registerConverterFor< SireIO::TRR >();
+    ObjectRegistry::registerConverterFor< SireIO::XTC >();
     ObjectRegistry::registerConverterFor< SireIO::ZmatrixMaker >();
 
 }

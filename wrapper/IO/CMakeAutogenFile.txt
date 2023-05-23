@@ -36,6 +36,7 @@ set ( PYPP_SOURCES
        Tinker.pypp.cpp
        TinkerParameters.pypp.cpp
        TrajectoryMonitor.pypp.cpp
+       XTC.pypp.cpp
        ZmatrixMaker.pypp.cpp
        _IO_free_functions.pypp.cpp
        SireIO_containers.cpp

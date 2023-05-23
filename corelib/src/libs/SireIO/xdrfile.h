@@ -103,7 +103,7 @@ namespace SireIO
 
     namespace detail
     {
-        class TRRFrameBuffer;
+        class XDRFrameBuffer;
     }
 
     /** This class builds on the XDRFile to provide a higher-level
@@ -132,7 +132,7 @@ namespace SireIO
         void _lkr_writeBufferToFile();
 
         /** The current frame that has been read into the buffer */
-        std::shared_ptr<detail::TRRFrameBuffer> frame_buffer;
+        std::shared_ptr<detail::XDRFrameBuffer> frame_buffer;
 
         /** The number of atoms in the frame - we assume all
          *  frames have the same number of atoms
@@ -154,6 +154,43 @@ namespace SireIO
 
         /** The data type if all frames are the same */
         qint32 frame_type;
+    };
+
+    /** This class builds on the XDRFile to provide a higher-level
+     *  interface for XTC files
+     */
+    class SIREIO_EXPORT XTCFile : public XDRFile
+    {
+    public:
+        XTCFile();
+        XTCFile(const QString &filename);
+        ~XTCFile();
+
+        bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
+
+        SireMol::Frame readFrame(int i, bool use_parallel = true) const;
+        void writeFrame(const SireMol::Frame &frame,
+                        bool use_parallel = true);
+
+        int nAtoms() const;
+        int nFrames() const;
+
+    private:
+        void _lkr_reset();
+        void _lkr_reindexFrames();
+        void _lkr_readFrameIntoBuffer(int i);
+        void _lkr_writeBufferToFile();
+
+        /** The current frame that has been read into the buffer */
+        std::shared_ptr<detail::XDRFrameBuffer> frame_buffer;
+
+        /** The number of atoms in the frame - we assume all
+         *  frames have the same number of atoms
+         */
+        qint64 natoms;
+
+        /** The seek position of each frame */
+        QList<qint64> seek_frame;
     };
 
 } // namespace SireIO

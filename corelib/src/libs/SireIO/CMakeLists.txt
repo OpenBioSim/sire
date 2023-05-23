@@ -57,6 +57,7 @@ set ( SIREIO_HEADERS
       trajectorymonitor.h
       trr.h
       xdrfile.h
+      xtc.h
       zmatrixmaker.h
     )
 
@@ -103,6 +104,7 @@ set ( SIREIO_SOURCES
       trajectorymonitor.cpp
       trr.cpp
       xdrfile.cpp
+      xtc.cpp
       zmatrixmaker.cpp
 
       ${SIREIO_HEADERS}

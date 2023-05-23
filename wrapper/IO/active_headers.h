@@ -30,6 +30,7 @@
 #include "tinker.h"
 #include "trajectorymonitor.h"
 #include "trr.h"
+#include "xtc.h"
 #include "zmatrixmaker.h"
 
 #endif

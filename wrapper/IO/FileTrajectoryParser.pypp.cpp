@@ -266,7 +266,7 @@ void register_FileTrajectoryParser_class(){
                 "title"
                 , title_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the title" );
         
         }
         { //::SireIO::FileTrajectoryParser::toString

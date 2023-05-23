@@ -77,6 +77,8 @@
 
 #include "TrajectoryMonitor.pypp.hpp"
 
+#include "XTC.pypp.hpp"
+
 #include "ZmatrixMaker.pypp.hpp"
 
 #include "_IO_free_functions.pypp.hpp"
@@ -167,6 +169,8 @@ BOOST_PYTHON_MODULE(_IO){
     register_TinkerParameters_class();
 
     register_TrajectoryMonitor_class();
+
+    register_XTC_class();
 
     register_ZmatrixMaker_class();
 

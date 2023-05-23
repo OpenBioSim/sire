@@ -44,11 +44,14 @@
 #include "SireUnits/units.h"
 
 #include "SireBase/parallel.h"
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
 #include "SireBase/properties.h"
 #include "SireBase/numberproperty.h"
 
 #include "third_party/xdrfile.h"
 #include "third_party/xdrfile_trr.h"
+#include "third_party/xdrfile_xtc.h"
 
 using namespace SireIO;
 using namespace SireVol;
@@ -232,21 +235,22 @@ qint64 XDRFile::size() const
     return sz;
 }
 
-////////
-//////// Implementation of TRRFile
-////////
+///////
+/////// Frame buffer used for XDRFiles
+///////
 
 namespace SireIO
 {
     namespace detail
     {
-        class TRRFrameBuffer
+        class XDRFrameBuffer
         {
         public:
-            TRRFrameBuffer(const Frame &frame)
+            XDRFrameBuffer(const Frame &frame)
                 : current_frame(0), natoms(0),
                   coords(0), vels(0), frcs(0),
                   lambda(0), time(0), step(0),
+                  precision(1000),
                   has_box(false)
             {
                 if (frame.nAtoms() == 0)
@@ -267,10 +271,11 @@ namespace SireIO
                     has_box = true;
             }
 
-            TRRFrameBuffer(int num_atoms, qint32 frame_type)
+            XDRFrameBuffer(int num_atoms, qint32 frame_type)
                 : current_frame(0), natoms(0),
                   coords(0), vels(0), frcs(0),
                   lambda(0), time(0), step(0),
+                  precision(1000),
                   has_box(false)
             {
                 if (num_atoms <= 0)
@@ -299,7 +304,7 @@ namespace SireIO
                 }
             }
 
-            ~TRRFrameBuffer()
+            ~XDRFrameBuffer()
             {
                 delete[] coords;
                 delete[] vels;
@@ -363,10 +368,16 @@ namespace SireIO
             float time;
             int step;
 
+            float precision;
+
             bool has_box;
         };
     }
 }
+
+////////
+//////// Implementation of TRRFile
+////////
 
 TRRFile::TRRFile()
     : XDRFile(),
@@ -452,7 +463,7 @@ void TRRFile::_lkr_writeBufferToFile()
 void TRRFile::writeFrame(const Frame &frame, bool use_parallel)
 {
     // create a frame buffer for this frame
-    std::shared_ptr<detail::TRRFrameBuffer> buffer(new detail::TRRFrameBuffer(frame));
+    std::shared_ptr<detail::XDRFrameBuffer> buffer(new detail::XDRFrameBuffer(frame));
 
     // copy the data into this buffer
     if (buffer->has_box)
@@ -659,7 +670,7 @@ void TRRFile::_lkr_readFrameIntoBuffer(int i)
     }
     else
     {
-        frame_buffer.reset(new detail::TRRFrameBuffer(natoms, ftype));
+        frame_buffer.reset(new detail::XDRFrameBuffer(natoms, ftype));
     }
 
     // seek to the start position for this frame
@@ -1184,6 +1195,464 @@ bool TRRFile::open(QIODevice::OpenMode mode)
     if (must_manually_index)
     {
         this->_lkr_reindexFrames();
+    }
+
+    return true;
+}
+
+////////
+//////// Implementation of XTCFile
+////////
+
+XTCFile::XTCFile()
+    : XDRFile(), natoms(0)
+{
+}
+
+XTCFile::XTCFile(const QString &filename)
+    : XDRFile(filename), natoms(0)
+{
+}
+
+XTCFile::~XTCFile()
+{
+}
+
+int XTCFile::nAtoms() const
+{
+    return natoms;
+}
+
+int XTCFile::nFrames() const
+{
+    return seek_frame.count();
+}
+
+void XTCFile::_lkr_reset()
+{
+    frame_buffer.reset();
+
+    natoms = 0;
+    seek_frame.clear();
+}
+
+void XTCFile::_lkr_writeBufferToFile()
+{
+    if (f == 0)
+        throw SireError::io_error(QObject::tr(
+                                      "Cannot save to a file that is not open!"),
+                                  CODELOC);
+
+    if (frame_buffer.get() == 0)
+        throw SireError::io_error(QObject::tr(
+                                      "There is no XTC frame to save to the file..."),
+                                  CODELOC);
+
+    int ok = 0;
+
+    if (frame_buffer->has_box)
+    {
+        ok = write_xtc(f, frame_buffer->natoms, frame_buffer->step,
+                       frame_buffer->time,
+                       frame_buffer->box,
+                       frame_buffer->coords,
+                       frame_buffer->precision);
+    }
+    else
+    {
+        ok = write_xtc(f, frame_buffer->natoms, frame_buffer->step,
+                       frame_buffer->time,
+                       0,
+                       frame_buffer->coords,
+                       frame_buffer->precision);
+    }
+
+    if (ok != exdrOK)
+        throw SireError::io_error(QObject::tr(
+                                      "There was an error trying to write a XTC file to the file "
+                                      "'%1'. The error was '%2'")
+                                      .arg(this->filename())
+                                      .arg(exdr_message[ok]),
+                                  CODELOC);
+}
+
+void XTCFile::writeFrame(const Frame &frame, bool use_parallel)
+{
+    // create a frame buffer for this frame
+    std::shared_ptr<detail::XDRFrameBuffer> buffer(new detail::XDRFrameBuffer(frame));
+
+    // copy the data into this buffer
+    if (buffer->has_box)
+    {
+        auto m = angstrom.to(nanometer) * frame.space().boxMatrix();
+
+        for (int i = 0; i < 3; ++i)
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                buffer->box[i][j] = m(i, j);
+            }
+        }
+    }
+
+    buffer->step = frame.property("step", NumberProperty(qint64(0))).asAnInteger();
+    buffer->time = frame.time().to(picosecond);
+
+    const int natoms = frame.nAtoms();
+
+    if (natoms != buffer->natoms)
+        throw SireError::program_bug(QObject::tr(
+                                         "Memory not allocated!"),
+                                     CODELOC);
+
+    auto copy_coordinates = [&]()
+    {
+        if (not frame.hasCoordinates())
+            return;
+
+        const auto coords_data = frame.coordinates().constData();
+        auto c_data = buffer->coords;
+
+        if (c_data == 0)
+            return;
+
+        const double internal_to_units = (angstrom).to(nanometer);
+
+        if (use_parallel)
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, natoms), [&](tbb::blocked_range<int> r)
+                              {
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    const auto &value = coords_data[i];
+
+                    c_data[i][0] = value.x() * internal_to_units;
+                    c_data[i][1] = value.y() * internal_to_units;
+                    c_data[i][2] = value.z() * internal_to_units;
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < natoms; ++i)
+            {
+                const auto &value = coords_data[i];
+
+                c_data[i][0] = value.x() * internal_to_units;
+                c_data[i][1] = value.y() * internal_to_units;
+                c_data[i][2] = value.z() * internal_to_units;
+            }
+        }
+    };
+
+    copy_coordinates();
+
+    QMutexLocker lkr(&mutex);
+
+    // replace the current buffer with this new buffer
+    frame_buffer.reset();
+    frame_buffer = buffer;
+
+    // now write this to the file
+    this->_lkr_writeBufferToFile();
+}
+
+void XTCFile::_lkr_readFrameIntoBuffer(int i)
+{
+    if (i < 0 or i >= this->nFrames())
+    {
+        throw SireError::invalid_index(QObject::tr(
+                                           "Cannot read frame %1 as the number of frames is %2.")
+                                           .arg(i)
+                                           .arg(this->nFrames()),
+                                       CODELOC);
+    }
+
+    if (f == 0)
+    {
+        throw SireError::io_error(QObject::tr(
+                                      "Unaable to read frame %1 for file %2 as the file is not open?")
+                                      .arg(i)
+                                      .arg(this->filename()),
+                                  CODELOC);
+    }
+
+    auto start_position = seek_frame.at(i);
+
+    if (frame_buffer.get() != 0)
+    {
+        if (frame_buffer->current_frame == i)
+        {
+            // we already have this frame in the buffer :-)
+            return;
+        }
+    }
+    else
+    {
+        frame_buffer.reset(new detail::XDRFrameBuffer(natoms, XDRFile::COORDINATES | XDRFile::BOX));
+    }
+
+    // seek to the start position for this frame
+    auto ok = xdr_seek(f, start_position, SEEK_SET);
+
+    if (ok != exdrOK)
+    {
+        throw SireError::io_error(QObject::tr(
+                                      "Unable to seek to the start of frame %1 in TRR file %2. "
+                                      "Is the file corrupt or has it changed since opening?")
+                                      .arg(i)
+                                      .arg(this->filename()),
+                                  CODELOC);
+    }
+
+    // read the frame into the buffer
+    if (frame_buffer->has_box)
+    {
+        ok = read_xtc(f,
+                      frame_buffer->natoms,
+                      &(frame_buffer->step),
+                      &(frame_buffer->time),
+                      frame_buffer->box,
+                      frame_buffer->coords,
+                      &(frame_buffer->precision));
+    }
+    else
+    {
+        ok = read_xtc(f,
+                      frame_buffer->natoms,
+                      &(frame_buffer->step),
+                      &(frame_buffer->time),
+                      0,
+                      frame_buffer->coords,
+                      &(frame_buffer->precision));
+    }
+
+    if (ok != exdrOK)
+    {
+        throw SireError::io_error(QObject::tr(
+                                      "Failed to read in data for frame %1 in XTC file %2. "
+                                      "Is the file corrupt or has it changed since opening?")
+                                      .arg(i)
+                                      .arg(this->filename()),
+                                  CODELOC);
+    }
+}
+
+Frame XTCFile::readFrame(int i, bool use_parallel) const
+{
+    XTCFile *nonconst_this = const_cast<XTCFile *>(this);
+
+    QMutexLocker lkr(&(nonconst_this->mutex));
+
+    // load the frame into the buffer
+    nonconst_this->_lkr_readFrameIntoBuffer(i);
+
+    if (frame_buffer.get() == 0)
+    {
+        // no frame has been loaded?
+        return Frame();
+    }
+
+    // copy it out from the buffer to local storage
+    SpacePtr space;
+    auto time = double(frame_buffer->time) * picosecond;
+    int step = frame_buffer->step;
+    bool has_box = frame_buffer->has_box;
+
+    Matrix box(0.0);
+
+    if (has_box)
+    {
+        const matrix &m = frame_buffer->box;
+        box = Matrix(m[0][0], m[0][1], m[0][2],
+                     m[1][0], m[1][1], m[1][2],
+                     m[2][0], m[2][1], m[2][2]);
+    }
+
+    // and also the coords / vels / forces data
+    QVector<float> coords;
+
+    if (frame_buffer->coords != 0)
+    {
+        float *start = &(frame_buffer->coords[0][0]);
+        coords = QVector<float>(start, start + (3 * natoms));
+    }
+
+    // we've finished with the buffer - can release the mutex
+    lkr.unlock();
+
+    // now need to convert the coords, vels and frcs into the right units
+    // Can do this in parallel if allowed :-)
+    QVector<Vector> c;
+
+    auto copy_coordinates = [&]()
+    {
+        if (coords.isEmpty())
+            return;
+
+        c = QVector<Vector>(natoms);
+        auto c_data = c.data();
+        auto coords_data = coords.constData();
+
+        const double units_to_internal = (1 * nanometer).value();
+
+        if (use_parallel)
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, natoms), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    c_data[i] = Vector(coords_data[(3 * i) + 0] * units_to_internal,
+                                       coords_data[(3 * i) + 1] * units_to_internal,
+                                       coords_data[(3 * i) + 2] * units_to_internal);
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < natoms; ++i)
+            {
+                c_data[i] = Vector(coords_data[(3 * i) + 0] * units_to_internal,
+                                   coords_data[(3 * i) + 1] * units_to_internal,
+                                   coords_data[(3 * i) + 2] * units_to_internal);
+            }
+        }
+    };
+
+    copy_coordinates();
+
+    // any additional properties
+    Properties props;
+
+    props.setProperty("step", NumberProperty(qint64(step)));
+
+    // now construct the space
+    if (has_box)
+    {
+        box *= (1 * nanometer).value();
+
+        if (box.isDiagonal())
+        {
+            return Frame(c, QVector<Velocity3D>(), QVector<Force3D>(),
+                         PeriodicBox(box.diagonal()), time, props);
+        }
+        else
+        {
+            return Frame(c, QVector<Velocity3D>(), QVector<Force3D>(),
+                         TriclinicBox(box.column0(), box.column1(), box.column2()),
+                         time, props);
+        }
+    }
+    else
+    {
+        return Frame(c, QVector<Velocity3D>(), QVector<Force3D>(),
+                     Cartesian(), time, props);
+    }
+
+    return Frame();
+}
+
+bool XTCFile::open(QIODevice::OpenMode mode)
+{
+    auto gil = SireBase::release_gil();
+
+    QMutexLocker lkr(&mutex);
+
+    this->_lkr_reset();
+
+    if (not this->_lkr_open(mode))
+        return false;
+
+    if (f == 0)
+        throw SireError::program_bug(QObject::tr(
+            "The file handle should not be null if the file opened correctly..."));
+
+    if (mode != QIODevice::ReadOnly)
+    {
+        // we only want to write, and so this should be an empty file
+        return true;
+    }
+
+    // read the first header to see if this is really a XTC file
+    int local_natoms;
+    int step;
+    float time;
+
+    auto ok = xtc_header(f, &local_natoms, &step, &time, true);
+
+    if (ok != exdrOK)
+    {
+        this->_lkr_close();
+        throw SireIO::parse_error(QObject::tr(
+                                      "The file '%1' is not a valid XTC file. The error message is '%2'")
+                                      .arg(this->filename())
+                                      .arg(exdr_message[ok]),
+                                  CODELOC);
+    }
+
+    natoms = local_natoms;
+
+    if (natoms <= 0)
+    {
+        return true;
+    }
+
+    // protect against a memory DDOS or file corruption
+    if (natoms > 2048 * 2048)
+    {
+        qint64 natoms_tmp = natoms;
+        this->_lkr_close();
+        this->_lkr_reset();
+        throw SireError::unsupported(QObject::tr(
+                                         "natoms = %1. Reading trajectory files with more than %1 atoms is not supported.")
+                                         .arg(natoms_tmp)
+                                         .arg(2048 * 2048),
+                                     CODELOC);
+    }
+
+    // we must manually index the file as each frame takes up
+    // a different number of bytes
+    seek_frame.clear();
+
+    // how big is the file...
+    ok = xdr_seek(f, 0, SEEK_END);
+    qint64 file_size = xdr_tell(f);
+
+    // go through and manually find the start of each frame
+    ok = xdr_seek(f, 0, SEEK_SET);
+
+    frame_buffer.reset(new detail::XDRFrameBuffer(natoms, XDRFile::COORDINATES | XDRFile::BOX));
+
+    ProgressBar bar(file_size, "Indexing XTC");
+    bar.setSpeedUnit("bytes / s");
+
+    bar = bar.enter();
+
+    while (ok == exdrOK)
+    {
+        qint64 frame_start = xdr_tell(f);
+
+        // read in the frame - this is all we can do, because each frame
+        // has a different size, and there is no shortcut available to
+        // just read the frame header
+        ok = read_xtc(f,
+                      frame_buffer->natoms,
+                      &(frame_buffer->step),
+                      &(frame_buffer->time),
+                      frame_buffer->box,
+                      frame_buffer->coords,
+                      &(frame_buffer->precision));
+
+        if (ok != exdrOK)
+        {
+            // we have finished reading this trajectory
+            bar.success();
+            break;
+        }
+        else
+        {
+            // this was a valid frame :-)
+            seek_frame.append(frame_start);
+            bar.setProgress(frame_start);
+        }
     }
 
     return true;
