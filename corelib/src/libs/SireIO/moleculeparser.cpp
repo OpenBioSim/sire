@@ -1727,7 +1727,7 @@ MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename, const Prop
     }
 
     // try to find the right parser based on the suffix
-    QString suffix = info.suffix();
+    QString suffix = info.suffix().toLower();
 
     QStringList errors;
     QStringList suffix_errors;

@@ -159,7 +159,7 @@ void register_Matrix_class(){
                 "diagonal"
                 , diagonal_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the diagonal of this matrix" );
         
         }
         { //::SireMaths::Matrix::diagonalise
@@ -231,7 +231,7 @@ void register_Matrix_class(){
                 "isDiagonal"
                 , isDiagonal_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return whether or not this is a diagonal matrix" );
         
         }
         { //::SireMaths::Matrix::isIdentity
@@ -256,6 +256,18 @@ void register_Matrix_class(){
                 , isSymmetric_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a symmetric matrix" );
+        
+        }
+        { //::SireMaths::Matrix::isZero
+        
+            typedef bool ( ::SireMaths::Matrix::*isZero_function_type)(  ) const;
+            isZero_function_type isZero_function_value( &::SireMaths::Matrix::isZero );
+            
+            Matrix_exposer.def( 
+                "isZero"
+                , isZero_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMaths::Matrix::offset

@@ -29,6 +29,9 @@
 
 #include "SireID/index.h"
 
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
+
 #include "SireError/errors.h"
 
 #include <QDataStream>
@@ -196,6 +199,8 @@ void FortranFile::write(const FortranRecord &record)
 
 bool FortranFile::try_read()
 {
+    auto gil = SireBase::release_gil();
+
     record_pointers.clear();
     record_sizes.clear();
 
@@ -207,12 +212,20 @@ bool FortranFile::try_read()
             QObject::tr("Could not open file %1. Please check it exists and is readable.").arg(abs_filename), CODELOC);
     }
 
+    // remember the total file size
+    const auto file_size = file.size();
+
     QDataStream ds(&file);
 
     QByteArray start_buffer(int_size, 0);
     QByteArray end_buffer(int_size, 0);
 
     qint64 read_count = 0;
+
+    SireBase::ProgressBar bar(file_size, "Indexing Fortran File");
+    bar.setSpeedUnit("bytes / s");
+
+    bar = bar.enter();
 
     // each fortran record starts and ends with an integer that
     // gives the size in bytes of the record. We will now scan
@@ -224,6 +237,7 @@ bool FortranFile::try_read()
 
         if (read_size != int_size)
         {
+            bar.failure();
             return false;
         }
 
@@ -244,6 +258,13 @@ bool FortranFile::try_read()
                 start_size = qFromBigEndian<qint64>(start_buffer.data());
         }
 
+        if (start_size < 0 or start_size > file_size)
+        {
+            // this is not a fortran file as the sizes don't make sense
+            bar.failure();
+            return false;
+        }
+
         read_count += int_size;
 
         read_size = ds.skipRawData(start_size);
@@ -251,6 +272,7 @@ bool FortranFile::try_read()
         if (read_size != start_size)
         {
             // could not read this much!
+            bar.failure();
             return false;
         }
 
@@ -258,6 +280,7 @@ bool FortranFile::try_read()
 
         if (read_size != int_size)
         {
+            bar.failure();
             return false;
         }
 
@@ -281,6 +304,7 @@ bool FortranFile::try_read()
         if (start_size != end_size)
         {
             // disagreement - cannot be a valid record
+            bar.failure();
             return false;
         }
 
@@ -288,7 +312,11 @@ bool FortranFile::try_read()
         record_sizes.append(start_size);
 
         read_count += start_size + int_size;
+
+        bar.setProgress(read_count);
     }
+
+    bar.success();
 
     file.close();
 

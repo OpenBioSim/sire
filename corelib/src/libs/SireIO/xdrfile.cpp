@@ -1250,22 +1250,11 @@ void XTCFile::_lkr_writeBufferToFile()
 
     int ok = 0;
 
-    if (frame_buffer->has_box)
-    {
-        ok = write_xtc(f, frame_buffer->natoms, frame_buffer->step,
-                       frame_buffer->time,
-                       frame_buffer->box,
-                       frame_buffer->coords,
-                       frame_buffer->precision);
-    }
-    else
-    {
-        ok = write_xtc(f, frame_buffer->natoms, frame_buffer->step,
-                       frame_buffer->time,
-                       0,
-                       frame_buffer->coords,
-                       frame_buffer->precision);
-    }
+    ok = write_xtc(f, frame_buffer->natoms, frame_buffer->step,
+                   frame_buffer->time,
+                   frame_buffer->box,
+                   frame_buffer->coords,
+                   frame_buffer->precision);
 
     if (ok != exdrOK)
         throw SireError::io_error(QObject::tr(
@@ -1405,26 +1394,13 @@ void XTCFile::_lkr_readFrameIntoBuffer(int i)
     }
 
     // read the frame into the buffer
-    if (frame_buffer->has_box)
-    {
-        ok = read_xtc(f,
-                      frame_buffer->natoms,
-                      &(frame_buffer->step),
-                      &(frame_buffer->time),
-                      frame_buffer->box,
-                      frame_buffer->coords,
-                      &(frame_buffer->precision));
-    }
-    else
-    {
-        ok = read_xtc(f,
-                      frame_buffer->natoms,
-                      &(frame_buffer->step),
-                      &(frame_buffer->time),
-                      0,
-                      frame_buffer->coords,
-                      &(frame_buffer->precision));
-    }
+    ok = read_xtc(f,
+                  frame_buffer->natoms,
+                  &(frame_buffer->step),
+                  &(frame_buffer->time),
+                  frame_buffer->box,
+                  frame_buffer->coords,
+                  &(frame_buffer->precision));
 
     if (ok != exdrOK)
     {
@@ -1529,7 +1505,12 @@ Frame XTCFile::readFrame(int i, bool use_parallel) const
     {
         box *= (1 * nanometer).value();
 
-        if (box.isDiagonal())
+        if (box.isZero())
+        {
+            return Frame(c, QVector<Velocity3D>(), QVector<Force3D>(),
+                         Cartesian(), time, props);
+        }
+        else if (box.isDiagonal())
         {
             return Frame(c, QVector<Velocity3D>(), QVector<Force3D>(),
                          PeriodicBox(box.diagonal()), time, props);
