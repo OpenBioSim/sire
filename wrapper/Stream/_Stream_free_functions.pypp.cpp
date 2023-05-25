@@ -167,6 +167,86 @@ namespace bp = boost::python;
 
 #include "streamdata.hpp"
 
+#include "SireError/errors.h"
+
+#include "SireStream/errors.h"
+
+#include "SireStream/version_error.h"
+
+#include "registeralternativename.h"
+
+#include "shareddatastream.h"
+
+#include "streamdata.hpp"
+
+#include "tostring.h"
+
+#include <QByteArray>
+
+#include <QDataStream>
+
+#include <QDebug>
+
+#include <QFile>
+
+#include <QList>
+
+#include <QMutex>
+
+#include <QProcess>
+
+#include <QSysInfo>
+
+#include <QtGlobal>
+
+#include <boost/config.hpp>
+
+#include <cstdlib>
+
+#include <memory>
+
+#include "streamdata.hpp"
+
+#include "SireError/errors.h"
+
+#include "SireStream/errors.h"
+
+#include "SireStream/version_error.h"
+
+#include "registeralternativename.h"
+
+#include "shareddatastream.h"
+
+#include "streamdata.hpp"
+
+#include "tostring.h"
+
+#include <QByteArray>
+
+#include <QDataStream>
+
+#include <QDebug>
+
+#include <QFile>
+
+#include <QList>
+
+#include <QMutex>
+
+#include <QProcess>
+
+#include <QSysInfo>
+
+#include <QtGlobal>
+
+#include <boost/config.hpp>
+
+#include <cstdlib>
+
+#include <memory>
+
+#include "streamdata.hpp"
+
 void register_free_functions(){
 
     { //::SireStream::getDataHeader
@@ -195,6 +275,19 @@ void register_free_functions(){
     
     }
 
+    { //::SireStream::getHeaderProperty
+    
+        typedef ::QString ( *getHeaderProperty_function_type )( ::QString const & );
+        getHeaderProperty_function_type getHeaderProperty_function_value( &::SireStream::getHeaderProperty );
+        
+        bp::def( 
+            "getHeaderProperty"
+            , getHeaderProperty_function_value
+            , ( bp::arg("key") )
+            , "" );
+    
+    }
+
     { //::SireStream::getLibraryVersion
     
         typedef ::quint32 ( *getLibraryVersion_function_type )( ::QString const & );
@@ -217,6 +310,19 @@ void register_free_functions(){
             "getMinimumSupportedVersion"
             , getMinimumSupportedVersion_function_value
             , ( bp::arg("library") )
+            , "" );
+    
+    }
+
+    { //::SireStream::setHeaderProperty
+    
+        typedef void ( *setHeaderProperty_function_type )( ::QString const &,::QString const & );
+        setHeaderProperty_function_type setHeaderProperty_function_value( &::SireStream::setHeaderProperty );
+        
+        bp::def( 
+            "setHeaderProperty"
+            , setHeaderProperty_function_value
+            , ( bp::arg("key"), bp::arg("data") )
             , "" );
     
     }
