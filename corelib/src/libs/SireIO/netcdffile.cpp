@@ -41,6 +41,163 @@
 using namespace SireIO;
 
 /////////////
+///////////// Implemenetation of NetCDFHyperSlab
+/////////////
+
+NetCDFHyperSlab::NetCDFHyperSlab()
+{
+}
+
+NetCDFHyperSlab::NetCDFHyperSlab(const QVector<size_t> &starts,
+                                 const QVector<size_t> &counts)
+    : sts(starts), cts(counts)
+{
+    if (sts.count() != cts.count())
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The number of starts (%1) must equal the number of counts (%2)")
+                                         .arg(sts.count())
+                                         .arg(cts.count()),
+                                     CODELOC);
+    }
+
+    bool ok = true;
+
+    for (int i = 0; i < sts.count(); ++i)
+    {
+        if (sts[i] < 0 or cts[i] < 1)
+        {
+            ok = false;
+            break;
+        }
+    }
+
+    if (not ok)
+        throw SireError::invalid_arg(QObject::tr(
+                                         "Invalid hyperslab parameters: %1 : %2")
+                                         .arg(Sire::toString(sts))
+                                         .arg(Sire::toString(cts)),
+                                     CODELOC);
+}
+
+NetCDFHyperSlab::NetCDFHyperSlab(const NetCDFHyperSlab &other)
+    : sts(other.sts), cts(other.cts)
+{
+}
+
+NetCDFHyperSlab::~NetCDFHyperSlab()
+{
+}
+
+NetCDFHyperSlab &NetCDFHyperSlab::operator=(const NetCDFHyperSlab &other)
+{
+    sts = other.sts;
+    cts = other.cts;
+    return *this;
+}
+
+QString NetCDFHyperSlab::toString() const
+{
+    if (sts.isEmpty())
+    {
+        return QObject::tr("NetCDFHyperSlab::null");
+    }
+    else
+    {
+        QStringList dims;
+
+        for (int i = 0; i < sts.count(); ++i)
+        {
+            dims.append(QString("[%1:%2]").arg(sts[i]).arg(sts[i] + cts[i] - 1));
+        }
+
+        return QObject::tr("NetCDFHyperSlab(%1)").arg(dims.join("x"));
+    }
+}
+
+int NetCDFHyperSlab::nDimensions() const
+{
+    return sts.count();
+}
+
+bool NetCDFHyperSlab::isNull() const
+{
+    return sts.isEmpty();
+}
+
+const size_t *NetCDFHyperSlab::starts() const
+{
+    return sts.constData();
+}
+
+const size_t *NetCDFHyperSlab::counts() const
+{
+    return cts.constData();
+}
+
+NetCDFHyperSlab NetCDFHyperSlab::operator[](int i) const
+{
+    return this->operator()(i);
+}
+
+NetCDFHyperSlab NetCDFHyperSlab::operator()(int i) const
+{
+    NetCDFHyperSlab ret(*this);
+
+    if (ret.sts.isEmpty())
+    {
+        throw SireError::invalid_index(QObject::tr(
+                                           "Cannot index a null slab!"),
+                                       CODELOC);
+    }
+
+    ret.sts[0] = i;
+    ret.cts[0] = 1;
+
+    return ret;
+}
+
+NetCDFHyperSlab NetCDFHyperSlab::operator()(int i, int j) const
+{
+    NetCDFHyperSlab ret(*this);
+
+    if (ret.sts.count() < 2)
+    {
+        throw SireError::invalid_index(QObject::tr(
+                                           "Cannot double-index a 1D or 0D slab"),
+                                       CODELOC);
+    }
+
+    ret.sts[0] = i;
+    ret.cts[0] = 1;
+    ret.sts[1] = j;
+    ret.cts[1] = 1;
+
+    return ret;
+}
+
+NetCDFHyperSlab NetCDFHyperSlab::operator()(int i, int j, int k) const
+{
+    NetCDFHyperSlab ret(*this);
+
+    if (ret.sts.count() < 3)
+    {
+        throw SireError::invalid_index(QObject::tr(
+                                           "Cannot triple-index a 2D, 1D or 0D slab"),
+                                       CODELOC);
+    }
+
+    ret.sts[0] = i;
+    ret.cts[0] = 1;
+    ret.sts[1] = j;
+    ret.cts[1] = 1;
+    ret.sts[2] = k;
+    ret.cts[2] = 1;
+
+    return ret;
+}
+
+/////////////
 ///////////// Implemenetation of NetCDFDataInfo
 /////////////
 
@@ -503,8 +660,39 @@ NetCDFDataInfo::NetCDFDataInfo(int idnum, QString name, const QString &xtyp, QSt
 /** Copy constructor */
 NetCDFDataInfo::NetCDFDataInfo(const NetCDFDataInfo &other)
     : nme(other.nme), dim_names(other.dim_names), dim_sizes(other.dim_sizes), att_names(other.att_names),
-      att_types(other.att_types), att_values(other.att_values), idnum(other.idnum), xtyp(other.xtyp)
+      att_types(other.att_types), att_values(other.att_values),
+      slab(other.slab), idnum(other.idnum), xtyp(other.xtyp)
 {
+}
+
+/** Copy, setting the slab */
+NetCDFDataInfo::NetCDFDataInfo(const NetCDFDataInfo &other, const NetCDFHyperSlab &s)
+    : nme(other.nme), dim_names(other.dim_names), dim_sizes(other.dim_sizes), att_names(other.att_names),
+      att_types(other.att_types), att_values(other.att_values),
+      slab(s), idnum(other.idnum), xtyp(other.xtyp)
+{
+    if (slab.nDimensions() != dim_sizes.count())
+        throw SireError::invalid_arg(QObject::tr(
+                                         "You cannot use a slab that has a different number of dimensions (%1) "
+                                         "to the actual data (%2)")
+                                         .arg(slab.nDimensions())
+                                         .arg(dim_sizes.count()),
+                                     CODELOC);
+
+    for (int i = 0; i < dim_sizes.count(); ++i)
+    {
+        if (slab.starts()[i] < 0 or slab.starts()[i] + slab.counts()[i] > dim_sizes[i])
+        {
+            throw SireError::invalid_index(QObject::tr(
+                                               "The slab for dimension %1 has the wrong shape (%2, %3) when the "
+                                               "dimension only has %4 values.")
+                                               .arg(i)
+                                               .arg(slab.starts()[i])
+                                               .arg(slab.counts()[i])
+                                               .arg(dim_sizes[i]),
+                                           CODELOC);
+        }
+    }
 }
 
 /** Destructor */
@@ -516,6 +704,26 @@ NetCDFDataInfo::~NetCDFDataInfo()
 bool NetCDFDataInfo::isNull() const
 {
     return idnum == -1;
+}
+
+/** Return a hyperslab which would cover all of the data */
+NetCDFHyperSlab NetCDFDataInfo::hyperslab() const
+{
+    if (not slab.isNull())
+        return slab;
+
+    else if (dim_sizes.isEmpty())
+        return NetCDFHyperSlab();
+
+    QVector<size_t> starts(dim_sizes.count(), 0);
+    QVector<size_t> counts(dim_sizes.count());
+
+    for (int i = 0; i < dim_sizes.count(); ++i)
+    {
+        counts[i] = dim_sizes[i];
+    }
+
+    return NetCDFHyperSlab(starts, counts);
 }
 
 /** Return a string representation of this data info */
@@ -551,9 +759,20 @@ QString NetCDFDataInfo::toString() const
     else
     {
         QStringList dims;
-        for (int i = 0; i < dim_names.count(); ++i)
+
+        if (slab.isNull())
         {
-            dims.append(QString("%1:%2").arg(dim_names[i]).arg(dim_sizes[i]));
+            for (int i = 0; i < dim_names.count(); ++i)
+            {
+                dims.append(QString("%1:%2").arg(dim_names[i]).arg(dim_sizes[i]));
+            }
+        }
+        else
+        {
+            for (int i = 0; i < slab.nDimensions(); ++i)
+            {
+                dims.append(QString("%1:%2-%3").arg(dim_names[i]).arg(slab.starts()[i]).arg(slab.starts()[i] + slab.counts()[i] - 1));
+            }
         }
 
         if (att_names.isEmpty())
@@ -612,14 +831,28 @@ int NetCDFDataInfo::typeSize() const
 /** Return the number of values that should be held by this data */
 int NetCDFDataInfo::nValues() const
 {
-    int base = 1;
-
-    for (const auto &sz : dim_sizes)
+    if (slab.isNull())
     {
-        base *= sz;
-    }
+        int base = 1;
 
-    return base;
+        for (const auto &sz : dim_sizes)
+        {
+            base *= sz;
+        }
+
+        return base;
+    }
+    else
+    {
+        int base = 1;
+
+        for (int i = 0; i < slab.nDimensions(); ++i)
+        {
+            base *= slab.counts()[i];
+        }
+
+        return base;
+    }
 }
 
 /** Assert that the number of values that can be held by this data is 'n' */
@@ -741,6 +974,12 @@ NetCDFData::~NetCDFData()
 
 /** Internal constructor used by NetCDFFile */
 NetCDFData::NetCDFData(const NetCDFDataInfo &info) : NetCDFDataInfo(info)
+{
+}
+
+/** Internal constructor used by NetCDFFile */
+NetCDFData::NetCDFData(const NetCDFDataInfo &info,
+                       const NetCDFHyperSlab &slab) : NetCDFDataInfo(info, slab)
 {
 }
 
@@ -1022,11 +1261,6 @@ QMutex *NetCDFFile::globalMutex()
     return &(NetCDFFile::mutex);
 }
 
-/** Constructor */
-NetCDFFile::NetCDFFile() : hndl(-1)
-{
-}
-
 /** Function used to call and check the output of netcdf operations */
 int NetCDFFile::call_netcdf_function(std::function<int()> func, int ignored_error) const
 {
@@ -1040,81 +1274,90 @@ int NetCDFFile::call_netcdf_function(std::function<int()> func, int ignored_erro
     return err;
 }
 
-/** Construct to open the file 'filename' in read-only mode */
-NetCDFFile::NetCDFFile(const QString &filename) : fname(filename)
+bool NetCDFFile::open(QIODevice::OpenMode mode,
+                      bool use_64bit_offset, bool use_netcdf4)
+{
+    QMutexLocker lkr(this->globalMutex());
+    return this->_lkr_open(mode, use_64bit_offset, use_netcdf4);
+}
+
+bool NetCDFFile::_lkr_open(QIODevice::OpenMode mode,
+                           bool use_64bit_offset, bool use_netcdf4)
 {
 #ifdef SIRE_USE_NETCDF
-    QByteArray c_filename = filename.toUtf8();
-    call_netcdf_function([&]()
-                         { return nc_open(c_filename.constData(), NC_NOWRITE, &hndl); });
+    if (mode == QIODevice::ReadOnly)
+    {
+        QByteArray c_filename = fname.toUtf8();
+        call_netcdf_function([&]()
+                             { return nc_open(c_filename.constData(), NC_NOWRITE, &hndl); });
+    }
+    else
+    {
+        QFileInfo file(fname);
+
+        if (file.exists())
+        {
+            if (not(mode & QIODevice::Append))
+            {
+                throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists, and "
+                                                      "the software is not allowed to overwrite an existing file!")
+                                              .arg(fname),
+                                          CODELOC);
+            }
+
+            if (file.isDir())
+            {
+                throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
+                                                      "is a directory!")
+                                              .arg(fname),
+                                          CODELOC);
+            }
+
+            if (not file.isWritable())
+            {
+                throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
+                                                      "is read-only")
+                                              .arg(fname),
+                                          CODELOC);
+            }
+        }
+
+        int flags = NC_WRITE;
+
+        if (not(mode & QIODevice::Append))
+        {
+            flags |= NC_NOCLOBBER;
+        }
+
+        if (use_64bit_offset)
+        {
+            flags |= NC_64BIT_OFFSET;
+        }
+
+        if (use_netcdf4)
+        {
+            flags |= NC_NETCDF4;
+        }
+
+        QByteArray c_filename = file.absoluteFilePath().toUtf8();
+        call_netcdf_function([&]()
+                             { return nc_create(c_filename.constData(), flags, &hndl); });
+    }
 #else
     throw SireError::unsupported(
         QObject::tr("Software is missing NetCDF support, so cannot read the NetCDF file '%1'").arg(filename), CODELOC);
 #endif
+
+    return true;
 }
 
-/** Construct to create the file 'filename' in write-only mode. If 'overwrite_file'
-    is true, then this will overwrite any existing file. If use_64bit_offset is
-    true, then a 64bit offset format file is created. If use_netcdf4 is true,
-    then a NetCDF4 file is created (otherwise, NetCDF3 is used) */
-NetCDFFile::NetCDFFile(const QString &filename, bool overwrite_file, bool use_64bit_offset, bool use_netcdf4)
-    : fname(filename)
+NetCDFFile::NetCDFFile() : hndl(-1)
 {
-#ifdef SIRE_USE_NETCDF
-    QFileInfo file(filename);
+}
 
-    if (file.exists())
-    {
-        if (not overwrite_file)
-        {
-            throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists, and "
-                                                  "the software is not allowed to overwrite an existing file!")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-
-        if (file.isDir())
-        {
-            throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
-                                                  "is a directory!")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-
-        if (not file.isWritable())
-        {
-            throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
-                                                  "is read-only")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-    }
-
-    int flags = NC_WRITE;
-
-    if (not overwrite_file)
-    {
-        flags |= NC_NOCLOBBER;
-    }
-
-    if (use_64bit_offset)
-    {
-        flags |= NC_64BIT_OFFSET;
-    }
-
-    if (use_netcdf4)
-    {
-        flags |= NC_NETCDF4;
-    }
-
-    QByteArray c_filename = file.absoluteFilePath().toUtf8();
-    call_netcdf_function([&]()
-                         { return nc_create(c_filename.constData(), flags, &hndl); });
-
-#else
-    throw SireError::unsupported(
-        QObject::tr("Software is missing NetCDF support, so cannot write the NetCDF file '%1'").arg(filename), CODELOC);
-#endif
+/** Construct to work on the file 'filename' */
+NetCDFFile::NetCDFFile(const QString &filename) : fname(filename), hndl(-1)
+{
 }
 
 /** Destructor - this will close the NetCDFFile */
@@ -1129,8 +1372,20 @@ NetCDFFile::~NetCDFFile()
 #endif
 }
 
+QString NetCDFFile::filename() const
+{
+    return this->fname;
+}
+
 /** Close the file - you should always do this once you are finished with it */
 void NetCDFFile::close()
+{
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    this->_lkr_close();
+}
+
+/** Close the file - you should always do this once you are finished with it */
+void NetCDFFile::_lkr_close()
 {
 #ifdef SIRE_USE_NETCDF
     if (hndl != -1)
@@ -1144,6 +1399,14 @@ void NetCDFFile::close()
 /** Return the full set of names and data types for all of the variables
     in the file */
 QHash<QString, NetCDFDataInfo> NetCDFFile::getVariablesInfo() const
+{
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    return this->_lkr_getVariablesInfo();
+}
+
+/** Return the full set of names and data types for all of the variables
+    in the file */
+QHash<QString, NetCDFDataInfo> NetCDFFile::_lkr_getVariablesInfo() const
 {
     QHash<QString, NetCDFDataInfo> vars;
 
@@ -1251,7 +1514,7 @@ QHash<QString, NetCDFDataInfo> NetCDFFile::getVariablesInfo() const
 }
 
 /** Write all of the passed data to the file */
-void NetCDFFile::writeData(const QHash<QString, QString> &globals, const QHash<QString, NetCDFData> &variable_data)
+void NetCDFFile::_lkr_writeData(const QHash<QString, QString> &globals, const QHash<QString, NetCDFData> &variable_data)
 {
     if (hndl != -1)
     {
@@ -1473,6 +1736,13 @@ void NetCDFFile::writeData(const QHash<QString, QString> &globals, const QHash<Q
 /** Return the names and sizes of all of the dimensions in the file */
 QHash<QString, int> NetCDFFile::getDimensions() const
 {
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    return this->_lkr_getDimensions();
+}
+
+/** Return the names and sizes of all of the dimensions in the file */
+QHash<QString, int> NetCDFFile::_lkr_getDimensions() const
+{
     QHash<QString, int> dims;
 
 #ifdef SIRE_USE_NETCDF
@@ -1518,50 +1788,18 @@ QString NetCDFFile::write(const QString &filename, const QHash<QString, QString>
                           const QHash<QString, NetCDFData> &data, bool overwrite_file, bool use_64bit_offset,
                           bool use_netcdf4)
 {
-#ifdef SIRE_USE_NETCDF
-    QFileInfo file(filename);
-
-    if (file.exists())
-    {
-        if (not overwrite_file)
-        {
-            throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists, and "
-                                                  "the software is not allowed to overwrite an existing file!")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-
-        if (file.isDir())
-        {
-            throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
-                                                  "is a directory!")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-
-        if (not file.isWritable())
-        {
-            throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
-                                                  "is read-only")
-                                          .arg(filename),
-                                      CODELOC);
-        }
-    }
-
-    QString absfile = file.absoluteFilePath();
-
-    NetCDFFile netcdf(absfile, overwrite_file, use_64bit_offset, use_netcdf4);
-    netcdf.writeData(globals, data);
-
-    return absfile;
-#else
-    throw SireError::unsupported(QObject::tr("This version of Sire does not have support for writing NetCDF files!"),
-                                 CODELOC);
-#endif
+    return QString();
 }
 
 /** Return the value of the string attribute 'name'.*/
 QString NetCDFFile::getStringAttribute(const QString &name) const
+{
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    return this->_lkr_getStringAttribute(name);
+}
+
+/** Return the value of the string attribute 'name'.*/
+QString NetCDFFile::_lkr_getStringAttribute(const QString &name) const
 {
     if (hndl != -1)
     {
@@ -1608,6 +1846,13 @@ QString NetCDFFile::getStringAttribute(const QString &name) const
 /** Read in and return the NetCDFData associated with the passed NetCDFDataInfo */
 NetCDFData NetCDFFile::read(const NetCDFDataInfo &variable) const
 {
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    return this->_lkr_read(variable);
+}
+
+/** Read in and return the NetCDFData associated with the passed NetCDFDataInfo */
+NetCDFData NetCDFFile::_lkr_read(const NetCDFDataInfo &variable) const
+{
     NetCDFData data(variable);
 
     int data_size = data.dataSize();
@@ -1619,6 +1864,38 @@ NetCDFData NetCDFFile::read(const NetCDFDataInfo &variable) const
         memdata.fill('\0', data_size);
         call_netcdf_function([&]()
                              { return nc_get_var(hndl, variable.ID(), memdata.data()); });
+        data.setData(memdata);
+#endif
+    }
+
+    return data;
+}
+
+/** Read in and return the NetCDFData associated with the passed NetCDFDataInfo */
+NetCDFData NetCDFFile::read(const NetCDFDataInfo &variable,
+                            const NetCDFHyperSlab &slab) const
+{
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    return this->_lkr_read(variable, slab);
+}
+
+/** Read in and return the NetCDFData associated with the passed NetCDFDataInfo */
+NetCDFData NetCDFFile::_lkr_read(const NetCDFDataInfo &variable,
+                                 const NetCDFHyperSlab &slab) const
+{
+    NetCDFData data(variable, slab);
+
+    int data_size = data.dataSize();
+
+    if (hndl != -1 and data_size > 0)
+    {
+#ifdef SIRE_USE_NETCDF
+        QByteArray memdata;
+        memdata.fill('\0', data_size);
+        call_netcdf_function([&]()
+                             { return nc_get_vara(hndl, variable.ID(),
+                                                  slab.starts(), slab.counts(),
+                                                  memdata.data()); });
         data.setData(memdata);
 #endif
     }

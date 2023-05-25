@@ -34,6 +34,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <QIODevice>
 
 #include <boost/noncopyable.hpp>
 
@@ -43,6 +44,38 @@ SIRE_BEGIN_HEADER
 
 namespace SireIO
 {
+
+    /** This class represents a hyperslab in a NetCDF file */
+    class SIREIO_EXPORT NetCDFHyperSlab
+    {
+    public:
+        NetCDFHyperSlab();
+        NetCDFHyperSlab(const QVector<size_t> &starts,
+                        const QVector<size_t> &counts);
+        NetCDFHyperSlab(const NetCDFHyperSlab &other);
+        ~NetCDFHyperSlab();
+
+        NetCDFHyperSlab &operator=(const NetCDFHyperSlab &other);
+
+        const size_t *starts() const;
+        const size_t *counts() const;
+
+        QString toString() const;
+
+        int nDimensions() const;
+
+        bool isNull() const;
+
+        NetCDFHyperSlab operator[](int i) const;
+
+        NetCDFHyperSlab operator()(int i) const;
+        NetCDFHyperSlab operator()(int i, int j) const;
+        NetCDFHyperSlab operator()(int i, int j, int k) const;
+
+    private:
+        QVector<size_t> sts;
+        QVector<size_t> cts;
+    };
 
     /** This class provides information about a data variable in
         a NetCDF file
@@ -58,6 +91,8 @@ namespace SireIO
         NetCDFDataInfo();
 
         NetCDFDataInfo(const NetCDFDataInfo &other);
+        NetCDFDataInfo(const NetCDFDataInfo &other,
+                       const NetCDFHyperSlab &slab);
 
         ~NetCDFDataInfo();
 
@@ -82,6 +117,8 @@ namespace SireIO
 
         QHash<QString, QVariant> attributes() const;
         QHash<QString, QString> attributeTypes() const;
+
+        NetCDFHyperSlab hyperslab() const;
 
         QString toString() const;
 
@@ -111,6 +148,9 @@ namespace SireIO
         QList<int> att_types;
         /** The values of all of the attributes */
         QList<QVariant> att_values;
+
+        /** The hyperslab info */
+        NetCDFHyperSlab slab;
 
         /** The ID number of the variable in the data file */
         int idnum;
@@ -209,6 +249,8 @@ namespace SireIO
 
     protected:
         NetCDFData(const NetCDFDataInfo &info);
+        NetCDFData(const NetCDFDataInfo &info,
+                   const NetCDFHyperSlab &slab);
 
         void setData(const QByteArray &data);
 
@@ -225,16 +267,20 @@ namespace SireIO
     {
     public:
         NetCDFFile();
-
         NetCDFFile(const QString &filename);
 
         ~NetCDFFile();
+
+        bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly,
+                  bool use_64bit_offset = true, bool use_netcdf4 = true);
 
         static QString write(const QString &filename, const QHash<QString, QString> &globals,
                              const QHash<QString, NetCDFData> &data, bool overwrite_file = true,
                              bool use_64bit_offset = true, bool use_netcdf4 = false);
 
         static QMutex *globalMutex();
+
+        QString filename() const;
 
         QString getStringAttribute(const QString &name) const;
 
@@ -243,13 +289,31 @@ namespace SireIO
         QHash<QString, NetCDFDataInfo> getVariablesInfo() const;
 
         NetCDFData read(const NetCDFDataInfo &variable) const;
+        NetCDFData read(const NetCDFDataInfo &variable,
+                        const NetCDFHyperSlab &slab) const;
 
         void close();
+
+    protected:
+        bool _lkr_open(QIODevice::OpenMode mode = QIODevice::ReadOnly,
+                       bool use_64bit_offset = true, bool use_netcdf4 = true);
+
+        QString _lkr_getStringAttribute(const QString &name) const;
+
+        QHash<QString, int> _lkr_getDimensions() const;
+
+        QHash<QString, NetCDFDataInfo> _lkr_getVariablesInfo() const;
+
+        NetCDFData _lkr_read(const NetCDFDataInfo &variable) const;
+        NetCDFData _lkr_read(const NetCDFDataInfo &variable,
+                             const NetCDFHyperSlab &slab) const;
+
+        void _lkr_close();
 
     private:
         NetCDFFile(const QString &filename, bool overwrite_file, bool use_64bit_offset = true, bool use_netcdf4 = false);
 
-        void writeData(const QHash<QString, QString> &globals, const QHash<QString, NetCDFData> &data);
+        void _lkr_writeData(const QHash<QString, QString> &globals, const QHash<QString, NetCDFData> &data);
 
         int call_netcdf_function(std::function<int()> func, int ignored_error = 0) const;
 
