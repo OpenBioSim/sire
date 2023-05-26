@@ -81,8 +81,15 @@ using namespace SireStream;
 class AmberRstFrameBuffer
 {
 public:
+    AmberRstFrameBuffer()
+        : current_frame(-1), natoms(0)
+    {
+    }
+
     AmberRstFrameBuffer(const Frame &frame)
-        : current_frame(0), natoms(0)
+        : current_frame(-1), natoms(0),
+          cell_angles(0), cell_lengths(0),
+          time(0)
     {
         if (frame.nAtoms() == 0)
             return;
@@ -97,9 +104,6 @@ public:
 
         if (frame.hasForces())
             frcs = QVector<double>(3 * natoms);
-
-        if (frame.space().isPeriodic())
-            spce = QVector<double>(6);
     }
 
     ~AmberRstFrameBuffer()
@@ -112,8 +116,9 @@ public:
     QVector<double> coords;
     QVector<double> vels;
     QVector<double> frcs;
-    QVector<double> box;
-    QVector<double> spce;
+
+    Vector cell_angles;
+    Vector cell_lengths;
 
     double time;
 };
@@ -204,6 +209,36 @@ void AmberRstFile::_lkr_reset()
 
     natoms = 0;
     nframes = 0;
+}
+
+QVector<double> float_to_double(const QVector<float> &values)
+{
+    QVector<double> ret(values.count());
+
+    const auto values_data = values.constData();
+    auto ret_data = ret.data();
+
+    for (int i = 0; i < values.count(); ++i)
+    {
+        ret_data[i] = values_data[i];
+    }
+
+    return ret;
+}
+
+QVector<float> double_to_float(const QVector<double> &values)
+{
+    QVector<float> ret(values.count());
+
+    const auto values_data = values.constData();
+    auto ret_data = ret.data();
+
+    for (int i = 0; i < values.count(); ++i)
+    {
+        ret_data[i] = values_data[i];
+    }
+
+    return ret;
 }
 
 void AmberRstFile::_lkr_writeBufferToFile()
@@ -363,6 +398,90 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
     this->_lkr_writeBufferToFile();
 }
 
+NetCDFHyperSlab get_slab(const NetCDFHyperSlab &slab, int frame)
+{
+    if (slab.nDimensions() == 3)
+    {
+        // this is a trajectory file - we want the ith frame
+        return slab[frame];
+    }
+    else if (slab.nDimensions() == 2)
+    {
+        // we can only really be asking for the 0th frame
+        if (frame != 0)
+            throw SireError::invalid_index(QObject::tr(
+                                               "Cannot read frame %1 as the number of frames is 0.")
+                                               .arg(frame),
+                                           CODELOC);
+        return slab;
+    }
+    else
+    {
+        throw SireIO::parse_error(QObject::tr(
+                                      "Unexpected number of dimensions (%1). Only expecting 2 or 3.")
+                                      .arg(slab.nDimensions()),
+                                  CODELOC);
+    }
+
+    return slab;
+}
+
+NetCDFHyperSlab get_time_slab(const NetCDFHyperSlab &slab, int frame)
+{
+    if (slab.nDimensions() == 1)
+    {
+        // this is a trajectory file - we want the ith frame
+        return slab[frame];
+    }
+    else if (slab.nDimensions() == 0)
+    {
+        // we can only really be asking for the 0th frame
+        if (frame != 0)
+            throw SireError::invalid_index(QObject::tr(
+                                               "Cannot read frame %1 as the number of frames is 0.")
+                                               .arg(frame),
+                                           CODELOC);
+        return slab;
+    }
+    else
+    {
+        throw SireIO::parse_error(QObject::tr(
+                                      "Unexpected number of dimensions (%1). Only expecting 0 or 1.")
+                                      .arg(slab.nDimensions()),
+                                  CODELOC);
+    }
+
+    return slab;
+}
+
+NetCDFHyperSlab get_cell_slab(const NetCDFHyperSlab &slab, int frame)
+{
+    if (slab.nDimensions() == 2)
+    {
+        // this is a trajectory file - we want the ith frame
+        return slab[frame];
+    }
+    else if (slab.nDimensions() == 1)
+    {
+        // we can only really be asking for the 0th frame
+        if (frame != 0)
+            throw SireError::invalid_index(QObject::tr(
+                                               "Cannot read frame %1 as the number of frames is 0.")
+                                               .arg(frame),
+                                           CODELOC);
+        return slab;
+    }
+    else
+    {
+        throw SireIO::parse_error(QObject::tr(
+                                      "Unexpected number of dimensions (%1). Only expecting 1 or 2.")
+                                      .arg(slab.nDimensions()),
+                                  CODELOC);
+    }
+
+    return slab;
+}
+
 void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
 {
     if (frame < 0 or frame >= nframes)
@@ -374,20 +493,298 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
                                        CODELOC);
     }
 
-    qDebug() << "READ FRAME" << frame;
+    if (frame_buffer.get() == 0)
+    {
+        frame_buffer.reset(new AmberRstFrameBuffer());
+    }
+    else if (frame_buffer->current_frame == frame)
+    {
+        // we've already read this frame
+        return;
+    }
 
     const auto dimensions = this->_lkr_getVariablesInfo();
 
+    const auto time = dimensions.value("time");
+
+    if (time.isNull())
+    {
+        frame_buffer->time = 0;
+    }
+    else
+    {
+        const auto slab = get_time_slab(time.hyperslab(), frame);
+        auto time_data = this->_lkr_read(time, slab);
+
+        if (time.typeSize() == 4)
+        {
+            const auto t = time_data.toFloatArray();
+
+            if (t.count() != 1)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unexpected number of time values (%1). Should be 1.")
+                                              .arg(t.count()),
+                                          CODELOC);
+            }
+
+            frame_buffer->time = t[0];
+        }
+        else if (time.typeSize() == 8)
+        {
+            const auto t = time_data.toDoubleArray();
+
+            if (t.count() != 1)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unexpected number of time values (%1). Should be 1.")
+                                              .arg(t.count()),
+                                          CODELOC);
+            }
+
+            frame_buffer->time = t[0];
+        }
+        else
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Invalid data size for time: %1")
+                                          .arg(time.typeSize()),
+                                      CODELOC);
+        }
+    }
+
+    const auto cell_lengths = dimensions.value("cell_lengths");
+
+    if (cell_lengths.isNull())
+    {
+        frame_buffer->cell_lengths = Vector(0);
+    }
+    else
+    {
+        const auto slab = get_cell_slab(cell_lengths.hyperslab(), frame);
+        auto cell_lengths_data = this->_lkr_read(cell_lengths, slab);
+
+        if (cell_lengths.typeSize() == 4)
+        {
+            const auto c = cell_lengths_data.toFloatArray();
+
+            if (c.count() != 3)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unexpected number of cell_lengths values (%1). Should be 3.")
+                                              .arg(c.count()),
+                                          CODELOC);
+            }
+
+            frame_buffer->cell_lengths = Vector(c[0], c[1], c[2]);
+        }
+        else if (cell_lengths.typeSize() == 8)
+        {
+            const auto c = cell_lengths_data.toDoubleArray();
+
+            if (c.count() != 3)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unexpected number of cell_lengths values (%1). Should be 3.")
+                                              .arg(c.count()),
+                                          CODELOC);
+            }
+
+            frame_buffer->cell_lengths = Vector(c[0], c[1], c[2]);
+        }
+        else
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Invalid data size for cell_lengths: %1")
+                                          .arg(cell_lengths.typeSize()),
+                                      CODELOC);
+        }
+    }
+
+    const auto cell_angles = dimensions.value("cell_angles");
+
+    if (cell_angles.isNull())
+    {
+        frame_buffer->cell_angles = Vector(0);
+    }
+    else
+    {
+        const auto slab = get_cell_slab(cell_angles.hyperslab(), frame);
+        auto cell_angles_data = this->_lkr_read(cell_angles, slab);
+
+        if (cell_angles.typeSize() == 4)
+        {
+            const auto c = cell_angles_data.toFloatArray();
+
+            if (c.count() != 3)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unexpected number of cell_angles values (%1). Should be 3.")
+                                              .arg(c.count()),
+                                          CODELOC);
+            }
+
+            frame_buffer->cell_angles = Vector(c[0], c[1], c[2]);
+        }
+        else if (cell_angles.typeSize() == 8)
+        {
+            const auto c = cell_angles_data.toDoubleArray();
+
+            if (c.count() != 3)
+            {
+                throw SireIO::parse_error(QObject::tr(
+                                              "Unexpected number of cell_angles values (%1). Should be 3.")
+                                              .arg(c.count()),
+                                          CODELOC);
+            }
+
+            frame_buffer->cell_angles = Vector(c[0], c[1], c[2]);
+        }
+        else
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Invalid data size for cell_angles: %1")
+                                          .arg(cell_angles.typeSize()),
+                                      CODELOC);
+        }
+    }
+
     const auto coordinates = dimensions.value("coordinates");
-    const auto slab = coordinates.hyperslab();
 
-    qDebug() << coordinates.toString();
-    qDebug() << slab.toString();
+    if (coordinates.isNull())
+    {
+        frame_buffer->coords.clear();
+    }
+    else
+    {
+        const auto slab = get_slab(coordinates.hyperslab(), frame);
+        auto coordinates_data = this->_lkr_read(coordinates, slab);
 
-    auto coordinates_data = this->_lkr_read(coordinates, slab);
+        if (coordinates.typeSize() == 4)
+        {
+            // this is float data
+            frame_buffer->coords = float_to_double(coordinates_data.toFloatArray());
+        }
+        else if (coordinates.typeSize() == 8)
+        {
+            // this is double data
+            frame_buffer->coords = coordinates_data.toDoubleArray();
+        }
+        else
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Invalid data size for coordinates: %1")
+                                          .arg(coordinates.typeSize()),
+                                      CODELOC);
+        }
+    }
 
-    qDebug() << coordinates_data.toString();
-    qDebug() << Sire::toString(coordinates_data.toFloatArray());
+    const auto velocities = dimensions.value("velocities");
+
+    if (velocities.isNull())
+    {
+        frame_buffer->vels.clear();
+    }
+    else
+    {
+        const auto slab = get_slab(velocities.hyperslab(), frame);
+        auto velocities_data = this->_lkr_read(velocities, slab);
+
+        if (velocities.typeSize() == 4)
+        {
+            // this is float data
+            frame_buffer->vels = float_to_double(velocities_data.toFloatArray());
+        }
+        else if (velocities.typeSize() == 8)
+        {
+            // this is double data
+            frame_buffer->vels = velocities_data.toDoubleArray();
+        }
+        else
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Invalid data size for velocities: %1")
+                                          .arg(velocities.typeSize()),
+                                      CODELOC);
+        }
+    }
+
+    const auto forces = dimensions.value("forces");
+
+    if (forces.isNull())
+    {
+        frame_buffer->frcs.clear();
+    }
+    else
+    {
+        const auto slab = get_slab(forces.hyperslab(), frame);
+        auto forces_data = this->_lkr_read(forces, slab);
+
+        if (forces.typeSize() == 4)
+        {
+            // this is float data
+            frame_buffer->frcs = float_to_double(forces_data.toFloatArray());
+        }
+        else if (forces.typeSize() == 8)
+        {
+            // this is double data
+            frame_buffer->frcs = forces_data.toDoubleArray();
+        }
+        else
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Invalid data size for forces: %1")
+                                          .arg(forces.typeSize()),
+                                      CODELOC);
+        }
+    }
+
+    frame_buffer->natoms = 0;
+
+    if (not frame_buffer->coords.isEmpty())
+    {
+        frame_buffer->natoms = frame_buffer->coords.count() / 3;
+    }
+
+    if (not frame_buffer->vels.isEmpty())
+    {
+        int nats = frame_buffer->vels.count() / 3;
+
+        if (frame_buffer->natoms == 0)
+        {
+            frame_buffer->natoms = nats;
+        }
+        else if (frame_buffer->natoms != nats)
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Disagreement in number of atoms between coordinates (%1) "
+                                          "and velocities (%2).")
+                                          .arg(frame_buffer->natoms)
+                                          .arg(nats),
+                                      CODELOC);
+        }
+    }
+
+    if (not frame_buffer->frcs.isEmpty())
+    {
+        int nats = frame_buffer->frcs.count() / 3;
+
+        if (frame_buffer->natoms == 0)
+        {
+            frame_buffer->natoms = nats;
+        }
+        else if (frame_buffer->natoms != nats)
+        {
+            throw SireIO::parse_error(QObject::tr(
+                                          "Disagreement in number of atoms between coordinates or velocities (%1) "
+                                          "and forces (%2).")
+                                          .arg(frame_buffer->natoms)
+                                          .arg(nats),
+                                      CODELOC);
+        }
+    }
+
+    frame_buffer->current_frame = frame;
 }
 
 Frame AmberRstFile::readFrame(int i, bool use_parallel) const
@@ -406,8 +803,9 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
     // copy it out from the buffer to local storage
     const auto natoms = frame_buffer->natoms;
 
-    SpacePtr space;
-    auto time = double(frame_buffer->time) * picosecond;
+    const auto cell_lengths = frame_buffer->cell_lengths;
+    const auto cell_angles = frame_buffer->cell_angles;
+    const auto time = double(frame_buffer->time) * picosecond;
 
     // and also the coords / vels / forces data
     QVector<double> coords = frame_buffer->coords;
@@ -463,7 +861,7 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
         auto v_data = v.data();
         auto vels_data = vels.constData();
 
-        const auto units_to_internal = (1 * nanometer / picosecond);
+        const auto units_to_internal = (angstrom / picosecond);
 
         if (use_parallel)
         {
@@ -496,7 +894,7 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
         auto f_data = f.data();
         auto frcs_data = frcs.constData();
 
-        const auto units_to_internal = (kilojoule / nanometer);
+        const auto units_to_internal = (kcal / angstrom);
 
         if (use_parallel)
         {
@@ -536,9 +934,25 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
         copy_forces();
     }
 
-    // NEED TO CONSTRUCT THE SPACE
+    SpacePtr space;
 
-    return Frame(c, v, f, Cartesian(), time);
+    if (cell_lengths.isZero() or cell_angles.isZero())
+    {
+        space = Cartesian();
+    }
+    else if (cell_angles == Vector(90, 90, 90))
+    {
+        space = PeriodicBox(cell_lengths);
+    }
+    else
+    {
+        space = TriclinicBox(cell_lengths.x(), cell_lengths.y(), cell_lengths.z(),
+                             cell_angles.x() * degrees,
+                             cell_angles.y() * degrees,
+                             cell_angles.z() * degrees);
+    }
+
+    return Frame(c, v, f, space.read(), time);
 }
 
 bool AmberRstFile::open(QIODevice::OpenMode mode, bool use_64bit_offset, bool use_netcdf4)
