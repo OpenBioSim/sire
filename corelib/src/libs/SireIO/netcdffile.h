@@ -88,11 +88,46 @@ namespace SireIO
         friend class NetCDFFile;
 
     public:
+        template <class T>
+        static QString get_nc_type()
+        {
+            if (std::is_same<T, float>::value)
+            {
+                return "NC_FLOAT";
+            }
+            else if (std::is_same<T, double>::value)
+            {
+                return "NC_DOUBLE";
+            }
+            else if (std::is_same<T, char>::value)
+            {
+                return "NC_CHAR";
+            }
+            else if (std::is_same<T, qint32>::value)
+            {
+                return "NC_INT";
+            }
+            else if (std::is_same<T, qint64>::value)
+            {
+                return "NC_INT64";
+            }
+            else
+            {
+                return "unknown";
+            }
+        }
+
         NetCDFDataInfo();
 
         NetCDFDataInfo(const NetCDFDataInfo &other);
         NetCDFDataInfo(const NetCDFDataInfo &other,
                        const NetCDFHyperSlab &slab);
+
+        NetCDFDataInfo(const QString &nc_type,
+                       const QString &name,
+                       const QStringList &dim_names,
+                       const QList<int> &dim_sizes,
+                       const QHash<QString, QVariant> &attributes);
 
         ~NetCDFDataInfo();
 
@@ -133,6 +168,10 @@ namespace SireIO
         NetCDFDataInfo(int idnum, QString name, const QString &xtyp, QStringList dim_names, QList<int> dim_sizes,
                        QStringList att_names, QList<int> att_types, QList<QVariant> att_values);
 
+        static QStringList get_attribute_names(const QHash<QString, QVariant> &attributes);
+        static QList<int> get_attribute_types(const QHash<QString, QVariant> &attributes);
+        static QList<QVariant> get_attribute_values(const QHash<QString, QVariant> &attributes);
+
         /** The name of the variable */
         QString nme;
 
@@ -167,40 +206,6 @@ namespace SireIO
     {
 
         friend class NetCDFFile;
-
-    protected:
-        template <class T>
-        static QString get_nc_type()
-        {
-            if (std::is_same<T, float>::value)
-            {
-                return "NC_FLOAT";
-            }
-            else if (std::is_same<T, double>::value)
-            {
-                return "NC_DOUBLE";
-            }
-            else if (std::is_same<T, char>::value)
-            {
-                return "NC_CHAR";
-            }
-            else if (std::is_same<T, qint32>::value)
-            {
-                return "NC_INT";
-            }
-            else if (std::is_same<T, qint64>::value)
-            {
-                return "NC_INT64";
-            }
-            else
-            {
-                return "unknown";
-            }
-        }
-
-        static QStringList get_attribute_names(const QHash<QString, QVariant> &attributes);
-        static QList<int> get_attribute_types(const QHash<QString, QVariant> &attributes);
-        static QList<QVariant> get_attribute_values(const QHash<QString, QVariant> &attributes);
 
     public:
         NetCDFData();
@@ -274,10 +279,6 @@ namespace SireIO
         bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly,
                   bool use_64bit_offset = true, bool use_netcdf4 = true);
 
-        static QString write(const QString &filename, const QHash<QString, QString> &globals,
-                             const QHash<QString, NetCDFData> &data, bool overwrite_file = true,
-                             bool use_64bit_offset = true, bool use_netcdf4 = false);
-
         static QMutex *globalMutex();
 
         QString filename() const;
@@ -297,6 +298,9 @@ namespace SireIO
     protected:
         bool _lkr_open(QIODevice::OpenMode mode = QIODevice::ReadOnly,
                        bool use_64bit_offset = true, bool use_netcdf4 = true);
+
+        void _lkr_writeHeader(const QHash<QString, QString> &globals,
+                              const QHash<QString, NetCDFDataInfo> &dimensions);
 
         QString _lkr_getStringAttribute(const QString &name) const;
 

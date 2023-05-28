@@ -310,6 +310,8 @@ namespace SireIO
 
         const SireBase::PropertyMap &propertyMap() const;
 
+        QString saveTitle() const;
+
     private:
         static MoleculeParserPtr _pvt_parse(const QString &filename, const PropertyMap &map);
 

@@ -608,6 +608,84 @@ NetCDFDataInfo::NetCDFDataInfo() : idnum(-1), xtyp(-1)
 {
 }
 
+/** Internal function to extract attribute information */
+QStringList NetCDFDataInfo::get_attribute_names(const QHash<QString, QVariant> &attributes)
+{
+    if (attributes.isEmpty())
+        return QStringList();
+
+    QStringList names = attributes.keys();
+    std::sort(names.begin(), names.end());
+    return names;
+}
+
+/** Internal function to extract attribute information */
+QList<int> NetCDFDataInfo::get_attribute_types(const QHash<QString, QVariant> &attributes)
+{
+    if (attributes.isEmpty())
+        return QList<int>();
+
+    QList<int> typs;
+
+    for (const auto &name : get_attribute_names(attributes))
+    {
+        typs.append(qvariant_to_nc_type(attributes.value(name)));
+    }
+
+    return typs;
+}
+
+/** Internal function to extract attribute information */
+QList<QVariant> NetCDFDataInfo::get_attribute_values(const QHash<QString, QVariant> &attributes)
+{
+    if (attributes.isEmpty())
+        return QList<QVariant>();
+
+    QList<QVariant> vals;
+
+    for (const auto &name : get_attribute_names(attributes))
+    {
+        vals.append(attributes.value(name));
+    }
+
+    return vals;
+}
+
+NetCDFDataInfo::NetCDFDataInfo(const QString &nc_type,
+                               const QString &name,
+                               const QStringList &dim_ns,
+                               const QList<int> &dim_sz,
+                               const QHash<QString, QVariant> &attributes)
+{
+    idnum = 0;
+    nme = name;
+    xtyp = string_to_nc_type(nc_type);
+    dim_names = dim_ns;
+    dim_sizes = dim_sz;
+    att_names = get_attribute_names(attributes);
+    att_types = get_attribute_types(attributes);
+    att_values = get_attribute_values(attributes);
+
+    if (dim_names.count() != dim_sizes.count())
+    {
+        throw SireError::invalid_arg(QObject::tr("The number of dimension names (%1) must equal the number of "
+                                                 "dimension sizes (%2)")
+                                         .arg(dim_names.count())
+                                         .arg(dim_sizes.count()),
+                                     CODELOC);
+    }
+
+    if (att_names.count() != att_types.count() or att_names.count() != att_values.count())
+    {
+        throw SireError::invalid_arg(QObject::tr("The number of attribute names (%1), types (%2) and values (%3) must "
+                                                 "all be equal!")
+                                         .arg(att_names.count())
+                                         .arg(att_types.count())
+                                         .arg(att_values.count()),
+                                     CODELOC);
+    }
+}
+
 /** Internal constructor used by NetCDFFile to construct from the passed data */
 NetCDFDataInfo::NetCDFDataInfo(int idn, QString name, int tp, QStringList dim_ns, QList<int> dim_sz, QStringList att_ns,
                                QList<int> att_ts, QList<QVariant> att_vs)
@@ -989,49 +1067,6 @@ void NetCDFData::setData(const QByteArray &data)
     memdata = data;
 }
 
-/** Internal function to extract attribute information */
-QStringList NetCDFData::get_attribute_names(const QHash<QString, QVariant> &attributes)
-{
-    if (attributes.isEmpty())
-        return QStringList();
-
-    QStringList names = attributes.keys();
-    std::sort(names.begin(), names.end());
-    return names;
-}
-
-/** Internal function to extract attribute information */
-QList<int> NetCDFData::get_attribute_types(const QHash<QString, QVariant> &attributes)
-{
-    if (attributes.isEmpty())
-        return QList<int>();
-
-    QList<int> typs;
-
-    for (const auto &name : get_attribute_names(attributes))
-    {
-        typs.append(qvariant_to_nc_type(attributes.value(name)));
-    }
-
-    return typs;
-}
-
-/** Internal function to extract attribute information */
-QList<QVariant> NetCDFData::get_attribute_values(const QHash<QString, QVariant> &attributes)
-{
-    if (attributes.isEmpty())
-        return QList<QVariant>();
-
-    QList<QVariant> vals;
-
-    for (const auto &name : get_attribute_names(attributes))
-    {
-        vals.append(attributes.value(name));
-    }
-
-    return vals;
-}
-
 /** Return the data as an array of QVariants */
 QVector<QVariant> NetCDFData::toArray() const
 {
@@ -1297,14 +1332,6 @@ bool NetCDFFile::_lkr_open(QIODevice::OpenMode mode,
 
         if (file.exists())
         {
-            if (not(mode & QIODevice::Append))
-            {
-                throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists, and "
-                                                      "the software is not allowed to overwrite an existing file!")
-                                              .arg(fname),
-                                          CODELOC);
-            }
-
             if (file.isDir())
             {
                 throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
@@ -1313,21 +1340,29 @@ bool NetCDFFile::_lkr_open(QIODevice::OpenMode mode,
                                           CODELOC);
             }
 
-            if (not file.isWritable())
+            if (mode & QIODevice::Append)
             {
-                throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
-                                                      "is read-only")
-                                              .arg(fname),
-                                          CODELOC);
+                if (not file.isWritable())
+                {
+                    throw SireError::io_error(QObject::tr("Cannot create the NetCDF file '%1' as it already exists and "
+                                                          "is read-only")
+                                                  .arg(fname),
+                                              CODELOC);
+                }
+            }
+            else
+            {
+                if (not file.isWritable())
+                {
+                    throw SireError::io_error(QObject::tr(
+                                                  "Cannot write the file '%1' as it exists and is not writable.")
+                                                  .arg(fname),
+                                              CODELOC);
+                }
             }
         }
 
-        int flags = NC_WRITE;
-
-        if (not(mode & QIODevice::Append))
-        {
-            flags |= NC_NOCLOBBER;
-        }
+        int flags = NC_CLOBBER;
 
         if (use_64bit_offset)
         {
@@ -1337,6 +1372,10 @@ bool NetCDFFile::_lkr_open(QIODevice::OpenMode mode,
         if (use_netcdf4)
         {
             flags |= NC_NETCDF4;
+        }
+        else
+        {
+            flags |= NC_CLASSIC_MODEL;
         }
 
         QByteArray c_filename = file.absoluteFilePath().toUtf8();
@@ -1514,7 +1553,7 @@ QHash<QString, NetCDFDataInfo> NetCDFFile::_lkr_getVariablesInfo() const
 }
 
 /** Write all of the passed data to the file */
-void NetCDFFile::_lkr_writeData(const QHash<QString, QString> &globals, const QHash<QString, NetCDFData> &variable_data)
+void NetCDFFile::_lkr_writeHeader(const QHash<QString, QString> &globals, const QHash<QString, NetCDFDataInfo> &variable_data)
 {
     if (hndl != -1)
     {
@@ -1712,7 +1751,11 @@ void NetCDFFile::_lkr_writeData(const QHash<QString, QString> &globals, const QH
         // we have finished writing the metadata about the file
         call_netcdf_function([&]()
                              { return nc_enddef(hndl); });
+#endif
+    }
+}
 
+/*
         // now that the metadata has been written, we can now write the actual data
         for (const auto &variable : variables)
         {
@@ -1729,9 +1772,7 @@ void NetCDFFile::_lkr_writeData(const QHash<QString, QString> &globals, const QH
                              { return nc_close(hndl); });
         hndl = -1;
 
-#endif
-    }
-}
+*/
 
 /** Return the names and sizes of all of the dimensions in the file */
 QHash<QString, int> NetCDFFile::getDimensions() const
@@ -1778,17 +1819,6 @@ QHash<QString, int> NetCDFFile::_lkr_getDimensions() const
 #endif
 
     return dims;
-}
-
-/** Write the passed NetCDFData to the file 'filename'. This will overwrite
-    the file if 'overwrite_file' is true, will write the file using a 64bit offset
-    if 'use_64bit_offset' is true, and will write using NetCDF 4 if 'use_netcdf4'
-    is true (otherwise it will write using NetCDF 3) */
-QString NetCDFFile::write(const QString &filename, const QHash<QString, QString> &globals,
-                          const QHash<QString, NetCDFData> &data, bool overwrite_file, bool use_64bit_offset,
-                          bool use_netcdf4)
-{
-    return QString();
 }
 
 /** Return the value of the string attribute 'name'.*/

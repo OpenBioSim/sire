@@ -2962,6 +2962,11 @@ const PropertyMap &MoleculeParser::propertyMap() const
     return propmap;
 }
 
+QString MoleculeParser::saveTitle() const
+{
+    return saved_system.name().value();
+}
+
 Q_GLOBAL_STATIC(NullParser, nullParser)
 
 const NullParser &MoleculeParser::null()

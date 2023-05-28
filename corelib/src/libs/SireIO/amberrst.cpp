@@ -53,6 +53,7 @@
 #include "SireBase/timeproperty.h"
 #include "SireBase/progressbar.h"
 #include "SireBase/releasegil.h"
+#include "SireBase/getinstalldir.h"
 
 #include "SireIO/errors.h"
 #include "SireError/errors.h"
@@ -134,12 +135,15 @@ public:
     AmberRstFile(const QString &filename);
     ~AmberRstFile();
 
-    bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly,
-              bool use_64bit_offset = true, bool use_netcdf4 = true);
+    bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
     SireMol::Frame readFrame(int i, bool use_parallel = true) const;
     void writeFrame(const SireMol::Frame &frame,
                     bool use_parallel = true);
+
+    void writeHeader(const QString &title, int nframes, int natoms,
+                     bool have_coords, bool have_vels, bool have_frcs,
+                     bool have_space);
 
     int nAtoms() const;
     int nFrames() const;
@@ -165,6 +169,9 @@ private:
     /** Title for the file */
     QString title;
 
+    /** The dimensions info in the file */
+    QHash<QString, NetCDFDataInfo> dims;
+
     /** The number of atoms in the frame - we assume all
      *  frames have the same number of atoms
      */
@@ -179,13 +186,13 @@ private:
 
 AmberRstFile::AmberRstFile()
     : NetCDFFile(),
-      natoms(0), nframes(0)
+      natoms(0), nframes(0), is_restart(false)
 {
 }
 
 AmberRstFile::AmberRstFile(const QString &filename)
     : NetCDFFile(filename),
-      natoms(0), nframes(0)
+      natoms(0), nframes(0), is_restart(false)
 {
 }
 
@@ -241,6 +248,216 @@ QVector<float> double_to_float(const QVector<double> &values)
     return ret;
 }
 
+void AmberRstFile::writeHeader(const QString &title, int nframes, int natoms,
+                               bool have_coordinates, bool have_velocities,
+                               bool have_forces, bool have_space)
+{
+    if (nframes <= 0 or natoms <= 0)
+        return;
+
+    // This will be a restart file if the number of frames is 1
+    is_restart = (nframes == 1);
+
+    // create the hash of all global data
+    QHash<QString, QString> globals;
+
+    // first create all of the global variables
+    if (nframes <= 1)
+    {
+        globals.insert("Conventions", "AMBERRESTART");
+        is_restart = true;
+    }
+    else
+    {
+        globals.insert("Conventions", "AMBER");
+        is_restart = false;
+    }
+
+    globals.insert("ConventionVersion", "1.0");
+
+    globals.insert("application", "sire");
+
+    globals.insert("program", "AmberRst");
+
+    globals.insert("programVersion", SireBase::getReleaseVersion());
+
+    if (title.count() > 80)
+    {
+        globals.insert("title", title.mid(0, 80));
+    }
+    else if (not title.isEmpty())
+    {
+        globals.insert("title", title);
+    }
+
+    // now create the descriptions of all of the dimensions
+    QHash<QString, NetCDFDataInfo> dimensions;
+
+    // start off with the label variables
+    {
+        dimensions.insert("spatial",
+                          NetCDFDataInfo(NetCDFDataInfo::get_nc_type<char>(),
+                                         "spatial", {"spatial"}, {3},
+                                         QHash<QString, QVariant>()));
+
+        if (have_space)
+        {
+            dimensions.insert("cell_spatial",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<char>(),
+                                             "cell_spatial",
+                                             {"cell_spatial"},
+                                             {3},
+                                             QHash<QString, QVariant>()));
+            dimensions.insert("cell_angular",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<char>(),
+                                             "cell_angular",
+                                             {"cell_angular", "label"},
+                                             {3, 5},
+                                             QHash<QString, QVariant>()));
+        }
+    }
+
+    // now the time
+    {
+        QHash<QString, QVariant> attributes;
+
+        attributes.insert("units", QString("picosecond"));
+
+        if (is_restart)
+        {
+            dimensions.insert("time",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<double>(),
+                                             "time",
+                                             {}, {}, attributes));
+        }
+        else
+        {
+            dimensions.insert("time",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<float>(),
+                                             "time",
+                                             {"frame"},
+                                             {nframes}, attributes));
+        }
+    }
+
+    QHash<QString, QVariant> angstrom_units;
+    angstrom_units.insert("units", "angstrom");
+
+    // coordinates
+    if (have_coordinates)
+    {
+        if (is_restart)
+        {
+            dimensions.insert("coordinates",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<double>(),
+                                             "coordinates",
+                                             {"atom", "spatial"},
+                                             {natoms, 3}, angstrom_units));
+        }
+        else
+        {
+            dimensions.insert("coordinates",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<float>(),
+                                             "coordinates",
+                                             {"frame", "atom", "spatial"},
+                                             {nframes, natoms, 3}, angstrom_units));
+        }
+    }
+
+    // cell lengths and angles
+    if (have_space)
+    {
+        QHash<QString, QVariant> degree_units;
+        degree_units.insert("units", "degree");
+
+        if (is_restart)
+        {
+            dimensions.insert("cell_lengths",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<double>(),
+                                             "cell_lengths",
+                                             {"cell_spatial"},
+                                             {3}, angstrom_units));
+
+            dimensions.insert("cell_angles",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<double>(),
+                                             "cell_angles",
+                                             {"cell_angular"},
+                                             {3}, degree_units));
+        }
+        else
+        {
+            dimensions.insert("cell_lengths",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<float>(),
+                                             "cell_lengths",
+                                             {"frame", "cell_spatial"},
+                                             {nframes, 3}, angstrom_units));
+
+            dimensions.insert("cell_angles",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<float>(),
+                                             "cell_angles",
+                                             {"frame", "cell_angular"},
+                                             {nframes, 3}, degree_units));
+        }
+    }
+
+    // velocities
+    if (have_velocities)
+    {
+        QHash<QString, QVariant> vel_attributes;
+        vel_attributes.insert("units", "angstrom/picosecond");
+
+        if (is_restart)
+        {
+            vel_attributes.insert("scale_factor", double(20.455));
+
+            dimensions.insert("velocities",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<double>(),
+                                             "velocities",
+                                             {"atom", "spatial"},
+                                             {natoms, 3}, vel_attributes));
+        }
+        else
+        {
+            vel_attributes.insert("scale_factor", float(20.455));
+
+            dimensions.insert("velocities",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<float>(),
+                                             "velocities",
+                                             {"frame", "atom", "spatial"},
+                                             {nframes, natoms, 3}, vel_attributes));
+        }
+    }
+
+    // forces
+    if (have_forces)
+    {
+        QHash<QString, QVariant> force_units;
+        force_units.insert("units", "amu*angstrom/picosecond^2");
+
+        if (is_restart)
+        {
+            dimensions.insert("forces",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<double>(),
+                                             "forces",
+                                             {"atom", "spatial"},
+                                             {natoms, 3}, force_units));
+        }
+        else
+        {
+            dimensions.insert("forces",
+                              NetCDFDataInfo(NetCDFDataInfo::get_nc_type<float>(),
+                                             "forces",
+                                             {"frame", "atom", "spatial"},
+                                             {nframes, natoms, 3}, force_units));
+        }
+    }
+
+    QMutexLocker lkr(NetCDFFile::globalMutex());
+    NetCDFFile::_lkr_writeHeader(globals, dimensions);
+
+    dims = dimensions;
+}
+
 void AmberRstFile::_lkr_writeBufferToFile()
 {
 }
@@ -250,9 +467,37 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
     // create a frame buffer for this frame
     std::shared_ptr<AmberRstFrameBuffer> buffer(new AmberRstFrameBuffer(frame));
 
-    // copy the space info into the buffer
-
+    buffer->current_frame = -1;
     buffer->time = frame.time().to(picosecond);
+
+    if (frame.space().isPeriodic())
+    {
+        if (frame.space().isA<PeriodicBox>())
+        {
+            buffer->cell_angles = Vector(90);
+            buffer->cell_lengths = frame.space().asA<PeriodicBox>().dimensions();
+        }
+        else
+        {
+            TriclinicBox box;
+
+            if (frame.space().isA<TriclinicBox>())
+                box = frame.space().asA<TriclinicBox>();
+            else
+            {
+                const auto m = frame.space().boxMatrix();
+                box = TriclinicBox(m.column0(), m.column1(), m.column2());
+            }
+
+            buffer->cell_lengths = Vector(box.vector0().magnitude(),
+                                          box.vector1().magnitude(),
+                                          box.vector2().magnitude());
+
+            buffer->cell_angles = Vector(box.alpha(),
+                                         box.beta(),
+                                         box.gamma());
+        }
+    }
 
     const int natoms = frame.nAtoms();
 
@@ -317,9 +562,9 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
                 {
                     const auto &value = vels_data[i];
 
-                    v_data[(3*i) + 0] = value.x().to(nanometer / picosecond);
-                    v_data[(3*i) + 1] = value.y().to(nanometer / picosecond);
-                    v_data[(3*i) + 2] = value.z().to(nanometer / picosecond);
+                    v_data[(3*i) + 0] = value.x().to(angstrom / picosecond);
+                    v_data[(3*i) + 1] = value.y().to(angstrom / picosecond);
+                    v_data[(3*i) + 2] = value.z().to(angstrom / picosecond);
                 } });
         }
         else
@@ -328,9 +573,9 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
             {
                 const auto &value = vels_data[i];
 
-                v_data[(3 * i) + 0] = value.x().to(nanometer / picosecond);
-                v_data[(3 * i) + 1] = value.y().to(nanometer / picosecond);
-                v_data[(3 * i) + 2] = value.z().to(nanometer / picosecond);
+                v_data[(3 * i) + 0] = value.x().to(angstrom / picosecond);
+                v_data[(3 * i) + 1] = value.y().to(angstrom / picosecond);
+                v_data[(3 * i) + 2] = value.z().to(angstrom / picosecond);
             }
         }
     };
@@ -354,9 +599,9 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
                 {
                     const auto &value = frcs_data[i];
 
-                    f_data[(3*i) + 0] = value.x().to(kilojoule / nanometer);
-                    f_data[(3*i) + 1] = value.y().to(kilojoule / nanometer);
-                    f_data[(3*i) + 2] = value.z().to(kilojoule / nanometer);
+                    f_data[(3*i) + 0] = value.x().to(kcal / angstrom);
+                    f_data[(3*i) + 1] = value.y().to(kcal / angstrom);
+                    f_data[(3*i) + 2] = value.z().to(kcal / angstrom);
                 } });
         }
         else
@@ -365,9 +610,9 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
             {
                 const auto &value = frcs_data[i];
 
-                f_data[(3 * i) + 0] = value.x().to(kilojoule / nanometer);
-                f_data[(3 * i) + 1] = value.y().to(kilojoule / nanometer);
-                f_data[(3 * i) + 2] = value.z().to(kilojoule / nanometer);
+                f_data[(3 * i) + 0] = value.x().to(kcal / angstrom);
+                f_data[(3 * i) + 1] = value.y().to(kcal / angstrom);
+                f_data[(3 * i) + 2] = value.z().to(kcal / angstrom);
             }
         }
     };
@@ -955,11 +1200,11 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
     return Frame(c, v, f, space.read(), time);
 }
 
-bool AmberRstFile::open(QIODevice::OpenMode mode, bool use_64bit_offset, bool use_netcdf4)
+bool AmberRstFile::open(QIODevice::OpenMode mode)
 {
     QMutexLocker lkr(NetCDFFile::globalMutex());
 
-    if (not this->_lkr_open(mode, use_64bit_offset, use_netcdf4))
+    if (not this->_lkr_open(mode, true, false))
         return false;
 
     if (mode != QIODevice::ReadOnly)
@@ -1163,7 +1408,7 @@ void AmberRst::parse()
 
     try
     {
-        if (not f->open(QIODevice::ReadOnly, true, false))
+        if (not f->open(QIODevice::ReadOnly))
         {
             throw SireIO::parse_error(QObject::tr(
                                           "Failed to open AmberRst file %1")
@@ -1419,12 +1664,28 @@ QStringList AmberRst::writeToFile(const QString &filename) const
     {
         const auto frames = this->framesToWrite();
 
+        if (frames.isEmpty())
+            return QStringList();
+
+        Frame first_frame = this->createFrame(frames[0]);
+
+        outfile.writeHeader(this->saveTitle(), frames.count(),
+                            first_frame.nAtoms(),
+                            first_frame.hasCoordinates(),
+                            first_frame.hasVelocities(),
+                            first_frame.hasForces(),
+                            first_frame.space().isPeriodic());
+
         ProgressBar bar("Save AmberRst", frames.count());
         bar.setSpeedUnit("frames / s");
 
         bar = bar.enter();
 
-        for (int i = 0; i < frames.count(); ++i)
+        outfile.writeFrame(first_frame, usesParallel());
+        first_frame = Frame();
+        bar.setProgress(1);
+
+        for (int i = 1; i < frames.count(); ++i)
         {
             const auto frame = this->createFrame(frames[i]);
             outfile.writeFrame(frame, usesParallel());
@@ -1435,6 +1696,12 @@ QStringList AmberRst::writeToFile(const QString &filename) const
     }
     else
     {
+        outfile.writeHeader(this->saveTitle(), 1, current_frame.nAtoms(),
+                            current_frame.hasCoordinates(),
+                            current_frame.hasVelocities(),
+                            current_frame.hasForces(),
+                            current_frame.space().isPeriodic());
+
         outfile.writeFrame(current_frame, usesParallel());
     }
 
