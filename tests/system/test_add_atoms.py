@@ -81,3 +81,69 @@ def test_add_atoms(tmpdir, ala_mols):
 
     assert mol.num_atoms() == ala_mols[0].num_atoms() + n_to_add
     assert len(mol.bonds("atomname Re")) == 1
+
+
+def test_add_dummies(tmpdir, ala_mols):
+    mols = ala_mols.clone()
+
+    n_existing_atoms = mols.num_atoms()
+    n_existing_residues = mols.num_residues()
+
+    newmol = sr.mol.Molecule("dummies")
+
+    n_to_add = 10
+
+    editor = newmol.edit()
+
+    # Create a residue
+    editor = (
+        editor.add(sr.mol.ResName("Re"))
+        .renumber(sr.mol.ResNum(n_existing_residues + 1))
+        .molecule()
+    )
+
+    for i in range(0, n_to_add):
+        editor = (
+            editor.add(sr.mol.AtomName("Re"))
+            .renumber(sr.mol.AtomNum(n_existing_residues + i + 1))
+            .reparent(sr.mol.ResIdx(0))
+            .molecule()
+        )
+
+    mol = editor.commit()
+
+    cursor = mol.cursor()["atomname Re"]
+
+    # need to set the properties to the correct type...
+    cursor[0]["charge"] = 1 * sr.units.mod_electron
+    cursor[0]["mass"] = 1 * sr.units.g_per_mol
+
+    for atom in cursor.atoms():
+        atom["coordinates"] = sr.maths.Vector(0)
+        atom["charge"] = 0 * sr.units.mod_electron
+        atom["element"] = sr.mol.Element(0)
+        atom["mass"] = 0 * sr.units.g_per_mol
+        atom["atomtype"] = "DM"
+        atom["LJ"] = sr.mm.LJParameter(
+            1 * sr.units.angstrom, 0 * sr.units.kcal_per_mol
+        )
+
+    mol = cursor.molecule().commit()
+
+    # This line is a bit janky as there isn't yet a "modern API"
+    # way to do this
+    mols = mols.molecules()
+    mols.append(mol)
+
+    d = tmpdir.mkdir("test_add_dummies")
+    f = sr.save(mols, d.join("test"), format=["PRM7", "RST7"])
+
+    # load to check
+    mols = sr.load(f)
+
+    mol = mols[-1]
+
+    assert mol.num_atoms() == 10
+
+    for atom in mol.atoms():
+        assert atom.name().value() == "Re"

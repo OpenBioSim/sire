@@ -2163,7 +2163,7 @@ void guessMasses(AtomMasses &masses, const AtomElements &elements, bool *has_mas
     {
         const CGIdx cg(i);
 
-        for (int j = 0; i < elements.nAtoms(cg); ++j)
+        for (int j = 0; j < elements.nAtoms(cg); ++j)
         {
             const CGAtomIdx idx(cg, Index(j));
 
