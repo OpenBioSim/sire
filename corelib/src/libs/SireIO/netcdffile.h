@@ -238,6 +238,52 @@ namespace SireIO
                 data[i] = orig[i];
             }
         }
+
+        template <class T>
+        NetCDFData(const NetCDFDataInfo &info,
+                   const QVector<T> &values)
+            : NetCDFDataInfo(info)
+        {
+            if (values.count() != this->nValues())
+            {
+                this->assertNValuesEquals(values.count());
+            }
+
+            memdata = QByteArray();
+            memdata.resize(values.count() * sizeof(T));
+
+            char *data = memdata.data();
+            const char *orig = reinterpret_cast<const char *>(values.data());
+
+            for (int i = 0; i < memdata.count(); ++i)
+            {
+                data[i] = orig[i];
+            }
+        }
+
+        template <class T>
+        NetCDFData(const NetCDFDataInfo &info,
+                   const NetCDFHyperSlab &hyperslab,
+                   const QVector<T> &values)
+            : NetCDFDataInfo(info, hyperslab)
+        {
+            if (values.count() != this->nValues())
+            {
+                this->assertNValuesEquals(values.count());
+            }
+
+            memdata = QByteArray();
+            memdata.resize(values.count() * sizeof(T));
+
+            char *data = memdata.data();
+            const char *orig = reinterpret_cast<const char *>(values.data());
+
+            for (int i = 0; i < memdata.count(); ++i)
+            {
+                data[i] = orig[i];
+            }
+        }
+
 #endif
 
         NetCDFData(const NetCDFData &other);
@@ -251,6 +297,8 @@ namespace SireIO
 
         QVector<qint32> toInt32Array() const;
         QVector<qint64> toInt64Array() const;
+
+        const void *data() const;
 
     protected:
         NetCDFData(const NetCDFDataInfo &info);
@@ -301,6 +349,8 @@ namespace SireIO
 
         void _lkr_writeHeader(const QHash<QString, QString> &globals,
                               const QHash<QString, NetCDFDataInfo> &dimensions);
+
+        void _lkr_writeData(const NetCDFData &data);
 
         QString _lkr_getStringAttribute(const QString &name) const;
 

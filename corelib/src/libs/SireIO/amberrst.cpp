@@ -105,6 +105,9 @@ public:
 
         if (frame.hasForces())
             frcs = QVector<double>(3 * natoms);
+
+        cell_angles = QVector<double>(3, 0.0);
+        cell_lengths = QVector<double>(3, 0.0);
     }
 
     ~AmberRstFrameBuffer()
@@ -118,8 +121,8 @@ public:
     QVector<double> vels;
     QVector<double> frcs;
 
-    Vector cell_angles;
-    Vector cell_lengths;
+    QVector<double> cell_angles;
+    QVector<double> cell_lengths;
 
     double time;
 };
@@ -138,7 +141,8 @@ public:
     bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
     SireMol::Frame readFrame(int i, bool use_parallel = true) const;
-    void writeFrame(const SireMol::Frame &frame,
+    void writeFrame(int frame_idx,
+                    const SireMol::Frame &frame,
                     bool use_parallel = true);
 
     void writeHeader(const QString &title, int nframes, int natoms,
@@ -455,27 +459,128 @@ void AmberRstFile::writeHeader(const QString &title, int nframes, int natoms,
     QMutexLocker lkr(NetCDFFile::globalMutex());
     NetCDFFile::_lkr_writeHeader(globals, dimensions);
 
-    dims = dimensions;
+    dims = NetCDFFile::_lkr_getVariablesInfo();
 }
 
 void AmberRstFile::_lkr_writeBufferToFile()
 {
+    if (is_restart)
+    {
+        // start with the time
+        const auto time = dims["time"];
+
+        if (not time.isNull())
+            NetCDFFile::_lkr_writeData(NetCDFData(time, QVector<double>(1, frame_buffer->time)));
+
+        // now the coordinates
+        const auto coordinates = dims["coordinates"];
+
+        if (not(coordinates.isNull() or frame_buffer->coords.isEmpty()))
+            NetCDFFile::_lkr_writeData(NetCDFData(coordinates,
+                                                  frame_buffer->coords));
+
+        // now the velocities
+        const auto velocities = dims["velocities"];
+
+        if (not(velocities.isNull() or frame_buffer->vels.isEmpty()))
+        {
+            NetCDFFile::_lkr_writeData(NetCDFData(velocities,
+                                                  frame_buffer->vels));
+        }
+
+        // now the forces
+        const auto forces = dims["forces"];
+
+        if (not(forces.isNull() or frame_buffer->frcs.isEmpty()))
+            NetCDFFile::_lkr_writeData(NetCDFData(forces,
+                                                  frame_buffer->frcs));
+
+        // now the box info
+        const auto cell_lengths = dims["cell_lengths"];
+        const auto cell_angles = dims["cell_angles"];
+
+        if (not(cell_lengths.isNull() or cell_angles.isNull()))
+        {
+            NetCDFFile::_lkr_writeData(NetCDFData(cell_lengths,
+                                                  frame_buffer->cell_lengths));
+            NetCDFFile::_lkr_writeData(NetCDFData(cell_angles,
+                                                  frame_buffer->cell_angles));
+        }
+    }
+    else
+    {
+        const auto current_frame = frame_buffer->current_frame;
+
+        // start with the time
+        const auto time = dims["time"];
+
+        if (not time.isNull())
+            NetCDFFile::_lkr_writeData(NetCDFData(time,
+                                                  time.hyperslab()[current_frame],
+                                                  QVector<float>(1, frame_buffer->time)));
+
+        // now the coordinates
+        const auto coordinates = dims["coordinates"];
+
+        if (not(coordinates.isNull() or frame_buffer->coords.isEmpty()))
+            NetCDFFile::_lkr_writeData(NetCDFData(coordinates,
+                                                  coordinates.hyperslab()[current_frame],
+                                                  double_to_float(frame_buffer->coords)));
+
+        // now the velocities
+        const auto velocities = dims["velocities"];
+
+        if (not(velocities.isNull() or frame_buffer->vels.isEmpty()))
+            NetCDFFile::_lkr_writeData(NetCDFData(velocities,
+                                                  velocities.hyperslab()[current_frame],
+                                                  double_to_float(frame_buffer->vels)));
+
+        // now the forces
+        const auto forces = dims["forces"];
+
+        if (not(forces.isNull() or frame_buffer->frcs.isEmpty()))
+            NetCDFFile::_lkr_writeData(NetCDFData(forces,
+                                                  forces.hyperslab()[current_frame],
+                                                  double_to_float(frame_buffer->frcs)));
+
+        // now the box info
+        const auto cell_lengths = dims["cell_lengths"];
+        const auto cell_angles = dims["cell_angles"];
+
+        if (not(cell_lengths.isNull() or cell_angles.isNull()))
+        {
+            NetCDFFile::_lkr_writeData(NetCDFData(cell_lengths,
+                                                  cell_lengths.hyperslab()[current_frame],
+                                                  double_to_float(frame_buffer->cell_lengths)));
+
+            NetCDFFile::_lkr_writeData(NetCDFData(cell_angles,
+                                                  cell_angles.hyperslab()[current_frame],
+                                                  double_to_float(frame_buffer->cell_angles)));
+        }
+    }
 }
 
-void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
+void AmberRstFile::writeFrame(int frame_idx, const Frame &frame, bool use_parallel)
 {
     // create a frame buffer for this frame
     std::shared_ptr<AmberRstFrameBuffer> buffer(new AmberRstFrameBuffer(frame));
 
-    buffer->current_frame = -1;
+    buffer->current_frame = frame_idx;
     buffer->time = frame.time().to(picosecond);
 
     if (frame.space().isPeriodic())
     {
         if (frame.space().isA<PeriodicBox>())
         {
-            buffer->cell_angles = Vector(90);
-            buffer->cell_lengths = frame.space().asA<PeriodicBox>().dimensions();
+            buffer->cell_angles[0] = 90;
+            buffer->cell_angles[1] = 90;
+            buffer->cell_angles[2] = 90;
+
+            const auto dims = frame.space().asA<PeriodicBox>().dimensions();
+
+            buffer->cell_lengths[0] = dims.x();
+            buffer->cell_lengths[1] = dims.y();
+            buffer->cell_lengths[2] = dims.z();
         }
         else
         {
@@ -489,13 +594,13 @@ void AmberRstFile::writeFrame(const Frame &frame, bool use_parallel)
                 box = TriclinicBox(m.column0(), m.column1(), m.column2());
             }
 
-            buffer->cell_lengths = Vector(box.vector0().magnitude(),
-                                          box.vector1().magnitude(),
-                                          box.vector2().magnitude());
+            buffer->cell_lengths[0] = box.vector0().magnitude();
+            buffer->cell_lengths[1] = box.vector1().magnitude();
+            buffer->cell_lengths[2] = box.vector2().magnitude();
 
-            buffer->cell_angles = Vector(box.alpha(),
-                                         box.beta(),
-                                         box.gamma());
+            buffer->cell_angles[0] = box.alpha();
+            buffer->cell_angles[1] = box.beta();
+            buffer->cell_angles[2] = box.gamma();
         }
     }
 
@@ -802,7 +907,7 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
 
     if (cell_lengths.isNull())
     {
-        frame_buffer->cell_lengths = Vector(0);
+        frame_buffer->cell_lengths = QVector<double>(3, 0.0);
     }
     else
     {
@@ -821,7 +926,7 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
                                           CODELOC);
             }
 
-            frame_buffer->cell_lengths = Vector(c[0], c[1], c[2]);
+            frame_buffer->cell_lengths = float_to_double(c);
         }
         else if (cell_lengths.typeSize() == 8)
         {
@@ -835,7 +940,7 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
                                           CODELOC);
             }
 
-            frame_buffer->cell_lengths = Vector(c[0], c[1], c[2]);
+            frame_buffer->cell_lengths = c;
         }
         else
         {
@@ -850,7 +955,7 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
 
     if (cell_angles.isNull())
     {
-        frame_buffer->cell_angles = Vector(0);
+        frame_buffer->cell_angles = QVector<double>(3, 0.0);
     }
     else
     {
@@ -869,7 +974,7 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
                                           CODELOC);
             }
 
-            frame_buffer->cell_angles = Vector(c[0], c[1], c[2]);
+            frame_buffer->cell_angles = float_to_double(c);
         }
         else if (cell_angles.typeSize() == 8)
         {
@@ -883,7 +988,7 @@ void AmberRstFile::_lkr_readFrameIntoBuffer(int frame)
                                           CODELOC);
             }
 
-            frame_buffer->cell_angles = Vector(c[0], c[1], c[2]);
+            frame_buffer->cell_angles = c;
         }
         else
         {
@@ -1048,8 +1153,14 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
     // copy it out from the buffer to local storage
     const auto natoms = frame_buffer->natoms;
 
-    const auto cell_lengths = frame_buffer->cell_lengths;
-    const auto cell_angles = frame_buffer->cell_angles;
+    const Vector cell_lengths(frame_buffer->cell_lengths[0],
+                              frame_buffer->cell_lengths[1],
+                              frame_buffer->cell_lengths[2]);
+
+    const Vector cell_angles(frame_buffer->cell_angles[0],
+                             frame_buffer->cell_angles[1],
+                             frame_buffer->cell_angles[2]);
+
     const auto time = double(frame_buffer->time) * picosecond;
 
     // and also the coords / vels / forces data
@@ -1681,14 +1792,14 @@ QStringList AmberRst::writeToFile(const QString &filename) const
 
         bar = bar.enter();
 
-        outfile.writeFrame(first_frame, usesParallel());
+        outfile.writeFrame(0, first_frame, usesParallel());
         first_frame = Frame();
         bar.setProgress(1);
 
         for (int i = 1; i < frames.count(); ++i)
         {
             const auto frame = this->createFrame(frames[i]);
-            outfile.writeFrame(frame, usesParallel());
+            outfile.writeFrame(i, frame, usesParallel());
             bar.setProgress(i + 1);
         }
 
@@ -1702,7 +1813,7 @@ QStringList AmberRst::writeToFile(const QString &filename) const
                             current_frame.hasForces(),
                             current_frame.space().isPeriodic());
 
-        outfile.writeFrame(current_frame, usesParallel());
+        outfile.writeFrame(0, current_frame, usesParallel());
     }
 
     outfile.close();

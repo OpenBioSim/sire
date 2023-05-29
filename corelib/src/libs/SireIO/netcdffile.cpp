@@ -749,26 +749,47 @@ NetCDFDataInfo::NetCDFDataInfo(const NetCDFDataInfo &other, const NetCDFHyperSla
       att_types(other.att_types), att_values(other.att_values),
       slab(s), idnum(other.idnum), xtyp(other.xtyp)
 {
-    if (slab.nDimensions() != dim_sizes.count())
-        throw SireError::invalid_arg(QObject::tr(
-                                         "You cannot use a slab that has a different number of dimensions (%1) "
-                                         "to the actual data (%2)")
-                                         .arg(slab.nDimensions())
-                                         .arg(dim_sizes.count()),
-                                     CODELOC);
-
-    for (int i = 0; i < dim_sizes.count(); ++i)
+    if (dim_sizes.isEmpty())
     {
-        if (slab.starts()[i] < 0 or slab.starts()[i] + slab.counts()[i] > dim_sizes[i])
+        if (slab.nDimensions() > 1)
+            throw SireError::invalid_arg(QObject::tr(
+                                             "You cannot use a slab that has a different number of dimensions (%1) "
+                                             "to the actual data (%2)")
+                                             .arg(slab.nDimensions())
+                                             .arg(dim_sizes.count()),
+                                         CODELOC);
+
+        if (slab.nDimensions() == 1 and slab.counts()[0] > 1)
+            throw SireError::invalid_arg(QObject::tr(
+                                             "You cannot use a slab that has a different number of dimensions (%1) "
+                                             "to the actual data (%2)")
+                                             .arg(slab.nDimensions())
+                                             .arg(dim_sizes.count()),
+                                         CODELOC);
+    }
+    else
+    {
+        if (slab.nDimensions() != dim_sizes.count())
+            throw SireError::invalid_arg(QObject::tr(
+                                             "You cannot use a slab that has a different number of dimensions (%1) "
+                                             "to the actual data (%2)")
+                                             .arg(slab.nDimensions())
+                                             .arg(dim_sizes.count()),
+                                         CODELOC);
+
+        for (int i = 0; i < dim_sizes.count(); ++i)
         {
-            throw SireError::invalid_index(QObject::tr(
-                                               "The slab for dimension %1 has the wrong shape (%2, %3) when the "
-                                               "dimension only has %4 values.")
-                                               .arg(i)
-                                               .arg(slab.starts()[i])
-                                               .arg(slab.counts()[i])
-                                               .arg(dim_sizes[i]),
-                                           CODELOC);
+            if (slab.starts()[i] < 0 or slab.starts()[i] + slab.counts()[i] > dim_sizes[i])
+            {
+                throw SireError::invalid_index(QObject::tr(
+                                                   "The slab for dimension %1 has the wrong shape (%2, %3) when the "
+                                                   "dimension only has %4 values.")
+                                                   .arg(i)
+                                                   .arg(slab.starts()[i])
+                                                   .arg(slab.counts()[i])
+                                                   .arg(dim_sizes[i]),
+                                               CODELOC);
+            }
         }
     }
 }
@@ -791,7 +812,7 @@ NetCDFHyperSlab NetCDFDataInfo::hyperslab() const
         return slab;
 
     else if (dim_sizes.isEmpty())
-        return NetCDFHyperSlab();
+        return NetCDFHyperSlab({0}, {1});
 
     QVector<size_t> starts(dim_sizes.count(), 0);
     QVector<size_t> counts(dim_sizes.count());
@@ -1065,6 +1086,12 @@ NetCDFData::NetCDFData(const NetCDFDataInfo &info,
 void NetCDFData::setData(const QByteArray &data)
 {
     memdata = data;
+}
+
+/** Return a raw pointer to the data */
+const void *NetCDFData::data() const
+{
+    return memdata.constData();
 }
 
 /** Return the data as an array of QVariants */
@@ -1755,24 +1782,20 @@ void NetCDFFile::_lkr_writeHeader(const QHash<QString, QString> &globals, const 
     }
 }
 
-/*
-        // now that the metadata has been written, we can now write the actual data
-        for (const auto &variable : variables)
-        {
-            const auto vardata = variable_data[variable];
-
-            const int id = var_ids.value(variable, -1);
-
-            call_netcdf_function([&]()
-                                 { return nc_put_var(hndl, id, vardata.memdata.constData()); });
-        }
-
-        // finished writing the file :-)
+void NetCDFFile::_lkr_writeData(const NetCDFData &data)
+{
+    if (hndl != -1)
+    {
+#ifdef SIRE_USE_NETCDF
+        const auto hyperslab = data.hyperslab();
         call_netcdf_function([&]()
-                             { return nc_close(hndl); });
-        hndl = -1;
-
-*/
+                             { return nc_put_vara(hndl, data.ID(),
+                                                  hyperslab.starts(),
+                                                  hyperslab.counts(),
+                                                  data.data()); });
+#endif
+    }
+}
 
 /** Return the names and sizes of all of the dimensions in the file */
 QHash<QString, int> NetCDFFile::getDimensions() const

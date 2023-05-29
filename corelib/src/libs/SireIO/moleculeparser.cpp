@@ -804,6 +804,8 @@ static QVector<Velocity3D> getVelocities(const Molecule &mol, const PropertyName
             vels[i] = molvels.at(molinfo.cgAtomIdx(AtomIdx(i)));
         }
 
+        qDebug() << mol.toString() << Sire::toString(vels);
+
         return vels;
     }
     catch (...)
@@ -965,6 +967,45 @@ Frame MoleculeParser::createFrame(const System &system,
 
         if (::hasData(all_coords))
         {
+            // check the edge case that some molecules had coordinates defined, but some didn't
+            bool none_have_coords = true;
+            bool all_have_coords = true;
+            bool some_have_coords = false;
+
+            for (const auto &c : all_coords)
+            {
+                if (c.isEmpty())
+                {
+                    all_have_coords = false;
+                }
+                else
+                {
+                    none_have_coords = false;
+                }
+
+                if (all_have_coords == false and none_have_coords == false)
+                {
+                    // ok, only some have coordinates...
+                    some_have_coords = true;
+                    break;
+                }
+            }
+
+            if (some_have_coords)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &coords_i = all_coords_data[i];
+
+                    if (coords_i.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        coords_i = QVector<Vector>(natoms, Vector(0));
+                    }
+                }
+            }
+
             coords = collapse(all_coords);
         }
 
@@ -1001,7 +1042,7 @@ Frame MoleculeParser::createFrame(const System &system,
                 {
                     auto &vels_i = all_vels_data[i];
 
-                    if (vels.isEmpty())
+                    if (vels_i.isEmpty())
                     {
                         const int natoms = system[molnums[i]].atoms().count();
                         vels_i = QVector<Velocity3D>(natoms, Velocity3D(0));
@@ -1014,6 +1055,45 @@ Frame MoleculeParser::createFrame(const System &system,
 
         if (::hasData(all_forces))
         {
+            // check the edge case that some molecules had forces defined, but some didn't
+            bool none_have_forces = true;
+            bool all_have_forces = true;
+            bool some_have_forces = false;
+
+            for (const auto &frcs : all_forces)
+            {
+                if (frcs.isEmpty())
+                {
+                    all_have_forces = false;
+                }
+                else
+                {
+                    none_have_forces = false;
+                }
+
+                if (all_have_forces == false and none_have_forces == false)
+                {
+                    // ok, only some have forces...
+                    some_have_forces = true;
+                    break;
+                }
+            }
+
+            if (some_have_forces)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &frcs_i = all_forces_data[i];
+
+                    if (frcs_i.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        frcs_i = QVector<Force3D>(natoms, Force3D(0));
+                    }
+                }
+            }
+
             frcs = collapse(all_forces);
         }
     }
@@ -1027,6 +1107,8 @@ Frame MoleculeParser::createFrame(const System &system,
     }
 
     auto time = get_time_from_system(system, map["time"]);
+
+    qDebug() << "MOL" << Sire::toString(vels);
 
     return SireMol::Frame(coords, vels, frcs, space.read(), time);
 }
