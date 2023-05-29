@@ -4,6 +4,7 @@ import sire as sr
 
 
 def test_trajectories(tmpdir, ala_traj):
+    # ala_traj is a AmberRst file - it contains time and space info
     mols = ala_traj
 
     d = tmpdir.mkdir("test_trajectories")
@@ -54,16 +55,19 @@ def test_trajectories(tmpdir, ala_traj):
 
         precision = 0.001
         check_time = True
+        time_delta = 0
 
         if traj.endswith(".xtc"):
             precision = 0.01
 
-        if (
-            traj.endswith(".traj")  # these should all work, but don't...
-            or traj.endswith(".dcd")
-            or traj.endswith(".xtc")
-        ):
+        if traj.endswith(".traj"):
+            # this format doesn't store the simulation time
             check_time = False
+        elif traj.endswith(".dcd"):
+            # this format only stores a single timestep, and the
+            # first frame is 0 ps (the original trajectory starts
+            # at 0.2 ps)
+            time_delta = 0.2 * sr.units.picosecond
 
         mols2 = sr.load(f[0], traj)
 
@@ -76,8 +80,10 @@ def test_trajectories(tmpdir, ala_traj):
 
         if check_time:
             assert m.property("time").value() == pytest.approx(
-                m2.property("time").value(), precision
+                m2.property("time").value() + time_delta, precision
             )
+        else:
+            assert m2.property("time").value() == 0
 
         assert_space_equal(
             m.property("space"), m2.property("space"), precision

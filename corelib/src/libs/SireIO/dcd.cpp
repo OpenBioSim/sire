@@ -99,6 +99,8 @@ public:
     bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
     SireMol::Frame readFrame(int i, bool use_parallel = true) const;
+
+    void writeHeader(int nframes, int natoms, bool has_periodic_space);
     void writeFrame(const SireMol::Frame &frame, bool use_parallel = true);
 
     int nAtoms() const;
@@ -114,7 +116,6 @@ public:
 
 private:
     void readHeader();
-    void writeHeader(int natoms, bool has_periodic_space);
 
     SpacePtr readSpace(int frame) const;
     QVector<Vector> readCoordinates(int frame) const;
@@ -355,11 +356,8 @@ void DCDFile::readHeader()
     }
 }
 
-void DCDFile::writeHeader(int natoms, bool has_periodic_space)
+void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 {
-    if (have_written_header)
-        return;
-
     FortranRecord line(f.isLittleEndian());
 
     // bytes 0 to 3
@@ -369,7 +367,7 @@ void DCDFile::writeHeader(int natoms, bool has_periodic_space)
     QVector<qint32> ints(9, 0);
 
     // every value is zero, as we don't know what they are
-    // ints[0] = 0; // nframes - we don't know this yet...
+    ints[0] = nframes;
     // ints[1] = 0; // index of the first frame - we don't know this either...
     // ints[2] = 0; // nsavc - should be zero?
     // ints[8] = 0; // nfixed is zero - everything will be treated as moving
@@ -396,6 +394,7 @@ void DCDFile::writeHeader(int natoms, bool has_periodic_space)
     line.writeInt32(0); // not four dimensions
 
     // bytes 52-79 - should all be zero - can re-use ints
+    ints[0] = 0;
     line.writeInt32(ints, 7);
 
     // bytes 80-83
@@ -613,8 +612,6 @@ void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
         return;
 
     bool has_periodic_space = frame.space().isPeriodic();
-
-    this->writeHeader(natoms, has_periodic_space);
 
     // now write the space
     if (has_periodic_space)
@@ -1079,12 +1076,39 @@ QStringList DCD::writeToFile(const QString &filename) const
     {
         const auto frames = this->framesToWrite();
 
+        if (frames.isEmpty())
+            return QStringList();
+
         ProgressBar bar("Save DCD", frames.count());
         bar.setSpeedUnit("frames / s");
 
         bar = bar.enter();
 
-        for (int i = 0; i < frames.count(); ++i)
+        Frame first_frame = this->createFrame(frames[0]);
+        Frame second_frame;
+
+        if (frames.count() > 1)
+        {
+            second_frame = this->createFrame(frames[1]);
+            outfile.setTimeStep(second_frame.time() - first_frame.time());
+        }
+
+        outfile.writeHeader(frames.count(), first_frame.nAtoms(),
+                            first_frame.space().isPeriodic());
+
+        outfile.writeFrame(first_frame, usesParallel());
+        bar.setProgress(1);
+
+        first_frame = Frame();
+
+        if (frames.count() > 1)
+        {
+            outfile.writeFrame(second_frame, usesParallel());
+            bar.setProgress(2);
+            second_frame = Frame();
+        }
+
+        for (int i = 2; i < frames.count(); ++i)
         {
             const auto frame = this->createFrame(frames[i]);
             outfile.writeFrame(frame, usesParallel());
@@ -1095,6 +1119,9 @@ QStringList DCD::writeToFile(const QString &filename) const
     }
     else
     {
+        outfile.writeHeader(1, current_frame.nAtoms(),
+                            current_frame.space().isPeriodic());
+
         outfile.writeFrame(current_frame, usesParallel());
     }
 
