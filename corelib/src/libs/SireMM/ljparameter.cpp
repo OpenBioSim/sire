@@ -79,11 +79,6 @@ LJParameter::LJParameter(const LJParameter &other) : sqrtsig(other.sqrtsig), sqr
 /** Construct a LJParameter that has the specified sigma and epsilon */
 LJParameter::LJParameter(Length s, MolarEnergy e) : sqrtsig(std::sqrt(std::abs(s))), sqrteps(std::sqrt(std::abs(e)))
 {
-    if (SireMaths::isZero(sqrtsig) or SireMaths::isZero(sqrteps))
-    {
-        sqrtsig = 0.0;
-        sqrteps = 0.0;
-    }
 }
 
 /** Destructor */

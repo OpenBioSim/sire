@@ -431,7 +431,32 @@ bool Molecules::update(const MoleculeData &moldata)
     {
         if (it->data() != moldata)
         {
-            mols.find(moldata.number())->update(moldata);
+            if (it->data().info().UID() != moldata.info().UID())
+            {
+                // the molecule has changed a lot - atoms have been
+                // added or removed - we need to replace, rather than
+                // update the molecule
+                if (it->selectedAll())
+                {
+                    mols[moldata.number()] = ViewsOfMol(moldata);
+                }
+                else
+                    throw SireError::incompatible_error(QObject::tr(
+                                                            "Cannot update molecule %1 because the layout for the new "
+                                                            "version of the molecule (%2) is different and this container "
+                                                            "contains only a subset of the atoms. This is likely "
+                                                            "because the molecule has been edited and the layout of "
+                                                            "atoms, residues etc has been changed. To update this molecule "
+                                                            "you will need to replace it in the container.")
+                                                            .arg(it->toString())
+                                                            .arg(Molecule(moldata).toString()),
+                                                        CODELOC);
+            }
+            else
+            {
+                mols.find(moldata.number())->update(moldata);
+            }
+
             return true;
         }
         else
