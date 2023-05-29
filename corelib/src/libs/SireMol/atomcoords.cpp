@@ -335,7 +335,11 @@ AtomProperty<QVariant> AtomProperty<Vector>::toVariant() const
 
 static void assertCanConvert(const QVariant &value)
 {
-    if (not value.canConvert<Vector>())
+    if (value.isNull())
+    {
+        return;
+    }
+    else if (not value.canConvert<Vector>())
     {
         throw SireError::invalid_cast(QObject::tr("Cannot convert an object of type %1 to a SireMaths::Vector, "
                                                   "as is required to allow this object to be part of an "
@@ -358,9 +362,17 @@ static CoordGroup makeCoordGroup(const PackedArray2D<QVariant>::Array &values)
     for (int i = 0; i < nvals; ++i)
     {
         const QVariant &value = values_array[i];
-        assertCanConvert(value);
 
-        tmp_coords[i] = value.value<Vector>();
+        if (value.isNull())
+        {
+            tmp_coords[i] = Vector(0);
+        }
+        else
+        {
+            assertCanConvert(value);
+
+            tmp_coords[i] = value.value<Vector>();
+        }
     }
 
     return CoordGroup(tmp_coords);
