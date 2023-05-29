@@ -399,6 +399,20 @@ const MolGroupsBase &System::_pvt_constMoleculeGroups(MGNum mgnum) const
 
     \throw SireMol::missing_group
 */
+MoleculeGroup &System::_pvt_moleculeGroup(MGNum mgnum)
+{
+    int idx = mgroups_by_num.value(mgnum, -1);
+
+    if (idx == -1)
+        this->_pvt_throwMissingGroup(mgnum);
+
+    return SireMol::detail::get_editable_group(molgroups[idx].edit(), mgnum);
+}
+
+/** Return the molecule group with number 'mgnum'
+
+    \throw SireMol::missing_group
+*/
 const MoleculeGroup &System::_pvt_moleculeGroup(MGNum mgnum) const
 {
     int idx = mgroups_by_num.value(mgnum, -1);
@@ -407,6 +421,12 @@ const MoleculeGroup &System::_pvt_moleculeGroup(MGNum mgnum) const
         this->_pvt_throwMissingGroup(mgnum);
 
     return molgroups[idx]->at(mgnum);
+}
+
+/** Internal function used to get the group with number 'mgnum' */
+MoleculeGroup &System::getGroup(MGNum mgnum)
+{
+    return this->_pvt_moleculeGroup(mgnum);
 }
 
 /** Internal function used to get the group with number 'mgnum' */
@@ -3290,6 +3310,11 @@ void System::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void System::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
 static SireUnits::Dimension::Time get_time_from_property(const Property &prop)
 {
     try
@@ -3431,6 +3456,13 @@ void System::deleteFrame(int frame, const SireBase::PropertyMap &map)
     this->accept();
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::deleteFrame(frame, map);
+}
+
+void System::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    this->accept();
+    this->mustNowRecalculateFromScratch();
+    MolGroupsBase::deleteAllFrames(map);
 }
 
 const char *System::typeName()

@@ -10,6 +10,8 @@ namespace bp = boost::python;
 
 #include "SireBase/savestate.h"
 
+#include "SireBase/timeproperty.h"
+
 #include "SireError/errors.h"
 
 #include "SireFF/energytable.h"
@@ -796,6 +798,31 @@ void register_System_class(){
                 , ( bp::arg("ffid"), bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return whether or not any of the forcefields identified by the ID ffid\ncontain a property called name" );
+        
+        }
+        { //::SireSystem::System::deleteAllFrames
+        
+            typedef void ( ::SireSystem::System::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireSystem::System::deleteAllFrames );
+            
+            System_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::deleteAllFrames
+        
+            typedef void ( ::SireSystem::System::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireSystem::System::deleteAllFrames );
+            
+            System_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireSystem::System::deleteFrame

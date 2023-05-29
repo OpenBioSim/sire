@@ -2518,6 +2518,11 @@ void MoleculeGroup::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void MoleculeGroup::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
 void MoleculeGroup::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     if (not this->isEmpty())
@@ -2554,6 +2559,16 @@ void MoleculeGroup::deleteFrame(int frame, const SireBase::PropertyMap &map)
     {
         this->accept();
         d->molecules.deleteFrame(frame, map);
+        d->incrementMinor();
+    }
+}
+
+void MoleculeGroup::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    if (not this->isEmpty())
+    {
+        this->accept();
+        d->molecules.deleteAllFrames(map);
         d->incrementMinor();
     }
 }

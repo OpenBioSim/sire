@@ -151,6 +151,13 @@ class System:
         self._system.delete_frame(i, map=create_map(map))
         self._molecules = None
 
+    def delete_all_frames(self, map=None):
+        """Delete all the frames from the trajectory"""
+        from ..base import create_map
+
+        self._system.delete_all_frames(map=create_map(map))
+        self._molecules = None
+
     def to_molecule_group(self):
         """Return this System converted to a sire.mol.MoleculeGroup"""
         return self.molecules().to_molecule_group()

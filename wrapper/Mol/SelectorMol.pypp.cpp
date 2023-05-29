@@ -469,6 +469,31 @@ void register_SelectorMol_class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorMol::deleteAllFrames
+        
+            typedef void ( ::SireMol::SelectorMol::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorMol::deleteAllFrames );
+            
+            SelectorMol_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::deleteAllFrames
+        
+            typedef void ( ::SireMol::SelectorMol::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorMol::deleteAllFrames );
+            
+            SelectorMol_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorMol::deleteFrame
         
             typedef void ( ::SireMol::SelectorMol::*deleteFrame_function_type)( int ) ;

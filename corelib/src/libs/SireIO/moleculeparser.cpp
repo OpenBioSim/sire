@@ -804,8 +804,6 @@ static QVector<Velocity3D> getVelocities(const Molecule &mol, const PropertyName
             vels[i] = molvels.at(molinfo.cgAtomIdx(AtomIdx(i)));
         }
 
-        qDebug() << mol.toString() << Sire::toString(vels);
-
         return vels;
     }
     catch (...)
@@ -1107,8 +1105,6 @@ Frame MoleculeParser::createFrame(const System &system,
     }
 
     auto time = get_time_from_system(system, map["time"]);
-
-    qDebug() << "MOL" << Sire::toString(vels);
 
     return SireMol::Frame(coords, vels, frcs, space.read(), time);
 }

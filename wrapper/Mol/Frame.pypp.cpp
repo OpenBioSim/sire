@@ -176,7 +176,7 @@ void register_Frame_class(){
                 "join"
                 , join_function_value
                 , ( bp::arg("frames"), bp::arg("use_parallel")=(bool)(true) )
-                , "" );
+                , "Join the vector of passed frames into a single frame. The\n  frames are joined in order, e.g. from the first atom in\n  the first frame to the last atom in the last frame\n" );
         
         }
         { //::SireMol::Frame::nAtoms

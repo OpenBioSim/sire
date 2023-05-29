@@ -1047,6 +1047,16 @@ void SelectorMDihedral::saveFrame()
     this->saveFrame(PropertyMap());
 }
 
+void SelectorMDihedral::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
+void SelectorMDihedral::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    SireMol::detail::_deleteAllFrames(this->dihs, map);
+}
+
 void SelectorMDihedral::deleteFrame(int frame)
 {
     this->deleteFrame(frame, PropertyMap());

@@ -413,15 +413,18 @@ namespace SireSystem
         void saveFrame(int frame);
         void saveFrame();
         void deleteFrame(int frame);
+        void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
+        void deleteAllFrames(const SireBase::PropertyMap &map);
 
         static const System &null();
 
     protected:
+        MoleculeGroup &getGroup(MGNum mgnum);
         const MoleculeGroup &getGroup(MGNum mgnum) const;
 
         void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;
@@ -461,6 +464,7 @@ namespace SireSystem
         const MolGroupsBase &_pvt_moleculeGroups(MGNum mgnum) const;
         const MolGroupsBase &_pvt_constMoleculeGroups(MGNum mgnum) const;
 
+        MoleculeGroup &_pvt_moleculeGroup(MGNum mgnum);
         const MoleculeGroup &_pvt_moleculeGroup(MGNum mgnum) const;
 
         void _pvt_throwMissingGroup(MGNum mgnum) const;

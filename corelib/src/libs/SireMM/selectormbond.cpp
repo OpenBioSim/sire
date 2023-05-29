@@ -992,6 +992,16 @@ void SelectorMBond::saveFrame()
     this->saveFrame(PropertyMap());
 }
 
+void SelectorMBond::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
+void SelectorMBond::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    SireMol::detail::_deleteAllFrames(this->bnds, map);
+}
+
 void SelectorMBond::deleteFrame(int frame)
 {
     this->deleteFrame(frame, PropertyMap());

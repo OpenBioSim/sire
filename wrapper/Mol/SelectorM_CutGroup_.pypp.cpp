@@ -541,6 +541,33 @@ void register_SelectorM_CutGroup__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::deleteAllFrames
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::CutGroup >::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::deleteAllFrames );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::deleteAllFrames
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::CutGroup >::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::deleteAllFrames );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::CutGroup >::deleteFrame
         
             typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;

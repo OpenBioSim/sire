@@ -1408,6 +1408,11 @@ void SelectorMol::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void SelectorMol::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
 void SelectorMol::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     SireMol::detail::_loadFrame(this->mols, frame, map);
@@ -1426,6 +1431,11 @@ void SelectorMol::saveFrame(const SireBase::PropertyMap &map)
 void SelectorMol::deleteFrame(int frame, const SireBase::PropertyMap &map)
 {
     SireMol::detail::_deleteFrame(this->mols, frame, map);
+}
+
+void SelectorMol::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    SireMol::detail::_deleteAllFrames(this->mols, map);
 }
 
 bool SelectorMol::isEmpty() const

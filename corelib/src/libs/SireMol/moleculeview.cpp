@@ -229,6 +229,11 @@ void MoleculeView::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void MoleculeView::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
 void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];
@@ -309,6 +314,17 @@ void MoleculeView::deleteFrame(int frame, const SireBase::PropertyMap &map)
     {
         d->setProperty(traj_prop.source(), traj);
     }
+}
+
+void MoleculeView::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    const auto traj_prop = map["trajectory"];
+
+    if (not(traj_prop.hasSource() and d->hasProperty(traj_prop)))
+        return;
+
+    // just remove the trajectory property :-)
+    d->removeProperty(traj_prop.source());
 }
 
 /** Return whether or not this view is of the same molecule as 'other'

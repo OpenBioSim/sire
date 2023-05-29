@@ -175,6 +175,16 @@ void G1FF::assertContains(MGNum mgnum) const
 
     \throw SireMol::missing_group
 */
+MoleculeGroup &G1FF::getGroup(MGNum mgnum)
+{
+    G1FF::assertContains(mgnum);
+    return molgroup;
+}
+
+/** Return a reference to the group with number 'mgnum'
+
+    \throw SireMol::missing_group
+*/
 const MoleculeGroup &G1FF::getGroup(MGNum mgnum) const
 {
     G1FF::assertContains(mgnum);

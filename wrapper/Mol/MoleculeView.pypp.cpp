@@ -611,6 +611,31 @@ void register_MoleculeView_class(){
                 , "Return the MoleculeData that contains all of the information\nabout the molecule which this view is showing" );
         
         }
+        { //::SireMol::MoleculeView::deleteAllFrames
+        
+            typedef void ( ::SireMol::MoleculeView::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::MoleculeView::deleteAllFrames );
+            
+            MoleculeView_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MoleculeView::deleteAllFrames
+        
+            typedef void ( ::SireMol::MoleculeView::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::MoleculeView::deleteAllFrames );
+            
+            MoleculeView_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::MoleculeView::deleteFrame
         
             typedef void ( ::SireMol::MoleculeView::*deleteFrame_function_type)( int ) ;

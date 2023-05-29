@@ -446,6 +446,31 @@ void register_MoleculeGroup_class(){
                 , "Return whether or not this group contains all of the\nviews of any version of all of the molecules contained\nin molecules" );
         
         }
+        { //::SireMol::MoleculeGroup::deleteAllFrames
+        
+            typedef void ( ::SireMol::MoleculeGroup::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::MoleculeGroup::deleteAllFrames );
+            
+            MoleculeGroup_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MoleculeGroup::deleteAllFrames
+        
+            typedef void ( ::SireMol::MoleculeGroup::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::MoleculeGroup::deleteAllFrames );
+            
+            MoleculeGroup_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::MoleculeGroup::deleteFrame
         
             typedef void ( ::SireMol::MoleculeGroup::*deleteFrame_function_type)( int ) ;

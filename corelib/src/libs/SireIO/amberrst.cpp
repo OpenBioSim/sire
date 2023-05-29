@@ -1787,7 +1787,7 @@ QStringList AmberRst::writeToFile(const QString &filename) const
                             first_frame.hasForces(),
                             first_frame.space().isPeriodic());
 
-        ProgressBar bar("Save AmberRst", frames.count());
+        ProgressBar bar("Save RST", frames.count());
         bar.setSpeedUnit("frames / s");
 
         bar = bar.enter();

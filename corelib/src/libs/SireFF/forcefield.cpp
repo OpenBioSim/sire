@@ -337,6 +337,13 @@ const MoleculeGroup &NullFF::at(MGNum mgnum) const
     return this->getGroup(mgnum);
 }
 
+MoleculeGroup &NullFF::getGroup(MGNum mgnum)
+{
+    throwNoGroups();
+    static MoleculeGroup mgroup;
+    return mgroup;
+}
+
 const MoleculeGroup &NullFF::getGroup(MGNum mgnum) const
 {
     return NullFF::at(mgnum);

@@ -92,6 +92,11 @@ namespace SireMol
     class CGID;
     class AtomID;
 
+    namespace detail
+    {
+        MoleculeGroup &get_editable_group(MolGroupsBase &groups, MGNum mgnum);
+    }
+
     /** This is the base class of all MoleculeGroups objects.
         These are containers for MoleculeGroup objects, thereby
         allowing lots of MoleculeGroup objects to be collected
@@ -107,6 +112,8 @@ namespace SireMol
 
         friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const MolGroupsBase &);
         friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, MolGroupsBase &);
+
+        friend SIREMOL_EXPORT MoleculeGroup &detail::get_editable_group(MolGroupsBase &, MGNum mgnum);
 
     public:
         virtual ~MolGroupsBase();
@@ -347,11 +354,13 @@ namespace SireMol
         virtual void saveFrame(int frame);
         virtual void saveFrame();
         virtual void deleteFrame(int frame);
+        virtual void deleteAllFrames();
 
         virtual void loadFrame(int frame, const SireBase::PropertyMap &map);
         virtual void saveFrame(int frame, const SireBase::PropertyMap &map);
         virtual void saveFrame(const SireBase::PropertyMap &map);
         virtual void deleteFrame(int frame, const SireBase::PropertyMap &map);
+        virtual void deleteAllFrames(const SireBase::PropertyMap &map);
 
         static const MoleculeGroups &null();
 
@@ -362,6 +371,7 @@ namespace SireMol
 
         MolGroupsBase &operator=(const MolGroupsBase &other);
 
+        virtual MoleculeGroup &getGroup(MGNum mgnum) = 0;
         virtual const MoleculeGroup &getGroup(MGNum mgnum) const = 0;
 
         virtual void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const = 0;
@@ -513,6 +523,7 @@ namespace SireMol
 
     protected:
         const MoleculeGroup &getGroup(MGNum mgnum) const;
+        MoleculeGroup &getGroup(MGNum mgnum);
 
         void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;
 
