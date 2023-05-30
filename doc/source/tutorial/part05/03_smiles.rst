@@ -72,6 +72,15 @@ create an `rdkit Molecule <https://www.rdkit.org/docs/source/rdkit.Chem.rdchem.h
 which is converted to a :mod:`sire` :class:`~sire.mol.Molecule` using
 the functions in the :mod:`~sire.convert` module.
 
+.. note::
+
+   Note that the default is that all sanitization steps provided by rdkit
+   will be performed when generating the molecule. If any fail, then
+   an exception will be raised and the molecule won't be generated.
+   You can change this behaviour by passing ``must_sanitize`` as ``False``.
+   This will run as many of the sanitization steps as possible, ignoring
+   errors caused by individual steps.
+
 Generating smiles strings from molecules
 ----------------------------------------
 
