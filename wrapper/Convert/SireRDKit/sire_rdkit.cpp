@@ -908,11 +908,23 @@ namespace SireRDKit
     {
         RDKit::SmilesParserParams params;
         params.debugParse = 0;
-        params.sanitize = true;
+        params.sanitize = false;
         params.removeHs = false;
         params.parseName = false;
 
         RWMOL_SPTR rdkit_mol;
+
+        bool already_sanitized = false;
+
+        if (map.specified("must_sanitize"))
+        {
+            if (map["must_sanitize"].value().asABoolean())
+            {
+                // we will force full sanitization
+                params.sanitize = true;
+                already_sanitized = true;
+            }
+        }
 
         try
         {
@@ -923,7 +935,39 @@ namespace SireRDKit
         }
 
         if (rdkit_mol.get() == 0)
+        {
             return ROMOL_SPTR();
+        }
+
+        if (not already_sanitized)
+        {
+            // Now try to sanitize the molecule - we will do this repeatedly,
+            // removing any processes that fail
+            unsigned int failed_op;
+            unsigned int sanitize_ops = RDKit::MolOps::SANITIZE_ALL;
+
+            bool all_complete = false;
+            int ntries = 0;
+
+            while (not all_complete)
+            {
+                try
+                {
+                    RDKit::MolOps::sanitizeMol(*rdkit_mol, failed_op, sanitize_ops);
+                    all_complete = true;
+                }
+                catch (...)
+                {
+                    sanitize_ops |= failed_op;
+                }
+
+                ntries += 1;
+
+                if (ntries > 10)
+                    // we've tried enough!
+                    break;
+            }
+        }
 
         rdkit_mol->setProp<std::string>("_Name", label.toStdString());
 

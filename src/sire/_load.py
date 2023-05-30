@@ -652,6 +652,7 @@ def smiles(
     labels_column: str = "labels",
     add_hydrogens: bool = True,
     generate_coordinates: bool = True,
+    must_sanitize: bool = True,
     map=None,
 ):
     """
@@ -687,6 +688,13 @@ def smiles(
             Whether or not to automatically generate 3D coordinates.
             Note that generating coordinates requires that
             hydrogens are automatically added.
+        must_sanitize: bool (default True)
+            Whether or not all sanity checks must pass when creating
+            the molecule. This will ensure that all sanity checks pass,
+            and if they don't, then an exception will be raised.
+            If this is not True, then sanity checks that failed are
+            skipped and silently ignored. It is possible, in this case,
+            that a null or malformed molecule may be returned.
         map:
             Property map if you want to put the molecule properties
             into different places
@@ -727,9 +735,39 @@ def smiles(
         {
             "add_hydrogens": add_hydrogens,
             "generate_coordinates": generate_coordinates,
+            "must_sanitize": must_sanitize,
         },
     )
 
     rdkit_mols = smiles_to_rdkit(smiles, labels, map)
 
-    return rdkit_to_sire(rdkit_mols)
+    mols = rdkit_to_sire(rdkit_mols)
+
+    if must_sanitize:
+        if len(smiles) == 1:
+            mol = mols
+            if mol.num_atoms() == 0:
+                raise ValueError(
+                    "Failed to generate a molecule from the smiles string "
+                    f"'{smiles[0]}'. Re-run this function setting "
+                    "'must_sanitize' to False if you want to try again, "
+                    "ignoring the sanitization steps that failed."
+                )
+        else:
+            empty_mols = []
+
+            for i, mol in enumerate(mols):
+                if mol.num_atoms() == 0:
+                    empty_mols.append(smiles[i])
+
+            if len(empty_mols) > 0:
+                empty_mols = ", ".join(empty_mols)
+
+                raise ValueError(
+                    "Failed to generate some molecules from smiles strings. "
+                    f"Failed conversions were: [{empty_mols}]. Re-run setting "
+                    "'must_sanitize' to False to try to generate the molecule "
+                    "ignoring the errors."
+                )
+
+    return mols

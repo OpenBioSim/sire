@@ -55,7 +55,7 @@ jobs:
           use-mamba: true
       #
       - name: Clone the main branch (push to main)
-        run: git clone -b main https://github.com/openbiosim/sire
+        run: git clone -b main https://github.com/openbiosim/sire sire
       #
       - name: Setup Conda
         run: mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser

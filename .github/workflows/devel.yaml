@@ -44,7 +44,7 @@ jobs:
     env:
       SIRE_DONT_PHONEHOME: 1
       SIRE_SILENT_PHONEHOME: 1
-      REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
+      REPO: "${{ github.repository }}"
     steps:
       #     Need to install and use VS 2017 for conda-compliant builds
       - name: Set up Visual Studio 2017 Build Tools (required for Python modules)
@@ -62,8 +62,7 @@ jobs:
           use-mamba: true
       #
       - name: Clone the devel branch (push to devel)
-        run: git clone https://github.com/${{ env.REPO }}
-        if: github.event_name != 'pull_request'
+        run: git clone https://github.com/${{ env.REPO }} sire
       #
       - name: Setup Conda
         run: mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
@@ -83,4 +82,3 @@ jobs:
         env:
           SRC_DIR: ${{ github.workspace }}/sire
           ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
-        if: github.event_name != 'pull_request'
