@@ -226,14 +226,9 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
        These constraints can be solved using simultaneous equations.
      */
 
-    // Perform the reduction. Add a small bias so that we always round in a consistent
-    // direction. This mitigates numerical errors due to box dimensions and angles, or
-    // lattice cell vectors being specified in fixed precision in the file formats that
-    // we support. Without these, repeated read/write conversion to different formats
-    // can cause the box angles to rotate back-and-forth.
-    this->v2 = this->v2 - this->v1*std::round(1e-6 + this->v2.y() / this->v1.y());
-    this->v2 = this->v2 - this->v0*std::round(1e-6 + this->v2.x() / this->v0.x());
-    this->v1 = this->v1 - this->v0*std::round(1e-6 + this->v1.x() / this->v0.x());
+    this->v2 = this->v2 - this->v1*std::round(this->v2.y() / this->v1.y());
+    this->v2 = this->v2 - this->v0*std::round(this->v2.x() / this->v0.x());
+    this->v1 = this->v1 - this->v0*std::round(this->v1.x() / this->v0.x());
 
     // Store the cell matrix and its inverse.
     this->cell_matrix = Matrix(this->v0, this->v1, this->v2).transpose();
