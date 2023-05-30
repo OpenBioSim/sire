@@ -156,13 +156,19 @@ namespace SireStream
 
         quint32 version() const;
 
+        const QString &property(const QString &key) const;
+        const QString &property(const QString &key, const QString &default_value) const;
+
+        bool hasProperty(const QString &key) const;
+
         void assertCompatible() const;
         void assertNotCorrupted(const QByteArray &compressed_data) const;
 
     private:
-        FileHeader(const QString &type_name, const QByteArray &compressed_data, const QByteArray &raw_data);
-
         FileHeader(const QStringList &type_names, const QByteArray &compressed_data, const QByteArray &raw_data);
+
+        /** Any additional properties stored in the header */
+        QHash<QString, QString> props;
 
         /** The username of the person who created this data */
         QString created_by;
@@ -214,6 +220,9 @@ namespace SireStream
 
     SIRESTREAM_EXPORT quint32 getLibraryVersion(const QString &library);
     SIRESTREAM_EXPORT quint32 getMinimumSupportedVersion(const QString &library);
+
+    SIRESTREAM_EXPORT void setHeaderProperty(const QString &key, const QString &data);
+    SIRESTREAM_EXPORT QString getHeaderProperty(const QString &key);
 
     class SIRESTREAM_EXPORT RegisterLibrary
     {
@@ -317,6 +326,8 @@ namespace SireStream
 SIRE_EXPOSE_FUNCTION(SireStream::getDataHeader)
 SIRE_EXPOSE_FUNCTION(SireStream::getLibraryVersion)
 SIRE_EXPOSE_FUNCTION(SireStream::getMinimumSupportedVersion)
+SIRE_EXPOSE_FUNCTION(SireStream::setHeaderProperty)
+SIRE_EXPOSE_FUNCTION(SireStream::getHeaderProperty)
 
 SIRE_EXPOSE_CLASS(SireStream::FileHeader)
 

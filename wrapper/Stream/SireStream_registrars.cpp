@@ -3,8 +3,6 @@
 
 #include "SireStream_registrars.h"
 
-
-
 #include "magic_error.h"
 #include "version_error.h"
 

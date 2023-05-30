@@ -16,9 +16,9 @@ def test_partial_selection(tmpdir, ala_mols):
 
     s3file = str(dir.join("output.s3"))
 
-    s3 = sr.legacy.Stream.save(res, s3file)
+    sr.stream.save(res, s3file)
 
-    res2 = sr.legacy.Stream.load(s3file)
+    res2 = sr.stream.load(s3file)
 
     assert res2.selection().num_selected_residues() == 1
     assert res2.residue().number() == res.residue().number()
@@ -29,9 +29,9 @@ def test_partial_selection(tmpdir, ala_mols):
 
     s3file = str(dir.join("output2.s3"))
 
-    s3 = sr.legacy.Stream.save(res, s3file)
+    sr.stream.save(res, s3file)
 
-    res2 = sr.legacy.Stream.load(s3file)
+    res2 = sr.stream.load(s3file)
 
     assert res2.selection().num_selected_residues() == 1
     assert res2.residue().number() == res.residue().number()
