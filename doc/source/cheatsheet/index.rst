@@ -9,5 +9,6 @@ use and understand various parts of sire.
    :maxdepth: 2
 
    search
+   trajectory
    view
    openmm
