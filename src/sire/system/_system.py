@@ -60,10 +60,32 @@ class System:
     def __getitem__(self, key):
         return self.molecules()[key]
 
+    def __iadd__(self, molecules):
+        self.add(molecules)
+        return self
+
+    def __add__(self, molecules):
+        ret = self.__copy__()
+        ret.add(molecules)
+        return ret
+
+    def __radd__(self, molecules):
+        return self.__add__(molecules)
+
+    def __isub__(self, molecules):
+        self.remove(molecules)
+        return self
+
+    def __sub__(self, molecules):
+        ret = self.__copy__()
+        ret.remove(molecules)
+        return ret
+
     def clone(self):
         """Return a copy (clone) of this System"""
         s = System()
         s._system = self._system.clone()
+        s._molecules = None
         return s
 
     def count(self):
@@ -304,6 +326,68 @@ class System:
         """
         return self.molecules().coordinates(*args, **kwargs)
 
+    def space(self):
+        """
+        Return the space used for this system
+        """
+        try:
+            return self._system.property("space")
+        except Exception:
+            from ..vol import Cartesian
+
+            return Cartesian()
+
+    def time(self):
+        """
+        Return the current system time
+        """
+        try:
+            return self._system.property("time")
+        except Exception:
+            from ..units import picosecond
+
+            return 0 * picosecond
+
+    def set_space(self, space):
+        """
+        Set the space to be used to hold all of the molecules
+        in this system
+        """
+        from ..legacy.Vol import Space
+
+        if not issubclass(type(space), Space):
+            raise TypeError(
+                "You can only set the space to a type derived from sire.vol.Space, "
+                "e.g. sire.vol.PeriodicBox, sire.vol.TriclinicBox or "
+                f"sire.vol.Cartesian. You cannot use a {type(space)}."
+            )
+
+        self._system.set_property("space", space)
+
+    def set_time(self, time):
+        """
+        Set the current time for the system
+        """
+        from ..units import picosecond
+        from ..base import wrap
+
+        if time == 0:
+            self._system.set_property("time", wrap(0 * picosecond))
+        else:
+            if not hasattr(time, "has_same_units"):
+                raise TypeError(
+                    "You can only set the time to a value with units 'time', e.g. "
+                    f"5 * sire.units.picosecond. YOu cannot use a {type(time)}."
+                )
+
+            if not time.has_same_units(picosecond):
+                raise TypeError(
+                    "You can only set the time to a value of units time. You "
+                    f"cannot use {time}."
+                )
+
+            self._system.set_property("time", wrap(time))
+
     def evaluate(self, *args, **kwargs):
         """Return an evaluator for this Systme (or of the matching
         index/search subset of this System)"""
@@ -360,13 +444,67 @@ class System:
         """
         return self.molecules().view2d(*args, **kwargs)
 
-    def update(self, value):
-        """Update the molecules in this system so that they have
+    def add(self, molecules):
+        """
+        Add the passed molecules to this system. This will only
+        add molecules that don't already exist in this system.
+        """
+        if type(molecules) is list:
+            for molecule in molecules:
+                self.add(molecule)
+            return
+
+        from ..legacy.Mol import MGName
+
+        mgid = MGName("all")
+
+        if hasattr(molecules, "molecules"):
+            # rather convoluted way to get a 'Molecules' object...
+            mols = molecules.molecules().to_molecule_group().molecules()
+            self._system.add_if_unique(mols, mgid)
+        else:
+            self._system.add_if_unique(molecules, mgid)
+
+        self._molecules = None
+
+    def remove(self, molecules):
+        """
+        Remove the passed molecules from this system.
+        """
+        if type(molecules) is list:
+            for molecule in molecules:
+                self.remove(molecule)
+            return
+
+        molnums = None
+
+        if hasattr(molecules, "molecules"):
+            molnums = molecules.molecules().mol_nums()
+        else:
+            molnums = [molecule.molecule().number()]
+
+        for molnum in molnums:
+            self._system.remove(molnum)
+
+        self._molecules = None
+
+    def update(self, molecules):
+        """
+        Update the molecules in this system so that they have
         the same versions and data as the new molecules contained
         in 'value'
         """
+        if type(molecules) is list:
+            for molecule in molecules:
+                self.update(molecule)
+            return
+
+        if hasattr(molecules, "molecules"):
+            self._system.update(molecules.molecules())
+        else:
+            self._system.update(molecules)
+
         self._molecules = None
-        self._system.update(value)
 
     def apply(self, *args, **kwargs):
         """
