@@ -1,6 +1,6 @@
 ########################################
 #
-# sire.io
+# sire.io.parser
 #
 ########################################
 
@@ -10,6 +10,4 @@ set ( SCRIPTS
     )
 
 # installation
-install( FILES ${SCRIPTS} DESTINATION ${SIRE_PYTHON}/sire/io )
-
-add_subdirectory (parser)
+install( FILES ${SCRIPTS} DESTINATION ${SIRE_PYTHON}/sire/io/parser )

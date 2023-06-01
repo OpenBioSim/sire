@@ -6,6 +6,8 @@ from .. import use_new_api as _use_new_api
 # Imported to ensure that sire.maths.Vector is properly wrapped
 from ..maths import Vector as _Vector
 
+from . import parser
+
 _use_new_api()
 
 
