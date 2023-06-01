@@ -3137,7 +3137,29 @@ const MoleculeInfoData &StructureEditor::commitInfo()
     this->assertSane();
 
     if (this->needsInfoRebuild())
+    {
+        // make sure that we have at least once CutGroup
+        if (this->nCutGroupsInMolecule() == 0)
+        {
+            this->addCutGroup().rename(CGName("0"));
+        }
+
+        // make sure that all atoms are in CutGroups - reparent them
+        // to the first CutGroup if not
+        for (int i = 0; i < this->nAtomsInMolecule(); ++i)
+        {
+            const auto info = this->getAtomData(AtomIdx(i));
+
+            if (info.get<2>().isNull())
+            {
+                // this atom isn't in a CutGroup
+                // Reparent it into the first CutGroup
+                this->reparentAtom(this->getUID(AtomIdx(i)), CGIdx(0));
+            }
+        }
+
         d->cached_molinfo = new MoleculeInfoData(*this);
+    }
 
     return *(d->cached_molinfo);
 }
@@ -3146,7 +3168,13 @@ const MoleculeInfoData &StructureEditor::commitInfo()
     all of the data in this editor */
 MoleculeData StructureEditor::commitChanges() const
 {
-    this->assertSane();
+    if (this->needsInfoRebuild())
+    {
+        const_cast<StructureEditor *>(this)->commitInfo();
+    }
+    else
+        this->assertSane();
+
     return MoleculeData(*this);
 }
 
