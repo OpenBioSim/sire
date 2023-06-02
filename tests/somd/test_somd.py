@@ -9,7 +9,7 @@ import sire as sr
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
 @pytest.mark.slow
-def test_parameters():
+def test_parameters(tmpdir):
     """A test to catch invalid SOMD parameters. Updates to add PME
     functionality have broken paramter resolution, meaning that OpenMM
     is configured to use the CUDA platform, even when the CPU platform
@@ -18,16 +18,13 @@ def test_parameters():
     """
 
     # Create a temporary working directrory.
-    tmp_dir = tempfile.TemporaryDirectory()
+    d = tmpdir.mkdir("test_somd_parameters")
 
     # Load the test system.
-    system = sr.load(
-        sr.expand(sr.tutorial_url, "ala.top", "ala.crd"),
-        directory=tmp_dir.name,
-    )
+    sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.crd"), directory=d)
 
     # Write the SOMD configuration file.
-    with open(f"{tmp_dir.name}/test.cfg", "w") as f:
+    with open(d.join("test.cfg"), "w") as f:
         f.write(
             "save coordinates = True\n"
             "minimise = True\n"
@@ -45,7 +42,7 @@ def test_parameters():
     cmd = "somd -c ala.crd -t ala.top -C test.cfg -p CPU"
 
     # Run the subprocess.
-    proc = subprocess.run(shlex.split(cmd), cwd=tmp_dir.name)
+    proc = subprocess.run(shlex.split(cmd), cwd=d)
 
     # Make sure the process completed without error
     assert proc.returncode == 0
