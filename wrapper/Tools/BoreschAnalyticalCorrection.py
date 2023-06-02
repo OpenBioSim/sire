@@ -17,7 +17,7 @@ from Sire.Tools.OpenMMMD import *
 
 # Constants
 v0 = ((Units.meter3/1000)/Units.mole.value()).value() # A^3, the standard state volume
-R = Units.gasr # kcal mol-1, the molar gas constant
+R = Units.gasr.value() # kcal mol-1, the molar gas constant
 
 @resolveParameters
 def run():
@@ -69,7 +69,7 @@ def run():
     n_nonzero_k = len(force_constants)
 
     # Calculation
-    numerator = prefactor*np.sqrt(prod_force_constants)
+    numerator = prefactor*np.sqrt(np.prod(force_constants))
     denominator = (r0**2)*sin(thetaA0)*sin(thetaB0)*(2*pi*R*T)**(n_nonzero_k/2)
 
     dg = -R*T*log(numerator/denominator)
