@@ -9,6 +9,11 @@ You can print the list of supported formats using
 
    >>> print(sr.supported_formats())
 
+   ## Parser DCD ##
+   Supports files: DCD
+   DCD coordinate/velocity binary trajectory files based on charmm / namd / x-plor format.
+   ################
+
    ## Parser Gro87 ##
    Supports files: gro
    Gromacs Gro87 structure format files.
@@ -54,10 +59,20 @@ You can print the list of supported formats using
    Structure Data File (SDF) format files.
    ################
 
-   ## Parser SUPPLEMENTARY ##
-   Supports files: *
-   Files that are supplementary to a lead parser.
-   ##########################
+   ## Parser TRAJ ##
+   Supports files: traj, trj, crd
+   Amber trajectory (ascii) coordinate or velocity files supported from Amber 7 upwards.
+   #################
+
+   ## Parser TRR ##
+   Supports files: trr
+   Gromacs TRR (XDR file) coordinate / velocity / force trajectory file
+   ################
+
+   ## Parser XTC ##
+   Supports files: xtc
+   Gromacs XTC (XDR file) compressed coordinate trajectory file
+   ################
 
 Symmetric Input / Output
 ------------------------
