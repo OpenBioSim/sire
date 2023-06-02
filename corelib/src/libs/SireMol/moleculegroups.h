@@ -94,7 +94,7 @@ namespace SireMol
 
     namespace detail
     {
-        MoleculeGroup &get_editable_group(MolGroupsBase &groups, MGNum mgnum);
+        SIREMOL_EXPORT MoleculeGroup &get_editable_group(MolGroupsBase &groups, MGNum mgnum);
     }
 
     /** This is the base class of all MoleculeGroups objects.
