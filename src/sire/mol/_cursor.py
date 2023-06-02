@@ -39,23 +39,24 @@ class _CursorData:
             ).edit()
         except Exception:
             # the molecule doesn't have a connectivity. Create one for it
-            from ..legacy.Mol import CovalentBondHunter
+            if self.molecule.has_property(self.map["coordinates"].source()):
+                from ..legacy.Mol import CovalentBondHunter
 
-            hunter = CovalentBondHunter()
+                hunter = CovalentBondHunter()
 
-            try:
-                connectivity = hunter(self.molecule)
-                self.molecule.set_property(
-                    self.connectivity_property, connectivity
-                )
-                self.connectivity = connectivity.edit()
-            except Exception as e:
-                from ..utils import Console
+                try:
+                    connectivity = hunter(self.molecule, self.map)
+                    self.molecule.set_property(
+                        self.connectivity_property, connectivity
+                    )
+                    self.connectivity = connectivity.edit()
+                except Exception as e:
+                    from ..utils import Console
 
-                Console.warning(
-                    f"Cannot auto-generate a connectivity for {self.molecule}."
-                    f" The error is:\n\n{e}"
-                )
+                    Console.warning(
+                        f"Cannot auto-generate a connectivity for {self.molecule}."
+                        f" The error is:\n\n{e}"
+                    )
 
     def number(self):
         """Return the molnum number of the molecule being edited
