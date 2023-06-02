@@ -6,6 +6,12 @@ import os
 import sys
 import pytest
 
+try:
+    import scipy
+    have_scipy = True
+except ImportError:
+    have_scipy = False
+
 
 def _write_config(d):
     # Write the SOMD configuration file.
@@ -44,6 +50,7 @@ def _write_config(d):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
+@pytest.mark.skipif(not have_scipy, reason="Not supported if scipy not installed")
 def test_boresch_analytical_correction(tmpdir):
     """
     Check that the Boresch analytical correction yields
@@ -75,6 +82,7 @@ def test_boresch_analytical_correction(tmpdir):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
+@pytest.mark.skipif(not have_scipy, reason="Not supported if scipy not installed")
 def test_boresch_numerical_correction(tmpdir):
     """
     Check that the Boresch numerical correction yields
