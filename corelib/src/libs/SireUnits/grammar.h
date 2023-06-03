@@ -45,6 +45,8 @@ using phoenix::val;
 
 using boost::spirit::ascii::char_;
 
+#include "SireUnits/units.h"
+
 /** This is the grammar that enables skipping of spaces, newlines and comments */
 template <typename IteratorT>
 class SkipperGrammar : public qi::grammar<IteratorT>
@@ -101,10 +103,41 @@ class Grammar : public qi::grammar<IteratorT, AST::Node(), SkipperT>
 public:
     Grammar() : Grammar::base_type(nodeRule, "Node")
     {
+        unit_token.add(
+            "calorie", AST::Unit(SireUnits::cal))(
+            "joule", AST::Unit(SireUnits::joule))(
+            "mole", AST::Unit(SireUnits::mole))(
+            "mol", AST::Unit(SireUnits::mole))(
+            "dozen", AST::Unit(SireUnits::dozen))(
+            "radian", AST::Unit(SireUnits::radian))(
+            "degree", AST::Unit(SireUnits::degree))(
+            "angstrom", AST::Unit(SireUnits::angstrom))(
+            "meter", AST::Unit(SireUnits::meter));
+
         // root rule to read a node as a single expression and no further input (eoi)
-        nodeRule = qi::eoi;
+        nodeRule = expressionRule >> qi::eoi;
+
+        // convenient shortcuts for the brackets
+        static const auto leftB = qi::lit("(");
+        static const auto rightB = qi::lit(")");
+
+        powerRule = eps[_val = AST::Power()] >>
+                        double_[_val *= _1] |
+                    (qi::lit("**") >> double_[_val *= _1]) |
+                    (qi::lit("^") >> double_[_val *= _1]);
+
+        fullUnitRule = eps[_val = AST::FullUnit()] >>
+                           (unit_token[_val += _1]) |
+                       (leftB >> unit_token[_val += _1] >> rightB) |
+                       (unit_token[_val += _1] >> -powerRule[_val *= _1]) |
+                       (leftB >> unit_token[_val += _1] >> rightB >> -powerRule[_val *= _1]);
+
+        expressionRule = fullUnitRule;
 
         nodeRule.name("Node");
+        expressionRule.name("Expression");
+        fullUnitRule.name("FullUnit");
+        powerRule.name("PowerRule");
 
         // action on failure to parse the string using the grammar
         on_error<fail>(nodeRule, std::cout << val("Error! Expecting ") << _4 // what failed?
@@ -113,7 +146,12 @@ public:
                                            << val("\"") << std::endl);
     }
 
+    qi::symbols<char, AST::Unit> unit_token;
+
     qi::rule<IteratorT, AST::Node(), SkipperT> nodeRule;
+    qi::rule<IteratorT, AST::Expression(), SkipperT> expressionRule;
+    qi::rule<IteratorT, AST::FullUnit(), SkipperT> fullUnitRule;
+    qi::rule<IteratorT, AST::Power(), SkipperT> powerRule;
 };
 
 #endif

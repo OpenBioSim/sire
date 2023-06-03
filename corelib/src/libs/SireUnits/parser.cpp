@@ -200,17 +200,8 @@ GeneralUnit::GeneralUnit(double value, const QString &unit) : Unit(0)
         return;
     }
 
-    GeneralUnit parsed_unit(1.0);
-
     // try to get the unit from the passed string
-    try
-    {
-        auto ast = ::parse_main(processed_unit.toStdString());
-    }
-    catch (const SireError::exception &e)
-    {
-        qDebug() << e.toString();
-    }
+    const auto ast = ::parse_main(processed_unit.toStdString());
 
-    this->operator=(value * parsed_unit);
+    this->operator=(value * ast.toUnit());
 }

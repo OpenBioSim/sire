@@ -58,17 +58,93 @@ namespace SireUnits
     /** Namespace holding the objects used in the abstract syntax tree */
     namespace AST
     {
+        using SireUnits::Dimension::GeneralUnit;
+
         struct Node;
+        struct Expression;
+
+        /** Struct the holds the Unit */
+        struct Unit
+        {
+            Unit() : unit(0)
+            {
+            }
+
+            Unit(const GeneralUnit &u) : unit(u)
+            {
+            }
+
+            template <class T>
+            Unit(const T &u) : unit(u)
+            {
+            }
+
+            GeneralUnit unit;
+
+            QString toString() const;
+
+            GeneralUnit toUnit() const;
+        };
+
+        struct Power
+        {
+            double power = 1.0;
+
+            Power &operator*=(double p)
+            {
+                power = p;
+                return *this;
+            }
+        };
+
+        struct FullUnit
+        {
+            Unit unit;
+            double power = 1.0;
+            double scale = 1.0;
+
+            FullUnit &operator+=(const Unit &u)
+            {
+                unit = u;
+                return *this;
+            }
+
+            FullUnit &operator*=(const Power &p)
+            {
+                power = p.power;
+                return *this;
+            }
+
+            QString toString() const;
+            GeneralUnit toUnit() const;
+        };
+
+        /** Struct that holds a general selection expression */
+        struct Expression
+        {
+            FullUnit unit;
+
+            QString toString() const;
+
+            GeneralUnit toUnit() const;
+        };
 
         /** The root node of the AST - this holds a single Expression */
         struct Node
         {
+            Expression values;
+
             QString toString() const;
+
+            GeneralUnit toUnit() const;
         };
 
     } // namespace AST
 
 } // namespace SireUnits
+
+BOOST_FUSION_ADAPT_STRUCT(SireUnits::AST::Expression, (SireUnits::AST::FullUnit, unit))
+BOOST_FUSION_ADAPT_STRUCT(SireUnits::AST::Node, (SireUnits::AST::Expression, values))
 
 SIRE_END_HEADER
 

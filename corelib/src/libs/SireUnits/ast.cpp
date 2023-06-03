@@ -26,3 +26,81 @@
   *
 \*********************************************/
 
+#include "SireUnits/ast.h"
+
+namespace SireUnits
+{
+    namespace AST
+    {
+        QString Unit::toString() const
+        {
+            return unit.toString();
+        }
+
+        GeneralUnit Unit::toUnit() const
+        {
+            return unit;
+        }
+
+        QString Expression::toString() const
+        {
+            return this->toUnit().toString();
+        }
+
+        GeneralUnit Expression::toUnit() const
+        {
+            return unit.toUnit();
+        }
+
+        QString Node::toString() const
+        {
+            return this->toUnit().toString();
+        }
+
+        GeneralUnit Node::toUnit() const
+        {
+            return values.toUnit();
+        }
+
+        QString FullUnit::toString() const
+        {
+            return this->toUnit().toString();
+        }
+
+        GeneralUnit FullUnit::toUnit() const
+        {
+            GeneralUnit ret = scale * unit.toUnit();
+
+            if (power != 1.0)
+            {
+                int pow = std::abs(int(power));
+
+                if (pow == 0)
+                {
+                    return GeneralUnit(1);
+                }
+
+                GeneralUnit multiple = ret;
+
+                for (int i = 0; i < pow; ++i)
+                {
+                    multiple *= ret;
+                }
+
+                if (power < 0)
+                {
+                    return 1.0 / multiple;
+                }
+                else
+                {
+                    return multiple;
+                }
+            }
+            else
+            {
+                return ret;
+            }
+        }
+
+    } // namespace AST
+} // namespace SireUnits
