@@ -122,15 +122,15 @@ public:
         static const auto rightB = qi::lit(")");
 
         powerRule = eps[_val = AST::Power()] >>
-                        double_[_val *= _1] |
-                    (qi::lit("**") >> double_[_val *= _1]) |
-                    (qi::lit("^") >> double_[_val *= _1]);
+                        (qi::lit("**") >> int_[_val *= _1]) |
+                    (qi::lit("^") >> int_[_val *= _1]) |
+                    double_[_val *= _1];
 
         fullUnitRule = eps[_val = AST::FullUnit()] >>
-                           (unit_token[_val += _1]) |
+                           (leftB >> unit_token[_val += _1] >> rightB >> -powerRule[_val *= _1]) |
                        (leftB >> unit_token[_val += _1] >> rightB) |
                        (unit_token[_val += _1] >> -powerRule[_val *= _1]) |
-                       (leftB >> unit_token[_val += _1] >> rightB >> -powerRule[_val *= _1]);
+                       (unit_token[_val += _1]);
 
         expressionRule = fullUnitRule;
 

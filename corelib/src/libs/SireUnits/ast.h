@@ -88,9 +88,9 @@ namespace SireUnits
 
         struct Power
         {
-            double power = 1.0;
+            int power = 1;
 
-            Power &operator*=(double p)
+            Power &operator*=(int p)
             {
                 power = p;
                 return *this;
@@ -100,7 +100,7 @@ namespace SireUnits
         struct FullUnit
         {
             Unit unit;
-            double power = 1.0;
+            int power = 1;
             double scale = 1.0;
 
             FullUnit &operator+=(const Unit &u)

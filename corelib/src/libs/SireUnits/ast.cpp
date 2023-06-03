@@ -71,9 +71,9 @@ namespace SireUnits
         {
             GeneralUnit ret = scale * unit.toUnit();
 
-            if (power != 1.0)
+            if (power != 1)
             {
-                int pow = std::abs(int(power));
+                int pow = std::abs(power);
 
                 if (pow == 0)
                 {
@@ -82,14 +82,14 @@ namespace SireUnits
 
                 GeneralUnit multiple = ret;
 
-                for (int i = 0; i < pow; ++i)
+                for (int i = 1; i < pow; ++i)
                 {
                     multiple *= ret;
                 }
 
                 if (power < 0)
                 {
-                    return 1.0 / multiple;
+                    return multiple.invert();
                 }
                 else
                 {
