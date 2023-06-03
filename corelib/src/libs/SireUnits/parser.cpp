@@ -34,10 +34,6 @@
 #include "SireUnits/generalunit.h"
 #include "SireUnits/ast.h"
 
-#include <QDebug>
-#include <QHash>
-#include <QMutex>
-
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
 
@@ -49,6 +45,9 @@
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
+
+#include <QRegularExpression>
+#include <QDebug>
 
 using namespace SireUnits;
 using namespace SireUnits::Dimension;
@@ -124,6 +123,59 @@ GeneralUnit GeneralUnit::fromString(const QString &value)
 /** Construct a unit (or a value * unit) from the passed string */
 GeneralUnit::GeneralUnit(const QString &value) : Unit(0)
 {
+    Mass = 0;
+    Length = 0;
+    Time = 0;
+    Charge = 0;
+    temperature = 0;
+    Quantity = 0;
+    Angle = 0;
+
+    QString processed_value = value.simplified();
+
+    // split this into 'value * unit' (if we can)
+    // (thanks to this stackoverflow post for the correct regexp -
+    //  https://stackoverflow.com/questions/12643009/regular-expression-for-floating-point-numbers)
+    QRegularExpression regexp("[+-]?(\\d+([.]\\d*)?([eE][+-]?\\d+)?|[.]\\d+([eE][+-]?\\d+)?)(.*)");
+
+    auto match = regexp.match(processed_value);
+
+    if (match.hasMatch() and match.capturedStart() == 0)
+    {
+        // this is a 'value * unit' - groups[1] is the number and groups[5]
+        // is the unit
+        auto groups = match.capturedTexts();
+
+        if (groups.count() != 6)
+        {
+            qWarning() << "STRANGE CAPTURE NUMBER?" << groups.count();
+
+            for (int i = 0; i < groups.count(); ++i)
+            {
+                qDebug() << i << groups[i];
+            }
+        }
+
+        bool ok;
+
+        double value_number = groups[1].toDouble(&ok);
+
+        if (not ok)
+        {
+            throw SireError::program_bug(QObject::tr(
+                                             "Cannot convert '%1' to a number despite it matching the "
+                                             "regular expression!")
+                                             .arg(groups[1]),
+                                         CODELOC);
+        }
+
+        this->operator=(GeneralUnit(value_number, groups[5]));
+    }
+    else
+    {
+        // this must just be the unit?
+        this->operator=(GeneralUnit(1.0, value));
+    }
 }
 
 /** Construct a value as 'value' * 'unit', where 'unit' is
@@ -131,8 +183,15 @@ GeneralUnit::GeneralUnit(const QString &value) : Unit(0)
  */
 GeneralUnit::GeneralUnit(double value, const QString &unit) : Unit(0)
 {
+    Mass = 0;
+    Length = 0;
+    Time = 0;
+    Charge = 0;
+    temperature = 0;
+    Quantity = 0;
+    Angle = 0;
+
     QString processed_unit = unit.simplified();
-    processed_unit = processed_unit.toLower();
 
     if (processed_unit.length() == 0)
     {
@@ -141,8 +200,17 @@ GeneralUnit::GeneralUnit(double value, const QString &unit) : Unit(0)
         return;
     }
 
-    // try to get the unit from the passed string
-    auto ast = ::parse_main(processed_unit.toStdString());
+    GeneralUnit parsed_unit(1.0);
 
-    // this->operator=(value * parsed_unit);
+    // try to get the unit from the passed string
+    try
+    {
+        auto ast = ::parse_main(processed_unit.toStdString());
+    }
+    catch (const SireError::exception &e)
+    {
+        qDebug() << e.toString();
+    }
+
+    this->operator=(value * parsed_unit);
 }
