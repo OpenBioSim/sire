@@ -303,4 +303,6 @@ void register_man_global_variables()
     scope().attr("celsius") = celsius;
 
     scope().attr("fahrenheit") = fahrenheit;
+
 }
+

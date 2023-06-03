@@ -45,14 +45,16 @@ void register_GeneralUnit_class(){
         typedef bp::class_< SireUnits::Dimension::GeneralUnit, bp::bases< SireUnits::Dimension::Unit > > GeneralUnit_exposer_t;
         GeneralUnit_exposer_t GeneralUnit_exposer = GeneralUnit_exposer_t( "GeneralUnit", "", bp::init< >("") );
         bp::scope GeneralUnit_scope( GeneralUnit_exposer );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::TempBase const & >(( bp::arg("temperature") ), "") );
-        GeneralUnit_exposer.def( bp::init< double >(( bp::arg("value") ), "") );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< -1, -3, 2, 2, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, -1, -1, 0 > const & >(( bp::arg("unit") ), "") );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 1, 0, -2, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< -1, 3, -2, 0, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 2, -1, 0, 0, 0, 0 > const & >(( bp::arg("unit") ), "") );
-        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::GeneralUnit const & >(( bp::arg("other") ), "") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::TempBase const & >(( bp::arg("temperature") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< double >(( bp::arg("value") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< QString const & >(( bp::arg("value") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< double, QString const & >(( bp::arg("value"), bp::arg("unit") ), "Construct a value as value  unit, where unit is\n  interpreted from the passed string\n") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< -1, -3, 2, 2, 0, 0, 0 > const & >(( bp::arg("unit") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, -1, -1, 0 > const & >(( bp::arg("unit") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 1, 0, -2, 0, 0, 0 > const & >(( bp::arg("unit") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< -1, 3, -2, 0, 0, 0, 0 > const & >(( bp::arg("unit") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::PhysUnit< 1, 2, -1, 0, 0, 0, 0 > const & >(( bp::arg("unit") ), "Construct a unit (or a value  unit) from the passed string") );
+        GeneralUnit_exposer.def( bp::init< SireUnits::Dimension::GeneralUnit const & >(( bp::arg("other") ), "Construct a unit (or a value  unit) from the passed string") );
         { //::SireUnits::Dimension::GeneralUnit::ANGLE
         
             typedef int ( ::SireUnits::Dimension::GeneralUnit::*ANGLE_function_type)(  ) const;
@@ -172,6 +174,19 @@ void register_GeneralUnit_class(){
                 , components_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireUnits::Dimension::GeneralUnit::fromString
+        
+            typedef ::SireUnits::Dimension::GeneralUnit ( *fromString_function_type )( ::QString const & );
+            fromString_function_type fromString_function_value( &::SireUnits::Dimension::GeneralUnit::fromString );
+            
+            GeneralUnit_exposer.def( 
+                "fromString"
+                , fromString_function_value
+                , ( bp::arg("unit") )
+                , bp::release_gil_policy()
+                , "Construct a unit (or value  unit) from the passed string" );
         
         }
         { //::SireUnits::Dimension::GeneralUnit::getComponent
@@ -407,6 +422,7 @@ void register_GeneralUnit_class(){
                 , "" );
         
         }
+        GeneralUnit_exposer.staticmethod( "fromString" );
         GeneralUnit_exposer.staticmethod( "typeName" );
         GeneralUnit_exposer.def( bp::other<double>() + bp::self );
         GeneralUnit_exposer.def( bp::other<double>() - bp::self );

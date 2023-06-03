@@ -47,6 +47,10 @@ namespace SireUnits
 
             explicit GeneralUnit(double value);
 
+            explicit GeneralUnit(const QString &value);
+
+            explicit GeneralUnit(double value, const QString &unit);
+
             template <int M, int L, int T, int C, int t, int Q, int A>
             explicit GeneralUnit(const PhysUnit<M, L, T, C, t, Q, A> &unit) : Unit(unit)
             {
@@ -146,6 +150,8 @@ namespace SireUnits
             double to(const GeneralUnit &other) const;
 
             QString toString() const;
+
+            static GeneralUnit fromString(const QString &unit);
 
             template <class T>
             bool isUnit() const;
