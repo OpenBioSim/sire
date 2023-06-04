@@ -215,12 +215,16 @@ public:
                              (expressionPartRule[_val = _1] >> sep >> expressionPartRule[_val *= _1]) |
                          (expressionPartRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1]) |
                          (expressionPartRule[_val = _1] >> *sep >> qi::lit("/") >> *sep >> expressionPartRule[_val /= _1]) |
-                         (expressionPartRule[_val = _1] >> qi::lit("per") >> expressionPartRule[_val /= _1]) |
+                         (expressionPartRule[_val = _1] >> sep >> qi::lit("per") >> sep >> expressionPartRule[_val /= _1]) |
                          expressionPartRule[_val = _1] |
                          (leftB >> expressionRule[_val = _1] >> sep >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
                          (leftB >> expressionRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
+                         (leftB >> expressionRule[_val = _1] >> *sep >> qi::lit("/") >> *sep >> expressionPartRule[_val /= _1] >> rightB >> -powerRule[_val *= _1]) |
+                         (leftB >> expressionRule[_val = _1] >> sep >> qi::lit("per") >> sep >> expressionPartRule[_val /= _1] >> rightB >> -powerRule[_val *= _1]) |
                          (leftB >> expressionRule[_val = _1] >> sep >> expressionPartRule[_val *= _1] >> rightB) |
                          (leftB >> expressionRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1] >> rightB) |
+                         (leftB >> expressionRule[_val = _1] >> *sep >> qi::lit("/") >> *sep >> expressionPartRule[_val /= _1] >> rightB) |
+                         (leftB >> expressionRule[_val = _1] >> sep >> qi::lit("per") >> sep >> expressionPartRule[_val /= _1] >> rightB) |
                          (leftB >> expressionRule[_val = _1] >> rightB >> -powerRule[_val *= _1]) |
                          (leftB >> expressionRule[_val = _1] >> rightB);
 
