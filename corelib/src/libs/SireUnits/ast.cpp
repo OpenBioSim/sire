@@ -57,7 +57,7 @@ namespace SireUnits
 
         GeneralUnit Expression::toUnit() const
         {
-            return unit.toUnit();
+            return unit;
         }
 
         QString Node::toString() const

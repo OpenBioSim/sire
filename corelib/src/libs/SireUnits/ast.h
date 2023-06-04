@@ -153,7 +153,46 @@ namespace SireUnits
         /** Struct that holds a general selection expression */
         struct Expression
         {
-            FullUnit unit;
+            GeneralUnit unit;
+
+            Expression &operator=(const Expression &e)
+            {
+                unit = e.unit;
+                return *this;
+            }
+
+            Expression &operator*=(const Expression &e)
+            {
+                unit *= e.unit;
+                return *this;
+            }
+
+            Expression &operator*=(const Power &power)
+            {
+                FullUnit f;
+                f += unit;
+                f *= power;
+                unit = f.toUnit();
+                return *this;
+            }
+
+            Expression &operator=(const FullUnit &u)
+            {
+                unit = u.toUnit();
+                return *this;
+            }
+
+            Expression &operator*=(const FullUnit &other)
+            {
+                unit *= other.toUnit();
+                return *this;
+            }
+
+            Expression &operator/=(const FullUnit &other)
+            {
+                unit /= other.toUnit();
+                return *this;
+            }
 
             QString toString() const;
 
@@ -174,7 +213,7 @@ namespace SireUnits
 
 } // namespace SireUnits
 
-BOOST_FUSION_ADAPT_STRUCT(SireUnits::AST::Expression, (SireUnits::AST::FullUnit, unit))
+BOOST_FUSION_ADAPT_STRUCT(SireUnits::AST::Expression, (SireUnits::Dimension::GeneralUnit, unit))
 BOOST_FUSION_ADAPT_STRUCT(SireUnits::AST::Node, (SireUnits::AST::Expression, values))
 
 SIRE_END_HEADER

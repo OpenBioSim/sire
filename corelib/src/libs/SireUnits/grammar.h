@@ -165,7 +165,18 @@ public:
                        (unitRule[_val += _1] >> -powerRule[_val *= _1]) |
                        (unitRule[_val += _1]);
 
-        expressionRule = fullUnitRule;
+        expressionPartRule = eps[_val = AST::Expression()] >>
+                                 (fullUnitRule[_val = _1] >> fullUnitRule[_val *= _1]) |
+                             (fullUnitRule[_val = _1] >> qi::lit("/") >> fullUnitRule[_val /= _1]) |
+                             fullUnitRule[_val = _1];
+
+        expressionRule = eps[_val = AST::Expression()] >>
+                             (expressionPartRule[_val = _1] >> expressionPartRule[_val *= _1]) |
+                         expressionPartRule[_val = _1] |
+                         (leftB >> expressionRule[_val = _1] >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
+                         (leftB >> expressionRule[_val = _1] >> expressionPartRule[_val *= _1] >> rightB) |
+                         (leftB >> expressionRule[_val = _1] >> rightB >> -powerRule[_val *= _1]) |
+                         (leftB >> expressionRule[_val = _1] >> rightB);
 
         nodeRule.name("Node");
         expressionRule.name("Expression");
@@ -185,6 +196,9 @@ public:
 
     qi::rule<IteratorT, AST::Node(), SkipperT> nodeRule;
     qi::rule<IteratorT, AST::Expression(), SkipperT> expressionRule;
+    qi::rule<IteratorT, AST::Expression(), SkipperT> expressionPartRule;
+    qi::rule<IteratorT, AST::Expression(), SkipperT> lhsRule;
+    qi::rule<IteratorT, AST::Expression(), SkipperT> rhsRule;
     qi::rule<IteratorT, AST::Unit> unitRule;
     qi::rule<IteratorT, AST::FullUnit(), SkipperT> fullUnitRule;
     qi::rule<IteratorT, AST::Power(), SkipperT> powerRule;
