@@ -93,9 +93,24 @@ namespace SireUnits
             {
             }
 
+            Unit &operator=(const Prefix &p)
+            {
+                prefix = p.value;
+                unit = GeneralUnit(0);
+                return *this;
+            }
+
+            Unit &operator=(const Unit &u)
+            {
+                prefix = 1.0;
+                unit = u.unit;
+                return *this;
+            }
+
             Unit &operator*=(const Prefix &p)
             {
                 prefix = p.value;
+                unit = GeneralUnit(0);
                 return *this;
             }
 

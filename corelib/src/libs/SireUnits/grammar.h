@@ -103,17 +103,51 @@ class Grammar : public qi::grammar<IteratorT, AST::Node(), SkipperT>
 public:
     Grammar() : Grammar::base_type(nodeRule, "Node")
     {
+        short_unit_token.add(
+            "cal", AST::Unit(SireUnits::cal))(
+            "J", AST::Unit(SireUnits::joule))(
+            "mol", AST::Unit(SireUnits::mole))(
+            "rad", AST::Unit(SireUnits::radian))(
+            "°", AST::Unit(SireUnits::degree))(
+            "Å", AST::Unit(SireUnits::angstrom))(
+            "m", AST::Unit(SireUnits::meter));
+
         unit_token.add(
             "calorie", AST::Unit(SireUnits::cal))(
             "joule", AST::Unit(SireUnits::joule))(
             "mole", AST::Unit(SireUnits::mole))(
-            "mol", AST::Unit(SireUnits::mole))(
             "dozen", AST::Unit(SireUnits::dozen))(
             "radian", AST::Unit(SireUnits::radian))(
             "degree", AST::Unit(SireUnits::degree))(
             "angstrom", AST::Unit(SireUnits::angstrom))(
-            "Å", AST::Unit(SireUnits::angstrom))(
             "meter", AST::Unit(SireUnits::meter));
+
+        short_prefix_token.add(
+            "d", AST::Prefix(1e-1))(
+            "c", AST::Prefix(1e-2))(
+            "m", AST::Prefix(1e-3))(
+            "u", AST::Prefix(1e-6))(
+            "μ", AST::Prefix(1e-6))(
+            "n", AST::Prefix(1e-9))(
+            "p", AST::Prefix(1e-12))(
+            "f", AST::Prefix(1e-15))(
+            "a", AST::Prefix(1e-18))(
+            "z", AST::Prefix(1e-21))(
+            "y", AST::Prefix(1e-24))(
+            "r", AST::Prefix(1e-27))(
+            "q", AST::Prefix(1e-30))(
+            "da", AST::Prefix(10.0))(
+            "h", AST::Prefix(1e2))(
+            "k", AST::Prefix(1e3))(
+            "M", AST::Prefix(1e6))(
+            "G", AST::Prefix(1e9))(
+            "T", AST::Prefix(1e12))(
+            "P", AST::Prefix(1e15))(
+            "E", AST::Prefix(1e18))(
+            "Z", AST::Prefix(1e21))(
+            "Y", AST::Prefix(1e24))(
+            "R", AST::Prefix(1e27))(
+            "Q", AST::Prefix(1e30));
 
         prefix_token.add(
             "deci", AST::Prefix(1e-1))(
@@ -149,10 +183,12 @@ public:
         static const auto rightB = qi::lit(")");
 
         unitRule = eps[_val = AST::Unit(1.0)] >>
-                       (prefix_token[_val *= _1] >> unit_token[_val *= _1] >> qi::lit("s")) |
-                   (prefix_token[_val *= _1] >> unit_token[_val *= _1]) |
-                   (unit_token[_val *= _1] >> qi::lit("s")) |
-                   (unit_token[_val *= _1]);
+                       (prefix_token[_val = _1] >> unit_token[_val *= _1] >> qi::lit("s")) |
+                   (prefix_token[_val = _1] >> unit_token[_val *= _1]) |
+                   (unit_token[_val = _1] >> qi::lit("s")) |
+                   (unit_token[_val = _1]) |
+                   (short_prefix_token[_val = _1] >> short_unit_token[_val *= _1]) |
+                   (short_unit_token[_val = _1]);
 
         powerRule = eps[_val = AST::Power()] >>
                         (qi::lit("**") >> int_[_val *= _1]) |
@@ -193,6 +229,8 @@ public:
 
     qi::symbols<char, AST::Unit> unit_token;
     qi::symbols<char, AST::Prefix> prefix_token;
+    qi::symbols<char, AST::Unit> short_unit_token;
+    qi::symbols<char, AST::Prefix> short_prefix_token;
 
     qi::rule<IteratorT, AST::Node(), SkipperT> nodeRule;
     qi::rule<IteratorT, AST::Expression(), SkipperT> expressionRule;
