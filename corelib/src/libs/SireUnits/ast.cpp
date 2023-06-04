@@ -26,7 +26,15 @@
   *
 \*********************************************/
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-builtins"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "SireUnits/ast.h"
+
+#include <QDebug>
 
 namespace SireUnits
 {
@@ -34,12 +42,12 @@ namespace SireUnits
     {
         QString Unit::toString() const
         {
-            return unit.toString();
+            return this->toUnit().toString();
         }
 
         GeneralUnit Unit::toUnit() const
         {
-            return unit;
+            return unit * prefix;
         }
 
         QString Expression::toString() const
@@ -69,7 +77,7 @@ namespace SireUnits
 
         GeneralUnit FullUnit::toUnit() const
         {
-            GeneralUnit ret = scale * unit.toUnit();
+            GeneralUnit ret = unit.toUnit();
 
             if (power != 1)
             {
@@ -104,3 +112,7 @@ namespace SireUnits
 
     } // namespace AST
 } // namespace SireUnits
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

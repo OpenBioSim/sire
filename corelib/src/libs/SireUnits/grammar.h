@@ -112,7 +112,34 @@ public:
             "radian", AST::Unit(SireUnits::radian))(
             "degree", AST::Unit(SireUnits::degree))(
             "angstrom", AST::Unit(SireUnits::angstrom))(
+            "Å", AST::Unit(SireUnits::angstrom))(
             "meter", AST::Unit(SireUnits::meter));
+
+        prefix_token.add(
+            "deci", AST::Prefix(1e-1))(
+            "centi", AST::Prefix(1e-2))(
+            "milli", AST::Prefix(1e-3))(
+            "micro", AST::Prefix(1e-6))(
+            "nano", AST::Prefix(1e-9))(
+            "pico", AST::Prefix(1e-12))(
+            "femto", AST::Prefix(1e-15))(
+            "atto", AST::Prefix(1e-18))(
+            "zepto", AST::Prefix(1e-21))(
+            "yocto", AST::Prefix(1e-24))(
+            "ronto", AST::Prefix(1e-27))(
+            "quecto", AST::Prefix(1e-30))(
+            "deca", AST::Prefix(10.0))(
+            "hecto", AST::Prefix(1e2))(
+            "kilo", AST::Prefix(1e3))(
+            "mega", AST::Prefix(1e6))(
+            "giga", AST::Prefix(1e9))(
+            "tera", AST::Prefix(1e12))(
+            "peta", AST::Prefix(1e15))(
+            "exa", AST::Prefix(1e18))(
+            "zetta", AST::Prefix(1e21))(
+            "yotta", AST::Prefix(1e24))(
+            "ronna", AST::Prefix(1e27))(
+            "quetta", AST::Prefix(1e30));
 
         // root rule to read a node as a single expression and no further input (eoi)
         nodeRule = expressionRule >> qi::eoi;
@@ -121,22 +148,29 @@ public:
         static const auto leftB = qi::lit("(");
         static const auto rightB = qi::lit(")");
 
+        unitRule = eps[_val = AST::Unit(1.0)] >>
+                       (prefix_token[_val *= _1] >> unit_token[_val *= _1] >> qi::lit("s")) |
+                   (prefix_token[_val *= _1] >> unit_token[_val *= _1]) |
+                   (unit_token[_val *= _1] >> qi::lit("s")) |
+                   (unit_token[_val *= _1]);
+
         powerRule = eps[_val = AST::Power()] >>
                         (qi::lit("**") >> int_[_val *= _1]) |
                     (qi::lit("^") >> int_[_val *= _1]) |
                     double_[_val *= _1];
 
         fullUnitRule = eps[_val = AST::FullUnit()] >>
-                           (leftB >> unit_token[_val += _1] >> rightB >> -powerRule[_val *= _1]) |
-                       (leftB >> unit_token[_val += _1] >> rightB) |
-                       (unit_token[_val += _1] >> -powerRule[_val *= _1]) |
-                       (unit_token[_val += _1]);
+                           (leftB >> unitRule[_val += _1] >> rightB >> -powerRule[_val *= _1]) |
+                       (leftB >> unitRule[_val += _1] >> rightB) |
+                       (unitRule[_val += _1] >> -powerRule[_val *= _1]) |
+                       (unitRule[_val += _1]);
 
         expressionRule = fullUnitRule;
 
         nodeRule.name("Node");
         expressionRule.name("Expression");
         fullUnitRule.name("FullUnit");
+        unitRule.name("Unit");
         powerRule.name("PowerRule");
 
         // action on failure to parse the string using the grammar
@@ -147,9 +181,11 @@ public:
     }
 
     qi::symbols<char, AST::Unit> unit_token;
+    qi::symbols<char, AST::Prefix> prefix_token;
 
     qi::rule<IteratorT, AST::Node(), SkipperT> nodeRule;
     qi::rule<IteratorT, AST::Expression(), SkipperT> expressionRule;
+    qi::rule<IteratorT, AST::Unit> unitRule;
     qi::rule<IteratorT, AST::FullUnit(), SkipperT> fullUnitRule;
     qi::rule<IteratorT, AST::Power(), SkipperT> powerRule;
 };

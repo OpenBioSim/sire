@@ -47,7 +47,7 @@ SIRE_BEGIN_HEADER
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
 
-#include <memory>
+#include <QDebug>
 
 // A lot of the below code is heavily inspired by
 // https://medium.com/@alinakipoglu/parsing-with-spirit-qi-fcaeaf4357b3
@@ -63,27 +63,55 @@ namespace SireUnits
         struct Node;
         struct Expression;
 
-        /** Struct the holds the Unit */
-        struct Unit
+        /** Struct the holds the SI prefix */
+        struct Prefix
         {
-            Unit() : unit(0)
+            Prefix() : value(1.0)
             {
             }
 
-            Unit(const GeneralUnit &u) : unit(u)
+            Prefix(double v) : value(v)
+            {
+            }
+
+            double value;
+        };
+
+        /** Struct the holds the Unit */
+        struct Unit
+        {
+            Unit() : unit(0), prefix(1.0)
+            {
+            }
+
+            Unit(const GeneralUnit &u) : unit(u), prefix(1.0)
             {
             }
 
             template <class T>
-            Unit(const T &u) : unit(u)
+            Unit(const T &u) : unit(u), prefix(1.0)
             {
             }
 
-            GeneralUnit unit;
+            Unit &operator*=(const Prefix &p)
+            {
+                prefix = p.value;
+                return *this;
+            }
+
+            Unit &operator*=(const Unit &u)
+            {
+                unit = u.unit;
+                return *this;
+            }
 
             QString toString() const;
 
             GeneralUnit toUnit() const;
+
+        private:
+            GeneralUnit unit;
+            double prefix;
         };
 
         struct Power
@@ -99,9 +127,12 @@ namespace SireUnits
 
         struct FullUnit
         {
+            FullUnit() : power(1)
+            {
+            }
+
             Unit unit;
-            int power = 1;
-            double scale = 1.0;
+            int power;
 
             FullUnit &operator+=(const Unit &u)
             {
