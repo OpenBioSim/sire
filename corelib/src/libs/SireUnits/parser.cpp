@@ -142,7 +142,7 @@ GeneralUnit::GeneralUnit(const QString &value) : Unit(0)
     // split this into 'value * unit' (if we can)
     // (thanks to this stackoverflow post for the correct regexp -
     //  https://stackoverflow.com/questions/12643009/regular-expression-for-floating-point-numbers)
-    QRegularExpression regexp("[+-]?(\\d+([.]\\d*)?([eE][+-]?\\d+)?|[.]\\d+([eE][+-]?\\d+)?)(.*)");
+    QRegularExpression regexp("([+-]?(\\d+([.]\\d*)?([eE][+-]?\\d+)?|[.]\\d+([eE][+-]?\\d+)?))(.*)");
 
     auto match = regexp.match(processed_value);
 
@@ -152,7 +152,7 @@ GeneralUnit::GeneralUnit(const QString &value) : Unit(0)
         // is the unit
         auto groups = match.capturedTexts();
 
-        if (groups.count() != 6)
+        if (groups.count() != 7)
         {
             qWarning() << "STRANGE CAPTURE NUMBER?" << groups.count();
 
@@ -175,7 +175,7 @@ GeneralUnit::GeneralUnit(const QString &value) : Unit(0)
                                          CODELOC);
         }
 
-        this->operator=(GeneralUnit(value_number, groups[5]));
+        this->operator=(GeneralUnit(value_number, groups[6]));
     }
     else
     {

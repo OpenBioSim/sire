@@ -54,7 +54,7 @@ class SkipperGrammar : public qi::grammar<IteratorT>
 public:
     SkipperGrammar() : SkipperGrammar::base_type(rule)
     {
-        lineCommentRule = qi::lit("//") >> *(qi::char_ - qi::eol) >> qi::eol;
+        lineCommentRule = qi::lit("//") >> *(qi::char_);
         blockCommentRule = qi::lit("/*") >> *(qi::char_ - qi::lit("*/")) >> qi::lit("*/");
         rule = lineCommentRule | blockCommentRule;
     }
@@ -108,6 +108,7 @@ public:
             "rad", AST::Unit(SireUnits::radian))(
             "°", AST::Unit(SireUnits::degree))(
             "Å", AST::Unit(SireUnits::angstrom))(
+            "A", AST::Unit(SireUnits::angstrom))(
             "m", AST::Unit(SireUnits::meter))(
             "s", AST::Unit(SireUnits::second));
 
@@ -175,15 +176,15 @@ public:
             "ronna", AST::Prefix(1e27))(
             "quetta", AST::Prefix(1e30));
 
-        // root rule to read a node as a single expression and no further input (eoi)
-        nodeRule = expressionRule >> qi::eoi;
+        // convenient shortcuts for the unit separator
+        static const auto sep = qi::blank;
 
         // convenient shortcuts for the brackets
         static const auto leftB = qi::lit("(");
         static const auto rightB = qi::lit(")");
 
-        // convenient shortcuts for the unit separator
-        static const auto sep = qi::blank;
+        // root rule to read a node as a single expression and no further input (eoi)
+        nodeRule = (expressionRule >> qi::eoi) | (expressionRule >> sep >> qi::eoi);
 
         unitRule = eps[_val = AST::Unit()] >>
                        (prefix_token[_val = _1] >> unit_token[_val *= _1] >> qi::lit("s")) |
@@ -206,12 +207,15 @@ public:
         expressionPartRule = eps[_val = AST::Expression()] >>
                                  (fullUnitRule[_val = _1] >> sep >> fullUnitRule[_val *= _1]) |
                              (fullUnitRule[_val = _1] >> qi::lit(".") >> fullUnitRule[_val *= _1]) |
-                             (fullUnitRule[_val = _1] >> qi::lit("/") >> fullUnitRule[_val /= _1]) |
+                             (fullUnitRule[_val = _1] >> *sep >> qi::lit("/") >> *sep >> fullUnitRule[_val /= _1]) |
+                             (fullUnitRule[_val = _1] >> sep >> qi::lit("per") >> sep >> fullUnitRule[_val /= _1]) |
                              fullUnitRule[_val = _1];
 
         expressionRule = eps[_val = AST::Expression()] >>
                              (expressionPartRule[_val = _1] >> sep >> expressionPartRule[_val *= _1]) |
                          (expressionPartRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1]) |
+                         (expressionPartRule[_val = _1] >> *sep >> qi::lit("/") >> *sep >> expressionPartRule[_val /= _1]) |
+                         (expressionPartRule[_val = _1] >> qi::lit("per") >> expressionPartRule[_val /= _1]) |
                          expressionPartRule[_val = _1] |
                          (leftB >> expressionRule[_val = _1] >> sep >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
                          (leftB >> expressionRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |

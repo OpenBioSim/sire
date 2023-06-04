@@ -217,6 +217,13 @@ namespace SireUnits
                 return *this;
             }
 
+            Expression &operator/=(const Expression &e)
+            {
+                unit /= e.unit;
+                // qDebug() << "Expression *= Expression" << e.toString() << unit.toString();
+                return *this;
+            }
+
             Expression &operator*=(const Power &power)
             {
                 FullUnit f;
