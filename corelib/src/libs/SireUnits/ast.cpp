@@ -47,6 +47,7 @@ namespace SireUnits
 
         GeneralUnit Unit::toUnit() const
         {
+            // qDebug() << "Unit::toUnit()" << (unit * prefix).toString();
             return unit * prefix;
         }
 

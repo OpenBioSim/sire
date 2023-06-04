@@ -68,6 +68,7 @@ namespace SireUnits
         {
             Prefix() : value(1.0)
             {
+                // qDebug() << "Prefix()";
             }
 
             Prefix(double v) : value(v)
@@ -82,6 +83,7 @@ namespace SireUnits
         {
             Unit() : unit(0), prefix(1.0)
             {
+                // qDebug() << "Unit()";
             }
 
             Unit(const GeneralUnit &u) : unit(u), prefix(1.0)
@@ -97,26 +99,29 @@ namespace SireUnits
             {
                 prefix = p.value;
                 unit = GeneralUnit(0);
+                // qDebug() << "Unit = prefix" << prefix << unit.toString();
                 return *this;
             }
 
             Unit &operator=(const Unit &u)
             {
-                prefix = 1.0;
+                prefix = u.prefix;
                 unit = u.unit;
+                // qDebug() << "Unit = unit" << prefix << unit.toString();
                 return *this;
             }
 
             Unit &operator*=(const Prefix &p)
             {
                 prefix = p.value;
-                unit = GeneralUnit(0);
+                // qDebug() << "Unit *= prefix" << prefix << unit.toString();
                 return *this;
             }
 
             Unit &operator*=(const Unit &u)
             {
                 unit = u.unit;
+                // qDebug() << "Unit *= unit" << prefix << unit.toString();
                 return *this;
             }
 
@@ -131,10 +136,16 @@ namespace SireUnits
 
         struct Power
         {
-            int power = 1;
+            Power() : power(1)
+            {
+                // qDebug() << "Power()";
+            }
+
+            int power;
 
             Power &operator*=(int p)
             {
+                // qDebug() << "Power *=" << p;
                 power = p;
                 return *this;
             }
@@ -144,20 +155,31 @@ namespace SireUnits
         {
             FullUnit() : power(1)
             {
+                // qDebug() << "FullUnit()";
             }
 
             Unit unit;
             int power;
 
+            FullUnit &operator=(const Unit &u)
+            {
+                unit = u;
+                power = 1;
+                // qDebug() << "FullUnit = Unit" << power << unit.toString();
+                return *this;
+            }
+
             FullUnit &operator+=(const Unit &u)
             {
                 unit = u;
+                // qDebug() << "FullUnit += Unit" << power << unit.toString();
                 return *this;
             }
 
             FullUnit &operator*=(const Power &p)
             {
                 power = p.power;
+                // qDebug() << "FullUnit *= Power" << power << unit.toString();
                 return *this;
             }
 
@@ -168,17 +190,30 @@ namespace SireUnits
         /** Struct that holds a general selection expression */
         struct Expression
         {
+            Expression() : unit(0)
+            {
+                // qDebug() << "Expression()";
+            }
+
             GeneralUnit unit;
 
             Expression &operator=(const Expression &e)
             {
                 unit = e.unit;
+                // qDebug() << "Expression = Expression" << e.toString() << unit.toString();
+                return *this;
+            }
+
+            Expression &operator+=(int)
+            {
+                // qDebug() << "Expression sep";
                 return *this;
             }
 
             Expression &operator*=(const Expression &e)
             {
                 unit *= e.unit;
+                // qDebug() << "Expression *= Expression" << e.toString() << unit.toString();
                 return *this;
             }
 
@@ -188,24 +223,35 @@ namespace SireUnits
                 f += unit;
                 f *= power;
                 unit = f.toUnit();
+                // qDebug() << "Expression *= Power" << power.power << unit.toString();
+                return *this;
+            }
+
+            Expression &operator=(const Unit &u)
+            {
+                unit = u.toUnit();
+                // qDebug() << "Expression = Unit" << u.toString() << unit.toString();
                 return *this;
             }
 
             Expression &operator=(const FullUnit &u)
             {
                 unit = u.toUnit();
+                // qDebug() << "Expression = FullUnit" << u.toString() << unit.toString();
                 return *this;
             }
 
             Expression &operator*=(const FullUnit &other)
             {
                 unit *= other.toUnit();
+                // qDebug() << "Expression *= FullUnit" << other.toString() << unit.toString();
                 return *this;
             }
 
             Expression &operator/=(const FullUnit &other)
             {
                 unit /= other.toUnit();
+                // qDebug() << "Expression / FullUnit" << other.toString() << unit.toString();
                 return *this;
             }
 

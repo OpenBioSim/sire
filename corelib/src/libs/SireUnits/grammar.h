@@ -56,13 +56,11 @@ public:
     {
         lineCommentRule = qi::lit("//") >> *(qi::char_ - qi::eol) >> qi::eol;
         blockCommentRule = qi::lit("/*") >> *(qi::char_ - qi::lit("*/")) >> qi::lit("*/");
-        spaceRule = qi::space;
-        rule = spaceRule | lineCommentRule | blockCommentRule;
+        rule = lineCommentRule | blockCommentRule;
     }
 
     qi::rule<IteratorT> lineCommentRule;
     qi::rule<IteratorT> blockCommentRule;
-    qi::rule<IteratorT> spaceRule;
     qi::rule<IteratorT> rule;
 };
 
@@ -110,7 +108,8 @@ public:
             "rad", AST::Unit(SireUnits::radian))(
             "°", AST::Unit(SireUnits::degree))(
             "Å", AST::Unit(SireUnits::angstrom))(
-            "m", AST::Unit(SireUnits::meter));
+            "m", AST::Unit(SireUnits::meter))(
+            "s", AST::Unit(SireUnits::second));
 
         unit_token.add(
             "calorie", AST::Unit(SireUnits::cal))(
@@ -120,7 +119,8 @@ public:
             "radian", AST::Unit(SireUnits::radian))(
             "degree", AST::Unit(SireUnits::degree))(
             "angstrom", AST::Unit(SireUnits::angstrom))(
-            "meter", AST::Unit(SireUnits::meter));
+            "meter", AST::Unit(SireUnits::meter))(
+            "second", AST::Unit(SireUnits::second));
 
         short_prefix_token.add(
             "d", AST::Prefix(1e-1))(
@@ -182,7 +182,10 @@ public:
         static const auto leftB = qi::lit("(");
         static const auto rightB = qi::lit(")");
 
-        unitRule = eps[_val = AST::Unit(1.0)] >>
+        // convenient shortcuts for the unit separator
+        static const auto sep = qi::blank;
+
+        unitRule = eps[_val = AST::Unit()] >>
                        (prefix_token[_val = _1] >> unit_token[_val *= _1] >> qi::lit("s")) |
                    (prefix_token[_val = _1] >> unit_token[_val *= _1]) |
                    (unit_token[_val = _1] >> qi::lit("s")) |
@@ -191,26 +194,29 @@ public:
                    (short_unit_token[_val = _1]);
 
         powerRule = eps[_val = AST::Power()] >>
-                        (qi::lit("**") >> int_[_val *= _1]) |
-                    (qi::lit("^") >> int_[_val *= _1]) |
+                        ((qi::lit("**") | qi::lit("^")) >> int_[_val *= _1]) |
                     double_[_val *= _1];
 
         fullUnitRule = eps[_val = AST::FullUnit()] >>
-                           (leftB >> unitRule[_val += _1] >> rightB >> -powerRule[_val *= _1]) |
-                       (leftB >> unitRule[_val += _1] >> rightB) |
-                       (unitRule[_val += _1] >> -powerRule[_val *= _1]) |
-                       (unitRule[_val += _1]);
+                           (leftB >> unitRule[_val = _1] >> rightB >> -powerRule[_val *= _1]) |
+                       (leftB >> unitRule[_val = _1] >> rightB) |
+                       (unitRule[_val = _1] >> -powerRule[_val *= _1]) |
+                       (unitRule[_val = _1]);
 
         expressionPartRule = eps[_val = AST::Expression()] >>
-                                 (fullUnitRule[_val = _1] >> fullUnitRule[_val *= _1]) |
+                                 (fullUnitRule[_val = _1] >> sep >> fullUnitRule[_val *= _1]) |
+                             (fullUnitRule[_val = _1] >> qi::lit(".") >> fullUnitRule[_val *= _1]) |
                              (fullUnitRule[_val = _1] >> qi::lit("/") >> fullUnitRule[_val /= _1]) |
                              fullUnitRule[_val = _1];
 
         expressionRule = eps[_val = AST::Expression()] >>
-                             (expressionPartRule[_val = _1] >> expressionPartRule[_val *= _1]) |
+                             (expressionPartRule[_val = _1] >> sep >> expressionPartRule[_val *= _1]) |
+                         (expressionPartRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1]) |
                          expressionPartRule[_val = _1] |
-                         (leftB >> expressionRule[_val = _1] >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
-                         (leftB >> expressionRule[_val = _1] >> expressionPartRule[_val *= _1] >> rightB) |
+                         (leftB >> expressionRule[_val = _1] >> sep >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
+                         (leftB >> expressionRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1] >> rightB >> -powerRule[_val *= _1]) |
+                         (leftB >> expressionRule[_val = _1] >> sep >> expressionPartRule[_val *= _1] >> rightB) |
+                         (leftB >> expressionRule[_val = _1] >> qi::lit(".") >> expressionPartRule[_val *= _1] >> rightB) |
                          (leftB >> expressionRule[_val = _1] >> rightB >> -powerRule[_val *= _1]) |
                          (leftB >> expressionRule[_val = _1] >> rightB);
 
@@ -235,8 +241,6 @@ public:
     qi::rule<IteratorT, AST::Node(), SkipperT> nodeRule;
     qi::rule<IteratorT, AST::Expression(), SkipperT> expressionRule;
     qi::rule<IteratorT, AST::Expression(), SkipperT> expressionPartRule;
-    qi::rule<IteratorT, AST::Expression(), SkipperT> lhsRule;
-    qi::rule<IteratorT, AST::Expression(), SkipperT> rhsRule;
     qi::rule<IteratorT, AST::Unit> unitRule;
     qi::rule<IteratorT, AST::FullUnit(), SkipperT> fullUnitRule;
     qi::rule<IteratorT, AST::Power(), SkipperT> powerRule;
