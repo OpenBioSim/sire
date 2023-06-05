@@ -80,6 +80,8 @@ namespace SireUnits
         {
             GeneralUnit ret = unit.toUnit();
 
+            // qDebug() << "toUnit" << ret.toString() << "**" << power;
+
             if (power != 1)
             {
                 int pow = std::abs(power);

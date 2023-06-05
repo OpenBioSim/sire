@@ -248,7 +248,7 @@ bool GeneralUnit::isDimensionless() const
 
 bool _isZero(const double v)
 {
-    return std::abs(v) < std::numeric_limits<double>::epsilon();
+    return std::abs(v) < 1e-30;
 }
 
 bool GeneralUnit::isZero() const
