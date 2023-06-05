@@ -110,7 +110,7 @@ public:
             "rad", AST::Unit(SireUnits::radian))(
             "°", AST::Unit(SireUnits::degree))(
             "Å", AST::Unit(SireUnits::angstrom))(
-            "A", AST::Unit(SireUnits::angstrom))(
+            "A", AST::Unit(SireUnits::angstrom))( // this replaces A for amp, but is more normal in MD
             "m", AST::Unit(SireUnits::meter))(
             "\"", AST::Unit(SireUnits::inch))(
             "in", AST::Unit(SireUnits::inch))(
@@ -178,14 +178,15 @@ public:
             "mod_electron", AST::Unit(SireUnits::mod_electron))(
             "faraday", AST::Unit(SireUnits::faraday))(
             "coulomb", AST::Unit(SireUnits::coulomb))(
-            "kcal_per_mol", AST::Unit(SireUnits::kcal_per_mol))(
-            "kJ_per_mol", AST::Unit(SireUnits::kJ_per_mol));
+            "kcal_per_mol", AST::Unit(SireUnits::kcal_per_mol))( // this is commonly used
+            "kJ_per_mol", AST::Unit(SireUnits::kJ_per_mol));     // this is commonly used
 
         short_prefix_token.add(
             "d", AST::Prefix(1e-1))(
             "c", AST::Prefix(1e-2))(
             "m", AST::Prefix(1e-3))(
             "u", AST::Prefix(1e-6))(
+            "µ", AST::Prefix(1e-6))(
             "μ", AST::Prefix(1e-6))(
             "n", AST::Prefix(1e-9))(
             "p", AST::Prefix(1e-12))(

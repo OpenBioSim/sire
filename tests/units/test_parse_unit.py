@@ -7,6 +7,7 @@ U = sr.units.GeneralUnit
 @pytest.mark.parametrize(
     "text, expect",
     [
+        ("0", U(0)),
         ("5", U(5)),
         ("-3.2", U(-3.2)),
         ("-3.141e-10", U(-3.141e-10)),
@@ -22,6 +23,11 @@ U = sr.units.GeneralUnit
         ("15 ps", 15 * sr.units.picosecond),
         ("20*angstroms", 20 * sr.units.angstrom),
         ("20 angstrom", 20 * sr.units.angstrom),
+        ("120 µm", 120 * sr.units.micrometer),
+        (
+            "120 μm",
+            120 * sr.units.micrometer,
+        ),  # this is a different micro symbol
         ("15 * kcal.mol-1", 15 * sr.units.kcal_per_mol),
         (
             "1 kJ/(mol nm**2)",
