@@ -228,6 +228,28 @@ double GeneralUnit::to(const GeneralUnit &units) const
     return units.convertFromInternal(value());
 }
 
+TempBase::~TempBase()
+{
+}
+
+Celsius::~Celsius()
+{
+}
+
+Fahrenheit::~Fahrenheit()
+{
+}
+
+double TempBase::to(const GeneralUnit &other) const
+{
+    return GeneralUnit(*this).to(other);
+}
+
+double TempBase::to(const QString &other) const
+{
+    return GeneralUnit(*this).to(other);
+}
+
 double GeneralUnit::to(const TempBase &other) const
 {
     // this must be a temperature!

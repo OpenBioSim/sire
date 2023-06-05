@@ -148,6 +148,7 @@ namespace SireUnits
 
             double to(const TempBase &other) const;
             double to(const GeneralUnit &other) const;
+            double to(const QString &other) const;
 
             QString toString() const;
 

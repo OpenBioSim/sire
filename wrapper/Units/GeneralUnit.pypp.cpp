@@ -362,6 +362,19 @@ void register_GeneralUnit_class(){
                 , "" );
         
         }
+        { //::SireUnits::Dimension::GeneralUnit::to
+        
+            typedef double ( ::SireUnits::Dimension::GeneralUnit::*to_function_type)( ::QString const & ) const;
+            to_function_type to_function_value( &::SireUnits::Dimension::GeneralUnit::to );
+            
+            GeneralUnit_exposer.def( 
+                "to"
+                , to_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireUnits::Dimension::GeneralUnit::toString
         
             typedef ::QString ( ::SireUnits::Dimension::GeneralUnit::*toString_function_type)(  ) const;

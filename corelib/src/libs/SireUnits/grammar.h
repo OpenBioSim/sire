@@ -46,6 +46,7 @@ using phoenix::val;
 using boost::spirit::ascii::char_;
 
 #include "SireUnits/units.h"
+#include "SireUnits/temperature.h"
 
 /** This is the grammar that enables skipping of spaces, newlines and comments */
 template <typename IteratorT>
@@ -104,26 +105,81 @@ public:
         short_unit_token.add(
             "cal", AST::Unit(SireUnits::cal))(
             "J", AST::Unit(SireUnits::joule))(
+            "Ha", AST::Unit(SireUnits::hartree))(
             "mol", AST::Unit(SireUnits::mole))(
             "rad", AST::Unit(SireUnits::radian))(
             "°", AST::Unit(SireUnits::degree))(
             "Å", AST::Unit(SireUnits::angstrom))(
             "A", AST::Unit(SireUnits::angstrom))(
             "m", AST::Unit(SireUnits::meter))(
+            "\"", AST::Unit(SireUnits::inch))(
+            "in", AST::Unit(SireUnits::inch))(
+            "'", AST::Unit(SireUnits::foot))(
+            "ft", AST::Unit(SireUnits::foot))(
+            "mph", AST::Unit(SireUnits::miles_per_hour))(
+            "kph", AST::Unit(SireUnits::kilometers_per_hour))(
             "s", AST::Unit(SireUnits::second))(
-            "g", AST::Unit(SireUnits::gram));
+            "g", AST::Unit(SireUnits::gram))(
+            "N", AST::Unit(SireUnits::newton))(
+            "Pa", AST::Unit(SireUnits::pascal))(
+            "K", AST::Unit(SireUnits::kelvin))(
+            "°K", AST::Unit(SireUnits::kelvin))(
+            "V", AST::Unit(SireUnits::volt))(
+            "F", AST::Unit(SireUnits::farad))(
+            "W", AST::Unit(SireUnits::watt))(
+            "e", AST::Unit(SireUnits::e_charge))(
+            "|e|", AST::Unit(SireUnits::mod_electron))(
+            "F", AST::Unit(SireUnits::faraday))(
+            "C", AST::Unit(SireUnits::coulomb));
 
         unit_token.add(
             "calorie", AST::Unit(SireUnits::cal))(
             "joule", AST::Unit(SireUnits::joule))(
+            "hartree", AST::Unit(SireUnits::hartree))(
             "mole", AST::Unit(SireUnits::mole))(
             "dozen", AST::Unit(SireUnits::dozen))(
             "radian", AST::Unit(SireUnits::radian))(
             "degree", AST::Unit(SireUnits::degree))(
             "angstrom", AST::Unit(SireUnits::angstrom))(
             "meter", AST::Unit(SireUnits::meter))(
+            "bohr", AST::Unit(SireUnits::bohr_radii))(
+            "inch", AST::Unit(SireUnits::inch))(
+            "inches", AST::Unit(SireUnits::inch))(
+            "foot", AST::Unit(SireUnits::foot))(
+            "feet", AST::Unit(SireUnits::foot))(
+            "yard", AST::Unit(SireUnits::yard))(
+            "mile", AST::Unit(SireUnits::mile))(
             "second", AST::Unit(SireUnits::second))(
-            "gram", AST::Unit(SireUnits::gram));
+            "minute", AST::Unit(SireUnits::minute))(
+            "hour", AST::Unit(SireUnits::hour))(
+            "day", AST::Unit(SireUnits::day))(
+            "week", AST::Unit(SireUnits::week))(
+            "fortnight", AST::Unit(SireUnits::fortnight))(
+            "akma", AST::Unit(SireUnits::akma_time))(
+            "gram", AST::Unit(SireUnits::gram))(
+            "tonne", AST::Unit(SireUnits::tonne))(
+            "newton", AST::Unit(SireUnits::newton))(
+            "ounce", AST::Unit(SireUnits::ounce))(
+            "pound", AST::Unit(SireUnits::pound))(
+            "stone", AST::Unit(SireUnits::stone))(
+            "hundredweight", AST::Unit(SireUnits::hundredweight))(
+            "pascal", AST::Unit(SireUnits::pascal))(
+            "bar", AST::Unit(SireUnits::bar))(
+            "atm", AST::Unit(SireUnits::atm))(
+            "psi", AST::Unit(SireUnits::psi))(
+            "mmHg", AST::Unit(SireUnits::mmHg))(
+            "kelvin", AST::Unit(SireUnits::kelvin))(
+            "amp", AST::Unit(SireUnits::amp))(
+            "volt", AST::Unit(SireUnits::volt))(
+            "farad", AST::Unit(SireUnits::farad))(
+            "watt", AST::Unit(SireUnits::watt))(
+            "electron", AST::Unit(SireUnits::e_charge))(
+            "e_charge", AST::Unit(SireUnits::e_charge))(
+            "mod_electron", AST::Unit(SireUnits::mod_electron))(
+            "faraday", AST::Unit(SireUnits::faraday))(
+            "coulomb", AST::Unit(SireUnits::coulomb))(
+            "kcal_per_mol", AST::Unit(SireUnits::kcal_per_mol))(
+            "kJ_per_mol", AST::Unit(SireUnits::kJ_per_mol));
 
         short_prefix_token.add(
             "d", AST::Prefix(1e-1))(
@@ -186,7 +242,10 @@ public:
         static const auto rightB = qi::lit(")");
 
         // root rule to read a node as a single expression and no further input (eoi)
-        nodeRule = (expressionRule >> qi::eoi) | (expressionRule >> sep >> qi::eoi);
+        nodeRule = (expressionRule >> qi::eoi) |
+                   (expressionRule >> sep >> qi::eoi) |
+                   (sep >> expressionRule >> qi::eoi) |
+                   (sep >> expressionRule >> sep >> qi::eoi);
 
         unitRule = eps[_val = AST::Unit()] >>
                        (prefix_token[_val = _1] >> unit_token[_val *= _1] >> qi::lit("s")) |

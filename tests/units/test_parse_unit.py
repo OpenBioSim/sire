@@ -13,15 +13,16 @@ U = sr.units.GeneralUnit
         ("1 angstrom", 1 * sr.units.angstrom),
         ("1 angstrom /* block comment */", 1 * sr.units.angstrom),
         ("1 angstrom // line comment", 1 * sr.units.angstrom),
+        ("10 Å", 10 * sr.units.angstrom),
         ("-10.5e5 A", -10.5e5 * sr.units.angstrom),
         ("10 s-1", 10 / sr.units.second),
         ("6.5 m s-1", 6.5 * sr.units.meter / sr.units.second),
         ("1.2 m.s-1", 1.2 * sr.units.meter / sr.units.second),
         ("55 mm", 55 * sr.units.millimeter),
         ("15 ps", 15 * sr.units.picosecond),
-        ("20 angstroms", 20 * sr.units.angstrom),
+        ("20*angstroms", 20 * sr.units.angstrom),
         ("20 angstrom", 20 * sr.units.angstrom),
-        ("15 kcal.mol-1", 15 * sr.units.kcal_per_mol),
+        ("15 * kcal.mol-1", 15 * sr.units.kcal_per_mol),
         (
             "1 kJ/(mol nm**2)",
             1
@@ -106,10 +107,135 @@ U = sr.units.GeneralUnit
             * sr.units.meter
             / (sr.units.second * sr.units.second * sr.units.kilogram),
         ),
+        ("35.1°", 35.1 * sr.units.degree),
+        ("90 degrees", 90 * sr.units.degrees),
+        ("3.141 radians", 3.141 * sr.units.radians),
+        ('12"', 12 * sr.units.inch),
+        ("10 |e|", 10 * sr.units.mod_electron),
+        ("25°C", U(25 * sr.units.celsius)),
+        ("100 fahrenheit", U(100 * sr.units.fahrenheit)),
+        ("0 celsius", U(0 * sr.units.celsius)),
+        ("13 J K-1", 13 * sr.units.joule / sr.units.kelvin),
+        ("60 miles per hour", 60 * sr.units.miles / sr.units.hour),
+        ("70mph", 70 * sr.units.miles / sr.units.hour),
+        ("120 kph", 120 * sr.units.kilometer / sr.units.hour),
+        (
+            "radian * degree**2 / radian^2",
+            sr.units.degree * sr.units.degree / sr.units.radian,
+        ),
+        (
+            "angstrom**3 / nanometer",
+            sr.units.angstrom
+            * sr.units.angstrom
+            * sr.units.angstrom
+            / (sr.units.nanometer),
+        ),
+        (
+            "coulombs * angstrom**-2 * nanometer**2",
+            sr.units.coulomb
+            * sr.units.nanometer
+            * sr.units.nanometer
+            / (sr.units.angstrom * sr.units.angstrom),
+        ),
+        (
+            "kcal_per_mol / angstrom**2 * nanometer**2",
+            sr.units.kcal_per_mol
+            / (
+                sr.units.angstrom
+                * sr.units.angstrom
+                * sr.units.nanometer
+                * sr.units.nanometer
+            ),
+        ),
+        (
+            "angstrom**3 * nanometer^-1 / picometer",
+            sr.units.angstrom
+            * sr.units.angstrom
+            * sr.units.angstrom
+            / (sr.units.nanometer * sr.units.picometer),
+        ),
+        (
+            "bar * kJ_per_mol**2 / (kcal_per_mol * kJ_per_mol)",
+            sr.units.bar * sr.units.kJ_per_mol / (sr.units.kcal_per_mol),
+        ),
+        (
+            "coulomb * kelvin^-2 * kelvin^3 / e_charge",
+            sr.units.coulomb * sr.units.kelvin / sr.units.e_charge,
+        ),
+        (
+            "nanoseconds^3 * kelvin^-3 * kelvin**3 / milliseconds**2",
+            sr.units.nanosecond
+            * sr.units.nanosecond
+            * sr.units.nanosecond
+            / (sr.units.millisecond * sr.units.millisecond),
+        ),
+        (
+            "angstroms3 * atm^-3 * bar**3",
+            sr.units.angstrom
+            * sr.units.angstrom
+            * sr.units.angstrom
+            * sr.units.bar
+            * sr.units.bar
+            * sr.units.bar
+            / (sr.units.atm * sr.units.atm * sr.units.atm),
+        ),
+        ("degree", sr.units.degree),
+        ("meters2", sr.units.meter * sr.units.meter),
+        ("coulombs", sr.units.coulomb),
+        ("kJ_per_mol", sr.units.kJ_per_mol),
+        ("nanometer", sr.units.nanometer),
+        ("bar", sr.units.bar),
+        ("fahrenheit", U(sr.units.fahrenheit)),
+        ("days", sr.units.day),
+        (
+            "picometers**3",
+            sr.units.picometer * sr.units.picometer * sr.units.picometer,
+        ),
+        (
+            "kcal per mol / angstrom**2",
+            sr.units.kcal_per_mol / (sr.units.angstrom * sr.units.angstrom),
+        ),
     ],
 )
 def test_parse_unit(text, expect):
     u = U(text)
+
+    assert u.has_same_units(expect)
+    assert u.value() == pytest.approx(expect.value())
+
+
+@pytest.mark.parametrize(
+    "initial, final, expect",
+    [
+        (
+            "10 angstrom",
+            "nanometer",
+            (10 * sr.units.angstrom).to(sr.units.nanometer),
+        ),
+        (
+            "15 kcal per mol",
+            "kJ.mol-1",
+            (15 * sr.units.kcal_per_mol).to(sr.units.kJ_per_mol),
+        ),
+        ("0 celsius", "kelvin", 273.15),
+        ("273.15 K", "celsius", 0),
+    ],
+)
+def test_convert_unit(initial, final, expect):
+    result = U(initial).to(final)
+
+    assert result == pytest.approx(expect)
+
+
+@pytest.mark.parametrize(
+    "unit, expect",
+    [
+        ("5 meter", U("5 meter")),
+        ("0.5 kcal mol-1", 0.5 * sr.units.kcal_per_mol),
+    ],
+)
+def test_create_unit(unit, expect):
+    u = sr.u(unit)
 
     assert u.has_same_units(expect)
     assert u.value() == pytest.approx(expect.value())

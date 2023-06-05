@@ -199,17 +199,51 @@ GeneralUnit::GeneralUnit(double value, const QString &unit) : Unit(0)
 
     QString processed_unit = unit.simplified();
 
+    if (processed_unit.startsWith("*"))
+    {
+        // remove the *
+        processed_unit = processed_unit.mid(1).simplified();
+    }
+
     if (processed_unit.length() == 0)
     {
         // this is a dimensionless value
         this->operator=(GeneralUnit(value));
         return;
     }
+    else if (processed_unit == "celsius" or processed_unit == "°C")
+    {
+        this->operator=(GeneralUnit(Celsius(value)));
+    }
+    else if (processed_unit == "fahrenheit" or processed_unit == "°F")
+    {
+        this->operator=(GeneralUnit(Fahrenheit(value)));
+    }
+    else
+    {
+        // try to get the unit from the passed string
+        const auto ast = ::parse_main(processed_unit.toStdString());
 
-    // try to get the unit from the passed string
-    const auto ast = ::parse_main(processed_unit.toStdString());
+        this->operator=(value * ast.toUnit());
+    }
+}
 
-    this->operator=(value * ast.toUnit());
+double GeneralUnit::to(const QString &units) const
+{
+    QString processed_unit = units.simplified();
+
+    if (processed_unit == "celsius" or processed_unit == "°C")
+    {
+        return this->to(Celsius());
+    }
+    else if (processed_unit == "fahrenheit" or processed_unit == "°F")
+    {
+        return this->to(Fahrenheit());
+    }
+    else
+    {
+        return this->to(GeneralUnit(units));
+    }
 }
 
 #ifdef __clang__

@@ -42,6 +42,7 @@ __all__ = [
     "smiles",
     "supported_formats",
     "tutorial_url",
+    "u",
     "use_mixed_api",
     "use_new_api",
     "use_old_api",
@@ -112,6 +113,29 @@ def _fix_openmm_path():
 
 
 _fix_openmm_path()
+
+
+def u(unit):
+    """
+    Return a sire unit created from the passed expression. If this is a
+    sire.units.GeneralUnit then it will be returned. If this is a string,
+    then it will be parseed and returned as a sire.units.GeneralUnit.
+    """
+    from .units import GeneralUnit
+
+    try:
+        return GeneralUnit(unit)
+    except Exception as e:
+        pass
+
+    # is this a different unit model?
+
+    # Try BioSimSpace
+
+    # Try Pint
+
+    # nothing matched, raise the original exception
+    raise e
 
 
 def molid(

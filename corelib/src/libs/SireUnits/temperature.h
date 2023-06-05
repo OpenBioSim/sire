@@ -58,7 +58,7 @@ namespace SireUnits
 
 #endif // end of 'ifdef SKIP_BROKEN_GCCXML_PARTS'
 
-        class TempBase
+        class SIREUNITS_EXPORT TempBase
         {
             friend class SireUnits::Celsius;
             friend class SireUnits::Fahrenheit;
@@ -76,9 +76,7 @@ namespace SireUnits
             {
             }
 
-            virtual ~TempBase()
-            {
-            }
+            virtual ~TempBase();
 
             TempBase &operator=(const TempBase &other)
             {
@@ -148,6 +146,9 @@ namespace SireUnits
                 return this->in(other);
             }
 
+            double to(const GeneralUnit &other) const;
+            double to(const QString &other) const;
+
             virtual double convertToInternal(double value) const = 0;
             virtual double convertFromInternal(double value) const = 0;
 
@@ -173,7 +174,7 @@ namespace SireUnits
 
     } // end of namespace Dimension
 
-    class Celsius : public Dimension::TempBase
+    class SIREUNITS_EXPORT Celsius : public Dimension::TempBase
     {
 
     public:
@@ -198,9 +199,7 @@ namespace SireUnits
         {
         }
 
-        ~Celsius()
-        {
-        }
+        ~Celsius();
 
         double convertToInternal(double value) const
         {
@@ -330,7 +329,7 @@ namespace SireUnits
         return temp * value;
     }
 
-    class Fahrenheit : public Dimension::TempBase
+    class SIREUNITS_EXPORT Fahrenheit : public Dimension::TempBase
     {
 
     public:
@@ -355,9 +354,7 @@ namespace SireUnits
         {
         }
 
-        ~Fahrenheit()
-        {
-        }
+        ~Fahrenheit();
 
         double convertToInternal(double value) const
         {
