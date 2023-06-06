@@ -3484,8 +3484,8 @@ void OpenMMFrEnergyST::createContext(IntegratorWorkspace &workspace, SireUnits::
                 OpenMM::Vec3(c[j].x() * (OpenMM::NmPerAngstrom), c[j].y() * (OpenMM::NmPerAngstrom),
                              c[j].z() * (OpenMM::NmPerAngstrom));
 
-            if (m[j] == 0.0)
-                qDebug() << "\nWARNING - THE MASS OF PARTICLE " << system_index << " is ZERO\n";
+            //if (m[j] == 0.0)
+            //    qDebug() << "\nWARNING - THE MASS OF PARTICLE " << system_index << " is ZERO\n";
 
             if (m[j] > SireMaths::small)
             {
