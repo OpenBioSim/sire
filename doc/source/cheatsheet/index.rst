@@ -12,3 +12,4 @@ use and understand various parts of sire.
    trajectory
    view
    openmm
+   units

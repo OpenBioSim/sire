@@ -77,15 +77,18 @@ This is because :mod:`sire` is focussed on molecular simulation, where
 Here is the full set of supported units.
 
 *Long units*
-``calorie, joule, hartree, mole, dozen, radian, degree, angstrom, meter, bohr, inch
+
+  calorie, joule, hartree, mole, dozen, radian, degree, angstrom, meter, bohr, inch
   inches, foot, feet, yard, mile, second, minute, hour, day, week, fortnight, akma,
   dalton, gram, tonne, newton, ounce, pound, stone, hundredweight, pascal, bar, atm,
   atmosphere, psi, mmHg, kelvin, celsius, fahrenheit, amp, ampere, volt, farad,
   watt, electron, e_charge, mod_electron, faraday, coulomb, kcal_per_mol,
-  kJ_per_mol``
+  kJ_per_mol
 
 *Short units*
-``cal, J, Ha, mol, rad, °, Å, A, m, ", ', in, ft, mph, kph, s, g, N, Pa, K, °K, °C, °F, V, F, W, e, |e|, C``
+
+  cal, J, Ha, mol, rad, °, Å, A, m, ``"``, ``'``, in, ft, mph, kph,
+  s, g, N, Pa, K, °K, °C, °F, V, F, W, e, ``|e|``, C
 
 .. note::
 
@@ -117,7 +120,7 @@ Raising units to a power
 
 You can raise a unit to a power using the following symbols.
 
-* `` `` e.g. ``m 3``, ``m3``, ``mol-1``
+* ``the number`` e.g. ``m 3``, ``m3``, ``mol-1``
 * ``**`` e.g. ``m**3``, ``m ** 3``, ``mol**-1``
 * ``^`` e.g. ``m^3``, ``m ^ 3``, ``mol^-1``
 
