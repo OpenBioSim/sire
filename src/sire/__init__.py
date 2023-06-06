@@ -123,19 +123,40 @@ def u(unit):
     """
     from .units import GeneralUnit
 
+    error = None
+
     try:
         return GeneralUnit(unit)
     except Exception as e:
-        pass
+        error = e
 
     # is this a different unit model?
 
     # Try BioSimSpace
+    if str(type(unit)).find("BioSimSpace") != -1:
+        try:
+            return GeneralUnit(unit._sire_unit)
+        except Exception:
+            pass
+
+        return GeneralUnit(f"{unit}")
 
     # Try Pint
+    if str(type(unit)).find("pint") != -1 and hasattr(type(unit), "magnitude"):
+        # this is a pint unit - convert to a string (using the long-default
+        # format, as sire should be able to read and understand this)
+        # (we can't use short default as we use 'A' to mean angstrom, not amp)
+        return GeneralUnit(unit.magnitude, f"{unit.units}")
 
-    # nothing matched, raise the original exception
-    raise e
+    # Just try representing this as a string and see what happens
+    try:
+        return GeneralUnit(f"{unit}")
+    except Exception as e:
+        raise TypeError(
+            f"Could not convert {unit} to a sire unit. The original error "
+            f"that was raised was: {error}. The error raised when parsing "
+            f"the string version was {e}"
+        )
 
 
 def molid(

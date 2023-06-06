@@ -1,7 +1,33 @@
 import pytest
 import sire as sr
 
+try:
+    import pint
+
+    ureg = pint.UnitRegistry()
+except Exception:
+    ureg = None
+
 U = sr.units.GeneralUnit
+
+
+@pytest.mark.skipif(ureg is None, reason="pint is not installed")
+@pytest.mark.parametrize(
+    "text, expect",
+    [
+        ("10 A", "10 amp"),
+        ("10 Å", "10 A"),
+        ("3.1e5 kcal mol**-1", "3.1e5 kcal mol-1"),
+        ("5 m ** 2 / s ** 2", "5 m2.s-2"),
+        ("-3 * meter/second**2", "-3 m s-2"),
+    ],
+)
+def test_parse_pint(text, expect):
+    p = sr.u(ureg(text))
+    s = sr.u(expect)
+
+    assert p.has_same_units(s)
+    assert p.value() == pytest.approx(s.value())
 
 
 @pytest.mark.parametrize(
@@ -19,6 +45,13 @@ U = sr.units.GeneralUnit
         ("10 s-1", 10 / sr.units.second),
         ("6.5 m s-1", 6.5 * sr.units.meter / sr.units.second),
         ("1.2 m.s-1", 1.2 * sr.units.meter / sr.units.second),
+        (
+            "3.2m2.s-2",
+            3.2
+            * sr.units.meter
+            * sr.units.meter
+            / (sr.units.second * sr.units.second),
+        ),
         ("55 mm", 55 * sr.units.millimeter),
         ("15 ps", 15 * sr.units.picosecond),
         ("20*angstroms", 20 * sr.units.angstrom),

@@ -129,7 +129,6 @@ public:
             "W", AST::Unit(SireUnits::watt))(
             "e", AST::Unit(SireUnits::e_charge))(
             "|e|", AST::Unit(SireUnits::mod_electron))(
-            "F", AST::Unit(SireUnits::faraday))(
             "C", AST::Unit(SireUnits::coulomb));
 
         unit_token.add(
@@ -156,6 +155,7 @@ public:
             "week", AST::Unit(SireUnits::week))(
             "fortnight", AST::Unit(SireUnits::fortnight))(
             "akma", AST::Unit(SireUnits::akma_time))(
+            "dalton", AST::Unit(SireUnits::g_per_mol * SireUnits::mole))(
             "gram", AST::Unit(SireUnits::gram))(
             "tonne", AST::Unit(SireUnits::tonne))(
             "newton", AST::Unit(SireUnits::newton))(
@@ -166,10 +166,12 @@ public:
             "pascal", AST::Unit(SireUnits::pascal))(
             "bar", AST::Unit(SireUnits::bar))(
             "atm", AST::Unit(SireUnits::atm))(
+            "atmosphere", AST::Unit(SireUnits::atm))(
             "psi", AST::Unit(SireUnits::psi))(
             "mmHg", AST::Unit(SireUnits::mmHg))(
             "kelvin", AST::Unit(SireUnits::kelvin))(
             "amp", AST::Unit(SireUnits::amp))(
+            "ampere", AST::Unit(SireUnits::amp))(
             "volt", AST::Unit(SireUnits::volt))(
             "farad", AST::Unit(SireUnits::farad))(
             "watt", AST::Unit(SireUnits::watt))(
@@ -258,7 +260,7 @@ public:
 
         powerRule = eps[_val = AST::Power()] >>
                         (*sep >> (qi::lit("**") | qi::lit("^")) >> *sep >> int_[_val *= _1]) |
-                    double_[_val *= _1];
+                    int_[_val *= _1];
 
         fullUnitRule = eps[_val = AST::FullUnit()] >>
                            (leftB >> *sep >> unitRule[_val = _1] >> *sep >> rightB >> -powerRule[_val *= _1]) |

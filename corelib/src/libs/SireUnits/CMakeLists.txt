@@ -33,6 +33,7 @@ set ( SIREUNITS_SOURCES
       dimensions.cpp
       generalunit.cpp
       parser.cpp
+      temperature.cpp
 
       ${SIREUNITS_HEADERS}
     )

@@ -481,7 +481,7 @@ class DynamicsData:
                                 raise NeedsMinimiseError()
 
                             raise RuntimeError(
-                                "The kinetic energy has exceeded 100 kcal mol-1 "
+                                "The kinetic energy has exceeded 1000 kcal mol-1 "
                                 f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
                                 f" and {kinetic_energy} kcal mol-1 total). This "
                                 "suggests that the simulation has become "
