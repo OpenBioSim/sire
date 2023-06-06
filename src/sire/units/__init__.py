@@ -2,6 +2,8 @@ __all__ = [
     "angle",
     "convert",
     "length",
+    "set_default_unit",
+    "set_default_units",
     "set_energy_unit",
     "set_internal_units",
     "set_length_unit",
@@ -385,7 +387,6 @@ _names = None
 
 
 def _get_unit_name(unit):
-
     global _names
 
     if _names is None:
@@ -536,6 +537,59 @@ def set_time_unit(time, name: str = None):
 
     (length / time).set_as_default(f"{lname} {name}-1")
     (length / (time * time)).set_as_default(f"{lname} {name}-2")
+
+
+def set_default_units(units):
+    """
+    Set the default unit names for the units named in the passed
+    list of strings.
+
+    For example, set_default_units(["m"]) would set the default length
+    unit to "meters", and will print it out using "m" as the string.
+
+    Calling set_default_unit(["kcal", "kcal.mol-1"]) would set the default
+    molar energy unit to kcal_per_mol, and will print it out
+    using "kcal.mol-1", and the default energy unit to "kcal", printed
+    out using "kcal".
+
+    All of the strings must be something that can be parsed by
+    the units grammar in GeneralUnit, and should be units only -
+    they cannot contain values.
+    """
+    if type(units) is not list:
+        units = [units]
+
+    unit_strings = {}
+
+    # parse all the units first
+    for unit in units:
+        unit_strings[GeneralUnit(1.0, unit)] = unit
+
+    # we have fully parsed units, and only have one of each type
+    for key in unit_strings.keys():
+        key.set_as_default(unit_strings[key])
+
+
+def set_default_unit(unit: str):
+    """
+    Set the default unit name for the unit named in the passed
+    string.
+
+    For example, set_default_unit("m") would set the default length
+    unit to "meters", and will print it out using "m" as the string.
+
+    Calling set_default_unit("kcal.mol-1") would set the default
+    molar energy unit to kcal_per_mol, and will print it out
+    using "kcal.mol-1"
+
+    The string must be something that can be parsed by
+    the units grammar in GeneralUnit, and should be units only -
+    they cannot contain values.
+    """
+    if type(unit) is list:
+        set_default_units(unit)
+    else:
+        set_default_units([unit])
 
 
 def set_si_units():

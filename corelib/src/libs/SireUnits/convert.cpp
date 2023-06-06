@@ -61,29 +61,6 @@ namespace SireUnits
             }
         }
 
-        static QString getGenericUnitString(int M, int L, int T, int C, int t, int Q, int A)
-        {
-            QStringList pos;
-            QStringList neg;
-
-            appendString(M, "M", pos, neg);
-            appendString(L, "L", pos, neg);
-            appendString(T, "T", pos, neg);
-            appendString(C, "C", pos, neg);
-            appendString(t, "t", pos, neg);
-            appendString(Q, "Q", pos, neg);
-            appendString(A, "A", pos, neg);
-
-            if (pos.isEmpty() and neg.isEmpty())
-                return "";
-            else if (neg.isEmpty())
-                return pos.join(" ");
-            else if (pos.isEmpty())
-                return neg.join(" ");
-            else
-                return QString("%1 %2").arg(pos.join(" "), neg.join(" "));
-        }
-
         class DimensionKey
         {
         public:
@@ -288,7 +265,50 @@ namespace SireUnits
                 return *it;
 
             else
-                return QPair<double, QString>(1.0, getGenericUnitString(M, L, T, C, t, Q, A));
+            {
+                // construct from the default units
+                QStringList pos, neg;
+
+                auto add_to_unit = [&](int U, const QPair<double, QString> &s)
+                {
+                    appendString(U, s.second, pos, neg);
+                };
+
+                if (Q != 0)
+                    add_to_unit(Q, default_strings->value(DimensionKey(mole), QPair<double, QString>(mole, "mol")));
+
+                if (M != 0)
+                    add_to_unit(M, default_strings->value(DimensionKey(gram), QPair<double, QString>(gram, "g")));
+
+                if (L != 0)
+                    add_to_unit(L, default_strings->value(DimensionKey(angstrom), QPair<double, QString>(angstrom, "Å")));
+
+                if (T != 0)
+                    add_to_unit(T, default_strings->value(DimensionKey(picosecond), QPair<double, QString>(picosecond, "ps")));
+
+                if (C != 0)
+                    add_to_unit(C, default_strings->value(DimensionKey(mod_electron), QPair<double, QString>(mod_electron, "|e|")));
+
+                if (t != 0)
+                    add_to_unit(t, default_strings->value(DimensionKey(kelvin), QPair<double, QString>(kelvin, "K")));
+
+                if (A != 0)
+                    add_to_unit(A, default_strings->value(DimensionKey(degree), QPair<double, QString>(degree, "°")));
+
+                QString unit_string;
+
+                if (pos.isEmpty())
+                    unit_string = neg.join(" ");
+                else if (neg.isEmpty())
+                    unit_string = pos.join(" ");
+                else
+                    unit_string = QString("%1 %2").arg(pos.join(" ")).arg(neg.join(" "));
+
+                // reparse the string, to calculate the right scaling factor
+                GeneralUnit unit(unit_string);
+
+                return QPair<double, QString>(unit.value(), unit_string);
+            }
         }
 
     } // namespace Dimension
