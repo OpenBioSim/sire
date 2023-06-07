@@ -326,29 +326,41 @@ class System:
         """
         return self.molecules().coordinates(*args, **kwargs)
 
-    def space(self):
+    def space(self, map=None):
         """
         Return the space used for this system
         """
         try:
-            return self._system.property("space")
+            if map is None:
+                return self._system.property("space")
+            else:
+                from ..base import create_map
+
+                map = create_map(map)
+                return self._system.property(map["space"])
         except Exception:
             from ..vol import Cartesian
 
             return Cartesian()
 
-    def time(self):
+    def time(self, map=None):
         """
         Return the current system time
         """
         try:
-            return self._system.property("time")
+            if map is None:
+                return self._system.property("time")
+            else:
+                from ..base import create_map
+
+                map = create_map(map)
+                return self._system.property(map["time"])
         except Exception:
             from ..units import picosecond
 
             return 0 * picosecond
 
-    def set_space(self, space):
+    def set_space(self, space, map=None):
         """
         Set the space to be used to hold all of the molecules
         in this system
@@ -362,9 +374,19 @@ class System:
                 f"sire.vol.Cartesian. You cannot use a {type(space)}."
             )
 
-        self._system.set_property("space", space)
+        if map is None:
+            self._system.set_property("space", space)
+        else:
+            from ..base import create_map
 
-    def set_time(self, time):
+            map = create_map(map)
+
+            space_property = map["space"]
+
+            if space_property.has_source():
+                self._system.set_property(space_property.source(), space)
+
+    def set_time(self, time, map=None):
         """
         Set the current time for the system
         """
@@ -372,7 +394,7 @@ class System:
         from ..base import wrap
 
         if time == 0:
-            self._system.set_property("time", wrap(0 * picosecond))
+            time = wrap(0 * picosecond)
         else:
             if not hasattr(time, "has_same_units"):
                 raise TypeError(
@@ -386,7 +408,19 @@ class System:
                     f"cannot use {time}."
                 )
 
-            self._system.set_property("time", wrap(time))
+            time = wrap(time)
+
+        if map is None:
+            self._system.set_property("time", time)
+        else:
+            from ..base import create_map
+
+            map = create_map(map)
+
+            time_property = map["time"]
+
+            if time_property.has_source():
+                self._system.set_property(time_property.source(), time)
 
     def evaluate(self, *args, **kwargs):
         """Return an evaluator for this Systme (or of the matching
