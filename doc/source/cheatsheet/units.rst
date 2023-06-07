@@ -166,11 +166,45 @@ Changing default units
 
 :mod:`sire` prints values out using default output units. You can change
 these using the functions in :mod:`sire.units`, e.g.
-:func:`sire.units.set_si_units` will change the output to SI units.
+:func:`sire.units.set_si_units` will change the output to SI units,
+while :func:`sire.units.set_internal_units` will change the output to
+internal (AKMA-style) units.
 
 Changing the output units just changes how they are printed. It doens't
 change their internal representation. For more info, see the section
 below on ``Under the hood - GeneralUnit``.
+
+You can set your own default units by calling
+:func:`sire.units.set_default_unit` or :func:`sire.units.set_default_units`.
+For example
+
+>>> sr.units.set_default_unit("kJ mol-1")
+
+will set the default molar energy unit to ``kJ mol-1``, while
+
+>>> sr.units.set_default_units(["m", "J", "kg", "C", "rad", "K", "mol"])
+
+will set the default units for the seven physical dimensions to the
+passed values.
+
+.. note::
+
+   The strings passed must be parseable into a unit. This is then set
+   as the default for that unit, with the string used to represent that
+   unit on output.
+
+.. note::
+
+   Units that don't have a default are constructed from the defaults of the
+   seven physical dimensions.
+
+Indeed, :func:`sire.units.set_si_units` is really just calling
+:func:`sire.units.set_default_units` with a list of units that are
+commonly set as part of the SI system (including derived units such
+as ``J`` for energy, ``W`` for power, ``N`` for force, etc.)
+
+You can clear the set of default units by calling
+:func:`sire.units.clear_default_units`.
 
 Conversion from ``pint``
 ------------------------

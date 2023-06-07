@@ -278,3 +278,99 @@ def test_create_unit(unit, expect):
 
     assert u.has_same_units(expect)
     assert u.value() == pytest.approx(expect.value())
+
+
+@pytest.mark.parametrize(
+    "unit1, unit2, tol",
+    [
+        ("m", "s", 1e-6),
+        ("cal", "mol", 1e-6),
+        ("J", "mol", 1e-3),
+        ("g", "m", 1e-6),
+        ("m", "g", 1e-6),
+    ],
+)
+def test_default_units(unit1, unit2, tol):
+    unit1_u = sr.u(unit1)
+    unit2_u = sr.u(unit2)
+
+    expect = sr.u(f"{unit1} {unit2}-1")
+
+    old_unit1 = sr.u(unit1).get_default().unit_string()
+    old_unit2 = sr.u(unit2).get_default().unit_string()
+
+    sr.units.set_default_units([unit1, unit2])
+
+    try:
+        u = sr.u(f"{unit1} {unit2}-1")
+
+        assert u.has_same_units(expect)
+        assert u.value() == pytest.approx(expect.value(), tol)
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value(), 1e-3)
+
+        u = sr.u(f"m{unit1} {unit2}-1")
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value())
+
+        assert u.has_same_units(expect)
+        assert u.value() == pytest.approx(1e-3 * expect.value(), tol)
+
+        u = sr.u(f"{unit1} m{unit2}-1")
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value(), tol)
+
+        assert u.has_same_units(expect)
+        assert u.value() == pytest.approx(1e3 * expect.value(), tol)
+
+        u = sr.u(f"m{unit1} m{unit2}-1")
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value(), tol)
+
+        assert u.has_same_units(expect)
+        assert u.value() == pytest.approx(expect.value(), tol)
+
+        u = sr.u(f"{unit1} {unit2}-3")
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value(), tol)
+
+        assert u.has_same_units(expect / (unit2_u * unit2_u))
+        assert u.value() == pytest.approx(
+            expect.value() / (unit2_u.value() ** 2), tol
+        )
+
+        u = sr.u(f"{unit1}3 {unit2}-1")
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value(), tol)
+
+        assert u.has_same_units(expect * unit1_u * unit1_u)
+        assert u.value() == pytest.approx(
+            expect.value() * (unit1_u.value() ** 2), tol
+        )
+
+        u = sr.u(f"{unit1}3 {unit2}-3")
+
+        u2 = sr.u(str(u))
+        assert u2.has_same_units(u)
+        assert u2.value() == pytest.approx(u.value(), tol)
+
+        assert u.has_same_units(expect.pow(3))
+        assert u.value() == pytest.approx(expect.pow(3).value(), tol)
+
+    except Exception as e:
+        sr.units.set_default_units([old_unit1, old_unit2])
+        raise e
+
+    sr.units.set_default_units([old_unit1, old_unit2])

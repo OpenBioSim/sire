@@ -60,6 +60,7 @@ QDataStream &operator>>(QDataStream &ds, SireUnits::Dimension::GeneralUnit &u)
         u.temperature = t1;
         u.Time = t2;
         u.Quantity = q;
+        u.log_value = 0;
     }
     else
         throw version_error(v, "1", r_genunit, CODELOC);
@@ -134,6 +135,7 @@ GeneralUnit::GeneralUnit() : Unit(0)
     temperature = 0;
     Quantity = 0;
     Angle = 0;
+    log_value = 0;
 }
 
 GeneralUnit::GeneralUnit(double value) : Unit(value)
@@ -145,6 +147,7 @@ GeneralUnit::GeneralUnit(double value) : Unit(value)
     temperature = 0;
     Quantity = 0;
     Angle = 0;
+    log_value = 0;
 }
 
 GeneralUnit::GeneralUnit(const TempBase &t) : Unit(t)
@@ -156,6 +159,29 @@ GeneralUnit::GeneralUnit(const TempBase &t) : Unit(t)
     temperature = 1;
     Quantity = 0;
     Angle = 0;
+    log_value = 0;
+}
+
+GeneralUnit::GeneralUnit(double value, const QList<qint32> &dimensions)
+    : Unit(value)
+{
+    if (dimensions.count() != 7)
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "You can only create a GeneralUnit using 7 dimensions "
+                                         "(M,L,T,C,t,Q,A). You have only supplied %1.")
+                                         .arg(Sire::toString(dimensions)),
+                                     CODELOC);
+    }
+
+    Mass = dimensions[0];
+    Length = dimensions[1];
+    Time = dimensions[2];
+    Charge = dimensions[3];
+    temperature = dimensions[4];
+    Quantity = dimensions[5];
+    Angle = dimensions[6];
+    log_value = 0;
 }
 
 GeneralUnit::GeneralUnit(const GeneralUnit &other) : Unit(other), comps(other.comps)
@@ -167,6 +193,7 @@ GeneralUnit::GeneralUnit(const GeneralUnit &other) : Unit(other), comps(other.co
     temperature = other.temperature;
     Quantity = other.Quantity;
     Angle = other.Angle;
+    log_value = other.log_value;
 }
 
 GeneralUnit::~GeneralUnit()
@@ -222,6 +249,14 @@ QString GeneralUnit::toString() const
         return QString("%1 %2").arg(v).arg(u.second);
 }
 
+/** Return the physical dimensions of this unit, in the order
+ *  (M,L,T,C,t,Q,A)
+ */
+QList<qint32> GeneralUnit::dimensions() const
+{
+    return QList<qint32>({Mass, Length, Time, Charge, temperature, Quantity, Angle});
+}
+
 double GeneralUnit::to(const GeneralUnit &units) const
 {
     assertCompatible(units);
@@ -246,9 +281,22 @@ bool GeneralUnit::isDimensionless() const
            Angle == 0;
 }
 
+// test for zero when multiplying
 bool _isZero(const double v)
 {
-    return std::abs(v) < 1e-30;
+    // smallest double is ~1e-308
+    return std::abs(v) < 1e-307;
+}
+
+// test for zero when doing addition
+bool _isWithinEpsilonZero(const double v)
+{
+    return std::abs(v) < std::numeric_limits<double>::epsilon();
+}
+
+bool GeneralUnit::isWithinEpsilonZero() const
+{
+    return _isWithinEpsilonZero(this->value());
 }
 
 bool GeneralUnit::isZero() const
@@ -296,6 +344,7 @@ GeneralUnit GeneralUnit::units() const
 {
     GeneralUnit ret(*this);
     ret.setScale(1.0);
+    ret.log_value = 0;
     return ret;
 }
 
@@ -316,6 +365,7 @@ GeneralUnit &GeneralUnit::operator=(const GeneralUnit &other)
     temperature = other.TEMPERATURE();
     Quantity = other.QUANTITY();
     Angle = other.ANGLE();
+    log_value = other.log_value;
     comps = other.comps;
 
     return *this;
@@ -416,26 +466,31 @@ GeneralUnit GeneralUnit::operator/(const TempBase &other) const
 
 GeneralUnit &GeneralUnit::operator+=(const GeneralUnit &other)
 {
-    if (this->isZero())
+    if (this->isWithinEpsilonZero())
     {
         this->operator=(other);
+        return *this;
+    }
+    else if (other.isWithinEpsilonZero())
+    {
         return *this;
     }
 
     assertCompatible(other);
     setScale(value() + other.value());
+    log_value = 0;
 
     for (const auto &key : other.comps.keys())
     {
         this->comps[key] = this->comps.value(key) + other.comps[key];
 
-        if (_isZero(this->comps[key]))
+        if (_isWithinEpsilonZero(this->comps[key]))
         {
             this->comps.remove(key);
         }
     }
 
-    if (this->isZero() and this->comps.isEmpty())
+    if (this->isWithinEpsilonZero() and this->comps.isEmpty())
         this->operator=(GeneralUnit());
 
     return *this;
@@ -443,26 +498,31 @@ GeneralUnit &GeneralUnit::operator+=(const GeneralUnit &other)
 
 GeneralUnit &GeneralUnit::operator-=(const GeneralUnit &other)
 {
-    if (this->isZero())
+    if (this->isWithinEpsilonZero())
     {
         this->operator=(-other);
+        return *this;
+    }
+    else if (other.isWithinEpsilonZero())
+    {
         return *this;
     }
 
     assertCompatible(other);
     setScale(value() - other.value());
+    log_value = 0;
 
     for (const auto &key : other.comps.keys())
     {
         this->comps[key] = this->comps.value(key) - other.comps[key];
 
-        if (_isZero(this->comps[key]))
+        if (_isWithinEpsilonZero(this->comps[key]))
         {
             this->comps.remove(key);
         }
     }
 
-    if (this->isZero() and this->comps.isEmpty())
+    if (this->isWithinEpsilonZero() and this->comps.isEmpty())
         this->operator=(GeneralUnit());
 
     return *this;
@@ -484,24 +544,12 @@ GeneralUnit GeneralUnit::operator-(const GeneralUnit &other) const
 
 GeneralUnit &GeneralUnit::operator+=(double val)
 {
-    assertCompatible(GeneralUnit(val));
-    setScale(value() + val);
-
-    if (this->isZero())
-        this->operator=(GeneralUnit());
-
-    return *this;
+    return this->operator+=(GeneralUnit(val));
 }
 
 GeneralUnit &GeneralUnit::operator-=(double val)
 {
-    assertCompatible(GeneralUnit(val));
-    setScale(value() - val);
-
-    if (this->isZero())
-        this->operator=(GeneralUnit());
-
-    return *this;
+    return this->operator-=(GeneralUnit(val));
 }
 
 GeneralUnit GeneralUnit::operator+(double val) const
@@ -518,9 +566,115 @@ GeneralUnit GeneralUnit::operator-(double val) const
     return ret;
 }
 
+bool GeneralUnit::useLog() const
+{
+    if (log_value != 0)
+        return true;
+
+    double v = std::abs(this->value());
+
+    return (v > 1e6 or v < 1e-6);
+}
+
+double GeneralUnit::getLog() const
+{
+    if (log_value != 0)
+        return log_value;
+    else
+    {
+        double v = std::abs(this->value());
+
+        if (v == 0)
+            return 0;
+        else
+            return std::log10(v);
+    }
+}
+
+double GeneralUnit::getLog()
+{
+    if (log_value == 0)
+    {
+        double v = std::abs(this->value());
+
+        if (v != 0)
+            log_value = std::log10(v);
+    }
+
+    return log_value;
+}
+
+GeneralUnit GeneralUnit::pow(int n) const
+{
+    if (n == 1)
+    {
+        return *this;
+    }
+    else if (n == 0)
+    {
+        return GeneralUnit(1.0);
+    }
+    else if (this->isZero())
+    {
+        return GeneralUnit(0);
+    }
+
+    GeneralUnit ret(*this);
+
+    ret.comps.clear();
+
+    double log_pow_n = ret.getLog() * n;
+
+    ret.log_value = log_pow_n;
+
+    if (this->value() > 0)
+        ret.setScale(std::pow(10, log_pow_n));
+    else
+        ret.setScale(-std::pow(10, log_pow_n));
+
+    ret.Mass *= n;
+    ret.Length *= n;
+    ret.Time *= n;
+    ret.Charge *= n;
+    ret.temperature *= n;
+    ret.Quantity *= n;
+    ret.Angle *= n;
+
+    return ret;
+}
+
 GeneralUnit &GeneralUnit::operator*=(const GeneralUnit &other)
 {
-    setScale(value() * other.value());
+    if (this->isZero())
+    {
+        return *this;
+    }
+    else if (other.isZero())
+    {
+        this->operator=(GeneralUnit(0));
+        return *this;
+    }
+
+    if (this->useLog() or other.useLog())
+    {
+        double log_prod = this->getLog() + other.getLog();
+        log_value = log_prod;
+
+        if ((this->value() > 0 and other.value() > 0) or (this->value() < 0 and other.value() < 0))
+        {
+            this->setScale(std::pow(10.0, log_value));
+        }
+        else
+        {
+            this->setScale(-std::pow(10.0, log_value));
+        }
+    }
+    else
+    {
+        setScale(value() * other.value());
+        log_value = 0;
+    }
+
     Mass += other.Mass;
     Length += other.Length;
     Time += other.Time;
@@ -536,7 +690,7 @@ GeneralUnit &GeneralUnit::operator*=(const GeneralUnit &other)
         {
             this->comps[key] *= other.value();
 
-            if (_isZero(this->comps[key]))
+            if (_isWithinEpsilonZero(this->comps[key]))
                 this->comps.remove(key);
         }
     }
@@ -551,7 +705,7 @@ GeneralUnit &GeneralUnit::operator*=(const GeneralUnit &other)
         {
             this->comps[key] *= v;
 
-            if (_isZero(this->comps[key]))
+            if (_isWithinEpsilonZero(this->comps[key]))
                 this->comps.remove(key);
         }
     }
@@ -561,15 +715,42 @@ GeneralUnit &GeneralUnit::operator*=(const GeneralUnit &other)
         this->comps.clear();
     }
 
-    if (this->isZero() and this->comps.isEmpty())
-        this->operator=(GeneralUnit());
-
     return *this;
 }
 
 GeneralUnit &GeneralUnit::operator/=(const GeneralUnit &other)
 {
-    setScale(value() / other.value());
+    if (this->isZero())
+    {
+        return *this;
+    }
+    else if (other.isZero())
+    {
+        // NaN
+        this->operator=(GeneralUnit(1.0 / 0.0));
+        return *this;
+    }
+
+    if (this->useLog() or other.useLog())
+    {
+        double log_div = this->getLog() - other.getLog();
+        log_value = log_div;
+
+        if ((this->value() > 0 and other.value() > 0) or (this->value() < 0 and other.value() < 0))
+        {
+            this->setScale(std::pow(10.0, log_value));
+        }
+        else
+        {
+            this->setScale(-std::pow(10.0, log_value));
+        }
+    }
+    else
+    {
+        setScale(value() / other.value());
+        log_value = 0;
+    }
+
     Mass -= other.Mass;
     Length -= other.Length;
     Time -= other.Time;
@@ -585,7 +766,7 @@ GeneralUnit &GeneralUnit::operator/=(const GeneralUnit &other)
         {
             this->comps[key] /= other.value();
 
-            if (_isZero(this->comps[key]))
+            if (_isWithinEpsilonZero(this->comps[key]))
                 this->comps.remove(key);
         }
     }
@@ -600,7 +781,7 @@ GeneralUnit &GeneralUnit::operator/=(const GeneralUnit &other)
         {
             this->comps[key] /= v;
 
-            if (_isZero(this->comps[key]))
+            if (_isWithinEpsilonZero(this->comps[key]))
                 this->comps.remove(key);
         }
     }
@@ -609,9 +790,6 @@ GeneralUnit &GeneralUnit::operator/=(const GeneralUnit &other)
         // we can't retain the components as they won't multiply
         this->comps.clear();
     }
-
-    if (this->isZero() and this->comps.isEmpty())
-        this->operator=(GeneralUnit());
 
     return *this;
 }
@@ -673,7 +851,33 @@ GeneralUnit GeneralUnit::operator/(const GeneralUnit &other) const
 
 GeneralUnit &GeneralUnit::operator*=(double val)
 {
-    setScale(value() * val);
+    if (val == 0 or this->isZero())
+    {
+        this->operator=(GeneralUnit(0));
+        return *this;
+    }
+
+    if (this->useLog())
+    {
+        double log_prod = this->getLog();
+        log_prod += std::log10(std::abs(val));
+
+        if ((this->value() < 0 and val < 0) or (this->value() > 0 and val > 0))
+        {
+            setScale(std::pow(10.0, log_prod));
+        }
+        else
+        {
+            setScale(-std::pow(10.0, log_prod));
+        }
+
+        log_value = log_prod;
+    }
+    else
+    {
+        setScale(value() * val);
+        log_value = 0;
+    }
 
     for (const auto &key : this->comps.keys())
     {
@@ -683,15 +887,43 @@ GeneralUnit &GeneralUnit::operator*=(double val)
             this->comps.remove(key);
     }
 
-    if (this->isZero() and this->comps.isEmpty())
-        this->operator=(GeneralUnit());
-
     return *this;
 }
 
 GeneralUnit &GeneralUnit::operator/=(double val)
 {
-    setScale(value() / val);
+    if (this->isZero())
+    {
+        this->operator=(GeneralUnit(0));
+        return *this;
+    }
+    else if (val == 0)
+    {
+        // this will become infinite
+        this->operator=(GeneralUnit(1.0 / 0.0));
+        return *this;
+    }
+
+    if (this->useLog())
+    {
+        double log_div = this->getLog() - std::log10(std::abs(val));
+
+        if ((this->value() < 0 and val < 0) or (this->value() > 0 and val > 0))
+        {
+            setScale(std::pow(10.0, log_div));
+        }
+        else
+        {
+            setScale(-std::pow(10.0, log_div));
+        }
+
+        log_value = log_div;
+    }
+    else
+    {
+        setScale(value() / val);
+        log_value = 0;
+    }
 
     for (const auto &key : this->comps.keys())
     {
@@ -700,9 +932,6 @@ GeneralUnit &GeneralUnit::operator/=(double val)
         if (_isZero(this->comps[key]))
             this->comps.remove(key);
     }
-
-    if (this->isZero() and this->comps.isEmpty())
-        this->operator=(GeneralUnit());
 
     return *this;
 }
@@ -747,22 +976,7 @@ GeneralUnit GeneralUnit::operator/(int val) const
 
 GeneralUnit GeneralUnit::invert() const
 {
-    GeneralUnit ret;
-
-    ret.setScale(1.0 / value());
-
-    ret.Mass = -Mass;
-    ret.Length = -Length;
-    ret.Time = -Time;
-    ret.Charge = -Charge;
-    ret.temperature = -temperature;
-    ret.Quantity = -Quantity;
-    ret.Angle = -Angle;
-
-    // we can't retain the components
-    ret.comps.clear();
-
-    return ret;
+    return this->pow(-1);
 }
 
 QHash<QString, GeneralUnit> GeneralUnit::components() const
@@ -793,52 +1007,59 @@ void GeneralUnit::setComponent(const QString &component, const GeneralUnit &valu
 {
     this->assertCompatible(value);
 
-    if (this->isZero() and this->comps.isEmpty())
+    if (this->isWithinEpsilonZero() and this->comps.isEmpty())
     {
         this->operator=(value);
         this->comps.clear();
-        this->setScale(0);
+        this->comps.insert(component, value.value());
+        log_value = 0;
+        return;
     }
 
     double delta = value.value() - this->comps.value(component);
 
     this->comps[component] = value.value();
 
-    if (_isZero(this->comps[component]))
+    if (_isWithinEpsilonZero(this->comps[component]))
     {
         this->comps.remove(component);
     }
 
     this->setScale(this->value() + delta);
 
-    if (this->isZero() and this->comps.isEmpty())
+    log_value = 0;
+
+    if (this->isWithinEpsilonZero() and this->comps.isEmpty())
         this->operator=(GeneralUnit());
 }
 
 void GeneralUnit::addComponent(const QString &component, const GeneralUnit &value)
 {
-    if (value.isZero())
+    if (value.isWithinEpsilonZero())
         return;
 
-    if (this->isZero() and this->comps.isEmpty())
+    if (this->isWithinEpsilonZero() and this->comps.isEmpty())
     {
         this->operator=(value);
-        this->comps.clear();
-        this->setScale(0);
+        this->comps.insert(component, value.value());
+        log_value = 0;
+        return;
     }
 
     this->assertCompatible(value);
 
     this->comps[component] += value.value();
 
-    if (_isZero(this->comps[component]))
+    if (_isWithinEpsilonZero(this->comps[component]))
     {
         this->comps.remove(component);
     }
 
     this->setScale(this->value() + value.value());
 
-    if (this->isZero() and this->comps.isEmpty())
+    log_value = 0;
+
+    if (this->isWithinEpsilonZero() and this->comps.isEmpty())
         this->operator=(GeneralUnit());
 }
 

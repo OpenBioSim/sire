@@ -78,39 +78,7 @@ namespace SireUnits
 
         GeneralUnit FullUnit::toUnit() const
         {
-            GeneralUnit ret = unit.toUnit();
-
-            // qDebug() << "toUnit" << ret.toString() << "**" << power;
-
-            if (power != 1)
-            {
-                int pow = std::abs(power);
-
-                if (pow == 0)
-                {
-                    return GeneralUnit(1);
-                }
-
-                GeneralUnit multiple = ret;
-
-                for (int i = 1; i < pow; ++i)
-                {
-                    multiple *= ret;
-                }
-
-                if (power < 0)
-                {
-                    return multiple.invert();
-                }
-                else
-                {
-                    return multiple;
-                }
-            }
-            else
-            {
-                return ret;
-            }
+            return unit.toUnit().pow(power);
         }
 
     } // namespace AST

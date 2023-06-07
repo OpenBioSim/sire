@@ -61,11 +61,14 @@ namespace SireUnits
                 temperature = t;
                 Quantity = Q;
                 Angle = A;
+                log_value = 0;
                 detail::registerTypeName(*this, PhysUnit<M, L, T, C, t, Q, A>::typeName());
 
                 if (this->isZero())
                     this->operator=(GeneralUnit());
             }
+
+            explicit GeneralUnit(double value, const QList<qint32> &dimensions);
 
             GeneralUnit(const GeneralUnit &other);
 
@@ -87,6 +90,8 @@ namespace SireUnits
             int TEMPERATURE() const;
             int QUANTITY() const;
             int ANGLE() const;
+
+            QList<qint32> dimensions() const;
 
             bool hasSameUnits(const GeneralUnit &other) const;
 
@@ -146,6 +151,8 @@ namespace SireUnits
 
             GeneralUnit invert() const;
 
+            GeneralUnit pow(int n) const;
+
             double to(const TempBase &other) const;
             double to(const GeneralUnit &other) const;
             double to(const QString &other) const;
@@ -165,6 +172,8 @@ namespace SireUnits
             bool isZero() const;
 
             void setAsDefault(const QString &unit_name) const;
+
+            static void clearDefaults();
 
             GeneralUnit getDefault() const;
 
@@ -199,7 +208,16 @@ namespace SireUnits
         private:
             void assertCompatible(const GeneralUnit &other) const;
 
+            bool useLog() const;
+
+            double getLog() const;
+            double getLog();
+
+            bool isWithinEpsilonZero() const;
+
             int Mass, Length, Time, Charge, temperature, Quantity, Angle;
+
+            double log_value;
 
             QHash<QString, double> comps;
         };
