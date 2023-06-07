@@ -122,6 +122,7 @@ target_link_libraries (SireIO
                        SireMM
                        SireMove
                        SireMol
+                       SireUnits
                        SireStream
                        ${SIREIO_NETCDF_LIBRARIES}
                        )

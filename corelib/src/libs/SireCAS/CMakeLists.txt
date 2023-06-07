@@ -54,39 +54,39 @@ set ( SIRECAS_SOURCES
       register_sirecas.cpp
 
       abs.cpp
-      complexvalues.cpp           
+      complexvalues.cpp
       conditional.cpp
       constant.cpp
-      doublefunc.cpp                
-      errors.cpp                  
-      exbase.cpp                  
-      exp.cpp                     
-      expressionbase.cpp          
-      expression.cpp              
+      doublefunc.cpp
+      errors.cpp
+      exbase.cpp
+      exp.cpp
+      expressionbase.cpp
+      expression.cpp
       expressionproperty.cpp
-      expressions.cpp             
-      function.cpp                
-      functions.cpp               
-      functionsignature.cpp       
-      hyperbolicfuncs.cpp         
-      i.cpp                       
-      identities.cpp              
-      integrationconstant.cpp     
-      invhyperbolicfuncs.cpp      
-      invtrigfuncs.cpp 
-      minmax.cpp           
-      powerconstant.cpp           
-      power.cpp                   
-      product.cpp                 
-      singlefunc.cpp              
-      sum.cpp                     
-      symbol.cpp                  
-      symbolexpression.cpp        
-      trigfuncs.cpp               
+      expressions.cpp
+      function.cpp
+      functions.cpp
+      functionsignature.cpp
+      hyperbolicfuncs.cpp
+      i.cpp
+      identities.cpp
+      integrationconstant.cpp
+      invhyperbolicfuncs.cpp
+      invtrigfuncs.cpp
+      minmax.cpp
+      powerconstant.cpp
+      power.cpp
+      product.cpp
+      singlefunc.cpp
+      sum.cpp
+      symbol.cpp
+      symbolexpression.cpp
+      trigfuncs.cpp
       values.cpp
-      
+
       ${SIRECAS_HEADERS}
-                        
+
     )
 
 add_library (SireCAS ${SIRECAS_SOURCES})
@@ -100,6 +100,7 @@ set_target_properties (SireCAS PROPERTIES
 target_link_libraries (SireCAS
                        SireMaths
                        SireBase
+                       SireUnits
                        SireStream
                        )
 

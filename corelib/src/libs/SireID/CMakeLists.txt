@@ -47,6 +47,7 @@ set_target_properties (SireID PROPERTIES
 
 # Link to other Sire libraries
 target_link_libraries (SireID
+                       SireUnits
                        SireStream
                        )
 
@@ -57,6 +58,6 @@ install( TARGETS SireID EXPORT SireLibraries
          ARCHIVE DESTINATION ${SIRE_ARCHIVES}
        )
 
-install( FILES ${SIREID_HEADERS} 
+install( FILES ${SIREID_HEADERS}
          DESTINATION ${SIRE_INCLUDES}/SireID )
 

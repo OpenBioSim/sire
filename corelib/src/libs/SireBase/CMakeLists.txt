@@ -137,8 +137,8 @@ set_target_properties (SireBase PROPERTIES
 
 # Link to other Sire libraries
 target_link_libraries (SireBase
-                       SireUnits
                        SireID
+                       SireUnits
                        SireStream
                        ${TBB_LIBRARY}
                        ${TBB_MALLOC_LIBRARY}

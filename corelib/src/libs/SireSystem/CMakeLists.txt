@@ -111,6 +111,7 @@ target_link_libraries (SireSystem
                        SireMol
                        SireCAS
                        SireBase
+                       SireUnits
                        SireStream
                        )
 
