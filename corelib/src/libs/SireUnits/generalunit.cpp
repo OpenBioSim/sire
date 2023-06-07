@@ -726,9 +726,12 @@ GeneralUnit &GeneralUnit::operator/=(const GeneralUnit &other)
     }
     else if (other.isZero())
     {
-        // NaN
-        this->operator=(GeneralUnit(1.0 / 0.0));
-        return *this;
+        // this will become infinite
+        throw SireError::invalid_operation(QObject::tr(
+                                               "You cannot divide %1 by 0 (%2)")
+                                               .arg(this->toString())
+                                               .arg(other.toString()),
+                                           CODELOC);
     }
 
     if (this->useLog() or other.useLog())
@@ -900,8 +903,10 @@ GeneralUnit &GeneralUnit::operator/=(double val)
     else if (val == 0)
     {
         // this will become infinite
-        this->operator=(GeneralUnit(1.0 / 0.0));
-        return *this;
+        throw SireError::invalid_operation(QObject::tr(
+                                               "You cannot divide %1 by 0")
+                                               .arg(this->toString()),
+                                           CODELOC);
     }
 
     if (this->useLog())
