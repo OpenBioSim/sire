@@ -1,6 +1,9 @@
 import sire as sr
 
 import pytest
+import tempfile
+
+from openmm.app import AmberInpcrdFile, Topology
 
 
 @pytest.fixture
@@ -63,3 +66,35 @@ def test_reduction_angles(box):
         assert alpha == box.alpha()
         assert beta == box.beta()
         assert gamma == box.gamma()
+
+
+def test_cresset_box():
+    """
+    Test that OpenMM is happy with Cresset's default triclinic box vectors after
+    application of our triclinic lattice reduction.
+    """
+
+    # Create a temporary working directory.
+    tmp_dir = tempfile.TemporaryDirectory()
+    tmp_path = tmp_dir.name
+    rst7_file = f"{tmp_path}/test.rst7"
+
+    # Load the test system.
+    system = sr.load(
+        sr.expand(
+            sr.tutorial_url, "cresset_triclinic_box.prm7", "cresset_triclinic_box.rst7"
+        ),
+        directory=tmp_path,
+    )
+
+    # Write back to the temporary path.
+    sr.save(system, rst7_file)
+
+    # Load a minimal coordinate file containing the default Cresset triclinic box.
+    inpcrd = AmberInpcrdFile(rst7_file)
+
+    # Create an empty topology.
+    topology = Topology()
+
+    # Try to set the periodic box vectors using those from the inpcrd file.
+    topology.setPeriodicBoxVectors(inpcrd.boxVectors)
