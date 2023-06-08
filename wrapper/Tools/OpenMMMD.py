@@ -2797,7 +2797,7 @@ def runFreeNrg():
                 "# %8s %25s %25s %25s %25s %25s"
                 % (
                     "[step]",
-                    "[potential kcal/mol]",
+                    "[potential]",
                     "[gradient]",
                     "[forward Metropolis]",
                     "[backward Metropolis]",
