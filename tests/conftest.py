@@ -43,7 +43,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_slow)
 
     if not runveryslow:
-        skip_veryslow = pytest.mark.skip(reason="need --runveryslow option to run")
+        skip_veryslow = pytest.mark.skip(
+            reason="need --runveryslow option to run"
+        )
         for item in items:
             if "veryslow" in item.keywords:
                 item.add_marker(skip_veryslow)
@@ -95,5 +97,12 @@ def excluded_mols():
 
 
 @pytest.fixture(scope="session")
+def wrapped_mols():
+    return sr.load_test_files("wrapped.rst7", "wrapped.prm7")
+
+
+@pytest.fixture(scope="session")
 def openmm_interchange_mols():
-    return sr.load_test_files("openmm_interchange.rst7", "openmm_interchange.prm7")
+    return sr.load_test_files(
+        "openmm_interchange.rst7", "openmm_interchange.prm7"
+    )

@@ -295,6 +295,17 @@ namespace SireSystem
         Properties userProperties() const;
         Properties builtinProperties() const;
 
+        void addSharedProperty(const QString &name);
+        void addSharedProperty(const QString &name, const Property &value);
+
+        void setSharedProperty(const QString &name, const Property &value);
+
+        void removeSharedProperty(const QString &name);
+
+        void removeAllSharedProperties();
+
+        Properties sharedProperties() const;
+
         const SystemMonitors &monitors() const;
         const ForceFields &forceFields() const;
         const MoleculeGroups &extraGroups() const;
@@ -421,6 +432,9 @@ namespace SireSystem
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
         void deleteAllFrames(const SireBase::PropertyMap &map);
 
+        void makeWhole();
+        void makeWhole(const SireBase::PropertyMap &map);
+
         static const System &null();
 
     protected:
@@ -448,6 +462,15 @@ namespace SireSystem
 
     private:
         void rebuildIndex();
+
+        void _setProperty(const QString &name, const Property &value,
+                          bool update_shared);
+
+        void _updateSharedProperty(const QString &name,
+                                   const Property &value);
+
+        void _updateSharedProperties(MoleculeData &data) const;
+        void _updateSharedProperties(MoleculeView &view) const;
 
         ForceFields &_pvt_forceFields();
 
@@ -496,6 +519,11 @@ namespace SireSystem
         /** The index of which of the two set of MoleculeGroups each
             individual molecule group in this set is in */
         QHash<MGNum, int> mgroups_by_num;
+
+        /** The set of shared properties - these are properties which
+            will be added and kept up-to-date in contained molecules.
+            By default, these are the "space" and "time" properties */
+        QStringList shared_properties;
 
         /** The subversion of this system - this is incremented when
             delta updates are being applied. A system with non-zero

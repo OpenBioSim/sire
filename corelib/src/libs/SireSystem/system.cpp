@@ -157,7 +157,7 @@ QDataStream &operator<<(QDataStream &ds, const System &system)
     if (system.needsAccepting())
         qDebug() << "SYSTEM NEEDS ACCEPTING";
 
-    writeHeader(ds, r_system, 3);
+    writeHeader(ds, r_system, 4);
 
     if (system.subversion != 0)
         throw SireError::program_bug(QObject::tr("It is a mistake to try and save a system that is in a "
@@ -175,7 +175,7 @@ QDataStream &operator<<(QDataStream &ds, const System &system)
     SireMM::LJDBIOLock dblock = SireMM::LJParameterDB::saveParameters(sds);
 
     sds << system.uid << system.sysname << system.molgroups[0] << system.molgroups[1] << system.sysmonitors
-        << system.cons << static_cast<const MolGroupsBase &>(system);
+        << system.cons << system.shared_properties << static_cast<const MolGroupsBase &>(system);
 
     return ds;
 }
@@ -185,7 +185,22 @@ QDataStream &operator>>(QDataStream &ds, System &system)
 {
     VersionID v = readHeader(ds, r_system);
 
-    if (v == 3)
+    if (v == 4)
+    {
+        SharedDataStream sds(ds);
+
+        SireMM::LJDBIOLock dblock = SireMM::LJParameterDB::loadParameters(sds);
+
+        sds >> system.uid >> system.sysname >> system.molgroups[0] >> system.molgroups[1] >> system.sysmonitors >>
+            system.cons >> system.shared_properties >> static_cast<MolGroupsBase &>(system);
+
+        system.rebuildIndex();
+
+        system.sysversion = systemRegistry().registerObject(system.uid);
+        system.subversion = 0;
+        system.shared_properties.clear();
+    }
+    else if (v == 3)
     {
         SharedDataStream sds(ds);
 
@@ -198,6 +213,7 @@ QDataStream &operator>>(QDataStream &ds, System &system)
 
         system.sysversion = systemRegistry().registerObject(system.uid);
         system.subversion = 0;
+        system.shared_properties.clear();
     }
     else if (v == 2)
     {
@@ -210,6 +226,7 @@ QDataStream &operator>>(QDataStream &ds, System &system)
 
         system.sysversion = systemRegistry().registerObject(system.uid);
         system.subversion = 0;
+        system.shared_properties.clear();
     }
     else if (v == 1)
     {
@@ -222,17 +239,21 @@ QDataStream &operator>>(QDataStream &ds, System &system)
 
         system.sysversion = systemRegistry().registerObject(system.uid);
         system.subversion = 0;
+        system.shared_properties.clear();
     }
     else
-        throw version_error(v, "1,2", r_system, CODELOC);
+        throw version_error(v, "1-4", r_system, CODELOC);
 
     return ds;
 }
 
+QStringList default_shared_properties = {"space", "time"};
+
 /** Construct an unnamed System */
 System::System()
     : ConcreteProperty<System, MolGroupsBase>(), uid(QUuid::createUuid()),
-      sysversion(systemRegistry().registerObject(uid)), subversion(0)
+      sysversion(systemRegistry().registerObject(uid)),
+      shared_properties(default_shared_properties), subversion(0)
 {
     molgroups[0] = ForceFields();
     molgroups[1] = MoleculeGroups();
@@ -246,7 +267,8 @@ const System &System::null()
 /** Construct a named System */
 System::System(const QString &name)
     : ConcreteProperty<System, MolGroupsBase>(), uid(QUuid::createUuid()), sysname(name),
-      sysversion(systemRegistry().registerObject(uid)), subversion(0)
+      sysversion(systemRegistry().registerObject(uid)),
+      shared_properties(default_shared_properties), subversion(0)
 {
     molgroups[0] = ForceFields();
     molgroups[1] = MoleculeGroups();
@@ -256,7 +278,9 @@ System::System(const QString &name)
 System::System(const System &other)
     : ConcreteProperty<System, MolGroupsBase>(other), uid(other.uid), sysname(other.sysname),
       sysversion(other.sysversion), sysmonitors(other.sysmonitors), cons(other.cons),
-      mgroups_by_num(other.mgroups_by_num), subversion(other.subversion)
+      mgroups_by_num(other.mgroups_by_num),
+      shared_properties(other.shared_properties),
+      subversion(other.subversion)
 {
     molgroups[0] = other.molgroups[0];
     molgroups[1] = other.molgroups[1];
@@ -280,6 +304,7 @@ System &System::operator=(const System &other)
         sysmonitors = other.sysmonitors;
         cons = other.cons;
         mgroups_by_num = other.mgroups_by_num;
+        shared_properties = other.shared_properties;
         subversion = other.subversion;
 
         MolGroupsBase::operator=(other);
@@ -1206,6 +1231,78 @@ void System::potential(PotentialTable &pottable, const Symbol &component, const 
     this->_pvt_forceFields().potential(pottable, component, probe, scale_potential);
 }
 
+/** Internal function used to copy a shared property to all of the
+    contained molecules
+*/
+void System::_updateSharedProperty(const QString &name, const Property &value)
+{
+    if (this->needsAccepting())
+    {
+        this->accept();
+    }
+
+    Molecules mols_to_update;
+
+    for (auto mol : this->molecules())
+    {
+        const auto &moldata = mol.constData();
+
+        bool needs_updating = false;
+
+        if (moldata.hasProperty(name))
+        {
+            needs_updating = not(value.equals(moldata.property(name)));
+        }
+        else
+            needs_updating = true;
+
+        if (needs_updating)
+        {
+            auto data = MoleculeData(moldata);
+            data.setProperty(name, value);
+            mol.update(data);
+
+            mols_to_update.add(mol);
+        }
+    }
+
+    if (not mols_to_update.isEmpty())
+    {
+        Delta delta(*this, true);
+
+        // this ensures that only a single copy of System is used - prevents
+        // unnecessary copying
+        this->operator=(System());
+        delta.update(mols_to_update);
+        this->operator=(delta.apply());
+
+        if (this->needsAccepting())
+        {
+            delta = Delta();
+            this->accept();
+        }
+    }
+}
+
+/** Internal function used to set the value of the property, which has
+ *  an extra "update_shared" flag to optionally update (or not) the
+ *  value of any shared properties in the molecules.
+ */
+void System::_setProperty(const QString &name, const Property &value,
+                          bool update_shared)
+{
+    this->_pvt_forceFields().setProperty(name, value);
+
+    if (update_shared and this->shared_properties.contains(name))
+    {
+        // also update this property in all of the molecules
+        this->_updateSharedProperty(name, value);
+    }
+
+    sysversion.incrementMajor();
+    this->applyConstraints();
+}
+
 /** Set the value of the property called 'name' to the value 'value' in
     all forcefields that have this property
 
@@ -1215,9 +1312,7 @@ void System::potential(PotentialTable &pottable, const Symbol &component, const 
 */
 void System::setProperty(const QString &name, const Property &value)
 {
-    this->_pvt_forceFields().setProperty(name, value);
-    sysversion.incrementMajor();
-    this->applyConstraints();
+    this->_setProperty(name, value, true);
 }
 
 /** Set the value of the property called 'name' in the forcefields identified
@@ -1241,6 +1336,25 @@ void System::setProperty(const FFID &ffid, const QString &name, const Property &
 void System::removeProperty(const QString &name)
 {
     this->_pvt_forceFields().removeProperty(name);
+
+    if (this->shared_properties.contains(name))
+    {
+        // remove this from all the contained molecules too!
+        const Molecules mols = this->molecules();
+
+        Molecules updated_mols = mols;
+
+        for (const auto &mol : mols)
+        {
+            MoleculeData moldata(mol.data());
+            moldata.removeProperty(name);
+
+            updated_mols.update(moldata);
+        }
+
+        this->update(updated_mols);
+    }
+
     sysversion.incrementMajor();
     this->applyConstraints();
 }
@@ -1428,6 +1542,98 @@ Properties System::userProperties() const
 Properties System::builtinProperties() const
 {
     return this->_pvt_forceFields().builtinProperties();
+}
+
+/** Specify that the property called 'name' should be a shared property */
+void System::addSharedProperty(const QString &name)
+{
+    if (this->shared_properties.contains(name))
+    {
+        return;
+    }
+
+    this->shared_properties.append(name);
+
+    if (this->containsProperty(name))
+    {
+        this->_updateSharedProperty(name, this->property(name));
+    }
+}
+
+/** Specify that the passed property called 'name' with value 'value'
+ *  should be a shared property
+ */
+void System::addSharedProperty(const QString &name, const Property &value)
+{
+    if (this->shared_properties.contains(name))
+    {
+        this->setProperty(name, value);
+        return;
+    }
+
+    this->shared_properties.append(name);
+    this->_updateSharedProperty(name, value);
+    this->_setProperty(name, value, false);
+}
+
+/** Set the shared property called 'name' to the value 'value' */
+void System::setSharedProperty(const QString &name, const Property &value)
+{
+    if (not this->shared_properties.contains(name))
+    {
+        throw SireError::invalid_key(QObject::tr(
+                                         "There is no shared property called '%1'. The shared properties "
+                                         "are: %2")
+                                         .arg(name)
+                                         .arg(Sire::toString(this->shared_properties)),
+                                     CODELOC);
+    }
+
+    this->setProperty(name, value);
+}
+
+/** Remove the specified shared property from this system. This will
+ *  remove the property, and will also remove its value from all of the
+ *  contained molecules.
+ */
+void System::removeSharedProperty(const QString &name)
+{
+    if (not this->shared_properties.contains(name))
+    {
+        return;
+    }
+
+    this->removeProperty(name);
+    this->shared_properties.removeAll(name);
+}
+
+void System::removeAllSharedProperties()
+{
+    auto to_remove = this->shared_properties;
+
+    for (const auto &name : to_remove)
+    {
+        this->removeSharedProperty(name);
+    }
+}
+
+Properties System::sharedProperties() const
+{
+    Properties props;
+
+    for (const auto &name : this->shared_properties)
+    {
+        if (this->containsProperty(name))
+        {
+            props.setProperty(name, this->property(name));
+        }
+        else
+        {
+            props.setProperty(name, NullProperty());
+        }
+    }
+
+    return props;
 }
 
 /** Return the list of all monitors of this system */
@@ -1952,6 +2158,71 @@ const MoleculeGroup &System::at(MGNum mgnum) const
     return this->_pvt_moleculeGroup(mgnum);
 }
 
+/** Update the passed molecule so that it contains the current
+ *  versions of the shared properties.
+ */
+void System::_updateSharedProperties(MoleculeData &data) const
+{
+    for (const auto &name : this->shared_properties)
+    {
+        if (this->containsProperty(name))
+        {
+            const auto &prop = this->property(name);
+
+            if (data.hasProperty(name))
+            {
+                if (not prop.equals(data.property(name)))
+                {
+                    data.setProperty(name, prop);
+                }
+            }
+            else
+            {
+                data.setProperty(name, prop);
+            }
+        }
+    }
+}
+
+/** Update the passed molecule so that it contains the current
+ *  versions of the shared properties.
+ */
+void System::_updateSharedProperties(MoleculeView &view) const
+{
+    const auto &data = view.constData();
+
+    bool needs_update = false;
+
+    for (const auto &name : this->shared_properties)
+    {
+        if (this->containsProperty(name))
+        {
+            const auto &prop = this->property(name);
+
+            if (data.hasProperty(name))
+            {
+                if (not prop.equals(data.property(name)))
+                {
+                    needs_update = true;
+                    break;
+                }
+            }
+            else
+            {
+                needs_update = true;
+                break;
+            }
+        }
+    }
+
+    if (needs_update)
+    {
+        MoleculeData moldata(data);
+        this->_updateSharedProperties(moldata);
+        view.update(moldata);
+    }
+}
+
 /** Add the molecule viewed in 'molview' to the molecule groups
     identified by the ID 'mgid'. The supplied property map
     is used to find the properties required by any forcefields
@@ -1969,7 +2240,19 @@ void System::add(const MoleculeView &molview, const MGID &mgid, const PropertyMa
     QList<MGNum> mgnums = mgid.map(*this);
 
     PartialMolecule view(molview);
-    view.update(this->matchToExistingVersion(molview.data()));
+
+    if (this->contains(molview.data().number()))
+    {
+        // Update so that the added moleucle has the same version and data
+        // as the current copy in this system.
+        // This will make sure that any shared properties are up to data
+        view.update(this->matchToExistingVersion(molview.data()));
+    }
+    else
+    {
+        // Update the molecule so that it contains the shared properties
+        this->_updateSharedProperties(view);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2013,7 +2296,19 @@ void System::add(const ViewsOfMol &molviews, const MGID &mgid, const PropertyMap
     QList<MGNum> mgnums = mgid.map(*this);
 
     ViewsOfMol views(molviews);
-    views.update(this->matchToExistingVersion(molviews.data()));
+
+    if (this->contains(views.data().number()))
+    {
+        // Update so that the added moleucle has the same version and data
+        // as the current copy in this system.
+        // This will make sure that any shared properties are up to data
+        views.update(this->matchToExistingVersion(molviews.data()));
+    }
+    else
+    {
+        // Update the molecule so that it contains the shared properties
+        this->_updateSharedProperties(views);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2056,7 +2351,23 @@ void System::add(const Molecules &molecules, const MGID &mgid, const PropertyMap
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    Molecules mols = this->matchToExistingVersion(molecules);
+    Molecules mols = molecules;
+
+    // update the molecules to match what is in this system, including
+    // the shared properties for new molecules
+    for (auto mol : molecules)
+    {
+        if (this->contains(mol.data().number()))
+        {
+            mol.update(this->matchToExistingVersion(mol.data()));
+        }
+        else
+        {
+            this->_updateSharedProperties(mol);
+        }
+
+        mols.update(mol.data());
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2100,7 +2411,20 @@ void System::add(const MoleculeGroup &molgroup, const MGID &mgid, const Property
     QList<MGNum> mgnums = mgid.map(*this);
 
     MolGroupPtr group(molgroup);
-    group.edit().update(this->matchToExistingVersion(molgroup.molecules()));
+
+    for (auto mol : molgroup.molecules())
+    {
+        if (this->contains(mol.data().number()))
+        {
+            mol.update(this->matchToExistingVersion(mol.data()));
+        }
+        else
+        {
+            this->_updateSharedProperties(mol);
+        }
+
+        group.edit().update(mol.data());
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2146,7 +2470,15 @@ void System::addIfUnique(const MoleculeView &molview, const MGID &mgid, const Pr
     QList<MGNum> mgnums = mgid.map(*this);
 
     PartialMolecule view(molview);
-    view.update(this->matchToExistingVersion(molview.data()));
+
+    if (this->contains(molview.data().number()))
+    {
+        view.update(this->matchToExistingVersion(molview.data()));
+    }
+    else
+    {
+        this->_updateSharedProperties(view);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2192,7 +2524,15 @@ void System::addIfUnique(const ViewsOfMol &molviews, const MGID &mgid, const Pro
     QList<MGNum> mgnums = mgid.map(*this);
 
     ViewsOfMol views(molviews);
-    views.update(this->matchToExistingVersion(molviews.data()));
+
+    if (this->contains(molviews.data().number()))
+    {
+        views.update(this->matchToExistingVersion(molviews.data()));
+    }
+    else
+    {
+        this->_updateSharedProperties(views);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2237,7 +2577,21 @@ void System::addIfUnique(const Molecules &molecules, const MGID &mgid, const Pro
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    Molecules mols = this->matchToExistingVersion(molecules);
+    Molecules mols = molecules;
+
+    for (auto mol : molecules)
+    {
+        if (this->contains(mol.data().number()))
+        {
+            mol.update(this->matchToExistingVersion(mol.data()));
+        }
+        else
+        {
+            this->_updateSharedProperties(mol);
+        }
+
+        mols.update(mol);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2283,7 +2637,20 @@ void System::addIfUnique(const MoleculeGroup &molgroup, const MGID &mgid, const 
     QList<MGNum> mgnums = mgid.map(*this);
 
     MolGroupPtr group(molgroup);
-    group.edit().update(this->matchToExistingVersion(molgroup.molecules()));
+
+    for (auto mol : molgroup.molecules())
+    {
+        if (this->contains(mol.data().number()))
+        {
+            mol.update(this->matchToExistingVersion(mol.data()));
+        }
+        else
+        {
+            this->_updateSharedProperties(mol);
+        }
+
+        group.edit().update(mol.data());
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2834,12 +3201,15 @@ bool System::remove(const QSet<MolNum> &molnums, const MGID &mgid)
 */
 void System::update(const MoleculeData &moldata, bool auto_commit)
 {
+    MoleculeData data = moldata;
+    this->_updateSharedProperties(data);
+
     Delta delta(*this, auto_commit);
 
     // this ensures that only a single copy of System is used - prevents
     // unnecessary copying
     this->operator=(System());
-    delta.update(moldata);
+    delta.update(data);
     this->operator=(delta.apply());
 
     if (auto_commit and this->needsAccepting())
@@ -2863,12 +3233,20 @@ void System::update(const MoleculeView &molview, bool auto_commit)
 */
 void System::update(const Molecules &molecules, bool auto_commit)
 {
+    Molecules mols = molecules;
+
+    for (auto mol : molecules)
+    {
+        this->_updateSharedProperties(mol);
+        mols.update(mol.data());
+    }
+
     Delta delta(*this, auto_commit);
 
     // this ensures that only a single copy of System is used - prevents
     // unnecessary copying
     this->operator=(System());
-    delta.update(molecules);
+    delta.update(mols);
     this->operator=(delta.apply());
 
     if (auto_commit and this->needsAccepting())
@@ -2913,7 +3291,15 @@ void System::setContents(const MGID &mgid, const MoleculeView &molview, const Pr
     QList<MGNum> mgnums = mgid.map(*this);
 
     PartialMolecule view(molview);
-    view.update(this->matchToExistingVersion(molview.data()));
+
+    if (this->contains(view.data().number()))
+    {
+        view.update(this->matchToExistingVersion(molview.data()));
+    }
+    else
+    {
+        this->_updateSharedProperties(view);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -2958,7 +3344,15 @@ void System::setContents(const MGID &mgid, const ViewsOfMol &molviews, const Pro
     QList<MGNum> mgnums = mgid.map(*this);
 
     ViewsOfMol views(molviews);
-    views.update(this->matchToExistingVersion(molviews.data()));
+
+    if (this->contains(views.data().number()))
+    {
+        views.update(this->matchToExistingVersion(molviews.data()));
+    }
+    else
+    {
+        this->_updateSharedProperties(views);
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -3003,7 +3397,21 @@ void System::setContents(const MGID &mgid, const Molecules &molecules, const Pro
 {
     QList<MGNum> mgnums = mgid.map(*this);
 
-    Molecules mols = this->matchToExistingVersion(molecules);
+    Molecules mols = molecules;
+
+    for (auto mol : molecules)
+    {
+        if (this->contains(mol.data().number()))
+        {
+            mol.update(this->matchToExistingVersion(mol.data()));
+        }
+        else
+        {
+            this->_updateSharedProperties(mol);
+        }
+
+        mols.update(mol.data());
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -3049,7 +3457,20 @@ void System::setContents(const MGID &mgid, const MoleculeGroup &molgroup, const 
     QList<MGNum> mgnums = mgid.map(*this);
 
     MolGroupPtr group(molgroup);
-    group.edit().update(this->matchToExistingVersion(molgroup.molecules()));
+
+    for (auto mol : molgroup.molecules())
+    {
+        if (this->contains(mol.data().number()))
+        {
+            mol.update(this->matchToExistingVersion(mol.data()));
+        }
+        else
+        {
+            this->_updateSharedProperties(mol);
+        }
+
+        group.edit().update(mol.data());
+    }
 
     SaveState old_state = SaveState::save(*this);
 
@@ -3336,10 +3757,6 @@ void System::loadFrame(int frame, const SireBase::PropertyMap &map)
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::loadFrame(frame, map);
 
-    // we must get the space property and a time property
-    SpacePtr old_space;
-    SireUnits::Dimension::Time old_time;
-
     const auto space_property = map["space"];
     const auto time_property = map["time"];
 
@@ -3351,6 +3768,10 @@ void System::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     if (space_property.hasSource())
         space_property_source = QString(space_property.source());
+
+    // we must get the space property and a time property
+    SpacePtr old_space;
+    SireUnits::Dimension::Time old_time;
 
     try
     {
@@ -3426,14 +3847,17 @@ void System::loadFrame(int frame, const SireBase::PropertyMap &map)
             break;
     }
 
-    if (found_space and (new_time != old_time))
+    if (found_space and (new_time != old_time) and
+        this->shared_properties.contains(time_property_source))
     {
-        this->setProperty(time_property_source, GeneralUnitProperty(new_time));
+        this->_setProperty(time_property_source,
+                           GeneralUnitProperty(new_time), false);
     }
 
-    if (found_space and (not old_space.read().equals(*new_space)))
+    if (found_space and (not old_space.read().equals(*new_space)) and
+        this->shared_properties.contains(space_property_source))
     {
-        this->setProperty(space_property_source, new_space);
+        this->_setProperty(space_property_source, new_space, false);
     }
 }
 
@@ -3463,6 +3887,74 @@ void System::deleteAllFrames(const SireBase::PropertyMap &map)
     this->accept();
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::deleteAllFrames(map);
+}
+
+void System::makeWhole(const PropertyMap &map)
+{
+    if (this->needsAccepting())
+    {
+        this->accept();
+    }
+
+    if (not this->containsProperty(map["space"]))
+        return;
+
+    if (not this->property(map["space"]).isA<Space>())
+        return;
+
+    const auto &space = this->property(map["space"]).asA<Space>();
+
+    if (not space.isPeriodic())
+        return;
+
+    PropertyMap m = map;
+    m.set("space", space);
+
+    const Molecules mols = this->molecules();
+
+    // find the center of the box
+    AABox box;
+
+    for (auto mol : mols)
+    {
+        box += mol.evaluate().aaBox(m);
+    }
+
+    const auto center = box.center();
+
+    Molecules changed_mols;
+
+    for (const auto &mol : mols)
+    {
+        auto new_mol = mol.move().makeWhole(center, m).commit();
+
+        if (new_mol.data().version() != mol.data().version())
+        {
+            changed_mols.add(new_mol);
+        }
+    }
+
+    if (not changed_mols.isEmpty())
+    {
+        Delta delta(*this, true);
+
+        // this ensures that only a single copy of System is used - prevents
+        // unnecessary copying
+        this->operator=(System());
+        delta.update(changed_mols);
+        this->operator=(delta.apply());
+
+        if (this->needsAccepting())
+        {
+            delta = Delta();
+            this->accept();
+        }
+    }
+}
+
+void System::makeWhole()
+{
+    this->makeWhole(PropertyMap());
 }
 
 const char *System::typeName()

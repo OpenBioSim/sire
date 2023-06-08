@@ -150,6 +150,9 @@ namespace SireVol
 
         QVector<Vector> getImagesWithin(const Vector &point, const Vector &center, double dist) const;
 
+        QVector<Vector> makeWhole(const QVector<Vector> &coords) const;
+        QVector<Vector> makeWhole(const QVector<Vector> &coords, const Vector &center) const;
+
         QList<boost::tuple<double, CoordGroup>> getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
                                                                 double dist) const;
 

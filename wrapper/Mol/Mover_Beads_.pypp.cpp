@@ -231,6 +231,34 @@ void register_Mover_Beads__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMol::Beads >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::Beads > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::Beads > & ( ::SireMol::Mover< SireMol::Beads >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::Beads >::makeWhole );
+            
+            Mover_Beads__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMol::Beads >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::Beads > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::Beads > & ( ::SireMol::Mover< SireMol::Beads >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::Beads >::makeWhole );
+            
+            Mover_Beads__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMol::Beads >::mapInto
         
             typedef SireMol::Mover< SireMol::Beads > exported_class_t;

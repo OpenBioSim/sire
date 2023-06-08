@@ -420,6 +420,32 @@ void register_PeriodicBox_class(){
                 , "A Periodic box is periodic" );
         
         }
+        { //::SireVol::PeriodicBox::makeWhole
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::PeriodicBox::*makeWhole_function_type)( ::QVector< SireMaths::Vector > const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::PeriodicBox::makeWhole );
+            
+            PeriodicBox_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireVol::PeriodicBox::makeWhole
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::PeriodicBox::*makeWhole_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::PeriodicBox::makeWhole );
+            
+            PeriodicBox_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::PeriodicBox::maxCoords
         
             typedef ::SireMaths::Vector ( ::SireVol::PeriodicBox::*maxCoords_function_type)( ::SireMaths::Vector const & ) const;

@@ -1464,6 +1464,32 @@ class Cursor:
         self._update()
         return self
 
+    def make_whole(self, center=None, map=None):
+        """
+        Make all of the atoms operated on by this cursor whole
+        (they won't be broken across a periodic box boundary)
+        Use 'map' to specify the property map used to find the
+        coordinates and space properties. Pass in 'center'
+        to specify the center of the periodic box into
+        which they should be wrapped.
+        """
+        map = self._d.merge(map)
+        view = self.commit()
+
+        if center is None:
+            view = view.move().make_whole(map=map).commit()
+        else:
+            from ..maths import Vector
+
+            view = (
+                view.move().make_whole(center=Vector(center), map=map).commit()
+            )
+
+        self._d.molecule = view.molecule().edit()
+        self._update()
+
+        return self
+
     def translate(self, *args, map=None):
         """
         Translate all of the atoms operated on by this cursor
@@ -2517,8 +2543,23 @@ class Cursors:
 
         return self
 
+    def make_whole(self, *args, map=None):
+        """
+        Make all of the atoms operated on by this cursor whole
+        (they won't be broken across a periodic box boundary)
+        Use 'map' to specify the property map used to find the
+        coordinates and space properties. Pass in 'center'
+        to specify the center of the periodic box into
+        which they should be wrapped.
+        """
+        for cursor in self._cursors:
+            cursor.make_whole(*args, map=map)
+
+        return self
+
     def translate(self, *args, map=None):
-        """Translate all of the atoms operated on by these cursors
+        """
+        Translate all of the atoms operated on by these cursors
         by the passed arguments (these are converted automatically
         to a sr.maths.Vector). Use 'map' to specify the property
         map to use to find the coordinates property
@@ -3661,8 +3702,23 @@ class CursorsM:
 
         return self
 
+    def make_whole(self, *args, map=None):
+        """
+        Make all of the atoms operated on by this cursor whole
+        (they won't be broken across a periodic box boundary)
+        Use 'map' to specify the property map used to find the
+        coordinates and space properties. Pass in 'center'
+        to specify the center of the periodic box into
+        which they should be wrapped.
+        """
+        for cursor in self._cursors:
+            cursor.make_whole(*args, map=map)
+
+        return self
+
     def translate(self, *args, map=None):
-        """Translate all of the atoms operated on by these cursors
+        """
+        Translate all of the atoms operated on by these cursors
         by the passed arguments (these are converted automatically
         to a sr.maths.Vector). Use 'map' to specify the property
         map to use to find the coordinates property

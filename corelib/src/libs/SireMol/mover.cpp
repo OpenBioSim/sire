@@ -173,6 +173,62 @@ void MoverBase::setMovableAtoms(const AtomSelection &selection)
     movable_atoms = selection;
 }
 
+/** Make the selected atoms whole */
+void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+                          const Space &space)
+{
+    if (selected_atoms.selectedAll())
+    {
+        // this is very easy
+        auto vector_coords = coords.toVector();
+        auto mapped_coords = space.makeWhole(vector_coords);
+
+        if (vector_coords.constData() != mapped_coords.constData())
+        {
+            coords.copyFrom(mapped_coords);
+        }
+    }
+    else if (not selected_atoms.selectedNone())
+    {
+        // this isn't too difficult
+        auto vector_coords = coords.toVector(selected_atoms);
+        auto mapped_coords = space.makeWhole(vector_coords);
+
+        if (vector_coords.constData() != mapped_coords.constData())
+        {
+            coords.copyFrom(mapped_coords, selected_atoms);
+        }
+    }
+}
+
+/** Make the selected atoms whole */
+void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+                          const Vector &center, const Space &space)
+{
+    if (selected_atoms.selectedAll())
+    {
+        // this is very easy
+        auto vector_coords = coords.toVector();
+        auto mapped_coords = space.makeWhole(vector_coords, center);
+
+        if (vector_coords.constData() != mapped_coords.constData())
+        {
+            coords.copyFrom(mapped_coords);
+        }
+    }
+    else if (not selected_atoms.selectedNone())
+    {
+        // this isn't too difficult
+        auto vector_coords = coords.toVector(selected_atoms);
+        auto mapped_coords = space.makeWhole(vector_coords, center);
+
+        if (vector_coords.constData() != mapped_coords.constData())
+        {
+            coords.copyFrom(mapped_coords, selected_atoms);
+        }
+    }
+}
+
 /** Translate the selected atoms from 'coords' by 'delta'.
     This function assumes that 'selected_atoms' is compatible
     with 'coords' */
@@ -513,6 +569,81 @@ void MoverBase::changeFrame(AtomCoords &coords, const AtomSelection &selected_at
     }
 }
 
+/** Make the molecule whole in the molecule's space */
+void MoverBase::makeWhole(MoleculeData &moldata,
+                          const AtomSelection &selected_atoms,
+                          const PropertyMap &map)
+{
+    // which property contains the coordinates?
+    PropertyName coord_property = map["coordinates"];
+
+    // get the current coordinates
+    AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
+
+    // get the current space
+    const auto &space = moldata.property(map["space"]).asA<Space>();
+
+    if (not space.isPeriodic())
+        return;
+
+    MoverBase::makeWhole(coords, selected_atoms, space);
+
+    // set the new property
+    if (coord_property.hasSource())
+        moldata.setProperty(coord_property.source(), coords);
+
+    // if we have translated all atoms, then update the center point
+    // of the molecule, if one has been set
+    if (selected_atoms.selectedAll())
+    {
+        PropertyName center_property = map["center"];
+        if (center_property.hasSource() and moldata.hasProperty(center_property))
+        {
+            Vector c = moldata.property(center_property).asA<VectorProperty>();
+            moldata.setProperty(center_property.source(),
+                                VectorProperty(space.getMinimumImage(c, coords[AtomIdx(0)])));
+        }
+    }
+}
+
+/** Make the molecule whole in the molecule's space */
+void MoverBase::makeWhole(MoleculeData &moldata,
+                          const AtomSelection &selected_atoms,
+                          const Vector &center,
+                          const PropertyMap &map)
+{
+    // which property contains the coordinates?
+    PropertyName coord_property = map["coordinates"];
+
+    // get the current coordinates
+    AtomCoords coords = moldata.property(coord_property).asA<AtomCoords>();
+
+    // get the current space
+    const auto &space = moldata.property(map["space"]).asA<Space>();
+
+    if (not space.isPeriodic())
+        return;
+
+    MoverBase::makeWhole(coords, selected_atoms, center, space);
+
+    // set the new property
+    if (coord_property.hasSource())
+        moldata.setProperty(coord_property.source(), coords);
+
+    // if we have translated all atoms, then update the center point
+    // of the molecule, if one has been set
+    if (selected_atoms.selectedAll())
+    {
+        PropertyName center_property = map["center"];
+        if (center_property.hasSource() and moldata.hasProperty(center_property))
+        {
+            Vector c = moldata.property(center_property).asA<VectorProperty>();
+            moldata.setProperty(center_property.source(),
+                                VectorProperty(space.getMinimumImage(c, center)));
+        }
+    }
+}
+
 /** Translate the selected atoms in the molecule whose data is in 'moldata'
     by 'delta', using 'coord_property' to get the coordinates to
     be translated. This function assumes that selected_atoms
@@ -726,6 +857,18 @@ void MoverBase::changeFrame(MoleculeData &moldata, const AxisSet &from_frame, co
                             const PropertyMap &map) const
 {
     MoverBase::changeFrame(moldata, movable_atoms, from_frame, to_frame, map);
+}
+
+/** Make the molecule whole, moving atoms that are allowed to move */
+void MoverBase::makeWhole(MoleculeData &moldata, const PropertyMap &map) const
+{
+    MoverBase::makeWhole(moldata, movable_atoms, map);
+}
+
+/** Make the molecule whole, moving atoms that are allowed to move */
+void MoverBase::makeWhole(MoleculeData &moldata, const Vector &center, const PropertyMap &map) const
+{
+    MoverBase::makeWhole(moldata, movable_atoms, center, map);
 }
 
 /** Translate atoms we are allowed to move from the molecule whose

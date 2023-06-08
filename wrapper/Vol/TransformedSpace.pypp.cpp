@@ -547,7 +547,7 @@ void register_TransformedSpace_class(){
                 , setVolume_function_value
                 , ( bp::arg("volume") )
                 , bp::release_gil_policy()
-                , "Throw an exception as an infinite space doesnt have a volume" );
+                , "" );
         
         }
         { //::SireVol::TransformedSpace::toString
@@ -583,7 +583,7 @@ void register_TransformedSpace_class(){
                 "volume"
                 , volume_function_value
                 , bp::release_gil_policy()
-                , "Throw an exception as an infinite space doesnt have a volume" );
+                , "" );
         
         }
         TransformedSpace_exposer.staticmethod( "typeName" );

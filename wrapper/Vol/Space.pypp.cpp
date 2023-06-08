@@ -76,7 +76,7 @@ void register_Space_class(){
                 "boxMatrix"
                 , boxMatrix_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the matrix that describes this box - these are the\n  three box vectors. This raises an exception if this is\n  not a periodic space\n" );
         
         }
         { //::SireVol::Space::calcAngle
@@ -515,6 +515,32 @@ void register_Space_class(){
                 , isPeriodic_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this space is periodic" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< SireMaths::Vector > const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireVol::Space::maximumCutoff

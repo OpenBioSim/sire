@@ -410,7 +410,7 @@ void register_CombinedSpace_class(){
                 , getMinimumImage_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "Return the minimum image copy of group with respect to center.\nIn this case, as this is not a periodic space, this just returns\ngroup" );
+                , "A cartesian space is not periodic, so this just returns the input point" );
         
         }
         { //::SireVol::CombinedSpace::getMinimumImage
