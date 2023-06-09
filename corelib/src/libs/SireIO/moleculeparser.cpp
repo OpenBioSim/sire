@@ -1170,6 +1170,15 @@ void MoleculeParser::copyFromFrame(const Frame &frame, System &system, const Pro
 
     const PropertyName frcs_property = map["force"];
 
+    bool should_make_whole = false;
+
+    const Space &space = frame.space();
+
+    if (space.isPeriodic() and map.specified("make_whole"))
+    {
+        should_make_whole = map["make_whole"].value().asABoolean();
+    }
+
     auto add_data = [&](int i)
     {
         const int atom_start_idx = atom_pointers.constData()[i];
@@ -1194,6 +1203,9 @@ void MoleculeParser::copyFromFrame(const Frame &frame, System &system, const Pro
 
                 coords[cgatomidx.cutGroup()][cgatomidx.atom()] = coords_array[atom_idx];
             }
+
+            if (should_make_whole)
+                coords = space.makeWhole(coords);
 
             mol.setProperty(coords_property, AtomCoords(CoordGroupArray(coords)));
         }

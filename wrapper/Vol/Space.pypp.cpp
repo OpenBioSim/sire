@@ -543,6 +543,32 @@ void register_Space_class(){
                 , "" );
         
         }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< QVector< SireMaths::Vector > > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< QVector< SireMaths::Vector > > const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< QVector< SireMaths::Vector > > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< QVector< SireMaths::Vector > > const &,::SireMaths::Vector const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::Space::maximumCutoff
         
             typedef ::SireUnits::Dimension::Length ( ::SireVol::Space::*maximumCutoff_function_type)(  ) const;

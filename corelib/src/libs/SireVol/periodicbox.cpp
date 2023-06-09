@@ -1356,11 +1356,11 @@ Vector PeriodicBox::getBoxCenter(const Vector &p, const Vector &center) const
 */
 QVector<Vector> PeriodicBox::makeWhole(const QVector<Vector> &coords, const Vector &center) const
 {
-    if (coords.isEmpty() or (not this->isPeriodic()))
+    if (coords.isEmpty())
         return coords;
     else if (coords.count() == 1)
     {
-        Vector image = this->getMinimumImage(coords[0], center);
+        Vector image = coords[0] + wrapDelta(coords[0], center);
 
         if (image != coords[0])
             // this has changed
@@ -1382,7 +1382,7 @@ QVector<Vector> PeriodicBox::makeWhole(const QVector<Vector> &coords, const Vect
 
     for (int i = 0; i < n; ++i)
     {
-        auto image = this->getMinimumImage(coords_data[i], ref_point);
+        auto image = coords_data[i] + wrapDelta(coords_data[i], ref_point);
 
         if (image != coords_data[i])
         {
@@ -1408,7 +1408,7 @@ QVector<Vector> PeriodicBox::makeWhole(const QVector<Vector> &coords, const Vect
  */
 QVector<Vector> PeriodicBox::makeWhole(const QVector<Vector> &coords) const
 {
-    if (coords.count() < 2 or (not this->isPeriodic()))
+    if (coords.count() < 2)
         return coords;
 
     int ncoords = coords.count();

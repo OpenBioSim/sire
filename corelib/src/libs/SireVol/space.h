@@ -338,6 +338,10 @@ namespace SireVol
         virtual QVector<Vector> makeWhole(const QVector<Vector> &coords) const;
         virtual QVector<Vector> makeWhole(const QVector<Vector> &coords, const Vector &center) const;
 
+        virtual QVector<QVector<Vector>> makeWhole(const QVector<QVector<Vector>> &coords) const;
+        virtual QVector<QVector<Vector>> makeWhole(const QVector<QVector<Vector>> &coords,
+                                                   const Vector &center) const;
+
         /** Return all periodic images of 'point' with respect to 'center' within
             'dist' distance of 'center' */
         virtual QVector<Vector> getImagesWithin(const Vector &point, const Vector &center, double dist) const = 0;

@@ -173,8 +173,9 @@ void MoverBase::setMovableAtoms(const AtomSelection &selection)
     movable_atoms = selection;
 }
 
-/** Make the selected atoms whole */
-void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+/** Make the selected atoms whole. Return whether or not this
+    changed the coordinates */
+bool MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
                           const Space &space)
 {
     if (selected_atoms.selectedAll())
@@ -186,6 +187,7 @@ void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atom
         if (vector_coords.constData() != mapped_coords.constData())
         {
             coords.copyFrom(mapped_coords);
+            return true;
         }
     }
     else if (not selected_atoms.selectedNone())
@@ -197,12 +199,16 @@ void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atom
         if (vector_coords.constData() != mapped_coords.constData())
         {
             coords.copyFrom(mapped_coords, selected_atoms);
+            return true;
         }
     }
+
+    return false;
 }
 
-/** Make the selected atoms whole */
-void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+/** Make the selected atoms whole. Return whether or not this changed
+    the coordinates */
+bool MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
                           const Vector &center, const Space &space)
 {
     if (selected_atoms.selectedAll())
@@ -214,6 +220,7 @@ void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atom
         if (vector_coords.constData() != mapped_coords.constData())
         {
             coords.copyFrom(mapped_coords);
+            return true;
         }
     }
     else if (not selected_atoms.selectedNone())
@@ -225,8 +232,11 @@ void MoverBase::makeWhole(AtomCoords &coords, const AtomSelection &selected_atom
         if (vector_coords.constData() != mapped_coords.constData())
         {
             coords.copyFrom(mapped_coords, selected_atoms);
+            return true;
         }
     }
+
+    return false;
 }
 
 /** Translate the selected atoms from 'coords' by 'delta'.
@@ -586,7 +596,9 @@ void MoverBase::makeWhole(MoleculeData &moldata,
     if (not space.isPeriodic())
         return;
 
-    MoverBase::makeWhole(coords, selected_atoms, space);
+    if (not MoverBase::makeWhole(coords, selected_atoms, space))
+        // nothing changed
+        return;
 
     // set the new property
     if (coord_property.hasSource())
@@ -624,7 +636,9 @@ void MoverBase::makeWhole(MoleculeData &moldata,
     if (not space.isPeriodic())
         return;
 
-    MoverBase::makeWhole(coords, selected_atoms, center, space);
+    if (not MoverBase::makeWhole(coords, selected_atoms, center, space))
+        // nothing moved
+        return;
 
     // set the new property
     if (coord_property.hasSource())

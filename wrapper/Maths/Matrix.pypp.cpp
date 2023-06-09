@@ -267,7 +267,7 @@ void register_Matrix_class(){
                 "isZero"
                 , isZero_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return whether or not this matrix is all zero" );
         
         }
         { //::SireMaths::Matrix::offset

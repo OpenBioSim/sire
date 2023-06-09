@@ -603,7 +603,7 @@ def save(
     return MoleculeParser.save(molecules, filename, map=map)
 
 
-def load_test_files(files: _Union[_List[str], str], *args):
+def load_test_files(files: _Union[_List[str], str], *args, map=None):
     """Load the passed files that are part of the unit testing
     and return the resulting molecules. This will cache the files
     into a directory called "../cache" so that downloads can be shared
@@ -641,7 +641,9 @@ def load_test_files(files: _Union[_List[str], str], *args):
             cache_dir = os.path.join(d, "cache")
 
     files = expand(tutorial_url, files, suffix=".bz2")
-    return load(files, directory=cache_dir, silent=True, show_warnings=False)
+    return load(
+        files, directory=cache_dir, silent=True, show_warnings=False, map=map
+    )
 
 
 def smiles(

@@ -173,9 +173,9 @@ namespace SireMol
         static void changeFrame(AtomCoords &coords, const AtomSelection &selected_atoms, const AxisSet &from_frame,
                                 const AxisSet &to_frame);
 
-        static void makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+        static bool makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
                               const SireVol::Space &space);
-        static void makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+        static bool makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
                               const SireMaths::Vector &center, const SireVol::Space &space);
 
         static void translate(AtomCoords &coords, const AtomSelection &selected_atoms, const SireMaths::Vector &delta);

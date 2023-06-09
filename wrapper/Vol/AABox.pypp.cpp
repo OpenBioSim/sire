@@ -39,6 +39,7 @@ void register_AABox_class(){
         AABox_exposer.def( bp::init< SireMaths::Vector const &, SireMaths::Vector const & >(( bp::arg("cent"), bp::arg("extents") ), "Construct an AABox with center at cent, and half-extents extents") );
         AABox_exposer.def( bp::init< QVector< SireMaths::Vector > const & >(( bp::arg("coordinates") ), "Construct an AABox that completely encases the points  in coordinates") );
         AABox_exposer.def( bp::init< SireMaths::Vector const *, int >(( bp::arg("coords"), bp::arg("ncoords") ), "Construct an AABox that completely encases the points in coords") );
+        AABox_exposer.def( bp::init< QVector< QVector< SireMaths::Vector > > const & >(( bp::arg("coordinates") ), "Construct an AABox that completely encases the points  in coordinates") );
         AABox_exposer.def( bp::init< SireVol::CoordGroupBase const & >(( bp::arg("coordgroup") ), "Construct an AABox that completely encases the CoordGroup coordgroup") );
         AABox_exposer.def( bp::init< SireVol::CoordGroupArray const & >(( bp::arg("cgarray") ), "Construct an AABox that completely encases all of the points in all of the\nCoordGroups in cgarray") );
         AABox_exposer.def( bp::init< SireVol::CoordGroupArrayArray const & >(( bp::arg("cgarrays") ), "Construct an AABox that completely encases all of the points in all of the\nCoordGroups in all of the arrays in cgarrays") );
@@ -354,6 +355,19 @@ void register_AABox_class(){
         { //::SireVol::AABox::recalculate
         
             typedef void ( ::SireVol::AABox::*recalculate_function_type)( ::QVector< SireMaths::Vector > const & ) ;
+            recalculate_function_type recalculate_function_value( &::SireVol::AABox::recalculate );
+            
+            AABox_exposer.def( 
+                "recalculate"
+                , recalculate_function_value
+                , ( bp::arg("coordinates") )
+                , bp::release_gil_policy()
+                , "Recalculate the AABox so that it completely encloses the coordinates" );
+        
+        }
+        { //::SireVol::AABox::recalculate
+        
+            typedef void ( ::SireVol::AABox::*recalculate_function_type)( ::QVector< QVector< SireMaths::Vector > > const & ) ;
             recalculate_function_type recalculate_function_value( &::SireVol::AABox::recalculate );
             
             AABox_exposer.def( 

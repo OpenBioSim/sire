@@ -3910,7 +3910,8 @@ void System::makeWhole(const PropertyMap &map)
     PropertyMap m = map;
     m.set("space", space);
 
-    const Molecules mols = this->molecules();
+    // get a list of all molecules in the system
+    const SelectorMol mols(*this);
 
     // find the center of the box
     AABox box;
@@ -3922,7 +3923,7 @@ void System::makeWhole(const PropertyMap &map)
 
     const auto center = box.center();
 
-    Molecules changed_mols;
+    SelectorMol changed_mols;
 
     for (const auto &mol : mols)
     {
@@ -3930,7 +3931,7 @@ void System::makeWhole(const PropertyMap &map)
 
         if (new_mol.data().version() != mol.data().version())
         {
-            changed_mols.add(new_mol);
+            changed_mols.append(new_mol);
         }
     }
 
@@ -3941,7 +3942,7 @@ void System::makeWhole(const PropertyMap &map)
         // this ensures that only a single copy of System is used - prevents
         // unnecessary copying
         this->operator=(System());
-        delta.update(changed_mols);
+        delta.update(changed_mols.toMolecules());
         this->operator=(delta.apply());
 
         if (this->needsAccepting())

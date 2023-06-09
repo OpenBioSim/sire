@@ -220,18 +220,66 @@ QVector<Vector> Space::makeWhole(const QVector<Vector> &coords) const
     if (coords.count() < 2 or (not this->isPeriodic()))
         return coords;
 
-    int ncoords = coords.count();
-    const auto coords_data = coords.constData();
+    // calculate the spatial central coordinates
+    const Vector center = AABox(coords).center();
 
-    // calculate the simple average coordinates
-    double scl = 1.0 / ncoords;
+    return this->makeWhole(coords, center);
+}
 
-    Vector center = scl * coords_data[0];
+/** Return the minimum image copy of 'coords' with respect to 'center',
+    where the coordinates are "made whole". This means that they are
+    translated as a single group, but the group as a whole will not
+    be split across a periodic boundary. Use this function if you want
+    to restore a molecule that has been split over a space into a single,
+    coherent entity (all of the coordinates physically close to
+    one another). This treats all of the passed arrays
+    of coordinates as a single unit that should not be split
+*/
+QVector<QVector<Vector>> Space::makeWhole(const QVector<QVector<Vector>> &coords,
+                                          const Vector &center) const
+{
+    if (coords.isEmpty() or (not this->isPeriodic()))
+        return coords;
 
-    for (int i = 1; i < ncoords; ++i)
+    QVector<QVector<Vector>> new_coords(coords);
+    QVector<Vector> *new_coords_data = 0;
+
+    const QVector<Vector> *coords_data = coords.constData();
+
+    const int n = coords.count();
+
+    for (int i = 0; i < n; ++i)
     {
-        center += scl * coords_data[i];
+        const auto whole_coords = this->makeWhole(coords_data[i], center);
+
+        if (whole_coords.constData() != coords_data[i].constData())
+        {
+            // the coordinates changed
+            if (new_coords_data == 0)
+            {
+                new_coords_data = new_coords.data();
+            }
+
+            new_coords_data[i] = whole_coords;
+        }
     }
+
+    return new_coords;
+}
+
+/** Make the passed group of coordinates 'whole'. This will make sure
+ *  that they are all next to each other, and aren't split across a
+ *  periodic image boundary. The box that will be chosen will be the
+ *  one that contains the center of the points, with the points mapped
+ *  from the first to the last. This treats all of the passed arrays
+ *  of coordinates as a single unit that should not be split
+ */
+QVector<QVector<Vector>> Space::makeWhole(const QVector<QVector<Vector>> &coords) const
+{
+    if (coords.isEmpty() or (not this->isPeriodic()))
+        return coords;
+
+    const Vector center = AABox(coords).center();
 
     return this->makeWhole(coords, center);
 }
