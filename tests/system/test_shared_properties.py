@@ -6,6 +6,13 @@ def test_shared_properties(ala_traj, ala_mols):
     mols = ala_traj.clone()
     extra_mol = ala_mols[0]
 
+    # This test will fail if another test has accidentally changed
+    # 'ala_traj', e.g. by changing the frame number. You can
+    # test for this by uncommenting the below line. If this test
+    # passes, then some test using `ala_traj` has forgotten to
+    # use 'clone' to create their own copy.
+    # mols.load_frame(0)
+
     first_space = mols.property("space")
     first_time = mols.property("time")
 

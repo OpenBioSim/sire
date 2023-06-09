@@ -5,7 +5,7 @@ import sire as sr
 
 def test_trajectories(tmpdir, ala_traj):
     # ala_traj is a AmberRst file - it contains time and space info
-    mols = ala_traj
+    mols = ala_traj.clone()
 
     d = tmpdir.mkdir("test_trajectories")
 

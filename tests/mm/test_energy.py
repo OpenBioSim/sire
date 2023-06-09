@@ -18,7 +18,7 @@ def assert_approx_equal(nrg0, nrg1):
 
 
 def test_trajectory_energies(ala_traj):
-    mols = ala_traj
+    mols = ala_traj.clone()
     mol = mols[0]
 
     from sire.units import angstrom
@@ -83,7 +83,7 @@ def test_trajectory_energies(ala_traj):
 
 
 def test_trajectory_energy(ala_traj):
-    mols = ala_traj
+    mols = ala_traj.clone()
     mol = mols[0]
 
     from sire.units import angstrom
