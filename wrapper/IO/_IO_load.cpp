@@ -6,6 +6,8 @@
 
 #include "SireBase/propertymap.h"
 #include "SireBase/propertylist.h"
+#include "SireBase/progressbar.h"
+#include "SireBase/releasegil.h"
 
 #include "SireIO/moleculeparser.h"
 
@@ -33,13 +35,20 @@ using namespace SireMol;
 using namespace SireVol;
 
 System load_molecules(const QStringList &files,
-                      const PropertyMap &map=PropertyMap())
+                      const PropertyMap &map = PropertyMap())
 {
-    boost::python::release_gil_policy::release_gil_no_raii();
+    auto gil = SireBase::release_gil();
 
     try
     {
+        SireBase::ProgressBar bar("Loading");
+        bar = bar.enter();
+        bar.tick();
+
         auto mols = MoleculeParser::load(files, map);
+
+        bar.setProgress("Processing", 0);
+        bar.tick();
 
         // get the name of this system - if it doesn't exist, then
         // infer it from the filename
@@ -76,7 +85,7 @@ System load_molecules(const QStringList &files,
 
             if (not mol.hasProperty("element"))
             {
-                for (int i=0; i<mol.nAtoms(); ++i)
+                for (int i = 0; i < mol.nAtoms(); ++i)
                 {
                     auto atom = editor.atom(AtomIdx(i));
                     atom.setProperty("element",
@@ -91,9 +100,10 @@ System load_molecules(const QStringList &files,
                 {
                     auto hunter = CovalentBondHunter();
                     editor.setProperty("connectivity",
-                                                 hunter(mol) ).commit();
+                                       hunter(mol))
+                        .commit();
                 }
-                catch(...)
+                catch (...)
                 {
                     qDebug() << "Failed to auto-generate the connectivity";
                 }
@@ -112,20 +122,22 @@ System load_molecules(const QStringList &files,
 
                 if (molname.isEmpty())
                 {
-                    //use the system name. The first molecule with this name
-                    //is named after the system. Otherwise, we add a suffix
+                    // use the system name. The first molecule with this name
+                    // is named after the system. Otherwise, we add a suffix
                     if (n == 0)
                     {
                         molname = name;
                     }
                     else
                     {
-                        molname = QString("%1_%2").arg(name).arg(n+1);
+                        molname = QString("%1_%2").arg(name).arg(n + 1);
                         n++;
                     }
                 }
 
                 editor.rename(molname).commit();
+
+                bar.tick();
             }
 
             // we want every molecule to know what space it has
@@ -142,6 +154,8 @@ System load_molecules(const QStringList &files,
         s.setName(name);
         s.add(grp);
 
+        bar.tick();
+
         for (const auto &key : mols.propertyKeys())
         {
             s.setProperty(key, mols.property(key));
@@ -149,15 +163,18 @@ System load_molecules(const QStringList &files,
 
         s.setProperty("filenames", StringArrayProperty(files));
 
+        bar.success();
+
         boost::python::release_gil_policy::acquire_gil_no_raii();
         return s;
     }
-    catch(SireError::exception &e)
+    catch (SireError::exception &e)
     {
         boost::python::release_gil_policy::acquire_gil_no_raii();
         throw SireError::io_error(
             QObject::tr("Cannot load the molecules: %1")
-                .arg(e.why()), CODELOC);
+                .arg(e.why()),
+            CODELOC);
     }
 }
 
@@ -165,7 +182,7 @@ void register_SireIO_load_function()
 {
     boost::python::def("load_molecules",
                        &load_molecules,
-                       ( boost::python::arg("filenames"),
-                         boost::python::arg("map")=PropertyMap() ),
+                       (boost::python::arg("filenames"),
+                        boost::python::arg("map") = PropertyMap()),
                        "Load molecules from the passed files.");
 }

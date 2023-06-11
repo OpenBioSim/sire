@@ -3772,32 +3772,40 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
     // the layout of cutgroups, residues and atoms
     MolStructureEditor mol;
 
-    auto atom_names = this->stringData("ATOM_NAME");
+    auto raw_atom_names = this->stringData("ATOM_NAME");
 
-    while (atom_names.count() < natoms)
+    while (raw_atom_names.count() < natoms)
     {
         // we are missing some atom names - give a default
         // name of "UNK", which tends to be used for "UNKNOWN" atoms.
         // see
         // https://www.rcsb.org/ligand/UNX
         // for this convention
-        atom_names.append("UNK");
+        raw_atom_names.append("UNK");
     }
+
+    // make sure we use a const reference, or else we will
+    // severely degrade performance by continually copying
+    // this list of names
+    const auto atom_names = raw_atom_names;
 
     // locate the residue pointers for this molecule - note that the
     // residue pointers are 1-indexed (i.e. from atom 1 to atom N)
     const auto res_pointers = this->intData("RESIDUE_POINTER");
-    auto res_names = this->stringData("RESIDUE_LABEL");
 
-    while (res_names.count() < res_pointers.count())
+    auto raw_res_names = this->stringData("RESIDUE_LABEL");
+
+    while (raw_res_names.count() < res_pointers.count())
     {
         // we are missing some residue names - give a default
         // name of "UNK", which tends to be used for "UNKNOWN" residues
         // see
         // http://www.bmsc.washington.edu/CrystaLinks/man/pdb/part_37.html
         // for this convention
-        res_names.append("UNK");
+        raw_res_names.append("UNK");
     }
+
+    const auto res_names = raw_res_names;
 
     for (int i = 0; i < res_pointers.count(); ++i)
     {
