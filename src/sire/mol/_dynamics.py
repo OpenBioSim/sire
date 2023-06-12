@@ -8,7 +8,11 @@ class DynamicsData:
     of molecule(s).
     """
 
-    def __init__(self, mols=None, map=None):
+    def __init__(self, mols=None, map=None, **kwargs):
+        from ..base import create_map
+
+        map = create_map(map, kwargs)
+
         if mols is not None:
             self._map = map  # this is already a PropertyMap
 
@@ -208,6 +212,12 @@ class DynamicsData:
         else:
             return self._ffinfo
 
+    def platform(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.getPlatform().getName()
+
     def current_step(self):
         if self.is_null():
             return 0
@@ -336,6 +346,12 @@ class DynamicsData:
         import openmm
 
         from ..units import picosecond
+        from .. import u
+
+        time = u(time)
+
+        if save_frequency is not None:
+            save_frequency = u(save_frequency)
 
         try:
             steps = int(time.to(picosecond) / self.timestep().to(picosecond))
@@ -540,12 +556,13 @@ class Dynamics:
         constraint=None,
     ):
         from ..base import create_map
+        from .. import u
 
         extras = {}
 
         _add_extra(extras, "cutoff", cutoff)
         _add_extra(extras, "cutoff_type", cutoff_type)
-        _add_extra(extras, "timestep", timestep)
+        _add_extra(extras, "timestep", u(timestep))
         _add_extra(extras, "save_frequency", save_frequency)
         _add_extra(extras, "constraint", constraint)
 
@@ -605,6 +622,12 @@ class Dynamics:
         be used for dynamics
         """
         return self._d.info()
+
+    def platform(self):
+        """
+        Return the name of the OpenMM platform being used for dynamics
+        """
+        return self._d.platform()
 
     def timestep(self):
         """

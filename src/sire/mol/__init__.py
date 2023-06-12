@@ -1257,6 +1257,7 @@ def _dynamics(
     timestep=None,
     save_frequency=None,
     constraint=None,
+    **kwargs,
 ):
     """
     Return a Dynamics object that can be used to perform
@@ -1264,7 +1265,7 @@ def _dynamics(
     """
     from ..base import create_map
 
-    map = create_map(map)
+    map = create_map(map, kwargs)
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1279,11 +1280,19 @@ def _dynamics(
         from ..units import femtosecond
 
         timestep = 1 * femtosecond
+    else:
+        from .. import u
+
+        timestep = u(timestep)
 
     if save_frequency is None and not map.specified("save_frequency"):
         from ..units import picosecond
 
         save_frequency = 25 * picosecond
+    else:
+        from .. import u
+
+        save_frequency = u(save_frequency)
 
     if constraint is None and not map.specified("constraint"):
         from ..units import femtosecond
