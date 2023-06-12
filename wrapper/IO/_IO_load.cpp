@@ -6,7 +6,6 @@
 
 #include "SireBase/propertymap.h"
 #include "SireBase/propertylist.h"
-#include "SireBase/progressbar.h"
 #include "SireBase/releasegil.h"
 
 #include "SireIO/moleculeparser.h"
@@ -41,14 +40,7 @@ System load_molecules(const QStringList &files,
 
     try
     {
-        SireBase::ProgressBar bar("Loading");
-        bar = bar.enter();
-        bar.tick();
-
         auto mols = MoleculeParser::load(files, map);
-
-        bar.setProgress("Processing", 0);
-        bar.tick();
 
         // get the name of this system - if it doesn't exist, then
         // infer it from the filename
@@ -136,8 +128,6 @@ System load_molecules(const QStringList &files,
                 }
 
                 editor.rename(molname).commit();
-
-                bar.tick();
             }
 
             // we want every molecule to know what space it has
@@ -154,16 +144,12 @@ System load_molecules(const QStringList &files,
         s.setName(name);
         s.add(grp);
 
-        bar.tick();
-
         for (const auto &key : mols.propertyKeys())
         {
             s.setProperty(key, mols.property(key));
         }
 
         s.setProperty("filenames", StringArrayProperty(files));
-
-        bar.success();
 
         boost::python::release_gil_policy::acquire_gil_no_raii();
         return s;

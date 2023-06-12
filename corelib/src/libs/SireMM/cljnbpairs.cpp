@@ -621,6 +621,164 @@ QString CLJNBPairs::toString() const
     return QObject::tr("CLJNBPairs( nAtoms() == %1, nGroups() == %2 )").arg(nAtoms()).arg(nGroups());
 }
 
+/** Return all of the excluded atoms for the atoms in the specified
+ *  CutGroup, returned in a hash indexed by the AtomIdx of those
+ *  atoms. This is equivalent to calling excludedAtoms individually,
+ *  but is far more efficient if trying to get all of the
+ *  excluded atoms in the whole molecule
+ */
+QHash<AtomIdx, QVector<AtomIdx>> CLJNBPairs::excludedAtoms(CGIdx cgidx) const
+{
+    const auto molinfo = info();
+
+    const int nats = molinfo.nAtoms(cgidx);
+
+    QHash<AtomIdx, QVector<AtomIdx>> all_cgpairs;
+
+    if (nats == 0)
+        return all_cgpairs;
+
+    all_cgpairs.reserve(nats);
+
+    if (molinfo.nCutGroups() == 1)
+    {
+        // we only need to worry about ourselves
+        const auto cgpairs = this->get(CGIdx(0), CGIdx(0));
+
+        if (cgpairs.isEmpty())
+        {
+            // all of the pairs have the same value (surprising!)
+            const auto cljscl = cgpairs.defaultValue();
+
+            if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
+            {
+                // all of the pairs are excluded for all atoms
+                QVector<AtomIdx> all_excluded(nats);
+                auto all_excluded_data = all_excluded.data();
+
+                for (int i = 0; i < nats; ++i)
+                {
+                    all_excluded_data[i] = AtomIdx(i);
+                }
+
+                for (int i = 0; i < nats; ++i)
+                {
+                    all_cgpairs.insert(AtomIdx(i), all_excluded);
+                    all_cgpairs[AtomIdx(i)].removeAll(AtomIdx(i));
+                }
+            }
+        }
+        else
+        {
+            // the pairs have different values, so add these in
+            for (int i = 0; i < nats; ++i)
+            {
+                QVector<AtomIdx> all_excluded;
+
+                for (int j = 0; j < nats; ++j)
+                {
+                    if (i != j)
+                    {
+                        const auto cljscl = cgpairs.get(i, j);
+
+                        if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
+                        {
+                            // this pair is excluded
+                            all_excluded.append(AtomIdx(j));
+                        }
+                    }
+                }
+
+                all_cgpairs.insert(AtomIdx(i), all_excluded);
+            }
+        }
+    }
+    else
+    {
+        QVector<AtomIdx> atomidxs(nats);
+
+        for (int i = 0; i < nats; ++i)
+        {
+            atomidxs[i] = molinfo.atomIdx(CGAtomIdx(CGIdx(cgidx), Index(i)));
+            all_cgpairs.insert(atomidxs[i], QVector<AtomIdx>());
+        }
+
+        const auto atomidxs_data = atomidxs.constData();
+
+        for (int jcg = 0; jcg < molinfo.nCutGroups(); ++jcg)
+        {
+            const auto cgpairs = this->get(cgidx, CGIdx(jcg));
+
+            if (cgpairs.isEmpty())
+            {
+                const auto cljscl = cgpairs.defaultValue();
+
+                if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
+                {
+                    // all of the pairs are excluded for all atoms
+                    const int other_nats = molinfo.nAtoms(CGIdx(jcg));
+                    QVector<AtomIdx> all_excluded(other_nats);
+                    auto all_excluded_data = all_excluded.data();
+
+                    for (int j = 0; j < other_nats; ++j)
+                    {
+                        all_excluded_data[j] = molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j)));
+                    }
+
+                    for (int i = 0; i < nats; ++i)
+                    {
+                        const auto &atomidx = atomidxs_data[i];
+
+                        all_cgpairs[atomidx] += all_excluded;
+
+                        // don't included the atom with itself
+                        int idx = all_excluded.indexOf(atomidx);
+
+                        if (idx >= 0)
+                        {
+                            all_cgpairs[atomidx].removeAll(atomidx);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // the pairs have different values, so add these in
+                const int other_nats = molinfo.nAtoms(CGIdx(jcg));
+
+                for (int i = 0; i < nats; ++i)
+                {
+                    QVector<AtomIdx> all_excluded;
+
+                    for (int j = 0; j < other_nats; ++j)
+                    {
+                        const auto cljscl = cgpairs.get(i, j);
+
+                        if (cljscl.coulomb() == 0 and cljscl.lj() == 0)
+                        {
+                            // this pair is excluded
+                            all_excluded.append(molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j))));
+                        }
+                    }
+
+                    if (not all_excluded.isEmpty())
+                    {
+                        // don't include the atom excluded from itself
+                        int idx = all_excluded.indexOf(atomidxs_data[i]);
+
+                        if (idx >= 0)
+                            all_excluded.remove(idx);
+
+                        all_cgpairs[atomidxs_data[i]] += all_excluded;
+                    }
+                }
+            }
+        }
+    }
+
+    return all_cgpairs;
+}
+
 /** Return the excluded atoms for the atom matching ID 'atomid'. This
     returns all of the atoms for which the interaction with atomid is
     equal to zero */

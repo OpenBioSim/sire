@@ -255,6 +255,34 @@ void register_Mover_Improper__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMM::Improper >::makeWhole
+        
+            typedef SireMol::Mover< SireMM::Improper > exported_class_t;
+            typedef ::SireMol::Mover< SireMM::Improper > & ( ::SireMol::Mover< SireMM::Improper >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMM::Improper >::makeWhole );
+            
+            Mover_Improper__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMM::Improper >::makeWhole
+        
+            typedef SireMol::Mover< SireMM::Improper > exported_class_t;
+            typedef ::SireMol::Mover< SireMM::Improper > & ( ::SireMol::Mover< SireMM::Improper >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMM::Improper >::makeWhole );
+            
+            Mover_Improper__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMM::Improper >::mapInto
         
             typedef SireMol::Mover< SireMM::Improper > exported_class_t;

@@ -108,6 +108,8 @@ namespace SireMol
 
         Molecule(const MoleculeData &moldata);
 
+        Molecule(const QString &molname, const MoleculeInfo &molinfo);
+
         Molecule(const Molecule &other);
 
         ~Molecule();

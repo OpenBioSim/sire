@@ -1389,15 +1389,62 @@ QVector<QVector<qint64>> getExcludedAtoms(const AmberParams &params, int start_i
 
     QVector<QVector<qint64>> excl(info.nAtoms());
 
+    auto excl_data = excl.data();
+
     const auto nbpairs = params.excludedAtoms();
 
-    if (use_parallel and info.nAtoms() > 50)
+    if (use_parallel and info.nCutGroups() > 10)
     {
-        tbb::parallel_for(tbb::blocked_range<int>(0, info.nAtoms()), [&](const tbb::blocked_range<int> &r)
+        tbb::parallel_for(tbb::blocked_range<int>(0, info.nCutGroups()), [&](const tbb::blocked_range<int> &r)
                           {
-            for (int i = r.begin(); i < r.end(); ++i)
+            for (int icg = r.begin(); icg < r.end(); ++icg)
             {
-                const QVector<AtomIdx> excluded_atoms = nbpairs.excludedAtoms(AtomIdx(i));
+                const auto excluded_cg_atoms = nbpairs.excludedAtoms(CGIdx(icg));
+
+                for (auto it = excluded_cg_atoms.constBegin();
+                        it != excluded_cg_atoms.constEnd();
+                        ++it)
+                {
+                    const int i = it.key().value();
+                    const auto &excluded_atoms = it.value();
+
+                    QVector<qint64> excl_atoms;
+                    excl_atoms.reserve(excluded_atoms.count());
+
+                    for (int j = 0; j < excluded_atoms.count(); ++j)
+                    {
+                        // only include i,j pairs where i < j
+                        if (i < excluded_atoms[j].value())
+                        {
+                            // have to add 1 as Amber is 1-indexed, and add start_idx as
+                            // each molecule is listed in sequence with increasing atom number
+                            excl_atoms.append(excluded_atoms[j].value() + start_idx + 1);
+                        }
+                    }
+
+                    if (excl_atoms.isEmpty())
+                    {
+                        // amber cannot have an empty excluded atoms list. In these cases
+                        // it has a single atom with index 0 (0 is a null atom in amber)
+                        excl_atoms.append(0);
+                    }
+
+                    excl_data[i] = excl_atoms;
+                }
+            } });
+    }
+    else
+    {
+        for (int icg = 0; icg < info.nCutGroups(); ++icg)
+        {
+            const auto excluded_cg_atoms = nbpairs.excludedAtoms(CGIdx(icg));
+
+            for (auto it = excluded_cg_atoms.constBegin();
+                 it != excluded_cg_atoms.constEnd();
+                 ++it)
+            {
+                const int i = it.key().value();
+                const auto &excluded_atoms = it.value();
 
                 QVector<qint64> excl_atoms;
                 excl_atoms.reserve(excluded_atoms.count());
@@ -1420,37 +1467,8 @@ QVector<QVector<qint64>> getExcludedAtoms(const AmberParams &params, int start_i
                     excl_atoms.append(0);
                 }
 
-                excl[i] = excl_atoms;
-            } });
-    }
-    else
-    {
-        for (int i = 0; i < info.nAtoms(); ++i)
-        {
-            const QVector<AtomIdx> excluded_atoms = nbpairs.excludedAtoms(AtomIdx(i));
-
-            QVector<qint64> excl_atoms;
-            excl_atoms.reserve(excluded_atoms.count());
-
-            for (int j = 0; j < excluded_atoms.count(); ++j)
-            {
-                // only include i,j pairs where i < j
-                if (i < excluded_atoms[j].value())
-                {
-                    // have to add 1 as Amber is 1-indexed, and add start_idx as
-                    // each molecule is listed in sequence with increasing atom number
-                    excl_atoms.append(excluded_atoms[j].value() + start_idx + 1);
-                }
+                excl_data[i] = excl_atoms;
             }
-
-            if (excl_atoms.isEmpty())
-            {
-                // amber cannot have an empty excluded atoms list. In these cases
-                // it has a single atom with index 0 (0 is a null atom in amber)
-                excl_atoms.append(0);
-            }
-
-            excl[i] = excl_atoms;
         }
     }
 
@@ -3754,7 +3772,7 @@ void AmberPrm::assertSane() const
     then we will only return a MolStructureEditor for the combined molecule with the
     lowest molidx - a null MolStructureEditor will be returned for the other molecules
 */
-MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cutting) const
+MolEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cutting) const
 {
     const int molnum = molidx + 1; // amber is 1-indexed
 
@@ -3768,13 +3786,61 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
                                      CODELOC);
     }
 
-    // first step is to build the structure of the molecule - i.e.
-    // the layout of cutgroups, residues and atoms
-    MolStructureEditor mol;
+    // locate the residue pointers for this molecule - note that the
+    // residue pointers are 1-indexed (i.e. from atom 1 to atom N)
+    const auto res_pointers = this->intData("RESIDUE_POINTER");
+
+    QSet<int> res_idxs_set;
+
+    int highest_atomnum = atomnums_in_mol[0];
+    int lowest_atomnum = highest_atomnum;
+
+    for (int i = 0; i < atomnums_in_mol.count(); ++i)
+    {
+        auto atomnum = atomnums_in_mol[i];
+
+        if (atomnum > highest_atomnum)
+        {
+            highest_atomnum = atomnum;
+        }
+
+        if (atomnum < lowest_atomnum)
+        {
+            lowest_atomnum = atomnum;
+        }
+    }
+
+    for (int i = 0; i < res_pointers.count(); ++i)
+    {
+        const int res_start_atom = res_pointers[i];
+
+        if (res_start_atom >= lowest_atomnum)
+        {
+            if (atomnums_in_mol.contains(res_start_atom))
+            {
+                res_idxs_set.insert(i);
+            }
+        }
+        else if (res_start_atom > highest_atomnum)
+        {
+            break;
+        }
+    }
+
+    QList<int> res_idxs = QList<int>(res_idxs_set.constBegin(),
+                                     res_idxs_set.constEnd());
+    std::sort(res_idxs.begin(), res_idxs.end());
+
+    if (res_idxs.isEmpty())
+    {
+        // no residues?
+        throw SireError::program_bug(QObject::tr("Strange - there are no residues in this molecule %1?").arg(molnum),
+                                     CODELOC);
+    }
 
     auto raw_atom_names = this->stringData("ATOM_NAME");
 
-    while (raw_atom_names.count() < natoms)
+    while (raw_atom_names.count() < highest_atomnum)
     {
         // we are missing some atom names - give a default
         // name of "UNK", which tends to be used for "UNKNOWN" atoms.
@@ -3789,13 +3855,9 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
     // this list of names
     const auto atom_names = raw_atom_names;
 
-    // locate the residue pointers for this molecule - note that the
-    // residue pointers are 1-indexed (i.e. from atom 1 to atom N)
-    const auto res_pointers = this->intData("RESIDUE_POINTER");
-
     auto raw_res_names = this->stringData("RESIDUE_LABEL");
 
-    while (raw_res_names.count() < res_pointers.count())
+    while (raw_res_names.count() <= res_idxs.at(res_idxs.count() - 1))
     {
         // we are missing some residue names - give a default
         // name of "UNK", which tends to be used for "UNKNOWN" residues
@@ -3807,10 +3869,59 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
 
     const auto res_names = raw_res_names;
 
-    for (int i = 0; i < res_pointers.count(); ++i)
+    // do this a quicker way if this is a single-residue molecule
+    // (e.g. like water)
+    if (res_idxs.count() == 1)
     {
-        int res_idx = i;
-        int res_num = i + 1;
+        int res_idx = res_idxs[0];
+
+        int res_start_atom = res_pointers[res_idx];
+        int res_end_atom;
+
+        if (res_idx + 1 == res_pointers.count())
+        {
+            res_end_atom = this->nAtoms(); // 1-indexed
+        }
+        else
+        {
+            res_end_atom = res_pointers[res_idx + 1] - 1; // 1 lower than first index of atom in next residue
+        }
+
+        qint64 resnum = res_idx + 1;
+        QString resname = res_names[res_idx];
+
+        const int nres_atoms = res_end_atom - res_start_atom + 1;
+
+        QVector<QString> res_atomnames(nres_atoms);
+        QVector<qint64> res_atomnums(nres_atoms);
+
+        auto res_atomnames_data = res_atomnames.data();
+        auto res_atomnums_data = res_atomnums.data();
+
+        int atomidx = 0;
+
+        for (int i = res_start_atom; i <= res_end_atom; ++i)
+        {
+            res_atomnames_data[atomidx] = atom_names[i - 1].trimmed();
+            res_atomnums_data[atomidx] = i;
+            atomidx += 1;
+        }
+
+        auto mol = Molecule(resname, MoleculeInfo(resname, resnum,
+                                                  res_atomnames,
+                                                  res_atomnums));
+
+        return mol.edit();
+    }
+
+    // first step is to build the structure of the molecule - i.e.
+    // the layout of cutgroups, residues and atoms
+    MolStructureEditor mol;
+
+    for (int i = 0; i < res_idxs.count(); ++i)
+    {
+        int res_idx = res_idxs.at(i);
+        int res_num = res_idx + 1;
         int res_start_atom = res_pointers[res_idx];
 
         if (atomnums_in_mol.contains(res_start_atom))
@@ -3883,7 +3994,7 @@ MolStructureEditor AmberPrm::getMolStructure(int molidx, const PropertyName &cut
         }
     }
 
-    return mol;
+    return mol.commit().edit();
 }
 
 /** Return the AmberParams for the ith molecule */
@@ -4239,7 +4350,7 @@ void _setProperty(MolEditor &mol, const PropertyMap &map, QString key, const Pro
 MolEditor AmberPrm::getMoleculeEditor(int molidx, const PropertyMap &map) const
 {
     // first, construct the layout of the molecule (sorting of atoms into residues and cutgroups)
-    auto mol = this->getMolStructure(molidx, map["cutting"]).commit().edit();
+    auto mol = this->getMolStructure(molidx, map["cutting"]);
 
     if (mol.nAtoms() == 0)
         return MolEditor();

@@ -76,6 +76,37 @@ MoleculeInfo::MoleculeInfo(const SharedDataPointer<MoleculeInfoData> &ptr) : d(p
 {
 }
 
+/** Construct a single-residue molecule with passed residue and atom info */
+MoleculeInfo::MoleculeInfo(const QString &resname, qint64 resnum,
+                           const QVector<QString> &atomnames,
+                           const QVector<qint64> &atomnums)
+    : d(new MoleculeInfoData(resname, resnum, atomnames, atomnums))
+{
+}
+
+MoleculeInfo::MoleculeInfo(const QString &resname, qint64 resnum,
+                           const QStringList &atomnames,
+                           const QList<qint64> &atomnums)
+    : d(new MoleculeInfoData(resname, resnum, atomnames, atomnums))
+{
+}
+
+MoleculeInfo::MoleculeInfo(const QVector<QString> &resnames,
+                           const QVector<qint64> &resnums,
+                           const QVector<QVector<QString>> &atomnames,
+                           const QVector<QVector<qint64>> &atomnums)
+    : d(new MoleculeInfoData(resnames, resnums, atomnames, atomnums))
+{
+}
+
+MoleculeInfo::MoleculeInfo(const QStringList &resnames,
+                           const QList<qint64> &resnums,
+                           const QList<QStringList> &atomnames,
+                           const QList<QList<qint64>> &atomnums)
+    : d(new MoleculeInfoData(resnames, resnums, atomnames, atomnums))
+{
+}
+
 /** Copy constructor */
 MoleculeInfo::MoleculeInfo(const MoleculeInfo &other) : d(other.d)
 {

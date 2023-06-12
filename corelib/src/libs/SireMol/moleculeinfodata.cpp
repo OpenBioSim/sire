@@ -621,6 +621,151 @@ const MoleculeInfoData &MoleculeInfoData::null()
     return *(create_shared_null<MoleculeInfoData>());
 }
 
+/** Construct a single-residue molecule with passed residue and atom info */
+MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
+                                   const QVector<QString> &atomnames,
+                                   const QVector<qint64> &atomnums)
+    : RefCountData()
+{
+    if (atomnames.count() != atomnums.count())
+    {
+        // we need to call this adding in null atoms
+        if (atomnums.count() < atomnames.count())
+        {
+            auto new_atomnums = atomnums;
+
+            while (new_atomnums.count() < atomnames.count())
+            {
+                new_atomnums.append(new_atomnums.count() + 1);
+            }
+
+            this->operator=(MoleculeInfoData(resname, resnum, atomnames, new_atomnums));
+            return;
+        }
+        else if (atomnames.count() < atomnums.count())
+        {
+            auto new_atomnames = atomnames;
+
+            while (new_atomnames.count() < atomnums.count())
+            {
+                new_atomnames.append("UNK");
+            }
+
+            this->operator=(MoleculeInfoData(resname, resnum, new_atomnames, atomnums));
+            return;
+        }
+    }
+
+    ResInfo res;
+    res.name = ResName(resname);
+    res.number = ResNum(resnum);
+    res.cgidx = CGIdx(0);
+
+    const int natoms = std::max(atomnames.count(), atomnums.count());
+
+    if (natoms > 0)
+    {
+        const auto *atomnames_data = atomnames.constData();
+        const auto *atomnums_data = atomnums.constData();
+
+        res.atoms_by_name.reserve(natoms);
+        res.atom_indicies = QList<AtomIdx>();
+
+        atoms_by_index = QVector<detail::AtomInfo>(natoms);
+        auto atoms_by_index_data = atoms_by_index.data();
+
+        atoms_by_name.reserve(natoms);
+        atoms_by_num.reserve(natoms);
+
+        for (int i = 0; i < natoms; ++i)
+        {
+            res.atom_indicies.append(AtomIdx(i));
+            res.atoms_by_name.insert(atomnames_data[i], AtomIdx(i));
+
+            auto &atom = atoms_by_index_data[i];
+
+            atom.name = AtomName(atomnames_data[i]);
+            atom.number = AtomNum(atomnums_data[i]);
+            atom.residx = ResIdx(0);
+            atom.cgatomidx = CGAtomIdx(CGIdx(0), Index(i));
+
+            atoms_by_name.insert(atomnames_data[i], AtomIdx(i));
+            atoms_by_num.insert(AtomNum(atomnums_data[i]), AtomIdx(i));
+        }
+
+        atoms_by_index.squeeze();
+        atoms_by_name.squeeze();
+        atoms_by_num.squeeze();
+    }
+
+    res_by_index = QVector<detail::ResInfo>(1, res);
+    res_by_index.squeeze();
+
+    res_by_name.insert(resname, ResIdx(0));
+    res_by_num.insert(ResNum(resnum), ResIdx(0));
+    res_by_name.squeeze();
+    res_by_num.squeeze();
+
+    CGInfo cg;
+    cg.name = CGName("1");
+    cg.atom_indicies = res.atom_indicies;
+
+    cg_by_index = QVector<detail::CGInfo>(1, cg);
+    cg_by_index.squeeze();
+
+    cg_by_name.insert(cg.name.value(), CGIdx(0));
+    cg_by_name.squeeze();
+
+    cutting_scheme = 2;
+
+    uid = QUuid::createUuid();
+}
+
+MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
+                                   const QStringList &atomnames,
+                                   const QList<qint64> &atomnums)
+    : RefCountData()
+{
+    this->operator=(MoleculeInfoData(resname, resnum,
+                                     QVector<QString>(atomnames.constBegin(), atomnames.constEnd()),
+                                     QVector<qint64>(atomnums.constBegin(), atomnums.constEnd())));
+}
+
+MoleculeInfoData::MoleculeInfoData(const QVector<QString> &resnames,
+                                   const QVector<qint64> &resnums,
+                                   const QVector<QVector<QString>> &atomnames,
+                                   const QVector<QVector<qint64>> &atomnums)
+    : RefCountData()
+{
+    // sanitise
+    throw SireError::incomplete_code(QObject::tr("Not implemented yet..."), CODELOC);
+}
+
+MoleculeInfoData::MoleculeInfoData(const QStringList &resnames,
+                                   const QList<qint64> &resnums,
+                                   const QList<QStringList> &atomnames,
+                                   const QList<QList<qint64>> &atomnums)
+    : RefCountData()
+{
+    QVector<QVector<QString>> names;
+    QVector<QVector<qint64>> nums;
+
+    for (const auto &n : atomnames)
+    {
+        names.append(QVector<QString>(n.constBegin(), n.constEnd()));
+    }
+
+    for (const auto &n : atomnums)
+    {
+        nums.append(QVector<qint64>(n.constBegin(), n.constEnd()));
+    }
+
+    this->operator=(MoleculeInfoData(
+        QVector<QString>(resnames.constBegin(), resnames.constEnd()),
+        QVector<qint64>(resnums.constBegin(), resnums.constEnd()),
+        names, nums));
+}
+
 /** Construct from the passed StructureEditor */
 MoleculeInfoData::MoleculeInfoData(const StructureEditor &editor) : RefCountData()
 {
