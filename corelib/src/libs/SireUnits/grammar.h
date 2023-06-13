@@ -129,7 +129,7 @@ public:
             "W", AST::Unit(SireUnits::watt))(
             "e", AST::Unit(SireUnits::e_charge))(
             "|e|", AST::Unit(SireUnits::mod_electron))(
-            "C", AST::Unit(SireUnits::coulomb));
+            "C", AST::Unit(SireUnits::coulomb)); // this is Coulomb, but lots of people use it for celsius
 
         unit_token.add(
             "calorie", AST::Unit(SireUnits::cal))(

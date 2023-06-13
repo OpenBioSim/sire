@@ -296,11 +296,11 @@ namespace SireIO
 
                 QMutexLocker lkr(&mutex);
 
-                helpers_by_id.insert(helper.formatName(), helper);
+                helpers_by_id.insert(helper.formatName().toLower(), helper);
 
                 for (const auto &suffix : helper.suffixes())
                 {
-                    helpers_by_suffix.insert(suffix, helper);
+                    helpers_by_suffix.insert(suffix.toLower(), helper);
                 }
             }
 
@@ -312,7 +312,8 @@ namespace SireIO
 
                 for (const auto &name : parser_names)
                 {
-                    auto helper = helpers_by_id.value(name);
+                    const auto lower_name = name.toLower();
+                    auto helper = helpers_by_id.value(lower_name);
 
                     if (not helper.isValid())
                     {

@@ -2196,7 +2196,8 @@ AtomElements guessElements(const MoleculeInfoData &molinfo, bool *has_elements)
 }
 
 /** Construct the hash of bonds */
-void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map)
+void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs, const MoleculeData &moldata,
+                                    const QVector<bool> &is_hydrogen, const PropertyMap &map)
 {
     // get the set of all bond functions
     const auto potentials = funcs.potentials();
@@ -2205,24 +2206,28 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs, const Molecul
     QVector<std::tuple<BondID, AmberBond, bool>> bonds(potentials.count());
     auto bonds_data = bonds.data();
 
+    const auto *potentials_data = potentials.constData();
+
+    const auto &molinfo = moldata.info();
+
+    const auto *is_hydrogen_data = is_hydrogen.constData();
+
+    if (molinfo.nAtoms() != is_hydrogen.count())
+        throw SireError::program_bug(QObject::tr("is_hydrogen is wrong!"), CODELOC);
+
     // convert each of these into an AmberBond
     tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
                       {
         for (int i = r.begin(); i < r.end(); ++i)
         {
-            const auto potential = potentials.constData()[i];
+            const auto &potential = potentials_data[i];
 
             // convert the atom IDs into a canonical form
             BondID bond = this->convert(BondID(potential.atom0(), potential.atom1()));
 
             // does this bond involve hydrogen? - this relies on "AtomElements" being full
-            bool contains_hydrogen = false;
-
-            if (not amber_elements.isEmpty())
-            {
-                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() == 1) or
-                                    (amber_elements.at(potential.atom1()).nProtons() == 1);
-            }
+            bool contains_hydrogen = is_hydrogen_data[molinfo.atomIdx(potential.atom0()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom1()).value()];
 
             bonds_data[i] = std::make_tuple(bond, AmberBond(potential.function(), Symbol("r")), contains_hydrogen);
         } });
@@ -2263,7 +2268,7 @@ void AmberParams::getAmberBondsFrom(const TwoAtomFunctions &funcs, const Molecul
 
 /** Construct the hash of angles */
 void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const MoleculeData &moldata,
-                                     const PropertyMap &map)
+                                     const QVector<bool> &is_hydrogen, const PropertyMap &map)
 {
     // get the set of all angle functions
     const auto potentials = funcs.potentials();
@@ -2271,6 +2276,12 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const Mole
     // create temporary space to hold the converted angles
     QVector<std::tuple<AngleID, AmberAngle, bool>> angles(potentials.count());
     auto angles_data = angles.data();
+
+    const auto &molinfo = moldata.info();
+    const auto *is_hydrogen_data = is_hydrogen.constData();
+
+    if (molinfo.nAtoms() != is_hydrogen.count())
+        throw SireError::program_bug(QObject::tr("is_hydrogen is wrong!"), CODELOC);
 
     // convert each of these into an AmberAngle
     tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
@@ -2283,14 +2294,9 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const Mole
             AngleID angle = this->convert(AngleID(potential.atom0(), potential.atom1(), potential.atom2()));
 
             // does this angle involve hydrogen? - this relies on "AtomElements" being full
-            bool contains_hydrogen = false;
-
-            if (not amber_elements.isEmpty())
-            {
-                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom1()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom2()).nProtons() < 2);
-            }
+            bool contains_hydrogen = is_hydrogen_data[molinfo.atomIdx(potential.atom0()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom1()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom2()).value()];
 
             angles_data[i] =
                 std::make_tuple(angle, AmberAngle(potential.function(), Symbol("theta")), contains_hydrogen);
@@ -2332,7 +2338,7 @@ void AmberParams::getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const Mole
 
 /** Construct the hash of dihedrals */
 void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata,
-                                        const PropertyMap &map)
+                                        const QVector<bool> &is_hydrogen, const PropertyMap &map)
 {
     // get the set of all dihedral functions
     const auto potentials = funcs.potentials();
@@ -2340,6 +2346,12 @@ void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs, const Mo
     // create temporary space to hold the converted dihedrals
     QVector<std::tuple<DihedralID, AmberDihedral, bool>> dihedrals(potentials.count());
     auto dihedrals_data = dihedrals.data();
+
+    const auto &molinfo = moldata.info();
+    const auto *is_hydrogen_data = is_hydrogen.constData();
+
+    if (molinfo.nAtoms() != is_hydrogen.count())
+        throw SireError::program_bug(QObject::tr("is_hydrogen is wrong!"), CODELOC);
 
     // convert each of these into an AmberDihedral
     tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
@@ -2353,15 +2365,10 @@ void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs, const Mo
                 this->convert(DihedralID(potential.atom0(), potential.atom1(), potential.atom2(), potential.atom3()));
 
             // does this bond involve hydrogen? - this relies on "AtomElements" being full
-            bool contains_hydrogen = false;
-
-            if (not amber_elements.isEmpty())
-            {
-                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom1()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom2()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom3()).nProtons() < 2);
-            }
+            bool contains_hydrogen = is_hydrogen_data[molinfo.atomIdx(potential.atom0()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom1()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom2()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom3()).value()];
 
             dihedrals_data[i] =
                 std::make_tuple(dihedral, AmberDihedral(potential.function(), Symbol("phi")), contains_hydrogen);
@@ -2380,7 +2387,7 @@ void AmberParams::getAmberDihedralsFrom(const FourAtomFunctions &funcs, const Mo
 
 /** Construct the hash of impropers */
 void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata,
-                                        const PropertyMap &map)
+                                        const QVector<bool> &is_hydrogen, const PropertyMap &map)
 {
     // get the set of all improper functions
     const auto potentials = funcs.potentials();
@@ -2388,6 +2395,12 @@ void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs, const Mo
     // create temporary space to hold the converted dihedrals
     QVector<std::tuple<ImproperID, AmberDihedral, bool>> impropers(potentials.count());
     auto impropers_data = impropers.data();
+
+    const auto &molinfo = moldata.info();
+    const auto *is_hydrogen_data = is_hydrogen.constData();
+
+    if (molinfo.nAtoms() != is_hydrogen.count())
+        throw SireError::program_bug(QObject::tr("is_hydrogen is wrong!"), CODELOC);
 
     // convert each of these into an AmberDihedral
     tbb::parallel_for(tbb::blocked_range<int>(0, potentials.count()), [&](const tbb::blocked_range<int> &r)
@@ -2401,15 +2414,10 @@ void AmberParams::getAmberImpropersFrom(const FourAtomFunctions &funcs, const Mo
                 this->convert(ImproperID(potential.atom0(), potential.atom1(), potential.atom2(), potential.atom3()));
 
             // does this bond involve hydrogen? - this relies on "AtomElements" being full
-            bool contains_hydrogen = false;
-
-            if (not amber_elements.isEmpty())
-            {
-                contains_hydrogen = (amber_elements.at(potential.atom0()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom1()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom2()).nProtons() < 2) or
-                                    (amber_elements.at(potential.atom3()).nProtons() < 2);
-            }
+            bool contains_hydrogen = is_hydrogen_data[molinfo.atomIdx(potential.atom0()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom1()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom2()).value()] or
+                                     is_hydrogen_data[molinfo.atomIdx(potential.atom3()).value()];
 
             impropers_data[i] =
                 std::make_tuple(improper, AmberDihedral(potential.function(), Symbol("phi")), contains_hydrogen);
@@ -2573,36 +2581,63 @@ void AmberParams::_pvt_createFrom(const MoleculeData &moldata)
     const auto impropers = getProperty<FourAtomFunctions>(map["improper"], moldata, &has_impropers);
     const auto nbpairs = getProperty<CLJNBPairs>(map["intrascale"], moldata, &has_nbpairs);
 
+    // get all of the atoms that contain hydrogen
+    QVector<bool> is_hydrogen;
+
+    if (has_bonds or has_ubs or has_angles or has_dihedrals or has_impropers)
+    {
+        const int natoms = moldata.info().nAtoms();
+
+        is_hydrogen = QVector<bool>(natoms, false);
+
+        if (not amber_elements.isEmpty())
+        {
+            auto is_hydrogen_data = is_hydrogen.data();
+
+            auto elements = amber_elements.toVector();
+
+            if (elements.count() != natoms)
+                throw SireError::program_bug(QObject::tr("Wrong elements count!"), CODELOC);
+
+            const auto *elements_data = elements.constData();
+
+            for (int i = 0; i < natoms; ++i)
+            {
+                is_hydrogen_data[i] = elements_data[i].nProtons() == 1;
+            }
+        }
+    }
+
     QVector<std::function<void()>> nb_functions;
 
     if (has_bonds)
     {
         nb_functions.append([&]()
-                            { getAmberBondsFrom(bonds, moldata, map); });
+                            { getAmberBondsFrom(bonds, moldata, is_hydrogen, map); });
     }
 
     if (has_ubs)
     {
         nb_functions.append([&]()
-                            { getAmberBondsFrom(ub_bonds, moldata, map); });
+                            { getAmberBondsFrom(ub_bonds, moldata, is_hydrogen, map); });
     }
 
     if (has_angles)
     {
         nb_functions.append([&]()
-                            { getAmberAnglesFrom(angles, moldata, map); });
+                            { getAmberAnglesFrom(angles, moldata, is_hydrogen, map); });
     }
 
     if (has_dihedrals)
     {
         nb_functions.append([&]()
-                            { getAmberDihedralsFrom(dihedrals, moldata, map); });
+                            { getAmberDihedralsFrom(dihedrals, moldata, is_hydrogen, map); });
     }
 
     if (has_impropers)
     {
         nb_functions.append([&]()
-                            { getAmberImpropersFrom(impropers, moldata, map); });
+                            { getAmberImpropersFrom(impropers, moldata, is_hydrogen, map); });
     }
 
     if (has_nbpairs)

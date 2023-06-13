@@ -782,7 +782,7 @@ QString Gro87::toString() const
 /** Return the format name that is used to identify this file format within Sire */
 QString Gro87::formatName() const
 {
-    return "Gro87";
+    return "GRO87";
 }
 
 /** Return a description of the file format */
@@ -794,7 +794,7 @@ QString Gro87::formatDescription() const
 /** Return the suffixes that these files are normally associated with */
 QStringList Gro87::formatSuffix() const
 {
-    static const QStringList suffixes = {"gro"};
+    static const QStringList suffixes = {"gro", "g87"};
     return suffixes;
 }
 

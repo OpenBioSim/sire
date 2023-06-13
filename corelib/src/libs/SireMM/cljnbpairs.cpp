@@ -642,6 +642,25 @@ QHash<AtomIdx, QVector<AtomIdx>> CLJNBPairs::excludedAtoms(CGIdx cgidx) const
 
     if (molinfo.nCutGroups() == 1)
     {
+        if (nats == 1)
+        {
+            all_cgpairs.insert(AtomIdx(0), QVector<AtomIdx>());
+            return all_cgpairs;
+        }
+        else if (nats == 2)
+        {
+            all_cgpairs.insert(AtomIdx(0), QVector<AtomIdx>({AtomIdx(1)}));
+            all_cgpairs.insert(AtomIdx(1), QVector<AtomIdx>({AtomIdx(0)}));
+            return all_cgpairs;
+        }
+        else if (nats <= 3)
+        {
+            all_cgpairs.insert(AtomIdx(0), QVector<AtomIdx>({AtomIdx(1), AtomIdx(2)}));
+            all_cgpairs.insert(AtomIdx(1), QVector<AtomIdx>({AtomIdx(0), AtomIdx(2)}));
+            all_cgpairs.insert(AtomIdx(2), QVector<AtomIdx>({AtomIdx(0), AtomIdx(1)}));
+            return all_cgpairs;
+        }
+
         // we only need to worry about ourselves
         const auto cgpairs = this->get(CGIdx(0), CGIdx(0));
 

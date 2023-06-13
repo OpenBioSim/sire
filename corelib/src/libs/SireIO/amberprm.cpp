@@ -1433,6 +1433,28 @@ QVector<QVector<qint64>> getExcludedAtoms(const AmberParams &params, int start_i
                 }
             } });
     }
+    else if (info.nCutGroups() == 1 and info.nAtoms() <= 3)
+    {
+        // this is a small molecule (e.g. solvent) where all atoms
+        // are excluded
+        const int nats = info.nAtoms();
+
+        if (nats == 1)
+        {
+            excl_data[0] = QVector<qint64>({0});
+        }
+        else if (nats == 2)
+        {
+            excl_data[0] = QVector<qint64>({1});
+            excl_data[1] = QVector<qint64>({0});
+        }
+        else if (nats == 3)
+        {
+            excl_data[0] = QVector<qint64>({1, 2});
+            excl_data[1] = QVector<qint64>({0, 2});
+            excl_data[2] = QVector<qint64>({0, 1});
+        }
+    }
     else
     {
         for (int icg = 0; icg < info.nCutGroups(); ++icg)
