@@ -2078,6 +2078,19 @@ bool ForceFields::operator!=(const ForceFields &other) const
 }
 
 /** Internal function used to return the group with number 'mgnum' */
+MoleculeGroup &ForceFields::getGroup(MGNum mgnum)
+{
+    if (not mgroups_by_num.contains(mgnum))
+        throw SireMol::missing_group(QObject::tr("None of the forcefields in this set contain a molecule group "
+                                                 "with number %1. Available groups are %2.")
+                                         .arg(mgnum)
+                                         .arg(Sire::toString(mgroups_by_num.keys())),
+                                     CODELOC);
+
+    return this->_pvt_forceField(mgnum).getGroup(mgnum);
+}
+
+/** Internal function used to return the group with number 'mgnum' */
 const MoleculeGroup &ForceFields::getGroup(MGNum mgnum) const
 {
     if (not mgroups_by_num.contains(mgnum))

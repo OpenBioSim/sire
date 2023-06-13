@@ -22,6 +22,8 @@ include(CMakeAutogenFile.txt)
 set ( WRAPBASE_SOURCES
 
       autoconvert_Slice.cpp
+      releasegil_impl.cpp
+
       _Base.main.cpp
 
       ${PYPP_SOURCES}

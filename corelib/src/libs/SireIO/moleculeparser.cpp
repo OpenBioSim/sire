@@ -27,6 +27,7 @@
 
 #include "moleculeparser.h"
 #include "filetrajectory.h"
+#include "filetrajectoryparser.h"
 #include "supplementary.h"
 
 #include "SireError/errors.h"
@@ -35,6 +36,7 @@
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
+#include "SireBase/releasegil.h"
 
 #include "SireFF/ffdetail.h"
 #include "SireMM/mmdetail.h"
@@ -43,8 +45,20 @@
 #include "SireMol/molecule.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/trajectory.h"
+#include "SireMol/mgname.h"
+#include "SireMol/mgnum.h"
+#include "SireMol/molidx.h"
+#include "SireMol/trajectoryaligner.h"
+
+#include "SireBase/timeproperty.h"
+#include "SireBase/parallel.h"
+#include "SireBase/propertylist.h"
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
 
 #include "SireSystem/system.h"
+
+#include "SireUnits/units.h"
 
 #include "SireError/errors.h"
 
@@ -61,9 +75,12 @@
 
 using namespace SireIO;
 using namespace SireSystem;
+using namespace SireMaths;
+using namespace SireMol;
 using namespace SireFF;
 using namespace SireBase;
 using namespace SireStream;
+using namespace SireUnits;
 
 //////////////
 ////////////// Implementation of ParserFactory and ParserFactoryHelper
@@ -482,10 +499,14 @@ static const RegisterMetaType<MoleculeParser> r_parser(MAGIC_ONLY, MoleculeParse
 
 QDataStream &operator<<(QDataStream &ds, const MoleculeParser &parser)
 {
-    writeHeader(ds, r_parser, 2);
+    writeHeader(ds, r_parser, 3);
 
     SharedDataStream sds(ds);
-    sds << parser.fname << parser.lnes << parser.scr << parser.run_parallel << static_cast<const Property &>(parser);
+    sds << parser.fname << parser.lnes
+        << parser.saved_system
+        << parser.frames_to_write
+        << parser.propmap
+        << parser.scr << parser.run_parallel << static_cast<const Property &>(parser);
 
     return ds;
 }
@@ -494,7 +515,12 @@ QDataStream &operator>>(QDataStream &ds, MoleculeParser &parser)
 {
     VersionID v = readHeader(ds, r_parser);
 
-    if (v == 2)
+    if (v == 3)
+    {
+        SharedDataStream sds(ds);
+        sds >> parser.fname >> parser.lnes >> parser.saved_system >> parser.frames_to_write >> parser.propmap >> parser.scr >> parser.run_parallel >> static_cast<Property &>(parser);
+    }
+    else if (v == 2)
     {
         SharedDataStream sds(ds);
         sds >> parser.fname >> parser.lnes >> parser.scr >> parser.run_parallel >> static_cast<Property &>(parser);
@@ -513,11 +539,82 @@ QDataStream &operator>>(QDataStream &ds, MoleculeParser &parser)
 }
 
 /** Constructor */
-MoleculeParser::MoleculeParser(const PropertyMap &map) : Property(), scr(0), run_parallel(true)
+MoleculeParser::MoleculeParser(const PropertyMap &map) : Property(), propmap(map), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
         run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+}
+
+void MoleculeParser::setParsedSystem(const System &system, const PropertyMap &map)
+{
+    if (map["parallel"].hasValue())
+    {
+        run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+
+    if (map["frames_to_write"].hasValue())
+    {
+        const qint32 num_frames = system.nFrames();
+
+        auto frames = map["frames_to_write"].value().asAnArray();
+
+        for (int i = 0; i < frames.count(); ++i)
+        {
+            qint32 frame_idx = frames[i].asAnInteger();
+
+            // make sure this is a valid frame
+            if (not Index(frame_idx).canMap(num_frames))
+            {
+                throw SireError::invalid_index(QObject::tr(
+                                                   "Cannot save trajectory frame '%1' as the number of "
+                                                   "frames is only '%2'")
+                                                   .arg(frame_idx)
+                                                   .arg(num_frames),
+                                               CODELOC);
+            }
+
+            frames_to_write.append(frame_idx);
+        }
+    }
+
+    saved_system = system;
+    propmap = map;
+}
+
+/** Constructor */
+MoleculeParser::MoleculeParser(const System &system, const PropertyMap &map)
+    : Property(), saved_system(system), propmap(map), scr(0), run_parallel(true)
+{
+    if (map["parallel"].hasValue())
+    {
+        run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
+    }
+
+    if (map["frames_to_write"].hasValue())
+    {
+        const qint32 num_frames = system.nFrames();
+
+        auto frames = map["frames_to_write"].value().asAnArray();
+
+        for (int i = 0; i < frames.count(); ++i)
+        {
+            qint32 frame_idx = frames[i].asAnInteger();
+
+            // make sure this is a valid frame
+            if (not Index(frame_idx).canMap(num_frames))
+            {
+                throw SireError::invalid_index(QObject::tr(
+                                                   "Cannot save trajectory frame '%1' as the number of "
+                                                   "frames is only '%2'")
+                                                   .arg(frame_idx)
+                                                   .arg(num_frames),
+                                               CODELOC);
+            }
+
+            frames_to_write.append(frame_idx);
+        }
     }
 }
 
@@ -607,7 +704,7 @@ QVector<QString> MoleculeParser::readTextFile(QString filename)
 
 /** Construct the parser, parsing in all of the lines in the file
     with passed filename */
-MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) : Property(), scr(0), run_parallel(true)
+MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) : Property(), propmap(map), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
@@ -620,7 +717,7 @@ MoleculeParser::MoleculeParser(const QString &filename, const PropertyMap &map) 
 
 /** Construct the parser, parsing in all of the passed text lines */
 MoleculeParser::MoleculeParser(const QStringList &lines, const PropertyMap &map)
-    : Property(), scr(0), run_parallel(true)
+    : Property(), propmap(map), scr(0), run_parallel(true)
 {
     if (map["parallel"].hasValue())
     {
@@ -635,13 +732,557 @@ MoleculeParser::MoleculeParser(const QStringList &lines, const PropertyMap &map)
 
 /** Copy constructor */
 MoleculeParser::MoleculeParser(const MoleculeParser &other)
-    : Property(other), fname(other.fname), lnes(other.lnes), scr(other.scr), run_parallel(other.run_parallel)
+    : Property(other), fname(other.fname), lnes(other.lnes),
+      saved_system(other.saved_system), frames_to_write(other.frames_to_write),
+      propmap(other.propmap), scr(other.scr), run_parallel(other.run_parallel)
 {
 }
 
 /** Destructor */
 MoleculeParser::~MoleculeParser()
 {
+}
+
+/** Return whether or not this parser runs in parallel - this will depend
+ *  on whether parallel was enabled for parsing, we have more than
+ *  one thread available, and the number of items (n) makes it worth
+ *  parsing in parallel. Pass in n<=0 if you don't want to check the
+ *  last condition.
+ */
+bool MoleculeParser::usesParallel(int n) const
+{
+    if (n > 0 and n < 8)
+    {
+        // don't parallelise for 8 items
+        return false;
+    }
+
+    // how many threads are available
+    if (get_max_num_threads() <= 1)
+        return false;
+
+    return run_parallel;
+}
+
+static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &coords_property)
+{
+    if (not mol.hasProperty(coords_property))
+    {
+        return QVector<Vector>();
+    }
+
+    QVector<Vector> coords(mol.nAtoms());
+
+    const auto molcoords = mol.property(coords_property).asA<AtomCoords>();
+
+    const auto molinfo = mol.info();
+
+    for (int i = 0; i < mol.nAtoms(); ++i)
+    {
+        coords[i] = molcoords.at(molinfo.cgAtomIdx(AtomIdx(i)));
+    }
+
+    return coords;
+}
+
+static QVector<Velocity3D> getVelocities(const Molecule &mol, const PropertyName &vels_property)
+{
+    if (not mol.hasProperty(vels_property))
+    {
+        return QVector<Velocity3D>();
+    }
+
+    try
+    {
+        const auto molvels = mol.property(vels_property).asA<AtomVelocities>();
+        const auto molinfo = mol.info();
+
+        QVector<Velocity3D> vels(mol.nAtoms());
+
+        for (int i = 0; i < mol.nAtoms(); ++i)
+        {
+            vels[i] = molvels.at(molinfo.cgAtomIdx(AtomIdx(i)));
+        }
+
+        return vels;
+    }
+    catch (...)
+    {
+        return QVector<Velocity3D>();
+    }
+}
+
+static QVector<Force3D> getForces(const Molecule &mol, const PropertyName &forces_property)
+{
+    if (not mol.hasProperty(forces_property))
+    {
+        return QVector<Force3D>();
+    }
+
+    try
+    {
+        const auto molforces = mol.property(forces_property).asA<AtomForces>();
+        const auto molinfo = mol.info();
+
+        QVector<Force3D> forces(mol.nAtoms());
+
+        for (int i = 0; i < mol.nAtoms(); ++i)
+        {
+            forces[i] = molforces.at(molinfo.cgAtomIdx(AtomIdx(i)));
+        }
+
+        return forces;
+    }
+    catch (...)
+    {
+        return QVector<Force3D>();
+    }
+}
+
+template <class T>
+static bool hasData(const QVector<QVector<T>> &array)
+{
+    const auto array_data = array.constData();
+
+    for (int i = 0; i < array.count(); ++i)
+    {
+        if (not array_data[i].isEmpty())
+            return true;
+    }
+
+    return false;
+}
+
+/** Internal function used to collapse an array of arrays of type T into
+    a single array of type T */
+template <class T>
+static QVector<T> collapse(const QVector<QVector<T>> &arrays)
+{
+    int nvals = 0;
+
+    for (const auto array : arrays)
+    {
+        nvals += array.count();
+    }
+
+    if (nvals == 0)
+    {
+        return QVector<T>();
+    }
+
+    QVector<T> values;
+    values.reserve(nvals);
+
+    for (const auto array : arrays)
+    {
+        values += array;
+    }
+
+    return values;
+}
+
+static SireUnits::Dimension::Time get_time_from_system(const System &system,
+                                                       const PropertyName &time_property)
+{
+    SireUnits::Dimension::Time time(0);
+
+    if (system.containsProperty(time_property))
+    {
+        try
+        {
+            const Property &prop = system.property(time_property);
+
+            if (prop.isA<TimeProperty>())
+                time = prop.asA<TimeProperty>().value();
+            else
+                time = prop.asA<GeneralUnitProperty>().toUnit<SireUnits::Dimension::Time>();
+        }
+        catch (...)
+        {
+        }
+    }
+
+    return time;
+}
+
+/** Convenience function that converts the passed System into a Frame */
+Frame MoleculeParser::createFrame(const System &system,
+                                  const PropertyMap &map) const
+{
+    // get the MolNums of each molecule in the System - this returns the
+    // numbers in MolIdx order
+    const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
+    const auto molnums_data = molnums.constData();
+
+    if (molnums.isEmpty())
+    {
+        // no molecules in the system
+        return Frame();
+    }
+
+    QVector<Vector> coords;
+    QVector<Velocity3D> vels;
+    QVector<Force3D> frcs;
+
+    // get the coordinates (and velocities if available) for each molecule in the system
+    {
+        QVector<QVector<Vector>> all_coords(molnums.count());
+        QVector<QVector<Velocity3D>> all_vels(molnums.count());
+        QVector<QVector<Force3D>> all_forces(molnums.count());
+
+        auto all_coords_data = all_coords.data();
+        auto all_vels_data = all_vels.data();
+        auto all_forces_data = all_forces.data();
+
+        const auto coords_property = map["coordinates"];
+        const auto vels_property = map["velocity"];
+        const auto forces_property = map["force"];
+
+        if (should_run_in_parallel(molnums.count(), map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
+                {
+                    const auto mol = system[molnums_data[i]].molecule();
+
+                    tbb::parallel_invoke([&]() { all_coords_data[i] = ::getCoordinates(mol, coords_property); },
+                                         [&]() { all_vels_data[i] = ::getVelocities(mol, vels_property); },
+                                         [&]() { all_forces_data[i] = ::getForces(mol, forces_property); });
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < molnums.count(); ++i)
+            {
+                const auto mol = system[molnums_data[i]].molecule();
+
+                all_coords_data[i] = ::getCoordinates(mol, coords_property);
+                all_vels_data[i] = ::getVelocities(mol, vels_property);
+                all_forces_data[i] = ::getForces(mol, forces_property);
+            }
+        }
+
+        if (::hasData(all_coords))
+        {
+            // check the edge case that some molecules had coordinates defined, but some didn't
+            bool none_have_coords = true;
+            bool all_have_coords = true;
+            bool some_have_coords = false;
+
+            for (const auto &c : all_coords)
+            {
+                if (c.isEmpty())
+                {
+                    all_have_coords = false;
+                }
+                else
+                {
+                    none_have_coords = false;
+                }
+
+                if (all_have_coords == false and none_have_coords == false)
+                {
+                    // ok, only some have coordinates...
+                    some_have_coords = true;
+                    break;
+                }
+            }
+
+            if (some_have_coords)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &coords_i = all_coords_data[i];
+
+                    if (coords_i.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        coords_i = QVector<Vector>(natoms, Vector(0));
+                    }
+                }
+            }
+
+            coords = collapse(all_coords);
+        }
+
+        if (::hasData(all_vels))
+        {
+            // check the edge case that some molecules had velocities defined, but some didn't
+            bool none_have_velocities = true;
+            bool all_have_velocities = true;
+            bool some_have_velocities = false;
+
+            for (const auto &vels : all_vels)
+            {
+                if (vels.isEmpty())
+                {
+                    all_have_velocities = false;
+                }
+                else
+                {
+                    none_have_velocities = false;
+                }
+
+                if (all_have_velocities == false and none_have_velocities == false)
+                {
+                    // ok, only some have velocities...
+                    some_have_velocities = true;
+                    break;
+                }
+            }
+
+            if (some_have_velocities)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &vels_i = all_vels_data[i];
+
+                    if (vels_i.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        vels_i = QVector<Velocity3D>(natoms, Velocity3D(0));
+                    }
+                }
+            }
+
+            vels = collapse(all_vels);
+        }
+
+        if (::hasData(all_forces))
+        {
+            // check the edge case that some molecules had forces defined, but some didn't
+            bool none_have_forces = true;
+            bool all_have_forces = true;
+            bool some_have_forces = false;
+
+            for (const auto &frcs : all_forces)
+            {
+                if (frcs.isEmpty())
+                {
+                    all_have_forces = false;
+                }
+                else
+                {
+                    none_have_forces = false;
+                }
+
+                if (all_have_forces == false and none_have_forces == false)
+                {
+                    // ok, only some have forces...
+                    some_have_forces = true;
+                    break;
+                }
+            }
+
+            if (some_have_forces)
+            {
+                // we need to populate the empty velocities with values of 0
+                for (int i = 0; i < molnums.count(); ++i)
+                {
+                    auto &frcs_i = all_forces_data[i];
+
+                    if (frcs_i.isEmpty())
+                    {
+                        const int natoms = system[molnums[i]].atoms().count();
+                        frcs_i = QVector<Force3D>(natoms, Force3D(0));
+                    }
+                }
+            }
+
+            frcs = collapse(all_forces);
+        }
+    }
+
+    SireVol::SpacePtr space;
+
+    const auto space_property = map["space"];
+    if (system.containsProperty(space_property))
+    {
+        space = system.property(space_property).asA<SireVol::Space>();
+    }
+
+    auto time = get_time_from_system(system, map["time"]);
+
+    return SireMol::Frame(coords, vels, frcs, space.read(), time);
+}
+
+void MoleculeParser::copyFromFrame(const Frame &frame, System &system, const PropertyMap &map) const
+{
+    // first, we are going to work with the group of all molecules, which should
+    // be called "all". We have to assume that the molecules are ordered in "all"
+    // in the same order as they are in this restart file, with the data
+    // in MolIdx/AtomIdx order (this should be the default for all parsers!)
+    MoleculeGroup allmols = system[MGName("all")];
+
+    const int nmols = allmols.nMolecules();
+
+    QVector<int> atom_pointers(nmols + 1, -1);
+
+    int natoms = 0;
+
+    for (int i = 0; i < nmols; ++i)
+    {
+        atom_pointers[i] = natoms;
+        const int nats = allmols[MolIdx(i)].data().info().nAtoms();
+        natoms += nats;
+    }
+
+    atom_pointers[nmols] = natoms;
+
+    if (natoms != frame.nAtoms())
+    {
+        // disagreement caused by us inferring the wrong number of atoms
+        // when reading the trajectory. We will need to infer the right
+        // number at a higher level...
+        throw SireIO::parse_error(QObject::tr("Incompatibility between the files, as this trajectory file contains data "
+                                              "for %1 atom(s), while the other file(s) have created a system with "
+                                              "%2 atom(s)")
+                                      .arg(frame.nAtoms())
+                                      .arg(natoms),
+                                  CODELOC);
+    }
+
+    // next, copy the coordinates into the molecules
+    QVector<Molecule> mols(nmols);
+    Molecule *mols_array = mols.data();
+
+    const Vector *coords_array = 0;
+
+    if (frame.hasCoordinates())
+        coords_array = frame.coordinates().constData();
+
+    const PropertyName coords_property = map["coordinates"];
+
+    const Velocity3D *vels_array = 0;
+
+    if (frame.hasVelocities())
+        vels_array = frame.velocities().constData();
+
+    const PropertyName vels_property = map["velocity"];
+
+    const Force3D *frcs_array = 0;
+
+    if (frame.hasForces())
+        frcs_array = frame.forces().constData();
+
+    const PropertyName frcs_property = map["force"];
+
+    bool should_make_whole = false;
+
+    const Space &space = frame.space();
+
+    if (space.isPeriodic() and map.specified("make_whole"))
+    {
+        should_make_whole = map["make_whole"].value().asABoolean();
+    }
+
+    auto add_data = [&](int i)
+    {
+        const int atom_start_idx = atom_pointers.constData()[i];
+        auto mol = system[MolIdx(i)].molecule().edit();
+        const auto molinfo = mol.data().info();
+
+        if (coords_array != 0)
+        {
+            // create space for the coordinates
+            auto coords = QVector<QVector<Vector>>(molinfo.nCutGroups());
+
+            for (int j = 0; j < molinfo.nCutGroups(); ++j)
+            {
+                coords[j] = QVector<Vector>(molinfo.nAtoms(CGIdx(j)));
+            }
+
+            for (int j = 0; j < mol.nAtoms(); ++j)
+            {
+                auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
+
+                const int atom_idx = atom_start_idx + j;
+
+                coords[cgatomidx.cutGroup()][cgatomidx.atom()] = coords_array[atom_idx];
+            }
+
+            if (should_make_whole)
+                coords = space.makeWhole(coords);
+
+            mol.setProperty(coords_property, AtomCoords(CoordGroupArray(coords)));
+        }
+
+        if (vels_array != 0)
+        {
+            auto vels = AtomVelocities(molinfo);
+
+            for (int j = 0; j < mol.nAtoms(); ++j)
+            {
+                auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
+
+                const int atom_idx = atom_start_idx + j;
+
+                vels.set(cgatomidx, vels_array[atom_idx]);
+            }
+
+            mol.setProperty(vels_property, vels).commit();
+        }
+
+        if (frcs_array != 0)
+        {
+            auto forces = AtomForces(molinfo);
+
+            for (int j = 0; j < mol.nAtoms(); ++j)
+            {
+                auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
+
+                const int atom_idx = atom_start_idx + j;
+
+                forces.set(cgatomidx, frcs_array[atom_idx]);
+            }
+
+            mol.setProperty(frcs_property, forces).commit();
+        }
+
+        mols_array[i] = mol.commit();
+    };
+
+    if (usesParallel())
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                add_data(i);
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nmols; ++i)
+        {
+            add_data(i);
+        }
+    }
+
+    system.update(Molecules(mols));
+
+    PropertyName space_property = map["space"];
+    if (space_property.hasValue())
+    {
+        system.setProperty("space", space_property.value());
+    }
+    else
+    {
+        system.setProperty(space_property.source(), frame.space());
+    }
+
+    PropertyName time_property = map["time"];
+    if (time_property.hasValue())
+    {
+        system.setProperty("time", time_property.value());
+    }
+    else
+    {
+        system.setProperty(time_property.source(), GeneralUnitProperty(frame.time()));
+    }
 }
 
 /** Remove any comment lines (those that start with 'comment_flag')
@@ -700,6 +1341,9 @@ MoleculeParser &MoleculeParser::operator=(const MoleculeParser &other)
     {
         fname = other.fname;
         lnes = other.lnes;
+        saved_system = other.saved_system;
+        frames_to_write = other.frames_to_write;
+        propmap = other.propmap;
         scr = other.scr;
         run_parallel = other.run_parallel;
         Property::operator=(other);
@@ -711,6 +1355,7 @@ MoleculeParser &MoleculeParser::operator=(const MoleculeParser &other)
 bool MoleculeParser::operator==(const MoleculeParser &other) const
 {
     return fname == other.fname and lnes == other.lnes and scr == other.scr and run_parallel == other.run_parallel and
+           saved_system == other.saved_system and frames_to_write == other.frames_to_write and propmap == other.propmap and
            Property::operator==(other);
 }
 
@@ -890,12 +1535,80 @@ PropertyPtr MoleculeParser::getForceField(const System &system, const PropertyMa
     return ffield.read().asA<FFDetail>();
 }
 
+/** Create a directory for the passed file (if it doesn't already exist) */
+void MoleculeParser::createDirectoryForFile(const QString &filename) const
+{
+    const auto fileinfo = QFileInfo(filename);
+
+    const auto basename = fileinfo.dir().filePath(fileinfo.baseName());
+    const auto basedir = fileinfo.absoluteDir();
+
+    if (basedir.exists())
+        return;
+
+    // need to use a mutex to minimise chance of a race condition
+
+    static QMutex create_dir_mutex;
+
+    QMutexLocker lkr(&create_dir_mutex);
+
+    if (not basedir.exists())
+    {
+        // create this directory
+        if (not basedir.mkpath("."))
+        {
+            throw SireError::file_error(QObject::tr(
+                                            "Could not create the directory '%1' into which the file "
+                                            "'%2' will be written. Make sure there is enough space "
+                                            "and you have the right permissions.")
+                                            .arg(basedir.absolutePath())
+                                            .arg(fileinfo.fileName()),
+                                        CODELOC);
+        }
+    }
+}
+
+void _check_and_remove_frame_dir(const QFileInfo &fileinfo)
+{
+    // we will only remove directories that only contain 'frame_XXX' files
+    auto dir = QDir(fileinfo.absoluteFilePath());
+
+    bool ok_to_delete = true;
+
+    for (const auto &subfile : dir.entryInfoList(QDir::Files))
+    {
+        if (not subfile.fileName().startsWith("frame_"))
+        {
+            ok_to_delete = false;
+            break;
+        }
+    }
+
+    if (not ok_to_delete)
+        return;
+
+    // now try to remove the files...
+    for (const auto &subfile : dir.entryInfoList(QDir::Files))
+    {
+        if (subfile.fileName().startsWith("frame_"))
+        {
+            dir.remove(subfile.fileName());
+        }
+    }
+
+    dir = QDir(fileinfo.absolutePath());
+    dir.rmdir(fileinfo.fileName());
+}
+
 /** Write the parsed data back to the file called 'filename'. This will
-    overwrite the file if it exists already, so be careful! */
-void MoleculeParser::writeToFile(const QString &filename) const
+    overwrite the file if it exists already, so be careful! Note that
+    this will write this to multiple files if trajectory writing
+    is requested and this is a frame parser
+*/
+QStringList MoleculeParser::writeToFile(const QString &filename) const
 {
     if (lnes.isEmpty())
-        return;
+        return QStringList();
 
     if (not this->isTextFile())
         throw SireError::program_bug(
@@ -905,21 +1618,175 @@ void MoleculeParser::writeToFile(const QString &filename) const
                 .arg(this->what()),
             CODELOC);
 
-    QFile f(filename);
+    auto gil = SireBase::release_gil();
 
-    if (not f.open(QIODevice::WriteOnly | QIODevice::Text))
+    QStringList written_files;
+
+    createDirectoryForFile(filename);
+
+    if (this->writingTrajectory() and this->isFrame())
     {
-        throw SireError::file_error(f, CODELOC);
+        System s = this->saved_system;
+
+        // construct a copy of our property map, but without
+        // including the list of frames to write
+        auto d = this->propmap.toDict();
+        d.remove("frames_to_write");
+        const PropertyMap m(d);
+
+        const int nframes = frames_to_write.count();
+
+        ProgressBar bar(QString("Save %1").arg(this->formatName()), nframes);
+        bar.setSpeedUnit("frames / s");
+
+        bar = bar.enter();
+
+        // find the largest frame so that we can pad with leading zeroes
+        const int largest_frame = *std::max_element(frames_to_write.constBegin(),
+                                                    frames_to_write.constEnd());
+
+        const int padding = QString::number(largest_frame).length();
+
+        // in this case, we are going to create a directory named after the
+        // filename, into which all the frames will be written
+        auto fileinfo = QFileInfo(filename);
+
+        if (fileinfo.exists())
+        {
+            // by default, we support overwriting of files - so remove this if it is a file
+            if (fileinfo.isDir())
+            {
+                _check_and_remove_frame_dir(fileinfo);
+
+                // rebuild so it is not cached
+                fileinfo = QFileInfo(filename);
+
+                if (fileinfo.exists())
+                    throw SireError::file_error(QObject::tr(
+                                                    "Could not write the trajectory for file '%1' as there "
+                                                    "is already a directory with this name that contains "
+                                                    "files that don't appear to have been created by sire.")
+                                                    .arg(filename),
+                                                CODELOC);
+            }
+            else
+            {
+                auto dir = fileinfo.absoluteDir();
+
+                if (not dir.remove(fileinfo.fileName()))
+                    throw SireError::file_error(QObject::tr(
+                                                    "Could not write the trajectory for file '%1' as "
+                                                    "we don't have permission to remove the existing "
+                                                    "file with this name.")
+                                                    .arg(filename),
+                                                CODELOC);
+            }
+        }
+
+        QDir framedir(fileinfo.absoluteFilePath());
+
+        if (not framedir.mkpath("."))
+            throw SireError::file_error(QObject::tr(
+                                            "Could not create the directory into which to write the "
+                                            "trajectory for '%1'. Check that there is enough space "
+                                            "and you have the correct permissions.")
+                                            .arg(framedir.absolutePath()),
+                                        CODELOC);
+
+        const auto suffix = fileinfo.completeSuffix();
+
+        const auto time_property = m["time"];
+
+        if (this->usesParallel())
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nframes), [&](tbb::blocked_range<int> r)
+                              {
+                System thread_s(s);
+
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    const auto frame = frames_to_write[i];
+
+                    // load the specified frame
+                    thread_s.loadFrame(frame, m);
+
+                    auto time = get_time_from_system(thread_s, time_property).to(picosecond);
+
+                    if (time < 0)
+                        time = 0;
+
+                    // construct a copy of this parser for this frame
+                    auto parser = this->construct(thread_s, m);
+
+                    // now write it to the file, numbered by the frame number and time
+                    QString frame_filename = framedir.filePath(
+                        "frame_" +
+                        QString::number(i).rightJustified(padding, '0') +
+                        "_" +
+                        QString::number(time).replace(".", "-") +
+                        "." + suffix);
+
+                    parser.read().writeToFile(frame_filename);
+
+                    bar.tick();
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < nframes; ++i)
+            {
+                const auto frame = frames_to_write[i];
+
+                // load the specified frame
+                s.loadFrame(frame, m);
+
+                auto time = get_time_from_system(s, time_property).to(picosecond);
+
+                // construct a copy of this parser for this frame
+                auto parser = this->construct(s, m);
+
+                // now write it to the file, numbered by the frame number
+                QString frame_filename = framedir.filePath(
+                    "frame_" +
+                    QString::number(i).rightJustified(padding, '0') +
+                    "_" +
+                    QString::number(time).replace(".", "-") +
+                    "." + suffix);
+
+                parser.read().writeToFile(frame_filename);
+
+                bar.tick();
+            }
+        }
+
+        bar.success();
+
+        // only return the directory name, as we can handle
+        // reading all the frames contained therein
+        written_files.append(framedir.absolutePath());
+    }
+    else
+    {
+        QFile f(filename);
+
+        if (not f.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            throw SireError::file_error(f, CODELOC);
+        }
+
+        QTextStream ts(&f);
+
+        for (const QString &line : lnes)
+        {
+            ts << line << '\n';
+        }
+
+        f.close();
+
+        written_files.append(filename);
     }
 
-    QTextStream ts(&f);
-
-    for (const QString &line : lnes)
-    {
-        ts << line << '\n';
-    }
-
-    f.close();
+    return written_files;
 }
 
 /** Internal function that actually tries to parse the supplied file with name
@@ -937,13 +1804,20 @@ MoleculeParserPtr MoleculeParser::_pvt_parse(const QString &filename, const Prop
 
     QFileInfo info(filename);
 
-    if (not(info.isFile() and info.isReadable()))
+    if (not info.isReadable())
     {
-        throw SireError::file_error(QObject::tr("There is no file readable called '%1'.").arg(filename), CODELOC);
+        throw SireError::file_error(QObject::tr("There is nothing readable called '%1'.").arg(filename), CODELOC);
+    }
+
+    if (info.isDir())
+    {
+        // this is a directory containing (potentially) multiple
+        // files representing multiple frames
+        return MoleculeParserPtr(FileTrajectoryParser(filename, map));
     }
 
     // try to find the right parser based on the suffix
-    QString suffix = info.suffix();
+    QString suffix = info.suffix().toLower();
 
     QStringList errors;
     QStringList suffix_errors;
@@ -1290,7 +2164,7 @@ QString MoleculeParser::supportedFormats()
     return getParserFactory()->supportedFormats();
 }
 
-QStringList pvt_write(const System &system, const QStringList &filenames, const QStringList &fileformats,
+QStringList pvt_write(System system, const QStringList &filenames, const QStringList &fileformats,
                       const PropertyMap &map)
 {
     if (filenames.count() != fileformats.count())
@@ -1301,6 +2175,10 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
                                      CODELOC);
     }
 
+    // release the GIL here so that progress bars can be displayed
+    auto handle = SireBase::release_gil();
+
+    // check that the files can be written
     QVector<QFileInfo> fileinfos(filenames.count());
 
     QStringList errors;
@@ -1313,8 +2191,14 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
         {
             if (fileinfos[i].isDir())
             {
-                errors.append(QObject::tr("The file %1 is actually a directory, and not writable!")
-                                  .arg(fileinfos[i].absoluteFilePath()));
+                _check_and_remove_frame_dir(fileinfos[i]);
+
+                // rebuild this, so this isn't cached
+                fileinfos[i] = QFileInfo(filenames[i]);
+
+                if (fileinfos[i].exists())
+                    errors.append(QObject::tr("The file %1 is actually a directory, and not writable!")
+                                      .arg(fileinfos[i].absoluteFilePath()));
             }
             else if (not fileinfos[i].isWritable())
             {
@@ -1334,7 +2218,7 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
     // now get all of the parsers
     const auto factories = getParserFactory()->getFactories(fileformats);
 
-    QVector<QString> written_files(filenames.count());
+    QVector<QStringList> written_files(filenames.count());
 
     // should we write the files in parallel?
     bool run_parallel = true;
@@ -1358,8 +2242,7 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
 
                     try
                     {
-                        written_files[i] = filename;
-                        factories[i].construct(system, map).read().writeToFile(filename);
+                        written_files[i] = factories[i].construct(system, map).read().writeToFile(filename);
                     }
                     catch (const SireError::exception &e)
                     {
@@ -1382,8 +2265,7 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
 
             try
             {
-                written_files[i] = filename;
-                factories[i].construct(system, map).read().writeToFile(filename);
+                written_files[i] = factories[i].construct(system, map).read().writeToFile(filename);
             }
             catch (const SireError::exception &e)
             {
@@ -1404,7 +2286,14 @@ QStringList pvt_write(const System &system, const QStringList &filenames, const 
                                   CODELOC);
     }
 
-    return written_files.toList();
+    QStringList w;
+
+    for (const auto &wf : written_files)
+    {
+        w += wf;
+    }
+
+    return w;
 }
 
 /** Save the passed System to the file called 'filename'. First, the 'fileformat'
@@ -2127,6 +3016,45 @@ QHash<QString, QList<MoleculeParserPtr>> MoleculeParser::sortParsers(const QList
     ret["supplementary"] = supplementary;
 
     return ret;
+}
+
+bool MoleculeParser::writingTrajectory() const
+{
+    return not frames_to_write.isEmpty();
+}
+
+QList<qint32> MoleculeParser::framesToWrite() const
+{
+    return frames_to_write;
+}
+
+SireMol::Frame MoleculeParser::createFrame(qint32 frame_index) const
+{
+    PropertyMap map(propmap);
+
+    frame_index = Index(frame_index).map(saved_system.nFrames());
+
+    if (map["frame_aligner"].hasValue())
+    {
+        map.set("transform",
+                map["frame_aligner"].value().asA<TrajectoryAligner>()[frame_index]);
+    }
+
+    System local_system(saved_system);
+
+    local_system.loadFrame(frame_index, map);
+
+    return this->createFrame(local_system, map);
+}
+
+const PropertyMap &MoleculeParser::propertyMap() const
+{
+    return propmap;
+}
+
+QString MoleculeParser::saveTitle() const
+{
+    return saved_system.name().value();
 }
 
 Q_GLOBAL_STATIC(NullParser, nullParser)

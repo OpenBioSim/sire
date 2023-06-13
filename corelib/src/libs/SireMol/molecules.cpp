@@ -1067,6 +1067,62 @@ void Molecules::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void Molecules::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
+template <class T>
+QVector<Molecule> _to_molvector(const T &mols)
+{
+    QVector<Molecule> molvector(mols.count());
+
+    auto moldata = molvector.data();
+
+    for (auto it = mols.constBegin(); it != mols.constEnd(); ++it)
+    {
+        *moldata = it.value().molecule();
+        ++moldata;
+    }
+
+    return molvector;
+}
+
+template <class T>
+void _update_hash(T &mols, const QVector<Molecule> &molvector)
+{
+    auto moldata = molvector.constData();
+
+    bool do_manually = false;
+
+    for (auto it = mols.begin(); it != mols.end(); ++it)
+    {
+        if (moldata->data().number() == it.key())
+        {
+            it.value().update(moldata->data());
+        }
+        else
+        {
+            do_manually = true;
+            break;
+        }
+
+        ++moldata;
+    }
+
+    if (do_manually)
+    {
+        qDebug() << "UPDATE MANUALLY!";
+
+        moldata = molvector.constData();
+
+        for (int i = 0; i < molvector.count(); ++i)
+        {
+            mols.find(moldata[i].data().number()).value().update(moldata[i].data());
+        }
+    }
+}
+
 void Molecules::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     int n = this->nFrames(map);
@@ -1110,5 +1166,13 @@ void Molecules::deleteFrame(int frame, const SireBase::PropertyMap &map)
     for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
     {
         it->deleteFrame(frame, map);
+    }
+}
+
+void Molecules::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
+    {
+        it->deleteAllFrames(map);
     }
 }

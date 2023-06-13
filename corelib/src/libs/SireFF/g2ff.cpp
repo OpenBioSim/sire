@@ -208,6 +208,20 @@ void G2FF::assertContains(MGNum mgnum) const
 
     \throw SireMol::missing_group
 */
+MoleculeGroup &G2FF::getGroup(MGNum mgnum)
+{
+    G2FF::assertContains(mgnum);
+
+    if (molgroup[0].number() == mgnum)
+        return molgroup[0];
+    else
+        return molgroup[1];
+}
+
+/** Return a reference to the group with number 'mgnum'
+
+    \throw SireMol::missing_group
+*/
 const MoleculeGroup &G2FF::getGroup(MGNum mgnum) const
 {
     G2FF::assertContains(mgnum);

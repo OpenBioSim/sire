@@ -268,11 +268,13 @@ namespace SireMol
         void saveFrame(int frame);
         void saveFrame();
         void deleteFrame(int frame);
+        void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
+        void deleteAllFrames(const SireBase::PropertyMap &map);
 
         const_iterator begin() const;
         const_iterator end() const;
@@ -466,6 +468,29 @@ namespace SireMol
             }
         }
 
+        template <class T>
+        SIRE_OUTOFLINE_TEMPLATE void _deleteAllFrames(QList<T> &vws, const SireBase::PropertyMap &map)
+        {
+            vws.detach();
+            const int n = vws.count();
+
+            if (_usesParallel(vws, map))
+            {
+                tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
+                                  {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                vws[i].deleteAllFrames(map);
+            } });
+            }
+            else
+            {
+                for (int i = 0; i < n; ++i)
+                {
+                    vws[i].deleteAllFrames(map);
+                }
+            }
+        }
     }  // end of namespace detail
 #endif // GCCXML_PARSE
 
@@ -2324,6 +2349,12 @@ namespace SireMol
     }
 
     template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::deleteAllFrames()
+    {
+        this->deleteAllFrames(PropertyMap());
+    }
+
+    template <class T>
     SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::loadFrame(int frame, const SireBase::PropertyMap &map)
     {
         SireMol::detail::_loadFrame(this->vws, frame, map);
@@ -2345,6 +2376,12 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::deleteFrame(int frame, const SireBase::PropertyMap &map)
     {
         SireMol::detail::_deleteFrame(this->vws, frame, map);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::deleteAllFrames(const SireBase::PropertyMap &map)
+    {
+        SireMol::detail::_deleteAllFrames(this->vws, map);
     }
 
     template <class T>

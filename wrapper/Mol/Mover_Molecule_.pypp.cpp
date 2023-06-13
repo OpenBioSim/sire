@@ -257,6 +257,34 @@ void register_Mover_Molecule__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMol::Molecule >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::Molecule > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::Molecule > & ( ::SireMol::Mover< SireMol::Molecule >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::Molecule >::makeWhole );
+            
+            Mover_Molecule__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMol::Molecule >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::Molecule > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::Molecule > & ( ::SireMol::Mover< SireMol::Molecule >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::Molecule >::makeWhole );
+            
+            Mover_Molecule__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMol::Molecule >::mapInto
         
             typedef SireMol::Mover< SireMol::Molecule > exported_class_t;

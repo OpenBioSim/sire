@@ -330,6 +330,7 @@ namespace SireFF
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
 
     protected:
+        MoleculeGroup &getGroup(MGNum mgnum);
         const MoleculeGroup &getGroup(MGNum mgnum) const;
 
         void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;

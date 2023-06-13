@@ -78,6 +78,8 @@ namespace SireID
 
         qint32 map(qint32 n) const;
 
+        bool canMap(qint32 n) const;
+
         uint hash() const;
 
     protected:

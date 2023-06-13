@@ -90,6 +90,18 @@ void register_CombinedSpace_class(){
                 , "Return whether or not two groups enclosed by the AABoxes aabox0\nand aabox1 are definitely beyond the cutoff distance" );
         
         }
+        { //::SireVol::CombinedSpace::boxMatrix
+        
+            typedef ::SireMaths::Matrix ( ::SireVol::CombinedSpace::*boxMatrix_function_type)(  ) const;
+            boxMatrix_function_type boxMatrix_function_value( &::SireVol::CombinedSpace::boxMatrix );
+            
+            CombinedSpace_exposer.def( 
+                "boxMatrix"
+                , boxMatrix_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::CombinedSpace::calcAngle
         
             typedef ::SireUnits::Dimension::Angle ( ::SireVol::CombinedSpace::*calcAngle_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const &,::SireMaths::Vector const & ) const;
@@ -398,7 +410,7 @@ void register_CombinedSpace_class(){
                 , getMinimumImage_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "Return the minimum image copy of group with respect to center.\nIn this case, as this is not a periodic space, this just returns\ngroup" );
+                , "A cartesian space is not periodic, so this just returns the input point" );
         
         }
         { //::SireVol::CombinedSpace::getMinimumImage

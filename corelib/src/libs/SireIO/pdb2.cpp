@@ -739,7 +739,7 @@ PDB2::PDB2(const QStringList &lines, const PropertyMap &map) : ConcreteProperty<
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
-PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<PDB2, MoleculeParser>(map)
+PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<PDB2, MoleculeParser>(system, map)
 {
     // Get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order.
@@ -839,6 +839,7 @@ PDB2::PDB2(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
 
     QStringList copy_warnings = parse_warnings;
     this->operator=(parsed);
+    this->setParsedSystem(system, map);
     parse_warnings = copy_warnings;
 }
 
@@ -2178,14 +2179,14 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
     {
         use_atom_numbers = map["use_atom_numbers"].value().asA<BooleanProperty>().value();
     }
-    catch(...)
+    catch (...)
     {
         use_atom_numbers = false;
     }
 
     if (use_atom_numbers)
     {
-        for (int i=0; i<num_atoms; ++i)
+        for (int i = 0; i < num_atoms; ++i)
         {
             const auto atomidx = AtomIdx(i);
 
@@ -2302,11 +2303,11 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
                     if (is_ter[i])
                     {
                         atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                            .arg(iline + 1, 5)
-                                            .arg(record.mid(17, 3))
-                                            .arg(record.at(21))
-                                            .arg(record.mid(22, 4))
-                                            .arg(record.at(26)));
+                                              .arg(iline + 1, 5)
+                                              .arg(record.mid(17, 3))
+                                              .arg(record.at(21))
+                                              .arg(record.mid(22, 4))
+                                              .arg(record.at(26)));
 
                         prev_ter = true;
                         prev_chain = atom.getChainID();
@@ -2321,11 +2322,11 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
                     atom_lines.append("TER");
                 else
                     atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                        .arg(iline + 1, 5)
-                                        .arg(last_record.mid(17, 3))
-                                        .arg(last_record.at(21))
-                                        .arg(last_record.mid(22, 4))
-                                        .arg(last_record.at(26)));
+                                          .arg(iline + 1, 5)
+                                          .arg(last_record.mid(17, 3))
+                                          .arg(last_record.at(21))
+                                          .arg(last_record.mid(22, 4))
+                                          .arg(last_record.at(26)));
 
                 prev_ter = true;
                 prev_chain = last_atom.getChainID();

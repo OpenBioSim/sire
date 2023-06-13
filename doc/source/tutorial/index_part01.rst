@@ -23,4 +23,5 @@ installed.
    part01/03_simple_indexing
    part01/04_saving_a_molecule
    part01/05_loading_from_multiple_files
-   part01/06_supported_file_formats
+   part01/06_trajectories
+   part01/07_supported_file_formats

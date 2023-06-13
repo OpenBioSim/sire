@@ -2,6 +2,9 @@ __all__ = [
     "angle",
     "convert",
     "length",
+    "clear_default_units",
+    "set_default_unit",
+    "set_default_units",
     "set_energy_unit",
     "set_internal_units",
     "set_length_unit",
@@ -385,7 +388,6 @@ _names = None
 
 
 def _get_unit_name(unit):
-
     global _names
 
     if _names is None:
@@ -423,7 +425,8 @@ def _incompatible_units(a, b, typ: str):
 
 
 def set_quantity_unit(q, name: str = None):
-    """Set the default quantity unit to be used for
+    """
+    Set the default quantity unit to be used for
     output and default conversions
     """
 
@@ -435,25 +438,10 @@ def set_quantity_unit(q, name: str = None):
 
     q.set_as_default(name)
 
-    e = kcal.get_default()
-    ename = e.unit_string()
-
-    (e / q).set_as_default(f"{ename} {name}-1")
-
-    length = angstrom.get_default()
-    lname = length.unit_string()
-
-    (e / (q * length)).set_as_default(f"{ename} {name}-1 {lname}-1")
-    (e / (q * length * length)).set_as_default(f"{ename} {name}-1 {lname}-2")
-
-    g = gram.get_default()
-    gname = g.unit_string()
-
-    (g / q).set_as_default(f"{gname} {name}-1")
-
 
 def set_energy_unit(energy, name: str = None):
-    """Set the default energy unit to be used for
+    """
+    Set the default energy unit to be used for
     output and default conversions
     """
 
@@ -463,15 +451,12 @@ def set_energy_unit(energy, name: str = None):
     if name is None:
         name = _get_unit_name(energy)
 
-    q = mole.get_default()
-    qname = q.unit_string()
-
     energy.set_as_default(name)
-    (energy / q).set_as_default(f"{name} {qname}-1")
 
 
 def set_length_unit(length, name: str = None):
-    """Set the default length unit to be used for
+    """
+    Set the default length unit to be used for
     output and default conversions
     """
 
@@ -482,22 +467,11 @@ def set_length_unit(length, name: str = None):
         name = _get_unit_name(length)
 
     length.set_as_default(name)
-    (length * length).set_as_default(f"{name}^2")
-    (length * length * length).set_as_default(f"{name}^3")
-
-    (1.0 / length).set_as_default(f"{name}-1")
-    (1.0 / (length * length)).set_as_default(f"{name}-2")
-    (1.0 / (length * length * length)).set_as_default(f"{name}-3")
-
-    e = kcal_per_mol.get_default()
-    ename = e.unit_string()
-
-    (e / length).set_as_default(f"{ename} {name}-1")
-    (e / (length * length)).set_as_default(f"{ename} {name}-2")
 
 
 def set_mass_unit(mass, name: str = None):
-    """Set the default mass unit to be used for
+    """
+    Set the default mass unit to be used for
     output and default conversions
     """
 
@@ -509,14 +483,10 @@ def set_mass_unit(mass, name: str = None):
 
     mass.set_as_default(name)
 
-    q = mole.get_default()
-    qname = q.unit_string()
-
-    (mass / q).set_as_default(f"{name} {qname}-1")
-
 
 def set_time_unit(time, name: str = None):
-    """Set the default time unit to be used for
+    """
+    Set the default time unit to be used for
     output and default conversions
     """
 
@@ -528,34 +498,158 @@ def set_time_unit(time, name: str = None):
 
     time.set_as_default(name)
 
-    (1.0 / time).set_as_default(f"{name}-1")
-    (1.0 / (time * time)).set_as_default(f"{name}-2")
 
-    length = angstrom.get_default()
-    lname = length.unit_string()
+def clear_default_units():
+    """
+    Clear the current set of default units. Note that you will need
+    to set some units, or else the code will complain.
+    """
+    GeneralUnit.clear_defaults()
 
-    (length / time).set_as_default(f"{lname} {name}-1")
-    (length / (time * time)).set_as_default(f"{lname} {name}-2")
+
+def set_default_units(units):
+    """
+    Set the default unit names for the units named in the passed
+    list of strings.
+
+    For example, set_default_units(["m"]) would set the default length
+    unit to "meters", and will print it out using "m" as the string.
+
+    Calling set_default_unit(["kcal", "kcal.mol-1"]) would set the default
+    molar energy unit to kcal_per_mol, and will print it out
+    using "kcal.mol-1", and the default energy unit to "kcal", printed
+    out using "kcal".
+
+    All of the strings must be something that can be parsed by
+    the units grammar in GeneralUnit, and should be units only -
+    they cannot contain values.
+    """
+    if type(units) is not list:
+        units = [units]
+
+    unit_strings = {}
+
+    # parse all the units first
+    for unit in units:
+        unit_strings[GeneralUnit(1.0, unit)] = unit
+
+    # we have fully parsed units, and only have one of each type
+    for key in unit_strings.keys():
+        if hasattr(type(key), "set_as_default"):
+            key.set_as_default(unit_strings[key])
+        else:
+            key.setAsDefault(unit_strings[key])
 
 
-def set_si_units():
+def set_default_unit(unit: str):
+    """
+    Set the default unit name for the unit named in the passed
+    string.
+
+    For example, set_default_unit("m") would set the default length
+    unit to "meters", and will print it out using "m" as the string.
+
+    Calling set_default_unit("kcal.mol-1") would set the default
+    molar energy unit to kcal_per_mol, and will print it out
+    using "kcal.mol-1"
+
+    The string must be something that can be parsed by
+    the units grammar in GeneralUnit, and should be units only -
+    they cannot contain values.
+    """
+    if type(unit) is list:
+        set_default_units(unit)
+    else:
+        set_default_units([unit])
+
+
+def set_si_units(scaled: bool = True):
     """
     Switch over to using SI units for output and default conversions
 
-    This uses:
+    If 'scaled' is true, then units scaled appropriately
+    for atomic-level simulations are chosen.
 
-        mass:     gram (g)
-        energy:   kilojoule (kJ)
-        length:   nanometer
-        time:     picosecond
-        quantity: mole
-        charge:   mod_electron charges
+    In this case, we would use
+
+        mass:        gram (g)
+        energy:      kilojoule (J)
+        length:      nanometer
+        time:        picosecond
+        quantity:    mole
+        charge:      coulomb (C)
+        angle:       radian
+        temperature: kelvin (K)
+
+    Unscaled, we would use
+
+        mass:        kilogram (g)
+        energy:      joule (J)
+        length:      meter
+        time:        second
+        quantity:    mole
+        charge:      coulomb (C)
+        angle:       radian
+        temperature: kelvin (K)
     """
-    set_quantity_unit(mole)
-    set_energy_unit(kilojoule)
-    set_mass_unit(gram)
-    set_time_unit(picosecond)
-    set_length_unit(nanometer)
+    try:
+        GeneralUnit.clear_defaults()
+    except AttributeError:
+        # this happens on load before the new api has been activated
+        pass
+
+    if scaled:
+        set_default_units(
+            [
+                "g",
+                "kJ",
+                "nm",
+                "ps",
+                "mol",
+                "C",
+                "rad",
+                "K",
+                "kJ mol-1",
+                "kJ mol-1 nm-1",
+                "kJ mol-1 nm-2",
+                "kJ mol-1 nm-3",
+                "kJ mol-1 rad-1",
+                "kJ mol-1 rad-2",
+                "kJ mol-1 K-1",
+                "kJ mol-1 K-2",
+                "J s",
+                "W",
+                "J mol-1 s",
+                "W mol-1",
+                "N",
+            ]
+        )
+    else:
+        set_default_units(
+            [
+                "kg",
+                "J",
+                "m",
+                "s",
+                "mol",
+                "C",
+                "rad",
+                "K",
+                "J mol-1",
+                "J mol-1 nm-1",
+                "J mol-1 nm-2",
+                "J mol-1 nm-3",
+                "J mol-1 rad-1",
+                "J mol-1 rad-2",
+                "J mol-1 K-1",
+                "J mol-1 K-2",
+                "J s",
+                "W",
+                "J mol-1 s",
+                "W mol-1",
+                "N",
+            ]
+        )
 
 
 def set_internal_units():
@@ -572,11 +666,36 @@ def set_internal_units():
         quantity: mole
         charge:   mod_electron charges
     """
-    set_quantity_unit(mole)
-    set_energy_unit(kcal)
-    set_mass_unit(gram)
-    set_time_unit(picosecond)
-    set_length_unit(angstrom)
+    try:
+        GeneralUnit.clear_defaults()
+    except AttributeError:
+        # this happens on load before the new api has been activated
+        pass
+
+    set_default_units(
+        [
+            "g",
+            "kcal",
+            "Å",
+            "ps",
+            "|e|",
+            "°",
+            "K",
+            "kcal mol-1",
+            "kcal mol-1 Å-1",
+            "kcal mol-1 Å-2",
+            "kcal mol-1 Å-3",
+            "kcal mol-1 °-1",
+            "kcal mol-1 °-2",
+            "kcal mol-1 K-1",
+            "kcal mol-1 K-2",
+            "kcal s",
+            "kcal s-1",
+            "kcal mol-1 s",
+            "kcal mol-1 s-1",
+            "kcal Å-1",
+        ]
+    )
 
 
 def length(length):
@@ -619,3 +738,7 @@ def angle(angle):
         )
 
     return angle
+
+
+# set internal units on load
+set_internal_units()

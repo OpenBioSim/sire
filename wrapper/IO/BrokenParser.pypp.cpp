@@ -11,7 +11,15 @@ namespace bp = boost::python;
 
 #include "SireBase/parallel.h"
 
+#include "SireBase/progressbar.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireBase/releasegil.h"
+
 #include "SireBase/stringproperty.h"
+
+#include "SireBase/timeproperty.h"
 
 #include "SireError/errors.h"
 
@@ -23,11 +31,19 @@ namespace bp = boost::python;
 
 #include "SireMol/core.h"
 
+#include "SireMol/mgname.h"
+
+#include "SireMol/mgnum.h"
+
 #include "SireMol/molecule.h"
 
 #include "SireMol/moleditor.h"
 
+#include "SireMol/molidx.h"
+
 #include "SireMol/trajectory.h"
+
+#include "SireMol/trajectoryaligner.h"
 
 #include "SireStream/datastream.h"
 
@@ -35,7 +51,11 @@ namespace bp = boost::python;
 
 #include "SireSystem/system.h"
 
+#include "SireUnits/units.h"
+
 #include "filetrajectory.h"
+
+#include "filetrajectoryparser.h"
 
 #include "moleculeparser.h"
 

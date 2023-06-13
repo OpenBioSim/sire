@@ -130,6 +130,32 @@ void register_TempBase_class(){
                 , "" );
         
         }
+        { //::SireUnits::Dimension::TempBase::to
+        
+            typedef double ( ::SireUnits::Dimension::TempBase::*to_function_type)( ::SireUnits::Dimension::GeneralUnit const & ) const;
+            to_function_type to_function_value( &::SireUnits::Dimension::TempBase::to );
+            
+            TempBase_exposer.def( 
+                "to"
+                , to_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireUnits::Dimension::TempBase::to
+        
+            typedef double ( ::SireUnits::Dimension::TempBase::*to_function_type)( ::QString const & ) const;
+            to_function_type to_function_value( &::SireUnits::Dimension::TempBase::to );
+            
+            TempBase_exposer.def( 
+                "to"
+                , to_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireUnits::Dimension::TempBase::toString
         
             typedef ::QString ( ::SireUnits::Dimension::TempBase::*toString_function_type)(  ) const;

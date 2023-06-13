@@ -289,6 +289,31 @@ void register_Molecules_class(){
                 , "Return the number of molecules in this set" );
         
         }
+        { //::SireMol::Molecules::deleteAllFrames
+        
+            typedef void ( ::SireMol::Molecules::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::Molecules::deleteAllFrames );
+            
+            Molecules_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Molecules::deleteAllFrames
+        
+            typedef void ( ::SireMol::Molecules::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::Molecules::deleteAllFrames );
+            
+            Molecules_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::Molecules::deleteFrame
         
             typedef void ( ::SireMol::Molecules::*deleteFrame_function_type)( int ) ;

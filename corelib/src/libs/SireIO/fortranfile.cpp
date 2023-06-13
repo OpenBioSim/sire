@@ -29,6 +29,9 @@
 
 #include "SireID/index.h"
 
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
+
 #include "SireError/errors.h"
 
 #include <QDataStream>
@@ -36,6 +39,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QtEndian>
+#include <QMutex>
 
 using namespace SireIO;
 
@@ -43,12 +47,160 @@ using namespace SireIO;
 ////// Implementatin of FortranFile
 //////
 
+class FortranFileHandle
+{
+public:
+    FortranFileHandle(const QString &filename, QIODevice::OpenMode mode = QIODevice::ReadOnly) : f(filename)
+    {
+        if (not f.open(mode))
+        {
+            throw SireError::file_error(f, CODELOC);
+        }
+    }
+
+    ~FortranFileHandle()
+    {
+    }
+
+    qint64 _lkr_skip_to(qint64 position)
+    {
+        if (not f.seek(position))
+            throw SireError::io_error(QObject::tr("Could not seek to position %1.").arg(position), CODELOC);
+
+        return f.pos();
+    }
+
+    qint64 _lkr_read(char *data, qint64 size)
+    {
+        if (size > 0)
+        {
+            int read = f.read(data, size);
+
+            if (read != size)
+                throw SireError::io_error(QObject::tr(
+                                              "Failed to read %1 bytes from the file. Only %2 bytes were read.")
+                                              .arg(size)
+                                              .arg(read),
+                                          CODELOC);
+
+            return read;
+        }
+        else
+            return 0;
+    }
+
+    void _lkr_write(const char *data, qint64 size)
+    {
+        if (size > 0)
+        {
+            int written = f.write(data, size);
+
+            if (written <= 0)
+                throw SireError::io_error(QObject::tr(
+                                              "Failed to write %1 bytes to the file. IO Error")
+                                              .arg(size),
+                                          CODELOC);
+            else if (written != size)
+                throw SireError::io_error(QObject::tr(
+                                              "Failed to write %1 bytes to the file. Only %2 bytes were written.")
+                                              .arg(size)
+                                              .arg(written),
+                                          CODELOC);
+        }
+    }
+
+    QMutex mutex;
+    QFile f;
+};
+
 FortranFile::FortranFile() : int_size(4), is_little_endian(true)
 {
 }
 
+void FortranFile::write(const FortranRecord &record)
+{
+    if (record.size() <= 0)
+        return;
+
+    if (f.get() == 0)
+        throw SireError::io_error(
+            QObject::tr("Problem writing file '%1'. File pointer has been closed?").arg(abs_filename), CODELOC);
+
+    QMutexLocker lkr(&(f->mutex));
+
+    // write the record size
+    if (int_size == 4)
+    {
+        qint32 sz;
+
+        if (is_little_endian)
+        {
+            sz = qToLittleEndian<qint32>(record.size());
+        }
+        else
+        {
+            sz = qToBigEndian<qint32>(record.size());
+        }
+
+        f->_lkr_write(reinterpret_cast<char *>(&sz), int_size);
+    }
+    else
+    {
+        qint64 sz;
+
+        if (is_little_endian)
+        {
+            sz = qToLittleEndian<qint64>(record.size());
+        }
+        else
+        {
+            sz = qToBigEndian<qint64>(record.size());
+        }
+
+        f->_lkr_write(reinterpret_cast<char *>(&sz), int_size);
+    }
+
+    // now write the record
+    f->_lkr_write(record.constData(), record.size());
+
+    // now write the size of the record again (it is written
+    // at the start and end of the record)
+    if (int_size == 4)
+    {
+        qint32 sz;
+
+        if (is_little_endian)
+        {
+            sz = qToLittleEndian<qint32>(record.size());
+        }
+        else
+        {
+            sz = qToBigEndian<qint32>(record.size());
+        }
+
+        f->_lkr_write(reinterpret_cast<char *>(&sz), int_size);
+    }
+    else
+    {
+        qint64 sz;
+
+        if (is_little_endian)
+        {
+            sz = qToLittleEndian<qint64>(record.size());
+        }
+        else
+        {
+            sz = qToBigEndian<qint64>(record.size());
+        }
+
+        f->_lkr_write(reinterpret_cast<char *>(&sz), int_size);
+    }
+}
+
 bool FortranFile::try_read()
 {
+    auto gil = SireBase::release_gil();
+
     record_pointers.clear();
     record_sizes.clear();
 
@@ -60,12 +212,20 @@ bool FortranFile::try_read()
             QObject::tr("Could not open file %1. Please check it exists and is readable.").arg(abs_filename), CODELOC);
     }
 
+    // remember the total file size
+    const auto file_size = file.size();
+
     QDataStream ds(&file);
 
     QByteArray start_buffer(int_size, 0);
     QByteArray end_buffer(int_size, 0);
 
     qint64 read_count = 0;
+
+    SireBase::ProgressBar bar(file_size, "Indexing Fortran File");
+    bar.setSpeedUnit("bytes / s");
+
+    bar = bar.enter();
 
     // each fortran record starts and ends with an integer that
     // gives the size in bytes of the record. We will now scan
@@ -77,6 +237,7 @@ bool FortranFile::try_read()
 
         if (read_size != int_size)
         {
+            bar.failure();
             return false;
         }
 
@@ -97,6 +258,13 @@ bool FortranFile::try_read()
                 start_size = qFromBigEndian<qint64>(start_buffer.data());
         }
 
+        if (start_size < 0 or start_size > file_size)
+        {
+            // this is not a fortran file as the sizes don't make sense
+            bar.failure();
+            return false;
+        }
+
         read_count += int_size;
 
         read_size = ds.skipRawData(start_size);
@@ -104,6 +272,7 @@ bool FortranFile::try_read()
         if (read_size != start_size)
         {
             // could not read this much!
+            bar.failure();
             return false;
         }
 
@@ -111,6 +280,7 @@ bool FortranFile::try_read()
 
         if (read_size != int_size)
         {
+            bar.failure();
             return false;
         }
 
@@ -134,6 +304,7 @@ bool FortranFile::try_read()
         if (start_size != end_size)
         {
             // disagreement - cannot be a valid record
+            bar.failure();
             return false;
         }
 
@@ -141,53 +312,80 @@ bool FortranFile::try_read()
         record_sizes.append(start_size);
 
         read_count += start_size + int_size;
+
+        bar.setProgress(read_count);
     }
+
+    bar.success();
+
+    file.close();
+
+    // we can read it - so return a handle to the file
+    f.reset(new FortranFileHandle(abs_filename));
 
     return true;
 }
 
-FortranFile::FortranFile(const QString &filename) : int_size(4), is_little_endian(true)
+FortranFile::FortranFile(const QString &filename,
+                         QIODevice::OpenMode mode)
+    : int_size(4), is_little_endian(true)
 {
     abs_filename = QFileInfo(filename).absoluteFilePath();
 
-    // try to read using 4 byte header and native endian
-    int_size = 4;
-    is_little_endian = true;
+    if (mode == QIODevice::ReadOnly)
+    {
+        // try to read using 4 byte header and little endian
+        int_size = 4;
+        is_little_endian = true;
 
-    if (try_read())
-        return;
+        if (try_read())
+            return;
 
-    // try to read using 8 byte header and native endian
-    int_size = 8;
-    is_little_endian = true;
+        // try to read using 8 byte header and little endian
+        int_size = 8;
+        is_little_endian = true;
 
-    if (try_read())
-        return;
+        if (try_read())
+            return;
 
-    // try to read using 4 byte header and swapped endian
-    int_size = 4;
-    is_little_endian = false;
+        // try to read using 4 byte header and big endian
+        int_size = 4;
+        is_little_endian = false;
 
-    if (try_read())
-        return;
+        if (try_read())
+            return;
 
-    // try to read using 8 byte header and swapped endian
-    int_size = 8;
-    is_little_endian = false;
+        // try to read using 8 byte header and big endian
+        int_size = 8;
+        is_little_endian = false;
 
-    if (try_read())
-        return;
+        if (try_read())
+            return;
 
-    throw SireError::io_error(QObject::tr("Could not read a consistent set of records from %1. "
-                                          "It could not be read as a record-based unformatted "
-                                          "Fortran binary file.")
-                                  .arg(abs_filename),
-                              CODELOC);
+        throw SireError::io_error(QObject::tr("Could not read a consistent set of records from %1. "
+                                              "It could not be read as a record-based unformatted "
+                                              "Fortran binary file.")
+                                      .arg(abs_filename),
+                                  CODELOC);
+    }
+    else
+    {
+        // open the file in writing mode
+        f.reset(new FortranFileHandle(abs_filename, mode));
+
+        int_size = 8;
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+        is_little_endian = true;
+#else
+        is_little_endian = false;
+#endif
+    }
 }
 
 FortranFile::FortranFile(const FortranFile &other)
     : abs_filename(other.abs_filename), record_pointers(other.record_pointers), record_sizes(other.record_sizes),
-      int_size(other.int_size), is_little_endian(other.is_little_endian)
+      f(other.f), int_size(other.int_size), is_little_endian(other.is_little_endian)
 {
 }
 
@@ -202,6 +400,7 @@ FortranFile &FortranFile::operator=(const FortranFile &other)
         abs_filename = other.abs_filename;
         record_pointers = other.record_pointers;
         record_sizes = other.record_sizes;
+        f = other.f;
         int_size = other.int_size;
         is_little_endian = other.is_little_endian;
     }
@@ -218,17 +417,19 @@ FortranRecord FortranFile::operator[](int i) const
 {
     i = SireID::Index(i).map(this->nRecords());
 
-    QFile file(this->abs_filename);
-
-    if (!file.open(QIODevice::ReadOnly))
+    if (f.get() == 0)
+    {
         throw SireError::io_error(
-            QObject::tr("Problem opening file '%1'. Please make sure it is readable.").arg(abs_filename), CODELOC);
+            QObject::tr("Problem opening file '%1'. File pointer has been closed?").arg(abs_filename), CODELOC);
+    }
 
-    QDataStream ds(&file);
+    FortranFileHandle *handle = const_cast<FortranFileHandle *>(f.get());
 
-    qint64 pointer = this->record_pointers[i];
+    QMutexLocker lkr(&(handle->mutex));
 
-    int skipped = ds.skipRawData(pointer);
+    auto pointer = this->record_pointers[i];
+
+    auto skipped = handle->_lkr_skip_to(pointer);
 
     if (pointer != skipped)
     {
@@ -244,7 +445,7 @@ FortranRecord FortranFile::operator[](int i) const
 
     QByteArray array(size, 0);
 
-    int read = ds.readRawData(array.data(), size);
+    int read = handle->_lkr_read(array.data(), size);
 
     if (size != read)
     {
@@ -256,7 +457,14 @@ FortranRecord FortranFile::operator[](int i) const
                                   CODELOC);
     }
 
+    lkr.unlock();
+
     return FortranRecord(array, is_little_endian);
+}
+
+bool FortranFile::isLittleEndian() const
+{
+    return is_little_endian;
 }
 
 //////
@@ -266,6 +474,10 @@ FortranRecord FortranFile::operator[](int i) const
 FortranRecord::FortranRecord() : cursor(0)
 {
     is_little_endian = true;
+}
+
+FortranRecord::FortranRecord(bool le) : cursor(0), is_little_endian(le)
+{
 }
 
 FortranRecord::FortranRecord(const QByteArray &d, bool le) : data(d), cursor(0), is_little_endian(le)
@@ -296,6 +508,11 @@ FortranRecord &FortranRecord::operator=(const FortranRecord &other)
 int FortranRecord::size() const
 {
     return data.count();
+}
+
+const char *FortranRecord::constData() const
+{
+    return data.constData();
 }
 
 void FortranRecord::_assertValid(int n, int size) const
@@ -479,46 +696,48 @@ QString FortranRecord::readChar(int n)
     return ret;
 }
 
+void assert_doubles_ok(bool is_little_endian)
+{
+    if (sizeof(double) != 8)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-64bit doubles..."));
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (not is_little_endian)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with big endian doubles..."));
+#else
+    if (not is_big_endian)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with little endian doubles..."));
+#endif
+}
+
+void assert_floats_ok(bool is_little_endian)
+{
+    if (sizeof(float) != 4)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-32bit floats..."));
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (not is_little_endian)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with big endian floats..."));
+#else
+    if (not is_big_endian)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with little endian floats..."));
+#endif
+}
+
 QVector<double> FortranRecord::readFloat64(int n)
 {
     if (n <= 0)
         return QVector<double>();
 
-    if (sizeof(double) != 8)
-        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-64bit doubles..."),
-                                         CODELOC);
+    assert_doubles_ok(is_little_endian);
 
     _assertValid(n, 8);
 
     QVector<double> ret(n);
 
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-    if (is_little_endian)
-    {
-        // just copy the data
-        memcpy(ret.data(), data.constData() + cursor, n * 8);
-        cursor += n * 8;
-    }
-    else
-    {
-        // need to reverse the data
-        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with big endian doubles..."),
-                                         CODELOC);
-    }
-#else
-    if (is_little_endian)
-    {
-        // need to reverse the data
-        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with little endian doubles..."),
-                                         CODELOC);
-    }
-    else
-    {
-        // just copy the data
-        memcpy(ret.data(), data.constData() + cursor, n * 8);
-        cursor += n * 8;
-    }
-#endif
+    // just copy the data
+    memcpy(ret.data(), data.constData() + cursor, n * 8);
+    cursor += n * 8;
 
     return ret;
 }
@@ -528,40 +747,15 @@ QVector<float> FortranRecord::readFloat32(int n)
     if (n <= 0)
         return QVector<float>();
 
-    if (sizeof(float) != 4)
-        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-32bit floats..."), CODELOC);
+    assert_floats_ok(is_little_endian);
 
     _assertValid(n, 4);
 
     QVector<float> ret(n);
 
-#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-    if (is_little_endian)
-    {
-        // just copy the data
-        memcpy(ret.data(), data.constData() + cursor, n * 4);
-        cursor += n * 4;
-    }
-    else
-    {
-        // need to reverse the data
-        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with big endian floats..."),
-                                         CODELOC);
-    }
-#else
-    if (is_little_endian)
-    {
-        // need to reverse the data
-        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with little endian floats..."),
-                                         CODELOC);
-    }
-    else
-    {
-        // just copy the data
-        memcpy(ret.data(), data.constData() + cursor, n * 4);
-        cursor += n * 4;
-    }
-#endif
+    // just copy the data
+    memcpy(ret.data(), data.constData() + cursor, n * 4);
+    cursor += n * 4;
 
     return ret;
 }
@@ -656,4 +850,248 @@ QVector<qint64> FortranRecord::readInt64(int n)
 #endif
 
     return ret;
+}
+
+void FortranRecord::writeFloat64(const QVector<double> &values, int n)
+{
+    if (n <= 0)
+        return;
+
+    if (sizeof(double) != 8)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-64bit doubles..."),
+                                         CODELOC);
+
+    QByteArray d(8 * n, char('\0'));
+
+    int n_to_copy = std::min(n, values.count());
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (is_little_endian)
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 8);
+    }
+    else
+    {
+        // need to reverse the data
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with big endian doubles..."),
+                                         CODELOC);
+    }
+#else
+    if (is_little_endian)
+    {
+        // need to reverse the data
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with little endian doubles..."),
+                                         CODELOC);
+    }
+    else
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 8);
+    }
+#endif
+
+    data.append(d);
+    cursor = data.count();
+}
+
+void FortranRecord::writeFloat32(const QVector<float> &values, int n)
+{
+    if (n <= 0)
+        return;
+
+    if (sizeof(float) != 4)
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with non-32bit floats..."),
+                                         CODELOC);
+
+    int n_to_copy = std::min(n, values.count());
+
+    QByteArray d(4 * n, char('\0'));
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (is_little_endian)
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 4);
+    }
+    else
+    {
+        // need to reverse the data
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with big endian floats..."),
+                                         CODELOC);
+    }
+#else
+    if (is_little_endian)
+    {
+        // need to reverse the data
+        throw SireError::incomplete_code(QObject::tr("Haven't written code to deal with little endian floats..."),
+                                         CODELOC);
+    }
+    else
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 4);
+    }
+#endif
+
+    data.append(d);
+    cursor = data.count();
+}
+
+void FortranRecord::writeInt32(const QVector<qint32> &values, int n)
+{
+    if (n <= 0)
+        return;
+
+    QByteArray d(4 * n, char('\0'));
+
+    int n_to_copy = std::min(n, values.count());
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (is_little_endian)
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 4);
+    }
+    else
+    {
+        // need to reverse the data
+        qint32 *int_data = reinterpret_cast<qint32 *>(d.data());
+
+        for (int i = 0; i < n_to_copy; ++i)
+        {
+            int_data[i] = qToBigEndian<qint32>(values[i]);
+        }
+    }
+#else
+    if (is_little_endian)
+    {
+        // need to reverse the data
+        qint32 *int_data = reinterpret_cast<qint32 *>(d.data());
+
+        for (int i = 0; i < n_to_copy; ++i)
+        {
+            int_data[i] = qToLittleEndian<qint32>(values[i]);
+        }
+    }
+    else
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 4);
+    }
+#endif
+
+    data.append(d);
+    cursor = data.count();
+}
+
+void FortranRecord::writeInt64(const QVector<qint64> &values, int n)
+{
+    if (n <= 0)
+        return;
+
+    QByteArray d(8 * n, char('\0'));
+    int n_to_copy = std::min(n, values.count());
+
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (is_little_endian)
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 8);
+    }
+    else
+    {
+        // need to reverse the data
+        qint64 *int_data = reinterpret_cast<qint64 *>(d.data());
+
+        for (int i = 0; i < n_to_copy; ++i)
+        {
+            int_data[i] = qToBigEndian<qint64>(values[i]);
+        }
+    }
+#else
+    if (is_little_endian)
+    {
+        // need to reverse the data
+        qint64 *int_data = reinterpret_cast<qint64 *>(d.data());
+
+        for (int i = 0; i < n_to_copy; ++i)
+        {
+            int_data[i] = qToLittleEndian<qint64>(values[i]);
+        }
+    }
+    else
+    {
+        // just copy the data
+        memcpy(d.data(), values.constData(), n_to_copy * 8);
+    }
+#endif
+
+    data.append(d);
+    cursor = data.count();
+}
+
+void FortranRecord::writeChar(const QString &text, int n)
+{
+    if (n <= 0)
+        return;
+
+    // we will utf8 encode the strings
+    const auto utf8 = text.toUtf8();
+
+    if (utf8.count() >= n)
+    {
+        // only write the first n characters
+        data.append(utf8.constData(), n);
+    }
+    else
+    {
+        // make sure that we pad with zeros
+        data.append(utf8.constData(), utf8.count());
+        data.append(n - utf8.count(), char('\0'));
+    }
+
+    cursor = data.count();
+}
+
+void FortranRecord::writeFloat64(double value)
+{
+    assert_doubles_ok(is_little_endian);
+    data.append(reinterpret_cast<char *>(&value), 8);
+    cursor = data.count();
+}
+
+void FortranRecord::writeFloat32(float value)
+{
+    assert_floats_ok(is_little_endian);
+    data.append(reinterpret_cast<char *>(&value), 4);
+    cursor = data.count();
+}
+
+void FortranRecord::writeInt32(qint32 value)
+{
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (not is_little_endian)
+        value = qToBigEndian<qint32>(value);
+#else
+    if (is_little_endian)
+        value = qToLittleEndian<qint32>(value);
+#endif
+
+    data.append(reinterpret_cast<char *>(&value), 4);
+    cursor = data.count();
+}
+
+void FortranRecord::writeInt64(qint64 value)
+{
+#if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
+    if (not is_little_endian)
+        value = qToBigEndian<qint64>(value);
+#else
+    if (is_little_endian)
+        value = qToLittleEndian<qint64>(value);
+#endif
+
+    data.append(reinterpret_cast<char *>(&value), 8);
+    cursor = data.count();
 }

@@ -83,6 +83,8 @@ namespace SireVol
         AABox(const QVector<Vector> &coordinates);
         AABox(const Vector *coords, int ncoords);
 
+        AABox(const QVector<QVector<Vector>> &coordinates);
+
         AABox(const CoordGroupBase &coordgroup);
         AABox(const CoordGroupArray &cgarray);
         AABox(const CoordGroupArrayArray &cgarrays);
@@ -122,6 +124,7 @@ namespace SireVol
         void recalculate(const CoordGroupArray &cgarray);
         void recalculate(const CoordGroupArrayArray &cgarrays);
         void recalculate(const QVector<Vector> &coordinates);
+        void recalculate(const QVector<QVector<Vector>> &coordinates);
 
         void translate(const Vector &delta);
 

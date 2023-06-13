@@ -174,6 +174,7 @@ target_link_libraries (SireMove
                        SireSystem
                        SireMaths
                        SireCluster
+                       SireUnits
                        SireStream
                        ${SIRE_OPENMM_LIBRARIES}
                        )

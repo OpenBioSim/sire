@@ -172,10 +172,36 @@ void MoleculeView::_fromFrame(const Frame &frame, const SireBase::PropertyMap &m
     const auto space_prop = map["space"];
     const auto time_prop = map["time"];
 
+    bool make_whole = false;
+
+    if (frame.space().isPeriodic() and map.specified("make_whole"))
+    {
+        make_whole = map["make_whole"].value().asABoolean();
+    }
+
+    if (space_prop.hasSource())
+    {
+        d->setProperty(space_prop.source(), frame.space());
+    }
+
+    if (time_prop.hasSource())
+    {
+        d->setProperty(time_prop.source(), GeneralUnitProperty(frame.time()));
+    }
+
     if (frame.hasCoordinates() and coords_prop.hasSource())
     {
         auto coords = AtomCoords(d->info());
-        coords.copyFrom(frame.coordinates());
+
+        if (make_whole)
+        {
+            coords.copyFrom(frame.space().makeWhole(frame.coordinates()));
+        }
+        else
+        {
+            coords.copyFrom(frame.coordinates());
+        }
+
         d->setProperty(coords_prop.source(), coords);
     }
 
@@ -191,16 +217,6 @@ void MoleculeView::_fromFrame(const Frame &frame, const SireBase::PropertyMap &m
         auto frcs = AtomForces(d->info());
         frcs.copyFrom(frame.forces());
         d->setProperty(frcs_prop.source(), frcs);
-    }
-
-    if (space_prop.hasSource())
-    {
-        d->setProperty(space_prop.source(), frame.space());
-    }
-
-    if (time_prop.hasSource())
-    {
-        d->setProperty(time_prop.source(), GeneralUnitProperty(frame.time()));
     }
 }
 
@@ -229,12 +245,27 @@ void MoleculeView::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void MoleculeView::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
 void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];
 
     if ((frame == 0 or frame == -1) and (not d->hasProperty(traj_prop)))
+    {
+        if (map.specified("make_whole"))
+        {
+            if (map["make_whole"].value().asABoolean())
+            {
+                this->update(this->molecule().move().makeWhole(map).commit().data());
+            }
+        }
+
         return;
+    }
 
     auto traj = d->property(traj_prop).asA<Trajectory>();
 
@@ -309,6 +340,17 @@ void MoleculeView::deleteFrame(int frame, const SireBase::PropertyMap &map)
     {
         d->setProperty(traj_prop.source(), traj);
     }
+}
+
+void MoleculeView::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    const auto traj_prop = map["trajectory"];
+
+    if (not(traj_prop.hasSource() and d->hasProperty(traj_prop)))
+        return;
+
+    // just remove the trajectory property :-)
+    d->removeProperty(traj_prop.source());
 }
 
 /** Return whether or not this view is of the same molecule as 'other'

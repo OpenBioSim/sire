@@ -311,11 +311,11 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        from datetime import datetime
+        from ..base import ProgressBar
 
-        start_time = datetime.now().timestamp()
+        with ProgressBar(text="minimisation") as spinner:
+            spinner.set_speed_unit("checks / s")
 
-        with Console.spinner("minimisation: 0.0s") as spinner:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, 0)
 
@@ -323,9 +323,10 @@ class DynamicsData:
                     try:
                         run_promise.result(timeout=0.2)
                     except Exception:
-                        delta = datetime.now().timestamp() - start_time
-                        spinner.update("minimisation: %.1f s" % delta)
+                        spinner.tick()
                         pass
+
+                spinner.set_completed()
 
     def run(self, time, save_frequency, auto_fix_minimise: bool = True):
         if self.is_null():
@@ -334,7 +335,6 @@ class DynamicsData:
         from concurrent.futures import ThreadPoolExecutor
         import openmm
 
-        from ..utils import Console
         from ..units import picosecond
 
         try:
@@ -395,9 +395,11 @@ class DynamicsData:
 
         nsteps_before_run = self._current_step
 
+        from ..base import ProgressBar
+
         try:
-            with Console.progress(transient=True) as progress:
-                t = progress.add_task("dynamics", total=steps)
+            with ProgressBar(total=steps, text="dynamics") as progress:
+                progress.set_speed_unit("steps / s")
 
                 with ThreadPoolExecutor() as pool:
                     while completed < steps:
@@ -436,7 +438,7 @@ class DynamicsData:
                             if result == 0:
                                 completed += nrun
                                 nrun_till_save -= nrun
-                                progress.update(t, completed=completed)
+                                progress.set_progress(completed)
                                 run_promise = None
                             else:
                                 # make sure we finish processing the last block
@@ -479,7 +481,7 @@ class DynamicsData:
                                 raise NeedsMinimiseError()
 
                             raise RuntimeError(
-                                "The kinetic energy has exceeded 100 kcal mol-1 "
+                                "The kinetic energy has exceeded 1000 kcal mol-1 "
                                 f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
                                 f" and {kinetic_energy} kcal mol-1 total). This "
                                 "suggests that the simulation has become "
@@ -559,7 +561,13 @@ class Dynamics:
         speed = self.time_speed()
 
         if speed == 0:
-            return f"Dynamics(completed=0)"
+            if self.current_step() > 0:
+                return (
+                    f"Dynamics(completed={self.current_time()}, "
+                    f"energy={self.current_energy()}, speed=FAST ns day-1)"
+                )
+            else:
+                return f"Dynamics(completed=0)"
         else:
             return (
                 f"Dynamics(completed={self.current_time()}, "

@@ -225,6 +225,34 @@ void register_Mover_Selector_Chain__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::Selector< SireMol::Chain > > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::Selector< SireMol::Chain > > & ( ::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::makeWhole );
+            
+            Mover_Selector_Chain__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::Selector< SireMol::Chain > > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::Selector< SireMol::Chain > > & ( ::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::makeWhole );
+            
+            Mover_Selector_Chain__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMol::Selector< SireMol::Chain > >::mapInto
         
             typedef SireMol::Mover< SireMol::Selector< SireMol::Chain > > exported_class_t;

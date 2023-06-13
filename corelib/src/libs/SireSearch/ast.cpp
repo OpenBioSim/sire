@@ -25,6 +25,12 @@
   *
 \*********************************************/
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-builtins"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "ast.h"
 #include "idengine.h"
 
@@ -591,3 +597,7 @@ namespace AST
         return IDDistanceVectorEngine::construct(value0.toEngine(), distance.value * distance.unit, value1);
     }
 } // namespace AST
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

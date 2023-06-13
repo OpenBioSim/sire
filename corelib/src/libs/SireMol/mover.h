@@ -103,11 +103,14 @@ namespace SireMol
 
         void setMovableAtoms(const AtomSelection &movable_atoms);
 
-        void translate(MoleculeData &data, const Vector &delta, const PropertyMap &map) const;
+        void makeWhole(MoleculeData &view, const PropertyMap &map) const;
+        void makeWhole(MoleculeData &view, const SireMaths::Vector &center, const PropertyMap &map) const;
 
-        void rotate(MoleculeData &data, const Quaternion &quat, const Vector &point, const PropertyMap &map) const;
+        void translate(MoleculeData &data, const SireMaths::Vector &delta, const PropertyMap &map) const;
 
-        void rotate(MoleculeData &data, const Matrix &rotmat, const Vector &point, const PropertyMap &map) const;
+        void rotate(MoleculeData &data, const Quaternion &quat, const SireMaths::Vector &point, const PropertyMap &map) const;
+
+        void rotate(MoleculeData &data, const Matrix &rotmat, const SireMaths::Vector &point, const PropertyMap &map) const;
 
         void transform(MoleculeData &data, const Transform &transform, const PropertyMap &map) const;
 
@@ -150,11 +153,17 @@ namespace SireMol
         static void changeFrame(MoleculeData &data, const AtomSelection &selected_atoms, const AxisSet &from_axes,
                                 const AxisSet &to_axes, const PropertyMap &map);
 
-        static void translate(MoleculeData &view, const AtomSelection &selected_atoms, const Vector &delta,
+        static void makeWhole(MoleculeData &view, const AtomSelection &selected_atoms,
+                              const PropertyMap &map);
+
+        static void makeWhole(MoleculeData &view, const AtomSelection &selected_atoms,
+                              const SireMaths::Vector &center, const PropertyMap &map);
+
+        static void translate(MoleculeData &view, const AtomSelection &selected_atoms, const SireMaths::Vector &delta,
                               const PropertyMap &map);
 
         static void rotate(MoleculeData &view, const AtomSelection &selected_atoms, const Matrix &rotmat,
-                           const Vector &point, const PropertyMap &map);
+                           const SireMaths::Vector &point, const PropertyMap &map);
 
         static void transform(MoleculeData &view, const AtomSelection &selected_atoms, const Transform &t,
                               const PropertyMap &map);
@@ -164,13 +173,18 @@ namespace SireMol
         static void changeFrame(AtomCoords &coords, const AtomSelection &selected_atoms, const AxisSet &from_frame,
                                 const AxisSet &to_frame);
 
-        static void translate(AtomCoords &coords, const AtomSelection &selected_atoms, const Vector &delta);
+        static bool makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+                              const SireVol::Space &space);
+        static bool makeWhole(AtomCoords &coords, const AtomSelection &selected_atoms,
+                              const SireMaths::Vector &center, const SireVol::Space &space);
+
+        static void translate(AtomCoords &coords, const AtomSelection &selected_atoms, const SireMaths::Vector &delta);
 
         static void rotate(AtomCoords &coords, const AtomSelection &selected_atoms, const Matrix &rotmat,
-                           const Vector &point);
+                           const SireMaths::Vector &point);
 
         static void rotate(AtomCoords &coords, const AtomSelection &selected_atoms, const Quaternion &quat,
-                           const Vector &point);
+                           const SireMaths::Vector &point);
 
         static void transform(AtomCoords &coords, const AtomSelection &selected_atoms, const Transform &t);
 

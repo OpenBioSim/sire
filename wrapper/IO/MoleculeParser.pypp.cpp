@@ -11,7 +11,15 @@ namespace bp = boost::python;
 
 #include "SireBase/parallel.h"
 
+#include "SireBase/progressbar.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireBase/releasegil.h"
+
 #include "SireBase/stringproperty.h"
+
+#include "SireBase/timeproperty.h"
 
 #include "SireError/errors.h"
 
@@ -23,11 +31,19 @@ namespace bp = boost::python;
 
 #include "SireMol/core.h"
 
+#include "SireMol/mgname.h"
+
+#include "SireMol/mgnum.h"
+
 #include "SireMol/molecule.h"
 
 #include "SireMol/moleditor.h"
 
+#include "SireMol/molidx.h"
+
 #include "SireMol/trajectory.h"
+
+#include "SireMol/trajectoryaligner.h"
 
 #include "SireStream/datastream.h"
 
@@ -35,7 +51,11 @@ namespace bp = boost::python;
 
 #include "SireSystem/system.h"
 
+#include "SireUnits/units.h"
+
 #include "filetrajectory.h"
+
+#include "filetrajectoryparser.h"
 
 #include "moleculeparser.h"
 
@@ -776,14 +796,14 @@ void register_MoleculeParser_class(){
         }
         { //::SireIO::MoleculeParser::usesParallel
         
-            typedef bool ( ::SireIO::MoleculeParser::*usesParallel_function_type)(  ) const;
+            typedef bool ( ::SireIO::MoleculeParser::*usesParallel_function_type)( int ) const;
             usesParallel_function_type usesParallel_function_value( &::SireIO::MoleculeParser::usesParallel );
             
             MoleculeParser_exposer.def( 
                 "usesParallel"
                 , usesParallel_function_value
-                , bp::release_gil_policy()
-                , "" );
+                , ( bp::arg("n")=(int)(-1) )
+                , "Return whether or not this parser runs in parallel - this will depend\n  on whether parallel was enabled for parsing, we have more than\n  one thread available, and the number of items (n) makes it worth\n  parsing in parallel. Pass in n<=0 if you dont want to check the\n  last condition.\n" );
         
         }
         { //::SireIO::MoleculeParser::warnings
@@ -878,7 +898,7 @@ void register_MoleculeParser_class(){
         }
         { //::SireIO::MoleculeParser::writeToFile
         
-            typedef void ( ::SireIO::MoleculeParser::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::MoleculeParser::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::MoleculeParser::writeToFile );
             
             MoleculeParser_exposer.def( 
@@ -886,7 +906,7 @@ void register_MoleculeParser_class(){
                 , writeToFile_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
-                , "Write the parsed data back to the file called filename. This will\noverwrite the file if it exists already, so be careful" );
+                , "Write the parsed data back to the file called filename. This will\noverwrite the file if it exists already, so be careful Note that\nthis will write this to multiple files if trajectory writing\nis requested and this is a frame parser\n" );
         
         }
         MoleculeParser_exposer.staticmethod( "load" );

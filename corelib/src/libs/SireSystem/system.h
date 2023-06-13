@@ -295,6 +295,17 @@ namespace SireSystem
         Properties userProperties() const;
         Properties builtinProperties() const;
 
+        void addSharedProperty(const QString &name);
+        void addSharedProperty(const QString &name, const Property &value);
+
+        void setSharedProperty(const QString &name, const Property &value);
+
+        void removeSharedProperty(const QString &name);
+
+        void removeAllSharedProperties();
+
+        Properties sharedProperties() const;
+
         const SystemMonitors &monitors() const;
         const ForceFields &forceFields() const;
         const MoleculeGroups &extraGroups() const;
@@ -413,15 +424,21 @@ namespace SireSystem
         void saveFrame(int frame);
         void saveFrame();
         void deleteFrame(int frame);
+        void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
+        void deleteAllFrames(const SireBase::PropertyMap &map);
+
+        void makeWhole();
+        void makeWhole(const SireBase::PropertyMap &map);
 
         static const System &null();
 
     protected:
+        MoleculeGroup &getGroup(MGNum mgnum);
         const MoleculeGroup &getGroup(MGNum mgnum) const;
 
         void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;
@@ -446,6 +463,15 @@ namespace SireSystem
     private:
         void rebuildIndex();
 
+        void _setProperty(const QString &name, const Property &value,
+                          bool update_shared);
+
+        void _updateSharedProperty(const QString &name,
+                                   const Property &value);
+
+        void _updateSharedProperties(MoleculeData &data) const;
+        void _updateSharedProperties(MoleculeView &view) const;
+
         ForceFields &_pvt_forceFields();
 
         const ForceFields &_pvt_constForceFields() const;
@@ -461,6 +487,7 @@ namespace SireSystem
         const MolGroupsBase &_pvt_moleculeGroups(MGNum mgnum) const;
         const MolGroupsBase &_pvt_constMoleculeGroups(MGNum mgnum) const;
 
+        MoleculeGroup &_pvt_moleculeGroup(MGNum mgnum);
         const MoleculeGroup &_pvt_moleculeGroup(MGNum mgnum) const;
 
         void _pvt_throwMissingGroup(MGNum mgnum) const;
@@ -492,6 +519,11 @@ namespace SireSystem
         /** The index of which of the two set of MoleculeGroups each
             individual molecule group in this set is in */
         QHash<MGNum, int> mgroups_by_num;
+
+        /** The set of shared properties - these are properties which
+            will be added and kept up-to-date in contained molecules.
+            By default, these are the "space" and "time" properties */
+        QStringList shared_properties;
 
         /** The subversion of this system - this is incremented when
             delta updates are being applied. A system with non-zero

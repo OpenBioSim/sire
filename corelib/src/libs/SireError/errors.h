@@ -32,9 +32,9 @@
 
 #include <boost/assert.hpp>
 
-//#ifndef BOOST_ENABLE_ASSERT_HANDLER
-//#define BOOST_ENABLE_ASSERT_HANDLER 1
-//#endif
+// #ifndef BOOST_ENABLE_ASSERT_HANDLER
+// #define BOOST_ENABLE_ASSERT_HANDLER 1
+// #endif
 
 #include "SireError/exception.h"
 #include "SireError/version_error.h"
@@ -890,11 +890,49 @@ namespace SireError
         }
     };
 
+    /** This exception is thrown whenever execution is stopped by
+        an interrupt
+
+        @author Christopher Woods
+    */
+    class SIREERROR_EXPORT interrupt_error : public exception
+    {
+    public:
+        interrupt_error() : exception()
+        {
+        }
+
+        interrupt_error(QString err, QString place = QString()) : exception(err, place)
+        {
+        }
+
+        interrupt_error(const id_error &other) : exception(other)
+        {
+        }
+
+        ~interrupt_error() throw()
+        {
+        }
+
+        static const char *typeName();
+
+        const char *what() const throw()
+        {
+            return interrupt_error::typeName();
+        }
+
+        void throwSelf() const
+        {
+            throw interrupt_error(*this);
+        }
+    };
+
 } // namespace SireError
 
 Q_DECLARE_METATYPE(SireError::program_bug)
 Q_DECLARE_METATYPE(SireError::unsupported)
 Q_DECLARE_METATYPE(SireError::id_error)
+Q_DECLARE_METATYPE(SireError::interrupt_error)
 Q_DECLARE_METATYPE(SireError::invalid_key)
 Q_DECLARE_METATYPE(SireError::invalid_index)
 Q_DECLARE_METATYPE(SireError::invalid_cast)

@@ -417,6 +417,31 @@ void register_SelectorMDihedral_class(){
                 , "" );
         
         }
+        { //::SireMM::SelectorMDihedral::deleteAllFrames
+        
+            typedef void ( ::SireMM::SelectorMDihedral::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMM::SelectorMDihedral::deleteAllFrames );
+            
+            SelectorMDihedral_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMDihedral::deleteAllFrames
+        
+            typedef void ( ::SireMM::SelectorMDihedral::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMM::SelectorMDihedral::deleteAllFrames );
+            
+            SelectorMDihedral_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::SelectorMDihedral::deleteFrame
         
             typedef void ( ::SireMM::SelectorMDihedral::*deleteFrame_function_type)( int ) ;

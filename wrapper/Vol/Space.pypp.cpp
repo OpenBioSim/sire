@@ -67,6 +67,18 @@ void register_Space_class(){
                 , "Return whether or not two groups that are enclosed by the AABoxes\naabox0 and aabox1 are beyond the cutoff distance dist.\n\nWarning: Note beyond does not mean definitely within the distance\n" );
         
         }
+        { //::SireVol::Space::boxMatrix
+        
+            typedef ::SireMaths::Matrix ( ::SireVol::Space::*boxMatrix_function_type)(  ) const;
+            boxMatrix_function_type boxMatrix_function_value( &::SireVol::Space::boxMatrix );
+            
+            Space_exposer.def( 
+                "boxMatrix"
+                , boxMatrix_function_value
+                , bp::release_gil_policy()
+                , "Return the matrix that describes this box - these are the\n  three box vectors. This raises an exception if this is\n  not a periodic space\n" );
+        
+        }
         { //::SireVol::Space::calcAngle
         
             typedef ::SireUnits::Dimension::Angle ( ::SireVol::Space::*calcAngle_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const &,::SireMaths::Vector const & ) const;
@@ -503,6 +515,58 @@ void register_Space_class(){
                 , isPeriodic_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this space is periodic" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< SireMaths::Vector > const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< SireMaths::Vector > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< SireMaths::Vector > const &,::SireMaths::Vector const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< QVector< SireMaths::Vector > > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< QVector< SireMaths::Vector > > const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireVol::Space::makeWhole
+        
+            typedef ::QVector< QVector< SireMaths::Vector > > ( ::SireVol::Space::*makeWhole_function_type)( ::QVector< QVector< SireMaths::Vector > > const &,::SireMaths::Vector const & ) const;
+            makeWhole_function_type makeWhole_function_value( &::SireVol::Space::makeWhole );
+            
+            Space_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("coords"), bp::arg("center") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireVol::Space::maximumCutoff

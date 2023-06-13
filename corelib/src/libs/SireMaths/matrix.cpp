@@ -379,6 +379,32 @@ bool Matrix::isIdentity() const
            zx() == 0 and zy() == 0;
 }
 
+/** Return whether or not this matrix is all zero */
+bool Matrix::isZero() const
+{
+    for (int i = 0; i < 9; ++i)
+    {
+        if (not SireMaths::isZero(array[i]))
+            return false;
+    }
+
+    return true;
+}
+
+/** Return whether or not this is a diagonal matrix */
+bool Matrix::isDiagonal() const
+{
+    return xy() == 0 and xz() == 0 and
+           yx() == 0 and yz() == 0 and
+           zx() == 0 and zy() == 0;
+}
+
+/** Return the diagonal of this matrix */
+Vector Matrix::diagonal() const
+{
+    return Vector(xx(), yy(), zz());
+}
+
 /** Copy assignment operator */
 Matrix &Matrix::operator=(const Matrix &other)
 {
@@ -494,7 +520,7 @@ Matrix &Matrix::operator*=(double c)
 
 Matrix &Matrix::operator/=(double c)
 {
-    if (isZero(c))
+    if (SireMaths::isZero(c))
         throw SireMaths::math_error(QObject::tr("Cannot divide a matrix by 0"), CODELOC);
 
     return this->operator*=(1 / c);
@@ -537,7 +563,7 @@ Matrix Matrix::inverse() const
     double det = this->determinant();
 
     // if the determinant is zero then this matrix cannot be inverted
-    if (isZero(det))
+    if (SireMaths::isZero(det))
     {
         throw SireMaths::math_error(QObject::tr("Matrix '%1' cannot be inverted!").arg(toString()), CODELOC);
     }

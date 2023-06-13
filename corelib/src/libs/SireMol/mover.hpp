@@ -82,6 +82,10 @@ namespace SireMol
 
         Mover<T> &mapInto(const AxisSet &axes, const PropertyMap &map = PropertyMap());
 
+        Mover<T> &makeWhole(const PropertyMap &map = PropertyMap());
+
+        Mover<T> &makeWhole(const Vector &center, const PropertyMap &map = PropertyMap());
+
         Mover<T> &changeFrame(const AxisSet &from_frame, const AxisSet &to_frame, const PropertyMap &map = PropertyMap());
 
         Mover<T> &translate(const Vector &delta, const PropertyMap &map = PropertyMap());
@@ -229,6 +233,23 @@ namespace SireMol
                                                             const PropertyMap &map)
     {
         MoverBase::changeFrame(*(this->d), from_frame, to_frame, map);
+        return *this;
+    }
+
+    /** Make this molecule whole, wrapping it into the periodic space */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Mover<T> &Mover<T>::makeWhole(const PropertyMap &map)
+    {
+        MoverBase::makeWhole(*(this->d), map);
+        return *this;
+    }
+
+    /** Make this molecule whole, wrapping it into the periodic space
+        centered on 'center' */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Mover<T> &Mover<T>::makeWhole(const Vector &center, const PropertyMap &map)
+    {
+        MoverBase::makeWhole(*(this->d), center, map);
         return *this;
     }
 

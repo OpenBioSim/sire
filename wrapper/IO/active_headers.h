@@ -7,11 +7,13 @@
 #include "amberprm.h"
 #include "amberrst.h"
 #include "amberrst7.h"
+#include "ambertraj.h"
 #include "biosimspace.h"
 #include "charmmpsf.h"
 #include "cube.h"
 #include "dcd.h"
 #include "filetrajectory.h"
+#include "filetrajectoryparser.h"
 #include "flexibilitylibrary.h"
 #include "getcoordsarray.h"
 #include "gro87.h"
@@ -27,6 +29,8 @@
 #include "supplementary.h"
 #include "tinker.h"
 #include "trajectorymonitor.h"
+#include "trr.h"
+#include "xtc.h"
 #include "zmatrixmaker.h"
 
 #endif

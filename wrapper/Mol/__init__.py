@@ -56,7 +56,8 @@ def __get_metadata__(molview, *args):
 
 
 _typename_mapping = {
-    "SireMol_Velocity3D": "SireMaths_Vector3D_SireUnits_Dimension_Velocity_"
+    "SireMol_Velocity3D": "SireMaths_Vector3D_SireUnits_Dimension_Velocity_",
+    "SireMol_Force3D": "SireMaths_Vector3D_SireUnits_Dimension_Force_",
 }
 
 

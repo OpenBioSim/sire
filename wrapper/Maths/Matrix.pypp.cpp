@@ -150,6 +150,18 @@ void register_Matrix_class(){
                 , "Return the determinant of the matrix" );
         
         }
+        { //::SireMaths::Matrix::diagonal
+        
+            typedef ::SireMaths::Vector ( ::SireMaths::Matrix::*diagonal_function_type)(  ) const;
+            diagonal_function_type diagonal_function_value( &::SireMaths::Matrix::diagonal );
+            
+            Matrix_exposer.def( 
+                "diagonal"
+                , diagonal_function_value
+                , bp::release_gil_policy()
+                , "Return the diagonal of this matrix" );
+        
+        }
         { //::SireMaths::Matrix::diagonalise
         
             typedef ::boost::tuples::tuple< SireMaths::Vector, SireMaths::Matrix, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireMaths::Matrix::*diagonalise_function_type)(  ) const;
@@ -210,6 +222,18 @@ void register_Matrix_class(){
                 , "Return the inverse of this matrix. Throws a math_error if this\nmatrix cannot be inverted." );
         
         }
+        { //::SireMaths::Matrix::isDiagonal
+        
+            typedef bool ( ::SireMaths::Matrix::*isDiagonal_function_type)(  ) const;
+            isDiagonal_function_type isDiagonal_function_value( &::SireMaths::Matrix::isDiagonal );
+            
+            Matrix_exposer.def( 
+                "isDiagonal"
+                , isDiagonal_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this is a diagonal matrix" );
+        
+        }
         { //::SireMaths::Matrix::isIdentity
         
             typedef bool ( ::SireMaths::Matrix::*isIdentity_function_type)(  ) const;
@@ -232,6 +256,18 @@ void register_Matrix_class(){
                 , isSymmetric_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a symmetric matrix" );
+        
+        }
+        { //::SireMaths::Matrix::isZero
+        
+            typedef bool ( ::SireMaths::Matrix::*isZero_function_type)(  ) const;
+            isZero_function_type isZero_function_value( &::SireMaths::Matrix::isZero );
+            
+            Matrix_exposer.def( 
+                "isZero"
+                , isZero_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this matrix is all zero" );
         
         }
         { //::SireMaths::Matrix::offset

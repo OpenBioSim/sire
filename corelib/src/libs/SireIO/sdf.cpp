@@ -1082,7 +1082,7 @@ SDFMolecule parseMolecule(const Molecule &molecule, QStringList &errors, const P
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
-SDF::SDF(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<SDF, MoleculeParser>(map)
+SDF::SDF(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<SDF, MoleculeParser>(system, map)
 {
     // Get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order.
@@ -1157,6 +1157,7 @@ SDF::SDF(const SireSystem::System &system, const PropertyMap &map) : ConcretePro
 
         QStringList copy_warnings = parse_warnings;
         this->operator=(parsed);
+        this->setParsedSystem(system, map);
         parse_warnings = copy_warnings;
     }
 }

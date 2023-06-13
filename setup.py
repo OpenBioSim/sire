@@ -28,12 +28,22 @@ import shutil
 import glob
 
 try:
-    # Check to see if Sire is already installed in this environment
-    # and store the version.
-    import sire as sr
+    # We have to check the version, but we can't do this by
+    # importing sire (this will block installing of files on
+    # windows, as we can't copy over a library file that is linked
+    # into the application)
+    curver = (
+        subprocess.check_output(
+            [sys.executable, os.path.join("build/get_sire_version.py")]
+        )
+        .decode("utf8")
+        .lstrip()
+        .rstrip()
+    )
 
-    curver = sr.__version__
-except ImportError:
+    if len(curver) == 0:
+        curver = None
+except Exception:
     curver = None
 
 # If Sire is already installed, see if the version number has changed.
@@ -322,7 +332,9 @@ def conda_install(dependencies, install_bss_reqs=False):
 
     if not _is_conda_prepped:
         if install_bss_reqs:
-            cmd = "%s config --prepend channels openbiosim/label/dev" % conda_exe
+            cmd = (
+                "%s config --prepend channels openbiosim/label/dev" % conda_exe
+            )
             print("Activating openbiosim channel channel using: '%s'" % cmd)
             status = subprocess.run(cmd.split())
             if status.returncode != 0:
@@ -381,7 +393,9 @@ def install_requires(install_bss_reqs=False):
     print(f"Installing requirements for {platform_string}")
 
     if not os.path.exists(conda):
-        print("\nSire can only be installed into a conda or miniconda environment.")
+        print(
+            "\nSire can only be installed into a conda or miniconda environment."
+        )
         print(
             "Please install conda, miniconda, miniforge or similar, then "
             "activate the conda environment, then rerun this installation "
@@ -408,7 +422,9 @@ def install_requires(install_bss_reqs=False):
             from parse_requirements import parse_requirements
         except ImportError as e:
             print("\n\n[ERROR] ** You need to install pip-requirements-parser")
-            print("Run `conda install -c conda-forge pip-requirements-parser\n\n")
+            print(
+                "Run `conda install -c conda-forge pip-requirements-parser\n\n"
+            )
             raise e
 
     reqs = parse_requirements("requirements_host.txt")
@@ -465,7 +481,10 @@ def _get_build_ext():
         else:
             ext = ""
 
-        return os.path.basename(conda_base.replace(" ", "_").replace(".", "_")) + ext
+        return (
+            os.path.basename(conda_base.replace(" ", "_").replace(".", "_"))
+            + ext
+        )
 
 
 def _get_bin_dir():
@@ -514,8 +533,12 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
         print(f"{CC} => {CC_bin}")
 
         if CXX_bin is None or CC_bin is None:
-            print("Cannot find the compilers requested by conda-build in the PATH")
-            print("Please check that the compilers are installed and available.")
+            print(
+                "Cannot find the compilers requested by conda-build in the PATH"
+            )
+            print(
+                "Please check that the compilers are installed and available."
+            )
             sys.exit(-1)
 
         # use the full paths, in case CMake struggles
@@ -646,7 +669,9 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # Compile and install, as need to install to compile the wrappers
     make_args = make_cmd(ncores, True)
 
-    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -710,7 +735,9 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # Just compile the wrappers
     make_args = make_cmd(npycores, False)
 
-    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -783,7 +810,9 @@ def install_module(ncores: int = 1):
     make_args = make_cmd(ncores, True)
 
     # Now that cmake has run, we can compile and install wrapper
-    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -823,7 +852,9 @@ def install(ncores: int = 1, npycores: int = 1):
     # Now install the wrappers
     make_args = make_cmd(npycores, True)
 
-    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
+    print(
+        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
+    )
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 

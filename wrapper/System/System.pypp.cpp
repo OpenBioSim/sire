@@ -10,6 +10,8 @@ namespace bp = boost::python;
 
 #include "SireBase/savestate.h"
 
+#include "SireBase/timeproperty.h"
+
 #include "SireError/errors.h"
 
 #include "SireFF/energytable.h"
@@ -408,6 +410,32 @@ void register_System_class(){
                 , "Convenient overload of System::addIfUnique that uses the default locations\nto find any necessary properties.\nThrow: SireMol::missing_group\nThrow: SireBase::missing_property\nThrow: SireError::invalid_index\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
         
         }
+        { //::SireSystem::System::addSharedProperty
+        
+            typedef void ( ::SireSystem::System::*addSharedProperty_function_type)( ::QString const & ) ;
+            addSharedProperty_function_type addSharedProperty_function_value( &::SireSystem::System::addSharedProperty );
+            
+            System_exposer.def( 
+                "addSharedProperty"
+                , addSharedProperty_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::addSharedProperty
+        
+            typedef void ( ::SireSystem::System::*addSharedProperty_function_type)( ::QString const &,::SireBase::Property const & ) ;
+            addSharedProperty_function_type addSharedProperty_function_value( &::SireSystem::System::addSharedProperty );
+            
+            System_exposer.def( 
+                "addSharedProperty"
+                , addSharedProperty_function_value
+                , ( bp::arg("name"), bp::arg("value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireSystem::System::applyConstraints
         
             typedef void ( ::SireSystem::System::*applyConstraints_function_type)(  ) ;
@@ -796,6 +824,31 @@ void register_System_class(){
                 , ( bp::arg("ffid"), bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Return whether or not any of the forcefields identified by the ID ffid\ncontain a property called name" );
+        
+        }
+        { //::SireSystem::System::deleteAllFrames
+        
+            typedef void ( ::SireSystem::System::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireSystem::System::deleteAllFrames );
+            
+            System_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::deleteAllFrames
+        
+            typedef void ( ::SireSystem::System::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireSystem::System::deleteAllFrames );
+            
+            System_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireSystem::System::deleteFrame
@@ -1258,6 +1311,31 @@ void register_System_class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::makeWhole
+        
+            typedef void ( ::SireSystem::System::*makeWhole_function_type)(  ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireSystem::System::makeWhole );
+            
+            System_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::makeWhole
+        
+            typedef void ( ::SireSystem::System::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireSystem::System::makeWhole );
+            
+            System_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -1967,6 +2045,18 @@ void register_System_class(){
                 , "Completely remove all monitors from this system" );
         
         }
+        { //::SireSystem::System::removeAllSharedProperties
+        
+            typedef void ( ::SireSystem::System::*removeAllSharedProperties_function_type)(  ) ;
+            removeAllSharedProperties_function_type removeAllSharedProperties_function_value( &::SireSystem::System::removeAllSharedProperties );
+            
+            System_exposer.def( 
+                "removeAllSharedProperties"
+                , removeAllSharedProperties_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireSystem::System::removeProperty
         
             typedef void ( ::SireSystem::System::*removeProperty_function_type)( ::QString const & ) ;
@@ -1978,6 +2068,19 @@ void register_System_class(){
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
                 , "Remove the property with name name. Note that this can only\nremove user-level properties - it cannot remove built-in properties\nof the system. This does nothing if there is no user-level\nproperty with this name" );
+        
+        }
+        { //::SireSystem::System::removeSharedProperty
+        
+            typedef void ( ::SireSystem::System::*removeSharedProperty_function_type)( ::QString const & ) ;
+            removeSharedProperty_function_type removeSharedProperty_function_value( &::SireSystem::System::removeSharedProperty );
+            
+            System_exposer.def( 
+                "removeSharedProperty"
+                , removeSharedProperty_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireSystem::System::saveFrame
@@ -2315,6 +2418,31 @@ void register_System_class(){
                 , ( bp::arg("ffid"), bp::arg("name"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "Set the value of the property called name in the forcefields identified\nby the ID ffid to the value value\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+        
+        }
+        { //::SireSystem::System::setSharedProperty
+        
+            typedef void ( ::SireSystem::System::*setSharedProperty_function_type)( ::QString const &,::SireBase::Property const & ) ;
+            setSharedProperty_function_type setSharedProperty_function_value( &::SireSystem::System::setSharedProperty );
+            
+            System_exposer.def( 
+                "setSharedProperty"
+                , setSharedProperty_function_value
+                , ( bp::arg("name"), bp::arg("value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::sharedProperties
+        
+            typedef ::SireBase::Properties ( ::SireSystem::System::*sharedProperties_function_type)(  ) const;
+            sharedProperties_function_type sharedProperties_function_value( &::SireSystem::System::sharedProperties );
+            
+            System_exposer.def( 
+                "sharedProperties"
+                , sharedProperties_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireSystem::System::subVersion

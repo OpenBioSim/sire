@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 #include "segid.h"
 
+#include "selector.hpp"
+
 #include "selectorm.hpp"
 
 #include "selectormol.h"
@@ -464,6 +466,31 @@ void register_SelectorMol_class(){
                 "cutGroups"
                 , cutGroups_function_value
                 , ( bp::arg("cgid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::deleteAllFrames
+        
+            typedef void ( ::SireMol::SelectorMol::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorMol::deleteAllFrames );
+            
+            SelectorMol_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorMol::deleteAllFrames
+        
+            typedef void ( ::SireMol::SelectorMol::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorMol::deleteAllFrames );
+            
+            SelectorMol_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
                 , "" );
         
         }

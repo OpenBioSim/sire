@@ -32,6 +32,8 @@
 
 #include "SireMol/residuecutting.h"
 
+#include "SireSystem/system.h"
+
 #include <functional>
 #include <memory>
 
@@ -69,6 +71,8 @@ namespace SireIO
     using SireBase::PropertyMap;
 
     typedef SireBase::PropPtr<MoleculeParser> MoleculeParserPtr;
+
+    class FileTrajectoryParser;
 
     namespace detail
     {
@@ -137,8 +141,13 @@ namespace SireIO
         friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const MoleculeParser &);
         friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, MoleculeParser &);
 
+        // this needs to be able to call the protected functions
+        friend class FileTrajectoryParser;
+
     public:
         MoleculeParser(const PropertyMap &map = PropertyMap());
+        MoleculeParser(const SireSystem::System &system, const PropertyMap &map);
+
         MoleculeParser(const QString &filename, const PropertyMap &map);
         MoleculeParser(const QStringList &lines, const PropertyMap &map);
 
@@ -243,7 +252,8 @@ namespace SireIO
         void enableParallel();
         void disableParallel();
         void setUseParallel(bool on);
-        bool usesParallel() const;
+
+        bool usesParallel(int n = -1) const;
 
         SireSystem::System toSystem(const PropertyMap &map) const;
 
@@ -257,7 +267,7 @@ namespace SireIO
 
         SireSystem::System toSystem(const QList<MoleculeParserPtr> &others) const;
 
-        virtual void writeToFile(const QString &filename) const;
+        virtual QStringList writeToFile(const QString &filename) const;
 
         virtual bool isTextFile() const;
         virtual bool isBinaryFile() const;
@@ -274,9 +284,14 @@ namespace SireIO
 
         void removeCommentLines(const QString &comment_flag);
 
+        SireMol::Frame createFrame(const SireSystem::System &system, const PropertyMap &map) const;
+        void copyFromFrame(const SireMol::Frame &frame, SireSystem::System &system, const PropertyMap &map) const;
+
         virtual SireSystem::System startSystem(const PropertyMap &map) const;
         virtual SireSystem::System startSystem(const QVector<QString> &lines, const PropertyMap &map) const;
         virtual void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
+
+        void createDirectoryForFile(const QString &filename) const;
 
         void setLines(const QVector<QString> &lines);
 
@@ -285,6 +300,17 @@ namespace SireIO
         static QVector<QString> readTextFile(QString filename);
 
         virtual SireBase::PropertyPtr getForceField(const SireSystem::System &system, const PropertyMap &map) const;
+
+        bool writingTrajectory() const;
+        QList<qint32> framesToWrite() const;
+        SireMol::Frame createFrame(qint32 frame_index) const;
+
+        void setParsedSystem(const SireSystem::System &system,
+                             const PropertyMap &map);
+
+        const SireBase::PropertyMap &propertyMap() const;
+
+        QString saveTitle() const;
 
     private:
         static MoleculeParserPtr _pvt_parse(const QString &filename, const PropertyMap &map);
@@ -297,6 +323,15 @@ namespace SireIO
 
         /** All of the lines in the file */
         QVector<QString> lnes;
+
+        /** The System being written */
+        SireSystem::System saved_system;
+
+        /** The frames of this system to save */
+        QList<qint32> frames_to_write;
+
+        /** The property map used when saving this System */
+        SireBase::PropertyMap propmap;
 
         /** The score associated with the parser. The higher the score,
             the better the file was parsed */
@@ -431,12 +466,6 @@ namespace SireIO
     SIRE_ALWAYS_INLINE bool MoleculeParser::isEmpty() const
     {
         return this->isTextFile() and lnes.isEmpty();
-    }
-
-    /** Return whether or not this parser runs in parallel */
-    SIRE_ALWAYS_INLINE bool MoleculeParser::usesParallel() const
-    {
-        return run_parallel;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

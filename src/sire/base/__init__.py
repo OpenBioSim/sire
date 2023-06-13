@@ -6,6 +6,8 @@ from .. import use_new_api as _use_new_api
 
 from ..legacy.Base import PropertyMap
 
+from ._progressbar import *
+
 _use_new_api()
 
 wrap = _Base.wrap

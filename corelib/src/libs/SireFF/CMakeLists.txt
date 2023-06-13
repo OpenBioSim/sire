@@ -86,7 +86,7 @@ set ( SIREFF_SOURCES
 
       detail/atomiccoords3d.cpp
       detail/ffmolecules.cpp
-      detail/ffmolecules3d.cpp   
+      detail/ffmolecules3d.cpp
 
       ${SIREFF_HEADERS}
       ${SIREFF_DETAIL_HEADERS}
@@ -105,6 +105,7 @@ target_link_libraries (SireFF
                        SireCAS
                        SireMaths
                        SireBase
+                       SireUnits
                        SireStream
                        ${TBB_LIBRARY}
                        ${TBB_MALLOC_LIBRARY}
@@ -117,7 +118,7 @@ install( TARGETS SireFF EXPORT SireLibraries
          ARCHIVE DESTINATION ${SIRE_ARCHIVES}
        )
 
-install( FILES ${SIREFF_HEADERS} 
+install( FILES ${SIREFF_HEADERS}
          DESTINATION ${SIRE_INCLUDES}/SireFF )
 
 install( FILES ${SIREFF_DETAIL_HEADERS}

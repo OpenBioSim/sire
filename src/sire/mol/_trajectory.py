@@ -18,7 +18,9 @@ class TrajectoryIterator:
 
             self._map = create_map(map)
             self._view = view
-            self._values = range(0, max(1, self._view.num_frames(self._map)))
+            self._values = list(
+                range(0, max(1, self._view.num_frames(self._map)))
+            )
             self._times = None
             self._iter = None
             self._frame = None
@@ -122,6 +124,30 @@ class TrajectoryIterator:
         else:
             return f"Trajectory({self._view}, num_frames={len(self._values)})"
 
+    def _is_trajectory_iterator(self):
+        """
+        Return that this is a TrajectoryIterator
+        """
+        return True
+
+    def _to_legacy_system(self):
+        """
+        Internal function used to convert the contained view into a
+        legacy.Sire.System
+        """
+        from .._load import _to_legacy_system
+
+        return _to_legacy_system(self.current())
+
+    def frame_indexes(self):
+        """
+        Return the indexes of the frames in this trajectory that
+        will be viewed
+        """
+        from copy import copy
+
+        return copy(self._values)
+
     def align(self, align):
         """
         Return a copy of this trajectory where each frame will be aligned
@@ -193,6 +219,31 @@ class TrajectoryIterator:
         ret.frame_index = lambda: self._frame
 
         return ret
+
+    def _populate_map(self, map):
+        """
+        Internal function called by sire.save to populate the
+        property map that will be used by MoleculeParser to
+        extract each frame from this trajectory.
+
+        Note that this populates a copy of the map, which is
+        returned
+        """
+        from ..base import create_map
+
+        # do it this way around, so that 'map' overwrites
+        # anything in this trajectory's map
+        map = create_map(self._map, map)
+
+        # now add in the frames to save
+        frames_to_write = self.frame_indexes()
+        map.set("frames_to_write", frames_to_write)
+
+        # and the aligner
+        if self._aligner is not None:
+            map.set("frame_aligner", self._aligner)
+
+        return map
 
     def first(self):
         """Return the first frame in the trajectory"""
@@ -291,75 +342,41 @@ class TrajectoryIterator:
 
         components = {}
 
-        from ..utils import Console
+        ff_nrgs = calculate_trajectory_energies(
+            forcefields, self._values, map=map
+        )
 
-        import os
+        for ff_idx in range(0, len(forcefields)):
+            nrg = ff_nrgs[ff_idx][0]
 
-        cpu_count = os.cpu_count()
+            if ff_idx == 0:
+                energy_unit = nrg.get_default().unit_string()
 
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through frames", total=nframes)
+            components[colname(colnames[ff_idx], "total")] = np.zeros(
+                nframes, dtype=float
+            )
 
-            num_per_chunk = cpu_count
-
-            i = 0
-
-            import time
-
-            while i < nframes:
-                start_time = time.time()
-                j = min(i + num_per_chunk, nframes)
-
-                ff_nrgs = calculate_trajectory_energies(
-                    forcefields, list(self._values[i:j]), map=map
+            for key in nrg.components().keys():
+                components[colname(colnames[ff_idx], key)] = np.zeros(
+                    nframes, dtype=float
                 )
 
-                if i == 0:
-                    for ff_idx in range(0, len(forcefields)):
-                        nrg = ff_nrgs[ff_idx][0]
+        for i in range(0, nframes):
+            for ff_idx in range(0, len(forcefields)):
+                nrg = ff_nrgs[ff_idx][i]
+                components[colname(colnames[ff_idx], "total")][
+                    i
+                ] = nrg.to_default()
 
-                        if ff_idx == 0:
-                            energy_unit = nrg.get_default().unit_string()
-
-                        components[
-                            colname(colnames[ff_idx], "total")
-                        ] = np.zeros(nframes, dtype=float)
-
-                        for key in nrg.components().keys():
-                            components[
-                                colname(colnames[ff_idx], key)
-                            ] = np.zeros(nframes, dtype=float)
-
-                for idx in range(i, j):
-                    for ff_idx in range(0, len(forcefields)):
-                        nrg = ff_nrgs[ff_idx][idx - i]
-                        components[colname(colnames[ff_idx], "total")][
-                            idx
-                        ] = nrg.to_default()
-
-                        for key, value in nrg.components().items():
-                            try:
-                                components[colname(colnames[ff_idx], key)][
-                                    idx
-                                ] = nrg[key].to_default()
-                            except KeyError:
-                                k = colname(colnames[ff_idx], key)
-                                components[k] = np.zeros(nframes, dtype=float)
-                                components[k][idx] = nrg[key].to_default()
-
-                    progress.update(task, completed=idx)
-
-                delta = time.time() - start_time
-
-                if delta > 0.8:
-                    # we want about 0.8 seconds between updates
-                    num_per_chunk = int(num_per_chunk / 2)
-                    if num_per_chunk < cpu_count:
-                        num_per_chunk = cpu_count
-                elif delta < 0.25:
-                    num_per_chunk = num_per_chunk + int(0.5 * num_per_chunk)
-
-                i = j
+                for key in nrg.components().keys():
+                    try:
+                        components[colname(colnames[ff_idx], key)][i] = nrg[
+                            key
+                        ].to_default()
+                    except KeyError:
+                        k = colname(colnames[ff_idx], key)
+                        components[k] = np.zeros(nframes, dtype=float)
+                        components[k][i] = nrg[key].to_default()
 
         data = {}
 
@@ -444,62 +461,28 @@ class TrajectoryIterator:
         time_unit = t[0].get_default().unit_string()
         energy_unit = None
 
+        # calculate all the energies
+        nrgs = calculate_trajectory_energy(ff, self._values, map)
+
+        # convert the result into a pandas dataframe
         components = {}
 
-        from ..utils import Console
+        nrg = nrgs[0]
+        energy_unit = nrg.get_default().unit_string()
+        components["total"] = np.zeros(nframes, dtype=float)
+        for key in nrg.components().keys():
+            components[key] = np.zeros(nframes, dtype=float)
 
-        import os
+        for i in range(0, nframes):
+            nrg = nrgs[i]
+            components["total"][i] = nrg.to_default()
 
-        cpu_count = os.cpu_count()
-
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through frames", total=nframes)
-
-            num_per_chunk = cpu_count
-
-            i = 0
-
-            import time
-
-            while i < nframes:
-                start_time = time.time()
-                j = min(i + num_per_chunk, nframes)
-
-                nrgs = calculate_trajectory_energy(
-                    ff, list(self._values[i:j]), map
-                )
-
-                if i == 0:
-                    nrg = nrgs[0]
-                    energy_unit = nrg.get_default().unit_string()
-                    components["total"] = np.zeros(nframes, dtype=float)
-                    for key in nrg.components().keys():
-                        components[key] = np.zeros(nframes, dtype=float)
-
-                for idx in range(i, j):
-                    nrg = nrgs[idx - i]
-                    components["total"][idx] = nrg.to_default()
-
-                    for key, value in nrg.components().items():
-                        try:
-                            components[key][idx] = nrg[key].to_default()
-                        except KeyError:
-                            components[key] = np.zeros(nframes, dtype=float)
-                            components[key][idx] = nrg[key].to_default()
-
-                    progress.update(task, completed=idx)
-
-                delta = time.time() - start_time
-
-                if delta > 0.8:
-                    # we want about 0.8 seconds between updates
-                    num_per_chunk = int(num_per_chunk / 2)
-                    if num_per_chunk < cpu_count:
-                        num_per_chunk = cpu_count
-                elif delta < 0.25:
-                    num_per_chunk = num_per_chunk + int(0.5 * num_per_chunk)
-
-                i = j
+            for key in nrg.components().keys():
+                try:
+                    components[key][i] = nrg[key].to_default()
+                except KeyError:
+                    components[key] = np.zeros(nframes, dtype=float)
+                    components[key][i] = nrg[key].to_default()
 
         data = {}
 
@@ -574,18 +557,16 @@ class TrajectoryIterator:
         time_unit = None
         measure_unit = None
 
-        from ..utils import Console
+        from ..base import ProgressBar
 
         if uses_measures:
             for view in self._view:
                 colnames.append(colname(view))
                 columns.append(np.zeros(nframes, dtype=float))
 
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for idx, frame in enumerate(self.__iter__()):
                     for i, measure in enumerate(frame.measures(map=self._map)):
                         columns[i][idx] = measure.to_default()
@@ -603,16 +584,14 @@ class TrajectoryIterator:
                                 time_unit = time.get_default().unit_string()
 
                     indexes[idx] = frame.frame_index()
-                    progress.update(task, completed=idx)
+                    progress.set_progress(idx)
         else:
             colnames.append(colname(self._view))
             column = np.zeros(nframes, dtype=float)
 
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for idx, frame in enumerate(self.__iter__()):
                     measure = frame.measure(map=self._map)
                     column[idx] = measure.to_default()
@@ -628,7 +607,7 @@ class TrajectoryIterator:
                             time_unit = time.get_default().unit_string()
 
                     indexes[idx] = frame.frame_index()
-                    progress.update(task, completed=idx)
+                    progress.set_progress(idx)
 
             columns = [column]
 
@@ -697,9 +676,9 @@ class TrajectoryIterator:
 
         from ..utils import Console
 
-        with Console.progress() as progress:
-            task = progress.add_task("Looping through frames", total=nframes)
-
+        with ProgressBar(
+            total=nframes, text="Looping through frames"
+        ) as progress:
             for idx, frame in enumerate(self.__iter__()):
                 for i, f in enumerate(func.values()):
                     measure = f(frame)
@@ -716,7 +695,7 @@ class TrajectoryIterator:
                             time_unit = time.get_default().unit_string()
 
                 indexes[idx] = frame.frame_index()
-                progress.update(task, completed=idx)
+                progress.set_progress(idx)
 
         data = {}
 
@@ -787,33 +766,29 @@ class TrajectoryIterator:
         """
         result = []
 
-        from ..utils import Console
+        from ..base import ProgressBar
 
         nframes = len(self)
 
         if str(func) == func:
             # we calling a named function
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for i in range(0, nframes):
                     obj = self.__getitem__(i).current()
                     result.append(getattr(obj, func)(*args, **kwargs))
-                    progress.update(task, completed=i + 1)
+                    progress.set_progress(i + 1)
 
         else:
             # we have been passed the function to call
-            with Console.progress() as progress:
-                task = progress.add_task(
-                    "Looping through frames", total=nframes
-                )
-
+            with ProgressBar(
+                total=nframes, text="Looping through frames"
+            ) as progress:
                 for i in range(0, nframes):
                     obj = self.__getitem__(i).current()
                     result.append(func(obj, *args, **kwargs))
-                    progress.update(task, completed=i + 1)
+                    progress.set_progress(i + 1)
 
         return result
 

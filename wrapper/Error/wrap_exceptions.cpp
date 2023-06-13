@@ -142,6 +142,13 @@ namespace SireError
                         get_exception_string(ex).toUtf8());
     }
 
+    void interupt_error(const SireError::exception &ex)
+    {
+        boost::python::release_gil_policy::acquire_gil_no_raii();
+        PyErr_SetString(PyExc_InterruptedError,
+                        get_exception_string(ex).toUtf8());
+    }
+
     void exception_translator(const SireError::exception &ex)
     {
         boost::python::release_gil_policy::acquire_gil_no_raii();
@@ -206,6 +213,7 @@ namespace SireError
         register_exception_translator<SireError::file_error>(&input_output_error);
         register_exception_translator<SireError::incompatible_error>(&value_error);
         register_exception_translator<SireMol::parse_error>(&syntax_error);
+        register_exception_translator<SireError::interrupt_error>(&interupt_error);
     }
 
 }

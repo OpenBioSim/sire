@@ -569,6 +569,31 @@ void register_MolGroupsBase_class(){
                 , "Return all of the CutGroups from this set that match the ID cgid.\nThe returned CutGroups are arranged by molecule, and only one copy\nof each CutGroup is returned, regardless of how many times it appears\nin this set.\nThrow: SireMol::missing_cutgroup\nThrow: SireError::invalid_index\n" );
         
         }
+        { //::SireMol::MolGroupsBase::deleteAllFrames
+        
+            typedef void ( ::SireMol::MolGroupsBase::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::MolGroupsBase::deleteAllFrames );
+            
+            MolGroupsBase_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MolGroupsBase::deleteAllFrames
+        
+            typedef void ( ::SireMol::MolGroupsBase::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::MolGroupsBase::deleteAllFrames );
+            
+            MolGroupsBase_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::MolGroupsBase::deleteFrame
         
             typedef void ( ::SireMol::MolGroupsBase::*deleteFrame_function_type)( int ) ;

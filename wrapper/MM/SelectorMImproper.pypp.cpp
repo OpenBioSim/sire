@@ -419,6 +419,31 @@ void register_SelectorMImproper_class(){
                 , "" );
         
         }
+        { //::SireMM::SelectorMImproper::deleteAllFrames
+        
+            typedef void ( ::SireMM::SelectorMImproper::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMM::SelectorMImproper::deleteAllFrames );
+            
+            SelectorMImproper_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::SelectorMImproper::deleteAllFrames
+        
+            typedef void ( ::SireMM::SelectorMImproper::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMM::SelectorMImproper::deleteAllFrames );
+            
+            SelectorMImproper_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::SelectorMImproper::deleteFrame
         
             typedef void ( ::SireMM::SelectorMImproper::*deleteFrame_function_type)( int ) ;

@@ -142,6 +142,8 @@ namespace SireVol
             volume of this space (e.g. it is an infinite space!) */
         virtual SireUnits::Dimension::Volume volume() const = 0;
 
+        virtual SireMaths::Matrix boxMatrix() const;
+
         /** Return a copy of this space with the volume of set to 'volume'
             - this will scale the space uniformly, keeping the center at
             the same location, to achieve this volume */
@@ -332,6 +334,13 @@ namespace SireVol
             For periodic spaces, this returns the point translated into the
             box that has its center at 'center' */
         virtual Vector getMinimumImage(const Vector &point, const Vector &center) const = 0;
+
+        virtual QVector<Vector> makeWhole(const QVector<Vector> &coords) const;
+        virtual QVector<Vector> makeWhole(const QVector<Vector> &coords, const Vector &center) const;
+
+        virtual QVector<QVector<Vector>> makeWhole(const QVector<QVector<Vector>> &coords) const;
+        virtual QVector<QVector<Vector>> makeWhole(const QVector<QVector<Vector>> &coords,
+                                                   const Vector &center) const;
 
         /** Return all periodic images of 'point' with respect to 'center' within
             'dist' distance of 'center' */

@@ -7,23 +7,19 @@
 
 namespace bp = boost::python;
 
-#include "SireBase/booleanproperty.h"
-
-#include "SireBase/centralcache.h"
-
 #include "SireBase/generalunitproperty.h"
 
-#include "SireBase/getinstalldir.h"
-
 #include "SireBase/parallel.h"
+
+#include "SireBase/progressbar.h"
+
+#include "SireBase/releasegil.h"
 
 #include "SireBase/stringproperty.h"
 
 #include "SireBase/timeproperty.h"
 
-#include "SireBase/unittest.h"
-
-#include "SireIO/amberformat.h"
+#include "SireError/errors.h"
 
 #include "SireIO/amberrst.h"
 
@@ -31,9 +27,9 @@ namespace bp = boost::python;
 
 #include "SireIO/netcdffile.h"
 
-#include "SireMol/atomcoords.h"
+#include "SireIO/xdrfile.h"
 
-#include "SireMol/atomforces.h"
+#include "SireMol/atomcoords.h"
 
 #include "SireMol/atomvelocities.h"
 
@@ -63,6 +59,10 @@ namespace bp = boost::python;
 
 #include "amberrst.h"
 
+#include "tostring.h"
+
+#include <QDebug>
+
 #include "amberrst.h"
 
 SireIO::AmberRst __copy__(const SireIO::AmberRst &other){ return SireIO::AmberRst(other); }
@@ -85,56 +85,6 @@ void register_AmberRst_class(){
         AmberRst_exposer.def( bp::init< QStringList const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("lines"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by parsing the data in the passed text lines") );
         AmberRst_exposer.def( bp::init< SireSystem::System const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("system"), bp::arg("map")=SireBase::PropertyMap() ), "Construct by extracting the necessary data from the passed System") );
         AmberRst_exposer.def( bp::init< SireIO::AmberRst const & >(( bp::arg("other") ), "Copy constructor") );
-        { //::SireIO::AmberRst::boxAngles
-        
-            typedef ::SireMaths::Vector ( ::SireIO::AmberRst::*boxAngles_function_type)(  ) const;
-            boxAngles_function_type boxAngles_function_value( &::SireIO::AmberRst::boxAngles );
-            
-            AmberRst_exposer.def( 
-                "boxAngles"
-                , boxAngles_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed box angles, or Vector(0) if there is no space information.\nIf there are multiple frames, then only the first frame is returned" );
-        
-        }
-        { //::SireIO::AmberRst::boxAngles
-        
-            typedef ::SireMaths::Vector ( ::SireIO::AmberRst::*boxAngles_function_type)( int ) const;
-            boxAngles_function_type boxAngles_function_value( &::SireIO::AmberRst::boxAngles );
-            
-            AmberRst_exposer.def( 
-                "boxAngles"
-                , boxAngles_function_value
-                , ( bp::arg("frame") )
-                , bp::release_gil_policy()
-                , "Return the box angles of the ith frame from the file" );
-        
-        }
-        { //::SireIO::AmberRst::boxDimensions
-        
-            typedef ::SireMaths::Vector ( ::SireIO::AmberRst::*boxDimensions_function_type)(  ) const;
-            boxDimensions_function_type boxDimensions_function_value( &::SireIO::AmberRst::boxDimensions );
-            
-            AmberRst_exposer.def( 
-                "boxDimensions"
-                , boxDimensions_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed box dimensions, or Vector(0) if there is no space information.\nIf there are multiple frames, then only the first frame is returned" );
-        
-        }
-        { //::SireIO::AmberRst::boxDimensions
-        
-            typedef ::SireMaths::Vector ( ::SireIO::AmberRst::*boxDimensions_function_type)( int ) const;
-            boxDimensions_function_type boxDimensions_function_value( &::SireIO::AmberRst::boxDimensions );
-            
-            AmberRst_exposer.def( 
-                "boxDimensions"
-                , boxDimensions_function_value
-                , ( bp::arg("frame") )
-                , bp::release_gil_policy()
-                , "Return the box dimensions of the ith\n frame from the file" );
-        
-        }
         { //::SireIO::AmberRst::construct
         
             typedef ::SireIO::MoleculeParserPtr ( ::SireIO::AmberRst::*construct_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
@@ -174,31 +124,6 @@ void register_AmberRst_class(){
                 , "Return this parser constructed from the passed SireSystem::System" );
         
         }
-        { //::SireIO::AmberRst::coordinates
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberRst::*coordinates_function_type)(  ) const;
-            coordinates_function_type coordinates_function_value( &::SireIO::AmberRst::coordinates );
-            
-            AmberRst_exposer.def( 
-                "coordinates"
-                , coordinates_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed coordinate data. If there are multiple frames,\nthen only the first frame is returned" );
-        
-        }
-        { //::SireIO::AmberRst::coordinates
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberRst::*coordinates_function_type)( int ) const;
-            coordinates_function_type coordinates_function_value( &::SireIO::AmberRst::coordinates );
-            
-            AmberRst_exposer.def( 
-                "coordinates"
-                , coordinates_function_value
-                , ( bp::arg("frame") )
-                , bp::release_gil_policy()
-                , "Return the coordinates of the ith frame from the file" );
-        
-        }
         { //::SireIO::AmberRst::count
         
             typedef int ( ::SireIO::AmberRst::*count_function_type)(  ) const;
@@ -208,68 +133,7 @@ void register_AmberRst_class(){
                 "count"
                 , count_function_value
                 , bp::release_gil_policy()
-                , "Return the number of frames in the file" );
-        
-        }
-        { //::SireIO::AmberRst::createdFromRestart
-        
-            typedef bool ( ::SireIO::AmberRst::*createdFromRestart_function_type)(  ) const;
-            createdFromRestart_function_type createdFromRestart_function_value( &::SireIO::AmberRst::createdFromRestart );
-            
-            AmberRst_exposer.def( 
-                "createdFromRestart"
-                , createdFromRestart_function_value
-                , bp::release_gil_policy()
-                , "Return whether or not this was created from a restart (.rst) file" );
-        
-        }
-        { //::SireIO::AmberRst::createdFromTrajectory
-        
-            typedef bool ( ::SireIO::AmberRst::*createdFromTrajectory_function_type)(  ) const;
-            createdFromTrajectory_function_type createdFromTrajectory_function_value( &::SireIO::AmberRst::createdFromTrajectory );
-            
-            AmberRst_exposer.def( 
-                "createdFromTrajectory"
-                , createdFromTrajectory_function_value
-                , bp::release_gil_policy()
-                , "Return whether or not this was created from a trajectory (.trj) file" );
-        
-        }
-        { //::SireIO::AmberRst::creatorApplication
-        
-            typedef ::QString ( ::SireIO::AmberRst::*creatorApplication_function_type)(  ) const;
-            creatorApplication_function_type creatorApplication_function_value( &::SireIO::AmberRst::creatorApplication );
-            
-            AmberRst_exposer.def( 
-                "creatorApplication"
-                , creatorApplication_function_value
-                , bp::release_gil_policy()
-                , "Return the application that created the file that has been parsed" );
-        
-        }
-        { //::SireIO::AmberRst::forces
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberRst::*forces_function_type)(  ) const;
-            forces_function_type forces_function_value( &::SireIO::AmberRst::forces );
-            
-            AmberRst_exposer.def( 
-                "forces"
-                , forces_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed force data. If there are multiple frames,\nthen only the first frame is returned" );
-        
-        }
-        { //::SireIO::AmberRst::forces
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberRst::*forces_function_type)( int ) const;
-            forces_function_type forces_function_value( &::SireIO::AmberRst::forces );
-            
-            AmberRst_exposer.def( 
-                "forces"
-                , forces_function_value
-                , ( bp::arg("frame") )
-                , bp::release_gil_policy()
-                , "Return the forces of the ith frame from the file" );
+                , "" );
         
         }
         { //::SireIO::AmberRst::formatDescription
@@ -305,19 +169,7 @@ void register_AmberRst_class(){
                 "formatSuffix"
                 , formatSuffix_function_value
                 , bp::release_gil_policy()
-                , "Return the suffixes that AmberRst files will typically use" );
-        
-        }
-        { //::SireIO::AmberRst::formatVersion
-        
-            typedef double ( ::SireIO::AmberRst::*formatVersion_function_type)(  ) const;
-            formatVersion_function_type formatVersion_function_value( &::SireIO::AmberRst::formatVersion );
-            
-            AmberRst_exposer.def( 
-                "formatVersion"
-                , formatVersion_function_value
-                , bp::release_gil_policy()
-                , "Return the version of the file format that was parsed" );
+                , "Return the suffixes that AmberRst files will typically have" );
         
         }
         { //::SireIO::AmberRst::getFrame
@@ -331,42 +183,6 @@ void register_AmberRst_class(){
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
-        
-        }
-        { //::SireIO::AmberRst::hasCoordinates
-        
-            typedef bool ( ::SireIO::AmberRst::*hasCoordinates_function_type)(  ) const;
-            hasCoordinates_function_type hasCoordinates_function_value( &::SireIO::AmberRst::hasCoordinates );
-            
-            AmberRst_exposer.def( 
-                "hasCoordinates"
-                , hasCoordinates_function_value
-                , bp::release_gil_policy()
-                , "Return whether or not this restart file provides coordinates" );
-        
-        }
-        { //::SireIO::AmberRst::hasForces
-        
-            typedef bool ( ::SireIO::AmberRst::*hasForces_function_type)(  ) const;
-            hasForces_function_type hasForces_function_value( &::SireIO::AmberRst::hasForces );
-            
-            AmberRst_exposer.def( 
-                "hasForces"
-                , hasForces_function_value
-                , bp::release_gil_policy()
-                , "Return whether or not this restart file also provides forces" );
-        
-        }
-        { //::SireIO::AmberRst::hasVelocities
-        
-            typedef bool ( ::SireIO::AmberRst::*hasVelocities_function_type)(  ) const;
-            hasVelocities_function_type hasVelocities_function_value( &::SireIO::AmberRst::hasVelocities );
-            
-            AmberRst_exposer.def( 
-                "hasVelocities"
-                , hasVelocities_function_value
-                , bp::release_gil_policy()
-                , "Return whether or not this restart file also provides velocities" );
         
         }
         { //::SireIO::AmberRst::isFrame
@@ -402,19 +218,7 @@ void register_AmberRst_class(){
                 "nAtoms"
                 , nAtoms_function_value
                 , bp::release_gil_policy()
-                , "Return the number of atoms whose data are contained in this restart file" );
-        
-        }
-        { //::SireIO::AmberRst::nBytes
-        
-            typedef int ( ::SireIO::AmberRst::*nBytes_function_type)(  ) const;
-            nBytes_function_type nBytes_function_value( &::SireIO::AmberRst::nBytes );
-            
-            AmberRst_exposer.def( 
-                "nBytes"
-                , nBytes_function_value
-                , bp::release_gil_policy()
-                , "Return the number of bytes this takes" );
+                , "Return the number of atoms whose coordinates are contained in this restart file" );
         
         }
         { //::SireIO::AmberRst::nFrames
@@ -426,7 +230,7 @@ void register_AmberRst_class(){
                 "nFrames"
                 , nFrames_function_value
                 , bp::release_gil_policy()
-                , "Return the number of frames that have been loaded from the file" );
+                , "" );
         
         }
         AmberRst_exposer.def( bp::self != bp::self );
@@ -478,44 +282,7 @@ void register_AmberRst_class(){
                 "size"
                 , size_function_value
                 , bp::release_gil_policy()
-                , "Return the number of frames in the file" );
-        
-        }
-        { //::SireIO::AmberRst::time
-        
-            typedef double ( ::SireIO::AmberRst::*time_function_type)(  ) const;
-            time_function_type time_function_value( &::SireIO::AmberRst::time );
-            
-            AmberRst_exposer.def( 
-                "time"
-                , time_function_value
-                , bp::release_gil_policy()
-                , "Return the current time of the simulation from which this restart\nfile was written. Returns 0 if there is no time set. If there are\nmultiple frames, then the time of the first frame is returned" );
-        
-        }
-        { //::SireIO::AmberRst::time
-        
-            typedef double ( ::SireIO::AmberRst::*time_function_type)( int ) const;
-            time_function_type time_function_value( &::SireIO::AmberRst::time );
-            
-            AmberRst_exposer.def( 
-                "time"
-                , time_function_value
-                , ( bp::arg("frame") )
-                , bp::release_gil_policy()
-                , "Return the time of the ith frame from the file" );
-        
-        }
-        { //::SireIO::AmberRst::title
-        
-            typedef ::QString ( ::SireIO::AmberRst::*title_function_type)(  ) const;
-            title_function_type title_function_value( &::SireIO::AmberRst::title );
-            
-            AmberRst_exposer.def( 
-                "title"
-                , title_function_value
-                , bp::release_gil_policy()
-                , "Return the title of the file" );
+                , "" );
         
         }
         { //::SireIO::AmberRst::toString
@@ -542,43 +309,6 @@ void register_AmberRst_class(){
                 , "" );
         
         }
-        { //::SireIO::AmberRst::velocities
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberRst::*velocities_function_type)(  ) const;
-            velocities_function_type velocities_function_value( &::SireIO::AmberRst::velocities );
-            
-            AmberRst_exposer.def( 
-                "velocities"
-                , velocities_function_value
-                , bp::release_gil_policy()
-                , "Return the parsed coordinate data. If there are multiple frames,\nthen only the first frame is returned" );
-        
-        }
-        { //::SireIO::AmberRst::velocities
-        
-            typedef ::QVector< SireMaths::Vector > ( ::SireIO::AmberRst::*velocities_function_type)( int ) const;
-            velocities_function_type velocities_function_value( &::SireIO::AmberRst::velocities );
-            
-            AmberRst_exposer.def( 
-                "velocities"
-                , velocities_function_value
-                , ( bp::arg("frame") )
-                , bp::release_gil_policy()
-                , "Return the velocities of the ith frame from the file" );
-        
-        }
-        { //::SireIO::AmberRst::warnings
-        
-            typedef ::QStringList ( ::SireIO::AmberRst::*warnings_function_type)(  ) const;
-            warnings_function_type warnings_function_value( &::SireIO::AmberRst::warnings );
-            
-            AmberRst_exposer.def( 
-                "warnings"
-                , warnings_function_value
-                , bp::release_gil_policy()
-                , "Return any warnings that were triggered during parsing" );
-        
-        }
         { //::SireIO::AmberRst::what
         
             typedef char const * ( ::SireIO::AmberRst::*what_function_type)(  ) const;
@@ -593,7 +323,7 @@ void register_AmberRst_class(){
         }
         { //::SireIO::AmberRst::writeToFile
         
-            typedef void ( ::SireIO::AmberRst::*writeToFile_function_type)( ::QString const & ) const;
+            typedef ::QStringList ( ::SireIO::AmberRst::*writeToFile_function_type)( ::QString const & ) const;
             writeToFile_function_type writeToFile_function_value( &::SireIO::AmberRst::writeToFile );
             
             AmberRst_exposer.def( 
@@ -601,7 +331,7 @@ void register_AmberRst_class(){
                 , writeToFile_function_value
                 , ( bp::arg("filename") )
                 , bp::release_gil_policy()
-                , "Write this AmberRst to a file called filename. This will write out\nthe data in this object to the Amber NetCDF format" );
+                , "Write this binary file filename" );
         
         }
         AmberRst_exposer.staticmethod( "parse" );

@@ -52,12 +52,14 @@ set ( SIREBASE_HEADERS
       sire_process.h
       parallel.h
       podproperty.hpp
+      progressbar.h
       properties.h
       property.h
       propertylist.h
       propertymap.h
       quickcopy.hpp
       qvariant_metatype.h
+      releasegil.h
       savestate.h
       shareddatapointer.hpp
       sharedpolypointer.hpp
@@ -101,6 +103,7 @@ set ( SIREBASE_SOURCES
       packedarray2d.cpp
       parallel.cpp
       process.cpp
+      progressbar.cpp
       properties.cpp
       property.cpp
       propertylist.cpp
@@ -108,6 +111,7 @@ set ( SIREBASE_SOURCES
       range.cpp
       ranges.cpp
       refcountdata.cpp
+      releasegil.cpp
       savestate.cpp
       sharedpolypointer.cpp
       slice.cpp
@@ -133,8 +137,8 @@ set_target_properties (SireBase PROPERTIES
 
 # Link to other Sire libraries
 target_link_libraries (SireBase
-                       SireUnits
                        SireID
+                       SireUnits
                        SireStream
                        ${TBB_LIBRARY}
                        ${TBB_MALLOC_LIBRARY}

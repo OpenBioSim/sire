@@ -142,6 +142,7 @@
 #include "selector.hpp"
 #include "selectormol.h"
 #include "trajectory.h"
+#include "trajectoryaligner.h"
 #include <QDebug>
 #include "moleculeview.h"
 #include "SireCAS/identities.h"

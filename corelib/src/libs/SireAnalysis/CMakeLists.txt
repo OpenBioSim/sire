@@ -49,6 +49,7 @@ target_link_libraries (SireAnalysis
                        SireCAS
                        SireMaths
                        SireBase
+                       SireUnits
                        SireStream
                        )
 

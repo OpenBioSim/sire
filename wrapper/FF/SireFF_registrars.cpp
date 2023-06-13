@@ -3,8 +3,6 @@
 
 #include "SireFF_registrars.h"
 
-
-
 #include "energytable.h"
 #include "ffcomponent.h"
 #include "ffidentifier.h"

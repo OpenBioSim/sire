@@ -24,3 +24,60 @@
   *  You can contact the authors at https://sire.openbiosim.org
   *
 \*********************************************/
+
+#include "parallel.h"
+
+#include <QMutex>
+
+#include <tbb/global_control.h>
+
+namespace SireBase
+{
+    static tbb::global_control *global_tbb_control = 0;
+
+    static QMutex global_mutex;
+
+    int get_max_num_threads()
+    {
+        return tbb::global_control::active_value(tbb::global_control::max_allowed_parallelism);
+    }
+
+    void set_default_num_threads()
+    {
+        QMutexLocker lkr(&global_mutex);
+
+        if (global_tbb_control != 0)
+        {
+            delete global_tbb_control;
+            global_tbb_control = 0;
+        }
+    }
+
+    bool should_run_in_parallel(int count, const PropertyMap &map)
+    {
+        if (count < 8)
+            return false;
+        else if (get_max_num_threads() <= 1)
+            return false;
+        else if (map["parallel"].hasValue())
+            return map["parallel"].value().asA<BooleanProperty>().value();
+        else
+            return true;
+    }
+
+    void set_max_num_threads(int n)
+    {
+        if (n <= 0)
+            return;
+
+        QMutexLocker lkr(&global_mutex);
+
+        if (global_tbb_control != 0)
+        {
+            delete global_tbb_control;
+            global_tbb_control = 0;
+        }
+
+        global_tbb_control = new tbb::global_control(tbb::global_control::max_allowed_parallelism, n);
+    }
+}

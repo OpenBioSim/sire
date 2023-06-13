@@ -55,7 +55,7 @@ set ( SQUIRE_SOURCES
       gto.cpp
       hf.cpp
       latticecharges.cpp
-      
+
       molpro.cpp
       mopac.cpp
       sqm.cpp
@@ -72,7 +72,7 @@ set ( SQUIRE_SOURCES
 
 #add the additional include files needed by Squire
 include_directories( ${SQUIRE_INCLUDE_DIRS} )
-  
+
 add_library (Squire ${SQUIRE_SOURCES})
 
 set_target_properties (Squire PROPERTIES
@@ -89,6 +89,7 @@ target_link_libraries (Squire
                        SireMol
                        SireCAS
                        SireBase
+                       SireUnits
                        SireStream
                        SireError
                       )

@@ -113,7 +113,12 @@ def _resolve_path(path, directory, silent=False):
     if hasattr(directory, "strpath"):
         directory = directory.strpath
 
-    if os.path.exists(path) and os.path.isfile(path):
+    if os.path.isdir(path):
+        # we need to process this as a trajectory directory - return
+        # this as a directory
+        return [path]
+
+    elif os.path.exists(path) and os.path.isfile(path):
         if path.endswith(".gz"):
             # unzip the file first
             unzipped = path[0:-3]
@@ -426,18 +431,14 @@ def load(
 
 
 def _to_legacy_system(molecules):
-    """Internal function to convert the passed set of molecule views
+    """
+    Internal function to convert the passed set of molecule views
     into a sire.legacy.System.System
     """
+    if hasattr(molecules, "_to_legacy_system"):
+        return molecules._to_legacy_system()
+
     from .legacy.System import System as LegacySystem
-
-    if type(molecules) is LegacySystem:
-        return molecules
-
-    from .system import System as NewSystem
-
-    if type(molecules) is NewSystem:
-        return molecules._system
 
     s = LegacySystem()
 
@@ -588,12 +589,21 @@ def save(
 
         map.set("fileformat", ",".join(format))
 
+    if hasattr(molecules, "_is_trajectory_iterator"):
+        # Doing it this way rather that using type(molecules)
+        # as type(molecules) randomly fails, and because
+        # this way is more pythonic
+        if molecules._is_trajectory_iterator():
+            # we are saving a trajectory - not just the molecules
+            map = molecules._populate_map(map)
+            molecules = molecules.current()
+
     molecules = _to_legacy_system(molecules)
 
     return MoleculeParser.save(molecules, filename, map=map)
 
 
-def load_test_files(files: _Union[_List[str], str], *args):
+def load_test_files(files: _Union[_List[str], str], *args, map=None):
     """Load the passed files that are part of the unit testing
     and return the resulting molecules. This will cache the files
     into a directory called "../cache" so that downloads can be shared
@@ -631,7 +641,9 @@ def load_test_files(files: _Union[_List[str], str], *args):
             cache_dir = os.path.join(d, "cache")
 
     files = expand(tutorial_url, files, suffix=".bz2")
-    return load(files, directory=cache_dir, silent=True, show_warnings=False)
+    return load(
+        files, directory=cache_dir, silent=True, show_warnings=False, map=map
+    )
 
 
 def smiles(
@@ -642,6 +654,7 @@ def smiles(
     labels_column: str = "labels",
     add_hydrogens: bool = True,
     generate_coordinates: bool = True,
+    must_sanitize: bool = True,
     map=None,
 ):
     """
@@ -677,6 +690,13 @@ def smiles(
             Whether or not to automatically generate 3D coordinates.
             Note that generating coordinates requires that
             hydrogens are automatically added.
+        must_sanitize: bool (default True)
+            Whether or not all sanity checks must pass when creating
+            the molecule. This will ensure that all sanity checks pass,
+            and if they don't, then an exception will be raised.
+            If this is not True, then sanity checks that failed are
+            skipped and silently ignored. It is possible, in this case,
+            that a null or malformed molecule may be returned.
         map:
             Property map if you want to put the molecule properties
             into different places
@@ -717,9 +737,39 @@ def smiles(
         {
             "add_hydrogens": add_hydrogens,
             "generate_coordinates": generate_coordinates,
+            "must_sanitize": must_sanitize,
         },
     )
 
     rdkit_mols = smiles_to_rdkit(smiles, labels, map)
 
-    return rdkit_to_sire(rdkit_mols)
+    mols = rdkit_to_sire(rdkit_mols)
+
+    if must_sanitize:
+        if len(smiles) == 1:
+            mol = mols
+            if mol.num_atoms() == 0:
+                raise ValueError(
+                    "Failed to generate a molecule from the smiles string "
+                    f"'{smiles[0]}'. Re-run this function setting "
+                    "'must_sanitize' to False if you want to try again, "
+                    "ignoring the sanitization steps that failed."
+                )
+        else:
+            empty_mols = []
+
+            for i, mol in enumerate(mols):
+                if mol.num_atoms() == 0:
+                    empty_mols.append(smiles[i])
+
+            if len(empty_mols) > 0:
+                empty_mols = ", ".join(empty_mols)
+
+                raise ValueError(
+                    "Failed to generate some molecules from smiles strings. "
+                    f"Failed conversions were: [{empty_mols}]. Re-run setting "
+                    "'must_sanitize' to False to try to generate the molecule "
+                    "ignoring the errors."
+                )
+
+    return mols

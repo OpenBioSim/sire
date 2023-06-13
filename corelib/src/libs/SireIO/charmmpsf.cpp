@@ -1003,6 +1003,7 @@ CharmmPSF::CharmmPSF(const SireSystem::System &system, const PropertyMap &map)
     }
 
     this->operator=(parsed);
+    this->setParsedSystem(system, map);
 }
 
 /** Copy constructor */
@@ -3562,12 +3563,12 @@ System CharmmPSF::startSystem(const QVector<QString> &param_lines, const Propert
 
 /** Write the parsed data back to the file called 'filename'. This will
     overwrite the file if it exists already, so be careful! */
-void CharmmPSF::writeToFile(const QString &filename) const
+QStringList CharmmPSF::writeToFile(const QString &filename) const
 {
     QVector<QString> lines = toLines();
 
     if (lines.isEmpty())
-        return;
+        return QStringList();
 
     QFile f(filename);
 
@@ -3659,6 +3660,8 @@ void CharmmPSF::writeToFile(const QString &filename) const
 
         f.close();
     }
+
+    return QStringList(filename);
 }
 
 /** Internal function used to get the molecule structure for molecule 'imol'. */

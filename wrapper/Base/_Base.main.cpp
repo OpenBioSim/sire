@@ -89,6 +89,8 @@
 
 #include "Process.pypp.hpp"
 
+#include "ProgressBar.pypp.hpp"
+
 #include "Properties.pypp.hpp"
 
 #include "Property.pypp.hpp"
@@ -154,6 +156,8 @@ namespace bp = boost::python;
 #include "SireBase/slice.h"
 
 void autoconvert_Slice();
+
+#include "releasegil_impl.h"
 
 BOOST_PYTHON_MODULE(_Base){
     register_SireBase_objects();
@@ -230,6 +234,8 @@ BOOST_PYTHON_MODULE(_Base){
 
     register_Process_class();
 
+    register_ProgressBar_class();
+
     register_Properties_class();
 
     register_PropertyList_class();
@@ -301,6 +307,8 @@ BOOST_PYTHON_MODULE(_Base){
     bp::implicitly_convertible< SireBase::IntegerArrayProperty, SireBase::PropertyList >();
 
     bp::implicitly_convertible< SireBase::StringArrayProperty, SireBase::PropertyList >();
+
+    register_releasegil();
 
     autoconvert_Slice();
 

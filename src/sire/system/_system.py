@@ -42,6 +42,12 @@ class System:
 
         return type(obj) == System or type(obj) == _System
 
+    def _to_legacy_system(self):
+        """
+        Internal function used to convert this back to a legacy system
+        """
+        return self._system
+
     def __copy__(self):
         other = System()
         other._system = self._system.clone()
@@ -131,13 +137,32 @@ class System:
         """Return the numbers of all of the molecules in this System"""
         return self.molecules().numbers()
 
-    def num_frames(self):
-        """Return the number of trajectory frames for this System"""
-        return self._system.num_frames()
+    def make_whole(self, map=None):
+        """
+        Make all of the molecules in this system whole. This
+        maps each molecule into the current space, such that no
+        molecule is broken across a periodic box boundary
+        """
+        if map is None:
+            self._system.make_whole()
+        else:
+            from ..base import create_map
 
-    def load_frame(self, i):
+            self._system.make_whole(map=create_map(map))
+
+        self._molecules = None
+
+    def num_frames(self, map=None):
+        """Return the number of trajectory frames for this System"""
+        from ..base import create_map
+
+        return self._system.num_frames(map=create_map(map))
+
+    def load_frame(self, i, map=None):
         """Load the ith frame into this System"""
-        self._system.load_frame(i)
+        from ..base import create_map
+
+        self._system.load_frame(i, map=create_map(map))
         self._molecules = None
 
     def save_frame(self, i=None, map=None):
@@ -156,9 +181,18 @@ class System:
 
         self._molecules = None
 
-    def delete_frame(self, i):
+    def delete_frame(self, i, map=None):
         """Delete the ith frame from the trajectory"""
-        self._system.delete_frame(i)
+        from ..base import create_map
+
+        self._system.delete_frame(i, map=create_map(map))
+        self._molecules = None
+
+    def delete_all_frames(self, map=None):
+        """Delete all the frames from the trajectory"""
+        from ..base import create_map
+
+        self._system.delete_all_frames(map=create_map(map))
         self._molecules = None
 
     def to_molecule_group(self):
@@ -274,8 +308,28 @@ class System:
         return self.molecules().improper(*args, **kwargs)
 
     def trajectory(self, *args, **kwargs):
-        """Return an iterator over the trajectory of frames for this System"""
-        return self.molecules().trajectory(*args, **kwargs)
+        """
+        Return an iterator over the trajectory of frames of this view.
+
+        align:
+            Pass in a selection string to select atoms against which
+            every frame will be aligned. These atoms will be moved
+            to the center of the periodic box (if a periodic box
+            is used). If 'True' is passed then this will align
+            against all of the atoms in the view.
+
+        smooth:
+            Pass in the number of frames to smooth (average) the view
+            over. If 'True' is passed, then the recommended number
+            of frames will be averaged over
+
+        wrap: bool
+            Whether or not to wrap the coordinates into the periodic box
+
+        """
+        from ..mol._trajectory import TrajectoryIterator
+
+        return TrajectoryIterator(self, *args, **kwargs)
 
     def minimisation(self, map=None):
         """
@@ -386,6 +440,8 @@ class System:
             if space_property.has_source():
                 self._system.set_property(space_property.source(), space)
 
+        self._molecules = None
+
     def set_time(self, time, map=None):
         """
         Set the current time for the system
@@ -422,10 +478,16 @@ class System:
             if time_property.has_source():
                 self._system.set_property(time_property.source(), time)
 
+        self._molecules = None
+
     def evaluate(self, *args, **kwargs):
         """Return an evaluator for this Systme (or of the matching
         index/search subset of this System)"""
         return self.molecules().evaluate(*args, **kwargs)
+
+    def has_property(self, *args, **kwargs):
+        """Return whether or not this system has the passed property"""
+        return self._system.contains_property(*args, **kwargs)
 
     def property(self, *args, **kwargs):
         """Return the System property that matches the passed key/arguments"""
@@ -434,6 +496,44 @@ class System:
     def set_property(self, *args, **kwargs):
         """Set the System property according to the passed arguments"""
         self._system.set_property(*args, **kwargs)
+        self._molecules = None
+
+    def set_shared_property(self, name, value):
+        """Set the shared System property according to the passed arguments"""
+        from ..base import wrap
+
+        self._system.set_shared_property(name, wrap(value))
+        self._molecules = None
+
+    def add_shared_property(self, name, value=None):
+        """
+        Add the shared System property called 'name' to this system.
+        If 'value' is supplied, then this also sets the property too.
+        """
+        if value is None:
+            self._system.add_shared_property(name)
+        else:
+            from ..base import wrap
+
+            self._system.add_shared_property(name, wrap(value))
+
+        self._molecules = None
+
+    def remove_shared_property(self, *args, **kwargs):
+        """
+        Completely remove the specified shared property, and set this
+        as a non-shared property for the future
+        """
+        self._system.remove_shared_property(*args, **kwargs)
+        self._molecules = None
+
+    def remove_all_shared_properties(self, *args, **kwargs):
+        """
+        Completely remove all shared properties, and set no properties
+        as being shared from this system
+        """
+        self._system.remove_all_shared_properties(*args, **kwargs)
+        self._molecules = None
 
     def properties(self):
         """Return all of the System-level properties of this System"""
@@ -444,6 +544,13 @@ class System:
         of this System
         """
         return self._system.property_keys()
+
+    def shared_properties(self):
+        """
+        Return all of the System properties that are being shared
+        (copied) to all contained molecules
+        """
+        return self._system.shared_properties()
 
     def cursor(self):
         """

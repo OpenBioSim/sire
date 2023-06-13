@@ -113,6 +113,7 @@ namespace SireFF
         //// Implementation of FF virtual functions
         ////
 
+        MoleculeGroup &getGroup(MGNum mgnum);
         const MoleculeGroup &getGroup(MGNum mgnum) const;
 
         void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;

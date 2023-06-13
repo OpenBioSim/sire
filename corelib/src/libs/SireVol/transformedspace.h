@@ -75,6 +75,8 @@ namespace SireVol
         bool isCartesian() const;
         bool isPeriodic() const;
 
+        Matrix boxMatrix() const;
+
         SireUnits::Dimension::Volume volume() const;
         SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
 

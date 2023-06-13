@@ -367,4 +367,9 @@ namespace SireError
         return QMetaType::typeName(qMetaTypeId<dependency_error>());
     }
 
+    const char *interrupt_error::typeName()
+    {
+        return QMetaType::typeName(qMetaTypeId<interrupt_error>());
+    }
+
 } // namespace SireError

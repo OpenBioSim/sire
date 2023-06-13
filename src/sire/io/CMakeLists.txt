@@ -11,3 +11,5 @@ set ( SCRIPTS
 
 # installation
 install( FILES ${SCRIPTS} DESTINATION ${SIRE_PYTHON}/sire/io )
+
+add_subdirectory (parser)

@@ -283,11 +283,11 @@ namespace SireIO
         int nCrossTerms() const;
         int nCrossTerms(int i) const;
 
+        QStringList writeToFile(const QString &filename) const;
+
     protected:
         SireSystem::System startSystem(const PropertyMap &map) const;
         SireSystem::System startSystem(const QVector<QString> &param_lines, const PropertyMap &map) const;
-
-        void writeToFile(const QString &filename) const;
 
     private:
         void assertSane() const;

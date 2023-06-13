@@ -478,6 +478,12 @@ QString TriclinicBox::toString() const
         .arg(this->vector2().toString());
 }
 
+Matrix TriclinicBox::boxMatrix() const
+{
+    // I need to check if this is correct...
+    return this->cellMatrix();
+}
+
 /** Return the volume of the central box of this space. */
 SireUnits::Dimension::Volume TriclinicBox::volume() const
 {
