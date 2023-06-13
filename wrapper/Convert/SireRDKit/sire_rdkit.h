@@ -1,6 +1,10 @@
 #ifndef SIRE_RDKIT_H
 #define SIRE_RDKIT_H
 
+// needed as this causes a compile error on Linux
+// as newer rdkit relies on std::uint64_t already being defined
+#include <cstdint>
+
 #include "GraphMol/GraphMol.h"
 
 #include "SireMol/selectormol.h"
