@@ -95,6 +95,7 @@ namespace SireMol
         bool operator==(const AtomID &other) const;
         bool operator!=(const AtomID &other) const;
 
+        using AtomID::map;
         QList<AtomIdx> map(const MolInfo &molinfo) const;
 
     private:

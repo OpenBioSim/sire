@@ -347,12 +347,27 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         for (const auto &term : dihparam.terms())
         {
             const double v = term.k() * dihedral_k_to_openmm;
-            const double phase = term.phase();             // already in radians
-            const double periodicity = term.periodicity(); // already in correct units
+            const double phase = term.phase();                      // already in radians
+            const int periodicity = std::round(term.periodicity()); // this is just an integer
 
-            dih_params.append(std::make_tuple(atom0, atom1,
-                                              atom2, atom3,
-                                              periodicity, phase, v));
+            if (periodicity > 0)
+            {
+                dih_params.append(std::make_tuple(atom0, atom1,
+                                                  atom2, atom3,
+                                                  periodicity, phase, v));
+            }
+            else if (periodicity == 0 and v == 0)
+            {
+                // this is a null dihedral, e.g. for perturbation. Make sure
+                // that the periodicity is 1, else otherwise openmm will complain
+                dih_params.append(std::make_tuple(atom0, atom1,
+                                                  atom2, atom3,
+                                                  1, phase, v));
+            }
+            else
+            {
+                qWarning() << "IGNORING DIHEDRAL WITH WEIRD PERIODICITY" << dihparam.toString();
+            }
         }
     }
 
@@ -373,12 +388,27 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         for (const auto &term : impparam.terms())
         {
             const double v = term.k() * dihedral_k_to_openmm;
-            const double phase = term.phase();             // already in radians
-            const double periodicity = term.periodicity(); // already in correct units
+            const double phase = term.phase();                      // already in radians
+            const int periodicity = std::round(term.periodicity()); // this is just an integer
 
-            dih_params.append(std::make_tuple(atom0, atom1,
-                                              atom2, atom3,
-                                              periodicity, phase, v));
+            if (periodicity > 0)
+            {
+                dih_params.append(std::make_tuple(atom0, atom1,
+                                                  atom2, atom3,
+                                                  periodicity, phase, v));
+            }
+            else if (periodicity == 0 and v == 0)
+            {
+                // this is a null dihedral, e.g. for perturbation. Make sure
+                // that the periodicity is 1, else otherwise openmm will complain
+                dih_params.append(std::make_tuple(atom0, atom1,
+                                                  atom2, atom3,
+                                                  1, phase, v));
+            }
+            else
+            {
+                qWarning() << "IGNORING IMPROPER WITH WEIRD PERIODICITY" << impparam.toString();
+            }
         }
     }
 

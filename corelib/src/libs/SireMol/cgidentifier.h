@@ -91,6 +91,7 @@ namespace SireMol
         bool operator==(const CGID &other) const;
         bool operator!=(const CGID &other) const;
 
+        using CGID::map;
         QList<CGIdx> map(const MolInfo &molinfo) const;
 
     private:

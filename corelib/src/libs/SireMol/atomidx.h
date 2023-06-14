@@ -98,7 +98,6 @@ namespace SireMol
         using SireID::Index_T_<AtomIdx>::operator--;
 
         using SireID::Index_T_<AtomIdx>::map;
-
         QList<AtomIdx> map(const MolInfo &molinfo) const;
     };
 

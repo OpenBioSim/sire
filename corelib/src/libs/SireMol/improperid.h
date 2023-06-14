@@ -117,6 +117,7 @@ namespace SireMol
         ImproperID &operator=(const ImproperID &other);
 
         bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
         bool operator==(const ImproperID &other) const;
         bool operator!=(const ImproperID &other) const;

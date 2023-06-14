@@ -27,6 +27,8 @@ namespace bp = boost::python;
 
 #include <iostream>
 
+#include <signal.h>
+
 #include "progressbar.h"
 
 SireBase::ProgressBar __copy__(const SireBase::ProgressBar &other){ return SireBase::ProgressBar(other); }

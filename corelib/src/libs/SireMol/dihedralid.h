@@ -102,6 +102,7 @@ namespace SireMol
         DihedralID &operator=(const DihedralID &other);
 
         bool operator==(const SireID::ID &other) const;
+        using SireID::ID::operator!=;
 
         bool operator==(const DihedralID &other) const;
         bool operator!=(const DihedralID &other) const;
