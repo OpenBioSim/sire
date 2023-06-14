@@ -56,6 +56,8 @@ namespace SireMol
         Editor<Parent, T> &operator=(const Editor<Parent, T> &other);
         Editor<Parent, T> &operator=(const T &other);
 
+        using MoleculeView::operator[];
+
         MolViewPtr operator[](int i);
         MolViewPtr operator[](const QString &name);
         MolViewPtr operator[](const AtomID &atomid);

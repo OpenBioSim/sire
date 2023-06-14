@@ -80,7 +80,11 @@ namespace SireMol
         SegIdentifier &operator=(const SegID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const SegIdentifier &other) const;
         bool operator!=(const SegIdentifier &other) const;

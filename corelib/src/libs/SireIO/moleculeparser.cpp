@@ -861,7 +861,7 @@ static QVector<T> collapse(const QVector<QVector<T>> &arrays)
 {
     int nvals = 0;
 
-    for (const auto array : arrays)
+    for (const auto &array : arrays)
     {
         nvals += array.count();
     }
@@ -874,7 +874,7 @@ static QVector<T> collapse(const QVector<QVector<T>> &arrays)
     QVector<T> values;
     values.reserve(nvals);
 
-    for (const auto array : arrays)
+    for (const auto &array : arrays)
     {
         values += array;
     }

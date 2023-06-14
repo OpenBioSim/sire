@@ -81,7 +81,11 @@ namespace SireSystem
         MonitorIdentifier &operator=(const MonitorID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const MonitorIdentifier &other) const;
         bool operator!=(const MonitorIdentifier &other) const;

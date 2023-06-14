@@ -102,7 +102,11 @@ namespace SireMol
         AngleID &operator=(const AngleID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const AngleID &other) const;
         bool operator!=(const AngleID &other) const;

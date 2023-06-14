@@ -100,7 +100,11 @@ namespace SireMol
         MolResID &operator=(const MolResID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const MolResID &other) const;
         bool operator!=(const MolResID &other) const;
@@ -166,7 +170,11 @@ namespace SireMol
         MolResNum &operator=(const MolResNum &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const MolResNum &other) const;
         bool operator!=(const MolResNum &other) const;

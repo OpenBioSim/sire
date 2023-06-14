@@ -183,13 +183,6 @@ public:
         bytes_per_frame = 0;
         has_box_dims = false;
 
-        double linevals[10];
-
-        for (int i = 0; i < 10; ++i)
-        {
-            linevals[i] = 0;
-        }
-
         int nvals_per_line = 0;
         int nvals_last_line = -1;
         int nvals_per_frame = 0;
@@ -296,7 +289,6 @@ public:
                     break;
                 }
 
-                linevals[j] = val;
                 nvals_per_line += 1;
             }
 

@@ -146,6 +146,9 @@ namespace SireID
 
         static const char *typeName();
 
+        using Index_T_<Index>::operator==;
+        using Index_T_<Index>::operator!=;
+
         Index *clone() const;
 
         static Index null();

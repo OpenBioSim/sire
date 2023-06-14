@@ -107,6 +107,8 @@ namespace SireCAS
 
         virtual Condition *clone() const = 0;
 
+        using ExBase::operator==;
+
         Expression differentiate(const Symbol &symbol) const;
         Expression integrate(const Symbol &symbol) const;
 

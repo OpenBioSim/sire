@@ -87,6 +87,11 @@ namespace SireMol
         bool operator==(const MGNum &other) const;
         bool operator!=(const MGNum &other) const;
 
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
+
         bool operator<(const MGNum &other) const;
         bool operator<=(const MGNum &other) const;
         bool operator>(const MGNum &other) const;

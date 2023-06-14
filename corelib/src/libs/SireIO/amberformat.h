@@ -107,7 +107,7 @@ namespace SireIO
         {
             int nvals = 0;
 
-            for (const auto array : arrays)
+            for (const auto &array : arrays)
             {
                 nvals += std::get<0>(array).count();
             }
@@ -123,7 +123,7 @@ namespace SireIO
             tvals.reserve(nvals);
             uvals.reserve(nvals);
 
-            for (const auto array : arrays)
+            for (const auto &array : arrays)
             {
                 tvals += std::get<0>(array);
                 uvals += std::get<1>(array);
@@ -140,7 +140,7 @@ namespace SireIO
         {
             int nvals = 0;
 
-            for (const auto array : arrays)
+            for (const auto &array : arrays)
             {
                 nvals += std::get<0>(array).count();
             }
@@ -160,7 +160,7 @@ namespace SireIO
             vvals.reserve(nvals);
             wvals.reserve(nvals);
 
-            for (const auto array : arrays)
+            for (const auto &array : arrays)
             {
                 tvals += std::get<0>(array);
                 uvals += std::get<1>(array);
@@ -178,7 +178,7 @@ namespace SireIO
         {
             int nvals = 0;
 
-            for (const auto array : arrays)
+            for (const auto &array : arrays)
             {
                 nvals += array.count();
             }
@@ -191,7 +191,7 @@ namespace SireIO
             QVector<T> values;
             values.reserve(nvals);
 
-            for (const auto array : arrays)
+            for (const auto &array : arrays)
             {
                 values += array;
             }

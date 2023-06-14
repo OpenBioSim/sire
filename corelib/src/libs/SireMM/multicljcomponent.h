@@ -81,6 +81,9 @@ namespace SireMM
         bool operator==(const MultiCLJComponent &other) const;
         bool operator!=(const MultiCLJComponent &other) const;
 
+        using SireCAS::ExBase::operator==;
+        using SireCAS::ExBase::operator!=;
+
         const CoulombComponent &coulomb() const;
         const CoulombComponent &coulomb(QString key) const;
 
