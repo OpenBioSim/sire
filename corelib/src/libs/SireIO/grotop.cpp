@@ -5829,6 +5829,8 @@ QStringList GroTop::processDirectives(const QMap<int, QString> &taglocs, const Q
 
             GromacsBond bond;
 
+            qDebug() << "CONSTRUCT" << func_type << Sire::toString(params);
+
             try
             {
                 bond = GromacsBond(func_type, params);
