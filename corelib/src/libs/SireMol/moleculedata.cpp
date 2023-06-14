@@ -244,7 +244,7 @@ MoleculeData::MoleculeData(const MoleculeView &molview) : RefCountData()
 /** Construct a new molecule called 'molname' with the passed molecule info*/
 MoleculeData::MoleculeData(const QString &name,
                            const MoleculeInfo &info)
-    : RefCountData(), molinfo(info), molname(name)
+    : RefCountData(), molinfo(info), molname(name.simplified())
 {
     if (molinfo.read().isEmpty() == 0 and name.isEmpty())
         return;

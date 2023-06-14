@@ -657,7 +657,7 @@ MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
     }
 
     ResInfo res;
-    res.name = ResName(resname);
+    res.name = ResName(resname.simplified());
     res.number = ResNum(resnum);
     res.cgidx = CGIdx(0);
 
@@ -684,13 +684,13 @@ MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
 
             auto &atom = atoms_by_index_data[i];
 
-            atom.name = AtomName(atomnames_data[i]);
+            atom.name = AtomName(atomnames_data[i].simplified());
             atom.number = AtomNum(atomnums_data[i]);
             atom.residx = ResIdx(0);
             atom.cgatomidx = CGAtomIdx(CGIdx(0), Index(i));
 
-            atoms_by_name.insert(atomnames_data[i], AtomIdx(i));
-            atoms_by_num.insert(AtomNum(atomnums_data[i]), AtomIdx(i));
+            atoms_by_name.insert(atom.name.value(), AtomIdx(i));
+            atoms_by_num.insert(atom.number, AtomIdx(i));
         }
 
         atoms_by_index.squeeze();
@@ -701,7 +701,7 @@ MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
     res_by_index = QVector<detail::ResInfo>(1, res);
     res_by_index.squeeze();
 
-    res_by_name.insert(resname, ResIdx(0));
+    res_by_name.insert(res.name.value(), ResIdx(0));
     res_by_num.insert(ResNum(resnum), ResIdx(0));
     res_by_name.squeeze();
     res_by_num.squeeze();
