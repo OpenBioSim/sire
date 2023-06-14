@@ -68,6 +68,7 @@ void register_MonitorName_class(){
                 , "" );
         
         }
+        MonitorName_exposer.def( bp::self != bp::other< SireID::ID >() );
         MonitorName_exposer.def( bp::self != bp::self );
         { //::SireSystem::MonitorName::operator=
         

@@ -82,6 +82,7 @@ void register_ChainAtomID_class(){
         
         }
         ChainAtomID_exposer.def( bp::self != bp::self );
+        ChainAtomID_exposer.def( bp::self != bp::other< SireID::ID >() );
         ChainAtomID_exposer.def( bp::self == bp::self );
         ChainAtomID_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::GroupAtomID< SireMol::ChainID, SireMol::AtomID >::toString

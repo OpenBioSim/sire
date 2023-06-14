@@ -110,6 +110,7 @@ void register_AtomNum_class(){
                 , "" );
         
         }
+        AtomNum_exposer.def( bp::self != bp::other< SireID::ID >() );
         AtomNum_exposer.def( bp::self != bp::self );
         AtomNum_exposer.def( bp::self < bp::self );
         AtomNum_exposer.def( bp::self <= bp::self );

@@ -69,6 +69,7 @@ void register_FFName_class(){
                 , "Map this name to the index of the matching forcefield in the\npassed ForceFields object\nThrow: SireFF::missing_forcefield\n" );
         
         }
+        FFName_exposer.def( bp::self != bp::other< SireID::ID >() );
         FFName_exposer.def( bp::self != bp::self );
         { //::SireFF::FFName::operator=
         

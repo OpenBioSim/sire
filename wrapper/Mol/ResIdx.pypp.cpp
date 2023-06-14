@@ -122,6 +122,7 @@ void register_ResIdx_class(){
                 , "" );
         
         }
+        ResIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::ResIdx::operator=
         
             typedef ::SireMol::ResIdx & ( ::SireMol::ResIdx::*assign_function_type)( ::SireMol::ResIdx const & ) ;

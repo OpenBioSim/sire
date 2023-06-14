@@ -81,6 +81,7 @@ void register_CGsWithAtoms_class(){
                 , "Map this ID to the list of indicies of CutGroups that match this ID\nThrow: SireMol::missing_cutgroup\nThrow: SireError::invalid_index\n" );
         
         }
+        CGsWithAtoms_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGsWithAtoms_exposer.def( bp::self != bp::self );
         { //::SireMol::CGsWithAtoms::operator=
         

@@ -110,6 +110,7 @@ void register_MolAtomID_class(){
                 , "Return the MolID part of this match" );
         
         }
+        MolAtomID_exposer.def( bp::self != bp::other< SireID::ID >() );
         MolAtomID_exposer.def( bp::self != bp::self );
         { //::SireMol::MolAtomID::operator=
         

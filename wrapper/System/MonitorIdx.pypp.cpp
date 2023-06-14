@@ -80,6 +80,7 @@ void register_MonitorIdx_class(){
                 , "" );
         
         }
+        MonitorIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireSystem::MonitorIdx::operator=
         
             typedef ::SireSystem::MonitorIdx & ( ::SireSystem::MonitorIdx::*assign_function_type)( ::SireSystem::MonitorIdx const & ) ;

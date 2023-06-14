@@ -157,6 +157,7 @@ void register_ImproperID_class(){
                 , "Return the indicies of the four atoms of this improper, between the\ntwo molecules whose data is in mol0info (containing improper.atom0()),\nmol1info (containing improper.atom1()), mol2info (containing\nimproper.atom2()) and mol3info (containing improper.atom3())\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
         
         }
+        ImproperID_exposer.def( bp::self != bp::other< SireID::ID >() );
         ImproperID_exposer.def( bp::self != bp::self );
         { //::SireMol::ImproperID::operator=
         

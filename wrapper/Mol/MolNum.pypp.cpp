@@ -116,6 +116,7 @@ void register_MolNum_class(){
                 , "" );
         
         }
+        MolNum_exposer.def( bp::self != bp::other< SireID::ID >() );
         MolNum_exposer.def( bp::self != bp::self );
         MolNum_exposer.def( bp::self < bp::self );
         MolNum_exposer.def( bp::self <= bp::self );

@@ -144,6 +144,7 @@ void register_AngleID_class(){
                 , "Return the mirror of this AngleID - i.e. if this is\nAngleID(atom0, atom1, atom2), this returns\nAngleID(atom2, atom1, atom0).\nThis is useful if you know that AngleID(atom0,atom1,atom2) equals\n" );
         
         }
+        AngleID_exposer.def( bp::self != bp::other< SireID::ID >() );
         AngleID_exposer.def( bp::self != bp::self );
         { //::SireMol::AngleID::operator=
         

@@ -420,7 +420,7 @@ void register_System_class(){
                 , addSharedProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Specify that the property called name should be a shared property" );
         
         }
         { //::SireSystem::System::addSharedProperty
@@ -433,7 +433,7 @@ void register_System_class(){
                 , addSharedProperty_function_value
                 , ( bp::arg("name"), bp::arg("value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Specify that the passed property called name with value value\n  should be a shared property\n" );
         
         }
         { //::SireSystem::System::applyConstraints
@@ -2080,7 +2080,7 @@ void register_System_class(){
                 , removeSharedProperty_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove the specified shared property from this system. This will\n  remove the property, and will also remove its value from all of the\n  contained molecules.\n" );
         
         }
         { //::SireSystem::System::saveFrame
@@ -2430,7 +2430,7 @@ void register_System_class(){
                 , setSharedProperty_function_value
                 , ( bp::arg("name"), bp::arg("value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the shared property called name to the value value" );
         
         }
         { //::SireSystem::System::sharedProperties

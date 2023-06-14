@@ -111,6 +111,7 @@ void register_ResName_class(){
                 , "" );
         
         }
+        ResName_exposer.def( bp::self != bp::other< SireID::ID >() );
         ResName_exposer.def( bp::self != bp::self );
         { //::SireMol::ResName::operator=
         

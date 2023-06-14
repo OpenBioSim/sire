@@ -109,6 +109,7 @@ void register_MolWithResID_class(){
         
         }
         MolWithResID_exposer.def( bp::self != bp::self );
+        MolWithResID_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::MolWithResID::operator=
         
             typedef ::SireMol::MolWithResID & ( ::SireMol::MolWithResID::*assign_function_type)( ::SireMol::MolWithResID const & ) ;

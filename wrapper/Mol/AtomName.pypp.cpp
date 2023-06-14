@@ -111,6 +111,7 @@ void register_AtomName_class(){
                 , "" );
         
         }
+        AtomName_exposer.def( bp::self != bp::other< SireID::ID >() );
         AtomName_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomName::operator=
         

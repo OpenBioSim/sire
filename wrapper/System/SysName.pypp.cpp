@@ -64,6 +64,7 @@ void register_SysName_class(){
                 , "" );
         
         }
+        SysName_exposer.def( bp::self != bp::other< SireID::ID >() );
         SysName_exposer.def( bp::self != bp::self );
         { //::SireSystem::SysName::operator=
         

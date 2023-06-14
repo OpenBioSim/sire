@@ -86,6 +86,7 @@ void register_MGIdx_class(){
                 , "" );
         
         }
+        MGIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::MGIdx::operator=
         
             typedef ::SireMol::MGIdx & ( ::SireMol::MGIdx::*assign_function_type)( ::SireMol::MGIdx const & ) ;

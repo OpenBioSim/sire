@@ -138,6 +138,18 @@ void register_AtomID_class(){
         }
         { //::SireMol::AtomID::map
         
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomID::*map_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
+            map_function_type map_function_value( &::SireMol::AtomID::map );
+            
+            AtomID_exposer.def( 
+                "map"
+                , map_function_value
+                , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
+                , "Map this AtomID to the atoms in the passed molecule view\nThrow: SireMol::missing_atom\nThrow: SireError::invalid_index\n" );
+        
+        }
+        { //::SireMol::AtomID::map
+        
             typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomID::*map_function_type)( ::SireMol::MolInfo const & ) const;
             map_function_type map_function_value( &::SireMol::AtomID::map );
             
@@ -147,18 +159,6 @@ void register_AtomID_class(){
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "Map this ID back to the indicies of the matching atoms in the molecule,\nusing the passed MoleculeInfo to do the mapping" );
-        
-        }
-        { //::SireMol::AtomID::map
-        
-            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomID::*map_function_type)( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & ) const;
-            map_function_type map_function_value( &::SireMol::AtomID::map );
-            
-            AtomID_exposer.def( 
-                "map"
-                , map_function_value
-                , ( bp::arg("molview"), bp::arg("map")=SireBase::PropertyMap() )
-                , "Map this AtomID to the atoms in the passed molecule view\nThrow: SireMol::missing_atom\nThrow: SireError::invalid_index\n" );
         
         }
         AtomID_exposer.def( !bp::self );
