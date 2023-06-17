@@ -1445,14 +1445,16 @@ QVector<QVector<qint64>> getExcludedAtoms(const AmberParams &params, int start_i
         }
         else if (nats == 2)
         {
-            excl_data[0] = QVector<qint64>({1});
+            // only add pairs where i < j
+            excl_data[0] = QVector<qint64>({start_idx + 2});
             excl_data[1] = QVector<qint64>({0});
         }
         else if (nats == 3)
         {
-            excl_data[0] = QVector<qint64>({1, 2});
-            excl_data[1] = QVector<qint64>({0, 2});
-            excl_data[2] = QVector<qint64>({0, 1});
+            // only add pairs where i < j
+            excl_data[0] = QVector<qint64>({start_idx + 2, start_idx + 3});
+            excl_data[1] = QVector<qint64>({start_idx + 3});
+            excl_data[2] = QVector<qint64>({0});
         }
     }
     else
