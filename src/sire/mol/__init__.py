@@ -97,7 +97,14 @@ from ._dynamics import Dynamics
 from ._trajectory import TrajectoryIterator
 from ._element import Element
 from ._view import view as _viewfunc
-from ._smiles import _to_smiles, _view2d, _selector_to_smiles, _selector_view2d
+from ._smiles import (
+    _to_smiles,
+    _to_smarts,
+    _view2d,
+    _selector_to_smiles,
+    _selector_to_smarts,
+    _selector_view2d,
+)
 
 # make sure that Vector has units attached
 from ..maths import Vector as _Vector
@@ -1599,10 +1606,12 @@ SelectorM_CutGroup_.energies = _energies
 
 MoleculeView.view = _viewfunc
 MoleculeView.smiles = _to_smiles
+MoleculeView.smarts = _to_smarts
 MoleculeView.view2d = _view2d
 SelectorMol.view = _viewfunc
 SelectorMol.view2d = _selector_view2d
 SelectorMol.smiles = _selector_to_smiles
+SelectorMol.smarts = _selector_to_smarts
 Selector_Atom_.view = _viewfunc
 Selector_Residue_.view = _viewfunc
 Selector_Chain_.view = _viewfunc
@@ -1611,18 +1620,23 @@ Selector_CutGroup_.view = _viewfunc
 SelectorM_Atom_.view = _viewfunc
 SelectorM_Atom_.view2d = _selector_view2d
 SelectorM_Atom_.smiles = _selector_to_smiles
+SelectorM_Atom_.smiles = _selector_to_smarts
 SelectorM_Residue_.view = _viewfunc
 SelectorM_Residue_.view2d = _selector_view2d
 SelectorM_Residue_.smiles = _selector_to_smiles
+SelectorM_Residue_.smiles = _selector_to_smarts
 SelectorM_Chain_.view = _viewfunc
 SelectorM_Chain_.view2d = _selector_view2d
 SelectorM_Chain_.smiles = _selector_to_smiles
+SelectorM_Chain_.smiles = _selector_to_smarts
 SelectorM_Segment_.view = _viewfunc
 SelectorM_Segment_.view2d = _selector_view2d
 SelectorM_Segment_.smiles = _selector_to_smiles
+SelectorM_Segment_.smiles = _selector_to_smarts
 SelectorM_CutGroup_.view = _viewfunc
 SelectorM_CutGroup_.view2d = _selector_view2d
 SelectorM_CutGroup_.smiles = _selector_to_smiles
+SelectorM_CutGroup_.smiles = _selector_to_smarts
 
 if not hasattr(SelectorMol, "__orig__find__"):
 

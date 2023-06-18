@@ -27,6 +27,7 @@ from ..mol import (
     _dynamics,
     _minimisation,
     _selector_to_smiles,
+    _selector_to_smarts,
     _selector_view2d,
     _trajectory,
     _viewfunc,
@@ -121,6 +122,10 @@ SelectorMBond.smiles = _selector_to_smiles
 SelectorMAngle.smiles = _selector_to_smiles
 SelectorMDihedral.smiles = _selector_to_smiles
 SelectorMImproper.smiles = _selector_to_smiles
+SelectorMBond.smarts = _selector_to_smarts
+SelectorMAngle.smarts = _selector_to_smarts
+SelectorMDihedral.smarts = _selector_to_smarts
+SelectorMImproper.smarts = _selector_to_smarts
 
 SelectorMBond.trajectory = _trajectory
 SelectorMAngle.trajectory = _trajectory

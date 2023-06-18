@@ -5,6 +5,7 @@
 #include <GraphMol/PeriodicTable.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 
@@ -902,6 +903,92 @@ namespace SireRDKit
         return QList<ROMOL_SPTR>(rdkit_mols.constBegin(), rdkit_mols.constEnd());
     }
 
+    ROMOL_SPTR smarts_to_rdkit(const QString &smarts,
+                               const QString &label,
+                               const PropertyMap &map)
+    {
+        RDKit::SmartsParserParams params;
+        params.debugParse = 0;
+        params.allowCXSMILES = true;
+        params.mergeHs = false;
+        params.parseName = true;
+        params.skipCleanup = false;
+
+        RWMOL_SPTR rdkit_mol;
+
+        if (map.specified("merge_hydrogens"))
+        {
+            params.mergeHs = map["merge_hydrogens"].value().asABoolean();
+        }
+
+        if (map.specified("skip_cleanup"))
+        {
+            params.skipCleanup = map["skip_cleanup"].value().asABoolean();
+        }
+
+        if (map.specified("allow_cx_smiles"))
+        {
+            params.allowCXSMILES = map["allow_cx_smiles"].value().asABoolean();
+        }
+
+        try
+        {
+            rdkit_mol.reset(RDKit::SmartsToMol(smarts.toStdString(), params));
+        }
+        catch (...)
+        {
+        }
+
+        if (rdkit_mol.get() == 0)
+        {
+            return ROMOL_SPTR();
+        }
+
+        rdkit_mol->setProp<std::string>("_Name", label.toStdString());
+
+        return rdkit_mol;
+    }
+
+    QList<ROMOL_SPTR> smarts_to_rdkit(const QStringList &smarts,
+                                      const QStringList &labels,
+                                      const PropertyMap &map)
+    {
+        if (smarts.count() != labels.count())
+            throw SireError::invalid_arg(QObject::tr(
+                                             "The number of smarts strings (%1) must match the "
+                                             "number of labels (%2)")
+                                             .arg(smarts.count())
+                                             .arg(labels.count()),
+                                         CODELOC);
+
+        const int n = smarts.count();
+
+        if (n == 0)
+            return QList<ROMOL_SPTR>();
+
+        QVector<ROMOL_SPTR> ret(n);
+        ROMOL_SPTR *ret_data = ret.data();
+
+        if (use_parallel(n, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
+                              {
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    ret_data[i] = smarts_to_rdkit(smarts[i], labels[i], map);
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                ret_data[i] = smarts_to_rdkit(smarts[i], labels[i], map);
+            }
+        }
+
+        return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
+    }
+
     ROMOL_SPTR smiles_to_rdkit(const QString &smiles,
                                const QString &label,
                                const PropertyMap &map)
@@ -1051,6 +1138,54 @@ namespace SireRDKit
         }
 
         return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
+    }
+
+    QString rdkit_to_smarts(const ROMOL_SPTR &mol,
+                            const PropertyMap &map)
+    {
+        if (mol.get() == 0)
+            return QString();
+
+        try
+        {
+            return QString::fromStdString(RDKit::MolToSmarts(*mol));
+        }
+        catch (...)
+        {
+            // ignore errors
+            return QString();
+        }
+    }
+
+    QStringList rdkit_to_smarts(const QList<ROMOL_SPTR> &mols,
+                                const PropertyMap &map)
+    {
+        if (mols.isEmpty())
+            return QStringList();
+
+        const int nmols = mols.count();
+
+        QVector<QString> smarts(nmols);
+        QString *smarts_data = smarts.data();
+
+        if (use_parallel(nmols, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                              {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                smarts_data[i] = rdkit_to_smarts(mols[i], map);
+            } });
+        }
+        else
+        {
+            for (int i = 0; i < mols.count(); ++i)
+            {
+                smarts_data[i] = rdkit_to_smarts(mols[i], map);
+            }
+        }
+
+        return QStringList(smarts.constBegin(), smarts.constEnd());
     }
 
     QString rdkit_to_smiles(const ROMOL_SPTR &mol,
