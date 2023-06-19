@@ -175,6 +175,13 @@ namespace SireMol
 
             virtual SelectResult expand(const SelectResult &result) const;
 
+            virtual SelectEnginePtr createNew(const QList<QVariant> &args) const;
+
+            static void registerEngine(const QString &key, SelectEngine *engine);
+
+            static SelectEnginePtr createEngine(const QString &key, const QVariant &arg);
+            static SelectEnginePtr createEngine(const QString &key, const QList<QVariant> &args);
+
         protected:
             SelectEngine();
 

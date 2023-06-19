@@ -48,7 +48,7 @@ SIRE_BEGIN_HEADER
 // held in ExpressionVariant from the default of 20. This is
 // not a long term solution!
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
-#define BOOST_MPL_LIMIT_LIST_SIZE 30
+#define BOOST_MPL_LIMIT_LIST_SIZE 40
 
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/support_line_pos_iterator.hpp>
@@ -210,6 +210,7 @@ namespace AST
     struct IDObjCmpMass;
     struct IDObjCharge;
     struct IDObjCmpCharge;
+    struct IDSmarts;
 
     struct IDWhereCompare;
     struct IDWhereWithin;
@@ -231,7 +232,7 @@ namespace AST
         boost::recursive_wrapper<IDProtein>, boost::recursive_wrapper<IDPerturbable>, boost::recursive_wrapper<IDMass>,
         boost::recursive_wrapper<IDCharge>, boost::recursive_wrapper<IDCmpMass>, boost::recursive_wrapper<IDCmpCharge>,
         boost::recursive_wrapper<IDObjMass>, boost::recursive_wrapper<IDObjCharge>, boost::recursive_wrapper<IDObjCmpMass>,
-        boost::recursive_wrapper<IDObjCmpCharge>, boost::recursive_wrapper<ExpressionPart>,
+        boost::recursive_wrapper<IDObjCmpCharge>, boost::recursive_wrapper<IDSmarts>, boost::recursive_wrapper<ExpressionPart>,
         boost::recursive_wrapper<Expression>>;
 
     QString expression_to_string(const ExpressionVariant &expression);
@@ -764,6 +765,16 @@ namespace AST
         SelectEnginePtr toEngine() const;
     };
 
+    /** Struct that holds a "smarts" expression */
+    struct IDSmarts
+    {
+        std::string smarts;
+
+        QString toString() const;
+
+        SelectEnginePtr toEngine() const;
+    };
+
     /** Struct that holds a "charge" expression, e.g. 1 e */
     struct IDCharge
     {
@@ -954,6 +965,8 @@ namespace AST
 BOOST_FUSION_ADAPT_STRUCT(AST::IDWithin, (AST::Expression, value0)(AST::LengthValue, distance)(AST::Expression, value1))
 
 BOOST_FUSION_ADAPT_STRUCT(AST::IDCharge, (double, value)(SireUnits::Dimension::Charge, units))
+
+BOOST_FUSION_ADAPT_STRUCT(AST::IDSmarts, (std::string, smarts))
 
 BOOST_FUSION_ADAPT_STRUCT(AST::IDMass, (double, value)(SireUnits::Dimension::MolarMass, units))
 

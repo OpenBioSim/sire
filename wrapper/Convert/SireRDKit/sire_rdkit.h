@@ -56,6 +56,7 @@ namespace SireRDKit
                                       const QString &label,
                                       const SireBase::PropertyMap &map);
 
+    void register_smarts_search();
 }
 
 #endif

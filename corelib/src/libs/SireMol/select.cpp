@@ -262,6 +262,42 @@ SelectResult SireMol::parser::SelectEngine::expand(const SelectResult &results) 
     return SelectResult(expanded);
 }
 
+QHash<QString, SireMol::parser::SelectEnginePtr> _engines;
+
+SireMol::parser::SelectEnginePtr SireMol::parser::SelectEngine::createNew(const QList<QVariant> &args) const
+{
+    throw SireError::unsupported(QObject::tr(
+                                     "The SelectEngine %1 does not support be created via 'createNew'")
+                                     .arg(this->toString()),
+                                 CODELOC);
+}
+
+void SireMol::parser::SelectEngine::registerEngine(const QString &key, SireMol::parser::SelectEngine *engine)
+{
+    QMutexLocker lkr(globalLock());
+    _engines.insert(key, makePtr(engine));
+}
+
+SireMol::parser::SelectEnginePtr SireMol::parser::SelectEngine::createEngine(const QString &key,
+                                                                             const QList<QVariant> &args)
+{
+    QMutexLocker lkr(globalLock());
+
+    auto it = _engines.constFind(key);
+
+    if (it == _engines.constEnd())
+        return SireMol::parser::SelectEnginePtr();
+    else
+        return it.value()->createNew(args);
+}
+
+SireMol::parser::SelectEnginePtr SireMol::parser::SelectEngine::createEngine(const QString &key,
+                                                                             const QVariant &arg)
+{
+    QList<QVariant> args = {arg};
+    return SireMol::parser::SelectEngine::createEngine(key, args);
+}
+
 ///////////
 /////////// Implementation of Select
 ///////////

@@ -8,6 +8,7 @@
 #include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/Substruct/SubstructMatch.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -1288,5 +1289,105 @@ namespace SireRDKit
 
         return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
     }
-
 } // end of namespace SireRDKit
+
+#include "SireMol/select.h"
+
+namespace SireMol
+{
+    namespace parser
+    {
+
+        ////////
+        //////// Implementation of the IDSmartsEngine
+        ////////
+
+        /** Internal class used to search using smarts strings */
+        class IDSmartsEngine : public SelectEngine
+        {
+        public:
+            IDSmartsEngine();
+            SelectEnginePtr createNew(const QList<QVariant> &args) const;
+
+            ~IDSmartsEngine();
+
+            ObjType objectType() const;
+
+        protected:
+            SelectResult select(const SelectResult &mols, const PropertyMap &map) const;
+
+            QString smarts;
+        };
+
+        IDSmartsEngine::IDSmartsEngine()
+        {
+        }
+
+        IDSmartsEngine::~IDSmartsEngine()
+        {
+        }
+
+        SelectEngine::ObjType IDSmartsEngine::objectType() const
+        {
+            return SelectEngine::ATOM;
+        }
+
+        SelectEnginePtr IDSmartsEngine::createNew(const QList<QVariant> &args) const
+        {
+            if (args.isEmpty())
+                throw SireError::program_bug(QObject::tr(
+                                                 "Weird arguments? %s")
+                                                 .arg(Sire::toString(args)),
+                                             CODELOC);
+
+            IDSmartsEngine *ptr = new IDSmartsEngine();
+            auto p = makePtr(ptr);
+
+            ptr->smarts = args.at(0).toString();
+
+            return p;
+        }
+
+        SelectResult IDSmartsEngine::select(const SelectResult &mols, const PropertyMap &map) const
+        {
+            auto search_mol = SireRDKit::smarts_to_rdkit(smarts, smarts, map);
+
+            if (search_mol.get() == 0)
+                throw SireError::invalid_key(QObject::tr(
+                                                 "Unrecognised smarts string '%1'")
+                                                 .arg(smarts),
+                                             CODELOC);
+
+            QList<MolViewPtr> ret;
+
+            for (const auto &mol : mols)
+            {
+                auto rdmol = SireRDKit::sire_to_rdkit(mol.read(), map);
+
+                if (rdmol.count() == 1)
+                {
+                    std::vector<RDKit::MatchVectType> hits_vect;
+                    RDKit::SubstructMatch(*(rdmol.at(0)), *search_mol, hits_vect);
+
+                    if (hits_vect.size() > 0)
+                    {
+                        qDebug() << "GOT HITS!" << hits_vect.size();
+                        ret.append(mol);
+                    }
+                }
+            }
+
+            return SelectResult(ret);
+        }
+
+    }
+}
+
+namespace SireRDKit
+{
+    void register_smarts_search()
+    {
+        SireMol::parser::SelectEngine::registerEngine("smarts",
+                                                      new SireMol::parser::IDSmartsEngine());
+    }
+}

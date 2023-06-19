@@ -114,5 +114,9 @@ BOOST_PYTHON_MODULE(_SireRDKit)
                 (bp::arg("smarts"), bp::arg("label"), bp::arg("map")),
                 "Convert a smarts string to an RDKit molecule");
 
+        bp::def("_register_smarts_search",
+                &register_smarts_search,
+                "Internal function called once used to register smarts searching");
+
         register_list<QList<RDKit::ROMOL_SPTR>>();
 }

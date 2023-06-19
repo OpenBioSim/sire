@@ -1868,6 +1868,29 @@ SelectEnginePtr IDObjCmpMass::toEngine() const
 }
 
 ////////
+//////// Implementation of the IDSmarts
+////////
+
+QString IDSmarts::toString() const
+{
+    return QObject::tr("IDSmarts( %1 )").arg(QString::fromStdString(smarts));
+}
+
+SelectEnginePtr IDSmarts::toEngine() const
+{
+    auto engine = SelectEngine::createEngine("smarts", QVariant(QString::fromStdString(smarts)));
+
+    if (engine.get() == 0)
+        throw SireError::unsupported(QObject::tr(
+                                         "Cannot search using a smarts string as smarts support has not been loaded. "
+                                         "You can include smarts support by installing RDKit and makig sure that "
+                                         "sire has been compiled with RDKit support."),
+                                     CODELOC);
+
+    return engine;
+}
+
+////////
 //////// Implementation of the IDCharge
 ////////
 
@@ -2848,7 +2871,7 @@ SelectEnginePtr IDWithEngine::construct(SelectEnginePtr part0, IDToken token, Se
     auto type0 = part0->objectType();
     auto type1 = part1->objectType();
 
-    if (not(type0 == AST::VIEW or type1 == AST::VIEW))
+    if (not(type0 == SelectEngine::VIEW or type1 == SelectEngine::VIEW))
     {
         // VIEW is a special case and can be either side of the
         // in/with

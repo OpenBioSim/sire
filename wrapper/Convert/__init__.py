@@ -23,9 +23,11 @@ try:
         rdkit_remove_hydrogens,
         smiles_to_rdkit,
         smarts_to_rdkit,
+        _register_smarts_search,
     )
 
     _has_rdkit = True
+    _register_smarts_search()
 
 except Exception:
     # RDKit support is not available

@@ -23,14 +23,14 @@ except AttributeError as e:
 if _has_rdkit:
 
     def _selector_to_smarts(
-        obj, as_search: bool = True, include_hydrogens: bool = False, map=None
+        obj, as_search: bool = False, include_hydrogens: bool = False, map=None
     ):
         """
         Return the molecule views in this container as smarts strings. Include
         hydrogens if 'include_hydrogens' is True. This returns a list of
         smarts strings, in the same order as the views in the container.
 
-        If 'as_search' is True (the default) then the smarts string is
+        If 'as_search' is True then the smarts string is
         returned as a sire search string.
         """
         from ..convert import sire_to_rdkit
@@ -340,7 +340,7 @@ if _has_rdkit:
             return SVG(svg)
 
     def _to_smarts(
-        obj, as_search: bool = True, include_hydrogens: bool = False, map=None
+        obj, as_search: bool = False, include_hydrogens: bool = False, map=None
     ):
         """
         Return this molecule view as a smarts string. Include

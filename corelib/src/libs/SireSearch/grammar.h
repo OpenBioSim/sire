@@ -268,7 +268,7 @@ public:
         expressionPartRule = idNameRule | idNumberRule | idElementRule | propertyRule | bondRule | water_token |
                              pert_token | protein_token | notRule | joinRule | massRule | massCmpRule | chargeRule |
                              chargeCmpRule | massObjRule | massObjCmpRule | chargeObjRule | chargeObjCmpRule |
-                             all_token | countRule | user_token;
+                             all_token | countRule | smartsRule | user_token;
 
         // grammar that specifies a list of names (comma-separated)
         nameValuesRule = (nameValueRule % qi::lit(','));
@@ -344,6 +344,9 @@ public:
         notRule =
             qi::lit("not ") >> expressionRule | qi::lit("NOT ") >> expressionRule | qi::lit("!") >> expressionRule;
 
+        // grammar for a smarts search
+        smartsRule = qi::lit("smarts") >> qi::lexeme[+qi::print];
+
         // grammar for a "join" expression
         joinRule = qi::lit("join ") >> expressionRule;
 
@@ -390,6 +393,7 @@ public:
         chargeCmpRule.name("Charge Compare Rule");
         chargeObjRule.name("Charge Object Rule");
         chargeObjCmpRule.name("Charge Object Compare Rule");
+        smartsRule.name("Smarts Rule");
         stringRule.name("String");
         regExpRule.name("RegExp");
         bondRule.name("Bond");
@@ -423,6 +427,7 @@ public:
     qi::rule<IteratorT, AST::IDCmpCharge(), SkipperT> chargeCmpRule;
     qi::rule<IteratorT, AST::IDObjCharge(), SkipperT> chargeObjRule;
     qi::rule<IteratorT, AST::IDObjCmpCharge(), SkipperT> chargeObjCmpRule;
+    qi::rule<IteratorT, AST::IDSmarts(), SkipperT> smartsRule;
 
     qi::rule<IteratorT, AST::IDWhere(), SkipperT> whereRule;
     qi::rule<IteratorT, AST::IDWhereWithin(), SkipperT> whereWithinRule;
