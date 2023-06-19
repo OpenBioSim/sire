@@ -1348,6 +1348,67 @@ namespace SireMol
             return p;
         }
 
+        bool _is_water(const MolViewPtr &molview, const PropertyMap &map)
+        {
+            // Counters for the number of hydrogens, oxygens, and protons in the molecule.
+            int num_hydrogen = 0;
+            int num_oxygen = 0;
+            int num_protons = 0;
+
+            // Convert to a molecule.
+            auto molecule = molview->molecule();
+
+            // Skip if there is no element property.
+            if (not molecule.hasProperty(map["element"]))
+                return false;
+
+            // Extract the element property.
+            const auto &elements = molecule.property(map["element"]).asA<AtomElements>();
+
+            // Whether this a water molecule.
+            bool is_water = true;
+
+            // Loop over all cut-groups associated with the elements.
+            for (int i = 0; i < elements.nCutGroups(); ++i)
+            {
+                // Create the cut-group index.
+                CGIdx cg(i);
+
+                // Extract the data for this cut-group.
+                auto data = elements.constData(cg);
+
+                // Loop over all atoms in this cut-group.
+                for (int j = 0; j < elements.nAtoms(cg); ++j)
+                {
+                    // Get the element.
+                    const auto element = data[j];
+
+                    // Update the number of protons.
+                    num_protons += element.nProtons();
+
+                    // Hydrogen.
+                    if (element.nProtons() == 1)
+                        num_hydrogen++;
+                    // Oxygen.
+                    else if (element.nProtons() == 8)
+                        num_oxygen++;
+
+                    // Not a water molecule, abort!
+                    if (num_oxygen > 1 or num_hydrogen > 2 or num_protons > 10)
+                    {
+                        is_water = false;
+                        break;
+                    }
+                }
+
+                // Break out of inner loop.
+                if (not is_water)
+                    break;
+            }
+
+            return (is_water and num_oxygen == 1 and num_hydrogen == 2 and num_protons == 10);
+        }
+
         SelectResult IDSmartsEngine::select(const SelectResult &mols, const PropertyMap &map) const
         {
             auto search_mol = SireRDKit::smarts_to_rdkit(smarts, smarts, map);
@@ -1358,22 +1419,53 @@ namespace SireMol
                                                  .arg(smarts),
                                              CODELOC);
 
+            const int match_natoms = search_mol->getNumAtoms();
+
             QList<MolViewPtr> ret;
+
+            bool water_doesnt_match = false;
 
             for (const auto &mol : mols)
             {
+                if (mol.read().nAtoms() < match_natoms)
+                    continue;
+
+                bool this_is_water = _is_water(mol, map);
+
+                if (this_is_water)
+                {
+                    if (water_doesnt_match)
+                        continue;
+                }
+
                 auto rdmol = SireRDKit::sire_to_rdkit(mol.read(), map);
 
-                if (rdmol.count() == 1)
+                if (rdmol.count() != 1)
                 {
-                    std::vector<RDKit::MatchVectType> hits_vect;
-                    RDKit::SubstructMatch(*(rdmol.at(0)), *search_mol, hits_vect);
+                    if (this_is_water)
+                        water_doesnt_match = true;
 
-                    if (hits_vect.size() > 0)
+                    continue;
+                }
+
+                std::vector<RDKit::MatchVectType> hits_vect;
+
+                if (RDKit::SubstructMatch(*(rdmol.at(0)), *search_mol, hits_vect))
+                {
+                    if (hits_vect.size() == 0)
                     {
-                        qDebug() << "GOT HITS!" << hits_vect.size();
-                        ret.append(mol);
+                        if (this_is_water)
+                            water_doesnt_match = true;
+
+                        continue;
                     }
+
+                    qDebug() << "GOT HITS!" << hits_vect.size();
+                    ret.append(mol);
+                }
+                else if (this_is_water)
+                {
+                    water_doesnt_match = true;
                 }
             }
 
