@@ -1358,15 +1358,16 @@ namespace SireMol
             // Convert to a molecule.
             auto molecule = molview->molecule();
 
+            if (molecule.nAtoms() > 6)
+                // we won't check molecules that are full of dummy atoms
+                return false;
+
             // Skip if there is no element property.
             if (not molecule.hasProperty(map["element"]))
                 return false;
 
             // Extract the element property.
             const auto &elements = molecule.property(map["element"]).asA<AtomElements>();
-
-            // Whether this a water molecule.
-            bool is_water = true;
 
             // Loop over all cut-groups associated with the elements.
             for (int i = 0; i < elements.nCutGroups(); ++i)
@@ -1396,17 +1397,12 @@ namespace SireMol
                     // Not a water molecule, abort!
                     if (num_oxygen > 1 or num_hydrogen > 2 or num_protons > 10)
                     {
-                        is_water = false;
-                        break;
+                        return false;
                     }
                 }
-
-                // Break out of inner loop.
-                if (not is_water)
-                    break;
             }
 
-            return (is_water and num_oxygen == 1 and num_hydrogen == 2 and num_protons == 10);
+            return (num_oxygen == 1 and num_hydrogen == 2 and num_protons == 10);
         }
 
         SelectResult IDSmartsEngine::select(const SelectResult &mols, const PropertyMap &map) const
