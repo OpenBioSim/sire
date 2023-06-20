@@ -63,6 +63,7 @@
 #include "SireMol/atomvelocities.h"
 #include "SireMol/atomforces.h"
 #include "SireMol/selectormol.h"
+#include "SireMol/selector.hpp"
 #include "SireMol/core.h"
 
 #include "Base/convertpackedarray.hpp"
@@ -140,6 +141,8 @@ void register_SireMol_containers()
   register_list<QList<boost::tuple<AtomIdentifier, AtomIdentifier>>>();
 
   register_list<QVector<boost::tuple<MolNum, SireID::Index>>>();
+
+  register_list<QList<Selector<Atom>>>();
 
   register_list<QList<MGIDsAndMaps>>();
 

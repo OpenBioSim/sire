@@ -1,5 +1,6 @@
 __all__ = [
     "get_alignment",
+    "is_water",
     "Atom",
     "AtomIdx",
     "AtomName",
@@ -116,6 +117,30 @@ try:
     get_alignment = _Mol.getAlignment
 except AttributeError:
     get_alignment = _Mol.get_alignment
+
+
+def is_water(mol, map=None):
+    """
+    Return whether or not the passed molecule (or collection of molecules)
+    are water. This returns a single True or False if a single molecule
+    is passed, or a list of True/False values if a molecule collection
+    is passed.
+    """
+    from ..base import create_map
+
+    map = create_map(map)
+
+    try:
+        return _Mol.is_water(mol, map)
+    except Exception:
+        pass
+
+    if hasattr(type(mol), "molecules"):
+        return _Mol.is_water(mol.molecules(), map)
+
+    raise TypeError(
+        f"Cannot convert {mol} to a molecule view or molecule collection."
+    )
 
 
 # Here I will define some functions that make accessing

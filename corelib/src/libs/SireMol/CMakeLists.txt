@@ -30,6 +30,7 @@ set ( SIREMOL_HEADERS
       atomidentifier.h
       atomidx.h
       atommasses.h
+      atommatch.h
       atommatcher.h
       atommatchers.h
       atomname.h
@@ -84,6 +85,7 @@ set ( SIREMOL_HEADERS
       evaluator.h
       evaluatorm.h
       improperid.h
+      iswater.h
       geometryperturbation.h
       groupatomids.h
       groupgroupids.h
@@ -169,6 +171,7 @@ set ( SIREMOL_SOURCES
       atomid.cpp
       atomidentifier.cpp
       atomcutting.cpp
+      atommatch.cpp
       atommatcher.cpp
       atommatchers.cpp
       atomproperty.cpp
@@ -204,6 +207,7 @@ set ( SIREMOL_SOURCES
       evaluator.cpp
       evaluatorm.cpp
       improperid.cpp
+      iswater.cpp
       findmcs.cpp
       geometryperturbation.cpp
       groupatomids.cpp

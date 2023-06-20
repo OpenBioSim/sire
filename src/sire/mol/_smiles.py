@@ -89,11 +89,15 @@ if _has_rdkit:
         else:
             return smarts
 
-    def _selector_to_smiles(obj, include_hydrogens: bool = False, map=None):
+    def _selector_to_smiles(
+        obj, as_search: bool = True, include_hydrogens: bool = False, map=None
+    ):
         """
         Return the molecule views in this container as smiles strings. Include
         hydrogens if 'include_hydrogens' is True. This returns a list
-        of smiles strings, in the same order as the views in the container
+        of smiles strings, in the same order as the views in the container.
+
+        If 'as_search' is True, then this returns the sire search smiles string
         """
         from ..convert import sire_to_rdkit
         from ..legacy.Convert import rdkit_to_smiles
@@ -146,7 +150,10 @@ if _has_rdkit:
             for mol in obj:
                 smiles.append(s.get(mol.number().value(), water))
 
-        return smiles
+        if as_search:
+            return [f"smiles {x}" for x in smiles]
+        else:
+            return smiles
 
     def _selector_view2d(
         obj,
@@ -359,9 +366,14 @@ if _has_rdkit:
                 obj = obj["water"]
                 if obj.selected_all():
                     if include_hydrogens:
-                        return "[#8]1-[H][H]-1"
+                        smarts = "[#8]1-[H][H]-1"
                     else:
-                        return "[#8]"
+                        smarts = "[#8]"
+
+                    if as_search:
+                        return f"smarts {smarts}"
+                    else:
+                        return smarts
             except Exception:
                 pass
 
@@ -381,10 +393,14 @@ if _has_rdkit:
         else:
             return smarts
 
-    def _to_smiles(obj, include_hydrogens: bool = False, map=None):
+    def _to_smiles(
+        obj, as_search: bool = False, include_hydrogens: bool = False, map=None
+    ):
         """
         Return this molecule view as a smiles string. Include
-        hydrogens in 'include_hydrogens' is True
+        hydrogens in 'include_hydrogens' is True.
+
+        Return this as a sire search string is 'as_search' is True
         """
         from ..convert import sire_to_rdkit
         from ..legacy.Convert import rdkit_to_smiles
@@ -396,9 +412,14 @@ if _has_rdkit:
                 obj = obj["water"]
                 if obj.selected_all():
                     if include_hydrogens:
-                        return "[H]O[H]"
+                        smiles = "[H]O[H]"
                     else:
-                        return "O"
+                        smiles = "O"
+
+                    if as_search:
+                        return f"smiles {smiles}"
+                    else:
+                        return smiles
             except Exception:
                 pass
 
@@ -411,7 +432,12 @@ if _has_rdkit:
 
             rdkit_mol = rdkit_remove_hydrogens(rdkit_mol, map)
 
-        return rdkit_to_smiles(rdkit_mol, map)
+        smiles = rdkit_to_smiles(rdkit_mol, map)
+
+        if as_search:
+            return f"smiles {smiles}"
+        else:
+            return smiles
 
     def _view2d(
         obj,

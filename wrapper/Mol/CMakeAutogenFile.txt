@@ -27,6 +27,7 @@ set ( PYPP_SOURCES
        AtomIntegerArrayProperty.pypp.cpp
        AtomMCSMatcher.pypp.cpp
        AtomMasses.pypp.cpp
+       AtomMatch.pypp.cpp
        AtomMatchInverter.pypp.cpp
        AtomMatcher.pypp.cpp
        AtomMultiMatcher.pypp.cpp

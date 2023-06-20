@@ -29,6 +29,7 @@
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molecules.h"
 #include "SireMol/parser.h"
+#include "SireMol/atommatch.h"
 
 #include "SireMol/core.h"
 
@@ -1097,8 +1098,13 @@ QString SelectResult::getCommonType() const
     {
         const auto typ = molview->what();
 
-        if (typ == Molecule::typeName() or typ == Atom::typeName() or typ == Residue::typeName() or
-            typ == Chain::typeName() or typ == Segment::typeName() or typ == CutGroup::typeName())
+        if (typ == AtomMatch::typeName())
+        {
+            // everything must be an AtomMatch
+            return AtomMatch::typeName();
+        }
+        else if (typ == Molecule::typeName() or typ == Atom::typeName() or typ == Residue::typeName() or
+                 typ == Chain::typeName() or typ == Segment::typeName() or typ == CutGroup::typeName())
         {
             selections.append(molview->selection());
         }
@@ -1192,9 +1198,6 @@ QString SelectResult::getCommonType() const
             break;
         }
     }
-
-    if (is_cutgroup)
-        return CutGroup::typeName();
 
     if (is_cutgroup)
         return CutGroup::typeName();

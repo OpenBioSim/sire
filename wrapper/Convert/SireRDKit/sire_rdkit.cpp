@@ -19,6 +19,7 @@
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
 #include "SireMol/atommasses.h"
+#include "SireMol/atommatch.h"
 #include "SireMol/atomproperty.hpp"
 #include "SireMol/connectivity.h"
 #include "SireMol/bondid.h"
@@ -26,6 +27,7 @@
 #include "SireMol/stereochemistry.h"
 #include "SireMol/chirality.h"
 #include "SireMol/hybridization.h"
+#include "SireMol/iswater.h"
 
 #include "SireMM/selectorbond.h"
 
@@ -1306,7 +1308,7 @@ namespace SireMol
         class IDSmartsEngine : public SelectEngine
         {
         public:
-            IDSmartsEngine();
+            IDSmartsEngine(bool search_smarts = true);
             SelectEnginePtr createNew(const QList<QVariant> &args) const;
 
             ~IDSmartsEngine();
@@ -1317,9 +1319,10 @@ namespace SireMol
             SelectResult select(const SelectResult &mols, const PropertyMap &map) const;
 
             QString smarts;
+            bool search_smarts;
         };
 
-        IDSmartsEngine::IDSmartsEngine()
+        IDSmartsEngine::IDSmartsEngine(bool s) : search_smarts(s)
         {
         }
 
@@ -1329,7 +1332,7 @@ namespace SireMol
 
         SelectEngine::ObjType IDSmartsEngine::objectType() const
         {
-            return SelectEngine::ATOM;
+            return SelectEngine::VIEW;
         }
 
         SelectEnginePtr IDSmartsEngine::createNew(const QList<QVariant> &args) const
@@ -1344,70 +1347,23 @@ namespace SireMol
             auto p = makePtr(ptr);
 
             ptr->smarts = args.at(0).toString();
+            ptr->search_smarts = this->search_smarts;
 
             return p;
         }
 
-        bool _is_water(const MolViewPtr &molview, const PropertyMap &map)
-        {
-            // Counters for the number of hydrogens, oxygens, and protons in the molecule.
-            int num_hydrogen = 0;
-            int num_oxygen = 0;
-            int num_protons = 0;
-
-            // Convert to a molecule.
-            auto molecule = molview->molecule();
-
-            if (molecule.nAtoms() > 6)
-                // we won't check molecules that are full of dummy atoms
-                return false;
-
-            // Skip if there is no element property.
-            if (not molecule.hasProperty(map["element"]))
-                return false;
-
-            // Extract the element property.
-            const auto &elements = molecule.property(map["element"]).asA<AtomElements>();
-
-            // Loop over all cut-groups associated with the elements.
-            for (int i = 0; i < elements.nCutGroups(); ++i)
-            {
-                // Create the cut-group index.
-                CGIdx cg(i);
-
-                // Extract the data for this cut-group.
-                auto data = elements.constData(cg);
-
-                // Loop over all atoms in this cut-group.
-                for (int j = 0; j < elements.nAtoms(cg); ++j)
-                {
-                    // Get the element.
-                    const auto element = data[j];
-
-                    // Update the number of protons.
-                    num_protons += element.nProtons();
-
-                    // Hydrogen.
-                    if (element.nProtons() == 1)
-                        num_hydrogen++;
-                    // Oxygen.
-                    else if (element.nProtons() == 8)
-                        num_oxygen++;
-
-                    // Not a water molecule, abort!
-                    if (num_oxygen > 1 or num_hydrogen > 2 or num_protons > 10)
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return (num_oxygen == 1 and num_hydrogen == 2 and num_protons == 10);
-        }
-
         SelectResult IDSmartsEngine::select(const SelectResult &mols, const PropertyMap &map) const
         {
-            auto search_mol = SireRDKit::smarts_to_rdkit(smarts, smarts, map);
+            ROMOL_SPTR search_mol;
+
+            if (search_smarts)
+            {
+                search_mol = SireRDKit::smarts_to_rdkit(smarts, smarts, map);
+            }
+            else
+            {
+                search_mol = SireRDKit::smiles_to_rdkit(smarts, smarts, map);
+            }
 
             if (search_mol.get() == 0)
                 throw SireError::invalid_key(QObject::tr(
@@ -1417,16 +1373,22 @@ namespace SireMol
 
             const int match_natoms = search_mol->getNumAtoms();
 
-            QList<MolViewPtr> ret;
+            const auto water_mask = is_water(mols, map);
 
             bool water_doesnt_match = false;
 
-            for (const auto &mol : mols)
+            QList<MolViewPtr> ret;
+
+            for (int i = 0; i < mols.count(); ++i)
             {
-                if (mol.read().nAtoms() < match_natoms)
+                const auto mol = mols[i];
+
+                const int natoms = mol.read().nAtoms();
+
+                if (natoms < match_natoms)
                     continue;
 
-                bool this_is_water = _is_water(mol, map);
+                bool this_is_water = water_mask[i];
 
                 if (this_is_water)
                 {
@@ -1444,11 +1406,11 @@ namespace SireMol
                     continue;
                 }
 
-                std::vector<RDKit::MatchVectType> hits_vect;
+                std::vector<RDKit::MatchVectType> hits;
 
-                if (RDKit::SubstructMatch(*(rdmol.at(0)), *search_mol, hits_vect))
+                if (RDKit::SubstructMatch(*(rdmol.at(0)), *search_mol, hits))
                 {
-                    if (hits_vect.size() == 0)
+                    if (hits.size() == 0)
                     {
                         if (this_is_water)
                             water_doesnt_match = true;
@@ -1456,8 +1418,21 @@ namespace SireMol
                         continue;
                     }
 
-                    qDebug() << "GOT HITS!" << hits_vect.size();
-                    ret.append(mol);
+                    QList<QList<qint64>> groups;
+
+                    for (const auto &hit : hits)
+                    {
+                        QList<qint64> selected_atoms;
+
+                        for (const auto &atom : hit)
+                        {
+                            selected_atoms.append(atom.second);
+                        }
+
+                        groups.append(selected_atoms);
+                    }
+
+                    ret.append(MolViewPtr(new AtomMatch(mol.read().atoms(), groups)));
                 }
                 else if (this_is_water)
                 {
@@ -1476,6 +1451,9 @@ namespace SireRDKit
     void register_smarts_search()
     {
         SireMol::parser::SelectEngine::registerEngine("smarts",
-                                                      new SireMol::parser::IDSmartsEngine());
+                                                      new SireMol::parser::IDSmartsEngine(true));
+
+        SireMol::parser::SelectEngine::registerEngine("smiles",
+                                                      new SireMol::parser::IDSmartsEngine(false));
     }
 }

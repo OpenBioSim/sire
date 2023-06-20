@@ -33,6 +33,7 @@
 
 #include "SireMol/atomelements.h"
 #include "SireMol/core.h"
+#include "SireMol/iswater.h"
 
 #include "SireMM/selectorangle.h"
 #include "SireMM/selectorbond.h"
@@ -1873,21 +1874,39 @@ SelectEnginePtr IDObjCmpMass::toEngine() const
 
 QString IDSmarts::toString() const
 {
-    return QObject::tr("IDSmarts( %1 )").arg(QString::fromStdString(smarts));
+    return QObject::tr("IDSmarts( %1, %2 )")
+        .arg(idsmartstoken_to_string(search_type))
+        .arg(QString::fromStdString(smarts));
 }
 
 SelectEnginePtr IDSmarts::toEngine() const
 {
-    auto engine = SelectEngine::createEngine("smarts", QVariant(QString::fromStdString(smarts)));
+    if (search_type == AST::ID_SMILES)
+    {
+        auto engine = SelectEngine::createEngine("smiles", QVariant(QString::fromStdString(smarts)));
 
-    if (engine.get() == 0)
-        throw SireError::unsupported(QObject::tr(
-                                         "Cannot search using a smarts string as smarts support has not been loaded. "
-                                         "You can include smarts support by installing RDKit and makig sure that "
-                                         "sire has been compiled with RDKit support."),
-                                     CODELOC);
+        if (engine.get() == 0)
+            throw SireError::unsupported(QObject::tr(
+                                             "Cannot search using a smiles string as smiles support has not been loaded. "
+                                             "You can include smiles support by installing RDKit and makig sure that "
+                                             "sire has been compiled with RDKit support."),
+                                         CODELOC);
 
-    return engine;
+        return engine;
+    }
+    else
+    {
+        auto engine = SelectEngine::createEngine("smarts", QVariant(QString::fromStdString(smarts)));
+
+        if (engine.get() == 0)
+            throw SireError::unsupported(QObject::tr(
+                                             "Cannot search using a smarts string as smarts support has not been loaded. "
+                                             "You can include smarts support by installing RDKit and makig sure that "
+                                             "sire has been compiled with RDKit support."),
+                                         CODELOC);
+
+        return engine;
+    }
 }
 
 ////////
@@ -3533,67 +3552,12 @@ SelectResult IDWaterEngine::select(const SelectResult &mols, const PropertyMap &
 {
     QList<MolViewPtr> result;
 
-    for (const auto &molview : mols)
+    const auto mask = SireMol::is_water(mols, map);
+
+    for (int i = 0; i < mask.count(); ++i)
     {
-        // Counters for the number of hydrogens, oxygens, and protons in the molecule.
-        int num_hydrogen = 0;
-        int num_oxygen = 0;
-        int num_protons = 0;
-
-        // Convert to a molecule.
-        auto molecule = molview->molecule();
-
-        // Skip if there is no element property.
-        if (not molecule.hasProperty(map["element"]))
-            continue;
-
-        // Extract the element property.
-        const auto &elements = molecule.property(map["element"]).asA<AtomElements>();
-
-        // Whether this a water molecule.
-        bool is_water = true;
-
-        // Loop over all cut-groups associated with the elements.
-        for (int i = 0; i < elements.nCutGroups(); ++i)
-        {
-            // Create the cut-group index.
-            CGIdx cg(i);
-
-            // Extract the data for this cut-group.
-            auto data = elements.constData(cg);
-
-            // Loop over all atoms in this cut-group.
-            for (int j = 0; j < elements.nAtoms(cg); ++j)
-            {
-                // Get the element.
-                const auto element = data[j];
-
-                // Update the number of protons.
-                num_protons += element.nProtons();
-
-                // Hydrogen.
-                if (element.nProtons() == 1)
-                    num_hydrogen++;
-                // Oxygen.
-                else if (element.nProtons() == 8)
-                    num_oxygen++;
-
-                // Not a water molecule, abort!
-                if (num_oxygen > 1 or num_hydrogen > 2 or num_protons > 10)
-                {
-                    is_water = false;
-                    break;
-                }
-            }
-
-            // Break out of inner loop.
-            if (not is_water)
-                break;
-        }
-
-        // If this is a water molecule, append the result.
-        if (is_water and num_oxygen == 1 and num_hydrogen == 2 and num_protons == 10)
-            result.append(molecule);
+        if (mask[i])
+            result.append(mols[i]);
     }
 
     return SelectResult(result);

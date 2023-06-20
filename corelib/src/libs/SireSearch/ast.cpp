@@ -134,6 +134,19 @@ namespace AST
         }
     }
 
+    QString idsmartstoken_to_string(IDSmartsToken token)
+    {
+        switch (token)
+        {
+        case ID_SMARTS:
+            return "smarts";
+        case ID_SMILES:
+            return "smiles";
+        default:
+            return "smarts";
+        }
+    }
+
     QString idtoken_to_string(IDToken token)
     {
         switch (token)

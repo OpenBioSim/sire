@@ -198,6 +198,8 @@ public:
             "x", AST::ID_COORD_X)("coords.x", AST::ID_COORD_X)("y", AST::ID_COORD_Y)("coords.y", AST::ID_COORD_Y)(
             "z", AST::ID_COORD_Z)("coords.z", AST::ID_COORD_Z);
 
+        smarts_token.add("smarts", AST::ID_SMARTS)("smiles", AST::ID_SMILES);
+
         // now add in all of the element tokens
         for (int i = 0; i <= 111; ++i) // loop through all known elements
         {
@@ -345,7 +347,7 @@ public:
             qi::lit("not ") >> expressionRule | qi::lit("NOT ") >> expressionRule | qi::lit("!") >> expressionRule;
 
         // grammar for a smarts search
-        smartsRule = qi::lit("smarts") >> qi::lexeme[+qi::print];
+        smartsRule = smarts_token >> qi::lexeme[+qi::print];
 
         // grammar for a "join" expression
         joinRule = qi::lit("join ") >> expressionRule;
@@ -470,6 +472,7 @@ public:
     qi::symbols<char, AST::IDWater> water_token;
     qi::symbols<char, AST::IDPerturbable> pert_token;
     qi::symbols<char, AST::IDProtein> protein_token;
+    qi::symbols<char, AST::IDSmartsToken> smarts_token;
     UserTokens user_token;
 
     ValueGrammar<IteratorT, SkipperT> stringRule;

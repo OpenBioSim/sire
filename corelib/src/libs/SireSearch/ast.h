@@ -176,6 +176,15 @@ namespace AST
 
     QString idcoordtype_to_string(IDCoordType typ);
 
+    /** The different types of smarts search */
+    enum IDSmartsToken
+    {
+        ID_SMARTS = 0,
+        ID_SMILES = 1
+    };
+
+    QString idsmartstoken_to_string(IDSmartsToken token);
+
     struct NameValue;
     struct RangeValue;
     struct CompareValue;
@@ -768,6 +777,7 @@ namespace AST
     /** Struct that holds a "smarts" expression */
     struct IDSmarts
     {
+        IDSmartsToken search_type;
         std::string smarts;
 
         QString toString() const;
@@ -966,7 +976,7 @@ BOOST_FUSION_ADAPT_STRUCT(AST::IDWithin, (AST::Expression, value0)(AST::LengthVa
 
 BOOST_FUSION_ADAPT_STRUCT(AST::IDCharge, (double, value)(SireUnits::Dimension::Charge, units))
 
-BOOST_FUSION_ADAPT_STRUCT(AST::IDSmarts, (std::string, smarts))
+BOOST_FUSION_ADAPT_STRUCT(AST::IDSmarts, (AST::IDSmartsToken, search_type)(std::string, smarts))
 
 BOOST_FUSION_ADAPT_STRUCT(AST::IDMass, (double, value)(SireUnits::Dimension::MolarMass, units))
 

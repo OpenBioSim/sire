@@ -271,6 +271,24 @@ namespace bp = boost::python;
 
 #include "mover.h"
 
+#include "atomelements.h"
+
+#include "iswater.h"
+
+#include "iswater.h"
+
+#include "atomelements.h"
+
+#include "iswater.h"
+
+#include "iswater.h"
+
+#include "atomelements.h"
+
+#include "iswater.h"
+
+#include "iswater.h"
+
 void register_free_functions(){
 
     { //::SireMol::getAlignment
@@ -347,6 +365,45 @@ void register_free_functions(){
             "getAlignment"
             , getAlignment_function_value
             , ( bp::arg("view0"), bp::arg("map0"), bp::arg("view1"), bp::arg("map1"), bp::arg("matcher"), bp::arg("fit")=(bool)(true) )
+            , "" );
+    
+    }
+
+    { //::SireMol::is_water
+    
+        typedef bool ( *is_water_function_type )( ::SireMol::MoleculeView const &,::SireBase::PropertyMap const & );
+        is_water_function_type is_water_function_value( &::SireMol::is_water );
+        
+        bp::def( 
+            "is_water"
+            , is_water_function_value
+            , ( bp::arg("molecule"), bp::arg("map")=SireBase::PropertyMap() )
+            , "" );
+    
+    }
+
+    { //::SireMol::is_water
+    
+        typedef ::QVector< bool > ( *is_water_function_type )( ::SireMol::SelectorMol const &,::SireBase::PropertyMap const & );
+        is_water_function_type is_water_function_value( &::SireMol::is_water );
+        
+        bp::def( 
+            "is_water"
+            , is_water_function_value
+            , ( bp::arg("molecules"), bp::arg("map")=SireBase::PropertyMap() )
+            , "" );
+    
+    }
+
+    { //::SireMol::is_water
+    
+        typedef ::QVector< bool > ( *is_water_function_type )( ::SireMol::SelectResult const &,::SireBase::PropertyMap const & );
+        is_water_function_type is_water_function_value( &::SireMol::is_water );
+        
+        bp::def( 
+            "is_water"
+            , is_water_function_value
+            , ( bp::arg("molecules"), bp::arg("map")=SireBase::PropertyMap() )
             , "" );
     
     }
