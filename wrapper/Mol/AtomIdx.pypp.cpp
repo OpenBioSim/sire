@@ -122,6 +122,7 @@ void register_AtomIdx_class(){
                 , "" );
         
         }
+        AtomIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::AtomIdx::operator=
         
             typedef ::SireMol::AtomIdx & ( ::SireMol::AtomIdx::*assign_function_type)( ::SireMol::AtomIdx const & ) ;

@@ -1,4 +1,4 @@
-__all__ = ["get_coords_array"]
+__all__ = ["get_coords_array", "resolve_path"]
 
 from ..legacy import IO as _IO
 from .. import use_new_api as _use_new_api
@@ -11,8 +11,44 @@ from . import parser
 _use_new_api()
 
 
+def resolve_path(path, directory=".", auto_unzip=True, silent=False):
+    """
+    Resolve the passed path into a local path. This will automatically
+    download the files associated with a URL path to local files
+    that are placed into the specified `directory`.
+
+    This returns the full path to the locally resolved file.
+
+    Args:
+        path: The full path that needs resolving. If this is a URL
+              then it will be downloaded (either the original URL,
+              of a bzip2 version if the original doesn't exist).
+              If this is a PDB or alphafold code, then the corresponding
+              PDB or alphafold structure will be downloaded.
+
+        directory: The full path to the directory you want any downloaded
+                   files to be downloaded into.
+
+        auto_unzip: Automatically unzip any compressed files after download
+                    (or if they are local). Note that the original
+                    zipped file is not removed.
+
+        silent: Silence any output printed to the screen when resolving
+                the path.
+
+    Returns:
+        The list of filenames of all the files that are downloaded / resolved
+    """
+    from .._load import _resolve_path
+
+    return _resolve_path(
+        path=path, directory=directory, auto_unzip=auto_unzip, silent=silent
+    )
+
+
 def get_coords_array(mol, units=None, map=None):
-    """Return the coordinates of the passed molecule view as a
+    """
+    Return the coordinates of the passed molecule view as a
     numpy array of shape (natoms,3). Specify the length
     units to use, and optionally pass in a map to find
     the coordinates property

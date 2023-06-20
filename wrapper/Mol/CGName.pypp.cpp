@@ -107,6 +107,7 @@ void register_CGName_class(){
                 , "" );
         
         }
+        CGName_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGName_exposer.def( bp::self != bp::self );
         { //::SireMol::CGName::operator=
         

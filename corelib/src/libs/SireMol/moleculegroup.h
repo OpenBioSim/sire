@@ -138,8 +138,8 @@ namespace SireMol
 
         MoleculeGroup &operator=(const MoleculeGroup &other);
 
-        virtual bool operator==(const MoleculeGroup &other) const;
-        virtual bool operator!=(const MoleculeGroup &other) const;
+        bool operator==(const MoleculeGroup &other) const;
+        bool operator!=(const MoleculeGroup &other) const;
 
         const ViewsOfMol &operator[](MolNum molnum) const;
         const ViewsOfMol &operator[](MolIdx molidx) const;

@@ -73,6 +73,7 @@ void register_ChainResID_class(){
         
         }
         ChainResID_exposer.def( bp::self != bp::self );
+        ChainResID_exposer.def( bp::self != bp::other< SireID::ID >() );
         ChainResID_exposer.def( bp::self == bp::self );
         ChainResID_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::ChainResID::toString

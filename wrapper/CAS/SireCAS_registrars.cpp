@@ -3,8 +3,6 @@
 
 #include "SireCAS_registrars.h"
 
-
-
 #include "abs.h"
 #include "complexvalues.h"
 #include "conditional.h"

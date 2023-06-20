@@ -75,6 +75,8 @@ namespace SireMol
 
         Bead operator[](BeadIdx beadidx) const;
 
+        using MoleculeView::operator[];
+
         Bead at(BeadIdx beadidx) const;
 
         Bead bead(BeadIdx beadidx) const;

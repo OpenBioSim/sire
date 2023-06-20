@@ -62,9 +62,9 @@ namespace SireBase
 
         virtual ~Range();
 
-        static RangePtr create(qint64 i);
-        static RangePtr create(qint64 start, qint64 end);
-        static RangePtr create(qint64 start, qint64 end, qint64 increment);
+        static RangePtr construct(qint64 i);
+        static RangePtr construct(qint64 start, qint64 end);
+        static RangePtr construct(qint64 start, qint64 end, qint64 increment);
 
         virtual Range *clone() const = 0;
 

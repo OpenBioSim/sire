@@ -105,6 +105,7 @@ void register_MolName_class(){
                 , "" );
         
         }
+        MolName_exposer.def( bp::self != bp::other< SireID::ID >() );
         MolName_exposer.def( bp::self != bp::self );
         { //::SireMol::MolName::operator=
         

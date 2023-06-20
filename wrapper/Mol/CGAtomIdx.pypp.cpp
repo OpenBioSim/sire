@@ -106,6 +106,7 @@ void register_CGAtomIdx_class(){
                 , "" );
         
         }
+        CGAtomIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGAtomIdx_exposer.def( bp::self != bp::self );
         { //::SireMol::CGAtomIdx::operator=
         

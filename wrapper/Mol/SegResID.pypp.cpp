@@ -69,6 +69,7 @@ void register_SegResID_class(){
                 , "" );
         
         }
+        SegResID_exposer.def( bp::self != bp::other< SireID::ID >() );
         SegResID_exposer.def( bp::self != bp::self );
         SegResID_exposer.def( bp::self == bp::other< SireID::ID >() );
         SegResID_exposer.def( bp::self == bp::self );

@@ -241,6 +241,17 @@ MoleculeData::MoleculeData(const MoleculeView &molview) : RefCountData()
     SireBase::assert_true(vrsns.get() != 0, CODELOC);
 }
 
+/** Construct a new molecule called 'molname' with the passed molecule info*/
+MoleculeData::MoleculeData(const QString &name,
+                           const MoleculeInfo &info)
+    : RefCountData(), molinfo(info), molname(name.simplified())
+{
+    if (molinfo.read().isEmpty() == 0 and name.isEmpty())
+        return;
+
+    this->renumber();
+}
+
 SharedDataPointer<MoleculeData> MoleculeData::null()
 {
     auto n = SharedDataPointer<MoleculeData>(create_shared_null<MoleculeData>());

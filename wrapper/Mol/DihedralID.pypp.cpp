@@ -156,6 +156,7 @@ void register_DihedralID_class(){
                 , "Return the mirror of this DihedralID - i.e. if this is\nDihedralID(atom0, atom1, atom2, atom3), this returns\nDihedralID(atom3, atom2, atom1, atom0).\nThis is useful if you know that DihedralID(atom0,atom1,atom2,atom3) equals\n" );
         
         }
+        DihedralID_exposer.def( bp::self != bp::other< SireID::ID >() );
         DihedralID_exposer.def( bp::self != bp::self );
         { //::SireMol::DihedralID::operator=
         

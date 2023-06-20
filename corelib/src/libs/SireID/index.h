@@ -119,6 +119,8 @@ namespace SireID
         bool operator==(const T &other) const;
         bool operator==(const ID &other) const;
         bool operator==(qint32 val) const;
+
+        bool operator!=(const ID &other) const;
         bool operator!=(const T &other) const;
         bool operator!=(qint32 val) const;
 
@@ -143,6 +145,9 @@ namespace SireID
         ~Index();
 
         static const char *typeName();
+
+        using Index_T_<Index>::operator==;
+        using Index_T_<Index>::operator!=;
 
         Index *clone() const;
 
@@ -204,6 +209,13 @@ namespace SireID
     SIRE_OUTOFLINE_TEMPLATE bool Index_T_<T>::operator==(const ID &other) const
     {
         return ID::compare<T>(static_cast<const T &>(*this), other);
+    }
+
+    /** Comparison operator */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Index_T_<T>::operator!=(const ID &other) const
+    {
+        return not this->operator==(other);
     }
 
     /** Comparison operator */

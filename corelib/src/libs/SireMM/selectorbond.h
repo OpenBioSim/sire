@@ -112,6 +112,8 @@ namespace SireMM
         SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
         SireMol::MolViewPtr operator[](const SireMol::BondID &bond) const;
 
+        using MoleculeView::operator[];
+
         Bond operator()(int i) const;
         SelectorBond operator()(int i, int j) const;
         SelectorBond operator()(const SireBase::Slice &slice) const;

@@ -69,6 +69,7 @@ void register_CGChainID_class(){
                 , "" );
         
         }
+        CGChainID_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGChainID_exposer.def( bp::self != bp::self );
         CGChainID_exposer.def( bp::self == bp::other< SireID::ID >() );
         CGChainID_exposer.def( bp::self == bp::self );

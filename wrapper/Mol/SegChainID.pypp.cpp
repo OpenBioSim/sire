@@ -69,6 +69,7 @@ void register_SegChainID_class(){
                 , "" );
         
         }
+        SegChainID_exposer.def( bp::self != bp::other< SireID::ID >() );
         SegChainID_exposer.def( bp::self != bp::self );
         SegChainID_exposer.def( bp::self == bp::other< SireID::ID >() );
         SegChainID_exposer.def( bp::self == bp::self );

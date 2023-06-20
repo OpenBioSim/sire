@@ -93,6 +93,11 @@ namespace SireMol
 
         bool operator!=(const MolWithResID &other) const;
 
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
+
         const ResID &resID() const;
 
         QList<MolNum> map(const Molecules &molecules) const;

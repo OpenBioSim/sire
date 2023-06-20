@@ -539,21 +539,19 @@ static void setAtomParameters(AtomEditor &editatom, MolEditor &editmol, const QL
     int inbparams = nb_parm_index[pointers[NTYPES] * (itype - 1) + itype - 1];
     double iAcoef = lj_a_coeff[inbparams - 1];
     double iBcoef = lj_b_coeff[inbparams - 1];
-    double sigma, epsilon, rstar;
+    double sigma, epsilon;
 
     // is there a SMALL?
     if (iAcoef < 1E-10)
     {
         sigma = 0.0;
         epsilon = 0.0;
-        rstar = 0.0;
     }
     else
     {
         // and convert lj_a_coeff & lj_b_coeff into angstroms and kcal/mol-1
         sigma = std::pow(iAcoef / iBcoef, 1 / 6.);
         epsilon = pow_2(iBcoef) / (4 * iAcoef);
-        rstar = (sigma / 2.) * std::pow(2.0, 1 / 6.);
     }
 
     // qDebug() << " Atom " << atomNumber - 1 << " itype " << itype << " inbparams "

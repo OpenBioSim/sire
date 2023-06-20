@@ -62,6 +62,7 @@ void register_Molecule_class(){
         bp::scope Molecule_scope( Molecule_exposer );
         Molecule_exposer.def( bp::init< QString const & >(( bp::arg("molname") ), "Construct a new Molecule, called molname") );
         Molecule_exposer.def( bp::init< SireMol::MoleculeData const & >(( bp::arg("moldata") ), "Construct from the passed MoleculeData") );
+        Molecule_exposer.def( bp::init< QString const &, SireMol::MoleculeInfo const & >(( bp::arg("molname"), bp::arg("molinfo") ), "Construct a new molecule called molname with the passed info layout") );
         Molecule_exposer.def( bp::init< SireMol::Molecule const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::Molecule::assertContainsMetadata
         

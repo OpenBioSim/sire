@@ -69,6 +69,7 @@ void register_SegCGID_class(){
                 , "" );
         
         }
+        SegCGID_exposer.def( bp::self != bp::other< SireID::ID >() );
         SegCGID_exposer.def( bp::self != bp::self );
         SegCGID_exposer.def( bp::self == bp::other< SireID::ID >() );
         SegCGID_exposer.def( bp::self == bp::self );

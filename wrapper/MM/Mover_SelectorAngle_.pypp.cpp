@@ -253,6 +253,34 @@ void register_Mover_SelectorAngle__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMM::SelectorAngle >::makeWhole
+        
+            typedef SireMol::Mover< SireMM::SelectorAngle > exported_class_t;
+            typedef ::SireMol::Mover< SireMM::SelectorAngle > & ( ::SireMol::Mover< SireMM::SelectorAngle >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMM::SelectorAngle >::makeWhole );
+            
+            Mover_SelectorAngle__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMM::SelectorAngle >::makeWhole
+        
+            typedef SireMol::Mover< SireMM::SelectorAngle > exported_class_t;
+            typedef ::SireMol::Mover< SireMM::SelectorAngle > & ( ::SireMol::Mover< SireMM::SelectorAngle >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMM::SelectorAngle >::makeWhole );
+            
+            Mover_SelectorAngle__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMM::SelectorAngle >::mapInto
         
             typedef SireMol::Mover< SireMM::SelectorAngle > exported_class_t;

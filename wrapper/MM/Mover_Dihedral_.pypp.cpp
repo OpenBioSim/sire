@@ -253,6 +253,34 @@ void register_Mover_Dihedral__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMM::Dihedral >::makeWhole
+        
+            typedef SireMol::Mover< SireMM::Dihedral > exported_class_t;
+            typedef ::SireMol::Mover< SireMM::Dihedral > & ( ::SireMol::Mover< SireMM::Dihedral >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMM::Dihedral >::makeWhole );
+            
+            Mover_Dihedral__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMM::Dihedral >::makeWhole
+        
+            typedef SireMol::Mover< SireMM::Dihedral > exported_class_t;
+            typedef ::SireMol::Mover< SireMM::Dihedral > & ( ::SireMol::Mover< SireMM::Dihedral >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMM::Dihedral >::makeWhole );
+            
+            Mover_Dihedral__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMM::Dihedral >::mapInto
         
             typedef SireMol::Mover< SireMM::Dihedral > exported_class_t;

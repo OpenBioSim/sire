@@ -78,7 +78,11 @@ namespace SireMol
         ResIdentifier &operator=(const ResID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const ResIdentifier &other) const;
         bool operator!=(const ResIdentifier &other) const;
@@ -86,6 +90,7 @@ namespace SireMol
         bool operator==(const ResID &other) const;
         bool operator!=(const ResID &other) const;
 
+        using ResID::map;
         QList<ResIdx> map(const MolInfo &molinfo) const;
 
     private:

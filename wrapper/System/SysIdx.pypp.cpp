@@ -76,6 +76,7 @@ void register_SysIdx_class(){
                 , "" );
         
         }
+        SysIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireSystem::SysIdx::operator=
         
             typedef ::SireSystem::SysIdx & ( ::SireSystem::SysIdx::*assign_function_type)( ::SireSystem::SysIdx const & ) ;

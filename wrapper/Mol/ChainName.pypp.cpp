@@ -107,6 +107,7 @@ void register_ChainName_class(){
                 , "" );
         
         }
+        ChainName_exposer.def( bp::self != bp::other< SireID::ID >() );
         ChainName_exposer.def( bp::self != bp::self );
         { //::SireMol::ChainName::operator=
         

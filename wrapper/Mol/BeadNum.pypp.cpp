@@ -62,6 +62,7 @@ void register_BeadNum_class(){
         
         }
         BeadNum_exposer.def( bp::self != bp::self );
+        BeadNum_exposer.def( bp::self != bp::other< SireID::ID >() );
         BeadNum_exposer.def( bp::self < bp::self );
         BeadNum_exposer.def( bp::self <= bp::self );
         { //::SireMol::BeadNum::operator=

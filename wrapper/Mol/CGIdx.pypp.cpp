@@ -80,6 +80,7 @@ void register_CGIdx_class(){
                 , "" );
         
         }
+        CGIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGIdx_exposer.def( bp::self + bp::other< SireID::Index >() );
         { //::SireMol::CGIdx::operator=
         

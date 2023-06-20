@@ -80,7 +80,11 @@ namespace SireMol
         ChainIdentifier &operator=(const ChainID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const ChainIdentifier &other) const;
         bool operator!=(const ChainIdentifier &other) const;
@@ -88,6 +92,7 @@ namespace SireMol
         bool operator==(const ChainID &other) const;
         bool operator!=(const ChainID &other) const;
 
+        using ChainID::map;
         QList<ChainIdx> map(const MolInfo &molinfo) const;
 
     private:

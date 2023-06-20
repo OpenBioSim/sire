@@ -80,6 +80,7 @@ void register_FFIdx_class(){
                 , "" );
         
         }
+        FFIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireFF::FFIdx::operator=
         
             typedef ::SireFF::FFIdx & ( ::SireFF::FFIdx::*assign_function_type)( ::SireFF::FFIdx const & ) ;

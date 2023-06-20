@@ -40,43 +40,43 @@ void register_Range_class(){
                 , "" );
         
         }
-        { //::SireBase::Range::create
+        { //::SireBase::Range::construct
         
-            typedef ::SireBase::RangePtr ( *create_function_type )( ::qint64 );
-            create_function_type create_function_value( &::SireBase::Range::create );
+            typedef ::SireBase::RangePtr ( *construct_function_type )( ::qint64 );
+            construct_function_type construct_function_value( &::SireBase::Range::construct );
             
             Range_exposer.def( 
-                "create"
-                , create_function_value
+                "construct"
+                , construct_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
-                , "Return the range that represents the single value i" );
+                , "" );
         
         }
-        { //::SireBase::Range::create
+        { //::SireBase::Range::construct
         
-            typedef ::SireBase::RangePtr ( *create_function_type )( ::qint64,::qint64 );
-            create_function_type create_function_value( &::SireBase::Range::create );
+            typedef ::SireBase::RangePtr ( *construct_function_type )( ::qint64,::qint64 );
+            construct_function_type construct_function_value( &::SireBase::Range::construct );
             
             Range_exposer.def( 
-                "create"
-                , create_function_value
+                "construct"
+                , construct_function_value
                 , ( bp::arg("start"), bp::arg("end") )
                 , bp::release_gil_policy()
-                , "Return the range that represents the range from [start,end)" );
+                , "" );
         
         }
-        { //::SireBase::Range::create
+        { //::SireBase::Range::construct
         
-            typedef ::SireBase::RangePtr ( *create_function_type )( ::qint64,::qint64,::qint64 );
-            create_function_type create_function_value( &::SireBase::Range::create );
+            typedef ::SireBase::RangePtr ( *construct_function_type )( ::qint64,::qint64,::qint64 );
+            construct_function_type construct_function_value( &::SireBase::Range::construct );
             
             Range_exposer.def( 
-                "create"
-                , create_function_value
+                "construct"
+                , construct_function_value
                 , ( bp::arg("start"), bp::arg("end"), bp::arg("increment") )
                 , bp::release_gil_policy()
-                , "Return the range that represents the range from [start,end,increment)" );
+                , "" );
         
         }
         { //::SireBase::Range::hasNext
@@ -128,7 +128,7 @@ void register_Range_class(){
                 , "" );
         
         }
-        Range_exposer.staticmethod( "create" );
+        Range_exposer.staticmethod( "construct" );
         Range_exposer.staticmethod( "null" );
         Range_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::Range >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );

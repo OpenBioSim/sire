@@ -107,6 +107,7 @@ void register_SegName_class(){
                 , "" );
         
         }
+        SegName_exposer.def( bp::self != bp::other< SireID::ID >() );
         SegName_exposer.def( bp::self != bp::self );
         { //::SireMol::SegName::operator=
         

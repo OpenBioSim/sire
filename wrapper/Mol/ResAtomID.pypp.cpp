@@ -82,6 +82,7 @@ void register_ResAtomID_class(){
         
         }
         ResAtomID_exposer.def( bp::self != bp::self );
+        ResAtomID_exposer.def( bp::self != bp::other< SireID::ID >() );
         ResAtomID_exposer.def( bp::self == bp::self );
         ResAtomID_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::GroupAtomID< SireMol::ResID, SireMol::AtomID >::toString

@@ -91,7 +91,11 @@ namespace SireMol
         MolAtomID &operator=(const MolAtomID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const MolAtomID &other) const;
         bool operator!=(const MolAtomID &other) const;

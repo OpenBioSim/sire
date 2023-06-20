@@ -104,7 +104,7 @@ def _get_gromacs_dir():
         return None
 
 
-def _resolve_path(path, directory, silent=False):
+def _resolve_path(path, directory=".", auto_unzip=True, silent=False):
     import os
 
     if hasattr(path, "strpath"):
@@ -135,17 +135,20 @@ def _resolve_path(path, directory, silent=False):
                     print(f"Using cached unzipped file '{unzipped}'...")
                 return [os.path.abspath(unzipped)]
 
-            if not silent:
-                print(f"Unzipping '{path}'...")
+            if auto_unzip:
+                if not silent:
+                    print(f"Unzipping '{path}'...")
 
-            import gzip
-            import shutil
+                import gzip
+                import shutil
 
-            with gzip.open(path, "rb") as f_in:
-                with open(unzipped, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+                with gzip.open(path, "rb") as f_in:
+                    with open(unzipped, "wb") as f_out:
+                        shutil.copyfileobj(f_in, f_out)
 
-            return [os.path.abspath(unzipped)]
+                return [os.path.abspath(unzipped)]
+            else:
+                return [os.path.abspath(path)]
 
         elif path.endswith(".bz2"):
             # unzip the file first
@@ -163,17 +166,20 @@ def _resolve_path(path, directory, silent=False):
                     print(f"Using cached unzipped file '{unzipped}'...")
                 return [os.path.abspath(unzipped)]
 
-            if not silent:
-                print(f"Unzipping '{path}'...")
+            if auto_unzip:
+                if not silent:
+                    print(f"Unzipping '{path}'...")
 
-            import bz2
-            import shutil
+                import bz2
+                import shutil
 
-            with bz2.open(path, "rb") as f_in:
-                with open(unzipped, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
+                with bz2.open(path, "rb") as f_in:
+                    with open(unzipped, "wb") as f_out:
+                        shutil.copyfileobj(f_in, f_out)
 
-            return [os.path.abspath(unzipped)]
+                return [os.path.abspath(unzipped)]
+            else:
+                return [os.path.abspath(path)]
 
         else:
             return [os.path.abspath(path)]

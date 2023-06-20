@@ -121,6 +121,8 @@ namespace SireMM
         SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
         SireMol::MolViewPtr operator[](const SireMol::AngleID &angle) const;
 
+        using MoleculeView::operator[];
+
         Angle operator()(int i) const;
         SelectorAngle operator()(int i, int j) const;
         SelectorAngle operator()(const SireBase::Slice &slice) const;

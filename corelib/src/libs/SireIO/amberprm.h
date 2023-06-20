@@ -183,7 +183,7 @@ namespace SireIO
 
         SireMM::AmberParams getAmberParams(int imol, const SireMol::MoleculeInfoData &molinfo) const;
 
-        SireMol::MolStructureEditor getMolStructure(int molidx, const SireBase::PropertyName &cutting) const;
+        SireMol::MolEditor getMolStructure(int molidx, const SireBase::PropertyName &cutting) const;
 
         SireMol::MolEditor getMoleculeEditor(int molidx, const PropertyMap &map) const;
 

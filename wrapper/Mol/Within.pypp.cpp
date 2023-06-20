@@ -98,6 +98,7 @@ void register_Within_class(){
                 , "Map this ID to the list of atomidxs of specified atoms\nin the passed molecule\nThrow: SireMol::missing_atom\nThrow: SireError::invalid_index\n" );
         
         }
+        Within_exposer.def( bp::self != bp::other< SireID::ID >() );
         Within_exposer.def( bp::self != bp::self );
         { //::SireMol::Within::operator=
         

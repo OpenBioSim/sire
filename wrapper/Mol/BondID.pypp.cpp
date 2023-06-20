@@ -167,6 +167,7 @@ void register_BondID_class(){
                 , "Return the mirror of this BondID - i.e. if this is\nBond(atom0, atom1), this returns Bond(atom1, atom0).\nThis is useful if you know that Bond(atom0,atom1) equals\n" );
         
         }
+        BondID_exposer.def( bp::self != bp::other< SireID::ID >() );
         BondID_exposer.def( bp::self != bp::self );
         { //::SireMol::BondID::operator=
         

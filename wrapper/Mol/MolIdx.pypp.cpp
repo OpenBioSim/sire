@@ -116,6 +116,7 @@ void register_MolIdx_class(){
                 , "" );
         
         }
+        MolIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::MolIdx::operator=
         
             typedef ::SireMol::MolIdx & ( ::SireMol::MolIdx::*assign_function_type)( ::SireMol::MolIdx const & ) ;

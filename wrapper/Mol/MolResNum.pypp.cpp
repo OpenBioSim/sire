@@ -96,6 +96,7 @@ void register_MolResNum_class(){
                 , "Return the MolNum part of this match" );
         
         }
+        MolResNum_exposer.def( bp::self != bp::other< SireID::ID >() );
         MolResNum_exposer.def( bp::self != bp::self );
         { //::SireMol::MolResNum::operator=
         
