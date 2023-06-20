@@ -17,7 +17,6 @@ def box():
         90.0000000 * sr.units.degrees,
     )
 
-
 def test_reduction_vectors(box):
     """
     Test that repeat lattice reductions give consistent box dimensions
