@@ -17,7 +17,7 @@ def box():
         90.0000000 * sr.units.degrees,
     )
 
-@pytest.mark.xfail
+
 def test_reduction_vectors(box):
     """
     Test that repeat lattice reductions give consistent box dimensions
@@ -39,7 +39,6 @@ def test_reduction_vectors(box):
         assert beta == box.beta()
         assert gamma == box.gamma()
 
-@pytest.mark.xfail
 def test_reduction_angles(box):
     """
     Test that repeat lattice reductions give consistent box dimensions
