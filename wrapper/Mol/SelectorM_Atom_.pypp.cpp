@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 #include "segid.h"
 
+#include "selector.hpp"
+
 #include "selectorm.hpp"
 
 #include "selectormol.h"
@@ -536,6 +538,33 @@ void register_SelectorM_Atom__class(){
                 "cutGroups"
                 , cutGroups_function_value
                 , ( bp::arg("cgid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::deleteAllFrames
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Atom >::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorM< SireMol::Atom >::deleteAllFrames );
+            
+            SelectorM_Atom__exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::deleteAllFrames
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Atom >::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::SelectorM< SireMol::Atom >::deleteAllFrames );
+            
+            SelectorM_Atom__exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
                 , "" );
         
         }

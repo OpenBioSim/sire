@@ -39,85 +39,15 @@ SIRE_BEGIN_HEADER
 namespace SireIO
 {
     class DCD;
-
-    namespace detail
-    {
-        class DCDFile;
-    }
-
-} // namespace SireIO
+}
 
 SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::DCD &);
 SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::DCD &);
 
+class DCDFile;
+
 namespace SireIO
 {
-
-    class FortranFile;
-
-    namespace detail
-    {
-        /** This class provides a low-level interface to reading and writing
-         *  a DCD file. It is designed to be used only with the
-         *  DCD class
-         */
-        class DCDFile
-        {
-        public:
-            DCDFile();
-            DCDFile(const QString &filename);
-            ~DCDFile();
-
-            void readHeader(FortranFile &file);
-
-            SireVol::SpacePtr readSpace(FortranFile &file, int frame) const;
-            QVector<SireMaths::Vector> readCoordinates(FortranFile &file, int frame) const;
-
-            SireMol::Frame readFrame(FortranFile &file, int frame) const;
-
-            void setTitle(QString title);
-            QString getTitle() const;
-
-            double getTimeStep() const;
-            qint64 getFrameStart() const;
-            qint64 getFrameDelta() const;
-
-            double getCurrentTime() const;
-            void setCurrentTime(double time);
-
-            void setSpace(const SireVol::Space &space);
-            const SireVol::Space &getSpace() const;
-
-            qint64 nFrames() const;
-            qint64 nAtoms() const;
-
-            double getTimeAtFrame(int frame) const;
-
-        private:
-            QStringList title;
-
-            QVector<qint32> fixed_atoms;
-            QVector<SireMaths::Vector> first_frame;
-
-            double timestep;
-
-            SireVol::SpacePtr spc;
-
-            qint64 istart;
-            qint64 nsavc;
-            qint64 nfixed;
-
-            qint64 natoms;
-            qint64 nframes;
-
-            qint64 first_frame_line;
-
-            bool CHARMM_FORMAT;
-            bool HAS_EXTRA_BLOCK;
-            bool HAS_FOUR_DIMS;
-        };
-    } // namespace detail
-
     /** This class represents a DCD file reader.
 
         The format is described here
@@ -129,8 +59,8 @@ namespace SireIO
     class SIREIO_EXPORT DCD : public SireBase::ConcreteProperty<DCD, MoleculeParser>
     {
 
-        friend QDataStream & ::operator<<(QDataStream &, const DCD &);
-        friend QDataStream & ::operator>>(QDataStream &, DCD &);
+        friend SIREIO_EXPORT QDataStream & ::operator<<(QDataStream &, const DCD &);
+        friend SIREIO_EXPORT QDataStream & ::operator>>(QDataStream &, DCD &);
 
     public:
         DCD();
@@ -151,6 +81,8 @@ namespace SireIO
 
         const char *what() const;
 
+        DCD operator[](int i) const;
+
         MoleculeParserPtr construct(const QString &filename, const PropertyMap &map) const;
 
         MoleculeParserPtr construct(const QStringList &lines, const PropertyMap &map) const;
@@ -159,47 +91,46 @@ namespace SireIO
 
         QString toString() const;
 
-        bool isTextFile() const;
-
         QString formatName() const;
         QString formatDescription() const;
         QStringList formatSuffix() const;
 
         static DCD parse(const QString &filename);
 
-        int nAtoms() const;
-
         bool isFrame() const;
 
         int nFrames() const;
+        int count() const;
+        int size() const;
+
         SireMol::Frame getFrame(int i) const;
 
-        QString title() const;
+        int nAtoms() const;
 
-        QVector<SireMaths::Vector> coordinates() const;
+        bool isTextFile() const;
 
-        const SireVol::Space &space() const;
-
-        SireUnits::Dimension::Time time() const;
-
-        QStringList warnings() const;
-
-        void writeToFile(const QString &filename) const;
+        QStringList writeToFile(const QString &filename) const;
 
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
 
     private:
-        void parse(const QString &filename, const PropertyMap &map);
+        void parse();
 
-        /** The coordinate data */
-        QVector<SireMaths::Vector> coords;
-
-        /** Handle to read in the DCD data */
-        detail::DCDFile dcd;
+        /** The current frame */
+        SireMol::Frame current_frame;
 
         /** Any warnings that were raised when reading the file */
         QStringList parse_warnings;
+
+        /** The number of frames in this file */
+        qint64 nframes;
+
+        /** The current frame index */
+        qint64 frame_idx;
+
+        /** Pointer to the underlying file */
+        std::shared_ptr<DCDFile> f;
     };
 
 } // namespace SireIO

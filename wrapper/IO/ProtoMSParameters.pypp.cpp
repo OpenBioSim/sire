@@ -266,7 +266,7 @@ void register_ProtoMSParameters_class(){
                 "ureyBradley"
                 , ureyBradley_function_value
                 , bp::return_value_policy< bp::copy_const_reference >()
-                , "Return the name of the property that will contain the\nUrey-Bradley parameters\n\ndefault == Urey-Bradley\n" );
+                , "Return the name of the property that will contain the\nUrey-Bradley parameters\n\ndefault == urey-bradley\n" );
         
         }
         { //::SireIO::ProtoMSParameters::zmatrix

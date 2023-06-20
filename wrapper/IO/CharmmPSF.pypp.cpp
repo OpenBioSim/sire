@@ -438,6 +438,19 @@ void register_CharmmPSF_class(){
                 , "Return the C++ name for this class" );
         
         }
+        { //::SireIO::CharmmPSF::writeToFile
+        
+            typedef ::QStringList ( ::SireIO::CharmmPSF::*writeToFile_function_type)( ::QString const & ) const;
+            writeToFile_function_type writeToFile_function_value( &::SireIO::CharmmPSF::writeToFile );
+            
+            CharmmPSF_exposer.def( 
+                "writeToFile"
+                , writeToFile_function_value
+                , ( bp::arg("filename") )
+                , bp::release_gil_policy()
+                , "Write the parsed data back to the file called filename. This will\noverwrite the file if it exists already, so be careful" );
+        
+        }
         CharmmPSF_exposer.staticmethod( "typeName" );
         CharmmPSF_exposer.def( "__copy__", &__copy__);
         CharmmPSF_exposer.def( "__deepcopy__", &__copy__);

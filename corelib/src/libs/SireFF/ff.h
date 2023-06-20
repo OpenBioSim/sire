@@ -80,6 +80,7 @@ namespace SireFF
     using SireMol::ViewsOfMol;
 
     class NullFF;
+    class ForceFields;
 
     namespace detail
     {
@@ -132,6 +133,7 @@ namespace SireFF
 
         friend class FFMolGroup;  // so can call the group_???() functions
         friend class FFComponent; // so can call setComponent and changeComponent
+        friend class ForceFields;
 
     public:
         virtual ~FF();

@@ -310,6 +310,19 @@ bool CombinedSpace::isCartesian() const
     }
 }
 
+Matrix CombinedSpace::boxMatrix() const
+{
+    if (spces.isEmpty())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The empty combined space has no box matrix!"),
+                                            CODELOC);
+
+    else if (spces.count() != 1)
+        this->assertSameSpace("Cannot get the box matrix", CODELOC);
+
+    return spces.at(0).read().boxMatrix();
+}
+
 /** Returned the combined (summed) volume of all of the spaces */
 SireUnits::Dimension::Volume CombinedSpace::volume() const
 {

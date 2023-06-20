@@ -26,6 +26,7 @@
 \*********************************************/
 
 #ifndef SIRESEARCH_GRAMMAR_H
+#define SIRESEARCH_GRAMMAR_H
 
 using qi::_1;
 using qi::double_;

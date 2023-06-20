@@ -3,8 +3,6 @@
 
 #include "SireID_registrars.h"
 
-
-
 #include "identifier.h"
 #include "index.h"
 

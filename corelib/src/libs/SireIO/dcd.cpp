@@ -55,6 +55,8 @@
 #include "SireBase/stringproperty.h"
 #include "SireBase/timeproperty.h"
 #include "SireBase/unittest.h"
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
 
 #include "SireIO/errors.h"
 
@@ -81,104 +83,136 @@ using namespace SireStream;
 //// Thanks to the MDAnalysis parser
 //// (https://github.com/MDAnalysis/mdanalysis/blob/develop/package/MDAnalysis/lib/formats/include/readdcd.h)
 //// which really helped with the reverse engineering of the DCD fileformat
+//// ESPECIALLY(!) the weird handling of the periodic box info!
 
-static const RegisterMetaType<DCD> r_dcd;
-const RegisterParser<DCD> register_dcd;
-
-QDataStream &operator<<(QDataStream &ds, const DCD &dcd)
+/** This class provides a low-level interface to reading and writing
+ *  a DCD file. It is designed to be used only with the
+ *  DCD class
+ */
+class DCDFile
 {
-    writeHeader(ds, r_dcd, 1);
+public:
+    DCDFile();
+    DCDFile(const QString &filename);
+    ~DCDFile();
 
-    SharedDataStream sds(ds);
+    bool open(QIODevice::OpenMode mode = QIODevice::ReadOnly);
 
-    sds << dcd.coords << dcd.parse_warnings << static_cast<const MoleculeParser &>(dcd);
+    SireMol::Frame readFrame(int i, bool use_parallel = true) const;
 
-    return ds;
+    void writeHeader(int nframes, int natoms, bool has_periodic_space);
+    void writeFrame(const SireMol::Frame &frame, bool use_parallel = true);
+
+    int nAtoms() const;
+    int nFrames() const;
+
+    QString getTitle() const;
+    void setTitle(QString title);
+
+    SireUnits::Dimension::Time getTimeStep() const;
+    void setTimeStep(const SireUnits::Dimension::Time &timestep);
+
+    void close();
+
+private:
+    void readHeader();
+
+    SpacePtr readSpace(int frame) const;
+    QVector<Vector> readCoordinates(int frame) const;
+    SireUnits::Dimension::Time readTime(int frame) const;
+
+    void _lkr_reset();
+    void _lkr_reindexFrames();
+    void _lkr_readFrameIntoBuffer(int i);
+    void _lkr_writeBufferToFile();
+
+    /** The current frame that has been read into the buffer */
+    FortranFile f;
+
+    QString filename;
+
+    QStringList title;
+
+    QVector<qint32> fixed_atoms;
+
+    /** The number of atoms in the frame - we assume all
+     *  frames have the same number of atoms
+     */
+    qint64 natoms;
+
+    /** The number of frames in the file */
+    qint64 nframes;
+
+    double timestep;
+
+    SireVol::SpacePtr spc;
+
+    qint64 istart;
+    qint64 nsavc;
+    qint64 nfixed;
+
+    qint64 first_frame_line;
+
+    QVector<Vector> first_frame;
+
+    bool CHARMM_FORMAT;
+    bool HAS_EXTRA_BLOCK;
+    bool HAS_FOUR_DIMS;
+
+    bool have_written_header;
+};
+
+//// DCDFile
+
+DCDFile::DCDFile()
+    : natoms(0), nframes(0), timestep(0), istart(0), nsavc(0), nfixed(0), first_frame_line(0), CHARMM_FORMAT(false),
+      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false), have_written_header(false)
+{
 }
 
-QDataStream &operator>>(QDataStream &ds, DCD &dcd)
+DCDFile::DCDFile(const QString &fname)
+    : filename(fname), natoms(0), nframes(0), timestep(0), istart(0), nsavc(0), nfixed(0), first_frame_line(0), CHARMM_FORMAT(false),
+      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false), have_written_header(false)
 {
-    VersionID v = readHeader(ds, r_dcd);
+}
 
-    if (v == 1)
+DCDFile::~DCDFile()
+{
+}
+
+bool DCDFile::open(QIODevice::OpenMode mode)
+{
+    QString fname = this->filename;
+
+    this->close();
+
+    this->filename = fname;
+
+    f = FortranFile(this->filename, mode);
+
+    if (mode == QIODevice::ReadOnly)
     {
-        SharedDataStream sds(ds);
-
-        sds >> dcd.coords >> dcd.parse_warnings >> static_cast<MoleculeParser &>(dcd);
-
-        try
-        {
-            dcd.dcd = DCDFile();
-            FortranFile file(dcd.filename());
-            dcd.dcd.readHeader(file);
-        }
-        catch (SireError::exception &e)
-        {
-            qDebug() << "WARNING: Failed to reload DCD file" << dcd.filename();
-            qDebug() << e.what() << ":" << e.error();
-            dcd.dcd = DCDFile();
-        }
+        this->readHeader();
     }
-    else
-        throw version_error(v, "1", r_dcd, CODELOC);
 
-    return ds;
+    return true;
 }
 
-static Vector cubic_angs(90, 90, 90);
-
-/** Constructor */
-DCD::DCD() : ConcreteProperty<DCD, MoleculeParser>()
+void DCDFile::close()
 {
+    this->operator=(DCDFile());
 }
 
-/** Return the format name that is used to identify this file format within Sire */
-QString DCD::formatName() const
+void DCDFile::readHeader()
 {
-    return "DCD";
-}
+    if (f.nRecords() == 0)
+    {
+        nframes = 0;
+        natoms = 0;
+        return;
+    }
 
-/** Return the suffixes that DCD files will typically use */
-QStringList DCD::formatSuffix() const
-{
-    static const QStringList suffixes = {"dcd"};
-    return suffixes;
-}
-
-/** This is not a text file */
-bool DCD::isTextFile() const
-{
-    return false;
-}
-
-/** Return a description of the file format */
-QString DCD::formatDescription() const
-{
-    return QObject::tr("DCD coordinate/velocity binary trajectory files "
-                       "based on charmm / namd / x-plor format.");
-}
-
-SireIO::detail::DCDFile::DCDFile()
-    : timestep(0), istart(0), nsavc(0), nfixed(0), natoms(0), nframes(0), first_frame_line(0), CHARMM_FORMAT(false),
-      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
-{
-}
-
-SireIO::detail::DCDFile::DCDFile(const QString &filename)
-    : timestep(0), istart(0), nsavc(0), nfixed(0), natoms(0), nframes(0), first_frame_line(0), CHARMM_FORMAT(false),
-      HAS_EXTRA_BLOCK(false), HAS_FOUR_DIMS(false)
-{
-    FortranFile file(filename);
-    this->readHeader(file);
-}
-
-SireIO::detail::DCDFile::~DCDFile()
-{
-}
-
-void SireIO::detail::DCDFile::readHeader(FortranFile &file)
-{
-    auto line = file[0];
+    auto line = f[0];
 
     auto typ = line.readChar(4);
 
@@ -217,7 +251,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
         timestep = line.readFloat64At(40);
     }
 
-    line = file[1];
+    line = f[1];
 
     int ntitle = line.readInt32(1)[0];
 
@@ -229,7 +263,7 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
             title.append(t);
     }
 
-    line = file[2];
+    line = f[2];
 
     natoms = line.readInt32(1)[0];
 
@@ -237,48 +271,13 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
     if (nfixed != 0)
     {
-        line = file[linenum];
+        line = f[linenum];
         linenum += 1;
 
         fixed_atoms = line.readInt32(nfixed);
     }
 
     first_frame_line = linenum;
-
-    // now read in the space
-    spc = this->readSpace(file, 0);
-
-    if (nfixed != 0)
-    {
-        // we have to read in the first set of coordinates, as these
-        // hold the fixed atoms as well as the movable atoms
-        if (CHARMM_FORMAT and HAS_EXTRA_BLOCK)
-        {
-            line = file[linenum];
-            linenum += 1;
-
-            line.readFloat64(6);
-        }
-
-        line = file[linenum];
-        linenum += 1;
-        auto x = line.readFloat32(natoms);
-
-        line = file[linenum];
-        linenum += 1;
-        auto y = line.readFloat32(natoms);
-
-        line = file[linenum];
-        linenum += 1;
-        auto z = line.readFloat32(natoms);
-
-        first_frame = QVector<Vector>(natoms);
-
-        for (int i = 0; i < natoms; ++i)
-        {
-            first_frame[i] = Vector(x[i], y[i], z[i]);
-        }
-    }
 
     // now sanity check the rest of the file
     int num_lines_per_frame = 3;
@@ -295,57 +294,150 @@ void SireIO::detail::DCDFile::readHeader(FortranFile &file)
 
     if (nframes != 0)
     {
-        if (file.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
+        if (f.nRecords() != first_frame_line + (num_lines_per_frame * nframes))
         {
-            throw SireIO::parse_error(QObject::tr("Wrong number of records in the DCD file. Expect to have %1 "
-                                                  "for %2 frames, but actually have %3.")
-                                          .arg(first_frame_line + (num_lines_per_frame * nframes))
-                                          .arg(nframes)
-                                          .arg(file.nRecords()),
-                                      CODELOC);
+            // we need to calculate nframes?
+            qDebug() << QObject::tr("WARNING: Wrong number of records in the DCD file. Expect to have %1 "
+                                    "for %2 frames, but actually have %3.")
+                            .arg(first_frame_line + (num_lines_per_frame * nframes))
+                            .arg(nframes)
+                            .arg(f.nRecords());
+
+            nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
         }
     }
     else
     {
         // we need to calculate nframes
-        nframes = (file.nRecords() - first_frame_line) / num_lines_per_frame;
+        nframes = (f.nRecords() - first_frame_line) / num_lines_per_frame;
+    }
+
+    if (nframes == 0)
+    {
+        // this is an empty file!
+        spc = SpacePtr(new Cartesian());
+        return;
+    }
+
+    // now read in the first frame, in case we have to do any merging
+    // with the fixed atoms - start by reading the space
+    spc = this->readSpace(0);
+
+    if (nfixed != 0)
+    {
+        // we have to read in the first set of coordinates, as these
+        // hold the fixed atoms as well as the movable atoms
+        if (CHARMM_FORMAT and HAS_EXTRA_BLOCK)
+        {
+            line = f[linenum];
+            linenum += 1;
+
+            line.readFloat64(6);
+        }
+
+        line = f[linenum];
+        linenum += 1;
+        auto x = line.readFloat32(natoms);
+
+        line = f[linenum];
+        linenum += 1;
+        auto y = line.readFloat32(natoms);
+
+        line = f[linenum];
+        linenum += 1;
+        auto z = line.readFloat32(natoms);
+
+        first_frame = QVector<Vector>(natoms);
+
+        for (int i = 0; i < natoms; ++i)
+        {
+            first_frame[i] = Vector(x[i], y[i], z[i]);
+        }
     }
 }
 
-double SireIO::detail::DCDFile::getTimeAtFrame(int frame) const
+void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 {
-    return (istart * timestep) + (frame * timestep);
-}
+    FortranRecord line(f.isLittleEndian());
 
-double SireIO::detail::DCDFile::getCurrentTime() const
-{
-    return getTimeAtFrame(0);
-}
+    // bytes 0 to 3
+    line.writeChar("CORD", 4);
 
-void SireIO::detail::DCDFile::setCurrentTime(double time)
-{
-    if (timestep != 0)
+    // first values are 9 integers, initialised to zero
+    QVector<qint32> ints(9, 0);
+
+    // every value is zero, as we don't know what they are
+    ints[0] = nframes;
+    // ints[1] = 0; // index of the first frame - we don't know this either...
+    // ints[2] = 0; // nsavc - should be zero?
+    // ints[8] = 0; // nfixed is zero - everything will be treated as moving
+
+    // bytes 4 to 39
+    line.writeInt32(ints, 9);
+
+    // bytes 40 to 43
+    line.writeFloat32(timestep);
+
+    // bytes 44 to 47
+    if (has_periodic_space)
     {
-        istart = int(time / timestep);
+        HAS_EXTRA_BLOCK = true;
+        line.writeInt32(1); // has an extra block
     }
     else
     {
-        timestep = time;
-        istart = 1;
+        HAS_EXTRA_BLOCK = false;
+        line.writeInt32(0); // no extra block
     }
+
+    // bytes 48-51
+    line.writeInt32(0); // not four dimensions
+
+    // bytes 52-79 - should all be zero - can re-use ints
+    ints[0] = 0;
+    line.writeInt32(ints, 7);
+
+    // bytes 80-83
+    line.writeInt32(1); // 1 as we are in CHARMM format - we need this to write space info
+    CHARMM_FORMAT = true;
+
+    // we will only write 3D coordinates
+    HAS_FOUR_DIMS = false;
+
+    f.write(line);
+
+    // now write the title
+    line = FortranRecord(f.isLittleEndian());
+
+    if (title.isEmpty())
+    {
+        title.append("WRITTEN BY SIRE");
+    }
+
+    line.writeInt32(title.count());
+
+    for (const auto &t : title)
+    {
+        line.writeChar(t, 32);
+    }
+
+    f.write(line);
+
+    // now write the number of atoms
+    line = FortranRecord(f.isLittleEndian());
+    line.writeInt32(natoms);
+
+    f.write(line);
+
+    have_written_header = true;
 }
 
-void SireIO::detail::DCDFile::setSpace(const Space &s)
+SireUnits::Dimension::Time DCDFile::readTime(int frame) const
 {
-    spc = s;
+    return ((istart * timestep) + (frame * timestep)) * picosecond;
 }
 
-const Space &SireIO::detail::DCDFile::getSpace() const
-{
-    return *spc;
-}
-
-SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
+SpacePtr DCDFile::readSpace(int frame) const
 {
     if (frame < 0 or frame >= nframes)
     {
@@ -366,18 +458,74 @@ SpacePtr SireIO::detail::DCDFile::readSpace(FortranFile &file, int frame) const
 
         int linenum = first_frame_line + (frame * num_lines_per_frame);
 
-        auto line = file[linenum];
+        auto line = f[linenum];
 
         auto boxinfo = line.readFloat64(6);
 
-        // construct from the above boxinfo
-        return SpacePtr();
+        // there isn't a well-defined standard for the box info
+
+        // first check for Charmm or NAMD > 2.5 format. This has the data
+        // written as [A, gamma, B, beta, alpha, C] (yes, really!)
+
+        auto A = boxinfo[0];
+        auto B = boxinfo[2];
+        auto C = boxinfo[5];
+
+        auto alpha = boxinfo[4];
+        auto beta = boxinfo[3];
+        auto gamma = boxinfo[1];
+
+        if (A == 0 and B == 0 and C == 0)
+        {
+            // this is an infinite cartesian space
+            return SpacePtr(new Cartesian());
+        }
+
+        try
+        {
+            if (alpha <= 1.0 and alpha >= -1.0 and beta <= 1.0 and beta >= -1.0 and gamma <= 1.0 and gamma >= -1.0)
+            {
+                // the angle cosines have been saved
+                alpha = 90 - ((std::asin(alpha)) * radians).to(degrees);
+                beta = 90 - ((std::asin(beta)) * radians).to(degrees);
+                gamma = 90 - ((std::asin(gamma)) * radians).to(degrees);
+            }
+            else if (alpha < 0 or beta < 0 or gamma < 0 or A < 0 or B < 0 or C < 0 or
+                     alpha > 180 or beta > 180 or gamma > 180)
+            {
+                // new CHARMM format - these are the box vectors
+                return SpacePtr(new TriclinicBox(Vector(boxinfo[0], boxinfo[1], boxinfo[3]),
+                                                 Vector(boxinfo[1], boxinfo[2], boxinfo[4]),
+                                                 Vector(boxinfo[3], boxinfo[4], boxinfo[5])));
+            }
+
+            if (alpha == 90 and beta == 90 and gamma == 90)
+            {
+                // this is a PeriodicBox
+                return SpacePtr(new PeriodicBox(Vector(A, B, C)));
+            }
+            else
+            {
+                // this is a triclinic space
+                return SpacePtr(new TriclinicBox(A, B, C,
+                                                 alpha * degrees,
+                                                 beta * degrees,
+                                                 gamma * degrees));
+            }
+        }
+        catch (const SireError::exception &e)
+        {
+            qDebug() << "WARNING - cannot interpret the space information for the DCD file.";
+            qDebug() << "WARNING - data is" << Sire::toString(boxinfo);
+            qDebug() << "WARNING - error is" << e.what() << ":" << e.why();
+        }
     }
 
-    return SpacePtr();
+    // this is an infinite cartesian space
+    return SpacePtr(new Cartesian());
 }
 
-QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int frame) const
+QVector<Vector> DCDFile::readCoordinates(int frame) const
 {
     if (frame < 0 or frame >= nframes)
     {
@@ -404,18 +552,23 @@ QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int 
     if (nfixed == 0)
     {
         // read in the x, y, and z data
-        auto line = file[linenum];
+        auto line = f[linenum];
         auto x = line.readFloat32(natoms);
-        line = file[linenum + 1];
+        line = f[linenum + 1];
         auto y = line.readFloat32(natoms);
-        line = file[linenum + 2];
+        line = f[linenum + 2];
         auto z = line.readFloat32(natoms);
 
         QVector<Vector> coords(natoms);
 
+        auto coords_data = coords.data();
+        const auto x_data = x.constData();
+        const auto y_data = y.constData();
+        const auto z_data = z.constData();
+
         for (int i = 0; i < natoms; ++i)
         {
-            coords[i] = Vector(x[i], y[i], z[i]);
+            coords_data[i] = Vector(x_data[i], y_data[i], z_data[i]);
         }
 
         return coords;
@@ -429,26 +582,129 @@ QVector<Vector> SireIO::detail::DCDFile::readCoordinates(FortranFile &file, int 
         // read the coordinates and map them into a copy of first_frame
         QVector<Vector> frame = first_frame;
 
+        // TODO
+        throw SireError::incomplete_code(QObject::tr(
+                                             "Need to write the code to read DCD frames with fixed atoms!"),
+                                         CODELOC);
+
         return frame;
     }
 }
 
-Frame SireIO::detail::DCDFile::readFrame(FortranFile &file, int frame) const
+Frame DCDFile::readFrame(int frame, bool use_parallel) const
 {
     frame = SireID::Index(frame).map(nframes);
 
-    auto space = this->readSpace(file, frame);
-    auto coords = this->readCoordinates(file, frame);
+    auto space = this->readSpace(frame);
+    auto coords = this->readCoordinates(frame);
+    auto time = this->readTime(frame);
 
-    return Frame(coords, space, getTimeAtFrame(frame) * picosecond);
+    return Frame(this->readCoordinates(frame),
+                 this->readSpace(frame).read(),
+                 this->readTime(frame));
 }
 
-QString SireIO::detail::DCDFile::getTitle() const
+void DCDFile::writeFrame(const SireMol::Frame &frame, bool use_parallel)
+{
+    const int natoms = frame.nAtoms();
+
+    if (natoms <= 0 or (not frame.hasCoordinates()))
+        return;
+
+    bool has_periodic_space = frame.space().isPeriodic();
+
+    // now write the space
+    if (has_periodic_space)
+    {
+        double A, B, C, alpha, beta, gamma;
+
+        if (frame.space().isA<PeriodicBox>())
+        {
+            const auto dims = frame.space().asA<PeriodicBox>().dimensions();
+
+            A = dims.x();
+            B = dims.y();
+            C = dims.z();
+
+            alpha = 90.0;
+            beta = 90.0;
+            gamma = 90.0;
+        }
+        else
+        {
+            TriclinicBox box;
+
+            if (frame.space().isA<TriclinicBox>())
+                box = frame.space().asA<TriclinicBox>();
+            else
+            {
+                auto matrix = frame.space().boxMatrix();
+                box = TriclinicBox(matrix.column0(), matrix.column1(), matrix.column2());
+            }
+
+            A = box.vector0().magnitude();
+            B = box.vector1().magnitude();
+            C = box.vector2().magnitude();
+
+            alpha = box.alpha();
+            beta = box.beta();
+            gamma = box.gamma();
+        }
+
+        FortranRecord line(f.isLittleEndian());
+
+        // we will only write values in CHARMM format
+        // [A, gamma, B, beta, alpha, C]
+
+        line.writeFloat64(A);
+        line.writeFloat64(gamma);
+        line.writeFloat64(B);
+        line.writeFloat64(beta);
+        line.writeFloat64(alpha);
+        line.writeFloat64(C);
+
+        f.write(line);
+    }
+
+    // now write the x, y and z coordinates
+    QVector<float> x(natoms);
+    QVector<float> y(natoms);
+    QVector<float> z(natoms);
+
+    auto x_data = x.data();
+    auto y_data = y.data();
+    auto z_data = z.data();
+
+    const auto coords_data = frame.coordinates().constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        const auto &c = coords_data[i];
+
+        x_data[i] = c.x();
+        y_data[i] = c.y();
+        z_data[i] = c.z();
+    }
+
+    FortranRecord line(f.isLittleEndian());
+    line.writeFloat32(x, natoms);
+    f.write(line);
+
+    line = FortranRecord(f.isLittleEndian());
+    line.writeFloat32(y, natoms);
+    f.write(line);
+
+    line = FortranRecord(f.isLittleEndian());
+    line.writeFloat32(z, natoms);
+    f.write(line);
+}
+
+QString DCDFile::getTitle() const
 {
     return title.join("");
 }
 
-void SireIO::detail::DCDFile::setTitle(QString t)
+void DCDFile::setTitle(QString t)
 {
     // need to split into blocks of 32 characters
     title.clear();
@@ -465,178 +721,166 @@ void SireIO::detail::DCDFile::setTitle(QString t)
     }
 }
 
-double SireIO::detail::DCDFile::getTimeStep() const
+SireUnits::Dimension::Time DCDFile::getTimeStep() const
 {
-    return timestep;
+    return timestep * picosecond;
 }
 
-qint64 SireIO::detail::DCDFile::getFrameStart() const
+void DCDFile::setTimeStep(const SireUnits::Dimension::Time &t)
 {
-    return istart;
+    timestep = t.to(picosecond);
 }
 
-qint64 SireIO::detail::DCDFile::getFrameDelta() const
-{
-    return nsavc;
-}
-
-qint64 SireIO::detail::DCDFile::nAtoms() const
+int DCDFile::nAtoms() const
 {
     return natoms;
 }
 
-qint64 SireIO::detail::DCDFile::nFrames() const
+int DCDFile::nFrames() const
 {
     return nframes;
 }
 
-/** Parse the data contained in the lines - this clears any pre-existing
-    data in this object */
-void DCD::parse(const QString &filename, const PropertyMap &map)
+////////
+//////// Implemenetation of DCD
+////////
+
+static const RegisterMetaType<DCD> r_dcd;
+const RegisterParser<DCD> register_dcd;
+
+QDataStream &operator<<(QDataStream &ds, const DCD &dcd)
 {
-    FortranFile file(filename);
+    writeHeader(ds, r_dcd, 1);
 
-    dcd = DCDFile();
-    dcd.readHeader(file);
+    SharedDataStream sds(ds);
 
-    coords = dcd.readCoordinates(file, 0);
+    sds << dcd.current_frame << dcd.parse_warnings
+        << dcd.nframes << dcd.frame_idx
+        << static_cast<const MoleculeParser &>(dcd);
 
-    // need to convert unit cell...
-
-    // set the score, and save the warnings
-    double score = 100.0 / (parse_warnings.count() + 1);
-    this->setScore(score);
+    return ds;
 }
 
-/** Construct by parsing the passed file */
-DCD::DCD(const QString &fname, const PropertyMap &map) : ConcreteProperty<DCD, MoleculeParser>(map)
+QDataStream &operator>>(QDataStream &ds, DCD &dcd)
 {
-    MoleculeParser::setFilename(fname);
-    this->parse(MoleculeParser::filename(), map);
-}
+    VersionID v = readHeader(ds, r_dcd);
 
-/** Construct by parsing the data in the passed text lines */
-DCD::DCD(const QStringList &lines, const PropertyMap &map) : ConcreteProperty<DCD, MoleculeParser>(lines, map)
-{
-    throw SireIO::parse_error(QObject::tr("You cannot create a binary DCD file from a set of text lines!"), CODELOC);
-}
-
-static QVector<Vector> getCoordinates(const Molecule &mol, const PropertyName &coords_property)
-{
-    if (not mol.hasProperty(coords_property))
+    if (v == 1)
     {
-        return QVector<Vector>();
+        SharedDataStream sds(ds);
+
+        sds >> dcd.current_frame >> dcd.parse_warnings >> dcd.nframes >> dcd.frame_idx >> static_cast<MoleculeParser &>(dcd);
     }
+    else
+        throw version_error(v, "1", r_dcd, CODELOC);
 
-    QVector<Vector> coords(mol.nAtoms());
-
-    const auto molcoords = mol.property(coords_property).asA<AtomCoords>();
-
-    const auto molinfo = mol.info();
-
-    for (int i = 0; i < mol.nAtoms(); ++i)
-    {
-        // coords are already in angstroms :-)
-        coords[i] = molcoords.at(molinfo.cgAtomIdx(AtomIdx(i)));
-    }
-
-    return coords;
+    return ds;
 }
 
-static bool hasData(const QVector<QVector<Vector>> &array)
+/** Constructor */
+DCD::DCD()
+    : ConcreteProperty<DCD, MoleculeParser>(),
+      nframes(0), frame_idx(0)
 {
-    for (int i = 0; i < array.count(); ++i)
-    {
-        if (not array[i].isEmpty())
-            return true;
-    }
+}
 
+/** Return the format name that is used to identify this file format within Sire */
+QString DCD::formatName() const
+{
+    return "DCD";
+}
+
+/** Return the suffixes that DCD files will typically have */
+QStringList DCD::formatSuffix() const
+{
+    static const QStringList suffixes = {"DCD"};
+    return suffixes;
+}
+
+/** Return a description of the file format */
+QString DCD::formatDescription() const
+{
+    return QObject::tr("DCD coordinate/velocity binary trajectory files "
+                       "based on charmm / namd / x-plor format.");
+}
+
+/** This is not a text file */
+bool DCD::isTextFile() const
+{
     return false;
 }
 
-/** Construct by extracting the necessary data from the passed System */
-DCD::DCD(const System &system, const PropertyMap &map) : ConcreteProperty<DCD, MoleculeParser>()
+/** Open the file and read in all the metadata */
+void DCD::parse()
 {
-    // get the MolNums of each molecule in the System - this returns the
-    // numbers in MolIdx order
-    const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
+    f.reset(new DCDFile(this->filename()));
 
-    if (molnums.isEmpty())
+    try
     {
-        // no molecules in the system
-        this->operator=(DCD());
-        return;
-    }
-
-    // get the coordinates (and velocities if available) for each molecule in the system
-    {
-        QVector<QVector<Vector>> all_coords(molnums.count());
-
-        const auto coords_property = map["coordinates"];
-
-        if (usesParallel())
+        if (not f->open(QIODevice::ReadOnly))
         {
-            tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> r)
-                              {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    const auto mol = system[molnums[i]].molecule();
-
-                    all_coords[i] = ::getCoordinates(mol, coords_property);
-                } });
-        }
-        else
-        {
-            for (int i = 0; i < molnums.count(); ++i)
-            {
-                const auto mol = system[molnums[i]].molecule();
-                all_coords[i] = ::getCoordinates(mol, coords_property);
-            }
+            throw SireIO::parse_error(QObject::tr(
+                                          "Failed to open DCDFile %1")
+                                          .arg(this->filename()),
+                                      CODELOC);
         }
 
-        coords.clear();
+        nframes = f->nFrames();
 
-        if (::hasData(all_coords))
+        if (nframes == 0)
         {
-            coords = collapse(all_coords);
+            this->setScore(0);
+            f.reset();
+            throw SireIO::parse_error(QObject::tr(
+                                          "Failed to read any frames from DCDFile %1. Is the file empty?")
+                                          .arg(this->filename()),
+                                      CODELOC);
         }
+
+        current_frame = f->readFrame(0, this->usesParallel());
+        frame_idx = 0;
+
+        this->setScore(f->nFrames() * current_frame.nAtoms());
     }
-
-    // extract the space of the system
-    SpacePtr space;
-
-    if (system.containsProperty(map["space"]))
+    catch (...)
     {
-        space = system.property(map["space"]).asA<Space>();
+        this->setScore(0);
+        f.reset();
+        throw;
     }
+}
 
-    // extract the current time for the system
-    double current_time = 0;
+/** Construct by parsing the passed file */
+DCD::DCD(const QString &filename, const PropertyMap &map)
+    : ConcreteProperty<DCD, MoleculeParser>(map),
+      nframes(0), frame_idx(0)
+{
+    // this gets the absolute file path
+    this->setFilename(filename);
+    this->parse();
+}
 
-    if (system.containsProperty(map["time"]))
-    {
-        const Property &prop = system.property(map["time"]);
+/** Construct by parsing the data in the passed text lines */
+DCD::DCD(const QStringList &lines, const PropertyMap &map)
+    : ConcreteProperty<DCD, MoleculeParser>(lines, map)
+{
+    throw SireIO::parse_error(QObject::tr("You cannot create a binary Gromacs DCD file from a set of text lines!"),
+                              CODELOC);
+}
 
-        Time time;
-
-        if (prop.isA<TimeProperty>())
-            time = prop.asA<TimeProperty>().value();
-        else
-            time = prop.asA<GeneralUnitProperty>();
-
-        current_time = time.to(picosecond);
-    }
-
-    dcd.setCurrentTime(current_time);
-
-    // extract the title for the system
-    dcd.setTitle(system.name().value());
+/** Construct by extracting the necessary data from the passed System */
+DCD::DCD(const System &system, const PropertyMap &map)
+    : ConcreteProperty<DCD, MoleculeParser>(system, map),
+      nframes(1), frame_idx(0)
+{
+    current_frame = MoleculeParser::createFrame(system, map);
 }
 
 /** Copy constructor */
 DCD::DCD(const DCD &other)
-    : ConcreteProperty<DCD, MoleculeParser>(other), coords(other.coords), dcd(other.dcd),
-      parse_warnings(other.parse_warnings)
+    : ConcreteProperty<DCD, MoleculeParser>(other),
+      current_frame(other.current_frame), parse_warnings(other.parse_warnings),
+      nframes(other.nframes), frame_idx(other.frame_idx), f(other.f)
 {
 }
 
@@ -649,9 +893,11 @@ DCD &DCD::operator=(const DCD &other)
 {
     if (this != &other)
     {
-        coords = other.coords;
-        dcd = other.dcd;
+        current_frame = other.current_frame;
         parse_warnings = other.parse_warnings;
+        nframes = other.nframes;
+        frame_idx = other.frame_idx;
+        f = other.f;
 
         MoleculeParser::operator=(other);
     }
@@ -666,7 +912,7 @@ bool DCD::operator==(const DCD &other) const
 
 bool DCD::operator!=(const DCD &other) const
 {
-    return not DCD::operator==(other);
+    return MoleculeParser::operator!=(other);
 }
 
 const char *DCD::typeName()
@@ -679,18 +925,69 @@ const char *DCD::what() const
     return DCD::typeName();
 }
 
+bool DCD::isFrame() const
+{
+    return true;
+}
+
+int DCD::nFrames() const
+{
+    return nframes;
+}
+
+int DCD::count() const
+{
+    return this->nFrames();
+}
+
+int DCD::size() const
+{
+    return this->nFrames();
+}
+
+Frame DCD::getFrame(int frame) const
+{
+    frame = SireID::Index(frame).map(this->nFrames());
+
+    if (frame < 0)
+        frame = 0;
+
+    if (frame == frame_idx)
+        return current_frame;
+
+    if (f.get() == 0)
+    {
+        throw SireError::file_error(QObject::tr(
+                                        "Somehow we don't have access to the underlying DCD file?"),
+                                    CODELOC);
+    }
+
+    return f->readFrame(frame, this->usesParallel());
+}
+
+DCD DCD::operator[](int i) const
+{
+    i = SireID::Index(i).map(this->nFrames());
+
+    DCD ret(*this);
+
+    ret.current_frame = this->getFrame(i);
+    ret.frame_idx = i;
+
+    return ret;
+}
+
 QString DCD::toString() const
 {
-    if (nAtoms() == 0)
+    if (this->nAtoms() == 0)
     {
-        return QObject::tr("DCD( nAtoms() = 0 )");
+        return QObject::tr("DCD::null");
     }
     else
     {
-        return QObject::tr("DCD( title() = %1, nAtoms() = %2, nFrames() = %3 )")
-            .arg(title())
-            .arg(nAtoms())
-            .arg(nFrames());
+        return QObject::tr("DCD( nAtoms() = %1, nFrames() = %2 )")
+            .arg(this->nAtoms())
+            .arg(this->nFrames());
     }
 }
 
@@ -703,101 +1000,7 @@ DCD DCD::parse(const QString &filename)
 /** Internal function used to add the data from this parser into the passed System */
 void DCD::addToSystem(System &system, const PropertyMap &map) const
 {
-    if (coords.isEmpty())
-        return;
-
-    // first, we are going to work with the group of all molecules, which should
-    // be called "all". We have to assume that the molecules are ordered in "all"
-    // in the same order as they are in this restart file, with the data
-    // in MolIdx/AtomIdx order (this should be the default for all parsers!)
-    MoleculeGroup allmols = system[MGName("all")];
-
-    const int nmols = allmols.nMolecules();
-
-    QVector<int> atom_pointers(nmols + 1, -1);
-
-    int natoms = 0;
-
-    for (int i = 0; i < nmols; ++i)
-    {
-        atom_pointers[i] = natoms;
-        const int nats = allmols[MolIdx(i)].data().info().nAtoms();
-        natoms += nats;
-    }
-
-    atom_pointers[nmols] = natoms;
-
-    if (natoms != this->nAtoms())
-        throw SireIO::parse_error(QObject::tr("Incompatibility between the files, as this DCD file contains data "
-                                              "for %1 atom(s), while the other file(s) have created a system with "
-                                              "%2 atom(s)")
-                                      .arg(this->nAtoms())
-                                      .arg(natoms),
-                                  CODELOC);
-
-    // next, copy the coordinates and optionally the velocities into the molecules
-    QVector<Molecule> mols(nmols);
-    Molecule *mols_array = mols.data();
-
-    const PropertyName coords_property = map["coordinates"];
-
-    const Vector *coords_array = this->coordinates().constData();
-
-    auto add_moldata = [&](int i)
-    {
-        const int atom_start_idx = atom_pointers.constData()[i];
-        auto mol = allmols[MolIdx(i)].molecule();
-        const auto molinfo = mol.data().info();
-
-        auto moleditor = mol.edit();
-
-        auto coords = QVector<QVector<Vector>>(molinfo.nCutGroups());
-
-        for (int j = 0; j < molinfo.nCutGroups(); ++j)
-        {
-            coords[j] = QVector<Vector>(molinfo.nAtoms(CGIdx(j)));
-        }
-
-        for (int j = 0; j < mol.nAtoms(); ++j)
-        {
-            auto cgatomidx = molinfo.cgAtomIdx(AtomIdx(j));
-
-            const int atom_idx = atom_start_idx + j;
-
-            coords[cgatomidx.cutGroup()][cgatomidx.atom()] = coords_array[atom_idx];
-        }
-
-        moleditor.setProperty(coords_property, AtomCoords(CoordGroupArray(coords)));
-        mols_array[i] = moleditor.commit();
-    };
-
-    if (coords_property.hasSource())
-    {
-        if (usesParallel())
-        {
-            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
-                              {
-                for (int i = r.begin(); i < r.end(); ++i)
-                {
-                    add_moldata(i);
-                } });
-        }
-        else
-        {
-            for (int i = 0; i < nmols; ++i)
-            {
-                add_moldata(i);
-            }
-        }
-
-        system.update(Molecules(mols));
-    }
-
-    PropertyName space_property = map["space"];
-    if (space_property.hasSource())
-    {
-        system.setProperty(space_property.source(), dcd.getSpace());
-    }
+    MoleculeParser::copyFromFrame(current_frame, system, map);
 
     // update the System fileformat property to record that it includes
     // data from this file format
@@ -818,76 +1021,16 @@ void DCD::addToSystem(System &system, const PropertyMap &map) const
     {
         system.setProperty(fileformat_property.source(), StringProperty(fileformat));
     }
-
-    PropertyName time_property = map["time"];
-
-    if (time_property.hasSource())
+    else
     {
-        system.setProperty(time_property.source(), GeneralUnitProperty(dcd.getCurrentTime() * picosecond));
+        system.setProperty("fileformat", StringProperty(fileformat));
     }
 }
 
-/** Return the title of the file */
-QString DCD::title() const
-{
-    return dcd.getTitle();
-}
-
-/** Return the current time of the simulation from which this restart
-    file was written. Returns 0 if there is no time set. If there are
-    multiple frames, then the time of the first frame is returned */
-SireUnits::Dimension::Time DCD::time() const
-{
-    return dcd.getCurrentTime() * picosecond;
-}
-
-/** Return the number of atoms whose data are contained in this DCD file */
+/** Return the number of atoms whose coordinates are contained in this restart file */
 int DCD::nAtoms() const
 {
-    return coords.count();
-}
-
-bool DCD::isFrame() const
-{
-    return true;
-}
-
-/** Return the number of frames in this DCD file */
-int DCD::nFrames() const
-{
-    return dcd.nFrames();
-}
-
-/** Return the ith frame */
-Frame DCD::getFrame(int i) const
-{
-    // will eventually look to see if we should cache this?
-    QString f = this->filename();
-
-    if (f.isEmpty())
-        throw SireIO::parse_error(QObject::tr("Cannot get the frame as the DCD filename has not been specified."),
-                                  CODELOC);
-
-    FortranFile file(this->filename());
-    return dcd.readFrame(file, i);
-}
-
-/** Return the parsed coordinate data. */
-QVector<SireMaths::Vector> DCD::coordinates() const
-{
-    return coords;
-}
-
-/** Return the parsed space */
-const Space &DCD::space() const
-{
-    return dcd.getSpace();
-}
-
-/** Return any warnings that were triggered during parsing */
-QStringList DCD::warnings() const
-{
-    return parse_warnings;
+    return current_frame.nAtoms();
 }
 
 /** Return this parser constructed from the passed filename */
@@ -911,9 +1054,78 @@ MoleculeParserPtr DCD::construct(const SireSystem::System &system, const Propert
     return MoleculeParserPtr(DCD(system, map));
 }
 
-/** Write this DCD to a file called 'filename'. This will write out
-    the data in this object to the DCD format */
-void DCD::writeToFile(const QString &filename) const
+/** Write this binary file 'filename' */
+QStringList DCD::writeToFile(const QString &filename) const
 {
-    // (write all types to files, as needed)
+    if (this->nFrames() == 0 or this->nAtoms() == 0)
+        return QStringList();
+
+    auto gil = SireBase::release_gil();
+
+    createDirectoryForFile(filename);
+
+    DCDFile outfile(filename);
+
+    if (not outfile.open(QIODevice::WriteOnly))
+        throw SireError::file_error(QObject::tr(
+                                        "Could not open %1 to write the DCD file.")
+                                        .arg(filename),
+                                    CODELOC);
+
+    if (this->writingTrajectory())
+    {
+        const auto frames = this->framesToWrite();
+
+        if (frames.isEmpty())
+            return QStringList();
+
+        ProgressBar bar("Save DCD", frames.count());
+        bar.setSpeedUnit("frames / s");
+
+        bar = bar.enter();
+
+        Frame first_frame = this->createFrame(frames[0]);
+        Frame second_frame;
+
+        if (frames.count() > 1)
+        {
+            second_frame = this->createFrame(frames[1]);
+            outfile.setTimeStep(second_frame.time() - first_frame.time());
+        }
+
+        outfile.writeHeader(frames.count(), first_frame.nAtoms(),
+                            first_frame.space().isPeriodic());
+
+        outfile.writeFrame(first_frame, usesParallel());
+        bar.setProgress(1);
+
+        first_frame = Frame();
+
+        if (frames.count() > 1)
+        {
+            outfile.writeFrame(second_frame, usesParallel());
+            bar.setProgress(2);
+            second_frame = Frame();
+        }
+
+        for (int i = 2; i < frames.count(); ++i)
+        {
+            const auto frame = this->createFrame(frames[i]);
+            outfile.writeFrame(frame, usesParallel());
+            bar.setProgress(i + 1);
+        }
+
+        bar.success();
+    }
+    else
+    {
+        outfile.writeHeader(1, current_frame.nAtoms(),
+                            current_frame.space().isPeriodic());
+
+        outfile.writeFrame(current_frame, usesParallel());
+    }
+
+    outfile.close();
+
+    return QStringList(filename);
 }

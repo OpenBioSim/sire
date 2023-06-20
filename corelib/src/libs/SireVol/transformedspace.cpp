@@ -151,13 +151,17 @@ bool TransformedSpace::isCartesian() const
     return spc.read().isCartesian();
 }
 
-/** Throw an exception as an infinite space doesn't have a volume! */
+Matrix TransformedSpace::boxMatrix() const
+{
+    // return the transformed value
+    return tform.rotationMatrix() * spc.read().boxMatrix();
+}
+
 SireUnits::Dimension::Volume TransformedSpace::volume() const
 {
     return spc.read().volume();
 }
 
-/** Throw an exception as an infinite space doesn't have a volume! */
 SpacePtr TransformedSpace::setVolume(SireUnits::Dimension::Volume volume) const
 {
     TransformedSpace ret(*this);

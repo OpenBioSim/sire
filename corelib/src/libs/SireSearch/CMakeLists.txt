@@ -49,6 +49,7 @@ target_link_libraries (SireSearch
                        SireMM
                        SireMol
                        SireCAS
+                       SireUnits
                        SireStream
                        )
 

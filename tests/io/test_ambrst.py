@@ -2,11 +2,12 @@ import sire as sr
 import pytest
 
 
-@pytest.mark.slow
-def test_ambrst_velocities(tmpdir, kigaki_mols):
+def test_ambrst_vels_and_forces(tmpdir, kigaki_mols):
     mols = kigaki_mols.clone()
 
-    mol = mols[10]
+    mols = mols[5:10]
+
+    mol = mols[2]
 
     a_per_ps = sr.units.angstrom / sr.units.picosecond
 
@@ -20,7 +21,23 @@ def test_ambrst_velocities(tmpdir, kigaki_mols):
 
     mols.update(mol)
 
-    d = tmpdir.mkdir("test_ambrst_velocities")
+    mol = mols[1]
+
+    kcal_per_a = sr.units.kcal / sr.units.angstrom
+
+    force = sr.legacy.Mol.Force3D(
+        1 * kcal_per_a, 2 * kcal_per_a, 3 * kcal_per_a
+    )
+
+    c = mol.cursor().atoms()
+
+    c["force"] = force
+
+    mol = c.molecule().commit()
+
+    mols.update(mol)
+
+    d = tmpdir.mkdir("test_ambrst_vels_and_forces")
 
     f = sr.save(mols, d.join("test"), format=["RST", "PRM7"])
 
@@ -31,14 +48,16 @@ def test_ambrst_velocities(tmpdir, kigaki_mols):
         assert v1.y().value() == pytest.approx(v2.y().value())
         assert v1.z().value() == pytest.approx(v2.z().value())
 
-    for i, mol in enumerate(mols[0:20]):
-        if i == 10:
+    for i, mol in enumerate(mols):
+        if i == 1:
+            for atom in mol.atoms():
+                compare(atom.property("velocity"), sr.legacy.Mol.Velocity3D())
+                compare(atom.property("force"), force)
+        elif i == 2:
             for atom in mol.atoms():
                 compare(atom.property("velocity"), v)
+                compare(atom.property("force"), sr.legacy.Mol.Force3D())
         else:
             for atom in mol.atoms():
                 compare(atom.property("velocity"), sr.legacy.Mol.Velocity3D())
-
-    for i, mol in enumerate(mols[30::100]):
-        for atom in mol.atoms():
-            compare(atom.property("velocity"), sr.legacy.Mol.Velocity3D())
+                compare(atom.property("force"), sr.legacy.Mol.Force3D())

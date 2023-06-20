@@ -3,8 +3,6 @@
 
 #include "SireBase_registrars.h"
 
-
-
 #include "booleanproperty.h"
 #include "cpuid.h"
 #include "generalunitproperty.h"
@@ -12,6 +10,7 @@
 #include "linktoproperty.h"
 #include "majorminorversion.h"
 #include "numberproperty.h"
+#include "progressbar.h"
 #include "properties.h"
 #include "property.h"
 #include "propertylist.h"
@@ -36,6 +35,7 @@ void register_SireBase_objects()
     ObjectRegistry::registerConverterFor< SireBase::MajorMinorVersion >();
     ObjectRegistry::registerConverterFor< SireBase::Version >();
     ObjectRegistry::registerConverterFor< SireBase::NumberProperty >();
+    ObjectRegistry::registerConverterFor< SireBase::ProgressBar >();
     ObjectRegistry::registerConverterFor< SireBase::Properties >();
     ObjectRegistry::registerConverterFor< SireBase::NullProperty >();
     ObjectRegistry::registerConverterFor< SireBase::DoubleArrayProperty >();

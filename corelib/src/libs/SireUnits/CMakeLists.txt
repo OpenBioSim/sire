@@ -14,6 +14,7 @@ include_directories( ${CMAKE_SOURCE_DIR}/src/libs )
 
 set ( SIREUNITS_HEADERS
       angle.h
+      ast.h
       convert.h
       dimensions.h
       generalunit.h
@@ -26,10 +27,13 @@ set ( SIREUNITS_SOURCES
 
       register_sireunits.cpp
 
+      ast.cpp
       angle.cpp
       convert.cpp
       dimensions.cpp
       generalunit.cpp
+      parser.cpp
+      temperature.cpp
 
       ${SIREUNITS_HEADERS}
     )

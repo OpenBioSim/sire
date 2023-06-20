@@ -29,12 +29,14 @@ set ( SIREIO_HEADERS
       amberprm.h
       amberrst.h
       amberrst7.h
+      ambertraj.h
       biosimspace.h
       charmmpsf.h
       cube.h
       dcd.h
       errors.h
       filetrajectory.h
+      filetrajectoryparser.h
       flexibilitylibrary.h
       fortranfile.h
       getcoordsarray.h
@@ -50,8 +52,12 @@ set ( SIREIO_HEADERS
       protoms.h
       sdf.h
       supplementary.h
+      textfile.h
       tinker.h
       trajectorymonitor.h
+      trr.h
+      xdrfile.h
+      xtc.h
       zmatrixmaker.h
     )
 
@@ -60,17 +66,24 @@ set ( SIREIO_SOURCES
 
       register_sireio.cpp
 
+      third_party/xdrfile_trr.c
+      third_party/xdrfile_xtc.c
+      third_party/xdrfile.c
+      third_party/xtc_seek.c
+
       amber.cpp
       amberformat.cpp
       amberprm.cpp
       amberrst.cpp
       amberrst7.cpp
+      ambertraj.cpp
       biosimspace.cpp
       charmmpsf.cpp
       cube.cpp
       dcd.cpp
       errors.cpp
       filetrajectory.cpp
+      filetrajectoryparser.cpp
       flexibilitylibrary.cpp
       fortranfile.cpp
       getcoordsarray.cpp
@@ -86,8 +99,12 @@ set ( SIREIO_SOURCES
       protoms.cpp
       sdf.cpp
       supplementary.cpp
+      textfile.cpp
       tinker.cpp
       trajectorymonitor.cpp
+      trr.cpp
+      xdrfile.cpp
+      xtc.cpp
       zmatrixmaker.cpp
 
       ${SIREIO_HEADERS}
@@ -105,6 +122,7 @@ target_link_libraries (SireIO
                        SireMM
                        SireMove
                        SireMol
+                       SireUnits
                        SireStream
                        ${SIREIO_NETCDF_LIBRARIES}
                        )

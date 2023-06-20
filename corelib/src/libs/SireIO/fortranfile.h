@@ -31,8 +31,12 @@
 #include "sireglobal.h"
 
 #include <QByteArray>
+#include <QFile>
+#include <memory>
 
 SIRE_BEGIN_HEADER
+
+class FortranFileHandle;
 
 namespace SireIO
 {
@@ -44,6 +48,7 @@ namespace SireIO
     {
     public:
         FortranRecord();
+        FortranRecord(bool is_little_endian);
         FortranRecord(const QByteArray &data, bool is_little_endian);
         FortranRecord(const FortranRecord &other);
 
@@ -52,6 +57,7 @@ namespace SireIO
         FortranRecord &operator=(const FortranRecord &other);
 
         int size() const;
+        const char *constData() const;
 
         QString readChar(int n);
         QVector<double> readFloat64(int n);
@@ -64,6 +70,18 @@ namespace SireIO
         float readFloat32At(int pos) const;
         qint32 readInt32At(int pos) const;
         qint64 readInt64At(int pos) const;
+
+        void writeChar(const QString &text, int n);
+
+        void writeFloat64(const QVector<double> &values, int n);
+        void writeFloat32(const QVector<float> &values, int n);
+        void writeInt32(const QVector<qint32> &values, int n);
+        void writeInt64(const QVector<qint64> &values, int n);
+
+        void writeFloat64(double value);
+        void writeFloat32(float value);
+        void writeInt32(qint32 value);
+        void writeInt64(qint64 value);
 
     private:
         void _assertPosValid(int pos, int size) const;
@@ -84,7 +102,8 @@ namespace SireIO
     {
     public:
         FortranFile();
-        FortranFile(const QString &filename);
+        FortranFile(const QString &filename,
+                    QIODevice::OpenMode mode = QIODevice::ReadOnly);
         FortranFile(const FortranFile &other);
         ~FortranFile();
 
@@ -94,6 +113,10 @@ namespace SireIO
 
         FortranRecord operator[](int i) const;
 
+        void write(const FortranRecord &record);
+
+        bool isLittleEndian() const;
+
     private:
         bool try_read();
 
@@ -101,6 +124,8 @@ namespace SireIO
 
         QVector<qint64> record_pointers;
         QVector<qint64> record_sizes;
+
+        std::shared_ptr<FortranFileHandle> f;
 
         int int_size;
 

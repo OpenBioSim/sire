@@ -257,6 +257,34 @@ void register_Mover_PartialMolecule__class(){
                 , "" );
         
         }
+        { //::SireMol::Mover< SireMol::PartialMolecule >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::PartialMolecule > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::PartialMolecule > & ( ::SireMol::Mover< SireMol::PartialMolecule >::*makeWhole_function_type)( ::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::PartialMolecule >::makeWhole );
+            
+            Mover_PartialMolecule__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::Mover< SireMol::PartialMolecule >::makeWhole
+        
+            typedef SireMol::Mover< SireMol::PartialMolecule > exported_class_t;
+            typedef ::SireMol::Mover< SireMol::PartialMolecule > & ( ::SireMol::Mover< SireMol::PartialMolecule >::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireMol::Mover< SireMol::PartialMolecule >::makeWhole );
+            
+            Mover_PartialMolecule__exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::Mover< SireMol::PartialMolecule >::mapInto
         
             typedef SireMol::Mover< SireMol::PartialMolecule > exported_class_t;

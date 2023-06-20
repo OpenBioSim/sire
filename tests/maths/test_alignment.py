@@ -40,7 +40,7 @@ def test_alignment(ala_mols):
 
 
 def test_trajectory_alignment(ala_traj):
-    mols = ala_traj
+    mols = ala_traj.clone()
 
     mol = mols[0]
 

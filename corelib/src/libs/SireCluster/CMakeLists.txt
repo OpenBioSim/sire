@@ -54,7 +54,7 @@ if ( SIRE_USE_MPI )
       )
 
 else()
-  message( STATUS "SireCluster will be compiled without MPI support." )   
+  message( STATUS "SireCluster will be compiled without MPI support." )
   save_sire_variable( "SIRE_MPI_DEFINITIONS" "" )
 endif()
 
@@ -68,7 +68,7 @@ set ( SIRECLUSTER_HEADERS
       frontend.h
       node.h
       nodes.h
-      promise.h      
+      promise.h
       workpacket.h
     )
 
@@ -84,7 +84,7 @@ set ( SIRECLUSTER_SOURCES
       nodes.cpp
       promise.cpp
       workpacket.cpp
- 
+
       ${SIRECLUSTER_MPI_SOURCES}
       ${SIRECLUSTER_MPI_HEADERS}
 
@@ -103,6 +103,7 @@ target_link_libraries (SireCluster
                        SireMaths
                        SireBase
                        SireError
+                       SireUnits
                        SireStream
                        ${SIRECLUSTER_EXTRA_LIBRARIES}
                        )

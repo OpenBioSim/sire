@@ -119,6 +119,20 @@ QDataStream &operator>>(QDataStream &ds, MolGroupsBase &molgroupsbase)
     return ds;
 }
 
+namespace SireMol
+{
+    namespace detail
+    {
+        /** Internal function used to get the editable reference to a group.
+         *  Only call this function if you really know what you are doing
+         */
+        SIREMOL_EXPORT MoleculeGroup &get_editable_group(MolGroupsBase &groups, MGNum mgnum)
+        {
+            return groups.getGroup(mgnum);
+        }
+    }
+}
+
 /** Null constructor */
 MolGroupsBase::MolGroupsBase() : Property()
 {
@@ -2175,7 +2189,14 @@ int MolGroupsBase::nFrames() const
 
 int MolGroupsBase::nFrames(const SireBase::PropertyMap &map) const
 {
-    return this->molecules().nFrames(map);
+    if (this->nGroups() == 1)
+    {
+        return this->group(this->mgNums()[0]).nFrames(map);
+    }
+    else
+    {
+        return this->molecules().nFrames(map);
+    }
 }
 
 void MolGroupsBase::loadFrame(int frame)
@@ -2198,32 +2219,79 @@ void MolGroupsBase::deleteFrame(int frame)
     this->deleteFrame(frame, PropertyMap());
 }
 
+void MolGroupsBase::deleteAllFrames()
+{
+    this->deleteAllFrames(PropertyMap());
+}
+
 void MolGroupsBase::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
-    auto mols = this->molecules();
-    mols.loadFrame(frame, map);
-    this->update(mols);
+    if (this->nGroups() == 1)
+    {
+        this->getGroup(this->mgNums()[0]).loadFrame(frame, map);
+    }
+    else
+    {
+        auto mols = this->molecules();
+        mols.loadFrame(frame, map);
+        this->update(mols);
+    }
 }
 
 void MolGroupsBase::saveFrame(int frame, const SireBase::PropertyMap &map)
 {
-    auto mols = this->molecules();
-    mols.saveFrame(frame, map);
-    this->update(mols);
+    if (this->nGroups() == 1)
+    {
+        this->getGroup(this->mgNums()[0]).saveFrame(frame, map);
+    }
+    else
+    {
+        auto mols = this->molecules();
+        mols.saveFrame(frame, map);
+        this->update(mols);
+    }
 }
 
 void MolGroupsBase::saveFrame(const SireBase::PropertyMap &map)
 {
-    auto mols = this->molecules();
-    mols.saveFrame(map);
-    this->update(mols);
+    if (this->nGroups() == 1)
+    {
+        this->getGroup(this->mgNums()[0]).saveFrame(map);
+    }
+    else
+    {
+        auto mols = this->molecules();
+        mols.saveFrame(map);
+        this->update(mols);
+    }
 }
 
 void MolGroupsBase::deleteFrame(int frame, const SireBase::PropertyMap &map)
 {
-    auto mols = this->molecules();
-    mols.deleteFrame(frame, map);
-    this->update(mols);
+    if (this->nGroups() == 1)
+    {
+        this->getGroup(this->mgNums()[0]).deleteFrame(frame, map);
+    }
+    else
+    {
+        auto mols = this->molecules();
+        mols.deleteFrame(frame, map);
+        this->update(mols);
+    }
+}
+
+void MolGroupsBase::deleteAllFrames(const SireBase::PropertyMap &map)
+{
+    if (this->nGroups() == 1)
+    {
+        this->getGroup(this->mgNums()[0]).deleteAllFrames(map);
+    }
+    else
+    {
+        auto mols = this->molecules();
+        mols.deleteAllFrames(map);
+        this->update(mols);
+    }
 }
 
 /////////////
@@ -3278,6 +3346,25 @@ void MoleculeGroups::setContents(const MGID &mgid, const MoleculeGroup &molgroup
             this->addToIndex(mgnum, molnums);
         }
     }
+}
+
+/** Protected function used to return an editable reference to the
+    group with number 'mgnum'
+
+    \throw SireMol::missing_group
+*/
+MoleculeGroup &MoleculeGroups::getGroup(MGNum mgnum)
+{
+    QHash<MGNum, MolGroupPtr>::iterator it = mgroups.find(mgnum);
+
+    if (it == mgroups.end())
+        throw SireMol::missing_group(QObject::tr("Cannot find the MoleculeGroup with number %1. Available "
+                                                 "groups are %2")
+                                         .arg(mgnum)
+                                         .arg(Sire::toString(mgroups.keys())),
+                                     CODELOC);
+
+    return it->edit();
 }
 
 /** Protected function used to return a const reference to the

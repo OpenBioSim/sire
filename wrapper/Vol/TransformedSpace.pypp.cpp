@@ -71,6 +71,18 @@ void register_TransformedSpace_class(){
                 , "Return whether or not these two groups are definitely beyond the cutoff distance." );
         
         }
+        { //::SireVol::TransformedSpace::boxMatrix
+        
+            typedef ::SireMaths::Matrix ( ::SireVol::TransformedSpace::*boxMatrix_function_type)(  ) const;
+            boxMatrix_function_type boxMatrix_function_value( &::SireVol::TransformedSpace::boxMatrix );
+            
+            TransformedSpace_exposer.def( 
+                "boxMatrix"
+                , boxMatrix_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireVol::TransformedSpace::calcAngle
         
             typedef ::SireUnits::Dimension::Angle ( ::SireVol::TransformedSpace::*calcAngle_function_type)( ::SireMaths::Vector const &,::SireMaths::Vector const &,::SireMaths::Vector const & ) const;
@@ -535,7 +547,7 @@ void register_TransformedSpace_class(){
                 , setVolume_function_value
                 , ( bp::arg("volume") )
                 , bp::release_gil_policy()
-                , "Throw an exception as an infinite space doesnt have a volume" );
+                , "" );
         
         }
         { //::SireVol::TransformedSpace::toString
@@ -571,7 +583,7 @@ void register_TransformedSpace_class(){
                 "volume"
                 , volume_function_value
                 , bp::release_gil_policy()
-                , "Throw an exception as an infinite space doesnt have a volume" );
+                , "" );
         
         }
         TransformedSpace_exposer.staticmethod( "typeName" );

@@ -266,6 +266,13 @@ SireUnits::Dimension::Volume PeriodicBox::volume() const
     return SireUnits::Dimension::Volume(boxlength.x() * boxlength.y() * boxlength.z());
 }
 
+Matrix PeriodicBox::boxMatrix() const
+{
+    return Matrix(boxlength.x(), 0, 0,
+                  0, boxlength.y(), 0,
+                  0, 0, boxlength.z());
+}
+
 /** Return a copy of this space with the volume of set to 'volume'
     - this will scale the space uniformly, keeping the center at
     the same location, to achieve this volume */
@@ -1337,6 +1344,87 @@ Vector PeriodicBox::getBoxCenter(const Vector &p) const
 Vector PeriodicBox::getBoxCenter(const Vector &p, const Vector &center) const
 {
     return wrapDelta(center, p);
+}
+
+/** Return the minimum image copy of 'coords' with respect to 'center',
+    where the coordinates are "made whole". This means that they are
+    translated as a single group, but the group as a whole will not
+    be split across a periodic boundary. Use this function if you want
+    to restore a molecule that has been split over a space into a single,
+    coherent entity (all of the coordinates physically close to
+    one another)
+*/
+QVector<Vector> PeriodicBox::makeWhole(const QVector<Vector> &coords, const Vector &center) const
+{
+    if (coords.isEmpty())
+        return coords;
+    else if (coords.count() == 1)
+    {
+        Vector image = coords[0] + wrapDelta(coords[0], center);
+
+        if (image != coords[0])
+            // this has changed
+            return QVector<Vector>({image});
+        else
+            return coords;
+    }
+
+    // build this up, getting the minimum image for each point as we
+    // walk along the points
+    QVector<Vector> mapped = coords;
+    Vector *mapped_data = 0;
+
+    const auto coords_data = coords.constData();
+    const int n = coords.count();
+
+    // the starting point in the center
+    Vector ref_point = center;
+
+    for (int i = 0; i < n; ++i)
+    {
+        auto image = coords_data[i] + wrapDelta(coords_data[i], ref_point);
+
+        if (image != coords_data[i])
+        {
+            if (mapped_data == 0)
+                mapped_data = mapped.data();
+
+            mapped_data[i] = image;
+        }
+
+        ref_point = image;
+    }
+
+    // this will only be different to `coords` if any
+    // of the atoms have been changed
+    return mapped;
+}
+
+/** Make the passed group of coordinates 'whole'. This will make sure
+ *  that they are all next to each other, and aren't split across a
+ *  periodic image boundary. The box that will be chosen will be the
+ *  one that contains the center of the points, with the points mapped
+ *  from the first to the last
+ */
+QVector<Vector> PeriodicBox::makeWhole(const QVector<Vector> &coords) const
+{
+    if (coords.count() < 2)
+        return coords;
+
+    int ncoords = coords.count();
+    const auto coords_data = coords.constData();
+
+    // calculate the simple average coordinates
+    double scl = 1.0 / ncoords;
+
+    Vector center = scl * coords_data[0];
+
+    for (int i = 1; i < ncoords; ++i)
+    {
+        center += scl * coords_data[i];
+    }
+
+    return this->makeWhole(coords, center);
 }
 
 const char *PeriodicBox::typeName()

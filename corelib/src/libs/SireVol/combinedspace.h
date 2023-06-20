@@ -100,6 +100,8 @@ namespace SireVol
 
         QString toString() const;
 
+        SireMaths::Matrix boxMatrix() const;
+
         SireUnits::Dimension::Volume volume() const;
 
         SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;

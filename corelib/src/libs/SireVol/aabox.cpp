@@ -105,6 +105,12 @@ AABox::AABox(const QVector<Vector> &coordinates)
     recalculate(coordinates);
 }
 
+/** Construct an AABox that completely encases the points  in 'coordinates' */
+AABox::AABox(const QVector<QVector<Vector>> &coordinates)
+{
+    recalculate(coordinates);
+}
+
 /** Construct an AABox that completely encases the points in 'coords' */
 AABox::AABox(const Vector *coords, int ncoords)
 {
@@ -251,7 +257,7 @@ void AABox::recalculate(const Vector *coords, int sz)
     {
         cent = Vector(0);
         halfextents = Vector(0);
-        sz = 0;
+        rad = 0;
     }
 }
 
@@ -279,6 +285,77 @@ void AABox::recalculate(const CoordGroupArrayArray &cgarrays)
 void AABox::recalculate(const QVector<Vector> &coordinates)
 {
     this->recalculate(coordinates.constData(), coordinates.size());
+}
+
+/** Recalculate the AABox so that it completely encloses the 'coordinates' */
+void AABox::recalculate(const QVector<QVector<Vector>> &coordinates)
+{
+    const int n = coordinates.count();
+
+    if (n == 1)
+    {
+        this->recalculate(coordinates[0]);
+    }
+
+    bool have_started = false;
+    Vector maxcoords, mincoords;
+
+    for (int i = 0; i < n; ++i)
+    {
+        const auto coords = coordinates[i].constData();
+
+        const int sz = coordinates[i].count();
+
+        if (sz > 0)
+        {
+            if (have_started)
+            {
+                // loop through all of the remaining coordinates in the group
+                for (int i = 0; i < sz; ++i)
+                {
+                    // calculate the maximum and minimum coordinates
+                    const Vector &coord = coords[i];
+                    maxcoords.setMax(coord);
+                    mincoords.setMin(coord);
+                }
+            }
+            else
+            {
+                // set the initial max and min coords from the first coordinate in the group
+                maxcoords = Vector(coords[0]);
+                mincoords = Vector(maxcoords);
+                have_started = true;
+
+                // loop through all of the remaining coordinates in the group
+                for (int i = 1; i < sz; ++i)
+                {
+                    // calculate the maximum and minimum coordinates
+                    const Vector &coord = coords[i];
+                    maxcoords.setMax(coord);
+                    mincoords.setMin(coord);
+                }
+            }
+        }
+    }
+
+    if (have_started)
+    {
+        // now calculate the center as half the maximum and minimum coordinates
+        cent = 0.5 * (maxcoords + mincoords);
+
+        // the positive half-extent is the difference between the maximum
+        // coordinates and the center
+        halfextents = maxcoords - cent;
+
+        // the radius is the length of 'halfextents'
+        rad = halfextents.length();
+    }
+    else
+    {
+        cent = Vector(0);
+        halfextents = Vector(0);
+        rad = 0;
+    }
 }
 
 /** Return whether or not this box is within 'dist' of box 'box'.

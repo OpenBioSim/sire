@@ -6,6 +6,8 @@ from .. import use_new_api as _use_new_api
 # Imported to ensure that sire.maths.Vector is properly wrapped
 from ..maths import Vector as _Vector
 
+from . import parser
+
 _use_new_api()
 
 
@@ -36,8 +38,17 @@ def get_coords_array(mol, units=None, map=None):
     return np.reshape(np.asarray(coords, dtype=float), (natoms, 3))
 
 
-def load_molecules(*args, **kwargs):
+def load_molecules(*args, map=None, **kwargs):
     from ..legacy.IO import load_molecules as _load_molecules
     from ..system import System
+    from ..base import create_map
 
-    return System(_load_molecules(*args, **kwargs))
+    map = create_map(map)
+
+    mols = System(_load_molecules(*args, map=map, **kwargs))
+
+    if map.specified("make_whole"):
+        if map["make_whole"]:
+            mols.make_whole()
+
+    return mols

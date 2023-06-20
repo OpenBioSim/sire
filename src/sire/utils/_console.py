@@ -17,122 +17,6 @@ _console = None
 _theme = None
 
 
-class _NullProgress:
-    """Null progress to use if user disables progress"""
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __enter__(self, *args, **kwargs):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        return False
-
-    def add_task(self, *args, **kwargs):
-        return 0
-
-    def update(self, *args, **kwargs):
-        return
-
-
-class _Progress:
-    def __init__(self, show_limit: int = 50, transient: bool = True):
-        from rich.progress import Progress, BarColumn, TimeRemainingColumn
-
-        self._progress = Progress(
-            "[progress.description]{task.description}",
-            BarColumn(
-                style="bar.back",
-                complete_style="bar.complete",
-                finished_style="bar.complete",
-            ),
-            "[progress.percentage]{task.percentage:>3.0f}%",
-            TimeRemainingColumn(),
-            auto_refresh=False,
-            transient=transient,
-        )
-        self._last_update = _datetime.now()
-        self._show_limit = show_limit
-        self._completed = {}
-        self._total = {}
-
-        self._have_entered = False
-        self._enter_args = None
-
-    def __enter__(self, *args, **kwargs):
-        self._enter_args = (args, kwargs)
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        if self._have_entered:
-            self._progress.__exit__(*args, **kwargs)
-
-        return False
-
-    def add_task(self, description: str, total: int):
-        if total > self._show_limit:
-            if not self._have_entered:
-                args, kwargs = self._enter_args
-                self._progress.__enter__(*args, **kwargs)
-                self._have_entered = True
-
-            task_id = self._progress.add_task(
-                description=description, total=total
-            )
-            self._completed[task_id] = 0
-            self._total[task_id] = total
-            return task_id
-        else:
-            return None
-
-    def update(
-        self,
-        task_id: int,
-        completed: float = None,
-        advance: float = None,
-        force_update: bool = False,
-    ):
-        if task_id is None:
-            return
-        elif completed is not None:
-            self._completed[task_id] = completed
-        elif advance is not None:
-            self._completed[task_id] += advance
-        else:
-            return
-
-        now = _datetime.now()
-
-        if (
-            force_update
-            or (now - self._last_update).total_seconds() > 0.1
-            or self._total[task_id] - self._completed[task_id] < 5
-        ):
-            self._progress.update(
-                task_id=task_id, completed=self._completed[task_id]
-            )
-            self._progress.refresh()
-            self._last_update = now
-
-
-class _NullSpinner:
-    """Null spinner to use if a spinner is not available -
-    disables spinners"""
-
-    def __init__(self):
-        pass
-
-    def __enter__(self, *args, **kwargs):
-        return self
-
-    def __exit__(self, *args, **kwargs):
-        return False
-
-    def update(self, *args, **kwargs):
-        pass
-
-
 class Table:
     """This a rich.table, with an additional "to_string()" function"""
 
@@ -250,8 +134,6 @@ class Console:
                 emoji=Console.supports_emojis(),
             )
 
-            _console._use_spinner = True
-            _console._use_progress = True
             _console._debugging_enabled = False
             _console._debugging_level = None
 
@@ -291,8 +173,6 @@ class Console:
             log_path=True,
             emoji=Console.supports_emojis(),
         )
-        new_out._use_spinner = False
-        new_out._use_progress = False
         new_out._debugging_enabled = console._debugging_enabled
         new_out._debugging_level = console._debugging_level
         old_out = console
@@ -540,40 +420,6 @@ class Console:
         """Print the current-handled exception"""
         console = Console._get_console()
         console.print_exception()
-
-    @staticmethod
-    def set_use_spinner(use_spinner: bool = True):
-        console = Console._get_console()
-        console._use_spinner = use_spinner
-
-    @staticmethod
-    def set_use_progress(use_progress: bool = True):
-        console = Console._get_console()
-        console._use_progress = use_progress
-
-    @staticmethod
-    def progress(
-        visible: bool = True, show_limit: int = 50, transient: bool = True
-    ):
-        console = Console._get_console()
-
-        if visible and console._use_progress:
-            return _Progress(show_limit=show_limit, transient=transient)
-        else:
-            return _NullProgress()
-
-    @staticmethod
-    def spinner(text: str = ""):
-        console = Console._get_console()
-
-        if console._use_spinner:
-            try:
-                theme = Console._get_theme()
-                return theme.spinner(text=text)
-            except Exception:
-                return _NullSpinner()
-        else:
-            return _NullSpinner()
 
     @staticmethod
     def save(file: _Union[str, _IO]):

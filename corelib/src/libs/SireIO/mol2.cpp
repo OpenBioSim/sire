@@ -1646,7 +1646,7 @@ Mol2::Mol2(const QStringList &lines, const PropertyMap &map) : ConcreteProperty<
 /** Construct this parser by extracting all necessary information from the
     passed SireSystem::System, looking for the properties that are specified
     in the passed property map */
-Mol2::Mol2(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<Mol2, MoleculeParser>(map)
+Mol2::Mol2(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<Mol2, MoleculeParser>(system, map)
 {
     // Get the MolNums of each molecule in the System - this returns the
     // numbers in MolIdx order.
@@ -1748,6 +1748,7 @@ Mol2::Mol2(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
     Mol2 parsed(lines, map);
 
     this->operator=(parsed);
+    this->setParsedSystem(system, map);
 }
 
 /** Copy constructor */

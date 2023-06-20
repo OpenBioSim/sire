@@ -25,6 +25,12 @@
   *
 \*********************************************/
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-builtins"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #define BOOST_SPIRIT_USE_PHOENIX_V3
 #define BOOST_SPIRIT_UNICODE
 
@@ -345,3 +351,7 @@ namespace SireSearch
         }
     } // namespace parser
 } // namespace SireSearch
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

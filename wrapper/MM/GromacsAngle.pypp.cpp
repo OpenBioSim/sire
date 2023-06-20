@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireCAS/trigfuncs.h"
 
+#include "SireCAS/values.h"
+
 #include "SireError/errors.h"
 
 #include "SireID/index.h"

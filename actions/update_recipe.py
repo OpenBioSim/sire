@@ -43,6 +43,13 @@ def run_cmd(cmd):
 
 gitdir = os.path.join(srcdir, ".git")
 
+# Get the sire remote
+sire_remote = run_cmd(
+    f"git --git-dir={gitdir} --work-tree={srcdir} config --get remote.origin.url"
+)
+sire_remote += ".git"
+print(sire_remote)
+
 # Get the Sire branch.
 sire_branch = run_cmd(
     f"git --git-dir={gitdir} --work-tree={srcdir} rev-parse --abbrev-ref HEAD"
@@ -79,6 +86,7 @@ with open(recipe, "w") as FILE:
         elif line.find("SIRE_TEST_REQUIREMENTS") != -1:
             line = test_reqs
         else:
+            line = line.replace("SIRE_REMOTE", sire_remote)
             line = line.replace("SIRE_BRANCH", sire_branch)
 
         FILE.write(line)

@@ -86,7 +86,7 @@ void register_Transform_class(){
                 "inverse"
                 , inverse_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the inverse of this transformation" );
         
         }
         { //::SireMaths::Transform::isNull

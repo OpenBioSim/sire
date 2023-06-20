@@ -85,6 +85,8 @@ namespace SireVol
         SireUnits::Dimension::Volume volume() const;
         SpacePtr setVolume(SireUnits::Dimension::Volume volume) const;
 
+        Matrix boxMatrix() const;
+
         void setDimensions(const Vector &dimensions);
         void setDimensions(const Vector &mincoords, const Vector &maxcoords);
 
@@ -147,6 +149,9 @@ namespace SireVol
         Vector getMinimumImage(const Vector &point, const Vector &center) const;
 
         QVector<Vector> getImagesWithin(const Vector &point, const Vector &center, double dist) const;
+
+        QVector<Vector> makeWhole(const QVector<Vector> &coords) const;
+        QVector<Vector> makeWhole(const QVector<Vector> &coords, const Vector &center) const;
 
         QList<boost::tuple<double, CoordGroup>> getCopiesWithin(const CoordGroup &group, const CoordGroup &center,
                                                                 double dist) const;

@@ -15,18 +15,21 @@ from ._load import (
     smiles,
 )
 
-from ._thumbsup import thumbs_up, get_thumbs_up_info, disable_thumbs_up
 from ._measure import measure
 from ._colname import colname, colnames
+from ._parallel import (
+    get_max_num_threads,
+    set_max_num_threads,
+    set_default_num_threads,
+)
 
 __all__ = [
     "atomid",
     "chainid",
     "colname",
     "colnames",
-    "disable_thumbs_up",
     "expand",
-    "get_thumbs_up_info",
+    "get_max_num_threads",
     "load",
     "load_test_files",
     "measure",
@@ -34,10 +37,12 @@ __all__ = [
     "save",
     "save_to_string",
     "segid",
+    "set_default_num_threads",
+    "set_max_num_threads",
     "smiles",
     "supported_formats",
-    "thumbs_up",
     "tutorial_url",
+    "u",
     "use_mixed_api",
     "use_new_api",
     "use_old_api",
@@ -108,6 +113,50 @@ def _fix_openmm_path():
 
 
 _fix_openmm_path()
+
+
+def u(unit):
+    """
+    Return a sire unit created from the passed expression. If this is a
+    sire.units.GeneralUnit then it will be returned. If this is a string,
+    then it will be parseed and returned as a sire.units.GeneralUnit.
+    """
+    from .units import GeneralUnit
+
+    error = None
+
+    try:
+        return GeneralUnit(unit)
+    except Exception as e:
+        error = e
+
+    # is this a different unit model?
+
+    # Try BioSimSpace
+    if str(type(unit)).find("BioSimSpace") != -1:
+        try:
+            return GeneralUnit(unit._sire_unit)
+        except Exception:
+            pass
+
+        return GeneralUnit(f"{unit}")
+
+    # Try Pint
+    if str(type(unit)).find("pint") != -1 and hasattr(type(unit), "magnitude"):
+        # this is a pint unit - convert to a string (using the long-default
+        # format, as sire should be able to read and understand this)
+        # (we can't use short default as we use 'A' to mean angstrom, not amp)
+        return GeneralUnit(unit.magnitude, f"{unit.units}")
+
+    # Just try representing this as a string and see what happens
+    try:
+        return GeneralUnit(f"{unit}")
+    except Exception as e:
+        raise TypeError(
+            f"Could not convert {unit} to a sire unit. The original error "
+            f"that was raised was: {error}. The error raised when parsing "
+            f"the string version was {e}"
+        )
 
 
 def molid(
@@ -615,8 +664,8 @@ if "SIRE_NO_LAZY_IMPORT" not in _os.environ:
 
         # Previously needed to filter to remove excessive warnings
         # from 'frozen importlib' when lazy loading.
-        #import warnings
-        #warnings.filterwarnings("ignore")
+        # import warnings
+        # warnings.filterwarnings("ignore")
 
         _can_lazy_import = True
 

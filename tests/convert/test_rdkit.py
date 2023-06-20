@@ -89,3 +89,26 @@ def test_hybridization2():
 
     for atom, e in zip(mol.atoms(), expected):
         assert atom.property("hybridization").to_rdkit() == e
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_returns_null():
+    # This molecule should construct if sanitization is turned off
+    mol = sr.smiles("c3cc[c+]2cc(C1CCCC1)[nH]c2c3", must_sanitize=False)
+
+    assert mol.num_atoms() == 36
+
+    # coordinates should be possible, albeit likely wrong!
+    assert mol.has_property("coordinates")
+
+    # We should raise an exception if sanitization fails
+    # and `must_sanitize` is True
+    with pytest.raises(ValueError):
+        mol = sr.smiles("c3cc[c+]2cc(C1CCCC1)[nH]c2c3", must_sanitize=True)
+
+    # this should be the default
+    with pytest.raises(ValueError):
+        mol = sr.smiles("c3cc[c+]2cc(C1CCCC1)[nH]c2c3")

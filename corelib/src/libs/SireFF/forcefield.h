@@ -123,6 +123,7 @@ namespace SireFF
 
         void _pvt_updateName();
 
+        MoleculeGroup &getGroup(MGNum mgnum);
         const MoleculeGroup &getGroup(MGNum mgnum) const;
 
         void getGroups(const QList<MGNum> &mgnums, QVarLengthArray<const MoleculeGroup *, 10> &groups) const;

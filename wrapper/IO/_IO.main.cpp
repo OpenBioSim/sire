@@ -5,8 +5,6 @@
 
 #include "boost/python.hpp"
 
-#include "Helpers/clone_const_reference.hpp"
-
 #include "Amber.pypp.hpp"
 
 #include "AmberPrm.pypp.hpp"
@@ -15,6 +13,8 @@
 
 #include "AmberRst7.pypp.hpp"
 
+#include "AmberTraj.pypp.hpp"
+
 #include "BrokenParser.pypp.hpp"
 
 #include "CharmmPSF.pypp.hpp"
@@ -22,6 +22,8 @@
 #include "Cube.pypp.hpp"
 
 #include "DCD.pypp.hpp"
+
+#include "FileTrajectoryParser.pypp.hpp"
 
 #include "FlexibilityLibrary.pypp.hpp"
 
@@ -67,11 +69,15 @@
 
 #include "Supplementary.pypp.hpp"
 
+#include "TRR.pypp.hpp"
+
 #include "Tinker.pypp.hpp"
 
 #include "TinkerParameters.pypp.hpp"
 
 #include "TrajectoryMonitor.pypp.hpp"
+
+#include "XTC.pypp.hpp"
 
 #include "ZmatrixMaker.pypp.hpp"
 
@@ -102,6 +108,8 @@ BOOST_PYTHON_MODULE(_IO){
 
     register_AmberRst7_class();
 
+    register_AmberTraj_class();
+
     register_BrokenParser_class();
 
     register_CharmmPSF_class();
@@ -109,6 +117,8 @@ BOOST_PYTHON_MODULE(_IO){
     register_Cube_class();
 
     register_DCD_class();
+
+    register_FileTrajectoryParser_class();
 
     register_FlexibilityLibrary_class();
 
@@ -152,11 +162,15 @@ BOOST_PYTHON_MODULE(_IO){
 
     register_Supplementary_class();
 
+    register_TRR_class();
+
     register_Tinker_class();
 
     register_TinkerParameters_class();
 
     register_TrajectoryMonitor_class();
+
+    register_XTC_class();
 
     register_ZmatrixMaker_class();
 

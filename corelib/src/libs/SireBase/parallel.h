@@ -54,18 +54,19 @@ SIRE_BEGIN_HEADER
 
 #include <memory>
 
+#endif // skip TBB when parsing with GCCXML
+
 namespace SireBase
 {
-    inline bool should_run_in_parallel(int count, const PropertyMap &map = PropertyMap())
-    {
-        if (count < 8)
-            return false;
-        else if (map["parallel"].hasValue())
-            return map["parallel"].value().asA<BooleanProperty>().value();
-        else
-            return true;
-    }
+    SIREBASE_EXPORT bool should_run_in_parallel(int count, const PropertyMap &map = PropertyMap());
 
+    SIREBASE_EXPORT int get_max_num_threads();
+
+    SIREBASE_EXPORT void set_max_num_threads(int n);
+
+    SIREBASE_EXPORT void set_default_num_threads();
+
+#ifndef GCCXML_PARSE
     /** This function runs the passed array T of functions in parallel, if
         the optional 'run_parallel' is true. Otherwise, it runs the functions
         serially, one after another */
@@ -89,10 +90,14 @@ namespace SireBase
             }
         }
     }
+#endif
 
 } // end of namespace SireBase
 
-#endif
+SIRE_EXPOSE_FUNCTION(SireBase::should_run_in_parallel)
+SIRE_EXPOSE_FUNCTION(SireBase::get_max_num_threads)
+SIRE_EXPOSE_FUNCTION(SireBase::set_max_num_threads)
+SIRE_EXPOSE_FUNCTION(SireBase::set_default_num_threads)
 
 SIRE_END_HEADER
 

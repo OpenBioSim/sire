@@ -533,10 +533,10 @@ const Property &Properties::property(const PropertyName &key, const Property &de
     }
     else
     {
-        QHash<QString, Properties>::const_iterator it = d->props_metadata.constFind(key.source());
+        auto it = d->properties.constFind(key.source());
 
-        if (it != d->props_metadata.constEnd())
-            return *it;
+        if (it != d->properties.constEnd())
+            return it.value();
         else
             return default_value;
     }

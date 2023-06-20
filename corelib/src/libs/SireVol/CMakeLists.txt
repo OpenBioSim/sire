@@ -62,6 +62,7 @@ set_target_properties (SireVol PROPERTIES
 target_link_libraries (SireVol
                        SireMaths
                        SireBase
+                       SireUnits
                        SireStream
                        )
 
