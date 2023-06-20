@@ -89,6 +89,12 @@ Molecule::Molecule(const QString &molname) : ConcreteProperty<Molecule, Molecule
     this->operator=(this->edit().renumber().rename(molname).commit());
 }
 
+/** Construct a new molecule called 'molname' with the passed info layout */
+Molecule::Molecule(const QString &molname, const MoleculeInfo &molinfo)
+    : ConcreteProperty<Molecule, MoleculeView>(MoleculeData(molname, molinfo))
+{
+}
+
 /** Construct from the passed MoleculeData */
 Molecule::Molecule(const MoleculeData &moldata) : ConcreteProperty<Molecule, MoleculeView>(moldata)
 {

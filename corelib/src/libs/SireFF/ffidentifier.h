@@ -81,7 +81,11 @@ namespace SireFF
         FFIdentifier &operator=(const FFID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const FFIdentifier &other) const;
         bool operator!=(const FFIdentifier &other) const;

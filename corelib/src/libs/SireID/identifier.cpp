@@ -146,7 +146,7 @@ bool Identifier::operator==(const ID &other) const
 /** Comparison operator */
 bool Identifier::operator!=(const ID &other) const
 {
-    return ID::operator!=(other);
+    return not this->operator==(other);
 }
 
 /** Comparison operator */

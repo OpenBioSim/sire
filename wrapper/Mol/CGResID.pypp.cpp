@@ -69,6 +69,7 @@ void register_CGResID_class(){
                 , "" );
         
         }
+        CGResID_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGResID_exposer.def( bp::self != bp::self );
         CGResID_exposer.def( bp::self == bp::other< SireID::ID >() );
         CGResID_exposer.def( bp::self == bp::self );

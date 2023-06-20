@@ -89,7 +89,10 @@ namespace SireMol
             return SireID::ID::compare<ChainResID>(*this, other);
         }
 
-        using SireID::ID::operator!=;
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         uint hash() const
         {

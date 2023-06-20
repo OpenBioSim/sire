@@ -73,6 +73,7 @@ void register_BeadIdx_class(){
                 , "" );
         
         }
+        BeadIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::BeadIdx::operator=
         
             typedef ::SireMol::BeadIdx & ( ::SireMol::BeadIdx::*assign_function_type)( ::SireMol::BeadIdx const & ) ;

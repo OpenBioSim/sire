@@ -515,10 +515,10 @@ namespace SireMM
         void _pvt_createFrom(const MoleculeData &moldata);
         void _pvt_updateFrom(const MoleculeData &moldata);
 
-        void getAmberBondsFrom(const TwoAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
-        void getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
-        void getAmberDihedralsFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
-        void getAmberImpropersFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const PropertyMap &map);
+        void getAmberBondsFrom(const TwoAtomFunctions &funcs, const MoleculeData &moldata, const QVector<bool> &hydrogens, const PropertyMap &map);
+        void getAmberAnglesFrom(const ThreeAtomFunctions &funcs, const MoleculeData &moldata, const QVector<bool> &hydrogens, const PropertyMap &map);
+        void getAmberDihedralsFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const QVector<bool> &hydrogens, const PropertyMap &map);
+        void getAmberImpropersFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const QVector<bool> &hydrogens, const PropertyMap &map);
 
         void getAmberNBsFrom(const CLJNBPairs &nbpairs, const FourAtomFunctions &funcs);
 

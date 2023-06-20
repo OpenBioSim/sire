@@ -131,6 +131,24 @@ namespace SireMol
 
         MoleculeInfoData(const StructureEditor &editor);
 
+        MoleculeInfoData(const QString &resname, qint64 resnum,
+                         const QVector<QString> &atomnames,
+                         const QVector<qint64> &atomnums);
+
+        MoleculeInfoData(const QString &resname, qint64 resnum,
+                         const QStringList &atomnames,
+                         const QList<qint64> &atomnums);
+
+        MoleculeInfoData(const QVector<QString> &resnames,
+                         const QVector<qint64> &resnums,
+                         const QVector<QVector<QString>> &atomnames,
+                         const QVector<QVector<qint64>> &atomnums);
+
+        MoleculeInfoData(const QStringList &resnames,
+                         const QList<qint64> &resnums,
+                         const QList<QStringList> &atomnames,
+                         const QList<QList<qint64>> &atomnums);
+
         MoleculeInfoData(const MoleculeInfoData &other);
 
         ~MoleculeInfoData();

@@ -83,7 +83,11 @@ namespace SireMol
         CGIdentifier &operator=(const CGID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const CGIdentifier &other) const;
         bool operator!=(const CGIdentifier &other) const;
@@ -91,6 +95,7 @@ namespace SireMol
         bool operator==(const CGID &other) const;
         bool operator!=(const CGID &other) const;
 
+        using CGID::map;
         QList<CGIdx> map(const MolInfo &molinfo) const;
 
     private:

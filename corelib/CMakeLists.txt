@@ -524,6 +524,13 @@ if ( ${SIRE_CXX_COMPILER_ID} MATCHES "GNU" )
         else()
           set ( SIRE_SHARE_LINK_FLAGS "${SIRE_SHARE_LINK_FLAGS} -Wl,--no-undefined" )
         endif()
+
+        CHECK_CXX_COMPILER_FLAG( "-lpthread" HAVE_PTHREAD_LIB )
+
+        if (HAVE_PTHREAD_LIB)
+          set ( SIRE_SHARE_LINK_FLAGS "${SIRE_SHARE_LINK_FLAGS} -lpthread" )
+        endif()
+
     endif()
 
 elseif ( ${SIRE_CXX_COMPILER_ID} MATCHES "CLANG" )

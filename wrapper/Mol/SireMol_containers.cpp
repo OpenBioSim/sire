@@ -179,6 +179,8 @@ void register_SireMol_containers()
   register_dict<QHash<AtomNum, AtomNum>>();
   register_dict<QHash<ResNum, ResNum>>();
 
+  register_dict<QHash<AtomIdx, QVector<AtomIdx>>>();
+
 #if QT_VERSION >= QT_VERSION_CHECK(4, 2, 0)
   register_dict<QHash<MolNum, Selector<Atom>>>();
   register_dict<QHash<MolNum, Selector<CutGroup>>>();

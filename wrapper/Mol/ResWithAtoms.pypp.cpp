@@ -81,6 +81,7 @@ void register_ResWithAtoms_class(){
                 , "Map this ID to the list of indicies of residues that match this ID\nThrow: SireMol::missing_atom\nThrow: SireMol::missing_residue\nThrow: SireError::invalid_index\n" );
         
         }
+        ResWithAtoms_exposer.def( bp::self != bp::other< SireID::ID >() );
         ResWithAtoms_exposer.def( bp::self != bp::self );
         { //::SireMol::ResWithAtoms::operator=
         

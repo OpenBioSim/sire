@@ -229,7 +229,10 @@ try:
             for i in range(0, openmm.Platform.getNumPlatforms()):
                 p = openmm.Platform.getPlatform(i)
 
-                if p.getName() == desired_platform:
+                if (p.getName().lower() == desired_platform.lower()) or (
+                    p.getName() == "HIP"
+                    and desired_platform.lower() == "metal"
+                ):
                     platform = p
                     break
                 else:
@@ -243,14 +246,37 @@ try:
                     f"openmm. Available platforms are [{platforms}]"
                 )
         else:
-            # just find the fastest platform
-            speed = 0
+            # just find the fastest platform - this will be "metal" if that
+            # is available and we are on Mac, or CUDA if CUDA works,
+            # or OpenCL if OpenCL works, or CPU if nothing is left...
+            import sys
+
+            platforms = {}
+
             for i in range(0, openmm.Platform.getNumPlatforms()):
                 p = openmm.Platform.getPlatform(i)
+                platforms[p.getName().lower()] = p
 
-                if p.getSpeed() > speed:
-                    platform = p
-                    speed = platform.getSpeed()
+            platform = None
+
+            if sys.platform == "darwin":
+                if "hip" in platforms:
+                    platform = platforms["hip"]
+                elif "metal" in platforms:
+                    platform = platforms["metal"]
+
+            if platform is None:
+                if "cuda" in platforms:
+                    platform = platforms["cuda"]
+
+                elif "opencl" in platforms:
+                    platform = platforms["opencl"]
+
+                elif "cpu" in platforms:
+                    platform = platforms["cpu"]
+
+                elif len(platforms) > 0:
+                    platform = platforms[platforms.keys()[0]]
 
             if platform is None:
                 raise ValueError(

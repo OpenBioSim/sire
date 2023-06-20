@@ -436,7 +436,7 @@ static void assert_valid_bond_function(int func_type)
 }
 
 // the value used to indicate that the parameter needs to be resolved
-static double unresolved_parameter_value = std::numeric_limits<double>::infinity();
+static double unresolved_parameter_value = std::numeric_limits<double>::max();
 
 /** Construct a bond that is of the specified type, but the parameters have yet
     to be resolved. This is because Gromacs can indicate the required type of

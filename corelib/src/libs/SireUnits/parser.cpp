@@ -184,6 +184,20 @@ GeneralUnit::GeneralUnit(const QString &value) : Unit(0)
     }
 }
 
+bool _is_celsius(const QString &unit)
+{
+    return (unit == "celsius") or
+           (unit == "°C") or
+           (unit == "oC");
+}
+
+bool _is_fahrenheit(const QString &unit)
+{
+    return (unit == "fahrenheit") or
+           (unit == "°F") or
+           (unit == "oF");
+}
+
 /** Construct a value as 'value' * 'unit', where 'unit' is
  *  interpreted from the passed string
  */
@@ -211,11 +225,11 @@ GeneralUnit::GeneralUnit(double value, const QString &unit) : Unit(0)
         this->operator=(GeneralUnit(value));
         return;
     }
-    else if (processed_unit == "celsius" or processed_unit == "°C")
+    else if (_is_celsius(processed_unit))
     {
         this->operator=(GeneralUnit(Celsius(value)));
     }
-    else if (processed_unit == "fahrenheit" or processed_unit == "°F")
+    else if (_is_fahrenheit(processed_unit))
     {
         this->operator=(GeneralUnit(Fahrenheit(value)));
     }
@@ -232,11 +246,11 @@ double GeneralUnit::to(const QString &units) const
 {
     QString processed_unit = units.simplified();
 
-    if (processed_unit == "celsius" or processed_unit == "°C")
+    if (_is_celsius(processed_unit))
     {
         return this->to(Celsius());
     }
-    else if (processed_unit == "fahrenheit" or processed_unit == "°F")
+    else if (_is_fahrenheit(processed_unit))
     {
         return this->to(Fahrenheit());
     }

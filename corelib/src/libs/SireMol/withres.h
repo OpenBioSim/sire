@@ -82,7 +82,11 @@ namespace SireMol
         ChainsWithRes &operator=(const ChainsWithRes &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const ChainsWithRes &other) const;
         bool operator!=(const ChainsWithRes &other) const;

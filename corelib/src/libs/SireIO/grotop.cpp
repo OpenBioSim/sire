@@ -4688,7 +4688,7 @@ QString GroTop::toString() const
 /** Return the format name that is used to identify this file format within Sire */
 QString GroTop::formatName() const
 {
-    return "GroTop";
+    return "GROTOP";
 }
 
 /** Return a description of the file format */
@@ -4700,7 +4700,7 @@ QString GroTop::formatDescription() const
 /** Return the suffixes that these files are normally associated with */
 QStringList GroTop::formatSuffix() const
 {
-    static const QStringList suffixes = {"top"};
+    static const QStringList suffixes = {"top", "grotop", "gtop"};
     return suffixes;
 }
 

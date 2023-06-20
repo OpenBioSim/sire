@@ -87,7 +87,11 @@ namespace SireMol
         AtomIdentifier &operator=(const AtomID &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const AtomIdentifier &other) const;
         bool operator!=(const AtomIdentifier &other) const;
@@ -95,6 +99,7 @@ namespace SireMol
         bool operator==(const AtomID &other) const;
         bool operator!=(const AtomID &other) const;
 
+        using AtomID::map;
         QList<AtomIdx> map(const MolInfo &molinfo) const;
 
     private:

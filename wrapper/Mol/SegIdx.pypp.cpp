@@ -118,6 +118,7 @@ void register_SegIdx_class(){
                 , "" );
         
         }
+        SegIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::SegIdx::operator=
         
             typedef ::SireMol::SegIdx & ( ::SireMol::SegIdx::*assign_function_type)( ::SireMol::SegIdx const & ) ;

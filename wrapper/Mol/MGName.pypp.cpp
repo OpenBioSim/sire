@@ -75,6 +75,7 @@ void register_MGName_class(){
                 , "" );
         
         }
+        MGName_exposer.def( bp::self != bp::other< SireID::ID >() );
         MGName_exposer.def( bp::self != bp::self );
         { //::SireMol::MGName::operator=
         

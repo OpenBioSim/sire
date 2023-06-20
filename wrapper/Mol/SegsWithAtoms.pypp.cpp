@@ -81,6 +81,7 @@ void register_SegsWithAtoms_class(){
                 , "Map this ID to the list of indicies of segments that match this ID\nThrow: SireMol::missing_segment\nThrow: SireError::invalid_index\n" );
         
         }
+        SegsWithAtoms_exposer.def( bp::self != bp::other< SireID::ID >() );
         SegsWithAtoms_exposer.def( bp::self != bp::self );
         { //::SireMol::SegsWithAtoms::operator=
         

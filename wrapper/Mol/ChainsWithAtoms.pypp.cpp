@@ -81,6 +81,7 @@ void register_ChainsWithAtoms_class(){
                 , "Map this ID to the list of indicies of chains that match this ID\nThrow: SireMol::missing_chain\nThrow: SireError::invalid_index\n" );
         
         }
+        ChainsWithAtoms_exposer.def( bp::self != bp::other< SireID::ID >() );
         ChainsWithAtoms_exposer.def( bp::self != bp::self );
         { //::SireMol::ChainsWithAtoms::operator=
         

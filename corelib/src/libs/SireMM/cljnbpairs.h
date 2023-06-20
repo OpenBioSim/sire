@@ -292,6 +292,8 @@ namespace SireMM
 
         int nExcludedAtoms(const AtomID &atomid) const;
         QVector<AtomIdx> excludedAtoms(const AtomID &atomid) const;
+
+        QHash<AtomIdx, QVector<AtomIdx>> excludedAtoms(CGIdx cgidx) const;
     };
 
 } // namespace SireMM

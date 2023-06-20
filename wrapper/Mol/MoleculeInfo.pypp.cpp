@@ -38,6 +38,10 @@ void register_MoleculeInfo_class(){
         bp::scope MoleculeInfo_scope( MoleculeInfo_exposer );
         MoleculeInfo_exposer.def( bp::init< SireMol::MoleculeView const & >(( bp::arg("molecule") ), "Construct to get the MoleculeInfo for the passed molecule") );
         MoleculeInfo_exposer.def( bp::init< SireBase::SharedDataPointer< SireMol::MoleculeInfoData > const & >(( bp::arg("ptr") ), "Construct from the passed shared pointer") );
+        MoleculeInfo_exposer.def( bp::init< QString const &, qint64, QVector< QString > const &, QVector< long long > const & >(( bp::arg("resname"), bp::arg("resnum"), bp::arg("atomnames"), bp::arg("atomnums") ), "Construct a single-residue molecule with passed residue and atom info") );
+        MoleculeInfo_exposer.def( bp::init< QString const &, qint64, QStringList const &, QList< long long > const & >(( bp::arg("resname"), bp::arg("resnum"), bp::arg("atomnames"), bp::arg("atomnums") ), "Construct a single-residue molecule with passed residue and atom info") );
+        MoleculeInfo_exposer.def( bp::init< QVector< QString > const &, QVector< long long > const &, QVector< QVector< QString > > const &, QVector< QVector< long long > > const & >(( bp::arg("resnames"), bp::arg("resnums"), bp::arg("atomnames"), bp::arg("atomnums") ), "Construct a single-residue molecule with passed residue and atom info") );
+        MoleculeInfo_exposer.def( bp::init< QStringList const &, QList< long long > const &, QList< QStringList > const &, QList< QList< long long > > const & >(( bp::arg("resnames"), bp::arg("resnums"), bp::arg("atomnames"), bp::arg("atomnums") ), "Construct a single-residue molecule with passed residue and atom info") );
         MoleculeInfo_exposer.def( bp::init< SireMol::MoleculeInfo const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMol::MoleculeInfo::UID
         

@@ -118,6 +118,7 @@ void register_ChainIdx_class(){
                 , "" );
         
         }
+        ChainIdx_exposer.def( bp::self != bp::other< SireID::ID >() );
         { //::SireMol::ChainIdx::operator=
         
             typedef ::SireMol::ChainIdx & ( ::SireMol::ChainIdx::*assign_function_type)( ::SireMol::ChainIdx const & ) ;

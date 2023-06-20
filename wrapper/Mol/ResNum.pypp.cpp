@@ -110,6 +110,7 @@ void register_ResNum_class(){
                 , "" );
         
         }
+        ResNum_exposer.def( bp::self != bp::other< SireID::ID >() );
         ResNum_exposer.def( bp::self != bp::self );
         ResNum_exposer.def( bp::self < bp::self );
         ResNum_exposer.def( bp::self <= bp::self );

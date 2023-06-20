@@ -63,3 +63,5 @@ tests/cache/*
 #VS Code
 .vscode
 
+.DS_Store
+

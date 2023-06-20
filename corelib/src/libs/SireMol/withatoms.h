@@ -97,7 +97,11 @@ namespace SireMol
         ResWithAtoms &operator=(const ResWithAtoms &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const ResWithAtoms &other) const;
         bool operator!=(const ResWithAtoms &other) const;
@@ -146,7 +150,11 @@ namespace SireMol
         CGsWithAtoms &operator=(const CGsWithAtoms &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const CGsWithAtoms &other) const;
         bool operator!=(const CGsWithAtoms &other) const;
@@ -195,7 +203,11 @@ namespace SireMol
         ChainsWithAtoms &operator=(const ChainsWithAtoms &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const ChainsWithAtoms &other) const;
         bool operator!=(const ChainsWithAtoms &other) const;
@@ -244,7 +256,11 @@ namespace SireMol
         SegsWithAtoms &operator=(const SegsWithAtoms &other);
 
         bool operator==(const SireID::ID &other) const;
-        using SireID::ID::operator!=;
+
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
 
         bool operator==(const SegsWithAtoms &other) const;
         bool operator!=(const SegsWithAtoms &other) const;

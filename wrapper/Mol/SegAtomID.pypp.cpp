@@ -82,6 +82,7 @@ void register_SegAtomID_class(){
         
         }
         SegAtomID_exposer.def( bp::self != bp::self );
+        SegAtomID_exposer.def( bp::self != bp::other< SireID::ID >() );
         SegAtomID_exposer.def( bp::self == bp::self );
         SegAtomID_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::GroupAtomID< SireMol::SegID, SireMol::AtomID >::toString

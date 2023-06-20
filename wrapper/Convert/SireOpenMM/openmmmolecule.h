@@ -83,7 +83,7 @@ namespace SireOpenMM
         QVector<std::tuple<int, int, int, double, double>> ang_params;
 
         /** All the dihedral and improper parameters */
-        QVector<std::tuple<int, int, int, int, double, double, double>> dih_params;
+        QVector<std::tuple<int, int, int, int, int, double, double>> dih_params;
 
         /** All the constraints */
         QVector<std::tuple<int, int, double>> constraints;

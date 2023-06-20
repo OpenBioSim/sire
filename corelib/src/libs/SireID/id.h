@@ -86,10 +86,7 @@ namespace SireID
         virtual bool operator==(const ID &other) const = 0;
 
         /** Comparison operator */
-        virtual bool operator!=(const ID &other) const
-        {
-            return not this->operator==(other);
-        }
+        virtual bool operator!=(const ID &other) const = 0;
 
         /** Use this function in your comparison operators, e.g.
 

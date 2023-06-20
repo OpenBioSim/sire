@@ -61,6 +61,19 @@ void register_CLJNBPairs_class(){
                 , "Return the excluded atoms for the atom matching ID atomid. This\nreturns all of the atoms for which the interaction with atomid is\nequal to zero" );
         
         }
+        { //::SireMM::CLJNBPairs::excludedAtoms
+        
+            typedef ::QHash< SireMol::AtomIdx, QVector< SireMol::AtomIdx > > ( ::SireMM::CLJNBPairs::*excludedAtoms_function_type)( ::SireMol::CGIdx ) const;
+            excludedAtoms_function_type excludedAtoms_function_value( &::SireMM::CLJNBPairs::excludedAtoms );
+            
+            CLJNBPairs_exposer.def( 
+                "excludedAtoms"
+                , excludedAtoms_function_value
+                , ( bp::arg("cgidx") )
+                , bp::release_gil_policy()
+                , "Return all of the excluded atoms for the atoms in the specified\n  CutGroup, returned in a hash indexed by the AtomIdx of those\n  atoms. This is equivalent to calling excludedAtoms individually,\n  but is far more efficient if trying to get all of the\n  excluded atoms in the whole molecule\n" );
+        
+        }
         { //::SireMM::CLJNBPairs::nExcludedAtoms
         
             typedef int ( ::SireMM::CLJNBPairs::*nExcludedAtoms_function_type)(  ) const;

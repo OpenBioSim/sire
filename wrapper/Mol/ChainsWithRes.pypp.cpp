@@ -69,6 +69,7 @@ void register_ChainsWithRes_class(){
                 , "Map this ID to the list of indicies of chains that match this ID\nThrow: SireMol::missing_chain\nThrow: SireError::invalid_index\n" );
         
         }
+        ChainsWithRes_exposer.def( bp::self != bp::other< SireID::ID >() );
         ChainsWithRes_exposer.def( bp::self != bp::self );
         { //::SireMol::ChainsWithRes::operator=
         

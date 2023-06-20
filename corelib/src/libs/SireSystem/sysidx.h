@@ -85,6 +85,11 @@ namespace SireSystem
 
         bool operator==(const SireID::ID &other) const;
 
+        bool operator!=(const SireID::ID &other) const
+        {
+            return not this->operator==(other);
+        }
+
         using SireID::Index_T_<SysIdx>::operator=;
 
         using SireID::Index_T_<SysIdx>::operator==;

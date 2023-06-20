@@ -82,6 +82,7 @@ void register_CGAtomID_class(){
         
         }
         CGAtomID_exposer.def( bp::self != bp::self );
+        CGAtomID_exposer.def( bp::self != bp::other< SireID::ID >() );
         CGAtomID_exposer.def( bp::self == bp::self );
         CGAtomID_exposer.def( bp::self == bp::other< SireID::ID >() );
         { //::SireMol::GroupAtomID< SireMol::CGID, SireMol::AtomID >::toString

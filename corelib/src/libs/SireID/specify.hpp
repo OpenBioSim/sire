@@ -125,21 +125,21 @@ namespace SireID
     /** Construct, using the passed ID and index */
     template <class ID>
     SIRE_OUTOFLINE_TEMPLATE Specify<ID>::Specify(const ID &idobj, qint64 i)
-        : ID(), id(idobj), idxs(SireBase::Range::create(i))
+        : ID(), id(idobj), idxs(SireBase::Range::construct(i))
     {
     }
 
     /** Construct using the passed ID and range */
     template <class ID>
     SIRE_OUTOFLINE_TEMPLATE Specify<ID>::Specify(const ID &idobj, qint64 start, qint64 end)
-        : ID(), id(idobj), idxs(SireBase::Range::create(start, end))
+        : ID(), id(idobj), idxs(SireBase::Range::construct(start, end))
     {
     }
 
     /** Construct using the passed ID and range */
     template <class ID>
     SIRE_OUTOFLINE_TEMPLATE Specify<ID>::Specify(const ID &idobj, qint64 start, qint64 end, qint64 increment)
-        : ID(), id(idobj), idxs(SireBase::Range::create(start, end, increment))
+        : ID(), id(idobj), idxs(SireBase::Range::construct(start, end, increment))
     {
     }
 

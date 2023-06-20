@@ -132,6 +132,8 @@ namespace SireMM
         SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
         SireMol::MolViewPtr operator[](const SireMol::ImproperID &Improper) const;
 
+        using MoleculeView::operator[];
+
         Improper operator()(int i) const;
         SelectorImproper operator()(int i, int j) const;
         SelectorImproper operator()(const SireBase::Slice &slice) const;

@@ -3,6 +3,21 @@ import sire as sr
 import pytest
 
 
+def test_single_molecule_prmtop(tmpdir, ose_mols):
+    mols = ose_mols
+
+    # this makes sure it is now "OSE "
+    assert mols[0].residues()[0].name() == sr.resid(name="OSE")
+
+    dir = tmpdir.mkdir("test_single_molecule_prmtop")
+
+    f = sr.save(mols, dir.join("test"), format=["prm"])
+
+    mols2 = sr.load(f)
+
+    assert mols[0].residues()[0].name() == sr.resid(name="OSE")
+
+
 def test_reverse_dihedral(tmpdir, openmm_interchange_mols):
     mols = openmm_interchange_mols
 

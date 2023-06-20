@@ -88,19 +88,19 @@ const Range &Range::null()
 }
 
 /** Return the range that represents the single value 'i' */
-RangePtr Range::create(qint64 i)
+RangePtr Range::construct(qint64 i)
 {
     return SimpleRange(i);
 }
 
 /** Return the range that represents the range from [start,end) */
-RangePtr Range::create(qint64 start, qint64 end)
+RangePtr Range::construct(qint64 start, qint64 end)
 {
     return SimpleRange(start, end);
 }
 
 /** Return the range that represents the range from [start,end,increment) */
-RangePtr Range::create(qint64 start, qint64 end, qint64 increment)
+RangePtr Range::construct(qint64 start, qint64 end, qint64 increment)
 {
     return SimpleRange(start, end, increment);
 }

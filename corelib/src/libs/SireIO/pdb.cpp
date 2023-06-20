@@ -459,9 +459,6 @@ QString PDBAtom::writeToLine() const
     else if (charge < 0)
         chg = QString("%1-").arg(-charge);
 
-    char line[83];
-    line[82] = '\0';
-
     int num = serial;
 
     if (num < 0)

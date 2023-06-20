@@ -132,6 +132,8 @@ namespace SireMM
         SireMol::MolViewPtr operator[](const QList<qint64> &idxs) const;
         SireMol::MolViewPtr operator[](const SireMol::DihedralID &dihedral) const;
 
+        using MoleculeView::operator[];
+
         Dihedral operator()(int i) const;
         SelectorDihedral operator()(int i, int j) const;
         SelectorDihedral operator()(const SireBase::Slice &slice) const;

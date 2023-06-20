@@ -280,6 +280,9 @@ namespace SireIO
         bool operator==(const MoleculeParser &other) const;
         bool operator!=(const MoleculeParser &other) const;
 
+        using Property::load;
+        using Property::save;
+
         void setScore(double score);
 
         void removeCommentLines(const QString &comment_flag);

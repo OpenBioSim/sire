@@ -87,6 +87,7 @@ void register_MGNum_class(){
         
         }
         MGNum_exposer.def( bp::self != bp::self );
+        MGNum_exposer.def( bp::self != bp::other< SireID::ID >() );
         MGNum_exposer.def( bp::self < bp::self );
         MGNum_exposer.def( bp::self <= bp::self );
         { //::SireMol::MGNum::operator=
