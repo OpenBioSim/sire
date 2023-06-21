@@ -43,6 +43,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   a directory. Sire will automatically recognise these directories on load,
   and will stream-load the frames as needed.
 
+* Added full smarts and smiles searching support, including proper returning
+  and querying of sub-structure matches. This is described in the
+  :doc:`search guide <cheatsheet/search>` and
+  :doc:`new tutorial <tutorial/part05/04_smarts>`.
+
 * Re-worked the progress bar, and how sire communicates from the C++ layer
   up to the Python layer. Progress bars are now created in C++ and are
   thread-safe. They propogate up to the Python layer, meaning that they

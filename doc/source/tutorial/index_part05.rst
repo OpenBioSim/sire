@@ -22,4 +22,5 @@ and parameterising and solvating molecules.
    part05/01_convert
    part05/02_view
    part05/03_smiles
-   part05/04_dynamics
+   part05/04_smarts
+   part05/05_dynamics
