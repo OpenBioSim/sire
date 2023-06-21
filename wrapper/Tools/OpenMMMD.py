@@ -309,10 +309,16 @@ use_restraints = Parameter(
     """Whether or not to use harmonic restaints on the solute atoms.""",
 )
 
+restrained_atoms = Parameter(
+    "restrained atoms",
+    None,
+    """A dictionary of anchor atoms and real atoms attached to the anchor.""",
+)
+
 k_restraint = Parameter(
     "restraint force constant",
     100.0,
-    """Force constant to use for the harmonic restaints.""",
+    """Force constant to use for the harmonic positional restraints (kj/mol/nm-2).""",
 )
 
 heavy_mass_restraint = Parameter(
@@ -901,6 +907,27 @@ def linkbondVectorListToProperty(list):
 
     return prop
 
+def PositionalRestraintsToProperty(posrest_list):
+    """Generates properties to store positional restraint parameters.
+    Args:
+        posrest_list (list): Containts the information required to set up all
+        positional restraints
+    Returns:
+        class 'Sire.Base._Base.Properties': The properties required to
+        set up the positional distance restraint
+    """
+    prop = Sire.Base.Properties()
+
+    i = 0
+    for value in posrest_list:
+        prop.setProperty("Anchor(%d)" % i, Sire.Base.VariantProperty(value[0]))
+        prop.setProperty("Atom(%d)" % i, Sire.Base.VariantProperty(value[1]))
+        prop.setProperty("k(%d)" % i, Sire.Base.VariantProperty(value[2]))
+        i += 1
+
+    prop.setProperty("nrestrainedatoms", Sire.Base.VariantProperty(i))
+
+    return prop
 
 def boreschDistRestraintToProperty(boresch_dict):
     """Generates properties to store information needed to set up the single
@@ -1071,6 +1098,48 @@ def propertyToAtomNumVectorList(prop):
 
     return list
 
+def setupPositionalRestraints(system):
+    # Tag atoms in the system that are listed in the provided restrained atoms file
+    # this is used to activate positional restraints during initialisation 
+    # of the OpenMM integrator
+
+    # parse restrained atoms file
+    if restrained_atoms is None:
+        print ("""Error: if positional restraints are activated you must supply a keyword argument restrained atoms = /path/to/file.""")
+        sys.exit(-1)
+    restrained_dict = restrained_atoms.val
+    keys = restrained_dict.keys()
+
+    molecules = system[MGName("all")].molecules()
+    molnums = molecules.molNums()
+ 
+    # loop over mols and find the molecule containing atom numbers
+    for molnum in molnums:
+        mol = molecules.molecule(molnum)[0].molecule()
+        nats = mol.nAtoms()
+        atoms = mol.atoms()
+
+        restrainedAtoms = []
+
+        for x in range(0, nats):
+            at = atoms[x]
+            atnumber = at.number()
+            atnumberval = atnumber.value()
+            if atnumberval in keys:
+                restrainedAtoms.append((atnumberval, restrained_dict[atnumberval] , k_restraint.val))
+
+        if len(restrainedAtoms) > 0:
+            mol = (
+                mol.edit()
+                .setProperty(
+                    "restrainedatoms",
+                    PositionalRestraintsToProperty(restrainedAtoms),
+                )
+                .commit()
+            )
+            system.update(mol)
+
+    return system
 
 def setupRestraints(system):
     molecules = system[MGName("all")].molecules()
@@ -2673,7 +2742,9 @@ def runFreeNrg():
 
         if use_restraints.val:
             print("Using positional restraints.")
-            system = setupRestraints(system)
+            # JM 05/23 the function below has been deprecated as it no longer works
+            # system = setupRestraints(system)
+            system = setupPositionalRestraints(system)
 
         if turn_on_restraints_mode.val:
             print(

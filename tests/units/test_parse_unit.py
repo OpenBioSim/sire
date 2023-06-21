@@ -374,3 +374,12 @@ def test_default_units(unit1, unit2, tol):
         raise e
 
     sr.units.set_default_units([old_unit1, old_unit2])
+
+
+def test_temperature():
+    assert sr.u("1 kelvin").to("celsius") == pytest.approx(-272.15)
+    assert sr.u("298.15 K").to("celsius") == pytest.approx(25)
+    assert sr.u("25 celsius").to("kelvin") == pytest.approx(298.15)
+    assert sr.u("0 celsius").to("kelvin") == pytest.approx(273.15)
+    assert sr.u("0 kelvin").to("celsius") == pytest.approx(-273.15)
+

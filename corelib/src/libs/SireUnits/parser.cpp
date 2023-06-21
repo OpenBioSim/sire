@@ -248,11 +248,11 @@ double GeneralUnit::to(const QString &units) const
 
     if (_is_celsius(processed_unit))
     {
-        return this->to(Celsius());
+        return this->to(Celsius(1.0));
     }
     else if (_is_fahrenheit(processed_unit))
     {
-        return this->to(Fahrenheit());
+        return this->to(Fahrenheit(1.0));
     }
     else
     {
