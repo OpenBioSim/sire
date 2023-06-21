@@ -28,6 +28,7 @@
 #include "SireMol/chirality.h"
 #include "SireMol/hybridization.h"
 #include "SireMol/iswater.h"
+#include "SireMol/mover_metaid.h"
 
 #include "SireMM/selectorbond.h"
 

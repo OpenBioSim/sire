@@ -29,6 +29,7 @@
 #include "atommatch.h"
 
 #include "SireMol/core.h"
+#include "SireMol/mover_metaid.h"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"

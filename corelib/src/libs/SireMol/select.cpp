@@ -30,6 +30,7 @@
 #include "SireMol/molecules.h"
 #include "SireMol/parser.h"
 #include "SireMol/atommatch.h"
+#include "SireMol/mover_metaid.h"
 
 #include "SireMol/core.h"
 
