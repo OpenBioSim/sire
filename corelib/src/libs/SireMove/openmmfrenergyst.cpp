@@ -1238,19 +1238,24 @@ void OpenMMFrEnergyST::initialise()
 
     /************************************************************RESTRAINTS********************************************************/
 
-    OpenMM::CustomExternalForce *positionalRestraints_openmm = NULL;
+    // JM 05/23 CustomExternalForce has been deprecated as it is not recommended for implementing positional restraints
+    // see thread https://github.com/openmm/openmm/issues/2262
+    //OpenMM::CustomExternalForce *positionalRestraints_openmm = NULL;
+    OpenMM::HarmonicBondForce *positionalRestraints_openmm = NULL;
 
     if (Restraint_flag == true)
     {
-        positionalRestraints_openmm = new OpenMM::CustomExternalForce("k*d2;"
-                                                                      "d2 = max(0.0, d1 - d^2);"
-                                                                      "d1 = (x-xref)^2 + (y-yref)^2  + (z-zref)^2");
-        positionalRestraints_openmm->addPerParticleParameter("xref");
-        positionalRestraints_openmm->addPerParticleParameter("yref");
-        positionalRestraints_openmm->addPerParticleParameter("zref");
-        positionalRestraints_openmm->addPerParticleParameter("k");
-        positionalRestraints_openmm->addPerParticleParameter("d");
+        //positionalRestraints_openmm = new OpenMM::CustomExternalForce("k*d2;"
+        //                                                              "d2 = max(0.0, d1 - d^2);"
+        //                                                              "d1 = (x-xref)^2 + (y-yref)^2  + (z-zref)^2");
+        //positionalRestraints_openmm->addPerParticleParameter("xref");
+        //positionalRestraints_openmm->addPerParticleParameter("yref");
+        //positionalRestraints_openmm->addPerParticleParameter("zref");
+        //positionalRestraints_openmm->addPerParticleParameter("k");
+        //positionalRestraints_openmm->addPerParticleParameter("d");
 
+	positionalRestraints_openmm = new OpenMM::HarmonicBondForce();
+        positionalRestraints_openmm->setUsesPeriodicBoundaryConditions(true);
         system_openmm->addForce(positionalRestraints_openmm);
 
         if (Debug)
@@ -1818,36 +1823,49 @@ void OpenMMFrEnergyST::initialise()
 
                 for (int i = 0; i < nrestrainedatoms; i++)
                 {
+                    int anchornum =
+                        restrainedAtoms.property(QString("Anchor(%1)").arg(i)).asA<VariantProperty>().toInt();
                     int atomnum =
-                        restrainedAtoms.property(QString("AtomNum(%1)").arg(i)).asA<VariantProperty>().toInt();
-                    double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                        restrainedAtoms.property(QString("Atom(%1)").arg(i)).asA<VariantProperty>().toInt(); 
+		    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
 
-                    int openmmindex = AtomNumToOpenMMIndex[atomnum];
+                    int atopenmmindex = AtomNumToOpenMMIndex[atomnum];
+                    int anchoropenmmindex = AtomNumToOpenMMIndex[anchornum];
 
                     if (Debug)
                     {
-                        qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
-                                 << yref << " z " << zref << " k " << k << " d " << d;
+                        //qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
+                        //         << yref << " z " << zref << " k " << k << " d " << d;
+			qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
+                        qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;			
+
                     }
 
-                    int posrestrdim = 5;
-                    std::vector<double> params(posrestrdim);
+                    //int posrestrdim = 5;
+                    //std::vector<double> params(posrestrdim);
 
-                    params[0] = xref * OpenMM::NmPerAngstrom;
-                    params[1] = yref * OpenMM::NmPerAngstrom;
-                    params[2] = zref * OpenMM::NmPerAngstrom;
-                    params[3] = k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm);
-                    params[4] = d * OpenMM::NmPerAngstrom;
+                    //params[0] = xref * OpenMM::NmPerAngstrom;
+                    //params[1] = yref * OpenMM::NmPerAngstrom;
+                    //params[2] = zref * OpenMM::NmPerAngstrom;
+                    //params[3] = k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm);
+                    //params[4] = d * OpenMM::NmPerAngstrom;
 
-                    positionalRestraints_openmm->addParticle(openmmindex, params);
+                    //positionalRestraints_openmm->addParticle(openmmindex, params);
+		    //int dummyidx = system_openmm->addParticle(0);
+                    //std::vector<double> custom_non_bonded_params{ 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.};
+		    //custom_force_field->addParticle(custom_non_bonded_params);
+		    custom_force_field->addExclusion(anchoropenmmindex, atopenmmindex);
+		    positionalRestraints_openmm->addBond(anchoropenmmindex, atopenmmindex, 
+				                         0 * OpenMM::NmPerAngstrom, 
+							 k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm));
                 }
             }
         } // end of restraint flag
-
         // IONS
 
         bool hasConnectivity = molecule.hasProperty("connectivity");
@@ -3466,8 +3484,8 @@ void OpenMMFrEnergyST::createContext(IntegratorWorkspace &workspace, SireUnits::
                 OpenMM::Vec3(c[j].x() * (OpenMM::NmPerAngstrom), c[j].y() * (OpenMM::NmPerAngstrom),
                              c[j].z() * (OpenMM::NmPerAngstrom));
 
-            if (m[j] == 0.0)
-                qDebug() << "\nWARNING - THE MASS OF PARTICLE " << system_index << " is ZERO\n";
+            //if (m[j] == 0.0)
+            //    qDebug() << "\nWARNING - THE MASS OF PARTICLE " << system_index << " is ZERO\n";
 
             if (m[j] > SireMaths::small)
             {
