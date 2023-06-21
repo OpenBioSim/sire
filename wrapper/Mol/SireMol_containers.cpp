@@ -49,6 +49,7 @@
 #include "SireMol/segment.h"
 #include "SireMol/molecule.h"
 #include "SireMol/atomselection.h"
+#include "SireMol/atommatch.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/moleculegroups.h"
 #include "SireMol/mgnum.h"
@@ -142,6 +143,7 @@ void register_SireMol_containers()
 
   register_list<QVector<boost::tuple<MolNum, SireID::Index>>>();
 
+  register_list<QList<AtomMatch>>();
   register_list<QList<Selector<Atom>>>();
 
   register_list<QList<MGIDsAndMaps>>();

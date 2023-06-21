@@ -69,6 +69,7 @@ void register_SelectorM_CutGroup__class(){
         bp::scope SelectorM_CutGroup__scope( SelectorM_CutGroup__exposer );
         SelectorM_CutGroup__exposer.def( bp::init< SireMol::CutGroup const & >(( bp::arg("view") ), "") );
         SelectorM_CutGroup__exposer.def( bp::init< SireMol::Selector< SireMol::CutGroup > const & >(( bp::arg("views") ), "") );
+        SelectorM_CutGroup__exposer.def( bp::init< QList< SireMol::Selector< SireMol::CutGroup > > const & >(( bp::arg("views") ), "") );
         SelectorM_CutGroup__exposer.def( bp::init< SireMol::Molecules const & >(( bp::arg("mols") ), "") );
         SelectorM_CutGroup__exposer.def( bp::init< SireMol::MoleculeGroup const & >(( bp::arg("mols") ), "") );
         SelectorM_CutGroup__exposer.def( bp::init< SireMol::MolGroupsBase const & >(( bp::arg("mols") ), "") );

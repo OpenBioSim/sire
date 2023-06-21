@@ -3,6 +3,8 @@ __all__ = [
     "is_water",
     "Atom",
     "AtomIdx",
+    "AtomMatch",
+    "AtomMatchM",
     "AtomName",
     "AtomNum",
     "BondOrder",
@@ -90,6 +92,8 @@ from ..legacy.Mol import (
     BondOrder,
     Stereochemistry,
     AtomCoords,
+    AtomMatch,
+    AtomMatchM,
 )
 
 from ._cursor import Cursor, Cursors, CursorsM
@@ -335,6 +339,8 @@ def __from_select_result(obj):
         return SelectorM_Segment_(obj)
     elif typ == CutGroup.typename():
         return SelectorM_CutGroup_(obj)
+    elif typ == AtomMatch.typename():
+        return AtomMatchM(obj)
     else:
         from ..mm import SelectorBond, SelectorMBond
 

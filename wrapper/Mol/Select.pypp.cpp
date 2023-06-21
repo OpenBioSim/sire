@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireMol/atommatch.h"
+
 #include "SireMol/core.h"
 
 #include "SireMol/moleculegroup.h"

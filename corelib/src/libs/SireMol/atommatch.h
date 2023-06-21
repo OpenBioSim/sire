@@ -38,10 +38,14 @@ SIRE_BEGIN_HEADER
 namespace SireMol
 {
     class AtomMatch;
+    class AtomMatchM;
 }
 
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomMatch &);
 SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomMatch &);
+
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomMatchM &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomMatchM &);
 
 namespace SireMol
 {
@@ -54,6 +58,7 @@ namespace SireMol
 
     public:
         AtomMatch();
+        AtomMatch(const MoleculeView &molview);
         AtomMatch(const Selector<Atom> &molview, const QList<qint64> &matches);
         AtomMatch(const Selector<Atom> &molview, const QList<QList<qint64>> &matches);
 
@@ -72,7 +77,7 @@ namespace SireMol
             return new AtomMatch(*this);
         }
 
-        AtomMatch &operator=(const AtomMatch &AtomMatch);
+        AtomMatch &operator=(const AtomMatch &other);
 
         bool operator==(const AtomMatch &other) const;
         bool operator!=(const AtomMatch &other) const;
@@ -92,13 +97,57 @@ namespace SireMol
 
     /** This class holds the result of performing a match on multiple
      *  molecules */
-    // class SIREMOL_EXPORT AtomMatchM : public SireBase::ConcreteProperty<AtomMatchM, SelectorM<Atom>>
+    class SIREMOL_EXPORT AtomMatchM : public SireBase::ConcreteProperty<AtomMatchM, SelectorM<Atom>>
+    {
+
+        friend QDataStream & ::operator<<(QDataStream &, const AtomMatchM &);
+        friend QDataStream & ::operator>>(QDataStream &, AtomMatchM &);
+
+    public:
+        AtomMatchM();
+        AtomMatchM(const AtomMatch &match);
+        AtomMatchM(const QList<AtomMatch> &matches);
+        AtomMatchM(const SelectResult &mols);
+
+        AtomMatchM(const AtomMatchM &other);
+        virtual ~AtomMatchM();
+
+        static const char *typeName();
+
+        virtual const char *what() const
+        {
+            return AtomMatchM::typeName();
+        }
+
+        virtual AtomMatchM *clone() const
+        {
+            return new AtomMatchM(*this);
+        }
+
+        AtomMatchM &operator=(const AtomMatchM &other);
+
+        bool operator==(const AtomMatchM &other) const;
+        bool operator!=(const AtomMatchM &other) const;
+
+        QString toString() const;
+
+        int nGroups() const;
+
+        Selector<Atom> group(int i) const;
+
+        QList<Selector<Atom>> groups() const;
+
+    protected:
+        QList<AtomMatch> matches;
+    };
 
 } // namespace SireMM
 
 Q_DECLARE_METATYPE(SireMol::AtomMatch)
+Q_DECLARE_METATYPE(SireMol::AtomMatchM)
 
 SIRE_EXPOSE_CLASS(SireMol::AtomMatch)
+SIRE_EXPOSE_CLASS(SireMol::AtomMatchM)
 
 SIRE_END_HEADER
 

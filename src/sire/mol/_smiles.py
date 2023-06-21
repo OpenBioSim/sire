@@ -77,9 +77,9 @@ if _has_rdkit:
             smarts = []
 
             if include_hydrogens:
-                water = "[#8]1-[H][H]-1"
+                water = "[#1]-[#8]-[#1]"
             else:
-                water = "[#8]"
+                water = "[OH2]"
 
             for mol in obj:
                 smarts.append(s.get(mol.number().value(), water))
@@ -366,9 +366,9 @@ if _has_rdkit:
                 obj = obj["water"]
                 if obj.selected_all():
                     if include_hydrogens:
-                        smarts = "[#8]1-[H][H]-1"
+                        smarts = "[#1]-[#8]-[#1]"
                     else:
-                        smarts = "[#8]"
+                        smarts = "[OH2]"
 
                     if as_search:
                         return f"smarts {smarts}"

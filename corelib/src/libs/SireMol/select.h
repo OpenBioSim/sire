@@ -140,6 +140,7 @@ namespace SireMol
                 SEGMENT = 8,
                 CUTGROUP = 9,
                 MOLECULE = 10,
+                MATCH = 11,
                 VIEW = 99
             };
 

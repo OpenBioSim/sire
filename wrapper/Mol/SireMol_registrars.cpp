@@ -147,6 +147,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::AtomIdx >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMasses >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMatch >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomMatchM >();
     ObjectRegistry::registerConverterFor< SireMol::AtomResultMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMatchInverter >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIdxMatcher >();

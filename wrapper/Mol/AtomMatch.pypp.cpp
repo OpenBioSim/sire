@@ -37,6 +37,7 @@ void register_AtomMatch_class(){
         typedef bp::class_< SireMol::AtomMatch, bp::bases< SireMol::Selector<SireMol::Atom>, SireMol::MoleculeView, SireBase::Property > > AtomMatch_exposer_t;
         AtomMatch_exposer_t AtomMatch_exposer = AtomMatch_exposer_t( "AtomMatch", "This class holds the results of performing a match on a molecule.", bp::init< >("") );
         bp::scope AtomMatch_scope( AtomMatch_exposer );
+        AtomMatch_exposer.def( bp::init< SireMol::MoleculeView const & >(( bp::arg("molview") ), "") );
         AtomMatch_exposer.def( bp::init< SireMol::Selector< SireMol::Atom > const &, QList< long long > const & >(( bp::arg("molview"), bp::arg("matches") ), "") );
         AtomMatch_exposer.def( bp::init< SireMol::Selector< SireMol::Atom > const &, QList< QList< long long > > const & >(( bp::arg("molview"), bp::arg("matches") ), "") );
         AtomMatch_exposer.def( bp::init< SireMol::AtomMatch const & >(( bp::arg("other") ), "") );
@@ -86,7 +87,7 @@ void register_AtomMatch_class(){
             AtomMatch_exposer.def( 
                 "assign"
                 , assign_function_value
-                , ( bp::arg("AtomMatch") )
+                , ( bp::arg("other") )
                 , bp::return_self< >()
                 , "" );
         

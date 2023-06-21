@@ -65,6 +65,8 @@
 
 #include "AtomMatchInverter.pypp.hpp"
 
+#include "AtomMatchM.pypp.hpp"
+
 #include "AtomMatcher.pypp.hpp"
 
 #include "AtomMultiMatcher.pypp.hpp"
@@ -710,6 +712,10 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_AtomMatchInverter_class();
 
+    register_SelectorM_Atom__class();
+
+    register_AtomMatchM_class();
+
     register_AtomMultiMatcher_class();
 
     register_AtomName_class();
@@ -1103,8 +1109,6 @@ BOOST_PYTHON_MODULE(_Mol){
     register_SelectResult_class();
 
     register_SelectResultMover_class();
-
-    register_SelectorM_Atom__class();
 
     register_SelectorM_Chain__class();
 

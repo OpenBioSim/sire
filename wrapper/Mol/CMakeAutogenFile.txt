@@ -29,6 +29,7 @@ set ( PYPP_SOURCES
        AtomMasses.pypp.cpp
        AtomMatch.pypp.cpp
        AtomMatchInverter.pypp.cpp
+       AtomMatchM.pypp.cpp
        AtomMatcher.pypp.cpp
        AtomMultiMatcher.pypp.cpp
        AtomName.pypp.cpp

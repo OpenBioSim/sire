@@ -190,6 +190,8 @@ MolViewPtr SireMol::parser::SelectEngine::expandMol(const MoleculeView &mol) con
         return mol.segments();
     case SelectEngine::MOLECULE:
         return mol.molecule();
+    case SelectEngine::MATCH:
+        return AtomMatch(mol);
     default:
         return mol;
     }
@@ -248,6 +250,13 @@ SelectResult SireMol::parser::SelectEngine::expand(const SelectResult &results) 
         for (auto result : results)
         {
             expanded.append(result->molecule());
+        }
+    }
+    else if (objtyp == SelectEngine::MATCH)
+    {
+        for (auto result : results)
+        {
+            expanded.append(AtomMatch(result.read()));
         }
     }
     else if (objtyp == SelectEngine::VIEW)
