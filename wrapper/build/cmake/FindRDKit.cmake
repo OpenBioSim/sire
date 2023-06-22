@@ -63,6 +63,8 @@ else()
                                   HINTS ${RDKIT_LIBRARY_DIR})
       find_library(DISTGEOMHELPERS_LIB NAMES DistGeomHelpers RDKitDistGeomHelpers
                                   HINTS ${RDKIT_LIBRARY_DIR})
+      find_library(SUBSTRUCTMATCH_LIB NAMES SubstructMatch RDKitSubstructMatch
+                                  HINTS ${RDKIT_LIBRARY_DIR})
 
       set (RDKIT_LIBRARIES ${GRAPHMOL_LIB}            # RDKit::ROMol et al
                            ${RDGENERAL_LIB}           # Base RDKit objects
@@ -71,6 +73,7 @@ else()
                            ${DISTGEOMHELPERS_LIB}     # Optimize geometries
                            ${FORCEFIELD_LIB}          # Add forcefields to molecules
                            ${FORCEFIELD_HELPERS_LIB}  # Add forcefields to molecules
+                           ${SUBSTRUCTMATCH_LIB}      # Substructure matching
            )
     endif()
     if(RDKIT_LIBRARIES)
