@@ -32,6 +32,7 @@
 #include "SireMol/atom.h"
 #include "SireMol/selector.hpp"
 #include "SireMol/selectorm.hpp"
+#include "SireMol/partialmolecule.h"
 
 SIRE_BEGIN_HEADER
 
@@ -50,7 +51,7 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomMatchM &);
 namespace SireMol
 {
     /** This class holds the results of performing a match on a molecule. */
-    class SIREMOL_EXPORT AtomMatch : public SireBase::ConcreteProperty<AtomMatch, Selector<Atom>>
+    class SIREMOL_EXPORT AtomMatch : public SireBase::ConcreteProperty<AtomMatch, PartialMolecule>
     {
 
         friend QDataStream & ::operator<<(QDataStream &, const AtomMatch &);
@@ -97,7 +98,7 @@ namespace SireMol
 
     /** This class holds the result of performing a match on multiple
      *  molecules */
-    class SIREMOL_EXPORT AtomMatchM : public SireBase::ConcreteProperty<AtomMatchM, SelectorM<Atom>>
+    class SIREMOL_EXPORT AtomMatchM : public SireBase::ConcreteProperty<AtomMatchM, SireBase::Property>
     {
 
         friend QDataStream & ::operator<<(QDataStream &, const AtomMatchM &);
@@ -130,6 +131,8 @@ namespace SireMol
         bool operator!=(const AtomMatchM &other) const;
 
         QString toString() const;
+
+        bool isEmpty() const;
 
         int nGroups() const;
 

@@ -509,6 +509,58 @@ void register_MoleculeGroup_class(){
                 , "Return a reference to the first molecule in the group\nThrow: SireError::invalid_index\n" );
         
         }
+        { //::SireMol::MoleculeGroup::forceAdd
+        
+            typedef void ( ::SireMol::MoleculeGroup::*forceAdd_function_type)( ::SireMol::MoleculeView const & ) ;
+            forceAdd_function_type forceAdd_function_value( &::SireMol::MoleculeGroup::forceAdd );
+            
+            MoleculeGroup_exposer.def( 
+                "forceAdd"
+                , forceAdd_function_value
+                , ( bp::arg("molview") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MoleculeGroup::forceAdd
+        
+            typedef void ( ::SireMol::MoleculeGroup::*forceAdd_function_type)( ::SireMol::ViewsOfMol const & ) ;
+            forceAdd_function_type forceAdd_function_value( &::SireMol::MoleculeGroup::forceAdd );
+            
+            MoleculeGroup_exposer.def( 
+                "forceAdd"
+                , forceAdd_function_value
+                , ( bp::arg("molviews") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MoleculeGroup::forceAdd
+        
+            typedef void ( ::SireMol::MoleculeGroup::*forceAdd_function_type)( ::SireMol::Molecules const & ) ;
+            forceAdd_function_type forceAdd_function_value( &::SireMol::MoleculeGroup::forceAdd );
+            
+            MoleculeGroup_exposer.def( 
+                "forceAdd"
+                , forceAdd_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MoleculeGroup::forceAdd
+        
+            typedef void ( ::SireMol::MoleculeGroup::*forceAdd_function_type)( ::SireMol::MoleculeGroup const & ) ;
+            forceAdd_function_type forceAdd_function_value( &::SireMol::MoleculeGroup::forceAdd );
+            
+            MoleculeGroup_exposer.def( 
+                "forceAdd"
+                , forceAdd_function_value
+                , ( bp::arg("MoleculeGroup") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::MoleculeGroup::front
         
             typedef ::SireMol::ViewsOfMol const & ( ::SireMol::MoleculeGroup::*front_function_type)(  ) const;

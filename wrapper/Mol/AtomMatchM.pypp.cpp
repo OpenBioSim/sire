@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 #include "SireMol/errors.h"
 
+#include "SireMol/mover_metaid.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -29,12 +31,10 @@ SireMol::AtomMatchM __copy__(const SireMol::AtomMatchM &other){ return SireMol::
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "Helpers/len.hpp"
-
 void register_AtomMatchM_class(){
 
     { //::SireMol::AtomMatchM
-        typedef bp::class_< SireMol::AtomMatchM, bp::bases< SireMol::SelectorM<SireMol::Atom>, SireBase::Property > > AtomMatchM_exposer_t;
+        typedef bp::class_< SireMol::AtomMatchM, bp::bases< SireBase::Property > > AtomMatchM_exposer_t;
         AtomMatchM_exposer_t AtomMatchM_exposer = AtomMatchM_exposer_t( "AtomMatchM", "This class holds the result of performing a match on multiple\nmolecules", bp::init< >("") );
         bp::scope AtomMatchM_scope( AtomMatchM_exposer );
         AtomMatchM_exposer.def( bp::init< SireMol::AtomMatch const & >(( bp::arg("match") ), "") );
@@ -62,6 +62,18 @@ void register_AtomMatchM_class(){
             AtomMatchM_exposer.def( 
                 "groups"
                 , groups_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::isEmpty
+        
+            typedef bool ( ::SireMol::AtomMatchM::*isEmpty_function_type)(  ) const;
+            isEmpty_function_type isEmpty_function_value( &::SireMol::AtomMatchM::isEmpty );
+            
+            AtomMatchM_exposer.def( 
+                "isEmpty"
+                , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -140,7 +152,6 @@ void register_AtomMatchM_class(){
         AtomMatchM_exposer.def_pickle(sire_pickle_suite< ::SireMol::AtomMatchM >());
         AtomMatchM_exposer.def( "__str__", &__str__< ::SireMol::AtomMatchM > );
         AtomMatchM_exposer.def( "__repr__", &__str__< ::SireMol::AtomMatchM > );
-        AtomMatchM_exposer.def( "__len__", &__len_size< ::SireMol::AtomMatchM > );
     }
 
 }

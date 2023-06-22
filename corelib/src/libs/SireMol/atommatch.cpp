@@ -52,7 +52,7 @@ SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const AtomMatch &match)
     writeHeader(ds, r_atommatch, 1);
 
     SharedDataStream sds(ds);
-    sds << match.matches << match.reference << static_cast<const Selector<Atom> &>(match);
+    sds << match.matches << match.reference << static_cast<const PartialMolecule &>(match);
 
     return ds;
 }
@@ -64,7 +64,7 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, AtomMatch &match)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> match.matches >> match.reference >> static_cast<Selector<Atom> &>(match);
+        sds >> match.matches >> match.reference >> static_cast<PartialMolecule &>(match);
     }
     else
         throw SireStream::version_error(v, "1", r_atommatch, CODELOC);
@@ -72,12 +72,12 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, AtomMatch &match)
     return ds;
 }
 
-AtomMatch::AtomMatch() : ConcreteProperty<AtomMatch, Selector<Atom>>()
+AtomMatch::AtomMatch() : ConcreteProperty<AtomMatch, PartialMolecule>()
 {
 }
 
 AtomMatch::AtomMatch(const MoleculeView &molview)
-    : ConcreteProperty<AtomMatch, Selector<Atom>>()
+    : ConcreteProperty<AtomMatch, PartialMolecule>()
 {
     if (molview.isA<AtomMatch>())
     {
@@ -104,14 +104,14 @@ AtomMatch::AtomMatch(const MoleculeView &molview)
 }
 
 AtomMatch::AtomMatch(const Selector<Atom> &molview, const QList<qint64> &m)
-    : ConcreteProperty<AtomMatch, Selector<Atom>>()
+    : ConcreteProperty<AtomMatch, PartialMolecule>()
 {
     if (not m.isEmpty())
         this->operator=(AtomMatch(molview, QList<QList<qint64>>({m})));
 }
 
 AtomMatch::AtomMatch(const Selector<Atom> &molview, const QList<QList<qint64>> &m)
-    : ConcreteProperty<AtomMatch, Selector<Atom>>()
+    : ConcreteProperty<AtomMatch, PartialMolecule>()
 {
     const int count = molview.count();
 
@@ -146,12 +146,12 @@ AtomMatch::AtomMatch(const Selector<Atom> &molview, const QList<QList<qint64>> &
         QList<qint64> atoms(idxs.constBegin(), idxs.constEnd());
         std::sort(atoms.begin(), atoms.end());
 
-        Selector<Atom>::operator=(reference(atoms));
+        PartialMolecule::operator=(reference(atoms));
     }
 }
 
 AtomMatch::AtomMatch(const AtomMatch &other)
-    : ConcreteProperty<AtomMatch, Selector<Atom>>(other),
+    : ConcreteProperty<AtomMatch, PartialMolecule>(other),
       reference(other.reference), matches(other.matches)
 {
 }
@@ -171,7 +171,7 @@ AtomMatch &AtomMatch::operator=(const AtomMatch &other)
     {
         reference = other.reference;
         matches = other.matches;
-        Selector<Atom>::operator=(other);
+        PartialMolecule::operator=(other);
     }
 
     return *this;
@@ -179,7 +179,7 @@ AtomMatch &AtomMatch::operator=(const AtomMatch &other)
 
 bool AtomMatch::operator==(const AtomMatch &other) const
 {
-    return matches == other.matches and Selector<Atom>::operator==(other);
+    return matches == other.matches and PartialMolecule::operator==(other);
 }
 
 bool AtomMatch::operator!=(const AtomMatch &other) const
@@ -294,7 +294,7 @@ SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const AtomMatchM &match)
     writeHeader(ds, r_atommatchm, 1);
 
     SharedDataStream sds(ds);
-    sds << match.matches << static_cast<const SelectorM<Atom> &>(match);
+    sds << match.matches << static_cast<const Property &>(match);
 
     return ds;
 }
@@ -306,7 +306,7 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, AtomMatchM &match)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> match.matches >> static_cast<SelectorM<Atom> &>(match);
+        sds >> match.matches >> static_cast<Property &>(match);
     }
     else
         throw SireStream::version_error(v, "1", r_atommatchm, CODELOC);
@@ -315,12 +315,12 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, AtomMatchM &match)
 }
 
 AtomMatchM::AtomMatchM()
-    : ConcreteProperty<AtomMatchM, SelectorM<Atom>>()
+    : ConcreteProperty<AtomMatchM, Property>()
 {
 }
 
 AtomMatchM::AtomMatchM(const AtomMatch &match)
-    : ConcreteProperty<AtomMatchM, SelectorM<Atom>>()
+    : ConcreteProperty<AtomMatchM, Property>()
 {
     if (not match.isEmpty())
     {
@@ -329,24 +329,19 @@ AtomMatchM::AtomMatchM(const AtomMatch &match)
 }
 
 AtomMatchM::AtomMatchM(const QList<AtomMatch> &m)
-    : ConcreteProperty<AtomMatchM, SelectorM<Atom>>()
+    : ConcreteProperty<AtomMatchM, Property>()
 {
-    QList<Selector<Atom>> atoms;
-
     for (const auto &match : m)
     {
         if (not match.isEmpty())
         {
-            atoms.append(match);
             matches.append(match);
         }
     }
-
-    SelectorM<Atom>::operator=(SelectorM<Atom>(atoms));
 }
 
 AtomMatchM::AtomMatchM(const SelectResult &mols)
-    : ConcreteProperty<AtomMatchM, SelectorM<Atom>>()
+    : ConcreteProperty<AtomMatchM, Property>()
 {
     QList<AtomMatch> atoms;
 
@@ -359,7 +354,7 @@ AtomMatchM::AtomMatchM(const SelectResult &mols)
 }
 
 AtomMatchM::AtomMatchM(const AtomMatchM &other)
-    : ConcreteProperty<AtomMatchM, SelectorM<Atom>>(other),
+    : ConcreteProperty<AtomMatchM, Property>(other),
       matches(other.matches)
 {
 }
@@ -378,7 +373,7 @@ AtomMatchM &AtomMatchM::operator=(const AtomMatchM &other)
     if (this != &other)
     {
         matches = other.matches;
-        SelectorM<Atom>::operator=(other);
+        Property::operator=(other);
     }
 
     return *this;
@@ -387,12 +382,17 @@ AtomMatchM &AtomMatchM::operator=(const AtomMatchM &other)
 bool AtomMatchM::operator==(const AtomMatchM &other) const
 {
     return matches == other.matches and
-           SelectorM<Atom>::operator==(other);
+           Property::operator==(other);
 }
 
 bool AtomMatchM::operator!=(const AtomMatchM &other) const
 {
     return not this->operator==(other);
+}
+
+bool AtomMatchM::isEmpty() const
+{
+    return this->matches.isEmpty();
 }
 
 QString AtomMatchM::toString() const
@@ -486,10 +486,7 @@ Selector<Atom> AtomMatchM::group(int i) const
 
         if (i < n)
         {
-            const auto mols = this->molecules();
-            auto atoms = match.group(i);
-            atoms.update(mols[atoms.data().number()].data());
-            return atoms;
+            return match.group(i);
         }
         else
         {
@@ -509,11 +506,8 @@ QList<Selector<Atom>> AtomMatchM::groups() const
 {
     QList<Selector<Atom>> ret;
 
-    const auto mols = this->molecules();
-
     for (auto match : matches)
     {
-        match.update(mols[match.data().number()].data());
         ret += match.groups();
     }
 

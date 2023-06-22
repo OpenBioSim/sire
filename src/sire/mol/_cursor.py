@@ -1132,7 +1132,12 @@ class Cursor:
         # get the type right...
         orig_name = self._view.name()
 
-        self._view.rename(orig_name.__class__(name))
+        try:
+            self._view.rename(orig_name.__class__(name))
+        except Exception:
+            # This is a molecule, so can set name using a string
+            self._view.rename(name)
+
         self._d.molecule = self._view.molecule()
 
         return self
@@ -1173,8 +1178,10 @@ class Cursor:
         return self
 
     def get_index(self):
-        """Return the index of the current view. This returns it as
-        as simple number (i.e. not as an AtomIdx, ResIdx etc)"""
+        """
+        Return the index of the current view. This returns it as
+        as simple number (i.e. not as an AtomIdx, ResIdx etc)
+        """
         self._update()
 
         if self.is_internal():
@@ -1184,6 +1191,19 @@ class Cursor:
             )
 
         return self._view.index().value()
+
+    def renumber(self):
+        """
+        Renumber the underlying molecule holding this view. This makes the
+        molecule distinct from its other copies (molecules are uniquely
+        idenfied by their number). You don't have control over the number
+        - this is generated randomly and is guaranteed to not be a number
+        of a molecule that already exists
+        """
+        self._update()
+
+        self._d.molecule.renumber()
+        self._view.update(self._d.molecule)
 
     name = property(get_name, set_name)
     number = property(get_number, set_number)

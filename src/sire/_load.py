@@ -455,7 +455,13 @@ def _to_legacy_system(molecules):
         from .legacy.Mol import MoleculeGroup
 
         m = MoleculeGroup("all")
-        m.add(molecules)
+
+        if type(molecules) is list:
+            for molecule in molecules:
+                m.add(molecule)
+        else:
+            m.add(molecules)
+
         s.add(m)
 
     return s

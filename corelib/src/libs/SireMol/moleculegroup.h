@@ -269,6 +269,11 @@ namespace SireMol
         virtual void add(const Molecules &molecules);
         virtual void add(const MoleculeGroup &MoleculeGroup);
 
+        void forceAdd(const MoleculeView &molview);
+        void forceAdd(const ViewsOfMol &molviews);
+        void forceAdd(const Molecules &molecules);
+        void forceAdd(const MoleculeGroup &MoleculeGroup);
+
         virtual bool addIfUnique(const MoleculeView &molview);
         virtual ViewsOfMol addIfUnique(const ViewsOfMol &molviews);
         virtual QList<ViewsOfMol> addIfUnique(const Molecules &molecules);
