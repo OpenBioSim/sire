@@ -59,8 +59,8 @@ Selector<SireMol::Atom>( size=1
 
 The atoms contained in the :class:`~sire.mol.AtomMatch` object are all
 the ones that are involved in any of the matches. Since this object is
-derived from a standard atom contains (a ``Selector<Atom>``) it can
-be used like any other atom container, e.g.
+also a standard molecule view, it can be used like any other
+molecule view, e.g.
 
 >>> print(m.atoms())
 Selector<SireMol::Atom>( size=6

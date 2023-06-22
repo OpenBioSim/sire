@@ -31,6 +31,8 @@ SireMol::AtomMatchM __copy__(const SireMol::AtomMatchM &other){ return SireMol::
 
 #include "Helpers/release_gil_policy.hpp"
 
+#include "Helpers/len.hpp"
+
 void register_AtomMatchM_class(){
 
     { //::SireMol::AtomMatchM
@@ -41,6 +43,507 @@ void register_AtomMatchM_class(){
         AtomMatchM_exposer.def( bp::init< QList< SireMol::AtomMatch > const & >(( bp::arg("matches") ), "") );
         AtomMatchM_exposer.def( bp::init< SireMol::SelectResult const & >(( bp::arg("mols") ), "") );
         AtomMatchM_exposer.def( bp::init< SireMol::AtomMatchM const & >(( bp::arg("other") ), "") );
+        { //::SireMol::AtomMatchM::IDs
+        
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomMatchM::*IDs_function_type)(  ) const;
+            IDs_function_type IDs_function_value( &::SireMol::AtomMatchM::IDs );
+            
+            AtomMatchM_exposer.def( 
+                "IDs"
+                , IDs_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atom
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*atom_function_type)( int,::SireBase::PropertyMap const & ) const;
+            atom_function_type atom_function_value( &::SireMol::AtomMatchM::atom );
+            
+            AtomMatchM_exposer.def( 
+                "atom"
+                , atom_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atom
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*atom_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            atom_function_type atom_function_value( &::SireMol::AtomMatchM::atom );
+            
+            AtomMatchM_exposer.def( 
+                "atom"
+                , atom_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atom
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*atom_function_type)( ::SireMol::AtomID const &,::SireBase::PropertyMap const & ) const;
+            atom_function_type atom_function_value( &::SireMol::AtomMatchM::atom );
+            
+            AtomMatchM_exposer.def( 
+                "atom"
+                , atom_function_value
+                , ( bp::arg("atomid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atoms
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*atoms_function_type)(  ) const;
+            atoms_function_type atoms_function_value( &::SireMol::AtomMatchM::atoms );
+            
+            AtomMatchM_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atoms
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*atoms_function_type)( int,::SireBase::PropertyMap const & ) const;
+            atoms_function_type atoms_function_value( &::SireMol::AtomMatchM::atoms );
+            
+            AtomMatchM_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atoms
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*atoms_function_type)( ::SireBase::Slice const &,::SireBase::PropertyMap const & ) const;
+            atoms_function_type atoms_function_value( &::SireMol::AtomMatchM::atoms );
+            
+            AtomMatchM_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , ( bp::arg("slice"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atoms
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*atoms_function_type)( ::QList< long long > const &,::SireBase::PropertyMap const & ) const;
+            atoms_function_type atoms_function_value( &::SireMol::AtomMatchM::atoms );
+            
+            AtomMatchM_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , ( bp::arg("idxs"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atoms
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*atoms_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            atoms_function_type atoms_function_value( &::SireMol::AtomMatchM::atoms );
+            
+            AtomMatchM_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::atoms
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*atoms_function_type)( ::SireMol::AtomID const &,::SireBase::PropertyMap const & ) const;
+            atoms_function_type atoms_function_value( &::SireMol::AtomMatchM::atoms );
+            
+            AtomMatchM_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , ( bp::arg("atomid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chain
+        
+            typedef ::SireMol::Chain ( ::SireMol::AtomMatchM::*chain_function_type)( int,::SireBase::PropertyMap const & ) const;
+            chain_function_type chain_function_value( &::SireMol::AtomMatchM::chain );
+            
+            AtomMatchM_exposer.def( 
+                "chain"
+                , chain_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chain
+        
+            typedef ::SireMol::Chain ( ::SireMol::AtomMatchM::*chain_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            chain_function_type chain_function_value( &::SireMol::AtomMatchM::chain );
+            
+            AtomMatchM_exposer.def( 
+                "chain"
+                , chain_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chain
+        
+            typedef ::SireMol::Chain ( ::SireMol::AtomMatchM::*chain_function_type)( ::SireMol::ChainID const &,::SireBase::PropertyMap const & ) const;
+            chain_function_type chain_function_value( &::SireMol::AtomMatchM::chain );
+            
+            AtomMatchM_exposer.def( 
+                "chain"
+                , chain_function_value
+                , ( bp::arg("chainid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chains
+        
+            typedef ::SireMol::SelectorM< SireMol::Chain > ( ::SireMol::AtomMatchM::*chains_function_type)(  ) const;
+            chains_function_type chains_function_value( &::SireMol::AtomMatchM::chains );
+            
+            AtomMatchM_exposer.def( 
+                "chains"
+                , chains_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chains
+        
+            typedef ::SireMol::SelectorM< SireMol::Chain > ( ::SireMol::AtomMatchM::*chains_function_type)( int,::SireBase::PropertyMap const & ) const;
+            chains_function_type chains_function_value( &::SireMol::AtomMatchM::chains );
+            
+            AtomMatchM_exposer.def( 
+                "chains"
+                , chains_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chains
+        
+            typedef ::SireMol::SelectorM< SireMol::Chain > ( ::SireMol::AtomMatchM::*chains_function_type)( ::SireBase::Slice const &,::SireBase::PropertyMap const & ) const;
+            chains_function_type chains_function_value( &::SireMol::AtomMatchM::chains );
+            
+            AtomMatchM_exposer.def( 
+                "chains"
+                , chains_function_value
+                , ( bp::arg("slice"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chains
+        
+            typedef ::SireMol::SelectorM< SireMol::Chain > ( ::SireMol::AtomMatchM::*chains_function_type)( ::QList< long long > const &,::SireBase::PropertyMap const & ) const;
+            chains_function_type chains_function_value( &::SireMol::AtomMatchM::chains );
+            
+            AtomMatchM_exposer.def( 
+                "chains"
+                , chains_function_value
+                , ( bp::arg("idxs"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chains
+        
+            typedef ::SireMol::SelectorM< SireMol::Chain > ( ::SireMol::AtomMatchM::*chains_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            chains_function_type chains_function_value( &::SireMol::AtomMatchM::chains );
+            
+            AtomMatchM_exposer.def( 
+                "chains"
+                , chains_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::chains
+        
+            typedef ::SireMol::SelectorM< SireMol::Chain > ( ::SireMol::AtomMatchM::*chains_function_type)( ::SireMol::ChainID const &,::SireBase::PropertyMap const & ) const;
+            chains_function_type chains_function_value( &::SireMol::AtomMatchM::chains );
+            
+            AtomMatchM_exposer.def( 
+                "chains"
+                , chains_function_value
+                , ( bp::arg("chainid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::contains
+        
+            typedef bool ( ::SireMol::AtomMatchM::*contains_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            contains_function_type contains_function_value( &::SireMol::AtomMatchM::contains );
+            
+            AtomMatchM_exposer.def( 
+                "contains"
+                , contains_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::contains
+        
+            typedef bool ( ::SireMol::AtomMatchM::*contains_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            contains_function_type contains_function_value( &::SireMol::AtomMatchM::contains );
+            
+            AtomMatchM_exposer.def( 
+                "contains"
+                , contains_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::contains
+        
+            typedef bool ( ::SireMol::AtomMatchM::*contains_function_type)( ::SireMol::Atom const & ) const;
+            contains_function_type contains_function_value( &::SireMol::AtomMatchM::contains );
+            
+            AtomMatchM_exposer.def( 
+                "contains"
+                , contains_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::count
+        
+            typedef int ( ::SireMol::AtomMatchM::*count_function_type)(  ) const;
+            count_function_type count_function_value( &::SireMol::AtomMatchM::count );
+            
+            AtomMatchM_exposer.def( 
+                "count"
+                , count_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroup
+        
+            typedef ::SireMol::CutGroup ( ::SireMol::AtomMatchM::*cutGroup_function_type)( int,::SireBase::PropertyMap const & ) const;
+            cutGroup_function_type cutGroup_function_value( &::SireMol::AtomMatchM::cutGroup );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroup"
+                , cutGroup_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroup
+        
+            typedef ::SireMol::CutGroup ( ::SireMol::AtomMatchM::*cutGroup_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            cutGroup_function_type cutGroup_function_value( &::SireMol::AtomMatchM::cutGroup );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroup"
+                , cutGroup_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroup
+        
+            typedef ::SireMol::CutGroup ( ::SireMol::AtomMatchM::*cutGroup_function_type)( ::SireMol::CGID const &,::SireBase::PropertyMap const & ) const;
+            cutGroup_function_type cutGroup_function_value( &::SireMol::AtomMatchM::cutGroup );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroup"
+                , cutGroup_function_value
+                , ( bp::arg("cgid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroups
+        
+            typedef ::SireMol::SelectorM< SireMol::CutGroup > ( ::SireMol::AtomMatchM::*cutGroups_function_type)(  ) const;
+            cutGroups_function_type cutGroups_function_value( &::SireMol::AtomMatchM::cutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroups"
+                , cutGroups_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroups
+        
+            typedef ::SireMol::SelectorM< SireMol::CutGroup > ( ::SireMol::AtomMatchM::*cutGroups_function_type)( int,::SireBase::PropertyMap const & ) const;
+            cutGroups_function_type cutGroups_function_value( &::SireMol::AtomMatchM::cutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroups"
+                , cutGroups_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroups
+        
+            typedef ::SireMol::SelectorM< SireMol::CutGroup > ( ::SireMol::AtomMatchM::*cutGroups_function_type)( ::SireBase::Slice const &,::SireBase::PropertyMap const & ) const;
+            cutGroups_function_type cutGroups_function_value( &::SireMol::AtomMatchM::cutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroups"
+                , cutGroups_function_value
+                , ( bp::arg("slice"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroups
+        
+            typedef ::SireMol::SelectorM< SireMol::CutGroup > ( ::SireMol::AtomMatchM::*cutGroups_function_type)( ::QList< long long > const &,::SireBase::PropertyMap const & ) const;
+            cutGroups_function_type cutGroups_function_value( &::SireMol::AtomMatchM::cutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroups"
+                , cutGroups_function_value
+                , ( bp::arg("idxs"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroups
+        
+            typedef ::SireMol::SelectorM< SireMol::CutGroup > ( ::SireMol::AtomMatchM::*cutGroups_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            cutGroups_function_type cutGroups_function_value( &::SireMol::AtomMatchM::cutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroups"
+                , cutGroups_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::cutGroups
+        
+            typedef ::SireMol::SelectorM< SireMol::CutGroup > ( ::SireMol::AtomMatchM::*cutGroups_function_type)( ::SireMol::CGID const &,::SireBase::PropertyMap const & ) const;
+            cutGroups_function_type cutGroups_function_value( &::SireMol::AtomMatchM::cutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "cutGroups"
+                , cutGroups_function_value
+                , ( bp::arg("cgid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::deleteAllFrames
+        
+            typedef void ( ::SireMol::AtomMatchM::*deleteAllFrames_function_type)(  ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::AtomMatchM::deleteAllFrames );
+            
+            AtomMatchM_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::deleteAllFrames
+        
+            typedef void ( ::SireMol::AtomMatchM::*deleteAllFrames_function_type)( ::SireBase::PropertyMap const & ) ;
+            deleteAllFrames_function_type deleteAllFrames_function_value( &::SireMol::AtomMatchM::deleteAllFrames );
+            
+            AtomMatchM_exposer.def( 
+                "deleteAllFrames"
+                , deleteAllFrames_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::deleteFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*deleteFrame_function_type)( int ) ;
+            deleteFrame_function_type deleteFrame_function_value( &::SireMol::AtomMatchM::deleteFrame );
+            
+            AtomMatchM_exposer.def( 
+                "deleteFrame"
+                , deleteFrame_function_value
+                , ( bp::arg("frame") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::deleteFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*deleteFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
+            deleteFrame_function_type deleteFrame_function_value( &::SireMol::AtomMatchM::deleteFrame );
+            
+            AtomMatchM_exposer.def( 
+                "deleteFrame"
+                , deleteFrame_function_value
+                , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::evaluate
+        
+            typedef ::SireMol::EvaluatorM ( ::SireMol::AtomMatchM::*evaluate_function_type)(  ) const;
+            evaluate_function_type evaluate_function_value( &::SireMol::AtomMatchM::evaluate );
+            
+            AtomMatchM_exposer.def( 
+                "evaluate"
+                , evaluate_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::extract
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*extract_function_type)(  ) const;
+            extract_function_type extract_function_value( &::SireMol::AtomMatchM::extract );
+            
+            AtomMatchM_exposer.def( 
+                "extract"
+                , extract_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::find
+        
+            typedef ::QList< long long > ( ::SireMol::AtomMatchM::*find_function_type)( ::SireMol::Atom const & ) const;
+            find_function_type find_function_value( &::SireMol::AtomMatchM::find );
+            
+            AtomMatchM_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::find
+        
+            typedef ::QList< long long > ( ::SireMol::AtomMatchM::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            find_function_type find_function_value( &::SireMol::AtomMatchM::find );
+            
+            AtomMatchM_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::find
+        
+            typedef ::QList< long long > ( ::SireMol::AtomMatchM::*find_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            find_function_type find_function_value( &::SireMol::AtomMatchM::find );
+            
+            AtomMatchM_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::AtomMatchM::group
         
             typedef ::SireMol::Selector< SireMol::Atom > ( ::SireMol::AtomMatchM::*group_function_type)( int ) const;
@@ -66,6 +569,147 @@ void register_AtomMatchM_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomMatchM::hasMetadata
+        
+            typedef bool ( ::SireMol::AtomMatchM::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
+            hasMetadata_function_type hasMetadata_function_value( &::SireMol::AtomMatchM::hasMetadata );
+            
+            AtomMatchM_exposer.def( 
+                "hasMetadata"
+                , hasMetadata_function_value
+                , ( bp::arg("metakey") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::hasMetadata
+        
+            typedef bool ( ::SireMol::AtomMatchM::*hasMetadata_function_type)( ::SireBase::PropertyName const &,::SireBase::PropertyName const & ) const;
+            hasMetadata_function_type hasMetadata_function_value( &::SireMol::AtomMatchM::hasMetadata );
+            
+            AtomMatchM_exposer.def( 
+                "hasMetadata"
+                , hasMetadata_function_value
+                , ( bp::arg("key"), bp::arg("metakey") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::hasProperty
+        
+            typedef bool ( ::SireMol::AtomMatchM::*hasProperty_function_type)( ::SireBase::PropertyName const & ) const;
+            hasProperty_function_type hasProperty_function_value( &::SireMol::AtomMatchM::hasProperty );
+            
+            AtomMatchM_exposer.def( 
+                "hasProperty"
+                , hasProperty_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::indexes
+        
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomMatchM::*indexes_function_type)(  ) const;
+            indexes_function_type indexes_function_value( &::SireMol::AtomMatchM::indexes );
+            
+            AtomMatchM_exposer.def( 
+                "indexes"
+                , indexes_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::intersection
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*intersection_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            intersection_function_type intersection_function_value( &::SireMol::AtomMatchM::intersection );
+            
+            AtomMatchM_exposer.def( 
+                "intersection"
+                , intersection_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::intersection
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*intersection_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            intersection_function_type intersection_function_value( &::SireMol::AtomMatchM::intersection );
+            
+            AtomMatchM_exposer.def( 
+                "intersection"
+                , intersection_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::intersection
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*intersection_function_type)( ::SireMol::Atom const & ) const;
+            intersection_function_type intersection_function_value( &::SireMol::AtomMatchM::intersection );
+            
+            AtomMatchM_exposer.def( 
+                "intersection"
+                , intersection_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::intersects
+        
+            typedef bool ( ::SireMol::AtomMatchM::*intersects_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            intersects_function_type intersects_function_value( &::SireMol::AtomMatchM::intersects );
+            
+            AtomMatchM_exposer.def( 
+                "intersects"
+                , intersects_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::intersects
+        
+            typedef bool ( ::SireMol::AtomMatchM::*intersects_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            intersects_function_type intersects_function_value( &::SireMol::AtomMatchM::intersects );
+            
+            AtomMatchM_exposer.def( 
+                "intersects"
+                , intersects_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::intersects
+        
+            typedef bool ( ::SireMol::AtomMatchM::*intersects_function_type)( ::SireMol::Atom const & ) const;
+            intersects_function_type intersects_function_value( &::SireMol::AtomMatchM::intersects );
+            
+            AtomMatchM_exposer.def( 
+                "intersects"
+                , intersects_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::invert
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*invert_function_type)(  ) const;
+            invert_function_type invert_function_value( &::SireMol::AtomMatchM::invert );
+            
+            AtomMatchM_exposer.def( 
+                "invert"
+                , invert_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::AtomMatchM::isEmpty
         
             typedef bool ( ::SireMol::AtomMatchM::*isEmpty_function_type)(  ) const;
@@ -74,6 +718,238 @@ void register_AtomMatchM_class(){
             AtomMatchM_exposer.def( 
                 "isEmpty"
                 , isEmpty_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::isSelector
+        
+            typedef bool ( ::SireMol::AtomMatchM::*isSelector_function_type)(  ) const;
+            isSelector_function_type isSelector_function_value( &::SireMol::AtomMatchM::isSelector );
+            
+            AtomMatchM_exposer.def( 
+                "isSelector"
+                , isSelector_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::loadFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*loadFrame_function_type)( int ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::AtomMatchM::loadFrame );
+            
+            AtomMatchM_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::loadFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::AtomMatchM::loadFrame );
+            
+            AtomMatchM_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::metadataKeys
+        
+            typedef ::QStringList ( ::SireMol::AtomMatchM::*metadataKeys_function_type)(  ) const;
+            metadataKeys_function_type metadataKeys_function_value( &::SireMol::AtomMatchM::metadataKeys );
+            
+            AtomMatchM_exposer.def( 
+                "metadataKeys"
+                , metadataKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::metadataKeys
+        
+            typedef ::QStringList ( ::SireMol::AtomMatchM::*metadataKeys_function_type)( ::SireBase::PropertyName const & ) const;
+            metadataKeys_function_type metadataKeys_function_value( &::SireMol::AtomMatchM::metadataKeys );
+            
+            AtomMatchM_exposer.def( 
+                "metadataKeys"
+                , metadataKeys_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecule
+        
+            typedef ::SireMol::Molecule ( ::SireMol::AtomMatchM::*molecule_function_type)( int,::SireBase::PropertyMap const & ) const;
+            molecule_function_type molecule_function_value( &::SireMol::AtomMatchM::molecule );
+            
+            AtomMatchM_exposer.def( 
+                "molecule"
+                , molecule_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecule
+        
+            typedef ::SireMol::Molecule ( ::SireMol::AtomMatchM::*molecule_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            molecule_function_type molecule_function_value( &::SireMol::AtomMatchM::molecule );
+            
+            AtomMatchM_exposer.def( 
+                "molecule"
+                , molecule_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecule
+        
+            typedef ::SireMol::Molecule ( ::SireMol::AtomMatchM::*molecule_function_type)( ::SireMol::MolID const &,::SireBase::PropertyMap const & ) ;
+            molecule_function_type molecule_function_value( &::SireMol::AtomMatchM::molecule );
+            
+            AtomMatchM_exposer.def( 
+                "molecule"
+                , molecule_function_value
+                , ( bp::arg("molid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecules
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*molecules_function_type)(  ) const;
+            molecules_function_type molecules_function_value( &::SireMol::AtomMatchM::molecules );
+            
+            AtomMatchM_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecules
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*molecules_function_type)( int,::SireBase::PropertyMap const & ) const;
+            molecules_function_type molecules_function_value( &::SireMol::AtomMatchM::molecules );
+            
+            AtomMatchM_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecules
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*molecules_function_type)( ::SireBase::Slice const &,::SireBase::PropertyMap const & ) const;
+            molecules_function_type molecules_function_value( &::SireMol::AtomMatchM::molecules );
+            
+            AtomMatchM_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , ( bp::arg("slice"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecules
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*molecules_function_type)( ::QList< long long > const &,::SireBase::PropertyMap const & ) const;
+            molecules_function_type molecules_function_value( &::SireMol::AtomMatchM::molecules );
+            
+            AtomMatchM_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , ( bp::arg("idxs"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecules
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*molecules_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            molecules_function_type molecules_function_value( &::SireMol::AtomMatchM::molecules );
+            
+            AtomMatchM_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::molecules
+        
+            typedef ::SireMol::SelectorMol ( ::SireMol::AtomMatchM::*molecules_function_type)( ::SireMol::MolID const &,::SireBase::PropertyMap const & ) const;
+            molecules_function_type molecules_function_value( &::SireMol::AtomMatchM::molecules );
+            
+            AtomMatchM_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , ( bp::arg("molid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nAtoms
+        
+            typedef int ( ::SireMol::AtomMatchM::*nAtoms_function_type)(  ) const;
+            nAtoms_function_type nAtoms_function_value( &::SireMol::AtomMatchM::nAtoms );
+            
+            AtomMatchM_exposer.def( 
+                "nAtoms"
+                , nAtoms_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nChains
+        
+            typedef int ( ::SireMol::AtomMatchM::*nChains_function_type)(  ) const;
+            nChains_function_type nChains_function_value( &::SireMol::AtomMatchM::nChains );
+            
+            AtomMatchM_exposer.def( 
+                "nChains"
+                , nChains_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nCutGroups
+        
+            typedef int ( ::SireMol::AtomMatchM::*nCutGroups_function_type)(  ) const;
+            nCutGroups_function_type nCutGroups_function_value( &::SireMol::AtomMatchM::nCutGroups );
+            
+            AtomMatchM_exposer.def( 
+                "nCutGroups"
+                , nCutGroups_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nFrames
+        
+            typedef int ( ::SireMol::AtomMatchM::*nFrames_function_type)(  ) const;
+            nFrames_function_type nFrames_function_value( &::SireMol::AtomMatchM::nFrames );
+            
+            AtomMatchM_exposer.def( 
+                "nFrames"
+                , nFrames_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nFrames
+        
+            typedef int ( ::SireMol::AtomMatchM::*nFrames_function_type)( ::SireBase::PropertyMap const & ) const;
+            nFrames_function_type nFrames_function_value( &::SireMol::AtomMatchM::nFrames );
+            
+            AtomMatchM_exposer.def( 
+                "nFrames"
+                , nFrames_function_value
+                , ( bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -90,7 +966,103 @@ void register_AtomMatchM_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomMatchM::nMolecules
+        
+            typedef int ( ::SireMol::AtomMatchM::*nMolecules_function_type)(  ) const;
+            nMolecules_function_type nMolecules_function_value( &::SireMol::AtomMatchM::nMolecules );
+            
+            AtomMatchM_exposer.def( 
+                "nMolecules"
+                , nMolecules_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nResidues
+        
+            typedef int ( ::SireMol::AtomMatchM::*nResidues_function_type)(  ) const;
+            nResidues_function_type nResidues_function_value( &::SireMol::AtomMatchM::nResidues );
+            
+            AtomMatchM_exposer.def( 
+                "nResidues"
+                , nResidues_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::nSegments
+        
+            typedef int ( ::SireMol::AtomMatchM::*nSegments_function_type)(  ) const;
+            nSegments_function_type nSegments_function_value( &::SireMol::AtomMatchM::nSegments );
+            
+            AtomMatchM_exposer.def( 
+                "nSegments"
+                , nSegments_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::names
+        
+            typedef ::QList< SireMol::AtomName > ( ::SireMol::AtomMatchM::*names_function_type)(  ) const;
+            names_function_type names_function_value( &::SireMol::AtomMatchM::names );
+            
+            AtomMatchM_exposer.def( 
+                "names"
+                , names_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::numbers
+        
+            typedef ::QList< SireMol::AtomNum > ( ::SireMol::AtomMatchM::*numbers_function_type)(  ) const;
+            numbers_function_type numbers_function_value( &::SireMol::AtomMatchM::numbers );
+            
+            AtomMatchM_exposer.def( 
+                "numbers"
+                , numbers_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         AtomMatchM_exposer.def( bp::self != bp::self );
+        { //::SireMol::AtomMatchM::operator()
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*__call___function_type)( int ) const;
+            __call___function_type __call___function_value( &::SireMol::AtomMatchM::operator() );
+            
+            AtomMatchM_exposer.def( 
+                "__call__"
+                , __call___function_value
+                , ( bp::arg("i") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::operator()
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*__call___function_type)( ::QString const & ) const;
+            __call___function_type __call___function_value( &::SireMol::AtomMatchM::operator() );
+            
+            AtomMatchM_exposer.def( 
+                "__call__"
+                , __call___function_value
+                , ( bp::arg("name") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::operator()
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*__call___function_type)( ::SireMol::Atom::ID const & ) const;
+            __call___function_type __call___function_value( &::SireMol::AtomMatchM::operator() );
+            
+            AtomMatchM_exposer.def( 
+                "__call__"
+                , __call___function_value
+                , ( bp::arg("id") )
+                , "" );
+        
+        }
         { //::SireMol::AtomMatchM::operator=
         
             typedef ::SireMol::AtomMatchM & ( ::SireMol::AtomMatchM::*assign_function_type)( ::SireMol::AtomMatchM const & ) ;
@@ -105,6 +1077,431 @@ void register_AtomMatchM_class(){
         
         }
         AtomMatchM_exposer.def( bp::self == bp::self );
+        { //::SireMol::AtomMatchM::operator[]
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*__getitem___function_type)( int ) const;
+            __getitem___function_type __getitem___function_value( &::SireMol::AtomMatchM::operator[] );
+            
+            AtomMatchM_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("i") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::operator[]
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*__getitem___function_type)( ::SireBase::Slice const & ) const;
+            __getitem___function_type __getitem___function_value( &::SireMol::AtomMatchM::operator[] );
+            
+            AtomMatchM_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::operator[]
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMatchM::*__getitem___function_type)( ::QList< long long > const & ) const;
+            __getitem___function_type __getitem___function_value( &::SireMol::AtomMatchM::operator[] );
+            
+            AtomMatchM_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("idxs") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::operator[]
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*__getitem___function_type)( ::QString const & ) const;
+            __getitem___function_type __getitem___function_value( &::SireMol::AtomMatchM::operator[] );
+            
+            AtomMatchM_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("name") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::operator[]
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMatchM::*__getitem___function_type)( ::SireMol::Atom::ID const & ) const;
+            __getitem___function_type __getitem___function_value( &::SireMol::AtomMatchM::operator[] );
+            
+            AtomMatchM_exposer.def( 
+                "__getitem__"
+                , __getitem___function_value
+                , ( bp::arg("id") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::propertyKeys
+        
+            typedef ::QStringList ( ::SireMol::AtomMatchM::*propertyKeys_function_type)(  ) const;
+            propertyKeys_function_type propertyKeys_function_value( &::SireMol::AtomMatchM::propertyKeys );
+            
+            AtomMatchM_exposer.def( 
+                "propertyKeys"
+                , propertyKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residue
+        
+            typedef ::SireMol::Residue ( ::SireMol::AtomMatchM::*residue_function_type)( int,::SireBase::PropertyMap const & ) const;
+            residue_function_type residue_function_value( &::SireMol::AtomMatchM::residue );
+            
+            AtomMatchM_exposer.def( 
+                "residue"
+                , residue_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residue
+        
+            typedef ::SireMol::Residue ( ::SireMol::AtomMatchM::*residue_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            residue_function_type residue_function_value( &::SireMol::AtomMatchM::residue );
+            
+            AtomMatchM_exposer.def( 
+                "residue"
+                , residue_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residue
+        
+            typedef ::SireMol::Residue ( ::SireMol::AtomMatchM::*residue_function_type)( ::SireMol::ResID const &,::SireBase::PropertyMap const & ) const;
+            residue_function_type residue_function_value( &::SireMol::AtomMatchM::residue );
+            
+            AtomMatchM_exposer.def( 
+                "residue"
+                , residue_function_value
+                , ( bp::arg("resid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residues
+        
+            typedef ::SireMol::SelectorM< SireMol::Residue > ( ::SireMol::AtomMatchM::*residues_function_type)(  ) const;
+            residues_function_type residues_function_value( &::SireMol::AtomMatchM::residues );
+            
+            AtomMatchM_exposer.def( 
+                "residues"
+                , residues_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residues
+        
+            typedef ::SireMol::SelectorM< SireMol::Residue > ( ::SireMol::AtomMatchM::*residues_function_type)( int,::SireBase::PropertyMap const & ) const;
+            residues_function_type residues_function_value( &::SireMol::AtomMatchM::residues );
+            
+            AtomMatchM_exposer.def( 
+                "residues"
+                , residues_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residues
+        
+            typedef ::SireMol::SelectorM< SireMol::Residue > ( ::SireMol::AtomMatchM::*residues_function_type)( ::SireBase::Slice const &,::SireBase::PropertyMap const & ) const;
+            residues_function_type residues_function_value( &::SireMol::AtomMatchM::residues );
+            
+            AtomMatchM_exposer.def( 
+                "residues"
+                , residues_function_value
+                , ( bp::arg("slice"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residues
+        
+            typedef ::SireMol::SelectorM< SireMol::Residue > ( ::SireMol::AtomMatchM::*residues_function_type)( ::QList< long long > const &,::SireBase::PropertyMap const & ) const;
+            residues_function_type residues_function_value( &::SireMol::AtomMatchM::residues );
+            
+            AtomMatchM_exposer.def( 
+                "residues"
+                , residues_function_value
+                , ( bp::arg("idxs"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residues
+        
+            typedef ::SireMol::SelectorM< SireMol::Residue > ( ::SireMol::AtomMatchM::*residues_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            residues_function_type residues_function_value( &::SireMol::AtomMatchM::residues );
+            
+            AtomMatchM_exposer.def( 
+                "residues"
+                , residues_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::residues
+        
+            typedef ::SireMol::SelectorM< SireMol::Residue > ( ::SireMol::AtomMatchM::*residues_function_type)( ::SireMol::ResID const &,::SireBase::PropertyMap const & ) const;
+            residues_function_type residues_function_value( &::SireMol::AtomMatchM::residues );
+            
+            AtomMatchM_exposer.def( 
+                "residues"
+                , residues_function_value
+                , ( bp::arg("resid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::saveFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*saveFrame_function_type)( int ) ;
+            saveFrame_function_type saveFrame_function_value( &::SireMol::AtomMatchM::saveFrame );
+            
+            AtomMatchM_exposer.def( 
+                "saveFrame"
+                , saveFrame_function_value
+                , ( bp::arg("frame") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::saveFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*saveFrame_function_type)(  ) ;
+            saveFrame_function_type saveFrame_function_value( &::SireMol::AtomMatchM::saveFrame );
+            
+            AtomMatchM_exposer.def( 
+                "saveFrame"
+                , saveFrame_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::saveFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*saveFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
+            saveFrame_function_type saveFrame_function_value( &::SireMol::AtomMatchM::saveFrame );
+            
+            AtomMatchM_exposer.def( 
+                "saveFrame"
+                , saveFrame_function_value
+                , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::saveFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*saveFrame_function_type)( ::SireBase::PropertyMap const & ) ;
+            saveFrame_function_type saveFrame_function_value( &::SireMol::AtomMatchM::saveFrame );
+            
+            AtomMatchM_exposer.def( 
+                "saveFrame"
+                , saveFrame_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::search
+        
+            typedef ::SireMol::SelectResult ( ::SireMol::AtomMatchM::*search_function_type)( ::QString const & ) const;
+            search_function_type search_function_value( &::SireMol::AtomMatchM::search );
+            
+            AtomMatchM_exposer.def( 
+                "search"
+                , search_function_value
+                , ( bp::arg("search_string") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::search
+        
+            typedef ::SireMol::SelectResult ( ::SireMol::AtomMatchM::*search_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            search_function_type search_function_value( &::SireMol::AtomMatchM::search );
+            
+            AtomMatchM_exposer.def( 
+                "search"
+                , search_function_value
+                , ( bp::arg("search_string"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segment
+        
+            typedef ::SireMol::Segment ( ::SireMol::AtomMatchM::*segment_function_type)( int,::SireBase::PropertyMap const & ) const;
+            segment_function_type segment_function_value( &::SireMol::AtomMatchM::segment );
+            
+            AtomMatchM_exposer.def( 
+                "segment"
+                , segment_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segment
+        
+            typedef ::SireMol::Segment ( ::SireMol::AtomMatchM::*segment_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            segment_function_type segment_function_value( &::SireMol::AtomMatchM::segment );
+            
+            AtomMatchM_exposer.def( 
+                "segment"
+                , segment_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segment
+        
+            typedef ::SireMol::Segment ( ::SireMol::AtomMatchM::*segment_function_type)( ::SireMol::SegID const &,::SireBase::PropertyMap const & ) const;
+            segment_function_type segment_function_value( &::SireMol::AtomMatchM::segment );
+            
+            AtomMatchM_exposer.def( 
+                "segment"
+                , segment_function_value
+                , ( bp::arg("segid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segments
+        
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::AtomMatchM::*segments_function_type)(  ) const;
+            segments_function_type segments_function_value( &::SireMol::AtomMatchM::segments );
+            
+            AtomMatchM_exposer.def( 
+                "segments"
+                , segments_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segments
+        
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::AtomMatchM::*segments_function_type)( int,::SireBase::PropertyMap const & ) const;
+            segments_function_type segments_function_value( &::SireMol::AtomMatchM::segments );
+            
+            AtomMatchM_exposer.def( 
+                "segments"
+                , segments_function_value
+                , ( bp::arg("i"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segments
+        
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::AtomMatchM::*segments_function_type)( ::SireBase::Slice const &,::SireBase::PropertyMap const & ) const;
+            segments_function_type segments_function_value( &::SireMol::AtomMatchM::segments );
+            
+            AtomMatchM_exposer.def( 
+                "segments"
+                , segments_function_value
+                , ( bp::arg("slice"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segments
+        
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::AtomMatchM::*segments_function_type)( ::QList< long long > const &,::SireBase::PropertyMap const & ) const;
+            segments_function_type segments_function_value( &::SireMol::AtomMatchM::segments );
+            
+            AtomMatchM_exposer.def( 
+                "segments"
+                , segments_function_value
+                , ( bp::arg("idxs"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segments
+        
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::AtomMatchM::*segments_function_type)( ::QString const &,::SireBase::PropertyMap const & ) const;
+            segments_function_type segments_function_value( &::SireMol::AtomMatchM::segments );
+            
+            AtomMatchM_exposer.def( 
+                "segments"
+                , segments_function_value
+                , ( bp::arg("name"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::segments
+        
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::AtomMatchM::*segments_function_type)( ::SireMol::SegID const &,::SireBase::PropertyMap const & ) const;
+            segments_function_type segments_function_value( &::SireMol::AtomMatchM::segments );
+            
+            AtomMatchM_exposer.def( 
+                "segments"
+                , segments_function_value
+                , ( bp::arg("segid"), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::size
+        
+            typedef int ( ::SireMol::AtomMatchM::*size_function_type)(  ) const;
+            size_function_type size_function_value( &::SireMol::AtomMatchM::size );
+            
+            AtomMatchM_exposer.def( 
+                "size"
+                , size_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::toList
+        
+            typedef ::QList< SireBase::PropPtr< SireMol::MoleculeView > > ( ::SireMol::AtomMatchM::*toList_function_type)(  ) const;
+            toList_function_type toList_function_value( &::SireMol::AtomMatchM::toList );
+            
+            AtomMatchM_exposer.def( 
+                "toList"
+                , toList_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::toMoleculeGroup
+        
+            typedef ::SireMol::MoleculeGroup ( ::SireMol::AtomMatchM::*toMoleculeGroup_function_type)(  ) const;
+            toMoleculeGroup_function_type toMoleculeGroup_function_value( &::SireMol::AtomMatchM::toMoleculeGroup );
+            
+            AtomMatchM_exposer.def( 
+                "toMoleculeGroup"
+                , toMoleculeGroup_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::toMolecules
+        
+            typedef ::SireMol::Molecules ( ::SireMol::AtomMatchM::*toMolecules_function_type)(  ) const;
+            toMolecules_function_type toMolecules_function_value( &::SireMol::AtomMatchM::toMolecules );
+            
+            AtomMatchM_exposer.def( 
+                "toMolecules"
+                , toMolecules_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::toSelectResult
+        
+            typedef ::SireMol::SelectResult ( ::SireMol::AtomMatchM::*toSelectResult_function_type)(  ) const;
+            toSelectResult_function_type toSelectResult_function_value( &::SireMol::AtomMatchM::toSelectResult );
+            
+            AtomMatchM_exposer.def( 
+                "toSelectResult"
+                , toSelectResult_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::AtomMatchM::toString
         
             typedef ::QString ( ::SireMol::AtomMatchM::*toString_function_type)(  ) const;
@@ -125,6 +1522,58 @@ void register_AtomMatchM_class(){
             AtomMatchM_exposer.def( 
                 "typeName"
                 , typeName_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::update
+        
+            typedef void ( ::SireMol::AtomMatchM::*update_function_type)( ::SireMol::MoleculeView const & ) ;
+            update_function_type update_function_value( &::SireMol::AtomMatchM::update );
+            
+            AtomMatchM_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molview") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::update
+        
+            typedef void ( ::SireMol::AtomMatchM::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMol::AtomMatchM::update );
+            
+            AtomMatchM_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::update
+        
+            typedef void ( ::SireMol::AtomMatchM::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMol::AtomMatchM::update );
+            
+            AtomMatchM_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::update
+        
+            typedef void ( ::SireMol::AtomMatchM::*update_function_type)( ::SireMol::SelectorMol const & ) ;
+            update_function_type update_function_value( &::SireMol::AtomMatchM::update );
+            
+            AtomMatchM_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -152,6 +1601,7 @@ void register_AtomMatchM_class(){
         AtomMatchM_exposer.def_pickle(sire_pickle_suite< ::SireMol::AtomMatchM >());
         AtomMatchM_exposer.def( "__str__", &__str__< ::SireMol::AtomMatchM > );
         AtomMatchM_exposer.def( "__repr__", &__str__< ::SireMol::AtomMatchM > );
+        AtomMatchM_exposer.def( "__len__", &__len_size< ::SireMol::AtomMatchM > );
     }
 
 }
