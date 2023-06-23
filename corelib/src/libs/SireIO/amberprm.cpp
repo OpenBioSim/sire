@@ -2499,8 +2499,13 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     // function used to generate the text for the excluded atoms
     auto getAllExcludedAtoms = [&]()
     {
-        QVector<QVector<QVector<qint64>>> excluded_atoms(params.count());
-        auto excluded_atoms_data = excluded_atoms.data();
+        const int nmols = params.count();
+
+        QVector<QVector<qint64>> all_excluded_atoms(nmols);
+        QVector<QVector<qint64>> num_excluded_atoms(nmols);
+
+        auto all_excluded_atoms_data = all_excluded_atoms.data();
+        auto num_excluded_atoms_data = num_excluded_atoms.data();
 
         if (use_parallel)
         {
@@ -2508,30 +2513,38 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                               {
                 for (int i = r.begin(); i < r.end(); ++i)
                 {
-                    excluded_atoms_data[i] = getExcludedAtoms(params_data[i], atom_start_index_data[i], true);
+                    const auto excluded_atoms = getExcludedAtoms(params_data[i], atom_start_index_data[i], true);
+
+                    QVector<qint64> mol_all_excluded_atoms;
+                    QVector<qint64> mol_num_excluded_atoms;
+
+                    for (const auto &e : excluded_atoms)
+                    {
+                        mol_num_excluded_atoms.append(e.count());
+                        mol_all_excluded_atoms += e;
+                    }
+
+                    all_excluded_atoms_data[i] = mol_all_excluded_atoms;
+                    num_excluded_atoms_data[i] = mol_num_excluded_atoms;
                 } });
         }
         else
         {
             for (int i = 0; i < params.count(); ++i)
             {
-                excluded_atoms_data[i] = getExcludedAtoms(params_data[i], atom_start_index_data[i]);
-            }
-        }
+                const auto excluded_atoms = getExcludedAtoms(params_data[i], atom_start_index_data[i], false);
 
-        QVector<qint64> all_excluded_atoms;
-        QVector<qint64> num_excluded_atoms;
+                QVector<qint64> mol_all_excluded_atoms;
+                QVector<qint64> mol_num_excluded_atoms;
 
-        for (int i = 0; i < excluded_atoms.count(); ++i)
-        {
-            const auto mol_excluded_atoms = excluded_atoms_data[i];
+                for (const auto &e : excluded_atoms)
+                {
+                    mol_num_excluded_atoms.append(e.count());
+                    mol_all_excluded_atoms += e;
+                }
 
-            for (int j = 0; j < mol_excluded_atoms.count(); ++j)
-            {
-                const auto my_excluded_atoms = mol_excluded_atoms[j];
-
-                num_excluded_atoms.append(my_excluded_atoms.count());
-                all_excluded_atoms += my_excluded_atoms;
+                all_excluded_atoms_data[i] = mol_all_excluded_atoms;
+                num_excluded_atoms_data[i] = mol_num_excluded_atoms;
             }
         }
 
@@ -2541,9 +2554,9 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         {
             QStringList errors;
 
-            excluded_atoms_lines = writeIntData(all_excluded_atoms, AmberFormat(AmberPrm::INTEGER, 10, 8), &errors);
+            excluded_atoms_lines = writeIntData(collapse(all_excluded_atoms), AmberFormat(AmberPrm::INTEGER, 10, 8), &errors);
 
-            num_excluded_lines = writeIntData(num_excluded_atoms, AmberFormat(AmberPrm::INTEGER, 10, 8), &errors);
+            num_excluded_lines = writeIntData(collapse(num_excluded_atoms), AmberFormat(AmberPrm::INTEGER, 10, 8), &errors);
 
             if (not errors.isEmpty())
             {
@@ -2554,11 +2567,16 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         }
         else
         {
-            excluded_atoms_lines = writeIntData(all_excluded_atoms, AmberFormat(AmberPrm::INTEGER, 10, 8));
-            num_excluded_lines = writeIntData(num_excluded_atoms, AmberFormat(AmberPrm::INTEGER, 10, 8));
+            excluded_atoms_lines = writeIntData(collapse(all_excluded_atoms), AmberFormat(AmberPrm::INTEGER, 10, 8));
+            num_excluded_lines = writeIntData(collapse(num_excluded_atoms), AmberFormat(AmberPrm::INTEGER, 10, 8));
         }
 
-        int nexcl = all_excluded_atoms.count();
+        int nexcl = 0;
+
+        for (const auto &e : all_excluded_atoms)
+        {
+            nexcl += e.count();
+        }
 
         return std::make_tuple(num_excluded_lines, excluded_atoms_lines, nexcl);
     };
