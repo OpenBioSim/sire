@@ -2557,21 +2557,21 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others, const Pr
 
     if (parsers.value("broken").count() > 0)
     {
-        // all of the parsers must be broken
-        QTextStream cout(stdout, QIODevice::WriteOnly);
-
-        cout << QObject::tr("Unable to read the file. Errors are below.\n\n");
-
         QStringList filenames;
+        QStringList parser_errors;
 
         for (const auto &parser : parsers["broken"])
         {
-            cout << "\n\n"
-                 << parser.read().errorReport();
+            parser_errors.append("\n\n");
+            parser_errors.append(parser.read().errorReport());
             filenames.append(parser.read().filename());
         }
 
-        throw SireIO::parse_error(QObject::tr("Unable to load the file: %1").arg(filenames.join(", ")), CODELOC);
+        throw SireIO::parse_error(QObject::tr(
+                                      "Unable to load the file: %1. Errors reported by all parsers are below.%2")
+                                      .arg(filenames.join(", "))
+                                      .arg(parser_errors.join("\n")),
+                                  CODELOC);
     }
 
     if (parsers.value("topology").count() == 0)

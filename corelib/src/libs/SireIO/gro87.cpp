@@ -1221,11 +1221,19 @@ void Gro87::parseLines(const PropertyMap &map)
 
         if (not ok)
         {
-            throw SireIO::parse_error(QObject::tr("This does not look like a Gro87 file, as the second line should "
-                                                  "contain just a free form integer which gives the number of atoms. "
-                                                  "In this file, the second line is '%1'")
-                                          .arg(lines()[1]),
-                                      CODELOC);
+            if (lines()[1].isEmpty() or lines()[1].contains("\u0000"))
+            {
+                throw SireIO::parse_error(QObject::tr("This does not look like a Gro87 file, as the second line should "
+                                                      "contain just a free form integer which gives the number of atoms. "
+                                                      "In this file, the second line is binary or unreadable."),
+                                          CODELOC);
+            }
+            else
+                throw SireIO::parse_error(QObject::tr("This does not look like a Gro87 file, as the second line should "
+                                                      "contain just a free form integer which gives the number of atoms. "
+                                                      "In this file, the second line is '%1'")
+                                              .arg(lines()[1]),
+                                          CODELOC);
         }
     }
 
