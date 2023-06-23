@@ -2650,11 +2650,42 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others, const Pr
         has_warnings = true;
     }
 
+    bool ignore_topology_frame = false;
+
+    if (map.specified("ignore_topology_frame"))
+    {
+        ignore_topology_frame = map["ignore_topology_frame"].value().asABoolean();
+    }
+
     if (parsers.value("frame").count() > 0)
     {
         auto frames = parsers["frame"];
 
-        if (not topology.read().isFrame())
+        if (ignore_topology_frame)
+        {
+            frames.removeAll(topology);
+
+            // we need to add frame information from the first file
+            if (not frames.isEmpty())
+            {
+                frames[0].read().addToSystem(system, map);
+
+                if (frames[0].read().hasWarnings())
+                {
+                    if (show_warnings)
+                    {
+                        QTextStream cout(stdout, QIODevice::WriteOnly);
+
+                        cout << QObject::tr("\nWARNINGS encountered when adding addition system data:\n");
+                        cout << frames[0].read().warnings().join("\n");
+                        cout << "====\n\n";
+                    }
+
+                    has_warnings = true;
+                }
+            }
+        }
+        else if (not topology.read().isFrame())
         {
             // we need to add frame information from the first file
             frames[0].read().addToSystem(system, map);
