@@ -650,6 +650,7 @@ def createSystem(molecules):
 
     # Add these groups to the System
     system = Sire.System.System()
+    system.removeAllSharedProperties()
 
     system.add(all)
     system.add(molecules)
@@ -1100,7 +1101,7 @@ def propertyToAtomNumVectorList(prop):
 
 def setupPositionalRestraints(system):
     # Tag atoms in the system that are listed in the provided restrained atoms file
-    # this is used to activate positional restraints during initialisation 
+    # this is used to activate positional restraints during initialisation
     # of the OpenMM integrator
 
     # parse restrained atoms file
@@ -1112,7 +1113,7 @@ def setupPositionalRestraints(system):
 
     molecules = system[MGName("all")].molecules()
     molnums = molecules.molNums()
- 
+
     # loop over mols and find the molecule containing atom numbers
     for molnum in molnums:
         mol = molecules.molecule(molnum)[0].molecule()
@@ -1750,6 +1751,7 @@ def createSystemFreeEnergy(molecules):
 
     # Add these groups to the System
     system = Sire.System.System()
+    system.removeAllSharedProperties()
 
     system.add(solutes)
     system.add(solute_grp_ref)

@@ -28,113 +28,206 @@ import copy
 # ALL OF THE GLOBAL USER-AVAILABLE QuanToMM PARAMETERS #
 ########################################################
 
-cutoff_method = Parameter("cutoff method", "shift electrostatics",
-                          """Method used to apply the non-bonded electrostatic cutoff.""")
+cutoff_method = Parameter(
+    "cutoff method",
+    "shift electrostatics",
+    """Method used to apply the non-bonded electrostatic cutoff.""",
+)
 
-rf_dielectric = Parameter("reaction field dielectric", 78.3,
-                          """Dielectric constant to use if the reaction field cutoff method is used.""")
+rf_dielectric = Parameter(
+    "reaction field dielectric",
+    78.3,
+    """Dielectric constant to use if the reaction field cutoff method is used.""",
+)
 
-coul_cutoff = Parameter("coulomb cutoff", 15*angstrom,
-                        """Coulomb cutoff length""")
+coul_cutoff = Parameter(
+    "coulomb cutoff", 15 * angstrom, """Coulomb cutoff length"""
+)
 
-lj_cutoff = Parameter("LJ cutoff", 15*angstrom,
-                      """Lennard Jones cutoff length""")
+lj_cutoff = Parameter(
+    "LJ cutoff", 15 * angstrom, """Lennard Jones cutoff length"""
+)
 
-grid_spacing = Parameter("grid spacing", 1.0*angstrom,
-                         """Grid spacing used for the grid-based forcefields""")
-grid_buffer = Parameter("grid buffer", 2*angstrom,
-                        """Buffer around the grid used to prevent recalculation
-                           in the grid-based forcefields.""")
+grid_spacing = Parameter(
+    "grid spacing",
+    1.0 * angstrom,
+    """Grid spacing used for the grid-based forcefields""",
+)
+grid_buffer = Parameter(
+    "grid buffer",
+    2 * angstrom,
+    """Buffer around the grid used to prevent recalculation
+                           in the grid-based forcefields.""",
+)
 
-disable_grid = Parameter("disable grid", False, """Whether or not to disable use of the grid""")
+disable_grid = Parameter(
+    "disable grid", False, """Whether or not to disable use of the grid"""
+)
 
-temperature = Parameter("temperature", 25*celsius, """Simulation temperature""")
-pressure = Parameter("pressure", 1*atm, """Simulation pressure. Ignored if a reflection sphere
-                                           is used.""")
+temperature = Parameter(
+    "temperature", 25 * celsius, """Simulation temperature"""
+)
+pressure = Parameter(
+    "pressure",
+    1 * atm,
+    """Simulation pressure. Ignored if a reflection sphere
+                                           is used.""",
+)
 
-random_seed = Parameter("random seed", None, """Random number seed. Set this if you
-                         want to have reproducible simulations.""")
+random_seed = Parameter(
+    "random seed",
+    None,
+    """Random number seed. Set this if you
+                         want to have reproducible simulations.""",
+)
 
-lambda_values = Parameter("lambda values", [ 0.0, 0.142, 0.285, 0.429, 0.571, 0.714, 0.857, 1.0 ],
-                          """The values of lambda to use in the RETI free energy simulation.""")
+lambda_values = Parameter(
+    "lambda values",
+    [0.0, 0.142, 0.285, 0.429, 0.571, 0.714, 0.857, 1.0],
+    """The values of lambda to use in the RETI free energy simulation.""",
+)
 
-ligand_name = Parameter("ligand name", "LIG",
-                        """The name of the ligand. This should be the name of one of the residues
-                           in the ligand, so that this program can find the correct molecule.""")
+ligand_name = Parameter(
+    "ligand name",
+    "LIG",
+    """The name of the ligand. This should be the name of one of the residues
+                           in the ligand, so that this program can find the correct molecule.""",
+)
 
-reflection_radius = Parameter("reflection radius", None,
-                              """The radius of the reflection sphere""")
+reflection_radius = Parameter(
+    "reflection radius", None, """The radius of the reflection sphere"""
+)
 
-topfile = Parameter("topfile", "system.top",
-                    """Name of the topology file containing the system.""")
+topfile = Parameter(
+    "topfile",
+    "system.top",
+    """Name of the topology file containing the system.""",
+)
 
-crdfile = Parameter("crdfile", "system.crd",
-                    """Name of the coordinate file containing the coordinates of the 
-                       system.""")
+crdfile = Parameter(
+    "crdfile",
+    "system.crd",
+    """Name of the coordinate file containing the coordinates of the
+                       system.""",
+)
 
-s3file = Parameter("s3file", "system.s3",
-                   """Name to use for the intermediate s3 file that will contain the 
-                      system after it has been loaded from the top/crd files.""")
+s3file = Parameter(
+    "s3file",
+    "system.s3",
+    """Name to use for the intermediate s3 file that will contain the
+                      system after it has been loaded from the top/crd files.""",
+)
 
-outdir = Parameter("output directory", "output",
-                   """Name of the directory in which to place all of the output files.""")
+outdir = Parameter(
+    "output directory",
+    "output",
+    """Name of the directory in which to place all of the output files.""",
+)
 
-restart_file = Parameter("restart file", "quantomm_restart.s3",
-                         """Name of the restart file to use to save progress during the simulation.""")
+restart_file = Parameter(
+    "restart file",
+    "quantomm_restart.s3",
+    """Name of the restart file to use to save progress during the simulation.""",
+)
 
-sysmoves_file = Parameter("sysmoves file", "quantomm_sysmoves.s3",
-                          """Name of the file to save the initial QM/MM pre-simulation system.""")
+sysmoves_file = Parameter(
+    "sysmoves file",
+    "quantomm_sysmoves.s3",
+    """Name of the file to save the initial QM/MM pre-simulation system.""",
+)
 
-nmoves = Parameter("nmoves", 200, """Number of RETI moves to perform during the simulation.""")
+nmoves = Parameter(
+    "nmoves", 200, """Number of RETI moves to perform during the simulation."""
+)
 
-save_pdb = Parameter("save pdb", True,
-                     """Whether or not to write a PDB of the system after each iteration.""")
+save_pdb = Parameter(
+    "save pdb",
+    True,
+    """Whether or not to write a PDB of the system after each iteration.""",
+)
 
-save_all_pdbs = Parameter("save all pdbs", False,
-                          """Whether or not to write all of the PDBs. If not, only PDBs at the two 
-                             end points of the simulation will be written.""")
+save_all_pdbs = Parameter(
+    "save all pdbs",
+    False,
+    """Whether or not to write all of the PDBs. If not, only PDBs at the two
+                             end points of the simulation will be written.""",
+)
 
-pdb_frequency = Parameter("pdb frequency", 10,
-                          """The frequency (number of iterations between) saving PDBs""")
+pdb_frequency = Parameter(
+    "pdb frequency",
+    10,
+    """The frequency (number of iterations between) saving PDBs""",
+)
 
-restart_frequency = Parameter("restart frequency", 1,
-                              """The frequency (number of iterations between) saving the restart file for the simulation.""")
+restart_frequency = Parameter(
+    "restart frequency",
+    1,
+    """The frequency (number of iterations between) saving the restart file for the simulation.""",
+)
 
-nslow = Parameter("nslow", 50,
-                  """The number of 'slow' moves to perform per RETI iteration.""")
+nslow = Parameter(
+    "nslow",
+    50,
+    """The number of 'slow' moves to perform per RETI iteration.""",
+)
 
-nfast = Parameter("nfast", 1000,
-                  """The number of 'fast' moves to perform per slow move.""")
+nfast = Parameter(
+    "nfast", 1000, """The number of 'fast' moves to perform per slow move."""
+)
 
-scale_charges = Parameter("scale charges", 1.0,
-                          """The amount by which to scale MM charges in the QM/MM calculation.""")
+scale_charges = Parameter(
+    "scale charges",
+    1.0,
+    """The amount by which to scale MM charges in the QM/MM calculation.""",
+)
 
-intermolecular_only = Parameter("intermolecular only", False,
-                                """Only calculate QM/MM intermolecular energies. This intramolecular energy of the QM atoms 
-                                   is calculated using the MM forcefield.""")
+intermolecular_only = Parameter(
+    "intermolecular only",
+    False,
+    """Only calculate QM/MM intermolecular energies. This intramolecular energy of the QM atoms
+                                   is calculated using the MM forcefield.""",
+)
 
-amberhome = Parameter("amberhome", None,
-                      """Use this to specify the installation directory of Amber / AmberTools, if you are using
+amberhome = Parameter(
+    "amberhome",
+    None,
+    """Use this to specify the installation directory of Amber / AmberTools, if you are using
                          the 'sqm' program. If this is not set, then you must have set this location using
-                         the AMBERHOME environmental variable.""")
+                         the AMBERHOME environmental variable.""",
+)
 
-qm_program = Parameter("qm program", "sqm",
-                       """The name of the program to use to calculate QM energies.""")
+qm_program = Parameter(
+    "qm program",
+    "sqm",
+    """The name of the program to use to calculate QM energies.""",
+)
 
-qm_executable = Parameter("qm executable", None,
-                          """Exact path to the QM executable used to calculate the QM energies. If 
-                             this is not set, then the QM executable will be searched from the path.""")
+qm_executable = Parameter(
+    "qm executable",
+    None,
+    """Exact path to the QM executable used to calculate the QM energies. If
+                             this is not set, then the QM executable will be searched from the path.""",
+)
 
-qm_method = Parameter("qm method", "AM1/d",
-                      """The string passed to the QM program to specify the QM method to use to model the ligand.""")
+qm_method = Parameter(
+    "qm method",
+    "AM1/d",
+    """The string passed to the QM program to specify the QM method to use to model the ligand.""",
+)
 
-basis_set = Parameter("basis set", "VDZ",
-                      """The string passed to the QM program (molpro, as ab-initio only) to specify the basis set used to model the ligand.""")
+basis_set = Parameter(
+    "basis set",
+    "VDZ",
+    """The string passed to the QM program (molpro, as ab-initio only) to specify the basis set used to model the ligand.""",
+)
 
-qm_zero_energy = Parameter("qm zero energy", None,
-                           """The value of 'zero' for the QM energy. This is used to shift the QM energy so that it
+qm_zero_energy = Parameter(
+    "qm zero energy",
+    None,
+    """The value of 'zero' for the QM energy. This is used to shift the QM energy so that it
                               has the same comparable value as the MM energy. This is normally determined automatically,
-                              but this option allows you to set the value manually.""")
+                              but this option allows you to set the value manually.""",
+)
 
 
 def createQMMMMoves(system):
@@ -142,7 +235,7 @@ def createQMMMMoves(system):
     print("Creating the Monte Carlo moves to sample the QM/MM system...")
 
     # create the global set of moves that will be applied to
-    # the system
+    # the system
     moves = WeightedMoves()
 
     # create zmatrix moves to move the protein sidechains
@@ -151,7 +244,7 @@ def createQMMMMoves(system):
 
         if mobile_sidechains.nViews() > 0:
             sc_moves = ZMatMove(mobile_sidechains)
-            moves.add( sc_moves, mobile_sidechains.nViews() )
+            moves.add(sc_moves, mobile_sidechains.nViews())
     except:
         pass
 
@@ -160,12 +253,16 @@ def createQMMMMoves(system):
 
         if mobile_backbones.nViews() > 0:
             bb_moves = RigidBodyMC(mobile_backbones)
-            bb_moves.setCenterOfRotation( GetCOGPoint( AtomName("CA", CaseInsensitive),
-                                                       AtomName("N", CaseInsensitive) ) )
+            bb_moves.setCenterOfRotation(
+                GetCOGPoint(
+                    AtomName("CA", CaseInsensitive),
+                    AtomName("N", CaseInsensitive),
+                )
+            )
 
-            bb_moves.setMaximumTranslation(0.030*angstrom)
-            bb_moves.setMaximumRotation(1.0*degrees)
-            moves.add( bb_moves, mobile_backbones.nViews() )
+            bb_moves.setMaximumTranslation(0.030 * angstrom)
+            bb_moves.setMaximumRotation(1.0 * degrees)
+            moves.add(bb_moves, mobile_backbones.nViews())
     except:
         pass
 
@@ -178,26 +275,41 @@ def createQMMMMoves(system):
             scale_moves = 10
 
             # get the amount to translate and rotate from the ligand's flexibility object
-            flex = mobile_ligand.moleculeAt(0)[0].molecule().property("flexibility")
+            flex = (
+                mobile_ligand.moleculeAt(0)[0]
+                .molecule()
+                .property("flexibility")
+            )
 
             # only move the solute if it is not the only molecule in the system
-            if system.nMolecules() > 1 and (flex.translation().value() != 0 or flex.rotation().value() != 0):
+            if system.nMolecules() > 1 and (
+                flex.translation().value() != 0 or flex.rotation().value() != 0
+            ):
                 rb_moves = RigidBodyMC(mobile_ligand)
                 rb_moves.setMaximumTranslation(flex.translation())
                 rb_moves.setMaximumRotation(flex.rotation())
 
                 if system.containsProperty("reflection sphere radius"):
-                    reflection_radius = float(str(system.property("reflection sphere radius"))) * angstroms
-                    reflection_center = system.property("reflection center").toVector()[0]
-                    rb_moves.setReflectionSphere(reflection_center, reflection_radius)
+                    reflection_radius = (
+                        float(str(system.property("reflection sphere radius")))
+                        * angstroms
+                    )
+                    reflection_center = system.property(
+                        "reflection center"
+                    ).toVector()[0]
+                    rb_moves.setReflectionSphere(
+                        reflection_center, reflection_radius
+                    )
                     use_reflection_sphere = True
-                    print("Using the reflection sphere to constrain solvent moves...")
+                    print(
+                        "Using the reflection sphere to constrain solvent moves..."
+                    )
 
                 scale_moves = scale_moves / 2
-                moves.add( rb_moves, scale_moves * mobile_ligand.nViews() )
+                moves.add(rb_moves, scale_moves * mobile_ligand.nViews())
 
             intra_moves = InternalMove(mobile_ligand)
-            moves.add( intra_moves, scale_moves * mobile_ligand.nViews() )
+            moves.add(intra_moves, scale_moves * mobile_ligand.nViews())
     except:
         pass
 
@@ -208,12 +320,16 @@ def createQMMMMoves(system):
             rb_moves = RigidBodyMC(mobile_solutes)
 
             if system.containsProperty("average solute translation delta"):
-                translation_delta = float(str(system.property("average solute translation delta")))
+                translation_delta = float(
+                    str(system.property("average solute translation delta"))
+                )
             else:
                 translation_delta = 0
 
             if system.containsProperty("average solute rotation delta"):
-                rotation_delta = float(str(system.property("average solute rotation delta")))
+                rotation_delta = float(
+                    str(system.property("average solute rotation delta"))
+                )
             else:
                 rotation_delta = 0
 
@@ -222,9 +338,16 @@ def createQMMMMoves(system):
                 rb_moves.setMaximumRotation(rotation_delta * degrees)
 
                 if system.containsProperty("reflection sphere radius"):
-                    reflection_radius = float(str(system.property("reflection sphere radius"))) * angstroms
-                    reflection_center = system.property("reflection center").toVector()[0]
-                    rb_moves.setReflectionSphere(reflection_center, reflection_radius)
+                    reflection_radius = (
+                        float(str(system.property("reflection sphere radius")))
+                        * angstroms
+                    )
+                    reflection_center = system.property(
+                        "reflection center"
+                    ).toVector()[0]
+                    rb_moves.setReflectionSphere(
+                        reflection_center, reflection_radius
+                    )
 
                 moves.add(rb_moves, 4 * mobile_solutes.nViews())
 
@@ -245,9 +368,16 @@ def createQMMMMoves(system):
             rb_moves.setMaximumRotation(max_water_rotation)
 
             if system.containsProperty("reflection sphere radius"):
-                reflection_radius = float(str(system.property("reflection sphere radius"))) * angstroms
-                reflection_center = system.property("reflection center").toVector()[0]
-                rb_moves.setReflectionSphere(reflection_center, reflection_radius)
+                reflection_radius = (
+                    float(str(system.property("reflection sphere radius")))
+                    * angstroms
+                )
+                reflection_center = system.property(
+                    "reflection center"
+                ).toVector()[0]
+                rb_moves.setReflectionSphere(
+                    reflection_center, reflection_radius
+                )
 
             moves.add(rb_moves, 4 * mobile_solvent.nViews())
     except:
@@ -256,35 +386,41 @@ def createQMMMMoves(system):
     moves.setTemperature(temperature.val)
 
     try:
-        if pressure.val and system.nMolecules() > 1 and system.property("space").isPeriodic():
+        if (
+            pressure.val
+            and system.nMolecules() > 1
+            and system.property("space").isPeriodic()
+        ):
             if not use_reflection_sphere:
                 print("Running a constant pressure calculation")
                 all = system[MGName("all")]
                 volume_move = VolumeMove(all)
                 volume_move.setTemperature(temperature.val)
                 volume_move.setPressure(pressure.val)
-                volume_move.setMaximumVolumeChange( 0.1 * all.nMolecules() * angstrom3 )
+                volume_move.setMaximumVolumeChange(
+                    0.1 * all.nMolecules() * angstrom3
+                )
                 moves.add(volume_move, 1)
     except:
         pass
 
     # Now create a multiple-timestep Monte Carlo move that
     # uses the above weighted moves for the fast energy
-    mtsmc = MTSMC( moves, nfast.val )
-    mtsmc.setFastEnergyComponent( Symbol("E_{fast}") )
-    mtsmc.setSlowEnergyComponent( Symbol("E_{slow}") )
+    mtsmc = MTSMC(moves, nfast.val)
+    mtsmc.setFastEnergyComponent(Symbol("E_{fast}"))
+    mtsmc.setSlowEnergyComponent(Symbol("E_{slow}"))
 
     seed = random_seed.val
 
     if seed is None:
-        seed = RanGenerator().randInt(100000,1000000)
+        seed = RanGenerator().randInt(100000, 1000000)
         print("Using generated random number seed %d" % seed)
     else:
         print("Using supplied random number seed %d" % seed)
 
-    mtsmc.setGenerator( RanGenerator(seed) )
+    mtsmc.setGenerator(RanGenerator(seed))
 
-    return SameMoves(mtsmc)    
+    return SameMoves(mtsmc)
 
 
 def printMoveInfo(moves):
@@ -299,8 +435,10 @@ def printMoveInfo(moves):
 
 def getMinimumDistance(mol0, mol1):
     space = Cartesian()
-    return space.minimumDistance(CoordGroup(mol0.molecule().property("coordinates").array()), \
-                                 CoordGroup(mol1.molecule().property("coordinates").array()))
+    return space.minimumDistance(
+        CoordGroup(mol0.molecule().property("coordinates").array()),
+        CoordGroup(mol1.molecule().property("coordinates").array()),
+    )
 
 
 def setCLJProperties(forcefield, space):
@@ -312,24 +450,33 @@ def setCLJProperties(forcefield, space):
         forcefield.setReactionFieldDielectric(rf_dielectric.val)
 
     else:
-        print("Cannot interpret the cutoff method from \"%s\"" % cutoff_method.val, file=sys.stderr)
+        print(
+            'Cannot interpret the cutoff method from "%s"' % cutoff_method.val,
+            file=sys.stderr,
+        )
 
     forcefield.setSpace(space)
-    forcefield.setSwitchingFunction( HarmonicSwitchingFunction(coul_cutoff.val,coul_cutoff.val,
-                                                               lj_cutoff.val,lj_cutoff.val) )
+    forcefield.setSwitchingFunction(
+        HarmonicSwitchingFunction(
+            coul_cutoff.val, coul_cutoff.val, lj_cutoff.val, lj_cutoff.val
+        )
+    )
 
     return forcefield
 
 
 def setFakeGridProperties(forcefield, space):
-    forcefield.setSwitchingFunction( HarmonicSwitchingFunction(coul_cutoff.val,coul_cutoff.val,
-                                                               lj_cutoff.val,lj_cutoff.val) )
+    forcefield.setSwitchingFunction(
+        HarmonicSwitchingFunction(
+            coul_cutoff.val, coul_cutoff.val, lj_cutoff.val, lj_cutoff.val
+        )
+    )
     forcefield.setSpace(space)
 
     return forcefield
 
 
-def setGridProperties(forcefield, extra_buffer=0*angstrom):
+def setGridProperties(forcefield, extra_buffer=0 * angstrom):
     forcefield.setGridSpacing(grid_spacing.val)
     forcefield.setBuffer(grid_buffer.val + extra_buffer)
     forcefield.setLJCutoff(lj_cutoff.val)
@@ -340,17 +487,20 @@ def setGridProperties(forcefield, extra_buffer=0*angstrom):
 
 def setQMProperties(forcefield, space):
     forcefield.setSpace(space)
-    forcefield.setSwitchingFunction( HarmonicSwitchingFunction(coul_cutoff.val,coul_cutoff.val,
-                                                               lj_cutoff.val,lj_cutoff.val) )
+    forcefield.setSwitchingFunction(
+        HarmonicSwitchingFunction(
+            coul_cutoff.val, coul_cutoff.val, lj_cutoff.val, lj_cutoff.val
+        )
+    )
 
-    # calculate the total charge on the QM atoms
+    # calculate the total charge on the QM atoms
     total_charge = 0.0
     for molnum in forcefield.molecules().molNums():
         total_charge += forcefield[molnum].evaluate().charge().value()
 
     # round the charge to the nearest integer
     print("Charge on QM atoms is %s" % total_charge)
-    
+
     total_charge = round(total_charge)
     print("Integer charge on QM atoms is %s" % total_charge)
 
@@ -364,16 +514,24 @@ def setQMProperties(forcefield, space):
             ahome = os.getenv("AMBERHOME")
 
             if ahome is None:
-                print("ERROR: YOU MUST SET THE AMBERHOME ENVIRONMENTAL VARIABLE!!!")
-                print("This must point to the installation directory of Amber / AmberTools")
+                print(
+                    "ERROR: YOU MUST SET THE AMBERHOME ENVIRONMENTAL VARIABLE!!!"
+                )
+                print(
+                    "This must point to the installation directory of Amber / AmberTools"
+                )
                 sys.exit(0)
         else:
             ahome = amberhome.val
 
         if qm_executable.val is None:
-            qm_prog.setExecutable( findExe("%s/bin/sqm" % ahome).absoluteFilePath() )
+            qm_prog.setExecutable(
+                findExe("%s/bin/sqm" % ahome).absoluteFilePath()
+            )
         else:
-            qm_prog.setExecutable( findExe(qm_executable.val).absoluteFilePath() )
+            qm_prog.setExecutable(
+                findExe(qm_executable.val).absoluteFilePath()
+            )
 
         qm_prog.setEnvironment("AMBERHOME", ahome)
 
@@ -386,9 +544,11 @@ def setQMProperties(forcefield, space):
         qm_prog.setTotalCharge(total_charge)
 
         if qm_executable.val is None:
-            qm_prog.setExecutable( findExe("molpro").absoluteFilePath() )
+            qm_prog.setExecutable(findExe("molpro").absoluteFilePath())
         else:
-            qm_prog.setExecutable( findExe(qm_executable.val).absoluteFilePath() )
+            qm_prog.setExecutable(
+                findExe(qm_executable.val).absoluteFilePath()
+            )
 
         forcefield.setQuantumProgram(qm_prog)
 
@@ -398,16 +558,21 @@ def setQMProperties(forcefield, space):
         forcefield.setQuantumProgram(qm_prog)
 
     else:
-        print("WARNING: Could not recognise the QM program from %s. Will use the NULL program." \
-                         % qm_program.val)
+        print(
+            "WARNING: Could not recognise the QM program from %s. Will use the NULL program."
+            % qm_program.val
+        )
 
         forcefield.setQuantumProgram(NullQM())
 
-    forcefield.setIntermolecularOnly( intermolecular_only.val )
+    forcefield.setIntermolecularOnly(intermolecular_only.val)
 
-    forcefield.setChargeScalingFactor( scale_charges.val )
+    forcefield.setChargeScalingFactor(scale_charges.val)
 
-    print("Using QM program %s, MM charges scaled by %s" % (qm_prog, scale_charges.val))
+    print(
+        "Using QM program %s, MM charges scaled by %s"
+        % (qm_prog, scale_charges.val)
+    )
 
     return forcefield
 
@@ -422,7 +587,7 @@ def printEnergies(nrgs):
 
 def loadQMMMSystem():
     """This function is called to set up the system. It sets everything
-       up, then returns a System object that holds the configured system"""
+    up, then returns a System object that holds the configured system"""
 
     print("Loading the system...")
 
@@ -433,7 +598,9 @@ def loadQMMMSystem():
         loadsys = Sire.Stream.load(s3file.val)
 
     else:
-        print("Loading from Amber files %s / %s..." % (topfile.val, crdfile.val))
+        print(
+            "Loading from Amber files %s / %s..." % (topfile.val, crdfile.val)
+        )
         # Add the name of the ligand to the list of solute molecules
         sys_scheme = NamingScheme()
         sys_scheme.addSoluteResidueName(ligand_name.val)
@@ -444,7 +611,10 @@ def loadQMMMSystem():
         ligand_mol = findMolecule(loadsys, ligand_name.val)
 
         if ligand_mol is None:
-            print("Cannot find the ligand (%s) in the set of loaded molecules!" % ligand_name.val)
+            print(
+                "Cannot find the ligand (%s) in the set of loaded molecules!"
+                % ligand_name.val
+            )
             sys.exit(-1)
 
         # Center the system with the ligand at (0,0,0)
@@ -452,38 +622,57 @@ def loadQMMMSystem():
         ligand_mol = loadsys[ligand_mol.number()][0].molecule()
 
         if reflection_radius.val is None:
-            loadsys = addFlexibility(loadsys, naming_scheme=sys_scheme )
+            loadsys = addFlexibility(loadsys, naming_scheme=sys_scheme)
         else:
-            loadsys = addFlexibility(loadsys, Vector(0), reflection_radius.val, naming_scheme=sys_scheme)
+            loadsys = addFlexibility(
+                loadsys,
+                Vector(0),
+                reflection_radius.val,
+                naming_scheme=sys_scheme,
+            )
 
         Sire.Stream.save(loadsys, s3file.val)
 
     ligand_mol = findMolecule(loadsys, ligand_name.val)
 
     if ligand_mol is None:
-        print("Cannot find the ligand (%s) in the set of loaded molecules!" % ligand_name.val)
+        print(
+            "Cannot find the ligand (%s) in the set of loaded molecules!"
+            % ligand_name.val
+        )
         sys.exit(-1)
 
     # Now build the QM/MM system
     system = System("QMMM system")
+    system.removeAllSharedProperties()
 
     if loadsys.containsProperty("reflection center"):
         reflect_center = loadsys.property("reflection center").toVector()[0]
-        reflect_radius = float(str(loadsys.property("reflection sphere radius")))
+        reflect_radius = float(
+            str(loadsys.property("reflection sphere radius"))
+        )
 
-        system.setProperty("reflection center", AtomCoords(CoordGroup(1,reflect_center)))
-        system.setProperty("reflection sphere radius", VariantProperty(reflect_radius))
+        system.setProperty(
+            "reflection center", AtomCoords(CoordGroup(1, reflect_center))
+        )
+        system.setProperty(
+            "reflection sphere radius", VariantProperty(reflect_radius)
+        )
         space = Cartesian()
     else:
         space = loadsys.property("space")
 
     if loadsys.containsProperty("average solute translation delta"):
-        system.setProperty("average solute translation delta", \
-                           loadsys.property("average solute translation delta"))
+        system.setProperty(
+            "average solute translation delta",
+            loadsys.property("average solute translation delta"),
+        )
 
     if loadsys.containsProperty("average solute rotation delta"):
-        system.setProperty("average solute rotation delta", \
-                           loadsys.property("average solute rotation delta"))
+        system.setProperty(
+            "average solute rotation delta",
+            loadsys.property("average solute rotation delta"),
+        )
 
     # create a molecule group to hold all molecules
     all_group = MoleculeGroup("all")
@@ -501,7 +690,7 @@ def loadQMMMSystem():
     # create a group to hold all of the fixed molecules in the bound leg
     fixed_group = MoleculeGroup("fixed_molecules")
     if MGName("fixed_molecules") in loadsys.mgNames():
-        fixed_group.add( loadsys[ MGName("fixed_molecules") ] )
+        fixed_group.add(loadsys[MGName("fixed_molecules")])
 
     if save_pdb.val:
         # write a PDB of the fixed atoms in the bound and free legs
@@ -513,11 +702,11 @@ def loadQMMMSystem():
     # create a group to hold all of the mobile solute molecules
     mobile_solutes_group = MoleculeGroup("mobile_solutes")
     if MGName("mobile_solutes") in loadsys.mgNames():
-        mobile_solutes_group.add( loadsys[MGName("mobile_solutes")] )
+        mobile_solutes_group.add(loadsys[MGName("mobile_solutes")])
         mobile_solutes_group.remove(ligand_mol)
         if mobile_solutes_group.nMolecules() > 0:
             all_group.add(mobile_solutes_group)
-    
+
     groups.append(mobile_solutes_group)
 
     # create a group to hold all of the mobile solvent molecules
@@ -530,20 +719,24 @@ def loadQMMMSystem():
 
         all_group.add(mobile_solvents_group)
 
-        print("The number of mobile solvent molecules is %d." % mobile_solvents_group.nMolecules())
+        print(
+            "The number of mobile solvent molecules is %d."
+            % mobile_solvents_group.nMolecules()
+        )
 
     groups.append(mobile_solvents_group)
 
-    # create the groups to hold all of the protein molecules. We will use "extract" to 
-    # pull out only those protein atoms that are in the mobile region
+    # create the groups to hold all of the protein molecules. We will use "extract" to
+    # pull out only those protein atoms that are in the mobile region
     protein_intra_group = MoleculeGroup("protein_intra_group")
     mobile_proteins_group = MoleculeGroup("proteins")
     mobile_protein_sidechains_group = MoleculeGroup("mobile_sidechains")
     mobile_protein_backbones_group = MoleculeGroup("mobile_backbones")
 
-    if MGName("protein_sidechains") in loadsys.mgNames() or \
-       MGName("protein_backbones") in loadsys.mgNames():
-
+    if (
+        MGName("protein_sidechains") in loadsys.mgNames()
+        or MGName("protein_backbones") in loadsys.mgNames()
+    ):
         all_proteins = Molecules()
 
         try:
@@ -566,7 +759,7 @@ def loadQMMMSystem():
 
         for molnum in all_proteins.molNums():
             protein_mol = Molecule.join(all_proteins[molnum])
-            
+
             if protein_mol.selectedAll():
                 protein_intra_group.add(protein_mol)
                 all_group.add(protein_mol)
@@ -576,30 +769,38 @@ def loadQMMMSystem():
                 if protein_sidechains.contains(molnum):
                     sidechains = protein_sidechains[molnum]
                     for sidechain in sidechains:
-                        mobile_protein_sidechains_group.add( sidechain )
+                        mobile_protein_sidechains_group.add(sidechain)
 
                     mobile_protein += sidechains
 
                 if protein_backbones.contains(molnum):
                     backbones = protein_backbones[molnum]
                     for backbone in backbones:
-                        mobile_protein_backbones_group.add( backbone )
+                        mobile_protein_backbones_group.add(backbone)
 
                     mobile_protein += backbones
 
                 if len(mobile_protein) > 0:
-                    mobile_proteins_group.add( Molecule.join(mobile_protein) )
+                    mobile_proteins_group.add(Molecule.join(mobile_protein))
 
             else:
                 # only some of the atoms have been selected. We will extract
                 # the mobile atoms and will then update all of the other selections
-                print("Extracting the mobile atoms of protein %s" % protein_mol.molecule())
+                print(
+                    "Extracting the mobile atoms of protein %s"
+                    % protein_mol.molecule()
+                )
                 new_protein_mol = protein_mol.extract()
-                print("Extracted %d mobile atoms from %d total atoms..." % \
-                                        (new_protein_mol.nAtoms(), protein_mol.molecule().nAtoms()))
+                print(
+                    "Extracted %d mobile atoms from %d total atoms..."
+                    % (
+                        new_protein_mol.nAtoms(),
+                        protein_mol.molecule().nAtoms(),
+                    )
+                )
 
                 protein_intra_group.add(new_protein_mol)
-                all_group.add( new_protein_mol )
+                all_group.add(new_protein_mol)
 
                 mobile_protein_view = new_protein_mol.selection()
                 mobile_protein_view = mobile_protein_view.selectNone()
@@ -613,12 +814,18 @@ def loadQMMMSystem():
 
                         for atomid in sidechain.selection().selectedAtoms():
                             atom = protein_mol.atom(atomid)
-                            resatomid = ResAtomID( atom.residue().number(), atom.name() )
-                            view = view.select( resatomid )
-                            mobile_protein_view = mobile_protein_view.select( resatomid )
+                            resatomid = ResAtomID(
+                                atom.residue().number(), atom.name()
+                            )
+                            view = view.select(resatomid)
+                            mobile_protein_view = mobile_protein_view.select(
+                                resatomid
+                            )
 
                         if view.nSelected() > 0:
-                            mobile_protein_sidechains_group.add( PartialMolecule(new_protein_mol, view) )
+                            mobile_protein_sidechains_group.add(
+                                PartialMolecule(new_protein_mol, view)
+                            )
 
                 if protein_backbones.contains(molnum):
                     backbones = protein_backbones[molnum]
@@ -629,18 +836,32 @@ def loadQMMMSystem():
 
                         for atomid in backbone.selection().selectedAtoms():
                             atom = protein_mol.atom(atomid)
-                            resatomid = ResAtomID( atom.residue().number(), atom.name() )
-                            view = view.select( resatomid )
-                            mobile_protein_view = mobile_protein_view.select( resatomid )
+                            resatomid = ResAtomID(
+                                atom.residue().number(), atom.name()
+                            )
+                            view = view.select(resatomid)
+                            mobile_protein_view = mobile_protein_view.select(
+                                resatomid
+                            )
 
                         if view.nSelected() > 0:
-                            mobile_protein_backbones_group.add( PartialMolecule(new_protein_mol, view) )
+                            mobile_protein_backbones_group.add(
+                                PartialMolecule(new_protein_mol, view)
+                            )
 
-                print("Number of moved protein sidechain residues = %s" % mobile_protein_sidechains_group.nViews())
-                print("Number of moved protein backbone residues = %s" % mobile_protein_backbones_group.nViews())
+                print(
+                    "Number of moved protein sidechain residues = %s"
+                    % mobile_protein_sidechains_group.nViews()
+                )
+                print(
+                    "Number of moved protein backbone residues = %s"
+                    % mobile_protein_backbones_group.nViews()
+                )
 
                 if mobile_protein_view.nSelected() > 0:
-                    mobile_proteins_group.add( PartialMolecule(new_protein_mol, mobile_protein_view) )
+                    mobile_proteins_group.add(
+                        PartialMolecule(new_protein_mol, mobile_protein_view)
+                    )
 
     groups.append(mobile_protein_backbones_group)
     groups.append(mobile_protein_sidechains_group)
@@ -652,25 +873,25 @@ def loadQMMMSystem():
             print("Adding group %s" % group.name())
             system.add(group)
 
-    # now add in the forcefields for the system...
+    # now add in the forcefields for the system...
     print("Creating the forcefields for the QM/MM system...")
 
     # first, group together the molecules grouped above into convenient
     # groups for the forcefields
 
-    # group holding just the ligand
+    # group holding just the ligand
     ligand_mols = ligand_group.molecules()
 
     # group holding all of the mobile atoms
     mobile_mols = mobile_solvents_group.molecules()
-    mobile_mols.add( mobile_solutes_group.molecules() )
-    mobile_mols.add( protein_intra_group.molecules() )
+    mobile_mols.add(mobile_solutes_group.molecules())
+    mobile_mols.add(protein_intra_group.molecules())
 
-    # group holding all of the mobile atoms in the bound leg, excluding the 
+    # group holding all of the mobile atoms in the bound leg, excluding the
     # buffer atoms that are fixed, but bonded to mobile atoms
     mobile_buffered_mols = mobile_solvents_group.molecules()
-    mobile_buffered_mols.add( mobile_solutes_group.molecules() )
-    mobile_buffered_mols.add( mobile_proteins_group.molecules() )
+    mobile_buffered_mols.add(mobile_solutes_group.molecules())
+    mobile_buffered_mols.add(mobile_proteins_group.molecules())
 
     # group holding all of the protein molecules that need intramolecular terms calculated
     protein_intra_mols = protein_intra_group.molecules()
@@ -683,7 +904,7 @@ def loadQMMMSystem():
     ###
     ### INTRA-ENERGY OF THE LIGAND AND CLUSTER
     ###
-    
+
     # intramolecular energy of the ligand
     ligand_intraclj = IntraCLJFF("ligand:intraclj")
     ligand_intraclj = setCLJProperties(ligand_intraclj, space)
@@ -695,7 +916,10 @@ def loadQMMMSystem():
     forcefields.append(ligand_intraclj)
     forcefields.append(ligand_intraff)
 
-    ligand_mm_nrg = ligand_intraclj.components().total() + ligand_intraff.components().total()
+    ligand_mm_nrg = (
+        ligand_intraclj.components().total()
+        + ligand_intraff.components().total()
+    )
 
     ###
     ### FORCEFIELDS INVOLVING THE LIGAND/CLUSTER AND OTHER ATOMS
@@ -709,7 +933,7 @@ def loadQMMMSystem():
     ligand_mobile.add(ligand_mols, MGIdx(0))
     ligand_mobile.add(mobile_mols, MGIdx(1))
 
-    qm_ligand = QMMMFF("system:ligand-QM")    
+    qm_ligand = QMMMFF("system:ligand-QM")
     qm_ligand.add(ligand_mols, MGIdx(0))
     qm_ligand = setQMProperties(qm_ligand, space)
 
@@ -718,34 +942,55 @@ def loadQMMMSystem():
     if not intermolecular_only.val:
         if qm_zero_energy.val is None:
             # calculate the delta value for the system - this is the difference between
-            # the MM and QM intramolecular energy of the ligand
+            # the MM and QM intramolecular energy of the ligand
             t.start()
             print("\nComparing the MM and QM energies of the ligand...")
-            mm_intra = ligand_intraclj.energy().value() + ligand_intraff.energy().value()
-            print("MM energy = %s kcal mol-1 (took %s ms)" % (mm_intra, t.elapsed()))
+            mm_intra = (
+                ligand_intraclj.energy().value()
+                + ligand_intraff.energy().value()
+            )
+            print(
+                "MM energy = %s kcal mol-1 (took %s ms)"
+                % (mm_intra, t.elapsed())
+            )
 
             t.start()
             zero_sys = System()
+            zero_sys.removeAllSharedProperties()
             zero_sys.add(qm_ligand)
             qm_intra = zero_sys.energy().value()
-            print("QM energy = %s kcal mol-1 (took %s ms)" % (qm_intra, t.elapsed()))
+            print(
+                "QM energy = %s kcal mol-1 (took %s ms)"
+                % (qm_intra, t.elapsed())
+            )
 
-            print("\nSetting the QM zero energy to %s kcal mol-1" % (qm_intra - mm_intra))
-            qm_ligand.setZeroEnergy( (qm_intra-mm_intra) * kcal_per_mol )
+            print(
+                "\nSetting the QM zero energy to %s kcal mol-1"
+                % (qm_intra - mm_intra)
+            )
+            qm_ligand.setZeroEnergy((qm_intra - mm_intra) * kcal_per_mol)
             zero_energy = qm_intra - mm_intra
         else:
-            print("\nManually setting the QM zero energy to %s" % qm_zero_energy.val)
-            qm_ligand.setZeroEnergy( qm_zero_energy.val )
+            print(
+                "\nManually setting the QM zero energy to %s"
+                % qm_zero_energy.val
+            )
+            qm_ligand.setZeroEnergy(qm_zero_energy.val)
             zero_energy = qm_zero_energy.val
 
     qm_ligand.add(mobile_mols, MGIdx(1))
 
     ligand_mm_nrg += ligand_mobile.components().total()
-    ligand_qm_nrg = qm_ligand.components().total() + ligand_mobile.components().lj()
+    ligand_qm_nrg = (
+        qm_ligand.components().total() + ligand_mobile.components().lj()
+    )
 
     if intermolecular_only.val:
         # the QM model still uses the MM intramolecular energy of the ligand
-        ligand_qm_nrg += ligand_intraclj.components().total() + ligand_intraff.components().total()
+        ligand_qm_nrg += (
+            ligand_intraclj.components().total()
+            + ligand_intraff.components().total()
+        )
 
     forcefields.append(ligand_mobile)
     forcefields.append(qm_ligand)
@@ -782,9 +1027,9 @@ def loadQMMMSystem():
             ligand_fixed = setGridProperties(ligand_fixed)
 
             ligand_fixed.add(ligand_mols, MGIdx(0))
-            ligand_fixed.addFixedAtoms( fixed_group )
+            ligand_fixed.addFixedAtoms(fixed_group)
 
-            qm_ligand.addFixedAtoms( fixed_group )
+            qm_ligand.addFixedAtoms(fixed_group)
 
             ligand_mm_nrg += ligand_fixed.components().total()
             ligand_qm_nrg += ligand_fixed.components().lj()
@@ -804,7 +1049,7 @@ def loadQMMMSystem():
     other_nrg = mobile_mobile.components().total()
     forcefields.append(mobile_mobile)
 
-    # forcefield holding the energy between the mobile atoms and  
+    # forcefield holding the energy between the mobile atoms and
     # the fixed atoms
     if disable_grid.val:
         mobile_fixed = InterGroupCLJFF("mobile-fixed")
@@ -869,7 +1114,7 @@ def loadQMMMSystem():
 
     lam = Symbol("lambda")
 
-    e_slow = ((1-lam) * ligand_qm_nrg) + (lam * ligand_mm_nrg) + other_nrg
+    e_slow = ((1 - lam) * ligand_qm_nrg) + (lam * ligand_mm_nrg) + other_nrg
     e_fast = ligand_mm_nrg + other_nrg
 
     de_by_dlam = ligand_mm_nrg - ligand_qm_nrg
@@ -882,14 +1127,17 @@ def loadQMMMSystem():
     system.setComponent(Symbol("E_{fast}"), e_fast)
     system.setComponent(Symbol("E_{slow}"), e_slow)
     system.setComponent(Symbol("dE/dlam"), de_by_dlam)
-    system.setComponent( system.totalComponent(), e_slow )
- 
+    system.setComponent(system.totalComponent(), e_slow)
+
     system.setProperty("space", space)
-    
+
     if space.isPeriodic():
         # ensure that all molecules are wrapped into the space with the ligand at the center
-        print("Adding in a space wrapper constraint %s, %s" % (space, ligand_mol.evaluate().center()))
-        system.add( SpaceWrapper( ligand_mol.evaluate().center(), all_group ) )
+        print(
+            "Adding in a space wrapper constraint %s, %s"
+            % (space, ligand_mol.evaluate().center())
+        )
+        system.add(SpaceWrapper(ligand_mol.evaluate().center(), all_group))
         system.applyConstraints()
 
     print("\nHere are the values of all of the initial energy components...")
@@ -898,16 +1146,29 @@ def loadQMMMSystem():
     print("(these took %d ms to evaluate)\n" % t.elapsed())
 
     # Create a monitor to monitor the free energy average
-    system.add( "dG/dlam", MonitorComponent(Symbol("dE/dlam"), AverageAndStddev()) )
+    system.add(
+        "dG/dlam", MonitorComponent(Symbol("dE/dlam"), AverageAndStddev())
+    )
 
     if intermolecular_only.val:
-        print("\n\n## This simulation uses QM to model *only* the intermolecular energy between")
-        print("## the QM and MM atoms. The intramolecular energy of the QM atoms is still")
+        print(
+            "\n\n## This simulation uses QM to model *only* the intermolecular energy between"
+        )
+        print(
+            "## the QM and MM atoms. The intramolecular energy of the QM atoms is still"
+        )
         print("## modelled using MM.\n")
     else:
-        print("\n\n## This simulation uses QM to model both the intermolecular and intramolecular")
-        print("## energies of the QM atoms. Because the this, we have to adjust the 'zero' point")
-        print("## of the QM potential. You need to add the value %s kcal mol-1 back onto the" % zero_energy)
+        print(
+            "\n\n## This simulation uses QM to model both the intermolecular and intramolecular"
+        )
+        print(
+            "## energies of the QM atoms. Because the this, we have to adjust the 'zero' point"
+        )
+        print(
+            "## of the QM potential. You need to add the value %s kcal mol-1 back onto the"
+            % zero_energy
+        )
         print("## QM->MM free energy calculated using this program.\n")
 
     return system
@@ -915,28 +1176,28 @@ def loadQMMMSystem():
 
 def makeRETI(system, moves):
     """This function replicates 'system' over each of the supplied lambda values
-       and uses 'moves' to sample each of the replicated systems. This uses RETI
-       to perform replica exchange moves across lambda"""
+    and uses 'moves' to sample each of the replicated systems. This uses RETI
+    to perform replica exchange moves across lambda"""
 
     lam = Symbol("lambda")
 
-    replicas = Replicas( len(lambda_values.val) )
+    replicas = Replicas(len(lambda_values.val))
 
     replicas.setSubSystem(system)
     replicas.setSubMoves(moves)
     replicas.setNSubMoves(nslow.val)
     replicas.setLambdaComponent(lam)
-    replicas.setRecordAllStatistics(True)        
+    replicas.setRecordAllStatistics(True)
 
     seed = random_seed.val
-    
+
     if seed is None:
-        seed = RanGenerator().randInt(100000,1000000)
+        seed = RanGenerator().randInt(100000, 1000000)
         print("RETI system using generated random number seed %d" % seed)
     else:
         print("RETI system using supplied random number seed %d" % seed)
-    
-    replicas.setGenerator( RanGenerator(seed+5) )
+
+    replicas.setGenerator(RanGenerator(seed + 5))
 
     for i in range(0, len(lambda_values.val)):
         # set the initial lambda value for this replica
@@ -947,15 +1208,15 @@ def makeRETI(system, moves):
         print(replicas[i].subSystem().constants())
 
     # Now add monitors for each replica that will copy back
-    nrgmons = [ "dG/dlam" ]
+    nrgmons = ["dG/dlam"]
 
     for nrgmon in nrgmons:
-        replicas.add( nrgmon, MonitorMonitor(MonitorName(nrgmon), True) )
+        replicas.add(nrgmon, MonitorMonitor(MonitorName(nrgmon), True))
 
     # now create the replica exchange moves for the replicas
     replica_moves = RepExMove()
     replica_moves.setDisableSwaps(False)
-    replica_moves.setGenerator( RanGenerator(seed+7) )
+    replica_moves.setGenerator(RanGenerator(seed + 7))
 
     print("\nReturning the QM/MM RETI replicas and moves...")
     return (replicas, replica_moves)
@@ -991,7 +1252,11 @@ def analyseQMMM(replicas, iteration, ti_freenrgs):
     print(" Results for iteration %d" % iteration, file=FILE)
     print("===========================", file=FILE)
 
-    print("temperature == %f K\n" % replicas[0].subMoves().temperature().to(kelvin), file=FILE) 
+    print(
+        "temperature == %f K\n"
+        % replicas[0].subMoves().temperature().to(kelvin),
+        file=FILE,
+    )
 
     nreplicas = replicas.nReplicas()
 
@@ -1012,58 +1277,67 @@ def analyseQMMM(replicas, iteration, ti_freenrgs):
         lambda_values.append(lamval)
 
         if write_pdbs:
-            if save_all_pdbs.val or (i == 0) or (i == nreplicas-1):
+            if save_all_pdbs.val or (i == 0) or (i == nreplicas - 1):
                 # Save a PDB of the final configuration for the bound and free legs for each lambda value
                 system = replica.subSystem()
                 all = system[MGName("all")]
 
-                PDB().write(all, "%s/coords_%000006d_%.5f.pdb" % (outdir.val, iteration, lamval))
+                PDB().write(
+                    all,
+                    "%s/coords_%000006d_%.5f.pdb"
+                    % (outdir.val, iteration, lamval),
+                )
 
         dg[lamval] = monitors[MonitorName("dG/dlam")][-1].accumulator()
 
-    ti_freenrgs.set( iteration, dg )
+    ti_freenrgs.set(iteration, dg)
 
     print("\n=============", file=FILE)
-    print("Correction free energy for iteration %d equals %s" % (iteration, \
-                        ti_freenrgs[iteration].integrate().values()[-1].y()), file=FILE)
+    print(
+        "Correction free energy for iteration %d equals %s"
+        % (iteration, ti_freenrgs[iteration].integrate().values()[-1].y()),
+        file=FILE,
+    )
     print("==============", file=FILE)
 
 
 @resolveParameters
 def run():
-    """This function is used to actually run the simulation according to the 
-       parameters passed in in 'params'"""
+    """This function is used to actually run the simulation according to the
+    parameters passed in in 'params'"""
 
     t = QTime()
     total_t = QTime()
     total_t.start()
 
-
     if os.path.exists(restart_file.val):
         t.start()
-        (qm_system,qm_moves) = Sire.Stream.load(restart_file.val)
+        (qm_system, qm_moves) = Sire.Stream.load(restart_file.val)
         print("Loading the restart file took %d ms" % t.elapsed())
     else:
         # Load the system from the files
         t.start()
         if os.path.exists(sysmoves_file.val):
-            (qm_system,qm_moves) = Sire.Stream.load(sysmoves_file.val)
+            (qm_system, qm_moves) = Sire.Stream.load(sysmoves_file.val)
         else:
-            (qm_system,qm_moves) = loadQMMM()            
-            Sire.Stream.save( (qm_system,qm_moves), sysmoves_file.val)
+            (qm_system, qm_moves) = loadQMMM()
+            Sire.Stream.save((qm_system, qm_moves), sysmoves_file.val)
 
         # now replicate the system across all lambda values so that we can
         # run a simulation
-        (qm_system,qm_moves) = makeRETI(qm_system,qm_moves)
+        (qm_system, qm_moves) = makeRETI(qm_system, qm_moves)
 
-        Sire.Stream.save( (qm_system,qm_moves), restart_file.val )
+        Sire.Stream.save((qm_system, qm_moves), restart_file.val)
 
         print("Initialising the system took %d ms" % t.elapsed())
 
     # see how many blocks of moves we still need to perform...
     nattempted = qm_moves.nMoves()
 
-    print("Number of iterations to perform: %d. Number of iterations completed: %d." % (nmoves.val, nattempted))
+    print(
+        "Number of iterations to perform: %d. Number of iterations completed: %d."
+        % (nmoves.val, nattempted)
+    )
 
     # See if we have any existing free energy statistics files...
     t.start()
@@ -1074,12 +1348,14 @@ def run():
     else:
         ti_freenrgs = Sire.Stream.load(freenrgs_file)
 
-    print("Initialising / loading the free energy files took %d ms" % t.elapsed())
+    print(
+        "Initialising / loading the free energy files took %d ms" % t.elapsed()
+    )
 
-    for i in range(nattempted+1, nmoves.val+1):
+    for i in range(nattempted + 1, nmoves.val + 1):
         t.start()
         print("Performing iteration %d..." % i)
-        sim = SupraSim.run( qm_system, qm_moves, 1, True )
+        sim = SupraSim.run(qm_system, qm_moves, 1, True)
         sim.wait()
 
         qm_system = sim.system()
@@ -1097,7 +1373,7 @@ def run():
             except:
                 pass
 
-            Sire.Stream.save( (qm_system, qm_moves), restart_file.val )
+            Sire.Stream.save((qm_system, qm_moves), restart_file.val)
             print("...save complete (took %d ms)" % t.elapsed())
 
         t.start()
@@ -1108,15 +1384,20 @@ def run():
 
         if i % restart_frequency.val == 0 or i == nmoves.val:
             t.start()
-            print("Saving the free energy analysis files from iteration %d..." % i)
+            print(
+                "Saving the free energy analysis files from iteration %d..."
+                % i
+            )
             # save the old file to a backup
             try:
                 shutil.copy(freenrgs_file, "%s.bak" % freenrgs_file)
             except:
                 pass
 
-            Sire.Stream.save( ti_freenrgs, freenrgs_file )
+            Sire.Stream.save(ti_freenrgs, freenrgs_file)
 
             print("...save complete (took %d ms)" % t.elapsed())
 
-    print("All iterations complete. Total runtime was %d ms" % total_t.elapsed())
+    print(
+        "All iterations complete. Total runtime was %d ms" % total_t.elapsed()
+    )

@@ -244,6 +244,7 @@ def createSystemFrom(molecules, space, system_name, naming_scheme = NamingScheme
        passed naming scheme"""
 
     system = System(system_name)
+    system.removeAllSharedProperties()
 
     # If requested, change the water model for all water molecules
     if water_model.val == "tip4p":

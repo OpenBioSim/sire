@@ -657,6 +657,7 @@ def mergeSystems(protein0_system, protein1_system, water_system, ligand_mol):
     water_mol = mobile_free_water_group[MolIdx(0)][0].molecule()
 
     system = System("PSRC system")
+    system.removeAllSharedProperties()
 
     if protein0_system.containsProperty("reflection center"):
         prot0_reflection_center = protein0_system.property("reflection center").toVector()[0]
@@ -1065,6 +1066,7 @@ def mergeSystems(protein0_system, protein1_system, water_system, ligand_mol):
             swap_water_group.update(swap_waters)
 
         equil_system = System()
+        equil_system.removeAllSharedProperties()
 
         ff = InterFF("interff")
         ff.setCLJFunction( getInterCLJFunction() )

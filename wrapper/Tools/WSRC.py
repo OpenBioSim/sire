@@ -1023,6 +1023,7 @@ def mergeSystems(protein_system, water_system, ligand_mol):
     print("Merging the protein box and water box to create the WSRC system...")
 
     system = System("WSRC system")
+    system.removeAllSharedProperties()
 
     if protein_system.containsProperty("reflection center"):
         prot_reflection_center = protein_system.property(
@@ -1397,6 +1398,7 @@ def mergeSystems(protein_system, water_system, ligand_mol):
             move.setGenerator(RanGenerator(4039251))
 
             equil_system = System()
+            equil_system.removeAllSharedProperties()
 
             ff = InterFF("interff")
             ff.setCLJFunction(getInterCLJFunction())
@@ -1483,6 +1485,7 @@ def mergeSystems(protein_system, water_system, ligand_mol):
         # now equilibrate the swap cluster, if requested
         if n_equil_reflect.val:
             equil_system = System()
+            equil_system.removeAllSharedProperties()
             ff = InterCLJFF("ff")
             ff.add(swap_water_group)
             liggroup = MoleculeGroup("liggroup")

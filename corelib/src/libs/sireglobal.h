@@ -22,7 +22,9 @@
 // boost::hash does not use std::unary_function
 // (which was deprecated in C++11 and removed in C++17)
 // See https://github.com/boostorg/container_hash/issues/22
-#define BOOST_NO_CXX98_FUNCTION_BASE 1
+#ifndef BOOST_NO_CXX98_FUNCTION_BASE
+#define BOOST_NO_CXX98_FUNCTION_BASE
+#endif
 #endif
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)

@@ -233,6 +233,7 @@ def _createSystem(molecules):
 
     # Add these groups to the System
     system = System()
+    system.removeAllSharedProperties()
 
     system.add(all)
     system.add(gridwater)
