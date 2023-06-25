@@ -17,6 +17,7 @@ def box():
         90.0000000 * sr.units.degrees,
     )
 
+
 def test_reduction_vectors(box):
     """
     Test that repeat lattice reductions give consistent box dimensions
@@ -37,6 +38,7 @@ def test_reduction_vectors(box):
         assert alpha == box.alpha()
         assert beta == box.beta()
         assert gamma == box.gamma()
+
 
 def test_reduction_angles(box):
     """
@@ -80,7 +82,9 @@ def test_cresset_box():
     # Load the test system.
     system = sr.load(
         sr.expand(
-            sr.tutorial_url, "cresset_triclinic_box.prm7", "cresset_triclinic_box.rst7"
+            sr.tutorial_url,
+            "cresset_triclinic_box.prm7",
+            "cresset_triclinic_box.rst7",
         ),
         directory=tmp_path,
     )

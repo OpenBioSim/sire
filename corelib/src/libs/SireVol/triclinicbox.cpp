@@ -231,9 +231,15 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
     // lattice cell vectors being specified in fixed precision in the file formats that
     // we support. Without these, repeated read/write conversion to different formats
     // can cause the box angles to rotate back-and-forth.
+<<<<<<< HEAD
     this->v2 = this->v2 - this->v1*std::round(-1e-8 + this->v2.y() / this->v1.y());
     this->v2 = this->v2 - this->v0*std::round(-1e-8 + this->v2.x() / this->v0.x());
     this->v1 = this->v1 - this->v0*std::round(-1e-8 + this->v1.x() / this->v0.x());
+=======
+    this->v2 = this->v2 - this->v1*std::round(1e-6 + this->v2.y() / this->v1.y());
+    this->v2 = this->v2 - this->v0*std::round(1e-6 + this->v2.x() / this->v0.x());
+    this->v1 = this->v1 - this->v0*std::round(1e-6 + this->v1.x() / this->v0.x());
+>>>>>>> e4c3836ee70409507e31896af0ff55cff5a5cbeb
 
     // Store the cell matrix and its inverse.
     this->cell_matrix = Matrix(this->v0, this->v1, this->v2).transpose();
