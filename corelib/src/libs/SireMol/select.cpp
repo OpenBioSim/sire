@@ -29,6 +29,8 @@
 #include "SireMol/moleculegroup.h"
 #include "SireMol/molecules.h"
 #include "SireMol/parser.h"
+#include "SireMol/atommatch.h"
+#include "SireMol/mover_metaid.h"
 
 #include "SireMol/core.h"
 
@@ -189,6 +191,8 @@ MolViewPtr SireMol::parser::SelectEngine::expandMol(const MoleculeView &mol) con
         return mol.segments();
     case SelectEngine::MOLECULE:
         return mol.molecule();
+    case SelectEngine::MATCH:
+        return AtomMatch(mol);
     default:
         return mol;
     }
@@ -249,6 +253,13 @@ SelectResult SireMol::parser::SelectEngine::expand(const SelectResult &results) 
             expanded.append(result->molecule());
         }
     }
+    else if (objtyp == SelectEngine::MATCH)
+    {
+        for (auto result : results)
+        {
+            expanded.append(AtomMatch(result.read()));
+        }
+    }
     else if (objtyp == SelectEngine::VIEW)
     {
         return results;
@@ -260,6 +271,42 @@ SelectResult SireMol::parser::SelectEngine::expand(const SelectResult &results) 
     }
 
     return SelectResult(expanded);
+}
+
+QHash<QString, SireMol::parser::SelectEnginePtr> _engines;
+
+SireMol::parser::SelectEnginePtr SireMol::parser::SelectEngine::createNew(const QList<QVariant> &args) const
+{
+    throw SireError::unsupported(QObject::tr(
+                                     "The SelectEngine %1 does not support be created via 'createNew'")
+                                     .arg(this->toString()),
+                                 CODELOC);
+}
+
+void SireMol::parser::SelectEngine::registerEngine(const QString &key, SireMol::parser::SelectEngine *engine)
+{
+    QMutexLocker lkr(globalLock());
+    _engines.insert(key, makePtr(engine));
+}
+
+SireMol::parser::SelectEnginePtr SireMol::parser::SelectEngine::createEngine(const QString &key,
+                                                                             const QList<QVariant> &args)
+{
+    QMutexLocker lkr(globalLock());
+
+    auto it = _engines.constFind(key);
+
+    if (it == _engines.constEnd())
+        return SireMol::parser::SelectEnginePtr();
+    else
+        return it.value()->createNew(args);
+}
+
+SireMol::parser::SelectEnginePtr SireMol::parser::SelectEngine::createEngine(const QString &key,
+                                                                             const QVariant &arg)
+{
+    QList<QVariant> args = {arg};
+    return SireMol::parser::SelectEngine::createEngine(key, args);
 }
 
 ///////////
@@ -1061,8 +1108,13 @@ QString SelectResult::getCommonType() const
     {
         const auto typ = molview->what();
 
-        if (typ == Molecule::typeName() or typ == Atom::typeName() or typ == Residue::typeName() or
-            typ == Chain::typeName() or typ == Segment::typeName() or typ == CutGroup::typeName())
+        if (typ == AtomMatch::typeName())
+        {
+            // everything must be an AtomMatch
+            return AtomMatch::typeName();
+        }
+        else if (typ == Molecule::typeName() or typ == Atom::typeName() or typ == Residue::typeName() or
+                 typ == Chain::typeName() or typ == Segment::typeName() or typ == CutGroup::typeName())
         {
             selections.append(molview->selection());
         }
@@ -1156,9 +1208,6 @@ QString SelectResult::getCommonType() const
             break;
         }
     }
-
-    if (is_cutgroup)
-        return CutGroup::typeName();
 
     if (is_cutgroup)
         return CutGroup::typeName();

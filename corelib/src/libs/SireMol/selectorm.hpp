@@ -73,6 +73,7 @@ namespace SireMol
         SelectorM();
         SelectorM(const T &view);
         SelectorM(const Selector<T> &views);
+        SelectorM(const QList<Selector<T>> &views);
         SelectorM(const Molecules &mols);
         SelectorM(const MoleculeGroup &mols);
         SelectorM(const MolGroupsBase &mols);
@@ -303,6 +304,7 @@ namespace SireMol
 
     protected:
         void _append(const T &view);
+        void _append(const Selector<T> &views);
 
         /** The actual views */
         QList<Selector<T>> vws;
@@ -512,6 +514,17 @@ namespace SireMol
     {
         if (not views.isEmpty())
             this->vws.append(views);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const QList<Selector<T>> &views)
+        : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
+    {
+        for (const auto &view : views)
+        {
+            if (not view.isEmpty())
+                this->_append(view);
+        }
     }
 
     template <class T>
@@ -800,6 +813,28 @@ namespace SireMol
         {
             // a new view in the current molecule
             this->vws.last() = this->vws.last().add(view);
+        }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::_append(const Selector<T> &views)
+    {
+        if (views.isEmpty())
+            return;
+
+        else if (this->vws.isEmpty())
+        {
+            this->vws.append(views);
+        }
+        else if (this->vws.last().data().number() != views.data().number())
+        {
+            // new molecule
+            this->vws.append(views);
+        }
+        else
+        {
+            // a new set of views for the current molecule
+            this->vws.last() = this->vws.last().add(views);
         }
     }
 
@@ -1319,9 +1354,9 @@ namespace SireMol
     {
         SelectorM<T> ret(*this);
 
-        for (int i = 0; i < other.count(); ++i)
+        for (const auto vw : other.vws)
         {
-            ret._append(other(i));
+            ret._append(vw);
         }
 
         return ret;

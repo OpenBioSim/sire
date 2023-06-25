@@ -17,6 +17,7 @@
 #include "atomidentifier.h"
 #include "atomidx.h"
 #include "atommasses.h"
+#include "atommatch.h"
 #include "atommatcher.h"
 #include "atommatchers.h"
 #include "atomname.h"
@@ -145,6 +146,8 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireID::MatchAll<SireMol::AtomID> >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIdx >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMasses >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomMatch >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomMatchM >();
     ObjectRegistry::registerConverterFor< SireMol::AtomResultMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMatchInverter >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIdxMatcher >();

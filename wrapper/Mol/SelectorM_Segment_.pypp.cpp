@@ -69,6 +69,7 @@ void register_SelectorM_Segment__class(){
         bp::scope SelectorM_Segment__scope( SelectorM_Segment__exposer );
         SelectorM_Segment__exposer.def( bp::init< SireMol::Segment const & >(( bp::arg("view") ), "") );
         SelectorM_Segment__exposer.def( bp::init< SireMol::Selector< SireMol::Segment > const & >(( bp::arg("views") ), "") );
+        SelectorM_Segment__exposer.def( bp::init< QList< SireMol::Selector< SireMol::Segment > > const & >(( bp::arg("views") ), "") );
         SelectorM_Segment__exposer.def( bp::init< SireMol::Molecules const & >(( bp::arg("mols") ), "") );
         SelectorM_Segment__exposer.def( bp::init< SireMol::MoleculeGroup const & >(( bp::arg("mols") ), "") );
         SelectorM_Segment__exposer.def( bp::init< SireMol::MolGroupsBase const & >(( bp::arg("mols") ), "") );

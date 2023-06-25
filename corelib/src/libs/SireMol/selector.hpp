@@ -1059,9 +1059,6 @@ namespace SireMol
                 }
             }
 
-            if (ret.idxs.count() >= n)
-                ret.idxs.clear();
-
             return ret;
         }
         else

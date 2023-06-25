@@ -61,7 +61,11 @@
 
 #include "AtomMasses.pypp.hpp"
 
+#include "AtomMatch.pypp.hpp"
+
 #include "AtomMatchInverter.pypp.hpp"
+
+#include "AtomMatchM.pypp.hpp"
 
 #include "AtomMatcher.pypp.hpp"
 
@@ -702,7 +706,13 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_AtomMCSMatcher_class();
 
+    register_PartialMolecule_class();
+
+    register_AtomMatch_class();
+
     register_AtomMatchInverter_class();
+
+    register_AtomMatchM_class();
 
     register_AtomMultiMatcher_class();
 
@@ -987,8 +997,6 @@ BOOST_PYTHON_MODULE(_Mol){
     register_Mover_CutGroup__class();
 
     register_Mover_Molecule__class();
-
-    register_PartialMolecule_class();
 
     register_Mover_PartialMolecule__class();
 

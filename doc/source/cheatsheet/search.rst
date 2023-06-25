@@ -577,6 +577,41 @@ within 3 Å of the point ``(5.3, 9.8, -2.1)``.
    periodic boundaries are accounted for in the search. You can specify
    the space to use by passing this in via a property map.
 
+Searching using Smiles or Smarts Strings
+----------------------------------------
+
+You can search for substructure matches in views using either
+`smiles <https://en.wikipedia.org/wiki/Simplified_molecular-input_line-entry_system>`__ or
+`smarts <https://en.wikipedia.org/wiki/SMILES_arbitrary_target_specification>`__.
+
+These searches are processed using the :mod:`sire`'s integration with
+`RDKit <https://rdkit.org>`__.
+
+You can search using smiles or smarts by putting ``smiles`` or ``smarts``
+before the search term.
+
+* ``smarts [#6]`` - search for all carbon atoms
+* ``smarts [#6]!:[#6]`` - search for carbons bonded to other carbon atoms
+  using an aliphatic bond.
+* ``smiles CNC(=O)C(C)NC(C)=O`` - search for molecules that match the
+  smiles string for alanine dipeptide.
+
+Since these searches can match multiple groups, and can have multiple
+atoms per match, the results of the search are returned as
+:class:`~sire.mol.AtomMatch` or :class:`~sire.mol.AtomMatchM` objects.
+
+These are derived from the standard atom selector classes, and will contain
+all atoms that are included in all matches of the smiles or smarts string
+in the molecule.
+
+You can extract individual matches (and then individual atoms within those
+matches) using the :func:`~sire.mol.AtomMatch.group` or
+:func:`~sire.mol.AtomMatch.groups` functions. These return either individual
+match groups, or all of the matching groups, as individual atom selectors.
+The order of the atoms in the atom selectors matches the order of the
+atoms in the smiles or smarts strings. More detail on how to use these
+match objects is given in the :doc:`the tutorial <../tutorial/part05/04_smarts>`.
+
 Searching for Water or Protein Molecules
 ----------------------------------------
 

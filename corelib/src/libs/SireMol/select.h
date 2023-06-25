@@ -140,6 +140,7 @@ namespace SireMol
                 SEGMENT = 8,
                 CUTGROUP = 9,
                 MOLECULE = 10,
+                MATCH = 11,
                 VIEW = 99
             };
 
@@ -174,6 +175,13 @@ namespace SireMol
             virtual ObjType objectType() const = 0;
 
             virtual SelectResult expand(const SelectResult &result) const;
+
+            virtual SelectEnginePtr createNew(const QList<QVariant> &args) const;
+
+            static void registerEngine(const QString &key, SelectEngine *engine);
+
+            static SelectEnginePtr createEngine(const QString &key, const QVariant &arg);
+            static SelectEnginePtr createEngine(const QString &key, const QList<QVariant> &args);
 
         protected:
             SelectEngine();

@@ -569,6 +569,14 @@ class System:
         """
         return self.molecules().smiles(*args, **kwargs)
 
+    def smarts(self, *args, **kwargs):
+        """
+        Return the molecule views in this container as smarts strings. Include
+        hydrogens in 'include_hydrogens' is True. This returns a list
+        of smarts strings, in the same order as the views in the container
+        """
+        return self.molecules().smarts(*args, **kwargs)
+
     def view(self, *args, **kwargs):
         """
         View this System (or the matching index/search subset)

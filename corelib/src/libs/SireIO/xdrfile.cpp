@@ -958,8 +958,6 @@ void TRRFile::_lkr_reindexFrames()
         return;
     }
 
-    qDebug() << "Manually reindexing TRR frames... This could take a while...";
-
     nframes = 0;
     bytes_per_frame = 0;
     seek_frame.clear();
@@ -968,6 +966,11 @@ void TRRFile::_lkr_reindexFrames()
     auto ok = xdr_seek(f, 0, SEEK_SET);
 
     t_trnheader header;
+
+    auto bar = SireBase::ProgressBar("Indexing TRR trajectory frames:");
+    bar.setSpeedUnit("frames / second");
+
+    bar.enter();
 
     while (ok == exdrOK)
     {
@@ -1032,8 +1035,11 @@ void TRRFile::_lkr_reindexFrames()
         {
             // this was a valid frame :-)
             seek_frame.append(std::make_tuple(frame_start, ftype));
+            bar.tick();
         }
     }
+
+    bar.success();
 
     nframes = seek_frame.count();
 }

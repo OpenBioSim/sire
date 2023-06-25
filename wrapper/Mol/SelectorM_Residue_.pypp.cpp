@@ -69,6 +69,7 @@ void register_SelectorM_Residue__class(){
         bp::scope SelectorM_Residue__scope( SelectorM_Residue__exposer );
         SelectorM_Residue__exposer.def( bp::init< SireMol::Residue const & >(( bp::arg("view") ), "") );
         SelectorM_Residue__exposer.def( bp::init< SireMol::Selector< SireMol::Residue > const & >(( bp::arg("views") ), "") );
+        SelectorM_Residue__exposer.def( bp::init< QList< SireMol::Selector< SireMol::Residue > > const & >(( bp::arg("views") ), "") );
         SelectorM_Residue__exposer.def( bp::init< SireMol::Molecules const & >(( bp::arg("mols") ), "") );
         SelectorM_Residue__exposer.def( bp::init< SireMol::MoleculeGroup const & >(( bp::arg("mols") ), "") );
         SelectorM_Residue__exposer.def( bp::init< SireMol::MolGroupsBase const & >(( bp::arg("mols") ), "") );

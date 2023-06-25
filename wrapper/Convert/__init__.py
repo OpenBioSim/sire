@@ -2,8 +2,10 @@ __all__ = [
     "sire_to_rdkit",
     "rdkit_to_sire",
     "rdkit_to_smiles",
+    "rdkit_to_smarts",
     "rdkit_remove_hydrogens",
     "smiles_to_rdkit",
+    "smarts_to_rdkit",
     "sire_to_openmm",
     "openmm_to_sire",
     "openmm_extract_coordinates",
@@ -17,11 +19,15 @@ try:
         sire_to_rdkit,
         rdkit_to_sire,
         rdkit_to_smiles,
+        rdkit_to_smarts,
         rdkit_remove_hydrogens,
         smiles_to_rdkit,
+        smarts_to_rdkit,
+        _register_smarts_search,
     )
 
     _has_rdkit = True
+    _register_smarts_search()
 
 except Exception:
     # RDKit support is not available
@@ -43,10 +49,16 @@ except Exception:
     def rdkit_to_smiles(*args, **kwargs):
         _no_rdkit()
 
+    def rdkit_to_smarts(*args, **kwargs):
+        _no_rdkit()
+
     def rdkit_remove_hydrogens(*args, **kwargs):
         _no_rdkit()
 
     def smiles_to_rdkit(*args, **kwargs):
+        _no_rdkit()
+
+    def smarts_to_rdkit(*args, **kwargs):
         _no_rdkit()
 
 

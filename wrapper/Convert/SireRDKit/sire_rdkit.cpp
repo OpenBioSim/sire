@@ -5,8 +5,10 @@
 #include <GraphMol/PeriodicTable.h>
 #include <GraphMol/SmilesParse/SmilesParse.h>
 #include <GraphMol/SmilesParse/SmilesWrite.h>
+#include <GraphMol/SmilesParse/SmartsWrite.h>
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
+#include <GraphMol/Substruct/SubstructMatch.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -17,6 +19,7 @@
 #include "SireMol/atomcharges.h"
 #include "SireMol/atomcoords.h"
 #include "SireMol/atommasses.h"
+#include "SireMol/atommatch.h"
 #include "SireMol/atomproperty.hpp"
 #include "SireMol/connectivity.h"
 #include "SireMol/bondid.h"
@@ -24,6 +27,8 @@
 #include "SireMol/stereochemistry.h"
 #include "SireMol/chirality.h"
 #include "SireMol/hybridization.h"
+#include "SireMol/iswater.h"
+#include "SireMol/mover_metaid.h"
 
 #include "SireMM/selectorbond.h"
 
@@ -902,6 +907,92 @@ namespace SireRDKit
         return QList<ROMOL_SPTR>(rdkit_mols.constBegin(), rdkit_mols.constEnd());
     }
 
+    ROMOL_SPTR smarts_to_rdkit(const QString &smarts,
+                               const QString &label,
+                               const PropertyMap &map)
+    {
+        RDKit::SmartsParserParams params;
+        params.debugParse = 0;
+        params.allowCXSMILES = true;
+        params.mergeHs = false;
+        params.parseName = true;
+        params.skipCleanup = false;
+
+        RWMOL_SPTR rdkit_mol;
+
+        if (map.specified("merge_hydrogens"))
+        {
+            params.mergeHs = map["merge_hydrogens"].value().asABoolean();
+        }
+
+        if (map.specified("skip_cleanup"))
+        {
+            params.skipCleanup = map["skip_cleanup"].value().asABoolean();
+        }
+
+        if (map.specified("allow_cx_smiles"))
+        {
+            params.allowCXSMILES = map["allow_cx_smiles"].value().asABoolean();
+        }
+
+        try
+        {
+            rdkit_mol.reset(RDKit::SmartsToMol(smarts.toStdString(), params));
+        }
+        catch (...)
+        {
+        }
+
+        if (rdkit_mol.get() == 0)
+        {
+            return ROMOL_SPTR();
+        }
+
+        rdkit_mol->setProp<std::string>("_Name", label.toStdString());
+
+        return rdkit_mol;
+    }
+
+    QList<ROMOL_SPTR> smarts_to_rdkit(const QStringList &smarts,
+                                      const QStringList &labels,
+                                      const PropertyMap &map)
+    {
+        if (smarts.count() != labels.count())
+            throw SireError::invalid_arg(QObject::tr(
+                                             "The number of smarts strings (%1) must match the "
+                                             "number of labels (%2)")
+                                             .arg(smarts.count())
+                                             .arg(labels.count()),
+                                         CODELOC);
+
+        const int n = smarts.count();
+
+        if (n == 0)
+            return QList<ROMOL_SPTR>();
+
+        QVector<ROMOL_SPTR> ret(n);
+        ROMOL_SPTR *ret_data = ret.data();
+
+        if (use_parallel(n, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
+                              {
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    ret_data[i] = smarts_to_rdkit(smarts[i], labels[i], map);
+                } });
+        }
+        else
+        {
+            for (int i = 0; i < n; ++i)
+            {
+                ret_data[i] = smarts_to_rdkit(smarts[i], labels[i], map);
+            }
+        }
+
+        return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
+    }
+
     ROMOL_SPTR smiles_to_rdkit(const QString &smiles,
                                const QString &label,
                                const PropertyMap &map)
@@ -1053,6 +1144,54 @@ namespace SireRDKit
         return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
     }
 
+    QString rdkit_to_smarts(const ROMOL_SPTR &mol,
+                            const PropertyMap &map)
+    {
+        if (mol.get() == 0)
+            return QString();
+
+        try
+        {
+            return QString::fromStdString(RDKit::MolToSmarts(*mol));
+        }
+        catch (...)
+        {
+            // ignore errors
+            return QString();
+        }
+    }
+
+    QStringList rdkit_to_smarts(const QList<ROMOL_SPTR> &mols,
+                                const PropertyMap &map)
+    {
+        if (mols.isEmpty())
+            return QStringList();
+
+        const int nmols = mols.count();
+
+        QVector<QString> smarts(nmols);
+        QString *smarts_data = smarts.data();
+
+        if (use_parallel(nmols, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
+                              {
+            for (int i=r.begin(); i<r.end(); ++i)
+            {
+                smarts_data[i] = rdkit_to_smarts(mols[i], map);
+            } });
+        }
+        else
+        {
+            for (int i = 0; i < mols.count(); ++i)
+            {
+                smarts_data[i] = rdkit_to_smarts(mols[i], map);
+            }
+        }
+
+        return QStringList(smarts.constBegin(), smarts.constEnd());
+    }
+
     QString rdkit_to_smiles(const ROMOL_SPTR &mol,
                             const PropertyMap &map)
     {
@@ -1153,5 +1292,169 @@ namespace SireRDKit
 
         return QList<ROMOL_SPTR>(ret.constBegin(), ret.constEnd());
     }
-
 } // end of namespace SireRDKit
+
+#include "SireMol/select.h"
+
+namespace SireMol
+{
+    namespace parser
+    {
+
+        ////////
+        //////// Implementation of the IDSmartsEngine
+        ////////
+
+        /** Internal class used to search using smarts strings */
+        class IDSmartsEngine : public SelectEngine
+        {
+        public:
+            IDSmartsEngine(bool search_smarts = true);
+            SelectEnginePtr createNew(const QList<QVariant> &args) const;
+
+            ~IDSmartsEngine();
+
+            ObjType objectType() const;
+
+        protected:
+            SelectResult select(const SelectResult &mols, const PropertyMap &map) const;
+
+            QString smarts;
+            bool search_smarts;
+        };
+
+        IDSmartsEngine::IDSmartsEngine(bool s) : search_smarts(s)
+        {
+        }
+
+        IDSmartsEngine::~IDSmartsEngine()
+        {
+        }
+
+        SelectEngine::ObjType IDSmartsEngine::objectType() const
+        {
+            return SelectEngine::VIEW;
+        }
+
+        SelectEnginePtr IDSmartsEngine::createNew(const QList<QVariant> &args) const
+        {
+            if (args.isEmpty())
+                throw SireError::program_bug(QObject::tr(
+                                                 "Weird arguments? %s")
+                                                 .arg(Sire::toString(args)),
+                                             CODELOC);
+
+            IDSmartsEngine *ptr = new IDSmartsEngine();
+            auto p = makePtr(ptr);
+
+            ptr->smarts = args.at(0).toString();
+            ptr->search_smarts = this->search_smarts;
+
+            return p;
+        }
+
+        SelectResult IDSmartsEngine::select(const SelectResult &mols, const PropertyMap &map) const
+        {
+            ROMOL_SPTR search_mol;
+
+            if (search_smarts)
+            {
+                search_mol = SireRDKit::smarts_to_rdkit(smarts, smarts, map);
+            }
+            else
+            {
+                search_mol = SireRDKit::smiles_to_rdkit(smarts, smarts, map);
+            }
+
+            if (search_mol.get() == 0)
+                throw SireError::invalid_key(QObject::tr(
+                                                 "Unrecognised smarts string '%1'")
+                                                 .arg(smarts),
+                                             CODELOC);
+
+            const int match_natoms = search_mol->getNumAtoms();
+
+            const auto water_mask = is_water(mols, map);
+
+            bool water_doesnt_match = false;
+
+            QList<MolViewPtr> ret;
+
+            for (int i = 0; i < mols.count(); ++i)
+            {
+                const auto mol = mols[i];
+
+                const int natoms = mol.read().nAtoms();
+
+                if (natoms < match_natoms)
+                    continue;
+
+                bool this_is_water = water_mask[i];
+
+                if (this_is_water)
+                {
+                    if (water_doesnt_match)
+                        continue;
+                }
+
+                auto rdmol = SireRDKit::sire_to_rdkit(mol.read(), map);
+
+                if (rdmol.count() != 1)
+                {
+                    if (this_is_water)
+                        water_doesnt_match = true;
+
+                    continue;
+                }
+
+                std::vector<RDKit::MatchVectType> hits;
+
+                if (RDKit::SubstructMatch(*(rdmol.at(0)), *search_mol, hits))
+                {
+                    if (hits.size() == 0)
+                    {
+                        if (this_is_water)
+                            water_doesnt_match = true;
+
+                        continue;
+                    }
+
+                    QList<QList<qint64>> groups;
+
+                    for (const auto &hit : hits)
+                    {
+                        QList<qint64> selected_atoms;
+
+                        for (const auto &atom : hit)
+                        {
+                            selected_atoms.append(atom.second);
+                        }
+
+                        groups.append(selected_atoms);
+                    }
+
+                    ret.append(MolViewPtr(new AtomMatch(mol.read().atoms(), groups)));
+                }
+                else if (this_is_water)
+                {
+                    water_doesnt_match = true;
+                }
+            }
+
+            return SelectResult(ret);
+        }
+
+    }
+}
+
+namespace SireRDKit
+{
+    void register_smarts_search()
+    {
+        SireMol::parser::SelectEngine::registerEngine("smarts",
+                                                      new SireMol::parser::IDSmartsEngine(true));
+
+        SireMol::parser::SelectEngine::registerEngine("smiles",
+                                                      new SireMol::parser::IDSmartsEngine(false));
+    }
+}

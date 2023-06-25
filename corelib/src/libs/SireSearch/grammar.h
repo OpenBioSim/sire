@@ -198,6 +198,8 @@ public:
             "x", AST::ID_COORD_X)("coords.x", AST::ID_COORD_X)("y", AST::ID_COORD_Y)("coords.y", AST::ID_COORD_Y)(
             "z", AST::ID_COORD_Z)("coords.z", AST::ID_COORD_Z);
 
+        smarts_token.add("smarts", AST::ID_SMARTS)("smiles", AST::ID_SMILES);
+
         // now add in all of the element tokens
         for (int i = 0; i <= 111; ++i) // loop through all known elements
         {
@@ -268,7 +270,7 @@ public:
         expressionPartRule = idNameRule | idNumberRule | idElementRule | propertyRule | bondRule | water_token |
                              pert_token | protein_token | notRule | joinRule | massRule | massCmpRule | chargeRule |
                              chargeCmpRule | massObjRule | massObjCmpRule | chargeObjRule | chargeObjCmpRule |
-                             all_token | countRule | user_token;
+                             all_token | countRule | smartsRule | user_token;
 
         // grammar that specifies a list of names (comma-separated)
         nameValuesRule = (nameValueRule % qi::lit(','));
@@ -344,6 +346,9 @@ public:
         notRule =
             qi::lit("not ") >> expressionRule | qi::lit("NOT ") >> expressionRule | qi::lit("!") >> expressionRule;
 
+        // grammar for a smarts search
+        smartsRule = smarts_token >> qi::lexeme[+qi::print];
+
         // grammar for a "join" expression
         joinRule = qi::lit("join ") >> expressionRule;
 
@@ -390,6 +395,7 @@ public:
         chargeCmpRule.name("Charge Compare Rule");
         chargeObjRule.name("Charge Object Rule");
         chargeObjCmpRule.name("Charge Object Compare Rule");
+        smartsRule.name("Smarts Rule");
         stringRule.name("String");
         regExpRule.name("RegExp");
         bondRule.name("Bond");
@@ -423,6 +429,7 @@ public:
     qi::rule<IteratorT, AST::IDCmpCharge(), SkipperT> chargeCmpRule;
     qi::rule<IteratorT, AST::IDObjCharge(), SkipperT> chargeObjRule;
     qi::rule<IteratorT, AST::IDObjCmpCharge(), SkipperT> chargeObjCmpRule;
+    qi::rule<IteratorT, AST::IDSmarts(), SkipperT> smartsRule;
 
     qi::rule<IteratorT, AST::IDWhere(), SkipperT> whereRule;
     qi::rule<IteratorT, AST::IDWhereWithin(), SkipperT> whereWithinRule;
@@ -465,6 +472,7 @@ public:
     qi::symbols<char, AST::IDWater> water_token;
     qi::symbols<char, AST::IDPerturbable> pert_token;
     qi::symbols<char, AST::IDProtein> protein_token;
+    qi::symbols<char, AST::IDSmartsToken> smarts_token;
     UserTokens user_token;
 
     ValueGrammar<IteratorT, SkipperT> stringRule;

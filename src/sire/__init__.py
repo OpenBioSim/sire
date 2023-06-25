@@ -13,6 +13,7 @@ from ._load import (
     load_test_files,
     supported_formats,
     smiles,
+    smarts,
 )
 
 from ._measure import measure
@@ -40,6 +41,7 @@ __all__ = [
     "set_default_num_threads",
     "set_max_num_threads",
     "smiles",
+    "smarts",
     "supported_formats",
     "tutorial_url",
     "u",

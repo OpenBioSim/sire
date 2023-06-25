@@ -1363,10 +1363,19 @@ void SDF::parseMoleculeLines(const PropertyMap &map, const QStringList &l)
 
     if (counts_line.size() < 39)
     {
-        this->parse_warnings.append(QObject::tr("The counts line in this SDF file does not "
-                                                "have enough characters! '%1'. It should be "
-                                                "at least 39 characters wide.")
-                                        .arg(counts_line));
+        if (counts_line.isEmpty() or counts_line.contains("\u0000"))
+        {
+            this->parse_warnings.append(QObject::tr("The counts line in this SDF file does not "
+                                                    "have enough characters! It is binary "
+                                                    "or unreadable. It should be "
+                                                    "at least 39 characters wide."));
+        }
+        else
+            this->parse_warnings.append(QObject::tr("The counts line in this SDF file does not "
+                                                    "have enough characters! '%1' / %2. It should be "
+                                                    "at least 39 characters wide.")
+                                            .arg(counts_line)
+                                            .arg(counts_line.count()));
         return;
     }
 

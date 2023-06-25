@@ -91,7 +91,7 @@ You can extract the results of dynamics by calling
 >>> mol = d.commit()
 >>> mol.view()
 
-.. image:: images/05_04_01.jpg
+.. image:: images/05_05_01.jpg
    :alt: Image from the movie of the molecular dynamics trajectory on aladip
 
 In this case, we performed molecular dynamics on just the first molecule
@@ -104,7 +104,7 @@ Dynamics(completed=6010 ps, energy=-5974.09 kcal mol-1, speed=80.5 ns day-1)
 >>> mols = d.commit()
 >>> mols.trajectory().energy().pretty_plot()
 
-.. image:: images/05_04_02.jpg
+.. image:: images/05_05_02.jpg
    :alt: Graph of the energies across the trajectory
 
 .. note::
@@ -137,7 +137,7 @@ Dynamics(completed=6071 ps, energy=-5976.05 kcal mol-1, speed=58.3 ns day-1)
 >>> mols = d.commit()
 >>> mols.view()
 
-.. image:: images/05_04_03.jpg
+.. image:: images/05_05_03.jpg
    :alt: Movie of dynamics with different times between frames.
 
 When you play the movie of the trajectory you should see the slow-motion

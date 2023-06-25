@@ -1,7 +1,10 @@
 __all__ = [
     "get_alignment",
+    "is_water",
     "Atom",
     "AtomIdx",
+    "AtomMatch",
+    "AtomMatchM",
     "AtomName",
     "AtomNum",
     "BondOrder",
@@ -89,6 +92,8 @@ from ..legacy.Mol import (
     BondOrder,
     Stereochemistry,
     AtomCoords,
+    AtomMatch,
+    AtomMatchM,
 )
 
 from ._cursor import Cursor, Cursors, CursorsM
@@ -97,7 +102,14 @@ from ._dynamics import Dynamics
 from ._trajectory import TrajectoryIterator
 from ._element import Element
 from ._view import view as _viewfunc
-from ._smiles import _to_smiles, _view2d, _selector_to_smiles, _selector_view2d
+from ._smiles import (
+    _to_smiles,
+    _to_smarts,
+    _view2d,
+    _selector_to_smiles,
+    _selector_to_smarts,
+    _selector_view2d,
+)
 
 # make sure that Vector has units attached
 from ..maths import Vector as _Vector
@@ -109,6 +121,30 @@ try:
     get_alignment = _Mol.getAlignment
 except AttributeError:
     get_alignment = _Mol.get_alignment
+
+
+def is_water(mol, map=None):
+    """
+    Return whether or not the passed molecule (or collection of molecules)
+    are water. This returns a single True or False if a single molecule
+    is passed, or a list of True/False values if a molecule collection
+    is passed.
+    """
+    from ..base import create_map
+
+    map = create_map(map)
+
+    try:
+        return _Mol.is_water(mol, map)
+    except Exception:
+        pass
+
+    if hasattr(type(mol), "molecules"):
+        return _Mol.is_water(mol.molecules(), map)
+
+    raise TypeError(
+        f"Cannot convert {mol} to a molecule view or molecule collection."
+    )
 
 
 # Here I will define some functions that make accessing
@@ -303,6 +339,8 @@ def __from_select_result(obj):
         return SelectorM_Segment_(obj)
     elif typ == CutGroup.typename():
         return SelectorM_CutGroup_(obj)
+    elif typ == AtomMatch.typename():
+        return AtomMatchM(obj)
     else:
         from ..mm import SelectorBond, SelectorMBond
 
@@ -1599,10 +1637,12 @@ SelectorM_CutGroup_.energies = _energies
 
 MoleculeView.view = _viewfunc
 MoleculeView.smiles = _to_smiles
+MoleculeView.smarts = _to_smarts
 MoleculeView.view2d = _view2d
 SelectorMol.view = _viewfunc
 SelectorMol.view2d = _selector_view2d
 SelectorMol.smiles = _selector_to_smiles
+SelectorMol.smarts = _selector_to_smarts
 Selector_Atom_.view = _viewfunc
 Selector_Residue_.view = _viewfunc
 Selector_Chain_.view = _viewfunc
@@ -1611,18 +1651,23 @@ Selector_CutGroup_.view = _viewfunc
 SelectorM_Atom_.view = _viewfunc
 SelectorM_Atom_.view2d = _selector_view2d
 SelectorM_Atom_.smiles = _selector_to_smiles
+SelectorM_Atom_.smiles = _selector_to_smarts
 SelectorM_Residue_.view = _viewfunc
 SelectorM_Residue_.view2d = _selector_view2d
 SelectorM_Residue_.smiles = _selector_to_smiles
+SelectorM_Residue_.smiles = _selector_to_smarts
 SelectorM_Chain_.view = _viewfunc
 SelectorM_Chain_.view2d = _selector_view2d
 SelectorM_Chain_.smiles = _selector_to_smiles
+SelectorM_Chain_.smiles = _selector_to_smarts
 SelectorM_Segment_.view = _viewfunc
 SelectorM_Segment_.view2d = _selector_view2d
 SelectorM_Segment_.smiles = _selector_to_smiles
+SelectorM_Segment_.smiles = _selector_to_smarts
 SelectorM_CutGroup_.view = _viewfunc
 SelectorM_CutGroup_.view2d = _selector_view2d
 SelectorM_CutGroup_.smiles = _selector_to_smiles
+SelectorM_CutGroup_.smiles = _selector_to_smarts
 
 if not hasattr(SelectorMol, "__orig__find__"):
 

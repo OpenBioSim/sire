@@ -431,6 +431,10 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
         }
     }
 
+    // renumber the molecule to remove confusion as to why
+    // extracted molecules cannot be combined
+    editor.renumber();
+
     return editor.commit().data();
 }
 
