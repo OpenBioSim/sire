@@ -247,13 +247,11 @@ QDataStream &operator>>(QDataStream &ds, System &system)
     return ds;
 }
 
-QStringList default_shared_properties = {"space", "time"};
-
 /** Construct an unnamed System */
 System::System()
     : ConcreteProperty<System, MolGroupsBase>(), uid(QUuid::createUuid()),
       sysversion(systemRegistry().registerObject(uid)),
-      shared_properties(default_shared_properties), subversion(0)
+      subversion(0)
 {
     molgroups[0] = ForceFields();
     molgroups[1] = MoleculeGroups();
@@ -268,7 +266,7 @@ const System &System::null()
 System::System(const QString &name)
     : ConcreteProperty<System, MolGroupsBase>(), uid(QUuid::createUuid()), sysname(name),
       sysversion(systemRegistry().registerObject(uid)),
-      shared_properties(default_shared_properties), subversion(0)
+      subversion(0)
 {
     molgroups[0] = ForceFields();
     molgroups[1] = MoleculeGroups();
@@ -2163,6 +2161,9 @@ const MoleculeGroup &System::at(MGNum mgnum) const
  */
 void System::_updateSharedProperties(MoleculeData &data) const
 {
+    if (shared_properties.isEmpty())
+        return;
+
     for (const auto &name : this->shared_properties)
     {
         if (this->containsProperty(name))
@@ -2189,6 +2190,9 @@ void System::_updateSharedProperties(MoleculeData &data) const
  */
 void System::_updateSharedProperties(MoleculeView &view) const
 {
+    if (shared_properties.isEmpty())
+        return;
+
     const auto &data = view.constData();
 
     bool needs_update = false;
@@ -3235,10 +3239,13 @@ void System::update(const Molecules &molecules, bool auto_commit)
 {
     Molecules mols = molecules;
 
-    for (auto mol : molecules)
+    if (not shared_properties.isEmpty())
     {
-        this->_updateSharedProperties(mol);
-        mols.update(mol.data());
+        for (auto mol : molecules)
+        {
+            this->_updateSharedProperties(mol);
+            mols.update(mol.data());
+        }
     }
 
     Delta delta(*this, auto_commit);

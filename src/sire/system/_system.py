@@ -17,7 +17,13 @@ class System:
         from ..legacy.System import System as _System
 
         if system is None:
+            from ..vol import Cartesian
+            from ..units import picosecond
+            from ..base import wrap
+
             self._system = _System()
+            self._system.add_shared_property("space", Cartesian())
+            self._system.add_shared_property("time", wrap(0 * picosecond))
         else:
             if _System not in type(system).mro():
                 raise TypeError(

@@ -83,6 +83,21 @@ def load_molecules(*args, map=None, **kwargs):
 
     mols = System(_load_molecules(*args, map=map, **kwargs))
 
+    try:
+        mols.add_shared_property("space", mols.property("space"))
+    except Exception:
+        from ..vol import Cartesian
+
+        mols.add_shared_property("space", Cartesian())
+
+    try:
+        mols.add_shared_property("time", mols.property("time"))
+    except Exception:
+        from ..units import picosecond
+        from ..base import wrap
+
+        mols.add_shared_property("time", wrap(0 * picosecond))
+
     if map.specified("make_whole"):
         if map["make_whole"]:
             mols.make_whole()
