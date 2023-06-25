@@ -25,7 +25,11 @@ and is distributed and supported as an open source community project by
 `OpenBioSim <https://openbiosim.org>`__.
 
 For more information about how to use Sire, and about application
-built with Sire, please `visit the Sire website <http://sire.openbiosim.org>`__.
+built with Sire, please `visit the Sire website <https://sire.openbiosim.org>`__.
+
+* `Features <https://sire.openbiosim.org/features.html>`__
+* `Quick start guide <https://sire.openbiosim.org/quickstart/index.html>`__
+* `Tutorial <https://sire.openbiosim.org/tutorial/index.html>`__
 
 Installation
 ============

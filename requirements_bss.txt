@@ -18,7 +18,7 @@ gromacs ; sys_platform != "win32" and platform_machine == "x86_64"
 # The following are actual BioSimSpace run-time requirements. Please update
 # this list as new requirements are added.
 configargparse
-ipywidgets<8
+ipywidgets
 kcombu_bss
 lomap2
 nglview
