@@ -21,3 +21,4 @@ can be recognised.
 * `@nigel-palmer <https://github.com/nigel-palmer>`__
 * `@msuruzon <https://github.com/msuruzhon>`__
 * `@kexul <https://github.com/kexul>`__
+* `mb2055 <https://github.com/mb2055>`__
