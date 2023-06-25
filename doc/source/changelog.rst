@@ -87,6 +87,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   :func:`sire.smiles`, thereby only running the sanitisation steps
   that pass.
 
+* Improved functionality of harmonic restraints in openMMMD. Each 
+  restrained atom will now have to a corrsponding dummy atom,
+  with the location of this dummy atom restraining the real atom.
+  This makes restrained systems consistent in NPT regimes. Provided 
+  that a modified system containing the dummy atoms is given, the argument
+  ``use restraints = True`` can be added to a SOMD ``.cfg`` file, along with 
+  the argument ``restrained atoms`` containing a dictionary of dummy atom 
+  numbers along with the numbers of the corresponding real atoms.
+
 * Added a new units grammar and parser, so that we can robustly
   read physical quantities (units) from strings. This is a complete
   grammar, meaning that the full range of physical units, SI prefixes,
