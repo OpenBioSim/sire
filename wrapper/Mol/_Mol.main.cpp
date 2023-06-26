@@ -706,13 +706,11 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_AtomMCSMatcher_class();
 
-    register_Selector_Atom__class();
+    register_PartialMolecule_class();
 
     register_AtomMatch_class();
 
     register_AtomMatchInverter_class();
-
-    register_SelectorM_Atom__class();
 
     register_AtomMatchM_class();
 
@@ -1000,13 +998,13 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_Mover_Molecule__class();
 
-    register_PartialMolecule_class();
-
     register_Mover_PartialMolecule__class();
 
     register_Mover_Residue__class();
 
     register_Mover_Segment__class();
+
+    register_Selector_Atom__class();
 
     register_Mover_Selector_Atom__class();
 
@@ -1109,6 +1107,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_SelectResult_class();
 
     register_SelectResultMover_class();
+
+    register_SelectorM_Atom__class();
 
     register_SelectorM_Chain__class();
 

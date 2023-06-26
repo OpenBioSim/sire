@@ -97,7 +97,6 @@ System load_molecules(const QStringList &files,
                 }
                 catch (...)
                 {
-                    qDebug() << "Failed to auto-generate the connectivity";
                 }
             }
 

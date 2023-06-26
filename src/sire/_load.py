@@ -338,6 +338,7 @@ def load(
     show_warnings=True,
     silent: bool = False,
     directory: str = ".",
+    ignore_topology_frame: bool = False,
     gromacs_path: str = None,
     parallel: bool = True,
     map=None,
@@ -367,6 +368,12 @@ def load(
      directory (str):
         Optional directory which will be used when creating any
         files (e.g. as a download from a URL or when unzipping files)
+
+     ignore_topology_frame (bool):
+        Ignore any coordinate / frame data coming from the topology file.
+        By default, frame data from topology files will be included.
+        Setting this to True will ignore that data, meaning that frame
+        data will only come from the trajectory files that are loaded.
 
      gromacs_path (str):
         Path to the directory containing gromacs parameters. If this
@@ -425,6 +432,7 @@ def load(
         "GROMACS_PATH": _get_gromacs_dir(),
         "show_warnings": show_warnings,
         "parallel": parallel,
+        "ignore_topology_frame": ignore_topology_frame,
     }
 
     for key in kwargs.keys():
@@ -455,7 +463,13 @@ def _to_legacy_system(molecules):
         from .legacy.Mol import MoleculeGroup
 
         m = MoleculeGroup("all")
-        m.add(molecules)
+
+        if type(molecules) is list:
+            for molecule in molecules:
+                m.add(molecule)
+        else:
+            m.add(molecules)
+
         s.add(m)
 
     return s

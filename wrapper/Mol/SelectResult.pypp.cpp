@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/molecules.h"
 
+#include "SireMol/mover_metaid.h"
+
 #include "SireMol/parser.h"
 
 #include "SireMol/select.h"

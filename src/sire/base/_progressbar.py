@@ -54,7 +54,7 @@ if not _checked_for_jupyter:
 
 
 class ProgressBar:
-    def __init__(self, total=None, text=None, _bar=None):
+    def __init__(self, total=None, text=None, unit=None, _bar=None):
         if _bar is not None:
             self._bar = _bar
         elif total is not None:
@@ -67,6 +67,9 @@ class ProgressBar:
                 self._bar = _ProgressBar(text=text)
             else:
                 self._bar = _ProgressBar()
+
+        if unit is not None:
+            self._bar.set_speed_unit(unit)
 
     def __enter__(self):
         if _stdout_is_a_file():

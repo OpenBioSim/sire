@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 #include "SireMol/errors.h"
 
+#include "SireMol/mover_metaid.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -34,7 +36,7 @@ SireMol::AtomMatch __copy__(const SireMol::AtomMatch &other){ return SireMol::At
 void register_AtomMatch_class(){
 
     { //::SireMol::AtomMatch
-        typedef bp::class_< SireMol::AtomMatch, bp::bases< SireMol::Selector<SireMol::Atom>, SireMol::MoleculeView, SireBase::Property > > AtomMatch_exposer_t;
+        typedef bp::class_< SireMol::AtomMatch, bp::bases< SireMol::PartialMolecule, SireMol::MoleculeView, SireBase::Property > > AtomMatch_exposer_t;
         AtomMatch_exposer_t AtomMatch_exposer = AtomMatch_exposer_t( "AtomMatch", "This class holds the results of performing a match on a molecule.", bp::init< >("") );
         bp::scope AtomMatch_scope( AtomMatch_exposer );
         AtomMatch_exposer.def( bp::init< SireMol::MoleculeView const & >(( bp::arg("molview") ), "") );

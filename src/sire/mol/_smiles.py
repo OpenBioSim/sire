@@ -578,6 +578,9 @@ elif _rdkit_import_error is not None:
     def _to_smiles(obj, *args, **kwargs):
         _no_rdkit()
 
+    def _to_smarts(obj, *args, **kwargs):
+        _no_rdkit()
+
     def _selector_view2d(obj, *args, **kwargs):
         _no_rdkit()
 
@@ -601,6 +604,14 @@ else:
         raise ImportError(
             "You need to install rdkit to be able to generate "
             "smiles strings Do this by typing, e.g. "
+            "'mamba install -c conda-forge rdkit' and then restarting "
+            "Python and running this script/notebook again."
+        )
+
+    def _to_smarts(obj, *args, **kwargs):
+        raise ImportError(
+            "You need to install rdkit to be able to generate "
+            "smarts strings Do this by typing, e.g. "
             "'mamba install -c conda-forge rdkit' and then restarting "
             "Python and running this script/notebook again."
         )
