@@ -11,6 +11,7 @@
 
 #include "SireUnits/dimensions.h"
 #include "SireUnits/temperature.h"
+#include "SireUnits/units.h"
 
 #include "tostring.h"
 
@@ -858,6 +859,30 @@ GeneralUnit &GeneralUnit::operator*=(double val)
     {
         this->operator=(GeneralUnit(0));
         return *this;
+    }
+
+    if (this->TIME() == 1)
+    {
+        // treat time differently, as a second is very large when
+        // described in akma units
+        GeneralUnit sec(SireUnits::second);
+
+        if (this->operator==(sec))
+        {
+            // convert this to picoseconds
+            this->setScale(SireUnits::picosecond.value());
+
+            // adjust the multiplication factor accordingly
+            val *= 1e12;
+
+            if (val != 1)
+            {
+                // mulitply if this isn't expressed in picoseconds
+                this->setScale(this->value() * val);
+            }
+
+            return *this;
+        }
     }
 
     if (this->useLog())
