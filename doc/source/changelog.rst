@@ -94,7 +94,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   that a modified system containing the dummy atoms is given, the argument
   ``use restraints = True`` can be added to a SOMD ``.cfg`` file, along with 
   the argument ``restrained atoms`` containing a dictionary of dummy atom 
-  numbers along with the numbers of the corresponding real atoms.
+  numbers along with the numbers of the corresponding real atoms 
+  (``{dummy_atom_num:real_atom_num}``).
 
 * Added a new units grammar and parser, so that we can robustly
   read physical quantities (units) from strings. This is a complete
