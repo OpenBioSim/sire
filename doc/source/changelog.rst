@@ -12,6 +12,12 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - September 2023
+----------------------------------------------------------------------------------------------
+
+* Please add the changelog entry for your PR here. We will add the link to your PR
+  during the code review :-)
+
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
 
