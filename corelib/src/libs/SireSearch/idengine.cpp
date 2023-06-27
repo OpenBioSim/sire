@@ -32,6 +32,7 @@
 #include "SireBase/parallel.h"
 
 #include "SireMol/atomelements.h"
+#include "SireMol/atomcoords.h"
 #include "SireMol/core.h"
 #include "SireMol/iswater.h"
 
@@ -3789,6 +3790,212 @@ SelectEnginePtr IDCountEngine::simplify()
 {
     if (object.get())
         object = object->simplify();
+
+    return selfptr.lock();
+}
+
+////////
+//////// Implementation of the IDClosestEngine
+////////
+
+IDClosestEngine::IDClosestEngine() : n(0), is_closest(true)
+{
+}
+
+SelectEnginePtr IDClosest::toEngine() const
+{
+    return IDClosestEngine::construct(search_set.toEngine(),
+                                      is_closest,
+                                      n,
+                                      reference_set.toEngine());
+}
+
+QString IDClosest::toString() const
+{
+    if (is_closest)
+    {
+        return QObject::tr("closest %1 %2 to %3").arg(n).arg(search_set.toString()).arg(reference_set.toString());
+    }
+    else
+    {
+        return QObject::tr("furthest %1 %2 from %3").arg(n).arg(search_set.toString()).arg(reference_set.toString());
+    }
+}
+
+SelectEnginePtr IDClosestEngine::construct(SelectEnginePtr search_set,
+                                           bool is_closest,
+                                           int n,
+                                           SelectEnginePtr reference_set)
+{
+    IDClosestEngine *ptr = new IDClosestEngine();
+    auto p = makePtr(ptr);
+
+    if (search_set)
+        search_set->setParent(p);
+
+    if (reference_set)
+        reference_set->setParent(p);
+
+    ptr->search_set = search_set;
+    ptr->is_closest = is_closest;
+    ptr->n = n;
+    ptr->reference_set = reference_set;
+
+    return p;
+}
+
+IDClosestEngine::~IDClosestEngine()
+{
+}
+
+class DistanceIndex
+{
+public:
+    DistanceIndex(double d = 0, int i = 0) : distance(d), index(i)
+    {
+    }
+
+    bool operator<(const DistanceIndex &other) const
+    {
+        return this->distance < other.distance;
+    }
+
+    float distance;
+    int index;
+};
+
+SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap &map) const
+{
+    QList<MolViewPtr> result;
+
+    if (n == 0 or search_set.get() == 0 or reference_set.get() == 0)
+        return result;
+
+    auto reference_items = reference_set->operator()(mols, map);
+
+    if (reference_items.isEmpty())
+        return result;
+
+    auto search_items = search_set->operator()(mols, map);
+
+    if (search_items.isEmpty())
+        return result;
+
+    if (n >= search_items.count())
+        // must match them all
+        return search_items;
+
+    // go through the reference items and get all of their CoordGroups
+    auto coords_property = map["coordinates"];
+
+    SireVol::SpacePtr space = SireVol::Cartesian();
+
+    if (map["space"].hasValue())
+    {
+        space = map["space"].value().asA<SireVol::Space>();
+    }
+    else
+    {
+        // try to find a space in refmols
+        const auto space_property = map["space"];
+
+        bool found_space = false;
+
+        for (const auto &mol : reference_items)
+        {
+            if (mol->data().hasProperty(space_property))
+            {
+                space = mol->data().property(space_property).asA<SireVol::Space>();
+                found_space = true;
+                break;
+            }
+        }
+
+        if (not found_space)
+        {
+            for (const auto &mol : search_items)
+            {
+                if (mol->data().hasProperty(space_property))
+                {
+                    space = mol->data().property(space_property).asA<SireVol::Space>();
+                    break;
+                }
+            }
+        }
+    }
+
+    QVector<CoordGroup> reference_coords;
+
+    for (const auto &mol : reference_items)
+    {
+        reference_coords.append(CoordGroup(_get_coords(mol->atoms(), coords_property)));
+    }
+
+    const int nsearch = search_items.count();
+
+    QVector<DistanceIndex> minimum_distances(nsearch);
+
+    for (int i = 0; i < nsearch; ++i)
+    {
+        CoordGroup coords(_get_coords(search_items[i]->atoms(), coords_property));
+
+        double mindist = std::numeric_limits<double>::max();
+
+        for (const auto &refcoords : reference_coords)
+        {
+            double dist = space->minimumDistance(refcoords, coords);
+
+            if (dist < mindist)
+                mindist = dist;
+        }
+
+        minimum_distances[i] = DistanceIndex(mindist, i);
+    }
+
+    std::sort(minimum_distances.begin(), minimum_distances.end(), std::less<DistanceIndex>());
+
+    if (is_closest)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            result.append(search_items[minimum_distances[i].index]);
+        }
+    }
+    else
+    {
+        for (int i = minimum_distances.count() - 1; i >= minimum_distances.count() - n; --i)
+        {
+            result.append(search_items[minimum_distances[i].index]);
+        }
+    }
+
+    return SelectResult(result);
+}
+
+SelectEngine::ObjType IDClosestEngine::objectType() const
+{
+    if (search_set)
+        return search_set->objectType();
+    else
+        return SelectEngine::COMPLEX;
+}
+
+SelectEnginePtr IDClosestEngine::simplify()
+{
+    if (n <= 0)
+    {
+        search_set.reset();
+        n = 0;
+        is_closest = true;
+        reference_set.reset();
+        return selfptr.lock();
+    }
+
+    if (search_set.get())
+        search_set = search_set->simplify();
+
+    if (reference_set.get())
+        reference_set = reference_set->simplify();
 
     return selfptr.lock();
 }
