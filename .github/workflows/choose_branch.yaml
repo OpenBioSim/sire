@@ -1,0 +1,86 @@
+name: Release Branch
+
+# Note that push and pull-request builds are automatically
+# now skipped by GitHub if
+# [skip ci], [ci skip], [no ci], [skip actions], or [actions skip]
+# are in the commit message. We don't need to check for this ourselves.
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "branch you want to build"
+        required: true
+
+jobs:
+  build:
+    name: build (${{ matrix.python-version }}, ${{ matrix.platform.name }})
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      max-parallel: 5
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+        platform:
+          - { name: "windows", os: "windows-latest", shell: "pwsh" }
+          - { name: "linux", os: "ubuntu-latest", shell: "bash -l {0}" }
+          - { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
+        exclude:
+          # Exclude all but the latest Python from all
+          # but Linux
+          - platform:
+              { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
+            python-version: "3.9"
+          - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
+            python-version: "3.9"
+          - platform:
+              { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
+            python-version: "3.10"
+          - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
+            python-version: "3.10"
+    environment:
+      name: sire-build
+    defaults:
+      run:
+        shell: ${{ matrix.platform.shell }}
+    env:
+      SIRE_DONT_PHONEHOME: 1
+      SIRE_SILENT_PHONEHOME: 1
+      REPO: "${{ github.repository }}"
+    steps:
+      #     Need to install and use VS 2017 for conda-compliant builds
+      - name: Set up Visual Studio 2017 Build Tools (required for Python modules)
+        run: |
+          choco install visualstudio2017-workload-vctools
+        if: matrix.platform.name == 'windows'
+      #
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+          activate-environment: sire_build
+          miniforge-version: latest
+          miniforge-variant: Mambaforge
+          use-mamba: true
+      #
+      - name: Clone the desired branch
+        run: git clone https://github.com/${{ env.REPO }} -b ${branch} sire
+      #
+      - name: Setup Conda
+        run: mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
+      #
+      - name: Update Conda recipe
+        run: python ${{ github.workspace }}/sire/actions/update_recipe.py
+      #
+      - name: Prepare build location
+        run: mkdir ${{ github.workspace }}/build
+      #
+      - name: Build Conda package using mamba build
+        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      #
+      - name: Upload Conda package
+        # Maybe add the logic here that this is a dev package?
+        run: python ${{ github.workspace }}/sire/actions/upload_package.py
+        env:
+          SRC_DIR: ${{ github.workspace }}/sire
+          ANACONDA_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
