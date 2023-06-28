@@ -101,7 +101,13 @@ if _has_nglview:
         def get_structure_string(self):
             from .. import save_to_string
 
-            return "\n".join(save_to_string(self._traj.first(), self.ext))
+            return "\n".join(
+                save_to_string(
+                    self._traj.first(),
+                    self.ext,
+                    map={"use_atom_numbers": True},
+                )
+            )
 
         @property
         def n_frames(self):

@@ -30,6 +30,8 @@
 
 #include "atomelements.h"
 
+#include "SireBase/parallel.h"
+
 using namespace SireMol;
 using namespace SireBase;
 
@@ -136,13 +138,32 @@ namespace SireMol
 
         const auto element_property = map["element"];
 
-        for (int i = 0; i < molecules.count(); ++i)
-        {
-            const auto &moldata = molecules[i].read().data();
+        const int nmols = molecules.count();
 
-            if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+        if (SireBase::should_run_in_parallel(nmols, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
+                {
+                    const auto &moldata = molecules[i].read().data();
+
+                    if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                    {
+                        result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                    }
+            } });
+        }
+        else
+        {
+            for (int i = 0; i < nmols; ++i)
             {
-                result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                const auto &moldata = molecules[i].read().data();
+
+                if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                {
+                    result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                }
             }
         }
 

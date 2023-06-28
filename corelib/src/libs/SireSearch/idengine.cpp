@@ -3551,14 +3551,21 @@ IDWaterEngine::~IDWaterEngine()
 
 SelectResult IDWaterEngine::select(const SelectResult &mols, const PropertyMap &map) const
 {
-    QList<MolViewPtr> result;
+    QList<MolViewPtr> result = mols.toList();
+
+    if (result.isEmpty())
+        return SelectResult(result);
 
     const auto mask = SireMol::is_water(mols, map);
 
+    QMutableListIterator<MolViewPtr> it(result);
+
     for (int i = 0; i < mask.count(); ++i)
     {
-        if (mask[i])
-            result.append(mols[i]);
+        it.next();
+
+        if (not mask[i])
+            it.remove();
     }
 
     return SelectResult(result);
@@ -3885,7 +3892,7 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
     if (n == 0 or search_set.get() == 0)
         return result;
 
-    auto search_items = search_set->operator()(mols, map);
+    const auto search_items = search_set->operator()(mols, map);
 
     if (search_items.isEmpty())
         return result;
@@ -3920,12 +3927,16 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
         }
     }
 
-    QVector<CoordGroup> reference_coords;
+    // use const here so that we don't modify it when reading
+    const QVector<CoordGroup> reference_coords;
+    bool uses_point = false;
 
     if (reference_set.get() == 0)
     {
         QVector<Vector> coords(1, point);
-        reference_coords.append(CoordGroup(coords));
+        // so need to const_cast when writing
+        const_cast<QVector<CoordGroup> *>(&reference_coords)->append(CoordGroup(coords));
+        uses_point = true;
     }
     else
     {
@@ -3950,36 +3961,119 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
 
         for (const auto &mol : reference_items)
         {
-            reference_coords.append(CoordGroup(_get_coords(mol->atoms(), coords_property)));
+            // so need to const_cast when writing
+            const_cast<QVector<CoordGroup> *>(&reference_coords)->append(CoordGroup(_get_coords(mol->atoms(), coords_property)));
         }
     }
 
     const int nsearch = search_items.count();
+    const int nreference = reference_coords.count();
+    const auto reference_coords_data = reference_coords.constData();
 
     QVector<DistanceIndex> minimum_distances(nsearch);
+    auto minimum_distances_data = minimum_distances.data();
 
-    for (int i = 0; i < nsearch; ++i)
+    if (SireBase::should_run_in_parallel(nsearch, map))
     {
-        CoordGroup coords(_get_coords(search_items[i]->atoms(), coords_property));
+        tbb::parallel_for(tbb::blocked_range<int>(0, nsearch), [&](const tbb::blocked_range<int> &r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                const auto &mol = search_items[i];
 
-        double mindist = std::numeric_limits<double>::max();
+                double mindist = std::numeric_limits<double>::max();
 
-        for (const auto &refcoords : reference_coords)
+                if (mol->nAtoms() == 1)
+                {
+                    // this is an atom search
+                    const Vector &coords = mol->atom().property<Vector>(coords_property);
+
+                    for (int j = 0; j < nreference; ++j)
+                    {
+                        const auto &refcoords = reference_coords_data[j];
+                        double dist = space->minimumDistance(refcoords, coords);
+
+                        if (dist < mindist)
+                            mindist = dist;
+                    }
+                }
+                else
+                {
+                    CoordGroup coords(_get_coords(search_items[i]->atoms(), coords_property));
+
+                    for (int j = 0; j < nreference; ++j)
+                    {
+                        const auto &refcoords = reference_coords_data[j];
+                        double dist = space->minimumDistance(refcoords, coords);
+
+                        if (dist < mindist)
+                            mindist = dist;
+                    }
+                }
+
+                minimum_distances_data[i] = DistanceIndex(mindist, i);
+            } });
+    }
+    else
+    {
+        for (int i = 0; i < nsearch; ++i)
         {
-            double dist = space->minimumDistance(refcoords, coords);
+            const auto &mol = search_items[i];
 
-            if (dist < mindist)
-                mindist = dist;
+            double mindist = std::numeric_limits<double>::max();
+
+            if (mol->nAtoms() == 1)
+            {
+                // this is an atom search
+                const Vector &coords = mol->atom().property<Vector>(coords_property);
+
+                for (int j = 0; j < nreference; ++j)
+                {
+                    const auto &refcoords = reference_coords_data[j];
+                    double dist = space->minimumDistance(refcoords, coords);
+
+                    if (dist < mindist)
+                        mindist = dist;
+                }
+            }
+            else
+            {
+                CoordGroup coords(_get_coords(search_items[i]->atoms(), coords_property));
+
+                for (int j = 0; j < nreference; ++j)
+                {
+                    const auto &refcoords = reference_coords_data[j];
+                    double dist = space->minimumDistance(refcoords, coords);
+
+                    if (dist < mindist)
+                        mindist = dist;
+                }
+            }
+
+            minimum_distances_data[i] = DistanceIndex(mindist, i);
         }
-
-        minimum_distances[i] = DistanceIndex(mindist, i);
     }
 
     std::sort(minimum_distances.begin(), minimum_distances.end(), std::less<DistanceIndex>());
 
     if (is_closest)
     {
-        for (int i = 0; i < n; ++i)
+        int num_to_return = n;
+
+        if (not uses_point)
+        {
+            // remove any results with a minimum distance of zero, as
+            // this shows that there was an atom from the search set
+            // in the reference set
+            while (minimum_distances.count() > 0 and minimum_distances[0].distance == 0)
+            {
+                minimum_distances.removeAt(0);
+            }
+
+            num_to_return = std::min(n, minimum_distances.count());
+        }
+
+        for (int i = 0; i < num_to_return; ++i)
         {
             result.append(search_items[minimum_distances[i].index]);
         }

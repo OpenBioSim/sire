@@ -474,6 +474,19 @@ void register_Cartesian_class(){
         }
         { //::SireVol::Cartesian::minimumDistance
         
+            typedef double ( ::SireVol::Cartesian::*minimumDistance_function_type)( ::SireMaths::Vector const &,::SireVol::CoordGroup const & ) const;
+            minimumDistance_function_type minimumDistance_function_value( &::SireVol::Cartesian::minimumDistance );
+            
+            Cartesian_exposer.def( 
+                "minimumDistance"
+                , minimumDistance_function_value
+                , ( bp::arg("point"), bp::arg("group") )
+                , bp::release_gil_policy()
+                , "Return the minimum distance between the points in group0 and group1." );
+        
+        }
+        { //::SireVol::Cartesian::minimumDistance
+        
             typedef double ( ::SireVol::Cartesian::*minimumDistance_function_type)( ::SireVol::CoordGroup const & ) const;
             minimumDistance_function_type minimumDistance_function_value( &::SireVol::Cartesian::minimumDistance );
             

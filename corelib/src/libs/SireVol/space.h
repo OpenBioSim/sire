@@ -265,6 +265,12 @@ namespace SireVol
             used) */
         virtual double minimumDistance(const CoordGroup &group0, const CoordGroup &group1) const = 0;
 
+        /** Return the minimum distance between 'point' and all the points in 'group'.
+            If this is a periodic space then this uses the minimum image convention
+            (i.e. the minimum distance between the closest periodic replicas are
+            used) */
+        virtual double minimumDistance(const Vector &point, const CoordGroup &group) const;
+
         /** Return the minimum distance between points within the group 'group'. */
         virtual double minimumDistance(const CoordGroup &group) const = 0;
 
