@@ -522,7 +522,8 @@ namespace parser_idengine
         static SelectEnginePtr construct(SelectEnginePtr search_set,
                                          bool is_closest,
                                          int n,
-                                         SelectEnginePtr reference_set);
+                                         SelectEnginePtr reference_set,
+                                         const SireMaths::Vector &point);
 
         ~IDClosestEngine();
 
@@ -536,6 +537,7 @@ namespace parser_idengine
     private:
         SelectEnginePtr search_set;
         SelectEnginePtr reference_set;
+        SireMaths::Vector point;
         int n;
         bool is_closest;
     };

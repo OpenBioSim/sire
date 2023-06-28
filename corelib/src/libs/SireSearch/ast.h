@@ -313,6 +313,11 @@ namespace AST
         double value;
         SireUnits::Dimension::Length unit;
 
+        SireUnits::Dimension::Length toLength() const
+        {
+            return value * unit;
+        }
+
         QString toString() const;
     };
 
@@ -351,6 +356,13 @@ namespace AST
                 throw SireMol::parse_error(QObject::tr("Cannot add more than there points to a vector"), CODELOC);
 
             return *this;
+        }
+
+        SireMaths::Vector toVector() const
+        {
+            return SireMaths::Vector(x.toLength().to(SireUnits::angstrom),
+                                     y.toLength().to(SireUnits::angstrom),
+                                     z.toLength().to(SireUnits::angstrom));
         }
 
         QString toString() const;
@@ -469,6 +481,11 @@ namespace AST
         ExpressionVariant value = IDNull();
 
         QString toString() const;
+
+        bool isNull() const
+        {
+            return this->toEngine() == SelectEnginePtr();
+        }
 
         SelectEnginePtr toEngine() const;
     };
@@ -890,6 +907,7 @@ namespace AST
         bool is_closest;
         int n;
         Expression reference_set;
+        SireMaths::Vector point;
 
         IDClosest &operator+=(const Expression &s)
         {
@@ -906,6 +924,12 @@ namespace AST
         IDClosest &operator*=(const Expression &r)
         {
             reference_set = r;
+            return *this;
+        }
+
+        IDClosest &operator*=(const VectorValue &v)
+        {
+            point = v.toVector();
             return *this;
         }
 

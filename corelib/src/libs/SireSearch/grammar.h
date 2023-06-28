@@ -376,7 +376,25 @@ public:
                       (qi::lit("furthest")[_val -= false] >>
                        expressionRule[_val += _1] >>
                        qi::lit("from")[_val += 1] >>
-                       expressionRule[_val *= _1]);
+                       expressionRule[_val *= _1]) |
+                      (qi::lit("closest")[_val -= true] >>
+                       qi::int_[_val += _1] >>
+                       expressionRule[_val += _1] >>
+                       qi::lit("to") >>
+                       vectorValueRule[_val *= _1]) |
+                      (qi::lit("closest")[_val -= true] >>
+                       expressionRule[_val += _1] >>
+                       qi::lit("to")[_val += 1] >>
+                       vectorValueRule[_val *= _1]) |
+                      (qi::lit("furthest")[_val -= false] >>
+                       qi::int_[_val += _1] >>
+                       expressionRule[_val += _1] >>
+                       qi::lit("from") >>
+                       vectorValueRule[_val *= _1]) |
+                      (qi::lit("furthest")[_val -= false] >>
+                       expressionRule[_val += _1] >>
+                       qi::lit("from")[_val += 1] >>
+                       vectorValueRule[_val *= _1]);
 
         /////
         ///// name all of the rules to simplify error messages

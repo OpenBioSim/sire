@@ -3807,25 +3807,38 @@ SelectEnginePtr IDClosest::toEngine() const
     return IDClosestEngine::construct(search_set.toEngine(),
                                       is_closest,
                                       n,
-                                      reference_set.toEngine());
+                                      reference_set.toEngine(),
+                                      point);
 }
 
 QString IDClosest::toString() const
 {
-    if (is_closest)
+    QString to_string;
+
+    if (reference_set.isNull())
     {
-        return QObject::tr("closest %1 %2 to %3").arg(n).arg(search_set.toString()).arg(reference_set.toString());
+        to_string = point.toString();
     }
     else
     {
-        return QObject::tr("furthest %1 %2 from %3").arg(n).arg(search_set.toString()).arg(reference_set.toString());
+        to_string = reference_set.toString();
+    }
+
+    if (is_closest)
+    {
+        return QObject::tr("closest %1 %2 to %3").arg(n).arg(search_set.toString()).arg(to_string);
+    }
+    else
+    {
+        return QObject::tr("furthest %1 %2 from %3").arg(n).arg(search_set.toString()).arg(to_string);
     }
 }
 
 SelectEnginePtr IDClosestEngine::construct(SelectEnginePtr search_set,
                                            bool is_closest,
                                            int n,
-                                           SelectEnginePtr reference_set)
+                                           SelectEnginePtr reference_set,
+                                           const Vector &point)
 {
     IDClosestEngine *ptr = new IDClosestEngine();
     auto p = makePtr(ptr);
@@ -3840,6 +3853,7 @@ SelectEnginePtr IDClosestEngine::construct(SelectEnginePtr search_set,
     ptr->is_closest = is_closest;
     ptr->n = n;
     ptr->reference_set = reference_set;
+    ptr->point = point;
 
     return p;
 }
@@ -3868,12 +3882,7 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
 {
     QList<MolViewPtr> result;
 
-    if (n == 0 or search_set.get() == 0 or reference_set.get() == 0)
-        return result;
-
-    auto reference_items = reference_set->operator()(mols, map);
-
-    if (reference_items.isEmpty())
+    if (n == 0 or search_set.get() == 0)
         return result;
 
     auto search_items = search_set->operator()(mols, map);
@@ -3886,22 +3895,21 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
         return search_items;
 
     // go through the reference items and get all of their CoordGroups
-    auto coords_property = map["coordinates"];
+    const auto coords_property = map["coordinates"];
+    const auto space_property = map["space"];
 
     SireVol::SpacePtr space = SireVol::Cartesian();
 
-    if (map["space"].hasValue())
+    bool found_space = false;
+
+    if (space_property.hasValue())
     {
-        space = map["space"].value().asA<SireVol::Space>();
+        space = space_property.value().asA<SireVol::Space>();
+        found_space = true;
     }
     else
     {
-        // try to find a space in refmols
-        const auto space_property = map["space"];
-
-        bool found_space = false;
-
-        for (const auto &mol : reference_items)
+        for (const auto &mol : search_items)
         {
             if (mol->data().hasProperty(space_property))
             {
@@ -3910,25 +3918,40 @@ SelectResult IDClosestEngine::select(const SelectResult &mols, const PropertyMap
                 break;
             }
         }
-
-        if (not found_space)
-        {
-            for (const auto &mol : search_items)
-            {
-                if (mol->data().hasProperty(space_property))
-                {
-                    space = mol->data().property(space_property).asA<SireVol::Space>();
-                    break;
-                }
-            }
-        }
     }
 
     QVector<CoordGroup> reference_coords;
 
-    for (const auto &mol : reference_items)
+    if (reference_set.get() == 0)
     {
-        reference_coords.append(CoordGroup(_get_coords(mol->atoms(), coords_property)));
+        QVector<Vector> coords(1, point);
+        reference_coords.append(CoordGroup(coords));
+    }
+    else
+    {
+        auto reference_items = reference_set->operator()(mols, map);
+
+        if (reference_items.isEmpty())
+            return result;
+
+        if (not found_space)
+        {
+            // try to find a space in refmols
+            for (const auto &mol : reference_items)
+            {
+                if (mol->data().hasProperty(space_property))
+                {
+                    space = mol->data().property(space_property).asA<SireVol::Space>();
+                    found_space = true;
+                    break;
+                }
+            }
+        }
+
+        for (const auto &mol : reference_items)
+        {
+            reference_coords.append(CoordGroup(_get_coords(mol->atoms(), coords_property)));
+        }
     }
 
     const int nsearch = search_items.count();
