@@ -53,7 +53,27 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         return;
     }
 
-    ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    bool is_perturbable = false;
+    bool swap_end_states = false;
+
+    if (mol.hasProperty(map["is_perturbable"]))
+    {
+        is_perturbable = mol.property(map["is_perturbable"]).asABoolean();
+
+        if (map.specified("swap_end_states"))
+        {
+            swap_end_states = map["swap_end_states"].value().asABoolean();
+        }
+    }
+
+    if (is_perturbable)
+    {
+        ffinfo = mol.property(map["forcefield0"]).asA<MMDetail>();
+    }
+    else
+    {
+        ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    }
 
     if (map.specified("constraint"))
     {
@@ -96,7 +116,35 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     if (ffinfo.isAmberStyle())
     {
-        this->constructFromAmber(mol, map);
+        if (is_perturbable)
+        {
+            // update the map to find the lambda=0 properties
+            QStringList props = {"LJ", "ambertype", "angle", "atomtype",
+                                 "bond", "charge", "coordinates",
+                                 "dihedral", "element", "forcefield",
+                                 "gb_radii", "gb_screening", "improper",
+                                 "intrascale", "mass", "name",
+                                 "parameters", "treechain"};
+
+            // we can't specialise these globally in case other molecules
+            // are not of amber type
+            auto map0 = map.addSuffix("0", props);
+            auto map1 = map.addSuffix("1", props);
+
+            if (swap_end_states)
+            {
+                std::swap(map0, map1);
+            }
+
+            this->constructFromAmber(mol, map0);
+
+            perturbed.reset(new OpenMMMolecule(*this));
+            perturbed->constructFromAmber(mol, map1);
+        }
+        else
+        {
+            this->constructFromAmber(mol, map);
+        }
     }
     else
     {
@@ -113,6 +161,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
 OpenMMMolecule::~OpenMMMolecule()
 {
+}
+
+bool OpenMMMolecule::isPerturbable() const
+{
+    return perturbed.get() != 0;
 }
 
 OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
@@ -139,7 +192,8 @@ inline qint64 to_pair(qint64 x, qint64 y)
         return x << 32 | y & 0x00000000FFFFFFFF;
 }
 
-void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &map)
+void OpenMMMolecule::constructFromAmber(const Molecule &mol,
+                                        const PropertyMap &map)
 {
     const auto &moldata = mol.data();
     const int nats = molinfo.nAtoms();
