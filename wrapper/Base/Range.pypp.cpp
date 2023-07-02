@@ -50,7 +50,7 @@ void register_Range_class(){
                 , construct_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
-                , "Return the range that represents the single value i" );
+                , "" );
         
         }
         { //::SireBase::Range::construct
@@ -63,7 +63,7 @@ void register_Range_class(){
                 , construct_function_value
                 , ( bp::arg("start"), bp::arg("end") )
                 , bp::release_gil_policy()
-                , "Return the range that represents the range from [start,end)" );
+                , "" );
         
         }
         { //::SireBase::Range::construct
@@ -76,7 +76,7 @@ void register_Range_class(){
                 , construct_function_value
                 , ( bp::arg("start"), bp::arg("end"), bp::arg("increment") )
                 , bp::release_gil_policy()
-                , "Return the range that represents the range from [start,end,increment)" );
+                , "" );
         
         }
         { //::SireBase::Range::hasNext
