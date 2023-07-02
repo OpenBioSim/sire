@@ -204,6 +204,12 @@ namespace SireBase
 
         void set(const QString &name, const PropertyName &source);
 
+        PropertyMap addPrefix(const QString &prefix,
+                              const QStringList &properties) const;
+
+        PropertyMap addSuffix(const QString &suffix,
+                              const QStringList &properties) const;
+
         PropertyMap merge(const PropertyMap &other) const;
 
         QString toString() const;

@@ -150,6 +150,15 @@ namespace SireOpenMM
             return CoordsAndVelocities();
         }
 
+        // whether or not to ignore perturbations
+        bool ignore_perturbations = false;
+        bool any_perturbable = false;
+
+        if (map.specified("ignore_perturbations"))
+        {
+            ignore_perturbations = map["ignore_perturbations"].value().asABoolean();
+        }
+
         // Extract all of the data needed by OpenMM from the Sire
         // molecules into some temporary OpenMMMolecule objects
         QVector<OpenMMMolecule> openmm_mols(nmols);
@@ -172,11 +181,62 @@ namespace SireOpenMM
             }
         }
 
+        // check to see if there are any perturbable molecules
+        if (not ignore_perturbations)
+        {
+            for (int i = 0; i < nmols; ++i)
+            {
+                if (openmm_mols_data[i].isPerturbable())
+                {
+                    any_perturbable = true;
+                    break;
+                }
+            }
+        }
+
         // create all the OpenMM forcefields - ownership is taken by 'system'
+        // (memory leak until we give this to 'system')
+
+        // CLJ energy between all non-perturbable atoms
         OpenMM::NonbondedForce *cljff = new OpenMM::NonbondedForce();
 
-        // maybe should let people set this manually?
-        cljff->setUseDispersionCorrection(false);
+        bool use_dispersion_correction = false;
+
+        if (map.specified("use_dispersion_correction"))
+        {
+            use_dispersion_correction = map["use_dispersion_correction"].value().asABoolean();
+        }
+
+        cljff->setUseDispersionCorrection(use_dispersion_correction);
+
+        // CLJ energy between perturbable atoms and non-perturbable at lambda=0
+        OpenMM::CustomNonbondedForce *group_system_cljff0 = 0;
+        // CLJ energy between perturbable atoms and non-perturbable at lambda=1
+        OpenMM::CustomNonbondedForce *group_system_cljff1 = 0;
+
+        // CLJ energy between all perturbable atoms at lambda=0
+        OpenMM::CustomNonbondedForce *group_group_cljff0 = 0;
+        // CLJ energy between all perturbable atoms at lambda=1
+        OpenMM::CustomNonbondedForce *group_group_cljff1 = 0;
+
+        if (any_perturbable)
+        {
+            // (memory leak here until we give these to 'system')
+            group_system_cljff0 = new OpenMM::CustomNonbondedForce();
+            group_system_cljff1 = new OpenMM::CustomNonbondedForce();
+
+            group_group_cljff0 = new OpenMM::CustomNonbondedForce();
+            group_group_cljff1 = new OpenMM::CustomNonbondedForce();
+
+            // we will use OpenMM interaction groups to make sure that
+            // only the perturbable-non-perturbable energies are calculated
+            // for group_system_cljffX
+
+            group_system_cljff0->setUseDispersionCorrection(use_dispersion_correction);
+            group_system_cljff1->setUseDispersionCorrection(use_dispersion_correction);
+            group_group_cljff0->setUseDispersionCorrection(use_dispersion_correction);
+            group_group_cljff1->setUseDispersionCorrection(use_dispersion_correction);
+        }
 
         // create the periodic box vectors
         std::shared_ptr<std::vector<OpenMM::Vec3>> boxvecs;
@@ -231,6 +291,8 @@ namespace SireOpenMM
         if (ffinfo.hasCutoff())
         {
             const auto typ = ffinfo.cutoffType();
+
+            // need to set cutoff for perturbable forcefields
 
             if (typ == "PME" or typ == "EWALD")
             {
@@ -299,14 +361,52 @@ namespace SireOpenMM
 
         system.addForce(cljff);
 
+        if (any_perturbable)
+        {
+            system.addForce(group_system_cljff0);
+            system.addForce(group_system_cljff1);
+            system.addForce(group_group_cljff0);
+            system.addForce(group_group_cljff1);
+        }
+
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
+        OpenMM::HarmonicBondForce *group_bondff0 = 0;
+        OpenMM::HarmonicBondForce *group_bondff1 = 0;
+
         system.addForce(bondff);
 
         OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
+        OpenMM::HarmonicAngleForce *group_angff0 = 0;
+        OpenMM::HarmonicAngleForce *group_angff1 = 0;
+
         system.addForce(angff);
 
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
+        OpenMM::PeriodicTorsionForce *group_dihff0 = 0;
+        OpenMM::PeriodicTorsionForce *group_dihff1 = 0;
+
         system.addForce(dihff);
+
+        if (any_perturbable)
+        {
+            group_bondff0 = new OpenMM::HarmonicBondForce();
+            group_bondff1 = new OpenMM::HarmonicBondForce();
+
+            system.addForce(group_bondff0);
+            system.addForce(group_bondff1);
+
+            OpenMM::HarmonicAngleForce *group_angff0 = new OpenMM::HarmonicAngleForce();
+            OpenMM::HarmonicAngleForce *group_angff1 = new OpenMM::HarmonicAngleForce();
+
+            system.addForce(group_angff0);
+            system.addForce(group_angff1);
+
+            OpenMM::PeriodicTorsionForce *group_dihff0 = new OpenMM::PeriodicTorsionForce();
+            OpenMM::PeriodicTorsionForce *group_dihff1 = new OpenMM::PeriodicTorsionForce();
+
+            system.addForce(group_dihff0);
+            system.addForce(group_dihff1);
+        }
 
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
@@ -316,6 +416,16 @@ namespace SireOpenMM
 
         std::vector<std::pair<int, int>> bond_pairs;
         std::vector<std::tuple<int, int, double, double, double>> custom_pairs;
+
+        std::vector<std::pair<int, int>> bond_pairs0;
+        std::vector<std::tuple<int, int, double, double, double>> custom_pairs0;
+
+        std::vector<std::pair<int, int>> bond_pairs1;
+        std::vector<std::tuple<int, int, double, double, double>> custom_pairs1;
+
+        // the division into interaction groups if any atoms are perturbable
+        std::set<int> non_perturbable_atoms;
+        std::set<int> perturbable_atoms;
 
         // get the 1-4 scaling factors from the first molecule
         const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
@@ -342,6 +452,9 @@ namespace SireOpenMM
                                                     CODELOC);
             }
 
+            // is this a perturbable molecule (and we haven't disabled perturbations)?
+            bool is_perturbable_mol = any_perturbable and mol.isPerturbable();
+
             // first the atom parameters
             auto masses_data = mol.masses.constData();
             auto cljs_data = mol.cljs.constData();
@@ -349,68 +462,115 @@ namespace SireOpenMM
             for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
                 system.addParticle(masses_data[j]);
+                const int atom_index = start_index + j;
+
                 const auto &clj = cljs_data[j];
-                cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+
+                if (is_perturbable_mol)
+                {
+                    const auto &clj0 = cljs_data[j];
+                    const auto &clj1 = mol.perturbed->cljs.constData()[j];
+
+                    group_system_cljff0->addParticle(std::get<0>(clj0), std::get<1>(clj0), std::get<2>(clj0));
+                    group_system_cljff1->addParticle(std::get<0>(clj1), std::get<1>(clj1), std::get<2>(clj1));
+
+                    group_group_cljff0->addParticle(std::get<0>(clj0), std::get<1>(clj0), std::get<2>(clj0));
+                    group_group_cljff1->addParticle(std::get<0>(clj1), std::get<1>(clj1), std::get<2>(clj1));
+
+                    perturbable_atoms.insert(atom_index);
+                }
+                else if (any_perturbable)
+                {
+                    group_system_cljff0->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+                    group_system_cljff1->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+
+                    cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+
+                    non_perturbable_atoms.insert(atom_index);
+                }
+                else
+                {
+                    cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+
+                    // all atoms are non-perturbable, so we don't need to record this
+                }
             }
 
             // now the connectivity
-            for (const auto &bond : mol.bond_pairs)
+            if (is_perturbable_mol)
             {
-                bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
-                                                    std::get<1>(bond) + start_index));
+                // intramolecular terms for lambda 0 and lambda 1
             }
-
-            // now any custom pairs
-            for (const auto &pair : mol.custom_pairs)
+            else
             {
-                custom_pairs.push_back(std::make_tuple(std::get<0>(pair) + start_index,
-                                                       std::get<1>(pair) + start_index,
-                                                       std::get<2>(pair),
-                                                       std::get<3>(pair),
-                                                       std::get<4>(pair)));
-            }
+                for (const auto &bond : mol.bond_pairs)
+                {
+                    bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
+                                                        std::get<1>(bond) + start_index));
+                }
 
-            // now bond parameters
-            for (const auto &bond : mol.bond_params)
-            {
-                bondff->addBond(std::get<0>(bond) + start_index,
-                                std::get<1>(bond) + start_index,
-                                std::get<2>(bond), std::get<3>(bond));
-            }
+                // now any custom pairs
+                for (const auto &pair : mol.custom_pairs)
+                {
+                    custom_pairs.push_back(std::make_tuple(std::get<0>(pair) + start_index,
+                                                           std::get<1>(pair) + start_index,
+                                                           std::get<2>(pair),
+                                                           std::get<3>(pair),
+                                                           std::get<4>(pair)));
+                }
 
-            // now the angles
-            for (const auto &ang : mol.ang_params)
-            {
-                angff->addAngle(std::get<0>(ang) + start_index,
-                                std::get<1>(ang) + start_index,
-                                std::get<2>(ang) + start_index,
-                                std::get<3>(ang), std::get<4>(ang));
-            }
+                // now bond parameters
+                for (const auto &bond : mol.bond_params)
+                {
+                    bondff->addBond(std::get<0>(bond) + start_index,
+                                    std::get<1>(bond) + start_index,
+                                    std::get<2>(bond), std::get<3>(bond));
+                }
 
-            // now the dihedrals and impropers
-            for (const auto &dih : mol.dih_params)
-            {
-                dihff->addTorsion(std::get<0>(dih) + start_index,
-                                  std::get<1>(dih) + start_index,
-                                  std::get<2>(dih) + start_index,
-                                  std::get<3>(dih) + start_index,
-                                  std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
-            }
+                // now the angles
+                for (const auto &ang : mol.ang_params)
+                {
+                    angff->addAngle(std::get<0>(ang) + start_index,
+                                    std::get<1>(ang) + start_index,
+                                    std::get<2>(ang) + start_index,
+                                    std::get<3>(ang), std::get<4>(ang));
+                }
 
-            // now constraints
-            for (const auto &constraint : mol.constraints)
-            {
-                system.addConstraint(std::get<0>(constraint) + start_index,
-                                     std::get<1>(constraint) + start_index,
-                                     std::get<2>(constraint));
+                // now the dihedrals and impropers
+                for (const auto &dih : mol.dih_params)
+                {
+                    dihff->addTorsion(std::get<0>(dih) + start_index,
+                                      std::get<1>(dih) + start_index,
+                                      std::get<2>(dih) + start_index,
+                                      std::get<3>(dih) + start_index,
+                                      std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
+                }
+
+                // now constraints
+                for (const auto &constraint : mol.constraints)
+                {
+                    system.addConstraint(std::get<0>(constraint) + start_index,
+                                         std::get<1>(constraint) + start_index,
+                                         std::get<2>(constraint));
+                }
             }
 
             start_index += mol.masses.count();
         }
 
+        if (any_perturbable)
+        {
+            // set the interaction groups in the perturbable forcefields
+            group_system_cljff0->addInteractionGroup(perturbable_atoms,
+                                                     non_perturbable_atoms);
+
+            group_system_cljff1->addInteractionGroup(perturbable_atoms,
+                                                     non_perturbable_atoms);
+        }
+
         const int natoms = start_index;
 
-        // add exclusions based on the bonding of this molecule
+        // add exclusions based on the bonding of the molecules
         cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
         for (const auto &p : custom_pairs)
@@ -419,6 +579,8 @@ namespace SireOpenMM
                                 std::get<2>(p), std::get<3>(p),
                                 std::get<4>(p), false);
         }
+
+        // will have to add exceptions for perturbable forces
 
         // see if we want to remove COM motion
         const auto com_remove_prop = map["com_reset_frequency"];
@@ -454,7 +616,7 @@ namespace SireOpenMM
                     const int start_index = start_indexes_data[i];
                     const auto &mol = openmm_mols_data[i];
                     mol.copyInCoordsAndVelocities(coords_data + start_index,
-                                                vels_data + start_index);
+                                                  vels_data + start_index);
                 } });
         }
         else

@@ -31,10 +31,17 @@ namespace SireOpenMM
         OpenMMMolecule();
         OpenMMMolecule(const SireMol::Molecule &mol,
                        const SireBase::PropertyMap &map);
+
+        OpenMMMolecule(const SireMol::Molecule &mol,
+                       const SireBase::PropertyMap &map0,
+                       const SireBase::PropertyMap &map1);
+
         ~OpenMMMolecule();
 
         void copyInCoordsAndVelocities(OpenMM::Vec3 *coords,
                                        OpenMM::Vec3 *velocities) const;
+
+        bool isPerturbable() const;
 
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of
@@ -87,6 +94,9 @@ namespace SireOpenMM
 
         /** All the constraints */
         QVector<std::tuple<int, int, double>> constraints;
+
+        /** The molecule perturbed molecule, if this is perturbable */
+        std::shared_ptr<OpenMMMolecule> perturbed;
 
         /** What type of constraint to use */
         qint32 constraint_type;
