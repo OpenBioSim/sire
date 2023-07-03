@@ -527,7 +527,7 @@ void register_Space_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Make the passed group of coordinates whole. This will make sure\n  that they are all next to each other, and arent split across a\n  periodic image boundary. The box that will be chosen will be the\n  one that contains the center of the points, with the points mapped\n  from the first to the last\n" );
         
         }
         { //::SireVol::Space::makeWhole
@@ -540,7 +540,7 @@ void register_Space_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the minimum image copy of coords with respect to center,\nwhere the coordinates are made whole. This means that they are\ntranslated as a single group, but the group as a whole will not\nbe split across a periodic boundary. Use this function if you want\nto restore a molecule that has been split over a space into a single,\ncoherent entity (all of the coordinates physically close to\none another)\n" );
         
         }
         { //::SireVol::Space::makeWhole
@@ -553,7 +553,7 @@ void register_Space_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Make the passed group of coordinates whole. This will make sure\n  that they are all next to each other, and arent split across a\n  periodic image boundary. The box that will be chosen will be the\n  one that contains the center of the points, with the points mapped\n  from the first to the last. This treats all of the passed arrays\n  of coordinates as a single unit that should not be split\n" );
         
         }
         { //::SireVol::Space::makeWhole
@@ -566,7 +566,7 @@ void register_Space_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the minimum image copy of coords with respect to center,\nwhere the coordinates are made whole. This means that they are\ntranslated as a single group, but the group as a whole will not\nbe split across a periodic boundary. Use this function if you want\nto restore a molecule that has been split over a space into a single,\ncoherent entity (all of the coordinates physically close to\none another). This treats all of the passed arrays\nof coordinates as a single unit that should not be split\n" );
         
         }
         { //::SireVol::Space::maximumCutoff
@@ -592,6 +592,19 @@ void register_Space_class(){
                 , ( bp::arg("group0"), bp::arg("group1") )
                 , bp::release_gil_policy()
                 , "Return the minimum distance between the points in group0 and group1.\nIf this is a periodic space then this uses the minimum image convention\n(i.e. the minimum distance between the closest periodic replicas are\nused)" );
+        
+        }
+        { //::SireVol::Space::minimumDistance
+        
+            typedef double ( ::SireVol::Space::*minimumDistance_function_type)( ::SireMaths::Vector const &,::SireVol::CoordGroup const & ) const;
+            minimumDistance_function_type minimumDistance_function_value( &::SireVol::Space::minimumDistance );
+            
+            Space_exposer.def( 
+                "minimumDistance"
+                , minimumDistance_function_value
+                , ( bp::arg("point"), bp::arg("group") )
+                , bp::release_gil_policy()
+                , "Return the minimum distance between point and all the points in group.\nIf this is a periodic space then this uses the minimum image convention\n(i.e. the minimum distance between the closest periodic replicas are\nused)" );
         
         }
         { //::SireVol::Space::minimumDistance

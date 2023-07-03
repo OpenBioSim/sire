@@ -1,4 +1,4 @@
-__all__ = ["Cartesian", "PeriodicBox"]
+__all__ = ["Cartesian", "PeriodicBox", "TriclinicBox", "CoordGroup"]
 
 from ..legacy import Vol as _Vol
 
@@ -9,3 +9,5 @@ _use_new_api()
 PeriodicBox = _Vol.PeriodicBox
 Cartesian = _Vol.Cartesian
 TriclinicBox = _Vol.TriclinicBox
+
+CoordGroup = _Vol.CoordGroup

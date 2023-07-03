@@ -430,7 +430,7 @@ void register_PeriodicBox_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Make the passed group of coordinates whole. This will make sure\n  that they are all next to each other, and arent split across a\n  periodic image boundary. The box that will be chosen will be the\n  one that contains the center of the points, with the points mapped\n  from the first to the last\n" );
         
         }
         { //::SireVol::PeriodicBox::makeWhole
@@ -443,7 +443,7 @@ void register_PeriodicBox_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the minimum image copy of coords with respect to center,\nwhere the coordinates are made whole. This means that they are\ntranslated as a single group, but the group as a whole will not\nbe split across a periodic boundary. Use this function if you want\nto restore a molecule that has been split over a space into a single,\ncoherent entity (all of the coordinates physically close to\none another)\n" );
         
         }
         { //::SireVol::PeriodicBox::maxCoords
@@ -480,6 +480,19 @@ void register_PeriodicBox_class(){
                 , minCoords_function_value
                 , ( bp::arg("center")=SireMaths::Vector(0) )
                 , "Return the minimum coordinates of the box that has its center at center" );
+        
+        }
+        { //::SireVol::PeriodicBox::minimumDistance
+        
+            typedef double ( ::SireVol::PeriodicBox::*minimumDistance_function_type)( ::SireMaths::Vector const &,::SireVol::CoordGroup const & ) const;
+            minimumDistance_function_type minimumDistance_function_value( &::SireVol::PeriodicBox::minimumDistance );
+            
+            PeriodicBox_exposer.def( 
+                "minimumDistance"
+                , minimumDistance_function_value
+                , ( bp::arg("point"), bp::arg("group") )
+                , bp::release_gil_policy()
+                , "Return the minimum distance between the points in group0 and group1.\nIf this is a periodic space then this uses the minimum image convention\n(i.e. the minimum distance between the closest periodic replicas are\nused)" );
         
         }
         { //::SireVol::PeriodicBox::minimumDistance
