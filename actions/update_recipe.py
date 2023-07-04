@@ -9,6 +9,15 @@ sys.path.insert(0, os.path.dirname(script))
 
 from parse_requirements import parse_requirements
 
+# has the user supplied an environment.yml file?
+if len(sys.argv) > 1:
+    from pathlib import Path
+    import yaml
+    d = yaml.safe_load(Path(sys.argv[1]).read_text())
+    env_reqs = [x for x in d["dependencies"] if type(x) is str]
+else:
+    env_reqs = []
+
 # go up one directories to get the source directory
 # (this script is in Sire/actions/)
 srcdir = os.path.dirname(os.path.dirname(script))
@@ -34,6 +43,7 @@ bss_reqs = parse_requirements(os.path.join(srcdir, "requirements_bss.txt"))
 print(bss_reqs)
 test_reqs = parse_requirements(os.path.join(srcdir, "requirements_test.txt"))
 print(test_reqs)
+print(env_reqs)
 
 
 def run_cmd(cmd):
@@ -68,8 +78,8 @@ def dep_lines(deps):
     return "".join(lines)
 
 build_reqs = dep_lines(build_reqs)
-host_reqs = dep_lines(host_reqs)
-run_reqs = dep_lines(run_reqs)
+host_reqs = dep_lines(host_reqs + env_reqs)
+run_reqs = dep_lines(run_reqs + env_reqs)
 bss_reqs = dep_lines(bss_reqs)
 test_reqs = dep_lines(test_reqs)
 
