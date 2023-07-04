@@ -695,7 +695,7 @@ def __fixed__impropers__(
 
     if idx is None:
         try:
-            result = C(obj)
+            result = C(obj, map=create_map(map))
         except Exception:
             result = C(obj.to_select_result(), map=create_map(map))
     elif idx1 is None:
