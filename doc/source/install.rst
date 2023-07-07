@@ -332,3 +332,122 @@ to learn how to use :mod:`sire` or the
 Please take a look at our :doc:`developer guide <contributing/development>`
 for more information on how to develop and contribute new code
 to :mod:`sire`.
+
+5. Hardest install - build your own custom conda packages
+=========================================================
+
+The :mod:`sire` conda packages that we build have a lot of dependencies that
+may conflict with your own environment. This is because we build :mod:`sire`
+to be compatible with the latest version of `BioSimSpace <https://biosimspace.openbiosim.org>`__,
+which itself optionally depends on a large number of simulation packages.
+
+You can build your own :mod:`sire` conda package that has fewer dependencies,
+or which is compatible with the packages already installed in your conda
+environment. There are a few steps you need to complete.
+
+A. Define your runtime environment
+----------------------------------
+
+The first step is to describe the desired runtime environment for the package.
+The easiest way to do this is to create that environment, e.g. by installing
+the packages you want, and to then create an ``environment.yml`` file
+that describes that environment. You can do this by running
+
+.. code-block:: bash
+
+   $ conda env export -f environment.yml
+
+This will create an environment file called ``environment.yml``
+that creates pins for the exact version of all of the packages installed
+in your environment.
+
+If you want, you can edit this file to add or remove pins. Simply delete
+lines describing the version of packages that you don't need pinned,
+add new lines if there are additional packages that you do want pinned,
+or even update the version number of the pins if you can allow more
+flexibility for the installation.
+
+B. Check out the sire source code
+---------------------------------
+
+The next step is to check out the :mod:`sire` source code (if you haven't
+already).
+
+.. code-block:: bash
+
+   $ git clone https://github.com/openbiosim/sire -b main
+
+This checks the ``main`` branch of the code out into a directory called
+``sire``. You can build a package for any branch of the code. Typically,
+you will want to choose the ``main`` branch, as this always corresponds to the
+last release. You can checkout the ``main`` branch by changing into the
+``sire`` directory and running;
+
+.. code-block:: bash
+
+   $ git checkout main
+
+C. Create the conda recipe
+--------------------------
+
+Next, we need to create the conda recipe to build the package. We do this by
+running the script ``actions/update_recipe.py``. You can add the path to
+your ``environment.yml`` file as an argument. This tells the script to
+create a recipe that includes all of the pins in the ``environment.yml``.
+For example;
+
+.. code-block:: bash
+
+   $ python actions/update_recipe.py environment.yml
+
+would create the recipe using the pins in ``environment.yml`` (assuming this
+file was in the current directory).
+
+The recipe is written to ``recipes/sire/meta.yaml``. You can (optionally)
+edit the pins in this file too, if you want to do some fine-tuning.
+
+D. Create the conda build environment
+-------------------------------------
+
+While you could build in your existing environment, it is cleaner to
+build in a dedicated build environment. Here, we will create a build
+environment called ``build_sire``. You can use any name you want.
+
+.. code-block:: bash
+
+   $ conda env create -n build_sire -f environment.yml
+
+Activate that environment
+
+.. code-block:: bash
+
+   $ conda activate build_sire
+
+And then install the tools needed to run conda-build
+
+.. code-block:: bash
+
+   $ conda install -y -c conda-forge mamba
+   $ mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
+
+E. Building the package
+-----------------------
+
+You can now run ``conda-build`` to create the package.
+
+.. code-block:: bash
+
+   $ conda mambabuild -c conda-forge -c openbiosim/label/dev recipes/sire
+
+This will take a while. At the end, it will print out the location of the
+sire conda package, e.g.
+
+::
+
+   Output from mambabuild
+
+Copy this conda package to wherever you need (e.g. into a channel, upload
+to conda, etc.).
+
+You can then install it, either via the channel you've uploaded to, or by
+directly running ``conda install`` on the package file itself.
