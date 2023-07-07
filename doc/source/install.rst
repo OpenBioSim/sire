@@ -387,26 +387,7 @@ last release. You can checkout the ``main`` branch by changing into the
 
    $ git checkout main
 
-C. Create the conda recipe
---------------------------
-
-Next, we need to create the conda recipe to build the package. We do this by
-running the script ``actions/update_recipe.py``. You can add the path to
-your ``environment.yml`` file as an argument. This tells the script to
-create a recipe that includes all of the pins in the ``environment.yml``.
-For example;
-
-.. code-block:: bash
-
-   $ python actions/update_recipe.py environment.yml
-
-would create the recipe using the pins in ``environment.yml`` (assuming this
-file was in the current directory).
-
-The recipe is written to ``recipes/sire/meta.yaml``. You can (optionally)
-edit the pins in this file too, if you want to do some fine-tuning.
-
-D. Create the conda build environment
+C. Create the conda build environment
 -------------------------------------
 
 While you could build in your existing environment, it is cleaner to
@@ -429,6 +410,25 @@ And then install the tools needed to run conda-build
 
    $ conda install -y -c conda-forge mamba
    $ mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
+
+D. Create the conda recipe
+--------------------------
+
+Next, we need to create the conda recipe to build the package. We do this by
+running the script ``actions/update_recipe.py``. You can add the path to
+your ``environment.yml`` file as an argument. This tells the script to
+create a recipe that includes all of the pins in the ``environment.yml``.
+For example;
+
+.. code-block:: bash
+
+   $ python actions/update_recipe.py environment.yml
+
+would create the recipe using the pins in ``environment.yml`` (assuming this
+file was in the current directory).
+
+The recipe is written to ``recipes/sire/meta.yaml``. You can (optionally)
+edit the pins in this file too, if you want to do some fine-tuning.
 
 E. Building the package
 -----------------------
