@@ -18,7 +18,6 @@ requirements:
     SIRE_BUILD_REQUIREMENTS
   host:
     SIRE_HOST_REQUIREMENTS
-    SIRE_BSS_REQUIREMENTS
   run:
     SIRE_RUN_REQUIREMENTS
   run_constrained:
