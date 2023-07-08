@@ -17,8 +17,11 @@ if len(sys.argv) > 1:
     d = yaml.safe_load(Path(sys.argv[1]).read_text())
     env_reqs = [x for x in d["dependencies"] if type(x) is str]
     print(f"Using environment from {sys.argv[1]}")
+
+    env_channels = d["channels"]
 else:
     env_reqs = []
+    env_channels = []
 
 # go up one directories to get the source directory
 # (this script is in Sire/actions/)
@@ -89,15 +92,30 @@ def combine(reqs0, reqs1):
     if type(reqs1) is not list:
         reqs1 = [reqs1]
 
+    import re
+    r = re.compile(r'([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*')
+
     reqs = []
 
     for req0 in reqs0:
         found = False
 
-        for req1 in reqs1:
-            req = req1.split("=")[0]
+        m = r.match(req0)
 
-            if req0.find(req) != -1:
+        if m.groups()[0] is None:
+            r0 = req0
+        else:
+            r0 = m.groups()[0]
+
+        for req1 in reqs1:
+            m = r.match(req1)
+
+            if m.groups()[0] is None:
+                req = req1
+            else:
+                req = m.groups()[0]
+
+            if r0 == req:
                 found = True
                 break
 
@@ -127,3 +145,17 @@ with open(recipe, "w") as FILE:
             line = line.replace("SIRE_BRANCH", sire_branch)
 
         FILE.write(line)
+
+channels = ["conda-forge", "openbiosim/label/dev"]
+
+for channel in env_channels:
+    if channel not in channels:
+        channels.insert(0, channel)
+
+channels = " ".join([f"-c {x}" for x in channels])
+
+print("\nBuild this package using the command")
+print(f"conda mambabuild {channels} {condadir}")
+
+
+

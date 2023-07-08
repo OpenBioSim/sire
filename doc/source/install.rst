@@ -442,12 +442,30 @@ You can now run ``conda-build`` to create the package.
 This will take a while. At the end, it will print out the location of the
 sire conda package, e.g.
 
+.. note::
+
+   The above command assumes that you don't need any other channels included
+   to install all of the packages included in your ``environment.yml``. 
+   The ``actions/update_recipe.py`` script will print out the correct 
+   ``conda mambabuild`` command at the end, which includes any extra
+   channels that are needed.
+
 ::
 
-   Output from mambabuild
+    /path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_19.tar.bz2
 
 Copy this conda package to wherever you need (e.g. into a channel, upload
 to conda, etc.).
 
+.. note::
+
+   A full set of tests will be run on the package after it has been built.
+   Some of these tests may fail if you have edited the recipe to remove 
+   some of the dependencies. If this happens, you can decide to ignore 
+   the tests, e.g. by removing them from the conda recipe (``meta.yml``)
+   or by just copying the file that is produced and has been placed into 
+   the ``conda-bld/broken`` directory.
+
 You can then install it, either via the channel you've uploaded to, or by
 directly running ``conda install`` on the package file itself.
+
