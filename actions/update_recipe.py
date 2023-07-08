@@ -125,7 +125,56 @@ def combine(reqs0, reqs1):
     return reqs + reqs1
 
 
-build_reqs = dep_lines(build_reqs)
+def check_reqs(reqs0, reqs1):
+    """
+    Update reqs0 so that if there are any version requirements
+    in reqs1 that affect dependencies in reqs0, then 
+    reqs0 is updated to include those versions.
+    """
+    if type(reqs0) is not list:
+        reqs0 = [reqs0]
+
+    if type(reqs1) is not list:
+        reqs1 = [reqs1]
+    
+    import re
+    r = re.compile(r'([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*')
+
+    reqs = []
+                
+    for req0 in reqs0:
+        found = False
+        found_req = None    
+                
+        m = r.match(req0)
+    
+        if m.groups()[0] is None:
+            r0 = req0
+        else:
+            r0 = m.groups()[0]
+
+        for req1 in reqs1:
+            m = r.match(req1)
+
+            if m.groups()[0] is None:
+                req = req1
+            else:
+                req = m.groups()[0]
+            
+            if r0 == req:
+                found = True
+                found_req = req1
+                break
+            
+        if found:
+            reqs.append(found_req)
+        else:
+            reqs.append(req0)
+        
+    return reqs
+
+
+build_reqs = dep_lines(check_reqs(build_reqs, env_reqs))
 host_reqs = dep_lines(combine(host_reqs, env_reqs))
 run_reqs = dep_lines(combine(run_reqs + bss_reqs, env_reqs))
 test_reqs = dep_lines(test_reqs)
