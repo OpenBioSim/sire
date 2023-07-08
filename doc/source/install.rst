@@ -460,7 +460,26 @@ sire conda package, e.g.
 
 ::
 
-    /path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_19.tar.bz2
+   # To have conda build upload to anaconda.org automatically, use
+   # conda config --set anaconda_upload yes
+   anaconda upload \
+       /path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2
+   anaconda_upload is not set.  Not uploading wheels: []
+
+   INFO :: The inputs making up the hashes for the built packages are as follows:
+   {
+     "sire-2023.3.0-py310hf95ea87_25": {
+       "recipe": {
+         "c_compiler": "clang",
+         "cxx_compiler": "clangxx",
+         "numpy": "1.22",
+         "target_platform": "osx-64"
+       }
+     }
+   }
+
+In this case, you can see that the package is the file
+``/path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2``.
 
 Copy this conda package to wherever you need (e.g. into a channel, upload
 to conda, etc.).
