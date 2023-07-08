@@ -430,6 +430,14 @@ file was in the current directory).
 The recipe is written to ``recipes/sire/meta.yaml``. You can (optionally)
 edit the pins in this file too, if you want to do some fine-tuning.
 
+.. note::
+
+   You may need to edit the recipe to fix version inconsistencies.
+   This is especially the case for ``rdkit`` - you need to to make
+   sure that if you specify a version for ``rdkit`` in your 
+   ``environment.yml`` that you also use the same version 
+   for the ``rdkit-devel`` package.
+
 E. Building the package
 -----------------------
 
