@@ -12,6 +12,3 @@ qt-main
 rich
 tbb
 tbb-devel
-
-# This is not available on aarch64 Linux
-pymbar<4; platform_machine != "aarch64"
