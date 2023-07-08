@@ -101,13 +101,7 @@ if _has_nglview:
         def get_structure_string(self):
             from .. import save_to_string
 
-            return "\n".join(
-                save_to_string(
-                    self._traj.first(),
-                    self.ext,
-                    map={"use_atom_numbers": True},
-                )
-            )
+            return "\n".join(save_to_string(self._traj.first(), self.ext))
 
         @property
         def n_frames(self):
@@ -192,14 +186,10 @@ if _has_nglview:
                 rep = [rep]
 
             for s in selection:
-                if s == "all":
-                    a = list(range(0, len(self.atoms)))
-                else:
-                    try:
-                        atms = self.view[s]
-                        a = self.atoms.find(atms.atoms())
-                    except Exception:
-                        continue
+                try:
+                    a = self.atoms.find(self.view[s].atoms())
+                except Exception:
+                    continue
 
                 for r in rep:
                     if r not in self.reps:
@@ -374,20 +364,11 @@ if _has_nglview:
           which properties are used to get the molecular data
           to be viewed.
         """
-        from ..utils import NullProfiler
-
-        p = NullProfiler()
-        p = p.start("total")
-
-        p1 = p.start("Traj")
         struc_traj = _SireStructureTrajectory(
             obj, align=align, smooth=smooth, wrap=wrap, map=map
         )
-        p1.stop()
 
-        p1 = p.start("widget")
         view = _nglview.NGLWidget(struc_traj)
-        p1.stop()
 
         if orthographic:
             view.camera = "orthographic"
@@ -396,11 +377,7 @@ if _has_nglview:
 
         view.clear_representations()
 
-        p1 = p.start("representations")
         reps = _Representations(obj)
-        p1.stop()
-
-        p1 = p.start("check reps")
 
         if all is None or all is False or default is None or default is False:
             # User has turned off all representations
@@ -492,10 +469,6 @@ if _has_nglview:
         tube = _check(tube)
         all = _check(all)
 
-        p1.stop()
-
-        p2 = p.start("add representations")
-
         if ball_and_stick is not None:
             ball_and_stick, colours = _split(ball_and_stick)
             reps.add(ball_and_stick, f"ball_and_stick{colours}")
@@ -555,10 +528,6 @@ if _has_nglview:
         if all is not None:
             reps.add("all", all)
 
-        p2.stop()
-
-        p1 = p.start("stage parameters")
-
         if stage_parameters is None:
             view.stage.set_parameters(
                 clipNear=0,
@@ -574,23 +543,12 @@ if _has_nglview:
         if (rest is None) or (rest is False):
             rest = None
 
-        p1.stop()
-
-        p1 = p.start("populate reps")
         reps.populate(view, rest=rest)
-        p1.stop()
 
-        p1 = p.start("center")
         if center is not None:
             view.center(selection=reps.get_selection_string(center))
         else:
             view.center()
-        p1.stop()
-
-        p.stop()
-
-        if not p.is_null():
-            print(p)
 
         return view
 

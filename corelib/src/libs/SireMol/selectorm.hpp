@@ -1294,45 +1294,13 @@ namespace SireMol
     {
         QList<qint64> matches;
 
-        // when searching for multiple views, it is definitely worth indexing
-        // this container
-        QMultiHash<MolNum, qint64> molnum_to_idx;
-
-        const int nmols = this->vws.count();
-
-        molnum_to_idx.reserve(nmols);
-
-        QVector<qint64> start_idx(nmols, 0);
-
-        for (int i = 0; i < nmols; ++i)
+        for (const auto &view : views)
         {
-            const auto &mol = this->vws[i];
-            molnum_to_idx.insert(mol.data().number(), i);
+            const auto m = this->find(view);
 
-            int next_mol = i + 1;
-
-            if (next_mol < nmols)
-                start_idx[next_mol] = start_idx[i] + mol.count();
-        }
-
-        const auto start_idx_data = start_idx.constData();
-
-        for (const auto &view : views.vws)
-        {
-            const auto molnum = view.data().number();
-
-            if (not molnum_to_idx.contains(molnum))
-                continue;
-
-            for (const auto &idx : molnum_to_idx.values(molnum))
+            if (not m.isEmpty())
             {
-                int start = start_idx_data[idx];
-                const auto m = this->vws.at(idx).find(view);
-
-                for (auto match : m)
-                {
-                    matches.append(start + match);
-                }
+                matches += m;
             }
         }
 

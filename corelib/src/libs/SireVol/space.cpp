@@ -141,12 +141,6 @@ Vector Space::getRandomPoint() const
     return this->getRandomPoint(Vector(0, 0, 0), generator);
 }
 
-double Space::minimumDistance(const Vector &point, const CoordGroup &group) const
-{
-    QVector<Vector> coords(1, point);
-    return this->minimumDistance(CoordGroup(coords), group);
-}
-
 /** Assert that 'other' is of the same type as this space
 
     \throw SireError::incompatible_error

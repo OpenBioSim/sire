@@ -116,14 +116,11 @@ class TrajectoryIterator:
 
         return it
 
-    def __repr__(self):
-        return self.__str__()
-
     def __str__(self):
         if self._view is None:
             return "TrajectoryIterator::null"
         elif len(self._values) <= 1:
-            return f"Trajectory({self._view}, num_frames=1)"
+            return str(self._view)
         else:
             return f"Trajectory({self._view}, num_frames={len(self._values)})"
 

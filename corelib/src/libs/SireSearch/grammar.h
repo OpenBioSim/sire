@@ -270,7 +270,7 @@ public:
         expressionPartRule = idNameRule | idNumberRule | idElementRule | propertyRule | bondRule | water_token |
                              pert_token | protein_token | notRule | joinRule | massRule | massCmpRule | chargeRule |
                              chargeCmpRule | massObjRule | massObjCmpRule | chargeObjRule | chargeObjCmpRule |
-                             all_token | countRule | closestRule | smartsRule | user_token;
+                             all_token | countRule | smartsRule | user_token;
 
         // grammar that specifies a list of names (comma-separated)
         nameValuesRule = (nameValueRule % qi::lit(','));
@@ -356,46 +356,6 @@ public:
         countRule = eps[_val = AST::IDCount()] >> (qi::lit("count(") >> expressionRule[_val += _1] >> qi::lit(")") >>
                                                    cmp_token[_val += _1] >> qi::int_[_val += _1]);
 
-        // grammar for a closest or furthest expression, e.g.
-        // closest 5 waters to ligand, furthest 10 ions from protein
-        closestRule = eps[_val = AST::IDClosest()] >>
-                          (qi::lit("closest")[_val -= true] >>
-                           qi::int_[_val += _1] >>
-                           expressionRule[_val += _1] >>
-                           qi::lit("to") >>
-                           expressionRule[_val *= _1]) |
-                      (qi::lit("closest")[_val -= true] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("to")[_val += 1] >>
-                       expressionRule[_val *= _1]) |
-                      (qi::lit("furthest")[_val -= false] >>
-                       qi::int_[_val += _1] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("from") >>
-                       expressionRule[_val *= _1]) |
-                      (qi::lit("furthest")[_val -= false] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("from")[_val += 1] >>
-                       expressionRule[_val *= _1]) |
-                      (qi::lit("closest")[_val -= true] >>
-                       qi::int_[_val += _1] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("to") >>
-                       vectorValueRule[_val *= _1]) |
-                      (qi::lit("closest")[_val -= true] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("to")[_val += 1] >>
-                       vectorValueRule[_val *= _1]) |
-                      (qi::lit("furthest")[_val -= false] >>
-                       qi::int_[_val += _1] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("from") >>
-                       vectorValueRule[_val *= _1]) |
-                      (qi::lit("furthest")[_val -= false] >>
-                       expressionRule[_val += _1] >>
-                       qi::lit("from")[_val += 1] >>
-                       vectorValueRule[_val *= _1]);
-
         /////
         ///// name all of the rules to simplify error messages
         /////
@@ -414,7 +374,6 @@ public:
         whereWithinRule.name("Where Within");
         whereCompareRule.name("Where Compare");
         countRule.name("Count Rule");
-        closestRule.name("Closest Rule");
         lhsRule.name("LHS");
         rhsRule.name("RHS");
         expressionRule.name("Expression");
@@ -476,7 +435,6 @@ public:
     qi::rule<IteratorT, AST::IDWhereWithin(), SkipperT> whereWithinRule;
     qi::rule<IteratorT, AST::IDWhereCompare(), SkipperT> whereCompareRule;
     qi::rule<IteratorT, AST::IDCount(), SkipperT> countRule;
-    qi::rule<IteratorT, AST::IDClosest(), SkipperT> closestRule;
 
     qi::rule<IteratorT, AST::Expression(), SkipperT> lhsRule;
     qi::rule<IteratorT, AST::Expression(), SkipperT> rhsRule;

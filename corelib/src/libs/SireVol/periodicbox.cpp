@@ -997,38 +997,6 @@ double PeriodicBox::minimumDistance(const AABox &box0, const AABox &box1) const
     return delta.length();
 }
 
-/** Return the minimum distance between 'point' and all the points in 'group'.
-    If this is a periodic space then this uses the minimum image convention
-    (i.e. the minimum distance between the closest periodic replicas are
-    used) */
-double PeriodicBox::minimumDistance(const Vector &point, const CoordGroup &group) const
-{
-    double mindist2(std::numeric_limits<double>::max());
-
-    const int n = group.count();
-
-    // see if we need to wrap the coordinates...
-    Vector wrapdelta = this->wrapDelta(point, group.aaBox().center());
-
-    // get raw pointers to the arrays - this provides more efficient access
-    const Vector *array = group.constData();
-
-    Vector p = point + wrapdelta;
-
-    for (int i = 0; i < n; ++i)
-    {
-        // calculate the distance between the two atoms
-        double tmpdist = Vector::distance2(p, array[i]);
-
-        // store the minimum distance, the value expected to be the minimum
-        // value is most efficiently placed as the second argument
-        mindist2 = std::min(tmpdist, mindist2);
-    }
-
-    // return the minimum distance
-    return sqrt(mindist2);
-}
-
 /** Return the minimum distance between the points in 'group0' and 'group1'.
     If this is a periodic space then this uses the minimum image convention
     (i.e. the minimum distance between the closest periodic replicas are

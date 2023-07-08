@@ -12,27 +12,6 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - September 2023
-----------------------------------------------------------------------------------------------
-
-* Added ``closest`` and ``furthest`` keywords to enable searching for the n closest
-  or furthest views. This is very general, and is described in the
-  :doc:`detailed search guide <cheatsheet/search>`. Searches such as
-  ``closest 10 waters to protein`` or
-  ``furthest (residue in protein) from water`` are supported.
-
-* Optimised the speed of viewing large molecules in NGLView, plus of searching
-  for water molecules. Added a new ``is_water`` function. Optimised the
-  find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
-  is now roughly O(N), using a hash to lookup at the molecule level, so that
-  we don't have to test individual atoms.
-
-* Added a :func:`sire.minimum_distance` function to calculate the minimum
-  distance between atoms of two views.
-
-* Please add the changelog entry for your PR here. We will add the link to your PR
-  during the code review :-)
-
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
 
@@ -108,14 +87,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   :func:`sire.smiles`, thereby only running the sanitisation steps
   that pass.
 
-* Improved functionality of harmonic restraints in openMMMD. Each
+* Improved functionality of harmonic restraints in openMMMD. Each 
   restrained atom will now have to a corrsponding dummy atom,
   with the location of this dummy atom restraining the real atom.
-  This makes restrained systems consistent in NPT regimes. Provided
+  This makes restrained systems consistent in NPT regimes. Provided 
   that a modified system containing the dummy atoms is given, the argument
-  ``use restraints = True`` can be added to a SOMD ``.cfg`` file, along with
-  the argument ``restrained atoms`` containing a dictionary of dummy atom
-  numbers along with the numbers of the corresponding real atoms
+  ``use restraints = True`` can be added to a SOMD ``.cfg`` file, along with 
+  the argument ``restrained atoms`` containing a dictionary of dummy atom 
+  numbers along with the numbers of the corresponding real atoms 
   (``{dummy_atom_num:real_atom_num}``).
 
 * Added a new units grammar and parser, so that we can robustly

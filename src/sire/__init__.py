@@ -16,7 +16,7 @@ from ._load import (
     smarts,
 )
 
-from ._measure import measure, minimum_distance
+from ._measure import measure
 from ._colname import colname, colnames
 from ._parallel import (
     get_max_num_threads,
@@ -33,7 +33,6 @@ __all__ = [
     "get_max_num_threads",
     "load",
     "load_test_files",
-    "minimum_distance",
     "measure",
     "molid",
     "save",

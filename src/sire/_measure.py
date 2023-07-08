@@ -1,4 +1,4 @@
-__all__ = ["measure", "minimum_distance"]
+__all__ = ["measure"]
 
 
 def measure(
@@ -175,61 +175,3 @@ def measure(
             return t.improper_angle()
         else:
             return t.angle()
-
-
-def minimum_distance(mol0, mol1, space=None, map=None):
-    """
-    Return the minimum distance between the atoms of the two passed
-    molecules.
-
-    If 'space' is passed, then that will be used to apply
-    periodic boundary conditions.
-    """
-
-    from .base import create_map
-
-    map = create_map(map)
-
-    if space is None:
-        found_space = False
-
-        if map.specified("space"):
-            space = map["space"].value()
-        else:
-            # try to find the space in the two molecules
-            try:
-                space = mol0.property(map["space"])
-                found_space = True
-            except Exception:
-                pass
-
-            if not found_space:
-                try:
-                    space = mol1.property(map["space"])
-                    found_space = True
-                except Exception:
-                    pass
-
-            if not found_space:
-                from .vol import Cartesian
-
-                space = Cartesian()
-
-    from .vol import CoordGroup
-
-    atoms0 = mol0.atoms()
-    atoms1 = mol1.atoms()
-
-    if len(atoms0) == 1:
-        group0 = CoordGroup([atoms0.coordinates()])
-    else:
-        group0 = CoordGroup(atoms0.property("coordinates"))
-
-    if len(atoms1) == 1:
-        group1 = CoordGroup([atoms1.coordinates()])
-    else:
-        group1 = CoordGroup(atoms1.property("coordinates"))
-
-    from .units import angstrom
-
-    return space.minimum_distance(group0, group1) * angstrom

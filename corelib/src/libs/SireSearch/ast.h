@@ -199,7 +199,6 @@ namespace AST
     struct IDWith;
     struct IDWhere;
     struct IDCount;
-    struct IDClosest;
     struct IDNot;
     struct IDSubscript;
     struct IDWithin;
@@ -242,8 +241,8 @@ namespace AST
         boost::recursive_wrapper<IDProtein>, boost::recursive_wrapper<IDPerturbable>, boost::recursive_wrapper<IDMass>,
         boost::recursive_wrapper<IDCharge>, boost::recursive_wrapper<IDCmpMass>, boost::recursive_wrapper<IDCmpCharge>,
         boost::recursive_wrapper<IDObjMass>, boost::recursive_wrapper<IDObjCharge>, boost::recursive_wrapper<IDObjCmpMass>,
-        boost::recursive_wrapper<IDObjCmpCharge>, boost::recursive_wrapper<IDSmarts>, boost::recursive_wrapper<IDClosest>,
-        boost::recursive_wrapper<ExpressionPart>, boost::recursive_wrapper<Expression>>;
+        boost::recursive_wrapper<IDObjCmpCharge>, boost::recursive_wrapper<IDSmarts>, boost::recursive_wrapper<ExpressionPart>,
+        boost::recursive_wrapper<Expression>>;
 
     QString expression_to_string(const ExpressionVariant &expression);
 
@@ -313,11 +312,6 @@ namespace AST
         double value;
         SireUnits::Dimension::Length unit;
 
-        SireUnits::Dimension::Length toLength() const
-        {
-            return value * unit;
-        }
-
         QString toString() const;
     };
 
@@ -356,13 +350,6 @@ namespace AST
                 throw SireMol::parse_error(QObject::tr("Cannot add more than there points to a vector"), CODELOC);
 
             return *this;
-        }
-
-        SireMaths::Vector toVector() const
-        {
-            return SireMaths::Vector(x.toLength().to(SireUnits::angstrom),
-                                     y.toLength().to(SireUnits::angstrom),
-                                     z.toLength().to(SireUnits::angstrom));
         }
 
         QString toString() const;
@@ -481,11 +468,6 @@ namespace AST
         ExpressionVariant value = IDNull();
 
         QString toString() const;
-
-        bool isNull() const
-        {
-            return this->toEngine() == SelectEnginePtr();
-        }
 
         SelectEnginePtr toEngine() const;
     };
@@ -890,52 +872,6 @@ namespace AST
         IDCount &operator+=(int v)
         {
             value = v;
-            return *this;
-        }
-
-        QString toString() const;
-
-        SelectEnginePtr toEngine() const;
-    };
-
-    /** Struct that holds "closest N X to Y" and "further N X from Y"
-     *  expressions
-     */
-    struct IDClosest
-    {
-        Expression search_set;
-        bool is_closest;
-        int n;
-        Expression reference_set;
-        SireMaths::Vector point;
-
-        IDClosest &operator+=(const Expression &s)
-        {
-            search_set = s;
-            return *this;
-        }
-
-        IDClosest &operator+=(int number)
-        {
-            n = number;
-            return *this;
-        }
-
-        IDClosest &operator*=(const Expression &r)
-        {
-            reference_set = r;
-            return *this;
-        }
-
-        IDClosest &operator*=(const VectorValue &v)
-        {
-            point = v.toVector();
-            return *this;
-        }
-
-        IDClosest &operator-=(bool c)
-        {
-            is_closest = c;
             return *this;
         }
 

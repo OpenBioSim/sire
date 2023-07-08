@@ -127,8 +127,6 @@ namespace SireVol
 
         bool beyond(double dist, const CoordGroup &group0, const CoordGroup &group1) const;
 
-        double minimumDistance(const Vector &point, const CoordGroup &group) const;
-
         double minimumDistance(const CoordGroup &group0, const CoordGroup &group1) const;
 
         double minimumDistance(const AABox &box0, const AABox &box1) const;
