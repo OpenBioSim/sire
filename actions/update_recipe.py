@@ -81,6 +81,30 @@ def dep_lines(deps):
     return "".join(lines)
 
 
+def check_environment_reqs(reqs):
+    """
+    Run through the environment reqs and try to 
+    fix any conflicts that may be created
+    """
+    if type(reqs) is not list:
+        reqs = [reqs]
+
+    import re
+    r = re.compile(r'([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*')
+
+    for req in reqs:
+        m = r.match(req)
+
+        if m.groups()[0] is not None:
+            req = m.groups()[0]
+
+        if req == "rdkit":
+            print(m.groups())
+
+        elif req == "alchemlyb":
+            print(m.groups())
+
+
 def combine(reqs0, reqs1):
     """
     Combine requirements together, removing those from reqs0
@@ -174,10 +198,12 @@ def check_reqs(reqs0, reqs1):
     return reqs
 
 
+# check_environment_reqs(env_reqs)
+
 build_reqs = dep_lines(check_reqs(build_reqs, env_reqs))
 host_reqs = dep_lines(combine(host_reqs, env_reqs))
-run_reqs = dep_lines(combine(run_reqs + bss_reqs, env_reqs))
-test_reqs = dep_lines(test_reqs)
+run_reqs = dep_lines(check_reqs(run_reqs, env_reqs))
+test_reqs = dep_lines(check_reqs(test_reqs, env_reqs))
 
 with open(recipe, "w") as FILE:
     for line in lines:
