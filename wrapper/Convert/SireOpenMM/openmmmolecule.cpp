@@ -612,7 +612,8 @@ void OpenMMMolecule::alignInternals()
 
         if (not found)
         {
-            bond_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, 0.0, 0.0));
+            // add a null bond with the same r0, but null k
+            bond_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, std::get<2>(bond0), 0.0));
         }
     }
 
@@ -626,7 +627,8 @@ void OpenMMMolecule::alignInternals()
             int atom0 = std::get<0>(bond1);
             int atom1 = std::get<1>(bond1);
 
-            bond_params.append(std::tuple<int, int, double, double>(atom0, atom1, 0.0, 0.0));
+            // add a null bond with the same r0, but null k
+            bond_params.append(std::tuple<int, int, double, double>(atom0, atom1, std::get<2>(bond1), 0.0));
             bond_params_1.append(bond1);
         }
     }
@@ -662,7 +664,8 @@ void OpenMMMolecule::alignInternals()
 
         if (not found)
         {
-            ang_params_1.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, 0.0, 0.0));
+            // add a null angle with the same theta0, but null k
+            ang_params_1.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, std::get<3>(ang0), 0.0));
         }
     }
 
@@ -677,7 +680,8 @@ void OpenMMMolecule::alignInternals()
             int atom1 = std::get<1>(ang1);
             int atom2 = std::get<2>(ang1);
 
-            ang_params.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, 0.0, 0.0));
+            // add a null angle with the same theta0, but null k
+            ang_params.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, std::get<3>(ang1), 0.0));
             ang_params_1.append(ang1);
         }
     }
@@ -715,8 +719,8 @@ void OpenMMMolecule::alignInternals()
 
         if (not found)
         {
-            // need periodicity of 1 for null dihedrals
-            dih_params_1.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, 1, 0.0, 0.0));
+            // add a null dihedral with the same periodicity and phase, but null k
+            dih_params_1.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, std::get<4>(dih0), std::get<5>(dih0), 0.0));
         }
     }
 
@@ -732,7 +736,8 @@ void OpenMMMolecule::alignInternals()
             int atom2 = std::get<2>(dih1);
             int atom3 = std::get<3>(dih1);
 
-            dih_params.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, 1, 0.0, 0.0));
+            // add a null dihedral with the same periodicity and phase, but null k
+            dih_params.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, std::get<4>(dih1), std::get<5>(dih1), 0.0));
             dih_params_1.append(dih1);
         }
     }
