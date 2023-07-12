@@ -140,6 +140,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
             perturbed.reset(new OpenMMMolecule(*this));
             perturbed->constructFromAmber(mol, map1);
+            this->alignInternals();
         }
         else
         {
@@ -316,8 +317,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &bondparam = it.value().first;
         const auto includes_h = it.value().second;
 
-        const int atom0 = bondid.get<0>().value();
-        const int atom1 = bondid.get<1>().value();
+        int atom0 = bondid.get<0>().value();
+        int atom1 = bondid.get<1>().value();
+
+        if (atom0 > atom1)
+            std::swap(atom0, atom1);
 
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
@@ -351,9 +355,12 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &angparam = it.value().first;
         const auto includes_h = it.value().second;
 
-        const int atom0 = angid.get<0>().value();
-        const int atom1 = angid.get<1>().value();
-        const int atom2 = angid.get<2>().value();
+        int atom0 = angid.get<0>().value();
+        int atom1 = angid.get<1>().value();
+        int atom2 = angid.get<2>().value();
+
+        if (atom0 > atom2)
+            std::swap(atom0, atom2);
 
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
@@ -393,10 +400,16 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &dihparam = it.value().first;
         const auto includes_h = it.value().second;
 
-        const int atom0 = dihid.get<0>().value();
-        const int atom1 = dihid.get<1>().value();
-        const int atom2 = dihid.get<2>().value();
-        const int atom3 = dihid.get<3>().value();
+        int atom0 = dihid.get<0>().value();
+        int atom1 = dihid.get<1>().value();
+        int atom2 = dihid.get<2>().value();
+        int atom3 = dihid.get<3>().value();
+
+        if (atom0 > atom3)
+        {
+            std::swap(atom0, atom3);
+            std::swap(atom1, atom2);
+        }
 
         for (const auto &term : dihparam.terms())
         {
@@ -562,6 +575,169 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             }
         }
     }
+}
+
+/** Go through all of the internals and compare them to the perturbed
+ *  state. Ensure that there is a one-to-one mapping, with them all
+ *  in the same order. Any that are missing are added as nulls in
+ *  the correct end state
+ */
+void OpenMMMolecule::alignInternals()
+{
+    QVector<std::tuple<int, int, double, double>> bond_params_1;
+    bond_params_1.reserve(bond_params.count());
+
+    QVector<bool> found_index(perturbed->bond_params.count(), false);
+
+    for (const auto &bond0 : bond_params)
+    {
+        int atom0 = std::get<0>(bond0);
+        int atom1 = std::get<1>(bond0);
+
+        bool found = false;
+
+        for (int i = 0; i < perturbed->bond_params.count(); ++i)
+        {
+            const auto &bond1 = perturbed->bond_params.at(i);
+
+            if (std::get<0>(bond1) == atom0 and std::get<1>(bond1) == atom1)
+            {
+                // we have found the matching bond!
+                bond_params_1.append(bond1);
+                found_index[i] = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (not found)
+        {
+            bond_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, 0.0, 0.0));
+        }
+    }
+
+    for (int i = 0; i < perturbed->bond_params.count(); ++i)
+    {
+        if (not found_index[i])
+        {
+            // need to add a bond missing in the reference state
+            const auto &bond1 = perturbed->bond_params.at(i);
+
+            int atom0 = std::get<0>(bond1);
+            int atom1 = std::get<1>(bond1);
+
+            bond_params.append(std::tuple<int, int, double, double>(atom0, atom1, 0.0, 0.0));
+            bond_params_1.append(bond1);
+        }
+    }
+
+    perturbed->bond_params = bond_params_1;
+
+    QVector<std::tuple<int, int, int, double, double>> ang_params_1;
+    ang_params_1.reserve(ang_params.count());
+
+    found_index = QVector<bool>(perturbed->ang_params.count(), false);
+
+    for (const auto &ang0 : ang_params)
+    {
+        int atom0 = std::get<0>(ang0);
+        int atom1 = std::get<1>(ang0);
+        int atom2 = std::get<2>(ang0);
+
+        bool found = false;
+
+        for (int i = 0; i < perturbed->ang_params.count(); ++i)
+        {
+            const auto &ang1 = perturbed->ang_params.at(i);
+
+            if (std::get<0>(ang1) == atom0 and std::get<1>(ang1) == atom1 and std::get<2>(ang1) == atom2)
+            {
+                // we have found the matching angle!
+                ang_params_1.append(ang1);
+                found_index[i] = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (not found)
+        {
+            ang_params_1.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, 0.0, 0.0));
+        }
+    }
+
+    for (int i = 0; i < perturbed->ang_params.count(); ++i)
+    {
+        if (not found_index[i])
+        {
+            // need to add a bond missing in the reference state
+            const auto &ang1 = perturbed->ang_params.at(i);
+
+            int atom0 = std::get<0>(ang1);
+            int atom1 = std::get<1>(ang1);
+            int atom2 = std::get<2>(ang1);
+
+            ang_params.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, 0.0, 0.0));
+            ang_params_1.append(ang1);
+        }
+    }
+
+    perturbed->ang_params = ang_params_1;
+
+    QVector<std::tuple<int, int, int, int, int, double, double>> dih_params_1;
+    dih_params_1.reserve(dih_params.count());
+
+    found_index = QVector<bool>(perturbed->dih_params.count(), false);
+
+    for (const auto &dih0 : dih_params)
+    {
+        int atom0 = std::get<0>(dih0);
+        int atom1 = std::get<1>(dih0);
+        int atom2 = std::get<2>(dih0);
+        int atom3 = std::get<3>(dih0);
+
+        bool found = false;
+
+        for (int i = 0; i < perturbed->dih_params.count(); ++i)
+        {
+            const auto &dih1 = perturbed->dih_params.at(i);
+
+            if (std::get<0>(dih1) == atom0 and std::get<1>(dih1) == atom1 and
+                std::get<2>(dih1) == atom2 and std::get<3>(dih1) == atom3)
+            {
+                // we have found the matching bond!
+                dih_params_1.append(dih1);
+                found_index[i] = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (not found)
+        {
+            // need periodicity of 1 for null dihedrals
+            dih_params_1.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, 1, 0.0, 0.0));
+        }
+    }
+
+    for (int i = 0; i < perturbed->dih_params.count(); ++i)
+    {
+        if (not found_index[i])
+        {
+            // need to add a bond missing in the reference state
+            const auto &dih1 = perturbed->dih_params.at(i);
+
+            int atom0 = std::get<0>(dih1);
+            int atom1 = std::get<1>(dih1);
+            int atom2 = std::get<2>(dih1);
+            int atom3 = std::get<3>(dih1);
+
+            dih_params.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, 1, 0.0, 0.0));
+            dih_params_1.append(dih1);
+        }
+    }
+
+    perturbed->dih_params = dih_params_1;
 }
 
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const

@@ -104,6 +104,8 @@ namespace SireOpenMM
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
                                 const SireBase::PropertyMap &map);
+
+        void alignInternals();
     };
 
 }
