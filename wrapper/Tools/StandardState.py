@@ -40,7 +40,7 @@ topfile = Parameter("topfile", "SYSTEM.top",
 buffer = Parameter("buffer", 5.0, """Buffer to be added to coordinates to create domain of integration""")
 delta_trans = Parameter("dtrans", 0.20, """Step size for translational volume elements, in Angstrom""")
 norient = Parameter("norient", 4, """Number of orientations per [0,2pi] Euler Angles interval""")
-temperature = Parameter("temperature",298 * kelvin,"""The temperature of the system""")
+temperature = Parameter("temperature",298 * Sire.Units.kelvin,"""The temperature of the system""")
 
 verbose = Parameter("verbose", False, """Print debug output""")
 
