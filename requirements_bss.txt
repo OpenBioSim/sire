@@ -29,7 +29,7 @@ py3dmol
 pydot
 pygtail
 pyyaml
-rdkit
+rdkit>=2023.0.0
 
 # The below are packages that aren't available on all
 # platforms/OSs and so need to be conditionally included
