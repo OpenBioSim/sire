@@ -205,6 +205,8 @@ host_reqs = dep_lines(combine(host_reqs, env_reqs))
 run_reqs = dep_lines(check_reqs(run_reqs, env_reqs))
 test_reqs = dep_lines(check_reqs(test_reqs, env_reqs))
 
+print("\nRECIPE")
+
 with open(recipe, "w") as FILE:
     for line in lines:
         if line.find("SIRE_BUILD_REQUIREMENTS") != -1:
@@ -220,6 +222,7 @@ with open(recipe, "w") as FILE:
             line = line.replace("SIRE_BRANCH", sire_branch)
 
         FILE.write(line)
+        print(line, end="")
 
 channels = ["conda-forge", "openbiosim/label/dev"]
 
