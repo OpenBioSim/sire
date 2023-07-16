@@ -21,6 +21,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug where outputs from legacy script would be written with base physical
   units, rather than prettier internal or SI units.
 
+* Fixed a bug in the writing of DCD headers, meaning that the files couldn't be read
+  by other DCD reader software (written non-compliant header)
+
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
 
