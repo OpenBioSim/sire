@@ -460,6 +460,57 @@ void AmberRstFile::writeHeader(const QString &title, int nframes, int natoms,
     NetCDFFile::_lkr_writeHeader(globals, dimensions);
 
     dims = NetCDFFile::_lkr_getVariablesInfo();
+
+    const auto spatial = dims["spatial"];
+
+    if (not spatial.isNull())
+    {
+        QVector<char> vals(3);
+        vals[0] = 'x';
+        vals[1] = 'y';
+        vals[2] = 'z';
+
+        NetCDFFile::_lkr_writeData(NetCDFData(spatial, vals));
+    }
+
+    if (have_space)
+    {
+        const auto cell_spatial = dims["cell_spatial"];
+
+        if (not cell_spatial.isNull())
+        {
+            QVector<char> vals(3);
+            vals[0] = 'a';
+            vals[1] = 'b';
+            vals[2] = 'c';
+
+            NetCDFFile::_lkr_writeData(NetCDFData(cell_spatial, vals));
+        }
+
+        const auto cell_angular = dims["cell_angular"];
+
+        if (not cell_angular.isNull())
+        {
+            QVector<char> vals(15);
+            vals[0] = 'a';
+            vals[1] = 'l';
+            vals[2] = 'p';
+            vals[3] = 'h';
+            vals[4] = 'a';
+            vals[5] = 'b';
+            vals[6] = 'e';
+            vals[7] = 't';
+            vals[8] = 'a';
+            vals[9] = ' ';
+            vals[10] = 'g';
+            vals[11] = 'a';
+            vals[12] = 'm';
+            vals[13] = 'm';
+            vals[14] = 'a';
+
+            NetCDFFile::_lkr_writeData(NetCDFData(cell_angular, vals));
+        }
+    }
 }
 
 void AmberRstFile::_lkr_writeBufferToFile()
@@ -659,6 +710,8 @@ void AmberRstFile::writeFrame(int frame_idx, const Frame &frame, bool use_parall
         if (v_data == 0)
             return;
 
+        const double units = 1.0 / (angstrom / (20.455 * picosecond)).value();
+
         if (use_parallel)
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, natoms), [&](tbb::blocked_range<int> r)
@@ -667,9 +720,9 @@ void AmberRstFile::writeFrame(int frame_idx, const Frame &frame, bool use_parall
                 {
                     const auto &value = vels_data[i];
 
-                    v_data[(3*i) + 0] = value.x().to(angstrom / picosecond);
-                    v_data[(3*i) + 1] = value.y().to(angstrom / picosecond);
-                    v_data[(3*i) + 2] = value.z().to(angstrom / picosecond);
+                    v_data[(3*i) + 0] = value.x().value() * units;
+                    v_data[(3*i) + 1] = value.y().value() * units;
+                    v_data[(3*i) + 2] = value.z().value() * units;
                 } });
         }
         else
@@ -678,9 +731,9 @@ void AmberRstFile::writeFrame(int frame_idx, const Frame &frame, bool use_parall
             {
                 const auto &value = vels_data[i];
 
-                v_data[(3 * i) + 0] = value.x().to(angstrom / picosecond);
-                v_data[(3 * i) + 1] = value.y().to(angstrom / picosecond);
-                v_data[(3 * i) + 2] = value.z().to(angstrom / picosecond);
+                v_data[(3 * i) + 0] = value.x().value() * units;
+                v_data[(3 * i) + 1] = value.y().value() * units;
+                v_data[(3 * i) + 2] = value.z().value() * units;
             }
         }
     };
@@ -1217,7 +1270,8 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
         auto v_data = v.data();
         auto vels_data = vels.constData();
 
-        const auto units_to_internal = (angstrom / picosecond);
+        // velocity is Angstroms per 1/20.455 ps
+        const auto vel_unit = (1.0 / 20.455) * angstrom / picosecond;
 
         if (use_parallel)
         {
@@ -1225,18 +1279,18 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
                               {
                 for (int i=r.begin(); i<r.end(); ++i)
                 {
-                    v_data[i] = Velocity3D(vels_data[(3 * i) + 0] * units_to_internal,
-                                           vels_data[(3 * i) + 1] * units_to_internal,
-                                           vels_data[(3 * i) + 2] * units_to_internal);
+                    v_data[i] = Velocity3D(vels_data[(3 * i) + 0] * vel_unit,
+                                           vels_data[(3 * i) + 1] * vel_unit,
+                                           vels_data[(3 * i) + 2] * vel_unit);
                 } });
         }
         else
         {
             for (int i = 0; i < natoms; ++i)
             {
-                v_data[i] = Velocity3D(vels_data[(3 * i) + 0] * units_to_internal,
-                                       vels_data[(3 * i) + 1] * units_to_internal,
-                                       vels_data[(3 * i) + 2] * units_to_internal);
+                v_data[i] = Velocity3D(vels_data[(3 * i) + 0] * vel_unit,
+                                       vels_data[(3 * i) + 1] * vel_unit,
+                                       vels_data[(3 * i) + 2] * vel_unit);
             }
         }
     };

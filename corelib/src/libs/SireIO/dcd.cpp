@@ -64,10 +64,13 @@
 
 #include "tostring.h"
 
+#include "sire_version.h"
+
 #include <QDataStream>
 #include <QDebug>
 #include <QFile>
 #include <QFileInfo>
+#include <QDateTime>
 
 using namespace SireIO;
 using namespace SireIO::detail;
@@ -369,7 +372,8 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
     // every value is zero, as we don't know what they are
     ints[0] = nframes;
     // ints[1] = 0; // index of the first frame - we don't know this either...
-    // ints[2] = 0; // nsavc - should be zero?
+    ints[2] = 1;       // number of timesteps between frames
+    ints[3] = nframes; // number of timesteps written
     // ints[8] = 0; // nfixed is zero - everything will be treated as moving
 
     // bytes 4 to 39
@@ -395,10 +399,12 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 
     // bytes 52-79 - should all be zero - can re-use ints
     ints[0] = 0;
+    ints[2] = 0;
+    ints[3] = 0;
     line.writeInt32(ints, 7);
 
     // bytes 80-83
-    line.writeInt32(1); // 1 as we are in CHARMM format - we need this to write space info
+    line.writeInt32(24); // 24 as we are in CHARMM format - we need this to write space info
     CHARMM_FORMAT = true;
 
     // we will only write 3D coordinates
@@ -411,14 +417,20 @@ void DCDFile::writeHeader(int nframes, int natoms, bool has_periodic_space)
 
     if (title.isEmpty())
     {
-        title.append("WRITTEN BY SIRE");
+        auto now = QDateTime::currentDateTime();
+
+        title.append("Created by https://sire.openbiosim.org");
+        title.append(QString("Version: %1").arg(SIRE_VERSION));
+        title.append(QString("REMARKS Created %1 at %2")
+                         .arg(now.toString("dd MMMM yyyy"))
+                         .arg(now.toString("hh:mm.ss")));
     }
 
     line.writeInt32(title.count());
 
     for (const auto &t : title)
     {
-        line.writeChar(t, 32);
+        line.writeChar(t, 80);
     }
 
     f.write(line);
@@ -706,13 +718,13 @@ QString DCDFile::getTitle() const
 
 void DCDFile::setTitle(QString t)
 {
-    // need to split into blocks of 32 characters
+    // need to split into blocks of 80 characters
     title.clear();
 
-    while (t.length() > 32)
+    while (t.length() > 80)
     {
-        title.append(t.mid(0, 32));
-        t.remove(0, 32);
+        title.append(t.mid(0, 80));
+        t.remove(0, 80);
     }
 
     if (t.length() > 0)
