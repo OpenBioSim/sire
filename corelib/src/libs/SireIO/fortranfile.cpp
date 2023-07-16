@@ -373,7 +373,7 @@ FortranFile::FortranFile(const QString &filename,
         // open the file in writing mode
         f.reset(new FortranFileHandle(abs_filename, mode));
 
-        int_size = 8;
+        int_size = 4; // most readers expect an int_size of 4
 
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
         is_little_endian = true;
