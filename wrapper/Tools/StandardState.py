@@ -256,7 +256,7 @@ def run():
     delta_over_two = delta_trans.val / 2.0
     deltavol = delta_trans.val * delta_trans.val * delta_trans.val
     ROT = 8 * pi**2
-    kb = Sire.Units.k_boltz
+    kb = Sire.Units.k_boltz.value()
     T = temperature.val.value()
     kbT = kb * T
     beta = 1 / kbT
