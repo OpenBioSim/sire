@@ -201,6 +201,7 @@ def check_reqs(reqs0, reqs1):
 # check_environment_reqs(env_reqs)
 
 build_reqs = dep_lines(check_reqs(build_reqs, env_reqs))
+host_reqs = combine(host_reqs, bss_reqs)
 host_reqs = dep_lines(combine(host_reqs, env_reqs))
 run_reqs = dep_lines(check_reqs(run_reqs, env_reqs))
 test_reqs = dep_lines(check_reqs(test_reqs, env_reqs))
