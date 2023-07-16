@@ -83,14 +83,17 @@ def dep_lines(deps):
 
 def check_environment_reqs(reqs):
     """
-    Run through the environment reqs and try to 
+    Run through the environment reqs and try to
     fix any conflicts that may be created
     """
     if type(reqs) is not list:
         reqs = [reqs]
 
     import re
-    r = re.compile(r'([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*')
+
+    r = re.compile(
+        r"([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*"
+    )
 
     for req in reqs:
         m = r.match(req)
@@ -117,7 +120,10 @@ def combine(reqs0, reqs1):
         reqs1 = [reqs1]
 
     import re
-    r = re.compile(r'([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*')
+
+    r = re.compile(
+        r"([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*"
+    )
 
     reqs = []
 
@@ -152,7 +158,7 @@ def combine(reqs0, reqs1):
 def check_reqs(reqs0, reqs1):
     """
     Update reqs0 so that if there are any version requirements
-    in reqs1 that affect dependencies in reqs0, then 
+    in reqs1 that affect dependencies in reqs0, then
     reqs0 is updated to include those versions.
     """
     if type(reqs0) is not list:
@@ -160,18 +166,21 @@ def check_reqs(reqs0, reqs1):
 
     if type(reqs1) is not list:
         reqs1 = [reqs1]
-    
+
     import re
-    r = re.compile(r'([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*')
+
+    r = re.compile(
+        r"([\w\d\-_]*)(>=|<=|==|<|>|=)(\d\.?\*?)*,?(>=|<=|=|==|<|>?)(\d\.?\*?)*|(\d\.?\*?)*\|(\d\.?\*?)*|(\d\.?\*?)*"
+    )
 
     reqs = []
-                
+
     for req0 in reqs0:
         found = False
-        found_req = None    
-                
+        found_req = None
+
         m = r.match(req0)
-    
+
         if m.groups()[0] is None:
             r0 = req0
         else:
@@ -184,26 +193,29 @@ def check_reqs(reqs0, reqs1):
                 req = req1
             else:
                 req = m.groups()[0]
-            
+
             if r0 == req:
                 found = True
                 found_req = req1
                 break
-            
+
         if found:
             reqs.append(found_req)
         else:
             reqs.append(req0)
-        
+
     return reqs
 
 
 # check_environment_reqs(env_reqs)
 
 build_reqs = dep_lines(check_reqs(build_reqs, env_reqs))
+host_reqs = combine(host_reqs, bss_reqs)
 host_reqs = dep_lines(combine(host_reqs, env_reqs))
 run_reqs = dep_lines(check_reqs(run_reqs, env_reqs))
 test_reqs = dep_lines(check_reqs(test_reqs, env_reqs))
+
+print("\nRECIPE")
 
 with open(recipe, "w") as FILE:
     for line in lines:
@@ -220,6 +232,7 @@ with open(recipe, "w") as FILE:
             line = line.replace("SIRE_BRANCH", sire_branch)
 
         FILE.write(line)
+        print(line, end="")
 
 channels = ["conda-forge", "openbiosim/label/dev"]
 
@@ -231,6 +244,3 @@ channels = " ".join([f"-c {x}" for x in channels])
 
 print("\nBuild this package using the command")
 print(f"conda mambabuild {channels} {condadir}")
-
-
-
