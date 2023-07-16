@@ -18,6 +18,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in the AmberRst parser where velocities were written with the wrong 
   unit (A ps-1 instead of AKMA time). Also added the correct labels to the AmberRst file.
 
+* Fixed a bug where outputs from legacy script would be written with base physical
+  units, rather than prettier internal or SI units.
+
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
 
