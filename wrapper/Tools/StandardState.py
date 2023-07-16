@@ -100,7 +100,6 @@ def defineIntegrationDomain(restr_dict):
             space = [(-x,-y,-z)(x,y,z)]
             where the coordinates define the minimum and maximum coordinates
             of the integration domain
-
     """
     max_x = -999999
     max_y = -999999
@@ -235,6 +234,11 @@ def run():
     Ztot = 0.0
     Uavg = 0
 
+    # If norient <= 3, then there will be no orientations with any weight.
+    if norient.val <= 3:
+        print ("Error, norient must be > 3. Abort.")
+        sys.ext(-1)
+
     sim_dictionary = distance_restraints_dict.val
     if sim_dictionary == {}:
         print ("Error, no distance restraints dictionary was found in the supplied config file. Abort.")
@@ -358,7 +362,8 @@ def run():
     # Create N orientations of restrained guest atoms by
     # rigid body rotations around COM
     guest_orientations = genOrientations(restr_dict, norientations=norient.val)
-    weight_norm_factor = ROT / sum([x[1] for x in guest_orientations])
+    weight_norm_factor = ROT / sum([x[0][1] for x in guest_orientations]) # Weight for first rotvector - all will be the same
+                                                                          # for a given orientation
     # FIXME: make sure space extends well into regions where restraint energy
     # is high
     space = defineIntegrationDomain(restr_dict)
@@ -386,36 +391,38 @@ def run():
                 ygrid = space[0][1] + delta_trans.val*j + delta_over_two
                 zgrid = space[0][2] + delta_trans.val*k + delta_over_two
                 for orientation in guest_orientations:
-                    pos = 0
-                    U = 0.0
-                    for pairs in restr_dict:
-                        req = restr_dict[pairs][0][0]
-                        k = restr_dict[pairs][0][1]
-                        dtol = restr_dict[pairs][0][2]
-                        host_coord = restr_dict[pairs][2]
-                        guest_coord = orientation[pos][0] # Select coordinates, not weight
-                        # Accumulate energy
-                        d2 = ((guest_coord[0]+xgrid) - host_coord[0])**2+\
-                             ((guest_coord[1]+ygrid) - host_coord[1])**2+\
-                             ((guest_coord[2]+zgrid) - host_coord[2])**2
-                        d = math.sqrt(d2)
-                        if (d > (req+dtol)):
-                            U += k*(d-req-dtol)**2
-                        elif (d < (req-dtol)):
-                            U += k*(d-req+dtol)**2
-                        else:
-                            U += 0.0
-                        pos += 1
-                        #print ("d %s U %s " % (d,U))
-                    deltarot = orientation[pos][1]*weight_norm_factor # Select weight and normalise to obtain a total of ROT
-                    Boltz = math.exp(-beta*U)*deltavol*deltarot
-                    Uavg += U*Boltz
-                    Ztot += Boltz
-                    if (U < 0.000001):
-                        free += 1/(norient.val*(norient.val/2)*norient.val)
-                    if ( U*beta < 10):
+                    deltarot = orientation[0][1]*weight_norm_factor # Select weight and normalise to obtain a total of ROT
+                    if deltarot !=0:
+                        pos = 0
+                        U = 0.0
+                        for pairs in restr_dict:
+                            req = restr_dict[pairs][0][0]
+                            k = restr_dict[pairs][0][1]
+                            dtol = restr_dict[pairs][0][2]
+                            host_coord = restr_dict[pairs][2]
+                            guest_coord = orientation[pos][0] # Select coordinates, not weight
+                            # Accumulate energy
+                            d2 = ((guest_coord[0]+xgrid) - host_coord[0])**2+\
+                                ((guest_coord[1]+ygrid) - host_coord[1])**2+\
+                                ((guest_coord[2]+zgrid) - host_coord[2])**2
+                            d = math.sqrt(d2)
+                            if (d > (req+dtol)):
+                                U += k*(d-req-dtol)**2
+                            elif (d < (req-dtol)):
+                                U += k*(d-req+dtol)**2
+                            else:
+                                U += 0.0
+                            pos += 1
+                            #print ("d %s U %s " % (d,U))
+                        Boltz = math.exp(-beta*U)*deltavol*deltarot
+                        Uavg += U*Boltz
+                        Ztot += Boltz
+                        if (U < 0.000001):
+                            free += deltarot/ROT
+                        if ( U*beta < 10):
+                            loweight += 1/(norient.val*(norient.val/2)*norient.val)
+                    else:
                         loweight += 1/(norient.val*(norient.val/2)*norient.val)
-                #import pdb;pdb.set_trace()
     #Calculation of Ztot, Uavg, S, Frestraint:
     free_vol = free*deltavol
     loweight_frac = loweight/float(count)
@@ -438,4 +445,3 @@ def run():
     #tidy up the folder by removing prmtop
     cmd = "rm -f SYSTEM.prmtop SYSTEM.rst7"
     os.system(cmd)
-    #import pdb; pdb.set_trace()
