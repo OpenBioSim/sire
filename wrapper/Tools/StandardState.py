@@ -267,7 +267,7 @@ def run():
     # If norient <= 3, then there will be no orientations with any weight.
     if norient.val <= 3:
         print("Error, norient must be > 3. Abort.")
-        sys.ext(-1)
+        sys.exit(-1)
 
     sim_dictionary = distance_restraints_dict.val
     if sim_dictionary == {}:
@@ -390,7 +390,6 @@ def run():
     # now restr_dict has:
     # restr_dict[lig,host]=[ [req,K,D], [ [coords]...] ,[ [coords],...] ]
     print("Calculating average coordinates for restrained atoms")
-    # import pdb; pdb.set_trace()
     restr_dict = averageCoordinates(restr_dict)
     print(restr_dict)
     # now the restr_dict is:
