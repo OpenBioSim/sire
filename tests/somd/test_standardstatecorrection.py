@@ -17,6 +17,15 @@ try:
 except ImportError:
     have_scipy = False
 
+import sire as sr
+
+
+try:
+    _wget = sr.legacy.Base.findExe("wget")
+    have_wget = True
+except Exception:
+    have_wget = False
+
 
 @pytest.fixture(scope="session")
 def input_tmpdir(tmpdir_factory):
@@ -69,6 +78,10 @@ def input_tmpdir(tmpdir_factory):
     return input_dir
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
+@pytest.mark.skipif(not have_scipy, reason="Cannot run as scipy not available")
+@pytest.mark.skipif(not have_wget, reason="Cannot run as wget is not available")
+@pytest.mark.slow
 def test_standard_state_correction(input_tmpdir):
     """
     Check that the standardstatecorrection yields the
