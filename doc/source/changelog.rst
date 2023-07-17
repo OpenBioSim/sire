@@ -30,6 +30,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added a :func:`sire.minimum_distance` function to calculate the minimum
   distance between atoms of two views.
 
+* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
+ the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0, 
+ because not all required changes were included.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
