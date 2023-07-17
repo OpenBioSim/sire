@@ -24,6 +24,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in the writing of DCD headers, meaning that the files couldn't be read
   by other DCD reader software (written non-compliant header)
 
+* Optimised the PDB and NGLView visualisation code to more rapidly view large molecular
+  systems, plus parallelised and optimised `is_water` functions.
+
+* Fix for crash when not passing a map to the SelectorImproper constructor
+
+* Fix for crash when checking a list of atoms rather than a list of molecules
+
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
 
