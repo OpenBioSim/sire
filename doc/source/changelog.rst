@@ -24,8 +24,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in the writing of DCD headers, meaning that the files couldn't be read
   by other DCD reader software (written non-compliant header)
 
-* Optimised the PDB and NGLView visualisation code to more rapidly view large molecular
-  systems, plus parallelised and optimised `is_water` functions.
+* Optimised the speed of viewing large molecules in NGLView, plus of searching
+  for water molecules. Added a new ``is_water`` function. Optimised the
+  find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
+  is now roughly O(N), using a hash to lookup at the molecule level, so that
+  we don't have to test individual atoms.
+
+* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
+ the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0, 
+ because not all required changes were included.
 
 * Fix for crash when not passing a map to the SelectorImproper constructor
 
