@@ -21,26 +21,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   ``closest 10 waters to protein`` or
   ``furthest (residue in protein) from water`` are supported.
 
-* Optimised the speed of viewing large molecules in NGLView, plus of searching
-  for water molecules. Added a new ``is_water`` function. Optimised the
-  find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
-  is now roughly O(N), using a hash to lookup at the molecule level, so that
-  we don't have to test individual atoms.
-
 * Added a :func:`sire.minimum_distance` function to calculate the minimum
   distance between atoms of two views.
-
-* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
- the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0, 
- because not all required changes were included.
 
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
-`2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - ???? 2023
+`2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
 
-* Fixed a bug in the AmberRst parser where velocities were written with the wrong 
+* Fixed a bug in the AmberRst parser where velocities were written with the wrong
   unit (A ps-1 instead of AKMA time). Also added the correct labels to the AmberRst file.
 
 * Fixed a bug where outputs from legacy script would be written with base physical
@@ -48,6 +38,20 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed a bug in the writing of DCD headers, meaning that the files couldn't be read
   by other DCD reader software (written non-compliant header)
+  
+* Optimised the speed of viewing large molecules in NGLView, plus of searching
+  for water molecules. Added a new ``is_water`` function. Optimised the
+  find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
+  is now roughly O(N), using a hash to lookup at the molecule level, so that
+  we don't have to test individual atoms.
+  
+* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
+ the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
+ because not all required changes were included.
+  
+* Fix for crash when not passing a map to the SelectorImproper constructor
+  
+* Fix for crash when checking a list of atoms rather than a list of molecules  
 
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
