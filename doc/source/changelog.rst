@@ -12,7 +12,7 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - ???? 2023
+`2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
 
 * Fixed a bug in the AmberRst parser where velocities were written with the wrong 
