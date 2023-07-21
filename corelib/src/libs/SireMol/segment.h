@@ -58,6 +58,9 @@ namespace SireMol
     template <class T>
     class Selector;
 
+    template <class T>
+    class SelectorM;
+
     class Atom;
     class Molecule;
 
@@ -93,6 +96,14 @@ namespace SireMol
         static const char *typeName();
 
         Segment *clone() const;
+
+        SelectorM<Segment> operator+(const SelectorM<Segment> &segments) const;
+        SelectorM<Segment> operator+(const Selector<Segment> &segments) const;
+        SelectorM<Segment> operator+(const Segment &other) const;
+
+        SelectorM<Segment> operator-(const SelectorM<Segment> &segments) const;
+        SelectorM<Segment> operator-(const Selector<Segment> &segments) const;
+        SelectorM<Segment> operator-(const Segment &other) const;
 
         QString toString() const;
 

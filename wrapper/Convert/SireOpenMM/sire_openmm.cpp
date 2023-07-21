@@ -62,37 +62,101 @@ namespace SireOpenMM
         return true;
     }
 
-    CoordsAndVelocities::CoordsAndVelocities()
+    ////
+    //// Implementation of LambdaLever
+    ////
+
+    LambdaLever::LambdaLever() : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>()
     {
     }
 
-    CoordsAndVelocities::CoordsAndVelocities(std::shared_ptr<std::vector<OpenMM::Vec3>> c,
-                                             std::shared_ptr<std::vector<OpenMM::Vec3>> v,
-                                             std::shared_ptr<std::vector<OpenMM::Vec3>> b)
-        : coords(c), vels(v), boxvecs(b)
+    LambdaLever::LambdaLever(const LambdaLever &other)
+        : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>(other)
     {
     }
 
-    CoordsAndVelocities::~CoordsAndVelocities()
+    LambdaLever::~LambdaLever()
     {
     }
 
-    bool CoordsAndVelocities::hasCoordinates() const
+    LambdaLever &LambdaLever::operator=(const LambdaLever &other)
+    {
+        Property::operator=(other);
+        return *this;
+    }
+
+    bool LambdaLever::operator==(const LambdaLever &other) const
+    {
+        return true;
+    }
+
+    bool LambdaLever::operator!=(const LambdaLever &other) const
+    {
+        return not this->operator==(other);
+    }
+
+    LambdaLever *LambdaLever::clone() const
+    {
+        return new LambdaLever(*this);
+    }
+
+    const char *LambdaLever::what() const
+    {
+        return LambdaLever::typeName();
+    }
+
+    const char *LambdaLever::typeName()
+    {
+        return QMetaType::typeName(qMetaTypeId<LambdaLever>());
+    }
+
+    ////
+    //// Implementation of OpenMMMetaData
+    ////
+
+    OpenMMMetaData::OpenMMMetaData()
+    {
+    }
+
+    OpenMMMetaData::OpenMMMetaData(const SireMol::SelectorM<SireMol::Atom> &i,
+                                   std::shared_ptr<std::vector<OpenMM::Vec3>> c,
+                                   std::shared_ptr<std::vector<OpenMM::Vec3>> v,
+                                   std::shared_ptr<std::vector<OpenMM::Vec3>> b,
+                                   const LambdaLever &l)
+        : atom_index(i), coords(c), vels(v), boxvecs(b), lambda_lever(l)
+    {
+    }
+
+    OpenMMMetaData::~OpenMMMetaData()
+    {
+    }
+
+    SireMol::SelectorM<SireMol::Atom> OpenMMMetaData::index() const
+    {
+        return atom_index;
+    }
+
+    LambdaLever OpenMMMetaData::lambdaLever() const
+    {
+        return lambda_lever;
+    }
+
+    bool OpenMMMetaData::hasCoordinates() const
     {
         return coords.get() != 0;
     }
 
-    bool CoordsAndVelocities::hasVelocities() const
+    bool OpenMMMetaData::hasVelocities() const
     {
         return vels.get() != 0;
     }
 
-    bool CoordsAndVelocities::hasBoxVectors() const
+    bool OpenMMMetaData::hasBoxVectors() const
     {
         return boxvecs.get() != 0;
     }
 
-    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::coordinates() const
+    const std::vector<OpenMM::Vec3> &OpenMMMetaData::coordinates() const
     {
         if (coords.get() == 0)
             throw SireError::incompatible_error(QObject::tr(
@@ -102,7 +166,7 @@ namespace SireOpenMM
         return *coords;
     }
 
-    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::velocities() const
+    const std::vector<OpenMM::Vec3> &OpenMMMetaData::velocities() const
     {
         if (vels.get() == 0)
             throw SireError::incompatible_error(QObject::tr(
@@ -112,7 +176,7 @@ namespace SireOpenMM
         return *vels;
     }
 
-    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::boxVectors() const
+    const std::vector<OpenMM::Vec3> &OpenMMMetaData::boxVectors() const
     {
         if (boxvecs.get() == 0)
             throw SireError::incompatible_error(QObject::tr(
@@ -121,6 +185,10 @@ namespace SireOpenMM
 
         return *boxvecs;
     }
+
+    ////
+    //// Implementation of standalone functions
+    ////
 
     SelectorMol openmm_system_to_sire(const OpenMM::System &mols,
                                       const PropertyMap &map)
@@ -132,9 +200,9 @@ namespace SireOpenMM
         return SelectorMol();
     }
 
-    CoordsAndVelocities sire_to_openmm_system(OpenMM::System &system,
-                                              const SelectorMol &mols,
-                                              const PropertyMap &map)
+    OpenMMMetaData sire_to_openmm_system(OpenMM::System &system,
+                                         const SelectorMol &mols,
+                                         const PropertyMap &map)
     {
         // we can assume that an empty system has been passed to us
 
@@ -147,7 +215,7 @@ namespace SireOpenMM
         if (nmols == 0)
         {
             // nothing to do
-            return CoordsAndVelocities();
+            return OpenMMMetaData();
         }
 
         // whether or not to ignore perturbations
@@ -365,10 +433,15 @@ namespace SireOpenMM
 
         QVector<int> start_indexes(nmols);
 
+        // save the atoms in the order they are added to the system
+        SireMol::SelectorM<SireMol::Atom> atom_index;
+
         for (int i = 0; i < nmols; ++i)
         {
             start_indexes[i] = start_index;
             const auto &mol = openmm_mols_data[i];
+
+            atom_index += mol.atoms;
 
             if (std::abs(mol.ffinfo.electrostatic14ScaleFactor() - coul_14_scl) > 0.001 or
                 std::abs(mol.ffinfo.vdw14ScaleFactor() - lj_14_scl) > 0.001)
@@ -518,11 +591,11 @@ namespace SireOpenMM
             }
         }
 
-        return CoordsAndVelocities(coords, vels, boxvecs);
+        return OpenMMMetaData(atom_index, coords, vels, boxvecs, LambdaLever());
     }
 
     void set_openmm_coordinates_and_velocities(OpenMM::Context &context,
-                                               const CoordsAndVelocities &coords_and_velocities)
+                                               const OpenMMMetaData &coords_and_velocities)
     {
         if (coords_and_velocities.hasCoordinates())
         {

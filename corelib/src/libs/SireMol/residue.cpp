@@ -31,6 +31,7 @@
 #include "mover.hpp"
 #include "reseditor.h"
 #include "selector.hpp"
+#include "selectorm.hpp"
 
 #include "atom.h"
 #include "chain.h"
@@ -435,6 +436,36 @@ bool SireMol::detail::has_metadata(const Residue *, const MoleculeData &moldata,
                                    const PropertyName &metakey)
 {
     return moldata.hasMetadataOfType<ResProp>(key, metakey);
+}
+
+SelectorM<Residue> Residue::operator+(const SelectorM<Residue> &residues) const
+{
+    return SelectorM<Residue>(*this) + residues;
+}
+
+SelectorM<Residue> Residue::operator+(const Selector<Residue> &residues) const
+{
+    return SelectorM<Residue>(*this) + residues;
+}
+
+SelectorM<Residue> Residue::operator+(const Residue &other) const
+{
+    return SelectorM<Residue>(*this) + other;
+}
+
+SelectorM<Residue> Residue::operator-(const SelectorM<Residue> &residues) const
+{
+    return SelectorM<Residue>(*this) - residues;
+}
+
+SelectorM<Residue> Residue::operator-(const Selector<Residue> &residues) const
+{
+    return SelectorM<Residue>(*this) - residues;
+}
+
+SelectorM<Residue> Residue::operator-(const Residue &other) const
+{
+    return SelectorM<Residue>(*this) - other;
 }
 
 namespace SireMol

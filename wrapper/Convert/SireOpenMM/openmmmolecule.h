@@ -5,6 +5,8 @@
 
 #include "SireMol/moleculeinfo.h"
 #include "SireMol/core.h"
+#include "SireMol/atom.h"
+#include "SireMol/selector.hpp"
 
 #include "SireMM/mmdetail.h"
 #include "SireMM/excludedpairs.h"
@@ -52,6 +54,11 @@ namespace SireOpenMM
 
         /** The molecule info that contains metadata about the molecule */
         SireMol::MoleculeInfo molinfo;
+
+        /** All of the atoms, in the order they should appear in the
+         *  OpenMM context
+         */
+        SireMol::Selector<SireMol::Atom> atoms;
 
         /** All of the excluded atom pairs */
         SireMM::ExcludedPairs excl_pairs;

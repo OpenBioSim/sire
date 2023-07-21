@@ -358,6 +358,12 @@ void register_CutGroup_class(){
         
         }
         CutGroup_exposer.def( bp::self != bp::self );
+        CutGroup_exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::CutGroup > >() );
+        CutGroup_exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::CutGroup > >() );
+        CutGroup_exposer.def( bp::self + bp::self );
+        CutGroup_exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::CutGroup > >() );
+        CutGroup_exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::CutGroup > >() );
+        CutGroup_exposer.def( bp::self - bp::self );
         { //::SireMol::CutGroup::operator=
         
             typedef ::SireMol::CutGroup & ( ::SireMol::CutGroup::*assign_function_type)( ::SireMol::CutGroup const & ) ;

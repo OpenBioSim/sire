@@ -354,6 +354,12 @@ void register_Segment_class(){
         
         }
         Segment_exposer.def( bp::self != bp::self );
+        Segment_exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::Segment > >() );
+        Segment_exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Segment > >() );
+        Segment_exposer.def( bp::self + bp::self );
+        Segment_exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::Segment > >() );
+        Segment_exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Segment > >() );
+        Segment_exposer.def( bp::self - bp::self );
         { //::SireMol::Segment::operator=
         
             typedef ::SireMol::Segment & ( ::SireMol::Segment::*assign_function_type)( ::SireMol::Segment const & ) ;

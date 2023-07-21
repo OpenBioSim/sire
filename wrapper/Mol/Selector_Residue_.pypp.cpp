@@ -673,12 +673,14 @@ void register_Selector_Residue__class(){
                 , "" );
         
         }
+        Selector_Residue__exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::Residue > >() );
         Selector_Residue__exposer.def( bp::self + bp::self );
-        Selector_Residue__exposer.def( bp::self + bp::other< SireMol::ResID >() );
         Selector_Residue__exposer.def( bp::self + bp::other< SireMol::Residue >() );
+        Selector_Residue__exposer.def( bp::self + bp::other< SireMol::ResID >() );
+        Selector_Residue__exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::Residue > >() );
         Selector_Residue__exposer.def( bp::self - bp::self );
-        Selector_Residue__exposer.def( bp::self - bp::other< SireMol::ResID >() );
         Selector_Residue__exposer.def( bp::self - bp::other< SireMol::Residue >() );
+        Selector_Residue__exposer.def( bp::self - bp::other< SireMol::ResID >() );
         { //::SireMol::Selector< SireMol::Residue >::operator=
         
             typedef SireMol::Selector< SireMol::Residue > exported_class_t;

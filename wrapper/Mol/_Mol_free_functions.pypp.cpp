@@ -271,17 +271,23 @@ namespace bp = boost::python;
 
 #include "mover.h"
 
-#include "atomelements.h"
-
-#include "iswater.h"
-
-#include "iswater.h"
+#include "SireBase/parallel.h"
 
 #include "atomelements.h"
 
 #include "iswater.h"
 
 #include "iswater.h"
+
+#include "SireBase/parallel.h"
+
+#include "atomelements.h"
+
+#include "iswater.h"
+
+#include "iswater.h"
+
+#include "SireBase/parallel.h"
 
 #include "atomelements.h"
 

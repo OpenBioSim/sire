@@ -216,7 +216,7 @@ try:
         # Next, convert the sire system to an openmm system
 
         # system must be an openmm.System() or else we will crash!
-        coords_and_vels = _sire_to_openmm_system(system, mols, map)
+        openmm_metadata = _sire_to_openmm_system(system, mols, map)
 
         # If we want NPT and this is periodic then we have to
         # add the barostat to the system
@@ -339,7 +339,15 @@ try:
             )
 
         # place the coordinates and velocities into the context
-        _set_openmm_coordinates_and_velocities(context, coords_and_vels)
+        _set_openmm_coordinates_and_velocities(context, openmm_metadata)
+
+        # add some monkey-patched functions that can be used to get
+        # the lambda level and the atom index from the context
+        atom_index = openmm_metadata.index()
+        lambda_lever = openmm_metadata.lambdaLever()
+
+        context.get_atom_index = lambda: atom_index
+        context.get_lambda_lever = lambda: lambda_lever
 
         return context
 

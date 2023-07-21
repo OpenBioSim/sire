@@ -1186,6 +1186,12 @@ void register_SelectorM_Chain__class(){
                 , "" );
         
         }
+        SelectorM_Chain__exposer.def( bp::self + bp::self );
+        SelectorM_Chain__exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Chain > >() );
+        SelectorM_Chain__exposer.def( bp::self + bp::other< SireMol::Chain >() );
+        SelectorM_Chain__exposer.def( bp::self - bp::self );
+        SelectorM_Chain__exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Chain > >() );
+        SelectorM_Chain__exposer.def( bp::self - bp::other< SireMol::Chain >() );
         { //::SireMol::SelectorM< SireMol::Chain >::operator=
         
             typedef SireMol::SelectorM< SireMol::Chain > exported_class_t;

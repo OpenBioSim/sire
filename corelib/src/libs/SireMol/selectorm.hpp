@@ -122,6 +122,22 @@ namespace SireMol
         T operator()(const QString &name) const;
         T operator()(const typename T::ID &id) const;
 
+        SelectorM<T> &operator+=(const SelectorM<T> &other);
+        SelectorM<T> &operator+=(const Selector<T> &views);
+        SelectorM<T> &operator+=(const T &view);
+
+        SelectorM<T> &operator-=(const SelectorM<T> &other);
+        SelectorM<T> &operator-=(const Selector<T> &views);
+        SelectorM<T> &operator-=(const T &view);
+
+        SelectorM<T> operator+(const SelectorM<T> &other) const;
+        SelectorM<T> operator+(const Selector<T> &views) const;
+        SelectorM<T> operator+(const T &view) const;
+
+        SelectorM<T> operator-(const SelectorM<T> &other) const;
+        SelectorM<T> operator-(const Selector<T> &views) const;
+        SelectorM<T> operator-(const T &view) const;
+
         QList<MolViewPtr> toList() const;
         Molecules toMolecules() const;
 
@@ -1482,6 +1498,84 @@ namespace SireMol
     }
 
     template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator+=(const SelectorM<T> &other)
+    {
+        this->operator=(this->add(other));
+        return *this;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator+=(const Selector<T> &views)
+    {
+        this->operator=(this->add(views));
+        return *this;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator+=(const T &view)
+    {
+        this->operator=(this->add(view));
+        return *this;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator-=(const SelectorM<T> &other)
+    {
+        this->operator=(this->subtract(other));
+        return *this;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator-=(const Selector<T> &views)
+    {
+        this->operator=(this->subtract(views));
+        return *this;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> &SelectorM<T>::operator-=(const T &view)
+    {
+        this->operator=(this->subtract(view));
+        return *this;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator+(const SelectorM<T> &other) const
+    {
+        return this->add(other);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator+(const Selector<T> &views) const
+    {
+        return this->add(views);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator+(const T &view) const
+    {
+        return this->add(view);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator-(const SelectorM<T> &other) const
+    {
+        return this->subtract(other);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator-(const Selector<T> &views) const
+    {
+        return this->subtract(views);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator-(const T &view) const
+    {
+        return this->subtract(view);
+    }
+
+    template <class T>
     SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::intersection(const SelectorM<T> &other) const
     {
         SelectorM<T> ret;
@@ -2707,6 +2801,43 @@ namespace SireMol
 
             return QObject::tr("%1( size=%2\n%3\n)").arg(this->what()).arg(n).arg(parts.join("\n"));
         }
+    }
+
+    /// DEFINING Selector<T> operators that involve SelectorM<T>
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> Selector<T>::operator+(const SelectorM<T> &views) const
+    {
+        return SelectorM<T>(*this) + views;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> Selector<T>::operator+(const Selector<T> &views) const
+    {
+        return SelectorM<T>(*this) + views;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> Selector<T>::operator+(const T &view) const
+    {
+        return SelectorM<T>(*this) + view;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> Selector<T>::operator-(const SelectorM<T> &views) const
+    {
+        return SelectorM<T>(*this) - views;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> Selector<T>::operator-(const Selector<T> &views) const
+    {
+        return SelectorM<T>(*this) - views;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T> Selector<T>::operator-(const T &view) const
+    {
+        return SelectorM<T>(*this) - view;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

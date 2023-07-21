@@ -43,8 +43,8 @@ void *extract_swig_wrapped_pointer(PyObject *obj)
 BOOST_PYTHON_MODULE(_SireOpenMM)
 {
     typedef SireMol::SelectorMol (*openmm_system_to_sire_function_type)(const OpenMM::System &, SireBase::PropertyMap const &);
-    typedef CoordsAndVelocities (*sire_to_openmm_system_function_type)(OpenMM::System &, const SireMol::SelectorMol &, SireBase::PropertyMap const &);
-    typedef void (*set_openmm_coordinates_and_velocities_function_type)(OpenMM::Context &, const CoordsAndVelocities &);
+    typedef OpenMMMetaData (*sire_to_openmm_system_function_type)(OpenMM::System &, const SireMol::SelectorMol &, SireBase::PropertyMap const &);
+    typedef void (*set_openmm_coordinates_and_velocities_function_type)(OpenMM::Context &, const OpenMMMetaData &);
     typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
     typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
     typedef SireMol::SelectorMol (*extract_coordinates_and_velocities_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
@@ -57,8 +57,22 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     extract_coordinates_and_velocities_function_type extract_coordinates_and_velocities_function_value(&extract_coordinates_and_velocities);
     extract_space_function_type extract_space_function_value(&extract_space);
 
-    bp::class_<CoordsAndVelocities> CoordsAndVelocities_exposer_t("CoordsAndVelocities",
-                                                                  "Internal class used to hold OpenMM coordinates and velocities data");
+    bp::class_<OpenMMMetaData> OpenMMMetaData_exposer_t("OpenMMMetaData",
+                                                        "Internal class used to hold OpenMM coordinates and velocities data");
+
+    OpenMMMetaData_exposer_t.def(
+        "index", &OpenMMMetaData::index,
+        "Return the index used to locate atoms in the OpenMM system");
+
+    OpenMMMetaData_exposer_t.def(
+        "lambdaLever", &OpenMMMetaData::lambdaLever,
+        "Return the lambda lever used to update the parameters in the "
+        "OpenMM system according to lambda");
+
+    bp::class_<LambdaLever, bp::bases<SireBase::Property>> LambdaLever_exposer_t(
+        "LambdaLever",
+        "A lever that can be used to change the parameters in an OpenMM system "
+        "based on a lambda value (or collection of lambda values)");
 
     bp::def("_openmm_system_to_sire",
             openmm_system_to_sire_function_value,

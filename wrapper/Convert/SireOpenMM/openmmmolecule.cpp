@@ -197,7 +197,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                         const PropertyMap &map)
 {
     const auto &moldata = mol.data();
-    const int nats = molinfo.nAtoms();
+    atoms = mol.atoms();
+    const int nats = atoms.count();
 
     if (nats <= 0)
     {
