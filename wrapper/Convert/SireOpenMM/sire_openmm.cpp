@@ -209,13 +209,6 @@ namespace SireOpenMM
 
         cljff->setUseDispersionCorrection(use_dispersion_correction);
 
-        const std::string lambda_morph_clj = "lambda_morph_clj";
-
-        if (any_perturbable)
-        {
-            cljff->addGlobalParameter(lambda_morph_clj, 0.0);
-        }
-
         // create the periodic box vectors
         std::shared_ptr<std::vector<OpenMM::Vec3>> boxvecs;
 
@@ -348,10 +341,6 @@ namespace SireOpenMM
 
         system.addForce(cljff);
 
-        const std::string lambda_morph_bond = "lambda_morph_bond";
-        const std::string lambda_morph_angle = "lambda_morph_angle";
-        const std::string lambda_morph_dihedral = "lambda_morph_dihedral";
-
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
         system.addForce(bondff);
 
@@ -396,18 +385,12 @@ namespace SireOpenMM
             }
 
             // is this a perturbable molecule (and we haven't disabled perturbations)?
-            bool is_perturbable_mol = any_perturbable and mol.isPerturbable();
+            // (not used now, but we will need to use this when we add softening)
+            // bool is_perturbable_mol = any_perturbable and mol.isPerturbable();
 
             // first the atom parameters
             auto masses_data = mol.masses.constData();
             auto cljs_data = mol.cljs.constData();
-
-            auto cljs1_data = mol.cljs.constData();
-
-            if (is_perturbable_mol)
-            {
-                cljs1_data = mol.perturbed->cljs.constData();
-            }
 
             for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
@@ -417,70 +400,49 @@ namespace SireOpenMM
                 const auto &clj = cljs_data[j];
 
                 cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
-
-                if (is_perturbable_mol)
-                {
-                    const auto &clj1 = cljs1_data[j];
-
-                    // X_lam = X_0 + lam * (X_1 - X_0)
-                    cljff->addParticleParameterOffset(lambda_morph_clj, atom_index,
-                                                      std::get<0>(clj1) - std::get<0>(clj),
-                                                      std::get<1>(clj1) - std::get<1>(clj),
-                                                      std::get<2>(clj1) - std::get<2>(clj));
-                }
             }
 
-            // now the connectivity
-            if (is_perturbable_mol)
+            for (const auto &bond : mol.bond_pairs)
             {
-                // will need to think about bond_pairs and custom pairs -
-                // will eventually need to account for pairs appearing or
-                // disappearing as part of a morph
+                bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
+                                                    std::get<1>(bond) + start_index));
             }
-            else
+
+            // now any custom pairs
+            for (const auto &pair : mol.custom_pairs)
             {
-                for (const auto &bond : mol.bond_pairs)
-                {
-                    bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
-                                                        std::get<1>(bond) + start_index));
-                }
+                custom_pairs.push_back(std::make_tuple(std::get<0>(pair) + start_index,
+                                                       std::get<1>(pair) + start_index,
+                                                       std::get<2>(pair),
+                                                       std::get<3>(pair),
+                                                       std::get<4>(pair)));
+            }
 
-                // now any custom pairs
-                for (const auto &pair : mol.custom_pairs)
-                {
-                    custom_pairs.push_back(std::make_tuple(std::get<0>(pair) + start_index,
-                                                           std::get<1>(pair) + start_index,
-                                                           std::get<2>(pair),
-                                                           std::get<3>(pair),
-                                                           std::get<4>(pair)));
-                }
+            // now bond parameters
+            for (const auto &bond : mol.bond_params)
+            {
+                bondff->addBond(std::get<0>(bond) + start_index,
+                                std::get<1>(bond) + start_index,
+                                std::get<2>(bond), std::get<3>(bond));
+            }
 
-                // now bond parameters
-                for (const auto &bond : mol.bond_params)
-                {
-                    bondff->addBond(std::get<0>(bond) + start_index,
-                                    std::get<1>(bond) + start_index,
-                                    std::get<2>(bond), std::get<3>(bond));
-                }
+            // now the angles
+            for (const auto &ang : mol.ang_params)
+            {
+                angff->addAngle(std::get<0>(ang) + start_index,
+                                std::get<1>(ang) + start_index,
+                                std::get<2>(ang) + start_index,
+                                std::get<3>(ang), std::get<4>(ang));
+            }
 
-                // now the angles
-                for (const auto &ang : mol.ang_params)
-                {
-                    angff->addAngle(std::get<0>(ang) + start_index,
-                                    std::get<1>(ang) + start_index,
-                                    std::get<2>(ang) + start_index,
-                                    std::get<3>(ang), std::get<4>(ang));
-                }
-
-                // now the dihedrals and impropers
-                for (const auto &dih : mol.dih_params)
-                {
-                    dihff->addTorsion(std::get<0>(dih) + start_index,
-                                      std::get<1>(dih) + start_index,
-                                      std::get<2>(dih) + start_index,
-                                      std::get<3>(dih) + start_index,
-                                      std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
-                }
+            // now the dihedrals and impropers
+            for (const auto &dih : mol.dih_params)
+            {
+                dihff->addTorsion(std::get<0>(dih) + start_index,
+                                  std::get<1>(dih) + start_index,
+                                  std::get<2>(dih) + start_index,
+                                  std::get<3>(dih) + start_index,
+                                  std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
             }
 
             // now constraints
@@ -496,7 +458,6 @@ namespace SireOpenMM
 
         const int natoms = start_index;
 
-        /*
         // add exclusions based on the bonding of the molecules
         cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
@@ -505,7 +466,7 @@ namespace SireOpenMM
             cljff->addException(std::get<0>(p), std::get<1>(p),
                                 std::get<2>(p), std::get<3>(p),
                                 std::get<4>(p), false);
-        }*/
+        }
 
         // will have to add exceptions for perturbable forces
 
