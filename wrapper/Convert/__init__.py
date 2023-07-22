@@ -66,7 +66,6 @@ try:
     from ._SireOpenMM import (
         _sire_to_openmm_system,
         _openmm_system_to_sire,
-        _set_openmm_coordinates_and_velocities,
         _openmm_extract_coordinates,
         _openmm_extract_coordinates_and_velocities,
         _openmm_extract_space,
@@ -330,26 +329,17 @@ try:
             platform.setPropertyDefaultValue("UseCpuPme", str(usecpu))
 
         try:
-            context = openmm.Context(system, integrator, platform)
+            from ._sommcontext import SOMMContext
+            return SOMMContext(system=system,
+                               integrator=integrator,
+                               platform=platform,
+                               metadata=openmm_metadata)
         except Exception as e:
             raise ValueError(
                 "There was a problem creating the OpenMM context. Perhaps "
                 "the platform was not supported for this system, options "
                 f"or on this computer? The error message is: {e}"
             )
-
-        # place the coordinates and velocities into the context
-        _set_openmm_coordinates_and_velocities(context, openmm_metadata)
-
-        # add some monkey-patched functions that can be used to get
-        # the lambda level and the atom index from the context
-        atom_index = openmm_metadata.index()
-        lambda_lever = openmm_metadata.lambdaLever()
-
-        context.get_atom_index = lambda: atom_index
-        context.get_lambda_lever = lambda: lambda_lever
-
-        return context
 
     def openmm_extract_coordinates(state, mols, map):
         return _openmm_extract_coordinates(state, mols, map)

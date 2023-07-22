@@ -68,6 +68,10 @@ if (${SIRE_USE_OPENMM})
           ARCHIVE DESTINATION ${INSTALLDIR}
           RUNTIME DESTINATION ${INSTALLDIR}
           )
+
+    install( FILES _sommcontext.py
+         DESTINATION ${INSTALLDIR}
+       )
   else()
     message ( STATUS "OpenMM not found, so OpenMM support is disabled." )
   endif()
