@@ -1,7 +1,7 @@
-
 __all__ = ["SOMMContext"]
 
 from openmm import Context as _Context
+
 
 class SOMMContext(_Context):
     """
@@ -16,12 +16,10 @@ class SOMMContext(_Context):
     extra functions that use this LambdaLever to
     set the lambda value of the context
     """
-    def __init__(self,
-                 system=None,
-                 integrator=None,
-                 platform=None,
-                 metadata=None
-                 ):
+
+    def __init__(
+        self, system=None, integrator=None, platform=None, metadata=None
+    ):
         """
         Construct from a passed OpenMM Context, the
         atom index, and the lambda lever
@@ -44,10 +42,12 @@ class SOMMContext(_Context):
         p = self.getPlatform()
         s = self.getSystem()
         i = self.getIntegrator()
-        return (f"openmm::Context( num_atoms={s.getNumParticles()} "
-                f"integrator={i.__class__.__name__} "
-                f"timestep={i.getStepSize()._value * 1000} fs "
-                f"platform={p.getName()} )")
+        return (
+            f"openmm::Context( num_atoms={s.getNumParticles()} "
+            f"integrator={i.__class__.__name__} "
+            f"timestep={i.getStepSize()._value * 1000} fs "
+            f"platform={p.getName()} )"
+        )
 
     def __repr__(self):
         return self.__str__()
@@ -65,3 +65,13 @@ class SOMMContext(_Context):
         of the parameters
         """
         return self._lambda_lever
+
+    def set_lambda(self, lambda_value: float):
+        """
+        Update the parameters in the context to set the lambda value
+        to 'lamval'
+        """
+        if self._lambda_lever is None:
+            return
+
+        self._lambda_lever.set_lambda(self, lambda_value)

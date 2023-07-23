@@ -74,6 +74,13 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "A lever that can be used to change the parameters in an OpenMM system "
         "based on a lambda value (or collection of lambda values)");
 
+    LambdaLever_exposer_t.def(
+        "set_lambda", &LambdaLever::set_lambda,
+        (bp::arg("system"), bp::arg("lambda_value")),
+        "Update the parameters in the passed context using this lambda lever "
+        "so that the parameters represent the system at the specified "
+        "lambda value");
+
     bp::def("_openmm_system_to_sire",
             openmm_system_to_sire_function_value,
             (bp::arg("system"), bp::arg("map")),

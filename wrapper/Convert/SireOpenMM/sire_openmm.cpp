@@ -110,6 +110,12 @@ namespace SireOpenMM
         return QMetaType::typeName(qMetaTypeId<LambdaLever>());
     }
 
+    void LambdaLever::set_lambda(OpenMM::Context &context,
+                                 double lambda_value) const
+    {
+        qDebug() << "set lambda to" << lambda_value;
+    }
+
     ////
     //// Implementation of OpenMMMetaData
     ////
@@ -407,16 +413,19 @@ namespace SireOpenMM
             cljff->setCutoffDistance(cutoff);
         }
 
-        system.addForce(cljff);
+        // also populate a LambaLever for any perturbable molecules
+        LambdaLever lambda_lever;
+
+        lambda_lever.set_force_index("clj", system.addForce(cljff));
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
-        system.addForce(bondff);
+        lambda_lever.set_force_index("bond", system.addForce(bondff));
 
         OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
-        system.addForce(angff);
+        lambda_lever.set_force_index("angle", system.addForce(angff));
 
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
-        system.addForce(dihff);
+        lambda_lever.set_force_index("torsion", system.addForce(dihff));
 
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
@@ -441,6 +450,8 @@ namespace SireOpenMM
             start_indexes[i] = start_index;
             const auto &mol = openmm_mols_data[i];
 
+            // add all of the atoms to the index of atoms
+            // (we guarantee to add them in atomidx order)
             atom_index += mol.atoms;
 
             if (std::abs(mol.ffinfo.electrostatic14ScaleFactor() - coul_14_scl) > 0.001 or
@@ -458,8 +469,20 @@ namespace SireOpenMM
             }
 
             // is this a perturbable molecule (and we haven't disabled perturbations)?
-            // (not used now, but we will need to use this when we add softening)
-            // bool is_perturbable_mol = any_perturbable and mol.isPerturbable();
+            if (any_perturbable and mol.isPerturbable())
+            {
+                // add a perturbable molecule, recording the start index
+                // for each of the forcefields
+                QHash<QString, qint32> start_indicies;
+                start_indicies.reserve(5);
+
+                start_indicies.insert("clj", start_index);
+                start_indicies.insert("bond", bondff->getNumBonds());
+                start_indicies.insert("angle", angff->getNumAngles());
+                start_indicies.insert("torsion", dihff->getNumTorsions());
+
+                lambda_lever.add_perturbable_molecule(mol, start_indicies);
+            }
 
             // first the atom parameters
             auto masses_data = mol.masses.constData();

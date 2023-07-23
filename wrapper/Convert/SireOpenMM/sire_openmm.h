@@ -12,6 +12,8 @@
 
 #include "SireBase/propertymap.h"
 
+#include "openmmmolecule.h"
+
 namespace SireOpenMM
 {
     class LambdaLever : public SireBase::ConcreteProperty<LambdaLever, SireBase::Property>
@@ -31,6 +33,17 @@ namespace SireOpenMM
 
         const char *what() const;
         static const char *typeName();
+
+        void set_lambda(OpenMM::Context &context, double lam_val) const;
+
+        void set_force_index(const QString &force, int index);
+
+        void add_perturbable_molecule(const OpenMMMolecule &molecule,
+                                      const QHash<QString, qint32> &start_indicies);
+
+    protected:
+        /** Map from a forcefield name to its index in the associated System */
+        QHash<QString, int> name_to_ffidx;
     };
 
     /** This is a read-only container for the extra information
