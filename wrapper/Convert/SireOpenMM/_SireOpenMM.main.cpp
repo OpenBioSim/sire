@@ -83,6 +83,98 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "so that the parameters represent the system at the specified "
         "lambda value");
 
+    LambdaLever_exposer_t.def(
+        "lambda", &LambdaLever::lambda,
+        "Return the symbol used for the lambda value in each stage");
+
+    LambdaLever_exposer_t.def(
+        "initial", &LambdaLever::initial,
+        "Return the symbol used for the initial (lambda=0) parameter in each stage");
+
+    LambdaLever_exposer_t.def(
+        "final", &LambdaLever::final,
+        "Return the symbol used for the final (lambda=1) parameter in each stage");
+
+    LambdaLever_exposer_t.def(
+        "add_lever", &LambdaLever::add_lever,
+        (bp::arg("lever")),
+        "Add a new lever named 'lever'");
+
+    LambdaLever_exposer_t.def(
+        "add_levers", &LambdaLever::add_levers,
+        (bp::arg("levers")),
+        "Add several new levers, whose names are in 'levers'");
+
+    LambdaLever_exposer_t.def(
+        "num_levers", &LambdaLever::num_levers,
+        "Return the number of lambda levers");
+
+    LambdaLever_exposer_t.def(
+        "get_levers", &LambdaLever::get_levers,
+        "Return the names of all of the lambda levers");
+
+    LambdaLever_exposer_t.def(
+        "num_stages", &LambdaLever::num_stages,
+        "Return the number of lambda lever stages");
+
+    LambdaLever_exposer_t.def(
+        "get_stages", &LambdaLever::get_stages,
+        "Return the names of all of the stages, in the "
+        "order in which they will be applied");
+
+    LambdaLever_exposer_t.def(
+        "get_stage", &LambdaLever::get_stage,
+        (bp::arg("lambda_value")),
+        "Return name of the stage that will be applied for the specified "
+        "global value of lambda");
+
+    LambdaLever_exposer_t.def(
+        "get_lambda_in_stage", &LambdaLever::get_lambda_in_stage,
+        (bp::arg("lambda_value")),
+        "Return the stage-local value of lambda that will be applied within "
+        "the associated stage for the specified global value of lambda");
+
+    LambdaLever_exposer_t.def(
+        "add_stage", &LambdaLever::add_stage,
+        (bp::arg("stage"), bp::arg("equation")),
+        "Add a new stage with the specified name, "
+        "and with the passed equation used as default for all "
+        "parameters for that stage");
+
+    LambdaLever_exposer_t.def(
+        "clear", &LambdaLever::clear,
+        "Remove all stages from this lambda lever");
+
+    LambdaLever_exposer_t.def(
+        "set_equation", &LambdaLever::set_equation,
+        (bp::arg("stage"), bp::arg("lever"), bp::arg("equation")),
+        "Set the equation used for the specified lever for the specified stage.");
+
+    LambdaLever_exposer_t.def(
+        "set_default_equation", &LambdaLever::set_default_equation,
+        (bp::arg("stage"), bp::arg("equation")),
+        "Set the default equation used for the levers in a stage for which "
+        "a specified equation has not been supplied");
+
+    LambdaLever_exposer_t.def(
+        "get_equation", &LambdaLever::get_equation,
+        (bp::arg("stage"), bp::arg("lever")),
+        "Return the equation used to set the parameters for the "
+        "specified lever in the specified stage");
+
+    LambdaLever_exposer_t.def(
+        "get_lever_values", &LambdaLever::get_lever_values,
+        (bp::arg("lambda_values"), bp::arg("initial_value"), bp::arg("final_value")),
+        "Return the values of all of the levers for the specified global "
+        "lambda values, assuming a parameter that has the specified initial "
+        "and final values");
+
+    LambdaLever_exposer_t.def(
+        "get_lever_stages", &LambdaLever::get_lever_stages,
+        (bp::arg("lambda_values")),
+        "Return the name of the stage associated with each of the passed "
+        "global lambda values");
+
     bp::def("_openmm_system_to_sire",
             openmm_system_to_sire_function_value,
             (bp::arg("system"), bp::arg("map")),
