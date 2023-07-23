@@ -1,4 +1,4 @@
-__all__ = ["Expression", "lam", "Symbol", "x", "y"]
+__all__ = ["Expression", "lam", "Symbol", "x", "y", "LambdaSchedule"]
 
 from ..legacy import CAS as _CAS
 
@@ -12,3 +12,5 @@ Expression = _CAS.Expression
 lam = Symbol("lambda")
 x = Symbol("x")
 y = Symbol("y")
+
+LambdaSchedule = _CAS.LambdaSchedule

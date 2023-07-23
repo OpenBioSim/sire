@@ -18,6 +18,7 @@
 #include "integrationconstant.h"
 #include "invhyperbolicfuncs.h"
 #include "invtrigfuncs.h"
+#include "lambdaschedule.h"
 #include "minmax.h"
 #include "power.h"
 #include "powerconstant.h"
@@ -71,6 +72,7 @@ void register_SireCAS_objects()
     ObjectRegistry::registerConverterFor< SireCAS::ArcCsc >();
     ObjectRegistry::registerConverterFor< SireCAS::ArcSec >();
     ObjectRegistry::registerConverterFor< SireCAS::ArcCot >();
+    ObjectRegistry::registerConverterFor< SireCAS::LambdaSchedule >();
     ObjectRegistry::registerConverterFor< SireCAS::Min >();
     ObjectRegistry::registerConverterFor< SireCAS::Max >();
     ObjectRegistry::registerConverterFor< SireCAS::Power >();
