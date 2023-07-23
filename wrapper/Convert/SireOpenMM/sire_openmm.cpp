@@ -63,60 +63,6 @@ namespace SireOpenMM
     }
 
     ////
-    //// Implementation of LambdaLever
-    ////
-
-    LambdaLever::LambdaLever() : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>()
-    {
-    }
-
-    LambdaLever::LambdaLever(const LambdaLever &other)
-        : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>(other)
-    {
-    }
-
-    LambdaLever::~LambdaLever()
-    {
-    }
-
-    LambdaLever &LambdaLever::operator=(const LambdaLever &other)
-    {
-        Property::operator=(other);
-        return *this;
-    }
-
-    bool LambdaLever::operator==(const LambdaLever &other) const
-    {
-        return true;
-    }
-
-    bool LambdaLever::operator!=(const LambdaLever &other) const
-    {
-        return not this->operator==(other);
-    }
-
-    LambdaLever *LambdaLever::clone() const
-    {
-        return new LambdaLever(*this);
-    }
-
-    const char *LambdaLever::what() const
-    {
-        return LambdaLever::typeName();
-    }
-
-    const char *LambdaLever::typeName()
-    {
-        return QMetaType::typeName(qMetaTypeId<LambdaLever>());
-    }
-
-    void LambdaLever::set_lambda(OpenMM::Context &context,
-                                 double lambda_value) const
-    {
-        qDebug() << "set lambda to" << lambda_value;
-    }
-
-    ////
     //// Implementation of OpenMMMetaData
     ////
 

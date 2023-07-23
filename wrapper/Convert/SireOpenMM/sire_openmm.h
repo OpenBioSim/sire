@@ -13,39 +13,10 @@
 #include "SireBase/propertymap.h"
 
 #include "openmmmolecule.h"
+#include "lambdalever.h"
 
 namespace SireOpenMM
 {
-    class LambdaLever : public SireBase::ConcreteProperty<LambdaLever, SireBase::Property>
-    {
-    public:
-        LambdaLever();
-        LambdaLever(const LambdaLever &other);
-
-        virtual ~LambdaLever();
-
-        LambdaLever &operator=(const LambdaLever &other);
-
-        bool operator==(const LambdaLever &other) const;
-        bool operator!=(const LambdaLever &other) const;
-
-        LambdaLever *clone() const;
-
-        const char *what() const;
-        static const char *typeName();
-
-        void set_lambda(OpenMM::Context &context, double lam_val) const;
-
-        void set_force_index(const QString &force, int index);
-
-        void add_perturbable_molecule(const OpenMMMolecule &molecule,
-                                      const QHash<QString, qint32> &start_indicies);
-
-    protected:
-        /** Map from a forcefield name to its index in the associated System */
-        QHash<QString, int> name_to_ffidx;
-    };
-
     /** This is a read-only container for the extra information
      *  we need to create an OpenMM system and make it editable
      *
@@ -119,7 +90,5 @@ namespace SireOpenMM
 
     SireVol::SpacePtr extract_space(const OpenMM::State &state);
 }
-
-Q_DECLARE_METATYPE(SireOpenMM::LambdaLever)
 
 #endif

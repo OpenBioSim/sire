@@ -5,6 +5,8 @@
 
 #include "sire_openmm.h"
 
+#include "lambdalever.h"
+
 #include "Helpers/convertlist.hpp"
 
 #include <QDebug>
