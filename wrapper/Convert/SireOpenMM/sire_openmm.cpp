@@ -362,6 +362,8 @@ namespace SireOpenMM
         // also populate a LambaLever for any perturbable molecules
         LambdaLever lambda_lever;
 
+        // make sure that we tell the lever the index of the named
+        // forcefields when they are added
         lambda_lever.set_force_index("clj", system.addForce(cljff));
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
@@ -560,7 +562,7 @@ namespace SireOpenMM
             }
         }
 
-        return OpenMMMetaData(atom_index, coords, vels, boxvecs, LambdaLever());
+        return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
     }
 
     void set_openmm_coordinates_and_velocities(OpenMM::Context &context,

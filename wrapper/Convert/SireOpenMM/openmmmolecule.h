@@ -40,10 +40,15 @@ namespace SireOpenMM
 
         ~OpenMMMolecule();
 
+        bool operator==(const OpenMMMolecule &other) const;
+        bool operator!=(const OpenMMMolecule &other) const;
+
         void copyInCoordsAndVelocities(OpenMM::Vec3 *coords,
                                        OpenMM::Vec3 *velocities) const;
 
         bool isPerturbable() const;
+
+        QVector<double> getCharges() const;
 
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of

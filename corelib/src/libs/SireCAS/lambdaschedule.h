@@ -128,6 +128,11 @@ namespace SireCAS
 
         QStringList getLeverStages(int num_lambda = 101) const;
 
+        QVector<double> morph(const QString &lever,
+                              const QVector<double> &initial,
+                              const QVector<double> &final,
+                              double lambda_value) const;
+
     protected:
         int find_stage(const QString &stage) const;
         double clamp(double lambda_value) const;

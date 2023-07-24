@@ -164,6 +164,16 @@ OpenMMMolecule::~OpenMMMolecule()
 {
 }
 
+bool OpenMMMolecule::operator==(const OpenMMMolecule &other) const
+{
+    return this == &other;
+}
+
+bool OpenMMMolecule::operator!=(const OpenMMMolecule &other) const
+{
+    return not this->operator==(other);
+}
+
 bool OpenMMMolecule::isPerturbable() const
 {
     return perturbed.get() != 0;
@@ -773,4 +783,21 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
             v += 1;
         }
     }
+}
+
+QVector<double> OpenMMMolecule::getCharges() const
+{
+    const int natoms = this->cljs.count();
+
+    QVector<double> charges(natoms);
+
+    auto charges_data = charges.data();
+    const auto cljs_data = this->cljs.constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        charges_data[i] = std::get<0>(cljs_data[i]);
+    }
+
+    return charges;
 }

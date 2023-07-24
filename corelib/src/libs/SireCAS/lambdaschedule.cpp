@@ -410,7 +410,7 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     const QVector<double> &lambda_values,
     double initial_value, double final_value) const
 {
-    QVector<double> values(lambda_values.count(), 0.0);
+    QVector<double> values(lambda_values.count(), NAN);
 
     QHash<QString, QVector<double>> lever_values;
     lever_values.reserve(this->lever_names.count() + 1);
@@ -431,9 +431,9 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
         return lever_values;
 
     Values input_values;
-    input_values.add(this->initial() == initial_value);
-    input_values.add(this->final() == final_value);
-    input_values.add(this->lam() == 0.0);
+    input_values.set(this->initial(), initial_value);
+    input_values.set(this->final(), final_value);
+    input_values.set(this->lam(), 0.0);
 
     for (int i = 0; i < lambda_values.count(); ++i)
     {
@@ -463,5 +463,52 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     int nvalues,
     double initial_value, double final_value) const
 {
-    return this->getLeverValues(generate_lambdas(nvalues));
+    return this->getLeverValues(generate_lambdas(nvalues),
+                                initial_value, final_value);
+}
+
+QVector<double> LambdaSchedule::morph(const QString &lever_name,
+                                      const QVector<double> &initial,
+                                      const QVector<double> &final,
+                                      double lambda_value) const
+{
+    const int nparams = initial.count();
+
+    if (final.count() != nparams)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of initial and final parameters for lever %1 is not the same. "
+                                                "%2 versus %3. They need to be the same.")
+                                                .arg(lever_name)
+                                                .arg(initial.count())
+                                                .arg(final.count()),
+                                            CODELOC);
+
+    if (this->nStages() == 0)
+        // just return the initial parameters as we don't know how to morph
+        return initial;
+
+    Values input_values;
+    input_values.set(this->lam(), 0.0);
+
+    const auto resolved = this->resolve_lambda(lambda_value);
+    const int stage = std::get<0>(resolved);
+
+    const auto equation = this->stage_equations[stage].value(
+        lever_name, this->default_equations[stage]);
+
+    QVector<double> morphed(nparams);
+
+    auto morphed_data = morphed.data();
+    const auto initial_data = initial.constData();
+    const auto final_data = final.constData();
+
+    for (int i = 0; i < nparams; ++i)
+    {
+        input_values.set(this->initial(), initial_data[i]);
+        input_values.set(this->final(), final_data[i]);
+
+        morphed_data[i] = equation(input_values);
+    }
+
+    return morphed;
 }
