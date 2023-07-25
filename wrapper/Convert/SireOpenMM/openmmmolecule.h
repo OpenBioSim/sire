@@ -52,6 +52,16 @@ namespace SireOpenMM
         QVector<double> getSigmas() const;
         QVector<double> getEpsilons() const;
 
+        QVector<double> getBondKs() const;
+        QVector<double> getBondLengths() const;
+
+        QVector<double> getAngleKs() const;
+        QVector<double> getAngleSizes() const;
+
+        QVector<int> getTorsionPeriodicities() const;
+        QVector<double> getTorsionPhases() const;
+        QVector<double> getTorsionKs() const;
+
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of
          *  this SireOpenMM converter library.

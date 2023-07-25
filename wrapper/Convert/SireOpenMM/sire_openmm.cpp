@@ -367,13 +367,13 @@ namespace SireOpenMM
         lambda_lever.set_force_index("clj", system.addForce(cljff));
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
-        // lambda_lever.set_force_index("bond", system.addForce(bondff));
+        lambda_lever.set_force_index("bond", system.addForce(bondff));
 
         OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
-        // lambda_lever.set_force_index("angle", system.addForce(angff));
+        lambda_lever.set_force_index("angle", system.addForce(angff));
 
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
-        // lambda_lever.set_force_index("torsion", system.addForce(dihff));
+        lambda_lever.set_force_index("torsion", system.addForce(dihff));
 
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
@@ -503,15 +503,14 @@ namespace SireOpenMM
         const int natoms = start_index;
 
         // add exclusions based on the bonding of the molecules
-        // cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
+        cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
-        /*
         for (const auto &p : custom_pairs)
         {
             cljff->addException(std::get<0>(p), std::get<1>(p),
                                 std::get<2>(p), std::get<3>(p),
                                 std::get<4>(p), false);
-        }*/
+        }
 
         // will have to add exceptions for perturbable forces
 

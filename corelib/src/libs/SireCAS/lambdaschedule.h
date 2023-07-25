@@ -133,6 +133,11 @@ namespace SireCAS
                               const QVector<double> &final,
                               double lambda_value) const;
 
+        QVector<int> morph(const QString &lever,
+                           const QVector<int> &initial,
+                           const QVector<int> &final,
+                           double lambda_value) const;
+
     protected:
         int find_stage(const QString &stage) const;
         double clamp(double lambda_value) const;

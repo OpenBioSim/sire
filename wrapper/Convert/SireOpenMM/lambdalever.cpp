@@ -93,7 +93,7 @@ const char *LambdaLever::typeName()
 }
 
 template <class T>
-T &get_force(const QString &name, OpenMM::Context &context,
+T *get_force(const QString &name, OpenMM::Context &context,
              const QHash<QString, int> &name_to_index,
              const QString &force_type)
 {
@@ -101,12 +101,7 @@ T &get_force(const QString &name, OpenMM::Context &context,
 
     if (it == name_to_index.constEnd())
     {
-        throw SireError::invalid_key(QObject::tr(
-                                         "There is no Force called '%1' in the passed OpenMM Context. "
-                                         "Available forces are [ %2 ]")
-                                         .arg(name)
-                                         .arg(name_to_index.keys().join(", ")),
-                                     CODELOC);
+        return 0;
     }
 
     const int idx = it.value();
@@ -139,7 +134,7 @@ T &get_force(const QString &name, OpenMM::Context &context,
                                       CODELOC);
     }
 
-    return *t_force;
+    return t_force;
 }
 
 void LambdaLever::set_lambda(OpenMM::Context &context,
@@ -149,7 +144,10 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
     // and then pass those updated parameters to the context
 
     // get copies of the forcefields in which the parameters will be changed
-    auto &cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
+    auto cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
+    auto bondff = get_force<OpenMM::HarmonicBondForce>("bond", context, name_to_ffidx, "HarmonicBondForce");
+    auto angff = get_force<OpenMM::HarmonicAngleForce>("angle", context, name_to_ffidx, "HarmonicAngleForce");
+    auto dihff = get_force<OpenMM::PeriodicTorsionForce>("torsion", context, name_to_ffidx, "PeriodicTorsionForce");
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -157,44 +155,186 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
         const auto &perturbable_mol = this->perturbable_mols[i];
         const auto &start_idxs = this->start_indicies[i];
 
-        const auto charge0 = perturbable_mol.getCharges();
-        const auto charge1 = perturbable_mol.perturbed->getCharges();
-
-        const auto sigma0 = perturbable_mol.getSigmas();
-        const auto sigma1 = perturbable_mol.perturbed->getSigmas();
-
-        const auto epsilon0 = perturbable_mol.getEpsilons();
-        const auto epsilon1 = perturbable_mol.perturbed->getEpsilons();
-
         // calculate the new parameters for this lambda value
-        const auto morphed_charges = this->lambda_schedule.morph("charge", charge0, charge1, lambda_value);
-        const auto morphed_sigmas = this->lambda_schedule.morph("sigma", sigma0, sigma1, lambda_value);
-        const auto morphed_epsilons = this->lambda_schedule.morph("epsilon", epsilon0, epsilon1, lambda_value);
+        const auto morphed_charges = this->lambda_schedule.morph(
+            "charge",
+            perturbable_mol.getCharges(),
+            perturbable_mol.perturbed->getCharges(),
+            lambda_value);
 
-        // now update the forcefield
-        const auto start_index = start_idxs.value("clj", -1);
+        const auto morphed_sigmas = this->lambda_schedule.morph(
+            "sigma",
+            perturbable_mol.getSigmas(),
+            perturbable_mol.perturbed->getSigmas(),
+            lambda_value);
 
-        if (start_index == -1)
-            throw SireError::program_bug(QObject::tr(
-                                             "No start index for force %1, despite this force existing?")
-                                             .arg("clj"),
-                                         CODELOC);
+        const auto morphed_epsilons = this->lambda_schedule.morph(
+            "epsilon",
+            perturbable_mol.getEpsilons(),
+            perturbable_mol.perturbed->getEpsilons(),
+            lambda_value);
 
-        const int nparams = morphed_charges.count();
+        const auto morphed_bond_k = this->lambda_schedule.morph(
+            "bond_k",
+            perturbable_mol.getBondKs(),
+            perturbable_mol.perturbed->getBondKs(),
+            lambda_value);
 
-        for (int j = 0; j < nparams; ++j)
+        const auto morphed_bond_length = this->lambda_schedule.morph(
+            "bond_length",
+            perturbable_mol.getBondLengths(),
+            perturbable_mol.perturbed->getBondLengths(),
+            lambda_value);
+
+        const auto morphed_angle_k = this->lambda_schedule.morph(
+            "angle_k",
+            perturbable_mol.getAngleKs(),
+            perturbable_mol.perturbed->getAngleKs(),
+            lambda_value);
+
+        const auto morphed_angle_size = this->lambda_schedule.morph(
+            "angle_size",
+            perturbable_mol.getAngleSizes(),
+            perturbable_mol.perturbed->getAngleSizes(),
+            lambda_value);
+
+        const auto morphed_torsion_phase = this->lambda_schedule.morph(
+            "torsion_phase",
+            perturbable_mol.getTorsionPhases(),
+            perturbable_mol.perturbed->getTorsionPhases(),
+            lambda_value);
+
+        const auto morphed_torsion_periodicity = this->lambda_schedule.morph(
+            "torsion_periodicity",
+            perturbable_mol.getTorsionPeriodicities(),
+            perturbable_mol.perturbed->getTorsionPeriodicities(),
+            lambda_value);
+
+        const auto morphed_torsion_k = this->lambda_schedule.morph(
+            "torsion_k",
+            perturbable_mol.getTorsionKs(),
+            perturbable_mol.perturbed->getTorsionKs(),
+            lambda_value);
+
+        // now update the forcefields
+        int start_index = start_idxs.value("clj", -1);
+
+        if (start_index != -1)
         {
-            int idx = start_index + j;
+            const int nparams = morphed_charges.count();
 
-            // qDebug() << idx << j << "I" << charge0[j] << sigma0[j] << epsilon0[j];
-            // qDebug() << idx << j << "M" << morphed_charges[j] << morphed_sigmas[j] << morphed_epsilons[j];
-            // qDebug() << idx << j << "F" << charge1[j] << sigma1[j] << epsilon1[j];
+            if (cljff == 0)
+                throw SireError::incompatible_error(QObject::tr(
+                                                        "There is no NonbondedForce called 'clj' in this context!"),
+                                                    CODELOC);
 
-            cljff.setParticleParameters(idx, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+            for (int j = 0; j < nparams; ++j)
+            {
+                cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+            }
+        }
+
+        start_index = start_idxs.value("bond", -1);
+
+        if (start_index != -1)
+        {
+            const int nparams = morphed_bond_k.count();
+
+            if (bondff == 0)
+                throw SireError::incompatible_error(QObject::tr(
+                                                        "There is no HarmonicBondForce called 'bond' in this context!"),
+                                                    CODELOC);
+
+            for (int j = 0; j < nparams; ++j)
+            {
+                const int index = start_index + j;
+
+                int particle1, particle2;
+                double length, k;
+
+                bondff->getBondParameters(index, particle1, particle2,
+                                          length, k);
+
+                bondff->setBondParameters(index, particle1, particle2,
+                                          morphed_bond_length[j],
+                                          morphed_bond_k[j]);
+            }
+        }
+
+        start_index = start_idxs.value("angle", -1);
+
+        if (start_index != -1)
+        {
+            const int nparams = morphed_angle_k.count();
+
+            if (angff == 0)
+                throw SireError::incompatible_error(QObject::tr(
+                                                        "There is no HarmonicAngleForce called 'angle' in this context!"),
+                                                    CODELOC);
+
+            for (int j = 0; j < nparams; ++j)
+            {
+                const int index = start_index + j;
+
+                int particle1, particle2, particle3;
+                double size, k;
+
+                angff->getAngleParameters(index,
+                                          particle1, particle2, particle3,
+                                          size, k);
+
+                angff->setAngleParameters(index,
+                                          particle1, particle2, particle3,
+                                          morphed_angle_size[j],
+                                          morphed_angle_k[j]);
+            }
+        }
+
+        start_index = start_idxs.value("torsion", -1);
+
+        if (start_index != -1)
+        {
+            const int nparams = morphed_torsion_k.count();
+
+            if (dihff == 0)
+                throw SireError::incompatible_error(QObject::tr(
+                                                        "There is no PeriodicTorsionForce called 'torsion' in this context!"),
+                                                    CODELOC);
+
+            for (int j = 0; j < nparams; ++j)
+            {
+                const int index = start_index + j;
+
+                int particle1, particle2, particle3, particle4;
+                double phase, k;
+                int periodicity;
+
+                dihff->getTorsionParameters(index,
+                                            particle1, particle2,
+                                            particle3, particle4,
+                                            periodicity, phase, k);
+
+                dihff->setTorsionParameters(index,
+                                            particle1, particle2,
+                                            particle3, particle4,
+                                            morphed_torsion_periodicity[j],
+                                            morphed_torsion_phase[j],
+                                            morphed_torsion_k[j]);
+            }
         }
     }
 
-    cljff.updateParametersInContext(context);
+    if (cljff)
+        cljff->updateParametersInContext(context);
+
+    if (bondff)
+        bondff->updateParametersInContext(context);
+
+    if (angff)
+        angff->updateParametersInContext(context);
+
+    if (dihff)
+        dihff->updateParametersInContext(context);
 }
 
 void LambdaLever::set_force_index(const QString &force, int index)

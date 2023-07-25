@@ -835,3 +835,122 @@ QVector<double> OpenMMMolecule::getEpsilons() const
 
     return epsilons;
 }
+
+QVector<double> OpenMMMolecule::getBondKs() const
+{
+    const int nbonds = this->bond_params.count();
+
+    QVector<double> bond_ks(nbonds);
+
+    auto bond_ks_data = bond_ks.data();
+    const auto bond_params_data = this->bond_params.constData();
+
+    for (int i = 0; i < nbonds; ++i)
+    {
+        bond_ks_data[i] = std::get<3>(bond_params_data[i]);
+    }
+
+    return bond_ks;
+}
+
+QVector<double> OpenMMMolecule::getBondLengths() const
+{
+    const int nbonds = this->bond_params.count();
+
+    QVector<double> bond_lengths(nbonds);
+
+    auto bond_lengths_data = bond_lengths.data();
+    const auto bond_params_data = this->bond_params.constData();
+
+    for (int i = 0; i < nbonds; ++i)
+    {
+        bond_lengths_data[i] = std::get<2>(bond_params_data[i]);
+    }
+
+    return bond_lengths;
+}
+
+QVector<double> OpenMMMolecule::getAngleKs() const
+{
+    const int nangs = this->ang_params.count();
+
+    QVector<double> ang_ks(nangs);
+
+    auto ang_ks_data = ang_ks.data();
+    const auto ang_params_data = this->ang_params.constData();
+
+    for (int i = 0; i < nangs; ++i)
+    {
+        ang_ks_data[i] = std::get<4>(ang_params_data[i]);
+    }
+
+    return ang_ks;
+}
+
+QVector<double> OpenMMMolecule::getAngleSizes() const
+{
+    const int nangs = this->ang_params.count();
+
+    QVector<double> ang_sizes(nangs);
+
+    auto ang_sizes_data = ang_sizes.data();
+    const auto ang_params_data = this->ang_params.constData();
+
+    for (int i = 0; i < nangs; ++i)
+    {
+        ang_sizes_data[i] = std::get<3>(ang_params_data[i]);
+    }
+
+    return ang_sizes;
+}
+
+QVector<int> OpenMMMolecule::getTorsionPeriodicities() const
+{
+    const int ndihs = this->dih_params.count();
+
+    QVector<int> dih_periodicities(ndihs);
+
+    auto dih_periodicities_data = dih_periodicities.data();
+    const auto dih_params_data = this->dih_params.constData();
+
+    for (int i = 0; i < ndihs; ++i)
+    {
+        dih_periodicities_data[i] = std::get<4>(dih_params_data[i]);
+    }
+
+    return dih_periodicities;
+}
+
+QVector<double> OpenMMMolecule::getTorsionPhases() const
+{
+    const int ndihs = this->dih_params.count();
+
+    QVector<double> dih_phases(ndihs);
+
+    auto dih_phases_data = dih_phases.data();
+    const auto dih_params_data = this->dih_params.constData();
+
+    for (int i = 0; i < ndihs; ++i)
+    {
+        dih_phases_data[i] = std::get<5>(dih_params_data[i]);
+    }
+
+    return dih_phases;
+}
+
+QVector<double> OpenMMMolecule::getTorsionKs() const
+{
+    const int ndihs = this->dih_params.count();
+
+    QVector<double> dih_ks(ndihs);
+
+    auto dih_ks_data = dih_ks.data();
+    const auto dih_params_data = this->dih_params.constData();
+
+    for (int i = 0; i < ndihs; ++i)
+    {
+        dih_ks_data[i] = std::get<6>(dih_params_data[i]);
+    }
+
+    return dih_ks;
+}

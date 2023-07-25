@@ -512,3 +512,51 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
 
     return morphed;
 }
+
+QVector<int> LambdaSchedule::morph(const QString &lever_name,
+                                   const QVector<int> &initial,
+                                   const QVector<int> &final,
+                                   double lambda_value) const
+{
+    const int nparams = initial.count();
+
+    if (final.count() != nparams)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of initial and final parameters for lever %1 is not the same. "
+                                                "%2 versus %3. They need to be the same.")
+                                                .arg(lever_name)
+                                                .arg(initial.count())
+                                                .arg(final.count()),
+                                            CODELOC);
+
+    if (this->nStages() == 0)
+        // just return the initial parameters as we don't know how to morph
+        return initial;
+
+    const auto resolved = this->resolve_lambda(lambda_value);
+    const int stage = std::get<0>(resolved);
+
+    const auto equation = this->stage_equations[stage].value(
+        lever_name, this->default_equations[stage]);
+
+    Values input_values;
+    input_values.set(this->lam(), std::get<1>(resolved));
+
+    QVector<int> morphed(nparams);
+
+    auto morphed_data = morphed.data();
+    const auto initial_data = initial.constData();
+    const auto final_data = final.constData();
+
+    for (int i = 0; i < nparams; ++i)
+    {
+        input_values.set(this->initial(), double(initial_data[i]));
+        input_values.set(this->final(), double(final_data[i]));
+
+        // the result is the resulting float rounded to the nearest
+        // integer
+        morphed_data[i] = int(std::floor(equation(input_values) + 0.5));
+    }
+
+    return morphed;
+}
