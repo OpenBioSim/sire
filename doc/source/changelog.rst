@@ -15,7 +15,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
 
-* Fixed a bug in the AmberRst parser where velocities were written with the wrong 
+* Fixed a bug in the AmberRst parser where velocities were written with the wrong
   unit (A ps-1 instead of AKMA time). Also added the correct labels to the AmberRst file.
 
 * Fixed a bug where outputs from legacy script would be written with base physical
@@ -24,19 +24,22 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in the writing of DCD headers, meaning that the files couldn't be read
   by other DCD reader software (written non-compliant header)
 
+* Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
+  when not all lambda windows were run for equal lengths of time. 
+  
 * Optimised the speed of viewing large molecules in NGLView, plus of searching
   for water molecules. Added a new ``is_water`` function. Optimised the
   find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
   is now roughly O(N), using a hash to lookup at the molecule level, so that
   we don't have to test individual atoms.
-
+  
 * Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
- the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0, 
+ the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
  because not all required changes were included.
-
+  
 * Fix for crash when not passing a map to the SelectorImproper constructor
-
-* Fix for crash when checking a list of atoms rather than a list of molecules
+  
+* Fix for crash when checking a list of atoms rather than a list of molecules  
 
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------
@@ -113,14 +116,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   :func:`sire.smiles`, thereby only running the sanitisation steps
   that pass.
 
-* Improved functionality of harmonic restraints in openMMMD. Each 
+* Improved functionality of harmonic restraints in openMMMD. Each
   restrained atom will now have to a corrsponding dummy atom,
   with the location of this dummy atom restraining the real atom.
-  This makes restrained systems consistent in NPT regimes. Provided 
+  This makes restrained systems consistent in NPT regimes. Provided
   that a modified system containing the dummy atoms is given, the argument
-  ``use restraints = True`` can be added to a SOMD ``.cfg`` file, along with 
-  the argument ``restrained atoms`` containing a dictionary of dummy atom 
-  numbers along with the numbers of the corresponding real atoms 
+  ``use restraints = True`` can be added to a SOMD ``.cfg`` file, along with
+  the argument ``restrained atoms`` containing a dictionary of dummy atom
+  numbers along with the numbers of the corresponding real atoms
   (``{dummy_atom_num:real_atom_num}``).
 
 * Added a new units grammar and parser, so that we can robustly
