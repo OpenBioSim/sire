@@ -66,6 +66,26 @@ class SOMMContext(_Context):
         """
         return self._lambda_lever
 
+    def get_lambda_schedule(self):
+        """
+        Return the LambdaSchedule used to control how different forcefield
+        parameters will be changed with lambda
+        """
+        if self._lambda_lever is None:
+            return None
+
+        return self._lambda_lever.schedule()
+
+    def set_lambda_schedule(self, schedule):
+        """
+        Set the LambdaSchedule used to control how different forcefield
+        parameters will be changed with lambda
+        """
+        if self._lambda_lever is None:
+            raise ValueError("Cannot set the schedule in a null context!")
+
+        self._lambda_lever.set_schedule(schedule)
+
     def set_lambda(self, lambda_value: float):
         """
         Update the parameters in the context to set the lambda value

@@ -87,6 +87,10 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "schedule", &LambdaLever::schedule,
         "Return the LambdaSchedule used to control the parameters by lambda");
 
+    LambdaLever_exposer_t.def(
+        "set_schedule", &LambdaLever::set_schedule,
+        "Set the LambdaSchedule used to control the parameters by lambda");
+
     bp::def("_openmm_system_to_sire",
             openmm_system_to_sire_function_value,
             (bp::arg("system"), bp::arg("map")),

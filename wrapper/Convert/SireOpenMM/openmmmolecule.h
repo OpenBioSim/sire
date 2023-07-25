@@ -49,6 +49,8 @@ namespace SireOpenMM
         bool isPerturbable() const;
 
         QVector<double> getCharges() const;
+        QVector<double> getSigmas() const;
+        QVector<double> getEpsilons() const;
 
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of

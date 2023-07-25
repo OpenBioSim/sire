@@ -487,14 +487,14 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
         // just return the initial parameters as we don't know how to morph
         return initial;
 
-    Values input_values;
-    input_values.set(this->lam(), 0.0);
-
     const auto resolved = this->resolve_lambda(lambda_value);
     const int stage = std::get<0>(resolved);
 
     const auto equation = this->stage_equations[stage].value(
         lever_name, this->default_equations[stage]);
+
+    Values input_values;
+    input_values.set(this->lam(), std::get<1>(resolved));
 
     QVector<double> morphed(nparams);
 

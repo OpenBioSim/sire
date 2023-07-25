@@ -801,3 +801,37 @@ QVector<double> OpenMMMolecule::getCharges() const
 
     return charges;
 }
+
+QVector<double> OpenMMMolecule::getSigmas() const
+{
+    const int natoms = this->cljs.count();
+
+    QVector<double> sigmas(natoms);
+
+    auto sigmas_data = sigmas.data();
+    const auto cljs_data = this->cljs.constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        sigmas_data[i] = std::get<1>(cljs_data[i]);
+    }
+
+    return sigmas;
+}
+
+QVector<double> OpenMMMolecule::getEpsilons() const
+{
+    const int natoms = this->cljs.count();
+
+    QVector<double> epsilons(natoms);
+
+    auto epsilons_data = epsilons.data();
+    const auto cljs_data = this->cljs.constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        epsilons_data[i] = std::get<2>(cljs_data[i]);
+    }
+
+    return epsilons;
+}

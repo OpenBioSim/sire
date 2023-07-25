@@ -93,7 +93,7 @@ const char *LambdaLever::typeName()
 }
 
 template <class T>
-T &get_force(const QString &name, const OpenMM::System &system,
+T &get_force(const QString &name, OpenMM::Context &context,
              const QHash<QString, int> &name_to_index,
              const QString &force_type)
 {
@@ -111,6 +111,8 @@ T &get_force(const QString &name, const OpenMM::System &system,
 
     const int idx = it.value();
 
+    OpenMM::System &system = const_cast<OpenMM::System &>(context.getSystem());
+
     const int num_forces = system.getNumForces();
 
     if (idx < 0 or idx >= num_forces)
@@ -124,9 +126,9 @@ T &get_force(const QString &name, const OpenMM::System &system,
                                      CODELOC);
     }
 
-    const OpenMM::Force &force = system.getForce(idx);
+    OpenMM::Force &force = system.getForce(idx);
 
-    const T *t_force = dynamic_cast<const T *>(&force);
+    T *t_force = dynamic_cast<T *>(&force);
 
     if (t_force == 0)
     {
@@ -137,7 +139,7 @@ T &get_force(const QString &name, const OpenMM::System &system,
                                       CODELOC);
     }
 
-    return *const_cast<T *>(t_force);
+    return *t_force;
 }
 
 void LambdaLever::set_lambda(OpenMM::Context &context,
@@ -146,10 +148,8 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
     // go over each forcefield and update the parameters in the forcefield,
     // and then pass those updated parameters to the context
 
-    const auto &system = context.getSystem();
-
     // get copies of the forcefields in which the parameters will be changed
-    auto &cljff = get_force<OpenMM::NonbondedForce>("clj", system, name_to_ffidx, "NonbondedForce");
+    auto &cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -160,8 +160,16 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
         const auto charge0 = perturbable_mol.getCharges();
         const auto charge1 = perturbable_mol.perturbed->getCharges();
 
-        // calculate the new charges for this lambda value
+        const auto sigma0 = perturbable_mol.getSigmas();
+        const auto sigma1 = perturbable_mol.perturbed->getSigmas();
+
+        const auto epsilon0 = perturbable_mol.getEpsilons();
+        const auto epsilon1 = perturbable_mol.getEpsilons();
+
+        // calculate the new parameters for this lambda value
         const auto morphed_charges = this->lambda_schedule.morph("charge", charge0, charge1, lambda_value);
+        const auto morphed_sigmas = this->lambda_schedule.morph("sigma", sigma0, sigma1, lambda_value);
+        const auto morphed_epsilons = this->lambda_schedule.morph("epsilon", epsilon0, epsilon1, lambda_value);
 
         // now update the forcefield
         const auto start_index = start_idxs.value("clj", -1);
@@ -176,18 +184,16 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
 
         for (int j = 0; j < nparams; ++j)
         {
-            double charge;
-            double sigma;
-            double epsilon;
-
             int idx = start_index + j;
 
-            cljff.getParticleParameters(idx, charge, sigma, epsilon);
-            cljff.setParticleParameters(idx, morphed_charges[j], sigma, epsilon);
+            // qDebug() << idx << j << "I" << charge0[j] << sigma0[j] << epsilon0[j];
+            // qDebug() << idx << j << "M" << morphed_charges[j] << morphed_sigmas[j] << morphed_epsilons[j];
+            // qDebug() << idx << j << "F" << charge1[j] << sigma1[j] << epsilon1[j];
+
+            cljff.setParticleParameters(idx, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
         }
     }
 
-    // now update the parameters in the context
     cljff.updateParametersInContext(context);
 }
 
@@ -214,4 +220,9 @@ void LambdaLever::add_perturbable_molecule(const OpenMMMolecule &molecule,
 LambdaSchedule LambdaLever::schedule() const
 {
     return lambda_schedule;
+}
+
+void LambdaLever::set_schedule(const LambdaSchedule &sched)
+{
+    lambda_schedule = sched;
 }

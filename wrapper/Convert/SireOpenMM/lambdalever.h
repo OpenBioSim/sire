@@ -70,6 +70,8 @@ namespace SireOpenMM
         void add_perturbable_molecule(const OpenMMMolecule &molecule,
                                       const QHash<QString, qint32> &start_indicies);
 
+        void set_schedule(const SireCAS::LambdaSchedule &schedule);
+
         SireCAS::LambdaSchedule schedule() const;
 
     protected:
