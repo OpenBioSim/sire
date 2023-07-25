@@ -164,7 +164,7 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
         const auto sigma1 = perturbable_mol.perturbed->getSigmas();
 
         const auto epsilon0 = perturbable_mol.getEpsilons();
-        const auto epsilon1 = perturbable_mol.getEpsilons();
+        const auto epsilon1 = perturbable_mol.perturbed->getEpsilons();
 
         // calculate the new parameters for this lambda value
         const auto morphed_charges = this->lambda_schedule.morph("charge", charge0, charge1, lambda_value);
