@@ -24,6 +24,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added a :func:`sire.minimum_distance` function to calculate the minimum
   distance between atoms of two views.
 
+* Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
+  when not all lambda windows were run for equal lengths of time. 
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
