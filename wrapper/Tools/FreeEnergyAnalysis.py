@@ -34,9 +34,7 @@ except ImportError:
     import platform
 
     if platform.machine() in ["aarch64", "arm64"]:
-        print(
-            "'pymbar' is not available on the 'aarch64' or 'arm64' platforms"
-        )
+        print("'pymbar' is not available on the 'aarch64' or 'arm64' platforms")
 
     raise ImportError(
         "'pymbar' is not installed. Please install pymbar in order to use MBAR for your free energy analysis.`"
@@ -61,9 +59,7 @@ class FreeEnergies(object):
         reduced gradients
     """
 
-    def __init__(
-        self, u_kln=None, N_k=None, lambda_array=None, gradients_kn=None
-    ):
+    def __init__(self, u_kln=None, N_k=None, lambda_array=None, gradients_kn=None):
         r"""The data passed here is already subsampled"""
 
         self._u_kln = u_kln
@@ -88,11 +84,13 @@ class FreeEnergies(object):
         cubic_spline : bool
             Use cubic spline estimation instead of trapezium rule.
         """
-        means = numpy.mean(self._gradients_kn, axis=1)
+        means = numpy.nanmean(self._gradients_kn, axis=1)
         if cubic_spline:
             NotImplementedError("Cubic Spline TI has not been implemented yet")
         else:
-            self._pmf_ti = numpy.zeros(shape=(self._lambda_array.shape[0], 2))
+            self._pmf_ti = numpy.full(
+                shape=(self._lambda_array.shape[0], 2), fill_value=numpy.nan
+            )
             self._pmf_ti[:, 0] = self._lambda_array
             for i in range(1, self._lambda_array.shape[0]):
                 self._pmf_ti[i - 1][1] = numpy.trapz(
@@ -115,9 +113,7 @@ class FreeEnergies(object):
         except:
             solver_options = {"maximum_iterations": 10000, "verbose": True}
             solver_protocol = {"method": "BFGS", "options": solver_options}
-            MBAR_obj = MBAR(
-                self._u_kln, self._N_k, solver_protocol=(solver_protocol,)
-            )
+            MBAR_obj = MBAR(self._u_kln, self._N_k, solver_protocol=(solver_protocol,))
             self._f_k = MBAR_obj.f_k
             (
                 deltaF_ij,
@@ -126,12 +122,14 @@ class FreeEnergies(object):
             ) = MBAR_obj.getFreeEnergyDifferences(return_theta=True)
         self._deltaF_mbar = deltaF_ij[0, self._lambda_array.shape[0] - 1]
         self._dDeltaF_mbar = dDeltaF_ij[0, self._lambda_array.shape[0] - 1]
-        self._pmf_mbar = numpy.zeros(shape=(self._lambda_array.shape[0], 3))
+        self._pmf_mbar = numpy.full(
+            shape=(self._lambda_array.shape[0], 3), fill_value=numpy.nan
+        )
         self._pmf_mbar[:, 0] = self._lambda_array
         self._pmf_mbar[:, 1] = self._f_k
         self._pmf_mbar[:, 2] = dDeltaF_ij[0]
-        self._pairwise_F = numpy.zeros(
-            shape=(self._lambda_array.shape[0] - 1, 4)
+        self._pairwise_F = numpy.full(
+            shape=(self._lambda_array.shape[0] - 1, 4), fill_value=numpy.nan
         )
         self._pairwise_F[:, 0] = self._lambda_array[:-1]
         self._pairwise_F[:, 1] = self._lambda_array[1:]
@@ -214,8 +212,7 @@ class SubSample(object):
         if N_k.shape[0] != u_kln.shape[0]:
             RuntimeError(
                 "The number of thermodynamic states must be the same in u_kln and N_k!"
-                "u_kln has size %d and N_k has size %d"
-                % (u_kln.shape[0], N_k.shape[0])
+                "u_kln has size %d and N_k has size %d" % (u_kln.shape[0], N_k.shape[0])
             )
         self.subsample = subsample
         self.percentage = percentage
@@ -230,20 +227,16 @@ class SubSample(object):
                 "You are not subsampling your data according to the statistical inefficiency nor are "
                 "you discarding initial data. Please set percentage to another value than 100!"
             )
-        percentage_removal = (
-            self._N_k * (1 - self.percentage / 100.0)
-        ).astype("int32")
+        percentage_removal = (self._N_k * (1 - self.percentage / 100.0)).astype("int32")
         self._subsampled_N_k_gradients = self._N_k - percentage_removal
         N_max = int(numpy.max(self._subsampled_N_k_gradients))
-        self._subsampled_grad_kn = numpy.zeros(
-            shape=(self._N_k.shape[0], N_max)
+        self._subsampled_grad_kn = numpy.full(
+            shape=(self._N_k.shape[0], N_max), fill_value=numpy.nan
         )
         for p in range(percentage_removal.shape[0]):
             start = percentage_removal[p]
             finish = percentage_removal[p] + N_max
-            self._subsampled_grad_kn[p, :] = self._gradients_kn[
-                p, start:finish
-            ]
+            self._subsampled_grad_kn[p, :] = self._gradients_kn[p, start:finish]
         if N_max <= 50:
             warnings.warn(
                 "You have reduced your data to less than 50 samples, the results from these might not "
@@ -252,29 +245,23 @@ class SubSample(object):
         # if subsampling is percentage, then we are done here, otherwise we will now subsample according to timeseries
 
         if self.subsample:
-            print(
-                "#Subsampling gradients according to statistical inefficiency"
-            )
+            print("#Subsampling gradients according to statistical inefficiency")
             # first we compute statistical inefficiency
             self._gradients_kn = self._subsampled_grad_kn.copy()
             self._N_k = self._subsampled_N_k_gradients.copy()
 
-            g_k = numpy.zeros(shape=(self._gradients_kn.shape[0]))
-            self._subsampled_N_k_gradients = numpy.zeros(
-                shape=(self._gradients_kn.shape[0])
+            g_k = numpy.full(shape=(self._gradients_kn.shape[0]), fill_value=numpy.nan)
+            self._subsampled_N_k_gradients = numpy.full(
+                shape=(self._gradients_kn.shape[0]), fill_value=numpy.nan
             )
             for i in range(g_k.shape[0]):
-                g_k[i] = timeseries.statisticalInefficiency(
-                    self._gradients_kn[i, :]
-                )
+                g_k[i] = timeseries.statisticalInefficiency(self._gradients_kn[i, :])
             g = int(numpy.max(g_k))
             # now we need to figure out what the indices in the data are for subsampling
             indices_k = []
             for i in range(g_k.shape[0]):
                 indices_k.append(
-                    timeseries.subsampleCorrelatedData(
-                        self._gradients_kn[i, :], g=g
-                    )
+                    timeseries.subsampleCorrelatedData(self._gradients_kn[i, :], g=g)
                 )
                 self._subsampled_N_k_gradients[i] = len(indices_k[i])
             N_max = int(numpy.max(self._subsampled_N_k_gradients))
@@ -283,13 +270,11 @@ class SubSample(object):
                     "You have reduced your data to less than 50 samples, the results from these might not "
                     "be trustworthy. If you don't want to add more samples consider rerunning the analysis using the percentage option."
                 )
-            self._subsampled_grad_kn = numpy.zeros(
-                [self._gradients_kn.shape[0], N_max], numpy.float64
+            self._subsampled_grad_kn = numpy.full(
+                [self._gradients_kn.shape[0], N_max], fill_value=numpy.nan
             )
             for k in range(self._gradients_kn.shape[0]):
-                self._subsampled_grad_kn[k, :] = self._gradients_kn[
-                    k, indices_k[k]
-                ]
+                self._subsampled_grad_kn[k, :] = self._gradients_kn[k, indices_k[k]]
 
     def subsample_energies(self):
         r"""This subsamples u_kln according to percentage, i.e. remove initial equilibration data and then can additionally subsample according to timeseries"""
@@ -300,16 +285,14 @@ class SubSample(object):
                 "you discarding initial data. Please set percentage to another value than 100!"
             )
 
-        percentage_removal = (
-            self._N_k * (1 - self.percentage / 100.0)
-        ).astype("int32")
+        percentage_removal = (self._N_k * (1 - self.percentage / 100.0)).astype("int32")
         self._subsampled_N_k_energies = self._N_k - percentage_removal
         N_max = int(numpy.max(self._subsampled_N_k_energies))
-        self._subsampled_u_kln = numpy.zeros(
-            shape=(self._N_k.shape[0], self._N_k.shape[0], N_max)
+        self._subsampled_u_kln = numpy.full(
+            shape=(self._N_k.shape[0], self._N_k.shape[0], N_max), fill_value=numpy.nan
         )
-        self._subsampled_energies_kn = numpy.zeros(
-            shape=(self._N_k.shape[0], N_max)
+        self._subsampled_energies_kn = numpy.full(
+            shape=(self._N_k.shape[0], N_max), fill_value=numpy.nan
         )
         for k in range(0, self._N_k.shape[0]):
             self._subsampled_u_kln[k] = self._u_kln[
@@ -334,7 +317,7 @@ class SubSample(object):
             self._N_k = self._subsampled_N_k_energies.copy()
             self._energies_kn = self._subsampled_energies_kn.copy()
             # first we compute statistical inefficiency
-            g_k = numpy.zeros(shape=(self._energies_kn.shape[0]))
+            g_k = numpy.full(shape=(self._energies_kn.shape[0]), fill_value=numpy.nan)
             for i in range(g_k.shape[0]):
                 g_k[i] = timeseries.statisticalInefficiency(
                     self._energies_kn[i, percentage_removal[i] :]
@@ -342,14 +325,12 @@ class SubSample(object):
             g = numpy.max(g_k)
             # now we need to figure out what the indices in the data are for subsampling
             indices_k = []
-            self._subsampled_N_k_energies = numpy.zeros(
-                shape=(self._energies_kn.shape[0])
+            self._subsampled_N_k_energies = numpy.full(
+                shape=(self._energies_kn.shape[0]), fill_value=numpy.nan
             )
             for i in range(g_k.shape[0]):
                 indices_k.append(
-                    timeseries.subsampleCorrelatedData(
-                        self._energies_kn[i, :], g=g
-                    )
+                    timeseries.subsampleCorrelatedData(self._energies_kn[i, :], g=g)
                 )
                 self._subsampled_N_k_energies[i] = len(indices_k[i])
             # self._subsampled_N_k_energies = (numpy.ceil(self._N_k / g)).astype(int)
@@ -359,13 +340,13 @@ class SubSample(object):
                     "You have reduced your data to less than 50 samples, the results from these might not "
                     "be trustworthy. If you don't want to add more samples consider rerunning the analysis using the percentage option."
                 )
-            self._subsampled_u_kln = numpy.zeros(
+            self._subsampled_u_kln = numpy.full(
                 [
                     self._gradients_kn.shape[0],
                     self._gradients_kn.shape[0],
                     N_max,
                 ],
-                numpy.float64,
+                fill_value=numpy.nan,
             )
             for k in range(self._gradients_kn.shape[0]):
                 self._subsampled_u_kln[k, :, :] = self._u_kln[

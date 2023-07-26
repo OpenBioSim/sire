@@ -115,7 +115,6 @@ def processFreeEnergies(nrgs, FILE):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
         description="Analyse free energy files to calculate "
         "free energies, PMFs and to view convergence.",
@@ -237,9 +236,7 @@ if __name__ == "__main__":
         help="Number of saved simulation snapshots that should be discarded at the beginning of a trajectory.",
     )
 
-    parser_mbar.add_argument(
-        "--lam", type=float, nargs="*", help="lambda array"
-    )
+    parser_mbar.add_argument("--lam", type=float, nargs="*", help="lambda array")
 
     parser_mbar.add_argument(
         "--temperature",
@@ -284,9 +281,7 @@ if __name__ == "__main__":
                 sys.exit(1)
             else:
                 parser_mbar.print_help()
-                print(
-                    "analyse_freenrg: error: unrecognized arguments: %s " % u
-                )
+                print("analyse_freenrg: error: unrecognized arguments: %s " % u)
                 sys.exit(1)
 
         must_exit = False
@@ -296,21 +291,17 @@ if __name__ == "__main__":
             must_exit = True
 
         if args.author:
-            print(
-                "\nanalyse_freenrg was written by Christopher Woods (C) 2014"
-            )
+            print("\nanalyse_freenrg was written by Christopher Woods (C) 2014")
             print("It is based on the analysis tools in Sire.Analysis")
             must_exit = True
 
         if args.version:
             print(
-                "analyse_freenrg -- from Sire release version <%s>"
-                % Sire.__version__
+                "analyse_freenrg -- from Sire release version <%s>" % Sire.__version__
             )
             print(
                 "This particular release can be downloaded here: "
-                "https://github.com/openbiosim/sire/releases/tag/v%s"
-                % Sire.__version__
+                "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__
             )
             must_exit = True
 
@@ -373,10 +364,7 @@ if __name__ == "__main__":
 
         # input_file = os.path.realpath(input_file)
 
-        FILE.write(
-            '# Analysing free energies contained in file(s) "%s"\n'
-            % input_file
-        )
+        FILE.write('# Analysing free energies contained in file(s) "%s"\n' % input_file)
 
         num_inputfiles = len(input_file)
 
@@ -470,9 +458,7 @@ if __name__ == "__main__":
         try:
             p = ap.AFigure()
             strt = int(len(x) / 10)
-            conv_plot = p.plot(
-                numpy.array(x[strt:]), numpy.array(y[strt:]), "."
-            )
+            conv_plot = p.plot(numpy.array(x[strt:]), numpy.array(y[strt:]), ".")
             FILE.write("\nPlot of free energy versus iteration\n")
             FILE.write(conv_plot + "\n\n")
         except Exception as e:
@@ -520,9 +506,7 @@ if __name__ == "__main__":
             )
 
             try:
-                FILE.write(
-                    " (quadrature = %s kcal mol-1)" % result[2].quadrature()
-                )
+                FILE.write(" (quadrature = %s kcal mol-1)" % result[2].quadrature())
             except:
                 pass
 
@@ -538,10 +522,7 @@ if __name__ == "__main__":
 
         if len(unknown) > 0:
             parser_mbar.print_help()
-            print(
-                "analyse_freenrg: error: unrecognized arguments: %s "
-                % unknown[0]
-            )
+            print("analyse_freenrg: error: unrecognized arguments: %s " % unknown[0])
             sys.exit(1)
 
         must_exit = False
@@ -550,9 +531,7 @@ if __name__ == "__main__":
         print("----------------------------------------------------------")
 
         if args.author:
-            print(
-                "\nanalyse_freenrg mbar was written by Antonia Mey (C) 2015-2017"
-            )
+            print("\nanalyse_freenrg mbar was written by Antonia Mey (C) 2015-2017")
             print(
                 "It is based on the pymbar analysis scripts (https://github.com/choderalab/pymbar)"
             )
@@ -564,8 +543,7 @@ if __name__ == "__main__":
             )
             print(
                 "This particular release can be downloaded here: "
-                "https://github.com/openbiosim/sire/releases/tag/v%s"
-                % Sire.__version__
+                "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__
             )
             must_exit = True
         if args.description:
@@ -655,9 +633,7 @@ if __name__ == "__main__":
 
                     if line.startswith("#Alchemical"):
                         if lamvals is None:
-                            lamvals = (
-                                line.split("(")[-1].split(")")[0].split(",")
-                            )
+                            lamvals = line.split("(")[-1].split(")")[0].split(",")
                             lamvals = numpy.array([float(i) for i in lamvals])
                             lam = lamvals
 
@@ -696,9 +672,7 @@ if __name__ == "__main__":
                 for line in open(f, encoding="utf-8"):
                     if line.startswith("#Alchemical"):
                         if lamvals is None:
-                            lamvals = (
-                                line.split("(")[-1].split(")")[0].split(",")
-                            )
+                            lamvals = line.split("(")[-1].split(")")[0].split(",")
                             lamvals = numpy.array([float(i) for i in lamvals])
                             lam = lamvals
 
@@ -756,21 +730,21 @@ if __name__ == "__main__":
             N_k[k] = data[k].shape[0]
 
         max_sample = int(max(N_k))
-        grad_kn = numpy.zeros(shape=(lamvals.shape[0], max_sample))
-        energies_kn = numpy.zeros(shape=(lamvals.shape[0], max_sample))
+        grad_kn = numpy.full(shape=(lamvals.shape[0], max_sample), fill_value=numpy.nan)
+        energies_kn = numpy.full(
+            shape=(lamvals.shape[0], max_sample), fill_value=numpy.nan
+        )
 
         for k in range(0, N_k.shape[0]):
-            grad_kn[k, 0 : N_k[k]] = data[k][
-                :, 2
-            ]  # get the gradient information
+            grad_kn[k, 0 : N_k[k]] = data[k][:, 2]  # get the gradient information
             energies_kn[k, 0 : N_k[k]] = data[k][
                 :, 1
             ]  # get the potential energies from the file.
 
         # Are the reduced perturbed potential energies generated at thermodynamic state k evaluated at state l, over
         # all n samples. This information is contained as is in the simulation file.
-        u_kln = numpy.zeros(
-            shape=(lamvals.shape[0], lamvals.shape[0], max_sample)
+        u_kln = numpy.full(
+            shape=(lamvals.shape[0], lamvals.shape[0], max_sample), fill_value=numpy.nan
         )
         for k in range(0, lamvals.shape[0]):
             u_kln[k, :, 0 : N_k[k]] = data[k][:, 5:].transpose()
@@ -793,13 +767,9 @@ if __name__ == "__main__":
             lamvals,
             subsample_obj.gradients_kn,
         )
-        print(
-            "#running mbar ===================================================="
-        )
+        print("#running mbar ====================================================")
         free_energy_obj.run_mbar(test_overlap)
-        print(
-            "#running mbar done ==============================================="
-        )
+        print("#running mbar done ===============================================")
         free_energy_obj.run_ti()
 
         ti_warn_msg = ""
@@ -811,14 +781,16 @@ if __name__ == "__main__":
             mbar_warn_msg = " #WARNING SUBSAMPLING ENERGIES RESULTED IN LESS THAN 50 SAMPLES, CONSIDER RERUN WITHOUT SUBSAMPLE OPTION"
 
         if not subsampling:
-            ti_warn_msg = " #WARNING SUBSAMPLING DISABLED, CONSIDER RERUN WITH SUBSAMPLING OPTION"
-            mbar_warn_msg = " #WARNING SUBSAMPLING DISABLED, CONSIDER RERUN WITH SUBSAMPLING OPTION"
+            ti_warn_msg = (
+                " #WARNING SUBSAMPLING DISABLED, CONSIDER RERUN WITH SUBSAMPLING OPTION"
+            )
+            mbar_warn_msg = (
+                " #WARNING SUBSAMPLING DISABLED, CONSIDER RERUN WITH SUBSAMPLING OPTION"
+            )
 
         if test_overlap:
             M = free_energy_obj.overlap_matrix
-            diag_elements = numpy.array(
-                [numpy.diag(M, k=1), numpy.diag(M, k=-1)]
-            )
+            diag_elements = numpy.array([numpy.diag(M, k=1), numpy.diag(M, k=-1)])
             if numpy.min(diag_elements) < 0.03:
                 warnings.warn(
                     "Off diagonal elements of the overlap matrix are smaller than 0.03! Your free energy estimate is "
@@ -831,9 +803,7 @@ if __name__ == "__main__":
         pairwise_F = free_energy_obj.pairwise_F
         pairwise_F[:, 2] = pairwise_F[:, 2] * T * k_boltz.value()
         pairwise_F[:, 3] = pairwise_F[:, 3] * T * k_boltz.value()
-        FILE.write(
-            bytes("#DG from neighbouring lambda in kcal/mol\n", "UTF-8")
-        )
+        FILE.write(bytes("#DG from neighbouring lambda in kcal/mol\n", "UTF-8"))
         numpy.savetxt(FILE, pairwise_F, fmt=["%.4f", "%.4f", "%.4f", "%.4f"])
 
         # mbar pmf
@@ -844,8 +814,8 @@ if __name__ == "__main__":
         numpy.savetxt(FILE, pmf_mbar, fmt=["%.4f", "%.4f", "%.4f"])
 
         # ti mean gradients and std.
-        grad_mean = numpy.mean(subsample_obj.gradients_kn, axis=1)
-        grad_std = numpy.std(subsample_obj.gradients_kn, axis=1)
+        grad_mean = numpy.nanmean(subsample_obj.gradients_kn, axis=1)
+        grad_std = numpy.nanstd(subsample_obj.gradients_kn, axis=1)
         grad_mean = grad_mean * T * k_boltz.value()
         grad_std = grad_std * T * k_boltz.value()
         FILE.write(

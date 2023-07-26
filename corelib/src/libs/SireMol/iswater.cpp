@@ -30,6 +30,8 @@
 
 #include "atomelements.h"
 
+#include "SireBase/parallel.h"
+
 using namespace SireMol;
 using namespace SireBase;
 
@@ -105,18 +107,37 @@ namespace SireMol
         if (molecules.isEmpty())
             return result;
 
-        result = QVector<bool>(molecules.count(), false);
+        const int nmols = molecules.count();
+
+        result = QVector<bool>(nmols, false);
         auto result_data = result.data();
 
         const auto element_property = map["element"];
 
-        for (int i = 0; i < molecules.count(); ++i)
+        if (SireBase::should_run_in_parallel(nmols, map))
         {
-            const auto &moldata = molecules[i].data();
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
+                {
+                    const auto &moldata = molecules[i].data();
 
-            if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                    if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                    {
+                        result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                    }
+            } });
+        }
+        else
+        {
+            for (int i = 0; i < molecules.count(); ++i)
             {
-                result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                const auto &moldata = molecules[i].data();
+
+                if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                {
+                    result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                }
             }
         }
 
@@ -131,18 +152,39 @@ namespace SireMol
         if (molecules.isEmpty())
             return result;
 
-        result = QVector<bool>(molecules.count(), false);
+        const auto &mols = molecules.toList();
+
+        const int nmols = mols.count();
+
+        result = QVector<bool>(nmols, false);
         auto result_data = result.data();
 
         const auto element_property = map["element"];
 
-        for (int i = 0; i < molecules.count(); ++i)
+        if (SireBase::should_run_in_parallel(nmols, map))
         {
-            const auto &moldata = molecules[i].read().data();
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
+                              {
+                for (int i = r.begin(); i < r.end(); ++i)
+                {
+                    const auto &moldata = mols.at(i).read().data();
 
-            if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                    if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                    {
+                        result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                    }
+            } });
+        }
+        else
+        {
+            for (int i = 0; i < nmols; ++i)
             {
-                result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                const auto &moldata = mols.at(i).read().data();
+
+                if (moldata.info().nAtoms() <= 6 and moldata.hasProperty(element_property))
+                {
+                    result_data[i] = _is_water(moldata.property(element_property).asA<AtomElements>());
+                }
             }
         }
 
