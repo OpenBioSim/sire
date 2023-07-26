@@ -83,6 +83,10 @@ namespace SireIO
 
     private:
         MoleculeParserPtr parser;
+
+        QMutex frame_mutex;
+        SireMol::Frame last_loaded_frame;
+        int last_loaded_frame_index;
     };
 
 } // namespace SireIO

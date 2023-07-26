@@ -376,9 +376,21 @@ namespace SireMol
             vws.detach();
             const int n = vws.count();
 
+            // make sure that the frame has been loaded into the cache
+            // before we loop in parallel - this will stop contention
+            // from threads that are copying data from the thread that
+            // wants to load the frame
+            if (n == 0)
+                return;
+
+            vws[0].loadFrame(frame, map);
+
+            if (n == 1)
+                return;
+
             if (_usesParallel(vws, map))
             {
-                tbb::parallel_for(tbb::blocked_range<int>(0, n), [&](tbb::blocked_range<int> r)
+                tbb::parallel_for(tbb::blocked_range<int>(1, n), [&](tbb::blocked_range<int> r)
                                   {
             for (int i = r.begin(); i < r.end(); ++i)
             {
@@ -387,7 +399,7 @@ namespace SireMol
             }
             else
             {
-                for (int i = 0; i < n; ++i)
+                for (int i = 1; i < n; ++i)
                 {
                     vws[i].loadFrame(frame, map);
                 }
