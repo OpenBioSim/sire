@@ -27,6 +27,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
   when not all lambda windows were run for equal lengths of time. 
 
+* Make sure atom serial number in PDB files are capped when renumbering when
+  TER records are present.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
