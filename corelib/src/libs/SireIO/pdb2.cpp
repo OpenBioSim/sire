@@ -2263,9 +2263,12 @@ int PDB2::parseWholeMolecule(const SireMol::Molecule &molecule, QVector<QString>
             PDBAtom atom(atoms(i), is_ter[i], map, errors);
             last_atom = atom;
 
+            // Set the serial number.
+            atom.setSerial(1 + iline++);
+
             // Generate a PDB atom data record.
             auto record = atom.toPDBRecord();
-            record.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' '));
+            record.replace(6, 5, QString::number(atom.getNumber()).rightJustified(5, ' '));
             last_record = record;
 
             // If this record follows a TER, yet belongs to the same chain, then
@@ -2280,11 +2283,18 @@ int PDB2::parseWholeMolecule(const SireMol::Molecule &molecule, QVector<QString>
                 atom_lines.append(record);
                 prev_ter = false;
 
+                // Work out the serial number for the TER record.
+                auto ter_serial = 1 + atom.getNumber();
+
+                // Cap serial number to formatting width.
+                if (ter_serial > 99999)
+                    ter_serial = 99999;
+
                 // Add a TER record for this atom.
                 if (is_ter[i])
                 {
                     atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                          .arg(iline + 1, 5)
+                                          .arg(ter_serial, 5)
                                           .arg(record.mid(17, 3))
                                           .arg(record.at(21))
                                           .arg(record.mid(22, 4))
@@ -2292,13 +2302,23 @@ int PDB2::parseWholeMolecule(const SireMol::Molecule &molecule, QVector<QString>
 
                     prev_ter = true;
                     prev_chain = atom.getChainID();
+                    iline++;
                 }
             }
         }
 
         // Now append all of the post-TER records.
         for (auto &line : post_ter_lines)
-            atom_lines.append(line.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' ')));
+        {
+            // Work out the serial number.
+            auto serial = 1 + iline++;
+
+            // Cap serial number to formatting width.
+            if (serial > 99999)
+                serial = 99999;
+
+            atom_lines.append(line.replace(6, 5, QString::number(serial).rightJustified(5, ' ')));
+        }
 
         return iline;
     }
@@ -2440,9 +2460,12 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
                 PDBAtom atom(molecule.atom(atomidx), is_ter[i], map, errors);
                 last_atom = atom;
 
+                // Set the serial number.
+                atom.setSerial(1 + iline++);
+
                 // Generate a PDB atom data record.
                 auto record = atom.toPDBRecord();
-                record.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' '));
+                record.replace(6, 5, QString::number(atom.getNumber()).rightJustified(5, ' '));
                 last_record = record;
 
                 // If this record follows a TER, yet belongs to the same chain, then
@@ -2457,11 +2480,18 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
                     atom_lines.append(record);
                     prev_ter = false;
 
+                    // Work out the serial number for the TER record.
+                    auto ter_serial = 1 + atom.getNumber();
+
+                    // Cap serial number to formatting width.
+                    if (ter_serial > 99999)
+                        ter_serial = 99999;
+
                     // Add a TER record for this atom.
                     if (is_ter[i])
                     {
                         atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                              .arg(iline + 1, 5)
+                                              .arg(ter_serial, 5)
                                               .arg(record.mid(17, 3))
                                               .arg(record.at(21))
                                               .arg(record.mid(22, 4))
@@ -2469,6 +2499,7 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
 
                         prev_ter = true;
                         prev_chain = atom.getChainID();
+                        iline++;
                     }
                 }
             }
@@ -2479,12 +2510,21 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
                 if (last_record.isEmpty())
                     atom_lines.append("TER");
                 else
+                {
+                    // Work out the serial number for the TER record.
+                    auto ter_serial = 1 + iline++;
+
+                    // Cap serial number to formatting width.
+                    if (ter_serial > 99999)
+                        ter_serial = 99999;
+
                     atom_lines.append(QString("TER   %1      %2 %3\%4\%5")
-                                          .arg(iline + 1, 5)
+                                          .arg(ter_serial, 5)
                                           .arg(last_record.mid(17, 3))
                                           .arg(last_record.at(21))
                                           .arg(last_record.mid(22, 4))
                                           .arg(last_record.at(26)));
+                }
 
                 prev_ter = true;
                 prev_chain = last_atom.getChainID();
@@ -2493,7 +2533,16 @@ int PDB2::parseMolecule(const SireMol::MoleculeView &sire_mol, QVector<QString> 
 
         // Now append all of the post-TER records.
         for (auto &line : post_ter_lines)
-            atom_lines.append(line.replace(6, 5, QString::number(1 + iline++).rightJustified(5, ' ')));
+        {
+            // Work out the serial number.
+            auto serial = 1 + iline++;
+
+            // Cap serial number to formatting width.
+            if (serial > 99999)
+                serial = 99999;
+
+            atom_lines.append(line.replace(6, 5, QString::number(serial).rightJustified(5, ' ')));
+        }
 
         return iline;
     }

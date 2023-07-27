@@ -677,7 +677,7 @@ class TrajectoryIterator:
             colnames.append(key)
             columns.append(np.zeros(nframes, dtype=float))
 
-        from ..utils import Console
+        from ..base import ProgressBar
 
         with ProgressBar(
             total=nframes, text="Looping through frames"
