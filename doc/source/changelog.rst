@@ -27,6 +27,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
   when not all lambda windows were run for equal lengths of time. 
 
+* Make sure atom serial number in PDB files are capped when renumbering when
+  TER records are present.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
@@ -41,6 +44,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed a bug in the writing of DCD headers, meaning that the files couldn't be read
   by other DCD reader software (written non-compliant header)
+
+* Fixed a bug in the trajectory measure code, where the ProgressBar class was
+  not being properly imported (`fix_88 <https://github.com/OpenBioSim/sire/issues/88>`__).
+
+* Fixed a deadlock in the file trajectory loading code. This was because multiple threads
+  trying to read the same frame lead to starvation of the thread that had progressed to
+  read the frame. Now a single thread loads the frame, with subsequent threads using
+  this cached load (`fix_88 <https://github.com/OpenBioSim/sire/issues/88>`__).
   
 * Optimised the speed of viewing large molecules in NGLView, plus of searching
   for water molecules. Added a new ``is_water`` function. Optimised the
