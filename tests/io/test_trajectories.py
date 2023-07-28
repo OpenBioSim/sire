@@ -114,10 +114,14 @@ def test_trajectories(tmpdir, ala_traj):
                 m2 = mols2.trajectory()[3].current()
                 print(m2.property("time"))
                 mols2 = sr.load(f[0], traj)
+                m2 = mols2.trajectory()[3].current()
+
                 for frame in mols2.trajectory():
                     print(frame.property("time"))
 
-                assert False
+                assert m.property("time").value() == pytest.approx(
+	                m2.property("time").value() + time_delta, precision)
+
         else:
             assert m2.property("time").value() == 0
 
