@@ -52,6 +52,72 @@ class SOMMContext(_Context):
     def __repr__(self):
         return self.__str__()
 
+    def get_platform(self):
+        """
+        Return the platform used for this simulation
+        """
+        return self.getPlatform()
+
+    def get_integrator(self):
+        """
+        Return the integrator used for the simulation
+        """
+        return self.getIntegrator()
+
+    def get_platform_properties(self):
+        """
+        Return all of the properties (and their values) of the
+        platform used to run the simulation.
+        """
+        props = {}
+
+        platform = self.getPlatform()
+
+        for key in platform.getPropertyNames():
+            props[key] = platform.getPropertyValue(self, key)
+
+        return props
+
+    def get_platform_property(self, key):
+        """
+        Return the value of the specified platform property
+        """
+        platform = self.getPlatform()
+
+        keys = platform.getPropertyNames()
+
+        if key not in keys:
+            keys = ", ".join(keys)
+
+            raise KeyError(
+                f"There is no platform property called {key} in the "
+                f"platform {platform.getName()}. Available properties "
+                f"are [ {keys} ]"
+            )
+
+        return platform.getPropertyValue(self, key)
+
+    def set_platform_property(self, key, value):
+        """
+        Set the value of the platform property 'key' to 'value'
+        """
+        platform = self.getPlatform()
+
+        keys = platform.getPropertyNames()
+
+        if key not in keys:
+            keys = ", ".join(keys)
+
+            raise KeyError(
+                f"There is no platform property called {key} in the "
+                f"platform {platform.getName()}. Available properties "
+                f"are [ {keys} ]"
+            )
+
+        from ._SireOpenMM import _openmm_set_context_platform_property
+
+        _openmm_set_context_platform_property(self, key, value)
+
     def get_atom_index(self):
         """
         Return the index mapping from atom metadata to its index

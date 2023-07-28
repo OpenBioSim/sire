@@ -89,6 +89,10 @@ namespace SireOpenMM
                                                             const SireBase::PropertyMap &map);
 
     SireVol::SpacePtr extract_space(const OpenMM::State &state);
+
+    void set_context_platform_property(OpenMM::Context &context,
+                                       const QString &key,
+                                       const QString &value);
 }
 
 #endif

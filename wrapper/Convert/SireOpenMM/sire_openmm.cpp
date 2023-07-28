@@ -807,6 +807,29 @@ namespace SireOpenMM
         return SelectorMol(ret);
     }
 
+    void set_context_platform_property(OpenMM::Context &context,
+                                       const QString &key,
+                                       const QString &value)
+    {
+        OpenMM::Platform &platform = context.getPlatform();
+
+        platform.setPropertyValue(context,
+                                  key.toStdString(),
+                                  value.toStdString());
+
+        QString new_value = QString::fromStdString(platform.getPropertyValue(context, key.toStdString()));
+
+        if (new_value != value)
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Unable to change the value of property %1 to `%2` in the "
+                                                    "platform %3. The property value is still '%4'.")
+                                                    .arg(key)
+                                                    .arg(value)
+                                                    .arg(QString::fromStdString(platform.getName()))
+                                                    .arg(new_value),
+                                                CODELOC);
+    }
+
     SelectorMol extract_coordinates(const OpenMM::State &state,
                                     const SelectorMol &mols,
                                     const PropertyMap &map)

@@ -121,6 +121,11 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             (bp::arg("state")),
             "Extract and return the space from 'state'");
 
+    bp::def("_openmm_set_context_platform_property",
+            &set_context_platform_property,
+            (bp::arg("context"), bp::arg("key"), bp::arg("value")),
+            "Set the Platform property for the passed context.");
+
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::System>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Context>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::State>());
