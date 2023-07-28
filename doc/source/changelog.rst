@@ -30,6 +30,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Make sure atom serial number in PDB files are capped when renumbering when
   TER records are present.
 
+* Updated ``FreeEnergyAnalysis.py`` to use the new pymbar 4 API.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
