@@ -178,7 +178,15 @@ get_exception(int atom0, int atom1, int start_index,
     }
 
     if (charge == 0 and epsilon == 0)
+    {
+        // openmm tries to optimise away zero parameters - this is an issue
+        // as perturbation requires that we don't remove them!
+        // If we don't do this, then we get a
+        // "updateParametersInContext: The set of non-excluded exceptions has changed"
+        /// exception when we update parameters in context
+        sigma = 1e-9;
         epsilon = 1e-9;
+    }
 
     return std::make_tuple(atom0 + start_index,
                            atom1 + start_index,
