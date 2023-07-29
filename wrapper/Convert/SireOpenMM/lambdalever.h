@@ -63,16 +63,19 @@ namespace SireOpenMM
         const char *what() const;
         static const char *typeName();
 
-        void set_lambda(OpenMM::Context &context, double lam_val) const;
+        void setLambda(OpenMM::Context &context, double lam_val) const;
 
-        void set_force_index(const QString &force, int index);
+        void setForceIndex(const QString &force, int index);
 
-        void add_perturbable_molecule(const OpenMMMolecule &molecule,
-                                      const QHash<QString, qint32> &start_indicies);
+        void addPerturbableMolecule(const OpenMMMolecule &molecule,
+                                    const QHash<QString, qint32> &start_indicies);
 
-        void set_schedule(const SireCAS::LambdaSchedule &schedule);
+        void setExceptionIndicies(int idx, const QString &ff,
+                                  const QVector<int> &exception_idxs);
 
-        SireCAS::LambdaSchedule schedule() const;
+        void setSchedule(const SireCAS::LambdaSchedule &schedule);
+
+        SireCAS::LambdaSchedule getSchedule() const;
 
     protected:
         /** Map from a forcefield name to its index in the associated System */

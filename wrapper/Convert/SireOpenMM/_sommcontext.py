@@ -161,3 +161,16 @@ class SOMMContext(_Context):
             return
 
         self._lambda_lever.set_lambda(self, lambda_value)
+
+    def get_potential_energy(self):
+        """
+        Calculate and return the potential energy of the system
+        """
+        s = self.getState(getEnergy=True)
+        return s.getPotentialEnergy()
+
+    def get_energy(self):
+        """
+        Synonym for self.get_potential_energy()
+        """
+        return self.get_potential_energy()

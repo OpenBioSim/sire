@@ -138,11 +138,11 @@ T *get_force(const QString &name, OpenMM::Context &context,
 }
 
 std::tuple<int, int, double, double, double>
-get_nb14_params(int atom0, int atom1, int start_index,
-                double coul_14_scl, double lj_14_scl,
-                const QVector<double> &morphed_charges,
-                const QVector<double> &morphed_sigmas,
-                const QVector<double> &morphed_epsilons)
+get_exception(int atom0, int atom1, int start_index,
+              double coul_14_scl, double lj_14_scl,
+              const QVector<double> &morphed_charges,
+              const QVector<double> &morphed_sigmas,
+              const QVector<double> &morphed_epsilons)
 {
     double charge = 0.0;
     double sigma = 0.0;
@@ -173,17 +173,20 @@ get_nb14_params(int atom0, int atom1, int start_index,
         }
 
         charge = coul_14_scl * morphed_charges.constData()[atom0] * morphed_charges.constData()[atom1];
-        sigma = lj_14_scl * morphed_sigmas.constData()[atom0] * morphed_sigmas.constData()[atom1];
-        epsilon = lj_14_scl * morphed_epsilons.constData()[atom0] * morphed_epsilons.constData()[atom1];
+        sigma = lj_14_scl * 0.5 * (morphed_sigmas.constData()[atom0] + morphed_sigmas.constData()[atom1]);
+        epsilon = lj_14_scl * std::sqrt(morphed_epsilons.constData()[atom0] * morphed_epsilons.constData()[atom1]);
     }
+
+    if (charge == 0 and epsilon == 0)
+        epsilon = 1e-9;
 
     return std::make_tuple(atom0 + start_index,
                            atom1 + start_index,
                            charge, sigma, epsilon);
 }
 
-void LambdaLever::set_lambda(OpenMM::Context &context,
-                             double lambda_value) const
+void LambdaLever::setLambda(OpenMM::Context &context,
+                            double lambda_value) const
 {
     // go over each forcefield and update the parameters in the forcefield,
     // and then pass those updated parameters to the context
@@ -278,30 +281,24 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
                 cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
             }
 
-            // we need to re-set the 1-4 scale factors using the new CLJ parameters
-            const double coul_14_scale = perturbable_mol.ffinfo.electrostatic14ScaleFactor();
-            const double lj_14_scale = perturbable_mol.ffinfo.vdw14ScaleFactor();
+            const auto idxs = perturbable_mol.exception_idxs.value("clj");
 
-            for (const auto &pair : perturbable_mol.standard_14_pairs)
+            if (not idxs.isEmpty())
             {
-                const auto nb14 = get_nb14_params(std::get<0>(pair), std::get<1>(pair),
-                                                  start_index, coul_14_scale, lj_14_scale,
-                                                  morphed_charges, morphed_sigmas, morphed_epsilons);
+                for (int j = 0; j < perturbable_mol.exception_params.count(); ++j)
+                {
+                    const auto &param = perturbable_mol.exception_params[j];
 
-                cljff->addException(std::get<0>(nb14), std::get<1>(nb14),
-                                    std::get<2>(nb14), std::get<3>(nb14),
-                                    std::get<4>(nb14), true);
-            }
+                    const auto p = get_exception(std::get<0>(param), std::get<1>(param),
+                                                 start_index, std::get<2>(param), std::get<3>(param),
+                                                 morphed_charges, morphed_sigmas, morphed_epsilons);
 
-            for (const auto &pair : perturbable_mol.custom_14_pairs)
-            {
-                const auto nb14 = get_nb14_params(std::get<0>(pair), std::get<1>(pair),
-                                                  start_index, std::get<2>(pair), std::get<3>(pair),
-                                                  morphed_charges, morphed_sigmas, morphed_epsilons);
-
-                cljff->addException(std::get<0>(nb14), std::get<1>(nb14),
-                                    std::get<2>(nb14), std::get<3>(nb14),
-                                    std::get<4>(nb14), true);
+                    cljff->setExceptionParameters(
+                        idxs[j],
+                        std::get<0>(p), std::get<1>(p),
+                        std::get<2>(p), std::get<3>(p),
+                        std::get<4>(p));
+                }
             }
         }
 
@@ -408,7 +405,7 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
         dihff->updateParametersInContext(context);
 }
 
-void LambdaLever::set_force_index(const QString &force, int index)
+void LambdaLever::setForceIndex(const QString &force, int index)
 {
     if (index < 0)
         throw SireError::invalid_index(QObject::tr(
@@ -420,20 +417,30 @@ void LambdaLever::set_force_index(const QString &force, int index)
     this->name_to_ffidx.insert(force, index);
 }
 
-void LambdaLever::add_perturbable_molecule(const OpenMMMolecule &molecule,
-                                           const QHash<QString, qint32> &starts)
+void LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
+                                         const QHash<QString, qint32> &starts)
 {
     // should add in some sanity checks for these inputs
     this->perturbable_mols.append(molecule);
     this->start_indicies.append(starts);
 }
 
-LambdaSchedule LambdaLever::schedule() const
+void LambdaLever::setExceptionIndicies(int mol_idx,
+                                       const QString &name,
+                                       const QVector<int> &exception_idxs)
+{
+    mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
+
+    this->perturbable_mols[mol_idx].exception_idxs.insert(
+        name, exception_idxs);
+}
+
+LambdaSchedule LambdaLever::getSchedule() const
 {
     return lambda_schedule;
 }
 
-void LambdaLever::set_schedule(const LambdaSchedule &sched)
+void LambdaLever::setSchedule(const LambdaSchedule &sched)
 {
     lambda_schedule = sched;
 }

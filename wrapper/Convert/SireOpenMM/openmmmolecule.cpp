@@ -203,7 +203,7 @@ inline qint64 to_pair(qint64 x, qint64 y)
         return x << 32 | y & 0x00000000FFFFFFFF;
 }
 
-std::tuple<int, int, double, double, double> OpenMMMolecule::get_nb14_params(
+std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
     int atom0, int atom1, int start_index, double coul_14_scl, double lj_14_scl) const
 {
     double charge = 0.0;
@@ -223,8 +223,8 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::get_nb14_params(
         const auto &clj1 = cljs.constData()[atom1];
 
         charge = coul_14_scl * std::get<0>(clj0) * std::get<0>(clj1);
-        sigma = lj_14_scl * std::get<1>(clj0) * std::get<1>(clj1);
-        epsilon = lj_14_scl * std::get<2>(clj0) * std::get<2>(clj1);
+        sigma = lj_14_scl * 0.5 * (std::get<1>(clj0) + std::get<1>(clj1));
+        epsilon = lj_14_scl * std::sqrt(std::get<2>(clj0) * std::get<2>(clj1));
     }
 
     return std::make_tuple(atom0 + start_index,
@@ -519,12 +519,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
-    // now find all of the 1-4 pairs that don't have standard 1-4 values
-    const double coul_14_scale = ffinfo.electrostatic14ScaleFactor();
-    const double lj_14_scale = ffinfo.vdw14ScaleFactor();
-
-    custom_14_pairs.clear();
-    standard_14_pairs.clear();
+    exception_params.clear();
 
     for (auto it = params.nb14s().constBegin();
          it != params.nb14s().constEnd();
@@ -538,18 +533,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const int atom0 = nbid.get<0>().value();
         const int atom1 = nbid.get<1>().value();
 
-        if (std::abs(cscl - coul_14_scale) > 0.0001 or
-            std::abs(ljscl - lj_14_scale) > 0.0001)
-        {
-            // this is a custom 1-4 pair with custom scale factors
-            custom_14_pairs.append(std::make_tuple(
-                atom0, atom1, cscl, ljscl));
-        }
-        else
-        {
-            // this is a 1-4 pair with a standard scale factor
-            standard_14_pairs.append(std::make_pair(atom0, atom1));
-        }
+        exception_params.append(std::make_tuple(
+            atom0, atom1, cscl, ljscl));
     }
 
     // finally, add in all of the excluded atoms
@@ -561,8 +546,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         {
             auto pair = excl_pairs[i];
 
-            custom_14_pairs.append(std::make_tuple(
-                std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0));
+            exception_params.append(std::make_tuple(
+                std::get<0>(pair).value(), std::get<1>(pair).value(),
+                0.0, 0.0));
         }
 
         // and finally (finally!) find any atoms that are not bonded to

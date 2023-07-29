@@ -364,16 +364,16 @@ namespace SireOpenMM
 
         // make sure that we tell the lever the index of the named
         // forcefields when they are added
-        lambda_lever.set_force_index("clj", system.addForce(cljff));
+        lambda_lever.setForceIndex("clj", system.addForce(cljff));
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
-        lambda_lever.set_force_index("bond", system.addForce(bondff));
+        lambda_lever.setForceIndex("bond", system.addForce(bondff));
 
         OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
-        lambda_lever.set_force_index("angle", system.addForce(angff));
+        lambda_lever.setForceIndex("angle", system.addForce(angff));
 
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
-        lambda_lever.set_force_index("torsion", system.addForce(dihff));
+        lambda_lever.setForceIndex("torsion", system.addForce(dihff));
 
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
@@ -382,7 +382,7 @@ namespace SireOpenMM
         int start_index = 0;
 
         std::vector<std::pair<int, int>> bond_pairs;
-        std::vector<std::tuple<int, int, double, double, double>> nb_14_pairs;
+        std::vector<std::tuple<int, int, double, double, double>> exception_params;
 
         // get the 1-4 scaling factors from the first molecule
         const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
@@ -416,12 +416,13 @@ namespace SireOpenMM
                                                     CODELOC);
             }
 
+            QHash<QString, qint32> start_indicies;
+
             // is this a perturbable molecule (and we haven't disabled perturbations)?
             if (any_perturbable and mol.isPerturbable())
             {
                 // add a perturbable molecule, recording the start index
                 // for each of the forcefields
-                QHash<QString, qint32> start_indicies;
                 start_indicies.reserve(5);
 
                 start_indicies.insert("clj", start_index);
@@ -429,7 +430,7 @@ namespace SireOpenMM
                 start_indicies.insert("angle", angff->getNumAngles());
                 start_indicies.insert("torsion", dihff->getNumTorsions());
 
-                lambda_lever.add_perturbable_molecule(mol, start_indicies);
+                lambda_lever.addPerturbableMolecule(mol, start_indicies);
             }
 
             // first the atom parameters
@@ -450,29 +451,6 @@ namespace SireOpenMM
             {
                 bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
                                                     std::get<1>(bond) + start_index));
-            }
-
-            // now any standard 1-4 pairs
-            const double coul_14_scale = mol.ffinfo.electrostatic14ScaleFactor();
-            const double lj_14_scale = mol.ffinfo.vdw14ScaleFactor();
-
-            for (const auto &pair : mol.standard_14_pairs)
-            {
-                nb_14_pairs.push_back(mol.get_nb14_params(std::get<0>(pair),
-                                                          std::get<1>(pair),
-                                                          start_index,
-                                                          coul_14_scl,
-                                                          lj_14_scl));
-            }
-
-            // now any custom 1-4 pairs
-            for (const auto &pair : mol.custom_14_pairs)
-            {
-                nb_14_pairs.push_back(mol.get_nb14_params(std::get<0>(pair),
-                                                          std::get<1>(pair),
-                                                          start_index,
-                                                          std::get<2>(pair),
-                                                          std::get<3>(pair)));
             }
 
             // now bond parameters
@@ -518,14 +496,46 @@ namespace SireOpenMM
         // add exclusions based on the bonding of the molecules
         cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
-        // the exceptions include the parameters, so will need to
-        // be changed by the lambda lever
-
-        for (const auto &p : nb_14_pairs)
+        // now exceptions based on the 1-4 and excluded parameters
+        // in the molecules
+        for (int i = 0; i < nmols; ++i)
         {
-            cljff->addException(std::get<0>(p), std::get<1>(p),
-                                std::get<2>(p), std::get<3>(p),
-                                std::get<4>(p), true);
+            int start_index = start_indexes[i];
+            const auto &mol = openmm_mols_data[i];
+
+            QVector<int> exception_idxs;
+
+            const bool is_perturbable = any_perturbable and mol.isPerturbable();
+
+            if (is_perturbable)
+            {
+                exception_idxs = QVector<int>(mol.exception_params.count(), -1);
+            }
+
+            for (int j = 0; j < mol.exception_params.count(); ++j)
+            {
+                const auto &param = mol.exception_params[j];
+
+                auto p = mol.getException(std::get<0>(param),
+                                          std::get<1>(param),
+                                          start_index,
+                                          std::get<2>(param),
+                                          std::get<3>(param));
+
+                int idx = cljff->addException(std::get<0>(p), std::get<1>(p),
+                                              std::get<2>(p), std::get<3>(p),
+                                              std::get<4>(p), true);
+
+                if (is_perturbable)
+                {
+                    exception_idxs[j] = idx;
+                }
+            }
+
+            if (is_perturbable)
+            {
+                lambda_lever.setExceptionIndicies(i, "clj", exception_idxs);
+            }
         }
 
         // see if we want to remove COM motion
