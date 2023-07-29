@@ -203,6 +203,35 @@ inline qint64 to_pair(qint64 x, qint64 y)
         return x << 32 | y & 0x00000000FFFFFFFF;
 }
 
+std::tuple<int, int, double, double, double> OpenMMMolecule::get_nb14_params(
+    int atom0, int atom1, int start_index, double coul_14_scl, double lj_14_scl) const
+{
+    double charge = 0.0;
+    double sigma = 0.0;
+    double epsilon = 0.0;
+
+    if (coul_14_scl != 0 or lj_14_scl != 0)
+    {
+        if (atom0 < 0 or atom0 >= cljs.count() or atom1 < 0 or atom1 >= cljs.count())
+            throw SireError::invalid_index(QObject::tr(
+                                               "Cannot get CLJ parameters for atom %1 or atom %2.")
+                                               .arg(atom0)
+                                               .arg(atom1),
+                                           CODELOC);
+
+        const auto &clj0 = cljs.constData()[atom0];
+        const auto &clj1 = cljs.constData()[atom1];
+
+        charge = coul_14_scl * std::get<0>(clj0) * std::get<0>(clj1);
+        sigma = lj_14_scl * std::get<1>(clj0) * std::get<1>(clj1);
+        epsilon = lj_14_scl * std::get<2>(clj0) * std::get<2>(clj1);
+    }
+
+    return std::make_tuple(atom0 + start_index,
+                           atom1 + start_index,
+                           charge, sigma, epsilon);
+}
+
 void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                         const PropertyMap &map)
 {
@@ -494,8 +523,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     const double coul_14_scale = ffinfo.electrostatic14ScaleFactor();
     const double lj_14_scale = ffinfo.vdw14ScaleFactor();
 
-    bool is_arithmetic = ffinfo.usesArithmeticCombiningRules();
-    bool is_geometric = ffinfo.usesGeometricCombiningRules();
+    custom_14_pairs.clear();
+    standard_14_pairs.clear();
 
     for (auto it = params.nb14s().constBegin();
          it != params.nb14s().constEnd();
@@ -504,44 +533,22 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double cscl = it.value().cscl();
         const double ljscl = it.value().ljscl();
 
+        const auto nbid = it.key().map(molinfo);
+
+        const int atom0 = nbid.get<0>().value();
+        const int atom1 = nbid.get<1>().value();
+
         if (std::abs(cscl - coul_14_scale) > 0.0001 or
             std::abs(ljscl - lj_14_scale) > 0.0001)
         {
-            const auto nbid = it.key().map(molinfo);
-
-            const int atom0 = nbid.get<0>().value();
-            const int atom1 = nbid.get<1>().value();
-
-            const auto cgatomidx0 = idx_to_cgatomidx_data[atom0];
-            const auto cgatomidx1 = idx_to_cgatomidx_data[atom1];
-
-            const auto &clj0 = cljs[atom0];
-            const auto &clj1 = cljs[atom1];
-
-            const auto chg0 = std::get<0>(clj0);
-            const auto chg1 = std::get<0>(clj1);
-
-            const auto sig0 = std::get<1>(clj0);
-            const auto sig1 = std::get<1>(clj1);
-
-            const auto eps0 = std::get<2>(clj0);
-            const auto eps1 = std::get<2>(clj1);
-
-            double charge_pair = cscl * chg0 * chg1;
-            double sig_pair = 0.5 * ljscl * (sig0 + sig1);
-            double eps_pair = ljscl * std::sqrt(eps0 * eps1);
-
-            if (is_geometric)
-                sig_pair = ljscl * std::sqrt(sig0 * sig1);
-            else if (not is_arithmetic)
-                throw SireError::unsupported(QObject::tr(
-                                                 "We only support arithmetic or geometric combining rules. "
-                                                 "We cannot support the rules in %1.")
-                                                 .arg(ffinfo.toString()),
-                                             CODELOC);
-
-            custom_pairs.append(std::make_tuple(
-                atom0, atom1, charge_pair, sig_pair, eps_pair));
+            // this is a custom 1-4 pair with custom scale factors
+            custom_14_pairs.append(std::make_tuple(
+                atom0, atom1, cscl, ljscl));
+        }
+        else
+        {
+            // this is a 1-4 pair with a standard scale factor
+            standard_14_pairs.append(std::make_pair(atom0, atom1));
         }
     }
 
@@ -554,8 +561,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         {
             auto pair = excl_pairs[i];
 
-            custom_pairs.append(std::make_tuple(
-                std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0, 0.0));
+            custom_14_pairs.append(std::make_tuple(
+                std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0));
         }
 
         // and finally (finally!) find any atoms that are not bonded to
@@ -754,6 +761,10 @@ void OpenMMMolecule::alignInternals()
     }
 
     perturbed->dih_params = dih_params_1;
+
+    // we may need to align the the standard_14_pairs
+    // and the custom_14_pairs - this is the work that will be needed
+    // if the bonding changes across the perturbation!
 }
 
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const

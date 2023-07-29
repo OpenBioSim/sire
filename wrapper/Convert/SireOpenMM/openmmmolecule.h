@@ -62,6 +62,11 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
 
+        std::tuple<int, int, double, double, double> get_nb14_params(int atom0, int atom1,
+                                                                     int start_index,
+                                                                     double coul_14_scl,
+                                                                     double lj_14_scl) const;
+
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of
          *  this SireOpenMM converter library.
@@ -104,8 +109,11 @@ namespace SireOpenMM
         /** Indexes of all bond pairs */
         QVector<std::pair<int, int>> bond_pairs;
 
+        /** Indexes of pairs with standard 1-4 interactions */
+        QVector<std::pair<int, int>> standard_14_pairs;
+
         /** Indexes of pairs with custom 1-4 interactions */
-        QVector<std::tuple<int, int, double, double, double>> custom_pairs;
+        QVector<std::tuple<int, int, double, double>> custom_14_pairs;
 
         /** All the bond parameters */
         QVector<std::tuple<int, int, double, double>> bond_params;

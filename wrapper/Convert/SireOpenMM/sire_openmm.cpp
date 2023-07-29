@@ -382,7 +382,7 @@ namespace SireOpenMM
         int start_index = 0;
 
         std::vector<std::pair<int, int>> bond_pairs;
-        std::vector<std::tuple<int, int, double, double, double>> custom_pairs;
+        std::vector<std::tuple<int, int, double, double, double>> nb_14_pairs;
 
         // get the 1-4 scaling factors from the first molecule
         const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
@@ -452,14 +452,27 @@ namespace SireOpenMM
                                                     std::get<1>(bond) + start_index));
             }
 
-            // now any custom pairs
-            for (const auto &pair : mol.custom_pairs)
+            // now any standard 1-4 pairs
+            const double coul_14_scale = mol.ffinfo.electrostatic14ScaleFactor();
+            const double lj_14_scale = mol.ffinfo.vdw14ScaleFactor();
+
+            for (const auto &pair : mol.standard_14_pairs)
             {
-                custom_pairs.push_back(std::make_tuple(std::get<0>(pair) + start_index,
-                                                       std::get<1>(pair) + start_index,
-                                                       std::get<2>(pair),
-                                                       std::get<3>(pair),
-                                                       std::get<4>(pair)));
+                nb_14_pairs.push_back(mol.get_nb14_params(std::get<0>(pair),
+                                                          std::get<1>(pair),
+                                                          start_index,
+                                                          coul_14_scl,
+                                                          lj_14_scl));
+            }
+
+            // now any custom 1-4 pairs
+            for (const auto &pair : mol.custom_14_pairs)
+            {
+                nb_14_pairs.push_back(mol.get_nb14_params(std::get<0>(pair),
+                                                          std::get<1>(pair),
+                                                          start_index,
+                                                          std::get<2>(pair),
+                                                          std::get<3>(pair)));
             }
 
             // now bond parameters
@@ -505,14 +518,15 @@ namespace SireOpenMM
         // add exclusions based on the bonding of the molecules
         cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
-        for (const auto &p : custom_pairs)
+        // the exceptions include the parameters, so will need to
+        // be changed by the lambda lever
+
+        for (const auto &p : nb_14_pairs)
         {
             cljff->addException(std::get<0>(p), std::get<1>(p),
                                 std::get<2>(p), std::get<3>(p),
-                                std::get<4>(p), false);
+                                std::get<4>(p), true);
         }
-
-        // will have to add exceptions for perturbable forces
 
         // see if we want to remove COM motion
         const auto com_remove_prop = map["com_reset_frequency"];

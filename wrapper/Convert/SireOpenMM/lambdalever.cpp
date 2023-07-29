@@ -137,6 +137,51 @@ T *get_force(const QString &name, OpenMM::Context &context,
     return t_force;
 }
 
+std::tuple<int, int, double, double, double>
+get_nb14_params(int atom0, int atom1, int start_index,
+                double coul_14_scl, double lj_14_scl,
+                const QVector<double> &morphed_charges,
+                const QVector<double> &morphed_sigmas,
+                const QVector<double> &morphed_epsilons)
+{
+    double charge = 0.0;
+    double sigma = 0.0;
+    double epsilon = 0.0;
+
+    if (coul_14_scl != 0 or lj_14_scl != 0)
+    {
+        const int n = morphed_charges.count();
+
+        if (morphed_sigmas.count() != n or morphed_epsilons.count() != n)
+        {
+            throw SireError::program_bug(QObject::tr(
+                                             "Expect same number of parameters! %1 vs %2 vs %3")
+                                             .arg(n)
+                                             .arg(morphed_sigmas.count())
+                                             .arg(morphed_epsilons.count()),
+                                         CODELOC);
+        }
+
+        if (atom0 < 0 or atom0 >= n or atom1 < 0 or atom1 >= n)
+        {
+            throw SireError::invalid_index(QObject::tr(
+                                               "Wrong number of parameters (%1) for these atoms (%2, %3)")
+                                               .arg(n)
+                                               .arg(atom0)
+                                               .arg(atom1),
+                                           CODELOC);
+        }
+
+        charge = coul_14_scl * morphed_charges.constData()[atom0] * morphed_charges.constData()[atom1];
+        sigma = lj_14_scl * morphed_sigmas.constData()[atom0] * morphed_sigmas.constData()[atom1];
+        epsilon = lj_14_scl * morphed_epsilons.constData()[atom0] * morphed_epsilons.constData()[atom1];
+    }
+
+    return std::make_tuple(atom0 + start_index,
+                           atom1 + start_index,
+                           charge, sigma, epsilon);
+}
+
 void LambdaLever::set_lambda(OpenMM::Context &context,
                              double lambda_value) const
 {
@@ -231,6 +276,32 @@ void LambdaLever::set_lambda(OpenMM::Context &context,
             for (int j = 0; j < nparams; ++j)
             {
                 cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+            }
+
+            // we need to re-set the 1-4 scale factors using the new CLJ parameters
+            const double coul_14_scale = perturbable_mol.ffinfo.electrostatic14ScaleFactor();
+            const double lj_14_scale = perturbable_mol.ffinfo.vdw14ScaleFactor();
+
+            for (const auto &pair : perturbable_mol.standard_14_pairs)
+            {
+                const auto nb14 = get_nb14_params(std::get<0>(pair), std::get<1>(pair),
+                                                  start_index, coul_14_scale, lj_14_scale,
+                                                  morphed_charges, morphed_sigmas, morphed_epsilons);
+
+                cljff->addException(std::get<0>(nb14), std::get<1>(nb14),
+                                    std::get<2>(nb14), std::get<3>(nb14),
+                                    std::get<4>(nb14), true);
+            }
+
+            for (const auto &pair : perturbable_mol.custom_14_pairs)
+            {
+                const auto nb14 = get_nb14_params(std::get<0>(pair), std::get<1>(pair),
+                                                  start_index, std::get<2>(pair), std::get<3>(pair),
+                                                  morphed_charges, morphed_sigmas, morphed_epsilons);
+
+                cljff->addException(std::get<0>(nb14), std::get<1>(nb14),
+                                    std::get<2>(nb14), std::get<3>(nb14),
+                                    std::get<4>(nb14), true);
             }
         }
 
