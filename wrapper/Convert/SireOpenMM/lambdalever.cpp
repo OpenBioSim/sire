@@ -173,7 +173,7 @@ get_exception(int atom0, int atom1, int start_index,
         }
 
         charge = coul_14_scl * morphed_charges.constData()[atom0] * morphed_charges.constData()[atom1];
-        sigma = lj_14_scl * 0.5 * (morphed_sigmas.constData()[atom0] + morphed_sigmas.constData()[atom1]);
+        sigma = 0.5 * (morphed_sigmas.constData()[atom0] + morphed_sigmas.constData()[atom1]);
         epsilon = lj_14_scl * std::sqrt(morphed_epsilons.constData()[atom0] * morphed_epsilons.constData()[atom1]);
     }
 

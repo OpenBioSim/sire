@@ -223,11 +223,11 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
         const auto &clj1 = cljs.constData()[atom1];
 
         charge = coul_14_scl * std::get<0>(clj0) * std::get<0>(clj1);
-        sigma = lj_14_scl * 0.5 * (std::get<1>(clj0) + std::get<1>(clj1));
+        sigma = 0.5 * (std::get<1>(clj0) + std::get<1>(clj1));
         epsilon = lj_14_scl * std::sqrt(std::get<2>(clj0) * std::get<2>(clj1));
     }
 
-    if (charge == 0 and epsilon == 0)
+    if (this->isPerturbable() and charge == 0 and epsilon == 0)
     {
         // openmm tries to optimise away zero parameters - this is an issue
         // as perturbation requires that we don't remove them!
