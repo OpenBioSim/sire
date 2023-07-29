@@ -49,7 +49,15 @@ System load_molecules(const QStringList &files,
             if (f.endsWith(".s3"))
             {
                 // try to load this as a Sire s3 file
-                return SireStream::loadType<System>(f);
+                try
+                {
+                    return SireStream::loadType<System>(f);
+                }
+                catch (...)
+                {
+                    // it couldn't be loaded - try one of the
+                    // parsers below to try to read it
+                }
             }
         }
 
