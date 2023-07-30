@@ -40,8 +40,11 @@ def _run_test(mols, is_slow=False):
     mols0 = get_end_state(merge, "0", "1") + water
     mols1 = get_end_state(merge, "1", "0") + water
 
+    # need to use the reference platform on GH Actions
+    map = {"platform": "Reference"}
+
     # create the perturbable OpenMM system
-    omm = sr.convert.to(mols, "openmm")
+    omm = sr.convert.to(mols, "openmm", map=map)
 
     # a very basic lambda schedule
     l = omm.get_lambda_schedule()
@@ -52,10 +55,10 @@ def _run_test(mols, is_slow=False):
         return nrg.value_in_unit(nrg.unit)
 
     # now the lambda0 and lambda1 non-perturbable end states
-    omm0 = sr.convert.to(mols0, "openmm")
+    omm0 = sr.convert.to(mols0, "openmm", map=map)
     nrg0 = e(omm0.get_energy())
 
-    omm1 = sr.convert.to(mols1, "openmm")
+    omm1 = sr.convert.to(mols1, "openmm", map=map)
     nrg1 = e(omm1.get_energy())
 
     omm.set_lambda(0.0)
@@ -74,7 +77,9 @@ def _run_test(mols, is_slow=False):
     assert e(omm.get_energy()) == pytest.approx(nrg0)
 
     # now swap the end states - lambda 0 == 1 and lambda 1 == 0
-    omm = sr.convert.to(mols, "openmm", map={"swap_end_states": True})
+    map["swap_end_states"] = True
+
+    omm = sr.convert.to(mols, "openmm", map=map)
     omm.set_lambda_schedule(l)
 
     omm.set_lambda(0.0)
