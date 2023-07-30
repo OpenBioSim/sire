@@ -141,9 +141,25 @@ QString LambdaSchedule::toString() const
     if (this->isNull())
         return QObject::tr("LambdaSchedule::null");
 
-    return QObject::tr("LambdaSchedule( num_stages=%1 num_levers=%2 )")
-        .arg(this->nStages())
-        .arg(this->nLevers());
+    QStringList lines;
+
+    for (int i = 0; i < this->stage_names.count(); ++i)
+    {
+
+        lines.append(QString("  %1: %2")
+                         .arg(this->stage_names[i])
+                         .arg(this->default_equations[i].toString()));
+
+        for (const auto &lever : this->stage_equations[i].keys())
+        {
+            lines.append(QString("    %1 : %2")
+                             .arg(lever)
+                             .arg(this->stage_equations[i][lever].toString()));
+        }
+    }
+
+    return QObject::tr("LambdaSchedule(\n%1\n)")
+        .arg(lines.join("\n"));
 }
 
 Symbol LambdaSchedule::lambda_symbol("λ");
@@ -314,14 +330,11 @@ void LambdaSchedule::setEquation(const QString &stage,
                                  const QString &lever,
                                  const Expression &equation)
 {
-    if (not this->lever_names.contains(lever))
-        throw SireError::invalid_key(QObject::tr(
-                                         "There is no lever called '%1'. Valid levers are [ %2 ]")
-                                         .arg(lever)
-                                         .arg(this->lever_names.join(", ")),
-                                     CODELOC);
-
     auto &lever_expressions = this->stage_equations[this->find_stage(stage)];
+
+    if (not this->lever_names.contains(lever))
+        this->addLever(lever);
+
     lever_expressions[lever] = equation;
 }
 
