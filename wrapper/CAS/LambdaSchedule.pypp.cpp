@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireCAS/values.h"
 
+#include "SireError/errors.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -32,6 +34,19 @@ void register_LambdaSchedule_class(){
         LambdaSchedule_exposer_t LambdaSchedule_exposer = LambdaSchedule_exposer_t( "LambdaSchedule", "This is a schedule that specifies how parameters are changed according\nto a global lambda value. The change can be broken up by sub lever,\nand by stage.\n", bp::init< >("") );
         bp::scope LambdaSchedule_scope( LambdaSchedule_exposer );
         LambdaSchedule_exposer.def( bp::init< SireCAS::LambdaSchedule const & >(( bp::arg("other") ), "") );
+        { //::SireCAS::LambdaSchedule::addChargeScaleStages
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addChargeScaleStages_function_type)( double ) ;
+            addChargeScaleStages_function_type addChargeScaleStages_function_value( &::SireCAS::LambdaSchedule::addChargeScaleStages );
+            
+            LambdaSchedule_exposer.def( 
+                "addChargeScaleStages"
+                , addChargeScaleStages_function_value
+                , ( bp::arg("scale") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::addLever
         
             typedef void ( ::SireCAS::LambdaSchedule::*addLever_function_type)( ::QString const & ) ;
@@ -58,6 +73,18 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::addMorphStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addMorphStage_function_type)(  ) ;
+            addMorphStage_function_type addMorphStage_function_value( &::SireCAS::LambdaSchedule::addMorphStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addMorphStage"
+                , addMorphStage_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::addStage
         
             typedef void ( ::SireCAS::LambdaSchedule::*addStage_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
@@ -66,6 +93,19 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "addStage"
                 , addStage_function_value
+                , ( bp::arg("stage"), bp::arg("equation") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::appendStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*appendStage_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
+            appendStage_function_type appendStage_function_value( &::SireCAS::LambdaSchedule::appendStage );
+            
+            LambdaSchedule_exposer.def( 
+                "appendStage"
+                , appendStage_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
                 , "" );
@@ -91,6 +131,58 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "final"
                 , final_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::getConstant
+        
+            typedef double ( ::SireCAS::LambdaSchedule::*getConstant_function_type)( ::QString const & ) ;
+            getConstant_function_type getConstant_function_value( &::SireCAS::LambdaSchedule::getConstant );
+            
+            LambdaSchedule_exposer.def( 
+                "getConstant"
+                , getConstant_function_value
+                , ( bp::arg("constant") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::getConstant
+        
+            typedef double ( ::SireCAS::LambdaSchedule::*getConstant_function_type)( ::SireCAS::Symbol const & ) const;
+            getConstant_function_type getConstant_function_value( &::SireCAS::LambdaSchedule::getConstant );
+            
+            LambdaSchedule_exposer.def( 
+                "getConstant"
+                , getConstant_function_value
+                , ( bp::arg("constant") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::getConstantSymbol
+        
+            typedef ::SireCAS::Symbol ( ::SireCAS::LambdaSchedule::*getConstantSymbol_function_type)( ::QString const & ) const;
+            getConstantSymbol_function_type getConstantSymbol_function_value( &::SireCAS::LambdaSchedule::getConstantSymbol );
+            
+            LambdaSchedule_exposer.def( 
+                "getConstantSymbol"
+                , getConstantSymbol_function_value
+                , ( bp::arg("constant") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::getEquation
+        
+            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const & ) const;
+            getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
+            
+            LambdaSchedule_exposer.def( 
+                "getEquation"
+                , getEquation_function_value
+                , ( bp::arg("stage") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -154,7 +246,7 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "getLeverValues"
                 , getLeverValues_function_value
-                , ( bp::arg("lambda_values"), bp::arg("initial")=0., bp::arg("final")=1. )
+                , ( bp::arg("lambda_values"), bp::arg("initial")=1., bp::arg("final")=2. )
                 , "" );
         
         }
@@ -166,7 +258,7 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "getLeverValues"
                 , getLeverValues_function_value
-                , ( bp::arg("num_lambda")=(int)(101), bp::arg("initial")=0., bp::arg("final")=1. )
+                , ( bp::arg("num_lambda")=(int)(101), bp::arg("initial")=1., bp::arg("final")=2. )
                 , "" );
         
         }
@@ -219,6 +311,19 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::insertStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*insertStage_function_type)( int,::QString const &,::SireCAS::Expression const & ) ;
+            insertStage_function_type insertStage_function_value( &::SireCAS::LambdaSchedule::insertStage );
+            
+            LambdaSchedule_exposer.def( 
+                "insertStage"
+                , insertStage_function_value
+                , ( bp::arg("i"), bp::arg("stage"), bp::arg("equation") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::isNull
         
             typedef bool ( ::SireCAS::LambdaSchedule::*isNull_function_type)(  ) const;
@@ -239,6 +344,32 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "lam"
                 , lam_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::morph
+        
+            typedef ::QVector< double > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< double > const &,::QVector< double > const &,double ) const;
+            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
+            
+            LambdaSchedule_exposer.def( 
+                "morph"
+                , morph_function_value
+                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::morph
+        
+            typedef ::QVector< int > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< int > const &,::QVector< int > const &,double ) const;
+            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
+            
+            LambdaSchedule_exposer.def( 
+                "morph"
+                , morph_function_value
+                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -282,6 +413,19 @@ void register_LambdaSchedule_class(){
         
         }
         LambdaSchedule_exposer.def( bp::self == bp::self );
+        { //::SireCAS::LambdaSchedule::prependStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*prependStage_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
+            prependStage_function_type prependStage_function_value( &::SireCAS::LambdaSchedule::prependStage );
+            
+            LambdaSchedule_exposer.def( 
+                "prependStage"
+                , prependStage_function_value
+                , ( bp::arg("stage"), bp::arg("equation") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::removeEquation
         
             typedef void ( ::SireCAS::LambdaSchedule::*removeEquation_function_type)( ::QString const &,::QString const & ) ;
@@ -317,6 +461,32 @@ void register_LambdaSchedule_class(){
                 "removeLevers"
                 , removeLevers_function_value
                 , ( bp::arg("levers") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::setConstant
+        
+            typedef ::SireCAS::Symbol ( ::SireCAS::LambdaSchedule::*setConstant_function_type)( ::QString const &,double ) ;
+            setConstant_function_type setConstant_function_value( &::SireCAS::LambdaSchedule::setConstant );
+            
+            LambdaSchedule_exposer.def( 
+                "setConstant"
+                , setConstant_function_value
+                , ( bp::arg("constant"), bp::arg("value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::setConstant
+        
+            typedef ::SireCAS::Symbol ( ::SireCAS::LambdaSchedule::*setConstant_function_type)( ::SireCAS::Symbol const &,double ) ;
+            setConstant_function_type setConstant_function_value( &::SireCAS::LambdaSchedule::setConstant );
+            
+            LambdaSchedule_exposer.def( 
+                "setConstant"
+                , setConstant_function_value
+                , ( bp::arg("constant"), bp::arg("value") )
                 , bp::release_gil_policy()
                 , "" );
         
