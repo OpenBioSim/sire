@@ -1423,7 +1423,9 @@ Selector_Chain_.cursor = _cursors
 Selector_Segment_.cursor = _cursors
 
 
-def _trajectory(obj, align=None, smooth=None, wrap=None, map=None):
+def _trajectory(
+    obj, align=None, smooth=None, wrap=None, mapping=None, map=None
+):
     """
     Return an iterator over the trajectory of frames of this view.
 
@@ -1442,11 +1444,16 @@ def _trajectory(obj, align=None, smooth=None, wrap=None, map=None):
     wrap: bool
       Whether or not to wrap the coordinates into the periodic box
 
+    mapping: dict
+      Dictionary mapping from atom indexes in the trajectory to
+      atom indexes in the view to which this trajectory
+      should be aligned
+
     """
     from ._trajectory import TrajectoryIterator
 
     return TrajectoryIterator(
-        obj, align=align, smooth=smooth, wrap=wrap, map=map
+        obj, align=align, smooth=smooth, wrap=wrap, mapping=mapping, map=map
     )
 
 

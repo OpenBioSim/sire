@@ -48,7 +48,13 @@ if _has_nglview:
     @_nglview.register_backend("sire")
     class _SireStructureTrajectory(_nglview.Trajectory, _nglview.Structure):
         def __init__(
-            self, obj=None, align=None, smooth=None, wrap=None, map=None
+            self,
+            obj=None,
+            align=None,
+            smooth=None,
+            wrap=None,
+            mapping=None,
+            map=None,
         ):
             if type(obj) is _SireStructureTrajectory:
                 self._traj = obj._traj
@@ -77,7 +83,11 @@ if _has_nglview:
                     self._traj = obj
                 else:
                     self._traj = obj.trajectory(
-                        align=align, smooth=smooth, wrap=wrap, map=self._map
+                        align=align,
+                        smooth=smooth,
+                        wrap=wrap,
+                        mapping=mapping,
+                        map=self._map,
                     )
             else:
                 self._traj = None
@@ -305,6 +315,7 @@ if _has_nglview:
         align: str = None,
         smooth=False,
         wrap=True,
+        mapping=None,
         stage_parameters: str = None,
         map=None,
     ):
@@ -328,6 +339,11 @@ if _has_nglview:
           to the center of the periodic box (if a periodic box
           is used). If "True" is passed, then this will attempt
           to align *ALL* of the coordinates in the view.
+
+        mapping: dict
+            Dictionary mapping from atom indexes in the trajectory to
+            atom indexes in the view to which this trajectory
+            should be aligned
 
         smooth:
           Pass in the number of frames to smooth (average) the view
@@ -381,7 +397,12 @@ if _has_nglview:
 
         p1 = p.start("Traj")
         struc_traj = _SireStructureTrajectory(
-            obj, align=align, smooth=smooth, wrap=wrap, map=map
+            obj,
+            align=align,
+            smooth=smooth,
+            wrap=wrap,
+            mapping=mapping,
+            map=map,
         )
         p1.stop()
 

@@ -157,7 +157,7 @@ QString LambdaSchedule::toString() const
 
         for (const auto &lever : this->stage_equations[i].keys())
         {
-            lines.append(QString("    %1 : %2")
+            lines.append(QString("    %1: %2")
                              .arg(lever)
                              .arg(this->stage_equations[i][lever].toOpenMMString()));
         }

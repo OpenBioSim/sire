@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireStream/shareddatastream.h"
 
+#include "atommatch.h"
+
 #include "trajectoryaligner.h"
 
 #include "trajectoryaligner.h"
@@ -38,6 +40,7 @@ void register_TrajectoryAligner_class(){
         bp::scope TrajectoryAligner_scope( TrajectoryAligner_exposer );
         TrajectoryAligner_exposer.def( bp::init< SireMaths::Vector const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("center"), bp::arg("map")=SireBase::PropertyMap() ), "") );
         TrajectoryAligner_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atoms"), bp::arg("map")=SireBase::PropertyMap() ), "") );
+        TrajectoryAligner_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, QVector< SireMaths::Vector > const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atoms"), bp::arg("points"), bp::arg("map")=SireBase::PropertyMap() ), "") );
         TrajectoryAligner_exposer.def( bp::init< SireMol::TrajectoryAligner const & >(( bp::arg("other") ), "") );
         { //::SireMol::TrajectoryAligner::atoms
         

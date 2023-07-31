@@ -334,6 +334,10 @@ class System:
         wrap: bool
             Whether or not to wrap the coordinates into the periodic box
 
+        mapping: dict
+            Dictionary mapping from atom indexes in the trajectory to
+            atom indexes in the view to which this trajectory
+            should be aligned
         """
         from ..mol._trajectory import TrajectoryIterator
 

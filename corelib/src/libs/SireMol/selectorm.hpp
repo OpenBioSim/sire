@@ -1618,7 +1618,7 @@ namespace SireMol
 
         for (const auto &view : this->vws)
         {
-            if (view.data().number() == view.data().number())
+            if (view.data().number() == views.data().number())
             {
                 auto intersect = view.intersection(views);
 
@@ -1728,7 +1728,7 @@ namespace SireMol
     {
         for (const auto &view : this->vws)
         {
-            if (view == other)
+            if (view.contains(other))
                 return true;
         }
 

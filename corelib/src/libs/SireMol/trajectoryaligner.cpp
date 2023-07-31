@@ -27,6 +27,7 @@
 \*********************************************/
 
 #include "trajectoryaligner.h"
+#include "atommatch.h"
 
 #include "SireMaths/vector.h"
 
@@ -416,6 +417,44 @@ TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
     {
         const auto c = atms.property<Vector>(map["coordinates"]);
         refcoords = QVector<Vector>(c.begin(), c.end());
+
+        cent = refcoords[0];
+
+        if (refcoords.count() > 1)
+        {
+            Vector mincoords = cent;
+            Vector maxcoords = cent;
+
+            for (int i = 1; i < refcoords.count(); ++i)
+            {
+                mincoords.setMin(refcoords[i]);
+                maxcoords.setMax(refcoords[i]);
+            }
+
+            cent = mincoords + 0.5 * (maxcoords - mincoords);
+        }
+    }
+
+    this->_populate(m);
+}
+
+TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
+                                     const QVector<Vector> &points,
+                                     const PropertyMap &m)
+    : ConcreteProperty<TrajectoryAligner, Property>(),
+      atms(atoms), cent(0), nsmooth(1), map(m), autowrap(true)
+{
+    if (atms.count() > 0)
+    {
+        if (points.count() != atms.count())
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Not enought reference points (%1) to align this number "
+                                                    "of atoms (%2)")
+                                                    .arg(points.count())
+                                                    .arg(atoms.count()),
+                                                CODELOC);
+
+        refcoords = points;
 
         cent = refcoords[0];
 

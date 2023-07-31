@@ -11,7 +11,13 @@ class TrajectoryIterator:
     """
 
     def __init__(
-        self, view=None, align=None, smooth=None, wrap=None, map=None
+        self,
+        view=None,
+        align=None,
+        smooth=None,
+        wrap=None,
+        mapping=None,
+        map=None,
     ):
         if view is not None:
             from ..base import create_map
@@ -24,6 +30,7 @@ class TrajectoryIterator:
             self._times = None
             self._iter = None
             self._frame = None
+            self._mapping = mapping
 
             if align is True:
                 # passing in 'True' means align against everything
@@ -65,8 +72,53 @@ class TrajectoryIterator:
             from ..legacy.Mol import TrajectoryAligner
 
             if align is not None:
-                atoms = view[align].atoms()
-                self._aligner = TrajectoryAligner(atoms, map=self._map)
+                if hasattr(align, "atoms"):
+                    if mapping is None:
+                        atoms = view.atoms().intersection(align.atoms())
+
+                        if atoms.is_empty():
+                            # these two views don't intersect
+                            raise ValueError(
+                                "Cannot align trajectory, because there is no "
+                                "intersection between the atoms in the "
+                                "trajectory and the atoms against which this "
+                                "should be aligned. Pass in a mapping (via "
+                                "the 'mapping' argument ) that will map "
+                                "from an index of the atom in a trajectory "
+                                "to an atom in the view."
+                            )
+
+                        # update the atoms so they have the
+                        # same properties as align
+                        atoms.update(align)
+                        self._aligner = TrajectoryAligner(atoms, map=self._map)
+                    else:
+                        # use the mapping to go from the
+                        keys = list(mapping.keys())
+                        keys.sort()
+
+                        coords = []
+
+                        atoms = view.atoms()[keys]
+
+                        align_atoms = align.atoms()
+
+                        coords_property = self._map["coordinates"]
+
+                        for key in keys:
+                            coords.append(
+                                align_atoms[mapping[key]].property(
+                                    coords_property
+                                )
+                            )
+
+                        self._aligner = TrajectoryAligner(
+                            atoms, coords, map=self._map
+                        )
+
+                else:
+                    atoms = view[align].atoms()
+                    self._aligner = TrajectoryAligner(atoms, map=self._map)
             elif wrap or (smooth != 1):
                 self._aligner = TrajectoryAligner(
                     self._view.evaluate().center(),
@@ -84,6 +136,7 @@ class TrajectoryIterator:
             self._frame = None
             self._align = None
             self._aligner = None
+            self._mapping = None
 
     def __iter__(self):
         return self
@@ -156,7 +209,9 @@ class TrajectoryIterator:
         Return a copy of this trajectory where each frame will be aligned
         against the atoms that match the search string 'align'
         """
-        t = TrajectoryIterator(view=self._view, align=align, map=self._map)
+        t = TrajectoryIterator(
+            view=self._view, align=align, mapping=self._mapping, map=self._map
+        )
         t._values = self._values
         return t
 
@@ -167,7 +222,11 @@ class TrajectoryIterator:
         if 'smooth' is set to 'True')
         """
         t = TrajectoryIterator(
-            view=self._view, align=self._align, smooth=smooth, map=self._map
+            view=self._view,
+            align=self._align,
+            smooth=smooth,
+            mapping=self._mapping,
+            map=self._map,
         )
         t._values = self._values
         return t
@@ -178,7 +237,11 @@ class TrajectoryIterator:
         into the current space
         """
         t = TrajectoryIterator(
-            view=self._view, align=self._align, wrap=autowrap, map=self._map
+            view=self._view,
+            align=self._align,
+            wrap=autowrap,
+            mapping=self._mapping,
+            map=self._map,
         )
         t._values = self._values
         return t
