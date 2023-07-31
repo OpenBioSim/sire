@@ -53,7 +53,27 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         return;
     }
 
-    ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    bool is_perturbable = false;
+    bool swap_end_states = false;
+
+    if (mol.hasProperty(map["is_perturbable"]))
+    {
+        is_perturbable = mol.property(map["is_perturbable"]).asABoolean();
+
+        if (map.specified("swap_end_states"))
+        {
+            swap_end_states = map["swap_end_states"].value().asABoolean();
+        }
+    }
+
+    if (is_perturbable)
+    {
+        ffinfo = mol.property(map["forcefield0"]).asA<MMDetail>();
+    }
+    else
+    {
+        ffinfo = mol.property(map["forcefield"]).asA<MMDetail>();
+    }
 
     if (map.specified("constraint"))
     {
@@ -96,7 +116,36 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     if (ffinfo.isAmberStyle())
     {
-        this->constructFromAmber(mol, map);
+        if (is_perturbable)
+        {
+            // update the map to find the lambda=0 properties
+            QStringList props = {"LJ", "ambertype", "angle", "atomtype",
+                                 "bond", "charge", "coordinates",
+                                 "dihedral", "element", "forcefield",
+                                 "gb_radii", "gb_screening", "improper",
+                                 "intrascale", "mass", "name",
+                                 "parameters", "treechain"};
+
+            // we can't specialise these globally in case other molecules
+            // are not of amber type
+            auto map0 = map.addSuffix("0", props);
+            auto map1 = map.addSuffix("1", props);
+
+            if (swap_end_states)
+            {
+                std::swap(map0, map1);
+            }
+
+            this->constructFromAmber(mol, map0);
+
+            perturbed.reset(new OpenMMMolecule(*this));
+            perturbed->constructFromAmber(mol, map1);
+            this->alignInternals();
+        }
+        else
+        {
+            this->constructFromAmber(mol, map);
+        }
     }
     else
     {
@@ -113,6 +162,21 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
 OpenMMMolecule::~OpenMMMolecule()
 {
+}
+
+bool OpenMMMolecule::operator==(const OpenMMMolecule &other) const
+{
+    return this == &other;
+}
+
+bool OpenMMMolecule::operator!=(const OpenMMMolecule &other) const
+{
+    return not this->operator==(other);
+}
+
+bool OpenMMMolecule::isPerturbable() const
+{
+    return perturbed.get() != 0;
 }
 
 OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
@@ -139,10 +203,52 @@ inline qint64 to_pair(qint64 x, qint64 y)
         return x << 32 | y & 0x00000000FFFFFFFF;
 }
 
-void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &map)
+std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
+    int atom0, int atom1, int start_index, double coul_14_scl, double lj_14_scl) const
+{
+    double charge = 0.0;
+    double sigma = 0.0;
+    double epsilon = 0.0;
+
+    if (coul_14_scl != 0 or lj_14_scl != 0)
+    {
+        if (atom0 < 0 or atom0 >= cljs.count() or atom1 < 0 or atom1 >= cljs.count())
+            throw SireError::invalid_index(QObject::tr(
+                                               "Cannot get CLJ parameters for atom %1 or atom %2.")
+                                               .arg(atom0)
+                                               .arg(atom1),
+                                           CODELOC);
+
+        const auto &clj0 = cljs.constData()[atom0];
+        const auto &clj1 = cljs.constData()[atom1];
+
+        charge = coul_14_scl * std::get<0>(clj0) * std::get<0>(clj1);
+        sigma = 0.5 * (std::get<1>(clj0) + std::get<1>(clj1));
+        epsilon = lj_14_scl * std::sqrt(std::get<2>(clj0) * std::get<2>(clj1));
+    }
+
+    if (this->isPerturbable() and charge == 0 and epsilon == 0)
+    {
+        // openmm tries to optimise away zero parameters - this is an issue
+        // as perturbation requires that we don't remove them!
+        // If we don't do this, then we get a
+        // "updateParametersInContext: The set of non-excluded exceptions has changed"
+        /// exception when we update parameters in context
+        sigma = 1e-9;
+        epsilon = 1e-9;
+    }
+
+    return std::make_tuple(atom0 + start_index,
+                           atom1 + start_index,
+                           charge, sigma, epsilon);
+}
+
+void OpenMMMolecule::constructFromAmber(const Molecule &mol,
+                                        const PropertyMap &map)
 {
     const auto &moldata = mol.data();
-    const int nats = molinfo.nAtoms();
+    atoms = mol.atoms();
+    const int nats = atoms.count();
 
     if (nats <= 0)
     {
@@ -262,8 +368,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const auto &bondparam = it.value().first;
         const auto includes_h = it.value().second;
 
-        const int atom0 = bondid.get<0>().value();
-        const int atom1 = bondid.get<1>().value();
+        int atom0 = bondid.get<0>().value();
+        int atom1 = bondid.get<1>().value();
+
+        if (atom0 > atom1)
+            std::swap(atom0, atom1);
 
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
@@ -297,9 +406,12 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const auto &angparam = it.value().first;
         const auto includes_h = it.value().second;
 
-        const int atom0 = angid.get<0>().value();
-        const int atom1 = angid.get<1>().value();
-        const int atom2 = angid.get<2>().value();
+        int atom0 = angid.get<0>().value();
+        int atom1 = angid.get<1>().value();
+        int atom2 = angid.get<2>().value();
+
+        if (atom0 > atom2)
+            std::swap(atom0, atom2);
 
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
@@ -339,10 +451,16 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const auto &dihparam = it.value().first;
         const auto includes_h = it.value().second;
 
-        const int atom0 = dihid.get<0>().value();
-        const int atom1 = dihid.get<1>().value();
-        const int atom2 = dihid.get<2>().value();
-        const int atom3 = dihid.get<3>().value();
+        int atom0 = dihid.get<0>().value();
+        int atom1 = dihid.get<1>().value();
+        int atom2 = dihid.get<2>().value();
+        int atom3 = dihid.get<3>().value();
+
+        if (atom0 > atom3)
+        {
+            std::swap(atom0, atom3);
+            std::swap(atom1, atom2);
+        }
 
         for (const auto &term : dihparam.terms())
         {
@@ -412,12 +530,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         }
     }
 
-    // now find all of the 1-4 pairs that don't have standard 1-4 values
-    const double coul_14_scale = ffinfo.electrostatic14ScaleFactor();
-    const double lj_14_scale = ffinfo.vdw14ScaleFactor();
-
-    bool is_arithmetic = ffinfo.usesArithmeticCombiningRules();
-    bool is_geometric = ffinfo.usesGeometricCombiningRules();
+    exception_params.clear();
 
     for (auto it = params.nb14s().constBegin();
          it != params.nb14s().constEnd();
@@ -426,45 +539,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         const double cscl = it.value().cscl();
         const double ljscl = it.value().ljscl();
 
-        if (std::abs(cscl - coul_14_scale) > 0.0001 or
-            std::abs(ljscl - lj_14_scale) > 0.0001)
-        {
-            const auto nbid = it.key().map(molinfo);
+        const auto nbid = it.key().map(molinfo);
 
-            const int atom0 = nbid.get<0>().value();
-            const int atom1 = nbid.get<1>().value();
+        const int atom0 = nbid.get<0>().value();
+        const int atom1 = nbid.get<1>().value();
 
-            const auto cgatomidx0 = idx_to_cgatomidx_data[atom0];
-            const auto cgatomidx1 = idx_to_cgatomidx_data[atom1];
-
-            const auto &clj0 = cljs[atom0];
-            const auto &clj1 = cljs[atom1];
-
-            const auto chg0 = std::get<0>(clj0);
-            const auto chg1 = std::get<0>(clj1);
-
-            const auto sig0 = std::get<1>(clj0);
-            const auto sig1 = std::get<1>(clj1);
-
-            const auto eps0 = std::get<2>(clj0);
-            const auto eps1 = std::get<2>(clj1);
-
-            double charge_pair = cscl * chg0 * chg1;
-            double sig_pair = 0.5 * ljscl * (sig0 + sig1);
-            double eps_pair = ljscl * std::sqrt(eps0 * eps1);
-
-            if (is_geometric)
-                sig_pair = ljscl * std::sqrt(sig0 * sig1);
-            else if (not is_arithmetic)
-                throw SireError::unsupported(QObject::tr(
-                                                 "We only support arithmetic or geometric combining rules. "
-                                                 "We cannot support the rules in %1.")
-                                                 .arg(ffinfo.toString()),
-                                             CODELOC);
-
-            custom_pairs.append(std::make_tuple(
-                atom0, atom1, charge_pair, sig_pair, eps_pair));
-        }
+        exception_params.append(std::make_tuple(
+            atom0, atom1, cscl, ljscl));
     }
 
     // finally, add in all of the excluded atoms
@@ -476,8 +557,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
         {
             auto pair = excl_pairs[i];
 
-            custom_pairs.append(std::make_tuple(
-                std::get<0>(pair).value(), std::get<1>(pair).value(), 0.0, 0.0, 0.0));
+            exception_params.append(std::make_tuple(
+                std::get<0>(pair).value(), std::get<1>(pair).value(),
+                0.0, 0.0));
         }
 
         // and finally (finally!) find any atoms that are not bonded to
@@ -510,6 +592,178 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol, const PropertyMap &
     }
 }
 
+/** Go through all of the internals and compare them to the perturbed
+ *  state. Ensure that there is a one-to-one mapping, with them all
+ *  in the same order. Any that are missing are added as nulls in
+ *  the correct end state
+ */
+void OpenMMMolecule::alignInternals()
+{
+    QVector<std::tuple<int, int, double, double>> bond_params_1;
+    bond_params_1.reserve(bond_params.count());
+
+    QVector<bool> found_index(perturbed->bond_params.count(), false);
+
+    for (const auto &bond0 : bond_params)
+    {
+        int atom0 = std::get<0>(bond0);
+        int atom1 = std::get<1>(bond0);
+
+        bool found = false;
+
+        for (int i = 0; i < perturbed->bond_params.count(); ++i)
+        {
+            const auto &bond1 = perturbed->bond_params.at(i);
+
+            if (std::get<0>(bond1) == atom0 and std::get<1>(bond1) == atom1)
+            {
+                // we have found the matching bond!
+                bond_params_1.append(bond1);
+                found_index[i] = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (not found)
+        {
+            // add a null bond with the same r0, but null k
+            bond_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, std::get<2>(bond0), 0.0));
+        }
+    }
+
+    for (int i = 0; i < perturbed->bond_params.count(); ++i)
+    {
+        if (not found_index[i])
+        {
+            // need to add a bond missing in the reference state
+            const auto &bond1 = perturbed->bond_params.at(i);
+
+            int atom0 = std::get<0>(bond1);
+            int atom1 = std::get<1>(bond1);
+
+            // add a null bond with the same r0, but null k
+            bond_params.append(std::tuple<int, int, double, double>(atom0, atom1, std::get<2>(bond1), 0.0));
+            bond_params_1.append(bond1);
+        }
+    }
+
+    perturbed->bond_params = bond_params_1;
+
+    QVector<std::tuple<int, int, int, double, double>> ang_params_1;
+    ang_params_1.reserve(ang_params.count());
+
+    found_index = QVector<bool>(perturbed->ang_params.count(), false);
+
+    for (const auto &ang0 : ang_params)
+    {
+        int atom0 = std::get<0>(ang0);
+        int atom1 = std::get<1>(ang0);
+        int atom2 = std::get<2>(ang0);
+
+        bool found = false;
+
+        for (int i = 0; i < perturbed->ang_params.count(); ++i)
+        {
+            const auto &ang1 = perturbed->ang_params.at(i);
+
+            if (std::get<0>(ang1) == atom0 and std::get<1>(ang1) == atom1 and std::get<2>(ang1) == atom2)
+            {
+                // we have found the matching angle!
+                ang_params_1.append(ang1);
+                found_index[i] = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (not found)
+        {
+            // add a null angle with the same theta0, but null k
+            ang_params_1.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, std::get<3>(ang0), 0.0));
+        }
+    }
+
+    for (int i = 0; i < perturbed->ang_params.count(); ++i)
+    {
+        if (not found_index[i])
+        {
+            // need to add a bond missing in the reference state
+            const auto &ang1 = perturbed->ang_params.at(i);
+
+            int atom0 = std::get<0>(ang1);
+            int atom1 = std::get<1>(ang1);
+            int atom2 = std::get<2>(ang1);
+
+            // add a null angle with the same theta0, but null k
+            ang_params.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, std::get<3>(ang1), 0.0));
+            ang_params_1.append(ang1);
+        }
+    }
+
+    perturbed->ang_params = ang_params_1;
+
+    QVector<std::tuple<int, int, int, int, int, double, double>> dih_params_1;
+    dih_params_1.reserve(dih_params.count());
+
+    found_index = QVector<bool>(perturbed->dih_params.count(), false);
+
+    for (const auto &dih0 : dih_params)
+    {
+        int atom0 = std::get<0>(dih0);
+        int atom1 = std::get<1>(dih0);
+        int atom2 = std::get<2>(dih0);
+        int atom3 = std::get<3>(dih0);
+
+        bool found = false;
+
+        for (int i = 0; i < perturbed->dih_params.count(); ++i)
+        {
+            const auto &dih1 = perturbed->dih_params.at(i);
+
+            if (std::get<0>(dih1) == atom0 and std::get<1>(dih1) == atom1 and
+                std::get<2>(dih1) == atom2 and std::get<3>(dih1) == atom3)
+            {
+                // we have found the matching bond!
+                dih_params_1.append(dih1);
+                found_index[i] = true;
+                found = true;
+                break;
+            }
+        }
+
+        if (not found)
+        {
+            // add a null dihedral with the same periodicity and phase, but null k
+            dih_params_1.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, std::get<4>(dih0), std::get<5>(dih0), 0.0));
+        }
+    }
+
+    for (int i = 0; i < perturbed->dih_params.count(); ++i)
+    {
+        if (not found_index[i])
+        {
+            // need to add a bond missing in the reference state
+            const auto &dih1 = perturbed->dih_params.at(i);
+
+            int atom0 = std::get<0>(dih1);
+            int atom1 = std::get<1>(dih1);
+            int atom2 = std::get<2>(dih1);
+            int atom3 = std::get<3>(dih1);
+
+            // add a null dihedral with the same periodicity and phase, but null k
+            dih_params.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, std::get<4>(dih1), std::get<5>(dih1), 0.0));
+            dih_params_1.append(dih1);
+        }
+    }
+
+    perturbed->dih_params = dih_params_1;
+
+    // we may need to align the the standard_14_pairs
+    // and the custom_14_pairs - this is the work that will be needed
+    // if the bonding changes across the perturbation!
+}
+
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const
 {
     const auto *coords_data = coords.constData();
@@ -537,4 +791,174 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
             v += 1;
         }
     }
+}
+
+QVector<double> OpenMMMolecule::getCharges() const
+{
+    const int natoms = this->cljs.count();
+
+    QVector<double> charges(natoms);
+
+    auto charges_data = charges.data();
+    const auto cljs_data = this->cljs.constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        charges_data[i] = std::get<0>(cljs_data[i]);
+    }
+
+    return charges;
+}
+
+QVector<double> OpenMMMolecule::getSigmas() const
+{
+    const int natoms = this->cljs.count();
+
+    QVector<double> sigmas(natoms);
+
+    auto sigmas_data = sigmas.data();
+    const auto cljs_data = this->cljs.constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        sigmas_data[i] = std::get<1>(cljs_data[i]);
+    }
+
+    return sigmas;
+}
+
+QVector<double> OpenMMMolecule::getEpsilons() const
+{
+    const int natoms = this->cljs.count();
+
+    QVector<double> epsilons(natoms);
+
+    auto epsilons_data = epsilons.data();
+    const auto cljs_data = this->cljs.constData();
+
+    for (int i = 0; i < natoms; ++i)
+    {
+        epsilons_data[i] = std::get<2>(cljs_data[i]);
+    }
+
+    return epsilons;
+}
+
+QVector<double> OpenMMMolecule::getBondKs() const
+{
+    const int nbonds = this->bond_params.count();
+
+    QVector<double> bond_ks(nbonds);
+
+    auto bond_ks_data = bond_ks.data();
+    const auto bond_params_data = this->bond_params.constData();
+
+    for (int i = 0; i < nbonds; ++i)
+    {
+        bond_ks_data[i] = std::get<3>(bond_params_data[i]);
+    }
+
+    return bond_ks;
+}
+
+QVector<double> OpenMMMolecule::getBondLengths() const
+{
+    const int nbonds = this->bond_params.count();
+
+    QVector<double> bond_lengths(nbonds);
+
+    auto bond_lengths_data = bond_lengths.data();
+    const auto bond_params_data = this->bond_params.constData();
+
+    for (int i = 0; i < nbonds; ++i)
+    {
+        bond_lengths_data[i] = std::get<2>(bond_params_data[i]);
+    }
+
+    return bond_lengths;
+}
+
+QVector<double> OpenMMMolecule::getAngleKs() const
+{
+    const int nangs = this->ang_params.count();
+
+    QVector<double> ang_ks(nangs);
+
+    auto ang_ks_data = ang_ks.data();
+    const auto ang_params_data = this->ang_params.constData();
+
+    for (int i = 0; i < nangs; ++i)
+    {
+        ang_ks_data[i] = std::get<4>(ang_params_data[i]);
+    }
+
+    return ang_ks;
+}
+
+QVector<double> OpenMMMolecule::getAngleSizes() const
+{
+    const int nangs = this->ang_params.count();
+
+    QVector<double> ang_sizes(nangs);
+
+    auto ang_sizes_data = ang_sizes.data();
+    const auto ang_params_data = this->ang_params.constData();
+
+    for (int i = 0; i < nangs; ++i)
+    {
+        ang_sizes_data[i] = std::get<3>(ang_params_data[i]);
+    }
+
+    return ang_sizes;
+}
+
+QVector<int> OpenMMMolecule::getTorsionPeriodicities() const
+{
+    const int ndihs = this->dih_params.count();
+
+    QVector<int> dih_periodicities(ndihs);
+
+    auto dih_periodicities_data = dih_periodicities.data();
+    const auto dih_params_data = this->dih_params.constData();
+
+    for (int i = 0; i < ndihs; ++i)
+    {
+        dih_periodicities_data[i] = std::get<4>(dih_params_data[i]);
+    }
+
+    return dih_periodicities;
+}
+
+QVector<double> OpenMMMolecule::getTorsionPhases() const
+{
+    const int ndihs = this->dih_params.count();
+
+    QVector<double> dih_phases(ndihs);
+
+    auto dih_phases_data = dih_phases.data();
+    const auto dih_params_data = this->dih_params.constData();
+
+    for (int i = 0; i < ndihs; ++i)
+    {
+        dih_phases_data[i] = std::get<5>(dih_params_data[i]);
+    }
+
+    return dih_phases;
+}
+
+QVector<double> OpenMMMolecule::getTorsionKs() const
+{
+    const int ndihs = this->dih_params.count();
+
+    QVector<double> dih_ks(ndihs);
+
+    auto dih_ks_data = dih_ks.data();
+    const auto dih_params_data = this->dih_params.constData();
+
+    for (int i = 0; i < ndihs; ++i)
+    {
+        dih_ks_data[i] = std::get<6>(dih_params_data[i]);
+    }
+
+    return dih_ks;
 }

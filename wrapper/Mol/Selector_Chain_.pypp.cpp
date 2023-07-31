@@ -671,12 +671,14 @@ void register_Selector_Chain__class(){
                 , "" );
         
         }
+        Selector_Chain__exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::Chain > >() );
         Selector_Chain__exposer.def( bp::self + bp::self );
-        Selector_Chain__exposer.def( bp::self + bp::other< SireMol::ChainID >() );
         Selector_Chain__exposer.def( bp::self + bp::other< SireMol::Chain >() );
+        Selector_Chain__exposer.def( bp::self + bp::other< SireMol::ChainID >() );
+        Selector_Chain__exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::Chain > >() );
         Selector_Chain__exposer.def( bp::self - bp::self );
-        Selector_Chain__exposer.def( bp::self - bp::other< SireMol::ChainID >() );
         Selector_Chain__exposer.def( bp::self - bp::other< SireMol::Chain >() );
+        Selector_Chain__exposer.def( bp::self - bp::other< SireMol::ChainID >() );
         { //::SireMol::Selector< SireMol::Chain >::operator=
         
             typedef SireMol::Selector< SireMol::Chain > exported_class_t;

@@ -66,7 +66,6 @@ try:
     from ._SireOpenMM import (
         _sire_to_openmm_system,
         _openmm_system_to_sire,
-        _set_openmm_coordinates_and_velocities,
         _openmm_extract_coordinates,
         _openmm_extract_coordinates_and_velocities,
         _openmm_extract_space,
@@ -216,7 +215,7 @@ try:
         # Next, convert the sire system to an openmm system
 
         # system must be an openmm.System() or else we will crash!
-        coords_and_vels = _sire_to_openmm_system(system, mols, map)
+        openmm_metadata = _sire_to_openmm_system(system, mols, map)
 
         # If we want NPT and this is periodic then we have to
         # add the barostat to the system
@@ -302,46 +301,41 @@ try:
             precision = map["precision"].source()
             platform.setPropertyDefaultValue("Precision", precision)
 
-        if map.specified("device"):
-            device_index = None
-            device_name = None
+        if "Threads" in supported_properties and map.specified("threads"):
+            try:
+                threads = map["threads"].value().as_integer()
+            except Exception:
+                threads = map["threads"].source()
 
+            platform.setPropertyDefaultValue("Threads", str(threads))
+
+        if "DeviceIndex" in supported_properties and map.specified("device"):
             try:
                 device_index = map["device"].value().as_integer()
             except Exception:
-                device_name = map["device"].source()
+                device_index = map["device"].source()
 
-            if (
-                "DeviceIndex" in supported_properties
-                and device_index is not None
-            ):
-                platform.setPropertyDefaultValue(
-                    "DeviceIndex", str(device_index)
-                )
-
-            elif (
-                "DeviceName" in supported_properties
-                and device_name is not None
-            ):
-                platform.setPropertyDefaultValue("DeviceName", device_name)
+            platform.setPropertyDefaultValue("DeviceIndex", str(device_index))
 
         if map.specified("cpu_pme") and "UseCpuPme" in supported_properties:
             usecpu = int(map["cpu_pme"].value().as_boolean())
-            platform.setPropertyDefaultValue("UseCpuPme", str(usecpu))
+            platform.setPropertyDefaultValue("UseCpuPme", str(usecpu).lower())
 
         try:
-            context = openmm.Context(system, integrator, platform)
+            from ._sommcontext import SOMMContext
+
+            return SOMMContext(
+                system=system,
+                integrator=integrator,
+                platform=platform,
+                metadata=openmm_metadata,
+            )
         except Exception as e:
             raise ValueError(
                 "There was a problem creating the OpenMM context. Perhaps "
                 "the platform was not supported for this system, options "
                 f"or on this computer? The error message is: {e}"
             )
-
-        # place the coordinates and velocities into the context
-        _set_openmm_coordinates_and_velocities(context, coords_and_vels)
-
-        return context
 
     def openmm_extract_coordinates(state, mols, map):
         return _openmm_extract_coordinates(state, mols, map)

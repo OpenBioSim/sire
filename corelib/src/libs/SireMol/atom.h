@@ -65,6 +65,9 @@ namespace SireMol
     template <class T>
     class Selector;
 
+    template <class T>
+    class SelectorM;
+
     class Residue;
     class Chain;
     class CutGroup;
@@ -104,6 +107,14 @@ namespace SireMol
         static const char *typeName();
 
         Atom *clone() const;
+
+        SelectorM<Atom> operator+(const SelectorM<Atom> &atoms) const;
+        SelectorM<Atom> operator+(const Selector<Atom> &atoms) const;
+        SelectorM<Atom> operator+(const Atom &other) const;
+
+        SelectorM<Atom> operator-(const SelectorM<Atom> &atoms) const;
+        SelectorM<Atom> operator-(const Selector<Atom> &atoms) const;
+        SelectorM<Atom> operator-(const Atom &other) const;
 
         AtomSelection selection() const;
 

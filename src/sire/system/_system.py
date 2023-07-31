@@ -20,10 +20,12 @@ class System:
             from ..vol import Cartesian
             from ..units import picosecond
             from ..base import wrap
+            from ..legacy.Mol import MoleculeGroup
 
             self._system = _System()
             self._system.add_shared_property("space", Cartesian())
             self._system.add_shared_property("time", wrap(0 * picosecond))
+            self._system.add(MoleculeGroup("all"))
         else:
             if _System not in type(system).mro():
                 raise TypeError(

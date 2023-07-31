@@ -29,6 +29,7 @@ if (${SIRE_USE_OPENMM})
 
           _SireOpenMM.main.cpp
 
+          lambdalever.cpp
           openmmmolecule.cpp
           sire_openmm.cpp
 
@@ -51,6 +52,7 @@ if (${SIRE_USE_OPENMM})
                           SIRE_SireMol
                           SIRE_SireMM
                           SIRE_SireSystem
+                          SIRE_SireCAS
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
@@ -68,6 +70,10 @@ if (${SIRE_USE_OPENMM})
           ARCHIVE DESTINATION ${INSTALLDIR}
           RUNTIME DESTINATION ${INSTALLDIR}
           )
+
+    install( FILES _sommcontext.py
+         DESTINATION ${INSTALLDIR}
+       )
   else()
     message ( STATUS "OpenMM not found, so OpenMM support is disabled." )
   endif()

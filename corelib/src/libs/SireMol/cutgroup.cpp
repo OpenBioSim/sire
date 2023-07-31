@@ -34,6 +34,7 @@
 #include "evaluator.h"
 #include "mover.hpp"
 #include "selector.hpp"
+#include "selectorm.hpp"
 
 #include "cgatomidx.h"
 #include "groupatomids.h"
@@ -388,6 +389,36 @@ void CutGroup::assertContainsMetadata(const PropertyName &key, const PropertyNam
 const char *CutGroup::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<CutGroup>());
+}
+
+SelectorM<CutGroup> CutGroup::operator+(const SelectorM<CutGroup> &cutgroups) const
+{
+    return SelectorM<CutGroup>(*this) + cutgroups;
+}
+
+SelectorM<CutGroup> CutGroup::operator+(const Selector<CutGroup> &cutgroups) const
+{
+    return SelectorM<CutGroup>(*this) + cutgroups;
+}
+
+SelectorM<CutGroup> CutGroup::operator+(const CutGroup &other) const
+{
+    return SelectorM<CutGroup>(*this) + other;
+}
+
+SelectorM<CutGroup> CutGroup::operator-(const SelectorM<CutGroup> &cutgroups) const
+{
+    return SelectorM<CutGroup>(*this) - cutgroups;
+}
+
+SelectorM<CutGroup> CutGroup::operator-(const Selector<CutGroup> &cutgroups) const
+{
+    return SelectorM<CutGroup>(*this) - cutgroups;
+}
+
+SelectorM<CutGroup> CutGroup::operator-(const CutGroup &other) const
+{
+    return SelectorM<CutGroup>(*this) - other;
 }
 
 namespace SireMol

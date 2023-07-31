@@ -33,6 +33,7 @@ set ( SIRECAS_HEADERS
       integrationconstant.h
       invhyperbolicfuncs.h
       invtrigfuncs.h
+      lambdaschedule.h
       minmax.h
       powerconstant.h
       power.h
@@ -74,6 +75,7 @@ set ( SIRECAS_SOURCES
       integrationconstant.cpp
       invhyperbolicfuncs.cpp
       invtrigfuncs.cpp
+      lambdaschedule.cpp
       minmax.cpp
       powerconstant.cpp
       power.cpp

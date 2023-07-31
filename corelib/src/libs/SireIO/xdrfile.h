@@ -91,8 +91,9 @@ namespace SireIO
         /** The name of the file */
         QString fname;
 
-        /** Mutex to serialise access to this file */
-        QMutex mutex;
+        /** Mutex to serialise access to the XDR functions (they are
+         *  not thread-safe) */
+        static QMutex mutex;
 
         /** Handle to the XDR file */
         XDRFILE *f;

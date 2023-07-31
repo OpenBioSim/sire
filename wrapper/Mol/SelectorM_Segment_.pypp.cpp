@@ -1186,6 +1186,12 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        SelectorM_Segment__exposer.def( bp::self + bp::self );
+        SelectorM_Segment__exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Segment > >() );
+        SelectorM_Segment__exposer.def( bp::self + bp::other< SireMol::Segment >() );
+        SelectorM_Segment__exposer.def( bp::self - bp::self );
+        SelectorM_Segment__exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Segment > >() );
+        SelectorM_Segment__exposer.def( bp::self - bp::other< SireMol::Segment >() );
         { //::SireMol::SelectorM< SireMol::Segment >::operator=
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;

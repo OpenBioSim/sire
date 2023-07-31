@@ -34,6 +34,7 @@
 #include "mover.hpp"
 #include "segeditor.h"
 #include "selector.hpp"
+#include "selectorm.hpp"
 
 #include "groupatomids.h"
 
@@ -390,6 +391,36 @@ void Segment::assertContainsMetadata(const PropertyName &key, const PropertyName
 const char *Segment::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Segment>());
+}
+
+SelectorM<Segment> Segment::operator+(const SelectorM<Segment> &segments) const
+{
+    return SelectorM<Segment>(*this) + segments;
+}
+
+SelectorM<Segment> Segment::operator+(const Selector<Segment> &segments) const
+{
+    return SelectorM<Segment>(*this) + segments;
+}
+
+SelectorM<Segment> Segment::operator+(const Segment &other) const
+{
+    return SelectorM<Segment>(*this) + other;
+}
+
+SelectorM<Segment> Segment::operator-(const SelectorM<Segment> &segments) const
+{
+    return SelectorM<Segment>(*this) - segments;
+}
+
+SelectorM<Segment> Segment::operator-(const Selector<Segment> &segments) const
+{
+    return SelectorM<Segment>(*this) - segments;
+}
+
+SelectorM<Segment> Segment::operator-(const Segment &other) const
+{
+    return SelectorM<Segment>(*this) - other;
 }
 
 bool SireMol::detail::has_property(const Segment *, const MoleculeData &moldata, const PropertyName &key)

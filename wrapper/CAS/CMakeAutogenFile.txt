@@ -40,6 +40,7 @@ set ( PYPP_SOURCES
        Identities.pypp.cpp
        IntegerPower.pypp.cpp
        IntegrationConstant.pypp.cpp
+       LambdaSchedule.pypp.cpp
        LessOrEqualThan.pypp.cpp
        LessThan.pypp.cpp
        Ln.pypp.cpp

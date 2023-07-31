@@ -1266,6 +1266,27 @@ Atom.charge = _get_atom_charge
 Molecule.connectivity = lambda x: x.property("connectivity")
 
 
+def __molecule__add__(mol0, mol1):
+    """
+    Combine two molecules together into a system.
+    """
+    from ..system import System
+
+    mols = System()
+    mols.add(mol0)
+    mols.add(mol1)
+
+    from ..vol import Cartesian
+
+    mols.set_space(Cartesian())
+    mols.set_time(0)
+
+    return mols
+
+
+Molecule.__add__ = __molecule__add__
+
+
 # Here are some extra classes / functions defined as part of the
 # public API
 

@@ -125,3 +125,8 @@ def triclinic_protein_rst7():
     return sr.load_test_files(
         "triclinic_protein.prm7", "triclinic_protein.rst"
     )
+
+
+@pytest.fixture(scope="session")
+def merged_molecule():
+    return sr.load_test_files("merged_molecule.s3")

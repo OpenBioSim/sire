@@ -695,7 +695,7 @@ Selector<Atom> MoleculeView::atoms(const QStringList &names, const PropertyMap &
 
     for (int i = 1; i < names.count(); ++i)
     {
-        s = s + this->atoms(names[i], map);
+        s += this->atoms(names[i], map);
     }
 
     return s;
@@ -1058,7 +1058,7 @@ Selector<Residue> MoleculeView::residues(const QStringList &names, const Propert
 
     for (int i = 1; i < names.count(); ++i)
     {
-        s = s + this->residues(names[i], map);
+        s += this->residues(names[i], map);
     }
 
     return s;
@@ -1295,7 +1295,7 @@ Selector<Chain> MoleculeView::chains(const QStringList &names, const PropertyMap
 
     for (int i = 1; i < names.count(); ++i)
     {
-        s = s + this->chains(names[i], map);
+        s += this->chains(names[i], map);
     }
 
     return s;
@@ -1533,7 +1533,7 @@ Selector<Segment> MoleculeView::segments(const QStringList &names, const Propert
 
     for (int i = 1; i < names.count(); ++i)
     {
-        s = s + this->segments(names[i], map);
+        s += this->segments(names[i], map);
     }
 
     return s;

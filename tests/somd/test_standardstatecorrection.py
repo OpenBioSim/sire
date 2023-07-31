@@ -17,6 +17,15 @@ try:
 except ImportError:
     have_scipy = False
 
+
+try:
+    import mdtraj
+
+    have_mdtraj = True
+except ImportError:
+    have_mdtraj = False
+
+
 import sire as sr
 
 
@@ -81,6 +90,7 @@ def input_tmpdir(tmpdir_factory):
 @pytest.mark.skipif(sys.platform == "win32", reason="Not supported on Windows")
 @pytest.mark.skipif(not have_scipy, reason="Cannot run as scipy not available")
 @pytest.mark.skipif(not have_wget, reason="Cannot run as wget is not available")
+@pytest.mark.skipif(not have_mdtraj, reason="Cannot run as mdtraj not available")
 @pytest.mark.slow
 def test_standard_state_correction(input_tmpdir):
     """

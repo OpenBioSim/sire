@@ -24,17 +24,24 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added a :func:`sire.minimum_distance` function to calculate the minimum
   distance between atoms of two views.
 
-* Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
-  when not all lambda windows were run for equal lengths of time. 
-
-* Make sure atom serial number in PDB files are capped when renumbering when
-  TER records are present.
+* Added support for perturbable molecules to the OpenMM converter. Have addded
+  `LambdaLever` and `LambdaSchedule` classes that can be used to control
+  how forcefield parameters are changed with lambda. These levers change
+  the parameters in the OpenMM context, enabling simulations at different
+  values of lambda to be performed. This is initial functionality which
+  will be documented and expanded by subsequent PRs.
 
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
+
+* Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
+  when not all lambda windows were run for equal lengths of time.
+
+* Make sure atom serial number in PDB files are capped when renumbering when
+  TER records are present.
 
 * Fixed a bug in the AmberRst parser where velocities were written with the wrong
   unit (A ps-1 instead of AKMA time). Also added the correct labels to the AmberRst file.
@@ -52,20 +59,20 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   trying to read the same frame lead to starvation of the thread that had progressed to
   read the frame. Now a single thread loads the frame, with subsequent threads using
   this cached load (`fix_88 <https://github.com/OpenBioSim/sire/issues/88>`__).
-  
+
 * Optimised the speed of viewing large molecules in NGLView, plus of searching
   for water molecules. Added a new ``is_water`` function. Optimised the
   find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
   is now roughly O(N), using a hash to lookup at the molecule level, so that
   we don't have to test individual atoms.
-  
+
 * Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
  the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
  because not all required changes were included.
-  
+
 * Fix for crash when not passing a map to the SelectorImproper constructor
-  
-* Fix for crash when checking a list of atoms rather than a list of molecules  
+
+* Fix for crash when checking a list of atoms rather than a list of molecules
 
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------

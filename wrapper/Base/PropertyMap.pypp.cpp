@@ -36,6 +36,32 @@ void register_PropertyMap_class(){
         PropertyMap_exposer.def( bp::init< QString const &, SireBase::PropertyName const & >(( bp::arg("property"), bp::arg("propname") ), "Construct a map that holds just a single PropertyName") );
         PropertyMap_exposer.def( bp::init< QHash< QString, SireBase::PropertyName > const & >(( bp::arg("propnames") ), "Construct a map that holds lots of PropertyNames") );
         PropertyMap_exposer.def( bp::init< SireBase::PropertyMap const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireBase::PropertyMap::addPrefix
+        
+            typedef ::SireBase::PropertyMap ( ::SireBase::PropertyMap::*addPrefix_function_type)( ::QString const &,::QStringList const & ) const;
+            addPrefix_function_type addPrefix_function_value( &::SireBase::PropertyMap::addPrefix );
+            
+            PropertyMap_exposer.def( 
+                "addPrefix"
+                , addPrefix_function_value
+                , ( bp::arg("prefix"), bp::arg("properties") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::PropertyMap::addSuffix
+        
+            typedef ::SireBase::PropertyMap ( ::SireBase::PropertyMap::*addSuffix_function_type)( ::QString const &,::QStringList const & ) const;
+            addSuffix_function_type addSuffix_function_value( &::SireBase::PropertyMap::addSuffix );
+            
+            PropertyMap_exposer.def( 
+                "addSuffix"
+                , addSuffix_function_value
+                , ( bp::arg("suffix"), bp::arg("properties") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::PropertyMap::isDefault
         
             typedef bool ( ::SireBase::PropertyMap::*isDefault_function_type)(  ) const;

@@ -62,37 +62,53 @@ namespace SireOpenMM
         return true;
     }
 
-    CoordsAndVelocities::CoordsAndVelocities()
+    ////
+    //// Implementation of OpenMMMetaData
+    ////
+
+    OpenMMMetaData::OpenMMMetaData()
     {
     }
 
-    CoordsAndVelocities::CoordsAndVelocities(std::shared_ptr<std::vector<OpenMM::Vec3>> c,
-                                             std::shared_ptr<std::vector<OpenMM::Vec3>> v,
-                                             std::shared_ptr<std::vector<OpenMM::Vec3>> b)
-        : coords(c), vels(v), boxvecs(b)
+    OpenMMMetaData::OpenMMMetaData(const SireMol::SelectorM<SireMol::Atom> &i,
+                                   std::shared_ptr<std::vector<OpenMM::Vec3>> c,
+                                   std::shared_ptr<std::vector<OpenMM::Vec3>> v,
+                                   std::shared_ptr<std::vector<OpenMM::Vec3>> b,
+                                   const LambdaLever &l)
+        : atom_index(i), coords(c), vels(v), boxvecs(b), lambda_lever(l)
     {
     }
 
-    CoordsAndVelocities::~CoordsAndVelocities()
+    OpenMMMetaData::~OpenMMMetaData()
     {
     }
 
-    bool CoordsAndVelocities::hasCoordinates() const
+    SireMol::SelectorM<SireMol::Atom> OpenMMMetaData::index() const
+    {
+        return atom_index;
+    }
+
+    LambdaLever OpenMMMetaData::lambdaLever() const
+    {
+        return lambda_lever;
+    }
+
+    bool OpenMMMetaData::hasCoordinates() const
     {
         return coords.get() != 0;
     }
 
-    bool CoordsAndVelocities::hasVelocities() const
+    bool OpenMMMetaData::hasVelocities() const
     {
         return vels.get() != 0;
     }
 
-    bool CoordsAndVelocities::hasBoxVectors() const
+    bool OpenMMMetaData::hasBoxVectors() const
     {
         return boxvecs.get() != 0;
     }
 
-    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::coordinates() const
+    const std::vector<OpenMM::Vec3> &OpenMMMetaData::coordinates() const
     {
         if (coords.get() == 0)
             throw SireError::incompatible_error(QObject::tr(
@@ -102,7 +118,7 @@ namespace SireOpenMM
         return *coords;
     }
 
-    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::velocities() const
+    const std::vector<OpenMM::Vec3> &OpenMMMetaData::velocities() const
     {
         if (vels.get() == 0)
             throw SireError::incompatible_error(QObject::tr(
@@ -112,7 +128,7 @@ namespace SireOpenMM
         return *vels;
     }
 
-    const std::vector<OpenMM::Vec3> &CoordsAndVelocities::boxVectors() const
+    const std::vector<OpenMM::Vec3> &OpenMMMetaData::boxVectors() const
     {
         if (boxvecs.get() == 0)
             throw SireError::incompatible_error(QObject::tr(
@@ -121,6 +137,10 @@ namespace SireOpenMM
 
         return *boxvecs;
     }
+
+    ////
+    //// Implementation of standalone functions
+    ////
 
     SelectorMol openmm_system_to_sire(const OpenMM::System &mols,
                                       const PropertyMap &map)
@@ -132,9 +152,9 @@ namespace SireOpenMM
         return SelectorMol();
     }
 
-    CoordsAndVelocities sire_to_openmm_system(OpenMM::System &system,
-                                              const SelectorMol &mols,
-                                              const PropertyMap &map)
+    OpenMMMetaData sire_to_openmm_system(OpenMM::System &system,
+                                         const SelectorMol &mols,
+                                         const PropertyMap &map)
     {
         // we can assume that an empty system has been passed to us
 
@@ -147,7 +167,16 @@ namespace SireOpenMM
         if (nmols == 0)
         {
             // nothing to do
-            return CoordsAndVelocities();
+            return OpenMMMetaData();
+        }
+
+        // whether or not to ignore perturbations
+        bool ignore_perturbations = false;
+        bool any_perturbable = false;
+
+        if (map.specified("ignore_perturbations"))
+        {
+            ignore_perturbations = map["ignore_perturbations"].value().asABoolean();
         }
 
         // Extract all of the data needed by OpenMM from the Sire
@@ -172,11 +201,33 @@ namespace SireOpenMM
             }
         }
 
+        // check to see if there are any perturbable molecules
+        if (not ignore_perturbations)
+        {
+            for (int i = 0; i < nmols; ++i)
+            {
+                if (openmm_mols_data[i].isPerturbable())
+                {
+                    any_perturbable = true;
+                    break;
+                }
+            }
+        }
+
         // create all the OpenMM forcefields - ownership is taken by 'system'
+        // (memory leak until we give this to 'system')
+
+        // CLJ energy between all non-perturbable atoms
         OpenMM::NonbondedForce *cljff = new OpenMM::NonbondedForce();
 
-        // maybe should let people set this manually?
-        cljff->setUseDispersionCorrection(false);
+        bool use_dispersion_correction = false;
+
+        if (map.specified("use_dispersion_correction"))
+        {
+            use_dispersion_correction = map["use_dispersion_correction"].value().asABoolean();
+        }
+
+        cljff->setUseDispersionCorrection(use_dispersion_correction);
 
         // create the periodic box vectors
         std::shared_ptr<std::vector<OpenMM::Vec3>> boxvecs;
@@ -232,6 +283,8 @@ namespace SireOpenMM
         {
             const auto typ = ffinfo.cutoffType();
 
+            // need to set cutoff for perturbable forcefields
+
             if (typ == "PME" or typ == "EWALD")
             {
                 if (not ffinfo.space().isPeriodic())
@@ -242,10 +295,12 @@ namespace SireOpenMM
                                                         CODELOC);
                 }
 
-                if (typ == "PME")
-                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::PME);
-                else
-                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::Ewald);
+                auto nbmethod = OpenMM::NonbondedForce::PME;
+
+                if (typ != "PME")
+                    nbmethod = OpenMM::NonbondedForce::Ewald;
+
+                cljff->setNonbondedMethod(nbmethod);
 
                 double tolerance = ffinfo.getParameter("tolerance").value();
 
@@ -256,23 +311,28 @@ namespace SireOpenMM
             }
             else if (typ == "REACTION_FIELD")
             {
-                if (ffinfo.space().isPeriodic())
+                auto nbmethod = OpenMM::NonbondedForce::CutoffPeriodic;
+
+                if (not ffinfo.space().isPeriodic())
                 {
-                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::CutoffPeriodic);
-                }
-                else
-                {
-                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::CutoffNonPeriodic);
+                    nbmethod = OpenMM::NonbondedForce::CutoffNonPeriodic;
                 }
 
-                cljff->setReactionFieldDielectric(ffinfo.getParameter("dielectric").value());
+                auto dielectric = ffinfo.getParameter("dielectric").value();
+
+                if (dielectric <= 0)
+                    dielectric = 78.3;
+
+                cljff->setNonbondedMethod(nbmethod);
+                cljff->setReactionFieldDielectric(dielectric);
             }
             else if (typ == "CUTOFF")
             {
                 // use reaction field for non-periodic spaces, and PME for periodic
                 if (ffinfo.space().isPeriodic())
                 {
-                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::PME);
+                    const auto nbmethod = OpenMM::NonbondedForce::PME;
+                    cljff->setNonbondedMethod(nbmethod);
 
                     double tolerance = ffinfo.getParameter("tolerance").value();
 
@@ -283,7 +343,8 @@ namespace SireOpenMM
                 }
                 else
                 {
-                    cljff->setNonbondedMethod(OpenMM::NonbondedForce::CutoffNonPeriodic);
+                    const auto nbmethod = OpenMM::NonbondedForce::CutoffNonPeriodic;
+                    cljff->setNonbondedMethod(nbmethod);
 
                     double dielectric = ffinfo.getParameter("dielectric").value();
 
@@ -294,19 +355,25 @@ namespace SireOpenMM
                 }
             }
 
-            cljff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
+            const auto cutoff = ffinfo.cutoff().to(SireUnits::nanometers);
+            cljff->setCutoffDistance(cutoff);
         }
 
-        system.addForce(cljff);
+        // also populate a LambaLever for any perturbable molecules
+        LambdaLever lambda_lever;
+
+        // make sure that we tell the lever the index of the named
+        // forcefields when they are added
+        lambda_lever.setForceIndex("clj", system.addForce(cljff));
 
         OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
-        system.addForce(bondff);
+        lambda_lever.setForceIndex("bond", system.addForce(bondff));
 
         OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
-        system.addForce(angff);
+        lambda_lever.setForceIndex("angle", system.addForce(angff));
 
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
-        system.addForce(dihff);
+        lambda_lever.setForceIndex("torsion", system.addForce(dihff));
 
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
@@ -315,7 +382,7 @@ namespace SireOpenMM
         int start_index = 0;
 
         std::vector<std::pair<int, int>> bond_pairs;
-        std::vector<std::tuple<int, int, double, double, double>> custom_pairs;
+        std::vector<std::tuple<int, int, double, double, double>> exception_params;
 
         // get the 1-4 scaling factors from the first molecule
         const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
@@ -323,10 +390,17 @@ namespace SireOpenMM
 
         QVector<int> start_indexes(nmols);
 
+        // save the atoms in the order they are added to the system
+        SireMol::SelectorM<SireMol::Atom> atom_index;
+
         for (int i = 0; i < nmols; ++i)
         {
             start_indexes[i] = start_index;
             const auto &mol = openmm_mols_data[i];
+
+            // add all of the atoms to the index of atoms
+            // (we guarantee to add them in atomidx order)
+            atom_index += mol.atoms;
 
             if (std::abs(mol.ffinfo.electrostatic14ScaleFactor() - coul_14_scl) > 0.001 or
                 std::abs(mol.ffinfo.vdw14ScaleFactor() - lj_14_scl) > 0.001)
@@ -342,6 +416,23 @@ namespace SireOpenMM
                                                     CODELOC);
             }
 
+            QHash<QString, qint32> start_indicies;
+
+            // is this a perturbable molecule (and we haven't disabled perturbations)?
+            if (any_perturbable and mol.isPerturbable())
+            {
+                // add a perturbable molecule, recording the start index
+                // for each of the forcefields
+                start_indicies.reserve(5);
+
+                start_indicies.insert("clj", start_index);
+                start_indicies.insert("bond", bondff->getNumBonds());
+                start_indicies.insert("angle", angff->getNumAngles());
+                start_indicies.insert("torsion", dihff->getNumTorsions());
+
+                lambda_lever.addPerturbableMolecule(mol, start_indicies);
+            }
+
             // first the atom parameters
             auto masses_data = mol.masses.constData();
             auto cljs_data = mol.cljs.constData();
@@ -349,25 +440,17 @@ namespace SireOpenMM
             for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
                 system.addParticle(masses_data[j]);
+                const int atom_index = start_index + j;
+
                 const auto &clj = cljs_data[j];
+
                 cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
             }
 
-            // now the connectivity
             for (const auto &bond : mol.bond_pairs)
             {
                 bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
                                                     std::get<1>(bond) + start_index));
-            }
-
-            // now any custom pairs
-            for (const auto &pair : mol.custom_pairs)
-            {
-                custom_pairs.push_back(std::make_tuple(std::get<0>(pair) + start_index,
-                                                       std::get<1>(pair) + start_index,
-                                                       std::get<2>(pair),
-                                                       std::get<3>(pair),
-                                                       std::get<4>(pair)));
             }
 
             // now bond parameters
@@ -410,14 +493,49 @@ namespace SireOpenMM
 
         const int natoms = start_index;
 
-        // add exclusions based on the bonding of this molecule
+        // add exclusions based on the bonding of the molecules
         cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
-        for (const auto &p : custom_pairs)
+        // now exceptions based on the 1-4 and excluded parameters
+        // in the molecules
+        for (int i = 0; i < nmols; ++i)
         {
-            cljff->addException(std::get<0>(p), std::get<1>(p),
-                                std::get<2>(p), std::get<3>(p),
-                                std::get<4>(p), false);
+            int start_index = start_indexes[i];
+            const auto &mol = openmm_mols_data[i];
+
+            QVector<int> exception_idxs;
+
+            const bool is_perturbable = any_perturbable and mol.isPerturbable();
+
+            if (is_perturbable)
+            {
+                exception_idxs = QVector<int>(mol.exception_params.count(), -1);
+            }
+
+            for (int j = 0; j < mol.exception_params.count(); ++j)
+            {
+                const auto &param = mol.exception_params[j];
+
+                auto p = mol.getException(std::get<0>(param),
+                                          std::get<1>(param),
+                                          start_index,
+                                          std::get<2>(param),
+                                          std::get<3>(param));
+
+                int idx = cljff->addException(std::get<0>(p), std::get<1>(p),
+                                              std::get<2>(p), std::get<3>(p),
+                                              std::get<4>(p), true);
+
+                if (is_perturbable)
+                {
+                    exception_idxs[j] = idx;
+                }
+            }
+
+            if (is_perturbable)
+            {
+                lambda_lever.setExceptionIndicies(i, "clj", exception_idxs);
+            }
         }
 
         // see if we want to remove COM motion
@@ -454,7 +572,7 @@ namespace SireOpenMM
                     const int start_index = start_indexes_data[i];
                     const auto &mol = openmm_mols_data[i];
                     mol.copyInCoordsAndVelocities(coords_data + start_index,
-                                                vels_data + start_index);
+                                                  vels_data + start_index);
                 } });
         }
         else
@@ -468,11 +586,11 @@ namespace SireOpenMM
             }
         }
 
-        return CoordsAndVelocities(coords, vels, boxvecs);
+        return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
     }
 
     void set_openmm_coordinates_and_velocities(OpenMM::Context &context,
-                                               const CoordsAndVelocities &coords_and_velocities)
+                                               const OpenMMMetaData &coords_and_velocities)
     {
         if (coords_and_velocities.hasCoordinates())
         {
@@ -711,6 +829,29 @@ namespace SireOpenMM
         }
 
         return SelectorMol(ret);
+    }
+
+    void set_context_platform_property(OpenMM::Context &context,
+                                       const QString &key,
+                                       const QString &value)
+    {
+        OpenMM::Platform &platform = context.getPlatform();
+
+        platform.setPropertyValue(context,
+                                  key.toStdString(),
+                                  value.toStdString());
+
+        QString new_value = QString::fromStdString(platform.getPropertyValue(context, key.toStdString()));
+
+        if (new_value != value)
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Unable to change the value of property %1 to `%2` in the "
+                                                    "platform %3. The property value is still '%4'.")
+                                                    .arg(key)
+                                                    .arg(value)
+                                                    .arg(QString::fromStdString(platform.getName()))
+                                                    .arg(new_value),
+                                                CODELOC);
     }
 
     SelectorMol extract_coordinates(const OpenMM::State &state,

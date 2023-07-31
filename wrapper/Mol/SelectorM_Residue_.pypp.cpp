@@ -1186,6 +1186,12 @@ void register_SelectorM_Residue__class(){
                 , "" );
         
         }
+        SelectorM_Residue__exposer.def( bp::self + bp::self );
+        SelectorM_Residue__exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Residue > >() );
+        SelectorM_Residue__exposer.def( bp::self + bp::other< SireMol::Residue >() );
+        SelectorM_Residue__exposer.def( bp::self - bp::self );
+        SelectorM_Residue__exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Residue > >() );
+        SelectorM_Residue__exposer.def( bp::self - bp::other< SireMol::Residue >() );
         { //::SireMol::SelectorM< SireMol::Residue >::operator=
         
             typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;

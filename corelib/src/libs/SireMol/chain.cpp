@@ -35,6 +35,7 @@
 #include "evaluator.h"
 #include "mover.hpp"
 #include "selector.hpp"
+#include "selectorm.hpp"
 
 #include "chainresid.h"
 #include "groupatomids.h"
@@ -474,6 +475,36 @@ void Chain::assertContainsMetadata(const PropertyName &key, const PropertyName &
 const char *Chain::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Chain>());
+}
+
+SelectorM<Chain> Chain::operator+(const SelectorM<Chain> &chains) const
+{
+    return SelectorM<Chain>(*this) + chains;
+}
+
+SelectorM<Chain> Chain::operator+(const Selector<Chain> &chains) const
+{
+    return SelectorM<Chain>(*this) + chains;
+}
+
+SelectorM<Chain> Chain::operator+(const Chain &other) const
+{
+    return SelectorM<Chain>(*this) + other;
+}
+
+SelectorM<Chain> Chain::operator-(const SelectorM<Chain> &chains) const
+{
+    return SelectorM<Chain>(*this) - chains;
+}
+
+SelectorM<Chain> Chain::operator-(const Selector<Chain> &chains) const
+{
+    return SelectorM<Chain>(*this) - chains;
+}
+
+SelectorM<Chain> Chain::operator-(const Chain &other) const
+{
+    return SelectorM<Chain>(*this) - other;
 }
 
 namespace SireMol

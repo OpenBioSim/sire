@@ -1186,6 +1186,12 @@ void register_SelectorM_Atom__class(){
                 , "" );
         
         }
+        SelectorM_Atom__exposer.def( bp::self + bp::self );
+        SelectorM_Atom__exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Atom > >() );
+        SelectorM_Atom__exposer.def( bp::self + bp::other< SireMol::Atom >() );
+        SelectorM_Atom__exposer.def( bp::self - bp::self );
+        SelectorM_Atom__exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Atom > >() );
+        SelectorM_Atom__exposer.def( bp::self - bp::other< SireMol::Atom >() );
         { //::SireMol::SelectorM< SireMol::Atom >::operator=
         
             typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;

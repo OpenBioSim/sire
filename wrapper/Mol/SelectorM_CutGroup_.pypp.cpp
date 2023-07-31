@@ -1186,6 +1186,12 @@ void register_SelectorM_CutGroup__class(){
                 , "" );
         
         }
+        SelectorM_CutGroup__exposer.def( bp::self + bp::self );
+        SelectorM_CutGroup__exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::CutGroup > >() );
+        SelectorM_CutGroup__exposer.def( bp::self + bp::other< SireMol::CutGroup >() );
+        SelectorM_CutGroup__exposer.def( bp::self - bp::self );
+        SelectorM_CutGroup__exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::CutGroup > >() );
+        SelectorM_CutGroup__exposer.def( bp::self - bp::other< SireMol::CutGroup >() );
         { //::SireMol::SelectorM< SireMol::CutGroup >::operator=
         
             typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
