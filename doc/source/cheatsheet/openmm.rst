@@ -116,6 +116,8 @@ Available keys and allowable values are listed below.
 +-----------------+----------------------------------------------------------+
 | temperature     | Any temperature value, e.g. ``25*sr.units.celsius``      |
 +-----------------+----------------------------------------------------------+
+| threads         | The number of threads to use in the CPU platform         |
++-----------------+----------------------------------------------------------+
 | timestep        | Time between integration steps, e.g.                     |
 |                 | ``2 * sr.units.femtosecond``                             |
 +-----------------+----------------------------------------------------------+

@@ -101,6 +101,8 @@ class SOMMContext(_Context):
         """
         Set the value of the platform property 'key' to 'value'
         """
+        value = str(value)
+
         platform = self.getPlatform()
 
         keys = platform.getPropertyNames()
