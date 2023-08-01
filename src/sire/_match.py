@@ -6,6 +6,7 @@ def match_atoms(mol0, mol1, match_light_atoms=False, map0=None, map1=None):
     Perform a simple match that tries to identify the mapping from
     atoms in 'mol0' to the atoms in 'mol1'.
     """
+    from .mol import AtomMapping
     from .legacy.Mol import AtomMCSMatcher
     from .base import create_map
 
@@ -18,18 +19,13 @@ def match_atoms(mol0, mol1, match_light_atoms=False, map0=None, map1=None):
 
     m = matcher.match(mol0, map0, mol1, map1)
 
-    match = {}
+    atoms0 = []
+    atoms1 = []
 
     for atom0, atom1 in m.items():
-        match[atom0.value()] = atom1.value()
+        atoms0.append(atom0.value())
+        atoms1.append(atom1.value())
 
-    # now sort this dictionary
-    keys = list(match.keys())
-    keys.sort()
-
-    match2 = {}
-
-    for key in keys:
-        match2[key] = match[key]
-
-    return match2
+    return AtomMapping(
+        mol0.molecule().atoms()[atoms0], mol1.molecule().atoms()[atoms1]
+    )

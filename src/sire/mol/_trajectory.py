@@ -94,23 +94,15 @@ class TrajectoryIterator:
                         self._aligner = TrajectoryAligner(atoms, map=self._map)
                     else:
                         # use the mapping to go from the
-                        keys = list(mapping.keys())
-                        keys.sort()
+                        align_atoms = (
+                            align.molecules()
+                            .atoms()
+                            .intersection(mapping.atoms0())
+                        )
 
-                        coords = []
+                        atoms = mapping[align_atoms]
 
-                        atoms = view.atoms()[keys]
-
-                        align_atoms = align.atoms()
-
-                        coords_property = self._map["coordinates"]
-
-                        for key in keys:
-                            coords.append(
-                                align_atoms[mapping[key]].property(
-                                    coords_property
-                                )
-                            )
+                        coords = align_atoms.property(self._map["coordinates"])
 
                         self._aligner = TrajectoryAligner(
                             atoms, coords, map=self._map

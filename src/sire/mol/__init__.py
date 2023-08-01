@@ -3,6 +3,7 @@ __all__ = [
     "is_water",
     "Atom",
     "AtomIdx",
+    "AtomMapping",
     "AtomMatch",
     "AtomMatchM",
     "AtomName",
@@ -92,6 +93,7 @@ from ..legacy.Mol import (
     BondOrder,
     Stereochemistry,
     AtomCoords,
+    AtomMapping,
     AtomMatch,
     AtomMatchM,
 )
