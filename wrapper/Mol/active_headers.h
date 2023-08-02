@@ -67,6 +67,7 @@
 #include "evaluator.h"
 #include "evaluatorm.h"
 #include "geometryperturbation.h"
+#include "getrmsd.h"
 #include "groupatomids.h"
 #include "groupgroupids.h"
 #include "hybridization.h"

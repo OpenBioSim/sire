@@ -1426,17 +1426,36 @@ Selector_Segment_.cursor = _cursors
 
 
 def _trajectory(
-    obj, align=None, smooth=None, wrap=None, mapping=None, map=None
+    obj, align=None, smooth=None, wrap=None, mapping=None, frame=None, map=None
 ):
     """
     Return an iterator over the trajectory of frames of this view.
 
     align:
-      Pass in a selection string to select atoms against which
-      every frame will be aligned. These atoms will be moved
-      to the center of the periodic box (if a periodic box
-      is used). If 'True' is passed then this will align
-      against all of the atoms in the view.
+        Pass in a selection string to select atoms against which
+        every frame will be aligned. These atoms will be moved
+        to the center of the periodic box (if a periodic box
+        is used). If "True" is passed, then this will attempt
+        to align *ALL* of the coordinates in the view.
+
+        You can also choose to pass in a molecular container,
+        and it will align against the atoms in that container,
+        assuming they are contained in this view. If not, then
+        you need to supply a mapping that maps from the
+        atoms in the align container, to the atoms in this view.
+
+    frame:
+        The frame of the trajectory against which the alignment
+        should be based. For example, `frame=3` would align based
+        on the coordinates of the aligned atoms in frame 3 of
+        the trajectory. If this is `None` (the default) then the
+        first frame will be used.
+
+    mapping: AtomMapping
+        An AtomMapping object that maps from atoms in the alignment
+        container to atoms in this view. You only need to supply
+        this if all of the alignment atoms are not contained
+        in this view.
 
     smooth:
       Pass in the number of frames to smooth (average) the view
@@ -1446,16 +1465,17 @@ def _trajectory(
     wrap: bool
       Whether or not to wrap the coordinates into the periodic box
 
-    mapping: dict
-      Dictionary mapping from atom indexes in the trajectory to
-      atom indexes in the view to which this trajectory
-      should be aligned
-
     """
     from ._trajectory import TrajectoryIterator
 
     return TrajectoryIterator(
-        obj, align=align, smooth=smooth, wrap=wrap, mapping=mapping, map=map
+        obj,
+        align=align,
+        frame=frame,
+        smooth=smooth,
+        wrap=wrap,
+        mapping=mapping,
+        map=map,
     )
 
 

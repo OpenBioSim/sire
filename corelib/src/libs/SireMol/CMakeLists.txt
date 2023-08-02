@@ -88,6 +88,7 @@ set ( SIREMOL_HEADERS
       improperid.h
       iswater.h
       geometryperturbation.h
+      getrmsd.h
       groupatomids.h
       groupgroupids.h
       hybridization.h
@@ -212,6 +213,7 @@ set ( SIREMOL_SOURCES
       iswater.cpp
       findmcs.cpp
       geometryperturbation.cpp
+      getrmsd.cpp
       groupatomids.cpp
       groupgroupids.cpp
       hybridization.cpp
