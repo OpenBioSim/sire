@@ -658,7 +658,7 @@ void register_free_functions(){
             "setGromacsWater"
             , setGromacsWater_function_value
             , ( bp::arg("system"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("is_crystal")=(bool)(false) )
-            , "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nPar:am is_crystal\nWhether this is a crystal water molecule. If true, then the residue\nname will be set to XTL rather than SOL.\n\nRetval: system\nThe system with updated water topology.\n" );
+            , "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nPar:am is_crystal\nWhether this is a crystal water molecule. If true, then the molecule\nand residue name will be set to XTL rather than SOL.\n\nRetval: system\nThe system with updated water topology.\n" );
     
     }
 

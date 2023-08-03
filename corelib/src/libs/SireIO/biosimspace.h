@@ -129,8 +129,8 @@ namespace SireIO
             A dictionary of user-defined molecular property names.
 
         \param is_crystal
-            Whether this is a crystal water molecule. If true, then the residue
-            name will be set to XTL rather than SOL.
+            Whether this is a crystal water molecule. If true, then the molecule
+            and residue name will be set to XTL rather than SOL.
 
         \retval system
             The system with updated water topology.
