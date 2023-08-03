@@ -651,14 +651,14 @@ void register_free_functions(){
 
     { //::SireIO::setGromacsWater
     
-        typedef ::SireSystem::System ( *setGromacsWater_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const & );
+        typedef ::SireSystem::System ( *setGromacsWater_function_type )( ::SireSystem::System const &,::QString const &,::SireBase::PropertyMap const &,bool );
         setGromacsWater_function_type setGromacsWater_function_value( &::SireIO::setGromacsWater );
         
         bp::def( 
             "setGromacsWater"
             , setGromacsWater_function_value
-            , ( bp::arg("system"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap() )
-            , "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nRetval: system\nThe system with updated water topology.\n" );
+            , ( bp::arg("system"), bp::arg("model"), bp::arg("map")=SireBase::PropertyMap(), bp::arg("is_crystal")=(bool)(false) )
+            , "Set all water molecules in the passed system to the appropriate GROMACS\nformat topology.\n\nPar:am system\nThe molecular system of interest.\n\nPar:am model\nThe name of the water model.\n\nPar:am map\nA dictionary of user-defined molecular property names.\n\nPar:am is_crystal\nWhether this is a crystal water molecule. If true, then the residue\nname will be set to XTL rather than SOL.\n\nRetval: system\nThe system with updated water topology.\n" );
     
     }
 
