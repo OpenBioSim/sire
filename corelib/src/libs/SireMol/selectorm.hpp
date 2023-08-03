@@ -176,6 +176,10 @@ namespace SireMol
 
         SelectorM<T> invert() const;
 
+        SelectorM<T> filter(const SelectorM<T> &views) const;
+        SelectorM<T> filter(const Selector<T> &views) const;
+        SelectorM<T> filter(const T &view) const;
+
         bool intersects(const SelectorM<T> &other) const;
         bool intersects(const Selector<T> &view) const;
         bool intersects(const T &view) const;
@@ -1585,6 +1589,61 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE SelectorM<T> SelectorM<T>::operator-(const T &view) const
     {
         return this->subtract(view);
+    }
+
+    template <class T>
+    SelectorM<T> SelectorM<T>::filter(const SelectorM<T> &views) const
+    {
+        SelectorM<T> ret;
+
+        for (const auto &view : this->vws)
+        {
+            // merge all of the views in all molecules together
+            Selector<T> other_views;
+
+            for (const auto &other_view : views)
+            {
+                if (view.data().number() == other_view.data().number())
+                {
+                    // add this to `other_views`
+                    other_views += other_view;
+                }
+            }
+
+            if (other_views.selectedAll())
+            {
+                ret._append(view);
+            }
+            else if (not other_views.isEmpty())
+            {
+                QList<qint64> idxs;
+
+                for (int i = 0; i < view.count(); ++i)
+                {
+                    if (other_views.contains(view.index(i)))
+                    {
+                        idxs.append(i);
+                    }
+                }
+
+                if (not idxs.isEmpty())
+                    ret._append(view(idxs));
+            }
+        }
+
+        return ret;
+    }
+
+    template <class T>
+    SelectorM<T> SelectorM<T>::filter(const Selector<T> &views) const
+    {
+        return this->filter(SelectorM<T>(views));
+    }
+
+    template <class T>
+    SelectorM<T> SelectorM<T>::filter(const T &other) const
+    {
+        return this->filter(SelectorM<T>(other));
     }
 
     template <class T>

@@ -31,6 +31,8 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
+#include "tostring.h"
+
 using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
@@ -125,15 +127,7 @@ Atom AtomMapping::operator[](int i) const
 
 Atom AtomMapping::operator[](const Atom &atom) const
 {
-    const auto idxs = this->atms0.find(atom);
-
-    if (idxs.isEmpty())
-        throw SireMol::missing_atom(QObject::tr(
-                                        "Cannot find '%1' in the mapping.")
-                                        .arg(atom.toString()),
-                                    CODELOC);
-
-    return this->operator[](idxs[0]);
+    return this->map(atom, false);
 }
 
 SelectorM<Atom> AtomMapping::operator[](const SireBase::Slice &slice) const
@@ -153,22 +147,7 @@ SelectorM<Atom> AtomMapping::operator[](const Selector<Atom> &atoms) const
 
 SelectorM<Atom> AtomMapping::operator[](const SelectorM<Atom> &atoms) const
 {
-    QList<qint64> idxs;
-
-    for (int i = 0; i < atoms.count(); ++i)
-    {
-        const auto atom_idxs = this->atms0.find(atoms[i]);
-
-        if (atom_idxs.isEmpty())
-            throw SireMol::missing_atom(QObject::tr(
-                                            "Cannot find '%1' in the mapping.")
-                                            .arg(atoms[i].toString()),
-                                        CODELOC);
-
-        idxs.append(atom_idxs[i]);
-    }
-
-    return this->operator[](idxs);
+    return this->map(atoms, false);
 }
 
 AtomMapping *AtomMapping::clone() const
@@ -275,25 +254,205 @@ AtomMapping AtomMapping::swap() const
 
 /** Map from 'atom' (which must be in the reference atoms) to
  *  the corresponding atom in the mapped atoms */
-Atom AtomMapping::map(const Atom &atom) const
+Atom AtomMapping::map(const Atom &atom, bool find_all) const
 {
-    return this->operator[](atom);
+    const auto idxs = this->atms0.find(atom);
+
+    if (idxs.isEmpty())
+    {
+        if (find_all)
+            throw SireMol::missing_atom(QObject::tr(
+                                            "Cannot find '%1' in the mapping.")
+                                            .arg(atom.toString()),
+                                        CODELOC);
+
+        return Atom();
+    }
+
+    return this->operator[](idxs[0]);
 }
 
 /** Map from the passed 'atoms' (which must all be in the reference
  *  atoms) to the corresponding atoms in the mapped atoms. The
  *  mapped atoms will be returned in the same order as the
- *  reference atoms appeared in 'atoms' */
-SelectorM<Atom> AtomMapping::map(const Selector<Atom> &atoms) const
+ *  reference atoms appeared in 'atoms'. If 'find_all` is false
+ *  then this will use null atoms in the map when the mapped
+ *  atom cannot be found */
+SelectorM<Atom> AtomMapping::map(const Selector<Atom> &atoms,
+                                 bool find_all) const
 {
-    return this->operator[](atoms);
+    return this->map(SelectorM<Atom>(atoms), find_all);
 }
 
 /** Map from the passed 'atoms' (which must all be in the reference
  *  atoms) to the corresponding atoms in the mapped atoms. The
  *  mapped atoms will be returned in the same order as the
- *  reference atoms appeared in 'atoms' */
-SelectorM<Atom> AtomMapping::map(const SelectorM<Atom> &atoms) const
+ *  reference atoms appeared in 'atoms'. If 'find_all` is false
+ *  then this will use null atoms in the map when the mapped
+ *  atom cannot be found */
+SelectorM<Atom> AtomMapping::map(const SelectorM<Atom> &atoms,
+                                 bool find_all) const
 {
-    return this->operator[](atoms);
+    SelectorM<Atom> ret;
+
+    for (int i = 0; i < atoms.count(); ++i)
+    {
+        const auto atom_idxs = this->atms0.find(atoms[i]);
+
+        if (atom_idxs.isEmpty())
+        {
+            if (find_all)
+                throw SireMol::missing_atom(QObject::tr(
+                                                "Cannot find '%1' in the mapping.")
+                                                .arg(atoms[i].toString()),
+                                            CODELOC);
+
+            ret += Atom();
+        }
+        else
+        {
+            ret += this->atms1[atom_idxs[0]];
+        }
+    }
+
+    return ret;
+}
+
+/** Find and return the equivalent of 'atom' in the passed container.
+ *  This maps 'atom' from the reference to the mapped atom, and then
+ *  locates and returns the mapped atom from the container.
+ */
+Atom AtomMapping::find(const Atom &atom, const MoleculeView &container,
+                       bool find_all) const
+{
+    return this->find(atom, SelectorM<Atom>(container.atoms()), find_all);
+}
+
+/** Find and return the equivalent of 'atom' in the passed container.
+ *  This maps 'atom' from the reference to the mapped atom, and then
+ *  locates and returns the mapped atom from the container.
+ */
+Atom AtomMapping::find(const Atom &atom,
+                       const SelectorM<Atom> &container,
+                       bool find_all) const
+{
+    const auto mapped = this->map(atom, find_all);
+
+    if (mapped.isEmpty() and not find_all)
+        return Atom();
+
+    auto filtered = container.filter(mapped);
+
+    if (filtered.isEmpty())
+    {
+        throw SireMol::missing_atom(QObject::tr(
+                                        "There is no atom in %1 that matches atom %2, which was mapped "
+                                        "to atom %3.")
+                                        .arg(container.toString())
+                                        .arg(atom.toString())
+                                        .arg(mapped.toString()),
+                                    CODELOC);
+    }
+    else if (filtered.count() != 1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "There should only be a single match for the mapping: %1")
+                                         .arg(filtered.toString()),
+                                     CODELOC);
+    }
+
+    return filtered(0);
+}
+
+/** Find and return the equivalent of 'atom' in the passed container.
+ *  This maps 'atom' from the reference to the mapped atom, and then
+ *  locates and returns the mapped atom from the container.
+ */
+Selector<Atom> AtomMapping::find(const Selector<Atom> &atoms,
+                                 const MoleculeView &container,
+                                 bool find_all) const
+{
+    auto found = this->find(SelectorM<Atom>(atoms),
+                            container.atoms(), find_all);
+
+    if (not found.isEmpty())
+    {
+        // this is definitely a single-molecule set
+        return Selector<Atom>(found(0).data(), found.IDs());
+    }
+    else
+        return Selector<Atom>();
+}
+
+/** Find and return the equivalent of 'atoms' in the passed container.
+ *  This maps 'atoms' from the reference to the mapped atoms, and then
+ *  locates and returns the mapped atoms from the container. Note that
+ *  all atoms must be found, and they will be returned in the same
+ *  order as 'atoms'
+ */
+SelectorM<Atom> AtomMapping::find(const SelectorM<Atom> &atoms,
+                                  const MoleculeView &container,
+                                  bool find_all) const
+{
+    return this->find(atoms, SelectorM<Atom>(container.atoms()), find_all);
+}
+
+/** Find and return the equivalent of 'atoms' in the passed container.
+ *  This maps 'atoms' from the reference to the mapped atoms, and then
+ *  locates and returns the mapped atoms from the container. Note that
+ *  all atoms must be found, and they will be returned in the same
+ *  order as 'atoms'
+ */
+SelectorM<Atom> AtomMapping::find(const Selector<Atom> &atoms,
+                                  const SelectorM<Atom> &container,
+                                  bool find_all) const
+{
+    return this->find(SelectorM<Atom>(atoms), container, find_all);
+}
+
+/** Find and return the equivalent of 'atoms' in the passed container.
+ *  This maps 'atoms' from the reference to the mapped atoms, and then
+ *  locates and returns the mapped atoms from the container. Note that
+ *  all atoms must be found, and they will be returned in the same
+ *  order as 'atoms'
+ */
+SelectorM<Atom> AtomMapping::find(const SelectorM<Atom> &atoms,
+                                  const SelectorM<Atom> &container,
+                                  bool find_all) const
+{
+    if (atoms.isEmpty())
+        return SelectorM<Atom>();
+
+    else if (container.isEmpty() and not find_all)
+        return SelectorM<Atom>();
+
+    const auto mapped = this->map(atoms, find_all);
+
+    // need this way round as we have to have the same
+    // ordering as mapped
+    auto filtered = mapped.filter(container);
+
+    if (find_all and (filtered.count() < mapped.count()))
+    {
+        throw SireMol::missing_atom(QObject::tr(
+                                        "There were some atoms in %1 that could not be located "
+                                        "in the container %2, when mapped to %3.")
+                                        .arg(atoms.toString())
+                                        .arg(container.toString())
+                                        .arg(mapped.toString()),
+                                    CODELOC);
+    }
+    else if (filtered.count() > mapped.count())
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "There should only be a single match per atom for the mapping: %1")
+                                         .arg(filtered.toString()),
+                                     CODELOC);
+    }
+
+    // need to update so we have the same versions
+    // as in the container
+    filtered.update(container.molecules());
+
+    return filtered;
 }

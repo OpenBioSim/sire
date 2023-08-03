@@ -623,6 +623,48 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Segment >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::SelectorM< SireMol::Segment >::*filter_function_type)( ::SireMol::SelectorM< SireMol::Segment > const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Segment >::filter );
+            
+            SelectorM_Segment__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::SelectorM< SireMol::Segment >::*filter_function_type)( ::SireMol::Selector< SireMol::Segment > const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Segment >::filter );
+            
+            SelectorM_Segment__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::SelectorM< SireMol::Segment >::*filter_function_type)( ::SireMol::Segment const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Segment >::filter );
+            
+            SelectorM_Segment__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Segment >::find
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;

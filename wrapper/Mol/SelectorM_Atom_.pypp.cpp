@@ -623,6 +623,48 @@ void register_SelectorM_Atom__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Atom >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::SelectorM< SireMol::Atom >::*filter_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Atom >::filter );
+            
+            SelectorM_Atom__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::SelectorM< SireMol::Atom >::*filter_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Atom >::filter );
+            
+            SelectorM_Atom__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Atom >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::SelectorM< SireMol::Atom >::*filter_function_type)( ::SireMol::Atom const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Atom >::filter );
+            
+            SelectorM_Atom__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Atom >::find
         
             typedef SireMol::SelectorM< SireMol::Atom > exported_class_t;

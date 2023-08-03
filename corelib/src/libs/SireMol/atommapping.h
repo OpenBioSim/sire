@@ -97,10 +97,33 @@ namespace SireMol
 
         AtomMapping swap() const;
 
-        Atom map(const Atom &atom) const;
+        Atom map(const Atom &atom, bool find_all = true) const;
 
-        SelectorM<Atom> map(const Selector<Atom> &atoms) const;
-        SelectorM<Atom> map(const SelectorM<Atom> &atoms) const;
+        SelectorM<Atom> map(const Selector<Atom> &atoms,
+                            bool find_all = true) const;
+        SelectorM<Atom> map(const SelectorM<Atom> &atoms,
+                            bool find_all = true) const;
+
+        Atom find(const Atom &atom, const MoleculeView &container,
+                  bool find_all = true) const;
+        Atom find(const Atom &atom, const SelectorM<Atom> &container,
+                  bool find_all = true) const;
+
+        Selector<Atom> find(const Selector<Atom> &atoms,
+                            const MoleculeView &container,
+                            bool find_all = true) const;
+
+        SelectorM<Atom> find(const SelectorM<Atom> &atoms,
+                             const MoleculeView &container,
+                             bool find_all = true) const;
+
+        SelectorM<Atom> find(const Selector<Atom> &atoms,
+                             const SelectorM<Atom> &container,
+                             bool find_all = true) const;
+
+        SelectorM<Atom> find(const SelectorM<Atom> &atoms,
+                             const SelectorM<Atom> &container,
+                             bool find_all = true) const;
 
     private:
         /** The reference atoms - we map from these to the other atoms */

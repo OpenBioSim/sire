@@ -5,45 +5,23 @@ from ..units import GeneralUnit as _GeneralUnit
 
 
 def _get_align_atoms_and_coords(
-    view, align, frame=None, mapping=None, map=None
+    view, align, frame=None, mapping=None, map=None, find_all=True
 ):
     if hasattr(align, "atoms"):
+        align = align.atoms()
+
         if mapping is None:
-            atoms = view.atoms().intersection(align.atoms())
+            from . import AtomMapping
 
-            if atoms.is_empty():
-                # these two views don't intersect
-                raise ValueError(
-                    "Cannot align trajectory, because there is no "
-                    "intersection between the atoms in the "
-                    "trajectory and the atoms against which this "
-                    "should be aligned. Pass in a mapping (via "
-                    "the 'mapping' argument ) that will map "
-                    "from an index of the atom in a trajectory "
-                    "to an atom in the view."
-                )
+            mapping = AtomMapping(align, align)
 
-            # update the atoms so they have the
-            # same properties as align
-            atoms.update(align)
+        # use the mapping to go from the
+        atoms = mapping.find(align.atoms(), view.atoms(), find_all=find_all)
 
-            # set them to the right frame
-            if frame is not None:
-                atoms.load_frame(frame)
+        if frame is not None:
+            atoms.load_frame(frame)
 
-            return (atoms, atoms.property(map["coordinates"]))
-        else:
-            # use the mapping to go from the
-            align_atoms = (
-                align.molecules().atoms().intersection(mapping.atoms0())
-            )
-
-            atoms = mapping[align_atoms]
-
-            if frame is not None:
-                atoms.load_frame(frame)
-
-            return (atoms, align_atoms.property(map["coordinates"]))
+        return (atoms, atoms.property(map["coordinates"]))
     else:
         atoms = view[align].atoms()
 
@@ -124,7 +102,12 @@ class TrajectoryIterator:
 
             if align is not None:
                 (align, coords) = _get_align_atoms_and_coords(
-                    view=self._view, align=align, frame=frame, map=self._map
+                    view=self._view,
+                    align=align,
+                    mapping=mapping,
+                    frame=frame,
+                    map=self._map,
+                    find_all=False,
                 )
 
                 self._aligner = TrajectoryAligner(align, coords, map=self._map)
@@ -888,6 +871,7 @@ class TrajectoryIterator:
         align: bool = True,
         frame: int = None,
         mapping=None,
+        match_all: bool = True,
         map=None,
     ):
         """
@@ -917,6 +901,14 @@ class TrajectoryIterator:
            trajectory. This is only needed if the reference atoms
            are not contained in the atoms in this trajectory.
 
+        match_all: bool
+            Whether or not to find and match all of the atoms in
+            'reference' to the atoms in this trajectory. Normally
+            you do want to do this, so it defaults to True. If this
+            is False, then the RMSD of only atoms in this trajectory
+            that in 'reference' will be calculated, even if it just
+            a single atom.
+
         map: dict
            Any parameters that will overwrite any of the map
            parameters that are already in this trajectory
@@ -934,6 +926,7 @@ class TrajectoryIterator:
             frame=frame,
             mapping=mapping,
             map=self._map,
+            find_all=match_all,
         )
 
         if map is None:

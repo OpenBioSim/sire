@@ -28,6 +28,9 @@
 
 #include "getrmsd.h"
 
+#include "SireBase/releasegil.h"
+#include "SireBase/progressbar.h"
+
 #include "SireUnits/units.h"
 
 #include "SireMaths/align.h"
@@ -52,12 +55,19 @@ namespace SireMol
         if (frames.isEmpty())
             return rmsds;
 
+        // release the GIL here so that progress bars can be displayed
+        auto handle = SireBase::release_gil();
+
         rmsds = QVector<Length>(frames.count());
 
         SelectorM<Atom> frame = atoms;
         PropertyMap frame_map = map;
 
         const auto coords_property = map["coordinates"];
+
+        SireBase::ProgressBar bar(frames.count(), "Calculate RMSD");
+
+        bar = bar.enter();
 
         for (int i = 0; i < frames.count(); ++i)
         {
@@ -67,7 +77,11 @@ namespace SireMol
             const auto frame_coords = frame.property<Vector>(coords_property).toVector();
 
             rmsds[i] = SireMaths::getRMSD(coords, frame_coords) * angstrom;
+
+            bar.tick();
         }
+
+        bar.success();
 
         return rmsds;
     }

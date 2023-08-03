@@ -14,6 +14,8 @@ namespace bp = boost::python;
 
 #include "atommapping.h"
 
+#include "tostring.h"
+
 #include "atommapping.h"
 
 SireMol::AtomMapping __copy__(const SireMol::AtomMapping &other){ return SireMol::AtomMapping(other); }
@@ -70,6 +72,78 @@ void register_AtomMapping_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomMapping::find
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::Atom const &,::SireMol::MoleculeView const &,bool ) const;
+            find_function_type find_function_value( &::SireMol::AtomMapping::find );
+            
+            AtomMapping_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("atom"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
+                , "Find and return the equivalent of atom in the passed container.\n  This maps atom from the reference to the mapped atom, and then\n  locates and returns the mapped atom from the container.\n" );
+        
+        }
+        { //::SireMol::AtomMapping::find
+        
+            typedef ::SireMol::Atom ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::Atom const &,::SireMol::SelectorM< SireMol::Atom > const &,bool ) const;
+            find_function_type find_function_value( &::SireMol::AtomMapping::find );
+            
+            AtomMapping_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("atom"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
+                , "Find and return the equivalent of atoms in the passed container.\n  This maps atoms from the reference to the mapped atoms, and then\n  locates and returns the mapped atoms from the container. Note that\n  all atoms must be found, and they will be returned in the same\n  order as atoms\n" );
+        
+        }
+        { //::SireMol::AtomMapping::find
+        
+            typedef ::SireMol::Selector< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const &,::SireMol::MoleculeView const &,bool ) const;
+            find_function_type find_function_value( &::SireMol::AtomMapping::find );
+            
+            AtomMapping_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("atoms"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
+                , "Find and return the equivalent of atom in the passed container.\n  This maps atom from the reference to the mapped atom, and then\n  locates and returns the mapped atom from the container.\n" );
+        
+        }
+        { //::SireMol::AtomMapping::find
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::SelectorM< SireMol::Atom > const &,::SireMol::MoleculeView const &,bool ) const;
+            find_function_type find_function_value( &::SireMol::AtomMapping::find );
+            
+            AtomMapping_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("atoms"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
+                , "Find and return the equivalent of atoms in the passed container.\n  This maps atoms from the reference to the mapped atoms, and then\n  locates and returns the mapped atoms from the container. Note that\n  all atoms must be found, and they will be returned in the same\n  order as atoms\n" );
+        
+        }
+        { //::SireMol::AtomMapping::find
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const &,::SireMol::SelectorM< SireMol::Atom > const &,bool ) const;
+            find_function_type find_function_value( &::SireMol::AtomMapping::find );
+            
+            AtomMapping_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("atoms"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
+                , "Find and return the equivalent of atoms in the passed container.\n  This maps atoms from the reference to the mapped atoms, and then\n  locates and returns the mapped atoms from the container. Note that\n  all atoms must be found, and they will be returned in the same\n  order as atoms\n" );
+        
+        }
+        { //::SireMol::AtomMapping::find
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::SelectorM< SireMol::Atom > const &,::SireMol::SelectorM< SireMol::Atom > const &,bool ) const;
+            find_function_type find_function_value( &::SireMol::AtomMapping::find );
+            
+            AtomMapping_exposer.def( 
+                "find"
+                , find_function_value
+                , ( bp::arg("atoms"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
+                , "Find and return the equivalent of atoms in the passed container.\n  This maps atoms from the reference to the mapped atoms, and then\n  locates and returns the mapped atoms from the container. Note that\n  all atoms must be found, and they will be returned in the same\n  order as atoms\n" );
+        
+        }
         { //::SireMol::AtomMapping::isEmpty
         
             typedef bool ( ::SireMol::AtomMapping::*isEmpty_function_type)(  ) const;
@@ -84,41 +158,38 @@ void register_AtomMapping_class(){
         }
         { //::SireMol::AtomMapping::map
         
-            typedef ::SireMol::Atom ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::Atom const & ) const;
+            typedef ::SireMol::Atom ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::Atom const &,bool ) const;
             map_function_type map_function_value( &::SireMol::AtomMapping::map );
             
             AtomMapping_exposer.def( 
                 "map"
                 , map_function_value
-                , ( bp::arg("atom") )
-                , bp::release_gil_policy()
+                , ( bp::arg("atom"), bp::arg("find_all")=(bool)(true) )
                 , "Map from atom (which must be in the reference atoms) to\n  the corresponding atom in the mapped atoms" );
         
         }
         { //::SireMol::AtomMapping::map
         
-            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::Selector< SireMol::Atom > const & ) const;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::Selector< SireMol::Atom > const &,bool ) const;
             map_function_type map_function_value( &::SireMol::AtomMapping::map );
             
             AtomMapping_exposer.def( 
                 "map"
                 , map_function_value
-                , ( bp::arg("atoms") )
-                , bp::release_gil_policy()
-                , "Map from the passed atoms (which must all be in the reference\n  atoms) to the corresponding atoms in the mapped atoms. The\n  mapped atoms will be returned in the same order as the\n  reference atoms appeared in atoms" );
+                , ( bp::arg("atoms"), bp::arg("find_all")=(bool)(true) )
+                , "Map from the passed atoms (which must all be in the reference\n  atoms) to the corresponding atoms in the mapped atoms. The\n  mapped atoms will be returned in the same order as the\n  reference atoms appeared in atoms. If find_all` is false\n  then this will use null atoms in the map when the mapped\n  atom cannot be found" );
         
         }
         { //::SireMol::AtomMapping::map
         
-            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::SelectorM< SireMol::Atom > const & ) const;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::SelectorM< SireMol::Atom > const &,bool ) const;
             map_function_type map_function_value( &::SireMol::AtomMapping::map );
             
             AtomMapping_exposer.def( 
                 "map"
                 , map_function_value
-                , ( bp::arg("atoms") )
-                , bp::release_gil_policy()
-                , "Map from the passed atoms (which must all be in the reference\n  atoms) to the corresponding atoms in the mapped atoms. The\n  mapped atoms will be returned in the same order as the\n  reference atoms appeared in atoms" );
+                , ( bp::arg("atoms"), bp::arg("find_all")=(bool)(true) )
+                , "Map from the passed atoms (which must all be in the reference\n  atoms) to the corresponding atoms in the mapped atoms. The\n  mapped atoms will be returned in the same order as the\n  reference atoms appeared in atoms. If find_all` is false\n  then this will use null atoms in the map when the mapped\n  atom cannot be found" );
         
         }
         AtomMapping_exposer.def( bp::self != bp::self );
