@@ -38,6 +38,21 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   This means that they will be ignored by ``gmx genion`` when choosing water
   molecules to replace with ions.
 
+* Added the ability to align trajectories and views against molecule views
+  or containers. Added the :class:`sire.mol.AtomMapping` class to control
+  how to map from atoms in one group of molecules to another. This can
+  be used to align trajectories and views against atoms / molecules that
+  are not part of that trajectory.
+
+* Added the :func:`sire.mol.TrajectoryIterator.rmsd` function to make it
+  easier to calculate RMSDs across trajectories. The RMSD can be calculated
+  against all atoms, a subset of atoms, or even against a different
+  set of atoms that are matched via an :class:`~sire.mol.AtomMapping` object.
+  Full details in the :doc:`tutorial <tutorial/part04/02_trajectory>`.
+
+* Fixed a bug that prevented ``mols.trajectory().view()`` from working.
+  You can now view trajectory subsets again, e.g. ``mols.trajectory()[0:5].view()``.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
