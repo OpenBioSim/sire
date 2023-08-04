@@ -35,6 +35,8 @@ void register_AtomMapping_class(){
         AtomMapping_exposer_t AtomMapping_exposer = AtomMapping_exposer_t( "AtomMapping", "This class holds the mapping from one set of atoms to another.\nThis enables you associate, atom by atom, atoms in one set to\natoms in another set. This is useful, e.g. for building perturbations,\nor for specifying mappings for alignments or RMSD calculations etc.\n", bp::init< >("") );
         bp::scope AtomMapping_scope( AtomMapping_exposer );
         AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const & >(( bp::arg("atoms0"), bp::arg("atoms1") ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::MoleculeView const &, SireMol::MoleculeView const & >(( bp::arg("mol0"), bp::arg("mol1") ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorMol const &, SireMol::SelectorMol const & >(( bp::arg("mols0"), bp::arg("mols1") ), "") );
         AtomMapping_exposer.def( bp::init< SireMol::AtomMapping const & >(( bp::arg("other") ), "") );
         { //::SireMol::AtomMapping::atoms0
         
@@ -98,7 +100,7 @@ void register_AtomMapping_class(){
         }
         { //::SireMol::AtomMapping::find
         
-            typedef ::SireMol::Selector< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const &,::SireMol::MoleculeView const &,bool ) const;
+            typedef ::SireMol::Selector< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::MoleculeView const &,::SireMol::MoleculeView const &,bool ) const;
             find_function_type find_function_value( &::SireMol::AtomMapping::find );
             
             AtomMapping_exposer.def( 
@@ -122,7 +124,7 @@ void register_AtomMapping_class(){
         }
         { //::SireMol::AtomMapping::find
         
-            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::Selector< SireMol::Atom > const &,::SireMol::SelectorM< SireMol::Atom > const &,bool ) const;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*find_function_type)( ::SireMol::MoleculeView const &,::SireMol::SelectorM< SireMol::Atom > const &,bool ) const;
             find_function_type find_function_value( &::SireMol::AtomMapping::find );
             
             AtomMapping_exposer.def( 
@@ -170,7 +172,7 @@ void register_AtomMapping_class(){
         }
         { //::SireMol::AtomMapping::map
         
-            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::Selector< SireMol::Atom > const &,bool ) const;
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::MoleculeView const &,bool ) const;
             map_function_type map_function_value( &::SireMol::AtomMapping::map );
             
             AtomMapping_exposer.def( 

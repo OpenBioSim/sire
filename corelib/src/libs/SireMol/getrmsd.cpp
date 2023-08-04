@@ -30,6 +30,7 @@
 
 #include "SireBase/releasegil.h"
 #include "SireBase/progressbar.h"
+#include "SireBase/parallel.h"
 
 #include "SireUnits/units.h"
 
@@ -45,7 +46,7 @@ namespace SireMol
 {
     QVector<Length> get_rmsd(
         const SelectorM<Atom> &atoms,
-        const QVector<Vector> &coords,
+        const SelectorM<Atom> &reference,
         const TrajectoryAligner &aligner,
         const QList<qint64> &frames,
         const PropertyMap &map)
@@ -59,26 +60,53 @@ namespace SireMol
         auto handle = SireBase::release_gil();
 
         rmsds = QVector<Length>(frames.count());
-
-        SelectorM<Atom> frame = atoms;
-        PropertyMap frame_map = map;
+        auto rmsds_data = rmsds.data();
 
         const auto coords_property = map["coordinates"];
 
         SireBase::ProgressBar bar(frames.count(), "Calculate RMSD");
 
+        const auto coords = reference.property<Vector>(coords_property).toVector();
+
         bar = bar.enter();
 
-        for (int i = 0; i < frames.count(); ++i)
+        if (should_run_in_parallel(frames.count(), map))
         {
-            frame_map.set("transform", aligner[frames[i]]);
-            frame.loadFrame(frames[i], frame_map);
+            tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()),
+                              [&](const tbb::blocked_range<int> &r)
+                              {
+                                  SelectorM<Atom> frame = atoms;
+                                  PropertyMap frame_map = map;
 
-            const auto frame_coords = frame.property<Vector>(coords_property).toVector();
+                                  for (int i = r.begin(); i < r.end(); ++i)
+                                  {
+                                      frame_map.set("transform", aligner[frames[i]]);
+                                      frame.loadFrame(frames[i], frame_map);
 
-            rmsds[i] = SireMaths::getRMSD(coords, frame_coords) * angstrom;
+                                      const auto frame_coords = frame.property<Vector>(coords_property).toVector();
 
-            bar.tick();
+                                      rmsds_data[i] = SireMaths::getRMSD(coords, frame_coords) * angstrom;
+
+                                      bar.tick();
+                                  }
+                              });
+        }
+        else
+        {
+            SelectorM<Atom> frame = atoms;
+            PropertyMap frame_map = map;
+
+            for (int i = 0; i < frames.count(); ++i)
+            {
+                frame_map.set("transform", aligner[frames[i]]);
+                frame.loadFrame(frames[i], frame_map);
+
+                const auto frame_coords = frame.property<Vector>(coords_property).toVector();
+
+                rmsds_data[i] = SireMaths::getRMSD(coords, frame_coords) * angstrom;
+
+                bar.tick();
+            }
         }
 
         bar.success();

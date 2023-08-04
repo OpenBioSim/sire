@@ -389,13 +389,13 @@ void register_free_functions(){
 
     { //::SireMol::get_rmsd
     
-        typedef ::QVector< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > ( *get_rmsd_function_type )( ::SireMol::SelectorM< SireMol::Atom > const &,::QVector< SireMaths::Vector > const &,::SireMol::TrajectoryAligner const &,::QList< long long > const &,::SireBase::PropertyMap const & );
+        typedef ::QVector< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > ( *get_rmsd_function_type )( ::SireMol::SelectorM< SireMol::Atom > const &,::SireMol::SelectorM< SireMol::Atom > const &,::SireMol::TrajectoryAligner const &,::QList< long long > const &,::SireBase::PropertyMap const & );
         get_rmsd_function_type get_rmsd_function_value( &::SireMol::get_rmsd );
         
         bp::def( 
             "get_rmsd"
             , get_rmsd_function_value
-            , ( bp::arg("atoms"), bp::arg("coords"), bp::arg("aligner"), bp::arg("frames"), bp::arg("map") )
+            , ( bp::arg("atoms"), bp::arg("reference"), bp::arg("aligner"), bp::arg("frames"), bp::arg("map") )
             , "" );
     
     }

@@ -1006,13 +1006,18 @@ def _add_evals(obj):
 def _get_container_property(x, key):
     vals = []
 
-    for v in x:
-        prop = _get_property(v, key)
+    from ..base import ProgressBar
 
-        if type(prop) is list:
-            vals += prop
-        else:
-            vals.append(prop)
+    with ProgressBar(len(x), "Extract property") as bar:
+        for v in x:
+            prop = _get_property(v, key)
+
+            if type(prop) is list:
+                vals += prop
+            else:
+                vals.append(prop)
+
+            bar.tick()
 
     return vals
 
@@ -1197,7 +1202,8 @@ for C in [Residue, Chain, Segment]:
 
 
 def _molecule(obj, id=None):
-    """Return the molecule that contains this view. If 'id' is specified
+    """
+    Return the molecule that contains this view. If 'id' is specified
     then this will check that the ID matches this molecule before
     returning it. This will raise an exception if the ID doesn't match.
 
@@ -1215,7 +1221,8 @@ def _molecule(obj, id=None):
 
 
 def _molecules(obj, id=None):
-    """Return the molecule that contains this view as a list of molecules,
+    """
+    Return the molecule that contains this view as a list of molecules,
     containing just a single molecule.
 
     If 'id' is specified then this checks that this molecule matches
@@ -1773,6 +1780,32 @@ if not hasattr(SelectorMol, "__orig__find__"):
         SelectorM_Segment_,
     ]:
         __fix__find(C)
+
+
+if not hasattr(AtomMapping, "__orig_find__"):
+
+    def __mapping_find__(obj, atoms, container, find_all: bool = True):
+        from ..system import System
+
+        if System.is_system(container):
+            container = container.atoms()
+
+        return obj.__orig_find__(atoms, container, find_all=find_all)
+
+    def __mapping_map__(obj, atoms, container, match_all: bool = True):
+        from ..system import System
+
+        if System.is_system(container):
+            container = container.atoms()
+
+        return obj.__orig_map__(atoms, container, find_all=match_all)
+
+    AtomMapping.__orig_find__ = AtomMapping.find
+    AtomMapping.__orig_map__ = AtomMapping.map
+
+    AtomMapping.find = __mapping_find__
+    AtomMapping.map = __mapping_map__
+
 
 # Remove some temporary variables
 del C

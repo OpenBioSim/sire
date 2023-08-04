@@ -4,10 +4,19 @@ __all__ = ["TrajectoryIterator"]
 from ..units import GeneralUnit as _GeneralUnit
 
 
-def _get_align_atoms_and_coords(
+def _get_align_atoms_and_reference(
     view, align, frame=None, mapping=None, map=None, find_all=True
 ):
-    if hasattr(align, "atoms"):
+    if align is None:
+        # this is an all-to-all alignment
+        atoms = view.atoms()
+
+        if frame is not None:
+            atoms.load_frame(frame)
+
+        return (atoms, atoms)
+
+    elif hasattr(align, "atoms"):
         align = align.atoms()
 
         if mapping is None:
@@ -15,20 +24,23 @@ def _get_align_atoms_and_coords(
 
             mapping = AtomMapping(align, align)
 
-        # use the mapping to go from the
+        # use the mapping to go from the atoms to align to
+        # the atoms in the view
         atoms = mapping.find(align.atoms(), view.atoms(), find_all=find_all)
 
         if frame is not None:
             atoms.load_frame(frame)
 
-        return (atoms, atoms.property(map["coordinates"]))
+        return (atoms, align)
+
     else:
+        # This is a search string in 'view'
         atoms = view[align].atoms()
 
         if frame is not None:
             atoms.load_frame(frame)
 
-        return (atoms, atoms.property(map["coordinates"]))
+        return (atoms, atoms)
 
 
 class TrajectoryIterator:
@@ -101,7 +113,7 @@ class TrajectoryIterator:
             from ..legacy.Mol import TrajectoryAligner
 
             if align is not None:
-                (align, coords) = _get_align_atoms_and_coords(
+                (align, reference) = _get_align_atoms_and_reference(
                     view=self._view,
                     align=align,
                     mapping=mapping,
@@ -110,7 +122,9 @@ class TrajectoryIterator:
                     find_all=False,
                 )
 
-                self._aligner = TrajectoryAligner(align, coords, map=self._map)
+                self._aligner = TrajectoryAligner(
+                    align, reference, map=self._map
+                )
             elif wrap or (smooth != 1):
                 self._aligner = TrajectoryAligner(
                     self._view.evaluate().center(),
@@ -868,7 +882,7 @@ class TrajectoryIterator:
     def rmsd(
         self,
         reference=None,
-        align: bool = True,
+        align: bool = None,
         frame: int = None,
         mapping=None,
         match_all: bool = True,
@@ -917,10 +931,17 @@ class TrajectoryIterator:
         from ..legacy.Mol import get_rmsd
 
         if reference is None:
-            # this is just the RMSD of everything
-            reference = self.current().atoms()
+            # nothing to align against
+            align = False
 
-        (atoms, coords) = _get_align_atoms_and_coords(
+        elif align is None:
+            # auto-align only for smaller systems
+            if len(reference.molecules()) > 100:
+                align = False
+            else:
+                align = True
+
+        (atoms, reference) = _get_align_atoms_and_reference(
             view=self.current(),
             align=reference,
             frame=frame,
@@ -937,13 +958,13 @@ class TrajectoryIterator:
             map = self._map.merge(create_map(map))
 
         if align:
-            aligner = TrajectoryAligner(atoms, coords, map=map)
+            aligner = TrajectoryAligner(atoms, reference, map=map)
         else:
             aligner = TrajectoryAligner()
 
         return get_rmsd(
             atoms=atoms,
-            coords=coords,
+            reference=reference,
             aligner=aligner,
             frames=self._values,
             map=map,

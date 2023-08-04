@@ -439,22 +439,22 @@ TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
 }
 
 TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
-                                     const QVector<Vector> &points,
+                                     const SelectorM<Atom> &reference,
                                      const PropertyMap &m)
     : ConcreteProperty<TrajectoryAligner, Property>(),
       atms(atoms), cent(0), nsmooth(1), map(m), autowrap(true)
 {
     if (atms.count() > 0)
     {
-        if (points.count() != atms.count())
+        if (reference.count() != atms.count())
             throw SireError::incompatible_error(QObject::tr(
-                                                    "Not enought reference points (%1) to align this number "
+                                                    "Not enought reference atoms (%1) to align this number "
                                                     "of atoms (%2)")
-                                                    .arg(points.count())
+                                                    .arg(reference.count())
                                                     .arg(atoms.count()),
                                                 CODELOC);
 
-        refcoords = points;
+        refcoords = reference.property<Vector>(map["coordinates"]).toVector();
 
         cent = refcoords[0];
 

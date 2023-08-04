@@ -45,7 +45,7 @@ namespace SireMol
 {
     SIREMOL_EXPORT QVector<SireUnits::Dimension::Length>
     get_rmsd(const SelectorM<Atom> &atoms,
-             const QVector<SireMaths::Vector> &coords,
+             const SelectorM<Atom> &reference,
              const TrajectoryAligner &aligner,
              const QList<qint64> &frames,
              const PropertyMap &map);

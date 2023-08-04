@@ -62,6 +62,13 @@ namespace SireMol
         AtomMapping();
         AtomMapping(const SelectorM<Atom> &atoms0,
                     const SelectorM<Atom> &atoms1);
+
+        AtomMapping(const MoleculeView &mol0,
+                    const MoleculeView &mol1);
+
+        AtomMapping(const SelectorMol &mols0,
+                    const SelectorMol &mols1);
+
         AtomMapping(const AtomMapping &other);
 
         ~AtomMapping();
@@ -99,7 +106,7 @@ namespace SireMol
 
         Atom map(const Atom &atom, bool find_all = true) const;
 
-        SelectorM<Atom> map(const Selector<Atom> &atoms,
+        SelectorM<Atom> map(const MoleculeView &atoms,
                             bool find_all = true) const;
         SelectorM<Atom> map(const SelectorM<Atom> &atoms,
                             bool find_all = true) const;
@@ -109,7 +116,7 @@ namespace SireMol
         Atom find(const Atom &atom, const SelectorM<Atom> &container,
                   bool find_all = true) const;
 
-        Selector<Atom> find(const Selector<Atom> &atoms,
+        Selector<Atom> find(const MoleculeView &atoms,
                             const MoleculeView &container,
                             bool find_all = true) const;
 
@@ -117,7 +124,7 @@ namespace SireMol
                              const MoleculeView &container,
                              bool find_all = true) const;
 
-        SelectorM<Atom> find(const Selector<Atom> &atoms,
+        SelectorM<Atom> find(const MoleculeView &atoms,
                              const SelectorM<Atom> &container,
                              bool find_all = true) const;
 

@@ -140,7 +140,7 @@ namespace SireMol
         TrajectoryAligner(const SelectorM<Atom> &atoms,
                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
         TrajectoryAligner(const SelectorM<Atom> &atoms,
-                          const QVector<SireMaths::Vector> &points,
+                          const SelectorM<Atom> &reference,
                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         TrajectoryAligner(const TrajectoryAligner &other);

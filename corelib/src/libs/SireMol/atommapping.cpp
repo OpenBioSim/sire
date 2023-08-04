@@ -88,6 +88,19 @@ AtomMapping::AtomMapping(const SelectorM<Atom> &atoms0,
     }
 }
 
+AtomMapping::AtomMapping(const MoleculeView &mol0, const MoleculeView &mol1)
+    : ConcreteProperty<AtomMapping, Property>()
+{
+    this->operator=(AtomMapping(SelectorM<Atom>(mol0.atoms()),
+                                SelectorM<Atom>(mol1.atoms())));
+}
+
+AtomMapping::AtomMapping(const SelectorMol &mols0, const SelectorMol &mols1)
+    : ConcreteProperty<AtomMapping, Property>()
+{
+    this->operator=(AtomMapping(mols0.atoms(), mols1.atoms()));
+}
+
 AtomMapping::AtomMapping(const AtomMapping &other)
     : ConcreteProperty<AtomMapping, Property>(other),
       atms0(other.atms0), atms1(other.atms1)
@@ -278,10 +291,10 @@ Atom AtomMapping::map(const Atom &atom, bool find_all) const
  *  reference atoms appeared in 'atoms'. If 'find_all` is false
  *  then this will use null atoms in the map when the mapped
  *  atom cannot be found */
-SelectorM<Atom> AtomMapping::map(const Selector<Atom> &atoms,
+SelectorM<Atom> AtomMapping::map(const MoleculeView &atoms,
                                  bool find_all) const
 {
-    return this->map(SelectorM<Atom>(atoms), find_all);
+    return this->map(SelectorM<Atom>(atoms.atoms()), find_all);
 }
 
 /** Map from the passed 'atoms' (which must all be in the reference
@@ -368,11 +381,11 @@ Atom AtomMapping::find(const Atom &atom,
  *  This maps 'atom' from the reference to the mapped atom, and then
  *  locates and returns the mapped atom from the container.
  */
-Selector<Atom> AtomMapping::find(const Selector<Atom> &atoms,
+Selector<Atom> AtomMapping::find(const MoleculeView &atoms,
                                  const MoleculeView &container,
                                  bool find_all) const
 {
-    auto found = this->find(SelectorM<Atom>(atoms),
+    auto found = this->find(SelectorM<Atom>(atoms.atoms()),
                             container.atoms(), find_all);
 
     if (not found.isEmpty())
@@ -403,11 +416,11 @@ SelectorM<Atom> AtomMapping::find(const SelectorM<Atom> &atoms,
  *  all atoms must be found, and they will be returned in the same
  *  order as 'atoms'
  */
-SelectorM<Atom> AtomMapping::find(const Selector<Atom> &atoms,
+SelectorM<Atom> AtomMapping::find(const MoleculeView &atoms,
                                   const SelectorM<Atom> &container,
                                   bool find_all) const
 {
-    return this->find(SelectorM<Atom>(atoms), container, find_all);
+    return this->find(SelectorM<Atom>(atoms.atoms()), container, find_all);
 }
 
 /** Find and return the equivalent of 'atoms' in the passed container.
