@@ -448,10 +448,12 @@ TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
     {
         if (reference.count() != atms.count())
             throw SireError::incompatible_error(QObject::tr(
-                                                    "Not enought reference atoms (%1) to align this number "
-                                                    "of atoms (%2)")
+                                                    "Not enough reference atoms (%1) to align this number "
+                                                    "of atoms (%2)\n%3\n%4")
                                                     .arg(reference.count())
-                                                    .arg(atoms.count()),
+                                                    .arg(atoms.count())
+                                                    .arg(atms.toString())
+                                                    .arg(reference.toString()),
                                                 CODELOC);
 
         refcoords = reference.property<Vector>(map["coordinates"]).toVector();

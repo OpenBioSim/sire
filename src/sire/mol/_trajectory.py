@@ -29,7 +29,10 @@ def _get_align_atoms_and_reference(
         atoms = mapping.find(align.atoms(), view.atoms(), find_all=find_all)
 
         if frame is not None:
-            atoms.load_frame(frame)
+            align.load_frame(frame)
+
+        if len(atoms) != len(align) and not find_all:
+            align = mapping.swap().find(atoms, align, find_all=True)
 
         return (atoms, align)
 
