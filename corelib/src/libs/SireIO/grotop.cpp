@@ -4341,17 +4341,28 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
         isSorted = map["sort"].value().asA<BooleanProperty>().value();
     }
 
-    // Search the system for water molecules. Crystal waters are labelled
-    // using a residue name of XTL. If the user wants to preserve their own
-    // naming convention, then water molecules are flagged as being "non-searchable".
+    // Search for waters and crystal waters. The user can speficy the residue name
+    // for crystal waters using the "crystal_water" property in the map. If the user
+    // wishes to preserve a custom water topology naming, then they can use "skip_water".
     SelectResult waters;
-    if (not system.propertyKeys().contains("skip_water"))
+    SelectResult xtal_waters;
+    if (map.specified("crystal_water"))
     {
-        waters = system.search("(not mols with property is_non_searchable_water) and (water and not resname XTL)");
-    }
+        auto xtal_water_resname = map["crystal_water"].source();
+        xtal_waters = system.search(QString("resname %1").arg(xtal_water_resname));
 
-    // Search for any crystal waters.
-    auto xtal_waters = system.search("resname XTL");
+        if (not map.specified("skip_water"))
+        {
+            waters =
+                system.search(
+                    QString("(not mols with property is_non_searchable_water) and (water and not resname %1")
+                    .arg(xtal_water_resname));
+        }
+    }
+    else
+    {
+        waters = system.search("(not mols with property is_non_searchable_water) and water");
+    }
 
     // Extract the molecule numbers of the water molecules.
     auto water_nums = waters.molNums();
