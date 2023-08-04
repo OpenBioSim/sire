@@ -31,6 +31,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   values of lambda to be performed. This is initial functionality which
   will be documented and expanded by subsequent PRs.
 
+* Forced all new-style modules to import when `sr.use_new_api()` is called.
+  This will make it easier to use sire with multiprocessing.
+
 * Added option to allow GROMACS water molecules to be flagged as crystal waters.
   This means that they will be ignored by ``gmx genion`` when choosing water
   molecules to replace with ions.
