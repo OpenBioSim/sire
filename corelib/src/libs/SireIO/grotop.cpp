@@ -4342,16 +4342,22 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
     }
 
     // Search the system for water molecules.
-    auto waters = system.search("water");
+    auto waters = system.search("water and not resname XTL");
+
+    // Search for any crystal waters.
+    auto xtal_waters = system.search("resname XTL");
 
     // Extract the molecule numbers of the water molecules.
     auto water_nums = waters.molNums();
+
+    // Extract the molecule numbers of the crystal water molecules.
+    auto xtal_water_nums = xtal_waters.molNums();
 
     // Loop over the molecules to find the non-water molecules.
     QList<MolNum> non_water_nums;
     for (const auto &num : molnums)
     {
-        if (not water_nums.contains(num))
+        if (not water_nums.contains(num) and not xtal_water_nums.contains(num))
             non_water_nums.append(num);
     }
 
@@ -4449,6 +4455,32 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
             // Extract the molecule number of the molecule and work out
             // the index in the system.
             auto molnum = water_nums[i];
+            auto idx = molnum_to_idx[molnum];
+
+            // Store the name of the molecule type.
+            mol_to_moltype[idx] = name;
+        }
+    }
+
+    // Now add the crystal waters.
+    if (xtal_waters.count() > 0)
+    {
+        // Extract the GroMolType of the first water molecule.
+        auto water_type = GroMolType(system[xtal_water_nums[0]].molecule(), map);
+        auto name = water_type.name();
+        auto molnum = xtal_water_nums[0];
+        auto idx = molnum_to_idx[molnum];
+
+        // Populate the mappings.
+        name_to_mtyp.insert(name, water_type);
+        idx_name_to_mtyp.insert(QPair<int, QString>(idx, water_type.name()), water_type);
+        idx_name_to_example.insert(QPair<int, QString>(idx, name), system[molnum].molecule());
+
+        for (int i = 0; i < xtal_water_nums.count(); ++i)
+        {
+            // Extract the molecule number of the molecule and work out
+            // the index in the system.
+            auto molnum = xtal_water_nums[i];
             auto idx = molnum_to_idx[molnum];
 
             // Store the name of the molecule type.
