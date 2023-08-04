@@ -32,9 +32,9 @@
 #include "SireBase/progressbar.h"
 #include "SireBase/parallel.h"
 
-#include "SireUnits/units.h"
-
 #include "SireMaths/align.h"
+
+#include "SireUnits/units.h"
 
 using namespace SireMol;
 using namespace SireBase;
@@ -44,6 +44,7 @@ using namespace SireMaths;
 
 namespace SireMol
 {
+
     QVector<Length> get_rmsd(
         const SelectorM<Atom> &atoms,
         const SelectorM<Atom> &reference,
@@ -68,6 +69,8 @@ namespace SireMol
 
         const auto coords = reference.property<Vector>(coords_property).toVector();
 
+        const bool needs_aligning = aligner.count() != 0;
+
         bar = bar.enter();
 
         if (should_run_in_parallel(frames.count(), map))
@@ -80,7 +83,9 @@ namespace SireMol
 
                                   for (int i = r.begin(); i < r.end(); ++i)
                                   {
-                                      frame_map.set("transform", aligner[frames[i]]);
+                                      if (needs_aligning)
+                                          frame_map.set("transform", aligner[frames[i]]);
+
                                       frame.loadFrame(frames[i], frame_map);
 
                                       const auto frame_coords = frame.property<Vector>(coords_property).toVector();
@@ -98,7 +103,9 @@ namespace SireMol
 
             for (int i = 0; i < frames.count(); ++i)
             {
-                frame_map.set("transform", aligner[frames[i]]);
+                if (needs_aligning)
+                    frame_map.set("transform", aligner[frames[i]]);
+
                 frame.loadFrame(frames[i], frame_map);
 
                 const auto frame_coords = frame.property<Vector>(coords_property).toVector();

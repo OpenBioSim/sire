@@ -115,6 +115,74 @@ Residue( ARG:1   num_atoms=26 ) ( 14.3506 Å, 42.9594 Å, 18.359 Å )
 Residue( ARG:1   num_atoms=26 ) ( 15.4561 Å, 41.4458 Å, 17.4479 Å )
 Residue( ARG:1   num_atoms=26 ) ( 15.3717 Å, 41.1966 Å, 18.1695 Å )
 
+Measuring RMSD across a trajectory
+==================================
+
+You can measure the root mean square deviation (RMSD) across a trajectory
+using the :func:`~sire.mol.Trajectory.rmsd` function.
+
+>>> print(mol.trajectory().rmsd())
+[0 ,
+ 1.11524 Å,
+ 1.11777 Å,
+ 1.68127 Å,
+ 2.00073 Å,
+ ...
+ 2.17744 Å,
+ 2.05558 Å,
+ 2.15149 Å,
+ 2.14664 Å]
+
+You can calculate the RMSD for specific frames by slicing or indexing.
+
+>>> print(mol.trajectory()[0:5].rmsd())
+[0 , 1.11524 Å, 1.11777 Å, 1.68127 Å, 2.00073 Å]
+
+would print the RMSD over the first 5 frames. While
+
+>>> print(mol.trajectory()[ [0, 2, 4, 6 ]].rmsd())
+[0 , 1.11777 Å, 2.00073 Å, 1.94698 Å]
+
+prints the RMSD for frames 0, 2, 4 and 6.
+
+By default, the RMSD is calculated against the first frame. You can control
+the frame via the ``frame`` argument. For example, here we will print
+out the RMSD of the last 5 frames, measured against the last frame.
+
+>>> print(mol.trajectory()[-5:].rmsd(frame=-1))
+[1.57051 Å, 1.54928 Å, 1.16827 Å, 1.20729 Å, 0 ]
+
+By default, the RMSD is calculated for all atoms in the view. You can
+specify a subset using either a search string, e.g.
+
+>>> print(mol.trajectory()[0:5].rmsd("element C"))
+[0 , 0.855642 Å, 0.817883 Å, 1.022 Å, 1.04215 Å]
+
+would calculate the RMSD only for the carbon atoms. Note that this
+aligns each frame of the trajectory against the reference. You can control
+this using the ``align`` argument, e.g. by turning this off.
+
+>>> print(mol.trajectory()[0:5].rmsd("element C", align=False))
+[0 , 0.85613 Å, 0.818511 Å, 1.02247 Å, 1.04229 Å]
+
+.. note::
+
+   If ``align`` is not set, then it defaults to ``True`` for RMSD
+   calculations for a specified subset of atoms, or for RMSDs
+   calculate over all atoms when there are less than 100 molecules.
+   Otherwise, it is set to ``False``.
+
+You can also calculate the RMSD against a view, e.g.
+
+>>> print(mol.trajectory()[0:5].rmsd(mol.atoms()[0:10]))
+[1.31649 Å, 0.992494 Å, 1.0131 Å, 0.966568 Å, 0.986925 Å]
+
+calculates the RMSD over the first 10 atoms.
+
+Note that you will need to supply an atom mapping if the atoms in the
+RMSD reference are not in the trajectory. More details of how to do
+this are in the :doc:`mapping tutorial <../MERGING>`.
+
 Measuring bond lengths over a trajectory
 ========================================
 
@@ -658,6 +726,39 @@ You can, of course, plot this just as you did for simple measurements.
 
 .. image:: images/04_02_06.jpg
    :alt: Graph of the first two bonds against time
+
+Creating tables of RMSDs using Pandas
+=====================================
+
+Similarly, you can create tables of RMSDs using pandas. To do this,
+pass ``to_pandas=True`` to the :func:`~sire.mol.Trajectory.rmsd` function.
+
+.. code-block:: python
+
+   >>> df = mol.trajectory().rmsd(to_pandas=True)
+   >>> print(df)
+
+      frame   time      rmsd
+   0        0    0.0  0.000000
+   1        1    1.0  1.115236
+   2        2    2.0  1.117770
+   3        3    3.0  1.681272
+   4        4    4.0  2.000726
+   ..     ...    ...       ...
+   495    495  495.0  2.153361
+   496    496  496.0  2.177437
+   497    497  497.0  2.055585
+   498    498  498.0  2.151492
+   499    499  499.0  2.146644
+
+   [500 rows x 3 columns]
+
+You can also plot this, just as you did for simple measurements.
+
+>>> df.pretty_plot()
+
+.. image:: images/04_02_07.jpg
+   :alt: Graph of the RMSD over time for the trajectory
 
 .. note::
 

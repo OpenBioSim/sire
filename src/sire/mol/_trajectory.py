@@ -890,6 +890,7 @@ class TrajectoryIterator:
         mapping=None,
         match_all: bool = True,
         map=None,
+        to_pandas: bool = False,
     ):
         """
         Calculate the RMSD across the frames of this trajectory, against
@@ -929,6 +930,10 @@ class TrajectoryIterator:
         map: dict
            Any parameters that will overwrite any of the map
            parameters that are already in this trajectory
+
+        to_pandas: bool
+           Whether or not to write the output to a Pandas DataFrame
+           (default False)
         """
         from ..legacy.Mol import TrajectoryAligner
         from ..legacy.Mol import get_rmsd
@@ -939,7 +944,10 @@ class TrajectoryIterator:
 
         elif align is None:
             # auto-align only for smaller systems
-            if len(reference.molecules()) > 100:
+            if (
+                hasattr(reference, "molecules")
+                and len(reference.molecules()) > 100
+            ):
                 align = False
             else:
                 align = True
@@ -965,10 +973,66 @@ class TrajectoryIterator:
         else:
             aligner = TrajectoryAligner()
 
-        return get_rmsd(
+        rmsd = get_rmsd(
             atoms=atoms,
             reference=reference,
             aligner=aligner,
             frames=self._values,
             map=map,
         )
+
+        if to_pandas:
+            import pandas as pd
+
+            if len(rmsd) == 0:
+                return pd.DataFrame()
+
+            # convert the RMSD to default length units
+            from ..units import angstrom, picosecond
+
+            length_unit = angstrom.get_default()
+            time_unit = picosecond.get_default()
+
+            rmsd = [x.to(length_unit) for x in rmsd]
+
+            # get the times for each frame
+            import copy
+
+            t = copy.copy(self)
+            t._view = self._view.atoms()[0]
+
+            times = []
+
+            for frame in t:
+                times.append(frame.frame_time())
+
+            times = [x.to(time_unit) for x in times]
+
+            df = pd.DataFrame(
+                {"frame": copy.copy(self._values), "time": times, "rmsd": rmsd}
+            )
+
+            df.time_unit = lambda: time_unit.unit_string()
+            df.measure_unit = lambda: length_unit.unit_string()
+
+            def pretty_plot(x="time", y=None):
+                if y is None:
+                    y = ["rmsd"]
+
+                if x == "time":
+                    xlabel = f"Time / {df.time_unit()}"
+                elif x == "frame":
+                    xlabel = "Frame"
+                else:
+                    xlabel = x
+
+                ax = df.plot(x=x, y=y)
+                ax.set_xlabel(xlabel)
+                ax.set_ylabel(f"RMSD / {df.measure_unit()}")
+                ax.get_legend().remove()
+
+            df.pretty_plot = pretty_plot
+
+            return df
+        else:
+            return rmsd
