@@ -151,9 +151,7 @@ if _has_nglview:
 
     class _Representations:
         def __init__(self, view):
-            from . import TrajectoryIterator
-
-            if type(view) is TrajectoryIterator:
+            if type(view).__name__ == "TrajectoryIterator":
                 view = view.current()
 
             self.view = view
