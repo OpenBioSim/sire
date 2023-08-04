@@ -34,6 +34,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Forced all new-style modules to import when `sr.use_new_api()` is called.
   This will make it easier to use sire with multiprocessing.
 
+* Added option to allow GROMACS water molecules to be flagged as crystal waters.
+  This means that they will be ignored by ``gmx genion`` when choosing water
+  molecules to replace with ions.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 

@@ -65,9 +65,13 @@ namespace bp = boost::python;
 
 #include "dcd.h"
 
+#include "sire_version.h"
+
 #include "tostring.h"
 
 #include <QDataStream>
+
+#include <QDateTime>
 
 #include <QDebug>
 
