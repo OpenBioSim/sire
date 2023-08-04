@@ -4341,8 +4341,14 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
         isSorted = map["sort"].value().asA<BooleanProperty>().value();
     }
 
-    // Search the system for water molecules.
-    auto waters = system.search("water and not resname XTL");
+    // Search the system for water molecules. Crystal waters are labelled
+    // using a residue name of XTL. If the user wants to preserve their own
+    // naming convention, then water molecules are flagged as being "non-searchable".
+    SelectResult waters;
+    if (not system.propertyKeys().contains("skip_water"))
+    {
+        waters = system.search("(not mols with property is_non_searchable_water) and (water and not resname XTL)");
+    }
 
     // Search for any crystal waters.
     auto xtal_waters = system.search("resname XTL");
