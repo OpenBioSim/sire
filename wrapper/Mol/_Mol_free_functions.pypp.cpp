@@ -271,6 +271,8 @@ namespace bp = boost::python;
 
 #include "mover.h"
 
+#include "SireBase/parallel.h"
+
 #include "SireBase/progressbar.h"
 
 #include "SireBase/releasegil.h"

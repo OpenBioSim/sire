@@ -45,6 +45,8 @@
 
 #include "SireID/index.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
 
@@ -1393,6 +1395,11 @@ void SelectorMol::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void SelectorMol::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void SelectorMol::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -1415,7 +1422,14 @@ void SelectorMol::deleteAllFrames()
 
 void SelectorMol::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
-    SireMol::detail::_loadFrame(this->mols, frame, map);
+    LazyEvaluator evaluator;
+    this->loadFrame(frame, evaluator, map);
+}
+
+void SelectorMol::loadFrame(int frame, const LazyEvaluator &evaluator,
+                            const SireBase::PropertyMap &map)
+{
+    SireMol::detail::_loadFrame(this->mols, frame, evaluator, map);
 }
 
 void SelectorMol::saveFrame(int frame, const SireBase::PropertyMap &map)

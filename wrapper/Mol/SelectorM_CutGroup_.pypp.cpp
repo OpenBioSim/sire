@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireError/errors.h"
 
 #include "SireID/index.h"
@@ -902,6 +904,20 @@ void register_SelectorM_CutGroup__class(){
         { //::SireMol::SelectorM< SireMol::CutGroup >::loadFrame
         
             typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::CutGroup >::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::loadFrame );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::loadFrame
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
             typedef void ( ::SireMol::SelectorM< SireMol::CutGroup >::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::loadFrame );
             
@@ -909,6 +925,20 @@ void register_SelectorM_CutGroup__class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::CutGroup >::loadFrame
+        
+            typedef SireMol::SelectorM< SireMol::CutGroup > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::CutGroup >::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const &,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::SelectorM< SireMol::CutGroup >::loadFrame );
+            
+            SelectorM_CutGroup__exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         

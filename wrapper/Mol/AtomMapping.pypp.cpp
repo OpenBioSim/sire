@@ -95,7 +95,7 @@ void register_AtomMapping_class(){
                 "find"
                 , find_function_value
                 , ( bp::arg("atom"), bp::arg("container"), bp::arg("find_all")=(bool)(true) )
-                , "Find and return the equivalent of atoms in the passed container.\n  This maps atoms from the reference to the mapped atoms, and then\n  locates and returns the mapped atoms from the container. Note that\n  all atoms must be found, and they will be returned in the same\n  order as atoms\n" );
+                , "Find and return the equivalent of atom in the passed container.\n  This maps atom from the reference to the mapped atom, and then\n  locates and returns the mapped atom from the container.\n" );
         
         }
         { //::SireMol::AtomMapping::find

@@ -40,6 +40,7 @@
 #include "SireUnits/units.h"
 
 #include "SireBase/generalunitproperty.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireBase/slice.h"
 
@@ -146,6 +147,39 @@ QList<Frame> TrajectoryData::getFrames(int start_atom, int natoms) const
     for (int i = 0; i < n; ++i)
     {
         frames.append(this->getFrame(i).subset(start_atom, natoms));
+    }
+
+    return frames;
+}
+
+QList<Frame> TrajectoryData::getFrames(const LazyEvaluator &evaluator) const
+{
+    QList<Frame> frames;
+
+    const int n = this->nFrames();
+
+    frames.reserve(n);
+
+    for (int i = 0; i < n; ++i)
+    {
+        frames.append(this->getFrame(i, evaluator));
+    }
+
+    return frames;
+}
+
+QList<Frame> TrajectoryData::getFrames(int start_atom, int natoms,
+                                       const LazyEvaluator &evaluator) const
+{
+    QList<Frame> frames;
+
+    const int n = this->nFrames();
+
+    frames.reserve(n);
+
+    for (int i = 0; i < n; ++i)
+    {
+        frames.append(this->getFrame(i, evaluator).subset(start_atom, natoms));
     }
 
     return frames;
@@ -345,6 +379,11 @@ Frame MolTrajectoryData::getFrame(int i) const
     i = SireID::Index(i).map(this->nFrames());
 
     return frames[i];
+}
+
+Frame MolTrajectoryData::getFrame(int i, const LazyEvaluator &) const
+{
+    return MolTrajectoryData::getFrame(i);
 }
 
 bool MolTrajectoryData::isEditable() const
@@ -757,6 +796,20 @@ Frame Trajectory::getFrame(int i) const
         return frame.subset(start_atom, natoms);
 }
 
+Frame Trajectory::getFrame(int i, const LazyEvaluator &evaluator) const
+{
+    i = Index(i).map(this->nFrames());
+
+    int idx = _getIndexForFrame(i);
+
+    auto frame = d[idx]->getFrame(i, evaluator);
+
+    if (frame.nAtoms() == natoms)
+        return frame;
+    else
+        return frame.subset(start_atom, natoms);
+}
+
 Frame Trajectory::getFrame(int i, const FrameTransform &transform) const
 {
     const auto nframes = this->nFrames();
@@ -795,6 +848,53 @@ Frame Trajectory::getFrame(int i, const FrameTransform &transform) const
         {
             if (i != j)
                 frames.append(this->getFrame(j));
+        }
+
+        frame = frame.smooth(frames);
+    }
+
+    return frame.transform(transform);
+}
+
+Frame Trajectory::getFrame(int i, const FrameTransform &transform,
+                           const LazyEvaluator &evaluator) const
+{
+    const auto nframes = this->nFrames();
+
+    i = Index(i).map(nframes);
+
+    auto smooth = transform.nSmooth();
+
+    if (smooth > nframes)
+        smooth = nframes;
+
+    Frame frame = this->getFrame(i, evaluator);
+
+    if (smooth > 1)
+    {
+        int half = int(smooth / 2);
+        int start_frame = i - half;
+        int end_frame = i + half + 1;
+
+        if (smooth % 2 == 1)
+            end_frame += 1;
+
+        if (start_frame < 0)
+        {
+            start_frame = 0;
+        }
+
+        if (end_frame > nframes)
+        {
+            end_frame = nframes;
+        }
+
+        QList<Frame> frames;
+
+        for (int j = start_frame; j < end_frame; ++j)
+        {
+            if (i != j)
+                frames.append(this->getFrame(j, evaluator));
         }
 
         frame = frame.smooth(frames);

@@ -73,7 +73,7 @@ namespace SireMol
 
         bar = bar.enter();
 
-        if (should_run_in_parallel(frames.count(), map))
+        if (false) // should_run_in_parallel(frames.count(), map))
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()),
                               [&](const tbb::blocked_range<int> &r)

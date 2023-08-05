@@ -34,6 +34,7 @@
 
 #include "SireBase/booleanproperty.h"
 #include "SireBase/parallel.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireMol/errors.h"
 
@@ -286,12 +287,15 @@ namespace SireMol
         int nFrames(const SireBase::PropertyMap &map) const;
 
         void loadFrame(int frame);
+        void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator);
         void saveFrame(int frame);
         void saveFrame();
         void deleteFrame(int frame);
         void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
+        void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
+                       const SireBase::PropertyMap &map);
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
         void deleteFrame(int frame, const SireBase::PropertyMap &map);
@@ -339,7 +343,9 @@ namespace SireMol
         template <class T>
         SIRE_OUTOFLINE_TEMPLATE bool _usesParallel(const QList<T> vws, const SireBase::PropertyMap &map)
         {
-            if (vws.count() < 16)
+            return false;
+
+            /*if (vws.count() < 16)
                 return false;
 
             else if (map["parallel"].hasValue())
@@ -347,7 +353,7 @@ namespace SireMol
                 return map["parallel"].value().asA<SireBase::BooleanProperty>().value();
             }
 
-            return true;
+            return true;*/
         }
 
         template <class T>
@@ -386,7 +392,9 @@ namespace SireMol
         }
 
         template <class T>
-        SIRE_OUTOFLINE_TEMPLATE void _loadFrame(QList<T> &vws, int frame, const SireBase::PropertyMap &map)
+        SIRE_OUTOFLINE_TEMPLATE void _loadFrame(QList<T> &vws, int frame,
+                                                const SireBase::LazyEvaluator &evaluator,
+                                                const SireBase::PropertyMap &map)
         {
             const int nframes = _nFrames(vws, map);
 
@@ -403,7 +411,7 @@ namespace SireMol
             if (n == 0)
                 return;
 
-            vws[0].loadFrame(frame, map);
+            vws[0].loadFrame(frame, evaluator, map);
 
             if (n == 1)
                 return;
@@ -414,16 +422,24 @@ namespace SireMol
                                   {
             for (int i = r.begin(); i < r.end(); ++i)
             {
-                vws[i].loadFrame(frame, map);
+                vws[i].loadFrame(frame, evaluator, map);
             } });
             }
             else
             {
                 for (int i = 1; i < n; ++i)
                 {
-                    vws[i].loadFrame(frame, map);
+                    vws[i].loadFrame(frame, evaluator, map);
                 }
             }
+        }
+
+        template <class T>
+        SIRE_OUTOFLINE_TEMPLATE void _loadFrame(QList<T> &vws, int frame,
+                                                const SireBase::PropertyMap &map)
+        {
+            SireBase::LazyEvaluator evaluator;
+            _loadFrame(vws, frame, evaluator, map);
         }
 
         template <class T>
@@ -2559,7 +2575,14 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::loadFrame(int frame)
     {
-        this->loadFrame(frame, PropertyMap());
+        this->loadFrame(frame, SireBase::PropertyMap());
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::loadFrame(int frame,
+                                                         const SireBase::LazyEvaluator &evaluator)
+    {
+        this->loadFrame(frame, evaluator, SireBase::PropertyMap());
     }
 
     template <class T>
@@ -2589,7 +2612,16 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::loadFrame(int frame, const SireBase::PropertyMap &map)
     {
-        SireMol::detail::_loadFrame(this->vws, frame, map);
+        SireBase::LazyEvaluator evaluator;
+        SireMol::detail::_loadFrame(this->vws, frame, evaluator, map);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::loadFrame(int frame,
+                                                         const SireBase::LazyEvaluator &evaluator,
+                                                         const SireBase::PropertyMap &map)
+    {
+        SireMol::detail::_loadFrame(this->vws, frame, evaluator, map);
     }
 
     template <class T>

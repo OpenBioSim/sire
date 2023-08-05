@@ -45,6 +45,7 @@
 #include "SireBase/slice.h"
 
 #include "SireBase/generalunitproperty.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireVol/space.h"
 
@@ -230,6 +231,11 @@ void MoleculeView::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void MoleculeView::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void MoleculeView::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -280,6 +286,37 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
     }
 }
 
+void MoleculeView::loadFrame(int frame,
+                             const LazyEvaluator &evaluator,
+                             const SireBase::PropertyMap &map)
+{
+    const auto traj_prop = map["trajectory"];
+
+    if ((frame == 0 or frame == -1) and (not d->hasProperty(traj_prop)))
+    {
+        if (map.specified("make_whole"))
+        {
+            if (map["make_whole"].value().asABoolean())
+            {
+                this->update(this->molecule().move().makeWhole(map).commit().data());
+            }
+        }
+
+        return;
+    }
+
+    auto traj = d->property(traj_prop).asA<Trajectory>();
+
+    if (map.specified("transform"))
+    {
+        const auto &transform = map["transform"].value().asA<FrameTransform>();
+        this->_fromFrame(traj.getFrame(frame, transform, evaluator), map);
+    }
+    else
+    {
+        this->_fromFrame(traj.getFrame(frame, FrameTransform(map), evaluator), map);
+    }
+}
 void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];

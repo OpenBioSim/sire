@@ -16,6 +16,7 @@
 #include "getinstalldir.h"
 #include "increment.h"
 #include "incremint.h"
+#include "lazyevaluator.h"
 #include "lengthproperty.h"
 #include "linktoproperty.h"
 #include "majorminorversion.h"

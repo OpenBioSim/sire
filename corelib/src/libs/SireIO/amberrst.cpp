@@ -1224,6 +1224,8 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
     // we've finished with the buffer - can release the mutex
     lkr.unlock();
 
+    use_parallel = false;
+
     // now need to convert the coords, vels and frcs into the right units
     // Can do this in parallel if allowed :-)
     QVector<Vector> c;

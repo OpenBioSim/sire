@@ -12,6 +12,8 @@ namespace bp = boost::python;
 
 #include "SireBase/errors.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireBase/linktoproperty.h"
 
 #include "SireCAS/identities.h"
@@ -1258,6 +1260,19 @@ void register_ForceFields_class(){
         }
         { //::SireFF::ForceFields::loadFrame
         
+            typedef void ( ::SireFF::ForceFields::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireFF::ForceFields::loadFrame );
+            
+            ForceFields_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireFF::ForceFields::loadFrame
+        
             typedef void ( ::SireFF::ForceFields::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireFF::ForceFields::loadFrame );
             
@@ -1265,6 +1280,19 @@ void register_ForceFields_class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireFF::ForceFields::loadFrame
+        
+            typedef void ( ::SireFF::ForceFields::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const &,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireFF::ForceFields::loadFrame );
+            
+            ForceFields_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         

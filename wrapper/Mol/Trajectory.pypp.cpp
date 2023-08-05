@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/generalunitproperty.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireBase/slice.h"
 
 #include "SireError/errors.h"
@@ -116,6 +118,32 @@ void register_Trajectory_class(){
                 "getFrame"
                 , getFrame_function_value
                 , ( bp::arg("i"), bp::arg("transform") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Trajectory::getFrame
+        
+            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,::SireBase::LazyEvaluator const & ) const;
+            getFrame_function_type getFrame_function_value( &::SireMol::Trajectory::getFrame );
+            
+            Trajectory_exposer.def( 
+                "getFrame"
+                , getFrame_function_value
+                , ( bp::arg("i"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Trajectory::getFrame
+        
+            typedef ::SireMol::Frame ( ::SireMol::Trajectory::*getFrame_function_type)( int,::SireMol::FrameTransform const &,::SireBase::LazyEvaluator const & ) const;
+            getFrame_function_type getFrame_function_value( &::SireMol::Trajectory::getFrame );
+            
+            Trajectory_exposer.def( 
+                "getFrame"
+                , getFrame_function_value
+                , ( bp::arg("i"), bp::arg("transform"), bp::arg("evaluator") )
                 , bp::release_gil_policy()
                 , "" );
         
