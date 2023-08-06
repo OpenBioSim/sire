@@ -76,7 +76,7 @@ namespace SireMol
         PropertyMap my_map = map;
         my_map.set("coords_only", BooleanProperty(true));
 
-        if (false) // should_run_in_parallel(frames.count(), map))
+        if (should_run_in_parallel(frames.count(), map))
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()),
                               [&](const tbb::blocked_range<int> &r)
