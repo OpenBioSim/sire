@@ -26,7 +26,7 @@ except ImportError:
 try:
     # This should force the installation of pymbar if it isn't
     # installed already
-    _pymbar = Sire.try_import("pymbar", version=">=4")
+    _pymbar = Sire.try_import("pymbar")
 
     from pymbar import MBAR
     from pymbar import timeseries
@@ -39,6 +39,34 @@ except ImportError:
     raise ImportError(
         "'pymbar' is not installed. Please install pymbar in order to use MBAR for your free energy analysis.`"
     )
+
+# Get the pymbar version number
+_pymbar_version_no = None
+try:
+    _pymbar_version_no = int(_pymbar.__version__.split(".")[0])
+except AttributeError:
+    _pymbar_version_no = int(_pymbar.version.version.split(".")[0])
+
+if _pymbar_version_no is None:
+    raise ImportError("The pymbar version could not be determined.")
+
+if _pymbar_version_no < 4:
+    # Update the MBAR and timeseries modules to be compatible with the
+    # pymbar 4 API. This requires updating the compute free energy
+    # differences method to return a dictionary of results, and renaming
+    # several methods.
+    def compute_free_energy_differences(self, **kwargs):
+        results = self.getFreeEnergyDifferences(**kwargs)
+        return {
+            "Delta_f": results[0],
+            "dDelta_f": results[1],
+        }
+
+    MBAR.compute_free_energy_differences = compute_free_energy_differences
+    MBAR.compute_overlap = MBAR.computeOverlap
+    timeseries.statistical_inefficiency = timeseries.statisticalInefficiency
+    timeseries.subsample_correlated_data = timeseries.subsampleCorrelatedData
+
 
 import warnings
 
