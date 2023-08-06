@@ -343,9 +343,7 @@ namespace SireMol
         template <class T>
         SIRE_OUTOFLINE_TEMPLATE bool _usesParallel(const QList<T> vws, const SireBase::PropertyMap &map)
         {
-            return false;
-
-            /*if (vws.count() < 16)
+            if (vws.count() < 16)
                 return false;
 
             else if (map["parallel"].hasValue())
@@ -353,7 +351,7 @@ namespace SireMol
                 return map["parallel"].value().asA<SireBase::BooleanProperty>().value();
             }
 
-            return true;*/
+            return true;
         }
 
         template <class T>

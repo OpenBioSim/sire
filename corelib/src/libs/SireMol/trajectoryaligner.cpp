@@ -77,6 +77,16 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds,
     return ds;
 }
 
+bool FrameTransform::isNull() const
+{
+    return this->operator==(FrameTransform());
+}
+
+bool FrameTransform::wouldCreateTransform(const PropertyMap &map)
+{
+    return map.specified("wrap") or map.specified("smooth");
+}
+
 FrameTransform::FrameTransform()
     : ConcreteProperty<FrameTransform, Property>(),
       cent(0), smooth(1), autowrap(false)

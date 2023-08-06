@@ -241,6 +241,11 @@ namespace SireMol
 
         void setProperty(const QString &key, const Property &value, bool clear_metadata = false);
 
+        bool updateProperty(const QString &key, const Property &value, bool auto_add = true);
+
+        template <class T, class V>
+        bool updatePropertyFrom(const QString &key, const V &value, bool auto_add = true);
+
         void removeProperty(const QString &key);
 
         void setMetadata(const QString &metakey, const Property &value);
@@ -342,6 +347,28 @@ namespace SireMol
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
+
+    /** Update the property at key 'key' (which must be of type T) with
+     *  the value from 'values'. This called T::copyFrom(const V &values)
+     *  on the property. If 'auto_add' is true then this
+     *  default-constructs and adds the property if it doesn't exist.
+     *
+     *  This returns whether or not a property was updated (or added)
+     */
+    template <class T, class V>
+    SIRE_OUTOFLINE_TEMPLATE bool MoleculeData::updatePropertyFrom(const QString &key,
+                                                                  const V &value, bool auto_add)
+    {
+        bool updated = props.updatePropertyFrom<T>(key, value, auto_add);
+
+        if (updated)
+        {
+            // now the property version number
+            prop_vrsns[key] = vrsns->increment(key, vrsn);
+        }
+
+        return updated;
+    }
 
     /** Return whether or not this molecule has a property called 'key'
         that is of type 'T' */

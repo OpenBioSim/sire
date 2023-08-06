@@ -95,6 +95,11 @@ if _has_nglview:
                 self._traj = None
                 self._map = None
 
+            # set 'coords_only' to True, so that the loading of
+            # frames is quicker (prevents the slow assignment
+            # of space and time to all molecules for each frame)
+            self._map.set("coords_only", True)
+
             self.ext = "pdb"
             self.params = {}
             import uuid

@@ -73,18 +73,26 @@ namespace SireMol
 
         bar = bar.enter();
 
+        PropertyMap my_map = map;
+        my_map.set("coords_only", BooleanProperty(true));
+
         if (false) // should_run_in_parallel(frames.count(), map))
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, frames.count()),
                               [&](const tbb::blocked_range<int> &r)
                               {
                                   SelectorM<Atom> frame = atoms;
-                                  PropertyMap frame_map = map;
+                                  PropertyMap frame_map = my_map;
 
                                   for (int i = r.begin(); i < r.end(); ++i)
                                   {
                                       if (needs_aligning)
-                                          frame_map.set("transform", aligner[frames[i]]);
+                                      {
+                                          auto transform = aligner[frames[i]];
+
+                                          if (not transform.isNull())
+                                              frame_map.set("transform", transform);
+                                      }
 
                                       frame.loadFrame(frames[i], frame_map);
 
@@ -99,12 +107,17 @@ namespace SireMol
         else
         {
             SelectorM<Atom> frame = atoms;
-            PropertyMap frame_map = map;
+            PropertyMap frame_map = my_map;
 
             for (int i = 0; i < frames.count(); ++i)
             {
                 if (needs_aligning)
-                    frame_map.set("transform", aligner[frames[i]]);
+                {
+                    auto transform = aligner[frames[i]];
+
+                    if (not transform.isNull())
+                        frame_map.set("transform", transform);
+                }
 
                 frame.loadFrame(frames[i], frame_map);
 
