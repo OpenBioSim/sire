@@ -50,6 +50,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   set of atoms that are matched via an :class:`~sire.mol.AtomMapping` object.
   Full details in the :doc:`tutorial <tutorial/part04/02_trajectory>`.
 
+* Significantly optimised the loading of trajectory frames and of updating
+  properties in molecules. Switched from ``CentralCache`` to a new
+  ``LazyEvaluator`` class that uses ``tbb::collaborative_call`` to
+  lazy-calculate the results of functions in a thread-safe and
+  thread-cooperative manner. Moved ``PropertyMap`` to use a shared
+  pointer to assigned properties (removing costs of unnecessary
+  allocations and deallocations) and added ``update`` and ``updateFrom``
+  functions to ``Properties`` and ``MoleculeData`` so that properties
+  can be updated in place, thereby minimising new/free.
+
 * Fixed a bug that prevented ``mols.trajectory().view()`` from working.
   You can now view trajectory subsets again, e.g. ``mols.trajectory()[0:5].view()``.
 
