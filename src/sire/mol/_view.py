@@ -62,7 +62,12 @@ if _has_nglview:
                 self._map = obj._map
             elif obj is not None:
                 from ._trajectory import TrajectoryIterator
+                from ..system import System
                 from ..base import create_map
+
+                if System.is_system(obj):
+                    # faster to view a SelectorMol
+                    obj = obj.molecules()
 
                 self._map = create_map(map)
 
