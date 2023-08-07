@@ -27,6 +27,7 @@
 \*********************************************/
 
 #include "trajectoryaligner.h"
+#include "atommatch.h"
 
 #include "SireMaths/vector.h"
 
@@ -74,6 +75,16 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds,
         throw version_error(v, "1", r_ft, CODELOC);
 
     return ds;
+}
+
+bool FrameTransform::isNull() const
+{
+    return this->operator==(FrameTransform());
+}
+
+bool FrameTransform::wouldCreateTransform(const PropertyMap &map)
+{
+    return map.specified("wrap") or map.specified("smooth");
 }
 
 FrameTransform::FrameTransform()
@@ -416,6 +427,46 @@ TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
     {
         const auto c = atms.property<Vector>(map["coordinates"]);
         refcoords = QVector<Vector>(c.begin(), c.end());
+
+        cent = refcoords[0];
+
+        if (refcoords.count() > 1)
+        {
+            Vector mincoords = cent;
+            Vector maxcoords = cent;
+
+            for (int i = 1; i < refcoords.count(); ++i)
+            {
+                mincoords.setMin(refcoords[i]);
+                maxcoords.setMax(refcoords[i]);
+            }
+
+            cent = mincoords + 0.5 * (maxcoords - mincoords);
+        }
+    }
+
+    this->_populate(m);
+}
+
+TrajectoryAligner::TrajectoryAligner(const SelectorM<Atom> &atoms,
+                                     const SelectorM<Atom> &reference,
+                                     const PropertyMap &m)
+    : ConcreteProperty<TrajectoryAligner, Property>(),
+      atms(atoms), cent(0), nsmooth(1), map(m), autowrap(true)
+{
+    if (atms.count() > 0)
+    {
+        if (reference.count() != atms.count())
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Not enough reference atoms (%1) to align this number "
+                                                    "of atoms (%2)\n%3\n%4")
+                                                    .arg(reference.count())
+                                                    .arg(atoms.count())
+                                                    .arg(atms.toString())
+                                                    .arg(reference.toString()),
+                                                CODELOC);
+
+        refcoords = reference.property<Vector>(map["coordinates"]).toVector();
 
         cent = refcoords[0];
 

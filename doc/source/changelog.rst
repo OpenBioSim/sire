@@ -38,6 +38,31 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   This means that they will be ignored by ``gmx genion`` when choosing water
   molecules to replace with ions.
 
+* Added the ability to align trajectories and views against molecule views
+  or containers. Added the :class:`sire.mol.AtomMapping` class to control
+  how to map from atoms in one group of molecules to another. This can
+  be used to align trajectories and views against atoms / molecules that
+  are not part of that trajectory.
+
+* Added the :func:`sire.mol.TrajectoryIterator.rmsd` function to make it
+  easier to calculate RMSDs across trajectories. The RMSD can be calculated
+  against all atoms, a subset of atoms, or even against a different
+  set of atoms that are matched via an :class:`~sire.mol.AtomMapping` object.
+  Full details in the :doc:`tutorial <tutorial/part04/02_trajectory>`.
+
+* Significantly optimised the loading of trajectory frames and of updating
+  properties in molecules. Switched from ``CentralCache`` to a new
+  ``LazyEvaluator`` class that uses ``tbb::collaborative_call`` to
+  lazy-calculate the results of functions in a thread-safe and
+  thread-cooperative manner. Moved ``PropertyMap`` to use a shared
+  pointer to assigned properties (removing costs of unnecessary
+  allocations and deallocations) and added ``update`` and ``updateFrom``
+  functions to ``Properties`` and ``MoleculeData`` so that properties
+  can be updated in place, thereby minimising new/free.
+
+* Fixed a bug that prevented ``mols.trajectory().view()`` from working.
+  You can now view trajectory subsets again, e.g. ``mols.trajectory()[0:5].view()``.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 

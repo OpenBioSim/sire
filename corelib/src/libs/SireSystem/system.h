@@ -421,12 +421,15 @@ namespace SireSystem
         int nFrames(const SireBase::PropertyMap &map) const;
 
         void loadFrame(int frame);
+        void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator);
         void saveFrame(int frame);
         void saveFrame();
         void deleteFrame(int frame);
         void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
+        void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
+                       const SireBase::PropertyMap &map);
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
         void deleteFrame(int frame, const SireBase::PropertyMap &map);

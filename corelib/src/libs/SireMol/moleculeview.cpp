@@ -45,6 +45,7 @@
 #include "SireBase/slice.h"
 
 #include "SireBase/generalunitproperty.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireVol/space.h"
 
@@ -179,44 +180,71 @@ void MoleculeView::_fromFrame(const Frame &frame, const SireBase::PropertyMap &m
         make_whole = map["make_whole"].value().asABoolean();
     }
 
-    if (space_prop.hasSource())
+    bool coords_only = false;
+
+    if (map.specified("coords_only"))
     {
-        d->setProperty(space_prop.source(), frame.space());
+        coords_only = map["coords_only"].value().asABoolean();
     }
 
-    if (time_prop.hasSource())
+    if (not coords_only)
     {
-        d->setProperty(time_prop.source(), GeneralUnitProperty(frame.time()));
+        // these two updates are surprisingly computationally expensive!
+        if (space_prop.hasSource())
+        {
+            d->setProperty(space_prop.source(), frame.space());
+        }
+
+        if (time_prop.hasSource())
+        {
+            d->setProperty(time_prop.source(), GeneralUnitProperty(frame.time()));
+        }
+
+        if (frame.hasVelocities() and vels_prop.hasSource())
+        {
+            if (not d->updatePropertyFrom<AtomVelocities>(vels_prop.source(),
+                                                          frame.velocities(),
+                                                          false))
+            {
+                AtomVelocities vels(this->data().info());
+                vels.copyFrom(frame.velocities());
+                d->setProperty(vels_prop.source(), vels);
+            }
+        }
+
+        if (frame.hasForces() and frcs_prop.hasSource())
+        {
+            if (not d->updatePropertyFrom<AtomForces>(frcs_prop.source(),
+                                                      frame.forces(),
+                                                      false))
+            {
+                AtomForces frcs(this->data().info());
+                frcs.copyFrom(frame.forces());
+                d->setProperty(frcs_prop.source(), frcs);
+            }
+        }
     }
 
     if (frame.hasCoordinates() and coords_prop.hasSource())
     {
-        auto coords = AtomCoords(d->info());
+        QVector<Vector> coords;
 
         if (make_whole)
         {
-            coords.copyFrom(frame.space().makeWhole(frame.coordinates()));
+            coords = frame.space().makeWhole(frame.coordinates());
         }
         else
         {
-            coords.copyFrom(frame.coordinates());
+            coords = frame.coordinates();
         }
 
-        d->setProperty(coords_prop.source(), coords);
-    }
-
-    if (frame.hasVelocities() and vels_prop.hasSource())
-    {
-        auto vels = AtomVelocities(d->info());
-        vels.copyFrom(frame.velocities());
-        d->setProperty(vels_prop.source(), vels);
-    }
-
-    if (frame.hasForces() and frcs_prop.hasSource())
-    {
-        auto frcs = AtomForces(d->info());
-        frcs.copyFrom(frame.forces());
-        d->setProperty(frcs_prop.source(), frcs);
+        if (not d->updatePropertyFrom<AtomCoords>(coords_prop.source(),
+                                                  coords, false))
+        {
+            AtomCoords c(this->data().info());
+            c.copyFrom(coords);
+            d->setProperty(coords_prop.source(), c);
+        }
     }
 }
 
@@ -228,6 +256,11 @@ Frame MoleculeView::_toFrame(const SireBase::PropertyMap &map) const
 void MoleculeView::loadFrame(int frame)
 {
     this->loadFrame(frame, PropertyMap());
+}
+
+void MoleculeView::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
 }
 
 void MoleculeView::saveFrame(int frame)
@@ -267,7 +300,7 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
         return;
     }
 
-    auto traj = d->property(traj_prop).asA<Trajectory>();
+    const auto &traj = d.constData()->property(traj_prop).asA<Trajectory>();
 
     if (map.specified("transform"))
     {
@@ -280,6 +313,44 @@ void MoleculeView::loadFrame(int frame, const SireBase::PropertyMap &map)
     }
 }
 
+void MoleculeView::loadFrame(int frame,
+                             const LazyEvaluator &evaluator,
+                             const SireBase::PropertyMap &map)
+{
+    const auto traj_prop = map["trajectory"];
+
+    if ((frame == 0 or frame == -1) and (not d->hasProperty(traj_prop)))
+    {
+        if (map.specified("make_whole"))
+        {
+            if (map["make_whole"].value().asABoolean())
+            {
+                this->update(this->molecule().move().makeWhole(map).commit().data());
+            }
+        }
+
+        return;
+    }
+
+    const auto &traj = d.constData()->property(traj_prop).asA<Trajectory>();
+
+    if (map.specified("transform"))
+    {
+        const auto &transform = map["transform"].value().asA<FrameTransform>();
+        this->_fromFrame(traj.getFrame(frame, transform, evaluator), map);
+    }
+    else
+    {
+        if (FrameTransform::wouldCreateTransform(map))
+        {
+            this->_fromFrame(traj.getFrame(frame, FrameTransform(map), evaluator), map);
+        }
+        else
+        {
+            this->_fromFrame(traj.getFrame(frame, evaluator), map);
+        }
+    }
+}
 void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)
 {
     const auto traj_prop = map["trajectory"];

@@ -31,8 +31,8 @@ def _fix_lambdaschedule():
         obj,
         lambda_values=None,
         num_lambda=101,
-        initial=0.0,
-        final=1.0,
+        initial=1.0,
+        final=2.0,
         to_pandas: bool = True,
     ):
         """

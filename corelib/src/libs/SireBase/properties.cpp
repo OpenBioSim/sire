@@ -730,3 +730,44 @@ QString Properties::toString() const
     else
         return QObject::tr("Properties(\n%1\n)").arg(props.join(",\n"));
 }
+
+/** Internal function to return an editable property from the passed value.
+ *  This returns 0 if the property doesn't exist
+ */
+Property *Properties::getEditableProperty(const QString &key)
+{
+    auto it = d->properties.find(key);
+
+    if (it != d->properties.end())
+        return it.value().data();
+    else
+        return 0;
+}
+
+/** Update the passed property to have the value 'value'. This does
+ *  an in-place update on the existing property (which must have
+ *  a compatible type). If 'auto-add' is true, then this will add
+ *  the property if it doesn't exist. This returns whether or not
+ *  a property was updated (or added)
+ */
+bool Properties::updateProperty(const QString &key, const Property &value,
+                                bool auto_add)
+{
+    auto prop = this->getEditableProperty(key);
+
+    if (prop == 0)
+    {
+        if (auto_add)
+        {
+            this->setProperty(key, value);
+            return true;
+        }
+        else
+            return false;
+    }
+    else
+    {
+        prop->copy(value);
+        return true;
+    }
+}

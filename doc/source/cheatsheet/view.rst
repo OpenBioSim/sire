@@ -414,10 +414,15 @@ against all of the carbon atoms.
 .. image:: images/view_19.jpg
    :alt: View of the trajectory with all molecules wrapped into the same box
 
+.. note::
+
+   You can also pass in a sub-view directly, e.g.
+   ``mols.view(align=mols["element C"])``.
+
 If ``wrap`` is ``True`` (as is the default) then all molecules will be wrapped
 such that the aligned atoms are at the center of the box.
 
-You can use any search string to find the atoms to align. If you pass
+You can use any search string or view to find the atoms to align. If you pass
 ``align=True`` then this will align against all atoms. This can be useful
 when you are viewing individual molecules, e.g.
 
@@ -455,6 +460,14 @@ Note that all of the above options can be passed to the
 would give the same view as
 
 >>> mols.view(align="element C", smooth=50)
+
+as would
+
+>>> mols.trajectory(align=mols["element C"], smooth=50).view()
+
+and
+
+>>> mols.view(align=mols["element C"], smooth=50)
 
 This is because ``mols.view(...)`` is creating its own
 ``mols.trajectory(...)`` with those options, and is viewing those.

@@ -31,6 +31,8 @@
 #include "SireMol/core.h"
 #include "SireMol/mover_metaid.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
 
@@ -1068,10 +1070,12 @@ int AtomMatchM::nFrames(const SireBase::PropertyMap &map) const
 
 void AtomMatchM::loadFrame(int frame)
 {
-    for (auto &mol : matches)
-    {
-        mol.loadFrame(frame);
-    }
+    this->loadFrame(frame, PropertyMap());
+}
+
+void AtomMatchM::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
 }
 
 void AtomMatchM::saveFrame(int frame)
@@ -1108,9 +1112,16 @@ void AtomMatchM::deleteAllFrames()
 
 void AtomMatchM::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
+    LazyEvaluator evaluator;
+    this->loadFrame(frame, evaluator, map);
+}
+
+void AtomMatchM::loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
+                           const SireBase::PropertyMap &map)
+{
     for (auto &mol : matches)
     {
-        mol.loadFrame(frame, map);
+        mol.loadFrame(frame, evaluator, map);
     }
 }
 

@@ -53,6 +53,7 @@
 
 #include "SireBase/savestate.h"
 #include "SireBase/timeproperty.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -3723,6 +3724,11 @@ void System::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void System::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void System::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -3760,9 +3766,16 @@ static SireUnits::Dimension::Time get_time_from_property(const Property &prop)
 
 void System::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
+    LazyEvaluator evaluator;
+    this->loadFrame(frame, evaluator, map);
+}
+
+void System::loadFrame(int frame, const LazyEvaluator &evaluator,
+                       const SireBase::PropertyMap &map)
+{
     this->accept();
     this->mustNowRecalculateFromScratch();
-    MolGroupsBase::loadFrame(frame, map);
+    MolGroupsBase::loadFrame(frame, evaluator, map);
 
     const auto space_property = map["space"];
     const auto time_property = map["time"];

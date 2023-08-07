@@ -3,6 +3,7 @@ __all__ = [
     "is_water",
     "Atom",
     "AtomIdx",
+    "AtomMapping",
     "AtomMatch",
     "AtomMatchM",
     "AtomName",
@@ -92,6 +93,7 @@ from ..legacy.Mol import (
     BondOrder,
     Stereochemistry,
     AtomCoords,
+    AtomMapping,
     AtomMatch,
     AtomMatchM,
 )
@@ -1004,13 +1006,18 @@ def _add_evals(obj):
 def _get_container_property(x, key):
     vals = []
 
-    for v in x:
-        prop = _get_property(v, key)
+    from ..base import ProgressBar
 
-        if type(prop) is list:
-            vals += prop
-        else:
-            vals.append(prop)
+    with ProgressBar(len(x), "Extract property") as bar:
+        for v in x:
+            prop = _get_property(v, key)
+
+            if type(prop) is list:
+                vals += prop
+            else:
+                vals.append(prop)
+
+            bar.tick()
 
     return vals
 
@@ -1195,7 +1202,8 @@ for C in [Residue, Chain, Segment]:
 
 
 def _molecule(obj, id=None):
-    """Return the molecule that contains this view. If 'id' is specified
+    """
+    Return the molecule that contains this view. If 'id' is specified
     then this will check that the ID matches this molecule before
     returning it. This will raise an exception if the ID doesn't match.
 
@@ -1213,7 +1221,8 @@ def _molecule(obj, id=None):
 
 
 def _molecules(obj, id=None):
-    """Return the molecule that contains this view as a list of molecules,
+    """
+    Return the molecule that contains this view as a list of molecules,
     containing just a single molecule.
 
     If 'id' is specified then this checks that this molecule matches
@@ -1423,16 +1432,37 @@ Selector_Chain_.cursor = _cursors
 Selector_Segment_.cursor = _cursors
 
 
-def _trajectory(obj, align=None, smooth=None, wrap=None, map=None):
+def _trajectory(
+    obj, align=None, smooth=None, wrap=None, mapping=None, frame=None, map=None
+):
     """
     Return an iterator over the trajectory of frames of this view.
 
     align:
-      Pass in a selection string to select atoms against which
-      every frame will be aligned. These atoms will be moved
-      to the center of the periodic box (if a periodic box
-      is used). If 'True' is passed then this will align
-      against all of the atoms in the view.
+        Pass in a selection string to select atoms against which
+        every frame will be aligned. These atoms will be moved
+        to the center of the periodic box (if a periodic box
+        is used). If "True" is passed, then this will attempt
+        to align *ALL* of the coordinates in the view.
+
+        You can also choose to pass in a molecular container,
+        and it will align against the atoms in that container,
+        assuming they are contained in this view. If not, then
+        you need to supply a mapping that maps from the
+        atoms in the align container, to the atoms in this view.
+
+    frame:
+        The frame of the trajectory against which the alignment
+        should be based. For example, `frame=3` would align based
+        on the coordinates of the aligned atoms in frame 3 of
+        the trajectory. If this is `None` (the default) then the
+        first frame will be used.
+
+    mapping: AtomMapping
+        An AtomMapping object that maps from atoms in the alignment
+        container to atoms in this view. You only need to supply
+        this if all of the alignment atoms are not contained
+        in this view.
 
     smooth:
       Pass in the number of frames to smooth (average) the view
@@ -1446,7 +1476,13 @@ def _trajectory(obj, align=None, smooth=None, wrap=None, map=None):
     from ._trajectory import TrajectoryIterator
 
     return TrajectoryIterator(
-        obj, align=align, smooth=smooth, wrap=wrap, map=map
+        obj,
+        align=align,
+        frame=frame,
+        smooth=smooth,
+        wrap=wrap,
+        mapping=mapping,
+        map=map,
     )
 
 
@@ -1744,6 +1780,32 @@ if not hasattr(SelectorMol, "__orig__find__"):
         SelectorM_Segment_,
     ]:
         __fix__find(C)
+
+
+if not hasattr(AtomMapping, "__orig_find__"):
+
+    def __mapping_find__(obj, atoms, container, find_all: bool = True):
+        from ..system import System
+
+        if System.is_system(container):
+            container = container.atoms()
+
+        return obj.__orig_find__(atoms, container, find_all=find_all)
+
+    def __mapping_map__(obj, atoms, container, match_all: bool = True):
+        from ..system import System
+
+        if System.is_system(container):
+            container = container.atoms()
+
+        return obj.__orig_map__(atoms, container, find_all=match_all)
+
+    AtomMapping.__orig_find__ = AtomMapping.find
+    AtomMapping.__orig_map__ = AtomMapping.map
+
+    AtomMapping.find = __mapping_find__
+    AtomMapping.map = __mapping_map__
+
 
 # Remove some temporary variables
 del C

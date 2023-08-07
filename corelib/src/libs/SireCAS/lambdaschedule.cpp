@@ -47,7 +47,8 @@ QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
 
     SharedDataStream sds(ds);
 
-    sds << schedule.lever_names << schedule.stage_names
+    sds << schedule.constant_values
+        << schedule.lever_names << schedule.stage_names
         << schedule.default_equations
         << schedule.stage_equations
         << static_cast<const Property &>(schedule);
@@ -63,7 +64,8 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
     {
         SharedDataStream sds(ds);
 
-        sds >> schedule.lever_names >> schedule.stage_names >>
+        sds >> schedule.constant_values >>
+            schedule.lever_names >> schedule.stage_names >>
             schedule.default_equations >> schedule.stage_equations >>
             static_cast<Property &>(schedule);
     }
@@ -79,6 +81,7 @@ LambdaSchedule::LambdaSchedule() : ConcreteProperty<LambdaSchedule, Property>()
 
 LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
     : ConcreteProperty<LambdaSchedule, Property>(other),
+      constant_values(other.constant_values),
       lever_names(other.lever_names), stage_names(other.stage_names),
       default_equations(other.default_equations),
       stage_equations(other.stage_equations)
@@ -93,6 +96,7 @@ LambdaSchedule &LambdaSchedule::operator=(const LambdaSchedule &other)
 {
     if (this != &other)
     {
+        constant_values = other.constant_values;
         lever_names = other.lever_names;
         stage_names = other.stage_names;
         default_equations = other.default_equations;
@@ -105,7 +109,8 @@ LambdaSchedule &LambdaSchedule::operator=(const LambdaSchedule &other)
 
 bool LambdaSchedule::operator==(const LambdaSchedule &other) const
 {
-    return lever_names == other.lever_names and
+    return constant_values == other.constant_values and
+           lever_names == other.lever_names and
            stage_names == other.stage_names and
            default_equations == other.default_equations and
            stage_equations == other.stage_equations;
@@ -141,9 +146,32 @@ QString LambdaSchedule::toString() const
     if (this->isNull())
         return QObject::tr("LambdaSchedule::null");
 
-    return QObject::tr("LambdaSchedule( num_stages=%1 num_levers=%2 )")
-        .arg(this->nStages())
-        .arg(this->nLevers());
+    QStringList lines;
+
+    for (int i = 0; i < this->stage_names.count(); ++i)
+    {
+
+        lines.append(QString("  %1: %2")
+                         .arg(this->stage_names[i])
+                         .arg(this->default_equations[i].toOpenMMString()));
+
+        for (const auto &lever : this->stage_equations[i].keys())
+        {
+            lines.append(QString("    %1: %2")
+                             .arg(lever)
+                             .arg(this->stage_equations[i][lever].toOpenMMString()));
+        }
+    }
+
+    for (const auto &constant : this->constant_values.keys())
+    {
+        lines.append(QString("  %1 == %2")
+                         .arg(constant.toString())
+                         .arg(this->constant_values[constant]));
+    }
+
+    return QObject::tr("LambdaSchedule(\n%1\n)")
+        .arg(lines.join("\n"));
 }
 
 Symbol LambdaSchedule::lambda_symbol("λ");
@@ -163,6 +191,33 @@ Symbol LambdaSchedule::initial()
 Symbol LambdaSchedule::final()
 {
     return final_symbol;
+}
+
+SireCAS::Symbol LambdaSchedule::setConstant(const QString &constant, double value)
+{
+    return this->setConstant(this->getConstantSymbol(constant), value);
+}
+
+SireCAS::Symbol LambdaSchedule::setConstant(const SireCAS::Symbol &constant,
+                                            double value)
+{
+    this->constant_values.set(constant, value);
+    return constant;
+}
+
+double LambdaSchedule::getConstant(const QString &constant)
+{
+    return this->getConstant(this->getConstantSymbol(constant));
+}
+
+double LambdaSchedule::getConstant(const SireCAS::Symbol &constant) const
+{
+    return this->constant_values.value(constant);
+}
+
+SireCAS::Symbol LambdaSchedule::getConstantSymbol(const QString &constant) const
+{
+    return SireCAS::Symbol(constant);
 }
 
 void LambdaSchedule::addLever(const QString &lever)
@@ -277,17 +332,98 @@ void LambdaSchedule::clear()
     this->stage_names.clear();
     this->stage_equations.clear();
     this->default_equations.clear();
+    this->constant_values = Values();
+}
+
+void LambdaSchedule::addMorphStage()
+{
+    this->addStage("morph", (this->lam() * this->final()) +
+                                ((1 - this->lam()) * this->initial()));
+}
+
+void LambdaSchedule::addChargeScaleStages(double scale)
+{
+    auto scl = this->setConstant("γ", scale);
+
+    // make sure all of the existing stages for the charge lever are scaled
+    for (int i = 0; i < this->stage_names.count(); ++i)
+    {
+        this->setEquation(this->stage_names[i], "charge",
+                          scl * this->stage_equations[i].value("charge", this->default_equations[i]));
+    }
+
+    // now prepend the decharging stage, and append the recharging stage
+    this->prependStage("decharge", this->initial());
+    this->appendStage("recharge", this->final());
+
+    this->setEquation("decharge", "charge", (1.0 - ((1.0 - scl) * this->lam())) * this->initial());
+    this->setEquation("recharge", "charge", (1.0 - ((1.0 - scl) * (1.0 - this->lam()))) * this->final());
+}
+
+void LambdaSchedule::prependStage(const QString &name,
+                                  const SireCAS::Expression &equation)
+{
+    if (this->nStages() == 0)
+    {
+        this->appendStage(name, equation);
+        return;
+    }
+
+    if (this->stage_names.contains(name))
+        throw SireError::invalid_key(QObject::tr(
+                                         "Cannot prepend the stage %1 as it already exists.")
+                                         .arg(name),
+                                     CODELOC);
+
+    this->stage_names.prepend(name);
+    this->default_equations.prepend(equation);
+    this->stage_equations.prepend(QHash<QString, Expression>());
+}
+
+void LambdaSchedule::appendStage(const QString &name,
+                                 const SireCAS::Expression &equation)
+{
+    if (this->stage_names.contains(name))
+        throw SireError::invalid_key(QObject::tr(
+                                         "Cannot append the stage %1 as it already exists.")
+                                         .arg(name),
+                                     CODELOC);
+
+    this->stage_names.append(name);
+    this->default_equations.append(equation);
+    this->stage_equations.append(QHash<QString, Expression>());
+}
+
+void LambdaSchedule::insertStage(int i,
+                                 const QString &name,
+                                 const SireCAS::Expression &equation)
+{
+    if (i == 0)
+    {
+        this->prependStage(name, equation);
+        return;
+    }
+    else if (i >= this->nStages())
+    {
+        this->appendStage(name, equation);
+        return;
+    }
+
+    if (this->stage_names.contains(name))
+        throw SireError::invalid_key(QObject::tr(
+                                         "Cannot append the stage %1 as it already exists.")
+                                         .arg(name),
+                                     CODELOC);
+
+    this->stage_names.insert(i, name);
+    this->default_equations.insert(i, equation);
+    this->stage_equations.insert(i, QHash<QString, Expression>());
 }
 
 void LambdaSchedule::addStage(const QString &name,
-                              const Expression &default_equation)
+                              const Expression &equation)
 {
-    if (this->stage_names.contains(name))
-        return;
-
-    this->stage_names.append(name);
-    this->default_equations.append(default_equation);
-    this->stage_equations.append(QHash<QString, Expression>());
+    this->appendStage(name, equation);
 }
 
 int LambdaSchedule::find_stage(const QString &stage) const
@@ -314,14 +450,11 @@ void LambdaSchedule::setEquation(const QString &stage,
                                  const QString &lever,
                                  const Expression &equation)
 {
-    if (not this->lever_names.contains(lever))
-        throw SireError::invalid_key(QObject::tr(
-                                         "There is no lever called '%1'. Valid levers are [ %2 ]")
-                                         .arg(lever)
-                                         .arg(this->lever_names.join(", ")),
-                                     CODELOC);
-
     auto &lever_expressions = this->stage_equations[this->find_stage(stage)];
+
+    if (not this->lever_names.contains(lever))
+        this->addLever(lever);
+
     lever_expressions[lever] = equation;
 }
 
@@ -336,15 +469,18 @@ void LambdaSchedule::removeEquation(const QString &stage,
     this->stage_equations[idx].remove(lever);
 }
 
+Expression LambdaSchedule::getEquation(const QString &stage) const
+{
+    const int idx = this->find_stage(stage);
+
+    return this->default_equations[idx];
+}
+
 Expression LambdaSchedule::getEquation(const QString &stage,
                                        const QString &lever) const
 {
     if (not this->lever_names.contains(lever))
-        throw SireError::invalid_key(QObject::tr(
-                                         "There is no lever called '%1'. Valid levers are [ %2 ]")
-                                         .arg(lever)
-                                         .arg(this->lever_names.join(", ")),
-                                     CODELOC);
+        return this->getEquation(stage);
 
     const int idx = this->find_stage(stage);
 
@@ -417,10 +553,7 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
 
     lever_values.insert("λ", values);
 
-    for (const auto &stage_name : this->stage_names)
-    {
-        lever_values.insert(QString("λ_{%1}").arg(stage_name), values);
-    }
+    lever_values.insert("default", values);
 
     for (const auto &lever_name : this->lever_names)
     {
@@ -430,7 +563,7 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     if (this->nStages() == 0)
         return lever_values;
 
-    Values input_values;
+    Values input_values = this->constant_values;
     input_values.set(this->initial(), initial_value);
     input_values.set(this->final(), final_value);
     input_values.set(this->lam(), 0.0);
@@ -445,7 +578,8 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
         const int stage = std::get<0>(resolved);
         input_values.set(this->lam(), std::get<1>(resolved));
 
-        lever_values[QString("λ_{%1}").arg(this->stage_names[stage])][i] = std::get<1>(resolved);
+        const auto equation = this->default_equations[stage];
+        lever_values["default"][i] = equation(input_values);
 
         for (const auto &lever_name : lever_names)
         {
@@ -493,7 +627,7 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
     const auto equation = this->stage_equations[stage].value(
         lever_name, this->default_equations[stage]);
 
-    Values input_values;
+    Values input_values = this->constant_values;
     input_values.set(this->lam(), std::get<1>(resolved));
 
     QVector<double> morphed(nparams);
@@ -539,7 +673,7 @@ QVector<int> LambdaSchedule::morph(const QString &lever_name,
     const auto equation = this->stage_equations[stage].value(
         lever_name, this->default_equations[stage]);
 
-    Values input_values;
+    Values input_values = this->constant_values;
     input_values.set(this->lam(), std::get<1>(resolved));
 
     QVector<int> morphed(nparams);

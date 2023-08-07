@@ -27,10 +27,10 @@
 
 #include "filetrajectory.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include <QHash>
 #include <QMutex>
-
-#include "SireBase/centralcache.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -99,19 +99,18 @@ SIREIO_EXPORT QDataStream &operator>>(QDataStream &ds, FileTrajectory &file)
 }
 
 FileTrajectory::FileTrajectory()
-    : TrajectoryData(), last_loaded_frame_index(-1)
+    : TrajectoryData(), uuid(QUuid::createUuid())
 {
 }
 
 FileTrajectory::FileTrajectory(const MoleculeParser &p)
-    : TrajectoryData(), parser(p), last_loaded_frame_index(-1)
+    : TrajectoryData(), parser(p), uuid(QUuid::createUuid())
 {
 }
 
 FileTrajectory::FileTrajectory(const FileTrajectory &other)
     : TrajectoryData(other), parser(other.parser),
-      last_loaded_frame(other.last_loaded_frame),
-      last_loaded_frame_index(other.last_loaded_frame_index)
+      uuid(other.uuid)
 {
 }
 
@@ -179,47 +178,23 @@ QStringList FileTrajectory::filenames() const
     }
 }
 
+Frame FileTrajectory::getFrame(int i, const LazyEvaluator &evaluator) const
+{
+    i = SireID::Index(i).map(this->nFrames());
+
+    auto key = QString("%1-%2").arg(uuid.toString()).arg(i);
+
+    auto frame = evaluator.evaluate(key, [&]()
+                                    { return parser.read().getFrame(i); });
+
+    return frame.read().asA<Frame>();
+}
+
 Frame FileTrajectory::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    // It is often the case that we will repeatedly load the same frame
-    // Check for this here
-    QMutexLocker lkr(const_cast<QMutex *>(&(this->frame_mutex)));
-    FileTrajectory *nonconst_this = const_cast<FileTrajectory *>(this);
-
-    if (i == last_loaded_frame_index)
-    {
-        return this->last_loaded_frame;
-    }
-
-    // Ok - we are loading a different frame - see if this has been cached
-    auto cached_data = CentralCache::get(QString("FileTrajectory::%1::%2").arg(qint64(this)).arg(i));
-
-    QMutexLocker lkr2(cached_data->mutex());
-
-    if (not cached_data->isEmpty())
-    {
-        try
-        {
-            nonconst_this->last_loaded_frame = cached_data->data().value<Frame>();
-            lkr2.unlock();
-            nonconst_this->last_loaded_frame_index = i;
-            return this->last_loaded_frame;
-        }
-        catch (...)
-        {
-        }
-    }
-
-    // something went wrong - either the frame was corrupt or we
-    // haven't loaded it yet
-    nonconst_this->last_loaded_frame = parser.read().getFrame(i);
-    nonconst_this->last_loaded_frame_index = i;
-    cached_data->setData(QVariant::fromValue<Frame>(this->last_loaded_frame),
-                         this->last_loaded_frame.numBytes());
-    lkr2.unlock();
-    return this->last_loaded_frame;
+    return parser.read().getFrame(i);
 }
 
 bool FileTrajectory::isEditable() const
