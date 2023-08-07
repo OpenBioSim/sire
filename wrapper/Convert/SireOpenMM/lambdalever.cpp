@@ -193,11 +193,18 @@ get_exception(int atom0, int atom1, int start_index,
                            charge, sigma, epsilon);
 }
 
-void LambdaLever::setLambda(OpenMM::Context &context,
-                            double lambda_value) const
+/** Set the value of lambda in the passed context. Returns the
+ *  actual value of lambda set.
+ */
+double LambdaLever::setLambda(OpenMM::Context &context,
+                              double lambda_value) const
 {
     // go over each forcefield and update the parameters in the forcefield,
     // and then pass those updated parameters to the context
+    if (this->lambda_schedule.isNull())
+        return 0.0;
+
+    lambda_value = this->lambda_schedule.clamp(lambda_value);
 
     // get copies of the forcefields in which the parameters will be changed
     auto cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
@@ -411,6 +418,8 @@ void LambdaLever::setLambda(OpenMM::Context &context,
 
     if (dihff)
         dihff->updateParametersInContext(context);
+
+    return lambda_value;
 }
 
 void LambdaLever::setForceIndex(const QString &force, int index)

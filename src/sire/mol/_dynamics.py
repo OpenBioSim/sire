@@ -206,6 +206,38 @@ class DynamicsData:
             else:
                 return "none"
 
+    def get_schedule(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_lambda_schedule()
+
+    def set_schedule(self, schedule):
+        if not self.is_null():
+            self._omm_mols.set_lambda_schedule(schedule)
+
+    def get_lambda(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_lambda()
+
+    def set_lambda(self, lambda_value: float):
+        if not self.is_null():
+            s = self.get_schedule()
+
+            if s is None:
+                return
+
+            lambda_value = s.clamp(lambda_value)
+
+            if lambda_value == self._omm_mols.get_lambda():
+                # nothing to do
+                return
+
+            self._omm_mols.set_lambda(lambda_value)
+            self._clear_state()
+
     def info(self):
         if self.is_null():
             return None
@@ -336,7 +368,7 @@ class DynamicsData:
                         spinner.tick()
                         pass
 
-                spinner.set_completed()
+                spinner.success()
 
     def run(self, time, save_frequency, auto_fix_minimise: bool = True):
         if self.is_null():
@@ -554,6 +586,8 @@ class Dynamics:
         timestep=None,
         save_frequency=None,
         constraint=None,
+        schedule=None,
+        lambda_value=None,
     ):
         from ..base import create_map
         from .. import u
@@ -565,6 +599,8 @@ class Dynamics:
         _add_extra(extras, "timestep", u(timestep))
         _add_extra(extras, "save_frequency", save_frequency)
         _add_extra(extras, "constraint", constraint)
+        _add_extra(extras, "schedule", schedule)
+        _add_extra(extras, "lambda", lambda_value)
 
         map = create_map(map, extras)
 
@@ -602,6 +638,39 @@ class Dynamics:
             self._d.run(time=time, save_frequency=save_frequency)
 
         return self
+
+    def get_schedule(self):
+        """
+        Return the LambdaSchedule that shows how lambda changes the
+        underlying forcefield parameters in the system.
+        Returns None if this isn't a perturbable system.
+        """
+        return self._d.get_schedule()
+
+    def set_schedule(self, schedule):
+        """
+        Set the LambdaSchedule that will be used to control how
+        lambda changes the underlying forcefield parameters
+        in the system. This does nothing if this isn't
+        a perturbable system
+        """
+        self._d.set_schedule(schedule)
+
+    def get_lambda(self):
+        """
+        Return the current value of lambda for this system. This
+        does nothing if this isn't a perturbable system
+        """
+        return self._d.get_lambda()
+
+    def set_lambda(self, lambda_value: float):
+        """
+        Set the current value of lambda for this system. This will
+        update the forcefield parameters in the context according
+        to the data in the LambdaSchedule. This does nothing if
+        this isn't a perturbable system
+        """
+        self._d.set_lambda(lambda_value)
 
     def ensemble(self):
         """
@@ -715,11 +784,37 @@ class Dynamics:
         """
         return self._d.current_energy()
 
-    def current_potential_energy(self):
+    def current_potential_energy(self, lambda_values=None):
         """
-        Return the current potential energy
+        Return the current potential energy.
+
+        If `lambda_values` is passed (which should be a list of
+        lambda values) then this will return the energies
+        (as a list) at the requested lambda values
         """
-        return self._d.current_potential_energy()
+        if lambda_values is None:
+            return self._d.current_potential_energy()
+        else:
+            if not type(lambda_values) is list:
+                lambda_values = [lambda_values]
+
+            # save the current value of lambda so we
+            # can restore it
+            old_lambda = self.get_lambda()
+
+            nrgs = []
+
+            try:
+                for lambda_value in lambda_values:
+                    self.set_lambda(lambda_value)
+                    nrgs.append(self._d.current_potential_energy())
+            except Exception:
+                self.set_lambda(old_lambda)
+                raise
+
+            self.set_lambda(old_lambda)
+
+            return nrgs
 
     def current_kinetic_energy(self):
         """

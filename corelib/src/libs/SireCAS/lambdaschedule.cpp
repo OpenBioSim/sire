@@ -277,6 +277,9 @@ QStringList LambdaSchedule::getStages() const
     return this->stage_names;
 }
 
+/** Clamp and return the passed lambda value so that it is between a valid
+ *  range for this schedule (typically between [0.0-1.0] inclusive).
+ */
 double LambdaSchedule::clamp(double lambda_value) const
 {
     return std::max(0.0, std::min(lambda_value, 1.0));

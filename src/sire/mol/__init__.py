@@ -1325,6 +1325,8 @@ def _dynamics(
     timestep=None,
     save_frequency=None,
     constraint=None,
+    schedule=None,
+    lambda_value=None,
     **kwargs,
 ):
     """
@@ -1388,16 +1390,48 @@ def _dynamics(
         timestep=timestep,
         save_frequency=save_frequency,
         constraint=constraint,
+        schedule=schedule,
+        lambda_value=lambda_value,
         map=map,
     )
 
 
-def _minimisation(view, map=None):
+def _minimisation(
+    view,
+    map=None,
+    cutoff=None,
+    cutoff_type=None,
+    timestep=None,
+    save_frequency=None,
+    schedule=None,
+    lambda_value=None,
+    **kwargs,
+):
     """
     Return a Minimisation object that can be used to minimise the energy
     of the molecule(s) in this view.
     """
-    return Minimisation(view, map=map)
+    from ..base import create_map
+
+    map = create_map(map, kwargs)
+
+    # Set default values if these have not been set
+    if cutoff is None and not map.specified("cutoff"):
+        from ..units import angstrom
+
+        cutoff = 7.5 * angstrom
+
+    if cutoff_type is None and not map.specified("cutoff_type"):
+        cutoff_type = "PME"
+
+    return Minimisation(
+        view,
+        cutoff=cutoff,
+        cutoff_type=cutoff_type,
+        schedule=schedule,
+        lambda_value=lambda_value,
+        map=map,
+    )
 
 
 MoleculeView.dynamics = _dynamics

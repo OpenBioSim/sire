@@ -1,7 +1,10 @@
 __all__ = ["Minimisation"]
 
+from ._dynamics import DynamicsData as _DynamicsData
+from ._dynamics import _add_extra
 
-class MinimisationData:
+
+class MinimisationData(_DynamicsData):
     """
     Internal class that is designed to only be used by the Minimisation
     class. This holds the shared state for minimisation on a set
@@ -9,25 +12,7 @@ class MinimisationData:
     """
 
     def __init__(self, mols=None, map=None):
-        if mols is not None:
-            # eventually want to call 'extract' on this?
-            self._sire_mols = mols
-
-            from ..base import create_map
-
-            self._map = create_map(map)
-
-            from ..convert import to
-
-            self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
-
-        else:
-            self._sire_mols = None
-            self._map = None
-            self._omm_mols = None
-
-    def is_null(self):
-        return self._sire_mols is None
+        super().__init__(mols=mols, map=map)
 
     def run(self, max_iterations: int):
         from openmm import LocalEnergyMinimizer
@@ -56,17 +41,6 @@ class MinimisationData:
                         spinner.tick()
                         pass
 
-    def commit(self):
-        from ..legacy.Convert import openmm_extract_coordinates
-
-        state = self._omm_mols.getState(getPositions=True)
-
-        mols = openmm_extract_coordinates(
-            state, self._sire_mols.molecules(), self._map
-        )
-
-        self._sire_mols.update(mols.to_molecules())
-
 
 class Minimisation:
     """
@@ -76,7 +50,26 @@ class Minimisation:
     you want to minimise
     """
 
-    def __init__(self, mols=None, map=None):
+    def __init__(
+        self,
+        mols=None,
+        map=None,
+        cutoff=None,
+        cutoff_type=None,
+        schedule=None,
+        lambda_value=None,
+    ):
+        from ..base import create_map
+
+        extras = {}
+
+        _add_extra(extras, "cutoff", cutoff)
+        _add_extra(extras, "cutoff_type", cutoff_type)
+        _add_extra(extras, "schedule", schedule)
+        _add_extra(extras, "lambda", lambda_value)
+
+        map = create_map(map, extras)
+
         self._d = MinimisationData(mols=mols, map=map)
 
     def __str__(self):

@@ -324,7 +324,7 @@ try:
         try:
             from ._sommcontext import SOMMContext
 
-            return SOMMContext(
+            context = SOMMContext(
                 system=system,
                 integrator=integrator,
                 platform=platform,
@@ -336,6 +336,14 @@ try:
                 "the platform was not supported for this system, options "
                 f"or on this computer? The error message is: {e}"
             )
+
+        if map.specified("schedule"):
+            context.set_lambda_schedule(map["schedule"].value())
+
+        if map.specified("lambda"):
+            context.set_lambda(map["lambda"].value().as_double())
+
+        return context
 
     def openmm_extract_coordinates(state, mols, map):
         return _openmm_extract_coordinates(state, mols, map)

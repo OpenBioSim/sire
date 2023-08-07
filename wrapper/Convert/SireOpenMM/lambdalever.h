@@ -63,7 +63,7 @@ namespace SireOpenMM
         const char *what() const;
         static const char *typeName();
 
-        void setLambda(OpenMM::Context &context, double lam_val) const;
+        double setLambda(OpenMM::Context &context, double lam_val) const;
 
         void setForceIndex(const QString &force, int index);
 

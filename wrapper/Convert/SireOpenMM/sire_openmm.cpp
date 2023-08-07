@@ -905,20 +905,13 @@ namespace SireOpenMM
 
                     _populate_coords(converted_coords, positions_data+offsets_data[i], mol_natoms);
 
-                    SireMol::AtomCoords mol_coords;
-
-                    if (mol.data().hasProperty(coords_prop))
+                    if (not mol.updatePropertyFrom<SireMol::AtomCoords>(coords_prop.source(),
+                                                                        converted_coords, false))
                     {
-                        mol_coords = mol.data().property(coords_prop).asA<SireMol::AtomCoords>();
+                        SireMol::AtomCoords c(mol.data().info());
+                        c.copyFrom(converted_coords);
+                        mol.setProperty(coords_prop.source(), c);
                     }
-                    else
-                    {
-                        mol_coords = SireMol::AtomCoords(mol.data().info());
-                    }
-
-                    mol_coords.copyFrom(converted_coords);
-
-                    mol.setProperty(coords_prop.source(), mol_coords);
 
                     ret_data[i] = mol.commit();
                 } });
@@ -934,20 +927,13 @@ namespace SireOpenMM
 
                 _populate_coords(converted_coords, positions_data + offsets_data[i], mol_natoms);
 
-                SireMol::AtomCoords mol_coords;
-
-                if (mol.data().hasProperty(coords_prop))
+                if (not mol.updatePropertyFrom<SireMol::AtomCoords>(coords_prop.source(),
+                                                                    converted_coords, false))
                 {
-                    mol_coords = mol.data().property(coords_prop).asA<SireMol::AtomCoords>();
+                    SireMol::AtomCoords c(mol.data().info());
+                    c.copyFrom(converted_coords);
+                    mol.setProperty(coords_prop.source(), c);
                 }
-                else
-                {
-                    mol_coords = SireMol::AtomCoords(mol.data().info());
-                }
-
-                mol_coords.copyFrom(converted_coords);
-
-                mol.setProperty(coords_prop.source(), mol_coords);
 
                 ret_data[i] = mol.commit();
             }

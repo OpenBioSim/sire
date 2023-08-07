@@ -162,9 +162,10 @@ namespace SireCAS
                            const QVector<int> &final,
                            double lambda_value) const;
 
+        double clamp(double lambda_value) const;
+
     protected:
         int find_stage(const QString &stage) const;
-        double clamp(double lambda_value) const;
 
         std::tuple<int, double> resolve_lambda(double lambda) const;
 

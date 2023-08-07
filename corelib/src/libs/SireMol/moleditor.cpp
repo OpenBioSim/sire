@@ -335,6 +335,17 @@ MolStructureEditor MolEditor::removeAllSegments() const
     return editor.removeAllSegments();
 }
 
+/** Update the passed property to have the value 'value'. This does
+ *  an in-place update on the existing property (which must have
+ *  a compatible type). If 'auto-add' is true, then this will add
+ *  the property if it doesn't exist. This returns whether or not
+ *  a property was updated (or added)
+ */
+bool MolEditor::updateProperty(const QString &key, const Property &value, bool auto_add)
+{
+    return d->updateProperty(key, value, auto_add);
+}
+
 /** Commit these changes and return a copy of the
     edited molecule */
 Molecule MolEditor::commit() const

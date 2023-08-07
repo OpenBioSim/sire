@@ -111,6 +111,19 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::clamp
+        
+            typedef double ( ::SireCAS::LambdaSchedule::*clamp_function_type)( double ) const;
+            clamp_function_type clamp_function_value( &::SireCAS::LambdaSchedule::clamp );
+            
+            LambdaSchedule_exposer.def( 
+                "clamp"
+                , clamp_function_value
+                , ( bp::arg("lambda_value") )
+                , bp::release_gil_policy()
+                , "Clamp and return the passed lambda value so that it is between a valid\n  range for this schedule (typically between [0.0-1.0] inclusive).\n" );
+        
+        }
         { //::SireCAS::LambdaSchedule::clear
         
             typedef void ( ::SireCAS::LambdaSchedule::*clear_function_type)(  ) ;

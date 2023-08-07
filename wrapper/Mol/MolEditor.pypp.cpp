@@ -412,6 +412,18 @@ void register_MolEditor_class(){
                 , "" );
         
         }
+        { //::SireMol::MolEditor::updateProperty
+        
+            typedef bool ( ::SireMol::MolEditor::*updateProperty_function_type)( ::QString const &,::SireBase::Property const &,bool ) ;
+            updateProperty_function_type updateProperty_function_value( &::SireMol::MolEditor::updateProperty );
+            
+            MolEditor_exposer.def( 
+                "updateProperty"
+                , updateProperty_function_value
+                , ( bp::arg("key"), bp::arg("value"), bp::arg("auto_add")=(bool)(true) )
+                , "Update the passed property to have the value value. This does\n  an in-place update on the existing property (which must have\n  a compatible type). If auto-add is true, then this will add\n  the property if it doesnt exist. This returns whether or not\n  a property was updated (or added)\n" );
+        
+        }
         MolEditor_exposer.staticmethod( "typeName" );
         MolEditor_exposer.def( "__copy__", &__copy__);
         MolEditor_exposer.def( "__deepcopy__", &__copy__);

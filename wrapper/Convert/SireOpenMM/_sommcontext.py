@@ -38,6 +38,8 @@ class SOMMContext(_Context):
             self._atom_index = None
             self._lambda_lever = None
 
+        self._lambda_value = 0.0
+
     def __str__(self):
         p = self.getPlatform()
         s = self.getSystem()
@@ -100,6 +102,10 @@ class SOMMContext(_Context):
     def set_platform_property(self, key, value):
         """
         Set the value of the platform property 'key' to 'value'
+
+        Note that this probably doesn't do anything as it looks
+        like platform properties cannot be changed after
+        construction. This function may be removed.
         """
         value = str(value)
 
@@ -126,6 +132,12 @@ class SOMMContext(_Context):
         in the openmm context
         """
         return self._atom_index
+
+    def get_lambda(self):
+        """
+        Return the current value of lambda for this context
+        """
+        return self._lambda_value
 
     def get_lambda_lever(self):
         """
@@ -162,7 +174,14 @@ class SOMMContext(_Context):
         if self._lambda_lever is None:
             return
 
+        s = self._lambda_lever.schedule()
+
+        if s is None or s.is_null():
+            return
+
+        lambda_value = s.clamp(lambda_value)
         self._lambda_lever.set_lambda(self, lambda_value)
+        self._lambda_value = lambda_value
 
     def get_potential_energy(self):
         """
