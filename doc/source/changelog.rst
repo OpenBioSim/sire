@@ -63,6 +63,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug that prevented ``mols.trajectory().view()`` from working.
   You can now view trajectory subsets again, e.g. ``mols.trajectory()[0:5].view()``.
 
+* Updated ``FreeEnergyAnalysis.py`` to be compatible with both the new pymbar 4 API
+  and the old pymbar 3 API.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
