@@ -439,9 +439,12 @@ namespace SireMaths
 
         Average msd;
 
+        const auto p_data = p.constData();
+        const auto q_data = q.constData();
+
         for (int i = 0; i < n; ++i)
         {
-            msd.accumulate(pow_2(p[i].x() - q[i].x()) + pow_2(p[i].y() - q[i].y()) + pow_2(p[i].z() - q[i].z()));
+            msd.accumulate(Vector::distance2(p_data[i], q_data[i]));
         }
 
         return std::sqrt(msd.average());

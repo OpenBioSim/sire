@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireError/errors.h"
 
 #include "SireID/index.h"
@@ -623,6 +625,48 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Segment >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::SelectorM< SireMol::Segment >::*filter_function_type)( ::SireMol::SelectorM< SireMol::Segment > const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Segment >::filter );
+            
+            SelectorM_Segment__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::SelectorM< SireMol::Segment >::*filter_function_type)( ::SireMol::Selector< SireMol::Segment > const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Segment >::filter );
+            
+            SelectorM_Segment__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("views") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::filter
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef ::SireMol::SelectorM< SireMol::Segment > ( ::SireMol::SelectorM< SireMol::Segment >::*filter_function_type)( ::SireMol::Segment const & ) const;
+            filter_function_type filter_function_value( &::SireMol::SelectorM< SireMol::Segment >::filter );
+            
+            SelectorM_Segment__exposer.def( 
+                "filter"
+                , filter_function_value
+                , ( bp::arg("view") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Segment >::find
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
@@ -860,6 +904,20 @@ void register_SelectorM_Segment__class(){
         { //::SireMol::SelectorM< SireMol::Segment >::loadFrame
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::SelectorM< SireMol::Segment >::loadFrame );
+            
+            SelectorM_Segment__exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::loadFrame
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
             typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireMol::SelectorM< SireMol::Segment >::loadFrame );
             
@@ -867,6 +925,20 @@ void register_SelectorM_Segment__class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Segment >::loadFrame
+        
+            typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Segment >::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const &,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::SelectorM< SireMol::Segment >::loadFrame );
+            
+            SelectorM_Segment__exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -1186,6 +1258,12 @@ void register_SelectorM_Segment__class(){
                 , "" );
         
         }
+        SelectorM_Segment__exposer.def( bp::self + bp::self );
+        SelectorM_Segment__exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Segment > >() );
+        SelectorM_Segment__exposer.def( bp::self + bp::other< SireMol::Segment >() );
+        SelectorM_Segment__exposer.def( bp::self - bp::self );
+        SelectorM_Segment__exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Segment > >() );
+        SelectorM_Segment__exposer.def( bp::self - bp::other< SireMol::Segment >() );
         { //::SireMol::SelectorM< SireMol::Segment >::operator=
         
             typedef SireMol::SelectorM< SireMol::Segment > exported_class_t;

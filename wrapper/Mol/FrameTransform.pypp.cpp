@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireStream/shareddatastream.h"
 
+#include "atommatch.h"
+
 #include "trajectoryaligner.h"
 
 #include "trajectoryaligner.h"

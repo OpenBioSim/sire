@@ -576,9 +576,9 @@ QHash<AtomIdx, AtomIdx> AtomMCSMatcher::pvt_match(const MoleculeView &mol0, cons
                                                   const MoleculeView &mol1, const PropertyMap &map1) const
 {
     if (prematcher.isNull() or prematcher.read().isNull())
-        return Evaluator(mol0).findMCS(mol1, t, match_light, map0, map1, 6, this - verbose);
+        return Evaluator(mol0).findMCS(mol1, t, match_light, map0, map1, 6, this->verbose);
     else
-        return Evaluator(mol0).findMCS(mol1, prematcher.read(), t, match_light, map0, map1, 6, this - verbose);
+        return Evaluator(mol0).findMCS(mol1, prematcher.read(), t, match_light, map0, map1, 6, this->verbose);
 }
 
 /////////

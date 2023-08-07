@@ -134,8 +134,14 @@ namespace SireBase
         const Properties &allMetadata() const;
         const Properties &allMetadata(const PropertyName &key) const;
 
-        void setProperty(const QString &key, const Property &value);
+        bool updateProperty(const QString &key, const Property &value,
+                            bool auto_add = true);
 
+        template <class T, class V>
+        bool updatePropertyFrom(const QString &key, const V &values,
+                                bool auto_add = true);
+
+        void setProperty(const QString &key, const Property &value);
         void setProperty(const QString &key, const Property &value, bool clear_metadata);
 
         void setMetadata(const QString &metakey, const Property &value);
@@ -178,6 +184,8 @@ namespace SireBase
 
     private:
         Properties(bool);
+
+        Property *getEditableProperty(const QString &key);
 
         /** Implicitly shared pointer to the data of this object */
         SharedDataPointer<detail::PropertiesData> d;
@@ -262,6 +270,38 @@ namespace SireBase
     SIRE_OUTOFLINE_TEMPLATE bool Properties::hasMetadataOfType(const PropertyName &key, const PropertyName &metakey) const
     {
         return this->hasMetadata(key, metakey) and this->metadata(key, metakey).isA<T>();
+    }
+
+    /** Update the property at key 'key' (which must be of type T) with
+     *  the value from 'values'. This called T::copyFrom(const V &values)
+     *  on the property. If 'auto_add' is true then this
+     *  default-constructs and adds the property if it doesn't exist.
+     *
+     *  This returns whether or not a property was updated (or added)
+     */
+    template <class T, class V>
+    SIRE_OUTOFLINE_TEMPLATE bool Properties::updatePropertyFrom(const QString &key, const V &value,
+                                                                bool auto_add)
+    {
+        auto prop = this->getEditableProperty(key);
+
+        if (prop == 0)
+        {
+            if (auto_add)
+            {
+                T property;
+                property.copyFrom(value);
+                this->setProperty(key, property);
+                return true;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            prop->asA<T>().copyFrom(value);
+            return true;
+        }
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

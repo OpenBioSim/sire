@@ -21,6 +21,7 @@
 #include "integrationconstant.h"
 #include "invhyperbolicfuncs.h"
 #include "invtrigfuncs.h"
+#include "lambdaschedule.h"
 #include "minmax.h"
 #include "power.h"
 #include "powerconstant.h"

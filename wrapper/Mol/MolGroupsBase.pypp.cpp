@@ -8,6 +8,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireBase/slice.h"
 
 #include "SireError/errors.h"
@@ -968,6 +970,19 @@ void register_MolGroupsBase_class(){
         }
         { //::SireMol::MolGroupsBase::loadFrame
         
+            typedef void ( ::SireMol::MolGroupsBase::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::MolGroupsBase::loadFrame );
+            
+            MolGroupsBase_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MolGroupsBase::loadFrame
+        
             typedef void ( ::SireMol::MolGroupsBase::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireMol::MolGroupsBase::loadFrame );
             
@@ -975,6 +990,19 @@ void register_MolGroupsBase_class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MolGroupsBase::loadFrame
+        
+            typedef void ( ::SireMol::MolGroupsBase::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const &,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::MolGroupsBase::loadFrame );
+            
+            MolGroupsBase_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         

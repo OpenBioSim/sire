@@ -312,6 +312,62 @@ def use_new_api():
         ]
     )
 
+    try:
+        import lazy_import
+
+        have_lazy_import = True
+    except ImportError:
+        have_lazy_import = False
+
+    if have_lazy_import:
+        # Now make sure that all new modules have been loaded
+        from . import (
+            move,
+            io,
+            system,
+            squire,
+            mm,
+            convert,
+            ff,
+            mol,
+            analysis,
+            base,
+            cas,
+            cluster,
+            error,
+            id,
+            maths,
+            qt,
+            stream,
+            units,
+            vol,
+        )
+
+        for M in [
+            move,
+            io,
+            system,
+            squire,
+            mm,
+            convert,
+            ff,
+            mol,
+            analysis,
+            base,
+            cas,
+            cluster,
+            error,
+            id,
+            maths,
+            qt,
+            stream,
+            units,
+            vol,
+        ]:
+            if lazy_import.LazyModule in type(M).mro():
+                # this module is lazily loaded - use 'dir' to load it
+                dir(M)
+
 
 def use_old_api():
     """Load Sire using the old (C++-style) API. This is for

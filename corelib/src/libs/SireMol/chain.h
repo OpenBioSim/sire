@@ -58,6 +58,9 @@ namespace SireMol
     template <class T>
     class Selector;
 
+    template <class T>
+    class SelectorM;
+
     class Atom;
     class Residue;
     class Molecule;
@@ -91,6 +94,14 @@ namespace SireMol
         static const char *typeName();
 
         Chain *clone() const;
+
+        SelectorM<Chain> operator+(const SelectorM<Chain> &chains) const;
+        SelectorM<Chain> operator+(const Selector<Chain> &chains) const;
+        SelectorM<Chain> operator+(const Chain &other) const;
+
+        SelectorM<Chain> operator-(const SelectorM<Chain> &chains) const;
+        SelectorM<Chain> operator-(const Selector<Chain> &chains) const;
+        SelectorM<Chain> operator-(const Chain &other) const;
 
         bool operator==(const Chain &other) const;
         bool operator!=(const Chain &other) const;

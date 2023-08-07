@@ -87,6 +87,8 @@
 
 #include "IntegrationConstant.pypp.hpp"
 
+#include "LambdaSchedule.pypp.hpp"
+
 #include "LessOrEqualThan.pypp.hpp"
 
 #include "LessThan.pypp.hpp"
@@ -253,6 +255,8 @@ BOOST_PYTHON_MODULE(_CAS){
     register_Symbol_class();
 
     register_IntegrationConstant_class();
+
+    register_LambdaSchedule_class();
 
     register_LessOrEqualThan_class();
 

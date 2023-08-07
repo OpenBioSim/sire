@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectorm.hpp"
+
 #include <QDebug>
 
 #include "cutgroup.h"

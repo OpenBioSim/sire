@@ -41,6 +41,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectorm.hpp"
+
 #include <QDebug>
 
 #include "atom.h"
@@ -679,12 +681,14 @@ void register_Selector_Atom__class(){
                 , "" );
         
         }
+        Selector_Atom__exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::Atom > >() );
         Selector_Atom__exposer.def( bp::self + bp::self );
-        Selector_Atom__exposer.def( bp::self + bp::other< SireMol::AtomID >() );
         Selector_Atom__exposer.def( bp::self + bp::other< SireMol::Atom >() );
+        Selector_Atom__exposer.def( bp::self + bp::other< SireMol::AtomID >() );
+        Selector_Atom__exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::Atom > >() );
         Selector_Atom__exposer.def( bp::self - bp::self );
-        Selector_Atom__exposer.def( bp::self - bp::other< SireMol::AtomID >() );
         Selector_Atom__exposer.def( bp::self - bp::other< SireMol::Atom >() );
+        Selector_Atom__exposer.def( bp::self - bp::other< SireMol::AtomID >() );
         { //::SireMol::Selector< SireMol::Atom >::operator=
         
             typedef SireMol::Selector< SireMol::Atom > exported_class_t;

@@ -66,6 +66,7 @@ namespace SireMol
 #include "SireBase/incremint.h"
 #include "SireBase/majorminorversion.h"
 #include "SireBase/refcountdata.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -2503,6 +2504,11 @@ void MoleculeGroup::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void MoleculeGroup::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void MoleculeGroup::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -2527,8 +2533,18 @@ void MoleculeGroup::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
     if (not this->isEmpty())
     {
+        LazyEvaluator evaluator;
+        this->loadFrame(frame, evaluator, map);
+    }
+}
+
+void MoleculeGroup::loadFrame(int frame, const LazyEvaluator &evaluator,
+                              const SireBase::PropertyMap &map)
+{
+    if (not this->isEmpty())
+    {
         this->accept();
-        d->molecules.loadFrame(frame, map);
+        d->molecules.loadFrame(frame, evaluator, map);
         d->incrementMinor();
     }
 }

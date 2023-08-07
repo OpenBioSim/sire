@@ -5,6 +5,8 @@
 
 #include "SireMol/moleculeinfo.h"
 #include "SireMol/core.h"
+#include "SireMol/atom.h"
+#include "SireMol/selector.hpp"
 
 #include "SireMM/mmdetail.h"
 #include "SireMM/excludedpairs.h"
@@ -31,10 +33,39 @@ namespace SireOpenMM
         OpenMMMolecule();
         OpenMMMolecule(const SireMol::Molecule &mol,
                        const SireBase::PropertyMap &map);
+
+        OpenMMMolecule(const SireMol::Molecule &mol,
+                       const SireBase::PropertyMap &map0,
+                       const SireBase::PropertyMap &map1);
+
         ~OpenMMMolecule();
+
+        bool operator==(const OpenMMMolecule &other) const;
+        bool operator!=(const OpenMMMolecule &other) const;
 
         void copyInCoordsAndVelocities(OpenMM::Vec3 *coords,
                                        OpenMM::Vec3 *velocities) const;
+
+        bool isPerturbable() const;
+
+        QVector<double> getCharges() const;
+        QVector<double> getSigmas() const;
+        QVector<double> getEpsilons() const;
+
+        QVector<double> getBondKs() const;
+        QVector<double> getBondLengths() const;
+
+        QVector<double> getAngleKs() const;
+        QVector<double> getAngleSizes() const;
+
+        QVector<int> getTorsionPeriodicities() const;
+        QVector<double> getTorsionPhases() const;
+        QVector<double> getTorsionKs() const;
+
+        std::tuple<int, int, double, double, double> getException(int atom0, int atom1,
+                                                                  int start_index,
+                                                                  double coul_14_scl,
+                                                                  double lj_14_scl) const;
 
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of
@@ -45,6 +76,11 @@ namespace SireOpenMM
 
         /** The molecule info that contains metadata about the molecule */
         SireMol::MoleculeInfo molinfo;
+
+        /** All of the atoms, in the order they should appear in the
+         *  OpenMM context
+         */
+        SireMol::Selector<SireMol::Atom> atoms;
 
         /** All of the excluded atom pairs */
         SireMM::ExcludedPairs excl_pairs;
@@ -73,8 +109,9 @@ namespace SireOpenMM
         /** Indexes of all bond pairs */
         QVector<std::pair<int, int>> bond_pairs;
 
-        /** Indexes of pairs with custom 1-4 interactions */
-        QVector<std::tuple<int, int, double, double, double>> custom_pairs;
+        /** Set of 1-4 or excluded  pairs
+            (with coulomb and LJ scaling factors) */
+        QVector<std::tuple<int, int, double, double>> exception_params;
 
         /** All the bond parameters */
         QVector<std::tuple<int, int, double, double>> bond_params;
@@ -88,12 +125,21 @@ namespace SireOpenMM
         /** All the constraints */
         QVector<std::tuple<int, int, double>> constraints;
 
+        /** The molecule perturbed molecule, if this is perturbable */
+        std::shared_ptr<OpenMMMolecule> perturbed;
+
+        /** The indicies of the added exceptions - only populated
+         *  if this is a peturbable molecule */
+        QHash<QString, QVector<int>> exception_idxs;
+
         /** What type of constraint to use */
         qint32 constraint_type;
 
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
                                 const SireBase::PropertyMap &map);
+
+        void alignInternals();
     };
 
 }

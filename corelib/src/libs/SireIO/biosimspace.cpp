@@ -271,7 +271,7 @@ namespace SireIO
         // Copy across all properties that are unique to the original molecule.
         for (const auto &prop : molecule.propertyKeys())
         {
-            if (not water.hasProperty(prop))
+            if (not water.hasProperty(prop) and not prop.compare("is_non_searchable_water"))
             {
                 edit_mol = edit_mol.setProperty(prop, molecule.property(prop)).molecule();
             }
@@ -485,7 +485,7 @@ namespace SireIO
     }
 
     Molecule _pvt_setGromacsWater(Molecule &molecule, const Molecule &water, const QString &model, bool has_virtual,
-                                  const PropertyMap &map)
+                                  const PropertyMap &map, bool is_crystal)
     {
         // Make the template water molecule editable and renumber it.
         auto edit_mol = water.edit().renumber(molecule.number());
@@ -493,7 +493,7 @@ namespace SireIO
         // Copy across all properties that are unique to the original molecule.
         for (const auto &prop : molecule.propertyKeys())
         {
-            if (not water.hasProperty(prop))
+            if (not water.hasProperty(prop) and not prop.compare("is_non_searchable_water"))
             {
                 edit_mol = edit_mol.setProperty(prop, molecule.property(prop)).molecule();
             }
@@ -537,6 +537,13 @@ namespace SireIO
             // Oxygen.
             else if (element == Element("O"))
                 coord_oxygen = molecule.atom(idx).property<Vector>(map["coordinates"]);
+        }
+
+        // Rename the molecule and residue to XTL if this is a crystal water.
+        if (is_crystal)
+        {
+            edit_mol = edit_mol.rename(MolName("XTL")).molecule();
+            edit_mol = edit_mol.residue(ResIdx(0)).rename(ResName("XTL")).molecule();
         }
 
         // Replace the atomic coordinates in the template.
@@ -652,7 +659,7 @@ namespace SireIO
         return new_system;
     }
 
-    System setGromacsWater(const System &system, const QString &model, const PropertyMap &map)
+    System setGromacsWater(const System &system, const QString &model, const PropertyMap &map, bool is_crystal)
     {
         // Create a new system object.
         System new_system;
@@ -705,7 +712,7 @@ namespace SireIO
 
             if (isWater(molecule))
             {
-                molecule = _pvt_setGromacsWater(molecule, template_molecule, _model, has_virtual, map);
+                molecule = _pvt_setGromacsWater(molecule, template_molecule, _model, has_virtual, map, is_crystal);
             }
 
             molgroup.add(molecule);

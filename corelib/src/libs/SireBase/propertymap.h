@@ -32,6 +32,8 @@
 #include <QList>
 #include <QString>
 
+#include <memory>
+
 #include "property.h"
 
 SIRE_BEGIN_HEADER
@@ -136,7 +138,7 @@ namespace SireBase
         QString src;
 
         /** The supplied or default value of the property */
-        PropertyPtr val;
+        std::shared_ptr<PropertyPtr> val;
 
         /** Is the supplied value a default value? */
         bool value_is_default;
@@ -203,6 +205,12 @@ namespace SireBase
         bool specified(const PropertyName &name) const;
 
         void set(const QString &name, const PropertyName &source);
+
+        PropertyMap addPrefix(const QString &prefix,
+                              const QStringList &properties) const;
+
+        PropertyMap addSuffix(const QString &suffix,
+                              const QStringList &properties) const;
 
         PropertyMap merge(const PropertyMap &other) const;
 

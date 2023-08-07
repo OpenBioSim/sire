@@ -4341,17 +4341,40 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
         isSorted = map["sort"].value().asA<BooleanProperty>().value();
     }
 
-    // Search the system for water molecules.
-    auto waters = system.search("water");
+    // Search for waters and crystal waters. The user can speficy the residue name
+    // for crystal waters using the "crystal_water" property in the map. If the user
+    // wishes to preserve a custom water topology naming, then they can use "skip_water".
+    SelectResult waters;
+    SelectResult xtal_waters;
+    if (map.specified("crystal_water"))
+    {
+        auto xtal_water_resname = map["crystal_water"].source();
+        xtal_waters = system.search(QString("resname %1").arg(xtal_water_resname));
+
+        if (not map.specified("skip_water"))
+        {
+            waters =
+                system.search(
+                    QString("(not mols with property is_non_searchable_water) and (water and not resname %1")
+                    .arg(xtal_water_resname));
+        }
+    }
+    else
+    {
+        waters = system.search("(not mols with property is_non_searchable_water) and water");
+    }
 
     // Extract the molecule numbers of the water molecules.
     auto water_nums = waters.molNums();
+
+    // Extract the molecule numbers of the crystal water molecules.
+    auto xtal_water_nums = xtal_waters.molNums();
 
     // Loop over the molecules to find the non-water molecules.
     QList<MolNum> non_water_nums;
     for (const auto &num : molnums)
     {
-        if (not water_nums.contains(num))
+        if (not water_nums.contains(num) and not xtal_water_nums.contains(num))
             non_water_nums.append(num);
     }
 
@@ -4449,6 +4472,32 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
             // Extract the molecule number of the molecule and work out
             // the index in the system.
             auto molnum = water_nums[i];
+            auto idx = molnum_to_idx[molnum];
+
+            // Store the name of the molecule type.
+            mol_to_moltype[idx] = name;
+        }
+    }
+
+    // Now add the crystal waters.
+    if (xtal_waters.count() > 0)
+    {
+        // Extract the GroMolType of the first water molecule.
+        auto water_type = GroMolType(system[xtal_water_nums[0]].molecule(), map);
+        auto name = water_type.name();
+        auto molnum = xtal_water_nums[0];
+        auto idx = molnum_to_idx[molnum];
+
+        // Populate the mappings.
+        name_to_mtyp.insert(name, water_type);
+        idx_name_to_mtyp.insert(QPair<int, QString>(idx, water_type.name()), water_type);
+        idx_name_to_example.insert(QPair<int, QString>(idx, name), system[molnum].molecule());
+
+        for (int i = 0; i < xtal_water_nums.count(); ++i)
+        {
+            // Extract the molecule number of the molecule and work out
+            // the index in the system.
+            auto molnum = xtal_water_nums[i];
             auto idx = molnum_to_idx[molnum];
 
             // Store the name of the molecule type.

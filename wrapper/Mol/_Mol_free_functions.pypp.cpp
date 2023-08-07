@@ -271,17 +271,37 @@ namespace bp = boost::python;
 
 #include "mover.h"
 
+#include "SireBase/parallel.h"
+
+#include "SireBase/progressbar.h"
+
+#include "SireBase/releasegil.h"
+
+#include "SireMaths/align.h"
+
+#include "SireUnits/units.h"
+
+#include "getrmsd.h"
+
+#include "getrmsd.h"
+
+#include "SireBase/parallel.h"
+
 #include "atomelements.h"
 
 #include "iswater.h"
 
 #include "iswater.h"
 
+#include "SireBase/parallel.h"
+
 #include "atomelements.h"
 
 #include "iswater.h"
 
 #include "iswater.h"
+
+#include "SireBase/parallel.h"
 
 #include "atomelements.h"
 
@@ -365,6 +385,19 @@ void register_free_functions(){
             "getAlignment"
             , getAlignment_function_value
             , ( bp::arg("view0"), bp::arg("map0"), bp::arg("view1"), bp::arg("map1"), bp::arg("matcher"), bp::arg("fit")=(bool)(true) )
+            , "" );
+    
+    }
+
+    { //::SireMol::get_rmsd
+    
+        typedef ::QVector< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > ( *get_rmsd_function_type )( ::SireMol::SelectorM< SireMol::Atom > const &,::SireMol::SelectorM< SireMol::Atom > const &,::SireMol::TrajectoryAligner const &,::QList< long long > const &,::SireBase::PropertyMap const & );
+        get_rmsd_function_type get_rmsd_function_value( &::SireMol::get_rmsd );
+        
+        bp::def( 
+            "get_rmsd"
+            , get_rmsd_function_value
+            , ( bp::arg("atoms"), bp::arg("reference"), bp::arg("aligner"), bp::arg("frames"), bp::arg("map") )
             , "" );
     
     }

@@ -15,8 +15,9 @@ __all__ = [
 
 from .. import use_new_api as _use_new_api
 
-# Imported to ensure that sire.maths.Vector is properly wrapped
+# Imported to ensure that these classes are properly wrapped
 from ..maths import Vector as _Vector
+from ..cas import LambdaSchedule as _LambdaSchedule
 
 from ..mol import SelectorMol as _SelectorMol
 

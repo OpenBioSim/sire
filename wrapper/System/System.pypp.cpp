@@ -8,6 +8,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireBase/savestate.h"
 
 #include "SireBase/timeproperty.h"
@@ -1304,6 +1306,19 @@ void register_System_class(){
         }
         { //::SireSystem::System::loadFrame
         
+            typedef void ( ::SireSystem::System::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireSystem::System::loadFrame );
+            
+            System_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::loadFrame
+        
             typedef void ( ::SireSystem::System::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireSystem::System::loadFrame );
             
@@ -1311,6 +1326,19 @@ void register_System_class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::loadFrame
+        
+            typedef void ( ::SireSystem::System::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const &,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireSystem::System::loadFrame );
+            
+            System_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         

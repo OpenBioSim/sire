@@ -351,12 +351,15 @@ namespace SireMol
         virtual int nFrames(const SireBase::PropertyMap &map) const;
 
         virtual void loadFrame(int frame);
+        virtual void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator);
         virtual void saveFrame(int frame);
         virtual void saveFrame();
         virtual void deleteFrame(int frame);
         virtual void deleteAllFrames();
 
         virtual void loadFrame(int frame, const SireBase::PropertyMap &map);
+        virtual void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
+                               const SireBase::PropertyMap &map);
         virtual void saveFrame(int frame, const SireBase::PropertyMap &map);
         virtual void saveFrame(const SireBase::PropertyMap &map);
         virtual void deleteFrame(int frame, const SireBase::PropertyMap &map);

@@ -18,6 +18,7 @@ from ._load import (
 
 from ._measure import measure, minimum_distance
 from ._colname import colname, colnames
+from ._match import match_atoms
 from ._parallel import (
     get_max_num_threads,
     set_max_num_threads,
@@ -33,6 +34,7 @@ __all__ = [
     "get_max_num_threads",
     "load",
     "load_test_files",
+    "match_atoms",
     "minimum_distance",
     "measure",
     "molid",
