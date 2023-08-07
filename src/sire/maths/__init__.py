@@ -2,6 +2,7 @@ __all__ = [
     "align",
     "create_quaternion",
     "get_alignment",
+    "EnergyTrajectory",
     "kabasch",
     "kabasch_fit",
     "Matrix",
@@ -14,7 +15,15 @@ __all__ = [
 ]
 
 from ..legacy import Maths as _Maths
-from ..legacy.Maths import Matrix, Quaternion, Triangle, Transform, Torsion, pi
+from ..legacy.Maths import (
+    Matrix,
+    Quaternion,
+    Triangle,
+    Transform,
+    Torsion,
+    pi,
+    EnergyTrajectory,
+)
 
 from ._vector import Vector
 from ._sphere import Sphere

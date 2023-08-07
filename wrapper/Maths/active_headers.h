@@ -9,6 +9,7 @@
 #include "boys.h"
 #include "complex.h"
 #include "distvector.h"
+#include "energytrajectory.h"
 #include "freeenergyaverage.h"
 #include "gamma.h"
 #include "histogram.h"

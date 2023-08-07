@@ -10,6 +10,7 @@ class DynamicsData:
 
     def __init__(self, mols=None, map=None, **kwargs):
         from ..base import create_map
+        from ..maths import EnergyTrajectory
 
         map = create_map(map, kwargs)
 
@@ -78,7 +79,7 @@ class DynamicsData:
         else:
             self._sire_mols = None
 
-        self._energy_trajectory = {}
+        self._energy_trajectory = EnergyTrajectory()
 
     def is_null(self):
         return self._sire_mols is None
@@ -188,11 +189,11 @@ class DynamicsData:
 
             if lambda_windows is not None:
                 sim_lambda_value = self._omm_mols.get_lambda()
-                nrgs[sim_lambda_value] = nrgs["potential"]
+                nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
                 for lambda_value in lambda_windows:
                     self._omm_mols.set_lambda(lambda_value)
-                    nrgs[lambda_value] = (
+                    nrgs[str(lambda_value)] = (
                         self._omm_mols.get_potential_energy().value_in_unit(
                             openmm.unit.kilocalorie_per_mole
                         )
@@ -201,7 +202,7 @@ class DynamicsData:
 
                 self._omm_mols.set_lambda(sim_lambda_value)
 
-            self._energy_trajectory[current_time] = nrgs
+            self._energy_trajectory.set(current_time, nrgs)
 
         delta = current_time - self._elapsed_time
 
@@ -381,6 +382,9 @@ class DynamicsData:
             nrg = state.getKineticEnergy()
 
             return nrg.value_in_unit(_omm_kcal_mol) * _sire_kcal_mol
+
+    def energy_trajectory(self):
+        return self._energy_trajectory.clone()
 
     def _rebuild_and_minimise(self):
         if self.is_null():
@@ -1073,6 +1077,35 @@ class Dynamics:
         Return the current kinetic energy
         """
         return self._d.current_kinetic_energy()
+
+    def energy_trajectory(self, to_pandas: bool = True):
+        """
+        Return the energy trajectory. This is the trajectory of
+        energy values that have been captured during dynamics.
+
+        If 'to_pandas' is True, (the default) then this will
+        be returned as a pandas dataframe, with times and energies
+        in the defined default units
+        """
+        t = self._d.energy_trajectory()
+
+        if to_pandas:
+            import pandas as pd
+            from ..units import picosecond, kcal_per_mol
+
+            data = {}
+
+            data["time"] = t.times(picosecond.get_default())
+
+            keys = t.keys()
+            keys.sort()
+
+            for key in keys:
+                data[key] = t.energies(key, kcal_per_mol.get_default())
+
+            return pd.DataFrame(data).set_index("time")
+        else:
+            return t
 
     def commit(self):
         if not self._d.is_null():

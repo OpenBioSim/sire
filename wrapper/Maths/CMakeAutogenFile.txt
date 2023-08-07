@@ -12,6 +12,7 @@ set ( PYPP_SOURCES
        BennettsFreeEnergyAverage.pypp.cpp
        Complex.pypp.cpp
        DistVector.pypp.cpp
+       EnergyTrajectory.pypp.cpp
        ExpAverage.pypp.cpp
        FreeEnergyAverage.pypp.cpp
        Histogram.pypp.cpp
