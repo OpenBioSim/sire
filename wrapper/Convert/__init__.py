@@ -29,9 +29,12 @@ try:
     _has_rdkit = True
     _register_smarts_search()
 
-except Exception:
+except Exception as e:
+    _rdkit_import_error = e
+
     # RDKit support is not available
     def _no_rdkit():
+        print(_rdkit_import_error)
         raise ModuleNotFoundError(
             "Unable to convert to/from RDKit as it is not installed. "
             "Please install using `mamba install -c conda-forge rdkit` "
@@ -354,9 +357,13 @@ try:
     def openmm_extract_space(state):
         return _openmm_extract_space(state)
 
-except Exception:
+except Exception as e:
+    _openmm_import_exception = e
+
     # OpenMM support is not available
     def _no_openmm():
+        print(_openmm_import_exception)
+
         raise ModuleNotFoundError(
             "Unable to convert to/from OpenMM as this code hasn't been "
             "written yet. We hope to support this soon!"
