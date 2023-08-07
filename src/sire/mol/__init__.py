@@ -1327,6 +1327,9 @@ def _dynamics(
     constraint=None,
     schedule=None,
     lambda_value=None,
+    temperature=None,
+    pressure=None,
+    device=None,
     **kwargs,
 ):
     """
@@ -1334,6 +1337,7 @@ def _dynamics(
     dynamics of the molecule(s) in this view
     """
     from ..base import create_map
+    from .. import u
 
     map = create_map(map, kwargs)
 
@@ -1351,8 +1355,6 @@ def _dynamics(
 
         timestep = 1 * femtosecond
     else:
-        from .. import u
-
         timestep = u(timestep)
 
     if save_frequency is None and not map.specified("save_frequency"):
@@ -1360,8 +1362,6 @@ def _dynamics(
 
         save_frequency = 25 * picosecond
     else:
-        from .. import u
-
         save_frequency = u(save_frequency)
 
     if constraint is None and not map.specified("constraint"):
@@ -1382,6 +1382,17 @@ def _dynamics(
         else:
             # can get away with no constraints
             constraint = "none"
+
+    if temperature is not None:
+        temperature = u(temperature)
+        map.set("temperature", temperature)
+
+    if pressure is not None:
+        pressure = u(pressure)
+        map.set("pressure", pressure)
+
+    if device is not None:
+        map.set("device", str(device))
 
     return Dynamics(
         view,
