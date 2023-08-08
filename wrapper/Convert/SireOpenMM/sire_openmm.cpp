@@ -503,19 +503,34 @@ namespace SireOpenMM
                                   std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
             }
 
-            // now constraints - we need to make sure that we use the value
-            // of the r0 parameter calculated for this value of lambda if
-            // this is a perturbable molecule
+            // now constraints
             if (any_perturbable and mol.isPerturbable())
             {
                 // we may want to select out constraints that involve
-                // perturbing atoms... For now we will include them all
+                // perturbing atoms... For now we will include them all,
+                // but will use the current coordinates to set the
+                // constrained values, rather than using the
+                // forcefield parameters. This will work as long
+                // as the user has minimised the system at the desired
+                // lambda value before running dynamics...
                 for (const auto &constraint : mol.constraints)
                 {
+                    const auto coords0 = mol.coords[std::get<0>(constraint)];
+                    const auto coords1 = mol.coords[std::get<1>(constraint)];
+
+                    const auto delta = coords1 - coords0;
+
+                    const auto length = std::sqrt((delta[0] * delta[0]) +
+                                                  (delta[1] * delta[1]) +
+                                                  (delta[2] * delta[2]));
+
+                    // qDebug() << length << std::get<2>(constraint)
+                    //          << length - std::get<2>(constraint);
+
                     system.addConstraint(
                         std::get<0>(constraint) + start_index,
                         std::get<1>(constraint) + start_index,
-                        std::get<2>(constraint));
+                        length);
                 }
             }
             else

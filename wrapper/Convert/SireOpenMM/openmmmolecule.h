@@ -10,6 +10,7 @@
 
 #include "SireMM/mmdetail.h"
 #include "SireMM/excludedpairs.h"
+#include "SireMM/amberparams.h"
 
 SIRE_BEGIN_HEADER
 
@@ -137,7 +138,10 @@ namespace SireOpenMM
 
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
-                                const SireBase::PropertyMap &map);
+                                const SireMM::AmberParams &params,
+                                const SireMM::AmberParams &params1,
+                                const SireBase::PropertyMap &map,
+                                bool is_perturbable);
 
         void alignInternals();
     };

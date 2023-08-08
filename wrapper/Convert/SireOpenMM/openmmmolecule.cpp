@@ -16,6 +16,7 @@
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
 #include "SireMM/amberparams.h"
+#include "SireMM/twoatomfunctions.h"
 
 #include "SireMaths/vector.h"
 
@@ -136,15 +137,23 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
                 std::swap(map0, map1);
             }
 
-            this->constructFromAmber(mol, map0);
+            // extract the parameters in amber format - this should work,
+            // as the 'forcefield' property has promised that this is
+            // an amber-style molecule
+            const auto params = SireMM::AmberParams(mol, map0);
+            const auto params1 = SireMM::AmberParams(mol, map1);
 
             perturbed.reset(new OpenMMMolecule(*this));
-            perturbed->constructFromAmber(mol, map1);
+            perturbed->constructFromAmber(mol, params1, params, map1, true);
+
+            this->constructFromAmber(mol, params, params1, map0, true);
+
             this->alignInternals();
         }
         else
         {
-            this->constructFromAmber(mol, map);
+            const auto params = SireMM::AmberParams(mol, map);
+            this->constructFromAmber(mol, params, params, map, false);
         }
     }
     else
@@ -244,7 +253,10 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
 }
 
 void OpenMMMolecule::constructFromAmber(const Molecule &mol,
-                                        const PropertyMap &map)
+                                        const AmberParams &params,
+                                        const AmberParams &params1,
+                                        const PropertyMap &map,
+                                        bool is_perturbable)
 {
     const auto &moldata = mol.data();
     atoms = mol.atoms();
@@ -254,11 +266,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         return;
     }
-
-    // extract the parameters in amber format - this should work,
-    // as the 'forcefield' property has promised that this is
-    // an amber-style molecule
-    const auto params = SireMM::AmberParams(mol, map);
 
     // look up the CGAtomIdx of each atom - this is because we
     // will use AtomIdx for the ordering and atom identifiers
@@ -272,7 +279,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     // extract the coordinates and convert to OpenMM units
     const auto coords_prop = map["coordinates"];
-    coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
+    this->coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
 
     if (moldata.hasProperty(coords_prop))
     {
@@ -302,36 +309,69 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     // extract the masses and convert to OpenMM units
     const auto params_masses = params.masses();
-    masses = QVector<double>(nats, 0.0);
+
+    this->masses = QVector<double>(nats, 0.0);
 
     auto masses_data = masses.data();
 
-    for (int i = 0; i < nats; ++i)
+    if (is_perturbable)
     {
-        double mass = params_masses.at(idx_to_cgatomidx_data[i]).to(SireUnits::g_per_mol);
+        const auto params1_masses = params1.masses();
 
-        if (mass < 0.05)
+        for (int i = 0; i < nats; ++i)
         {
-            mass = 0.0;
-        }
+            const auto cgatomidx = idx_to_cgatomidx_data[i];
 
-        if (mass < 0.5)
-        {
-            virtual_sites.append(i);
-        }
-        else if (mass < 2.5)
-        {
-            light_atoms.append(i);
-        }
+            // use the largest mass of the perturbing atoms
+            double mass = std::max(params_masses.at(cgatomidx).to(SireUnits::g_per_mol),
+                                   params1_masses.at(cgatomidx).to(SireUnits::g_per_mol));
 
-        masses_data[i] = mass;
+            if (mass < 0.05)
+            {
+                mass = 0.0;
+            }
+
+            if (mass < 0.5)
+            {
+                virtual_sites.append(i);
+            }
+            else if (mass < 2.5)
+            {
+                light_atoms.append(i);
+            }
+
+            masses_data[i] = mass;
+        }
+    }
+    else
+    {
+        for (int i = 0; i < nats; ++i)
+        {
+            double mass = params_masses.at(idx_to_cgatomidx_data[i]).to(SireUnits::g_per_mol);
+
+            if (mass < 0.05)
+            {
+                mass = 0.0;
+            }
+
+            if (mass < 0.5)
+            {
+                virtual_sites.append(i);
+            }
+            else if (mass < 2.5)
+            {
+                light_atoms.append(i);
+            }
+
+            masses_data[i] = mass;
+        }
     }
 
     // extract the charges and LJ parameters and convert to OpenMM units
     const auto params_charges = params.charges();
     const auto params_ljs = params.ljs();
 
-    cljs = QVector<std::tuple<double, double, double>>(nats, std::make_tuple(0.0, 0.0, 0.0));
+    this->cljs = QVector<std::tuple<double, double, double>>(nats, std::make_tuple(0.0, 0.0, 0.0));
     auto cljs_data = cljs.data();
 
     for (int i = 0; i < nats; ++i)
@@ -347,12 +387,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         cljs_data[i] = std::make_tuple(chg, sig, eps);
     }
 
-    bond_pairs.clear();
-    bond_params.clear();
-    constraints.clear();
-
-    auto bond_param = bond_params.data();
-    auto bond_pair = bond_pairs.data();
+    this->bond_pairs.clear();
+    this->bond_params.clear();
+    this->constraints.clear();
 
     // now the bonds
     const double bond_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
@@ -380,16 +417,16 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const bool has_light_atom = includes_h or (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
         const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
-        bond_pairs.append(std::make_pair(atom0, atom1));
+        this->bond_pairs.append(std::make_pair(atom0, atom1));
 
         if ((not has_massless_atom) and ((constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (constraint_type & CONSTRAIN_HBONDS))))
         {
-            constraints.append(std::make_tuple(atom0, atom1, r0));
+            this->constraints.append(std::make_tuple(atom0, atom1, r0));
             constrained_pairs.insert(to_pair(atom0, atom1));
         }
         else
         {
-            bond_params.append(std::make_tuple(atom0, atom1, r0, k));
+            this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
         }
     }
 
@@ -595,7 +632,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 /** Go through all of the internals and compare them to the perturbed
  *  state. Ensure that there is a one-to-one mapping, with them all
  *  in the same order. Any that are missing are added as nulls in
- *  the correct end state
+ *  the correct end state.
+ *
+ *  Note that bonds and angles involved in constraints have been
+ *  removed from the list of potentials. This is because we don't
+ *  evaluate the energy of constrained degrees of freedom
  */
 void OpenMMMolecule::alignInternals()
 {

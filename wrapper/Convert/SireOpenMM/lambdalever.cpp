@@ -30,6 +30,8 @@
 
 #include "SireCAS/values.h"
 
+#include "tostring.h"
+
 using namespace SireOpenMM;
 using namespace SireCAS;
 
