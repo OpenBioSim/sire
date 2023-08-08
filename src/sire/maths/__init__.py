@@ -164,3 +164,27 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
             )
 
         return quaternion
+
+
+if not hasattr(EnergyTrajectory, "to_pandas"):
+
+    def _to_pandas(obj):
+        """
+        Return the energy trajectory as a pandas DataFrame
+        """
+        import pandas as pd
+        from ..units import picosecond, kcal_per_mol
+
+        data = {}
+
+        data["time"] = obj.times(picosecond.get_default())
+
+        keys = obj.keys()
+        keys.sort()
+
+        for key in keys:
+            data[key] = obj.energies(key, kcal_per_mol.get_default())
+
+        return pd.DataFrame(data).set_index("time")
+
+    EnergyTrajectory.to_pandas = _to_pandas

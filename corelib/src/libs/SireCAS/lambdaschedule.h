@@ -76,6 +76,9 @@ namespace SireCAS
 
         bool isNull() const;
 
+        static LambdaSchedule standard_morph();
+        static LambdaSchedule charge_scaled_morph(double scale = 0.2);
+
         static SireCAS::Symbol lam();
         static SireCAS::Symbol initial();
         static SireCAS::Symbol final();
@@ -114,7 +117,7 @@ namespace SireCAS
                          const SireCAS::Expression &equation);
 
         void addMorphStage();
-        void addChargeScaleStages(double scale);
+        void addChargeScaleStages(double scale = 0.2);
 
         void setEquation(const QString &stage,
                          const QString &lever,

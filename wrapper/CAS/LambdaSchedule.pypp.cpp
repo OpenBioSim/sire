@@ -42,9 +42,8 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "addChargeScaleStages"
                 , addChargeScaleStages_function_value
-                , ( bp::arg("scale") )
-                , bp::release_gil_policy()
-                , "" );
+                , ( bp::arg("scale")=0.20000000000000001 )
+                , "Sandwich the current set of stages with a charge-descaling and\n  a charge-scaling stage. This prepends a charge-descaling stage\n  that scales the charge parameter down from `initial` to\n  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of\n  the exising stages in this schedule are then multiplied\n  by :gamma:. A final charge-rescaling stage is then appended that\n  scales the charge parameter from :gamma:.final to final.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addLever
@@ -57,7 +56,7 @@ void register_LambdaSchedule_class(){
                 , addLever_function_value
                 , ( bp::arg("lever") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Add a lever to the schedule. This is only useful if you want to\n  plot how the equations would affect the lever. Levers will be\n  automatically added by any perturbation run that needs them,\n  so you dont need to add them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addLevers
@@ -70,7 +69,7 @@ void register_LambdaSchedule_class(){
                 , addLevers_function_value
                 , ( bp::arg("levers") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Add some levers to the schedule. This is only useful if you want to\n  plot how the equations would affect the lever. Levers will be\n  automatically added by any perturbation run that needs them,\n  so you dont need to add them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addMorphStage
@@ -82,7 +81,7 @@ void register_LambdaSchedule_class(){
                 "addMorphStage"
                 , addMorphStage_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Append a morph stage onto this schedule. The morph stage is a\n  standard stage that scales each forcefield parameter by\n  (1-:lambda:).initial + :lambda:.final\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addStage
@@ -95,7 +94,7 @@ void register_LambdaSchedule_class(){
                 , addStage_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Append a stage called name which uses the passed equation\n  to the end of this schedule. The equation will be the default\n  equation that scales all parameters (levers) that dont have\n  a custom lever for this stage.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::appendStage
@@ -108,7 +107,19 @@ void register_LambdaSchedule_class(){
                 , appendStage_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Append a stage called name which uses the passed equation\n  to the end of this schedule. The equation will be the default\n  equation that scales all parameters (levers) that dont have\n  a custom lever for this stage.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::charge_scaled_morph
+        
+            typedef ::SireCAS::LambdaSchedule ( *charge_scaled_morph_function_type )( double );
+            charge_scaled_morph_function_type charge_scaled_morph_function_value( &::SireCAS::LambdaSchedule::charge_scaled_morph );
+            
+            LambdaSchedule_exposer.def( 
+                "charge_scaled_morph"
+                , charge_scaled_morph_function_value
+                , ( bp::arg("scale")=0.20000000000000001 )
+                , "Return a LambdaSchedule that represents a central morph\n  stage that is sandwiched between a charge descaling,\n  and a charge rescaling stage. The first stage scales\n  the charge lever down from 1.0 to `scale`. This\n  is followed by a standard morph stage using the\n  descaled charges. This the finished with a recharging\n  stage that restores the charges back to their\n  original values.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::clamp
@@ -133,7 +144,7 @@ void register_LambdaSchedule_class(){
                 "clear"
                 , clear_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Completely clear all stages and levers" );
         
         }
         { //::SireCAS::LambdaSchedule::final
@@ -145,7 +156,7 @@ void register_LambdaSchedule_class(){
                 "final"
                 , final_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the symbol used to represent the final\n  (:lambda:=1) value of the forcefield parameter\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getConstant
@@ -158,7 +169,7 @@ void register_LambdaSchedule_class(){
                 , getConstant_function_value
                 , ( bp::arg("constant") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the value of the passed constant that may be\n  used in any of the stage equations\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getConstant
@@ -171,7 +182,7 @@ void register_LambdaSchedule_class(){
                 , getConstant_function_value
                 , ( bp::arg("constant") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the value of the passed constant that may be\n  used in any of the stage equations\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getConstantSymbol
@@ -184,7 +195,7 @@ void register_LambdaSchedule_class(){
                 , getConstantSymbol_function_value
                 , ( bp::arg("constant") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Get the Symbol used to represent the named constant constant" );
         
         }
         { //::SireCAS::LambdaSchedule::getEquation
@@ -197,7 +208,7 @@ void register_LambdaSchedule_class(){
                 , getEquation_function_value
                 , ( bp::arg("stage") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the default equation used to control the parameters for\n  the stage `stage`.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getEquation
@@ -210,7 +221,7 @@ void register_LambdaSchedule_class(){
                 , getEquation_function_value
                 , ( bp::arg("stage"), bp::arg("lever") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the equation used to control the specified `lever`\n  at the specified `stage`. This will be a custom equation\n  if that has been set for this lever, or else the\n  default equation for this stage.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLambdaInStage
@@ -223,7 +234,7 @@ void register_LambdaSchedule_class(){
                 , getLambdaInStage_function_value
                 , ( bp::arg("lambda_value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the stage-local value of :lambda: that corresponds to the\n  global value of :lambda: at `lambda_value`\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverStages
@@ -236,7 +247,7 @@ void register_LambdaSchedule_class(){
                 , getLeverStages_function_value
                 , ( bp::arg("lambda_values") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the list of lever stages that are used for the passed list\n  of lambda values. The lever names will be returned in the matching\n  order of the lambda values.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverStages
@@ -248,7 +259,7 @@ void register_LambdaSchedule_class(){
                 "getLeverStages"
                 , getLeverStages_function_value
                 , ( bp::arg("num_lambda")=(int)(101) )
-                , "" );
+                , "Return the lever stages used for the list of `nvalue` lambda values\n  generated for the global lambda value between 0 and 1 inclusive.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverValues
@@ -260,7 +271,7 @@ void register_LambdaSchedule_class(){
                 "getLeverValues"
                 , getLeverValues_function_value
                 , ( bp::arg("lambda_values"), bp::arg("initial")=1., bp::arg("final")=2. )
-                , "" );
+                , "Return the lever name and parameter values for that lever\n  for the specified list of lambda values, assuming that a\n  parameter for that lever has an initial value of\n  `initial_value` and a final value of `final_value`. This\n  is mostly useful for testing and graphing how this\n  schedule would change some hyperthetical forcefield\n  parameters for the specified lambda values.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverValues
@@ -272,7 +283,7 @@ void register_LambdaSchedule_class(){
                 "getLeverValues"
                 , getLeverValues_function_value
                 , ( bp::arg("num_lambda")=(int)(101), bp::arg("initial")=1., bp::arg("final")=2. )
-                , "" );
+                , "Return the lever name and parameter values for that lever\n  for the specified number of lambda values generated\n  evenly between 0 and 1, assuming that a\n  parameter for that lever has an initial value of\n  `initial_value` and a final value of `final_value`. This\n  is mostly useful for testing and graphing how this\n  schedule would change some hyperthetical forcefield\n  parameters for the specified lambda values.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLevers
@@ -284,7 +295,7 @@ void register_LambdaSchedule_class(){
                 "getLevers"
                 , getLevers_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return all of the levers that have been explicitly added\n  to the schedule. Note that levers will be automatically added\n  by any perturbation run that needs them, so you dont normally\n  need to manage them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getStage
@@ -297,7 +308,7 @@ void register_LambdaSchedule_class(){
                 , getStage_function_value
                 , ( bp::arg("lambda_value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the name of the stage that controls the forcefield parameters\n  at the global value of :lambda: equal to `lambda_value`\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getStages
@@ -309,7 +320,7 @@ void register_LambdaSchedule_class(){
                 "getStages"
                 , getStages_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the names of all of the stages in this schedule, in\n  the order they will be performed\n" );
         
         }
         { //::SireCAS::LambdaSchedule::initial
@@ -321,7 +332,7 @@ void register_LambdaSchedule_class(){
                 "initial"
                 , initial_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the symbol used to represent the initial\n  (:lambda:=0) value of the forcefield parameter\n" );
         
         }
         { //::SireCAS::LambdaSchedule::insertStage
@@ -334,7 +345,7 @@ void register_LambdaSchedule_class(){
                 , insertStage_function_value
                 , ( bp::arg("i"), bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Insert a stage called name at position `i` which uses the passed\n  equation. The equation will be the default\n  equation that scales all parameters (levers) that dont have\n  a custom lever for this stage.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::isNull
@@ -358,7 +369,7 @@ void register_LambdaSchedule_class(){
                 "lam"
                 , lam_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the symbol used to represent the :lambda: coordinate.\n  This symbol is used to represent the per-stage :lambda:\n  variable that goes from 0.0-1.0 within that stage.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::morph
@@ -371,7 +382,7 @@ void register_LambdaSchedule_class(){
                 , morph_function_value
                 , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs floating point parameters. There is an overload\n  of this function that morphs integer parameters, in which\n  case the result would be rounded to the nearest integer.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::morph
@@ -384,7 +395,7 @@ void register_LambdaSchedule_class(){
                 , morph_function_value
                 , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This function morphs integer parameters. In this case,\n  the result will be the rounded to the nearest integer.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::nLevers
@@ -396,7 +407,7 @@ void register_LambdaSchedule_class(){
                 "nLevers"
                 , nLevers_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the number of levers that have been explicitly added\n  to the schedule. Note that levers will be automatically added\n  by any perturbation run that needs them, so you dont normally\n  need to manage them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::nStages
@@ -408,7 +419,7 @@ void register_LambdaSchedule_class(){
                 "nStages"
                 , nStages_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the number of stages in this schedule" );
         
         }
         LambdaSchedule_exposer.def( bp::self != bp::self );
@@ -436,7 +447,7 @@ void register_LambdaSchedule_class(){
                 , prependStage_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Prepend a stage called name which uses the passed equation\n  to the start of this schedule. The equation will be the default\n  equation that scales all parameters (levers) that dont have\n  a custom lever for this stage.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::removeEquation
@@ -449,7 +460,7 @@ void register_LambdaSchedule_class(){
                 , removeEquation_function_value
                 , ( bp::arg("stage"), bp::arg("lever") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove the custom equation for the specified `lever` at the\n  specified `stage`. The lever will now use the default\n  equation at this stage.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::removeLever
@@ -462,7 +473,7 @@ void register_LambdaSchedule_class(){
                 , removeLever_function_value
                 , ( bp::arg("lever") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove a lever from the schedule. This will not impact any\n  perturbation runs that use this schedule, as any missing\n  levers will be re-added.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::removeLevers
@@ -475,7 +486,7 @@ void register_LambdaSchedule_class(){
                 , removeLevers_function_value
                 , ( bp::arg("levers") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove some levers from the schedule. This will not impact any\n  perturbation runs that use this schedule, as any missing\n  levers will be re-added.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::setConstant
@@ -488,7 +499,7 @@ void register_LambdaSchedule_class(){
                 , setConstant_function_value
                 , ( bp::arg("constant"), bp::arg("value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the value of a constant that may be used in any\n  of the stage equations.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::setConstant
@@ -501,7 +512,7 @@ void register_LambdaSchedule_class(){
                 , setConstant_function_value
                 , ( bp::arg("constant"), bp::arg("value") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the value of a constant that may be used in any\n  of the stage equations.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::setDefaultEquation
@@ -514,7 +525,7 @@ void register_LambdaSchedule_class(){
                 , setDefaultEquation_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the default equation used to control levers for the\n  stage stage to equation. This equation will be used\n  to control any levers in this stage that dont have\n  their own custom equation.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::setEquation
@@ -527,7 +538,19 @@ void register_LambdaSchedule_class(){
                 , setEquation_function_value
                 , ( bp::arg("stage"), bp::arg("lever"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the custom equation used to control the specified\n  `lever` at the stage `stage` to `equation`. This equation\n  will only be used to control the parameters for the\n  specified lever at the specified stage.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::standard_morph
+        
+            typedef ::SireCAS::LambdaSchedule ( *standard_morph_function_type )(  );
+            standard_morph_function_type standard_morph_function_value( &::SireCAS::LambdaSchedule::standard_morph );
+            
+            LambdaSchedule_exposer.def( 
+                "standard_morph"
+                , standard_morph_function_value
+                , bp::release_gil_policy()
+                , "Return a LambdaSchedule that represents a standard morph,\n  where every forcefield parameter is scaled by\n  (1-:lambda:).initial + :lambda:.final\n" );
         
         }
         { //::SireCAS::LambdaSchedule::toString
@@ -566,9 +589,11 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        LambdaSchedule_exposer.staticmethod( "charge_scaled_morph" );
         LambdaSchedule_exposer.staticmethod( "final" );
         LambdaSchedule_exposer.staticmethod( "initial" );
         LambdaSchedule_exposer.staticmethod( "lam" );
+        LambdaSchedule_exposer.staticmethod( "standard_morph" );
         LambdaSchedule_exposer.staticmethod( "typeName" );
         LambdaSchedule_exposer.def( "__copy__", &__copy__);
         LambdaSchedule_exposer.def( "__deepcopy__", &__copy__);

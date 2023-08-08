@@ -40,6 +40,17 @@ class DynamicsData:
                     "space", self._ffinfo.space()
                 )
 
+            # try to find any existing energy trajectory
+            try:
+                self._energy_trajectory = self._sire_mols.property(
+                    map["energy_trajectory"]
+                )
+
+                if type(self._energy_trajectory) is not EnergyTrajectory:
+                    self._energy_trajectory = EnergyTrajectory()
+            except Exception:
+                self._energy_trajectory = EnergyTrajectory()
+
             self._num_atoms = len(self._sire_mols.atoms())
 
             from ..units import nanosecond
@@ -78,8 +89,7 @@ class DynamicsData:
 
         else:
             self._sire_mols = None
-
-        self._energy_trajectory = EnergyTrajectory()
+            self._energy_trajectory = None
 
     def is_null(self):
         return self._sire_mols is None
@@ -192,13 +202,14 @@ class DynamicsData:
                 nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
                 for lambda_value in lambda_windows:
-                    self._omm_mols.set_lambda(lambda_value)
-                    nrgs[str(lambda_value)] = (
-                        self._omm_mols.get_potential_energy().value_in_unit(
-                            openmm.unit.kilocalorie_per_mole
+                    if lambda_value != sim_lambda_value:
+                        self._omm_mols.set_lambda(lambda_value)
+                        nrgs[str(lambda_value)] = (
+                            self._omm_mols.get_potential_energy().value_in_unit(
+                                openmm.unit.kilocalorie_per_mole
+                            )
+                            * kcal_per_mol
                         )
-                        * kcal_per_mol
-                    )
 
                 self._omm_mols.set_lambda(sim_lambda_value)
 
@@ -740,6 +751,11 @@ class DynamicsData:
             nsteps_completed=self._current_step,
         )
 
+        if not self._energy_trajectory.is_empty():
+            self._sire_mols.set_property(
+                "energy_trajectory", self._energy_trajectory
+            )
+
 
 def _add_extra(extras, key, value):
     if value is not None:
@@ -1090,20 +1106,7 @@ class Dynamics:
         t = self._d.energy_trajectory()
 
         if to_pandas:
-            import pandas as pd
-            from ..units import picosecond, kcal_per_mol
-
-            data = {}
-
-            data["time"] = t.times(picosecond.get_default())
-
-            keys = t.keys()
-            keys.sort()
-
-            for key in keys:
-                data[key] = t.energies(key, kcal_per_mol.get_default())
-
-            return pd.DataFrame(data).set_index("time")
+            return t.to_pandas()
         else:
             return t
 

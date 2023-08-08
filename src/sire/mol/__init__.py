@@ -1319,22 +1319,92 @@ Molecule.cursor = _cursor
 
 def _dynamics(
     view,
-    map=None,
     cutoff=None,
     cutoff_type=None,
     timestep=None,
     save_frequency=None,
+    energy_frequency=None,
+    frame_frequency=None,
     constraint=None,
     schedule=None,
     lambda_value=None,
     temperature=None,
     pressure=None,
     device=None,
+    map=None,
     **kwargs,
 ):
     """
     Return a Dynamics object that can be used to perform
     dynamics of the molecule(s) in this view
+
+    cutoff: Length
+        The size of the non-bonded cutoff
+
+    cutoff_type: str
+        The type of cutoff to use, e.g. "PME", "RF" etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options
+
+    timestep: time
+        The size of the dynamics timestep
+
+    save_frequency: time
+        The amount of simulation time between saving energies and frames.
+        This can be overridden using `energy_frequency` or `frame_frequency`,
+        or by these options in individual dynamics runs. Set this
+        to zero if you don't want any saves.
+
+    energy_frequency: time
+        The amount of time between saving energies. This overrides the
+        value in `save_frequency`. Set this to zero if you don't want
+        to save energies during the trajectory. This can be overridden
+        by setting energy_frequency during an individual run.
+
+    frame_frequency: time
+        The amount of time between saving frames. This overrides the
+        value in `save_frequency`. Set this to zero if you don't want
+        to save frames during the trajectory. This can be overridden
+        by setting frame_frequency during an individual run.
+
+    constraint: str
+        The type of constraint to use for bonds and/or angles, e.g.
+        `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This will be automatically
+        guessed from the timestep if it isn't set.
+
+    schedule: sire.cas.LambdaSchedule
+        The schedule used to control how perturbable forcefield parameters
+        should be morphed as a function of lambda. If this is not set
+        then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+    lambda_value: float
+        The value of lambda at which to run dynamics. This only impacts
+        perturbable molecules, whose forcefield parameters will be
+        scaled according to the lambda schedule for the specified
+        value of lambda.
+
+    temperature: temperature
+        The temperature at which to run the simulation. A
+        microcanonical (NVE) simulation will be run if you don't
+        specify the temperature.
+
+    pressure: pressure
+        The pressure at which to run the simulation. A
+        microcanonical (NVE) or canonical (NVT) simulation will be
+        run if the pressure is not set.
+
+    device: str or int
+        The ID of the GPU (or accelerator) used to accelerate
+        the simulation. This would be CUDA_DEVICE_ID or similar
+        if CUDA was used. This can be any valid OpenMM device string
+
+    map: dict
+        A dictionary of additional options. Note that any options
+        set in this dictionary that are also specified via one of
+        the arguments above will be overridden by the argument
+        value
     """
     from ..base import create_map
     from .. import u
@@ -1363,6 +1433,12 @@ def _dynamics(
         save_frequency = 25 * picosecond
     else:
         save_frequency = u(save_frequency)
+
+    if energy_frequency is not None:
+        map.set("energy_frequency", energy_frequency)
+
+    if frame_frequency is not None:
+        map.set("frame_frequency", frame_frequency)
 
     if constraint is None and not map.specified("constraint"):
         from ..units import femtosecond
@@ -1400,7 +1476,7 @@ def _dynamics(
         cutoff_type=cutoff_type,
         timestep=timestep,
         save_frequency=save_frequency,
-        constraint=constraint,
+        constraint=str(constraint),
         schedule=schedule,
         lambda_value=lambda_value,
         map=map,
@@ -1409,18 +1485,55 @@ def _dynamics(
 
 def _minimisation(
     view,
-    map=None,
     cutoff=None,
     cutoff_type=None,
-    timestep=None,
-    save_frequency=None,
+    constraint=None,
     schedule=None,
     lambda_value=None,
+    device=None,
+    map=None,
     **kwargs,
 ):
     """
-    Return a Minimisation object that can be used to minimise the energy
-    of the molecule(s) in this view.
+    Return a Minimisation object that can be used to perform
+    minimisation of the molecule(s) in this view
+
+    cutoff: Length
+        The size of the non-bonded cutoff
+
+    cutoff_type: str
+        The type of cutoff to use, e.g. "PME", "RF" etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options
+
+    constraint: str
+        The type of constraint to use for bonds and/or angles, e.g.
+        `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This will be automatically
+        guessed from the timestep if it isn't set.
+
+    schedule: sire.cas.LambdaSchedule
+        The schedule used to control how perturbable forcefield parameters
+        should be morphed as a function of lambda. If this is not set
+        then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+    lambda_value: float
+        The value of lambda at which to run minimisation. This only impacts
+        perturbable molecules, whose forcefield parameters will be
+        scaled according to the lambda schedule for the specified
+        value of lambda.
+
+    device: str or int
+        The ID of the GPU (or accelerator) used to accelerate
+        minimisation. This would be CUDA_DEVICE_ID or similar
+        if CUDA was used. This can be any valid OpenMM device string
+
+    map: dict
+        A dictionary of additional options. Note that any options
+        set in this dictionary that are also specified via one of
+        the arguments above will be overridden by the argument
+        value
     """
     from ..base import create_map
 
@@ -1434,6 +1547,12 @@ def _minimisation(
 
     if cutoff_type is None and not map.specified("cutoff_type"):
         cutoff_type = "PME"
+
+    if constraint is not None:
+        map.set("constraint", str(constraint))
+
+    if device is not None:
+        map.set("device", str(device))
 
     return Minimisation(
         view,

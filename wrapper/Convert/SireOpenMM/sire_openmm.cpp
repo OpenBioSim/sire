@@ -27,6 +27,8 @@
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
 
+#include "SireCAS/lambdaschedule.h"
+
 #include "SireMaths/vector.h"
 
 #include "SireBase/parallel.h"
@@ -43,6 +45,7 @@
 #include <QDebug>
 
 using SireBase::PropertyMap;
+using SireCAS::LambdaSchedule;
 using SireMol::Molecule;
 using SireMol::SelectorMol;
 using SireSystem::ForceFieldInfo;
@@ -585,6 +588,10 @@ namespace SireOpenMM
                                               vels_data + start_index);
             }
         }
+
+        // add a default schedule if there are any perturbable molecules
+        if (any_perturbable)
+            lambda_lever.setSchedule(LambdaSchedule::standard_morph());
 
         return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
     }

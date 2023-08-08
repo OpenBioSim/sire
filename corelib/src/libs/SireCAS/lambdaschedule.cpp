@@ -174,30 +174,75 @@ QString LambdaSchedule::toString() const
         .arg(lines.join("\n"));
 }
 
+/** Return a LambdaSchedule that represents a standard morph,
+ *  where every forcefield parameter is scaled by
+ *  (1-:lambda:).initial + :lambda:.final
+ */
+LambdaSchedule LambdaSchedule::standard_morph()
+{
+    LambdaSchedule l;
+    l.addMorphStage();
+    return l;
+}
+
+/** Return a LambdaSchedule that represents a central morph
+ *  stage that is sandwiched between a charge descaling,
+ *  and a charge rescaling stage. The first stage scales
+ *  the "charge" lever down from 1.0 to `scale`. This
+ *  is followed by a standard morph stage using the
+ *  descaled charges. This the finished with a recharging
+ *  stage that restores the charges back to their
+ *  original values.
+ */
+LambdaSchedule LambdaSchedule::charge_scaled_morph(double scale)
+{
+    LambdaSchedule l;
+    l.addMorphStage();
+    l.addChargeScaleStages(scale);
+
+    return l;
+}
+
 Symbol LambdaSchedule::lambda_symbol("λ");
 Symbol LambdaSchedule::initial_symbol("initial");
 Symbol LambdaSchedule::final_symbol("final");
 
+/** Return the symbol used to represent the :lambda: coordinate.
+ *  This symbol is used to represent the per-stage :lambda:
+ *  variable that goes from 0.0-1.0 within that stage.
+ */
 Symbol LambdaSchedule::lam()
 {
     return lambda_symbol;
 }
 
+/** Return the symbol used to represent the initial
+ *  (:lambda:=0) value of the forcefield parameter
+ */
 Symbol LambdaSchedule::initial()
 {
     return initial_symbol;
 }
 
+/** Return the symbol used to represent the final
+ *  (:lambda:=1) value of the forcefield parameter
+ */
 Symbol LambdaSchedule::final()
 {
     return final_symbol;
 }
 
+/** Set the value of a constant that may be used in any
+ *  of the stage equations.
+ */
 SireCAS::Symbol LambdaSchedule::setConstant(const QString &constant, double value)
 {
     return this->setConstant(this->getConstantSymbol(constant), value);
 }
 
+/** Set the value of a constant that may be used in any
+ *  of the stage equations.
+ */
 SireCAS::Symbol LambdaSchedule::setConstant(const SireCAS::Symbol &constant,
                                             double value)
 {
@@ -205,21 +250,33 @@ SireCAS::Symbol LambdaSchedule::setConstant(const SireCAS::Symbol &constant,
     return constant;
 }
 
+/** Return the value of the passed constant that may be
+ *  used in any of the stage equations
+ */
 double LambdaSchedule::getConstant(const QString &constant)
 {
     return this->getConstant(this->getConstantSymbol(constant));
 }
 
+/** Return the value of the passed constant that may be
+ *  used in any of the stage equations
+ */
 double LambdaSchedule::getConstant(const SireCAS::Symbol &constant) const
 {
     return this->constant_values.value(constant);
 }
 
+/** Get the Symbol used to represent the named constant 'constant' */
 SireCAS::Symbol LambdaSchedule::getConstantSymbol(const QString &constant) const
 {
     return SireCAS::Symbol(constant);
 }
 
+/** Add a lever to the schedule. This is only useful if you want to
+ *  plot how the equations would affect the lever. Levers will be
+ *  automatically added by any perturbation run that needs them,
+ *  so you don't need to add them manually yourself.
+ */
 void LambdaSchedule::addLever(const QString &lever)
 {
     if (this->lever_names.contains(lever))
@@ -228,6 +285,11 @@ void LambdaSchedule::addLever(const QString &lever)
     this->lever_names.append(lever);
 }
 
+/** Add some levers to the schedule. This is only useful if you want to
+ *  plot how the equations would affect the lever. Levers will be
+ *  automatically added by any perturbation run that needs them,
+ *  so you don't need to add them manually yourself.
+ */
 void LambdaSchedule::addLevers(const QStringList &levers)
 {
     for (const auto &lever : levers)
@@ -237,6 +299,10 @@ void LambdaSchedule::addLevers(const QStringList &levers)
     }
 }
 
+/** Remove a lever from the schedule. This will not impact any
+ *  perturbation runs that use this schedule, as any missing
+ *  levers will be re-added.
+ */
 void LambdaSchedule::removeLever(const QString &lever)
 {
     if (not this->lever_names.contains(lever))
@@ -249,6 +315,10 @@ void LambdaSchedule::removeLever(const QString &lever)
     this->stage_names.removeAt(idx);
 }
 
+/** Remove some levers from the schedule. This will not impact any
+ *  perturbation runs that use this schedule, as any missing
+ *  levers will be re-added.
+ */
 void LambdaSchedule::removeLevers(const QStringList &levers)
 {
     for (const auto &lever : levers)
@@ -257,21 +327,35 @@ void LambdaSchedule::removeLevers(const QStringList &levers)
     }
 }
 
+/** Return the number of levers that have been explicitly added
+ *  to the schedule. Note that levers will be automatically added
+ *  by any perturbation run that needs them, so you don't normally
+ *  need to manage them manually yourself.
+ */
 int LambdaSchedule::nLevers() const
 {
     return this->lever_names.count();
 }
 
+/** Return all of the levers that have been explicitly added
+ *  to the schedule. Note that levers will be automatically added
+ *  by any perturbation run that needs them, so you don't normally
+ *  need to manage them manually yourself.
+ */
 QStringList LambdaSchedule::getLevers() const
 {
     return this->lever_names;
 }
 
+/** Return the number of stages in this schedule */
 int LambdaSchedule::nStages() const
 {
     return this->stage_names.count();
 }
 
+/** Return the names of all of the stages in this schedule, in
+ *  the order they will be performed
+ */
 QStringList LambdaSchedule::getStages() const
 {
     return this->stage_names;
@@ -285,6 +369,9 @@ double LambdaSchedule::clamp(double lambda_value) const
     return std::max(0.0, std::min(lambda_value, 1.0));
 }
 
+/** Internal function used to resolve the global value of lambda down
+ *  to a stage number and stage-lambda value
+ */
 std::tuple<int, double> LambdaSchedule::resolve_lambda(double lambda_value) const
 {
     if (this->nStages() == 0)
@@ -313,6 +400,9 @@ std::tuple<int, double> LambdaSchedule::resolve_lambda(double lambda_value) cons
     return std::tuple<int, double>(int(stage), resolved - stage);
 }
 
+/** Return the name of the stage that controls the forcefield parameters
+ *  at the global value of :lambda: equal to `lambda_value`
+ */
 QString LambdaSchedule::getStage(double lambda_value) const
 {
     auto resolved = this->resolve_lambda(lambda_value);
@@ -320,6 +410,9 @@ QString LambdaSchedule::getStage(double lambda_value) const
     return this->stage_names[std::get<0>(resolved)];
 }
 
+/** Return the stage-local value of :lambda: that corresponds to the
+ *  global value of :lambda: at `lambda_value`
+ */
 double LambdaSchedule::getLambdaInStage(double lambda_value) const
 {
     if (this->nStages() == 0)
@@ -330,6 +423,7 @@ double LambdaSchedule::getLambdaInStage(double lambda_value) const
     return std::get<1>(resolved);
 }
 
+/** Completely clear all stages and levers */
 void LambdaSchedule::clear()
 {
     this->stage_names.clear();
@@ -338,12 +432,24 @@ void LambdaSchedule::clear()
     this->constant_values = Values();
 }
 
+/** Append a morph stage onto this schedule. The morph stage is a
+ *  standard stage that scales each forcefield parameter by
+ *  (1-:lambda:).initial + :lambda:.final
+ */
 void LambdaSchedule::addMorphStage()
 {
     this->addStage("morph", (this->lam() * this->final()) +
                                 ((1 - this->lam()) * this->initial()));
 }
 
+/** Sandwich the current set of stages with a charge-descaling and
+ *  a charge-scaling stage. This prepends a charge-descaling stage
+ *  that scales the charge parameter down from `initial` to
+ *  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of
+ *  the exising stages in this schedule are then multiplied
+ *  by :gamma:. A final charge-rescaling stage is then appended that
+ *  scales the charge parameter from :gamma:.final to final.
+ */
 void LambdaSchedule::addChargeScaleStages(double scale)
 {
     auto scl = this->setConstant("γ", scale);
@@ -363,6 +469,11 @@ void LambdaSchedule::addChargeScaleStages(double scale)
     this->setEquation("recharge", "charge", (1.0 - ((1.0 - scl) * (1.0 - this->lam()))) * this->final());
 }
 
+/** Prepend a stage called 'name' which uses the passed 'equation'
+ *  to the start of this schedule. The equation will be the default
+ *  equation that scales all parameters (levers) that don't have
+ *  a custom lever for this stage.
+ */
 void LambdaSchedule::prependStage(const QString &name,
                                   const SireCAS::Expression &equation)
 {
@@ -383,6 +494,11 @@ void LambdaSchedule::prependStage(const QString &name,
     this->stage_equations.prepend(QHash<QString, Expression>());
 }
 
+/** Append a stage called 'name' which uses the passed 'equation'
+ *  to the end of this schedule. The equation will be the default
+ *  equation that scales all parameters (levers) that don't have
+ *  a custom lever for this stage.
+ */
 void LambdaSchedule::appendStage(const QString &name,
                                  const SireCAS::Expression &equation)
 {
@@ -397,6 +513,11 @@ void LambdaSchedule::appendStage(const QString &name,
     this->stage_equations.append(QHash<QString, Expression>());
 }
 
+/** Insert a stage called 'name' at position `i` which uses the passed
+ *  'equation'. The equation will be the default
+ *  equation that scales all parameters (levers) that don't have
+ *  a custom lever for this stage.
+ */
 void LambdaSchedule::insertStage(int i,
                                  const QString &name,
                                  const SireCAS::Expression &equation)
@@ -423,12 +544,21 @@ void LambdaSchedule::insertStage(int i,
     this->stage_equations.insert(i, QHash<QString, Expression>());
 }
 
+/** Append a stage called 'name' which uses the passed 'equation'
+ *  to the end of this schedule. The equation will be the default
+ *  equation that scales all parameters (levers) that don't have
+ *  a custom lever for this stage.
+ */
 void LambdaSchedule::addStage(const QString &name,
                               const Expression &equation)
 {
     this->appendStage(name, equation);
 }
 
+/** Find the index of the stage called 'stage'. This returns
+ *  the order in which this stage will take place in the
+ *  schedule.
+ */
 int LambdaSchedule::find_stage(const QString &stage) const
 {
     int idx = this->stage_names.indexOf(stage);
@@ -443,12 +573,22 @@ int LambdaSchedule::find_stage(const QString &stage) const
     return idx;
 }
 
+/** Set the default equation used to control levers for the
+ *  stage 'stage' to 'equation'. This equation will be used
+ *  to control any levers in this stage that don't have
+ *  their own custom equation.
+ */
 void LambdaSchedule::setDefaultEquation(const QString &stage,
                                         const Expression &equation)
 {
     this->default_equations[this->find_stage(stage)] = equation;
 }
 
+/** Set the custom equation used to control the specified
+ *  `lever` at the stage `stage` to `equation`. This equation
+ *  will only be used to control the parameters for the
+ *  specified lever at the specified stage.
+ */
 void LambdaSchedule::setEquation(const QString &stage,
                                  const QString &lever,
                                  const Expression &equation)
@@ -461,6 +601,10 @@ void LambdaSchedule::setEquation(const QString &stage,
     lever_expressions[lever] = equation;
 }
 
+/** Remove the custom equation for the specified `lever` at the
+ *  specified `stage`. The lever will now use the default
+ *  equation at this stage.
+ */
 void LambdaSchedule::removeEquation(const QString &stage,
                                     const QString &lever)
 {
@@ -472,6 +616,9 @@ void LambdaSchedule::removeEquation(const QString &stage,
     this->stage_equations[idx].remove(lever);
 }
 
+/** Return the default equation used to control the parameters for
+ *  the stage `stage`.
+ */
 Expression LambdaSchedule::getEquation(const QString &stage) const
 {
     const int idx = this->find_stage(stage);
@@ -479,6 +626,11 @@ Expression LambdaSchedule::getEquation(const QString &stage) const
     return this->default_equations[idx];
 }
 
+/** Return the equation used to control the specified `lever`
+ *  at the specified `stage`. This will be a custom equation
+ *  if that has been set for this lever, or else the
+ *  default equation for this stage.
+ */
 Expression LambdaSchedule::getEquation(const QString &stage,
                                        const QString &lever) const
 {
@@ -518,6 +670,10 @@ QVector<double> generate_lambdas(int num_values)
     return lambda_values;
 }
 
+/** Return the list of lever stages that are used for the passed list
+ *  of lambda values. The lever names will be returned in the matching
+ *  order of the lambda values.
+ */
 QStringList LambdaSchedule::getLeverStages(const QVector<double> &lambda_values) const
 {
     QStringList stages;
@@ -540,11 +696,22 @@ QStringList LambdaSchedule::getLeverStages(const QVector<double> &lambda_values)
     return stages;
 }
 
+/** Return the lever stages used for the list of `nvalue` lambda values
+ *  generated for the global lambda value between 0 and 1 inclusive.
+ */
 QStringList LambdaSchedule::getLeverStages(int nvalues) const
 {
     return this->getLeverStages(generate_lambdas(nvalues));
 }
 
+/** Return the lever name and parameter values for that lever
+ *  for the specified list of lambda values, assuming that a
+ *  parameter for that lever has an initial value of
+ *  `initial_value` and a final value of `final_value`. This
+ *  is mostly useful for testing and graphing how this
+ *  schedule would change some hyperthetical forcefield
+ *  parameters for the specified lambda values.
+ */
 QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     const QVector<double> &lambda_values,
     double initial_value, double final_value) const
@@ -596,6 +763,15 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     return lever_values;
 }
 
+/** Return the lever name and parameter values for that lever
+ *  for the specified number of lambda values generated
+ *  evenly between 0 and 1, assuming that a
+ *  parameter for that lever has an initial value of
+ *  `initial_value` and a final value of `final_value`. This
+ *  is mostly useful for testing and graphing how this
+ *  schedule would change some hyperthetical forcefield
+ *  parameters for the specified lambda values.
+ */
 QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     int nvalues,
     double initial_value, double final_value) const
@@ -604,6 +780,18 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
                                 initial_value, final_value);
 }
 
+/** Return the parameters for the specified lever called `lever_name`
+ *  that have been morphed from the passed list of initial values
+ *  (in `initial`) to the passed list of final values (in `final`)
+ *  for the specified global value of :lambda: (in `lambda_value`).
+ *
+ *  The morphed parameters will be returned in the matching
+ *  order to `initial` and `final`.
+ *
+ *  This morphs floating point parameters. There is an overload
+ *  of this function that morphs integer parameters, in which
+ *  case the result would be rounded to the nearest integer.
+ */
 QVector<double> LambdaSchedule::morph(const QString &lever_name,
                                       const QVector<double> &initial,
                                       const QVector<double> &final,
@@ -650,6 +838,17 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
     return morphed;
 }
 
+/** Return the parameters for the specified lever called `lever_name`
+ *  that have been morphed from the passed list of initial values
+ *  (in `initial`) to the passed list of final values (in `final`)
+ *  for the specified global value of :lambda: (in `lambda_value`).
+ *
+ *  The morphed parameters will be returned in the matching
+ *  order to `initial` and `final`.
+ *
+ *  This function morphs integer parameters. In this case,
+ *  the result will be the rounded to the nearest integer.
+ */
 QVector<int> LambdaSchedule::morph(const QString &lever_name,
                                    const QVector<int> &initial,
                                    const QVector<int> &final,

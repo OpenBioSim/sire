@@ -357,19 +357,124 @@ class System:
 
         return TrajectoryIterator(self, *args, **kwargs)
 
-    def minimisation(self, map=None):
+    def minimisation(self, *args, **kwargs):
         """
-        Return a Minimisation object that can be used to minimise the energy
-        of the molecule(s) in this view.
-        """
-        from ..mol import Minimisation
+        Return a Minimisation object that can be used to perform
+        minimisation of the molecule(s) in this System
 
-        return Minimisation(self, map=map)
+        cutoff: Length
+            The size of the non-bonded cutoff
+
+        cutoff_type: str
+            The type of cutoff to use, e.g. "PME", "RF" etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options
+
+        constraint: str
+            The type of constraint to use for bonds and/or angles, e.g.
+            `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            guessed from the timestep if it isn't set.
+
+        schedule: sire.cas.LambdaSchedule
+            The schedule used to control how perturbable forcefield parameters
+            should be morphed as a function of lambda. If this is not set
+            then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+        lambda_value: float
+            The value of lambda at which to run minimisation. This only impacts
+            perturbable molecules, whose forcefield parameters will be
+            scaled according to the lambda schedule for the specified
+            value of lambda.
+
+        device: str or int
+            The ID of the GPU (or accelerator) used to accelerate
+            minimisation. This would be CUDA_DEVICE_ID or similar
+            if CUDA was used. This can be any valid OpenMM device string
+
+        map: dict
+            A dictionary of additional options. Note that any options
+            set in this dictionary that are also specified via one of
+            the arguments above will be overridden by the argument
+            value
+        """
+        from ..mol import _minimisation
+
+        return _minimisation(self, *args, **kwargs)
 
     def dynamics(self, *args, **kwargs):
         """
         Return a Dynamics object that can be used to perform
-        dynamics of the molecule(s) in this view
+        dynamics on the molecule(s) in this System
+
+        cutoff: Length
+            The size of the non-bonded cutoff
+
+        cutoff_type: str
+            The type of cutoff to use, e.g. "PME", "RF" etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options
+
+        timestep: time
+            The size of the dynamics timestep
+
+        save_frequency: time
+            The amount of simulation time between saving energies and frames.
+            This can be overridden using `energy_frequency` or `frame_frequency`,
+            or by these options in individual dynamics runs. Set this
+            to zero if you don't want any saves.
+
+        energy_frequency: time
+            The amount of time between saving energies. This overrides the
+            value in `save_frequency`. Set this to zero if you don't want
+            to save energies during the trajectory. This can be overridden
+            by setting energy_frequency during an individual run.
+
+        frame_frequency: time
+            The amount of time between saving frames. This overrides the
+            value in `save_frequency`. Set this to zero if you don't want
+            to save frames during the trajectory. This can be overridden
+            by setting frame_frequency during an individual run.
+
+        constraint: str
+            The type of constraint to use for bonds and/or angles, e.g.
+            `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            guessed from the timestep if it isn't set.
+
+        schedule: sire.cas.LambdaSchedule
+            The schedule used to control how perturbable forcefield parameters
+            should be morphed as a function of lambda. If this is not set
+            then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+        lambda_value: float
+            The value of lambda at which to run dynamics. This only impacts
+            perturbable molecules, whose forcefield parameters will be
+            scaled according to the lambda schedule for the specified
+            value of lambda.
+
+        temperature: temperature
+            The temperature at which to run the simulation. A
+            microcanonical (NVE) simulation will be run if you don't
+            specify the temperature.
+
+        pressure: pressure
+            The pressure at which to run the simulation. A
+            microcanonical (NVE) or canonical (NVT) simulation will be
+            run if the pressure is not set.
+
+        device: str or int
+            The ID of the GPU (or accelerator) used to accelerate
+            the simulation. This would be CUDA_DEVICE_ID or similar
+            if CUDA was used. This can be any valid OpenMM device string
+
+        map: dict
+            A dictionary of additional options. Note that any options
+            set in this dictionary that are also specified via one of
+            the arguments above will be overridden by the argument
+            value
         """
         from ..mol import _dynamics
 
