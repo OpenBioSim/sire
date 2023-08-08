@@ -40,16 +40,15 @@ def _run_test(mols, is_slow=False):
     mols0 = get_end_state(merge, "0", "1") + water
     mols1 = get_end_state(merge, "1", "0") + water
 
+    # a very basic lambda schedule
+    l = sr.cas.LambdaSchedule()
+    l.add_stage("morph", (1 - l.lam()) * l.initial() + l.lam() * l.final())
+
     # need to use the reference platform on GH Actions
-    map = {"platform": "Reference"}
+    map = {"platform": "Reference", "schedule": l}
 
     # create the perturbable OpenMM system
     omm = sr.convert.to(mols, "openmm", map=map)
-
-    # a very basic lambda schedule
-    l = omm.get_lambda_schedule()
-    l.add_stage("morph", (1 - l.lam()) * l.initial() + l.lam() * l.final())
-    omm.set_lambda_schedule(l)
 
     def e(nrg):
         return nrg.value_in_unit(nrg.unit)

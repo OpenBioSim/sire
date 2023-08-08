@@ -365,6 +365,20 @@ namespace SireOpenMM
         // also populate a LambaLever for any perturbable molecules
         LambdaLever lambda_lever;
 
+        if (any_perturbable)
+        {
+            if (map.specified("schedule"))
+            {
+                lambda_lever.setSchedule(
+                    map["schedule"].value().asA<LambdaSchedule>());
+            }
+            else
+            {
+                lambda_lever.setSchedule(
+                    LambdaSchedule::standard_morph());
+            }
+        }
+
         // make sure that we tell the lever the index of the named
         // forcefields when they are added
         lambda_lever.setForceIndex("clj", system.addForce(cljff));
@@ -395,6 +409,9 @@ namespace SireOpenMM
 
         // save the atoms in the order they are added to the system
         SireMol::SelectorM<SireMol::Atom> atom_index;
+
+        // the index to the perturbable molecule for the specified molecule
+        QHash<int, int> idx_to_pert_idx;
 
         for (int i = 0; i < nmols; ++i)
         {
@@ -433,7 +450,10 @@ namespace SireOpenMM
                 start_indicies.insert("angle", angff->getNumAngles());
                 start_indicies.insert("torsion", dihff->getNumTorsions());
 
-                lambda_lever.addPerturbableMolecule(mol, start_indicies);
+                auto pert_idx = lambda_lever.addPerturbableMolecule(mol,
+                                                                    start_indicies);
+
+                idx_to_pert_idx.insert(i, pert_idx);
             }
 
             // first the atom parameters
@@ -483,12 +503,29 @@ namespace SireOpenMM
                                   std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
             }
 
-            // now constraints
-            for (const auto &constraint : mol.constraints)
+            // now constraints - we need to make sure that we use the value
+            // of the r0 parameter calculated for this value of lambda if
+            // this is a perturbable molecule
+            if (any_perturbable and mol.isPerturbable())
             {
-                system.addConstraint(std::get<0>(constraint) + start_index,
-                                     std::get<1>(constraint) + start_index,
-                                     std::get<2>(constraint));
+                // we may want to select out constraints that involve
+                // perturbing atoms... For now we will include them all
+                for (const auto &constraint : mol.constraints)
+                {
+                    system.addConstraint(
+                        std::get<0>(constraint) + start_index,
+                        std::get<1>(constraint) + start_index,
+                        std::get<2>(constraint));
+                }
+            }
+            else
+            {
+                for (const auto &constraint : mol.constraints)
+                {
+                    system.addConstraint(std::get<0>(constraint) + start_index,
+                                         std::get<1>(constraint) + start_index,
+                                         std::get<2>(constraint));
+                }
             }
 
             start_index += mol.masses.count();
@@ -537,7 +574,9 @@ namespace SireOpenMM
 
             if (is_perturbable)
             {
-                lambda_lever.setExceptionIndicies(i, "clj", exception_idxs);
+                auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
+                lambda_lever.setExceptionIndicies(pert_idx,
+                                                  "clj", exception_idxs);
             }
         }
 
@@ -588,10 +627,6 @@ namespace SireOpenMM
                                               vels_data + start_index);
             }
         }
-
-        // add a default schedule if there are any perturbable molecules
-        if (any_perturbable)
-            lambda_lever.setSchedule(LambdaSchedule::standard_morph());
 
         return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
     }

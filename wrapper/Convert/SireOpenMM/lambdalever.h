@@ -37,7 +37,6 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
-
     /** This is a lever that is used to change the parameters in an OpenMM
      *  context according to a lambda value. This is actually a collection
      *  of levers, each of which is controlled by the main lever.
@@ -67,8 +66,8 @@ namespace SireOpenMM
 
         void setForceIndex(const QString &force, int index);
 
-        void addPerturbableMolecule(const OpenMMMolecule &molecule,
-                                    const QHash<QString, qint32> &start_indicies);
+        int addPerturbableMolecule(const OpenMMMolecule &molecule,
+                                   const QHash<QString, qint32> &start_indicies);
 
         void setExceptionIndicies(int idx, const QString &ff,
                                   const QVector<int> &exception_idxs);

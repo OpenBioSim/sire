@@ -434,14 +434,21 @@ void LambdaLever::setForceIndex(const QString &force, int index)
     this->name_to_ffidx.insert(force, index);
 }
 
-void LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
-                                         const QHash<QString, qint32> &starts)
+/** Add info for the passed perturbable OpenMMMolecule, returning
+ *  its index in the list of perturbable molecules
+ */
+int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
+                                        const QHash<QString, qint32> &starts)
 {
     // should add in some sanity checks for these inputs
     this->perturbable_mols.append(molecule);
     this->start_indicies.append(starts);
+    return this->perturbable_mols.count() - 1;
 }
 
+/** Set the exception indices for the perturbable molecule at
+ *  index 'mol_idx'
+ */
 void LambdaLever::setExceptionIndicies(int mol_idx,
                                        const QString &name,
                                        const QVector<int> &exception_idxs)

@@ -18,27 +18,50 @@ class SOMMContext(_Context):
     """
 
     def __init__(
-        self, system=None, integrator=None, platform=None, metadata=None
+        self,
+        system=None,
+        integrator=None,
+        platform=None,
+        metadata=None,
+        map=None,
     ):
         """
         Construct from a passed OpenMM Context, the
         atom index, and the lambda lever
         """
         if system is not None:
-            super().__init__(system, integrator, platform)
-
+            from ...base import create_map
             from ._SireOpenMM import _set_openmm_coordinates_and_velocities
+
+            map = create_map(map)
+
+            self._atom_index = metadata.index()
+            self._lambda_lever = metadata.lambdaLever()
+
+            # we need to update the constraints in the system
+            # to match the current value of lambda, before we
+            # turn this system into a context
+            if map.specified("lambda"):
+                lambda_value = map["lambda"].value().as_double()
+            else:
+                lambda_value = 0.0
+
+            # we have space here, if we need it, to update
+            # the system based on the requested value of lambda
+            # There are some things that are unchangeable once
+            # the context has been created (e.g. constraints)
+            super().__init__(system, integrator, platform)
 
             # place the coordinates and velocities into the context
             _set_openmm_coordinates_and_velocities(self, metadata)
 
-            self._atom_index = metadata.index()
-            self._lambda_lever = metadata.lambdaLever()
+            self._lambda_value = self._lambda_lever.set_lambda(
+                self, lambda_value
+            )
         else:
             self._atom_index = None
             self._lambda_lever = None
-
-        self._lambda_value = 0.0
+            self._lambda_value = 0.0
 
     def __str__(self):
         p = self.getPlatform()
@@ -174,14 +197,7 @@ class SOMMContext(_Context):
         if self._lambda_lever is None:
             return
 
-        s = self._lambda_lever.schedule()
-
-        if s is None or s.is_null():
-            return
-
-        lambda_value = s.clamp(lambda_value)
-        self._lambda_lever.set_lambda(self, lambda_value)
-        self._lambda_value = lambda_value
+        self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
 
     def get_potential_energy(self):
         """
