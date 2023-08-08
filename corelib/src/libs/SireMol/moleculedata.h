@@ -195,6 +195,13 @@ namespace SireMol
         QStringList metadataKeys() const;
         QStringList metadataKeys(const PropertyName &key) const;
 
+        void addLink(const QString &key, const QString &linked_property);
+        void removeLink(const QString &key);
+        void removeAllLinks();
+
+        bool hasLinks() const;
+        QHash<QString, QString> getLinks() const;
+
         const Property &property(const PropertyName &key) const;
 
         const Property &property(const PropertyName &key, const Property &default_value) const;

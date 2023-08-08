@@ -148,6 +148,19 @@ void register_MolEditor_class(){
                 , "Add a segment called name and return an editor that can\nbe used to edit it" );
         
         }
+        { //::SireMol::MolEditor::addLink
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*addLink_function_type)( ::QString const &,::QString const & ) ;
+            addLink_function_type addLink_function_value( &::SireMol::MolEditor::addLink );
+            
+            MolEditor_exposer.def( 
+                "addLink"
+                , addLink_function_value
+                , ( bp::arg("key"), bp::arg("linked_property") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::MolEditor::commit
         
             typedef ::SireMol::Molecule ( ::SireMol::MolEditor::*commit_function_type)(  ) const;
@@ -158,6 +171,30 @@ void register_MolEditor_class(){
                 , commit_function_value
                 , bp::release_gil_policy()
                 , "Commit these changes and return a copy of the\nedited molecule" );
+        
+        }
+        { //::SireMol::MolEditor::getLinks
+        
+            typedef ::QHash< QString, QString > ( ::SireMol::MolEditor::*getLinks_function_type)(  ) const;
+            getLinks_function_type getLinks_function_value( &::SireMol::MolEditor::getLinks );
+            
+            MolEditor_exposer.def( 
+                "getLinks"
+                , getLinks_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::MolEditor::hasLinks
+        
+            typedef bool ( ::SireMol::MolEditor::*hasLinks_function_type)(  ) const;
+            hasLinks_function_type hasLinks_function_value( &::SireMol::MolEditor::hasLinks );
+            
+            MolEditor_exposer.def( 
+                "hasLinks"
+                , hasLinks_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMol::MolEditor::operator=
@@ -287,6 +324,18 @@ void register_MolEditor_class(){
                 , "Remove all CutGroups from this molecule. This returns an editor that\ncan be used to further edit the structure of this molecule" );
         
         }
+        { //::SireMol::MolEditor::removeAllLinks
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*removeAllLinks_function_type)(  ) ;
+            removeAllLinks_function_type removeAllLinks_function_value( &::SireMol::MolEditor::removeAllLinks );
+            
+            MolEditor_exposer.def( 
+                "removeAllLinks"
+                , removeAllLinks_function_value
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::MolEditor::removeAllResidues
         
             typedef ::SireMol::MolStructureEditor ( ::SireMol::MolEditor::*removeAllResidues_function_type)(  ) const;
@@ -309,6 +358,19 @@ void register_MolEditor_class(){
                 , removeAllSegments_function_value
                 , bp::release_gil_policy()
                 , "Remove all segments from this molecule. This returns an editor that\ncan be used to further edit the structure of this molecule" );
+        
+        }
+        { //::SireMol::MolEditor::removeLink
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*removeLink_function_type)( ::QString const & ) ;
+            removeLink_function_type removeLink_function_value( &::SireMol::MolEditor::removeLink );
+            
+            MolEditor_exposer.def( 
+                "removeLink"
+                , removeLink_function_value
+                , ( bp::arg("key") )
+                , bp::return_self< >()
+                , "" );
         
         }
         { //::SireMol::MolEditor::rename

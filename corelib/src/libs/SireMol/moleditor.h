@@ -116,6 +116,13 @@ namespace SireMol
         template <class T, class V>
         bool updatePropertyFrom(const QString &key, const V &value, bool auto_add = true);
 
+        MolEditor &addLink(const QString &key, const QString &linked_property);
+        MolEditor &removeLink(const QString &key);
+        MolEditor &removeAllLinks();
+
+        bool hasLinks() const;
+        QHash<QString, QString> getLinks() const;
+
         AtomStructureEditor add(const AtomName &atom) const;
         AtomStructureEditor add(const AtomNum &atom) const;
 

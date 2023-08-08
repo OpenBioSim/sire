@@ -335,6 +335,44 @@ MolStructureEditor MolEditor::removeAllSegments() const
     return editor.removeAllSegments();
 }
 
+/** Add a link from the property 'key' to the property 'linked_property'.
+ *  The linked_property will be returned if there is no property
+ *  called 'key' in this set.
+ *
+ *  Note that the linked property must already be contained in this set.
+ */
+MolEditor &MolEditor::addLink(const QString &key, const QString &linked_property)
+{
+    d->addLink(key, linked_property);
+    return *this;
+}
+
+/** Remove the link associated with the key 'key' */
+MolEditor &MolEditor::removeLink(const QString &key)
+{
+    d->removeLink(key);
+    return *this;
+}
+
+/** Remove all property links from this set */
+MolEditor &MolEditor::removeAllLinks()
+{
+    d->removeAllLinks();
+    return *this;
+}
+
+/** Return whether or not there are any property links */
+bool MolEditor::hasLinks() const
+{
+    return d->hasLinks();
+}
+
+/** Return all of the property links */
+QHash<QString, QString> MolEditor::getLinks() const
+{
+    return d->getLinks();
+}
+
 /** Update the passed property to have the value 'value'. This does
  *  an in-place update on the existing property (which must have
  *  a compatible type). If 'auto-add' is true, then this will add
