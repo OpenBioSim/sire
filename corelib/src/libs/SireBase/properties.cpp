@@ -472,6 +472,11 @@ bool Properties::isEmpty() const
  */
 void Properties::addLink(const QString &key, const QString &linked_property)
 {
+    if (key.simplified().isEmpty())
+        throw SireError::invalid_key(QObject::tr(
+                                         "You can't use an empty string as a link name"),
+                                     CODELOC);
+
     this->assertContainsProperty(linked_property);
 
     if (d->properties.contains(key))

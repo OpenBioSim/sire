@@ -531,18 +531,33 @@ const char *MoleculeData::metadataType(const PropertyName &key, const PropertyNa
 void MoleculeData::addLink(const QString &key, const QString &linked_property)
 {
     props.addLink(key, linked_property);
+
+    // increment the global version number
+    vrsn = vrsns->increment();
 }
 
 /** Remove the link associated with the key 'key' */
 void MoleculeData::removeLink(const QString &key)
 {
-    props.removeLink(key);
+    if (this->getLinks().contains(key))
+    {
+        props.removeLink(key);
+
+        // increment the global version number
+        vrsn = vrsns->increment();
+    }
 }
 
 /** Remove all property links from this set */
 void MoleculeData::removeAllLinks()
 {
-    props.removeAllLinks();
+    if (this->hasLinks())
+    {
+        props.removeAllLinks();
+
+        // increment the global version number
+        vrsn = vrsns->increment();
+    }
 }
 
 /** Return whether or not there are any property links */
