@@ -1418,7 +1418,14 @@ def _dynamics(
         cutoff = 7.5 * angstrom
 
     if cutoff_type is None and not map.specified("cutoff_type"):
-        cutoff_type = "PME"
+        try:
+            if view.property(map["space"]).is_periodic():
+                cutoff_type = "PME"
+            else:
+                cutoff_type = "RF"
+        except Exception:
+            # no space, use RF
+            cutoff_type = "RF"
 
     if timestep is None and not map.specified("timestep"):
         from ..units import femtosecond
@@ -1546,7 +1553,14 @@ def _minimisation(
         cutoff = 7.5 * angstrom
 
     if cutoff_type is None and not map.specified("cutoff_type"):
-        cutoff_type = "PME"
+        try:
+            if view.property(map["space"]).is_periodic():
+                cutoff_type = "PME"
+            else:
+                cutoff_type = "RF"
+        except Exception:
+            # no space, use RF
+            cutoff_type = "RF"
 
     if constraint is not None:
         map.set("constraint", str(constraint))
