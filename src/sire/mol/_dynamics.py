@@ -40,16 +40,10 @@ class DynamicsData:
                     "space", self._ffinfo.space()
                 )
 
-            # try to find any existing energy trajectory
-            try:
-                self._energy_trajectory = self._sire_mols.property(
-                    map["energy_trajectory"]
-                )
-
-                if type(self._energy_trajectory) is not EnergyTrajectory:
-                    self._energy_trajectory = EnergyTrajectory()
-            except Exception:
-                self._energy_trajectory = EnergyTrajectory()
+            # find the existing energy trajectory - we will build on this
+            self._energy_trajectory = self._sire_mols.energy_trajectory(
+                to_pandas=False, map=self._map
+            )
 
             self._num_atoms = len(self._sire_mols.atoms())
 
@@ -179,6 +173,11 @@ class DynamicsData:
             * nanosecond
         )
 
+        delta = current_time - self._elapsed_time
+
+        self._elapsed_time = current_time
+        self._current_time += delta
+
         if save_energy:
             # should save energy here
             nrgs = {}
@@ -213,12 +212,7 @@ class DynamicsData:
 
                 self._omm_mols.set_lambda(sim_lambda_value)
 
-            self._energy_trajectory.set(current_time, nrgs)
-
-        delta = current_time - self._elapsed_time
-
-        self._elapsed_time = current_time
-        self._current_time += delta
+            self._energy_trajectory.set(self._current_time, nrgs)
 
         self._is_running = None
 
@@ -534,6 +528,10 @@ class DynamicsData:
             else:
                 frame_frequency = frame_frequency.to(picosecond)
 
+        if lambda_windows is None:
+            if self._map.specified("lambda_windows"):
+                lambda_windows = self._map["lambda_windows"].value()
+
         def runfunc(num_steps):
             try:
                 integrator = self._omm_mols.getIntegrator()
@@ -751,10 +749,9 @@ class DynamicsData:
             nsteps_completed=self._current_step,
         )
 
-        if not self._energy_trajectory.is_empty():
-            self._sire_mols.set_property(
-                "energy_trajectory", self._energy_trajectory
-            )
+        self._sire_mols.set_energy_trajectory(
+            self._energy_trajectory, map=self._map
+        )
 
 
 def _add_extra(extras, key, value):
@@ -813,7 +810,7 @@ class Dynamics:
                     f"energy={self.current_energy()}, speed=FAST ns day-1)"
                 )
             else:
-                return f"Dynamics(completed=0)"
+                return "Dynamics(completed=0)"
         else:
             return (
                 f"Dynamics(completed={self.current_time()}, "

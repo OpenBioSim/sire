@@ -611,6 +611,86 @@ class System:
 
         self._molecules = None
 
+    def energy_trajectory(self, to_pandas=True, map=None):
+        """
+        Return the energy trajectory for this System. This is the history
+        of energies evaluate during any dynamics runs. It could include
+        energies calculated at different values of lambda
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        try:
+            traj = self._system.property(traj_propname)
+        except Exception:
+            traj = None
+
+        if traj is not None:
+            if traj.what() != "SireMaths::EnergyTrajectory":
+                if traj_propname.has_value():
+                    raise TypeError(
+                        f"You cannot force the use of a {type(traj)} "
+                        "as an EnergyTrajectory"
+                    )
+
+                traj = None
+
+        if traj is None:
+            # we need to create this trajectory
+            from ..maths import EnergyTrajectory
+
+            self._system.set_property(
+                traj_propname.source(), EnergyTrajectory()
+            )
+
+            traj = self._system.property(traj_propname)
+
+        if to_pandas:
+            return traj.to_pandas()
+        else:
+            return traj
+
+    def set_energy_trajectory(self, trajectory, map=None):
+        """
+        Set the energy trajectory to the passed value
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        if traj_propname.has_value():
+            return
+
+        if trajectory.what() != "SireMaths::EnergyTrajectory":
+            raise TypeError(
+                f"You cannot set a {type(trajectory)} as an "
+                "energy trajectory!"
+            )
+
+        self._system.set_property(traj_propname.source(), trajectory)
+
+    def clear_energy_trajectory(self, map=None):
+        """
+        Completely clear any existing energy trajectory
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        if traj_propname.has_value():
+            return
+
+        from ..maths import EnergyTrajectory
+
+        self._system.set_property(traj_propname.source(), EnergyTrajectory())
+
     def evaluate(self, *args, **kwargs):
         """Return an evaluator for this Systme (or of the matching
         index/search subset of this System)"""
