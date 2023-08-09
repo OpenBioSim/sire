@@ -643,42 +643,50 @@ void OpenMMMolecule::alignInternals()
     QVector<std::tuple<int, int, double, double>> bond_params_1;
     bond_params_1.reserve(bond_params.count());
 
-    QVector<bool> found_index(perturbed->bond_params.count(), false);
+    QVector<bool> found_index_0(bond_params.count(), false);
+    QVector<bool> found_index_1(perturbed->bond_params.count(), false);
 
-    for (const auto &bond0 : bond_params)
+    for (int i = 0; i < bond_params.count(); ++i)
     {
+        const auto &bond0 = bond_params.at(i);
+
         int atom0 = std::get<0>(bond0);
         int atom1 = std::get<1>(bond0);
 
         bool found = false;
 
-        for (int i = 0; i < perturbed->bond_params.count(); ++i)
+        for (int j = 0; j < perturbed->bond_params.count(); ++j)
         {
-            const auto &bond1 = perturbed->bond_params.at(i);
-
-            if (std::get<0>(bond1) == atom0 and std::get<1>(bond1) == atom1)
+            if (not found_index_1[j])
             {
-                // we have found the matching bond!
-                bond_params_1.append(bond1);
-                found_index[i] = true;
-                found = true;
-                break;
+                const auto &bond1 = perturbed->bond_params.at(j);
+
+                if (std::get<0>(bond1) == atom0 and std::get<1>(bond1) == atom1)
+                {
+                    // we have found the matching bond!
+                    bond_params_1.append(bond1);
+                    found_index_0[i] = true;
+                    found_index_1[j] = true;
+                    found = true;
+                    break;
+                }
             }
         }
 
         if (not found)
         {
             // add a null bond with the same r0, but null k
+            found_index_0[i] = true;
             bond_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, std::get<2>(bond0), 0.0));
         }
     }
 
-    for (int i = 0; i < perturbed->bond_params.count(); ++i)
+    for (int j = 0; j < perturbed->bond_params.count(); ++j)
     {
-        if (not found_index[i])
+        if (not found_index_1[j])
         {
             // need to add a bond missing in the reference state
-            const auto &bond1 = perturbed->bond_params.at(i);
+            const auto &bond1 = perturbed->bond_params.at(j);
 
             int atom0 = std::get<0>(bond1);
             int atom1 = std::get<1>(bond1);
@@ -686,7 +694,17 @@ void OpenMMMolecule::alignInternals()
             // add a null bond with the same r0, but null k
             bond_params.append(std::tuple<int, int, double, double>(atom0, atom1, std::get<2>(bond1), 0.0));
             bond_params_1.append(bond1);
+
+            found_index_1[j] = true;
         }
+    }
+
+    // all of found_index_0 and found_index_1 should be true...
+    if (found_index_0.indexOf(false) != -1 or found_index_1.indexOf(false) != -1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Failed to align the bonds!"),
+                                     CODELOC);
     }
 
     perturbed->bond_params = bond_params_1;
@@ -694,43 +712,51 @@ void OpenMMMolecule::alignInternals()
     QVector<std::tuple<int, int, int, double, double>> ang_params_1;
     ang_params_1.reserve(ang_params.count());
 
-    found_index = QVector<bool>(perturbed->ang_params.count(), false);
+    found_index_0 = QVector<bool>(ang_params.count(), false);
+    found_index_1 = QVector<bool>(perturbed->ang_params.count(), false);
 
-    for (const auto &ang0 : ang_params)
+    for (int i = 0; i < ang_params.count(); ++i)
     {
+        const auto &ang0 = ang_params.at(i);
+
         int atom0 = std::get<0>(ang0);
         int atom1 = std::get<1>(ang0);
         int atom2 = std::get<2>(ang0);
 
         bool found = false;
 
-        for (int i = 0; i < perturbed->ang_params.count(); ++i)
+        for (int j = 0; j < perturbed->ang_params.count(); ++j)
         {
-            const auto &ang1 = perturbed->ang_params.at(i);
-
-            if (std::get<0>(ang1) == atom0 and std::get<1>(ang1) == atom1 and std::get<2>(ang1) == atom2)
+            if (not found_index_1[j])
             {
-                // we have found the matching angle!
-                ang_params_1.append(ang1);
-                found_index[i] = true;
-                found = true;
-                break;
+                const auto &ang1 = perturbed->ang_params.at(j);
+
+                if (std::get<0>(ang1) == atom0 and std::get<1>(ang1) == atom1 and std::get<2>(ang1) == atom2)
+                {
+                    // we have found the matching angle!
+                    ang_params_1.append(ang1);
+                    found_index_0[i] = true;
+                    found_index_1[j] = true;
+                    found = true;
+                    break;
+                }
             }
         }
 
         if (not found)
         {
             // add a null angle with the same theta0, but null k
+            found_index_0[i] = true;
             ang_params_1.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, std::get<3>(ang0), 0.0));
         }
     }
 
-    for (int i = 0; i < perturbed->ang_params.count(); ++i)
+    for (int j = 0; j < perturbed->ang_params.count(); ++j)
     {
-        if (not found_index[i])
+        if (not found_index_1[j])
         {
             // need to add a bond missing in the reference state
-            const auto &ang1 = perturbed->ang_params.at(i);
+            const auto &ang1 = perturbed->ang_params.at(j);
 
             int atom0 = std::get<0>(ang1);
             int atom1 = std::get<1>(ang1);
@@ -739,7 +765,17 @@ void OpenMMMolecule::alignInternals()
             // add a null angle with the same theta0, but null k
             ang_params.append(std::tuple<int, int, int, double, double>(atom0, atom1, atom2, std::get<3>(ang1), 0.0));
             ang_params_1.append(ang1);
+
+            found_index_1[j] = true;
         }
+    }
+
+    // all of found_index_0 and found_index_1 should be true...
+    if (found_index_0.indexOf(false) != -1 or found_index_1.indexOf(false) != -1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Failed to align the angles!"),
+                                     CODELOC);
     }
 
     perturbed->ang_params = ang_params_1;
@@ -747,10 +783,13 @@ void OpenMMMolecule::alignInternals()
     QVector<std::tuple<int, int, int, int, int, double, double>> dih_params_1;
     dih_params_1.reserve(dih_params.count());
 
-    found_index = QVector<bool>(perturbed->dih_params.count(), false);
+    found_index_0 = QVector<bool>(dih_params.count(), false);
+    found_index_1 = QVector<bool>(perturbed->dih_params.count(), false);
 
-    for (const auto &dih0 : dih_params)
+    for (int i = 0; i < dih_params.count(); ++i)
     {
+        const auto &dih0 = dih_params.at(i);
+
         int atom0 = std::get<0>(dih0);
         int atom1 = std::get<1>(dih0);
         int atom2 = std::get<2>(dih0);
@@ -758,18 +797,22 @@ void OpenMMMolecule::alignInternals()
 
         bool found = false;
 
-        for (int i = 0; i < perturbed->dih_params.count(); ++i)
+        for (int j = 0; j < perturbed->dih_params.count(); ++j)
         {
-            const auto &dih1 = perturbed->dih_params.at(i);
-
-            if (std::get<0>(dih1) == atom0 and std::get<1>(dih1) == atom1 and
-                std::get<2>(dih1) == atom2 and std::get<3>(dih1) == atom3)
+            if (not found_index_1[j])
             {
-                // we have found the matching bond!
-                dih_params_1.append(dih1);
-                found_index[i] = true;
-                found = true;
-                break;
+                const auto &dih1 = perturbed->dih_params.at(j);
+
+                if (std::get<0>(dih1) == atom0 and std::get<1>(dih1) == atom1 and
+                    std::get<2>(dih1) == atom2 and std::get<3>(dih1) == atom3)
+                {
+                    // we have found the matching bond!
+                    dih_params_1.append(dih1);
+                    found_index_0[i] = true;
+                    found_index_1[j] = true;
+                    found = true;
+                    break;
+                }
             }
         }
 
@@ -777,15 +820,16 @@ void OpenMMMolecule::alignInternals()
         {
             // add a null dihedral with the same periodicity and phase, but null k
             dih_params_1.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, std::get<4>(dih0), std::get<5>(dih0), 0.0));
+            found_index_0[i] = true;
         }
     }
 
-    for (int i = 0; i < perturbed->dih_params.count(); ++i)
+    for (int j = 0; j < perturbed->dih_params.count(); ++j)
     {
-        if (not found_index[i])
+        if (not found_index_1[j])
         {
             // need to add a bond missing in the reference state
-            const auto &dih1 = perturbed->dih_params.at(i);
+            const auto &dih1 = perturbed->dih_params.at(j);
 
             int atom0 = std::get<0>(dih1);
             int atom1 = std::get<1>(dih1);
@@ -795,7 +839,16 @@ void OpenMMMolecule::alignInternals()
             // add a null dihedral with the same periodicity and phase, but null k
             dih_params.append(std::tuple<int, int, int, int, int, double, double>(atom0, atom1, atom2, atom3, std::get<4>(dih1), std::get<5>(dih1), 0.0));
             dih_params_1.append(dih1);
+            found_index_1[j] = true;
         }
+    }
+
+    // all of found_index_0 and found_index_1 should be true...
+    if (found_index_0.indexOf(false) != -1 or found_index_1.indexOf(false) != -1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Failed to align the dihedrals!"),
+                                     CODELOC);
     }
 
     perturbed->dih_params = dih_params_1;

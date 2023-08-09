@@ -101,8 +101,8 @@ def _run_test(mols, is_slow=False):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda(merged_molecule):
-    _run_test(merged_molecule.clone(), False)
+def test_openmm_scale_lambda_simple(merged_ethane_methanol):
+    _run_test(merged_ethane_methanol.clone(), False)
 
 
 @pytest.mark.veryslow
@@ -110,5 +110,22 @@ def test_openmm_scale_lambda(merged_molecule):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_big_openmm_scale_lambda(merged_molecule):
-    _run_test(merged_molecule.clone(), True)
+def test_big_openmm_scale_lambda_simple(merged_ethane_methanol):
+    _run_test(merged_ethane_methanol.clone(), True)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_ligand(merged_zan_ose):
+    _run_test(merged_zan_ose.clone(), False)
+
+
+@pytest.mark.veryslow
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_big_openmm_scale_lambda_ligand(merged_zan_ose):
+    _run_test(merged_zan_ose.clone(), True)

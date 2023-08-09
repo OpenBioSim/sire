@@ -130,7 +130,7 @@ T *get_force(const QString &name, OpenMM::Context &context,
     if (t_force == 0)
     {
         throw SireError::invalid_cast(QObject::tr(
-                                          "Cannot case the force called '%1' to a %2.")
+                                          "Cannot cast the force called '%1' to a %2.")
                                           .arg(name)
                                           .arg(force_type),
                                       CODELOC);
@@ -284,14 +284,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // now update the forcefields
         int start_index = start_idxs.value("clj", -1);
 
-        if (start_index != -1)
+        if (start_index != -1 and cljff != 0)
         {
             const int nparams = morphed_charges.count();
-
-            if (cljff == 0)
-                throw SireError::incompatible_error(QObject::tr(
-                                                        "There is no NonbondedForce called 'clj' in this context!"),
-                                                    CODELOC);
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -321,14 +316,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         start_index = start_idxs.value("bond", -1);
 
-        if (start_index != -1)
+        if (start_index != -1 and bondff != 0)
         {
             const int nparams = morphed_bond_k.count();
-
-            if (bondff == 0)
-                throw SireError::incompatible_error(QObject::tr(
-                                                        "There is no HarmonicBondForce called 'bond' in this context!"),
-                                                    CODELOC);
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -348,14 +338,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         start_index = start_idxs.value("angle", -1);
 
-        if (start_index != -1)
+        if (start_index != -1 and angff != 0)
         {
             const int nparams = morphed_angle_k.count();
-
-            if (angff == 0)
-                throw SireError::incompatible_error(QObject::tr(
-                                                        "There is no HarmonicAngleForce called 'angle' in this context!"),
-                                                    CODELOC);
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -377,14 +362,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         start_index = start_idxs.value("torsion", -1);
 
-        if (start_index != -1)
+        if (start_index != -1 and dihff != 0)
         {
             const int nparams = morphed_torsion_k.count();
-
-            if (dihff == 0)
-                throw SireError::incompatible_error(QObject::tr(
-                                                        "There is no PeriodicTorsionForce called 'torsion' in this context!"),
-                                                    CODELOC);
 
             for (int j = 0; j < nparams; ++j)
             {
