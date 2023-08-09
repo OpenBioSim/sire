@@ -465,9 +465,18 @@ namespace SireOpenMM
         // the index to the perturbable molecule for the specified molecule
         QHash<int, int> idx_to_pert_idx;
 
+        // just a holder for all of the custom parameters
+        // (prevents us having to continually re-allocate it)
         std::vector<double> custom_params = {0, 0};
+
+        // the sets of ghost atoms and non-ghost atoms
         std::set<int> ghost_atoms;
         std::set<int> non_ghost_atoms;
+
+        // the set of all ghost atoms, with the value
+        // indicating if this is a from-ghost (true) or
+        // a to-ghost (false)
+        QHash<int, bool> ghost_is_from;
 
         for (int i = 0; i < nmols; ++i)
         {
@@ -536,19 +545,19 @@ namespace SireOpenMM
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
 
-                    cljff->addParticle(std::get<0>(clj), std::get<1>(clj),
-                                       std::get<2>(clj));
-
                     if (is_from_ghost or is_to_ghost)
                     {
                         ghost_atoms.insert(atom_index);
+                        ghost_is_from.insert(atom_index, is_from_ghost);
 
-                        // we will zero the cljff parameters for ghost
-                        // atoms later, so that we can use cljff
-                        // to detect exceptions ;-)
+                        // don't include the LJ energy as this will be
+                        // calculated using the ghost forcefields
+                        cljff->addParticle(std::get<0>(clj), 0.0, 0.0);
                     }
                     else
                     {
+                        cljff->addParticle(std::get<0>(clj), std::get<1>(clj),
+                                           std::get<2>(clj));
                         non_ghost_atoms.insert(atom_index);
                     }
                 }
@@ -575,10 +584,17 @@ namespace SireOpenMM
                 }
             }
 
-            for (const auto &bond : mol.bond_pairs)
+            if (not(any_perturbable and mol.isPerturbable()))
             {
-                bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
-                                                    std::get<1>(bond) + start_index));
+                // only save the bond pairs for non-perturbable molecules.
+                // This is because we want to know which exceptions
+                // are created for perturbable molecules, as we will
+                // need to manage them ourselves
+                for (const auto &bond : mol.bond_pairs)
+                {
+                    bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
+                                                        std::get<1>(bond) + start_index));
+                }
             }
 
             // now bond parameters
@@ -654,6 +670,8 @@ namespace SireOpenMM
         const int natoms = start_index;
 
         // add exclusions based on the bonding of the molecules
+        // Note that this only adds exceptions for the
+        // non-perturbable molecules!
         cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
         // now exceptions based on the 1-4 and excluded parameters
@@ -672,23 +690,67 @@ namespace SireOpenMM
                 exception_idxs = QVector<int>(mol.exception_params.count(), -1);
             }
 
+            // the list of exception parameters for perturbable
+            // molecules will include all 1-2, 1-3 and 1-4 terms
             for (int j = 0; j < mol.exception_params.count(); ++j)
             {
                 const auto &param = mol.exception_params[j];
 
-                auto p = mol.getException(std::get<0>(param),
-                                          std::get<1>(param),
-                                          start_index,
-                                          std::get<2>(param),
-                                          std::get<3>(param));
+                const auto atom0 = std::get<0>(param);
+                const auto atom1 = std::get<1>(param);
+                const auto coul_14_scale = std::get<2>(param);
+                const auto lj_14_scale = std::get<3>(param);
 
-                int idx = cljff->addException(std::get<0>(p), std::get<1>(p),
-                                              std::get<2>(p), std::get<3>(p),
-                                              std::get<4>(p), true);
+                auto p = mol.getException(atom0, atom1,
+                                          start_index,
+                                          coul_14_scale,
+                                          lj_14_scale);
 
                 if (is_perturbable)
                 {
+                    const bool atom0_is_ghost = mol.isGhostAtom(atom0);
+                    const bool atom1_is_ghost = mol.isGhostAtom(atom1);
+
+                    int idx;
+
+                    if (atom0_is_ghost or atom1_is_ghost)
+                    {
+                        // don't include the LJ term, as this is calculated
+                        // elsewhere - note that we need to use 1e-9 to
+                        // make sure that OpenMM doesn't eagerly remove
+                        // this, and cause "changed excluded atoms" warnings
+                        idx = cljff->addException(std::get<0>(p), std::get<1>(p),
+                                                  std::get<2>(p), 1e-9,
+                                                  1e-9, true);
+
+                        if (coul_14_scl != 0 or lj_14_scl != 0)
+                        {
+                            // this is a 1-4 interaction that should be added
+                            // to the ghost-14 forcefield
+                            // qDebug() << "ADD GHOST 1-4" << atom0 << atom1;
+                        }
+                    }
+                    else
+                    {
+                        idx = cljff->addException(std::get<0>(p), std::get<1>(p),
+                                                  std::get<2>(p), std::get<3>(p),
+                                                  std::get<4>(p), true);
+                    }
+
                     exception_idxs[j] = idx;
+
+                    // remove this interaction from the ghost forcefields
+                    if (ghost_ghostff != 0)
+                    {
+                        ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
+                        ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
+                    }
+                }
+                else
+                {
+                    cljff->addException(std::get<0>(p), std::get<1>(p),
+                                        std::get<2>(p), std::get<3>(p),
+                                        std::get<4>(p), true);
                 }
             }
 
@@ -700,43 +762,12 @@ namespace SireOpenMM
             }
         }
 
-        if (any_perturbable)
+        if (ghost_ghostff != 0)
         {
-            // also set up the interaction groups - ghost / non-ghost
-            //                                      ghost / ghost
+            // set up the interaction groups - ghost / non-ghost
+            //                                 ghost / ghost
             ghost_ghostff->addInteractionGroup(ghost_atoms, ghost_atoms);
             ghost_nonghostff->addInteractionGroup(ghost_atoms, non_ghost_atoms);
-
-            // use the exceptions created in cljff to exclude or 1-4 scale
-            // the terms in ghost_ghostff and ghost_nonghostff
-            for (int i = 0; i < cljff->getNumExceptions(); ++i)
-            {
-                int atom0, atom1;
-                double charge, sigma, epsilon;
-
-                cljff->getExceptionParameters(i, atom0, atom1,
-                                              charge, sigma, epsilon);
-
-                if (charge == 0 and sigma == 1 and epsilon == 0)
-                {
-                    // this is a 1-4 pair - we will have to deal with this
-                    // separately...
-                }
-
-                // any ways, this is not an atom-atom interaction that
-                // should be evaluated in the ghost forcefields
-                ghost_ghostff->addExclusion(atom0, atom1);
-                ghost_nonghostff->addExclusion(atom0, atom1);
-            }
-
-            // now go through all of the ghost atoms and remove their
-            // parameters from the CLJ forcefield
-            for (const auto &ghost_atom : ghost_atoms)
-            {
-                double charge, sigma, epsilon;
-                cljff->getParticleParameters(ghost_atom, charge, sigma, epsilon);
-                cljff->setParticleParameters(ghost_atom, charge, 0, 0);
-            }
         }
 
         // see if we want to remove COM motion

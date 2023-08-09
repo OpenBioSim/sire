@@ -188,6 +188,11 @@ bool OpenMMMolecule::isPerturbable() const
     return perturbed.get() != 0;
 }
 
+bool OpenMMMolecule::isGhostAtom(int atom) const
+{
+    return from_ghost_idxs.contains(atom) or to_ghost_idxs.contains(atom);
+}
+
 OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
 {
     const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);

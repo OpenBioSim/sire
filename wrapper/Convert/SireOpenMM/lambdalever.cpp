@@ -335,15 +335,42 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 {
                     const auto &param = perturbable_mol.exception_params[j];
 
+                    const auto atom0 = std::get<0>(param);
+                    const auto atom1 = std::get<1>(param);
+
+                    const auto coul_14_scale = std::get<2>(param);
+                    const auto lj_14_scale = std::get<3>(param);
+
+                    const bool atom0_is_ghost = perturbable_mol.isGhostAtom(atom0);
+                    const bool atom1_is_ghost = perturbable_mol.isGhostAtom(atom1);
+
                     const auto p = get_exception(std::get<0>(param), std::get<1>(param),
-                                                 start_index, std::get<2>(param), std::get<3>(param),
+                                                 start_index, coul_14_scale, lj_14_scale,
                                                  morphed_charges, morphed_sigmas, morphed_epsilons);
 
-                    cljff->setExceptionParameters(
-                        idxs[j],
-                        std::get<0>(p), std::get<1>(p),
-                        std::get<2>(p), std::get<3>(p),
-                        std::get<4>(p));
+                    // don't set LJ terms for ghost atoms
+                    if (atom0_is_ghost or atom1_is_ghost)
+                    {
+                        cljff->setExceptionParameters(
+                            idxs[j],
+                            std::get<0>(p), std::get<1>(p),
+                            std::get<2>(p), 1e-9, 1e-9);
+
+                        if (coul_14_scale != 0 or lj_14_scale != 0)
+                        {
+                            // this is a 1-4 parameter - need to update
+                            // the ghost 1-4 forcefield
+                            // qDebug() << "UPDATE GHOST 1-4" << atom0 << atom1;
+                        }
+                    }
+                    else
+                    {
+                        cljff->setExceptionParameters(
+                            idxs[j],
+                            std::get<0>(p), std::get<1>(p),
+                            std::get<2>(p), std::get<3>(p),
+                            std::get<4>(p));
+                    }
                 }
             }
         }

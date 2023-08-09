@@ -63,10 +63,13 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
 
-        std::tuple<int, int, double, double, double> getException(int atom0, int atom1,
-                                                                  int start_index,
-                                                                  double coul_14_scl,
-                                                                  double lj_14_scl) const;
+        bool isGhostAtom(int atom) const;
+
+        std::tuple<int, int, double, double, double>
+        getException(int atom0, int atom1,
+                     int start_index,
+                     double coul_14_scl,
+                     double lj_14_scl) const;
 
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of
