@@ -230,6 +230,8 @@ namespace SireOpenMM
             use_dispersion_correction = map["use_dispersion_correction"].value().asABoolean();
         }
 
+        // note that this will be very slow for perturbable systems, as
+        // it needs recalculating for every change of lambda
         cljff->setUseDispersionCorrection(use_dispersion_correction);
 
         // create the periodic box vectors
@@ -392,6 +394,56 @@ namespace SireOpenMM
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
         lambda_lever.setForceIndex("torsion", system.addForce(dihff));
 
+        OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
+        OpenMM::CustomNonbondedForce *ghost_nonghostff = 0;
+
+        if (any_perturbable)
+        {
+            const auto energy_expression = QString(
+                "4*epsilon*((sigma/r)^12-(sigma/r)^6);"
+                "sigma=0.5*(sigma1+sigma2);"
+                "epsilon=sqrt(epsilon1*epsilon2)");
+
+            ghost_ghostff = new OpenMM::CustomNonbondedForce(energy_expression.toStdString());
+            ghost_nonghostff = new OpenMM::CustomNonbondedForce(energy_expression.toStdString());
+
+            ghost_ghostff->addPerParticleParameter("sigma");
+            ghost_ghostff->addPerParticleParameter("epsilon");
+
+            ghost_nonghostff->addPerParticleParameter("sigma");
+            ghost_nonghostff->addPerParticleParameter("epsilon");
+
+            // this will be slow if switched on, as it needs recalculating
+            // for every change in parameters
+            ghost_ghostff->setUseLongRangeCorrection(use_dispersion_correction);
+            ghost_nonghostff->setUseLongRangeCorrection(use_dispersion_correction);
+
+            if (ffinfo.hasCutoff())
+            {
+                if (ffinfo.space().isPeriodic())
+                {
+                    ghost_ghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffPeriodic);
+                    ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffPeriodic);
+                }
+                else
+                {
+                    ghost_ghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffNonPeriodic);
+                    ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::CutoffNonPeriodic);
+                }
+
+                ghost_ghostff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
+                ghost_nonghostff->setCutoffDistance(ffinfo.cutoff().to(SireUnits::nanometers));
+            }
+            else
+            {
+                ghost_ghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
+                ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
+            }
+
+            lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
+            lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
+        }
+
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
         // (will deal with restraints, light atoms and virtual sites later)
@@ -412,6 +464,10 @@ namespace SireOpenMM
 
         // the index to the perturbable molecule for the specified molecule
         QHash<int, int> idx_to_pert_idx;
+
+        std::vector<double> custom_params = {0, 0};
+        std::set<int> ghost_atoms;
+        std::set<int> non_ghost_atoms;
 
         for (int i = 0; i < nmols; ++i)
         {
@@ -446,6 +502,8 @@ namespace SireOpenMM
                 start_indicies.reserve(5);
 
                 start_indicies.insert("clj", start_index);
+                start_indicies.insert("ghost/ghost", start_index);
+                start_indicies.insert("ghost/non-ghost", start_index);
                 start_indicies.insert("bond", bondff->getNumBonds());
                 start_indicies.insert("angle", angff->getNumAngles());
                 start_indicies.insert("torsion", dihff->getNumTorsions());
@@ -460,14 +518,61 @@ namespace SireOpenMM
             auto masses_data = mol.masses.constData();
             auto cljs_data = mol.cljs.constData();
 
-            for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
+            if (any_perturbable and mol.isPerturbable())
             {
-                system.addParticle(masses_data[j]);
-                const int atom_index = start_index + j;
+                for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
+                {
+                    const bool is_from_ghost = mol.from_ghost_idxs.contains(j);
+                    const bool is_to_ghost = mol.to_ghost_idxs.contains(j);
 
-                const auto &clj = cljs_data[j];
+                    system.addParticle(masses_data[j]);
+                    const int atom_index = start_index + j;
 
-                cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+                    const auto &clj = cljs_data[j];
+
+                    custom_params[0] = std::get<1>(clj);
+                    custom_params[1] = std::get<2>(clj);
+
+                    ghost_ghostff->addParticle(custom_params);
+                    ghost_nonghostff->addParticle(custom_params);
+
+                    cljff->addParticle(std::get<0>(clj), std::get<1>(clj),
+                                       std::get<2>(clj));
+
+                    if (is_from_ghost or is_to_ghost)
+                    {
+                        ghost_atoms.insert(atom_index);
+
+                        // we will zero the cljff parameters for ghost
+                        // atoms later, so that we can use cljff
+                        // to detect exceptions ;-)
+                    }
+                    else
+                    {
+                        non_ghost_atoms.insert(atom_index);
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
+                {
+                    system.addParticle(masses_data[j]);
+                    const int atom_index = start_index + j;
+
+                    const auto &clj = cljs_data[j];
+
+                    cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+
+                    if (any_perturbable)
+                    {
+                        custom_params[0] = std::get<1>(clj);
+                        custom_params[1] = std::get<2>(clj);
+                        ghost_ghostff->addParticle(custom_params);
+                        ghost_nonghostff->addParticle(custom_params);
+                        non_ghost_atoms.insert(atom_index);
+                    }
+                }
             }
 
             for (const auto &bond : mol.bond_pairs)
@@ -592,6 +697,45 @@ namespace SireOpenMM
                 auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
                 lambda_lever.setExceptionIndicies(pert_idx,
                                                   "clj", exception_idxs);
+            }
+        }
+
+        if (any_perturbable)
+        {
+            // also set up the interaction groups - ghost / non-ghost
+            //                                      ghost / ghost
+            ghost_ghostff->addInteractionGroup(ghost_atoms, ghost_atoms);
+            ghost_nonghostff->addInteractionGroup(ghost_atoms, non_ghost_atoms);
+
+            // use the exceptions created in cljff to exclude or 1-4 scale
+            // the terms in ghost_ghostff and ghost_nonghostff
+            for (int i = 0; i < cljff->getNumExceptions(); ++i)
+            {
+                int atom0, atom1;
+                double charge, sigma, epsilon;
+
+                cljff->getExceptionParameters(i, atom0, atom1,
+                                              charge, sigma, epsilon);
+
+                if (charge == 0 and sigma == 1 and epsilon == 0)
+                {
+                    // this is a 1-4 pair - we will have to deal with this
+                    // separately...
+                }
+
+                // any ways, this is not an atom-atom interaction that
+                // should be evaluated in the ghost forcefields
+                ghost_ghostff->addExclusion(atom0, atom1);
+                ghost_nonghostff->addExclusion(atom0, atom1);
+            }
+
+            // now go through all of the ghost atoms and remove their
+            // parameters from the CLJ forcefield
+            for (const auto &ghost_atom : ghost_atoms)
+            {
+                double charge, sigma, epsilon;
+                cljff->getParticleParameters(ghost_atom, charge, sigma, epsilon);
+                cljff->setParticleParameters(ghost_atom, charge, 0, 0);
             }
         }
 

@@ -133,6 +133,16 @@ namespace SireOpenMM
          *  if this is a peturbable molecule */
         QHash<QString, QVector<int>> exception_idxs;
 
+        /** The indexes of atoms that become ghosts in the
+         *  perturbed state
+         */
+        QSet<int> to_ghost_idxs;
+
+        /** The indexes of atoms that are ghosts in the reference
+         *  state and are real in the perturbed state
+         */
+        QSet<int> from_ghost_idxs;
+
         /** What type of constraint to use */
         qint32 constraint_type;
 

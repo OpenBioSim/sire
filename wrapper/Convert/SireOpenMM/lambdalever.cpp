@@ -210,9 +210,16 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // get copies of the forcefields in which the parameters will be changed
     auto cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
+    auto ghost_ghostff = get_force<OpenMM::CustomNonbondedForce>("ghost/ghost", context, name_to_ffidx, "CustomNonbondedForce");
+    auto ghost_nonghostff = get_force<OpenMM::CustomNonbondedForce>("ghost/non-ghost", context, name_to_ffidx, "CustomNonbondedForce");
     auto bondff = get_force<OpenMM::HarmonicBondForce>("bond", context, name_to_ffidx, "HarmonicBondForce");
     auto angff = get_force<OpenMM::HarmonicAngleForce>("angle", context, name_to_ffidx, "HarmonicAngleForce");
     auto dihff = get_force<OpenMM::PeriodicTorsionForce>("torsion", context, name_to_ffidx, "PeriodicTorsionForce");
+
+    // we know if we have peturbable ghost atoms if we have the ghost forcefields
+    const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
+
+    std::vector<double> custom_params = {0.0, 0.0};
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -288,9 +295,36 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         {
             const int nparams = morphed_charges.count();
 
-            for (int j = 0; j < nparams; ++j)
+            if (have_ghost_atoms)
             {
-                cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+                for (int j = 0; j < nparams; ++j)
+                {
+                    const bool is_from_ghost = perturbable_mol.from_ghost_idxs.contains(j);
+                    const bool is_to_ghost = perturbable_mol.to_ghost_idxs.contains(j);
+
+                    custom_params[0] = morphed_sigmas[j];
+                    custom_params[1] = morphed_epsilons[j];
+
+                    ghost_ghostff->setParticleParameters(start_index + j, custom_params);
+                    ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
+
+                    if (is_from_ghost or is_to_ghost)
+                    {
+                        // don't set the LJ parameters in the cljff
+                        cljff->setParticleParameters(start_index + j, morphed_charges[j], 0.0, 0.0);
+                    }
+                    else
+                    {
+                        cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < nparams; ++j)
+                {
+                    cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+                }
             }
 
             const auto idxs = perturbable_mol.exception_idxs.value("clj");
@@ -391,6 +425,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     if (cljff)
         cljff->updateParametersInContext(context);
+
+    if (ghost_ghostff)
+        ghost_ghostff->updateParametersInContext(context);
+
+    if (ghost_nonghostff)
+        ghost_nonghostff->updateParametersInContext(context);
 
     if (bondff)
         bondff->updateParametersInContext(context);

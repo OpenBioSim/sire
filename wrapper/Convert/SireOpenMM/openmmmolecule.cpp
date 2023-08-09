@@ -629,6 +629,21 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     }
 }
 
+bool is_ghost(const std::tuple<double, double, double> &clj)
+{
+    return std::get<0>(clj) == 0 and (std::get<1>(clj) == 0 or std::get<2>(clj) == 0);
+}
+
+bool is_ghost_charge(const std::tuple<double, double, double> &clj)
+{
+    return std::get<0>(clj) == 0;
+}
+
+bool is_ghost_lj(const std::tuple<double, double, double> &clj)
+{
+    return std::get<1>(clj) == 0 or std::get<2>(clj) == 0;
+}
+
 /** Go through all of the internals and compare them to the perturbed
  *  state. Ensure that there is a one-to-one mapping, with them all
  *  in the same order. Any that are missing are added as nulls in
@@ -640,6 +655,41 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
  */
 void OpenMMMolecule::alignInternals()
 {
+    // first go through an see which atoms are ghosts
+    if (cljs.count() != perturbed->cljs.count())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Different number of CLJ parameters between the reference "
+                                                "(%1) and perturbed (%2) states.")
+                                                .arg(cljs.count())
+                                                .arg(perturbed->cljs.count()),
+                                            CODELOC);
+
+    for (int i = 0; i < cljs.count(); ++i)
+    {
+        const auto &clj0 = cljs.at(i);
+        const auto &clj1 = perturbed->cljs.at(i);
+
+        if (clj0 != clj1)
+        {
+            if (is_ghost(clj0))
+            {
+                from_ghost_idxs.insert(i);
+            }
+            else if (is_ghost(clj1))
+            {
+                to_ghost_idxs.insert(i);
+            }
+            else if (is_ghost_lj(clj0) and not is_ghost_lj(clj1))
+            {
+                from_ghost_idxs.insert(i);
+            }
+            else if (is_ghost_lj(clj1) and not is_ghost_lj(clj0))
+            {
+                to_ghost_idxs.insert(i);
+            }
+        }
+    }
+
     QVector<std::tuple<int, int, double, double>> bond_params_1;
     bond_params_1.reserve(bond_params.count());
 
