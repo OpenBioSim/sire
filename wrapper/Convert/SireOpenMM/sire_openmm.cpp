@@ -672,7 +672,7 @@ namespace SireOpenMM
         // add exclusions based on the bonding of the molecules
         // Note that this only adds exceptions for the
         // non-perturbable molecules!
-        cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
+        // cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
         // now exceptions based on the 1-4 and excluded parameters
         // in the molecules
@@ -727,7 +727,7 @@ namespace SireOpenMM
                         {
                             // this is a 1-4 interaction that should be added
                             // to the ghost-14 forcefield
-                            // qDebug() << "ADD GHOST 1-4" << atom0 << atom1;
+                            qDebug() << "ADD GHOST 1-4" << atom0 << atom1;
                         }
                     }
                     else
