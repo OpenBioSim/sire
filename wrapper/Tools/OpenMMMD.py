@@ -349,9 +349,26 @@ distance_restraints_dict = Parameter(
     "Dictionary of pair of atoms whose distance is restrained, and restraint "
     "parameters. Syntax is {(atom0,atom1):(reql, kl, Dl)} where atom0, atom1 "
     "are atomic indices. reql the equilibrium distance. Kl the force constant "
-    "of the restraint. D the flat bottom radius. WARNING: PBC distance checks "
-    "not implemented, avoid restraining pair of atoms that may diffuse out of "
-    "the box.",
+    "of the restraint. D the flat bottom radius.",
+)
+
+use_permanent_distance_restraints = Parameter(
+    "use permanent distance restraints",
+    False,
+    """
+    Whether or not to use permanent (not affected by turn-on-restraints mode)
+    distance restraints distances between pairs of atoms.
+    """,
+)
+
+permanent_distance_restraints_dict = Parameter(
+    "permanent distance restraints dictionary",
+    {},
+    "Dictionary of pair of atoms whose distance is restrained, and restraint "
+    "parameters. Syntax is {(atom0,atom1):(reql, kl, Dl)} where atom0, atom1 "
+    "are atomic indices. reql the equilibrium distance. Kl the force constant "
+    "of the restraint. D the flat bottom radius. Permanent restraints are not "
+    "affected by turn-on-restraints mode and are always at full strength.",
 )
 
 turn_on_restraints_mode = Parameter(
@@ -864,6 +881,19 @@ def atomNumVectorListToProperty(list):
 
 
 def linkbondVectorListToProperty(list):
+    """
+    Converts a list of linkbond vectors to a Sire property.
+
+    Parameters
+    ----------
+    list : list
+        List of linkbond vectors.
+
+    Returns
+    -------
+    prop : Sire.Base.Properties
+        Sire property containing the linkbond vectors.
+    """
     prop = Sire.Base.Properties()
 
     i = 0
@@ -1176,14 +1206,38 @@ def saveTurnOnRestraintsModeProperty(system):
     return system
 
 
-def setupDistanceRestraints(system, restraints=None):
+def setupDistanceRestraints(system, restraints=None, permanent=False):
+    """
+    Sets up distance restraints between pairs of atoms in the system.
+
+    Parameters
+    ----------
+    system : Sire System
+        The system to which the restraints will be added.
+    restraints : dict, optional, default=None
+        A dictionary of the form {(atom0,atom1):(reql, kl, Dl)} where atom0, atom1
+        are atomic indices, reql is the equilibrium distance, Kl is the force constant
+        of the restraint and Dl is the flat bottom radius. If none, this will be read
+        from the cfg file.
+    permanent : bool, optional, default=False
+        If True, the restraints are 'permanent' and will not be scaled by lambda
+        in turn-on-restraints mode (they will always be at full strength).
+
+    Returns
+    -------
+    None
+    """
     prop_list = []
 
     molecules = system[MGName("all")].molecules()
 
+    # Get the provided restraints, or read them from the cfg file
+    # if none are provided
     if restraints is None:
-        # dic_items = list(distance_restraints_dict.val.items())
-        dic_items = list(dict(distance_restraints_dict.val).items())
+        if not permanent:
+            dic_items = list(dict(distance_restraints_dict.val).items())
+        else:  # Permanent restraints
+            dic_items = list(dict(permanent_distance_restraints_dict.val).items())
     else:
         dic_items = list(restraints.items())
 
@@ -1227,9 +1281,13 @@ def setupDistanceRestraints(system, restraints=None):
     print(unique_prop_list)
     # The solute will store all the information related to the receptor-ligand restraints
     solute = getSolute(system)
+    property_name = "linkbonds" if not permanent else "permanent_linkbonds"
     solute = (
         solute.edit()
-        .setProperty("linkbonds", linkbondVectorListToProperty(unique_prop_list))
+        .setProperty(
+            property_name,
+            linkbondVectorListToProperty(unique_prop_list),
+        )
         .commit()
     )
     system.update(solute)
@@ -2465,6 +2523,9 @@ def run():
                     stream.close()
             system = setupDistanceRestraints(system, restraints=restraints)
 
+        if use_permanent_distance_restraints.val:
+            system = setupDistanceRestraints(system, permanent=True)
+
         if use_boresch_restraints.val:
             print("Setting up Boresch restraints...")
             system = setupBoreschRestraints(system)
@@ -2664,7 +2725,12 @@ def runFreeNrg():
                 stream = open("restraints.cfg", "w")
                 stream.write("distance restraints dictionary = %s\n" % restraints)
                 stream.close()
-            system = setupDistanceRestraints(system, restraints=restraints)
+            system = setupDistanceRestraints(
+                system, restraints=restraints, permanent=False
+            )
+
+        if use_permanent_distance_restraints.val:
+            system = setupDistanceRestraints(system, permanent=True)
 
         if use_boresch_restraints.val:
             print("Setting up Boresch restraints...")

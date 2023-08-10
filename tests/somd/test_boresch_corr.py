@@ -8,6 +8,7 @@ import pytest
 
 try:
     import scipy
+
     have_scipy = True
 except ImportError:
     have_scipy = False
@@ -70,9 +71,7 @@ def test_boresch_analytical_correction(tmpdir):
     print(output)
 
     # Check that the correction is correct
-    data = output.split(
-        "Analytical correction for releasing Boresch restraints ="
-    )
+    data = output.split("Analytical correction for releasing Boresch restraints =")
 
     assert len(data) > 1
 
@@ -102,9 +101,7 @@ def test_boresch_numerical_correction(tmpdir):
 
     print(output)
 
-    data = output.split(
-        "Numerical correction for releasing Boresch restraints ="
-    )
+    data = output.split("Numerical correction for releasing Boresch restraints =")
 
     assert len(data) > 1
 

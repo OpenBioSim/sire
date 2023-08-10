@@ -198,6 +198,12 @@ namespace SireMove
         void setDebug(bool);
 
     private:
+        void addLinkBonds(OpenMM::System* system,
+                          const SireMol::Molecule& molecule,
+                          const SireBase::Properties& linkprop,
+                          const QHash<int, int>& atom_num_to_openmm_idx,
+                          OpenMM::CustomBondForce* custom_force,
+                          const bool debug);
         void createContext(IntegratorWorkspace &workspace, SireUnits::Dimension::Time timestep);
         void destroyContext();
         void updateBoxDimensions(OpenMM::State &state_openmm, QVector<QVector<Vector>> &buffered_dimensions,
