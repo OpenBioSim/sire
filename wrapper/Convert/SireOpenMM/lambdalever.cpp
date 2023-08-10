@@ -212,6 +212,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     auto cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
     auto ghost_ghostff = get_force<OpenMM::CustomNonbondedForce>("ghost/ghost", context, name_to_ffidx, "CustomNonbondedForce");
     auto ghost_nonghostff = get_force<OpenMM::CustomNonbondedForce>("ghost/non-ghost", context, name_to_ffidx, "CustomNonbondedForce");
+    auto ghost_14ff = get_force<OpenMM::CustomBondForce>("ghost-14", context, name_to_ffidx, "CustomBondForce");
     auto bondff = get_force<OpenMM::HarmonicBondForce>("bond", context, name_to_ffidx, "HarmonicBondForce");
     auto angff = get_force<OpenMM::HarmonicAngleForce>("angle", context, name_to_ffidx, "HarmonicAngleForce");
     auto dihff = get_force<OpenMM::PeriodicTorsionForce>("torsion", context, name_to_ffidx, "PeriodicTorsionForce");
@@ -288,6 +289,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             perturbable_mol.perturbed->getTorsionKs(),
             lambda_value);
 
+        // will eventually morph the NB14 / exception parameters :-)
+
         // now update the forcefields
         int start_index = start_idxs.value("clj", -1);
 
@@ -352,7 +355,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
                         cljff->setExceptionParameters(
-                            idxs[j],
+                            std::get<0>(idxs[j]),
                             std::get<0>(p), std::get<1>(p),
                             std::get<2>(p), 1e-9, 1e-9);
 
@@ -360,13 +363,27 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                         {
                             // this is a 1-4 parameter - need to update
                             // the ghost 1-4 forcefield
-                            // qDebug() << "UPDATE GHOST 1-4" << atom0 << atom1;
+                            int nbidx = std::get<1>(idxs[j]);
+
+                            if (nbidx < 0)
+                                throw SireError::program_bug(QObject::tr(
+                                                                 "Unset NB14 index for a ghost atom?"),
+                                                             CODELOC);
+
+                            if (ghost_14ff != 0)
+                            {
+                                std::vector<double> params14 = {std::get<3>(p), std::get<4>(p)};
+                                ghost_14ff->setBondParameters(nbidx,
+                                                              std::get<0>(p),
+                                                              std::get<1>(p),
+                                                              params14);
+                            }
                         }
                     }
                     else
                     {
                         cljff->setExceptionParameters(
-                            idxs[j],
+                            std::get<0>(idxs[j]),
                             std::get<0>(p), std::get<1>(p),
                             std::get<2>(p), std::get<3>(p),
                             std::get<4>(p));
@@ -459,6 +476,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (ghost_nonghostff)
         ghost_nonghostff->updateParametersInContext(context);
 
+    if (ghost_14ff)
+        ghost_14ff->updateParametersInContext(context);
+
     if (bondff)
         bondff->updateParametersInContext(context);
 
@@ -500,7 +520,7 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
  */
 void LambdaLever::setExceptionIndicies(int mol_idx,
                                        const QString &name,
-                                       const QVector<int> &exception_idxs)
+                                       const QVector<std::pair<int, int>> &exception_idxs)
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 

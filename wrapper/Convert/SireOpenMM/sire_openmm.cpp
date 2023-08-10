@@ -394,18 +394,33 @@ namespace SireOpenMM
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
         lambda_lever.setForceIndex("torsion", system.addForce(dihff));
 
+        OpenMM::CustomBondForce *ghost_14ff = 0;
         OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
         OpenMM::CustomNonbondedForce *ghost_nonghostff = 0;
 
         if (any_perturbable)
         {
-            const auto energy_expression = QString(
-                "4*epsilon*((sigma/r)^12-(sigma/r)^6);"
-                "sigma=0.5*(sigma1+sigma2);"
-                "epsilon=sqrt(epsilon1*epsilon2)");
+            const auto nb14_expression = QString(
+                                             "4*epsilon*((sigma/r)^12-(sigma/r)^6);")
+                                             .toStdString();
 
-            ghost_ghostff = new OpenMM::CustomNonbondedForce(energy_expression.toStdString());
-            ghost_nonghostff = new OpenMM::CustomNonbondedForce(energy_expression.toStdString());
+            ghost_14ff = new OpenMM::CustomBondForce(nb14_expression);
+
+            ghost_14ff->addPerBondParameter("sigma");
+            ghost_14ff->addPerBondParameter("epsilon");
+
+            // short-range intramolecular term that should not use
+            // periodic boundaries or cutoffs
+            ghost_14ff->setUsesPeriodicBoundaryConditions(false);
+
+            const auto clj_expression = QString(
+                                            "4*epsilon*((sigma/r)^12-(sigma/r)^6);"
+                                            "sigma=0.5*(sigma1+sigma2);"
+                                            "epsilon=sqrt(epsilon1*epsilon2)")
+                                            .toStdString();
+
+            ghost_ghostff = new OpenMM::CustomNonbondedForce(clj_expression);
+            ghost_nonghostff = new OpenMM::CustomNonbondedForce(clj_expression);
 
             ghost_ghostff->addPerParticleParameter("sigma");
             ghost_ghostff->addPerParticleParameter("epsilon");
@@ -442,6 +457,7 @@ namespace SireOpenMM
 
             lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
             lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
+            lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
         }
 
         // Now copy data from the temporary OpenMMMolecule objects
@@ -645,9 +661,6 @@ namespace SireOpenMM
                                                   (delta[1] * delta[1]) +
                                                   (delta[2] * delta[2]));
 
-                    // qDebug() << length << std::get<2>(constraint)
-                    //          << length - std::get<2>(constraint);
-
                     system.addConstraint(
                         std::get<0>(constraint) + start_index,
                         std::get<1>(constraint) + start_index,
@@ -681,13 +694,14 @@ namespace SireOpenMM
             int start_index = start_indexes[i];
             const auto &mol = openmm_mols_data[i];
 
-            QVector<int> exception_idxs;
+            QVector<std::pair<int, int>> exception_idxs;
 
             const bool is_perturbable = any_perturbable and mol.isPerturbable();
 
             if (is_perturbable)
             {
-                exception_idxs = QVector<int>(mol.exception_params.count(), -1);
+                exception_idxs = QVector<std::pair<int, int>>(mol.exception_params.count(),
+                                                              std::make_pair(-1, -1));
             }
 
             // the list of exception parameters for perturbable
@@ -711,7 +725,8 @@ namespace SireOpenMM
                     const bool atom0_is_ghost = mol.isGhostAtom(atom0);
                     const bool atom1_is_ghost = mol.isGhostAtom(atom1);
 
-                    int idx;
+                    int idx = -1;
+                    int nbidx = -1;
 
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
@@ -727,7 +742,19 @@ namespace SireOpenMM
                         {
                             // this is a 1-4 interaction that should be added
                             // to the ghost-14 forcefield
-                            qDebug() << "ADD GHOST 1-4" << atom0 << atom1;
+                            if (ghost_14ff != 0)
+                            {
+                                std::vector<double> params14 = {std::get<3>(p), std::get<4>(p)};
+
+                                if (params14[0] == 0)
+                                    // cannot use zero params in case they are
+                                    // eagerly removed
+                                    params14[0] = 1e-9;
+
+                                nbidx = ghost_14ff->addBond(std::get<0>(p),
+                                                            std::get<1>(p),
+                                                            params14);
+                            }
                         }
                     }
                     else
@@ -737,7 +764,7 @@ namespace SireOpenMM
                                                   std::get<4>(p), true);
                     }
 
-                    exception_idxs[j] = idx;
+                    exception_idxs[j] = std::make_pair(idx, nbidx);
 
                     // remove this interaction from the ghost forcefields
                     if (ghost_ghostff != 0)

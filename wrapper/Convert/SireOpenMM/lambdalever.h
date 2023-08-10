@@ -70,7 +70,7 @@ namespace SireOpenMM
                                    const QHash<QString, qint32> &start_indicies);
 
         void setExceptionIndicies(int idx, const QString &ff,
-                                  const QVector<int> &exception_idxs);
+                                  const QVector<std::pair<int, int>> &exception_idxs);
 
         void setSchedule(const SireCAS::LambdaSchedule &schedule);
 

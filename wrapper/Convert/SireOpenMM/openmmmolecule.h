@@ -134,7 +134,7 @@ namespace SireOpenMM
 
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
-        QHash<QString, QVector<int>> exception_idxs;
+        QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
 
         /** The indexes of atoms that become ghosts in the
          *  perturbed state

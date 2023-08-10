@@ -624,14 +624,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         else if (nats == 2)
         {
             // two atoms must be excluded
-            add_exception(AtomIdx(0), AtomIdx(1), 0.0, 0.0);
+            exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
         }
         else if (nats <= 3)
         {
             // three atoms must be excluded
-            add_exception(AtomIdx(0), AtomIdx(1), 0.0, 0.0);
-            add_exception(AtomIdx(0), AtomIdx(2), 0.0, 0.0);
-            add_exception(AtomIdx(1), AtomIdx(2), 0.0, 0.0);
+            exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
+            exception_params.append(std::make_tuple(1, 2, 0.0, 0.0));
+            exception_params.append(std::make_tuple(0, 2, 0.0, 0.0));
         }
         else
         {
