@@ -86,9 +86,6 @@ namespace SireOpenMM
          */
         SireMol::Selector<SireMol::Atom> atoms;
 
-        /** All of the excluded atom pairs */
-        SireMM::ExcludedPairs excl_pairs;
-
         /** The forcefield info that contains metadata about the parameters */
         SireMM::MMDetail ffinfo;
 
@@ -155,6 +152,15 @@ namespace SireOpenMM
                                 const SireMM::AmberParams &params1,
                                 const SireBase::PropertyMap &map,
                                 bool is_perturbable);
+
+        void buildStandardExceptions(const SireMol::Molecule &mol,
+                                     const SireMM::AmberParams &params,
+                                     QSet<qint64> &constrained_pairs,
+                                     const SireBase::PropertyMap &map);
+
+        void buildPerturbableExceptions(const SireMol::Molecule &mol,
+                                        QSet<qint64> &constrained_pairs,
+                                        const SireBase::PropertyMap &map);
 
         void alignInternals();
     };

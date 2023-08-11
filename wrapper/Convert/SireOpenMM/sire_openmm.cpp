@@ -413,6 +413,8 @@ namespace SireOpenMM
             // periodic boundaries or cutoffs
             ghost_14ff->setUsesPeriodicBoundaryConditions(false);
 
+            // could look at using half_sigma and sqrt_epsilon as the parameters
+            // just to save a few cycles
             const auto clj_expression = QString(
                                             "4*epsilon*((sigma/r)^12-(sigma/r)^6);"
                                             "sigma=0.5*(sigma1+sigma2);"
@@ -680,15 +682,13 @@ namespace SireOpenMM
             start_index += mol.masses.count();
         }
 
-        const int natoms = start_index;
+        // add the exceptions automatically for non-perturbable molecules
+        cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
 
-        // add exclusions based on the bonding of the molecules
-        // Note that this only adds exceptions for the
-        // non-perturbable molecules!
-        // cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
-
-        // now exceptions based on the 1-4 and excluded parameters
-        // in the molecules
+        // add additional exceptions, including all exceptions for
+        // perturbable molecules (perturbable molecules are handled
+        // completely because the exceptions may change during
+        // the perturbation)
         for (int i = 0; i < nmols; ++i)
         {
             int start_index = start_indexes[i];
@@ -704,8 +704,6 @@ namespace SireOpenMM
                                                               std::make_pair(-1, -1));
             }
 
-            // the list of exception parameters for perturbable
-            // molecules will include all 1-2, 1-3 and 1-4 terms
             for (int j = 0; j < mol.exception_params.count(); ++j)
             {
                 const auto &param = mol.exception_params[j];
@@ -813,6 +811,8 @@ namespace SireOpenMM
 
         // now get the coordinates and velocities
         std::shared_ptr<std::vector<OpenMM::Vec3>> coords, vels;
+
+        const int natoms = start_index;
 
         coords.reset(new std::vector<OpenMM::Vec3>(natoms));
         vels.reset(new std::vector<OpenMM::Vec3>(natoms));

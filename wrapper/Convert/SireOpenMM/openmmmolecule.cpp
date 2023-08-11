@@ -572,206 +572,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
-    exception_params.clear();
-
-    // we will build the complete exception list, and will not rely
-    // on this list being built by an OpenMM forcefield. This is because
-    // we need to allow this set to morph
-    const auto &nbpairs = mol.property(map["intrascale"]).asA<CLJNBPairs>();
-    const auto &connectivity = mol.property(map["connectivity"]).asA<Connectivity>();
-
-    const int ncgs = mol.nCutGroups();
-
-    auto add_exception = [&](const AtomIdx &atom0, const AtomIdx &atom1,
-                             double cscl, double ljscl)
+    if (is_perturbable)
     {
-        if (cscl != 1 or ljscl != 1)
-        {
-            const int i = atom0.value();
-            const int j = atom1.value();
-
-            exception_params.append(std::make_tuple(i, j, cscl, ljscl));
-
-            if (cscl == 0 and ljscl == 0)
-            {
-                // are any of these atoms unbonded? If so, then
-                // we will need to add a constraint to hold them
-                // in place
-                if (connectivity.nConnections(AtomIdx(i)) == 0 or
-                    connectivity.nConnections(AtomIdx(j)) == 0)
-                {
-                    if (not constrained_pairs.contains(to_pair(i, j)))
-                    {
-                        const auto delta = coords[j] - coords[i];
-                        const auto length = std::sqrt((delta[0] * delta[0]) +
-                                                      (delta[1] * delta[1]) +
-                                                      (delta[2] * delta[2]));
-                        constraints.append(std::make_tuple(i, j, length));
-                        constrained_pairs.insert(to_pair(i, j));
-                    }
-                }
-            }
-        }
-    };
-
-    // loop over all pairs of CutGroups and get the NB scale factors
-    if (ncgs == 1)
-    {
-        if (nats == 1)
-        {
-            // nothing to do :-)
-        }
-        else if (nats == 2)
-        {
-            // two atoms must be excluded
-            exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
-        }
-        else if (nats <= 3)
-        {
-            // three atoms must be excluded
-            exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
-            exception_params.append(std::make_tuple(1, 2, 0.0, 0.0));
-            exception_params.append(std::make_tuple(0, 2, 0.0, 0.0));
-        }
-        else
-        {
-            // we only need to worry about ourselves
-            const auto &cgpairs = nbpairs.get(CGIdx(0), CGIdx(0));
-
-            if (cgpairs.isEmpty())
-            {
-                // all of the pairs have the same value (surprising!)
-                const auto &cljscl = cgpairs.defaultValue();
-
-                if (cljscl.coulomb() != 1 or cljscl.lj() != 1)
-                {
-                    for (int i = 0; i < nats - 1; ++i)
-                    {
-                        for (int j = i + 1; j < nats; ++j)
-                        {
-                            add_exception(AtomIdx(i), AtomIdx(j),
-                                          cljscl.coulomb(), cljscl.lj());
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // the pairs have different values, so add these in
-                for (int i = 0; i < nats - 1; ++i)
-                {
-                    for (int j = i + 1; j < nats; ++j)
-                    {
-                        const auto &scl = cgpairs.get(i, j);
-
-                        if (scl.coulomb() != 1 or scl.lj() != 1)
-                        {
-                            add_exception(AtomIdx(i), AtomIdx(j),
-                                          scl.coulomb(), scl.lj());
-                        }
-                    }
-                }
-            }
-        }
+        // build all of the exceptions for perturbable molecules.
+        // This is because the exceptions could change during the
+        // perturbation, so we need more control over them
+        this->buildPerturbableExceptions(mol, constrained_pairs, map);
     }
     else
     {
-        const auto &molinfo = mol.data().info();
-
-        // do all individual cutgroups
-        for (int icg = 0; icg < ncgs; ++icg)
-        {
-            const int i_nats = molinfo.nAtoms(CGIdx(icg));
-
-            const auto &cgpairs = nbpairs.get(CGIdx(icg), CGIdx(icg));
-
-            if (cgpairs.isEmpty())
-            {
-                const auto &scl = cgpairs.defaultValue();
-
-                if (scl.coulomb() != 1 or scl.lj() != 1)
-                {
-                    // all of the pairs are excluded for all atoms
-                    for (int i = 0; i < i_nats - 1; ++i)
-                    {
-                        for (int j = i + 1; j < i_nats; ++j)
-                        {
-                            add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
-                                          molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(j))),
-                                          scl.coulomb(), scl.lj());
-                        }
-                    }
-                }
-            }
-            else
-            {
-                // all of the pairs are excluded for all atoms
-                for (int i = 0; i < i_nats - 1; ++i)
-                {
-                    for (int j = i + 1; j < i_nats; ++j)
-                    {
-                        const auto &scl = cgpairs.get(i, j);
-
-                        if (scl.coulomb() != 1 or scl.lj() != 1)
-                        {
-                            add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
-                                          molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(j))),
-                                          scl.coulomb(), scl.lj());
-                        }
-                    }
-                }
-            }
-        }
-
-        // do all cutgroup pairs
-        for (int icg = 0; icg < ncgs - 1; ++icg)
-        {
-            const int i_nats = molinfo.nAtoms(CGIdx(icg));
-
-            for (int jcg = icg + 1; jcg < ncgs; ++jcg)
-            {
-                const int j_nats = molinfo.nAtoms(CGIdx(jcg));
-
-                const auto &cgpairs = nbpairs.get(CGIdx(icg), CGIdx(jcg));
-
-                if (cgpairs.isEmpty())
-                {
-                    const auto &scl = cgpairs.defaultValue();
-
-                    if (scl.coulomb() != 1 or scl.lj() != 1)
-                    {
-                        // all of the pairs are excluded for all atoms
-                        for (int i = 0; i < i_nats; ++i)
-                        {
-                            for (int j = 0; j < j_nats; ++j)
-                            {
-                                add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
-                                              molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j))),
-                                              scl.coulomb(), scl.lj());
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // all of the pairs are excluded for all atoms
-                    for (int i = 0; i < i_nats; ++i)
-                    {
-                        for (int j = 0; j < j_nats; ++j)
-                        {
-                            const auto &scl = cgpairs.get(i, j);
-
-                            if (scl.coulomb() != 1 or scl.lj() != 1)
-                            {
-                                add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
-                                              molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j))),
-                                              scl.coulomb(), scl.lj());
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // just find any exceptions that would be missing based on just
+        // a cursary look at the bonding
+        this->buildStandardExceptions(mol, params,
+                                      constrained_pairs, map);
     }
 }
 
@@ -1052,6 +865,283 @@ void OpenMMMolecule::alignInternals()
     // we may need to align the the standard_14_pairs
     // and the custom_14_pairs - this is the work that will be needed
     // if the bonding changes across the perturbation!
+}
+
+void OpenMMMolecule::buildStandardExceptions(const Molecule &mol,
+                                             const AmberParams &params,
+                                             QSet<qint64> &constrained_pairs,
+                                             const PropertyMap &map)
+{
+    exception_params.clear();
+
+    // add all of the 1-4 terms
+    for (auto it = params.nb14s().constBegin();
+         it != params.nb14s().constEnd();
+         ++it)
+    {
+        const double cscl = it.value().cscl();
+        const double ljscl = it.value().ljscl();
+
+        const auto nbid = it.key().map(molinfo);
+
+        const int atom0 = nbid.get<0>().value();
+        const int atom1 = nbid.get<1>().value();
+
+        exception_params.append(std::make_tuple(
+            atom0, atom1, cscl, ljscl));
+    }
+
+    // add in all of the excluded atoms
+    const auto excl_pairs = ExcludedPairs(mol, map);
+
+    if (excl_pairs.count() > 0)
+    {
+        for (int i = 0; i < excl_pairs.count(); ++i)
+        {
+            auto pair = excl_pairs[i];
+
+            exception_params.append(std::make_tuple(
+                std::get<0>(pair).value(), std::get<1>(pair).value(),
+                0.0, 0.0));
+        }
+
+        // and finally (finally!) find any atoms that are not bonded to
+        // anything else and make sure that they are constrained. These
+        // atoms will be excluded atoms (by definition) so just look
+        // through those
+        const auto &connectivity = mol.property(map["connectivity"]).asA<Connectivity>();
+
+        for (int i = 0; i < excl_pairs.count(); ++i)
+        {
+            auto pair = excl_pairs[i];
+
+            const int atom0 = std::get<0>(pair).value();
+            const int atom1 = std::get<1>(pair).value();
+
+            if (not constrained_pairs.contains(to_pair(atom0, atom1)))
+            {
+                if (connectivity.nConnections(std::get<0>(pair)) == 0 or
+                    connectivity.nConnections(std::get<1>(pair)) == 0)
+                {
+                    const auto delta = coords[atom1] - coords[atom0];
+                    const auto length = std::sqrt((delta[0] * delta[0]) +
+                                                  (delta[1] * delta[1]) +
+                                                  (delta[2] * delta[2]));
+                    constraints.append(std::make_tuple(atom0, atom1, length));
+                    constrained_pairs.insert(to_pair(atom0, atom1));
+                }
+            }
+        }
+    }
+}
+
+void OpenMMMolecule::buildPerturbableExceptions(const Molecule &mol,
+                                                QSet<qint64> &constrained_pairs,
+                                                const PropertyMap &map)
+{
+    // we will build the complete exception list, and will not rely
+    // on this list being built by an OpenMM forcefield. This is because
+    // we need to allow this set to morph
+    exception_params.clear();
+
+    const int nats = this->cljs.count();
+
+    const auto &nbpairs = mol.property(map["intrascale"]).asA<CLJNBPairs>();
+    const auto &connectivity = mol.property(map["connectivity"]).asA<Connectivity>();
+
+    const int ncgs = mol.nCutGroups();
+
+    auto add_exception = [&](const AtomIdx &atom0, const AtomIdx &atom1,
+                             double cscl, double ljscl)
+    {
+        if (cscl != 1 or ljscl != 1)
+        {
+            const int i = atom0.value();
+            const int j = atom1.value();
+
+            exception_params.append(std::make_tuple(i, j, cscl, ljscl));
+
+            if (cscl == 0 and ljscl == 0)
+            {
+                // are any of these atoms unbonded? If so, then
+                // we will need to add a constraint to hold them
+                // in place
+                if (connectivity.nConnections(AtomIdx(i)) == 0 or
+                    connectivity.nConnections(AtomIdx(j)) == 0)
+                {
+                    if (not constrained_pairs.contains(to_pair(i, j)))
+                    {
+                        const auto delta = coords[j] - coords[i];
+                        const auto length = std::sqrt((delta[0] * delta[0]) +
+                                                      (delta[1] * delta[1]) +
+                                                      (delta[2] * delta[2]));
+                        constraints.append(std::make_tuple(i, j, length));
+                        constrained_pairs.insert(to_pair(i, j));
+                    }
+                }
+            }
+        }
+    };
+
+    // loop over all pairs of CutGroups and get the NB scale factors
+    if (ncgs == 1)
+    {
+        if (nats == 1)
+        {
+            // nothing to do :-)
+        }
+        else if (nats == 2)
+        {
+            // two atoms must be excluded
+            exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
+        }
+        else if (nats <= 3)
+        {
+            // three atoms must be excluded
+            exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
+            exception_params.append(std::make_tuple(1, 2, 0.0, 0.0));
+            exception_params.append(std::make_tuple(0, 2, 0.0, 0.0));
+        }
+        else
+        {
+            // we only need to worry about ourselves
+            const auto &cgpairs = nbpairs.get(CGIdx(0), CGIdx(0));
+
+            if (cgpairs.isEmpty())
+            {
+                // all of the pairs have the same value (surprising!)
+                const auto &cljscl = cgpairs.defaultValue();
+
+                if (cljscl.coulomb() != 1 or cljscl.lj() != 1)
+                {
+                    for (int i = 0; i < nats - 1; ++i)
+                    {
+                        for (int j = i + 1; j < nats; ++j)
+                        {
+                            add_exception(AtomIdx(i), AtomIdx(j),
+                                          cljscl.coulomb(), cljscl.lj());
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // the pairs have different values, so add these in
+                for (int i = 0; i < nats - 1; ++i)
+                {
+                    for (int j = i + 1; j < nats; ++j)
+                    {
+                        const auto &scl = cgpairs.get(i, j);
+
+                        if (scl.coulomb() != 1 or scl.lj() != 1)
+                        {
+                            add_exception(AtomIdx(i), AtomIdx(j),
+                                          scl.coulomb(), scl.lj());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        const auto &molinfo = mol.data().info();
+
+        // do all individual cutgroups
+        for (int icg = 0; icg < ncgs; ++icg)
+        {
+            const int i_nats = molinfo.nAtoms(CGIdx(icg));
+
+            const auto &cgpairs = nbpairs.get(CGIdx(icg), CGIdx(icg));
+
+            if (cgpairs.isEmpty())
+            {
+                const auto &scl = cgpairs.defaultValue();
+
+                if (scl.coulomb() != 1 or scl.lj() != 1)
+                {
+                    // all of the pairs are excluded for all atoms
+                    for (int i = 0; i < i_nats - 1; ++i)
+                    {
+                        for (int j = i + 1; j < i_nats; ++j)
+                        {
+                            add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
+                                          molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(j))),
+                                          scl.coulomb(), scl.lj());
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // all of the pairs are excluded for all atoms
+                for (int i = 0; i < i_nats - 1; ++i)
+                {
+                    for (int j = i + 1; j < i_nats; ++j)
+                    {
+                        const auto &scl = cgpairs.get(i, j);
+
+                        if (scl.coulomb() != 1 or scl.lj() != 1)
+                        {
+                            add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
+                                          molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(j))),
+                                          scl.coulomb(), scl.lj());
+                        }
+                    }
+                }
+            }
+        }
+
+        // do all cutgroup pairs
+        for (int icg = 0; icg < ncgs - 1; ++icg)
+        {
+            const int i_nats = molinfo.nAtoms(CGIdx(icg));
+
+            for (int jcg = icg + 1; jcg < ncgs; ++jcg)
+            {
+                const int j_nats = molinfo.nAtoms(CGIdx(jcg));
+
+                const auto &cgpairs = nbpairs.get(CGIdx(icg), CGIdx(jcg));
+
+                if (cgpairs.isEmpty())
+                {
+                    const auto &scl = cgpairs.defaultValue();
+
+                    if (scl.coulomb() != 1 or scl.lj() != 1)
+                    {
+                        // all of the pairs are excluded for all atoms
+                        for (int i = 0; i < i_nats; ++i)
+                        {
+                            for (int j = 0; j < j_nats; ++j)
+                            {
+                                add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
+                                              molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j))),
+                                              scl.coulomb(), scl.lj());
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // all of the pairs are excluded for all atoms
+                    for (int i = 0; i < i_nats; ++i)
+                    {
+                        for (int j = 0; j < j_nats; ++j)
+                        {
+                            const auto &scl = cgpairs.get(i, j);
+
+                            if (scl.coulomb() != 1 or scl.lj() != 1)
+                            {
+                                add_exception(molinfo.atomIdx(CGAtomIdx(CGIdx(icg), Index(i))),
+                                              molinfo.atomIdx(CGAtomIdx(CGIdx(jcg), Index(j))),
+                                              scl.coulomb(), scl.lj());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v) const
