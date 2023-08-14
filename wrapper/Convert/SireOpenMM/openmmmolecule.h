@@ -77,6 +77,7 @@ namespace SireOpenMM
          *
          *  Any values are in the internal units of OpenMM
          */
+        SireMol::MolNum number;
 
         /** The molecule info that contains metadata about the molecule */
         SireMol::MoleculeInfo molinfo;
@@ -132,6 +133,11 @@ namespace SireOpenMM
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
         QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
+
+        /** The property map used to get the perturbable properties -
+         *  this is only non-default if the molecule is perturbable
+         */
+        SireBase::PropertyMap perturtable_map;
 
         /** The indexes of atoms that become ghosts in the
          *  perturbed state

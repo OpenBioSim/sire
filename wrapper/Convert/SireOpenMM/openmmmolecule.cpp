@@ -46,6 +46,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
                                const PropertyMap &map)
 {
     molinfo = mol.info();
+    number = mol.number();
 
     if (molinfo.nAtoms() == 0)
     {
@@ -136,6 +137,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             {
                 std::swap(map0, map1);
             }
+
+            // save this perturbable map - this will help us set
+            // new properties from the results of dynamics, e.g.
+            // updating coordinates after minimisation
+            perturtable_map = map0;
 
             // extract the parameters in amber format - this should work,
             // as the 'forcefield' property has promised that this is

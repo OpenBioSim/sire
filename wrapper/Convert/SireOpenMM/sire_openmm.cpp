@@ -47,6 +47,7 @@
 using SireBase::PropertyMap;
 using SireCAS::LambdaSchedule;
 using SireMol::Molecule;
+using SireMol::MolNum;
 using SireMol::SelectorMol;
 using SireSystem::ForceFieldInfo;
 
@@ -981,8 +982,9 @@ namespace SireOpenMM
     }
 
     SelectorMol extract_coordinates(const OpenMM::State &state,
-                                    const SelectorMol &mols,
-                                    const PropertyMap &map)
+                                    const SireMol::SelectorMol &mols,
+                                    const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
+                                    const SireBase::PropertyMap &map)
     {
         const auto positions = state.getPositions();
 
@@ -1031,12 +1033,19 @@ namespace SireOpenMM
 
                     _populate_coords(converted_coords, positions_data+offsets_data[i], mol_natoms);
 
-                    if (not mol.updatePropertyFrom<SireMol::AtomCoords>(coords_prop.source(),
+                    auto my_coords_prop = coords_prop.source();
+
+                    if (perturbable_maps.contains(mol.number()))
+                    {
+                        my_coords_prop = perturbable_maps[mol.number()]["coordinates"].source();
+                    }
+
+                    if (not mol.updatePropertyFrom<SireMol::AtomCoords>(my_coords_prop,
                                                                         converted_coords, false))
                     {
                         SireMol::AtomCoords c(mol.data().info());
                         c.copyFrom(converted_coords);
-                        mol.setProperty(coords_prop.source(), c);
+                        mol.setProperty(my_coords_prop, c);
                     }
 
                     ret_data[i] = mol.commit();
@@ -1053,12 +1062,19 @@ namespace SireOpenMM
 
                 _populate_coords(converted_coords, positions_data + offsets_data[i], mol_natoms);
 
-                if (not mol.updatePropertyFrom<SireMol::AtomCoords>(coords_prop.source(),
+                auto my_coords_prop = coords_prop.source();
+
+                if (perturbable_maps.contains(mol.number()))
+                {
+                    my_coords_prop = perturbable_maps[mol.number()]["coordinates"].source();
+                }
+
+                if (not mol.updatePropertyFrom<SireMol::AtomCoords>(my_coords_prop,
                                                                     converted_coords, false))
                 {
                     SireMol::AtomCoords c(mol.data().info());
                     c.copyFrom(converted_coords);
-                    mol.setProperty(coords_prop.source(), c);
+                    mol.setProperty(my_coords_prop, c);
                 }
 
                 ret_data[i] = mol.commit();
@@ -1069,8 +1085,9 @@ namespace SireOpenMM
     }
 
     SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,
-                                                   const SelectorMol &mols,
-                                                   const PropertyMap &map)
+                                                   const SireMol::SelectorMol &mols,
+                                                   const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
+                                                   const SireBase::PropertyMap &map)
     {
         const auto positions = state.getPositions();
         const auto velocities = state.getVelocities();
@@ -1121,23 +1138,32 @@ namespace SireOpenMM
                     auto mol = mols[i].edit();
                     const int mol_natoms = mol.nAtoms();
 
+                    auto my_coords_prop = coords_prop.source();
+                    auto my_vels_prop = vels_prop.source();
+
+                    if (perturbable_maps.contains(mol.number()))
+                    {
+                        my_coords_prop = perturbable_maps[mol.number()]["coordinates"].source();
+                        my_vels_prop = perturbable_maps[mol.number()]["velocity"].source();
+                    }
+
                     _populate_coords(converted_coords, positions_data+offsets_data[i], mol_natoms);
                     _populate_vels(converted_vels, velocities_data+offsets_data[i], mol_natoms);
 
-                    if (not mol.updatePropertyFrom<SireMol::AtomCoords>(coords_prop.source(),
+                    if (not mol.updatePropertyFrom<SireMol::AtomCoords>(my_coords_prop,
                                                                         converted_coords, false))
                     {
                         SireMol::AtomCoords c(mol.data().info());
                         c.copyFrom(converted_coords);
-                        mol.setProperty(coords_prop.source(), c);
+                        mol.setProperty(my_coords_prop, c);
                     }
 
-                    if (not mol.updatePropertyFrom<SireMol::AtomVelocities>(vels_prop.source(),
+                    if (not mol.updatePropertyFrom<SireMol::AtomVelocities>(my_vels_prop,
                                                                             converted_vels, false))
                     {
                         SireMol::AtomVelocities v(mol.data().info());
                         v.copyFrom(converted_vels);
-                        mol.setProperty(vels_prop.source(), v);
+                        mol.setProperty(my_vels_prop, v);
                     }
 
                     ret_data[i] = mol.commit();
@@ -1153,23 +1179,32 @@ namespace SireOpenMM
                 auto mol = mols[i].edit();
                 const int mol_natoms = mol.nAtoms();
 
+                auto my_coords_prop = coords_prop.source();
+                auto my_vels_prop = vels_prop.source();
+
+                if (perturbable_maps.contains(mol.number()))
+                {
+                    my_coords_prop = perturbable_maps[mol.number()]["coordinates"].source();
+                    my_vels_prop = perturbable_maps[mol.number()]["velocity"].source();
+                }
+
                 _populate_coords(converted_coords, positions_data + offsets_data[i], mol_natoms);
                 _populate_vels(converted_vels, velocities_data + offsets_data[i], mol_natoms);
 
-                if (not mol.updatePropertyFrom<SireMol::AtomCoords>(coords_prop.source(),
+                if (not mol.updatePropertyFrom<SireMol::AtomCoords>(my_coords_prop,
                                                                     converted_coords, false))
                 {
                     SireMol::AtomCoords c(mol.data().info());
                     c.copyFrom(converted_coords);
-                    mol.setProperty(coords_prop.source(), c);
+                    mol.setProperty(my_coords_prop, c);
                 }
 
-                if (not mol.updatePropertyFrom<SireMol::AtomVelocities>(vels_prop.source(),
+                if (not mol.updatePropertyFrom<SireMol::AtomVelocities>(my_vels_prop,
                                                                         converted_vels, false))
                 {
                     SireMol::AtomVelocities v(mol.data().info());
                     v.copyFrom(converted_vels);
-                    mol.setProperty(vels_prop.source(), v);
+                    mol.setProperty(my_vels_prop, v);
                 }
 
                 ret_data[i] = mol.commit();

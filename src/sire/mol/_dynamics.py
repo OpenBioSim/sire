@@ -109,11 +109,17 @@ class DynamicsData:
         if state_has_cv[1]:
             # get velocities too
             mols = openmm_extract_coordinates_and_velocities(
-                state, self._sire_mols.molecules(), self._map
+                state,
+                self._sire_mols.molecules(),
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                map=self._map,
             )
         else:
             mols = openmm_extract_coordinates(
-                state, self._sire_mols.molecules(), self._map
+                state,
+                self._sire_mols.molecules(),
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                map=self._map,
             )
 
         space = openmm_extract_space(state)

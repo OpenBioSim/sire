@@ -343,11 +343,35 @@ try:
 
         return context
 
-    def openmm_extract_coordinates(state, mols, map):
-        return _openmm_extract_coordinates(state, mols, map)
+    def openmm_extract_coordinates(
+        state, mols, perturbable_maps=None, map=None
+    ):
+        from ...base import create_map
 
-    def openmm_extract_coordinates_and_velocities(state, mols, map):
-        return _openmm_extract_coordinates_and_velocities(state, mols, map)
+        map = create_map(map)
+
+        if perturbable_maps is None:
+            perturbable_maps = {}
+
+        return _openmm_extract_coordinates(
+            state=state, mols=mols, perturbable_maps=perturbable_maps, map=map
+        )
+
+    def openmm_extract_coordinates_and_velocities(
+        state, mols, perturbable_maps=None, map=None
+    ):
+        from ...base import create_map
+
+        map = create_map(map)
+
+        if perturbable_maps is None:
+            from ..Mol import MolNum
+
+            perturbable_maps = {}
+
+        return _openmm_extract_coordinates_and_velocities(
+            state=state, mols=mols, perturbable_maps=perturbable_maps, map=map
+        )
 
     def openmm_extract_space(state):
         return _openmm_extract_space(state)
@@ -372,13 +396,13 @@ except Exception as e:
     def openmm_to_sire(*args, **kwargs):
         _no_openmm()
 
-    def openmm_extract_coordinates(state, mols, map):
+    def openmm_extract_coordinates(*arg, **kwargs):
         _no_openmm()
 
-    def openmm_extract_coordinates_and_velocities(state, mols, map):
+    def openmm_extract_coordinates_and_velocities(*args, **kwargs):
         _no_openmm()
 
-    def openmm_extract_space(state):
+    def openmm_extract_space(*args, **kwargs):
         _no_openmm()
 
 

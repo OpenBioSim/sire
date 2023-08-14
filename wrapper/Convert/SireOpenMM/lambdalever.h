@@ -74,6 +74,8 @@ namespace SireOpenMM
 
         void setSchedule(const SireCAS::LambdaSchedule &schedule);
 
+        QHash<SireMol::MolNum, SireBase::PropertyMap> getPerturbableMoleculeMaps() const;
+
         SireCAS::LambdaSchedule getSchedule() const;
 
     protected:
@@ -89,6 +91,9 @@ namespace SireOpenMM
         /** The start indicies of the parameters in each named
             forcefield for each perturbable moleucle */
         QVector<QHash<QString, qint32>> start_indicies;
+
+        /** All of the property maps for the perturbable molecules */
+        QHash<SireMol::MolNum, SireBase::PropertyMap> perturbable_maps;
     };
 }
 

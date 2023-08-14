@@ -186,7 +186,6 @@ void register_SireMol_containers()
 
   register_dict<QHash<AtomIdx, QVector<AtomIdx>>>();
 
-#if QT_VERSION >= QT_VERSION_CHECK(4, 2, 0)
   register_dict<QHash<MolNum, Selector<Atom>>>();
   register_dict<QHash<MolNum, Selector<CutGroup>>>();
   register_dict<QHash<MolNum, Selector<Residue>>>();
@@ -194,27 +193,11 @@ void register_SireMol_containers()
   register_dict<QHash<MolNum, Selector<Segment>>>();
   register_dict<QHash<MolNum, double>>();
   register_dict<QHash<AtomIdx, AtomIdx>>();
+  register_dict<QHash<MolNum, SireBase::PropertyMap>>();
 
   register_set<QSet<AtomIdx>>();
   register_set<QSet<ResIdx>>();
 
   register_set<QSet<MolNum>>();
   register_set<QSet<MolName>>();
-
-#else
-  register_dict<QHash<MolNum, Selector<Atom>>, MolNum, Selector<Atom>>();
-  register_dict<QHash<MolNum, Selector<CutGroup>>, MolNum, Selector<CutGroup>>();
-  register_dict<QHash<MolNum, Selector<Residue>>, MolNum, Selector<Residue>>();
-  register_dict<QHash<MolNum, Selector<Chain>>, MolNum, Selector<Chain>>();
-  register_dict<QHash<MolNum, Selector<Segment>>, MolNum, Selector<Segment>>();
-  register_dict<QHash<MolNum, double>, MolNum, double>();
-  register_dict<QHash<AtomIdx, AtomIdx>, AtomIdx, AtomIdx>();
-
-  register_set<QSet<AtomIdx>, AtomIdx>();
-  register_set<QSet<ResIdx>, ResIdx>();
-
-  register_set<QSet<MolNum>, MolNum>();
-  register_set<QSet<MolName>, MolName>();
-
-#endif
 }

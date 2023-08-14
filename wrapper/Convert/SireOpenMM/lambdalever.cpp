@@ -44,7 +44,8 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       name_to_ffidx(other.name_to_ffidx),
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
-      start_indicies(other.start_indicies)
+      start_indicies(other.start_indicies),
+      perturbable_maps(other.perturbable_maps)
 {
 }
 
@@ -60,6 +61,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
         lambda_schedule = other.lambda_schedule;
         perturbable_mols = other.perturbable_mols;
         start_indicies = other.start_indicies;
+        perturbable_maps = other.perturbable_maps;
         Property::operator=(other);
     }
 
@@ -71,7 +73,8 @@ bool LambdaLever::operator==(const LambdaLever &other) const
     return name_to_ffidx == other.name_to_ffidx and
            lambda_schedule == other.lambda_schedule and
            perturbable_mols == other.perturbable_mols and
-           start_indicies == other.start_indicies;
+           start_indicies == other.start_indicies and
+           perturbable_maps == other.perturbable_maps;
 }
 
 bool LambdaLever::operator!=(const LambdaLever &other) const
@@ -512,6 +515,7 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
     // should add in some sanity checks for these inputs
     this->perturbable_mols.append(molecule);
     this->start_indicies.append(starts);
+    this->perturbable_maps.insert(molecule.number, molecule.perturtable_map);
     return this->perturbable_mols.count() - 1;
 }
 
@@ -526,6 +530,14 @@ void LambdaLever::setExceptionIndicies(int mol_idx,
 
     this->perturbable_mols[mol_idx].exception_idxs.insert(
         name, exception_idxs);
+}
+
+/** Return all of the property maps used to find the perturbable properties
+ *  of the perturbable molecules. This is indexed by molecule number
+ */
+QHash<SireMol::MolNum, SireBase::PropertyMap> LambdaLever::getPerturbableMoleculeMaps() const
+{
+    return perturbable_maps;
 }
 
 LambdaSchedule LambdaLever::getSchedule() const

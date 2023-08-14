@@ -78,7 +78,7 @@ class Minimisation:
     def __repr__(self):
         return self.__str__()
 
-    def run(self, max_iterations: int = 1000):
+    def run(self, max_iterations: int = 10000):
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.
