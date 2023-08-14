@@ -1985,5 +1985,19 @@ if not hasattr(AtomMapping, "__orig_find__"):
     AtomMapping.map = __mapping_map__
 
 
+if not hasattr(Molecule, "perturbation"):
+
+    def __molecule_perturbation(mol):
+        """
+        Return an interface to the perturbable properties of
+        this molecule. Note that the molecule must be
+        perturbable to call this function
+        """
+        from ._perturbation import Perturbation
+
+        return Perturbation(mol)
+
+    Molecule.perturbation = __molecule_perturbation
+
 # Remove some temporary variables
 del C

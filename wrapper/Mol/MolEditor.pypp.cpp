@@ -158,7 +158,7 @@ void register_MolEditor_class(){
                 , addLink_function_value
                 , ( bp::arg("key"), bp::arg("linked_property") )
                 , bp::return_self< >()
-                , "" );
+                , "Add a link from the property key to the property linked_property.\n  The linked_property will be returned if there is no property\n  called key in this set.\n\n  Note that the linked property must already be contained in this set.\n" );
         
         }
         { //::SireMol::MolEditor::commit
@@ -182,7 +182,7 @@ void register_MolEditor_class(){
                 "getLinks"
                 , getLinks_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return all of the property links" );
         
         }
         { //::SireMol::MolEditor::hasLinks
@@ -194,7 +194,7 @@ void register_MolEditor_class(){
                 "hasLinks"
                 , hasLinks_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return whether or not there are any property links" );
         
         }
         { //::SireMol::MolEditor::operator=
@@ -333,7 +333,7 @@ void register_MolEditor_class(){
                 "removeAllLinks"
                 , removeAllLinks_function_value
                 , bp::return_self< >()
-                , "" );
+                , "Remove all property links from this set" );
         
         }
         { //::SireMol::MolEditor::removeAllResidues
@@ -370,7 +370,7 @@ void register_MolEditor_class(){
                 , removeLink_function_value
                 , ( bp::arg("key") )
                 , bp::return_self< >()
-                , "" );
+                , "Remove the link associated with the key key" );
         
         }
         { //::SireMol::MolEditor::rename
