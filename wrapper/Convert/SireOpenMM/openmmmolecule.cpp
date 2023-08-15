@@ -452,7 +452,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         const auto angid = it.key().map(molinfo);
         const auto &angparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         int atom0 = angid.get<0>().value();
         int atom1 = angid.get<1>().value();
@@ -464,9 +463,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
 
-        const bool is_h_x_h = includes_h and (masses_data[atom0] < 2.5 and masses_data[atom2] < 2.5);
+        const bool is_h_x_h = masses_data[atom0] < 2.5 and masses_data[atom2] < 2.5;
 
-        if (not constrained_pairs.contains(to_pair(atom0, atom2)))
+        const auto key = to_pair(atom0, atom2);
+
+        if (not constrained_pairs.contains(key))
         {
             // only include the angle X-y-Z if X-Z are not already constrained
             if ((constraint_type & CONSTRAIN_ANGLES) and is_h_x_h)
@@ -476,7 +477,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                               (delta[1] * delta[1]) +
                                               (delta[2] * delta[2]));
                 constraints.append(std::make_tuple(atom0, atom2, length));
-                constrained_pairs.insert(to_pair(atom0, atom2));
+                constrained_pairs.insert(key);
             }
             else
             {

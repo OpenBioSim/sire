@@ -19,14 +19,12 @@ class DynamicsData:
 
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
-            from ..system import ForceFieldInfo
+            from ..system import ForceFieldInfo, System
 
             self._ffinfo = ForceFieldInfo(mols, map=self._map)
 
             # We want to store the molecules as a System so that
             # we can more easily track the space and time properties
-            from ..system import System, ForceFieldInfo
-
             if type(mols) is System:
                 # work on our own copy of the system
                 self._sire_mols = mols.clone()
@@ -56,8 +54,7 @@ class DynamicsData:
                 )
             except Exception:
                 current_time = 0 * nanosecond
-
-            self._sire_mols.set_property("time", current_time)
+                self._sire_mols.set_property("time", current_time)
 
             self._current_time = current_time
             self._current_step = 0
