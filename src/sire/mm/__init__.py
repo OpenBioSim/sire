@@ -1,4 +1,8 @@
 __all__ = [
+    "AmberBond",
+    "AmberAngle",
+    "AmberDihPart",
+    "AmberDihedral",
     "Angle",
     "Bond",
     "Dihedral",
@@ -36,6 +40,11 @@ from ..mol import (
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
+
+AmberBond = _MM.AmberBond
+AmberAngle = _MM.AmberAngle
+AmberDihPart = _MM.AmberDihPart
+AmberDihedral = _MM.AmberDihedral
 
 LJParameter = _MM.LJParameter
 

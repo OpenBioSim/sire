@@ -7,7 +7,7 @@ class Perturbation:
     easier to work with an visualise perturbations
     """
 
-    def __init__(self, mol, shrink_ghosts: bool = True, map=None):
+    def __init__(self, mol, map=None):
         """
         Construct the Perturbation object from the passed molecule.
         Note that this molecule must be perturbable
@@ -88,13 +88,6 @@ class Perturbation:
         r = Symbol("r")
         theta = Symbol("theta")
 
-        if shrink_ghosts:
-            bonds0 = mol.property(map0["bond"])
-            bonds1 = mol.property(map1["bond"])
-
-            changed0 = False
-            changed1 = False
-
         connectivity = mol.property(map0["connectivity"])
 
         for angle in mol.angles():
@@ -129,32 +122,6 @@ class Perturbation:
             r0_0 = pot0.r0()
             r0_1 = pot1.r0()
 
-            if shrink_ghosts:
-                is_from_ghost = (
-                    bond[0].index() in from_ghosts
-                    or bond[1].index() in from_ghosts
-                )
-
-                is_to_ghost = (
-                    bond[0].index() in to_ghosts
-                    or bond[1].index() in to_ghosts
-                )
-
-                if is_from_ghost and not is_to_ghost:
-                    r0_0 = 0.2
-                    bonds0.set(
-                        bond.id(),
-                        AmberBond(pot0.k(), r0_0).to_expression(r),
-                    )
-                    changed0 = True
-                elif is_to_ghost:
-                    r0_1 = 0.2
-                    bonds1.set(
-                        bond.id(),
-                        AmberBond(pot1.k(), r0_1).to_expression(r),
-                    )
-                    changed1 = True
-
             self._perturbations.append(
                 BondPerturbation(
                     bond=bond.id(),
@@ -163,21 +130,6 @@ class Perturbation:
                     map=map,
                 )
             )
-
-        if shrink_ghosts:
-            if changed0:
-                mol = (
-                    mol.edit()
-                    .set_property(map0["bond"].source(), bonds0)
-                    .commit()
-                )
-
-            if changed1:
-                mol = (
-                    mol.edit()
-                    .set_property(map1["bond"].source(), bonds1)
-                    .commit()
-                )
 
         self._mol = (
             mol.edit()

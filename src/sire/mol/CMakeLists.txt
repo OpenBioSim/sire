@@ -11,7 +11,6 @@ set ( SCRIPTS
         _dynamics.py
         _element.py
         _minimisation.py
-        _perturbation.py
         _smiles.py
         _trajectory.py
         _view.py

@@ -402,34 +402,50 @@ namespace SireOpenMM
         if (any_perturbable)
         {
             const auto nb14_expression = QString(
-                                             "4*epsilon*((sigma/r)^12-(sigma/r)^6);")
+                                             "four_epsilon*((sig6^2)-sig6);"
+                                             "sig6=(sigma^6)/((delta_sigma + r^2)^3);"
+                                             "delta_sigma=sigma*shift_delta;")
                                              .toStdString();
 
             ghost_14ff = new OpenMM::CustomBondForce(nb14_expression);
 
             ghost_14ff->addPerBondParameter("sigma");
-            ghost_14ff->addPerBondParameter("epsilon");
+            ghost_14ff->addPerBondParameter("four_epsilon");
+            ghost_14ff->addPerBondParameter("shift_delta");
 
             // short-range intramolecular term that should not use
             // periodic boundaries or cutoffs
             ghost_14ff->setUsesPeriodicBoundaryConditions(false);
 
-            // could look at using half_sigma and sqrt_epsilon as the parameters
-            // just to save a few cycles
+            // this uses the following potentials
+            //            Zacharias and McCammon, J. Chem. Phys., 1994, and also,
+            //            Michel et al., JCTC, 2007
+            //
+            //   V_{LJ}(r) = 4 epsilon [ ( sigma^12 / (delta*sigma + r^2)^6 ) -
+            //                           ( sigma^6  / (delta*sigma + r^2)^3 ) ]
+            //
+            //   delta = shift_delta * alpha
+            //
+            // Note that we pre-calculate delta as a forcefield parameter,
+            // and also supply half_sigma and two_sqrt_epsilon to save some
+            // cycles
             const auto clj_expression = QString(
-                                            "4*epsilon*((sigma/r)^12-(sigma/r)^6);"
-                                            "sigma=0.5*(sigma1+sigma2);"
-                                            "epsilon=sqrt(epsilon1*epsilon2)")
+                                            "two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
+                                            "sig6=(sigma^6)/((delta_sigma + r^2)^3);"
+                                            "delta_sigma=sigma*(shift_delta1+shift_delta2);"
+                                            "sigma=half_sigma1+half_sigma2;")
                                             .toStdString();
 
             ghost_ghostff = new OpenMM::CustomNonbondedForce(clj_expression);
             ghost_nonghostff = new OpenMM::CustomNonbondedForce(clj_expression);
 
-            ghost_ghostff->addPerParticleParameter("sigma");
-            ghost_ghostff->addPerParticleParameter("epsilon");
+            ghost_ghostff->addPerParticleParameter("half_sigma");
+            ghost_ghostff->addPerParticleParameter("two_sqrt_epsilon");
+            ghost_ghostff->addPerParticleParameter("shift_delta");
 
-            ghost_nonghostff->addPerParticleParameter("sigma");
-            ghost_nonghostff->addPerParticleParameter("epsilon");
+            ghost_nonghostff->addPerParticleParameter("half_sigma");
+            ghost_nonghostff->addPerParticleParameter("two_sqrt_epsilon");
+            ghost_nonghostff->addPerParticleParameter("shift_delta");
 
             // this will be slow if switched on, as it needs recalculating
             // for every change in parameters
@@ -486,7 +502,7 @@ namespace SireOpenMM
 
         // just a holder for all of the custom parameters
         // (prevents us having to continually re-allocate it)
-        std::vector<double> custom_params = {0, 0};
+        std::vector<double> custom_params = {0, 0, 0};
 
         // the sets of ghost atoms and non-ghost atoms
         std::set<int> ghost_atoms;
@@ -545,6 +561,7 @@ namespace SireOpenMM
             // first the atom parameters
             auto masses_data = mol.masses.constData();
             auto cljs_data = mol.cljs.constData();
+            auto shift_deltas_data = mol.shift_deltas.constData();
 
             if (any_perturbable and mol.isPerturbable())
             {
@@ -558,8 +575,12 @@ namespace SireOpenMM
 
                     const auto &clj = cljs_data[j];
 
-                    custom_params[0] = std::get<1>(clj);
-                    custom_params[1] = std::get<2>(clj);
+                    // half_sigma
+                    custom_params[0] = 0.5 * std::get<1>(clj);
+                    // two_sqrt_epsilon
+                    custom_params[1] = 2.0 * std::sqrt(std::get<2>(clj));
+                    // shift_delta
+                    custom_params[2] = shift_deltas_data[j];
 
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
@@ -594,8 +615,12 @@ namespace SireOpenMM
 
                     if (any_perturbable)
                     {
-                        custom_params[0] = std::get<1>(clj);
-                        custom_params[1] = std::get<2>(clj);
+                        // half_sigma
+                        custom_params[0] = 0.5 * std::get<1>(clj);
+                        // two_sqrt_epsilon
+                        custom_params[1] = 2.0 * std::sqrt(std::get<2>(clj));
+                        // shift_delta - is zero for non-ghost atoms
+                        custom_params[2] = 0.0;
                         ghost_ghostff->addParticle(custom_params);
                         ghost_nonghostff->addParticle(custom_params);
                         non_ghost_atoms.insert(atom_index);
@@ -743,12 +768,16 @@ namespace SireOpenMM
                             // to the ghost-14 forcefield
                             if (ghost_14ff != 0)
                             {
-                                std::vector<double> params14 = {std::get<3>(p), std::get<4>(p)};
+                                // parameters are sigma, four_epsilon and shift_delta
+                                std::vector<double> params14 = {std::get<3>(p), 4.0 * std::get<4>(p), 0.0};
 
                                 if (params14[0] == 0)
                                     // cannot use zero params in case they are
                                     // eagerly removed
                                     params14[0] = 1e-9;
+
+                                if (params14[1] == 0)
+                                    params14[1] = 1e-9;
 
                                 nbidx = ghost_14ff->addBond(std::get<0>(p),
                                                             std::get<1>(p),

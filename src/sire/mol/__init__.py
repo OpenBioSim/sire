@@ -1993,11 +1993,23 @@ if not hasattr(Molecule, "perturbation"):
         this molecule. Note that the molecule must be
         perturbable to call this function
         """
-        from ._perturbation import Perturbation
+        from ..morph._perturbation import Perturbation
 
         return Perturbation(mol)
 
+    def __molecule_is_perturbable(mol):
+        """
+        Return whether or not this molecule is perturbable
+        (can be morphed with a lambda coordinate)
+        """
+        if mol.has_property("is_perturbable"):
+            return mol.property("is_perturbable").as_boolean()
+        else:
+            return False
+
     Molecule.perturbation = __molecule_perturbation
+    Molecule.is_perturbable = __molecule_is_perturbable
+
 
 # Remove some temporary variables
 del C

@@ -52,6 +52,7 @@ namespace SireOpenMM
         QVector<double> getCharges() const;
         QVector<double> getSigmas() const;
         QVector<double> getEpsilons() const;
+        QVector<double> getShiftDeltas() const;
 
         QVector<double> getBondKs() const;
         QVector<double> getBondLengths() const;
@@ -139,6 +140,12 @@ namespace SireOpenMM
          */
         SireBase::PropertyMap perturtable_map;
 
+        /** Shift deltas for all of the atoms. This is equal to the default
+         *  shift_delta value for ghost atoms, and zero for non-ghost atoms.
+         *  This is only populated for perturbable molecules
+         */
+        QVector<double> shift_deltas;
+
         /** The indexes of atoms that become ghosts in the
          *  perturbed state
          */
@@ -168,7 +175,7 @@ namespace SireOpenMM
                                         QSet<qint64> &constrained_pairs,
                                         const SireBase::PropertyMap &map);
 
-        void alignInternals();
+        void alignInternals(const SireBase::PropertyMap &map);
     };
 
 }

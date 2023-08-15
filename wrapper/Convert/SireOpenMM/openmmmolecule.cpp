@@ -154,7 +154,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
             this->constructFromAmber(mol, params, params1, map0, true);
 
-            this->alignInternals();
+            this->alignInternals(map);
         }
         else
         {
@@ -618,9 +618,11 @@ bool is_ghost_lj(const std::tuple<double, double, double> &clj)
  *  removed from the list of potentials. This is because we don't
  *  evaluate the energy of constrained degrees of freedom
  */
-void OpenMMMolecule::alignInternals()
+void OpenMMMolecule::alignInternals(const PropertyMap &map)
 {
     // first go through an see which atoms are ghosts
+    // While we do this, set the shift_delta values for the
+    // reference and perturbed molecules
     if (cljs.count() != perturbed->cljs.count())
         throw SireError::incompatible_error(QObject::tr(
                                                 "Different number of CLJ parameters between the reference "
@@ -628,6 +630,20 @@ void OpenMMMolecule::alignInternals()
                                                 .arg(cljs.count())
                                                 .arg(perturbed->cljs.count()),
                                             CODELOC);
+
+    // the default shift_delta is 1.0 angstrom
+    double default_shift_delta = 1.0;
+
+    if (map.specified("shift_delta"))
+    {
+        default_shift_delta = map["shift_delta"].value().asADouble();
+
+        if (default_shift_delta < 0)
+            default_shift_delta = 0;
+    }
+
+    this->shift_deltas = QVector<double>(cljs.count(), 0.0);
+    this->perturbed->shift_deltas = this->shift_deltas;
 
     for (int i = 0; i < cljs.count(); ++i)
     {
@@ -639,18 +655,22 @@ void OpenMMMolecule::alignInternals()
             if (is_ghost(clj0))
             {
                 from_ghost_idxs.insert(i);
+                this->shift_deltas[i] = default_shift_delta;
             }
             else if (is_ghost(clj1))
             {
                 to_ghost_idxs.insert(i);
+                this->perturbed->shift_deltas[i] = default_shift_delta;
             }
             else if (is_ghost_lj(clj0) and not is_ghost_lj(clj1))
             {
                 from_ghost_idxs.insert(i);
+                this->shift_deltas[i] = default_shift_delta;
             }
             else if (is_ghost_lj(clj1) and not is_ghost_lj(clj0))
             {
                 to_ghost_idxs.insert(i);
+                this->perturbed->shift_deltas[i] = default_shift_delta;
             }
         }
     }
@@ -1177,6 +1197,11 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
             v += 1;
         }
     }
+}
+
+QVector<double> OpenMMMolecule::getShiftDeltas() const
+{
+    return this->shift_deltas;
 }
 
 QVector<double> OpenMMMolecule::getCharges() const

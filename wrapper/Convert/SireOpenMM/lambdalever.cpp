@@ -142,16 +142,18 @@ T *get_force(const QString &name, OpenMM::Context &context,
     return t_force;
 }
 
-std::tuple<int, int, double, double, double>
+std::tuple<int, int, double, double, double, double>
 get_exception(int atom0, int atom1, int start_index,
               double coul_14_scl, double lj_14_scl,
               const QVector<double> &morphed_charges,
               const QVector<double> &morphed_sigmas,
-              const QVector<double> &morphed_epsilons)
+              const QVector<double> &morphed_epsilons,
+              const QVector<double> &morphed_shift_deltas)
 {
     double charge = 0.0;
     double sigma = 0.0;
     double epsilon = 0.0;
+    double shift_delta = 0.0;
 
     if (coul_14_scl != 0 or lj_14_scl != 0)
     {
@@ -182,6 +184,11 @@ get_exception(int atom0, int atom1, int start_index,
         epsilon = lj_14_scl * std::sqrt(morphed_epsilons.constData()[atom0] * morphed_epsilons.constData()[atom1]);
     }
 
+    if (not morphed_shift_deltas.isEmpty())
+    {
+        shift_delta = morphed_shift_deltas[atom0] + morphed_shift_deltas[atom1];
+    }
+
     if (charge == 0 and epsilon == 0)
     {
         // openmm tries to optimise away zero parameters - this is an issue
@@ -195,7 +202,7 @@ get_exception(int atom0, int atom1, int start_index,
 
     return std::make_tuple(atom0 + start_index,
                            atom1 + start_index,
-                           charge, sigma, epsilon);
+                           charge, sigma, epsilon, shift_delta);
 }
 
 /** Set the value of lambda in the passed context. Returns the
@@ -223,7 +230,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
 
-    std::vector<double> custom_params = {0.0, 0.0};
+    std::vector<double> custom_params = {0.0, 0.0, 0.0};
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -248,6 +255,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             "epsilon",
             perturbable_mol.getEpsilons(),
             perturbable_mol.perturbed->getEpsilons(),
+            lambda_value);
+
+        const auto morphed_shift_deltas = this->lambda_schedule.morph(
+            "shift_delta",
+            perturbable_mol.getShiftDeltas(),
+            perturbable_mol.perturbed->getShiftDeltas(),
             lambda_value);
 
         const auto morphed_bond_k = this->lambda_schedule.morph(
@@ -308,8 +321,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const bool is_from_ghost = perturbable_mol.from_ghost_idxs.contains(j);
                     const bool is_to_ghost = perturbable_mol.to_ghost_idxs.contains(j);
 
-                    custom_params[0] = morphed_sigmas[j];
-                    custom_params[1] = morphed_epsilons[j];
+                    // half_sigma
+                    custom_params[0] = 0.5 * morphed_sigmas[j];
+                    // two_sqrt_epsilon
+                    custom_params[1] = 2.0 * std::sqrt(morphed_epsilons[j]);
+                    // shift_delta
+                    custom_params[2] = morphed_shift_deltas[j];
 
                     ghost_ghostff->setParticleParameters(start_index + j, custom_params);
                     ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
@@ -352,7 +369,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                     const auto p = get_exception(std::get<0>(param), std::get<1>(param),
                                                  start_index, coul_14_scale, lj_14_scale,
-                                                 morphed_charges, morphed_sigmas, morphed_epsilons);
+                                                 morphed_charges, morphed_sigmas, morphed_epsilons,
+                                                 morphed_shift_deltas);
 
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
@@ -375,7 +393,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (ghost_14ff != 0)
                             {
-                                std::vector<double> params14 = {std::get<3>(p), std::get<4>(p)};
+                                // parameters are sigma, four_epsilon and shift_delta
+                                std::vector<double> params14 = {std::get<3>(p), 4.0 * std::get<4>(p), std::get<5>(p)};
                                 ghost_14ff->setBondParameters(nbidx,
                                                               std::get<0>(p),
                                                               std::get<1>(p),

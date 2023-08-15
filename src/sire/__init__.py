@@ -695,6 +695,7 @@ if _can_lazy_import:
     maths = _lazy_import.lazy_module("sire.maths")
     mm = _lazy_import.lazy_module("sire.mm")
     mol = _lazy_import.lazy_module("sire.mol")
+    morph = _lazy_import.lazy_module("sire.morph")
     move = _lazy_import.lazy_module("sire.move")
     qt = _lazy_import.lazy_module("sire.qt")
     search = _lazy_import.lazy_module("sire.search")
