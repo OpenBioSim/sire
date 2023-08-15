@@ -666,12 +666,12 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
             else if (is_ghost_lj(clj0) and not is_ghost_lj(clj1))
             {
                 from_ghost_idxs.insert(i);
-                this->shift_deltas[i] = default_shift_delta;
+                // this->shift_deltas[i] = default_shift_delta;
             }
             else if (is_ghost_lj(clj1) and not is_ghost_lj(clj0))
             {
                 to_ghost_idxs.insert(i);
-                this->perturbed->shift_deltas[i] = default_shift_delta;
+                // this->perturbed->shift_deltas[i] = default_shift_delta;
             }
         }
     }

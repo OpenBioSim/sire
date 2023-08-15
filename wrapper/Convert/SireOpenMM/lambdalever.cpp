@@ -230,7 +230,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
 
-    std::vector<double> custom_params = {0.0, 0.0, 0.0};
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -321,12 +321,14 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const bool is_from_ghost = perturbable_mol.from_ghost_idxs.contains(j);
                     const bool is_to_ghost = perturbable_mol.to_ghost_idxs.contains(j);
 
+                    // reduced charge
+                    custom_params[0] = morphed_charges[j];
                     // half_sigma
-                    custom_params[0] = 0.5 * morphed_sigmas[j];
+                    custom_params[1] = 0.5 * morphed_sigmas[j];
                     // two_sqrt_epsilon
-                    custom_params[1] = 2.0 * std::sqrt(morphed_epsilons[j]);
+                    custom_params[2] = 2.0 * std::sqrt(morphed_epsilons[j]);
                     // shift_delta
-                    custom_params[2] = morphed_shift_deltas[j];
+                    custom_params[3] = morphed_shift_deltas[j];
 
                     ghost_ghostff->setParticleParameters(start_index + j, custom_params);
                     ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
@@ -393,8 +395,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (ghost_14ff != 0)
                             {
-                                // parameters are sigma, four_epsilon and shift_delta
-                                std::vector<double> params14 = {std::get<3>(p), 4.0 * std::get<4>(p), std::get<5>(p)};
+                                // parameters are q, sigma, four_epsilon and shift_delta
+                                std::vector<double> params14 =
+                                    {std::get<2>(p), std::get<3>(p),
+                                     4.0 * std::get<4>(p), std::get<5>(p)};
+
                                 ghost_14ff->setBondParameters(nbidx,
                                                               std::get<0>(p),
                                                               std::get<1>(p),

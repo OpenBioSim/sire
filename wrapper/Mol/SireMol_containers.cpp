@@ -108,8 +108,6 @@ void register_SireMol_containers()
   register_list<QList<ChainIdx>>();
   register_list<QList<SegIdx>>();
 
-  register_list<QList<GeomPertPtr>>();
-
   register_list<QList<MolIdx>>();
   register_list<QList<MolName>>();
   register_list<QList<MolNum>>();
