@@ -1582,26 +1582,54 @@ def getDummies(molecule):
     to_dummies = None
     from_non_dummies = []
     to_non_dummies = []
+    # For simulations in which restraints are modified while ligand is non-interacting
+    always_dummies = None
 
     for x in range(0, natoms):
         atom = atoms[x]
 
-        if atom.property("initial_ambertype") == "du":
-            if from_dummies is None:
-                from_dummies = molecule.selectAll(atom.index())
+        # First, check for special case where we are going from a dummy to a
+        # dummy.
+        if (
+            atom.property("initial_ambertype") == "du"
+            and atom.property("final_ambertype") == "du"
+        ):
+            if always_dummies is None:
+                always_dummies = molecule.selectAll(atom.index())
             else:
-                from_dummies += molecule.selectAll(atom.index())
+                always_dummies += molecule.selectAll(atom.index())
+        # Otherwise, this is a standard stage in a free energy calculation
+        # where we are going from a dummy to a non-dummy or vice versa.
         else:
-            from_non_dummies.append(atom.index())
-        if atom.property("final_ambertype") == "du":
-            if to_dummies is None:
-                to_dummies = molecule.selectAll(atom.index())
+            if atom.property("initial_ambertype") == "du":
+                if from_dummies is None:
+                    from_dummies = molecule.selectAll(atom.index())
+                else:
+                    from_dummies += molecule.selectAll(atom.index())
             else:
-                to_dummies += molecule.selectAll(atom.index())
-        else:
-            to_non_dummies.append(atom.index())
+                from_non_dummies.append(atom.index())
+            if atom.property("final_ambertype") == "du":
+                if to_dummies is None:
+                    to_dummies = molecule.selectAll(atom.index())
+                else:
+                    to_dummies += molecule.selectAll(atom.index())
+            else:
+                to_non_dummies.append(atom.index())
 
-    return to_dummies, from_dummies, to_non_dummies, from_non_dummies
+    # Check that if we have any "always_dummies" then we don't have any other types of dummies
+    # because we expect the entire ligand to be non-interacting (and the logic to handle this
+    # is not implemented).
+    if always_dummies is not None:
+        if from_dummies is not None or to_dummies is not None:
+            raise RuntimeError(
+                "Cannot have any dummy atoms in a ligand that is always non-interacting"
+            )
+        if not (len(from_non_dummies) == 0 and len(to_non_dummies) == 0):
+            raise RuntimeError(
+                "Cannot have any non-dummy atoms in a ligand that is always non-interacting"
+            )
+
+    return to_dummies, from_dummies, to_non_dummies, from_non_dummies, always_dummies
 
 
 def createSystemFreeEnergy(molecules):
@@ -1670,12 +1698,13 @@ def createSystemFreeEnergy(molecules):
         .commit()
     )
 
-    # We put atoms in three groups depending on what happens in the
+    # We put atoms in four groups depending on what happens in the
     # perturbation
     # non dummy to non dummy --> the hard group, use a normal intermolecular FF
     # non dummy to dummy --> the todummy group, uses SoftFF with alpha = Lambda
     # dummy to non dummy --> the fromdummy group, uses SoftFF with
     #                        alpha = 1 - Lambda
+    # dummy to dummy --> the alwaysdummy group, uses SoftFF with alpha = 1
     # We start assuming all atoms are hard atoms. Then we call getDummies to
     # find which atoms
     # start/end as dummies and update the hard, todummy and fromdummy groups
@@ -1685,10 +1714,12 @@ def createSystemFreeEnergy(molecules):
     solute_grp_ref_hard = MoleculeGroup("solute_ref_hard")
     solute_grp_ref_todummy = MoleculeGroup("solute_ref_todummy")
     solute_grp_ref_fromdummy = MoleculeGroup("solute_ref_fromdummy")
+    solute_grp_ref_alwaysdummy = MoleculeGroup("solute_ref_alwaysdummy")
 
     solute_ref_hard = solute.selectAllAtoms()
     solute_ref_todummy = solute.selectAllAtoms()
     solute_ref_fromdummy = solute.selectAllAtoms()
+    solute_ref_alwaysdummy = solute.selectAllAtoms()
 
     # N.B.: Currently Sire 2023 doesn't behave consistently with Sire < 2023 for
     # selections with zero items. Previously it was possible to create an empty
@@ -1701,7 +1732,13 @@ def createSystemFreeEnergy(molecules):
     # in order to add only the desired atoms. This can then be converted to a
     # Selector_Atom_ by passing the solute and selection to the constructor.
 
-    to_dummies, from_dummies, to_non_dummies, from_non_dummies = getDummies(solute)
+    (
+        to_dummies,
+        from_dummies,
+        to_non_dummies,
+        from_non_dummies,
+        always_dummies,
+    ) = getDummies(solute)
 
     if to_dummies is not None:
         ndummies = to_dummies.count()
@@ -1725,9 +1762,29 @@ def createSystemFreeEnergy(molecules):
     for non_dummy in from_non_dummies:
         solute_ref_fromdummy = solute_ref_fromdummy.subtract(solute.select(non_dummy))
 
+    if always_dummies is not None:
+        # Remove all the atoms from the hard group, the todummy group and the
+        # fromdummy group
+        ndummies = always_dummies.count()
+        dummies = always_dummies.atoms()
+
+        for x in range(0, ndummies):
+            dummy_index = dummies[x].index()
+            solute_ref_hard = solute_ref_hard.subtract(solute.select(dummy_index))
+            solute_ref_todummy = solute_ref_todummy.subtract(solute.select(dummy_index))
+            solute_ref_fromdummy = solute_ref_fromdummy.subtract(
+                solute.select(dummy_index)
+            )
+
+    else:  # We have no alwaysdummy atoms - remove all atoms from the always dummy group
+        solute_ref_alwaysdummy = solute_ref_alwaysdummy.subtract(
+            solute.selectAllAtoms()
+        )
+
     solute_grp_ref_hard.add(solute_ref_hard)
     solute_grp_ref_todummy.add(solute_ref_todummy)
     solute_grp_ref_fromdummy.add(solute_ref_fromdummy)
+    solute_grp_ref_alwaysdummy.add(solute_ref_alwaysdummy)
 
     solutes = MoleculeGroup("solutes")
     solutes.add(solute)
@@ -1751,6 +1808,7 @@ def createSystemFreeEnergy(molecules):
     all.add(solute_grp_ref_hard)
     all.add(solute_grp_ref_todummy)
     all.add(solute_grp_ref_fromdummy)
+    all.add(solute_grp_ref_alwaysdummy)
 
     # Add these groups to the System
     system = Sire.System.System()
@@ -1761,6 +1819,7 @@ def createSystemFreeEnergy(molecules):
     system.add(solute_grp_ref_hard)
     system.add(solute_grp_ref_todummy)
     system.add(solute_grp_ref_fromdummy)
+    system.add(solute_grp_ref_alwaysdummy)
 
     system.add(molecules)
 
@@ -1794,6 +1853,7 @@ def setupForceFieldsFreeEnergy(system, space):
     solute_hard = system[MGName("solute_ref_hard")]
     solute_todummy = system[MGName("solute_ref_todummy")]
     solute_fromdummy = system[MGName("solute_ref_fromdummy")]
+    solute_alwaysdummy = system[MGName("solute_ref_alwaysdummy")]
 
     solvent = system[MGName("solvent")]
 
@@ -1841,6 +1901,14 @@ def setupForceFieldsFreeEnergy(system, space):
         solute_fromdummy_intraclj.setUseReactionField(True)
         solute_fromdummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
     solute_fromdummy_intraclj.add(solute_fromdummy)
+
+    solute_alwaysdummy_intraclj = Sire.MM.IntraSoftCLJFF("solute_alwaysdummy_intraclj")
+    solute_alwaysdummy_intraclj.setShiftDelta(shift_delta.val)
+    solute_alwaysdummy_intraclj.setCoulombPower(coulomb_power.val)
+    if cutoff_type.val != "nocutoff":
+        solute_alwaysdummy_intraclj.setUseReactionField(True)
+        solute_alwaysdummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
+    solute_alwaysdummy_intraclj.add(solute_alwaysdummy)
 
     solute_hard_todummy_intraclj = Sire.MM.IntraGroupSoftCLJFF(
         "solute_hard:todummy_intraclj"
@@ -1903,6 +1971,7 @@ def setupForceFieldsFreeEnergy(system, space):
         solute_hard_intraclj,
         solute_todummy_intraclj,
         solute_fromdummy_intraclj,
+        solute_alwaysdummy_intraclj,
         solute_hard_todummy_intraclj,
         solute_hard_fromdummy_intraclj,
         solute_todummy_fromdummy_intraclj,
@@ -1937,6 +2006,7 @@ def setupForceFieldsFreeEnergy(system, space):
         + solute_hard_intraclj.components().total()
         + solute_todummy_intraclj.components().total(0)
         + solute_fromdummy_intraclj.components().total(0)
+        + solute_alwaysdummy_intraclj.components().total(0)
         + solute_hard_todummy_intraclj.components().total(0)
         + solute_hard_fromdummy_intraclj.components().total(0)
         + solute_todummy_fromdummy_intraclj.components().total(0)
@@ -1968,6 +2038,11 @@ def setupForceFieldsFreeEnergy(system, space):
     system.add(
         Sire.System.PropertyConstraint(
             "alpha0", Sire.FF.FFName("solute_fromdummy_intraclj"), 1 - lam
+        )
+    )
+    system.add(
+        Sire.System.PropertyConstraint(
+            "alpha0", Sire.FF.FFName("solute_alwaysdummy_intraclj"), 1
         )
     )
     system.add(
