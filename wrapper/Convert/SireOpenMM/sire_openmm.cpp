@@ -395,6 +395,8 @@ namespace SireOpenMM
         OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
         lambda_lever.setForceIndex("torsion", system.addForce(dihff));
 
+        // now let's define the forces used for managing the creation
+        // or deletion of ghost atoms
         OpenMM::CustomBondForce *ghost_14ff = 0;
         OpenMM::CustomNonbondedForce *ghost_ghostff = 0;
         OpenMM::CustomNonbondedForce *ghost_nonghostff = 0;
@@ -532,6 +534,84 @@ namespace SireOpenMM
             lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
             lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
             lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
+        }
+
+        // now the forcefields relating to restraints - first positional
+        // restraints - harmonic potentials keeping atoms close to
+        // fixed anchor points
+        OpenMM::HarmonicBondForce *positional_restraintff = 0;
+
+        if (map.specified("positional_restraints"))
+        {
+            positional_restraintff = new OpenMM::HarmonicBondForce();
+            positional_restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("positional_restraint",
+                                       system.addForce(positional_restraintff));
+        }
+
+        // now classic distance, angle or torsion restraints between
+        // any pairs, triples or quads of atoms (including intermolecular)
+        OpenMM::HarmonicBondForce *distance_restraintff = 0;
+        OpenMM::HarmonicAngleForce *angle_restraintff = 0;
+        OpenMM::PeriodicTorsionForce *torsion_restraintff = 0;
+
+        if (map.specified("distance_restraints"))
+        {
+            distance_restraintff = new OpenMM::HarmonicBondForce();
+            distance_restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("distance_restraint",
+                                       system.addForce(distance_restraintff));
+        }
+
+        if (map.specified("angle_restraints"))
+        {
+            angle_restraintff = new OpenMM::HarmonicAngleForce();
+            angle_restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("angle_restraint",
+                                       system.addForce(angle_restraintff));
+        }
+
+        if (map.specified("torsion_restraints"))
+        {
+            torsion_restraintff = new OpenMM::PeriodicTorsionForce();
+            torsion_restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("torsion_restraint",
+                                       system.addForce(torsion_restraintff));
+        }
+
+        // now the Boresch restraints that can be used to hold a ligand
+        // in a defined position and orientation relative to a receptor
+        OpenMM::HarmonicBondForce *boresch_distance_restraintff = 0;
+        OpenMM::HarmonicAngleForce *boresch_angle_restraintff = 0;
+        OpenMM::CustomTorsionForce *boresch_torsion_restraintff = 0;
+
+        if (map.specified("boresch_restraints"))
+        {
+            boresch_distance_restraintff = new OpenMM::HarmonicBondForce();
+            boresch_angle_restraintff = new OpenMM::HarmonicAngleForce();
+
+            const auto torsion_expression = QString(
+                                                "force_const*min(dtheta, 2*pi-dtheta)^2;"
+                                                "dtheta = abs(theta-equil_val);"
+                                                "pi = 3.1415926535;")
+                                                .toStdString();
+
+            boresch_torsion_restraintff = new OpenMM::CustomTorsionForce(torsion_expression);
+
+            boresch_distance_restraintff->setUsesPeriodicBoundaryConditions(true);
+            boresch_angle_restraintff->setUsesPeriodicBoundaryConditions(true);
+            boresch_torsion_restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("boresch_distance",
+                                       system.addForce(boresch_distance_restraintff));
+            lambda_lever.setForceIndex("boresch_angle",
+                                       system.addForce(boresch_angle_restraintff));
+            lambda_lever.setForceIndex("boresch_torsion",
+                                       system.addForce(boresch_torsion_restraintff));
         }
 
         // Now copy data from the temporary OpenMMMolecule objects
@@ -888,6 +968,37 @@ namespace SireOpenMM
             ghost_nonghostff->addInteractionGroup(ghost_atoms, non_ghost_atoms);
         }
 
+        // set up all of the restraints
+        if (positional_restraintff != 0)
+        {
+            // we have some positional restraints
+            const auto restraints = map["positional_restraints"].value().asA<PositionalRestraints>();
+
+            // go through each restraint and create an anchor atom, then add
+            // the restraint parameters
+        }
+
+        if (distance_restraintff != 0)
+        {
+            // we have some distance restraints
+        }
+
+        if (angle_restraintff != 0)
+        {
+            // we have some angle restraints
+        }
+
+        if (torsion_restraintff != 0)
+        {
+            // we have some torsion restraints
+        }
+
+        if (boresch_distance_restraintff != 0)
+        {
+            // we have some boresch restraints - these are a set
+            // that will always use all three boresch restraint forces
+        }
+
         // see if we want to remove COM motion
         const auto com_remove_prop = map["com_reset_frequency"];
 
@@ -938,25 +1049,28 @@ namespace SireOpenMM
             }
         }
 
+        // now copy in the positional restraint coordinates (if any)
+        // ...
+
         return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
     }
 
     void set_openmm_coordinates_and_velocities(OpenMM::Context &context,
-                                               const OpenMMMetaData &coords_and_velocities)
+                                               const OpenMMMetaData &metadata)
     {
-        if (coords_and_velocities.hasCoordinates())
+        if (metadata.hasCoordinates())
         {
-            context.setPositions(coords_and_velocities.coordinates());
+            context.setPositions(metadata.coordinates());
         }
 
-        if (coords_and_velocities.hasVelocities())
+        if (metadata.hasVelocities())
         {
-            context.setVelocities(coords_and_velocities.velocities());
+            context.setVelocities(metadata.velocities());
         }
 
-        if (coords_and_velocities.hasBoxVectors())
+        if (metadata.hasBoxVectors())
         {
-            const auto boxvecs = coords_and_velocities.boxVectors();
+            const auto boxvecs = metadata.boxVectors();
 
             context.setPeriodicBoxVectors(boxvecs[0], boxvecs[1], boxvecs[2]);
         }

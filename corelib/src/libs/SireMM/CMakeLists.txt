@@ -75,6 +75,7 @@ set ( SIREMM_HEADERS
       ljpotential.h
       mmdetail.h
       multicljcomponent.h
+      positionalrestraints.h
       restraint.h
       restraintcomponent.h
       restraintff.h
@@ -161,6 +162,7 @@ set ( SIREMM_SOURCES
       ljpotential.cpp
       mmdetail.cpp
       multicljcomponent.cpp
+      positionalrestraints.cpp
       restraint.cpp
       restraintcomponent.cpp
       restraintff.cpp
