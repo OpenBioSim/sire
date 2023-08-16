@@ -305,7 +305,7 @@ namespace SireMol
         friend class MolNum;
         static MolNum createUniqueMolNum();
 
-        class PropVersions
+        class SIREMOL_EXPORT PropVersions
         {
         public:
             PropVersions() : version(0)
