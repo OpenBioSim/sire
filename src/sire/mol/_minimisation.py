@@ -58,6 +58,9 @@ class Minimisation:
         cutoff_type=None,
         schedule=None,
         lambda_value=None,
+        swap_end_states=None,
+        shift_delta=None,
+        coulomb_power=None,
     ):
         from ..base import create_map
 
@@ -67,6 +70,9 @@ class Minimisation:
         _add_extra(extras, "cutoff_type", cutoff_type)
         _add_extra(extras, "schedule", schedule)
         _add_extra(extras, "lambda", lambda_value)
+        _add_extra(extras, "swap_end_states", swap_end_states)
+        _add_extra(extras, "shift_delta", shift_delta)
+        _add_extra(extras, "coulomb_power", coulomb_power)
 
         map = create_map(map, extras)
 

@@ -16,9 +16,9 @@ def shrink_ghost_atoms(mols, length=None, map=None):
     if length is None:
         length = 0.6
     else:
-        from ..units import angstrom
+        from ..units import angstrom, u
 
-        length = length.to(angstrom)
+        length = u(length).to(angstrom)
 
     map = create_map(map)
 

@@ -388,6 +388,25 @@ class System:
             scaled according to the lambda schedule for the specified
             value of lambda.
 
+        swap_end_states: bool
+            Whether or not to swap the end states. If this is True, then
+            the perturbation will run from the perturbed back to the
+            reference molecule (the perturbed molecule will be at lambda=0,
+            while the reference molecule will be at lambda=1). This will
+            use the coordinates of the perturbed molecule as the
+            starting point.
+
+        shift_delta: float
+            The shift_delta parameter that controls the electrostatic
+            and van der Waals softening potential that smooths the
+            creation and deletion of ghost atoms during a potential.
+            This defaults to 1.0.
+
+        coulomb_power: int
+            The coulomb power parmeter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 0.
+
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
             minimisation. This would be CUDA_DEVICE_ID or similar
@@ -455,6 +474,14 @@ class System:
             scaled according to the lambda schedule for the specified
             value of lambda.
 
+        swap_end_states: bool
+            Whether or not to swap the end states. If this is True, then
+            the perturbation will run from the perturbed back to the
+            reference molecule (the perturbed molecule will be at lambda=0,
+            while the reference molecule will be at lambda=1). This will
+            use the coordinates of the perturbed molecule as the
+            starting point.
+
         temperature: temperature
             The temperature at which to run the simulation. A
             microcanonical (NVE) simulation will be run if you don't
@@ -464,6 +491,17 @@ class System:
             The pressure at which to run the simulation. A
             microcanonical (NVE) or canonical (NVT) simulation will be
             run if the pressure is not set.
+
+        shift_delta: float
+            The shift_delta parameter that controls the electrostatic
+            and van der Waals softening potential that smooths the
+            creation and deletion of ghost atoms during a potential.
+            This defaults to 1.0.
+
+        coulomb_power: int
+            The coulomb power parmeter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 0.
 
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
