@@ -25,11 +25,22 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   distance between atoms of two views.
 
 * Added support for perturbable molecules to the OpenMM converter. Have addded
-  `LambdaLever` and `LambdaSchedule` classes that can be used to control
+  ``LambdaLever`` and ``LambdaSchedule`` classes that can be used to control
   how forcefield parameters are changed with lambda. These levers change
   the parameters in the OpenMM context, enabling simulations at different
   values of lambda to be performed. This is initial functionality which
   will be documented and expanded by subsequent PRs.
+
+* Added support for softening potentials used to smooth creation and
+  deletion of ghost atoms during alchemical free energy simulations.
+  Added a new ``sire.morph`` module that includes functions that should
+  make it easier to set up, view and control morphs (perturbations).
+
+* Added an ``EnergyTrajectory`` class that lets us record the energy
+  trajectory along a dynamics simulation. This includes recording energies
+  at different λ-windows to that being simulated, thereby providing
+  the raw data for free energy calculations. By default the
+  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
 
 * Forced all new-style modules to import when `sr.use_new_api()` is called.
   This will make it easier to use sire with multiprocessing.
