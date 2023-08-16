@@ -148,12 +148,12 @@ get_exception(int atom0, int atom1, int start_index,
               const QVector<double> &morphed_charges,
               const QVector<double> &morphed_sigmas,
               const QVector<double> &morphed_epsilons,
-              const QVector<double> &morphed_shift_deltas)
+              const QVector<double> &morphed_alphas)
 {
     double charge = 0.0;
     double sigma = 0.0;
     double epsilon = 0.0;
-    double shift_delta = 0.0;
+    double alpha = 0.0;
 
     if (coul_14_scl != 0 or lj_14_scl != 0)
     {
@@ -182,11 +182,17 @@ get_exception(int atom0, int atom1, int start_index,
         charge = coul_14_scl * morphed_charges.constData()[atom0] * morphed_charges.constData()[atom1];
         sigma = 0.5 * (morphed_sigmas.constData()[atom0] + morphed_sigmas.constData()[atom1]);
         epsilon = lj_14_scl * std::sqrt(morphed_epsilons.constData()[atom0] * morphed_epsilons.constData()[atom1]);
-    }
 
-    if (not morphed_shift_deltas.isEmpty())
-    {
-        shift_delta = morphed_shift_deltas[atom0] + morphed_shift_deltas[atom1];
+        if (not morphed_alphas.isEmpty())
+        {
+            alpha = std::max(morphed_alphas[atom0], morphed_alphas[atom1]);
+        }
+
+        // clamp alpha between 0 and 1
+        if (alpha < 0)
+            alpha = 0;
+        else if (alpha > 1)
+            alpha = 1;
     }
 
     if (charge == 0 and epsilon == 0)
@@ -202,7 +208,8 @@ get_exception(int atom0, int atom1, int start_index,
 
     return std::make_tuple(atom0 + start_index,
                            atom1 + start_index,
-                           charge, sigma, epsilon, shift_delta);
+                           charge, sigma, epsilon,
+                           alpha);
 }
 
 /** Set the value of lambda in the passed context. Returns the
@@ -257,10 +264,10 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             perturbable_mol.perturbed->getEpsilons(),
             lambda_value);
 
-        const auto morphed_shift_deltas = this->lambda_schedule.morph(
-            "shift_delta",
-            perturbable_mol.getShiftDeltas(),
-            perturbable_mol.perturbed->getShiftDeltas(),
+        const auto morphed_alphas = this->lambda_schedule.morph(
+            "alpha",
+            perturbable_mol.getAlphas(),
+            perturbable_mol.perturbed->getAlphas(),
             lambda_value);
 
         const auto morphed_bond_k = this->lambda_schedule.morph(
@@ -327,8 +334,14 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     custom_params[1] = 0.5 * morphed_sigmas[j];
                     // two_sqrt_epsilon
                     custom_params[2] = 2.0 * std::sqrt(morphed_epsilons[j]);
-                    // shift_delta
-                    custom_params[3] = morphed_shift_deltas[j];
+                    // alpha
+                    custom_params[3] = morphed_alphas[j];
+
+                    // clamp alpha between 0 and 1
+                    if (custom_params[3] < 0)
+                        custom_params[3] = 0;
+                    else if (custom_params[3] > 1)
+                        custom_params[3] = 1;
 
                     ghost_ghostff->setParticleParameters(start_index + j, custom_params);
                     ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
@@ -372,7 +385,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const auto p = get_exception(std::get<0>(param), std::get<1>(param),
                                                  start_index, coul_14_scale, lj_14_scale,
                                                  morphed_charges, morphed_sigmas, morphed_epsilons,
-                                                 morphed_shift_deltas);
+                                                 morphed_alphas);
 
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
@@ -395,7 +408,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             if (ghost_14ff != 0)
                             {
-                                // parameters are q, sigma, four_epsilon and shift_delta
+                                // parameters are q, sigma, four_epsilon and alpha
                                 std::vector<double> params14 =
                                     {std::get<2>(p), std::get<3>(p),
                                      4.0 * std::get<4>(p), std::get<5>(p)};

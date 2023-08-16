@@ -401,12 +401,49 @@ namespace SireOpenMM
 
         if (any_perturbable)
         {
+            double shift_delta = 1.0;
+
+            if (map.specified("shift_delta"))
+            {
+                shift_delta = map["shift_delta"].value().asADouble();
+            }
+
+            if (shift_delta < 0)
+                shift_delta = 0;
+
+            int coulomb_power = 0;
+
+            if (map.specified("coulomb_power"))
+            {
+                coulomb_power = map["coulomb_power"].value().asAnInteger();
+            }
+
+            if (coulomb_power < 0)
+                coulomb_power = 0;
+            else if (coulomb_power > 4)
+                coulomb_power = 4;
+
+            auto coulomb_power_expression = [](const QString &alpha, int power)
+            {
+                if (power == 0)
+                    return QString("1");
+                else if (power == 1)
+                    return QString("(1-%1)").arg(alpha);
+                else if (power == 2)
+                    return QString("(1-%1)*(1-%1)").arg(alpha);
+                else
+                    return QString("(1-%1)^%2").arg(alpha).arg(power);
+            };
+
+            // see below for the description of this energy expression
             const auto nb14_expression = QString(
                                              "coul_nrg+lj_nrg;"
-                                             "coul_nrg=q*((1.0/sqrt(shift_delta+r^2))-(1.0/r));"
+                                             "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(1.0/r));"
                                              "lj_nrg=four_epsilon*((sig6^2)-sig6);"
-                                             "sig6=(sigma^6)/((delta_sigma + r^2)^3);"
-                                             "delta_sigma=sigma*shift_delta;")
+                                             "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
+                                             "delta=%2*alpha;")
+                                             .arg(coulomb_power_expression("alpha", coulomb_power))
+                                             .arg(shift_delta)
                                              .toStdString();
 
             ghost_14ff = new OpenMM::CustomBondForce(nb14_expression);
@@ -414,7 +451,7 @@ namespace SireOpenMM
             ghost_14ff->addPerBondParameter("q");
             ghost_14ff->addPerBondParameter("sigma");
             ghost_14ff->addPerBondParameter("four_epsilon");
-            ghost_14ff->addPerBondParameter("shift_delta");
+            ghost_14ff->addPerBondParameter("alpha");
 
             // short-range intramolecular term that should not use
             // periodic boundaries or cutoffs
@@ -434,14 +471,22 @@ namespace SireOpenMM
             // Note that we pre-calculate delta as a forcefield parameter,
             // and also supply half_sigma and two_sqrt_epsilon to save some
             // cycles
-            const auto clj_expression = QString(
-                                            "coul_nrg+lj_nrg;"
-                                            "coul_nrg=q1*q2*((1.0/sqrt(delta+r^2))-(1.0/r));"
-                                            "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
-                                            "sig6=(sigma^6)/((delta_sigma + r^2)^3);"
-                                            "delta_sigma=sigma*delta;"
-                                            "delta=shift_delta1+shift_delta2;"
-                                            "sigma=half_sigma1+half_sigma2;")
+            //
+            // Note also that we subtract the normal coulomb energy as this
+            // is calculated during the standard NonbondedForce
+            //
+            // 138.9354558466661 is the constant needed to get energies in
+            // kJ mol-1 given the units of charge (|e|) and distance (nm)
+            //
+            const auto clj_expression = QString("coul_nrg+lj_nrg;"
+                                                "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(1.0/r));"
+                                                "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
+                                                "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
+                                                "delta=%2*max_alpha;"
+                                                "max_alpha=max(alpha1, alpha2);"
+                                                "sigma=half_sigma1+half_sigma2;")
+                                            .arg(coulomb_power_expression("max_alpha", coulomb_power))
+                                            .arg(shift_delta)
                                             .toStdString();
 
             ghost_ghostff = new OpenMM::CustomNonbondedForce(clj_expression);
@@ -450,12 +495,12 @@ namespace SireOpenMM
             ghost_ghostff->addPerParticleParameter("q");
             ghost_ghostff->addPerParticleParameter("half_sigma");
             ghost_ghostff->addPerParticleParameter("two_sqrt_epsilon");
-            ghost_ghostff->addPerParticleParameter("shift_delta");
+            ghost_ghostff->addPerParticleParameter("alpha");
 
             ghost_nonghostff->addPerParticleParameter("q");
             ghost_nonghostff->addPerParticleParameter("half_sigma");
             ghost_nonghostff->addPerParticleParameter("two_sqrt_epsilon");
-            ghost_nonghostff->addPerParticleParameter("shift_delta");
+            ghost_nonghostff->addPerParticleParameter("alpha");
 
             // this will be slow if switched on, as it needs recalculating
             // for every change in parameters
@@ -553,7 +598,7 @@ namespace SireOpenMM
             {
                 // add a perturbable molecule, recording the start index
                 // for each of the forcefields
-                start_indicies.reserve(5);
+                start_indicies.reserve(7);
 
                 start_indicies.insert("clj", start_index);
                 start_indicies.insert("ghost/ghost", start_index);
@@ -571,7 +616,7 @@ namespace SireOpenMM
             // first the atom parameters
             auto masses_data = mol.masses.constData();
             auto cljs_data = mol.cljs.constData();
-            auto shift_deltas_data = mol.shift_deltas.constData();
+            auto alphas_data = mol.alphas.constData();
 
             if (any_perturbable and mol.isPerturbable())
             {
@@ -591,8 +636,8 @@ namespace SireOpenMM
                     custom_params[1] = 0.5 * std::get<1>(clj);
                     // two_sqrt_epsilon
                     custom_params[2] = 2.0 * std::sqrt(std::get<2>(clj));
-                    // shift_delta
-                    custom_params[3] = shift_deltas_data[j];
+                    // alpha
+                    custom_params[3] = alphas_data[j];
 
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
@@ -635,7 +680,7 @@ namespace SireOpenMM
                         custom_params[1] = 0.5 * std::get<1>(clj);
                         // two_sqrt_epsilon
                         custom_params[2] = 2.0 * std::sqrt(std::get<2>(clj));
-                        // shift_delta - is zero for non-ghost atoms
+                        // alpha - is zero for non-ghost atoms
                         custom_params[3] = 0.0;
                         ghost_ghostff->addParticle(custom_params);
                         ghost_nonghostff->addParticle(custom_params);
@@ -784,7 +829,7 @@ namespace SireOpenMM
                             // to the ghost-14 forcefield
                             if (ghost_14ff != 0)
                             {
-                                // parameters are q, sigma, four_epsilon and shift_delta
+                                // parameters are q, sigma, four_epsilon and alpha
                                 std::vector<double> params14 =
                                     {std::get<2>(p), std::get<3>(p),
                                      4.0 * std::get<4>(p), 0.0};

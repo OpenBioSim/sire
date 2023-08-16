@@ -199,15 +199,26 @@ class SOMMContext(_Context):
 
         self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
 
-    def get_potential_energy(self):
+    def get_potential_energy(self, to_sire_units: bool = True):
         """
         Calculate and return the potential energy of the system
         """
         s = self.getState(getEnergy=True)
-        return s.getPotentialEnergy()
+        nrg = s.getPotentialEnergy()
 
-    def get_energy(self):
+        if to_sire_units:
+            import openmm
+            from ...units import kcal_per_mol
+
+            return (
+                nrg.value_in_unit(openmm.unit.kilocalorie_per_mole)
+                * kcal_per_mol
+            )
+        else:
+            return nrg
+
+    def get_energy(self, to_sire_units: bool = True):
         """
         Synonym for self.get_potential_energy()
         """
-        return self.get_potential_energy()
+        return self.get_potential_energy(to_sire_units=to_sire_units)
