@@ -207,9 +207,9 @@ class DynamicsData:
                     if lambda_value != sim_lambda_value:
                         self._omm_mols.set_lambda(lambda_value)
                         nrgs[str(lambda_value)] = (
-                            self._omm_mols.get_potential_energy().value_in_unit(
-                                openmm.unit.kilocalorie_per_mole
-                            )
+                            self._omm_mols.get_potential_energy(
+                                to_sire_units=False
+                            ).value_in_unit(openmm.unit.kilocalorie_per_mole)
                             * kcal_per_mol
                         )
 
