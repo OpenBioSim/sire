@@ -55,6 +55,7 @@
 #include "ljperturbation.h"
 #include "mmdetail.h"
 #include "multicljcomponent.h"
+#include "positionalrestraints.h"
 #include "restraint.h"
 #include "restraintcomponent.h"
 #include "restraintff.h"
@@ -203,6 +204,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::LJPerturbation >();
     ObjectRegistry::registerConverterFor< SireMM::MMDetail >();
     ObjectRegistry::registerConverterFor< SireMM::MultiCLJComponent >();
+    ObjectRegistry::registerConverterFor< SireMM::PositionalRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::PositionalRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::NullRestraint >();
     ObjectRegistry::registerConverterFor< SireMM::RestraintComponent >();
     ObjectRegistry::registerConverterFor< SireMM::RestraintFF >();

@@ -23,6 +23,7 @@
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
 #include "SireMM/amberparams.h"
+#include "SireMM/positionalrestraints.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
@@ -536,84 +537,6 @@ namespace SireOpenMM
             lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
         }
 
-        // now the forcefields relating to restraints - first positional
-        // restraints - harmonic potentials keeping atoms close to
-        // fixed anchor points
-        OpenMM::HarmonicBondForce *positional_restraintff = 0;
-
-        if (map.specified("positional_restraints"))
-        {
-            positional_restraintff = new OpenMM::HarmonicBondForce();
-            positional_restraintff->setUsesPeriodicBoundaryConditions(true);
-
-            lambda_lever.setForceIndex("positional_restraint",
-                                       system.addForce(positional_restraintff));
-        }
-
-        // now classic distance, angle or torsion restraints between
-        // any pairs, triples or quads of atoms (including intermolecular)
-        OpenMM::HarmonicBondForce *distance_restraintff = 0;
-        OpenMM::HarmonicAngleForce *angle_restraintff = 0;
-        OpenMM::PeriodicTorsionForce *torsion_restraintff = 0;
-
-        if (map.specified("distance_restraints"))
-        {
-            distance_restraintff = new OpenMM::HarmonicBondForce();
-            distance_restraintff->setUsesPeriodicBoundaryConditions(true);
-
-            lambda_lever.setForceIndex("distance_restraint",
-                                       system.addForce(distance_restraintff));
-        }
-
-        if (map.specified("angle_restraints"))
-        {
-            angle_restraintff = new OpenMM::HarmonicAngleForce();
-            angle_restraintff->setUsesPeriodicBoundaryConditions(true);
-
-            lambda_lever.setForceIndex("angle_restraint",
-                                       system.addForce(angle_restraintff));
-        }
-
-        if (map.specified("torsion_restraints"))
-        {
-            torsion_restraintff = new OpenMM::PeriodicTorsionForce();
-            torsion_restraintff->setUsesPeriodicBoundaryConditions(true);
-
-            lambda_lever.setForceIndex("torsion_restraint",
-                                       system.addForce(torsion_restraintff));
-        }
-
-        // now the Boresch restraints that can be used to hold a ligand
-        // in a defined position and orientation relative to a receptor
-        OpenMM::HarmonicBondForce *boresch_distance_restraintff = 0;
-        OpenMM::HarmonicAngleForce *boresch_angle_restraintff = 0;
-        OpenMM::CustomTorsionForce *boresch_torsion_restraintff = 0;
-
-        if (map.specified("boresch_restraints"))
-        {
-            boresch_distance_restraintff = new OpenMM::HarmonicBondForce();
-            boresch_angle_restraintff = new OpenMM::HarmonicAngleForce();
-
-            const auto torsion_expression = QString(
-                                                "force_const*min(dtheta, 2*pi-dtheta)^2;"
-                                                "dtheta = abs(theta-equil_val);"
-                                                "pi = 3.1415926535;")
-                                                .toStdString();
-
-            boresch_torsion_restraintff = new OpenMM::CustomTorsionForce(torsion_expression);
-
-            boresch_distance_restraintff->setUsesPeriodicBoundaryConditions(true);
-            boresch_angle_restraintff->setUsesPeriodicBoundaryConditions(true);
-            boresch_torsion_restraintff->setUsesPeriodicBoundaryConditions(true);
-
-            lambda_lever.setForceIndex("boresch_distance",
-                                       system.addForce(boresch_distance_restraintff));
-            lambda_lever.setForceIndex("boresch_angle",
-                                       system.addForce(boresch_angle_restraintff));
-            lambda_lever.setForceIndex("boresch_torsion",
-                                       system.addForce(boresch_torsion_restraintff));
-        }
-
         // Now copy data from the temporary OpenMMMolecule objects
         // into these forcefields
         // (will deal with restraints, light atoms and virtual sites later)
@@ -969,34 +892,148 @@ namespace SireOpenMM
         }
 
         // set up all of the restraints
-        if (positional_restraintff != 0)
-        {
-            // we have some positional restraints
-            const auto restraints = map["positional_restraints"].value().asA<PositionalRestraints>();
 
-            // go through each restraint and create an anchor atom, then add
-            // the restraint parameters
+        // first the positional restraints - these will depend on the coordinates
+        // of massless anchor atoms
+        std::vector<OpenMM::Vec3> anchor_coords;
+
+        custom_params[0] = 0.0;
+        custom_params[1] = 1e-9;
+        custom_params[2] = 0.0;
+        custom_params[3] = 0.0;
+
+        if (map.specified("positional_restraints"))
+        {
+            const auto &restraints = map["positional_restraints"].value().asA<SireMM::PositionalRestraints>();
+
+            if (restraints.hasCentroidRestraints())
+            {
+                throw SireError::unsupported(QObject::tr(
+                                                 "Centroid positional restraints aren't yet supported..."),
+                                             CODELOC);
+            }
+
+            auto *restraintff = new OpenMM::HarmonicBondForce();
+            restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("positional_restraint",
+                                       system.addForce(restraintff));
+
+            const auto atom_restraints = restraints.atomRestraints();
+
+            anchor_coords.reserve(atom_restraints.count());
+
+            auto to_vec3 = [](const SireMaths::Vector &coords)
+            {
+                const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+
+                return OpenMM::Vec3(internal_to_nm * coords.x(),
+                                    internal_to_nm * coords.y(),
+                                    internal_to_nm * coords.z());
+            };
+
+            QVector<SireMaths::Vector> anchor_idxs;
+
+            const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+            const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer2));
+
+            // we need to add all of the positions as anchor particles
+            for (const auto &restraint : atom_restraints)
+            {
+                int atom_index = restraint.atom();
+
+                if (atom_index < 0 or atom_index >= start_index)
+                    throw SireError::invalid_index(QObject::tr(
+                                                       "Invalid particle index! %1 from %2")
+                                                       .arg(atom_index)
+                                                       .arg(start_index),
+                                                   CODELOC);
+
+                // find the anchor at this position
+                int anchor_index = anchor_idxs.indexOf(restraint.position());
+
+                if (anchor_index != -1)
+                {
+                    anchor_index += start_index;
+                }
+                else if (anchor_index == -1)
+                {
+                    // doesn't exist - create it as a massless particle
+                    // (won't be moved)
+                    anchor_index = system.addParticle(0.0);
+                    anchor_coords.push_back(to_vec3(restraint.position()));
+                    anchor_idxs.append(restraint.position());
+
+                    // add a null particle to the nonbonded forces
+                    // and make sure to exclude interactions between normal
+                    // atoms and the anchor
+                    if (cljff != 0)
+                    {
+                        cljff->addParticle(0, 1e-9, 0);
+
+                        for (int i = 0; i < start_index; ++i)
+                        {
+                            cljff->addException(anchor_index, i, 0, 1, 0);
+                        }
+                    }
+
+                    if (ghost_ghostff != 0)
+                    {
+                        ghost_ghostff->addParticle(custom_params);
+
+                        for (int i = 0; i < start_index; ++i)
+                        {
+                            ghost_ghostff->addExclusion(anchor_index, i);
+                        }
+                    }
+
+                    if (ghost_nonghostff != 0)
+                    {
+                        ghost_nonghostff->addParticle(custom_params);
+
+                        for (int i = 0; i < start_index; ++i)
+                        {
+                            ghost_nonghostff->addExclusion(anchor_index, i);
+                        }
+                    }
+                }
+
+                restraintff->addBond(anchor_index, atom_index,
+                                     restraint.r0().value() * internal_to_nm,
+                                     restraint.k().value() * internal_to_k);
+            }
         }
 
-        if (distance_restraintff != 0)
+        if (map.specified("distance_restraints"))
         {
-            // we have some distance restraints
+            const auto energy_expression = QString("0").toStdString();
+
+            auto restraintff = new OpenMM::CustomBondForce(energy_expression);
+            restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("distance_restraint",
+                                       system.addForce(restraintff));
         }
 
-        if (angle_restraintff != 0)
+        if (map.specified("boresch_restraints"))
         {
-            // we have some angle restraints
-        }
+            // now the Boresch restraints that can be used to hold a ligand
+            // in a defined position and orientation relative to a receptor
 
-        if (torsion_restraintff != 0)
-        {
-            // we have some torsion restraints
-        }
+            // The equation is between three ligand points, p1, p2, p3
+            // and three receptor points, p4, p5, p6.
+            //
+            // A set of bond, angle and dihedral restraints based on these
+            // six points are evaluated
+            const auto energy_expression = QString(
+                                               "0")
+                                               .toStdString();
 
-        if (boresch_distance_restraintff != 0)
-        {
-            // we have some boresch restraints - these are a set
-            // that will always use all three boresch restraint forces
+            auto restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression);
+            restraintff->setUsesPeriodicBoundaryConditions(true);
+
+            lambda_lever.setForceIndex("boresch_restraint",
+                                       system.addForce(restraintff));
         }
 
         // see if we want to remove COM motion
@@ -1017,9 +1054,10 @@ namespace SireOpenMM
         std::shared_ptr<std::vector<OpenMM::Vec3>> coords, vels;
 
         const int natoms = start_index;
+        const int nanchors = anchor_coords.size();
 
-        coords.reset(new std::vector<OpenMM::Vec3>(natoms));
-        vels.reset(new std::vector<OpenMM::Vec3>(natoms));
+        coords.reset(new std::vector<OpenMM::Vec3>(natoms + nanchors));
+        vels.reset(new std::vector<OpenMM::Vec3>(natoms + nanchors));
 
         auto coords_data = coords->data();
         auto vels_data = vels->data();
@@ -1049,8 +1087,15 @@ namespace SireOpenMM
             }
         }
 
-        // now copy in the positional restraint coordinates (if any)
-        // ...
+        // now copy in the positions of the anchors
+        if (nanchors > 0)
+        {
+            for (int i = 0; i < nanchors; ++i)
+            {
+                coords_data[natoms + i] = anchor_coords[i];
+                vels_data[natoms + i] = OpenMM::Vec3(0, 0, 0);
+            }
+        }
 
         return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
     }
@@ -1197,7 +1242,7 @@ namespace SireOpenMM
         const int natoms = positions.size();
         const auto positions_data = positions.data();
 
-        if (mols.nAtoms() != natoms)
+        if (mols.nAtoms() > natoms)
         {
             throw SireError::incompatible_error(QObject::tr(
                                                     "Different number of atoms from OpenMM and sire. "
@@ -1302,7 +1347,7 @@ namespace SireOpenMM
         const auto positions_data = positions.data();
         const auto velocities_data = velocities.data();
 
-        if (mols.nAtoms() != natoms)
+        if (mols.nAtoms() > natoms)
         {
             throw SireError::incompatible_error(QObject::tr(
                                                     "Different number of atoms from OpenMM and sire. "

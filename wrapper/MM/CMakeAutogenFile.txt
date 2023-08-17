@@ -164,6 +164,8 @@ set ( PYPP_SOURCES
        NoCutoff.pypp.cpp
        NullCLJFunction.pypp.cpp
        NullRestraint.pypp.cpp
+       PositionalRestraint.pypp.cpp
+       PositionalRestraints.pypp.cpp
        Restraint.pypp.cpp
        Restraint3D.pypp.cpp
        RestraintComponent.pypp.cpp

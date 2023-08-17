@@ -59,6 +59,7 @@
 #include "ljpotential.h"
 #include "mmdetail.h"
 #include "multicljcomponent.h"
+#include "positionalrestraints.h"
 #include "restraint.h"
 #include "restraintcomponent.h"
 #include "restraintff.h"

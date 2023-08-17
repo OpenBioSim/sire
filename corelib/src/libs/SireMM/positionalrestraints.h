@@ -31,6 +31,11 @@
 
 #include "SireBase/property.h"
 
+#include "SireMaths/vector.h"
+
+#include "SireUnits/dimensions.h"
+#include "SireUnits/generalunit.h"
+
 SIRE_BEGIN_HEADER
 
 namespace SireMM
@@ -39,8 +44,148 @@ namespace SireMM
     class PositionalRestraints;
 }
 
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::PositionalRestraints &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::PositionalRestraints &);
+
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::PositionalRestraint &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::PositionalRestraint &);
+
 namespace SireMM
 {
+    /** This class provides information about a single positional restraint.
+     *  This is spherically symmetric and can act on either a single particle,
+     *  or the centroid of a group of particles. The restraints are either
+     *  flat-bottom harmonics or harmonic potentials
+     */
+    class SIREMM_EXPORT PositionalRestraint
+        : public SireBase::ConcreteProperty<PositionalRestraint, SireBase::Property>
+    {
+        friend QDataStream & ::operator<<(QDataStream &, const SireMM::PositionalRestraint &);
+        friend QDataStream & ::operator>>(QDataStream &, SireMM::PositionalRestraint &);
+
+    public:
+        PositionalRestraint();
+        PositionalRestraint(qint64 atom, const SireMaths::Vector &position,
+                            const SireUnits::Dimension::GeneralUnit &k,
+                            const SireUnits::Dimension::Length &r0);
+
+        PositionalRestraint(const QList<qint64> &atoms,
+                            const SireMaths::Vector &position,
+                            const SireUnits::Dimension::GeneralUnit &k,
+                            const SireUnits::Dimension::Length &r0);
+
+        PositionalRestraint(const PositionalRestraint &other);
+
+        ~PositionalRestraint();
+
+        PositionalRestraint &operator=(const PositionalRestraint &other);
+
+        bool operator==(const PositionalRestraint &other) const;
+        bool operator!=(const PositionalRestraint &other) const;
+
+        PositionalRestraints operator+(const PositionalRestraint &other) const;
+        PositionalRestraints operator+(const PositionalRestraints &other) const;
+
+        static const char *typeName();
+        const char *what() const;
+
+        PositionalRestraint *clone() const;
+
+        QString toString() const;
+
+        bool isNull() const;
+
+        bool isAtomRestraint() const;
+        bool isCentroidRestraint() const;
+
+        qint64 atom() const;
+        QVector<qint64> atoms() const;
+
+        SireMaths::Vector position() const;
+
+        SireUnits::Dimension::GeneralUnit k() const;
+        SireUnits::Dimension::Length r0() const;
+
+    private:
+        /** The atoms involved in the restraint */
+        QVector<qint64> atms;
+
+        /** The location of the restraint */
+        SireMaths::Vector pos;
+
+        /** The force constant */
+        double _k;
+
+        /** The flat-bottom width (0 of harmonic restraints) */
+        double _r0;
+    };
+
+    /** This class provides the information for a collection of positional
+     *  restraints that can be added to a collection of molecues. Each
+     *  restraint can act on a particle or the centroid of a collection
+     *  of particles. The restaints are spherically symmetric, and
+     *  are either flat-bottom harmonics or harmonic potentials
+     */
+    class SIREMM_EXPORT PositionalRestraints
+        : public SireBase::ConcreteProperty<PositionalRestraints, SireBase::Property>
+    {
+        friend QDataStream & ::operator<<(QDataStream &, const SireMM::PositionalRestraints &);
+        friend QDataStream & ::operator>>(QDataStream &, SireMM::PositionalRestraints &);
+
+    public:
+        PositionalRestraints();
+        PositionalRestraints(const PositionalRestraint &restraint);
+        PositionalRestraints(const QList<PositionalRestraint> &restraints);
+        PositionalRestraints(const PositionalRestraints &other);
+
+        ~PositionalRestraints();
+
+        PositionalRestraints &operator=(const PositionalRestraints &other);
+
+        bool operator==(const PositionalRestraints &other) const;
+        bool operator!=(const PositionalRestraints &other) const;
+
+        static const char *typeName();
+        const char *what() const;
+
+        PositionalRestraints *clone() const;
+
+        QString toString() const;
+
+        bool isEmpty() const;
+        bool isNull() const;
+
+        int count() const;
+        int size() const;
+        int nRestraints() const;
+
+        int nAtomRestraints() const;
+        int nCentroidRestraints() const;
+
+        bool hasAtomRestraints() const;
+        bool hasCentroidRestraints() const;
+
+        const PositionalRestraint &at(int i) const;
+        const PositionalRestraint &operator[](int i) const;
+
+        QList<PositionalRestraint> restraints() const;
+
+        QList<PositionalRestraint> atomRestraints() const;
+        QList<PositionalRestraint> centroidRestraints() const;
+
+        void add(const PositionalRestraint &restraint);
+        void add(const PositionalRestraints &restraints);
+
+        PositionalRestraints &operator+=(const PositionalRestraint &restraint);
+        PositionalRestraints &operator+=(const PositionalRestraints &restraints);
+
+        PositionalRestraints operator+(const PositionalRestraint &restraint) const;
+        PositionalRestraints operator+(const PositionalRestraints &restraints) const;
+
+    private:
+        /** The actual list of restraints*/
+        QList<PositionalRestraint> r;
+    };
 
 }
 

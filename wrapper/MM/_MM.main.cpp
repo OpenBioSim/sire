@@ -335,6 +335,10 @@
 
 #include "NullRestraint.pypp.hpp"
 
+#include "PositionalRestraint.pypp.hpp"
+
+#include "PositionalRestraints.pypp.hpp"
+
 #include "Restraint.pypp.hpp"
 
 #include "Restraint3D.pypp.hpp"
@@ -751,6 +755,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_NullCLJFunction_class();
 
     register_NullRestraint_class();
+
+    register_PositionalRestraint_class();
+
+    register_PositionalRestraints_class();
 
     register_RestraintComponent_class();
 

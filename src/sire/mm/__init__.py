@@ -7,6 +7,8 @@ __all__ = [
     "Bond",
     "Dihedral",
     "Improper",
+    "PositionRestraint",
+    "PositionRestraints",
     "SelectorAngle",
     "SelectorBond",
     "SelectorDihedral",
@@ -16,6 +18,7 @@ __all__ = [
     "SelectorMDihedral",
     "SelectorMImproper",
     "LJParameter",
+    "create_positional_restraints",
 ]
 
 from ..legacy import MM as _MM
@@ -40,6 +43,11 @@ from ..mol import (
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
+
+PositionalRestraint = _MM.PositionalRestraint
+PositionalRestraints = _MM.PositionalRestraints
+
+from ._restraints import *
 
 AmberBond = _MM.AmberBond
 AmberAngle = _MM.AmberAngle
