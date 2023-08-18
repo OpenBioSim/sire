@@ -54,27 +54,12 @@ using SireSystem::ForceFieldInfo;
 
 using namespace SireOpenMM;
 
-bool use_parallel(int n, const SireBase::PropertyMap &map)
-{
-    if (n <= 16)
-        return false;
-
-    if (map["parallel"].hasValue())
-    {
-        return map["parallel"].value().asABoolean();
-    }
-
-    return true;
-}
-
-QString get_name(const OpenMM::Force *f)
-{
-    if (f != 0)
-        return QString::fromStdString(f->getName());
-    else
-        return QString();
-}
-
+/** Add all of the positional restraints from 'restraints' to the passed
+ *  system, which is acted on by the passed LambdaLever. All of the
+ *  existing anchor atoms are in 'anchor_coords', which this function
+ *  will add to if any more need adding. The number of real (non-anchor)
+ *  atoms in the OpenMM::System is 'natoms'
+ */
 void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                 OpenMM::System &system, LambdaLever &lambda_lever,
                                 std::vector<OpenMM::Vec3> &anchor_coords,
@@ -91,7 +76,6 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     restraintff->setUsesPeriodicBoundaryConditions(true);
 
     lambda_lever.setForceIndex("positional_restraint",
-                               get_name(restraintff),
                                system.addForce(restraintff));
 
     const auto atom_restraints = restraints.atomRestraints();
@@ -185,6 +169,11 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     }
 }
 
+/** Set the coulomb and LJ cutoff in the passed NonbondedForce,
+ *  based on the information in the passed ForceFieldInfo.
+ *  This sets the cutoff type (e.g. PME) and the actual
+ *  cutoff length (if one is used)
+ */
 void _set_clj_cutoff(OpenMM::NonbondedForce &cljff,
                      const ForceFieldInfo &ffinfo)
 {
@@ -355,14 +344,21 @@ would be messy).
 This function is best read as a sequence of stages. These stages
 are commented within the function. The stages are:
 
-1.
+1. Initialisation - copying molecular data from sire into OpenMMMolecule
 
-2.
+2. Create base forces (forcefields)
 
-3.
+3. Define the LambdaLever and LambdaSchedule
 
-4.
+4. Define the forces (forcefields) for the ghost atoms
 
+5. Copy atomistic forcefield parameters to the OpenMM forces
+
+6. Set up the nonbonded pair exceptions
+
+7. Set up the restraints
+
+8. Copy across all of the coordinates and velocities
 
 */
 OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
@@ -411,7 +407,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     QVector<OpenMMMolecule> openmm_mols(nmols);
     auto openmm_mols_data = openmm_mols.data();
 
-    if (use_parallel(nmols, map))
+    if (SireBase::should_run_in_parallel(nmols, map))
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, mols.count()), [&](const tbb::blocked_range<int> &r)
                           {
@@ -446,7 +442,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // molecules are perturbable
 
     ///
-    /// Stage 2 - base forces
+    /// Stage 2 - Base Forces
     ///
     /// Aim is to create the base forces, e.g. Nonbonded, Bond, Angle,
     /// Torsion. These forces are created and parameterised via the
@@ -511,7 +507,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // We can now add the standard forces to the OpenMM::System.
     // We do this here, so that we can capture the index of the
     // force and associate it with a name in the lever.
-    lambda_lever.setForceIndex("clj", get_name(cljff), system.addForce(cljff));
+    lambda_lever.setForceIndex("clj", system.addForce(cljff));
 
     // We also want to name the levers available for this force,
     // e.g. we can change the charge, sigma and epsilon parameters
@@ -520,15 +516,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.addLever("epsilon");
 
     // Do the same for the bond, angle and torsion forces
-    lambda_lever.setForceIndex("bond", get_name(bondff), system.addForce(bondff));
+    lambda_lever.setForceIndex("bond", system.addForce(bondff));
     lambda_lever.addLever("bond_length");
     lambda_lever.addLever("bond_k");
 
-    lambda_lever.setForceIndex("angle", get_name(angff), system.addForce(angff));
+    lambda_lever.setForceIndex("angle", system.addForce(angff));
     lambda_lever.addLever("angle_size");
     lambda_lever.addLever("angle_k");
 
-    lambda_lever.setForceIndex("torsion", get_name(dihff), system.addForce(dihff));
+    lambda_lever.setForceIndex("torsion", system.addForce(dihff));
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_periodicity");
     lambda_lever.addLever("torsion_k");
@@ -678,12 +674,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             ghost_nonghostff->setNonbondedMethod(OpenMM::CustomNonbondedForce::NoCutoff);
         }
 
-        lambda_lever.setForceIndex("ghost/ghost", get_name(ghost_ghostff),
-                                   system.addForce(ghost_ghostff));
-        lambda_lever.setForceIndex("ghost/non-ghost", get_name(ghost_nonghostff),
-                                   system.addForce(ghost_nonghostff));
-        lambda_lever.setForceIndex("ghost-14", get_name(ghost_14ff),
-                                   system.addForce(ghost_14ff));
+        lambda_lever.setForceIndex("ghost/ghost", system.addForce(ghost_ghostff));
+        lambda_lever.setForceIndex("ghost/non-ghost", system.addForce(ghost_nonghostff));
+        lambda_lever.setForceIndex("ghost-14", system.addForce(ghost_14ff));
     }
 
     // Stage 4 is complete. We now have all(*) of the forces we need to run
@@ -1193,7 +1186,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     const int *start_indexes_data = start_indexes.constData();
 
     // now copy the atomic data into the arrays
-    if (use_parallel(nmols, map))
+    if (SireBase::should_run_in_parallel(nmols, map))
     {
         tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](tbb::blocked_range<int> r)
                           {

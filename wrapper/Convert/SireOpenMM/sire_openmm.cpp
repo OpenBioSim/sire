@@ -54,19 +54,6 @@ using SireSystem::ForceFieldInfo;
 
 namespace SireOpenMM
 {
-    bool use_parallel(int n, const SireBase::PropertyMap &map)
-    {
-        if (n <= 16)
-            return false;
-
-        if (map["parallel"].hasValue())
-        {
-            return map["parallel"].value().asABoolean();
-        }
-
-        return true;
-    }
-
     ////
     //// Implementation of OpenMMMetaData
     ////
@@ -328,7 +315,7 @@ namespace SireOpenMM
 
         const auto offsets_data = offsets.constData();
 
-        if (use_parallel(nmols, map))
+        if (SireBase::should_run_in_parallel(nmols, map))
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
                               {
@@ -434,7 +421,7 @@ namespace SireOpenMM
 
         const auto offsets_data = offsets.constData();
 
-        if (use_parallel(nmols, map))
+        if (SireBase::should_run_in_parallel(nmols, map))
         {
             tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
                               {

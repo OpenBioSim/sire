@@ -64,8 +64,7 @@ namespace SireOpenMM
 
         double setLambda(OpenMM::Context &context, double lam_val) const;
 
-        void setForceIndex(const QString &force,
-                           const QString &force_type, int index);
+        void setForceIndex(const QString &force, int index);
 
         int addPerturbableMolecule(const OpenMMMolecule &molecule,
                                    const QHash<QString, qint32> &start_indicies);
@@ -87,12 +86,13 @@ namespace SireOpenMM
         T *getForce(const QString &name, OpenMM::System &system) const;
 
         int getForceIndex(const QString &name) const;
-        QString getForceType(const QString &name) const;
+        QString getForceType(const QString &name,
+                             const OpenMM::System &system) const;
 
     protected:
         /** Map from a forcefield name to its index in the associated System,
          *  and its type */
-        QHash<QString, std::pair<int, QString>> name_to_ffidx;
+        QHash<QString, int> name_to_ffidx;
 
         /** The schedule used to set lambda */
         SireCAS::LambdaSchedule lambda_schedule;
@@ -110,6 +110,24 @@ namespace SireOpenMM
 
 #ifndef SIRE_SKIP_INLINE_FUNCTION
 
+    template <class T>
+    inline QString _get_typename()
+    {
+        return QString::fromStdString(T().getName());
+    }
+
+    template <>
+    inline QString _get_typename<OpenMM::CustomNonbondedForce>()
+    {
+        return "OpenMM::CustomNonbondedForce";
+    }
+
+    template <>
+    inline QString _get_typename<OpenMM::CustomBondForce>()
+    {
+        return "OpenMM::CustomBondForce";
+    }
+
     /** Return the OpenMM::Force (of type T) that is called 'name'
      *  from the passed OpenMM::System. This returns 0 if the force
      *  doesn't exist
@@ -124,9 +142,7 @@ namespace SireOpenMM
             return 0;
         }
 
-        const auto v = it.value();
-        const int idx = std::get<0>(v);
-        const QString &typ = std::get<1>(v);
+        const int idx = it.value();
 
         const int num_forces = system.getNumForces();
 
@@ -150,8 +166,8 @@ namespace SireOpenMM
             throw SireError::invalid_cast(QObject::tr(
                                               "Cannot cast the force called '%1' to a %2. We think it is a %3.")
                                               .arg(name)
-                                              .arg(force_type)
-                                              .arg(typ),
+                                              .arg(_get_typename<T>())
+                                              .arg(QString::fromStdString(force.getName())),
                                           CODELOC);
         }
 

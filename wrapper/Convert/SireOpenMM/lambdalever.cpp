@@ -126,22 +126,34 @@ int LambdaLever::getForceIndex(const QString &name) const
         return -1;
     }
 
-    return std::get<0>(it.value());
+    return it.value();
 }
 
 /** Get the C++ type of the force called 'name'. Returns an
  *  empty string if there is no such force
  */
-QString LambdaLever::getForceType(const QString &name) const
+QString LambdaLever::getForceType(const QString &name,
+                                  const OpenMM::System &system) const
 {
-    auto it = name_to_ffidx.constFind(name);
+    int idx = this->getForceIndex(name);
 
-    if (it == name_to_ffidx.constEnd())
-    {
+    if (idx == -1)
         return QString();
+
+    if (idx < 0 or idx >= system.getNumForces())
+    {
+        throw SireError::invalid_key(QObject::tr(
+                                         "The index for the Force called '%1', %2, is invalid for an "
+                                         "OpenMM System which has %3 forces.")
+                                         .arg(name)
+                                         .arg(idx)
+                                         .arg(system.getNumForces()),
+                                     CODELOC);
     }
 
-    return std::get<1>(it.value());
+    const OpenMM::Force &force = system.getForce(idx);
+
+    return QString::fromStdString(force.getName());
 }
 
 std::tuple<int, int, double, double, double, double>
@@ -538,7 +550,6 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 }
 
 void LambdaLever::setForceIndex(const QString &force,
-                                const QString &force_type,
                                 int index)
 {
     if (index < 0)
@@ -548,7 +559,7 @@ void LambdaLever::setForceIndex(const QString &force,
                                            .arg(index),
                                        CODELOC);
 
-    this->name_to_ffidx.insert(force, std::make_pair<int, QString>(index, QString(force_type)));
+    this->name_to_ffidx.insert(force, index);
 }
 
 /** Add info for the passed perturbable OpenMMMolecule, returning
