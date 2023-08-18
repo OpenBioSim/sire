@@ -63,6 +63,7 @@
 #include "restraint.h"
 #include "restraintcomponent.h"
 #include "restraintff.h"
+#include "restraints.h"
 #include "selectorangle.h"
 #include "selectorbond.h"
 #include "selectordihedral.h"

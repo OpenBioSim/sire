@@ -407,6 +407,11 @@ class System:
             softening potential that smooths the creation and deletion
             of ghost atoms during a potential. This defaults to 0.
 
+        restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+            A single set of restraints, or a list of sets of
+            restraints that will be applied to the atoms during
+            the simulation.
+
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
             minimisation. This would be CUDA_DEVICE_ID or similar
@@ -502,6 +507,11 @@ class System:
             The coulomb power parmeter that controls the electrostatic
             softening potential that smooths the creation and deletion
             of ghost atoms during a potential. This defaults to 0.
+
+        restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+            A single set of restraints, or a list of sets of
+            restraints that will be applied to the atoms during
+            the simulation.
 
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate

@@ -784,6 +784,7 @@ class Dynamics:
         swap_end_states=None,
         shift_delta=None,
         coulomb_power=None,
+        restraints=None,
     ):
         from ..base import create_map
         from .. import u
@@ -800,6 +801,7 @@ class Dynamics:
         _add_extra(extras, "swap_end_states", swap_end_states)
         _add_extra(extras, "shift_delta", shift_delta)
         _add_extra(extras, "coulomb_power", coulomb_power)
+        _add_extra(extras, "restraints", restraints)
 
         map = create_map(map, extras)
 

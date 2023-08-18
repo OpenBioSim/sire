@@ -1333,6 +1333,7 @@ def _dynamics(
     pressure=None,
     shift_delta=None,
     coulomb_power=None,
+    restraints=None,
     device=None,
     map=None,
     **kwargs,
@@ -1416,6 +1417,11 @@ def _dynamics(
         The coulomb power parmeter that controls the electrostatic
         softening potential that smooths the creation and deletion
         of ghost atoms during a potential. This defaults to 0.
+
+    restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+        A single set of restraints, or a list of sets of
+        restraints that will be applied to the atoms during
+        the simulation.
 
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
@@ -1511,6 +1517,7 @@ def _dynamics(
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
+        restraints=restraints,
         map=map,
     )
 
@@ -1526,6 +1533,7 @@ def _minimisation(
     shift_delta=None,
     coulomb_power=None,
     device=None,
+    restraints=None,
     map=None,
     **kwargs,
 ):
@@ -1578,6 +1586,11 @@ def _minimisation(
         softening potential that smooths the creation and deletion
         of ghost atoms during a potential. This defaults to 0.
 
+    restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+        A single set of restraints, or a list of sets of
+        restraints that will be applied to the atoms during
+        the simulation.
+
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
         minimisation. This would be CUDA_DEVICE_ID or similar
@@ -1624,6 +1637,7 @@ def _minimisation(
         swap_end_states=swap_end_states,
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
+        restraints=restraints,
         map=map,
     )
 

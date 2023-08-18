@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 #include "positionalrestraints.h"
 
+#include <QDebug>
+
 #include "positionalrestraints.h"
 
 SireMM::PositionalRestraint __copy__(const SireMM::PositionalRestraint &other){ return SireMM::PositionalRestraint(other); }

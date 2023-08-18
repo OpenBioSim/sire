@@ -77,6 +77,7 @@ set ( SIREMM_HEADERS
       multicljcomponent.h
       positionalrestraints.h
       restraint.h
+      restraints.h
       restraintcomponent.h
       restraintff.h
       selectorangle.h
@@ -164,6 +165,7 @@ set ( SIREMM_SOURCES
       multicljcomponent.cpp
       positionalrestraints.cpp
       restraint.cpp
+      restraints.cpp
       restraintcomponent.cpp
       restraintff.cpp
       selectorangle.cpp

@@ -32,6 +32,7 @@ if (${SIRE_USE_OPENMM})
           lambdalever.cpp
           openmmmolecule.cpp
           sire_openmm.cpp
+          sire_to_openmm_system.cpp
 
       )
 

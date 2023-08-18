@@ -97,49 +97,51 @@ const char *LambdaLever::typeName()
     return QMetaType::typeName(qMetaTypeId<LambdaLever>());
 }
 
-template <class T>
-T *get_force(const QString &name, OpenMM::Context &context,
-             const QHash<QString, int> &name_to_index,
-             const QString &force_type)
+bool LambdaLever::hasLever(const QString &lever_name)
 {
-    auto it = name_to_index.constFind(name);
+    return this->lambda_schedule.getLevers().contains(lever_name);
+}
 
-    if (it == name_to_index.constEnd())
-    {
-        return 0;
-    }
-
-    const int idx = it.value();
-
-    OpenMM::System &system = const_cast<OpenMM::System &>(context.getSystem());
-
-    const int num_forces = system.getNumForces();
-
-    if (idx < 0 or idx >= num_forces)
-    {
+void LambdaLever::addLever(const QString &lever_name)
+{
+    if (this->hasLever(lever_name))
         throw SireError::invalid_key(QObject::tr(
-                                         "The index for the Force called '%1', %2, is invalid for an "
-                                         "OpenMM System which has %3 forces.")
-                                         .arg(name)
-                                         .arg(idx)
-                                         .arg(num_forces),
+                                         "You cannot add a new lever called '%1' as a lever with "
+                                         "this name already exists.")
+                                         .arg(lever_name),
                                      CODELOC);
-    }
 
-    OpenMM::Force &force = system.getForce(idx);
+    this->lambda_schedule.addLever(lever_name);
+}
 
-    T *t_force = dynamic_cast<T *>(&force);
+/** Get the index of the force called 'name'. Returns -1 if
+ *  there is no force with this name
+ */
+int LambdaLever::getForceIndex(const QString &name) const
+{
+    auto it = name_to_ffidx.constFind(name);
 
-    if (t_force == 0)
+    if (it == name_to_ffidx.constEnd())
     {
-        throw SireError::invalid_cast(QObject::tr(
-                                          "Cannot cast the force called '%1' to a %2.")
-                                          .arg(name)
-                                          .arg(force_type),
-                                      CODELOC);
+        return -1;
     }
 
-    return t_force;
+    return std::get<0>(it.value());
+}
+
+/** Get the C++ type of the force called 'name'. Returns an
+ *  empty string if there is no such force
+ */
+QString LambdaLever::getForceType(const QString &name) const
+{
+    auto it = name_to_ffidx.constFind(name);
+
+    if (it == name_to_ffidx.constEnd())
+    {
+        return QString();
+    }
+
+    return std::get<1>(it.value());
 }
 
 std::tuple<int, int, double, double, double, double>
@@ -225,14 +227,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     lambda_value = this->lambda_schedule.clamp(lambda_value);
 
+    // we need an editable reference to the system to get editable
+    // pointers to the forces...
+    OpenMM::System &system = const_cast<OpenMM::System &>(context.getSystem());
+
     // get copies of the forcefields in which the parameters will be changed
-    auto cljff = get_force<OpenMM::NonbondedForce>("clj", context, name_to_ffidx, "NonbondedForce");
-    auto ghost_ghostff = get_force<OpenMM::CustomNonbondedForce>("ghost/ghost", context, name_to_ffidx, "CustomNonbondedForce");
-    auto ghost_nonghostff = get_force<OpenMM::CustomNonbondedForce>("ghost/non-ghost", context, name_to_ffidx, "CustomNonbondedForce");
-    auto ghost_14ff = get_force<OpenMM::CustomBondForce>("ghost-14", context, name_to_ffidx, "CustomBondForce");
-    auto bondff = get_force<OpenMM::HarmonicBondForce>("bond", context, name_to_ffidx, "HarmonicBondForce");
-    auto angff = get_force<OpenMM::HarmonicAngleForce>("angle", context, name_to_ffidx, "HarmonicAngleForce");
-    auto dihff = get_force<OpenMM::PeriodicTorsionForce>("torsion", context, name_to_ffidx, "PeriodicTorsionForce");
+    auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
+    auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
+    auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
+    auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
+    auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
+    auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
+    auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
 
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
@@ -531,7 +537,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     return lambda_value;
 }
 
-void LambdaLever::setForceIndex(const QString &force, int index)
+void LambdaLever::setForceIndex(const QString &force,
+                                const QString &force_type,
+                                int index)
 {
     if (index < 0)
         throw SireError::invalid_index(QObject::tr(
@@ -540,7 +548,7 @@ void LambdaLever::setForceIndex(const QString &force, int index)
                                            .arg(index),
                                        CODELOC);
 
-    this->name_to_ffidx.insert(force, index);
+    this->name_to_ffidx.insert(force, std::make_pair<int, QString>(index, QString(force_type)));
 }
 
 /** Add info for the passed perturbable OpenMMMolecule, returning

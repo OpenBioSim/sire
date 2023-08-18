@@ -170,6 +170,7 @@ set ( PYPP_SOURCES
        Restraint3D.pypp.cpp
        RestraintComponent.pypp.cpp
        RestraintFF.pypp.cpp
+       Restraints.pypp.cpp
        ScaledCLJParameterNames3D.pypp.cpp
        ScaledChargeParameterNames3D.pypp.cpp
        ScaledLJParameterNames3D.pypp.cpp

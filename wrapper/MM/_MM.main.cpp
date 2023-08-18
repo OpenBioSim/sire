@@ -347,6 +347,8 @@
 
 #include "RestraintFF.pypp.hpp"
 
+#include "Restraints.pypp.hpp"
+
 #include "ScaledCLJParameterNames3D.pypp.hpp"
 
 #include "ScaledChargeParameterNames3D.pypp.hpp"
@@ -757,6 +759,8 @@ BOOST_PYTHON_MODULE(_MM){
     register_NullRestraint_class();
 
     register_PositionalRestraint_class();
+
+    register_Restraints_class();
 
     register_PositionalRestraints_class();
 

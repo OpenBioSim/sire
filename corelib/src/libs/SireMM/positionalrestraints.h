@@ -29,7 +29,7 @@
 #ifndef SIREMM_POSITIONALRESTRAINTS_H
 #define SIREMM_POSITIONALRESTRAINTS_H
 
-#include "SireBase/property.h"
+#include "restraints.h"
 
 #include "SireMaths/vector.h"
 
@@ -127,15 +127,23 @@ namespace SireMM
      *  are either flat-bottom harmonics or harmonic potentials
      */
     class SIREMM_EXPORT PositionalRestraints
-        : public SireBase::ConcreteProperty<PositionalRestraints, SireBase::Property>
+        : public SireBase::ConcreteProperty<PositionalRestraints, Restraints>
     {
         friend QDataStream & ::operator<<(QDataStream &, const SireMM::PositionalRestraints &);
         friend QDataStream & ::operator>>(QDataStream &, SireMM::PositionalRestraints &);
 
     public:
         PositionalRestraints();
+
         PositionalRestraints(const PositionalRestraint &restraint);
         PositionalRestraints(const QList<PositionalRestraint> &restraints);
+
+        PositionalRestraints(const QString &name,
+                             const PositionalRestraint &restraint);
+
+        PositionalRestraints(const QString &name,
+                             const QList<PositionalRestraint> &restraints);
+
         PositionalRestraints(const PositionalRestraints &other);
 
         ~PositionalRestraints();

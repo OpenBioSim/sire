@@ -306,7 +306,7 @@ QDataStream &operator<<(QDataStream &ds, const PositionalRestraints &posrests)
     SharedDataStream sds(ds);
 
     sds << posrests.r
-        << static_cast<const Property &>(posrests);
+        << static_cast<const Restraints &>(posrests);
 
     return ds;
 }
@@ -319,7 +319,7 @@ QDataStream &operator>>(QDataStream &ds, PositionalRestraints &posrests)
     {
         SharedDataStream sds(ds);
 
-        sds >> posrests.r >> static_cast<Property &>(posrests);
+        sds >> posrests.r >> static_cast<Restraints &>(posrests);
     }
     else
         throw version_error(v, "1", r_posrests, CODELOC);
@@ -329,19 +329,38 @@ QDataStream &operator>>(QDataStream &ds, PositionalRestraints &posrests)
 
 /** Null constructor */
 PositionalRestraints::PositionalRestraints()
-    : ConcreteProperty<PositionalRestraints, Property>()
+    : ConcreteProperty<PositionalRestraints, Restraints>()
 {
 }
 
 PositionalRestraints::PositionalRestraints(const PositionalRestraint &restraint)
-    : ConcreteProperty<PositionalRestraints, Property>()
+    : ConcreteProperty<PositionalRestraints, Restraints>()
 {
     if (not restraint.isNull())
         r.append(restraint);
 }
 
 PositionalRestraints::PositionalRestraints(const QList<PositionalRestraint> &restraints)
-    : ConcreteProperty<PositionalRestraints, Property>()
+    : ConcreteProperty<PositionalRestraints, Restraints>()
+{
+    for (const auto &restraint : restraints)
+    {
+        if (not restraint.isNull())
+            r.append(restraint);
+    }
+}
+
+PositionalRestraints::PositionalRestraints(const QString &name,
+                                           const PositionalRestraint &restraint)
+    : ConcreteProperty<PositionalRestraints, Restraints>(name)
+{
+    if (not restraint.isNull())
+        r.append(restraint);
+}
+
+PositionalRestraints::PositionalRestraints(const QString &name,
+                                           const QList<PositionalRestraint> &restraints)
+    : ConcreteProperty<PositionalRestraints, Restraints>(name)
 {
     for (const auto &restraint : restraints)
     {
@@ -351,7 +370,7 @@ PositionalRestraints::PositionalRestraints(const QList<PositionalRestraint> &res
 }
 
 PositionalRestraints::PositionalRestraints(const PositionalRestraints &other)
-    : ConcreteProperty<PositionalRestraints, Property>(other), r(other.r)
+    : ConcreteProperty<PositionalRestraints, Restraints>(other), r(other.r)
 {
 }
 
@@ -362,12 +381,13 @@ PositionalRestraints::~PositionalRestraints()
 PositionalRestraints &PositionalRestraints::operator=(const PositionalRestraints &other)
 {
     r = other.r;
+    Restraints::operator=(other);
     return *this;
 }
 
 bool PositionalRestraints::operator==(const PositionalRestraints &other) const
 {
-    return r == other.r;
+    return r == other.r and Restraints::operator==(other);
 }
 
 bool PositionalRestraints::operator!=(const PositionalRestraints &other) const
