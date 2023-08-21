@@ -5,6 +5,8 @@ __all__ = [
     "AmberDihedral",
     "Angle",
     "Bond",
+    "BondRestraint",
+    "BondRestraints",
     "Dihedral",
     "Improper",
     "PositionRestraint",
@@ -43,6 +45,9 @@ from ..mol import (
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
+
+BondRestraint = _MM.BondRestraint
+BondRestraints = _MM.BondRestraints
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints

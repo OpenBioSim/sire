@@ -155,6 +155,9 @@ namespace SireCAS
 
         SireCAS::Symbol getConstantSymbol(const QString &constant) const;
 
+        double morph(const QString &lever,
+                     double initial, double final, double lambda_value) const;
+
         QVector<double> morph(const QString &lever,
                               const QVector<double> &initial,
                               const QVector<double> &final,

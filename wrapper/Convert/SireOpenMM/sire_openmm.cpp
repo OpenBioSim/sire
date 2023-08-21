@@ -23,7 +23,6 @@
 #include "SireMM/atomljs.h"
 #include "SireMM/selectorbond.h"
 #include "SireMM/amberparams.h"
-#include "SireMM/positionalrestraints.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"

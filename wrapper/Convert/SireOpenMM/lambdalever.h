@@ -66,6 +66,8 @@ namespace SireOpenMM
 
         void setForceIndex(const QString &force, int index);
 
+        void addRestraintIndex(const QString &force, int index);
+
         int addPerturbableMolecule(const OpenMMMolecule &molecule,
                                    const QHash<QString, qint32> &start_indicies);
 
@@ -85,14 +87,23 @@ namespace SireOpenMM
         template <class T>
         T *getForce(const QString &name, OpenMM::System &system) const;
 
+        QList<OpenMM::Force *> getRestraints(const QString &name,
+                                             OpenMM::System &system) const;
+
         int getForceIndex(const QString &name) const;
         QString getForceType(const QString &name,
                              const OpenMM::System &system) const;
 
     protected:
-        /** Map from a forcefield name to its index in the associated System,
-         *  and its type */
+        void updateRestraintInContext(OpenMM::Force &ff, double rho,
+                                      OpenMM::Context &context) const;
+
+        /** Map from a forcefield name to its index in the associated System */
         QHash<QString, int> name_to_ffidx;
+
+        /** Map from a restraint name to its index in the associated System.
+         *  Note that multiple restraints can have the same name */
+        QMultiHash<QString, int> name_to_restraintidx;
 
         /** The schedule used to set lambda */
         SireCAS::LambdaSchedule lambda_schedule;

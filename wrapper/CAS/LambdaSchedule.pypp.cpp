@@ -374,6 +374,19 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::morph
         
+            typedef double ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,double,double,double ) const;
+            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
+            
+            LambdaSchedule_exposer.def( 
+                "morph"
+                , morph_function_value
+                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
+                , bp::release_gil_policy()
+                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs floating point parameters. There is an overload\n  of this function that morphs integer parameters, in which\n  case the result would be rounded to the nearest integer.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::morph
+        
             typedef ::QVector< double > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< double > const &,::QVector< double > const &,double ) const;
             morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
             

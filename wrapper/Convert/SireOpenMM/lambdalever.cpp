@@ -525,6 +525,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         }
     }
 
+    // update the parameters in the context
     if (cljff)
         cljff->updateParametersInContext(context);
 
@@ -546,9 +547,104 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (dihff)
         dihff->updateParametersInContext(context);
 
+    // now update any restraints that are scaled
+    for (const auto &restraint : this->name_to_restraintidx.keys())
+    {
+        // restraints always morph between 1 and 1 (i.e. they fully
+        // follow whatever is set by lambda, e.g. 'initial*lambda'
+        // to switch them on, or `final*lambda` to switch them off)
+        const double rho = lambda_schedule.morph(restraint,
+                                                 1.0, 1.0,
+                                                 lambda_value);
+
+        for (auto &ff : this->getRestraints(restraint, system))
+        {
+            if (ff != 0)
+            {
+                this->updateRestraintInContext(*ff, rho, context);
+            }
+        }
+    }
+
     return lambda_value;
 }
 
+/** Update the parameters for a CustomBondForce for scale factor 'rho'
+ *  in the passed context */
+void _update_restraint_in_context(OpenMM::CustomBondForce *ff, double rho,
+                                  OpenMM::Context &context)
+{
+    if (ff == 0)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "Unable to cast the restraint force to an OpenMM::CustomBondForce, "
+                                          "despite it reporting that is was an object of this type..."),
+                                      CODELOC);
+
+    const int nbonds = ff->getNumBonds();
+
+    if (nbonds == 0)
+        // nothing to update
+        return;
+
+    const int nparams = ff->getNumPerBondParameters();
+
+    if (nparams == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Unable to set 'rho' for this restraint as it has no custom parameters!"),
+                                            CODELOC);
+
+    // we set the first parameter - we can see what the current value
+    // is from the first restraint. This is because rho should be the
+    // first parameter and have the same value for all restraints
+    std::vector<double> custom_params;
+    custom_params.resize(nparams);
+    int atom0, atom1;
+
+    ff->getBondParameters(0, atom0, atom1, custom_params);
+
+    if (custom_params[0] == rho)
+        // nothing to do - it is already equal to this value
+        return;
+
+    for (int i = 0; i < nbonds; ++i)
+    {
+        ff->getBondParameters(i, atom0, atom1, custom_params);
+        custom_params[0] = rho;
+        ff->setBondParameters(i, atom0, atom1, custom_params);
+    }
+
+    ff->updateParametersInContext(context);
+}
+
+/** Internal function used to update the restraint force to use the
+ *  supplied value of rho in the passed context */
+void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
+                                           OpenMM::Context &context) const
+{
+    // what is the type of this force...?
+    const auto ff_type = ff.getName();
+
+    if (ff_type == "OpenMM::CustomBondForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomBondForce *>(&ff),
+            rho, context);
+    }
+    else
+    {
+        throw SireError::unknown_type(QObject::tr(
+                                          "Unable to update the restraints for the passed force as it has "
+                                          "an unknown type (%1). We currently only support a limited number "
+                                          "of force types, e.g. CustomBondForce etc")
+                                          .arg(QString::fromStdString(ff_type)),
+                                      CODELOC);
+    }
+}
+
+/** Set the index of the force called 'force' in the OpenMM System.
+ *  There can only be one force with this name. Attempts to add
+ *  a duplicate will cause an error to be raised.
+ */
 void LambdaLever::setForceIndex(const QString &force,
                                 int index)
 {
@@ -560,6 +656,45 @@ void LambdaLever::setForceIndex(const QString &force,
                                        CODELOC);
 
     this->name_to_ffidx.insert(force, index);
+}
+
+/** Add the index of a restraint force called 'restraint' in the
+ *  OpenMM System. There can be multiple restraint forces with
+ *  the same name
+ */
+void LambdaLever::addRestraintIndex(const QString &restraint,
+                                    int index)
+{
+    this->name_to_restraintidx.insertMulti(restraint, index);
+}
+
+/** Return the pointers to all of the forces from the passed System
+ *  are restraints called 'restraint'. This returns an empty
+ *  list if there are no restraints with this name */
+QList<OpenMM::Force *> LambdaLever::getRestraints(const QString &name,
+                                                  OpenMM::System &system) const
+{
+    QList<OpenMM::Force *> forces;
+
+    const int num_forces = system.getNumForces();
+
+    for (const auto &idx : this->name_to_restraintidx.values(name))
+    {
+        if (idx < 0 or idx >= num_forces)
+        {
+            throw SireError::invalid_key(QObject::tr(
+                                             "The index for the Restraint Force called '%1', %2, is invalid for an "
+                                             "OpenMM System which has %3 forces.")
+                                             .arg(name)
+                                             .arg(idx)
+                                             .arg(num_forces),
+                                         CODELOC);
+        }
+
+        forces.append(&(system.getForce(idx)));
+    }
+
+    return forces;
 }
 
 /** Add info for the passed perturbable OpenMMMolecule, returning

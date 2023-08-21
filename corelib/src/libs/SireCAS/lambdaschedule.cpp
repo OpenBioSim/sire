@@ -788,6 +788,39 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
  *  The morphed parameters will be returned in the matching
  *  order to `initial` and `final`.
  *
+ *  This morphs a single floating point parameters.
+ */
+double LambdaSchedule::morph(const QString &lever_name,
+                             double initial, double final,
+                             double lambda_value) const
+{
+    if (this->nStages() == 0)
+        // just return the initial parameters as we don't know how to morph
+        return initial;
+
+    const auto resolved = this->resolve_lambda(lambda_value);
+    const int stage = std::get<0>(resolved);
+
+    const auto equation = this->stage_equations[stage].value(
+        lever_name, this->default_equations[stage]);
+
+    Values input_values = this->constant_values;
+    input_values.set(this->lam(), std::get<1>(resolved));
+
+    input_values.set(this->initial(), initial);
+    input_values.set(this->final(), final);
+
+    return equation(input_values);
+}
+
+/** Return the parameters for the specified lever called `lever_name`
+ *  that have been morphed from the passed list of initial values
+ *  (in `initial`) to the passed list of final values (in `final`)
+ *  for the specified global value of :lambda: (in `lambda_value`).
+ *
+ *  The morphed parameters will be returned in the matching
+ *  order to `initial` and `final`.
+ *
  *  This morphs floating point parameters. There is an overload
  *  of this function that morphs integer parameters, in which
  *  case the result would be rounded to the nearest integer.

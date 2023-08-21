@@ -53,6 +53,10 @@
 
 #include "BondParameterName.pypp.hpp"
 
+#include "BondRestraint.pypp.hpp"
+
+#include "BondRestraints.pypp.hpp"
+
 #include "BondSymbols.pypp.hpp"
 
 #include "CHARMMSwitchingFunction.pypp.hpp"
@@ -570,6 +574,12 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_BondParameterName_class();
 
+    register_BondRestraint_class();
+
+    register_Restraints_class();
+
+    register_BondRestraints_class();
+
     register_BondSymbols_class();
 
     register_SwitchingFunction_class();
@@ -759,8 +769,6 @@ BOOST_PYTHON_MODULE(_MM){
     register_NullRestraint_class();
 
     register_PositionalRestraint_class();
-
-    register_Restraints_class();
 
     register_PositionalRestraints_class();
 

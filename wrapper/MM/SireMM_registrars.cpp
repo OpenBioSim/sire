@@ -8,6 +8,7 @@
 #include "anglerestraint.h"
 #include "atomljs.h"
 #include "bond.h"
+#include "bondrestraints.h"
 #include "clj14group.h"
 #include "cljatoms.h"
 #include "cljboxes.h"
@@ -90,6 +91,8 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::AtomLJs >();
     ObjectRegistry::registerConverterFor< SireMM::Bond >();
     ObjectRegistry::registerConverterFor< SireMol::Mover<SireMM::Bond> >();
+    ObjectRegistry::registerConverterFor< SireMM::BondRestraint >();
+    ObjectRegistry::registerConverterFor< SireMM::BondRestraints >();
     ObjectRegistry::registerConverterFor< SireMM::CLJ14Group >();
     ObjectRegistry::registerConverterFor< SireMM::CLJAtom >();
     ObjectRegistry::registerConverterFor< SireMM::CLJAtoms >();

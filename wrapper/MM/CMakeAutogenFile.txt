@@ -23,6 +23,8 @@ set ( PYPP_SOURCES
        Bond.pypp.cpp
        BondComponent.pypp.cpp
        BondParameterName.pypp.cpp
+       BondRestraint.pypp.cpp
+       BondRestraints.pypp.cpp
        BondSymbols.pypp.cpp
        CHARMMSwitchingFunction.pypp.cpp
        CLJ14Group.pypp.cpp
