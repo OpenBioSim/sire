@@ -77,6 +77,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Updated ``FreeEnergyAnalysis.py`` to be compatible with both the new pymbar 4 API
   and the old pymbar 3 API.
 
+* Made sure that a title is written to an AmberRst file, even if the system
+  has no name (issue #99).
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
