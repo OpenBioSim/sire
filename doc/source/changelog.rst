@@ -12,6 +12,12 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.3.X <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.X>`__ - September 2023
+----------------------------------------------------------------------------------------------
+
+* Made sure that a title is written to an AmberRst file, even if the system
+  has no name (issue #99).
+
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
 
