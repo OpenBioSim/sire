@@ -1334,6 +1334,7 @@ def _dynamics(
     shift_delta=None,
     coulomb_power=None,
     restraints=None,
+    fixed=None,
     device=None,
     map=None,
     **kwargs,
@@ -1422,6 +1423,11 @@ def _dynamics(
         A single set of restraints, or a list of sets of
         restraints that will be applied to the atoms during
         the simulation.
+
+    fixed: molecule(s) view, search string, int, list[int] etc
+        Anything that can be used to identify the atom or atoms
+        that should be fixed in place during the simulation. These
+        atoms will not be moved by dynamics.
 
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
@@ -1518,6 +1524,7 @@ def _dynamics(
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
         restraints=restraints,
+        fixed=fixed,
         map=map,
     )
 
@@ -1534,6 +1541,7 @@ def _minimisation(
     coulomb_power=None,
     device=None,
     restraints=None,
+    fixed=None,
     map=None,
     **kwargs,
 ):
@@ -1591,6 +1599,11 @@ def _minimisation(
         restraints that will be applied to the atoms during
         the simulation.
 
+    fixed: molecule(s) view, search string, int, list[int] etc
+        Anything that can be used to identify the atom or atoms
+        that should be fixed in place during the simulation. These
+        atoms will not be moved by minimisation.
+
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
         minimisation. This would be CUDA_DEVICE_ID or similar
@@ -1638,6 +1651,7 @@ def _minimisation(
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
         restraints=restraints,
+        fixed=fixed,
         map=map,
     )
 

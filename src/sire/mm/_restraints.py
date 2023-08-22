@@ -98,7 +98,7 @@ def create_bond_restraints(
 
 
 def create_positional_restraints(
-    mols, atoms, k=None, r0=None, name: str = None, map=None
+    mols, atoms, k=None, r0=None, position=None, name: str = None, map=None
 ):
     """
     Create a set of position restraints for the atoms specified in
@@ -171,8 +171,13 @@ def create_positional_restraints(
         else:
             ir0 = r0[-1]
 
-        restraints.add(
-            PositionalRestraint(idxs[0], atom.property(coords_prop), ik, ir0)
-        )
+        if position is None:
+            restraints.add(
+                PositionalRestraint(
+                    idxs[0], atom.property(coords_prop), ik, ir0
+                )
+            )
+        else:
+            restraints.add(PositionalRestraint(idxs[0], position, ik, ir0))
 
     return restraints

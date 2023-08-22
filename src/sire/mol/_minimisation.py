@@ -62,6 +62,7 @@ class Minimisation:
         shift_delta=None,
         coulomb_power=None,
         restraints=None,
+        fixed=None,
     ):
         from ..base import create_map
 
@@ -75,6 +76,7 @@ class Minimisation:
         _add_extra(extras, "shift_delta", shift_delta)
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
+        _add_extra(extras, "fixed", fixed)
 
         map = create_map(map, extras)
 

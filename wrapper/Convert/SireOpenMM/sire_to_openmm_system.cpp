@@ -520,6 +520,24 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
+    QSet<int> fixed_atoms;
+
+    if (map.specified("fixed"))
+    {
+        // this should be a list of indexes of atoms to fix
+        const auto idxs = map["fixed"].value().asA<SireBase::IntegerArrayProperty>().toVector();
+
+        if (not idxs.isEmpty())
+        {
+            fixed_atoms.reserve(idxs.count());
+
+            for (const auto &idx : idxs)
+            {
+                fixed_atoms.insert(idx);
+            }
+        }
+    }
+
     // End of stage 1 - we have now extracted all of the molecular information
     // and have worked out what parameters to use and whether any of the
     // molecules are perturbable
@@ -895,8 +913,18 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // add the particle - the OpenMMMolecule has already
                 // ensured that the largest of the reference or perturbed
                 // masses is used
-                system.addParticle(masses_data[j]);
                 const int atom_index = start_index + j;
+
+                if (fixed_atoms.contains(atom_index))
+                {
+                    // this is a fixed (zero mass) atom
+                    system.addParticle(0.0);
+                }
+                else
+                {
+                    // this is a mobile atom (if its mass is > 0)
+                    system.addParticle(masses_data[j]);
+                }
 
                 // now the reference CLJ parameters
                 const auto &clj = cljs_data[j];
@@ -945,8 +973,18 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
                 // Add the particle to the system
-                system.addParticle(masses_data[j]);
                 const int atom_index = start_index + j;
+
+                if (fixed_atoms.contains(atom_index))
+                {
+                    // this is a fixed (zero mass) atom
+                    system.addParticle(0.0);
+                }
+                else
+                {
+                    // this is a mobile atom (if its mass is > 0)
+                    system.addParticle(masses_data[j]);
+                }
 
                 // Get the particle CLJ parameters
                 const auto &clj = cljs_data[j];
@@ -1012,28 +1050,52 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // lambda value before running dynamics...
             for (const auto &constraint : mol.constraints)
             {
-                const auto coords0 = mol.coords[std::get<0>(constraint)];
-                const auto coords1 = mol.coords[std::get<1>(constraint)];
+                const auto atom0 = std::get<0>(constraint);
+                const auto atom1 = std::get<1>(constraint);
 
-                const auto delta = coords1 - coords0;
+                const auto mass0 = system.getParticleMass(atom0 + start_index);
+                const auto mass1 = system.getParticleMass(atom1 + start_index);
 
-                const auto length = std::sqrt((delta[0] * delta[0]) +
-                                              (delta[1] * delta[1]) +
-                                              (delta[2] * delta[2]));
+                if (mass0 != 0 and mass1 != 0)
+                {
+                    // we can add the constraint
+                    const auto coords0 = mol.coords[atom0];
+                    const auto coords1 = mol.coords[atom1];
 
-                system.addConstraint(
-                    std::get<0>(constraint) + start_index,
-                    std::get<1>(constraint) + start_index,
-                    length);
+                    const auto delta = coords1 - coords0;
+
+                    const auto length = std::sqrt((delta[0] * delta[0]) +
+                                                  (delta[1] * delta[1]) +
+                                                  (delta[2] * delta[2]));
+
+                    system.addConstraint(
+                        atom0 + start_index,
+                        atom1 + start_index,
+                        length);
+                }
+                // else we will need to think about how to constrain bonds
+                // involving fixed atoms. Could we fix the other atom too?
             }
         }
         else
         {
             for (const auto &constraint : mol.constraints)
             {
-                system.addConstraint(std::get<0>(constraint) + start_index,
-                                     std::get<1>(constraint) + start_index,
-                                     std::get<2>(constraint));
+                const auto atom0 = std::get<0>(constraint);
+                const auto atom1 = std::get<1>(constraint);
+
+                const auto mass0 = system.getParticleMass(atom0 + start_index);
+                const auto mass1 = system.getParticleMass(atom1 + start_index);
+
+                if (mass0 != 0 and mass1 != 0)
+                {
+
+                    system.addConstraint(atom0 + start_index,
+                                         atom1 + start_index,
+                                         std::get<2>(constraint));
+                }
+                // else we will need to think about how to constrain bonds
+                // involving fixed atoms. Could we fix the other atom too?
             }
 
             // only save the bond pairs for non-perturbable molecules.

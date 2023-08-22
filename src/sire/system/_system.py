@@ -412,6 +412,11 @@ class System:
             restraints that will be applied to the atoms during
             the simulation.
 
+        fixed: molecule(s) view, search string, int, list[int] etc
+            Anything that can be used to identify the atom or atoms
+            that should be fixed in place during the simulation. These
+            atoms will not be moved by minimisation.
+
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
             minimisation. This would be CUDA_DEVICE_ID or similar
@@ -512,6 +517,11 @@ class System:
             A single set of restraints, or a list of sets of
             restraints that will be applied to the atoms during
             the simulation.
+
+        fixed: molecule(s) view, search string, int, list[int] etc
+            Anything that can be used to identify the atom or atoms
+            that should be fixed in place during the simulation. These
+            atoms will not be moved by dynamics.
 
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate

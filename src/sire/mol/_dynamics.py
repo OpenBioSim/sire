@@ -10,12 +10,26 @@ class DynamicsData:
 
     def __init__(self, mols=None, map=None, **kwargs):
         from ..base import create_map
-        from ..maths import EnergyTrajectory
 
         map = create_map(map, kwargs)
 
         if mols is not None:
             self._map = map  # this is already a PropertyMap
+
+            # see if there are any fixed atoms
+            if map.specified("fixed"):
+                if map["fixed"].has_value():
+                    fixed_atoms = map["fixed"].value()
+                else:
+                    fixed_atoms = map["fixed"].source()
+
+                # turn the fixed atoms into a list of atoms
+                if hasattr(fixed_atoms, "atoms"):
+                    fixed_atoms = fixed_atoms.atoms()
+                else:
+                    fixed_atoms = mols[fixed_atoms].atoms()
+
+                map.set("fixed", mols.atoms().find(fixed_atoms))
 
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
@@ -785,6 +799,7 @@ class Dynamics:
         shift_delta=None,
         coulomb_power=None,
         restraints=None,
+        fixed=None,
     ):
         from ..base import create_map
         from .. import u
@@ -802,6 +817,7 @@ class Dynamics:
         _add_extra(extras, "shift_delta", shift_delta)
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
+        _add_extra(extras, "fixed", fixed)
 
         map = create_map(map, extras)
 
