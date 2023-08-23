@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -66,12 +66,12 @@ namespace SireMM
     public:
         PositionalRestraint();
         PositionalRestraint(qint64 atom, const SireMaths::Vector &position,
-                            const SireUnits::Dimension::GeneralUnit &k,
+                            const SireUnits::Dimension::HarmonicBondConstant &k,
                             const SireUnits::Dimension::Length &r0);
 
         PositionalRestraint(const QList<qint64> &atoms,
                             const SireMaths::Vector &position,
-                            const SireUnits::Dimension::GeneralUnit &k,
+                            const SireUnits::Dimension::HarmonicBondConstant &k,
                             const SireUnits::Dimension::Length &r0);
 
         PositionalRestraint(const PositionalRestraint &other);
@@ -103,7 +103,7 @@ namespace SireMM
 
         SireMaths::Vector position() const;
 
-        SireUnits::Dimension::GeneralUnit k() const;
+        SireUnits::Dimension::HarmonicBondConstant k() const;
         SireUnits::Dimension::Length r0() const;
 
     private:
@@ -114,10 +114,10 @@ namespace SireMM
         SireMaths::Vector pos;
 
         /** The force constant */
-        double _k;
+        SireUnits::Dimension::HarmonicBondConstant _k;
 
         /** The flat-bottom width (0 of harmonic restraints) */
-        double _r0;
+        SireUnits::Dimension::Length _r0;
     };
 
     /** This class provides the information for a collection of positional

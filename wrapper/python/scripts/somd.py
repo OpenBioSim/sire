@@ -1,5 +1,6 @@
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -19,41 +20,77 @@ from Sire.Tools import OpenMMMD
 from Sire.Tools import readParams
 
 
-parser = argparse.ArgumentParser(description="Perform molecular dynamics using OpenMM",
-                                 epilog="somd is built using Sire and OpenMM and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org",
-                                 prog="somd")
+parser = argparse.ArgumentParser(
+    description="Perform molecular dynamics using OpenMM",
+    epilog="somd is built using Sire and OpenMM and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org",
+    prog="somd",
+)
 
-parser.add_argument('-C', '--config', nargs="?",
-                    help='Supply an optional CONFIG file to control the calculation.')
+parser.add_argument(
+    "-C",
+    "--config",
+    nargs="?",
+    help="Supply an optional CONFIG file to control the calculation.",
+)
 
-parser.add_argument('-H', '--help-config', action="store_true",
-                    help="Get additional help regarding all of the parameters "
-                         "(and their default values) that can be "
-                         "set in the optionally-supplied CONFIG file")
+parser.add_argument(
+    "-H",
+    "--help-config",
+    action="store_true",
+    help="Get additional help regarding all of the parameters "
+    "(and their default values) that can be "
+    "set in the optionally-supplied CONFIG file",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-t', '--topology_file', nargs="?",
-                    help="The Amber topology file containing the system.")
+parser.add_argument(
+    "-t",
+    "--topology_file",
+    nargs="?",
+    help="The Amber topology file containing the system.",
+)
 
-parser.add_argument('-c', '--coordinate_file', nargs="?",
-                    help="The Amber coordinate file giving the coordinates "
-                         "of all of the atoms in the passed topology file.")
+parser.add_argument(
+    "-c",
+    "--coordinate_file",
+    nargs="?",
+    help="The Amber coordinate file giving the coordinates "
+    "of all of the atoms in the passed topology file.",
+)
 
-parser.add_argument('-d', '--device', nargs="?",
-                    help="The device ID of the GPU on which you want to run the simulation.")
+parser.add_argument(
+    "-d",
+    "--device",
+    nargs="?",
+    help="The device ID of the GPU on which you want to run the simulation.",
+)
 
-parser.add_argument('-n', '--nmoves', nargs="?",
-                    help="The number of Molecular Dynamics moves you want to run.")
+parser.add_argument(
+    "-n",
+    "--nmoves",
+    nargs="?",
+    help="The number of Molecular Dynamics moves you want to run.",
+)
 
-parser.add_argument('-p', '--platform', nargs="?",
-                    help="The OpenMM platform on which you want to run the simulation.")
+parser.add_argument(
+    "-p",
+    "--platform",
+    nargs="?",
+    help="The OpenMM platform on which you want to run the simulation.",
+)
 
 sys.stdout.write("\n")
 args = parser.parse_args()
@@ -61,14 +98,19 @@ args = parser.parse_args()
 must_exit = False
 
 if args.author:
-    print("\nsomd was written by Gaetano Calabro, Julien Michel, Antonia Mey and Christopher Woods (C) 2015")
+    print(
+        "\nsomd was written by Gaetano Calabro, Julien Michel, Antonia Mey and Christopher Woods (C) 2015"
+    )
     print("It is based on the OpenMMMD module distributed in Sire.")
     must_exit = True
 
 if args.version:
-    print("somd -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print("somd -- from Sire release version <%s>" % Sire.__version__)
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if args.help_config:
@@ -117,7 +159,9 @@ if args.nmoves:
 
 if not (os.path.exists(coord_file) and os.path.exists(top_file)):
     parser.print_help()
-    print("\nPlease supply the name of an existing topology and coordinate file.")
+    print(
+        "\nPlease supply the name of an existing topology and coordinate file."
+    )
     if not os.path.exists(coord_file):
         print("(cannot find coordinate file %s)" % coord_file)
     if not os.path.exists(top_file):
@@ -125,7 +169,7 @@ if not (os.path.exists(coord_file) and os.path.exists(top_file)):
 
     sys.exit(-1)
 
-#print("\nRunning a somd calculation using files %s and %s." % (top_file, coord_file))
+# print("\nRunning a somd calculation using files %s and %s." % (top_file, coord_file))
 
-# Now lets run the OpenMMMD calculation
+# Now lets run the OpenMMMD calculation
 OpenMMMD.run(params)

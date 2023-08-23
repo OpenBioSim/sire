@@ -37,8 +37,8 @@ void register_BondRestraint_class(){
         typedef bp::class_< SireMM::BondRestraint, bp::bases< SireBase::Property > > BondRestraint_exposer_t;
         BondRestraint_exposer_t BondRestraint_exposer = BondRestraint_exposer_t( "BondRestraint", "This class represents a single bond restraint between any two\natoms in a system (or between the centroids of any two groups\nof atoms in a system)\n", bp::init< >("Null constructor") );
         bp::scope BondRestraint_scope( BondRestraint_exposer );
-        BondRestraint_exposer.def( bp::init< qint64, qint64, SireUnits::Dimension::GeneralUnit const &, SireUnits::Dimension::Length const & >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
-        BondRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::GeneralUnit const &, SireUnits::Dimension::Length const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the centroid of the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and flat-bottom well width\n") );
+        BondRestraint_exposer.def( bp::init< qint64, qint64, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const & >(( bp::arg("atom0"), bp::arg("atom1"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
+        BondRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the centroid of the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and flat-bottom well width\n") );
         BondRestraint_exposer.def( bp::init< SireMM::BondRestraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::BondRestraint::atom0
         
@@ -126,7 +126,7 @@ void register_BondRestraint_class(){
         }
         { //::SireMM::BondRestraint::k
         
-            typedef ::SireUnits::Dimension::GeneralUnit ( ::SireMM::BondRestraint::*k_function_type)(  ) const;
+            typedef ::SireUnits::Dimension::HarmonicBondConstant ( ::SireMM::BondRestraint::*k_function_type)(  ) const;
             k_function_type k_function_value( &::SireMM::BondRestraint::k );
             
             BondRestraint_exposer.def( 

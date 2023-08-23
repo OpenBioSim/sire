@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -64,12 +64,12 @@ namespace SireMM
     public:
         BondRestraint();
         BondRestraint(qint64 atom0, qint64 atom1,
-                      const SireUnits::Dimension::GeneralUnit &k,
+                      const SireUnits::Dimension::HarmonicBondConstant &k,
                       const SireUnits::Dimension::Length &r0);
 
         BondRestraint(const QList<qint64> &atoms0,
                       const QList<qint64> &atoms1,
-                      const SireUnits::Dimension::GeneralUnit &k,
+                      const SireUnits::Dimension::HarmonicBondConstant &k,
                       const SireUnits::Dimension::Length &r0);
 
         BondRestraint(const BondRestraint &other);
@@ -102,7 +102,7 @@ namespace SireMM
         QVector<qint64> atoms0() const;
         QVector<qint64> atoms1() const;
 
-        SireUnits::Dimension::GeneralUnit k() const;
+        SireUnits::Dimension::HarmonicBondConstant k() const;
         SireUnits::Dimension::Length r0() const;
 
     private:
@@ -113,10 +113,10 @@ namespace SireMM
         QVector<qint64> atms1;
 
         /** The force constant */
-        double _k;
+        SireUnits::Dimension::HarmonicBondConstant _k;
 
         /** The equilibrium distance for the restraint */
-        double _r0;
+        SireUnits::Dimension::Length _r0;
     };
 
     /** This class provides the information for a collection of bond

@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -106,6 +106,7 @@ Restraints &Restraints::operator=(const Restraints &other)
 {
     nme = other.nme;
     Property::operator=(other);
+    return *this;
 }
 
 bool Restraints::operator==(const Restraints &other) const

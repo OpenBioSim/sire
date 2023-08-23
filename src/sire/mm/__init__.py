@@ -20,6 +20,8 @@ __all__ = [
     "SelectorMDihedral",
     "SelectorMImproper",
     "LJParameter",
+    "create_bond_restraints",
+    "create_boresch_restraints",
     "create_positional_restraints",
 ]
 
@@ -48,6 +50,9 @@ _use_new_api()
 
 BondRestraint = _MM.BondRestraint
 BondRestraints = _MM.BondRestraints
+
+BoreschRestraint = _MM.BoreschRestraint
+BoreschRestraints = _MM.BoreschRestraints
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints

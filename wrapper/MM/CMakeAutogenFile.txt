@@ -26,6 +26,8 @@ set ( PYPP_SOURCES
        BondRestraint.pypp.cpp
        BondRestraints.pypp.cpp
        BondSymbols.pypp.cpp
+       BoreschRestraint.pypp.cpp
+       BoreschRestraints.pypp.cpp
        CHARMMSwitchingFunction.pypp.cpp
        CLJ14Group.pypp.cpp
        CLJAtom.pypp.cpp

@@ -25,6 +25,7 @@
 #include "SireMM/amberparams.h"
 #include "SireMM/bondrestraints.h"
 #include "SireMM/positionalrestraints.h"
+#include "SireMM/boreschrestraints.h"
 
 #include "SireVol/periodicbox.h"
 #include "SireVol/triclinicbox.h"
@@ -55,6 +56,29 @@ using SireSystem::ForceFieldInfo;
 
 using namespace SireOpenMM;
 
+/** Add all of the Boresch restraints from 'restraints' to the
+ *  passed systen, which is being acted on by the passed LambdaLever.
+ *  The number of real (non-anchor) atoms in the OpenMM::System is 'natoms'
+ */
+void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
+                             OpenMM::System &system, LambdaLever &lambda_lever,
+                             int natoms)
+{
+    if (restraints.isEmpty())
+        return;
+
+    // energy expression of the Boresch restraint - this is a set of
+    // one distance restraint, two angle restraints and three
+    // torsion restraints between the three ligand and three receptor
+    // atoms
+    const auto energy_expression = QString(
+                                       "rho*(e_bond + e_angle + e_torsion);"
+                                       "e_bond=0;"
+                                       "e_angle=0;"
+                                       "e_torsion=0;")
+                                       .toStdString();
+}
+
 /** Add all of the bond restraints from 'restraints' to the passed
  *  system, which is acted on by the passed LambdaLever. The number
  *  of real (non-anchor) atoms in the OpenMM::System is 'natoms'
@@ -63,6 +87,9 @@ void _add_bond_restraints(const SireMM::BondRestraints &restraints,
                           OpenMM::System &system, LambdaLever &lambda_lever,
                           int natoms)
 {
+    if (restraints.isEmpty())
+        return;
+
     if (restraints.hasCentroidRestraints())
     {
         throw SireError::unsupported(QObject::tr(
@@ -134,6 +161,9 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
                                 std::vector<OpenMM::Vec3> &anchor_coords,
                                 int natoms)
 {
+    if (restraints.isEmpty())
+        return;
+
     if (restraints.hasCentroidRestraints())
     {
         throw SireError::unsupported(QObject::tr(
@@ -1308,6 +1338,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             {
                 _add_bond_restraints(prop.read().asA<SireMM::BondRestraints>(),
                                      system, lambda_lever, start_index);
+            }
+            else if (prop.read().isA<SireMM::BoreschRestraints>())
+            {
+                _add_boresch_restraints(prop.read().asA<SireMM::BoreschRestraints>(),
+                                        system, lambda_lever, start_index);
             }
         }
     }

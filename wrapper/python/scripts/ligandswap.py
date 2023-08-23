@@ -37,6 +37,7 @@ If you need more help understanding or interpreting the results of a ligandswap 
 
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -50,72 +51,130 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description="Calculate relative binding free "
-                                             "energies using ligandswap",
-                                 epilog="ligandswap is built using Sire and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/ligandswap",
-                                 prog="ligandswap")
+parser = argparse.ArgumentParser(
+    description="Calculate relative binding free " "energies using ligandswap",
+    epilog="ligandswap is built using Sire and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/ligandswap",
+    prog="ligandswap",
+)
 
-parser.add_argument('--description', action="store_true",
-                    help="Print a complete description of this program.")
+parser.add_argument(
+    "--description",
+    action="store_true",
+    help="Print a complete description of this program.",
+)
 
-parser.add_argument('-H', '--help-config', action="store_true",
-                    help="Get additional help regarding all of the parameters "
-                         "(and their default values) that can be "
-                         "set in the optionally-supplied CONFIG file")
+parser.add_argument(
+    "-H",
+    "--help-config",
+    action="store_true",
+    help="Get additional help regarding all of the parameters "
+    "(and their default values) that can be "
+    "set in the optionally-supplied CONFIG file",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-l0', '--ligand0', nargs="?",
-                    help="Supply the name of one of the residues in ligand 0 whose "
-                         "binding free energy is to be calculated. By default, the ligand "
-                         "will be the first non-protein, non-solvent molecule in the "
-                         "input topology file. ligandswap calculates the relative binding "
-                         "free energy of ligand0 and ligand1 (dG{ligand1} - dG{ligand0}).")
+parser.add_argument(
+    "-l0",
+    "--ligand0",
+    nargs="?",
+    help="Supply the name of one of the residues in ligand 0 whose "
+    "binding free energy is to be calculated. By default, the ligand "
+    "will be the first non-protein, non-solvent molecule in the "
+    "input topology file. ligandswap calculates the relative binding "
+    "free energy of ligand0 and ligand1 (dG{ligand1} - dG{ligand0}).",
+)
 
-parser.add_argument('-l1', '--ligand1', nargs="?",
-                    help="Supply the name of one of the residues in ligand 1 whose "
-                         "binding free energy is to be calculated. By default, the ligand "
-                         "will be the first non-protein, non-solvent molecule in the "
-                         "input topology file. ligandswap calculates the relative binding "
-                         "free energy of ligand0 and ligand1 (dG{ligand1} - dG{ligand0}).")
+parser.add_argument(
+    "-l1",
+    "--ligand1",
+    nargs="?",
+    help="Supply the name of one of the residues in ligand 1 whose "
+    "binding free energy is to be calculated. By default, the ligand "
+    "will be the first non-protein, non-solvent molecule in the "
+    "input topology file. ligandswap calculates the relative binding "
+    "free energy of ligand0 and ligand1 (dG{ligand1} - dG{ligand0}).",
+)
 
-parser.add_argument('-t0', '--topology_file0', nargs="?",
-                    help="The Amber topology file containing the solvated, equilbrated protein-ligand0 complex.")
+parser.add_argument(
+    "-t0",
+    "--topology_file0",
+    nargs="?",
+    help="The Amber topology file containing the solvated, equilbrated protein-ligand0 complex.",
+)
 
-parser.add_argument('-t1', '--topology_file1', nargs="?",
-                    help="The Amber topology file containing the solvated, equilbrated protein-ligand1 complex.")
+parser.add_argument(
+    "-t1",
+    "--topology_file1",
+    nargs="?",
+    help="The Amber topology file containing the solvated, equilbrated protein-ligand1 complex.",
+)
 
-parser.add_argument('-c0', '--coordinate_file0', nargs="?",
-                    help="The Amber coordinate file (with periodic box) giving the coordinates "
-                         "of all of the atoms in the passed topology file of the protein-ligand0 complex.")
+parser.add_argument(
+    "-c0",
+    "--coordinate_file0",
+    nargs="?",
+    help="The Amber coordinate file (with periodic box) giving the coordinates "
+    "of all of the atoms in the passed topology file of the protein-ligand0 complex.",
+)
 
-parser.add_argument('-c1', '--coordinate_file1', nargs="?",
-                    help="The Amber coordinate file (with periodic box) giving the coordinates "
-                         "of all of the atoms in the passed topology file of the protein-ligand1 complex.")
+parser.add_argument(
+    "-c1",
+    "--coordinate_file1",
+    nargs="?",
+    help="The Amber coordinate file (with periodic box) giving the coordinates "
+    "of all of the atoms in the passed topology file of the protein-ligand1 complex.",
+)
 
-parser.add_argument('-C', '--config', nargs="?",
-                    help='Supply an optional CONFIG file to control the calculation.')
+parser.add_argument(
+    "-C",
+    "--config",
+    nargs="?",
+    help="Supply an optional CONFIG file to control the calculation.",
+)
 
-parser.add_argument('--lambda_values', type=float, nargs='+',
-                    help='Lambda values for the windows used in the free energy calculation')
+parser.add_argument(
+    "--lambda_values",
+    type=float,
+    nargs="+",
+    help="Lambda values for the windows used in the free energy calculation",
+)
 
-parser.add_argument('-n', '--num_iterations', type=int, nargs="?",
-                    help='The number of waterswap iterations to perform (default 1000)')
+parser.add_argument(
+    "-n",
+    "--num_iterations",
+    type=int,
+    nargs="?",
+    help="The number of waterswap iterations to perform (default 1000)",
+)
 
-parser.add_argument('--vacuum', action="store_true",
-                    help="Swap ligands into a vacuum box rather than a water box (for relative hydration calculations).")
+parser.add_argument(
+    "--vacuum",
+    action="store_true",
+    help="Swap ligands into a vacuum box rather than a water box (for relative hydration calculations).",
+)
 
-parser.add_argument('-m', '--match', nargs="?",
-                    help="Supply an optional match string to control alignment of the ligands. "
-                         "This should be a comma separated list of colon-separated atom name "
-                         "pairs, e.g. 'A1:B1,A2:B2,A3:B3' would match the atom named 'A1' "
-                         "in ligand0 to the atom named 'B1' in ligand1 etc.")
+parser.add_argument(
+    "-m",
+    "--match",
+    nargs="?",
+    help="Supply an optional match string to control alignment of the ligands. "
+    "This should be a comma separated list of colon-separated atom name "
+    "pairs, e.g. 'A1:B1,A2:B2,A3:B3' would match the atom named 'A1' "
+    "in ligand0 to the atom named 'B1' in ligand1 etc.",
+)
 
 sys.stdout.write("\n")
 args = parser.parse_args()
@@ -193,10 +252,16 @@ if args.vacuum:
 if args.match:
     params["match atoms"] = args.match
 
-if not (os.path.exists(coord_file0) and os.path.exists(top_file0) and
-        os.path.exists(coord_file1) and os.path.exists(top_file1)):
+if not (
+    os.path.exists(coord_file0)
+    and os.path.exists(top_file0)
+    and os.path.exists(coord_file1)
+    and os.path.exists(top_file1)
+):
     parser.print_help()
-    print("\nPlease supply the name of an existing topology and coordinate files.")
+    print(
+        "\nPlease supply the name of an existing topology and coordinate files."
+    )
     if not os.path.exists(coord_file0):
         print("(cannot find coordinate file %s)" % coord_file0)
     if not os.path.exists(top_file0):
@@ -216,10 +281,15 @@ elif "ligand0" in params:
     ligand0 = params["ligand0"]
 
 if ligand0:
-    print("Ligand 0 will be located by finding the first molecule containing residue %s" % ligand0)
+    print(
+        "Ligand 0 will be located by finding the first molecule containing residue %s"
+        % ligand0
+    )
 
 else:
-    print("Ligand 0 will be the first non-protein, non-solvent molecule found in system.")
+    print(
+        "Ligand 0 will be the first non-protein, non-solvent molecule found in system."
+    )
 
 ligand1 = None
 if args.ligand1:
@@ -229,13 +299,21 @@ elif "ligand1" in params:
     ligand1 = params["ligand1"]
 
 if ligand1:
-    print("Ligand 1 will be located by finding the first molecule containing residue %s" % ligand1)
+    print(
+        "Ligand 1 will be located by finding the first molecule containing residue %s"
+        % ligand1
+    )
 
 else:
-    print("Ligand 1 will be the first non-protein, non-solvent molecule found in system.")
+    print(
+        "Ligand 1 will be the first non-protein, non-solvent molecule found in system."
+    )
 
-print("\nRunning a ligandswap calculation calculating the difference in free energy between"
-      "\nligands 0 and 1 using files %s|%s and %s|%s." % (top_file0,coord_file0,top_file1,coord_file1))
+print(
+    "\nRunning a ligandswap calculation calculating the difference in free energy between"
+    "\nligands 0 and 1 using files %s|%s and %s|%s."
+    % (top_file0, coord_file0, top_file1, coord_file1)
+)
 
 lambda_values = args.lambda_values
 
@@ -250,5 +328,5 @@ if nits:
     print("Number of iterations to perform == %d\n" % nits)
     params["nmoves"] = nits
 
-# Now lets run the LSRC calculation
+# Now lets run the LSRC calculation
 LSRC.run(params)

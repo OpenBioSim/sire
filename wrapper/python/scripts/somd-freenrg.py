@@ -1,6 +1,6 @@
-
 try:
     import sire as sr
+
     sr.use_old_api()
 except ImportError:
     pass
@@ -19,55 +19,104 @@ from Sire.Tools import OpenMMMD
 from Sire.Tools import readParams
 
 
-parser = argparse.ArgumentParser(description="Perform molecular dynamics single topology free energy calculations "
-                                             "using OpenMM",
-                                 epilog="somd-freenrg is built using Sire and OpenMM and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org",
-                                 prog="somd-freenrg")
+parser = argparse.ArgumentParser(
+    description="Perform molecular dynamics single topology free energy calculations "
+    "using OpenMM",
+    epilog="somd-freenrg is built using Sire and OpenMM and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org",
+    prog="somd-freenrg",
+)
 
-parser.add_argument('-C', '--config', nargs="?",
-                    help='Supply an optional CONFIG file to control the calculation.')
+parser.add_argument(
+    "-C",
+    "--config",
+    nargs="?",
+    help="Supply an optional CONFIG file to control the calculation.",
+)
 
-parser.add_argument('-H', '--help-config', action="store_true",
-                    help="Get additional help regarding all of the parameters "
-                         "(and their default values) that can be "
-                         "set in the optionally-supplied CONFIG file")
+parser.add_argument(
+    "-H",
+    "--help-config",
+    action="store_true",
+    help="Get additional help regarding all of the parameters "
+    "(and their default values) that can be "
+    "set in the optionally-supplied CONFIG file",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-t', '--topology_file', nargs="?",
-                    help="The Amber topology file containing the system.")
+parser.add_argument(
+    "-t",
+    "--topology_file",
+    nargs="?",
+    help="The Amber topology file containing the system.",
+)
 
-parser.add_argument('-c', '--coordinate_file', nargs="?",
-                    help="The Amber coordinate file giving the coordinates "
-                         "of all of the atoms in the passed topology file.")
+parser.add_argument(
+    "-c",
+    "--coordinate_file",
+    nargs="?",
+    help="The Amber coordinate file giving the coordinates "
+    "of all of the atoms in the passed topology file.",
+)
 
-parser.add_argument('-m', '--morph_file', nargs="?",
-                    help="The morph file describing the single topology "
-                         "calculation to be performed.")
+parser.add_argument(
+    "-m",
+    "--morph_file",
+    nargs="?",
+    help="The morph file describing the single topology "
+    "calculation to be performed.",
+)
 
-parser.add_argument('-q', '--charge_diff', default=0, type=int,
-                    help="The difference in net charge between the two end "
-                    "states.  This will trigger the selection of waters "
-                    "which will be transformed to ions to compensate for the "
-                    "change in charge along the lambda coordinate.")
+parser.add_argument(
+    "-q",
+    "--charge_diff",
+    default=0,
+    type=int,
+    help="The difference in net charge between the two end "
+    "states.  This will trigger the selection of waters "
+    "which will be transformed to ions to compensate for the "
+    "change in charge along the lambda coordinate.",
+)
 
-parser.add_argument('-d', '--device', nargs="?",
-                    help="The device ID of the GPU on which you want to run the simulation.")
+parser.add_argument(
+    "-d",
+    "--device",
+    nargs="?",
+    help="The device ID of the GPU on which you want to run the simulation.",
+)
 
-parser.add_argument('-n', '--nmoves', nargs="?",
-                    help="The number of Molecular Dynamics moves you want to run.")
+parser.add_argument(
+    "-n",
+    "--nmoves",
+    nargs="?",
+    help="The number of Molecular Dynamics moves you want to run.",
+)
 
-parser.add_argument('-p', '--platform', nargs="?",
-                    help="The OpenMM platform on which you want to run the simulation.")
+parser.add_argument(
+    "-p",
+    "--platform",
+    nargs="?",
+    help="The OpenMM platform on which you want to run the simulation.",
+)
 
-parser.add_argument('-l', '--lambda_val', nargs="?",
-                    help="The lambda value at which you want to run the simulation.")
+parser.add_argument(
+    "-l",
+    "--lambda_val",
+    nargs="?",
+    help="The lambda value at which you want to run the simulation.",
+)
 
 sys.stdout.write("\n")
 args = parser.parse_args()
@@ -75,14 +124,19 @@ args = parser.parse_args()
 must_exit = False
 
 if args.author:
-    print("\nsomd-freenrg was written by Gaetano Calabro, Julien Michel and Christopher Woods (C) 2014")
+    print(
+        "\nsomd-freenrg was written by Gaetano Calabro, Julien Michel and Christopher Woods (C) 2014"
+    )
     print("It is based on the OpenMMMD module distributed in Sire.")
     must_exit = True
 
 if args.version:
-    print("somd-freenrg -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print("somd-freenrg -- from Sire release version <%s>" % Sire.__version__)
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if args.help_config:
@@ -142,11 +196,17 @@ if args.lambda_val:
     lambda_val = float(args.lambda_val)
     params["lambda_val"] = lambda_val
 
-params['charge difference'] = args.charge_diff
+params["charge difference"] = args.charge_diff
 
-if not (os.path.exists(coord_file) and os.path.exists(top_file) and os.path.exists(morph_file)):
+if not (
+    os.path.exists(coord_file)
+    and os.path.exists(top_file)
+    and os.path.exists(morph_file)
+):
     parser.print_help()
-    print("\nPlease supply the name of an existing topology, coordinate and morph file.")
+    print(
+        "\nPlease supply the name of an existing topology, coordinate and morph file."
+    )
     if not os.path.exists(coord_file):
         print("(cannot find coordinate file %s)" % coord_file)
     if not os.path.exists(top_file):
@@ -155,7 +215,10 @@ if not (os.path.exists(coord_file) and os.path.exists(top_file) and os.path.exis
         print("(cannot find morph file %s)" % morph_file)
     sys.exit(-1)
 
-print("\nRunning a somd-freenrg calculation using files %s, %s and %s." % (top_file, coord_file, morph_file))
+print(
+    "\nRunning a somd-freenrg calculation using files %s, %s and %s."
+    % (top_file, coord_file, morph_file)
+)
 
 # Now lets run the OpenMMMD free energy calculation
 OpenMMMD.runFreeNrg(params)

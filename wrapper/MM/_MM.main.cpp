@@ -59,6 +59,10 @@
 
 #include "BondSymbols.pypp.hpp"
 
+#include "BoreschRestraint.pypp.hpp"
+
+#include "BoreschRestraints.pypp.hpp"
+
 #include "CHARMMSwitchingFunction.pypp.hpp"
 
 #include "CLJ14Group.pypp.hpp"
@@ -581,6 +585,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_BondRestraints_class();
 
     register_BondSymbols_class();
+
+    register_BoreschRestraint_class();
+
+    register_BoreschRestraints_class();
 
     register_SwitchingFunction_class();
 

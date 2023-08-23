@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireUnits/temperature.h"
 
+#include "SireUnits/units.h"
+
 #include "generalunit.h"
 
 #include "tostring.h"
@@ -198,7 +200,7 @@ void register_GeneralUnit_class(){
                 "dimensions"
                 , dimensions_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the physical dimensions of this unit, in the order\n  (M,L,T,C,t,Q,A)\n" );
         
         }
         { //::SireUnits::Dimension::GeneralUnit::fromString

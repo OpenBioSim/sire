@@ -37,8 +37,8 @@ void register_PositionalRestraint_class(){
         typedef bp::class_< SireMM::PositionalRestraint, bp::bases< SireBase::Property > > PositionalRestraint_exposer_t;
         PositionalRestraint_exposer_t PositionalRestraint_exposer = PositionalRestraint_exposer_t( "PositionalRestraint", "This class provides information about a single positional restraint.\nThis is spherically symmetric and can act on either a single particle,\nor the centroid of a group of particles. The restraints are either\nflat-bottom harmonics or harmonic potentials\n", bp::init< >("Null constructor") );
         bp::scope PositionalRestraint_scope( PositionalRestraint_exposer );
-        PositionalRestraint_exposer.def( bp::init< qint64, SireMaths::Vector const &, SireUnits::Dimension::GeneralUnit const &, SireUnits::Dimension::Length const & >(( bp::arg("atom"), bp::arg("position"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
-        PositionalRestraint_exposer.def( bp::init< QList< long long > const &, SireMaths::Vector const &, SireUnits::Dimension::GeneralUnit const &, SireUnits::Dimension::Length const & >(( bp::arg("atoms"), bp::arg("position"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the centroid of the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and flat-bottom well width\n") );
+        PositionalRestraint_exposer.def( bp::init< qint64, SireMaths::Vector const &, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const & >(( bp::arg("atom"), bp::arg("position"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
+        PositionalRestraint_exposer.def( bp::init< QList< long long > const &, SireMaths::Vector const &, SireUnits::Dimension::HarmonicBondConstant const &, SireUnits::Dimension::Length const & >(( bp::arg("atoms"), bp::arg("position"), bp::arg("k"), bp::arg("r0") ), "Construct to restrain the centroid of the atoms whose indicies are\n  in atoms to the specified position using the specified force constant\n  and flat-bottom well width\n") );
         PositionalRestraint_exposer.def( bp::init< SireMM::PositionalRestraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::PositionalRestraint::atom
         
@@ -102,7 +102,7 @@ void register_PositionalRestraint_class(){
         }
         { //::SireMM::PositionalRestraint::k
         
-            typedef ::SireUnits::Dimension::GeneralUnit ( ::SireMM::PositionalRestraint::*k_function_type)(  ) const;
+            typedef ::SireUnits::Dimension::HarmonicBondConstant ( ::SireMM::PositionalRestraint::*k_function_type)(  ) const;
             k_function_type k_function_value( &::SireMM::PositionalRestraint::k );
             
             PositionalRestraint_exposer.def( 

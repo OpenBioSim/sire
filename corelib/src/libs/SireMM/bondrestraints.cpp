@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -91,10 +91,10 @@ BondRestraint::BondRestraint()
  *  using the specified force constant and flat-bottom well-width
  */
 BondRestraint::BondRestraint(qint64 atom0, qint64 atom1,
-                             const SireUnits::Dimension::GeneralUnit &k,
+                             const SireUnits::Dimension::HarmonicBondConstant &k,
                              const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<BondRestraint, Property>(),
-      _k(0), _r0(0)
+      _k(k), _r0(r0)
 {
     if (atom0 == atom1)
         throw SireError::invalid_arg(QObject::tr(
@@ -108,12 +108,6 @@ BondRestraint::BondRestraint(qint64 atom0, qint64 atom1,
 
     atms1 = QVector<qint64>(1, atom1);
     atms1.squeeze();
-
-    _r0 = r0.to(angstrom);
-    _k = GeneralUnit(k).to(GeneralUnit(kcal_per_mol) / GeneralUnit(angstrom * angstrom));
-
-    if (_r0 < 0)
-        _r0 = 0;
 }
 
 /** Construct to restrain the centroid of the atoms whose indicies are
@@ -122,19 +116,13 @@ BondRestraint::BondRestraint(qint64 atom0, qint64 atom1,
  */
 BondRestraint::BondRestraint(const QList<qint64> &atoms0,
                              const QList<qint64> &atoms1,
-                             const SireUnits::Dimension::GeneralUnit &k,
+                             const SireUnits::Dimension::HarmonicBondConstant &k,
                              const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<BondRestraint, Property>(),
-      _k(0), _r0(0)
+      _k(k), _r0(r0)
 {
     if (atoms0.isEmpty() or atoms1.isEmpty())
         return;
-
-    _r0 = r0.to(angstrom);
-    _k = GeneralUnit(k).to(GeneralUnit(kcal_per_mol) / GeneralUnit(angstrom * angstrom));
-
-    if (_r0 < 0)
-        _r0 = 0;
 
     // remove duplicates
     atms0.reserve(atoms0.count());
@@ -260,8 +248,8 @@ QString BondRestraint::toString() const
         return QString("BondRestraint( %1 <=> %2, k=%3 : r0=%4 )")
             .arg(this->atom0())
             .arg(this->atom1())
-            .arg(_k)
-            .arg(_r0);
+            .arg(_k.toString())
+            .arg(_r0.toString());
     }
     else
     {
@@ -280,8 +268,8 @@ QString BondRestraint::toString() const
         return QString("BondRestraint( [%1] <=> [%2], k=%3 : r0=%4 )")
             .arg(a0.join(", "))
             .arg(a1.join(", "))
-            .arg(_k)
-            .arg(_r0);
+            .arg(_k.toString())
+            .arg(_r0.toString());
     }
 }
 
@@ -343,15 +331,15 @@ QVector<qint64> BondRestraint::atoms1() const
 }
 
 /** Return the force constant for the restraint */
-SireUnits::Dimension::GeneralUnit BondRestraint::k() const
+SireUnits::Dimension::HarmonicBondConstant BondRestraint::k() const
 {
-    return this->_k * GeneralUnit(kcal_per_mol) / (GeneralUnit(angstrom * angstrom));
+    return this->_k;
 }
 
 /** Return the width of the harmonic bond. */
 SireUnits::Dimension::Length BondRestraint::r0() const
 {
-    return this->_r0 * angstrom;
+    return this->_r0;
 }
 
 ///////

@@ -72,6 +72,8 @@ namespace SireUnits
     const Dimension::Angle radians(1);
     const Dimension::Angle radian(1);
 
+    const auto radian2 = radian * radian;
+
     const Dimension::Angle degrees = radians * pi / 180.0;
     const Dimension::Angle degree = degrees;
 
@@ -219,6 +221,10 @@ namespace SireUnits
 
     const Dimension::Energy int_kcal(mole *int_kcal_per_mol);
     const Dimension::Energy int_cal(0.001 * int_kcal);
+
+    // Force constants
+    const Dimension::HarmonicBondConstant kcal_per_mol_per_A2(kcal_per_mol / angstrom2);
+    const Dimension::HarmonicAngleConstant kcal_per_mol_per_rad2(kcal_per_mol / radian2);
 
     // http://physics.nist.gov/cgi-bin/cuu/Value?hr|search_for=hartree
     const Dimension::Energy hartree(4.35974394e-18 * joule);

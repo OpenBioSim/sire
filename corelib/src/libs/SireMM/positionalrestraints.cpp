@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -91,19 +91,13 @@ PositionalRestraint::PositionalRestraint()
  *  using the specified force constant and flat-bottom well-width
  */
 PositionalRestraint::PositionalRestraint(qint64 atom, const SireMaths::Vector &position,
-                                         const SireUnits::Dimension::GeneralUnit &k,
+                                         const SireUnits::Dimension::HarmonicBondConstant &k,
                                          const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<PositionalRestraint, Property>(),
-      pos(position), _k(0), _r0(0)
+      pos(position), _k(k), _r0(r0)
 {
     atms = QVector<qint64>(1, atom);
     atms.squeeze();
-
-    _r0 = r0.to(angstrom);
-    _k = GeneralUnit(k).to(GeneralUnit(kcal_per_mol) / GeneralUnit(angstrom * angstrom));
-
-    if (_r0 < 0)
-        _r0 = 0;
 }
 
 /** Construct to restrain the centroid of the atoms whose indicies are
@@ -112,19 +106,13 @@ PositionalRestraint::PositionalRestraint(qint64 atom, const SireMaths::Vector &p
  */
 PositionalRestraint::PositionalRestraint(const QList<qint64> &atoms,
                                          const SireMaths::Vector &position,
-                                         const SireUnits::Dimension::GeneralUnit &k,
+                                         const SireUnits::Dimension::HarmonicBondConstant &k,
                                          const SireUnits::Dimension::Length &r0)
     : ConcreteProperty<PositionalRestraint, Property>(),
-      pos(position), _k(0), _r0(0)
+      pos(position), _k(k), _r0(r0)
 {
     if (atoms.isEmpty())
         return;
-
-    _r0 = r0.to(angstrom);
-    _k = GeneralUnit(k).to(GeneralUnit(kcal_per_mol) / GeneralUnit(angstrom * angstrom));
-
-    if (_r0 < 0)
-        _r0 = 0;
 
     // remove duplicates
     atms.reserve(atoms.count());
@@ -218,8 +206,8 @@ QString PositionalRestraint::toString() const
         return QString("PositionalRestraint( %1 => %2, k=%3 : r0=%4 )")
             .arg(this->atom())
             .arg(pos.toString())
-            .arg(_k)
-            .arg(_r0);
+            .arg(_k.toString())
+            .arg(_r0.toString());
     }
     else
     {
@@ -233,8 +221,8 @@ QString PositionalRestraint::toString() const
         return QString("PositionalRestraint( [%1] => %2, k=%3 : r0=%4 )")
             .arg(a.join(", "))
             .arg(pos.toString())
-            .arg(_k)
-            .arg(_r0);
+            .arg(_k.toString())
+            .arg(_r0.toString());
     }
 }
 
@@ -280,9 +268,9 @@ SireMaths::Vector PositionalRestraint::position() const
 }
 
 /** Return the force constant for the restraint */
-SireUnits::Dimension::GeneralUnit PositionalRestraint::k() const
+SireUnits::Dimension::HarmonicBondConstant PositionalRestraint::k() const
 {
-    return this->_k * GeneralUnit(kcal_per_mol) / (GeneralUnit(angstrom * angstrom));
+    return this->_k;
 }
 
 /** Return the width of the flat-bottom well. This is zero for a
@@ -290,7 +278,7 @@ SireUnits::Dimension::GeneralUnit PositionalRestraint::k() const
  */
 SireUnits::Dimension::Length PositionalRestraint::r0() const
 {
-    return this->_r0 * angstrom;
+    return this->_r0;
 }
 
 ///////

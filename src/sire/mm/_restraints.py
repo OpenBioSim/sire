@@ -1,4 +1,91 @@
-__all__ = ["create_positional_restraints"]
+__all__ = [
+    "create_bond_restraints",
+    "create_boresch_restraints",
+    "create_positional_restraints",
+]
+
+
+def _to_atoms(mols, atoms):
+    """
+    Internal function used to convert `mols[atoms]` into a list
+    of atoms
+    """
+    if hasattr(atoms, "atoms"):
+        return atoms.atoms()
+
+    from ..legacy.Base import NumberProperty, IntegerArrayProperty
+
+    if type(atoms) is NumberProperty or type(atoms) is IntegerArrayProperty:
+        return mols[atoms.value()].atoms()
+    else:
+        return mols[atoms].atoms()
+
+
+def create_boresch_restraints(
+    mols,
+    receptor,
+    ligand,
+    kr,
+    r0,
+    ktheta,
+    theta0,
+    kphi,
+    phi0,
+    name: str = None,
+    map=None,
+):
+    """
+    Create a set of Boresch restraints that will hold the passed
+    ligand in a its relative binding mode relative to the
+    passed receptor. All of the atoms in both 'ligand' and
+    'receptor' must be contained in 'mols'.
+
+    The BoreschRestraint will be a set of six restraints between
+    three identified ligand atoms, and three identified receptor
+    atoms.
+
+    1. A single distance restraint, with specified kr and r0 parameters
+    2. Two angle restraints, with the specified two ktheta and theta0
+       parameters
+    3. Three torsion restraints, with the specified three kphi and phi0
+       parameters
+
+    This will create a single BoreschRestraint, which will be passed
+    back in a BoreschRestraints object.
+    """
+    from . import BoreschRestraint, BoreschRestraints
+    from .. import u
+    from ..base import create_map
+
+    map = create_map(map)
+
+    receptor = _to_atoms(mols, receptor)
+    ligand = _to_atoms(mols, ligand)
+
+    if len(receptor) != 3 or len(ligand) != 3:
+        # Eventually will choose the best atoms from the receptor
+        # and ligand...
+        raise ValueError(
+            "You need to provide 3 receptor atoms and 3 ligand atoms"
+        )
+
+    mols = mols.atoms()
+
+    b = BoreschRestraint(
+        receptor=mols.find(receptor),
+        ligand=mols.find(ligand),
+        r0=r0,
+        theta0=theta0,
+        phi0=phi0,
+        kr=kr,
+        ktheta=ktheta,
+        kphi=kphi,
+    )
+
+    if name is None:
+        return BoreschRestraints(b)
+    else:
+        return BoreschRestraint(name, b)
 
 
 def create_bond_restraints(
@@ -32,15 +119,8 @@ def create_bond_restraints(
     else:
         r0 = [u(r0)]
 
-    if hasattr(atoms0, "atoms"):
-        atoms0 = atoms0.atoms()
-    else:
-        atoms0 = mols[atoms0].atoms()
-
-    if hasattr(atoms1, "atoms"):
-        atoms1 = atoms1.atoms()
-    else:
-        atoms1 = mols[atoms1].atoms()
+    atoms0 = _to_atoms(mols, atoms0)
+    atoms1 = _to_atoms(mols, atoms1)
 
     if len(atoms0) != len(atoms1):
         raise ValueError(
@@ -55,8 +135,6 @@ def create_bond_restraints(
         restraints = BondRestraints()
     else:
         restraints = BondRestraints(name=name)
-
-    coords_prop = map["coordinates"]
 
     for i, (atom0, atom1) in enumerate(zip(atoms0, atoms1)):
         idxs0 = mols.find(atom0)
@@ -134,10 +212,7 @@ def create_positional_restraints(
     else:
         r0 = [u(r0)]
 
-    if hasattr(atoms, "atoms"):
-        atoms = atoms.atoms()
-    else:
-        atoms = mols[atoms].atoms()
+    atoms = _to_atoms(mols, atoms)
 
     mols = mols.atoms()
 

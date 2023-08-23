@@ -1,5 +1,6 @@
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -13,26 +14,46 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description="Generate cell files from a passed trajectory",
-                                 epilog="nautilus-regionproperties is built using Sire, Numpy and mdtraj and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/nautilus",
-                                 prog="nautilus")
+parser = argparse.ArgumentParser(
+    description="Generate cell files from a passed trajectory",
+    epilog="nautilus-regionproperties is built using Sire, Numpy and mdtraj and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/nautilus",
+    prog="nautilus",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-g', '--gridforces', nargs="?",
-                    help="Grid.forces file which specifies average parameters of each grid point.")
+parser.add_argument(
+    "-g",
+    "--gridforces",
+    nargs="?",
+    help="Grid.forces file which specifies average parameters of each grid point.",
+)
 
-parser.add_argument('-r', '--regionfile', nargs="?",
-                    help="Region file which specifies grid points to be averaged.  Text file containing only grid indices as seen in gridforces file")
+parser.add_argument(
+    "-r",
+    "--regionfile",
+    nargs="?",
+    help="Region file which specifies grid points to be averaged.  Text file containing only grid indices as seen in gridforces file",
+)
 
-parser.add_argument('-b', '--benchmark', action='store_true',
-                    help="Benchmark the Nautilus subroutines.")
+parser.add_argument(
+    "-b",
+    "--benchmark",
+    action="store_true",
+    help="Benchmark the Nautilus subroutines.",
+)
 
 sys.stdout.write("\n")
 
@@ -41,14 +62,22 @@ args = parser.parse_args()
 must_exit = False
 
 if args.author:
-    print("\n nautilus-regionproperties was written by Georgios Gerogiokas and Julien Michel (C) 2014")
+    print(
+        "\n nautilus-regionproperties was written by Georgios Gerogiokas and Julien Michel (C) 2014"
+    )
     print("It is based on the Nautilus Sire module.")
     must_exit = True
 
 if args.version:
-    print("nautilus-regionproperties -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print(
+        "nautilus-regionproperties -- from Sire release version <%s>"
+        % Sire.__version__
+    )
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if must_exit:
@@ -87,7 +116,9 @@ if not (os.path.exists(gridforces) and os.path.exists(regionfile)):
         print("cannot find grid file %s" % gridforces)
     sys.exit(-1)
 
-#print (params,args)
-print("\nRunning nautilus-regionproperties.py using files %s and %s" % (gridforces, regionfile) )
+# print (params,args)
+print(
+    "\nRunning nautilus-regionproperties.py using files %s and %s"
+    % (gridforces, regionfile)
+)
 Nautilus.regionproperties(params)
-

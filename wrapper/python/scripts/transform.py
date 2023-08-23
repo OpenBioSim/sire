@@ -15,6 +15,7 @@ If you need more help understanding or using align then please feel free to get 
 
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -31,59 +32,102 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description="Transform ligands/small molecules/fragments "
-                                             "in a PDB file (e.g. translate/rotate)",
-                                 epilog="This program is built using Sire, which is released "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/transform",
-                                 prog="transform")
+parser = argparse.ArgumentParser(
+    description="Transform ligands/small molecules/fragments "
+    "in a PDB file (e.g. translate/rotate)",
+    epilog="This program is built using Sire, which is released "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/transform",
+    prog="transform",
+)
 
-parser.add_argument('--description', action="store_true",
-                    help="Print a complete description of this program.")
+parser.add_argument(
+    "--description",
+    action="store_true",
+    help="Print a complete description of this program.",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-l', '--ligand', nargs=1,
-                    help="Supply the name of the ligand you want to translate/rotate.")
+parser.add_argument(
+    "-l",
+    "--ligand",
+    nargs=1,
+    help="Supply the name of the ligand you want to translate/rotate.",
+)
 
-parser.add_argument('-p', '--pdb', nargs=1,
-                    help="Supply the PDB file containing the ligand.")
+parser.add_argument(
+    "-p", "--pdb", nargs=1, help="Supply the PDB file containing the ligand."
+)
 
-parser.add_argument('-t', '--translate', nargs=3,
-                    help="How much to translate the ligand along x, then y, then z, "
-                         "e.g. 0*nanometer 3*nanometer -0.5*nanometer. If no units "
-                         "are supplied, then they are assumed to be angstroms.")
+parser.add_argument(
+    "-t",
+    "--translate",
+    nargs=3,
+    help="How much to translate the ligand along x, then y, then z, "
+    "e.g. 0*nanometer 3*nanometer -0.5*nanometer. If no units "
+    "are supplied, then they are assumed to be angstroms.",
+)
 
-parser.add_argument('-r', '--rotate', nargs=1,
-                    help="How must to rotate the ligand around the rotation axis, e.g. "
-                         "30*degrees. If no units are supplied, then they are assumed "
-                         "to be degrees.")
+parser.add_argument(
+    "-r",
+    "--rotate",
+    nargs=1,
+    help="How must to rotate the ligand around the rotation axis, e.g. "
+    "30*degrees. If no units are supplied, then they are assumed "
+    "to be degrees.",
+)
 
-parser.add_argument('-ra', '--rotaxis', type=float, nargs=3,
-                    help="The rotation axis about which to rotate the molecule, e.g. "
-                         "1.0 0.0 0.0. If this is not supplied, then the rotation will "
-                         "be about the major principal axis of the molecule.")
+parser.add_argument(
+    "-ra",
+    "--rotaxis",
+    type=float,
+    nargs=3,
+    help="The rotation axis about which to rotate the molecule, e.g. "
+    "1.0 0.0 0.0. If this is not supplied, then the rotation will "
+    "be about the major principal axis of the molecule.",
+)
 
-parser.add_argument('-rc', '--rotcent', nargs=3,
-                    help="The center of rotation (before translation) for the rotation, e.g. "
-                         "5*angstrom 5.2*angstrom 4.8*angstrom. If no units are supplied, then "
-                         "angstroms are assumed. If this is not specified, then rotation will "
-                         "be about the center of mass or center of geometry of the molecule. "
-                         "(see --com or --cog).")
+parser.add_argument(
+    "-rc",
+    "--rotcent",
+    nargs=3,
+    help="The center of rotation (before translation) for the rotation, e.g. "
+    "5*angstrom 5.2*angstrom 4.8*angstrom. If no units are supplied, then "
+    "angstroms are assumed. If this is not specified, then rotation will "
+    "be about the center of mass or center of geometry of the molecule. "
+    "(see --com or --cog).",
+)
 
-parser.add_argument('--cog', action="store_true",
-                    help="Whether or not to rotate about the center of geometry of the molecule.")
+parser.add_argument(
+    "--cog",
+    action="store_true",
+    help="Whether or not to rotate about the center of geometry of the molecule.",
+)
 
-parser.add_argument('--com', action="store_true",
-                    help="Whether or not to rotate about the center of mass of the molecule.")
+parser.add_argument(
+    "--com",
+    action="store_true",
+    help="Whether or not to rotate about the center of mass of the molecule.",
+)
 
-parser.add_argument('-o', '--output', nargs=1,
-                    help="Name of the PDB file in which to output the transformed copy of the "
-                         "ligand.")
+parser.add_argument(
+    "-o",
+    "--output",
+    nargs=1,
+    help="Name of the PDB file in which to output the transformed copy of the "
+    "ligand.",
+)
 
 sys.stdout.write("\n")
 args = parser.parse_args()
@@ -96,7 +140,9 @@ if args.description:
 
 if args.author:
     print("\ntransform was written by Christopher Woods (C) 2014")
-    print("It is based on the Molecule::move().transform() function distributed in Sire.")
+    print(
+        "It is based on the Molecule::move().transform() function distributed in Sire."
+    )
     must_exit = True
 
 if args.version:
@@ -119,7 +165,7 @@ pdb = args.pdb[0]
 ligname = args.ligand[0]
 outfile = args.output[0]
 
-delta = Vector(0,0,0)
+delta = Vector(0, 0, 0)
 rotvec = None
 rotcent = None
 rotang = 0
@@ -128,6 +174,7 @@ axstring = "major principal axis"
 use_cog = True
 use_com = False
 rotstring = "center of geometry"
+
 
 def stringToValue(val):
     # see if we have to turn the value from a string into a python object
@@ -140,6 +187,7 @@ def stringToValue(val):
         except:
             return float(val)
 
+
 def stringToAngle(val):
     # see if we have to turn the value from a string into a python object
     try:
@@ -147,6 +195,7 @@ def stringToAngle(val):
     except:
         words = val.split("*")
         return float(words[0])
+
 
 if args.translate:
     dx = args.translate[0]
@@ -163,7 +212,7 @@ if args.rotaxis:
     y = stringToValue(args.rotaxis[1])
     z = stringToValue(args.rotaxis[2])
 
-    rotvec = Vector(x,y,z)
+    rotvec = Vector(x, y, z)
     axstring = "axis %s" % rotvec
 else:
     axstring = "major principal axis"
@@ -173,7 +222,7 @@ if args.rotcent:
     y = stringToValue(args.rotcent[1])
     z = stringToValue(args.rotcent[2])
 
-    rotcent = Vector(x,y,z)
+    rotcent = Vector(x, y, z)
     rotstring = "axis %s A" % rotcent
 
 elif args.com:
@@ -186,13 +235,19 @@ elif args.cog:
     use_com = False
     rotstring = "center of geometry"
 
-print("\nRotating ligand %s from PDB file %s by %s degrees around %s, "
-      "about %s, and then translating by %s A." % (ligname,pdb,rotang,axstring,
-                 rotstring, delta))
+print(
+    "\nRotating ligand %s from PDB file %s by %s degrees around %s, "
+    "about %s, and then translating by %s A."
+    % (ligname, pdb, rotang, axstring, rotstring, delta)
+)
 
-print("\nTransformed coordinates of ligand %s will be written to file %s." % (ligname,outfile))
+print(
+    "\nTransformed coordinates of ligand %s will be written to file %s."
+    % (ligname, outfile)
+)
 
 mols = PDB().read(pdb)
+
 
 def getResidueNames(molecule):
     nres = molecule.nResidues()
@@ -200,9 +255,10 @@ def getResidueNames(molecule):
     resnams = []
 
     for i in range(0, nres):
-        resnams.append( str( molecule.residue(ResIdx(i)).name().value()).upper() )
+        resnams.append(str(molecule.residue(ResIdx(i)).name().value()).upper())
 
     return resnams
+
 
 def findMolecule(molecules, molname):
     molname = molname.upper()
@@ -221,10 +277,14 @@ def findMolecule(molecules, molname):
 
     return None
 
+
 lig = findMolecule(mols, ligname)
 
 if lig is None:
-    print("\nWARNING: Cannot find the ligand (%s) in PDB file %s." % (ligname,pdb))
+    print(
+        "\nWARNING: Cannot find the ligand (%s) in PDB file %s."
+        % (ligname, pdb)
+    )
     print("Cannot transform. Exiting...")
     sys.exit(-1)
 
@@ -241,7 +301,7 @@ if rotvec is None:
     rotvec = axes.matrix().column0()
     print("Major principal axis is %s" % rotvec)
 
-t = Transform(delta, Quaternion(rotang*degrees,rotvec), rotcent)
+t = Transform(delta, Quaternion(rotang * degrees, rotvec), rotcent)
 
 print("Transform equals %s" % t.toString())
 
