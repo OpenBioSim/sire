@@ -1,6 +1,6 @@
 __all__ = [
-    "create_bond_restraints",
     "create_boresch_restraints",
+    "create_distance_restraints",
     "create_positional_restraints",
 ]
 
@@ -25,12 +25,9 @@ def create_boresch_restraints(
     mols,
     receptor,
     ligand,
-    kr,
-    r0,
-    ktheta,
-    theta0,
-    kphi,
-    phi0,
+    kr=None,
+    ktheta=None,
+    kphi=None,
     name: str = None,
     map=None,
 ):
@@ -52,6 +49,13 @@ def create_boresch_restraints(
 
     This will create a single BoreschRestraint, which will be passed
     back in a BoreschRestraints object.
+
+    If the force constants (kr, ktheta and kphi) are None, then they
+    will have default values of 150 kcal mol-1 A-2 and
+    150 kcal mol-1 rad-2
+
+    The equilibium distances and angles are based on the current coordinates
+    of that atoms
     """
     from . import BoreschRestraint, BoreschRestraints
     from .. import u
@@ -68,6 +72,58 @@ def create_boresch_restraints(
         raise ValueError(
             "You need to provide 3 receptor atoms and 3 ligand atoms"
         )
+
+    if kr is None:
+        kr = u("150 kcal mol-1 A-2")
+    else:
+        kr = u(kr)
+
+    _default_k = u("150 kcal mol-1 rad-2")
+
+    if ktheta is None:
+        ktheta = [_default_k, _default_k]
+    elif type(ktheta) is not list:
+        ktheta = 2 * [u(ktheta)]
+    else:
+        if len(ktheta) == 0:
+            ktheta = [_default_k, _default_k]
+        if len(ktheta) < 2:
+            ktheta = 2 * [u(ktheta[0])]
+        else:
+            ktheta = [u(x) for x in ktheta[0:2]]
+
+    if kphi is None:
+        kphi = [_default_k, _default_k, _default_k]
+    elif type(kphi) is not list:
+        kphi = 3 * [u(phi)]
+    else:
+        if len(kphi) == 0:
+            kphi = [_default_k, _default_k, _default_k]
+        elif len(kphi) == 1:
+            kphi = 3 * [u(kphi[0])]
+        elif len(kphi) == 2:
+            kphi = [u(kphi[0]), u(kphi[1]), u(kphi[1])]
+        else:
+            kphi = [u(x) for x in kphi[0:3]]
+
+    # r is | Ligand1 - Receptor1 | = distance(P1, P4)
+    # thetaA = angle(R2, R1, L1) = angle(P2, P1, P4)
+    # thetaB = angle(R1, L1, L2) = angle(P1, P4, P5)
+    # phiA = dihedral(R3, R2, R1, L1) = dihedral(P3, P2, P1, P4)
+    # phiB = dihedral(R2, R1, L1, L2) = dihedral(P2, P1, P4, P5)
+    # phiC = dihedral(R1, L1, L2, L3) = dihedral(P1, P4, P5, P6)
+    from .. import measure
+
+    r0 = measure(ligand[0], receptor[0])
+    theta0 = [
+        measure(receptor[1], receptor[0], ligand[0]),
+        measure(receptor[0], ligand[0], ligand[1]),
+    ]
+    phi0 = [
+        measure(receptor[2], receptor[1], receptor[0], ligand[0]),
+        measure(receptor[1], receptor[0], ligand[0], ligand[1]),
+        measure(receptor[0], ligand[0], ligand[1], ligand[2]),
+    ]
 
     mols = mols.atoms()
 
@@ -88,20 +144,26 @@ def create_boresch_restraints(
         return BoreschRestraint(name, b)
 
 
-def create_bond_restraints(
-    mols, atoms0, atoms1, k, r0, name: str = None, map=None
+def create_distance_restraints(
+    mols, atoms0, atoms1, r0=None, k=None, name: str = None, map=None
 ):
     """
-    Create a set of bond restraints from all of the atoms in 'atoms0'
+    Create a set of distance restraints from all of the atoms in 'atoms0'
     to all of the atoms in 'atoms1' where all atoms are
     contained in the container 'mols', using the
     passed values of the force constant 'k' and equilibrium
     bond length r0.
 
-    These restraints will be per bond. If a list of k and/or r0
+    These restraints will be per atom-atom distance. If a list of k and/or r0
     values are passed, then different values could be used for
-    different bonds (assuming the same number as the number of
-    bodns). Otherwise, all bonds will use the same parameters.
+    different atom-atom distances (assuming the same number as the number of
+    atom-atom distances). Otherwise, all atom-atom distances will use the
+    same parameters.
+
+    If r0 is None, then the current atom-atom distance for
+    each atom-atom pair will be used as the equilibium value.
+
+    If k is None, then a default value of 150 kcal mol-1 A-2 will be used
     """
     from . import BondRestraint, BondRestraints
     from .. import u
@@ -109,15 +171,12 @@ def create_bond_restraints(
 
     map = create_map(map)
 
-    if type(k) is list:
+    if k is None:
+        k = [u("150 kcal mol-1 A-2")]
+    elif type(k) is list:
         k = [u(x) for x in k]
     else:
         k = [u(k)]
-
-    if type(r0) is list:
-        r0 = [u(x) for x in r0]
-    else:
-        r0 = [u(r0)]
 
     atoms0 = _to_atoms(mols, atoms0)
     atoms1 = _to_atoms(mols, atoms1)
@@ -128,6 +187,18 @@ def create_bond_restraints(
             f"of atoms in the first group ({len(atoms0)}) is not equal to "
             f"the number of atoms in the second ({len(atoms1)})."
         )
+
+    if r0 is None:
+        # calculate all of the current distances
+        from .. import measure
+
+        r0 = []
+        for atom0, atom1 in zip(atoms0, atoms1):
+            r0.append(measure(atom0, atom1))
+    elif type(r0) is list:
+        r0 = [u(x) for x in r0]
+    else:
+        r0 = [u(r0)]
 
     mols = mols.atoms()
 
@@ -191,6 +262,9 @@ def create_positional_restraints(
 
     If 'r0' is not specified, then a simple harmonic restraint
     is used.
+
+    If 'k' is not specified, then a default of 150 kcal mol-1 A-2
+    will be used.
     """
     from . import PositionalRestraint, PositionalRestraints
     from .. import u

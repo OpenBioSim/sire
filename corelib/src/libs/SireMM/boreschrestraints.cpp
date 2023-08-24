@@ -104,14 +104,20 @@ BoreschRestraint::BoreschRestraint(const QList<qint64> &receptor_atoms,
       _r0(r0), _theta0(theta0), _phi0(phi0),
       _kr(kr), _ktheta(ktheta), _kphi(kphi)
 {
-    if (receptor_atms.count() != 3 or ligand_atms.count() != 3 or
+    if (receptor_atoms.count() != 3 or ligand_atoms.count() != 3 or
         theta0.count() != 2 or phi0.count() != 3 or
         ktheta.count() != 2 or kphi.count() != 3)
     {
         throw SireError::invalid_arg(QObject::tr(
                                          "Wrong number of inputs for a Boresch restraint. You need to "
-                                         "provide 3 receptor atoms, 3 ligand atoms, 2 theta0 values "
-                                         "3 phi0 values, 2 ktheta values and 3 kphi values."),
+                                         "provide 3 receptor atoms (%1), 3 ligand atoms (%2), 2 theta0 values (%3) "
+                                         "3 phi0 values (%4), 2 ktheta values (%5) and 3 kphi values (%6).")
+                                         .arg(receptor_atoms.count())
+                                         .arg(ligand_atoms.count())
+                                         .arg(theta0.count())
+                                         .arg(phi0.count())
+                                         .arg(ktheta.count())
+                                         .arg(kphi.count()),
                                      CODELOC);
     }
 

@@ -30,10 +30,7 @@ namespace bp = boost::python;
 
 #include "distancerestraint.h"
 
-SireMM::DistanceRestraint __copy__(const SireMM::DistanceRestraint &other)
-{
-    return SireMM::DistanceRestraint(other);
-}
+SireMM::DistanceRestraint __copy__(const SireMM::DistanceRestraint &other){ return SireMM::DistanceRestraint(other); }
 
 #include "Qt/qdatastream.hpp"
 
@@ -41,215 +38,319 @@ SireMM::DistanceRestraint __copy__(const SireMM::DistanceRestraint &other)
 
 #include "Helpers/release_gil_policy.hpp"
 
-void register_DistanceRestraint_class()
-{
+void register_DistanceRestraint_class(){
 
     { //::SireMM::DistanceRestraint
-        typedef bp::class_<SireMM::DistanceRestraint, bp::bases<SireMM::Restraint3D, SireMM::Restraint, SireBase::Property>> DistanceRestraint_exposer_t;
-        DistanceRestraint_exposer_t DistanceRestraint_exposer = DistanceRestraint_exposer_t("DistanceRestraint", "This is a restraint that operates on the distance between\ntwo SireMM::Point objects (e.g. two atoms in a molecule,\na point in space and the center of a molecule, the\ncenter of geometry of one molecule with the center of\nmass of the solvent)\n\nAuthor: Christopher Woods\n", bp::init<>("Constructor"));
-        bp::scope DistanceRestraint_scope(DistanceRestraint_exposer);
-        DistanceRestraint_exposer.def(bp::init<SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const &>((bp::arg("point0"), bp::arg("point1"), bp::arg("restraint")), "Construct a restraint that acts between the two points point0 and point1,\nrestraining the distance between these points using the expression\nrestraint"));
-        DistanceRestraint_exposer.def(bp::init<SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const &, SireCAS::Values const &>((bp::arg("point0"), bp::arg("point1"), bp::arg("restraint"), bp::arg("values")), "Construct a restraint that acts between the two points point0 and point1,\nrestraining the distance between these points using the expression\nrestraint, with supplied values for this expression in values.\nNote that any extra values in values that arent in the expression\nrestraint are ignored"));
-        DistanceRestraint_exposer.def(bp::init<SireMM::DistanceRestraint const &>((bp::arg("other")), "Copy constructor"));
+        typedef bp::class_< SireMM::DistanceRestraint, bp::bases< SireMM::Restraint3D, SireMM::Restraint, SireBase::Property > > DistanceRestraint_exposer_t;
+        DistanceRestraint_exposer_t DistanceRestraint_exposer = DistanceRestraint_exposer_t( "DistanceRestraint", "This is a restraint that operates on the distance between\ntwo SireMM::Point objects (e.g. two atoms in a molecule,\na point in space and the center of a molecule, the\ncenter of geometry of one molecule with the center of\nmass of the solvent)\n\nAuthor: Christopher Woods\n", bp::init< >("Constructor") );
+        bp::scope DistanceRestraint_scope( DistanceRestraint_exposer );
+        DistanceRestraint_exposer.def( bp::init< SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const & >(( bp::arg("point0"), bp::arg("point1"), bp::arg("restraint") ), "Construct a restraint that acts between the two points point0 and point1,\nrestraining the distance between these points using the expression\nrestraint") );
+        DistanceRestraint_exposer.def( bp::init< SireFF::PointRef const &, SireFF::PointRef const &, SireCAS::Expression const &, SireCAS::Values const & >(( bp::arg("point0"), bp::arg("point1"), bp::arg("restraint"), bp::arg("values") ), "Construct a restraint that acts between the two points point0 and point1,\nrestraining the distance between these points using the expression\nrestraint, with supplied values for this expression in values.\nNote that any extra values in values that arent in the expression\nrestraint are ignored") );
+        DistanceRestraint_exposer.def( bp::init< SireMM::DistanceRestraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::DistanceRestraint::builtinSymbols
-
-            typedef ::SireCAS::Symbols (::SireMM::DistanceRestraint::*builtinSymbols_function_type)() const;
-            builtinSymbols_function_type builtinSymbols_function_value(&::SireMM::DistanceRestraint::builtinSymbols);
-
-            DistanceRestraint_exposer.def(
-                "builtinSymbols", builtinSymbols_function_value, bp::release_gil_policy(), "Return the built-in symbols of this restraint");
+        
+            typedef ::SireCAS::Symbols ( ::SireMM::DistanceRestraint::*builtinSymbols_function_type)(  ) const;
+            builtinSymbols_function_type builtinSymbols_function_value( &::SireMM::DistanceRestraint::builtinSymbols );
+            
+            DistanceRestraint_exposer.def( 
+                "builtinSymbols"
+                , builtinSymbols_function_value
+                , bp::release_gil_policy()
+                , "Return the built-in symbols of this restraint" );
+        
         }
         { //::SireMM::DistanceRestraint::builtinValues
-
-            typedef ::SireCAS::Values (::SireMM::DistanceRestraint::*builtinValues_function_type)() const;
-            builtinValues_function_type builtinValues_function_value(&::SireMM::DistanceRestraint::builtinValues);
-
-            DistanceRestraint_exposer.def(
-                "builtinValues", builtinValues_function_value, bp::release_gil_policy(), "Return the built-in values of this restraint");
+        
+            typedef ::SireCAS::Values ( ::SireMM::DistanceRestraint::*builtinValues_function_type)(  ) const;
+            builtinValues_function_type builtinValues_function_value( &::SireMM::DistanceRestraint::builtinValues );
+            
+            DistanceRestraint_exposer.def( 
+                "builtinValues"
+                , builtinValues_function_value
+                , bp::release_gil_policy()
+                , "Return the built-in values of this restraint" );
+        
         }
         { //::SireMM::DistanceRestraint::contains
-
-            typedef bool (::SireMM::DistanceRestraint::*contains_function_type)(::SireMol::MolNum) const;
-            contains_function_type contains_function_value(&::SireMM::DistanceRestraint::contains);
-
-            DistanceRestraint_exposer.def(
-                "contains", contains_function_value, (bp::arg("molnum")), bp::release_gil_policy(), "Return whether or not this restraint affects the molecule\nwith number molnum");
+        
+            typedef bool ( ::SireMM::DistanceRestraint::*contains_function_type)( ::SireMol::MolNum ) const;
+            contains_function_type contains_function_value( &::SireMM::DistanceRestraint::contains );
+            
+            DistanceRestraint_exposer.def( 
+                "contains"
+                , contains_function_value
+                , ( bp::arg("molnum") )
+                , bp::release_gil_policy()
+                , "Return whether or not this restraint affects the molecule\nwith number molnum" );
+        
         }
         { //::SireMM::DistanceRestraint::contains
-
-            typedef bool (::SireMM::DistanceRestraint::*contains_function_type)(::SireMol::MolID const &) const;
-            contains_function_type contains_function_value(&::SireMM::DistanceRestraint::contains);
-
-            DistanceRestraint_exposer.def(
-                "contains", contains_function_value, (bp::arg("molid")), bp::release_gil_policy(), "Return whether or not this restraint affects the molecule\nwith ID molid");
+        
+            typedef bool ( ::SireMM::DistanceRestraint::*contains_function_type)( ::SireMol::MolID const & ) const;
+            contains_function_type contains_function_value( &::SireMM::DistanceRestraint::contains );
+            
+            DistanceRestraint_exposer.def( 
+                "contains"
+                , contains_function_value
+                , ( bp::arg("molid") )
+                , bp::release_gil_policy()
+                , "Return whether or not this restraint affects the molecule\nwith ID molid" );
+        
         }
         { //::SireMM::DistanceRestraint::differentialRestraintFunction
-
-            typedef ::SireCAS::Expression const &(::SireMM::DistanceRestraint::*differentialRestraintFunction_function_type)() const;
-            differentialRestraintFunction_function_type differentialRestraintFunction_function_value(&::SireMM::DistanceRestraint::differentialRestraintFunction);
-
-            DistanceRestraint_exposer.def(
-                "differentialRestraintFunction", differentialRestraintFunction_function_value, bp::return_value_policy<bp::copy_const_reference>(), "Return the function used to calculate the restraint force");
+        
+            typedef ::SireCAS::Expression const & ( ::SireMM::DistanceRestraint::*differentialRestraintFunction_function_type)(  ) const;
+            differentialRestraintFunction_function_type differentialRestraintFunction_function_value( &::SireMM::DistanceRestraint::differentialRestraintFunction );
+            
+            DistanceRestraint_exposer.def( 
+                "differentialRestraintFunction"
+                , differentialRestraintFunction_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "Return the function used to calculate the restraint force" );
+        
         }
         { //::SireMM::DistanceRestraint::differentiate
-
-            typedef ::SireMM::RestraintPtr (::SireMM::DistanceRestraint::*differentiate_function_type)(::SireCAS::Symbol const &) const;
-            differentiate_function_type differentiate_function_value(&::SireMM::DistanceRestraint::differentiate);
-
-            DistanceRestraint_exposer.def(
-                "differentiate", differentiate_function_value, (bp::arg("symbol")), bp::release_gil_policy(), "Return the restraint that is the differential of this restraint\nwith respect to the symbol symbol\nThrow: SireCAS::unavailable_differential\n");
+        
+            typedef ::SireMM::RestraintPtr ( ::SireMM::DistanceRestraint::*differentiate_function_type)( ::SireCAS::Symbol const & ) const;
+            differentiate_function_type differentiate_function_value( &::SireMM::DistanceRestraint::differentiate );
+            
+            DistanceRestraint_exposer.def( 
+                "differentiate"
+                , differentiate_function_value
+                , ( bp::arg("symbol") )
+                , bp::release_gil_policy()
+                , "Return the restraint that is the differential of this restraint\nwith respect to the symbol symbol\nThrow: SireCAS::unavailable_differential\n" );
+        
         }
         { //::SireMM::DistanceRestraint::force
-
-            typedef void (::SireMM::DistanceRestraint::*force_function_type)(::SireFF::MolForceTable &, double) const;
-            force_function_type force_function_value(&::SireMM::DistanceRestraint::force);
-
-            DistanceRestraint_exposer.def(
-                "force", force_function_value, (bp::arg("forcetable"), bp::arg("scale_force") = 1), "Calculate the force acting on the molecule in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force");
+        
+            typedef void ( ::SireMM::DistanceRestraint::*force_function_type)( ::SireFF::MolForceTable &,double ) const;
+            force_function_type force_function_value( &::SireMM::DistanceRestraint::force );
+            
+            DistanceRestraint_exposer.def( 
+                "force"
+                , force_function_value
+                , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
+                , "Calculate the force acting on the molecule in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force" );
+        
         }
         { //::SireMM::DistanceRestraint::force
-
-            typedef void (::SireMM::DistanceRestraint::*force_function_type)(::SireFF::ForceTable &, double) const;
-            force_function_type force_function_value(&::SireMM::DistanceRestraint::force);
-
-            DistanceRestraint_exposer.def(
-                "force", force_function_value, (bp::arg("forcetable"), bp::arg("scale_force") = 1), "Calculate the force acting on the molecules in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force");
+        
+            typedef void ( ::SireMM::DistanceRestraint::*force_function_type)( ::SireFF::ForceTable &,double ) const;
+            force_function_type force_function_value( &::SireMM::DistanceRestraint::force );
+            
+            DistanceRestraint_exposer.def( 
+                "force"
+                , force_function_value
+                , ( bp::arg("forcetable"), bp::arg("scale_force")=1 )
+                , "Calculate the force acting on the molecules in the forcetable forcetable\ncaused by this restraint, and add it on to the forcetable scaled by\nscale_force" );
+        
         }
         { //::SireMM::DistanceRestraint::halfHarmonic
-
-            typedef ::SireMM::DistanceRestraint (*halfHarmonic_function_type)(::SireFF::PointRef const &, ::SireFF::PointRef const &, ::SireUnits::Dimension::Length const &, ::SireUnits::Dimension::HarmonicBondConstant const &);
-            halfHarmonic_function_type halfHarmonic_function_value(&::SireMM::DistanceRestraint::halfHarmonic);
-
-            DistanceRestraint_exposer.def(
-                "halfHarmonic", halfHarmonic_function_value, (bp::arg("point0"), bp::arg("point1"), bp::arg("distance"), bp::arg("force_constant")), bp::release_gil_policy(), "Return a distance restraint that applied a half-harmonic potential\nbetween the points point0 and point1 above a distance distance\nusing a force constant force_constant");
+        
+            typedef ::SireMM::DistanceRestraint ( *halfHarmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::Length const &,::SireUnits::Dimension::HarmonicBondConstant const & );
+            halfHarmonic_function_type halfHarmonic_function_value( &::SireMM::DistanceRestraint::halfHarmonic );
+            
+            DistanceRestraint_exposer.def( 
+                "halfHarmonic"
+                , halfHarmonic_function_value
+                , ( bp::arg("point0"), bp::arg("point1"), bp::arg("distance"), bp::arg("force_constant") )
+                , bp::release_gil_policy()
+                , "Return a distance restraint that applied a half-harmonic potential\nbetween the points point0 and point1 above a distance distance\nusing a force constant force_constant" );
+        
         }
         { //::SireMM::DistanceRestraint::harmonic
-
-            typedef ::SireMM::DistanceRestraint (*harmonic_function_type)(::SireFF::PointRef const &, ::SireFF::PointRef const &, ::SireUnits::Dimension::HarmonicBondConstant const &);
-            harmonic_function_type harmonic_function_value(&::SireMM::DistanceRestraint::harmonic);
-
-            DistanceRestraint_exposer.def(
-                "harmonic", harmonic_function_value, (bp::arg("point0"), bp::arg("point1"), bp::arg("force_constant")), bp::release_gil_policy(), "Return a distance restraint that applies a harmonic potential between\nthe points point0 and point1 using a force constant force_constant");
+        
+            typedef ::SireMM::DistanceRestraint ( *harmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::HarmonicBondConstant const & );
+            harmonic_function_type harmonic_function_value( &::SireMM::DistanceRestraint::harmonic );
+            
+            DistanceRestraint_exposer.def( 
+                "harmonic"
+                , harmonic_function_value
+                , ( bp::arg("point0"), bp::arg("point1"), bp::arg("force_constant") )
+                , bp::release_gil_policy()
+                , "Return a distance restraint that applies a harmonic potential between\nthe points point0 and point1 using a force constant force_constant" );
+        
         }
         { //::SireMM::DistanceRestraint::molecules
-
-            typedef ::SireMol::Molecules (::SireMM::DistanceRestraint::*molecules_function_type)() const;
-            molecules_function_type molecules_function_value(&::SireMM::DistanceRestraint::molecules);
-
-            DistanceRestraint_exposer.def(
-                "molecules", molecules_function_value, bp::release_gil_policy(), "Return the molecules used in this restraint");
+        
+            typedef ::SireMol::Molecules ( ::SireMM::DistanceRestraint::*molecules_function_type)(  ) const;
+            molecules_function_type molecules_function_value( &::SireMM::DistanceRestraint::molecules );
+            
+            DistanceRestraint_exposer.def( 
+                "molecules"
+                , molecules_function_value
+                , bp::release_gil_policy()
+                , "Return the molecules used in this restraint" );
+        
         }
         { //::SireMM::DistanceRestraint::nPoints
-
-            typedef int (::SireMM::DistanceRestraint::*nPoints_function_type)() const;
-            nPoints_function_type nPoints_function_value(&::SireMM::DistanceRestraint::nPoints);
-
-            DistanceRestraint_exposer.def(
-                "nPoints", nPoints_function_value, bp::release_gil_policy(), "This restraint involves two points");
+        
+            typedef int ( ::SireMM::DistanceRestraint::*nPoints_function_type)(  ) const;
+            nPoints_function_type nPoints_function_value( &::SireMM::DistanceRestraint::nPoints );
+            
+            DistanceRestraint_exposer.def( 
+                "nPoints"
+                , nPoints_function_value
+                , bp::release_gil_policy()
+                , "This restraint involves two points" );
+        
         }
-        DistanceRestraint_exposer.def(bp::self != bp::self);
+        DistanceRestraint_exposer.def( bp::self != bp::self );
         { //::SireMM::DistanceRestraint::operator=
-
-            typedef ::SireMM::DistanceRestraint &(::SireMM::DistanceRestraint::*assign_function_type)(::SireMM::DistanceRestraint const &);
-            assign_function_type assign_function_value(&::SireMM::DistanceRestraint::operator=);
-
-            DistanceRestraint_exposer.def(
-                "assign", assign_function_value, (bp::arg("other")), bp::return_self<>(), "");
+        
+            typedef ::SireMM::DistanceRestraint & ( ::SireMM::DistanceRestraint::*assign_function_type)( ::SireMM::DistanceRestraint const & ) ;
+            assign_function_type assign_function_value( &::SireMM::DistanceRestraint::operator= );
+            
+            DistanceRestraint_exposer.def( 
+                "assign"
+                , assign_function_value
+                , ( bp::arg("other") )
+                , bp::return_self< >()
+                , "" );
+        
         }
-        DistanceRestraint_exposer.def(bp::self == bp::self);
+        DistanceRestraint_exposer.def( bp::self == bp::self );
         { //::SireMM::DistanceRestraint::point
-
-            typedef ::SireFF::Point const &(::SireMM::DistanceRestraint::*point_function_type)(int) const;
-            point_function_type point_function_value(&::SireMM::DistanceRestraint::point);
-
-            DistanceRestraint_exposer.def(
-                "point", point_function_value, (bp::arg("i")), bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>(), "Return the ith point");
+        
+            typedef ::SireFF::Point const & ( ::SireMM::DistanceRestraint::*point_function_type)( int ) const;
+            point_function_type point_function_value( &::SireMM::DistanceRestraint::point );
+            
+            DistanceRestraint_exposer.def( 
+                "point"
+                , point_function_value
+                , ( bp::arg("i") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the ith point" );
+        
         }
         { //::SireMM::DistanceRestraint::point0
-
-            typedef ::SireFF::Point const &(::SireMM::DistanceRestraint::*point0_function_type)() const;
-            point0_function_type point0_function_value(&::SireMM::DistanceRestraint::point0);
-
-            DistanceRestraint_exposer.def(
-                "point0", point0_function_value, bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>(), "Return the first point");
+        
+            typedef ::SireFF::Point const & ( ::SireMM::DistanceRestraint::*point0_function_type)(  ) const;
+            point0_function_type point0_function_value( &::SireMM::DistanceRestraint::point0 );
+            
+            DistanceRestraint_exposer.def( 
+                "point0"
+                , point0_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the first point" );
+        
         }
         { //::SireMM::DistanceRestraint::point1
-
-            typedef ::SireFF::Point const &(::SireMM::DistanceRestraint::*point1_function_type)() const;
-            point1_function_type point1_function_value(&::SireMM::DistanceRestraint::point1);
-
-            DistanceRestraint_exposer.def(
-                "point1", point1_function_value, bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>(), "Return the second point");
+        
+            typedef ::SireFF::Point const & ( ::SireMM::DistanceRestraint::*point1_function_type)(  ) const;
+            point1_function_type point1_function_value( &::SireMM::DistanceRestraint::point1 );
+            
+            DistanceRestraint_exposer.def( 
+                "point1"
+                , point1_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the second point" );
+        
         }
         { //::SireMM::DistanceRestraint::r
-
-            typedef ::SireCAS::Symbol const &(*r_function_type)();
-            r_function_type r_function_value(&::SireMM::DistanceRestraint::r);
-
-            DistanceRestraint_exposer.def(
-                "r", r_function_value, bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>(), "Return the symbol that represents the distance between the\ntwo points (r)");
+        
+            typedef ::SireCAS::Symbol const & ( *r_function_type )(  );
+            r_function_type r_function_value( &::SireMM::DistanceRestraint::r );
+            
+            DistanceRestraint_exposer.def( 
+                "r"
+                , r_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the symbol that represents the distance between the\ntwo points (r)" );
+        
         }
         { //::SireMM::DistanceRestraint::setSpace
-
-            typedef void (::SireMM::DistanceRestraint::*setSpace_function_type)(::SireVol::Space const &);
-            setSpace_function_type setSpace_function_value(&::SireMM::DistanceRestraint::setSpace);
-
-            DistanceRestraint_exposer.def(
-                "setSpace", setSpace_function_value, (bp::arg("space")), bp::release_gil_policy(), "Set the space used to evaluate the energy of this restraint\nThrow: SireVol::incompatible_space\n");
+        
+            typedef void ( ::SireMM::DistanceRestraint::*setSpace_function_type)( ::SireVol::Space const & ) ;
+            setSpace_function_type setSpace_function_value( &::SireMM::DistanceRestraint::setSpace );
+            
+            DistanceRestraint_exposer.def( 
+                "setSpace"
+                , setSpace_function_value
+                , ( bp::arg("space") )
+                , bp::release_gil_policy()
+                , "Set the space used to evaluate the energy of this restraint\nThrow: SireVol::incompatible_space\n" );
+        
         }
         { //::SireMM::DistanceRestraint::typeName
-
-            typedef char const *(*typeName_function_type)();
-            typeName_function_type typeName_function_value(&::SireMM::DistanceRestraint::typeName);
-
-            DistanceRestraint_exposer.def(
-                "typeName", typeName_function_value, bp::release_gil_policy(), "");
+        
+            typedef char const * ( *typeName_function_type )(  );
+            typeName_function_type typeName_function_value( &::SireMM::DistanceRestraint::typeName );
+            
+            DistanceRestraint_exposer.def( 
+                "typeName"
+                , typeName_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
         }
         { //::SireMM::DistanceRestraint::update
-
-            typedef void (::SireMM::DistanceRestraint::*update_function_type)(::SireMol::MoleculeData const &);
-            update_function_type update_function_value(&::SireMM::DistanceRestraint::update);
-
-            DistanceRestraint_exposer.def(
-                "update", update_function_value, (bp::arg("moldata")), bp::release_gil_policy(), "Update the points of this restraint using new molecule data from moldata\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n");
+        
+            typedef void ( ::SireMM::DistanceRestraint::*update_function_type)( ::SireMol::MoleculeData const & ) ;
+            update_function_type update_function_value( &::SireMM::DistanceRestraint::update );
+            
+            DistanceRestraint_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("moldata") )
+                , bp::release_gil_policy()
+                , "Update the points of this restraint using new molecule data from moldata\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+        
         }
         { //::SireMM::DistanceRestraint::update
-
-            typedef void (::SireMM::DistanceRestraint::*update_function_type)(::SireMol::Molecules const &);
-            update_function_type update_function_value(&::SireMM::DistanceRestraint::update);
-
-            DistanceRestraint_exposer.def(
-                "update", update_function_value, (bp::arg("molecules")), bp::release_gil_policy(), "Update the points of this restraint using new molecule data from molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n");
+        
+            typedef void ( ::SireMM::DistanceRestraint::*update_function_type)( ::SireMol::Molecules const & ) ;
+            update_function_type update_function_value( &::SireMM::DistanceRestraint::update );
+            
+            DistanceRestraint_exposer.def( 
+                "update"
+                , update_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "Update the points of this restraint using new molecule data from molecules\nThrow: SireBase::missing_property\nThrow: SireError::invalid_cast\nThrow: SireError::incompatible_error\n" );
+        
         }
         { //::SireMM::DistanceRestraint::usesMoleculesIn
-
-            typedef bool (::SireMM::DistanceRestraint::*usesMoleculesIn_function_type)(::SireFF::ForceTable const &) const;
-            usesMoleculesIn_function_type usesMoleculesIn_function_value(&::SireMM::DistanceRestraint::usesMoleculesIn);
-
-            DistanceRestraint_exposer.def(
-                "usesMoleculesIn", usesMoleculesIn_function_value, (bp::arg("forcetable")), bp::release_gil_policy(), "Return whether or not this restraint involves any of the molecules\nthat are in the forcetable forcetable");
+        
+            typedef bool ( ::SireMM::DistanceRestraint::*usesMoleculesIn_function_type)( ::SireFF::ForceTable const & ) const;
+            usesMoleculesIn_function_type usesMoleculesIn_function_value( &::SireMM::DistanceRestraint::usesMoleculesIn );
+            
+            DistanceRestraint_exposer.def( 
+                "usesMoleculesIn"
+                , usesMoleculesIn_function_value
+                , ( bp::arg("forcetable") )
+                , bp::release_gil_policy()
+                , "Return whether or not this restraint involves any of the molecules\nthat are in the forcetable forcetable" );
+        
         }
         { //::SireMM::DistanceRestraint::usesMoleculesIn
-
-            typedef bool (::SireMM::DistanceRestraint::*usesMoleculesIn_function_type)(::SireMol::Molecules const &) const;
-            usesMoleculesIn_function_type usesMoleculesIn_function_value(&::SireMM::DistanceRestraint::usesMoleculesIn);
-
-            DistanceRestraint_exposer.def(
-                "usesMoleculesIn", usesMoleculesIn_function_value, (bp::arg("molecules")), bp::release_gil_policy(), "Return whether or not this restraint involves any of the molecules\nin molecules");
+        
+            typedef bool ( ::SireMM::DistanceRestraint::*usesMoleculesIn_function_type)( ::SireMol::Molecules const & ) const;
+            usesMoleculesIn_function_type usesMoleculesIn_function_value( &::SireMM::DistanceRestraint::usesMoleculesIn );
+            
+            DistanceRestraint_exposer.def( 
+                "usesMoleculesIn"
+                , usesMoleculesIn_function_value
+                , ( bp::arg("molecules") )
+                , bp::release_gil_policy()
+                , "Return whether or not this restraint involves any of the molecules\nin molecules" );
+        
         }
-        DistanceRestraint_exposer.staticmethod("halfHarmonic");
-        DistanceRestraint_exposer.staticmethod("harmonic");
-        DistanceRestraint_exposer.staticmethod("r");
-        DistanceRestraint_exposer.staticmethod("typeName");
-        DistanceRestraint_exposer.def("__copy__", &__copy__);
-        DistanceRestraint_exposer.def("__deepcopy__", &__copy__);
-        DistanceRestraint_exposer.def("clone", &__copy__);
-        DistanceRestraint_exposer.def("__rlshift__", &__rlshift__QDataStream<::SireMM::DistanceRestraint>,
-                                      bp::return_internal_reference<1, bp::with_custodian_and_ward<1, 2>>());
-        DistanceRestraint_exposer.def("__rrshift__", &__rrshift__QDataStream<::SireMM::DistanceRestraint>,
-                                      bp::return_internal_reference<1, bp::with_custodian_and_ward<1, 2>>());
-        DistanceRestraint_exposer.def_pickle(sire_pickle_suite<::SireMM::DistanceRestraint>());
-        DistanceRestraint_exposer.def("__str__", &__str__<::SireMM::DistanceRestraint>);
-        DistanceRestraint_exposer.def("__repr__", &__str__<::SireMM::DistanceRestraint>);
+        DistanceRestraint_exposer.staticmethod( "halfHarmonic" );
+        DistanceRestraint_exposer.staticmethod( "harmonic" );
+        DistanceRestraint_exposer.staticmethod( "r" );
+        DistanceRestraint_exposer.staticmethod( "typeName" );
+        DistanceRestraint_exposer.def( "__copy__", &__copy__);
+        DistanceRestraint_exposer.def( "__deepcopy__", &__copy__);
+        DistanceRestraint_exposer.def( "clone", &__copy__);
+        DistanceRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::DistanceRestraint >,
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+        DistanceRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::DistanceRestraint >,
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+        DistanceRestraint_exposer.def_pickle(sire_pickle_suite< ::SireMM::DistanceRestraint >());
+        DistanceRestraint_exposer.def( "__str__", &__str__< ::SireMM::DistanceRestraint > );
+        DistanceRestraint_exposer.def( "__repr__", &__str__< ::SireMM::DistanceRestraint > );
     }
+
 }

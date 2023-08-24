@@ -37,7 +37,7 @@ void register_BoreschRestraint_class(){
         typedef bp::class_< SireMM::BoreschRestraint, bp::bases< SireBase::Property > > BoreschRestraint_exposer_t;
         BoreschRestraint_exposer_t BoreschRestraint_exposer = BoreschRestraint_exposer_t( "BoreschRestraint", "This class provides information about a single Boresch restaint.\nThis is a collection of distance, angle and torsion restraints\nthat hold a ligand in a binding pose relative to a receptor\n", bp::init< >("Null constructor") );
         bp::scope BoreschRestraint_scope( BoreschRestraint_exposer );
-        BoreschRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::Length const &, QVector< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 0, 0, 1 > > const &, QVector< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 0, 0, 1 > > const &, SireUnits::Dimension::HarmonicBondConstant const &, QVector< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, -2 > > const &, QVector< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, -2 > > const & >(( bp::arg("receptor_atoms"), bp::arg("ligand_atoms"), bp::arg("r0"), bp::arg("theta0"), bp::arg("phi0"), bp::arg("kr"), bp::arg("ktheta"), bp::arg("kphi") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
+        BoreschRestraint_exposer.def( bp::init< QList< long long > const &, QList< long long > const &, SireUnits::Dimension::Length const &, QVector< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 0, 0, 1 > > const &, QVector< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 0, 0, 1 > > const &, SireUnits::Dimension::HarmonicBondConstant const &, QVector< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, -2 > > const &, QVector< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, -2 > > const & >(( bp::arg("receptor"), bp::arg("ligand"), bp::arg("r0"), bp::arg("theta0"), bp::arg("phi0"), bp::arg("kr"), bp::arg("ktheta"), bp::arg("kphi") ), "Construct to restrain the atom at index atom to the specified position\n  using the specified force constant and flat-bottom well-width\n") );
         BoreschRestraint_exposer.def( bp::init< SireMM::BoreschRestraint const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireMM::BoreschRestraint::isNull
         
@@ -60,7 +60,7 @@ void register_BoreschRestraint_class(){
                 "kphi"
                 , kphi_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the force constant for the three dihedral restraints" );
         
         }
         { //::SireMM::BoreschRestraint::kr
@@ -72,7 +72,7 @@ void register_BoreschRestraint_class(){
                 "kr"
                 , kr_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the force constant for the bond restraint" );
         
         }
         { //::SireMM::BoreschRestraint::ktheta
@@ -84,7 +84,7 @@ void register_BoreschRestraint_class(){
                 "ktheta"
                 , ktheta_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the force constant for the two angle restraints" );
         
         }
         { //::SireMM::BoreschRestraint::ligandAtoms
@@ -125,7 +125,7 @@ void register_BoreschRestraint_class(){
                 "phi0"
                 , phi0_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the equilibium size of the three dihedral restraints" );
         
         }
         { //::SireMM::BoreschRestraint::r0
@@ -137,7 +137,7 @@ void register_BoreschRestraint_class(){
                 "r0"
                 , r0_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the equilibrium length of the bond restraint" );
         
         }
         { //::SireMM::BoreschRestraint::receptorAtoms
@@ -161,7 +161,7 @@ void register_BoreschRestraint_class(){
                 "theta0"
                 , theta0_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the equilibrium size of the two angle restraints" );
         
         }
         { //::SireMM::BoreschRestraint::toString

@@ -65,8 +65,8 @@ namespace SireMM
     public:
         BoreschRestraint();
 
-        BoreschRestraint(const QList<qint64> &receptor_atoms,
-                         const QList<qint64> &ligand_atoms,
+        BoreschRestraint(const QList<qint64> &receptor,
+                         const QList<qint64> &ligand,
                          const SireUnits::Dimension::Length &r0,
                          const QVector<SireUnits::Dimension::Angle> &theta0,
                          const QVector<SireUnits::Dimension::Angle> &phi0,

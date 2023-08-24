@@ -20,8 +20,8 @@ __all__ = [
     "SelectorMDihedral",
     "SelectorMImproper",
     "LJParameter",
-    "create_bond_restraints",
     "create_boresch_restraints",
+    "create_distance_restraints",
     "create_positional_restraints",
 ]
 
@@ -48,6 +48,8 @@ from .. import use_new_api as _use_new_api
 
 _use_new_api()
 
+# It would be better if these were called "DistanceRestraints",
+# but there is already a legacy Sire.MM class with this name
 BondRestraint = _MM.BondRestraint
 BondRestraints = _MM.BondRestraints
 

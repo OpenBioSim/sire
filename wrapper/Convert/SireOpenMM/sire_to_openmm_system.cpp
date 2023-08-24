@@ -67,16 +67,117 @@ void _add_boresch_restraints(const SireMM::BoreschRestraints &restraints,
     if (restraints.isEmpty())
         return;
 
-    // energy expression of the Boresch restraint - this is a set of
+    // energy expression of the Boresch restraint, which acts over
+    // six atoms - this is a set of
     // one distance restraint, two angle restraints and three
-    // torsion restraints between the three ligand and three receptor
-    // atoms
+    // torsion restraints between the three receptor (particles 0 to 2)
+    // and three ligand atoms (particles 3 to 5)
+    //
+    // r is | Ligand1 - Receptor1 | = distance(P1, P4)
+    // thetaA = angle(R2, R1, L1) = angle(P2, P1, P4)
+    // thetaB = angle(R1, L1, L2) = angle(P1, P4, P5)
+    // phiA = dihedral(R3, R2, R1, L1) = dihedral(P3, P2, P1, P4)
+    // phiB = dihedral(R2, R1, L1, L2) = dihedral(P2, P1, P4, P5)
+    // phiC = dihedral(R1, L1, L2, L3) = dihedral(P1, P4, P5, P6)
+    //
+    // Then the energies are
+    //
+    // e_restraint = rho * (e_bond + e_angle + e_torsion)
+    // e_bond = kr (r - r0)^2
+    // e_angle_i = ktheta_i (theta_i - theta0_i)^2
+    // e_torsion_i = k_phi_i (min(dphi_i, 2pi-dphi_i))^2 where
+    // dphi_i = abs(phi_i - phi0_i)
+    //
     const auto energy_expression = QString(
-                                       "rho*(e_bond + e_angle + e_torsion);"
-                                       "e_bond=0;"
-                                       "e_angle=0;"
-                                       "e_torsion=0;")
+                                       "rho*(e_bond + e_angle_A + e_angle_B + e_torsion_A + e_torsion_B + e_torsion_C);"
+                                       "e_bond=kr*(r-r0)^2;"
+                                       "e_angle_B=ktheta_B*(theta_B-theta0_B)^2;"
+                                       "e_angle_A=ktheta_A*(theta_A-theta0_A)^2;"
+                                       "e_torsion_C=kphi_C*(min(dphi_C, two_pi-dphi_C))^2;"
+                                       "e_torsion_B=kphi_B*(min(dphi_B, two_pi-dphi_B))^2;"
+                                       "e_torsion_A=kphi_A*(min(dphi_A, two_pi-dphi_A))^2;"
+                                       "dphi_C=abs(phi_C-phi0_C);"
+                                       "dphi_B=abs(phi_B-phi0_B);"
+                                       "dphi_A=abs(phi_A-phi0_A);"
+                                       "two_pi=6.283185307179586;"
+                                       "phi_C=dihedral(p1, p4, p5, p6);"
+                                       "phi_B=dihedral(p2, p1, p4, p5);"
+                                       "phi_A=dihedral(p3, p2, p1, p4);"
+                                       "theta_B=angle(p1, p4, p5);"
+                                       "theta_A=angle(p2, p1, p4);"
+                                       "r=distance(p1, p4);")
                                        .toStdString();
+
+    auto *restraintff = new OpenMM::CustomCompoundBondForce(6, energy_expression);
+
+    restraintff->addPerBondParameter("rho");
+    restraintff->addPerBondParameter("kr");
+    restraintff->addPerBondParameter("r0");
+    restraintff->addPerBondParameter("ktheta_A");
+    restraintff->addPerBondParameter("theta0_A");
+    restraintff->addPerBondParameter("ktheta_B");
+    restraintff->addPerBondParameter("theta0_B");
+    restraintff->addPerBondParameter("kphi_A");
+    restraintff->addPerBondParameter("phi0_A");
+    restraintff->addPerBondParameter("kphi_B");
+    restraintff->addPerBondParameter("phi0_B");
+    restraintff->addPerBondParameter("kphi_C");
+    restraintff->addPerBondParameter("phi0_C");
+
+    restraintff->setUsesPeriodicBoundaryConditions(true);
+
+    lambda_lever.addRestraintIndex(restraints.name(),
+                                   system.addForce(restraintff));
+
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+    const double internal_to_k = (1 * SireUnits::kcal_per_mol / (SireUnits::angstrom2)).to(SireUnits::kJ_per_mol / SireUnits::nanometer2);
+    const double internal_to_ktheta = (1 * SireUnits::kcal_per_mol / (SireUnits::radian2)).to(SireUnits::kJ_per_mol / SireUnits::radian2);
+
+    for (const auto &restraint : restraints.restraints())
+    {
+        if (restraint.isNull())
+            continue;
+
+        std::vector<int> particles;
+        particles.resize(6);
+
+        std::vector<double> parameters;
+        parameters.resize(13);
+
+        for (int i = 0; i < 3; ++i)
+        {
+            particles[i] = restraint.receptorAtoms()[i];
+            particles[i + 3] = restraint.ligandAtoms()[i];
+
+            if (particles[i] < 0 or particles[i] >= natoms or
+                particles[i + 3] < 0 or particles[i + 3] >= natoms)
+            {
+                throw SireError::invalid_index(QObject::tr(
+                                                   "Invalid particle indicies (ligand=%1, receptor=2) "
+                                                   "for a Boresch restraint for %3 atoms.")
+                                                   .arg(Sire::toString(restraint.ligandAtoms()))
+                                                   .arg(Sire::toString(restraint.receptorAtoms()))
+                                                   .arg(natoms),
+                                               CODELOC);
+            }
+        }
+
+        parameters[0] = 1.0;                                                // rho
+        parameters[1] = restraint.kr().value() * internal_to_k;             // kr
+        parameters[2] = restraint.r0().value() * internal_to_nm;            // r0
+        parameters[3] = restraint.ktheta()[0].value() * internal_to_ktheta; // ktheta_A
+        parameters[4] = restraint.theta0()[0].value();                      // theta0_A (already in radians)
+        parameters[5] = restraint.ktheta()[1].value() * internal_to_ktheta; // ktheta_B
+        parameters[6] = restraint.theta0()[1].value();                      // theta0_B
+        parameters[7] = restraint.kphi()[0].value() * internal_to_ktheta;   // kphi_A
+        parameters[8] = restraint.phi0()[0].value();                        // phi0_A
+        parameters[9] = restraint.kphi()[1].value() * internal_to_ktheta;   // kphi_B
+        parameters[10] = restraint.phi0()[1].value();                       // phi0_B
+        parameters[11] = restraint.kphi()[2].value() * internal_to_ktheta;  // kphi_C
+        parameters[12] = restraint.phi0()[2].value();                       // phi0_C
+
+        restraintff->addBond(particles, parameters);
+    }
 }
 
 /** Add all of the bond restraints from 'restraints' to the passed
