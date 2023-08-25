@@ -959,6 +959,30 @@ void MoleculeData::renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash
     }
 }
 
+/** Update the passed property to have the value 'value'. This does
+ *  an in-place update on the existing property (which must have
+ *  a compatible type). If 'auto-add' is true, then this will add
+ *  the property if it doesn't exist. This returns whether or not
+ *  a property was updated (or added)
+ */
+bool MoleculeData::updateProperty(const QString &key, const Property &value, bool auto_add)
+{
+    if (key.isEmpty())
+        throw SireError::invalid_arg(QObject::tr("You cannot update a property with an empty key!"), CODELOC);
+
+    bool updated = props.updateProperty(key, value, auto_add);
+
+    if (updated)
+    {
+        SireBase::assert_true(vrsns.get() != 0, CODELOC);
+
+        // now the property version number
+        prop_vrsns[key] = vrsns->increment(key, vrsn);
+    }
+
+    return updated;
+}
+
 /** Set the property with the key 'key' to the value 'value'.
     This replaces any current property with that key. This
     also checks to ensure that this property is compatible
@@ -976,7 +1000,7 @@ void MoleculeData::setProperty(const QString &key, const Property &value, bool c
     SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     // now the property version number
-    prop_vrsns.insert(key, vrsns->increment(key, vrsn));
+    prop_vrsns[key] = vrsns->increment(key, vrsn);
 
     // now save the property itself
     props.setProperty(key, value, clear_metadata);

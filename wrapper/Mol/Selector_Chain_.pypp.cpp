@@ -35,6 +35,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectorm.hpp"
+
 #include "chain.h"
 
 #include "SireMol/core.h"

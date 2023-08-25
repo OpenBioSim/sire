@@ -50,7 +50,12 @@ QDataStream &operator<<(QDataStream &ds, const PropertyName &propname)
 
     SharedDataStream sds(ds);
 
-    sds << propname.src << propname.val << propname.value_is_default;
+    PropertyPtr val;
+
+    if (propname.val.get() != 0)
+        val = *(propname.val.get());
+
+    sds << propname.src << val << propname.value_is_default;
 
     return ds;
 }
@@ -63,10 +68,18 @@ QDataStream &operator>>(QDataStream &ds, PropertyName &propname)
     if (v == 1)
     {
         SharedDataStream sds(ds);
-        sds >> propname.src >> propname.val >> propname.value_is_default;
+
+        PropertyPtr value;
+
+        sds >> propname.src >> value >> propname.value_is_default;
 
         if (propname.src.isEmpty())
             propname.src = QString();
+
+        if (not value.isNull())
+        {
+            propname.val.reset(new PropertyPtr(value));
+        }
     }
     else
         throw version_error(v, "1", r_propname, CODELOC);
@@ -93,8 +106,9 @@ PropertyName::PropertyName(const QString &source) : src(source), value_is_defaul
 
 /** Construct a PropertyName that uses the supplied
     value, rather than searching for the property */
-PropertyName::PropertyName(const Property &value) : val(value)
+PropertyName::PropertyName(const Property &value)
 {
+    val.reset(new PropertyPtr(value));
 }
 
 /** Construct a PropertyName that searches for the property
@@ -102,12 +116,14 @@ PropertyName::PropertyName(const Property &value) : val(value)
     specifically provided - otherwise the supplied default
     value of the property is used instead */
 PropertyName::PropertyName(const QString &source, const Property &default_value)
-    : src(source), val(default_value), value_is_default(true)
+    : src(source), value_is_default(true)
 {
     if (source.isEmpty())
         throw SireError::program_bug(QObject::tr(
                                          "You should not create a property with an empty name!"),
                                      CODELOC);
+
+    val.reset(new PropertyPtr(default_value));
 }
 
 /** Copy constructor */
@@ -134,13 +150,13 @@ PropertyName &PropertyName::operator=(const PropertyName &other)
 /** Comparison operator */
 bool PropertyName::operator==(const PropertyName &other) const
 {
-    return src == other.src and val == other.val and value_is_default == other.value_is_default;
+    return src == other.src and value().equals(other.value()) and value_is_default == other.value_is_default;
 }
 
 /** Comparison operator */
 bool PropertyName::operator!=(const PropertyName &other) const
 {
-    return src != other.src or val != other.val or value_is_default != other.value_is_default;
+    return not this->operator==(other);
 }
 
 const char *PropertyName::typeName()
@@ -163,7 +179,14 @@ bool PropertyName::hasSource() const
 /** Return whether or not the value has been set */
 bool PropertyName::hasValue() const
 {
-    return not val.isNull();
+    if (val.get() != 0)
+    {
+        return not val->isNull();
+    }
+    else
+    {
+        return false;
+    }
 }
 
 /** Return whether or not this has a default value */
@@ -175,7 +198,7 @@ bool PropertyName::hasDefaultValue() const
 /** Return whether this property is null */
 bool PropertyName::isNull() const
 {
-    return src.isEmpty() and val.isNull();
+    return src.isEmpty() and (val.get() == 0 or val->isNull());
 }
 
 /** Return the source of the property - this is only valid
@@ -185,11 +208,16 @@ const QString &PropertyName::source() const
     return src;
 }
 
+static NullProperty null_property;
+
 /** Return the value of the property - this is only valid
     if .hasValue() is true */
 const Property &PropertyName::value() const
 {
-    return val;
+    if (val.get() == 0)
+        return null_property;
+    else
+        return *val;
 }
 
 /** Return a string representation of this propertyname */
@@ -197,13 +225,13 @@ QString PropertyName::toString() const
 {
     if (this->hasSource())
     {
-        if (value_is_default)
-            return QString("%1 {default: %2}").arg(src).arg(val->toString());
+        if (value_is_default and val.get() != 0)
+            return QString("%1 {default: %2}").arg(src).arg((*val)->toString());
         else
             return src;
     }
     else if (this->hasValue())
-        return val->toString();
+        return (*val)->toString();
     else
         return "NULL";
 }

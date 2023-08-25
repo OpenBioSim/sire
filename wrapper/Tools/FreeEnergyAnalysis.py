@@ -26,7 +26,7 @@ except ImportError:
 try:
     # This should force the installation of pymbar if it isn't
     # installed already
-    _pymbar = Sire.try_import("pymbar", version="<4")
+    _pymbar = Sire.try_import("pymbar")
 
     from pymbar import MBAR
     from pymbar import timeseries
@@ -39,6 +39,34 @@ except ImportError:
     raise ImportError(
         "'pymbar' is not installed. Please install pymbar in order to use MBAR for your free energy analysis.`"
     )
+
+# Get the pymbar version number
+_pymbar_version_no = None
+try:
+    _pymbar_version_no = int(_pymbar.__version__.split(".")[0])
+except AttributeError:
+    _pymbar_version_no = int(_pymbar.version.version.split(".")[0])
+
+if _pymbar_version_no is None:
+    raise ImportError("The pymbar version could not be determined.")
+
+if _pymbar_version_no < 4:
+    # Update the MBAR and timeseries modules to be compatible with the
+    # pymbar 4 API. This requires updating the compute free energy
+    # differences method to return a dictionary of results, and renaming
+    # several methods.
+    def compute_free_energy_differences(self, **kwargs):
+        results = self.getFreeEnergyDifferences(**kwargs)
+        return {
+            "Delta_f": results[0],
+            "dDelta_f": results[1],
+        }
+
+    MBAR.compute_free_energy_differences = compute_free_energy_differences
+    MBAR.compute_overlap = MBAR.computeOverlap
+    timeseries.statistical_inefficiency = timeseries.statisticalInefficiency
+    timeseries.subsample_correlated_data = timeseries.subsampleCorrelatedData
+
 
 import warnings
 
@@ -105,21 +133,16 @@ class FreeEnergies(object):
         try:
             MBAR_obj = MBAR(self._u_kln, self._N_k, verbose=True)
             self._f_k = MBAR_obj.f_k
-            (
-                deltaF_ij,
-                dDeltaF_ij,
-                theta_ij,
-            ) = MBAR_obj.getFreeEnergyDifferences(return_theta=True)
+            results = MBAR_obj.compute_free_energy_differences()
+            deltaF_ij = results["Delta_f"]
+            dDeltaF_ij = results["dDelta_f"]
         except:
             solver_options = {"maximum_iterations": 10000, "verbose": True}
             solver_protocol = {"method": "BFGS", "options": solver_options}
             MBAR_obj = MBAR(self._u_kln, self._N_k, solver_protocol=(solver_protocol,))
-            self._f_k = MBAR_obj.f_k
-            (
-                deltaF_ij,
-                dDeltaF_ij,
-                theta_ij,
-            ) = MBAR_obj.getFreeEnergyDifferences(return_theta=True)
+            results = MBAR_obj.compute_free_energy_differences()
+            deltaF_ij = results["Delta_f"]
+            dDeltaF_ij = results["dDelta_f"]
         self._deltaF_mbar = deltaF_ij[0, self._lambda_array.shape[0] - 1]
         self._dDeltaF_mbar = dDeltaF_ij[0, self._lambda_array.shape[0] - 1]
         self._pmf_mbar = numpy.full(
@@ -138,7 +161,7 @@ class FreeEnergies(object):
 
         ##testing data overlap:
         if test_overlap:
-            overlap_matrix = MBAR_obj.computeOverlap()
+            overlap_matrix = MBAR_obj.compute_overlap()
             self._overlap_matrix = overlap_matrix["matrix"]
 
     @property
@@ -255,13 +278,13 @@ class SubSample(object):
                 shape=(self._gradients_kn.shape[0]), fill_value=numpy.nan
             )
             for i in range(g_k.shape[0]):
-                g_k[i] = timeseries.statisticalInefficiency(self._gradients_kn[i, :])
+                g_k[i] = timeseries.statistical_inefficiency(self._gradients_kn[i, :])
             g = int(numpy.max(g_k))
             # now we need to figure out what the indices in the data are for subsampling
             indices_k = []
             for i in range(g_k.shape[0]):
                 indices_k.append(
-                    timeseries.subsampleCorrelatedData(self._gradients_kn[i, :], g=g)
+                    timeseries.subsample_correlated_data(self._gradients_kn[i, :], g=g)
                 )
                 self._subsampled_N_k_gradients[i] = len(indices_k[i])
             N_max = int(numpy.max(self._subsampled_N_k_gradients))
@@ -319,7 +342,7 @@ class SubSample(object):
             # first we compute statistical inefficiency
             g_k = numpy.full(shape=(self._energies_kn.shape[0]), fill_value=numpy.nan)
             for i in range(g_k.shape[0]):
-                g_k[i] = timeseries.statisticalInefficiency(
+                g_k[i] = timeseries.statistical_inefficiency(
                     self._energies_kn[i, percentage_removal[i] :]
                 )
             g = numpy.max(g_k)
@@ -330,7 +353,7 @@ class SubSample(object):
             )
             for i in range(g_k.shape[0]):
                 indices_k.append(
-                    timeseries.subsampleCorrelatedData(self._energies_kn[i, :], g=g)
+                    timeseries.subsample_correlated_data(self._energies_kn[i, :], g=g)
                 )
                 self._subsampled_N_k_energies[i] = len(indices_k[i])
             # self._subsampled_N_k_energies = (numpy.ceil(self._N_k / g)).astype(int)

@@ -46,7 +46,7 @@ void register_PropertyMap_class(){
                 , addPrefix_function_value
                 , ( bp::arg("prefix"), bp::arg("properties") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Add the passed prefix onto all of the passed properties,\n  returning a new property map that would map from\n  map[key] = X to map[prefixkey] = X\n" );
         
         }
         { //::SireBase::PropertyMap::addSuffix
@@ -59,7 +59,7 @@ void register_PropertyMap_class(){
                 , addSuffix_function_value
                 , ( bp::arg("suffix"), bp::arg("properties") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Add the passed suffix onto all of the passed properties,\n  returning a new property map that would map from\n  map[key] = X to map[keysuffix] = X\n" );
         
         }
         { //::SireBase::PropertyMap::isDefault

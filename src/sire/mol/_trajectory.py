@@ -4,6 +4,48 @@ __all__ = ["TrajectoryIterator"]
 from ..units import GeneralUnit as _GeneralUnit
 
 
+def _get_align_atoms_and_reference(
+    view, align, frame=None, mapping=None, map=None, find_all=True
+):
+    if align is None:
+        # this is an all-to-all alignment
+        atoms = view.atoms()
+
+        if frame is not None:
+            atoms.load_frame(frame)
+
+        return (atoms, atoms)
+
+    elif hasattr(align, "atoms"):
+        align = align.atoms()
+
+        if mapping is None:
+            from . import AtomMapping
+
+            mapping = AtomMapping(align, align)
+
+        # use the mapping to go from the atoms to align to
+        # the atoms in the view
+        atoms = mapping.find(align.atoms(), view.atoms(), find_all=find_all)
+
+        if frame is not None:
+            align.load_frame(frame)
+
+        if len(atoms) != len(align) and not find_all:
+            align = mapping.swap().find(atoms, align, find_all=True)
+
+        return (atoms, align)
+
+    else:
+        # This is a search string in 'view'
+        atoms = view[align].atoms()
+
+        if frame is not None:
+            atoms.load_frame(frame)
+
+        return (atoms, atoms)
+
+
 class TrajectoryIterator:
     """
     An iterator that can be used to control which frames of a trajectory
@@ -11,7 +53,14 @@ class TrajectoryIterator:
     """
 
     def __init__(
-        self, view=None, align=None, smooth=None, wrap=None, map=None
+        self,
+        view=None,
+        align=None,
+        smooth=None,
+        wrap=None,
+        mapping=None,
+        frame=None,
+        map=None,
     ):
         if view is not None:
             from ..base import create_map
@@ -24,6 +73,8 @@ class TrajectoryIterator:
             self._times = None
             self._iter = None
             self._frame = None
+            self._mapping = mapping
+            self._frame = frame
 
             if align is True:
                 # passing in 'True' means align against everything
@@ -65,8 +116,18 @@ class TrajectoryIterator:
             from ..legacy.Mol import TrajectoryAligner
 
             if align is not None:
-                atoms = view[align].atoms()
-                self._aligner = TrajectoryAligner(atoms, map=self._map)
+                (align, reference) = _get_align_atoms_and_reference(
+                    view=self._view,
+                    align=align,
+                    mapping=mapping,
+                    frame=frame,
+                    map=self._map,
+                    find_all=False,
+                )
+
+                self._aligner = TrajectoryAligner(
+                    align, reference, map=self._map
+                )
             elif wrap or (smooth != 1):
                 self._aligner = TrajectoryAligner(
                     self._view.evaluate().center(),
@@ -84,6 +145,8 @@ class TrajectoryIterator:
             self._frame = None
             self._align = None
             self._aligner = None
+            self._mapping = None
+            self._frame = None
 
     def __iter__(self):
         return self
@@ -151,12 +214,21 @@ class TrajectoryIterator:
 
         return copy(self._values)
 
-    def align(self, align):
+    def align(self, align, frame=None):
         """
         Return a copy of this trajectory where each frame will be aligned
         against the atoms that match the search string 'align'
         """
-        t = TrajectoryIterator(view=self._view, align=align, map=self._map)
+        if frame is None:
+            frame = self._frame
+
+        t = TrajectoryIterator(
+            view=self._view,
+            align=align,
+            frame=frame,
+            mapping=self._mapping,
+            map=self._map,
+        )
         t._values = self._values
         return t
 
@@ -167,7 +239,12 @@ class TrajectoryIterator:
         if 'smooth' is set to 'True')
         """
         t = TrajectoryIterator(
-            view=self._view, align=self._align, smooth=smooth, map=self._map
+            view=self._view,
+            align=self._align,
+            frame=self._frame,
+            smooth=smooth,
+            mapping=self._mapping,
+            map=self._map,
         )
         t._values = self._values
         return t
@@ -178,7 +255,12 @@ class TrajectoryIterator:
         into the current space
         """
         t = TrajectoryIterator(
-            view=self._view, align=self._align, wrap=autowrap, map=self._map
+            view=self._view,
+            align=self._align,
+            frame=self._frame,
+            wrap=autowrap,
+            mapping=self._mapping,
+            map=self._map,
         )
         t._values = self._values
         return t
@@ -285,7 +367,7 @@ class TrajectoryIterator:
 
         return self._times
 
-    def energies(self, obj1=None, forcefield=None, to_pandas=True, map=None):
+    def energies(self, obj1=None, to_pandas=True, map=None):
         if self._view is None:
             return {}
 
@@ -799,3 +881,158 @@ class TrajectoryIterator:
         from ._view import view
 
         return view(self, *args, **kwargs)
+
+    def rmsd(
+        self,
+        reference=None,
+        align: bool = None,
+        frame: int = None,
+        mapping=None,
+        match_all: bool = True,
+        map=None,
+        to_pandas: bool = False,
+    ):
+        """
+        Calculate the RMSD across the frames of this trajectory, against
+        either all atoms or, optionally, the passed view. You can specify
+        whether to align the trajectory against the view
+        (controlling which frame should be the source of alignment via `frame`)
+
+        reference: molecule container or search string or index or range
+           Anything that is valid to specify a sub-view of the trajectory,
+           or that can be a molecular container itself. If this is a
+           view, then the RMSD only to the atoms in the view is calculated.
+           If the atoms aren't in this trajectory, then you need to provide
+           a mapping that shows how you can map from the atoms in the
+           view to the atoms in the trajectory.
+
+        align: bool
+           Whether or not to align the frames of the trajectory against
+           the reference. This defaults to True
+
+        frame: int
+           The frame number of the reference against which to align the
+           trajectory
+
+        mapping: AtomMapping
+           The mapping from atoms in the reference to atoms in the
+           trajectory. This is only needed if the reference atoms
+           are not contained in the atoms in this trajectory.
+
+        match_all: bool
+            Whether or not to find and match all of the atoms in
+            'reference' to the atoms in this trajectory. Normally
+            you do want to do this, so it defaults to True. If this
+            is False, then the RMSD of only atoms in this trajectory
+            that in 'reference' will be calculated, even if it just
+            a single atom.
+
+        map: dict
+           Any parameters that will overwrite any of the map
+           parameters that are already in this trajectory
+
+        to_pandas: bool
+           Whether or not to write the output to a Pandas DataFrame
+           (default False)
+        """
+        from ..legacy.Mol import TrajectoryAligner
+        from ..legacy.Mol import get_rmsd
+
+        if reference is None:
+            # nothing to align against
+            align = False
+
+        elif align is None:
+            # auto-align only for smaller systems
+            if (
+                hasattr(reference, "molecules")
+                and len(reference.molecules()) > 100
+            ):
+                align = False
+            else:
+                align = True
+
+        (atoms, reference) = _get_align_atoms_and_reference(
+            view=self.current(),
+            align=reference,
+            frame=frame,
+            mapping=mapping,
+            map=self._map,
+            find_all=match_all,
+        )
+
+        if map is None:
+            map = self._map
+        else:
+            from ..base import create_map
+
+            map = self._map.merge(create_map(map))
+
+        if align:
+            aligner = TrajectoryAligner(atoms, reference, map=map)
+        else:
+            aligner = TrajectoryAligner()
+
+        rmsd = get_rmsd(
+            atoms=atoms,
+            reference=reference,
+            aligner=aligner,
+            frames=self._values,
+            map=map,
+        )
+
+        if to_pandas:
+            import pandas as pd
+
+            if len(rmsd) == 0:
+                return pd.DataFrame()
+
+            # convert the RMSD to default length units
+            from ..units import angstrom, picosecond
+
+            length_unit = angstrom.get_default()
+            time_unit = picosecond.get_default()
+
+            rmsd = [x.to(length_unit) for x in rmsd]
+
+            # get the times for each frame
+            import copy
+
+            t = copy.copy(self)
+            t._view = self._view.atoms()[0]
+
+            times = []
+
+            for frame in t:
+                times.append(frame.frame_time())
+
+            times = [x.to(time_unit) for x in times]
+
+            df = pd.DataFrame(
+                {"frame": copy.copy(self._values), "time": times, "rmsd": rmsd}
+            )
+
+            df.time_unit = lambda: time_unit.unit_string()
+            df.measure_unit = lambda: length_unit.unit_string()
+
+            def pretty_plot(x="time", y=None):
+                if y is None:
+                    y = ["rmsd"]
+
+                if x == "time":
+                    xlabel = f"Time / {df.time_unit()}"
+                elif x == "frame":
+                    xlabel = "Frame"
+                else:
+                    xlabel = x
+
+                ax = df.plot(x=x, y=y)
+                ax.set_xlabel(xlabel)
+                ax.set_ylabel(f"RMSD / {df.measure_unit()}")
+                ax.get_legend().remove()
+
+            df.pretty_plot = pretty_plot
+
+            return df
+        else:
+            return rmsd

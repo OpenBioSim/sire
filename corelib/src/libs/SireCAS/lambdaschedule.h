@@ -103,6 +103,19 @@ namespace SireCAS
         void addStage(const QString &stage,
                       const SireCAS::Expression &equation);
 
+        void prependStage(const QString &stage,
+                          const SireCAS::Expression &equation);
+
+        void appendStage(const QString &stage,
+                         const SireCAS::Expression &equation);
+
+        void insertStage(int i,
+                         const QString &stage,
+                         const SireCAS::Expression &equation);
+
+        void addMorphStage();
+        void addChargeScaleStages(double scale);
+
         void setEquation(const QString &stage,
                          const QString &lever,
                          const SireCAS::Expression &equation);
@@ -113,20 +126,31 @@ namespace SireCAS
         void removeEquation(const QString &stage,
                             const QString &lever);
 
+        SireCAS::Expression getEquation(const QString &stage) const;
+
         SireCAS::Expression getEquation(const QString &stage,
                                         const QString &lever) const;
 
         QHash<QString, QVector<double>> getLeverValues(const QVector<double> &lambda_values,
-                                                       double initial = 0.0,
-                                                       double final = 1.0) const;
+                                                       double initial = 1.0,
+                                                       double final = 2.0) const;
 
         QHash<QString, QVector<double>> getLeverValues(int num_lambda = 101,
-                                                       double initial = 0.0,
-                                                       double final = 1.0) const;
+                                                       double initial = 1.0,
+                                                       double final = 2.0) const;
 
         QStringList getLeverStages(const QVector<double> &lambda_values) const;
 
         QStringList getLeverStages(int num_lambda = 101) const;
+
+        SireCAS::Symbol setConstant(const QString &constant, double value);
+        SireCAS::Symbol setConstant(const SireCAS::Symbol &constant,
+                                    double value);
+
+        double getConstant(const QString &constant);
+        double getConstant(const SireCAS::Symbol &constant) const;
+
+        SireCAS::Symbol getConstantSymbol(const QString &constant) const;
 
         QVector<double> morph(const QString &lever,
                               const QVector<double> &initial,
@@ -143,6 +167,9 @@ namespace SireCAS
         double clamp(double lambda_value) const;
 
         std::tuple<int, double> resolve_lambda(double lambda) const;
+
+        /** The set of all constants used across all stages */
+        SireCAS::Values constant_values;
 
         /** The names of all of the levers provided by the forcefields */
         QStringList lever_names;

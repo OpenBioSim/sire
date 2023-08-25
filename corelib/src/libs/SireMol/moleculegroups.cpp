@@ -62,6 +62,7 @@
 #include "tostring.h"
 
 #include "SireBase/slice.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
@@ -2204,6 +2205,11 @@ void MolGroupsBase::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void MolGroupsBase::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void MolGroupsBase::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -2226,14 +2232,21 @@ void MolGroupsBase::deleteAllFrames()
 
 void MolGroupsBase::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
+    LazyEvaluator evaluator;
+    this->loadFrame(frame, evaluator, map);
+}
+
+void MolGroupsBase::loadFrame(int frame, const LazyEvaluator &evaluator,
+                              const SireBase::PropertyMap &map)
+{
     if (this->nGroups() == 1)
     {
-        this->getGroup(this->mgNums()[0]).loadFrame(frame, map);
+        this->getGroup(this->mgNums()[0]).loadFrame(frame, evaluator, map);
     }
     else
     {
         auto mols = this->molecules();
-        mols.loadFrame(frame, map);
+        mols.loadFrame(frame, evaluator, map);
         this->update(mols);
     }
 }

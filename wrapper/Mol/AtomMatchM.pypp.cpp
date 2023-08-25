@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/errors.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireMol/core.h"
 
 #include "SireMol/errors.h"
@@ -749,6 +751,19 @@ void register_AtomMatchM_class(){
         }
         { //::SireMol::AtomMatchM::loadFrame
         
+            typedef void ( ::SireMol::AtomMatchM::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::AtomMatchM::loadFrame );
+            
+            AtomMatchM_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::loadFrame
+        
             typedef void ( ::SireMol::AtomMatchM::*loadFrame_function_type)( int,::SireBase::PropertyMap const & ) ;
             loadFrame_function_type loadFrame_function_value( &::SireMol::AtomMatchM::loadFrame );
             
@@ -756,6 +771,19 @@ void register_AtomMatchM_class(){
                 "loadFrame"
                 , loadFrame_function_value
                 , ( bp::arg("frame"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomMatchM::loadFrame
+        
+            typedef void ( ::SireMol::AtomMatchM::*loadFrame_function_type)( int,::SireBase::LazyEvaluator const &,::SireBase::PropertyMap const & ) ;
+            loadFrame_function_type loadFrame_function_value( &::SireMol::AtomMatchM::loadFrame );
+            
+            AtomMatchM_exposer.def( 
+                "loadFrame"
+                , loadFrame_function_value
+                , ( bp::arg("frame"), bp::arg("evaluator"), bp::arg("map") )
                 , bp::release_gil_policy()
                 , "" );
         

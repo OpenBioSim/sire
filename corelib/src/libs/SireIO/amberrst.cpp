@@ -285,13 +285,27 @@ void AmberRstFile::writeHeader(const QString &title, int nframes, int natoms,
 
     globals.insert("programVersion", SireBase::getReleaseVersion());
 
-    if (title.count() > 80)
+    QString t = title.simplified();
+
+    if (t.isEmpty())
     {
-        globals.insert("title", title.mid(0, 80));
+        if (nframes <= 1)
+        {
+            t = "AMBER restart file";
+        }
+        else
+        {
+            t = "AMBER trajectory file";
+        }
     }
-    else if (not title.isEmpty())
+
+    if (t.count() > 80)
     {
-        globals.insert("title", title);
+        globals.insert("title", t.mid(0, 80));
+    }
+    else
+    {
+        globals.insert("title", t);
     }
 
     // now create the descriptions of all of the dimensions
@@ -1223,6 +1237,8 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
 
     // we've finished with the buffer - can release the mutex
     lkr.unlock();
+
+    use_parallel = false;
 
     // now need to convert the coords, vels and frcs into the right units
     // Can do this in parallel if allowed :-)

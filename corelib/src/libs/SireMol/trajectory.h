@@ -66,11 +66,17 @@ namespace SireMaths
     class Transform;
 }
 
+namespace SireBase
+{
+    class LazyEvaluator;
+}
+
 namespace SireMol
 {
 
     typedef SireBase::SharedPolyPointer<TrajectoryData> TrajectoryDataPtr;
 
+    using SireBase::LazyEvaluator;
     using SireMaths::Vector;
 
     class FrameTransform;
@@ -129,6 +135,10 @@ namespace SireMol
         QVector<Velocity3D> velocities() const;
         QVector<Force3D> forces() const;
 
+        const Vector *coordinatesData() const;
+        const Velocity3D *velocitiesData() const;
+        const Force3D *forcesData() const;
+
         const SireVol::Space &space() const;
         SireUnits::Dimension::Time time() const;
 
@@ -158,6 +168,7 @@ namespace SireMol
 
     protected:
         void assertSane() const;
+        Frame extract() const;
 
     private:
         QVector<Vector> coords;
@@ -166,6 +177,8 @@ namespace SireMol
         SireVol::SpacePtr spc;
         SireUnits::Dimension::Time t;
         SireBase::Properties props;
+        qint32 start_atom;
+        qint32 num_atoms;
     };
 
     /** This is the virtual base class of all TrajectoryData objects.
@@ -206,9 +219,13 @@ namespace SireMol
         virtual QStringList filenames() const = 0;
 
         virtual Frame getFrame(int i) const = 0;
+        virtual Frame getFrame(int i, const LazyEvaluator &evaluator) const = 0;
 
         QList<Frame> getFrames() const;
         QList<Frame> getFrames(int start_atom, int natoms) const;
+
+        QList<Frame> getFrames(const LazyEvaluator &evaluator) const;
+        QList<Frame> getFrames(int start_atom, int natoms, const LazyEvaluator &evaluator) const;
 
         Frame operator[](int i) const;
 
@@ -263,6 +280,7 @@ namespace SireMol
         QStringList filenames() const;
 
         Frame getFrame(int i) const;
+        Frame getFrame(int i, const LazyEvaluator &evaluator) const;
 
         bool isEditable() const;
 
@@ -331,6 +349,10 @@ namespace SireMol
 
         Frame getFrame(int i) const;
         Frame getFrame(int i, const FrameTransform &transform) const;
+
+        Frame getFrame(int i, const LazyEvaluator &evaluator) const;
+        Frame getFrame(int i, const FrameTransform &transform,
+                       const LazyEvaluator &evaluator) const;
 
         Frame operator[](int i) const;
         QList<Frame> operator[](const QList<qint64> &idxs) const;

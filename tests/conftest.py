@@ -77,6 +77,11 @@ def ala_traj():
 
 
 @pytest.fixture(scope="session")
+def ala_trr():
+    return sr.load_test_files("ala.top", "ala.trr")
+
+
+@pytest.fixture(scope="session")
 def p38_mols():
     return sr.load_test_files("p38.pdb")
 

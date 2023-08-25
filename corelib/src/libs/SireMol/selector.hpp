@@ -600,7 +600,11 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::add(const Selector<T> &other) const
     {
-        if (this->selectedAll())
+        if (this->isEmpty())
+        {
+            return other;
+        }
+        else if (this->selectedAll())
         {
             if (other.isEmpty())
                 return *this;
@@ -1322,16 +1326,16 @@ namespace SireMol
 
         if (MoleculeView::isSameMolecule(view))
         {
-            if (this->selectedAll())
-            {
-                matches.append(view.index().value());
-            }
-            else if (not this->isEmpty())
+            if (not this->idxs.isEmpty())
             {
                 int match = this->idxs.indexOf(view.index());
 
                 if (match != -1)
                     matches.append(match);
+            }
+            else if (this->selectedAll())
+            {
+                matches.append(view.index().value());
             }
         }
 
@@ -1349,7 +1353,27 @@ namespace SireMol
 
         if (MoleculeView::isSameMolecule(views))
         {
-            if (this->selectedAll())
+            if (not this->idxs.isEmpty())
+            {
+                if (views.selectedAll())
+                {
+                    for (int i = 0; i < this->idxs.count(); ++i)
+                    {
+                        matches.append(this->idxs[i]);
+                    }
+                }
+                else if (not views.isEmpty())
+                {
+                    for (const auto &idx : views.idxs)
+                    {
+                        int match = this->idxs.indexOf(idx);
+
+                        if (match != -1)
+                            matches.append(match);
+                    }
+                }
+            }
+            else if (this->selectedAll())
             {
                 if (views.selectedAll())
                 {
@@ -1363,26 +1387,6 @@ namespace SireMol
                     for (const auto &idx : views.idxs)
                     {
                         matches.append(idx.value());
-                    }
-                }
-            }
-            else if (not this->isEmpty())
-            {
-                if (views.selectedAll())
-                {
-                    for (int i = 0; i < this->count(); ++i)
-                    {
-                        matches.append(i);
-                    }
-                }
-                else if (not views.isEmpty())
-                {
-                    for (const auto &idx : views.idxs)
-                    {
-                        int match = this->idxs.indexOf(idx);
-
-                        if (match != -1)
-                            matches.append(match);
                     }
                 }
             }

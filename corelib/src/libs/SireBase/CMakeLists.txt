@@ -22,7 +22,6 @@ set ( SIREBASE_HEADERS
       array2d.h
       arrayproperty.hpp
       booleanproperty.h
-      centralcache.h
       chunkedhash.hpp
       chunkedvector.hpp
       combineproperties.h
@@ -36,6 +35,7 @@ set ( SIREBASE_HEADERS
       globalsharedpointer.hpp
       increment.h
       incremint.h
+      lazyevaluator.h
       linktoproperty.h
       lengthproperty.h
       majorminorversion.h
@@ -84,7 +84,6 @@ set ( SIREBASE_SOURCES
       array2d.cpp
       arrayproperty.cpp
       booleanproperty.cpp
-      centralcache.cpp
       chunkedhash.cpp
       chunkedvector.cpp
       combineproperties.cpp
@@ -95,6 +94,7 @@ set ( SIREBASE_SOURCES
       generalunitproperty.cpp
       getinstalldir.cpp
       globalsharedpointer.cpp
+      lazyevaluator.cpp
       lengthproperty.cpp
       linktoproperty.cpp
       majorminorversion.cpp

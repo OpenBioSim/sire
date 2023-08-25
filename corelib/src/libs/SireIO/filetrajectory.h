@@ -28,9 +28,13 @@
 #ifndef SIREIO_FILETRAJECTORY_H
 #define SIREIO_FILETRAJECTORY_H
 
+#include <QUuid>
+
 #include "moleculeparser.h"
 
 #include "SireMol/trajectory.h"
+
+#include "SireBase/lazyevaluator.h"
 
 SIRE_BEGIN_HEADER
 
@@ -75,6 +79,7 @@ namespace SireIO
         QStringList filenames() const;
 
         SireMol::Frame getFrame(int i) const;
+        SireMol::Frame getFrame(int i, const SireBase::LazyEvaluator &evaluator) const;
 
         bool isEditable() const;
 
@@ -82,11 +87,11 @@ namespace SireIO
         bool _equals(const TrajectoryData &other) const;
 
     private:
+        /** The actual parser used to read the trajectory */
         MoleculeParserPtr parser;
 
-        QMutex frame_mutex;
-        SireMol::Frame last_loaded_frame;
-        int last_loaded_frame_index;
+        /** The UUID of the parser - this helps with cacheing */
+        QUuid uuid;
     };
 
 } // namespace SireIO

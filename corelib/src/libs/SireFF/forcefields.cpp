@@ -52,6 +52,7 @@
 
 #include "SireBase/combineproperties.h"
 #include "SireBase/linktoproperty.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "tostring.h"
 
@@ -5501,6 +5502,11 @@ void ForceFields::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void ForceFields::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void ForceFields::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -5518,9 +5524,16 @@ void ForceFields::deleteFrame(int frame)
 
 void ForceFields::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
+    LazyEvaluator evaluator;
+    this->loadFrame(frame, evaluator, map);
+}
+
+void ForceFields::loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
+                            const SireBase::PropertyMap &map)
+{
     this->accept();
     this->mustNowRecalculateFromScratch();
-    MolGroupsBase::loadFrame(frame, map);
+    MolGroupsBase::loadFrame(frame, evaluator, map);
 
     // we must get the space property
     SpacePtr old_space;

@@ -39,6 +39,8 @@
 
 #include "IntegerArrayProperty.pypp.hpp"
 
+#include "LazyEvaluator.pypp.hpp"
+
 #include "LengthProperty.pypp.hpp"
 
 #include "LinkToProperty.pypp.hpp"
@@ -197,6 +199,8 @@ BOOST_PYTHON_MODULE(_Base){
     register_Incremint_class();
 
     register_IntegerArrayProperty_class();
+
+    register_LazyEvaluator_class();
 
     register_LengthProperty_class();
 
