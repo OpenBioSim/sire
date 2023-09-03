@@ -95,7 +95,7 @@ def create_boresch_restraints(
     if kphi is None:
         kphi = [_default_k, _default_k, _default_k]
     elif type(kphi) is not list:
-        kphi = 3 * [u(phi)]
+        kphi = 3 * [u(kphi)]
     else:
         if len(kphi) == 0:
             kphi = [_default_k, _default_k, _default_k]

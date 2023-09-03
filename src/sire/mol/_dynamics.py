@@ -1,6 +1,9 @@
 __all__ = ["Dynamics"]
 
 
+from typing import Any
+
+
 class DynamicsData:
     """
     Internal class that is designed to only be used by the Dynamics
@@ -860,6 +863,8 @@ class Dynamics:
         """
         Perform dynamics on the molecules.
 
+        Parameters
+
         time: Time
             The amount of simulation time to run, e.g.
             dynamics.run(sr.u("5 ps")) would perform
@@ -1139,3 +1144,90 @@ class Dynamics:
             self._d.commit()
 
         return self._d._sire_mols
+
+    def __call__(
+        self,
+        time,
+        save_frequency=None,
+        frame_frequency=None,
+        energy_frequency=None,
+        lambda_windows=None,
+        save_velocities: bool = True,
+        auto_fix_minimise: bool = True,
+    ):
+        """
+        Perform dynamics on the molecules.
+
+        Parameters
+
+        time: Time
+            The amount of simulation time to run, e.g.
+            dynamics.run(sr.u("5 ps")) would perform
+            5 picoseconds of dynamics. The number of steps
+            is determined automatically based on the current
+            timestep (e.g. if the timestep was 1 femtosecond,
+            then 5 picoseconds would involve running 5000 steps)
+
+        save_frequency: Time
+            The amount of simulation time between saving frames
+            (coordinates, velocities) and energies from the trajectory. The
+            number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. Note that
+            `frame_frequency` or `energy_frequency` can be used
+            to override the frequency of saving frames or energies,
+            if you want them to be saved with different frequencies.
+            Specifying both will mean that the value of
+            `save_frequency` will be ignored.
+
+        frame_frequency: Time
+            The amount of simulation time between saving
+            frames (coordinates, velocities) from the trajectory.
+            The number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. The energies
+            will be saved into this object and are accessible via the
+            `energy_trajectory` function.
+
+        energy_frequency: Time
+            The amount of simulation time between saving
+            energies (kinetic and potential) from the trajectory.
+            The number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. The energies
+            will be saved into this object and are accessible via the
+            `energy_trajectory` function.
+
+        lambda_windows: list[float]
+            The values of lambda for which the potential energy will be
+            evaluated at every save. If this is None (the default) then
+            only the current energy will be saved every `energy_frequency`
+            time. If this is not None, then the potential energy for
+            each of the lambda values in this list will be saved. Note that
+            we always save the potential energy of the simulated lambda
+            value, even if it is not in the list of lambda windows.
+
+        save_velocities: bool
+            Whether or not to save the velocities when running dynamics.
+            By default this is True. Set this to False if you aren't
+            interested in saving the velocities.
+
+        auto_fix_minimise: bool
+            Whether or not to automatically run minimisation if the
+            trajectory exits with an error in the first few steps.
+            Such failures often indicate that the system needs
+            minimsing. This automatically runs the minimisation
+            in these cases, and then runs the requested dynamics.
+        """
+        return self.run(
+            time=time,
+            save_frequency=save_frequency,
+            frame_frequency=frame_frequency,
+            energy_frequency=energy_frequency,
+            lambda_windows=lambda_windows,
+            save_velocities=save_velocities,
+            auto_fix_minimise=auto_fix_minimise,
+        ).commit()

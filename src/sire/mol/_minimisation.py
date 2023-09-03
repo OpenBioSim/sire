@@ -15,6 +15,16 @@ class MinimisationData(_DynamicsData):
         super().__init__(mols=mols, map=map)
 
     def run(self, max_iterations: int):
+        """
+        Internal method that runs minimisation on the molecules.
+
+        This method is designed to be called from the Minimisation
+        class.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
+        """
         from openmm import LocalEnergyMinimizer
         from concurrent.futures import ThreadPoolExecutor
 
@@ -24,9 +34,14 @@ class MinimisationData(_DynamicsData):
         from ..base import ProgressBar
 
         def runfunc(max_its):
-            LocalEnergyMinimizer.minimize(
-                self._omm_mols, maxIterations=max_its
-            )
+            try:
+                LocalEnergyMinimizer.minimize(
+                    self._omm_mols, maxIterations=max_its
+                )
+
+                return 0
+            except Exception as e:
+                return e
 
         with ProgressBar(text="minimisation") as spinner:
             spinner.set_speed_unit("checks / s")
@@ -36,10 +51,13 @@ class MinimisationData(_DynamicsData):
 
                 while not run_promise.done():
                     try:
-                        run_promise.result(timeout=0.2)
+                        result = run_promise.result(timeout=0.2)
                     except Exception:
                         spinner.tick()
                         pass
+
+                if result != 0:
+                    raise result
 
 
 class Minimisation:
@@ -83,7 +101,7 @@ class Minimisation:
         self._d = MinimisationData(mols=mols, map=map)
 
     def __str__(self):
-        return f"Minimisation()"
+        return "Minimisation()"
 
     def __repr__(self):
         return self.__str__()
@@ -92,6 +110,10 @@ class Minimisation:
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
         """
         if not self._d.is_null():
             self._d.run(max_iterations=max_iterations)
@@ -99,7 +121,22 @@ class Minimisation:
         return self
 
     def commit(self):
+        """
+        Commit the minimisation to the molecules, returning the
+        minimised molecules.
+        """
         if not self._d.is_null():
             self._d.commit()
 
         return self._d._sire_mols
+
+    def __call__(self, max_iterations: int = 10000):
+        """
+        Perform minimisation on the molecules, running a maximum
+        of max_iterations iterations.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
+        """
+        return self.run(max_iterations=max_iterations).commit()
