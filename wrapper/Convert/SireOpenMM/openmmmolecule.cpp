@@ -579,7 +579,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
-    if (is_perturbable)
+    this->buildPerturbableExceptions(mol, constrained_pairs, map);
+
+    /*if (is_perturbable)
     {
         // build all of the exceptions for perturbable molecules.
         // This is because the exceptions could change during the
@@ -592,7 +594,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         // a cursary look at the bonding
         this->buildStandardExceptions(mol, params,
                                       constrained_pairs, map);
-    }
+    }*/
 }
 
 bool is_ghost(const std::tuple<double, double, double> &clj)

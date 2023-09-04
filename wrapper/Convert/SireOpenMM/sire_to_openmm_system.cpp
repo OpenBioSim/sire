@@ -926,11 +926,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // start_index keeps track of the index of the first atom in each molecule
     int start_index = 0;
 
-    // we need to keep track of which particles are bonded, and
-    // also which particles should have exceptions
-    std::vector<std::pair<int, int>> bond_pairs;
-    std::vector<std::tuple<int, int, double, double, double>> exception_params;
-
     // get the 1-4 scaling factors from the first molecule
     const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
     const double lj_14_scl = openmm_mols_data[0].ffinfo.vdw14ScaleFactor();
@@ -1228,16 +1223,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // else we will need to think about how to constrain bonds
                 // involving fixed atoms. Could we fix the other atom too?
             }
-
-            // only save the bond pairs for non-perturbable molecules.
-            // This is because we want to know which exceptions
-            // are created for perturbable molecules, as we will
-            // need to manage them ourselves
-            for (const auto &bond : mol.bond_pairs)
-            {
-                bond_pairs.push_back(std::make_pair(std::get<0>(bond) + start_index,
-                                                    std::get<1>(bond) + start_index));
-            }
         }
 
         start_index += mol.masses.count();
@@ -1281,14 +1266,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// of the entire function, as it involves lots of atom-atom
     /// pair loops and can create a large exception list
     ///
-
-    // add the exceptions automatically for non-perturbable molecules
-    cljff->createExceptionsFromBonds(bond_pairs, coul_14_scl, lj_14_scl);
-
-    // add additional exceptions, including all exceptions for
-    // perturbable molecules (perturbable molecules are handled
-    // completely because the exceptions may change during
-    // the perturbation)
     for (int i = 0; i < nmols; ++i)
     {
         int start_index = start_indexes[i];
@@ -1382,6 +1359,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 cljff->addException(std::get<0>(p), std::get<1>(p),
                                     std::get<2>(p), std::get<3>(p),
                                     std::get<4>(p), true);
+
+                // we need to make sure that the list of exclusions in
+                // the NonbondedForce match those in the CustomNonbondedForces
+                if (ghost_ghostff != 0 and std::get<2>(p) == 0 and
+                    std::get<3>(p) == 0 and std::get<4>(p) == 0)
+                {
+                    ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
+                    ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
+                }
             }
         }
 

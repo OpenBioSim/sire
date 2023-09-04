@@ -183,7 +183,15 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
         keys.sort()
 
         for key in keys:
-            data[key] = obj.energies(key, kcal_per_mol.get_default())
+            nrgs = obj.energies(key, kcal_per_mol.get_default())
+
+            try:
+                # make the keys floats if they are really numbers
+                key = float(key)
+            except ValueError:
+                pass
+
+            data[key] = nrgs
 
         return pd.DataFrame(data).set_index("time")
 
