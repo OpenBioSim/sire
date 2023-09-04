@@ -77,7 +77,7 @@ class DynamicsData:
             self._current_step = 0
             self._elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
-            self._is_running = None
+            self._is_running = False
 
             from ..convert import to
 
@@ -146,14 +146,12 @@ class DynamicsData:
         self._ffinfo.set_space(space)
 
     def _enter_dynamics_block(self):
-        if self._is_running is not None:
+        if self._is_running:
             raise SystemError(
                 "Cannot start dynamics while it is already running!"
             )
 
-        import datetime
-
-        self._is_running = datetime.datetime.now().timestamp()
+        self._is_running = True
         self._omm_state = None
         self._omm_state_has_cv = (False, False)
 
@@ -164,16 +162,11 @@ class DynamicsData:
         lambda_windows=[],
         save_velocities: bool = False,
     ):
-        if self._is_running is None:
+        if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
 
-        import datetime
         import openmm
-        from ..units import second, nanosecond, kcal_per_mol
-
-        self._walltime += (
-            datetime.datetime.now().timestamp() - self._is_running
-        ) * second
+        from ..units import nanosecond, kcal_per_mol
 
         if save_frame:
             self._omm_state = self._omm_mols.getState(
@@ -234,7 +227,7 @@ class DynamicsData:
 
             self._energy_trajectory.set(self._current_time, nrgs)
 
-        self._is_running = None
+        self._is_running = False
 
         return (self._omm_state, self._omm_state_has_cv)
 
@@ -635,10 +628,14 @@ class DynamicsData:
         nsteps_before_run = self._current_step
 
         from ..base import ProgressBar
+        from ..units import second
+        from datetime import datetime
 
         try:
             with ProgressBar(total=steps_to_run, text="dynamics") as progress:
                 progress.set_speed_unit("steps / s")
+
+                start_time = datetime.now()
 
                 with ThreadPoolExecutor() as pool:
                     while completed < steps_to_run:
@@ -738,6 +735,10 @@ class DynamicsData:
                                 "minimising the system and run again."
                             )
 
+                self._walltime += (
+                    datetime.now() - start_time
+                ).total_seconds() * second
+
             if state is not None and not saved_last_frame:
                 # we can process the last block in the main thread
                 process_block(
@@ -749,7 +750,7 @@ class DynamicsData:
         except NeedsMinimiseError:
             # try to fix this problem by minimising,
             # then running again
-            self._is_running = None
+            self._is_running = False
             self._omm_state = None
             self._omm_state_has_cv = (False, False)
             self._rebuild_and_minimise()
