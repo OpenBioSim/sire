@@ -362,16 +362,19 @@ void MoleculeView::saveFrame(int frame, const SireBase::PropertyMap &map)
 
     if (d->hasProperty(traj_prop))
     {
-        traj = d->property(traj_prop.source()).asA<Trajectory>();
+        traj = d->takeProperty(traj_prop.source()).read().asA<Trajectory>();
     }
 
     if (frame == traj.nFrames())
-        this->saveFrame();
+    {
+        traj.appendFrame(this->_toFrame(map));
+    }
     else
     {
         traj.setFrame(frame, this->_toFrame(map));
-        d->setProperty(traj_prop.source(), traj);
     }
+
+    d->setProperty(traj_prop.source(), traj);
 }
 
 void MoleculeView::saveFrame(const SireBase::PropertyMap &map)
@@ -385,7 +388,7 @@ void MoleculeView::saveFrame(const SireBase::PropertyMap &map)
 
     if (d->hasProperty(traj_prop))
     {
-        traj = d->property(traj_prop.source()).asA<Trajectory>();
+        traj = d->takeProperty(traj_prop.source()).read().asA<Trajectory>();
     }
 
     traj.appendFrame(this->_toFrame(map));
@@ -399,15 +402,11 @@ void MoleculeView::deleteFrame(int frame, const SireBase::PropertyMap &map)
     if (not(traj_prop.hasSource() and d->hasProperty(traj_prop)))
         return;
 
-    auto traj = d->property(traj_prop.source()).asA<Trajectory>();
+    auto traj = d->takeProperty(traj_prop.source()).read().asA<Trajectory>();
 
     traj.deleteFrame(frame);
 
-    if (traj.isEmpty())
-    {
-        d->removeProperty(traj_prop.source());
-    }
-    else
+    if (not traj.isEmpty())
     {
         d->setProperty(traj_prop.source(), traj);
     }
