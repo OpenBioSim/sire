@@ -50,6 +50,15 @@ class SOMMContext(_Context):
             # the system based on the requested value of lambda
             # There are some things that are unchangeable once
             # the context has been created (e.g. constraints)
+            #
+            # Note the initialisation of the constraints is slow,
+            # so if there are many constraints then this constructor
+            # can take several seconds to complete. However, the
+            # increase in dynamics performance through having a larger
+            # timestep if we constraint bonds and angles makes this
+            # more than worth it. Note that this is why minimisations
+            # start running more quickly than dynamics jobs. There
+            # are no constraints in minimisations
             super().__init__(system, integrator, platform)
 
             # place the coordinates and velocities into the context

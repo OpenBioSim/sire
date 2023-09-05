@@ -934,9 +934,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // particle in that molecule
     QVector<int> start_indexes(nmols);
 
-    // save the atoms in the order they are added to the system
-    SireMol::SelectorM<SireMol::Atom> atom_index;
-
     // the index to the perturbable molecule for the specified molecule
     // (i.e. the 5th perturbable molecule is the 10th molecule in the System)
     QHash<int, int> idx_to_pert_idx;
@@ -961,10 +958,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // particle for the first atom in this molecule
         start_indexes[i] = start_index;
         const auto &mol = openmm_mols_data[i];
-
-        // add all of the atoms to the index of atoms
-        // (we guarantee to add them in atomidx order)
-        atom_index += mol.atoms;
 
         // double-check that the molecule has a compatible forcefield with
         // the other molecules in this system
@@ -1491,6 +1484,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
-    // All done - we can return the metadata
-    return OpenMMMetaData(atom_index, coords, vels, boxvecs, lambda_lever);
+    // All done - we can return the metadata (atoms are always added in
+    // molidx/atomidx order)
+    return OpenMMMetaData(mols.atoms(), coords, vels, boxvecs, lambda_lever);
 }
