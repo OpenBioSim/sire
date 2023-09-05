@@ -58,12 +58,6 @@ namespace SireVol
     "Molecular dynamics of sense and sensibility in processing and analysis of data"
     by Tsjerk A. Wassenaar.
 
-    However, due to the fixed-width format used to represent box dimensions and angles
-    in the various molecular input files, repeated reading and writing can lead to
-    oscillation of the box angles on reduction due to rounding precision errors.
-    To account for this, we add a small bias so that we always round in a consistent
-    direction.
-
     @author Lester Hedges
     */
     class SIREVOL_EXPORT TriclinicBox : public SireBase::ConcreteProperty<TriclinicBox, Cartesian>
@@ -74,9 +68,76 @@ namespace SireVol
 
     public:
         TriclinicBox();
-        TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2);
-        TriclinicBox(double a, double b, double c, const SireUnits::Dimension::Angle &alpha,
-                     const SireUnits::Dimension::Angle &beta, const SireUnits::Dimension::Angle &gamma);
+
+        /** Construct a triclinic box from lattice vectors.
+
+            @param v0
+                The first lattice vector.
+
+            @param v1
+                The second lattice vector.
+
+            @param v2
+                The third lattice vector.
+
+            @param auto_rotate
+                Whether to automatically rotate the box to comply with the
+                contraints of molecular dynamics engines, i.e. vector0 aligned
+                with x axis, vector1 in x-y plane, and vector2 with positive
+                z component.
+
+            @param auto_reduce
+                Whether to automatically perform a lattice reduction on the
+                box.
+         */
+        TriclinicBox(
+            const Vector &v0,
+            const Vector &v1,
+            const Vector &v2,
+            bool auto_rotate=false,
+            bool auto_reduce=true
+        );
+
+        /** Construct a triclinic box from box lengths and angles.
+
+            @param a
+                The length of the first box vector.
+
+            @param b
+                The length of the second box vector.
+
+            @param c
+                The length of the third box vector.
+
+            @param alpha
+                The angle between the second and third box vectors.
+
+            @param beta
+                The angle between the first and third box vectors.
+
+            @param gamma
+                The angle between the second and first box vectors.
+
+            @param auto_rotate
+                Whether to automatically rotate the box to comply with the
+                contraints of molecular dynamics engines, i.e. vector0 aligned
+                with x axis, vector1 in x-y plane, and vector2 with positive
+                z component:w.
+
+            @param auto_reduce
+                Whether to automatically perform a lattice reduction on the
+                box.
+         */
+        TriclinicBox(
+            double a,
+            double b,
+            double c,
+            const SireUnits::Dimension::Angle &alpha,
+            const SireUnits::Dimension::Angle &beta,
+            const SireUnits::Dimension::Angle &gamma,
+            bool auto_rotate=false,
+            bool auto_reduce=true
+        );
 
         TriclinicBox(const TriclinicBox &other);
 
@@ -107,6 +168,9 @@ namespace SireVol
             in x-y plane, and vector2 with positive z component.
          */
         bool isRotated() const;
+
+        /** Whether an automatic lattice reduction has been performed. */
+        bool isReduced() const;
 
         double calcDist(const Vector &point0, const Vector &point1) const;
 
@@ -193,16 +257,44 @@ namespace SireVol
         static TriclinicBox cubic(double d);
 
         /** Return a square rhombic dodecahedron TriclinicBox with image distance d. */
-        static TriclinicBox rhombicDodecahedronSquare(double d);
+        static TriclinicBox rhombicDodecahedronSquare(double d, bool auto_rotate=true, bool auto_reduce=true);
 
         /** Return a hexagonal rhombic dodecahedron TriclinicBox with image distance d. */
-        static TriclinicBox rhombicDodecahedronHexagon(double d);
+        static TriclinicBox rhombicDodecahedronHexagon(double d, bool auto_rotate=true, bool auto_reduce=true);
 
         /** Return a truncated octahedron with image distance d. */
-        static TriclinicBox truncatedOctahedron(double d);
+        static TriclinicBox truncatedOctahedron(double d, bool auto_rotate=true, bool auto_reduce=true);
+
+        /** Rotate the triclinic cell to comply with the contraints of certain
+            molecular dynamics engines, i.e. such that vector0 is aligned with
+            the x axis, vector1, lies in the x-y plane, and vector2 has a positive
+            z component.
+
+            @param precision
+                The precision to use when sorting the lattice vectors based on
+                their magnitude. By default this is set to the minimum precision
+                of the fixed-precision molecular input files that we support,
+                i.e. Gro87.
+         */
+        void rotate(double precision=1e-5);
+
+        /** Perform a lattice reduction on the triclinic cell.
+
+            @param bias
+                The bias to use when rounding during the lattice reduction.
+                Negative values biases towards left-tilting boxes, whereas
+                positive values biases towards right-tilting boxes. This can
+                be used to ensure that rounding is performed in a consistent
+                direction, avoiding oscillation when the TriclinicBox is
+                instantiated from box vectors, or dimensions and angles, that
+                have been read from fixed-precision input files.
+         */
+        void reduce(double bias=-1e-8);
 
     protected:
-        void construct(const Vector &v0, const Vector &v1, const Vector &v2);
+        void construct(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate=false, bool auto_reduce=true);
+
+        void setAttributes();
 
         Vector wrapDelta(const Vector &v0, const Vector &v1) const;
 
@@ -262,6 +354,9 @@ namespace SireVol
 
         /** Whether the triclinic cell has been rotated. */
         bool is_rotated;
+
+        /** Whether the triclinic cell has been reduced. */
+        bool is_reduced;
 
         /** The inverse of the lengths of each side of the box */
         Vector invlength;
