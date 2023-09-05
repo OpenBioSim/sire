@@ -72,6 +72,8 @@ def _pythonize(C, delete_old: bool = True) -> None:
             new_attr = new_attr.replace("asA", "as")
         elif new_attr.startswith("isAn"):
             new_attr = new_attr.replace("isAn", "is")
+        elif new_attr.startswith("isAtom"):
+            new_attr = new_attr.replace("isAtom", "is_atom")
         elif new_attr.startswith("isA"):
             new_attr = new_attr.replace("isA", "is")
 
@@ -338,6 +340,7 @@ def use_new_api():
             id,
             maths,
             morph,
+            restraints,
             qt,
             stream,
             units,
@@ -361,6 +364,7 @@ def use_new_api():
             id,
             maths,
             morph,
+            restraints,
             qt,
             stream,
             units,

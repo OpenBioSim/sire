@@ -20,9 +20,6 @@ __all__ = [
     "SelectorMDihedral",
     "SelectorMImproper",
     "LJParameter",
-    "create_boresch_restraints",
-    "create_distance_restraints",
-    "create_positional_restraints",
 ]
 
 from ..legacy import MM as _MM
@@ -58,8 +55,6 @@ BoreschRestraints = _MM.BoreschRestraints
 
 PositionalRestraint = _MM.PositionalRestraint
 PositionalRestraints = _MM.PositionalRestraints
-
-from ._restraints import *
 
 AmberBond = _MM.AmberBond
 AmberAngle = _MM.AmberAngle

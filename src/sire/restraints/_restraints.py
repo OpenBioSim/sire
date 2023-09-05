@@ -1,7 +1,8 @@
 __all__ = [
-    "create_boresch_restraints",
-    "create_distance_restraints",
-    "create_positional_restraints",
+    "boresch",
+    "bond",
+    "distance",
+    "positional",
 ]
 
 
@@ -21,7 +22,7 @@ def _to_atoms(mols, atoms):
         return mols[atoms].atoms()
 
 
-def create_boresch_restraints(
+def boresch(
     mols,
     receptor,
     ligand,
@@ -57,9 +58,9 @@ def create_boresch_restraints(
     The equilibium distances and angles are based on the current coordinates
     of that atoms
     """
-    from . import BoreschRestraint, BoreschRestraints
     from .. import u
     from ..base import create_map
+    from ..mm import BoreschRestraint, BoreschRestraints
 
     map = create_map(map)
 
@@ -144,7 +145,7 @@ def create_boresch_restraints(
         return BoreschRestraint(name, b)
 
 
-def create_distance_restraints(
+def distance(
     mols, atoms0, atoms1, r0=None, k=None, name: str = None, map=None
 ):
     """
@@ -165,9 +166,9 @@ def create_distance_restraints(
 
     If k is None, then a default value of 150 kcal mol-1 A-2 will be used
     """
-    from . import BondRestraint, BondRestraints
     from .. import u
     from ..base import create_map
+    from ..mm import BondRestraint, BondRestraints
 
     map = create_map(map)
 
@@ -246,7 +247,15 @@ def create_distance_restraints(
     return restraints
 
 
-def create_positional_restraints(
+def bond(*args, **kwargs):
+    """
+    Synonym for distance(), as a bond restraint is treated the same
+    as a distance restraint
+    """
+    return distance(*args, **kwargs)
+
+
+def positional(
     mols, atoms, k=None, r0=None, position=None, name: str = None, map=None
 ):
     """
@@ -266,9 +275,9 @@ def create_positional_restraints(
     If 'k' is not specified, then a default of 150 kcal mol-1 A-2
     will be used.
     """
-    from . import PositionalRestraint, PositionalRestraints
     from .. import u
     from ..base import create_map
+    from ..mm import PositionalRestraint, PositionalRestraints
 
     map = create_map(map)
 
