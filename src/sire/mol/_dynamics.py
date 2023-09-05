@@ -630,6 +630,7 @@ class DynamicsData:
         from ..base import ProgressBar
         from ..units import second
         from datetime import datetime
+        from math import isnan
 
         try:
             with ProgressBar(total=steps_to_run, text="dynamics") as progress:
@@ -718,7 +719,7 @@ class DynamicsData:
 
                         ke_per_atom = kinetic_energy / self._num_atoms
 
-                        if ke_per_atom > 1000:
+                        if isnan(ke_per_atom) or ke_per_atom > 1000:
                             # The system has blown up!
                             state = None
                             saved_last_frame = True

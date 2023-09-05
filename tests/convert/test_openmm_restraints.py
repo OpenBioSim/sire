@@ -43,40 +43,42 @@ def test_openmm_positional_restraints(kigaki_mols):
 def test_openmm_distance_restraints(ala_mols):
     mols = ala_mols
 
-    mol = mols[0]
+    mols = mols[0:2]
 
     map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
 
-    # test restraining the distance between the first and last atom
-    restraints = sr.restraints.distance(mol, atoms0=mol[0], atoms1=mol[-1])
+    # test restraining the distance between the first and last molecule
+    restraints = sr.restraints.distance(
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A"
+    )
 
     assert len(restraints) == 1
 
     # check that we get the same result using bond restraints
-    restraints2 = sr.restraints.bond(mol, atoms0=mol[0], atoms1=mol[-1])
+    restraints2 = sr.restraints.bond(
+        mols, atoms0=mols[0][0], atoms1=mols[-1][0], r0="5A"
+    )
 
     assert len(restraints2) == 1
 
     assert restraints == restraints2
 
-    coords = [mol[0].coordinates(), mol[-1].coordinates()]
-
     assert restraints[0].is_atom_restraint()
-    assert restraints[0].r0() == (coords[0] - coords[1]).length()
+    assert restraints[0].r0() == sr.u("5A")
 
-    d = mol.dynamics(restraints=restraints, timestep="1fs", map=map)
+    # need to minimise the energy to get the restraint to work
+    mols = mols.minimisation(restraints=restraints, map=map)()
 
-    d.run("1ps")
+    d = mols.dynamics(restraints=restraints, timestep="4fs", map=map)
 
-    mol = d.commit()
+    d.run("10ps")
 
-    new_coords = [mol[0].coordinates(), mol[-1].coordinates()]
+    mols = d.commit()
 
-    print(coords)
-    print(new_coords)
+    new_coords = [mols[0][0].coordinates(), mols[-1][0].coordinates()]
 
-    assert (coords[0] - coords[1]).length().value() == pytest.approx(
-        (new_coords[0] - new_coords[1]).length().value()
+    assert (new_coords[0] - new_coords[1]).length().value() == pytest.approx(
+        5.0, 1e-2
     )
 
 
@@ -97,7 +99,7 @@ def test_openmm_fixed_atoms(kigaki_mols):
     for atom in mol.atoms("element C"):
         coords.append(atom.coordinates())
 
-    d = mol.dynamics(fixed="element C", timestep="4fs", map=map)
+    d = mol.dynamics(fixed="element C", timestep="1fs", map=map)
 
     d.run("1ps")
 
