@@ -95,7 +95,7 @@ namespace SireVol
             const Vector &v1,
             const Vector &v2,
             bool auto_rotate=false,
-            bool auto_reduce=true
+            bool auto_reduce=false
         );
 
         /** Construct a triclinic box from box lengths and angles.
@@ -136,7 +136,7 @@ namespace SireVol
             const SireUnits::Dimension::Angle &beta,
             const SireUnits::Dimension::Angle &gamma,
             bool auto_rotate=false,
-            bool auto_reduce=true
+            bool auto_reduce=false
         );
 
         TriclinicBox(const TriclinicBox &other);
@@ -292,7 +292,7 @@ namespace SireVol
         void reduce(double bias=-1e-8);
 
     protected:
-        void construct(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate=false, bool auto_reduce=true);
+        void construct(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate=false, bool auto_reduce=false);
 
         void setAttributes();
 

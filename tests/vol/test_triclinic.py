@@ -15,6 +15,8 @@ def box():
         120.0000229 * sr.units.degrees,
         120.0000229 * sr.units.degrees,
         90.0000000 * sr.units.degrees,
+        True,
+        True,
     )
 
 
@@ -32,7 +34,9 @@ def test_reduction_vectors(box):
 
     for i in range(0, 20):
         # Re-create object using the previous box vectors as input.
-        box = sr.vol.TriclinicBox(box.vector0(), box.vector1(), box.vector2())
+        box = sr.vol.TriclinicBox(
+            box.vector0(), box.vector1(), box.vector2(), True, True
+        )
 
         # Make sure that the angles haven't changed.
         assert alpha == box.alpha()
@@ -60,6 +64,8 @@ def test_reduction_angles(box):
             box.alpha() * sr.units.degrees,
             box.beta() * sr.units.degrees,
             box.gamma() * sr.units.degrees,
+            True,
+            True,
         )
 
         # Make sure that the angles haven't changed.
