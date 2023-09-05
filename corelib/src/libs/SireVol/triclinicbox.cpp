@@ -262,6 +262,9 @@ void TriclinicBox::rotate(double precision)
     {
         this->is_rotated = false;
     }
+
+    // Now set the box attributes.
+    this->setAttributes();
 }
 
 void TriclinicBox::reduce(double bias)
