@@ -174,7 +174,7 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
     }
 }
 
-/** Rotate the triclinic cell has to comply with the contraints of certain
+/** Rotate the triclinic cell has to comply with the constraints of certain
     molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
     in x-y plane, and vector2 with positive z component. This is normally
     done for simulation efficiency.
@@ -573,7 +573,7 @@ SpacePtr TriclinicBox::setVolume(SireUnits::Dimension::Volume vol) const
     return TriclinicBox(scl * this->v0, scl * this->v1, scl * this->v2);
 }
 
-/** Whether the triclinic cell has been rotated to comply with the contraints
+/** Whether the triclinic cell has been rotated to comply with the constraints
     of molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
     in x-y plane, and vector2 with positive z component.
  */

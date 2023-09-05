@@ -82,7 +82,7 @@ namespace SireVol
 
             @param auto_rotate
                 Whether to automatically rotate the box to comply with the
-                contraints of molecular dynamics engines, i.e. vector0 aligned
+                constraints of molecular dynamics engines, i.e. vector0 aligned
                 with x axis, vector1 in x-y plane, and vector2 with positive
                 z component.
 
@@ -120,7 +120,7 @@ namespace SireVol
 
             @param auto_rotate
                 Whether to automatically rotate the box to comply with the
-                contraints of molecular dynamics engines, i.e. vector0 aligned
+                constraints of molecular dynamics engines, i.e. vector0 aligned
                 with x axis, vector1 in x-y plane, and vector2 with positive
                 z component:w.
 
@@ -163,7 +163,7 @@ namespace SireVol
 
         static const char *typeName();
 
-        /** Whether the triclinic cell has been rotated to comply with the contraints
+        /** Whether the triclinic cell has been rotated to comply with the constraints
             of molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
             in x-y plane, and vector2 with positive z component.
          */
@@ -265,7 +265,7 @@ namespace SireVol
         /** Return a truncated octahedron with image distance d. */
         static TriclinicBox truncatedOctahedron(double d, bool auto_rotate=true, bool auto_reduce=true);
 
-        /** Rotate the triclinic cell to comply with the contraints of certain
+        /** Rotate the triclinic cell to comply with the constraints of certain
             molecular dynamics engines, i.e. such that vector0 is aligned with
             the x axis, vector1, lies in the x-y plane, and vector2 has a positive
             z component.
