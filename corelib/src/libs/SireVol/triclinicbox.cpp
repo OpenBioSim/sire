@@ -100,10 +100,10 @@ TriclinicBox::TriclinicBox() : ConcreteProperty<TriclinicBox, Cartesian>()
 }
 
 /** Construct a TriclinicBox with the specified lattice vectors */
-TriclinicBox::TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2)
+TriclinicBox::TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate, bool auto_reduce)
     : ConcreteProperty<TriclinicBox, Cartesian>(), v0(v0), v1(v1), v2(v2), v0_orig(v0), v1_orig(v1), v2_orig(v2)
 {
-    this->construct(v0, v1, v2);
+    this->construct(v0, v1, v2, auto_rotate, auto_reduce);
 }
 
 /** Construct a TriclinicBox with the specified lattice vector magnitudes
@@ -115,9 +115,12 @@ TriclinicBox::TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2)
     alpha = angle between second and third lattice vectors
     beta = angle between first and third lattice vectors
     gamma = angle between second and first lattice vectors
+    auto_rotate = whether to rotate the box for simulation efficienct
+    auto_reduce = whether to perform a lattice reduction on the box
 */
 TriclinicBox::TriclinicBox(double a, double b, double c, const SireUnits::Dimension::Angle &alpha,
-                           const SireUnits::Dimension::Angle &beta, const SireUnits::Dimension::Angle &gamma)
+                           const SireUnits::Dimension::Angle &beta, const SireUnits::Dimension::Angle &gamma,
+                           bool auto_rotate, bool auto_reduce)
 {
     // Adapted from:
     // https://github.com/rosswhitfield/ase/blob/master/ase/lattice/triclinic.py
@@ -133,54 +136,98 @@ TriclinicBox::TriclinicBox(double a, double b, double c, const SireUnits::Dimens
     Vector v2(c * cosb, c * (cosa - cosb * cosg) / sing,
               c * std::sqrt(sinb * sinb - (((cosa - cosb * cosg) / sing) * ((cosa - cosb * cosg) / sing))));
 
-    this->construct(v0, v1, v2);
+    this->construct(v0, v1, v2, auto_rotate, auto_reduce);
 }
 
 /** Construct a TriclinicBox with the specified lattice vectors */
-void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v2)
+void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate, bool auto_reduce)
 {
-    // What follows was adapted from Appendex A from Chapter 3 of
-    // "Molecular dynamics of sense and sensibility in processing and analysis of data"
-    // by Tsjerk A. Wassenaar.
-    // https://pure.rug.nl/ws/portalfiles/portal/2839530/03_c3.pdf
-
     // Store the original lattice vectors. These are needed for streaming
     // support.
     this->v0_orig = v0;
     this->v1_orig = v1;
     this->v2_orig = v2;
 
-    // Get the magnitudes of the lattice box vectors.
-    auto m0 = v0.magnitude();
-    auto m1 = v1.magnitude();
-    auto m2 = v2.magnitude();
+    // Set the initial lattice vectors.
+    this->v0 = v0;
+    this->v1 = v1;
+    this->v2 = v2;
 
-    // Create a list containing of magnitude/vector pairs.
-    QList<QPair<double, Vector>> magnitudes;
-    magnitudes.append(qMakePair(m0, v0));
-    magnitudes.append(qMakePair(m1, v1));
-    magnitudes.append(qMakePair(m2, v2));
+    // Flag that the box isn't reduced or rotated.
+    this->is_reduced = false;
+    this->is_rotated = false;
 
-    // Sort the pairs in ascending order.
-    std::sort(magnitudes.begin(), magnitudes.end(), QPairFirstComparer());
+    // Rotate the box, if required.
+    if (auto_rotate)
+    {
+        this->rotate();
+    }
+    // Perform a lattice reduction.
+    if (auto_reduce)
+    {
+        this->reduce();
+    }
+    // Set the box attributes.
+    else
+    {
+        this->setAttributes();
+    }
+}
 
-    // Reorder the vectors in order of descending magnitude.
-    this->v0 = magnitudes[2].second;
-    this->v1 = magnitudes[1].second;
-    this->v2 = magnitudes[0].second;
+/** Rotate the triclinic cell has to comply with the constraints of certain
+    molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
+    in x-y plane, and vector2 with positive z component. This is normally
+    done for simulation efficiency.
+ */
+void TriclinicBox::rotate(double precision)
+{
+    // What follows was adapted from Appendex A from Chapter 3 of
+    // "Molecular dynamics of sense and sensibility in processing and analysis of data"
+    // by Tsjerk A. Wassenaar.
+    // https://pure.rug.nl/ws/portalfiles/portal/2839530/03_c3.pdf
+
+    // Temporary vector for sorting.
+    auto tmp = Vector();
+
+    // Sort the lattice vectors according to their magnitudes. Don't re-order if
+    // they are already sufficiently close, i.e. within the minimum precision of
+    // fixed-width ASCII input files, e.g. Gro87. This stops the box angles flipping
+    // when converting between representations of the triclinic space.
+    if ((this->v0.magnitude() - this->v2.magnitude()) > precision)
+    {
+        tmp = this->v0;
+        this->v0 = this->v2;
+        this->v2 = tmp;
+    }
+    if ((this->v0.magnitude() - this->v1.magnitude()) > precision)
+    {
+        tmp = this->v0;
+        this->v0 = this->v1;
+        this->v1 = tmp;
+    }
+    if ((this->v1.magnitude() - this->v2.magnitude()) > precision)
+    {
+        tmp = this->v1;
+        this->v1 = this->v2;
+        this->v2 = tmp;
+    }
+
+    // Get the magnitudes of the first two lattice vectors.
+    auto m0 = this->v0.magnitude();
+    auto m1 = this->v1.magnitude();
 
     // Project v1 onto v0.
-    auto xn1 = Vector::dot(v0, v1) / m0;
+    auto xn1 = Vector::dot(this->v0, this->v1) / m0;
 
     // Evaluate the square root of the difference between the length of v1 squared
     // and the projection of that vector on v0 squared.
     auto yn1 = std::sqrt(m1 * m1 - xn1 * xn1);
 
     // Evaluate the vector product of v0 and v1 and take the magnitude.
-    auto zn2 = Vector::realCross(v0, v1).magnitude();
+    auto zn2 = Vector::realCross(this->v0, this->v1).magnitude();
 
     // Construct the original matrix.
-    Matrix X = Matrix(v0, v1, Vector::realCross(v0, v1)).transpose();
+    Matrix X = Matrix(this->v0, this->v1, Vector::realCross(v0, v1)).transpose();
 
     // Constuct the rotated matrix.
     Matrix X_rot(Vector(m0, xn1, 0), Vector(0, yn1, 0), Vector(0, 0, zn2));
@@ -189,9 +236,9 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
     this->rotation_matrix = X_rot * X.inverse();
 
     // Rotate the lattice vectors.
-    this->v0 = this->rotation_matrix * v0;
-    this->v1 = this->rotation_matrix * v1;
-    this->v2 = this->rotation_matrix * v2;
+    this->v0 = this->rotation_matrix * this->v0;
+    this->v1 = this->rotation_matrix * this->v1;
+    this->v2 = this->rotation_matrix * this->v2;
 
     // Make sure v2 has a positive z component.
     if (this->v2.z() < 0)
@@ -216,7 +263,18 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
         this->is_rotated = false;
     }
 
-    /* Next perform a lattice reduction such that the following conditions are
+    // Now set the box attributes.
+    this->setAttributes();
+}
+
+void TriclinicBox::reduce(double bias)
+{
+    // What follows was adapted from Appendex A from Chapter 3 of
+    // "Molecular dynamics of sense and sensibility in processing and analysis of data"
+    // by Tsjerk A. Wassenaar.
+    // https://pure.rug.nl/ws/portalfiles/portal/2839530/03_c3.pdf
+
+    /* Perform a lattice reduction such that the following conditions are
        met:
 
        | v1.x | <= 1/2 v0.x
@@ -226,15 +284,21 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
        These constraints can be solved using simultaneous equations.
      */
 
-    // Perform the reduction. Add a small bias so that we always round in a consistent
-    // direction. This mitigates numerical errors due to box dimensions and angles, or
-    // lattice cell vectors being specified in fixed precision in the file formats that
-    // we support. Without these, repeated read/write conversion to different formats
-    // can cause the box angles to rotate back-and-forth.
-    this->v2 = this->v2 - this->v1*std::round(-1e-8 + this->v2.y() / this->v1.y());
-    this->v2 = this->v2 - this->v0*std::round(-1e-8 + this->v2.x() / this->v0.x());
-    this->v1 = this->v1 - this->v0*std::round(-1e-8 + this->v1.x() / this->v0.x());
+    // Perform the reduction.
+    this->v2 = this->v2 - this->v1*std::round(bias + this->v2.y() / this->v1.y());
+    this->v2 = this->v2 - this->v0*std::round(bias + this->v2.x() / this->v0.x());
+    this->v1 = this->v1 - this->v0*std::round(bias + this->v1.x() / this->v0.x());
 
+    // Now set the box attributes.
+    this->setAttributes();
+
+    // Flag that the box has been reduced.
+    this->is_reduced = true;
+}
+
+/** Set the attributes of the triclinic box. These are based on the box vectors. */
+void TriclinicBox::setAttributes()
+{
     // Store the cell matrix and its inverse.
     this->cell_matrix = Matrix(this->v0, this->v1, this->v2).transpose();
     this->cell_matrix_inverse = this->cell_matrix.inverse();
@@ -245,9 +309,9 @@ void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v
     // Work out the maximum distance for minimum image calculations.
 
     // Get the magnitudes of the updated lattice box vectors. (Half-lengths)
-    m0 = this->v0.magnitude() * 0.5;
-    m1 = this->v1.magnitude() * 0.5;
-    m2 = this->v2.magnitude() * 0.5;
+    auto m0 = this->v0.magnitude() * 0.5;
+    auto m1 = this->v1.magnitude() * 0.5;
+    auto m2 = this->v2.magnitude() * 0.5;
 
     // Store the minimum half distance.
     if ((m0 < m1) and (m0 < m2))
@@ -314,7 +378,7 @@ TriclinicBox::TriclinicBox(const TriclinicBox &other)
       v0_orig(other.v0_orig), v1_orig(other.v1_orig), v2_orig(other.v2_orig), rotation_matrix(other.rotation_matrix),
       cell_matrix(other.cell_matrix), cell_matrix_inverse(other.cell_matrix_inverse), M(other.M),
       dist_max(other.dist_max), max_length(other.max_length), _alpha(other._alpha), _beta(other._beta),
-      _gamma(other._gamma), vol(other.vol), is_rotated(other.is_rotated), invlength(other.invlength)
+      _gamma(other._gamma), vol(other.vol), is_rotated(other.is_rotated), is_reduced(other.is_reduced), invlength(other.invlength)
 {
 }
 
@@ -343,6 +407,7 @@ TriclinicBox &TriclinicBox::operator=(const TriclinicBox &other)
         _gamma = other._gamma;
         vol = other.vol;
         is_rotated = other.is_rotated;
+        is_reduced = other.is_reduced;
         invlength = other.invlength;
         Cartesian::operator=(other);
     }
@@ -440,33 +505,33 @@ TriclinicBox TriclinicBox::cubic(double d)
 }
 
 /** Return a square rhombic dodecahedron TriclinicBox with image distance d. */
-TriclinicBox TriclinicBox::rhombicDodecahedronSquare(double d)
+TriclinicBox TriclinicBox::rhombicDodecahedronSquare(double d, bool auto_rotate, bool auto_reduce)
 {
     Vector v0(d, 0, 0);
     Vector v1(0, d, 0);
     Vector v2(0.5 * d, 0.5 * d, 0.5 * std::sqrt(2) * d);
 
-    return TriclinicBox(v0, v1, v2);
+    return TriclinicBox(v0, v1, v2, auto_rotate, auto_reduce);
 }
 
 /** Return a hexagonal rhombic dodecahedron TriclinicBox with image distance d. */
-TriclinicBox TriclinicBox::rhombicDodecahedronHexagon(double d)
+TriclinicBox TriclinicBox::rhombicDodecahedronHexagon(double d, bool auto_rotate, bool auto_reduce)
 {
     Vector v0(d, 0, 0);
     Vector v1(0.5, 0.5 * std::sqrt(3) * d, 0);
     Vector v2(0.5 * d, (1 / 6.0) * std::sqrt(3) * d, (1 / 3.0) * std::sqrt(6) * d);
 
-    return TriclinicBox(v0, v1, v2);
+    return TriclinicBox(v0, v1, v2, auto_rotate, auto_reduce);
 }
 
 /** Return a truncated octahedron with image distance d. */
-TriclinicBox TriclinicBox::truncatedOctahedron(double d)
+TriclinicBox TriclinicBox::truncatedOctahedron(double d, bool auto_rotate, bool auto_reduce)
 {
     Vector v0(d, 0, 0);
     Vector v1(d / 3.0, (2 / 3.0) * std::sqrt(2) * d, 0);
     Vector v2(-d / 3.0, (1 / 3.0) * std::sqrt(2) * d, (1 / 3.0) * std::sqrt(6) * d);
 
-    return TriclinicBox(v0, v1, v2);
+    return TriclinicBox(v0, v1, v2, auto_rotate, auto_reduce);
 }
 
 /** Return a string representation of this space */
@@ -511,13 +576,19 @@ SpacePtr TriclinicBox::setVolume(SireUnits::Dimension::Volume vol) const
     return TriclinicBox(scl * this->v0, scl * this->v1, scl * this->v2);
 }
 
-/** Whether the triclinic cell has been rotated to comply with the contraints
+/** Whether the triclinic cell has been rotated to comply with the constraints
     of molecular dynamics engines, i.e. vector0 aligned with x axis, vector1
     in x-y plane, and vector2 with positive z component.
  */
 bool TriclinicBox::isRotated() const
 {
     return this->is_rotated;
+}
+
+/** Whether the a lattice reduction has been performed on this triclinic space.  */
+bool TriclinicBox::isReduced() const
+{
+    return this->is_reduced;
 }
 
 /** Calculate the delta that needs to be subtracted from the interatomic
