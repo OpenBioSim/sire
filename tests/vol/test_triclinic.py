@@ -8,16 +8,21 @@ from openmm.app import AmberInpcrdFile, Topology
 
 @pytest.fixture
 def box():
-    return sr.vol.TriclinicBox(
+    tri_box = sr.vol.TriclinicBox(
         1,
         1,
         1,
         120.0000229 * sr.units.degrees,
         120.0000229 * sr.units.degrees,
         90.0000000 * sr.units.degrees,
-        True,
-        True,
     )
+    # Rotate the box using the minimimum precision from supported molecular
+    # input files.
+    tri_box.rotate(1e-5)
+    # Reduce the lattice vectors, biasing towards left-tilting boxes.
+    tri_box.reduce(-1e-8)
+
+    return tri_box
 
 
 def test_reduction_vectors(box):
@@ -34,9 +39,10 @@ def test_reduction_vectors(box):
 
     for i in range(0, 20):
         # Re-create object using the previous box vectors as input.
-        box = sr.vol.TriclinicBox(
-            box.vector0(), box.vector1(), box.vector2(), True, True
-        )
+        box = sr.vol.TriclinicBox(box.vector0(), box.vector1(), box.vector2())
+        # Perform a stable rotation and reduction.
+        box.rotate(1e-5)
+        box.reduce(-1e-8)
 
         # Make sure that the angles haven't changed.
         assert alpha == box.alpha()
@@ -64,9 +70,10 @@ def test_reduction_angles(box):
             box.alpha() * sr.units.degrees,
             box.beta() * sr.units.degrees,
             box.gamma() * sr.units.degrees,
-            True,
-            True,
         )
+        # Perform a stable rotation and reduction.
+        box.rotate(1e-5)
+        box.reduce(-1e-8)
 
         # Make sure that the angles haven't changed.
         assert alpha == box.alpha()

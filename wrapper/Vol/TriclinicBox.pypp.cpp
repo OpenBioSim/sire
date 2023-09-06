@@ -542,7 +542,7 @@ void register_TriclinicBox_class(){
             TriclinicBox_exposer.def( 
                 "reduce"
                 , reduce_function_value
-                , ( bp::arg("bias")=-1.0E-8 )
+                , ( bp::arg("bias")=0. )
                 , "Perform a lattice reduction on the triclinic cell.\n\nPar:am bias\nThe bias to use when rounding during the lattice reduction.\nNegative values biases towards left-tilting boxes, whereas\npositive values biases towards right-tilting boxes. This can\nbe used to ensure that rounding is performed in a consistent\ndirection, avoiding oscillation when the TriclinicBox is\ninstantiated from box vectors, or dimensions and angles, that\nhave been read from fixed-precision input files.\n" );
         
         }
@@ -578,8 +578,8 @@ void register_TriclinicBox_class(){
             TriclinicBox_exposer.def( 
                 "rotate"
                 , rotate_function_value
-                , ( bp::arg("precision")=1.0000000000000001E-5 )
-                , "Rotate the triclinic cell to comply with the constraints of certain\nmolecular dynamics engines, i.e. such that vector0 is aligned with\nthe x axis, vector1, lies in the x-y plane, and vector2 has a positive\nz component.\n\nPar:am precision\nThe precision to use when sorting the lattice vectors based on\ntheir magnitude. By default this is set to the minimum precision\nof the fixed-precision molecular input files that we support,\ni.e. Gro87.\n" );
+                , ( bp::arg("precision")=0. )
+                , "Rotate the triclinic cell to comply with the constraints of certain\nmolecular dynamics engines, i.e. such that vector0 is aligned with\nthe x axis, vector1, lies in the x-y plane, and vector2 has a positive\nz component.\n\nPar:am precision\nThe precision to use when sorting the lattice vectors based on\ntheir magnitude. This can be used to prevent unwanted rotation\nwhen using input fixed-precision ascii molecular input files.\n" );
         
         }
         { //::SireVol::TriclinicBox::rotationMatrix

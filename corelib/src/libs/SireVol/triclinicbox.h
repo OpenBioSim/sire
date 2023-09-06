@@ -272,11 +272,10 @@ namespace SireVol
 
             @param precision
                 The precision to use when sorting the lattice vectors based on
-                their magnitude. By default this is set to the minimum precision
-                of the fixed-precision molecular input files that we support,
-                i.e. Gro87.
+                their magnitude. This can be used to prevent unwanted rotation
+                when using input fixed-precision ascii molecular input files.
          */
-        void rotate(double precision=1e-5);
+        void rotate(double precision=0.0);
 
         /** Perform a lattice reduction on the triclinic cell.
 
@@ -289,7 +288,7 @@ namespace SireVol
                 instantiated from box vectors, or dimensions and angles, that
                 have been read from fixed-precision input files.
          */
-        void reduce(double bias=-1e-8);
+        void reduce(double bias=0.0);
 
     protected:
         void construct(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate=false, bool auto_reduce=false);
