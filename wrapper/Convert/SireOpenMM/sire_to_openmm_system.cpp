@@ -778,7 +778,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         lambda_lever.addLever("alpha");
 
-        double shift_delta = 1.0;
+        // somd uses a default shift_delta of 2.0
+        double shift_delta = 2.0;
 
         if (map.specified("shift_delta"))
         {

@@ -306,6 +306,14 @@ def positional(
 
     coords_prop = map["coordinates"]
 
+    if position is not None:
+        from ..maths import Vector
+
+        if type(position) is not list:
+            position = len(atoms) * [Vector.to_vector(position)]
+        else:
+            position = [Vector.to_vector(x) for x in position]
+
     for i, atom in enumerate(atoms.atoms()):
         idxs = mols.find(atom)
 
@@ -336,6 +344,6 @@ def positional(
                 )
             )
         else:
-            restraints.add(PositionalRestraint(idxs[0], position, ik, ir0))
+            restraints.add(PositionalRestraint(idxs[0], position[i], ik, ir0))
 
     return restraints
