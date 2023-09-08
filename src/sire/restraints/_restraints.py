@@ -11,15 +11,9 @@ def _to_atoms(mols, atoms):
     Internal function used to convert `mols[atoms]` into a list
     of atoms
     """
-    if hasattr(atoms, "atoms"):
-        return atoms.atoms()
+    from ..mol import selection_to_atoms
 
-    from ..legacy.Base import NumberProperty, IntegerArrayProperty
-
-    if type(atoms) is NumberProperty or type(atoms) is IntegerArrayProperty:
-        return mols[atoms.value()].atoms()
-    else:
-        return mols[atoms].atoms()
+    return selection_to_atoms(mols, atoms)
 
 
 def boresch(
@@ -182,12 +176,14 @@ def distance(
     atoms0 = _to_atoms(mols, atoms0)
     atoms1 = _to_atoms(mols, atoms1)
 
-    if len(atoms0) != len(atoms1):
-        raise ValueError(
-            "Cannot create the set of bond restraints because the number "
-            f"of atoms in the first group ({len(atoms0)}) is not equal to "
-            f"the number of atoms in the second ({len(atoms1)})."
-        )
+    if atoms0.is_empty() or atoms1.is_empty():
+        raise ValueError("We need at least one atom in each group")
+
+    while len(atoms0) < len(atoms1):
+        atoms0 += atoms0[-1]
+
+    while len(atoms1) < len(atoms0):
+        atoms1 += atoms1[-1]
 
     if r0 is None:
         # calculate all of the current distances

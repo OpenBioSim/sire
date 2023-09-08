@@ -1,6 +1,7 @@
 __all__ = [
     "get_alignment",
     "is_water",
+    "selection_to_atoms",
     "Atom",
     "AtomIdx",
     "AtomMapping",
@@ -123,6 +124,85 @@ try:
     get_alignment = _Mol.getAlignment
 except AttributeError:
     get_alignment = _Mol.get_alignment
+
+
+def selection_to_atoms(mols, atoms):
+    """
+    Convert the passed selection to a list of atoms.
+
+    Parameters
+    ----------
+    mols : A molecule view or collection
+        The molecule container from which to select the atoms.
+    atoms : str, int, list, molecule view/collection etc.
+        Any valid search string, atom index, list of atom indicies,
+        or molecule view/container that can be used to select
+        atoms from ``mols``
+
+    Returns
+    -------
+    atoms : A SelectorM_Atoms_ or Selector_Atom_ containing the list
+        of atoms.
+
+    Examples
+    --------
+
+    >>> import sire as sr
+    >>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.crd"))
+    >>> sr.mol.selection_to_atoms(mols, "atomname CA")
+    Selector<SireMol::Atom>( size=1
+    0:  Atom( CA:9    [  16.54,    5.03,   15.81] )
+    )
+
+    >>> sr.mol.selection_to_atoms(mols, "resname ALA")
+    Selector<SireMol::Atom>( size=10
+    0:  Atom( N:7     [  17.22,    4.31,   14.71] )
+    1:  Atom( H:8     [  16.68,    3.62,   14.22] )
+    2:  Atom( CA:9    [  16.54,    5.03,   15.81] )
+    3:  Atom( HA:10   [  17.29,    5.15,   16.59] )
+    4:  Atom( CB:11   [  16.05,    6.39,   15.26] )
+    5:  Atom( HB1:12  [  15.63,    6.98,   16.07] )
+    6:  Atom( HB2:13  [  16.90,    6.89,   14.80] )
+    7:  Atom( HB3:14  [  15.24,    6.18,   14.55] )
+    8:  Atom( C:15    [  15.37,    4.19,   16.43] )
+    9:  Atom( O:16    [  14.94,    3.17,   15.88] )
+    )
+
+    >>> sr.mol.selection_to_atoms(mols, [0, 1, 2, 3])
+    SireMol::SelectorM<SireMol::Atom>( size=4
+    0: MolNum(641) Atom( HH31:1  [  18.45,    3.49,   12.44] )
+    1: MolNum(641) Atom( CH3:2   [  18.98,    3.45,   13.39] )
+    2: MolNum(641) Atom( HH32:3  [  20.05,    3.63,   13.29] )
+    3: MolNum(641) Atom( HH33:4  [  18.80,    2.43,   13.73] )
+    )
+
+    >>> sr.mol.selection_to_atoms(mols, mols[0])
+    Selector<SireMol::Atom>( size=22
+    0:  Atom( HH31:1  [  18.45,    3.49,   12.44] )
+    1:  Atom( CH3:2   [  18.98,    3.45,   13.39] )
+    2:  Atom( HH32:3  [  20.05,    3.63,   13.29] )
+    3:  Atom( HH33:4  [  18.80,    2.43,   13.73] )
+    4:  Atom( C:5     [  18.48,    4.55,   14.35] )
+    ...
+    17:  Atom( H:18    [  15.34,    5.45,   17.96] )
+    18:  Atom( CH3:19  [  13.83,    3.94,   18.35] )
+    19:  Atom( HH31:20 [  14.35,    3.41,   19.15] )
+    20:  Atom( HH32:21 [  13.19,    4.59,   18.94] )
+    21:  Atom( HH33:22 [  13.21,    3.33,   17.69] )
+    )
+    """
+    if hasattr(atoms, "atoms"):
+        return atoms.atoms()
+
+    from ..legacy.Base import NumberProperty, IntegerArrayProperty
+
+    if type(atoms) is int or type(atoms) is list:
+        return mols.atoms()[atoms]
+    elif type(atoms) is NumberProperty or type(atoms) is IntegerArrayProperty:
+        atoms = [x.as_integer() for x in atoms.as_array()]
+        return mols.atoms()[atoms]
+    else:
+        return mols[atoms].atoms()
 
 
 def is_water(mol, map=None):

@@ -26,13 +26,13 @@ class DynamicsData:
                 else:
                     fixed_atoms = map["fixed"].source()
 
-                # turn the fixed atoms into a list of atoms
-                if hasattr(fixed_atoms, "atoms"):
-                    fixed_atoms = fixed_atoms.atoms()
-                else:
-                    fixed_atoms = mols[fixed_atoms].atoms()
+                from . import selection_to_atoms
 
-                map.set("fixed", mols.atoms().find(fixed_atoms))
+                # turn the fixed atoms into a list of atoms
+                map.set(
+                    "fixed",
+                    mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
+                )
 
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
