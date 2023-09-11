@@ -79,12 +79,81 @@ restraint from ``1.0`` to ``0`` while keeping the parameter at ``2.0``.
 We can now use this schedule to perturb the restraints during an alchemical
 simulation e.g.
 
->>> mols = sr.load(sr.expand(sr.tutorial_url, "perturbable_ligand.s3"))
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
 >>> restraints = sr.restraints.positional(mols, "molidx 0")
->>> mols = mols.minimisation().run(restraints=restraints,
-...                                lambda_value=0).commit()
+>>> mols = mols.minimisation(restraints=restraints,
+...                          lambda_value=0.0).run().commit()
 >>> d = mols.dynamics(timestep="4fs", temperature="25oC",
 ...                   restraints=restraints, schedule=l,
+...                   lambda_value=0.0)
+>>> d.run("10ps")
+>>> mols = d.commit()
+
+Using named restraints
+----------------------
+
+By default, all restraints in a system are called ``restraint``, and so are
+perturbed using the ``restraint`` lever. However, you can also give restraints
+their own name, and then perturb them using their name. For example, here
+we create two restraints, named ``positional`` and ``distance``.
+
+>>> pos_rest = sr.restraints.positional(mols, "molidx 0", name="positional")
+>>> dst_rest = sr.restraints.distance(mols, atoms0=0, atoms1=1, name="distance")
+>>> print(pos_rest, dst_rest)
+PositionalRestraints( name=positional, size=8
+0: PositionalRestraint( 0 => ( 25.7128, 24.9375, 25.2539 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+1: PositionalRestraint( 1 => ( 24.2872, 25.0626, 24.7461 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+2: PositionalRestraint( 2 => ( 25.9115, 23.8899, 25.5639 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+3: PositionalRestraint( 3 => ( 26.425, 25.2206, 24.4509 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+4: PositionalRestraint( 4 => ( 25.8616, 25.6094, 26.1259 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+5: PositionalRestraint( 5 => ( 24.1384, 24.3907, 23.8741 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+6: PositionalRestraint( 6 => ( 24.0888, 26.1101, 24.4351 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+7: PositionalRestraint( 7 => ( 23.575, 24.7795, 25.5491 ), k=150 kcal mol-1 Å-2 : r0=0 Å )
+) BondRestraints( name=distance, size=1
+0: BondRestraint( 0 <=> 1, k=150 kcal mol-1 Å-2 : r0=1.5185 Å )
+)
+
+We can now create a schedule that perturbs these restraints separately using
+their names. We will first scale up the ``distance`` restraint in a
+``distance_restraints`` stage...
+
+>>> l = sr.cas.LambdaSchedule()
+>>> l.add_stage("distance_restraints", 0)
+>>> l.set_equation("distance_restraints", "distance", l.lam() * l.initial())
+
+and will then scale up the ``positional`` restraint in a
+``positional_restraints`` stage, while keeping the ``distance`` restraint
+fully on.
+
+>>> l.add_stage("positional_restraints", 1)
+>>> l.set_equation("positional_restraints", "positional", l.lam() * l.initial())
+>>> print(l)
+LambdaSchedule(
+  distance_restraints: 0
+    distance: λ * initial
+  positional_restraints: 1
+    positional: λ * initial
+)
+>>> l.get_lever_values(initial=1.0, final=1.0,
+...                    levers=["positional", "distance"]).plot()
+
+.. image:: images/06_04_02.jpg
+   :alt: Impact of the schedule for scaling two restraints separately
+
+Here we can see that, in the first ``distance_restraints`` stage
+(from λ=0 to λ=0.5), the ``distance`` restraint is scaled from ``0`` to ``1``
+while the ``positional`` restraint is kept at ``0``. In the second
+``positional_restraints`` stage (from λ=0.5 to λ=1), the ``positional``
+restraint is scaled from ``0`` to ``1`` while the ``distance`` restraint is
+kept at ``1``.
+
+We can now use this schedule in a simulation, e.g.
+
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
+>>> mols = mols.minimisation(restraints=[dst_rest, pos_rest],
+...                          lambda_value=0.0).run().commit()
+>>> d = mols.dynamics(timestep="4fs", temperature="25oC",
+...                   restraints=[dst_rest, pos_rest], schedule=l,
 ...                   lambda_value=0.0)
 >>> d.run("10ps")
 >>> mols = d.commit()

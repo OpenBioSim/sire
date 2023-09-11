@@ -173,30 +173,6 @@ void register_MolEditor_class(){
                 , "Commit these changes and return a copy of the\nedited molecule" );
         
         }
-        { //::SireMol::MolEditor::getLinks
-        
-            typedef ::QHash< QString, QString > ( ::SireMol::MolEditor::*getLinks_function_type)(  ) const;
-            getLinks_function_type getLinks_function_value( &::SireMol::MolEditor::getLinks );
-            
-            MolEditor_exposer.def( 
-                "getLinks"
-                , getLinks_function_value
-                , bp::release_gil_policy()
-                , "Return all of the property links" );
-        
-        }
-        { //::SireMol::MolEditor::hasLinks
-        
-            typedef bool ( ::SireMol::MolEditor::*hasLinks_function_type)(  ) const;
-            hasLinks_function_type hasLinks_function_value( &::SireMol::MolEditor::hasLinks );
-            
-            MolEditor_exposer.def( 
-                "hasLinks"
-                , hasLinks_function_value
-                , bp::release_gil_policy()
-                , "Return whether or not there are any property links" );
-        
-        }
         { //::SireMol::MolEditor::operator=
         
             typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*assign_function_type)( ::SireMol::Molecule const & ) ;

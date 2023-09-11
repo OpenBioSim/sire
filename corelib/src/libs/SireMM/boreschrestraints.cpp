@@ -375,6 +375,11 @@ BoreschRestraints::BoreschRestraints()
 {
 }
 
+BoreschRestraints::BoreschRestraints(const QString &name)
+    : ConcreteProperty<BoreschRestraints, Restraints>(name)
+{
+}
+
 BoreschRestraints::BoreschRestraints(const BoreschRestraint &restraint)
     : ConcreteProperty<BoreschRestraints, Restraints>()
 {
@@ -483,7 +488,7 @@ QString BoreschRestraints::toString() const
         }
     }
 
-    return QObject::tr("BoreschRestraints( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
+    return QObject::tr("BoreschRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */

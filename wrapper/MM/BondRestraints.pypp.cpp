@@ -40,6 +40,7 @@ void register_BondRestraints_class(){
         typedef bp::class_< SireMM::BondRestraints, bp::bases< SireMM::Restraints, SireBase::Property > > BondRestraints_exposer_t;
         BondRestraints_exposer_t BondRestraints_exposer = BondRestraints_exposer_t( "BondRestraints", "This class provides the information for a collection of bond\nrestraints that can be added to a collection of molecues. Each\nrestraint can act on a pair of particles or a pair of the\ncentroids of two collections of particles.\nThe restaints are spherically symmetric, and\nare simple harmonic potentials\n", bp::init< >("Null constructor") );
         bp::scope BondRestraints_scope( BondRestraints_exposer );
+        BondRestraints_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         BondRestraints_exposer.def( bp::init< SireMM::BondRestraint const & >(( bp::arg("restraint") ), "") );
         BondRestraints_exposer.def( bp::init< QList< SireMM::BondRestraint > const & >(( bp::arg("restraints") ), "") );
         BondRestraints_exposer.def( bp::init< QString const &, SireMM::BondRestraint const & >(( bp::arg("name"), bp::arg("restraint") ), "") );

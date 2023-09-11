@@ -134,6 +134,7 @@ namespace SireMM
 
     public:
         BondRestraints();
+        BondRestraints(const QString &name);
 
         BondRestraints(const BondRestraint &restraint);
         BondRestraints(const QList<BondRestraint> &restraints);

@@ -151,7 +151,7 @@ SireMol::SelectorM<SireMol::Atom>( size=358
 Distance or Bond Restraints
 ---------------------------
 
-The :func:`~sire.restraints.distance` or :func:`sire.restraints.bond` functions
+The :func:`sire.restraints.distance` or :func:`sire.restraints.bond` functions
 are used to create bond or distance restraints. These are identical restraints,
 so the functions are just synonyms of each other (they are the same function
 with different names).

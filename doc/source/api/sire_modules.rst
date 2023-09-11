@@ -12,6 +12,8 @@ Sub-modules
    index_maths
    index_mm
    index_mol
+   index_morph
+   index_restraints
    index_search
    index_stream
    index_system

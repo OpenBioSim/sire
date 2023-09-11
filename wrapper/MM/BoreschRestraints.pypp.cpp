@@ -40,6 +40,7 @@ void register_BoreschRestraints_class(){
         typedef bp::class_< SireMM::BoreschRestraints, bp::bases< SireMM::Restraints, SireBase::Property > > BoreschRestraints_exposer_t;
         BoreschRestraints_exposer_t BoreschRestraints_exposer = BoreschRestraints_exposer_t( "BoreschRestraints", "This class provides the information for a collection of positional\nrestraints that can be added to a collection of molecues. Each\nrestraint can act on a particle or the centroid of a collection\nof particles. The restaints are spherically symmetric, and\nare either flat-bottom harmonics or harmonic potentials\n", bp::init< >("Null constructor") );
         bp::scope BoreschRestraints_scope( BoreschRestraints_exposer );
+        BoreschRestraints_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         BoreschRestraints_exposer.def( bp::init< SireMM::BoreschRestraint const & >(( bp::arg("restraint") ), "") );
         BoreschRestraints_exposer.def( bp::init< QList< SireMM::BoreschRestraint > const & >(( bp::arg("restraints") ), "") );
         BoreschRestraints_exposer.def( bp::init< QString const &, SireMM::BoreschRestraint const & >(( bp::arg("name"), bp::arg("restraint") ), "") );

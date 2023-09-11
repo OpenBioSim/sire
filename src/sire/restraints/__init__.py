@@ -1,3 +1,3 @@
-__all__ = ["positional", "distance", "boresch"]
+__all__ = ["positional", "bond", "distance", "boresch"]
 
 from ._restraints import *

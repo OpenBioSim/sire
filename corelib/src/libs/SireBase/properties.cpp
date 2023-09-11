@@ -1049,10 +1049,10 @@ void Properties::removeProperty(const QString &key)
 
             while (it.hasNext())
             {
+                it.next();
+
                 if (it.value() == key)
                     it.remove();
-                else
-                    it.next();
             }
 
             if (d->prop_links->isEmpty())

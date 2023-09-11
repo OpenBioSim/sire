@@ -569,6 +569,55 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     return lambda_value;
 }
 
+/** Update the parameters for a CustomCompoundBondForce for scale factor 'rho'
+ *  in the passed context */
+void _update_restraint_in_context(OpenMM::CustomCompoundBondForce *ff, double rho,
+                                  OpenMM::Context &context)
+{
+    if (ff == 0)
+        throw SireError::invalid_cast(QObject::tr(
+                                          "Unable to cast the restraint force to an OpenMM::CustomCompoundBondForce, "
+                                          "despite it reporting that is was an object of this type..."),
+                                      CODELOC);
+
+    const int nbonds = ff->getNumBonds();
+
+    if (nbonds == 0)
+        // nothing to update
+        return;
+
+    const int nparams = ff->getNumPerBondParameters();
+
+    if (nparams == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "Unable to set 'rho' for this restraint as it has no custom parameters!"),
+                                            CODELOC);
+
+    // we set the first parameter - we can see what the current value
+    // is from the first restraint. This is because rho should be the
+    // first parameter and have the same value for all restraints
+    std::vector<double> custom_params;
+    std::vector<int> particles;
+
+    custom_params.resize(nparams);
+    particles.resize(ff->getNumParticlesPerBond());
+
+    ff->getBondParameters(0, particles, custom_params);
+
+    if (custom_params[0] == rho)
+        // nothing to do - it is already equal to this value
+        return;
+
+    for (int i = 0; i < nbonds; ++i)
+    {
+        ff->getBondParameters(i, particles, custom_params);
+        custom_params[0] = rho;
+        ff->setBondParameters(i, particles, custom_params);
+    }
+
+    ff->updateParametersInContext(context);
+}
+
 /** Update the parameters for a CustomBondForce for scale factor 'rho'
  *  in the passed context */
 void _update_restraint_in_context(OpenMM::CustomBondForce *ff, double rho,
@@ -628,6 +677,12 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
+            rho, context);
+    }
+    else if (ff_type == "OpenMM::CustomCompoundBondForce")
+    {
+        _update_restraint_in_context(
+            dynamic_cast<OpenMM::CustomCompoundBondForce *>(&ff),
             rho, context);
     }
     else

@@ -134,6 +134,7 @@ namespace SireMM
 
     public:
         PositionalRestraints();
+        PositionalRestraints(const QString &name);
 
         PositionalRestraints(const PositionalRestraint &restraint);
         PositionalRestraints(const QList<PositionalRestraint> &restraints);

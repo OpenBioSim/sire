@@ -30,6 +30,7 @@ def _fix_lambdaschedule():
     def get_lever_values(
         obj,
         lambda_values=None,
+        levers=None,
         num_lambda=101,
         initial=1.0,
         final=2.0,
@@ -44,6 +45,11 @@ def _fix_lambdaschedule():
         lambda_values: list[float]
             A list of lambda values to evaluate. If this is not passed
             then the lambda values will be auto-generated
+
+        levers: str or list[str]
+            A list of the levers for which to retrieve the values.
+            If this is not given, then all of the levers will be
+            returned.
 
         num_lambda: int
             The number of lambda values to auto-generate if a list
@@ -69,6 +75,22 @@ def _fix_lambdaschedule():
             vals = obj.__orig__get_lever_values(
                 lambda_values=lambda_values, initial=initial, final=final
             )
+
+        if levers is not None:
+            if type(levers) is not list:
+                levers = [levers]
+
+            results = {}
+
+            results["λ"] = vals["λ"]
+
+            for lever in levers:
+                if lever in vals:
+                    results[lever] = vals[lever]
+                else:
+                    results[lever] = vals["default"]
+
+            vals = results
 
         if not to_pandas:
             return vals

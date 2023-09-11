@@ -2173,6 +2173,61 @@ MolViewPtr MoleculeView::at(const SireID::Index &idx) const
     return this->operator[](idx);
 }
 
+/**
+ * Return whether or not this molecule has any property links
+ */
+bool MoleculeView::hasLinks() const
+{
+    return d->hasLinks();
+}
+
+/**
+ * Return the property links for this molecule. This returns an
+ * empty dictionary if there are no links.
+ */
+QHash<QString, QString> MoleculeView::getLinks() const
+{
+    return d->getLinks();
+}
+
+/**
+ * Return whether or not this molecule has a link for the given
+ * property name
+ */
+bool MoleculeView::isLink(const PropertyName &key) const
+{
+    if (key.hasSource())
+    {
+        return this->getLinks().contains(key.source());
+    }
+    else
+        return false;
+}
+
+/**
+ * Return the link for the given property name. This will throw
+ * an exception if there is no link for the given property name.
+ */
+QString MoleculeView::getLink(const PropertyName &key) const
+{
+    if (key.hasSource())
+    {
+        const auto links = this->getLinks();
+
+        auto it = links.constFind(key.source());
+
+        if (it != links.constEnd())
+            return it.value();
+    }
+
+    throw SireError::invalid_key(QObject::tr(
+                                     "No link found for '%1'")
+                                     .arg(key.toString()),
+                                 CODELOC);
+
+    return QString();
+}
+
 namespace SireBase
 {
     template class SireBase::PropPtr<SireMol::MoleculeView>;

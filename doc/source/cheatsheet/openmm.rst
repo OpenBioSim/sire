@@ -2,7 +2,7 @@
 OpenMM Integration
 ==================
 
-The :doc:`dynamics functionality in sire <../tutorial/part05/04_dynamics>`
+The :doc:`dynamics functionality in sire <../tutorial/part05/05_dynamics>`
 is based on tight integration with `OpenMM <https://openmm.org>`__.
 
 This is achieved via code in :mod:`sire.convert` that can convert
@@ -141,7 +141,7 @@ Available keys and allowable values are listed below.
 +---------------------------+----------------------------------------------------------+
 | swap_end_states           | Whether to swap the end states of a perturbable molecule |
 |                           | (i.e. treat the perturbed state as the reference state   |
-|                           |  and vice versa).                                        |
+|                           | and vice versa).                                         |
 +---------------------------+----------------------------------------------------------+
 | temperature               | Any temperature value, e.g. ``25*sr.units.celsius``      |
 +---------------------------+----------------------------------------------------------+
@@ -150,8 +150,8 @@ Available keys and allowable values are listed below.
 | timestep                  | Time between integration steps, e.g.                     |
 |                           | ``2 * sr.units.femtosecond``                             |
 +---------------------------+----------------------------------------------------------+
-| use_dispersion_correction | Whether or not to use the dispersion correction to  |
-|                           | deal with cutoff issues. This is very expensive.    |
+| use_dispersion_correction | Whether or not to use the dispersion correction to       |
+|                           | deal with cutoff issues. This is very expensive.         |
 +---------------------------+----------------------------------------------------------+
 
 Higher level API

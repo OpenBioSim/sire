@@ -120,9 +120,6 @@ namespace SireMol
         MolEditor &removeLink(const QString &key);
         MolEditor &removeAllLinks();
 
-        bool hasLinks() const;
-        QHash<QString, QString> getLinks() const;
-
         AtomStructureEditor add(const AtomName &atom) const;
         AtomStructureEditor add(const AtomNum &atom) const;
 

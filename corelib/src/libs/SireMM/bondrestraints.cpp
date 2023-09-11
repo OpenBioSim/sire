@@ -382,6 +382,11 @@ BondRestraints::BondRestraints()
 {
 }
 
+BondRestraints::BondRestraints(const QString &name)
+    : ConcreteProperty<BondRestraints, Restraints>(name)
+{
+}
+
 BondRestraints::BondRestraints(const BondRestraint &restraint)
     : ConcreteProperty<BondRestraints, Restraints>()
 {
@@ -490,7 +495,7 @@ QString BondRestraints::toString() const
         }
     }
 
-    return QObject::tr("BondRestraints( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
+    return QObject::tr("BondRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */

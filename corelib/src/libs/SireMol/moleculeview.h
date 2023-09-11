@@ -285,6 +285,12 @@ namespace SireMol
         void update(const Molecules &molecules);
         void update(const SelectorMol &molecules);
 
+        bool hasLinks() const;
+        QHash<QString, QString> getLinks() const;
+
+        bool isLink(const PropertyName &key) const;
+        QString getLink(const PropertyName &key) const;
+
         /** Return whether or not this view has the property at key 'key'
              - note that this returns true only if there is a property,
                *and* it fits the view (e.g. is an AtomProperty if this

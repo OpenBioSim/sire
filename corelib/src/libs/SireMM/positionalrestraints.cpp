@@ -321,6 +321,11 @@ PositionalRestraints::PositionalRestraints()
 {
 }
 
+PositionalRestraints::PositionalRestraints(const QString &name)
+    : ConcreteProperty<PositionalRestraints, Restraints>(name)
+{
+}
+
 PositionalRestraints::PositionalRestraints(const PositionalRestraint &restraint)
     : ConcreteProperty<PositionalRestraints, Restraints>()
 {
@@ -429,7 +434,7 @@ QString PositionalRestraints::toString() const
         }
     }
 
-    return QObject::tr("PositionalRestraints( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
+    return QObject::tr("PositionalRestraints( name=%1, size=%2\n%3\n)").arg(this->name()).arg(n).arg(parts.join("\n"));
 }
 
 /** Return whether or not this is empty */

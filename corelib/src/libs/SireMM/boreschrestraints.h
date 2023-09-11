@@ -146,6 +146,7 @@ namespace SireMM
 
     public:
         BoreschRestraints();
+        BoreschRestraints(const QString &name);
 
         BoreschRestraints(const BoreschRestraint &restraint);
         BoreschRestraints(const QList<BoreschRestraint> &restraints);

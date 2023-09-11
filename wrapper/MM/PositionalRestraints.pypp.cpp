@@ -40,6 +40,7 @@ void register_PositionalRestraints_class(){
         typedef bp::class_< SireMM::PositionalRestraints, bp::bases< SireMM::Restraints, SireBase::Property > > PositionalRestraints_exposer_t;
         PositionalRestraints_exposer_t PositionalRestraints_exposer = PositionalRestraints_exposer_t( "PositionalRestraints", "This class provides the information for a collection of positional\nrestraints that can be added to a collection of molecues. Each\nrestraint can act on a particle or the centroid of a collection\nof particles. The restaints are spherically symmetric, and\nare either flat-bottom harmonics or harmonic potentials\n", bp::init< >("Null constructor") );
         bp::scope PositionalRestraints_scope( PositionalRestraints_exposer );
+        PositionalRestraints_exposer.def( bp::init< QString const & >(( bp::arg("name") ), "") );
         PositionalRestraints_exposer.def( bp::init< SireMM::PositionalRestraint const & >(( bp::arg("restraint") ), "") );
         PositionalRestraints_exposer.def( bp::init< QList< SireMM::PositionalRestraint > const & >(( bp::arg("restraints") ), "") );
         PositionalRestraints_exposer.def( bp::init< QString const &, SireMM::PositionalRestraint const & >(( bp::arg("name"), bp::arg("restraint") ), "") );

@@ -361,18 +361,6 @@ MolEditor &MolEditor::removeAllLinks()
     return *this;
 }
 
-/** Return whether or not there are any property links */
-bool MolEditor::hasLinks() const
-{
-    return d->hasLinks();
-}
-
-/** Return all of the property links */
-QHash<QString, QString> MolEditor::getLinks() const
-{
-    return d->getLinks();
-}
-
 /** Update the passed property to have the value 'value'. This does
  *  an in-place update on the existing property (which must have
  *  a compatible type). If 'auto-add' is true, then this will add
