@@ -83,6 +83,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
+* Modularise the :class:`~sire.vol.TriclinicBox` lattice rotation and reduction functionality
+  and make both optional.
+
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
 

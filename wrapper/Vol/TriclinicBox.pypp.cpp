@@ -43,10 +43,10 @@ void register_TriclinicBox_class(){
 
     { //::SireVol::TriclinicBox
         typedef bp::class_< SireVol::TriclinicBox, bp::bases< SireVol::Cartesian, SireVol::Space, SireBase::Property > > TriclinicBox_exposer_t;
-        TriclinicBox_exposer_t TriclinicBox_exposer = TriclinicBox_exposer_t( "TriclinicBox", "\nA TriclinicBox is a volume that represents standard periodic boundary conditions\n(a 3D box replicated to infinity along all three dimensions).\n\nTo support triclinic boxes that work across a range of molecular simulation\nengines, e.g. AMBER, GROMACS, OpenMM, we represent the triclinic space in\nreduced form, using the approach documented in Appendix A of Chapter 3 from\nMolecular dynamics of sense and sensibility in processing and analysis of data\nby Tsjerk A. Wassenaar.\n\nHowever, due to the fixed-width format used to represent box dimensions and angles\nin the various molecular input files, repeated reading and writing can lead to\noscillation of the box angles on reduction due to rounding precision errors.\nTo account for this, we add a small bias so that we always round in a consistent\ndirection.\n\nAuthor: Lester Hedges\n", bp::init< >("Construct a default TriclinicBox (large volume)") );
+        TriclinicBox_exposer_t TriclinicBox_exposer = TriclinicBox_exposer_t( "TriclinicBox", "\nA TriclinicBox is a volume that represents standard periodic boundary conditions\n(a 3D box replicated to infinity along all three dimensions).\n\nTo support triclinic boxes that work across a range of molecular simulation\nengines, e.g. AMBER, GROMACS, OpenMM, we represent the triclinic space in\nreduced form, using the approach documented in Appendix A of Chapter 3 from\nMolecular dynamics of sense and sensibility in processing and analysis of data\nby Tsjerk A. Wassenaar.\n\nAuthor: Lester Hedges\n", bp::init< >("Construct a default TriclinicBox (large volume)") );
         bp::scope TriclinicBox_scope( TriclinicBox_exposer );
-        TriclinicBox_exposer.def( bp::init< SireMaths::Vector const &, SireMaths::Vector const &, SireMaths::Vector const & >(( bp::arg("v0"), bp::arg("v1"), bp::arg("v2") ), "Construct a TriclinicBox with the specified lattice vectors") );
-        TriclinicBox_exposer.def( bp::init< double, double, double, SireUnits::Dimension::Angle const &, SireUnits::Dimension::Angle const &, SireUnits::Dimension::Angle const & >(( bp::arg("a"), bp::arg("b"), bp::arg("c"), bp::arg("alpha"), bp::arg("beta"), bp::arg("gamma") ), "Construct a TriclinicBox with the specified lattice vector magnitudes\nand angles.\na = magnitude of first lattice vector\nb = magnitude of second lattice vector\nc = magnitude of third lattice vector\nalpha = angle between second and third lattice vectors\nbeta = angle between first and third lattice vectors\ngamma = angle between second and first lattice vectors\n") );
+        TriclinicBox_exposer.def( bp::init< SireMaths::Vector const &, SireMaths::Vector const &, SireMaths::Vector const &, bp::optional< bool, bool > >(( bp::arg("v0"), bp::arg("v1"), bp::arg("v2"), bp::arg("auto_rotate")=(bool)(false), bp::arg("auto_reduce")=(bool)(false) ), "Construct a triclinic box from lattice vectors.\n\nPar:am v0\nThe first lattice vector.\n\nPar:am v1\nThe second lattice vector.\n\nPar:am v2\nThe third lattice vector.\n\nPar:am auto_rotate\nWhether to automatically rotate the box to comply with the\nconstraints of molecular dynamics engines, i.e. vector0 aligned\nwith x axis, vector1 in x-y plane, and vector2 with positive\nz component.\n\nPar:am auto_reduce\nWhether to automatically perform a lattice reduction on the\nbox.\n") );
+        TriclinicBox_exposer.def( bp::init< double, double, double, SireUnits::Dimension::Angle const &, SireUnits::Dimension::Angle const &, SireUnits::Dimension::Angle const &, bp::optional< bool, bool > >(( bp::arg("a"), bp::arg("b"), bp::arg("c"), bp::arg("alpha"), bp::arg("beta"), bp::arg("gamma"), bp::arg("auto_rotate")=(bool)(false), bp::arg("auto_reduce")=(bool)(false) ), "Construct a triclinic box from box lengths and angles.\n\nPar:am a\nThe length of the first box vector.\n\nPar:am b\nThe length of the second box vector.\n\nPar:am c\nThe length of the third box vector.\n\nPar:am alpha\nThe angle between the second and third box vectors.\n\nPar:am beta\nThe angle between the first and third box vectors.\n\nPar:am gamma\nThe angle between the second and first box vectors.\n\nPar:am auto_rotate\nWhether to automatically rotate the box to comply with the\nconstraints of molecular dynamics engines, i.e. vector0 aligned\nwith x axis, vector1 in x-y plane, and vector2 with positive\nz component:w.\n\nPar:am auto_reduce\nWhether to automatically perform a lattice reduction on the\nbox.\n") );
         TriclinicBox_exposer.def( bp::init< SireVol::TriclinicBox const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireVol::TriclinicBox::alpha
         
@@ -469,6 +469,18 @@ void register_TriclinicBox_class(){
                 , "A Triclinic box is periodic" );
         
         }
+        { //::SireVol::TriclinicBox::isReduced
+        
+            typedef bool ( ::SireVol::TriclinicBox::*isReduced_function_type)(  ) const;
+            isReduced_function_type isReduced_function_value( &::SireVol::TriclinicBox::isReduced );
+            
+            TriclinicBox_exposer.def( 
+                "isReduced"
+                , isReduced_function_value
+                , bp::release_gil_policy()
+                , "Whether an automatic lattice reduction has been performed." );
+        
+        }
         { //::SireVol::TriclinicBox::isRotated
         
             typedef bool ( ::SireVol::TriclinicBox::*isRotated_function_type)(  ) const;
@@ -478,7 +490,7 @@ void register_TriclinicBox_class(){
                 "isRotated"
                 , isRotated_function_value
                 , bp::release_gil_policy()
-                , "Whether the triclinic cell has been rotated to comply with the contraints\nof molecular dynamics engines, i.e. vector0 aligned with x axis, vector1\nin x-y plane, and vector2 with positive z component.\n" );
+                , "Whether the triclinic cell has been rotated to comply with the constraints\nof molecular dynamics engines, i.e. vector0 aligned with x axis, vector1\nin x-y plane, and vector2 with positive z component.\n" );
         
         }
         { //::SireVol::TriclinicBox::minimumDistance
@@ -522,30 +534,52 @@ void register_TriclinicBox_class(){
         
         }
         TriclinicBox_exposer.def( bp::self == bp::self );
+        { //::SireVol::TriclinicBox::reduce
+        
+            typedef void ( ::SireVol::TriclinicBox::*reduce_function_type)( double ) ;
+            reduce_function_type reduce_function_value( &::SireVol::TriclinicBox::reduce );
+            
+            TriclinicBox_exposer.def( 
+                "reduce"
+                , reduce_function_value
+                , ( bp::arg("bias")=0. )
+                , "Perform a lattice reduction on the triclinic cell.\n\nPar:am bias\nThe bias to use when rounding during the lattice reduction.\nNegative values biases towards left-tilting boxes, whereas\npositive values biases towards right-tilting boxes. This can\nbe used to ensure that rounding is performed in a consistent\ndirection, avoiding oscillation when the TriclinicBox is\ninstantiated from box vectors, or dimensions and angles, that\nhave been read from fixed-precision input files.\n" );
+        
+        }
         { //::SireVol::TriclinicBox::rhombicDodecahedronHexagon
         
-            typedef ::SireVol::TriclinicBox ( *rhombicDodecahedronHexagon_function_type )( double );
+            typedef ::SireVol::TriclinicBox ( *rhombicDodecahedronHexagon_function_type )( double,bool,bool );
             rhombicDodecahedronHexagon_function_type rhombicDodecahedronHexagon_function_value( &::SireVol::TriclinicBox::rhombicDodecahedronHexagon );
             
             TriclinicBox_exposer.def( 
                 "rhombicDodecahedronHexagon"
                 , rhombicDodecahedronHexagon_function_value
-                , ( bp::arg("d") )
-                , bp::release_gil_policy()
+                , ( bp::arg("d"), bp::arg("auto_rotate")=(bool)(true), bp::arg("auto_reduce")=(bool)(true) )
                 , "Return a hexagonal rhombic dodecahedron TriclinicBox with image distance d." );
         
         }
         { //::SireVol::TriclinicBox::rhombicDodecahedronSquare
         
-            typedef ::SireVol::TriclinicBox ( *rhombicDodecahedronSquare_function_type )( double );
+            typedef ::SireVol::TriclinicBox ( *rhombicDodecahedronSquare_function_type )( double,bool,bool );
             rhombicDodecahedronSquare_function_type rhombicDodecahedronSquare_function_value( &::SireVol::TriclinicBox::rhombicDodecahedronSquare );
             
             TriclinicBox_exposer.def( 
                 "rhombicDodecahedronSquare"
                 , rhombicDodecahedronSquare_function_value
-                , ( bp::arg("d") )
-                , bp::release_gil_policy()
+                , ( bp::arg("d"), bp::arg("auto_rotate")=(bool)(true), bp::arg("auto_reduce")=(bool)(true) )
                 , "Return a square rhombic dodecahedron TriclinicBox with image distance d." );
+        
+        }
+        { //::SireVol::TriclinicBox::rotate
+        
+            typedef void ( ::SireVol::TriclinicBox::*rotate_function_type)( double ) ;
+            rotate_function_type rotate_function_value( &::SireVol::TriclinicBox::rotate );
+            
+            TriclinicBox_exposer.def( 
+                "rotate"
+                , rotate_function_value
+                , ( bp::arg("precision")=0. )
+                , "Rotate the triclinic cell to comply with the constraints of certain\nmolecular dynamics engines, i.e. such that vector0 is aligned with\nthe x axis, vector1, lies in the x-y plane, and vector2 has a positive\nz component.\n\nPar:am precision\nThe precision to use when sorting the lattice vectors based on\ntheir magnitude. This can be used to prevent unwanted rotation\nwhen using input fixed-precision ascii molecular input files.\n" );
         
         }
         { //::SireVol::TriclinicBox::rotationMatrix
@@ -587,14 +621,13 @@ void register_TriclinicBox_class(){
         }
         { //::SireVol::TriclinicBox::truncatedOctahedron
         
-            typedef ::SireVol::TriclinicBox ( *truncatedOctahedron_function_type )( double );
+            typedef ::SireVol::TriclinicBox ( *truncatedOctahedron_function_type )( double,bool,bool );
             truncatedOctahedron_function_type truncatedOctahedron_function_value( &::SireVol::TriclinicBox::truncatedOctahedron );
             
             TriclinicBox_exposer.def( 
                 "truncatedOctahedron"
                 , truncatedOctahedron_function_value
-                , ( bp::arg("d") )
-                , bp::release_gil_policy()
+                , ( bp::arg("d"), bp::arg("auto_rotate")=(bool)(true), bp::arg("auto_reduce")=(bool)(true) )
                 , "Return a truncated octahedron with image distance d." );
         
         }
