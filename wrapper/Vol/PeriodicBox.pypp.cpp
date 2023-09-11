@@ -430,7 +430,7 @@ void register_PeriodicBox_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Make the passed group of coordinates whole. This will make sure\n  that they are all next to each other, and arent split across a\n  periodic image boundary. The box that will be chosen will be the\n  one that contains the center of the points, with the points mapped\n  from the first to the last\n" );
         
         }
         { //::SireVol::PeriodicBox::makeWhole
@@ -443,7 +443,7 @@ void register_PeriodicBox_class(){
                 , makeWhole_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the minimum image copy of coords with respect to center,\nwhere the coordinates are made whole. This means that they are\ntranslated as a single group, but the group as a whole will not\nbe split across a periodic boundary. Use this function if you want\nto restore a molecule that has been split over a space into a single,\ncoherent entity (all of the coordinates physically close to\none another)\n" );
         
         }
         { //::SireVol::PeriodicBox::maxCoords

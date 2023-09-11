@@ -18,6 +18,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Made sure that a title is written to an AmberRst file, even if the system
   has no name (issue #99).
 
+* Modularise the :class:`~sire.vol.TriclinicBox` lattice rotation and reduction functionality
+  and make both optional. (PR #102).
+
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------
 
