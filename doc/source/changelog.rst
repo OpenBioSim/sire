@@ -77,6 +77,18 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Updated ``FreeEnergyAnalysis.py`` to be compatible with both the new pymbar 4 API
   and the old pymbar 3 API.
 
+* Added support for restraints to the OpenMM dynamics layer. Initial tested
+  support for positional and distance/bond restraints is included, as well
+  as experimental support for Boresch restraints. The restraint are documented
+  in the :doc:`tutorial <tutorial/part06/03_restraints>`. This also documents
+  new code to let you specify atoms that should be fixed in space.
+
+* Added support for alchemical restraints to the OpenMM dynamics layer.
+  This lets you scale restraints as part of a λ-coordinate. This is
+  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints`.
+  Restraints can be named, meaning that you can scale different restraints
+  at different stages and by different values across the λ-coordinate.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
