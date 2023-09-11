@@ -368,7 +368,7 @@ void register_Cartesian_class(){
                 , getMinimumImage_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "A cartesian space is not periodic, so this just returns the input point" );
+                , "Return the minimum image copy of group with respect to center.\nIn this case, as this is not a periodic space, this just returns\ngroup" );
         
         }
         { //::SireVol::Cartesian::getMinimumImage
