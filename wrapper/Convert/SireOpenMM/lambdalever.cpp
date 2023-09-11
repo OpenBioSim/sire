@@ -42,6 +42,7 @@ LambdaLever::LambdaLever() : SireBase::ConcreteProperty<LambdaLever, SireBase::P
 LambdaLever::LambdaLever(const LambdaLever &other)
     : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>(other),
       name_to_ffidx(other.name_to_ffidx),
+      name_to_restraintidx(other.name_to_restraintidx),
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
       start_indicies(other.start_indicies),
@@ -58,6 +59,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
     if (this != &other)
     {
         name_to_ffidx = other.name_to_ffidx;
+        name_to_restraintidx = other.name_to_restraintidx;
         lambda_schedule = other.lambda_schedule;
         perturbable_mols = other.perturbable_mols;
         start_indicies = other.start_indicies;
@@ -71,6 +73,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
 bool LambdaLever::operator==(const LambdaLever &other) const
 {
     return name_to_ffidx == other.name_to_ffidx and
+           name_to_restraintidx == other.name_to_restraintidx and
            lambda_schedule == other.lambda_schedule and
            perturbable_mols == other.perturbable_mols and
            start_indicies == other.start_indicies and
@@ -673,13 +676,13 @@ void LambdaLever::updateRestraintInContext(OpenMM::Force &ff, double rho,
     // what is the type of this force...?
     const auto ff_type = ff.getName();
 
-    if (ff_type == "OpenMM::CustomBondForce")
+    if (ff_type == "CustomBondForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomBondForce *>(&ff),
             rho, context);
     }
-    else if (ff_type == "OpenMM::CustomCompoundBondForce")
+    else if (ff_type == "CustomCompoundBondForce")
     {
         _update_restraint_in_context(
             dynamic_cast<OpenMM::CustomCompoundBondForce *>(&ff),

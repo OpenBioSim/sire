@@ -719,21 +719,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // First, create the LambdaLever
     LambdaLever lambda_lever;
 
-    if (any_perturbable)
+    // Let the user supply their own schedule for any perturbations
+    if (map.specified("schedule"))
     {
-        // If we have an actual perturbation, then let the user supply
-        // their own schedule for the morph.
-        if (map.specified("schedule"))
-        {
-            lambda_lever.setSchedule(
-                map["schedule"].value().asA<LambdaSchedule>());
-        }
-        // If one isn't supplied, then use the default standard_morph
-        else
-        {
-            lambda_lever.setSchedule(
-                LambdaSchedule::standard_morph());
-        }
+        lambda_lever.setSchedule(
+            map["schedule"].value().asA<LambdaSchedule>());
+    }
+    else if (any_perturbable)
+    {
+        // use a standard morph if we have an alchemical perturbation
+        lambda_lever.setSchedule(
+            LambdaSchedule::standard_morph());
     }
 
     // We can now add the standard forces to the OpenMM::System.

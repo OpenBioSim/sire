@@ -109,3 +109,157 @@ def test_openmm_fixed_atoms(kigaki_mols):
         assert (
             atom.coordinates() - coords
         ).length() < 0.001 * sr.units.angstrom
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_alchemical_restraints(ala_mols):
+    mols = ala_mols
+
+    mol = mols[0]
+
+    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+
+    # test scaling a positional restraint
+    restraints = sr.restraints.positional(mol, atoms="element C")
+
+    # move the molecule so that the restraints have some energy
+    mol = mol.move().translate(sr.maths.Vector(1, 1, 1)).commit()
+
+    d = mol.dynamics(timestep="1fs", restraints=None, map=map)
+
+    nrg_0 = d.current_potential_energy()
+
+    d = mol.dynamics(timestep="1fs", restraints=restraints, map=map)
+
+    nrg_1 = d.current_potential_energy()
+
+    assert nrg_1 != nrg_0
+
+    l = sr.cas.LambdaSchedule()
+
+    l.add_stage("restraints", l.lam() * l.initial())
+    l.set_equation("restraints", "restraint", l.lam() * l.initial())
+
+    d = mol.dynamics(
+        timestep="1fs", restraints=restraints, schedule=l, map=map
+    )
+
+    d.set_lambda(0)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_0.value(), 1e-6
+    )
+
+    d.set_lambda(1)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_1.value(), 1e-6
+    )
+
+    d.set_lambda(0.3)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_0.value() + 0.3 * (nrg_1.value() - nrg_0.value()), 1e-6
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_named_restraints(ala_mols):
+    mols = ala_mols
+
+    mol = mols[0]
+
+    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+
+    # test using named restraints, that we can scale these independently
+    posrests = sr.restraints.positional(
+        mol, atoms="element C", name="positional"
+    )
+
+    dstrests = sr.restraints.distance(
+        mol, atoms0=mol[0], atoms1=mol[-1], name="distance", r0="5A"
+    )
+
+    restraints = [posrests, dstrests]
+
+    # move the molecule so that the restraints have some energy
+    mol = mol.move().translate(sr.maths.Vector(1, 1, 1)).commit()
+
+    d = mol.dynamics(timestep="1fs", restraints=None, map=map)
+
+    nrg_0 = d.current_potential_energy()
+
+    d = mol.dynamics(timestep="1fs", restraints=posrests, map=map)
+
+    nrg_1_posrests = d.current_potential_energy()
+
+    d = mol.dynamics(timestep="1fs", restraints=dstrests, map=map)
+
+    nrg_1_dstrests = d.current_potential_energy()
+
+    d = mol.dynamics(timestep="1fs", restraints=restraints, map=map)
+
+    nrg_1_1 = d.current_potential_energy()
+
+    assert nrg_0 != nrg_1_1
+    assert nrg_0 != nrg_1_dstrests
+    assert nrg_0 != nrg_1_posrests
+    assert nrg_1_dstrests != nrg_1_posrests
+
+    l = sr.cas.LambdaSchedule()
+
+    l.add_stage("1", 0)
+    l.set_equation("1", "positional", l.lam() * l.initial())
+
+    l.add_stage("2", 0)
+    l.set_equation("2", "distance", l.lam() * l.initial())
+
+    l.add_stage("3", 0)
+    l.set_equation("3", "positional", l.lam() * l.initial())
+    l.set_equation("3", "distance", l.lam() * l.initial())
+
+    d = mol.dynamics(
+        timestep="1fs", restraints=restraints, schedule=l, map=map
+    )
+
+    d.set_lambda(0)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_0.value(), 1e-6
+    )
+
+    d.set_lambda(1)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_1_1.value(), 1e-6
+    )
+
+    d.set_lambda(0.99999999999 / 3.0)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_1_posrests.value(), 1e-6
+    )
+
+    d.set_lambda(1.0 / 3.0)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_0.value(), 1e-6
+    )
+
+    d.set_lambda(1.99999999999 / 3.0)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_1_dstrests.value(), 1e-6
+    )
+
+    d.set_lambda(2.0 / 3.0)
+
+    assert d.current_potential_energy().value() == pytest.approx(
+        nrg_0.value(), 1e-6
+    )
