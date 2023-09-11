@@ -12,7 +12,7 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.3.X <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.X>`__ - September 2023
+`2023.3.2 <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.2>`__ - September 2023
 ----------------------------------------------------------------------------------------------
 
 * Made sure that a title is written to an AmberRst file, even if the system
@@ -20,6 +20,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Modularise the :class:`~sire.vol.TriclinicBox` lattice rotation and reduction functionality
   and make both optional. (PR #102).
+
+* Updated default units so that units of pressure default to printing out in units of atmospheres
 
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------

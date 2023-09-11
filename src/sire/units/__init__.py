@@ -622,6 +622,7 @@ def set_si_units(scaled: bool = True):
                 "J mol-1 s",
                 "W mol-1",
                 "N",
+                "atm",
             ]
         )
     else:
@@ -648,6 +649,7 @@ def set_si_units(scaled: bool = True):
                 "J mol-1 s",
                 "W mol-1",
                 "N",
+                "atm",
             ]
         )
 
@@ -694,6 +696,7 @@ def set_internal_units():
             "kcal mol-1 s",
             "kcal mol-1 s-1",
             "kcal Å-1",
+            "atm",
         ]
     )
 
