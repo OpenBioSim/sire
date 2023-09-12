@@ -208,6 +208,20 @@ class SOMMContext(_Context):
 
         self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
 
+    def set_temperature(self, temperature, rescale_velocities=True):
+        """
+        Set the target temperature for the dynamics. If
+        rescale_velocities is True then the velocities will
+        be rescaled to the new temperature
+        """
+        raise NotImplementedError("We can't yet set the temperature")
+
+    def set_pressure(self, pressure):
+        """
+        Set the target pressure for the dynamics.
+        """
+        raise NotImplementedError("We can't yet set the pressure")
+
     def get_potential_energy(self, to_sire_units: bool = True):
         """
         Calculate and return the potential energy of the system

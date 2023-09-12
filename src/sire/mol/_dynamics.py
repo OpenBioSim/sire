@@ -273,6 +273,36 @@ class DynamicsData:
 
             return Ensemble(map=self._map)
 
+    def set_ensemble(self, ensemble, rescale_velocities: bool = True):
+        """
+        Set the ensemble for the dynamics. Note that this will
+        only let you change the temperature and/or pressure of the
+        ensemble. You can't change its fundemental nature.
+
+        If rescalse_velocities is True, then the velocities will
+        be rescaled to the new temperature.
+        """
+        if self.is_null():
+            return
+
+        if ensemble.name() != self.ensemble().name():
+            raise ValueError(
+                "You cannot change the ensemble of the dynamics. "
+                f"Currently the ensemble is {self.ensemble().name()}, "
+                f"but you tried to set it to {ensemble.name()}."
+            )
+
+        if ensemble.temperature() != self.ensemble().temperature():
+            self._map["temperature"] = ensemble.temperature()
+            self._omm_mols.set_temperature(
+                ensemble.temperature(), rescale_velocities=rescale_velocities
+            )
+
+        if ensemble.is_constant_pressure():
+            if ensemble.pressure() != self.ensemble().pressure():
+                self._map["pressure"] = ensemble.pressure()
+                self._omm_mols.set_pressure(ensemble.pressure())
+
     def constraint(self):
         if self.is_null():
             return None
@@ -1014,6 +1044,15 @@ class Dynamics:
         Return the ensemble in which the simulation is being performed
         """
         return self._d.ensemble()
+
+    def set_ensemble(self, ensemble):
+        """
+        Set the ensemble that should be used for this simulation. Note
+        that you can only use this function to change temperature and/or
+        pressure values. You can't change the fundemental ensemble
+        of the simulation.
+        """
+        self._d.set_ensemble(ensemble)
 
     def constraint(self):
         """

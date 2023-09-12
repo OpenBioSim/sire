@@ -18,7 +18,9 @@ def _get_global_generator():
     return _global_generator
 
 
-def replica_exchange(replica0, replica1, rangenerator=None):
+def replica_exchange(
+    replica0, replica1, rangenerator=None, rescale_velocities: bool = True
+):
     """
     Perform a replica exchange move between the passed two replicas.
     This will be a Hamiltonian Replica Exchange, where the energies
@@ -40,6 +42,10 @@ def replica_exchange(replica0, replica1, rangenerator=None):
         should return uniformly distributed random numbers between 0 and 1.
         If this is not specified, then the global random number
         generator will be used.
+
+    rescale_velocities : bool, optional
+        If True, then the velocities of the replicas will be rescaled
+        to the new temperature after the exchange.
 
     Returns
     -------
@@ -107,8 +113,18 @@ def replica_exchange(replica0, replica1, rangenerator=None):
     move_passed = delta > 0 or (exp(delta) >= rangenerator.rand())
 
     if move_passed:
-        replica0.set_lambda(lam1)
-        replica1.set_lambda(lam0)
+        if lam0 != lam1:
+            replica0.set_lambda(lam1)
+            replica1.set_lambda(lam0)
+
+        if ensemble0 != ensemble1:
+            replica0.set_ensemble(
+                ensemble1, rescale_velocities=rescale_velocities
+            )
+            replica1.set_ensemble(
+                ensemble0, rescale_velocities=rescale_velocities
+            )
+
         return (replica1, replica0, True)
     else:
         return (replica0, replica1, False)
