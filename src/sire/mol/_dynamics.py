@@ -404,18 +404,53 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
+    def run_minimisation(self, max_iterations: int):
+        """
+        Internal method that runs minimisation on the molecules.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
+        """
+        from openmm import LocalEnergyMinimizer
+        from concurrent.futures import ThreadPoolExecutor
+
+        if max_iterations <= 0:
+            max_iterations = 0
+
+        from ..base import ProgressBar
+
+        def runfunc(max_its):
+            try:
+                LocalEnergyMinimizer.minimize(
+                    self._omm_mols, maxIterations=max_its
+                )
+
+                return 0
+            except Exception as e:
+                return e
+
+        with ProgressBar(text="minimisation") as spinner:
+            spinner.set_speed_unit("checks / s")
+
+            with ThreadPoolExecutor() as pool:
+                run_promise = pool.submit(runfunc, max_iterations)
+
+                while not run_promise.done():
+                    try:
+                        result = run_promise.result(timeout=0.2)
+                    except Exception:
+                        spinner.tick()
+                        pass
+
+                if result != 0:
+                    raise result
+
     def _rebuild_and_minimise(self):
         if self.is_null():
             return
 
-        from concurrent.futures import ThreadPoolExecutor
         from ..utils import Console
-        import openmm
-
-        def runfunc(max_its):
-            openmm.LocalEnergyMinimizer.minimize(
-                self._omm_mols, maxIterations=max_its
-            )
 
         Console.warning(
             "Something went wrong when running dynamics. Since no steps "
@@ -432,22 +467,7 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        from ..base import ProgressBar
-
-        with ProgressBar(text="minimisation") as spinner:
-            spinner.set_speed_unit("checks / s")
-
-            with ThreadPoolExecutor() as pool:
-                run_promise = pool.submit(runfunc, 0)
-
-                while not run_promise.done():
-                    try:
-                        run_promise.result(timeout=0.2)
-                    except Exception:
-                        spinner.tick()
-                        pass
-
-                spinner.success()
+        self.run_minimisation(max_iterations=10000)
 
     def run(
         self,
@@ -851,6 +871,20 @@ class Dynamics:
 
     def __repr__(self):
         return self.__str__()
+
+    def minimise(self, max_iterations: int = 10000):
+        """
+        Perform minimisation on the molecules, running a maximum
+        of max_iterations iterations.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
+        """
+        if not self._d.is_null():
+            self._d.run_minimisation(max_iterations=max_iterations)
+
+        return self
 
     def run(
         self,

@@ -7,6 +7,7 @@ __all__ = [
     "kabasch_fit",
     "Matrix",
     "pi",
+    "RanGenerator",
     "Sphere",
     "Torsion",
     "Transform",
@@ -18,6 +19,7 @@ from ..legacy import Maths as _Maths
 from ..legacy.Maths import (
     Matrix,
     Quaternion,
+    RanGenerator,
     Triangle,
     Transform,
     Torsion,

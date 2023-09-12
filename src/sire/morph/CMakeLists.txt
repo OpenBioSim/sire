@@ -9,6 +9,7 @@ set ( SCRIPTS
         __init__.py
         _ghost_atoms.py
         _perturbation.py
+        _repex.py
     )
 
 # installation

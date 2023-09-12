@@ -1,64 +1,5 @@
 __all__ = ["Minimisation"]
 
-from ._dynamics import DynamicsData as _DynamicsData
-from ._dynamics import _add_extra
-
-
-class MinimisationData(_DynamicsData):
-    """
-    Internal class that is designed to only be used by the Minimisation
-    class. This holds the shared state for minimisation on a set
-    of molecule(s).
-    """
-
-    def __init__(self, mols=None, map=None):
-        super().__init__(mols=mols, map=map)
-
-    def run(self, max_iterations: int):
-        """
-        Internal method that runs minimisation on the molecules.
-
-        This method is designed to be called from the Minimisation
-        class.
-
-        Parameters:
-
-        - max_iterations (int): The maximum number of iterations to run
-        """
-        from openmm import LocalEnergyMinimizer
-        from concurrent.futures import ThreadPoolExecutor
-
-        if max_iterations <= 0:
-            max_iterations = 0
-
-        from ..base import ProgressBar
-
-        def runfunc(max_its):
-            try:
-                LocalEnergyMinimizer.minimize(
-                    self._omm_mols, maxIterations=max_its
-                )
-
-                return 0
-            except Exception as e:
-                return e
-
-        with ProgressBar(text="minimisation") as spinner:
-            spinner.set_speed_unit("checks / s")
-
-            with ThreadPoolExecutor() as pool:
-                run_promise = pool.submit(runfunc, max_iterations)
-
-                while not run_promise.done():
-                    try:
-                        result = run_promise.result(timeout=0.2)
-                    except Exception:
-                        spinner.tick()
-                        pass
-
-                if result != 0:
-                    raise result
-
 
 class Minimisation:
     """
@@ -83,6 +24,7 @@ class Minimisation:
         fixed=None,
     ):
         from ..base import create_map
+        from ._dynamics import DynamicsData, _add_extra
 
         extras = {}
 
@@ -98,7 +40,7 @@ class Minimisation:
 
         map = create_map(map, extras)
 
-        self._d = MinimisationData(mols=mols, map=map)
+        self._d = DynamicsData(mols=mols, map=map)
 
     def __str__(self):
         return "Minimisation()"
@@ -116,7 +58,7 @@ class Minimisation:
         - max_iterations (int): The maximum number of iterations to run
         """
         if not self._d.is_null():
-            self._d.run(max_iterations=max_iterations)
+            self._d.run_minimisation(max_iterations=max_iterations)
 
         return self
 
