@@ -1749,6 +1749,9 @@ def _minimisation(
     if device is not None:
         map.set("device", str(device))
 
+    if constraint is not None:
+        map.set("constraint", str(constraint))
+
     return Minimisation(
         view,
         cutoff=cutoff,
