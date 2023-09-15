@@ -1521,9 +1521,24 @@ def _dynamics(
         value
     """
     from ..base import create_map
+    from ..system import System
     from .. import u
 
     map = create_map(map, kwargs)
+
+    if not map.specified("space"):
+        map = create_map(map, {"space": "space"})
+
+    if (
+        System.is_system(view)
+        and map.specified("space")
+        and not map["space"].has_value()
+        and not view.shared_properties().has_property(map["space"])
+    ):
+        # space is not a shared property, so may be lost when we
+        # convert to molecules. Make sure this doens't happen by
+        # adding the space directly to the property map
+        map.set("space", view.property(map["space"]))
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1696,8 +1711,24 @@ def _minimisation(
         value
     """
     from ..base import create_map
+    from ..system import System
+    from .. import u
 
     map = create_map(map, kwargs)
+
+    if not map.specified("space"):
+        map = create_map(map, {"space": "space"})
+
+    if (
+        System.is_system(view)
+        and map.specified("space")
+        and not map["space"].has_value()
+        and not view.shared_properties().has_property(map["space"])
+    ):
+        # space is not a shared property, so may be lost when we
+        # convert to molecules. Make sure this doens't happen by
+        # adding the space directly to the property map
+        map.set("space", view.property(map["space"]))
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1714,9 +1745,6 @@ def _minimisation(
         except Exception:
             # no space, use RF
             cutoff_type = "RF"
-
-    if constraint is not None:
-        map.set("constraint", str(constraint))
 
     if device is not None:
         map.set("device", str(device))
