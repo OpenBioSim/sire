@@ -2,7 +2,7 @@ import sire as sr
 import pytest
 
 
-def _run_test(mols, is_slow=False):
+def _run_test(mols, is_slow=False, use_taylor=False):
     c = mols.cursor()
 
     # can only get the same energies if they have the same coordinates
@@ -46,6 +46,9 @@ def _run_test(mols, is_slow=False):
 
     # need to use the reference platform on GH Actions
     map = {"platform": "Reference", "schedule": l}
+
+    if use_taylor:
+        map["use_taylor_softening"] = True
 
     # create the perturbable OpenMM system
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -100,6 +103,14 @@ def _run_test(mols, is_slow=False):
 )
 def test_openmm_scale_lambda_simple(merged_ethane_methanol):
     _run_test(merged_ethane_methanol.clone(), False)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_taylor_simple(merged_ethane_methanol):
+    _run_test(merged_ethane_methanol.clone(), False, True)
 
 
 @pytest.mark.veryslow
