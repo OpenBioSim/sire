@@ -36,6 +36,8 @@
 
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
+#include "SireBase/lengthproperty.h"
+#include "SireBase/generalunitproperty.h"
 
 #include "SireUnits/units.h"
 
@@ -774,16 +776,21 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         lambda_lever.addLever("alpha");
 
-        // somd uses a default shift_delta of 2.0
-        double shift_delta = 2.0;
+        // somd uses a default shift_delta of 2.0 A
+        SireUnits::Dimension::Length shift_delta = 2.0 * SireUnits::angstrom;
 
         if (map.specified("shift_delta"))
         {
-            shift_delta = map["shift_delta"].value().asADouble();
+            const auto &value = map["shift_delta"].value();
+
+            if (value.isA<SireBase::LengthProperty>())
+                shift_delta = value.asA<SireBase::LengthProperty>().value();
+            else
+                shift_delta = value.asA<SireBase::GeneralUnitProperty>().toUnit<SireUnits::Dimension::Length>();
         }
 
-        if (shift_delta < 0)
-            shift_delta = 0;
+        if (shift_delta.value() < 0)
+            shift_delta = 0.0 * SireUnits::angstrom;
 
         // use a Taylor LJ power of 1
         int taylor_power = 1;
@@ -870,7 +877,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                   "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
                                   "delta=%2*alpha;")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
-                                  .arg(shift_delta)
+                                  .arg(shift_delta.to(SireUnits::nanometer))
                                   .toStdString();
         }
 
@@ -947,7 +954,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
-                                 .arg(shift_delta)
+                                 .arg(shift_delta.to(SireUnits::nanometer))
                                  .toStdString();
         }
 

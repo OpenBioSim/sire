@@ -396,11 +396,11 @@ class System:
             use the coordinates of the perturbed molecule as the
             starting point.
 
-        shift_delta: float
+        shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
             creation and deletion of ghost atoms during a potential.
-            This defaults to 1.0.
+            This defaults to 2.0 A.
 
         coulomb_power: int
             The coulomb power parmeter that controls the electrostatic
@@ -502,11 +502,11 @@ class System:
             microcanonical (NVE) or canonical (NVT) simulation will be
             run if the pressure is not set.
 
-        shift_delta: float
+        shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
             creation and deletion of ghost atoms during a potential.
-            This defaults to 1.0.
+            This defaults to 2.0 A.
 
         coulomb_power: int
             The coulomb power parmeter that controls the electrostatic
