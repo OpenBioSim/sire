@@ -314,7 +314,7 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
     auto ghost_nonghostff = lambda_lever.getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
 
     std::vector<double> custom_params = {1.0, 0.0, 0.0};
-    std::vector<double> custom_clj_params = {0.0, 1e-9, 0.0, 0.0};
+    std::vector<double> custom_clj_params = {0.0, 0.0, 0.0, 0.0};
 
     // we need to add all of the positions as anchor particles
     for (const auto &restraint : atom_restraints)
@@ -344,42 +344,49 @@ void _add_positional_restraints(const SireMM::PositionalRestraints &restraints,
             anchor_idxs.append(restraint.position());
 
             // add a null particle to the nonbonded forces
-            // and make sure to exclude interactions between normal
-            // atoms and the anchor
             if (cljff != 0)
             {
-                cljff->addParticle(0, 1e-9, 0);
-
-                for (int i = 0; i < natoms; ++i)
-                {
-                    cljff->addException(anchor_index, i, 0, 1, 0);
-                }
+                cljff->addParticle(0, 0, 0);
             }
 
             if (ghost_ghostff != 0)
             {
                 ghost_ghostff->addParticle(custom_clj_params);
-
-                for (int i = 0; i < natoms; ++i)
-                {
-                    ghost_ghostff->addExclusion(anchor_index, i);
-                }
             }
 
             if (ghost_nonghostff != 0)
             {
                 ghost_nonghostff->addParticle(custom_clj_params);
-
-                for (int i = 0; i < natoms; ++i)
-                {
-                    ghost_nonghostff->addExclusion(anchor_index, i);
-                }
             }
         }
 
         custom_params[0] = 1.0;                                     // rho - always equal to 1 (scaled by lever)
         custom_params[1] = restraint.k().value() * internal_to_k;   // k
         custom_params[2] = restraint.r0().value() * internal_to_nm; // rb
+
+        if (cljff != 0)
+        {
+            // make sure to exclude interactions between
+            // the atom being positionally restrained and
+            // the anchor
+            cljff->addException(anchor_index, atom_index, 0, 0, 0, true);
+        }
+
+        if (ghost_ghostff != 0)
+        {
+            // make sure to exclude interactions between
+            // the atom being positionally restrained and
+            // the anchor
+            ghost_ghostff->addExclusion(anchor_index, atom_index);
+        }
+
+        if (ghost_nonghostff != 0)
+        {
+            // make sure to exclude interactions between
+            // the atom being positionally restrained and
+            // the anchor
+            ghost_nonghostff->addExclusion(anchor_index, atom_index);
+        }
 
         restraintff->addBond(anchor_index, atom_index, custom_params);
     }
