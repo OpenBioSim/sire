@@ -156,115 +156,14 @@ _is_using_old_api = None
 _is_using_new_api = None
 
 
-def use_mixed_api(support_old_module_names: bool = False):
-    """Load Sire using both the new (python-style) and old APIs. This
-    is useful for migrating old scripts as a temporary porting option.
-    You can start writing functions using the new API, safe in the
-    knowledge that the old API functions will still work.
-
-    Do aim to finish your port though, else you will forever have
-    a duplicated API (e.g. have both X.nAtoms() and X.num_atoms() etc.)
+def _load_new_api_modules(delete_old: bool = True):
     """
-    global _is_using_new_api, _is_using_old_api
-
-    if _is_using_old_api and _is_using_new_api:
-        # don't need to do this twice
-        return
-
-    if _is_using_old_api or _is_using_new_api:
-        msg = (
-            "Cannot import sire using the mixed API as either the old "
-            "or new APIs have already been activated."
-        )
-        print(msg)
-
-        raise ImportError(msg)
-
-    # First, bring in the old API
-    if support_old_module_names:
-        print("Loading Sire with support for old module names.")
-        print(
-            "Note that this can cause problems with classes importing twice."
-        )
-        use_old_api()
-    else:
-        _is_using_old_api = True
-
-    # Now, bring in the new API
-    _is_using_new_api = True
-
-    # call Pythonize on all of the new modules
-    from . import (
-        move,
-        io,
-        system,
-        squire,
-        mm,
-        ff,
-        mol,
-        analysis,
-        base,
-        cas,
-        cluster,
-        error,
-        id,
-        maths,
-        qt,
-        stream,
-        units,
-        vol,
-    )
-
-    _pythonize_modules(
-        [
-            analysis._Analysis,
-            base._Base,
-            cas._CAS,
-            cluster._Cluster,
-            error._Error,
-            ff._FF,
-            id._ID,
-            io._IO,
-            maths._Maths,
-            mm._MM,
-            mol._Mol,
-            move._Move,
-            qt._Qt,
-            squire._Squire,
-            stream._Stream,
-            system._System,
-            units._Units,
-            vol._Vol,
-        ],
-        delete_old=False,
-    )
-
-
-def use_new_api():
-    """Load Sire using the new (python-style) API. This will be called
-    automatically when you load any of the new Python modules, so you
-    shouldn't need to call this yourself.
+    Internal function to load the new API modules, pythonizing
+    the function names as we go. If `delete_old` is True, then
+    the old function names will be deleted. Otherwise, they will
+    be kept. Keeping the names is only needed for the mixed API.
     """
-    global _is_using_new_api, _is_using_old_api
-
-    # load up the new console - ensure this is done once
-    from .utils import Console as _Console
-
-    _Console._get_console()
-
-    if _is_using_new_api:
-        # already done
-        return
-
-    if _is_using_old_api:
-        msg = (
-            "Cannot import sire using the new API as the old API has "
-            "already been activated. Both APIs cannot be active at "
-            "the same time."
-        )
-        print(msg)
-
-        raise ImportError(msg)
+    global _is_using_new_api
 
     _is_using_new_api = True
 
@@ -311,7 +210,8 @@ def use_new_api():
             System._System,
             Units._Units,
             Vol._Vol,
-        ]
+        ],
+        delete_old=delete_old,
     )
 
     try:
@@ -373,6 +273,74 @@ def use_new_api():
             if lazy_import.LazyModule in type(M).mro():
                 # this module is lazily loaded - use 'dir' to load it
                 dir(M)
+
+
+def use_mixed_api(support_old_module_names: bool = False):
+    """Load Sire using both the new (python-style) and old APIs. This
+    is useful for migrating old scripts as a temporary porting option.
+    You can start writing functions using the new API, safe in the
+    knowledge that the old API functions will still work.
+
+    Do aim to finish your port though, else you will forever have
+    a duplicated API (e.g. have both X.nAtoms() and X.num_atoms() etc.)
+    """
+    global _is_using_new_api, _is_using_old_api
+
+    if _is_using_old_api and _is_using_new_api:
+        # don't need to do this twice
+        return
+
+    if _is_using_old_api or _is_using_new_api:
+        msg = (
+            "Cannot import sire using the mixed API as either the old "
+            "or new APIs have already been activated."
+        )
+        print(msg)
+
+        raise ImportError(msg)
+
+    # First, bring in the old API
+    if support_old_module_names:
+        print("Loading Sire with support for old module names.")
+        print(
+            "Note that this can cause problems with classes importing twice."
+        )
+        use_old_api()
+    else:
+        _is_using_old_api = True
+
+    # Now bring in the new API
+    _load_new_api_modules(delete_old=False)
+
+
+def use_new_api():
+    """Load Sire using the new (python-style) API. This will be called
+    automatically when you load any of the new Python modules, so you
+    shouldn't need to call this yourself.
+    """
+    global _is_using_new_api, _is_using_old_api
+
+    # load up the new console - ensure this is done once
+    from .utils import Console as _Console
+
+    _Console._get_console()
+
+    if _is_using_new_api:
+        # already done
+        return
+
+    if _is_using_old_api:
+        msg = (
+            "Cannot import sire using the new API as the old API has "
+            "already been activated. Both APIs cannot be active at "
+            "the same time."
+        )
+        print(msg)
+
+        raise ImportError(msg)
+
+    # Now bring in the new API
+    _load_new_api_modules(delete_old=True)
 
 
 def use_old_api():

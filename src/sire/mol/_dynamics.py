@@ -863,7 +863,10 @@ class Dynamics:
 
         _add_extra(extras, "cutoff", cutoff)
         _add_extra(extras, "cutoff_type", cutoff_type)
-        _add_extra(extras, "timestep", u(timestep))
+
+        if timestep is not None:
+            _add_extra(extras, "timestep", u(timestep))
+
         _add_extra(extras, "save_frequency", save_frequency)
         _add_extra(extras, "constraint", constraint)
         _add_extra(extras, "schedule", schedule)
