@@ -194,6 +194,10 @@ void register_man_global_variables()
 
     scope().attr("int_cal") = int_cal;
 
+    scope().attr("kcal_per_mol_per_A2") = kcal_per_mol_per_A2;
+
+    scope().attr("kcal_per_mol_per_rad2") = kcal_per_mol_per_rad2;
+
     scope().attr("hartree") = hartree;
 
     scope().attr("akma_time") = akma_time;

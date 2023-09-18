@@ -29,8 +29,6 @@ You perform minimisation itself by calling the :func:`~sire.mol.Minimisation.run
 function.
 
 >>> m.run()
-minimisation ✔
-Minimisation()
 
 You can extract the results of minimisation, converted back into the
 original view object by calling :func:`~sire.mol.Minimisation.commit`
@@ -43,7 +41,6 @@ You could run all of these steps on a single line, e.g.
 
 >>> mol = mols[0].minimisation().run().commit()
 >>> print(mol.energy())
-minimisation ✔
 17.7799 kcal mol-1
 
 In the above case we minimised just the first molecule that was loaded.
@@ -54,7 +51,6 @@ collection.
 -5855.24 kcal mol-1
 >>> mols = mols.minimisation().run().commit()
 >>> print(mols.energy())
-minimisation ✔
 -7971.79 kcal mol-1
 
 Molecular Dynamics

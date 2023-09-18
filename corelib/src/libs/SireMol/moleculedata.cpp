@@ -522,6 +522,56 @@ const char *MoleculeData::metadataType(const PropertyName &key, const PropertyNa
     return props.metadataType(key, metakey);
 }
 
+/** Add a link from the property 'key' to the property 'linked_property'.
+ *  The linked_property will be returned if there is no property
+ *  called 'key' in this set.
+ *
+ *  Note that the linked property must already be contained in this set.
+ */
+void MoleculeData::addLink(const QString &key, const QString &linked_property)
+{
+    props.addLink(key, linked_property);
+
+    // increment the global version number
+    vrsn = vrsns->increment();
+}
+
+/** Remove the link associated with the key 'key' */
+void MoleculeData::removeLink(const QString &key)
+{
+    if (this->getLinks().contains(key))
+    {
+        props.removeLink(key);
+
+        // increment the global version number
+        vrsn = vrsns->increment();
+    }
+}
+
+/** Remove all property links from this set */
+void MoleculeData::removeAllLinks()
+{
+    if (this->hasLinks())
+    {
+        props.removeAllLinks();
+
+        // increment the global version number
+        vrsn = vrsns->increment();
+    }
+}
+
+/** Return whether or not there are any property links */
+bool MoleculeData::hasLinks() const
+{
+    return props.hasLinks();
+}
+
+/** Return all of the property links */
+QHash<QString, QString> MoleculeData::getLinks() const
+{
+    return props.getLinks();
+}
+
 /** Return the property at key 'key'
 
     \throw SireBase::missing_property

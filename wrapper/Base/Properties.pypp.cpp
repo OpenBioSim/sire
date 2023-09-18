@@ -43,6 +43,19 @@ void register_Properties_class(){
         Properties_exposer_t Properties_exposer = Properties_exposer_t( "Properties", "This class holds a collection of properties, indexed by name.\nEach property comes complete with a set of metadata.\nThe metadata is actually another Properties object,\nand indeed Properties can itself be a Property,\nso allowing Properties to be nested indefinitely.\n\nAuthor: Christopher Woods\n", bp::init< >("Null constructor - construct an empty set of properties") );
         bp::scope Properties_scope( Properties_exposer );
         Properties_exposer.def( bp::init< SireBase::Properties const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireBase::Properties::addLink
+        
+            typedef void ( ::SireBase::Properties::*addLink_function_type)( ::QString const &,::QString const & ) ;
+            addLink_function_type addLink_function_value( &::SireBase::Properties::addLink );
+            
+            Properties_exposer.def( 
+                "addLink"
+                , addLink_function_value
+                , ( bp::arg("key"), bp::arg("linked_property") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::Properties::allMetadata
         
             typedef ::SireBase::Properties const & ( ::SireBase::Properties::*allMetadata_function_type)(  ) const;
@@ -129,6 +142,30 @@ void register_Properties_class(){
                 , count_function_value
                 , bp::release_gil_policy()
                 , "Return the number of properties in this set" );
+        
+        }
+        { //::SireBase::Properties::getLinks
+        
+            typedef ::QHash< QString, QString > ( ::SireBase::Properties::*getLinks_function_type)(  ) const;
+            getLinks_function_type getLinks_function_value( &::SireBase::Properties::getLinks );
+            
+            Properties_exposer.def( 
+                "getLinks"
+                , getLinks_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireBase::Properties::hasLinks
+        
+            typedef bool ( ::SireBase::Properties::*hasLinks_function_type)(  ) const;
+            hasLinks_function_type hasLinks_function_value( &::SireBase::Properties::hasLinks );
+            
+            Properties_exposer.def( 
+                "hasLinks"
+                , hasLinks_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireBase::Properties::hasMetadata
@@ -376,6 +413,18 @@ void register_Properties_class(){
                 , "Return the type name of the property at key key\nThrow: SireBase::missing_property\n" );
         
         }
+        { //::SireBase::Properties::removeAllLinks
+        
+            typedef void ( ::SireBase::Properties::*removeAllLinks_function_type)(  ) ;
+            removeAllLinks_function_type removeAllLinks_function_value( &::SireBase::Properties::removeAllLinks );
+            
+            Properties_exposer.def( 
+                "removeAllLinks"
+                , removeAllLinks_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::Properties::removeAllMetadata
         
             typedef void ( ::SireBase::Properties::*removeAllMetadata_function_type)(  ) ;
@@ -399,6 +448,19 @@ void register_Properties_class(){
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "Remove all of the metadata associated with the property at\nkey key" );
+        
+        }
+        { //::SireBase::Properties::removeLink
+        
+            typedef void ( ::SireBase::Properties::*removeLink_function_type)( ::QString const & ) ;
+            removeLink_function_type removeLink_function_value( &::SireBase::Properties::removeLink );
+            
+            Properties_exposer.def( 
+                "removeLink"
+                , removeLink_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireBase::Properties::removeMetadata
@@ -526,6 +588,18 @@ void register_Properties_class(){
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireBase::Properties::updateProperty
+        
+            typedef bool ( ::SireBase::Properties::*updateProperty_function_type)( ::QString const &,::SireBase::Property const &,bool ) ;
+            updateProperty_function_type updateProperty_function_value( &::SireBase::Properties::updateProperty );
+            
+            Properties_exposer.def( 
+                "updateProperty"
+                , updateProperty_function_value
+                , ( bp::arg("key"), bp::arg("value"), bp::arg("auto_add")=(bool)(true) )
+                , "Update the passed property to have the value value. This does\n  an in-place update on the existing property (which must have\n  a compatible type). If auto-add is true, then this will add\n  the property if it doesnt exist. This returns whether or not\n  a property was updated (or added)\n" );
         
         }
         Properties_exposer.staticmethod( "typeName" );

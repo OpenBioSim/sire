@@ -357,19 +357,182 @@ class System:
 
         return TrajectoryIterator(self, *args, **kwargs)
 
-    def minimisation(self, map=None):
+    def minimisation(self, *args, **kwargs):
         """
-        Return a Minimisation object that can be used to minimise the energy
-        of the molecule(s) in this view.
-        """
-        from ..mol import Minimisation
+        Return a Minimisation object that can be used to perform
+        minimisation of the molecule(s) in this System
 
-        return Minimisation(self, map=map)
+        cutoff: Length
+            The size of the non-bonded cutoff
+
+        cutoff_type: str
+            The type of cutoff to use, e.g. "PME", "RF" etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options
+
+        constraint: str
+            The type of constraint to use for bonds and/or angles, e.g.
+            `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            guessed from the timestep if it isn't set.
+
+        schedule: sire.cas.LambdaSchedule
+            The schedule used to control how perturbable forcefield parameters
+            should be morphed as a function of lambda. If this is not set
+            then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+        lambda_value: float
+            The value of lambda at which to run minimisation. This only impacts
+            perturbable molecules, whose forcefield parameters will be
+            scaled according to the lambda schedule for the specified
+            value of lambda.
+
+        swap_end_states: bool
+            Whether or not to swap the end states. If this is True, then
+            the perturbation will run from the perturbed back to the
+            reference molecule (the perturbed molecule will be at lambda=0,
+            while the reference molecule will be at lambda=1). This will
+            use the coordinates of the perturbed molecule as the
+            starting point.
+
+        shift_delta: length
+            The shift_delta parameter that controls the electrostatic
+            and van der Waals softening potential that smooths the
+            creation and deletion of ghost atoms during a potential.
+            This defaults to 2.0 A.
+
+        coulomb_power: int
+            The coulomb power parmeter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 0.
+
+        restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+            A single set of restraints, or a list of sets of
+            restraints that will be applied to the atoms during
+            the simulation.
+
+        fixed: molecule(s) view, search string, int, list[int] etc
+            Anything that can be used to identify the atom or atoms
+            that should be fixed in place during the simulation. These
+            atoms will not be moved by minimisation.
+
+        device: str or int
+            The ID of the GPU (or accelerator) used to accelerate
+            minimisation. This would be CUDA_DEVICE_ID or similar
+            if CUDA was used. This can be any valid OpenMM device string
+
+        map: dict
+            A dictionary of additional options. Note that any options
+            set in this dictionary that are also specified via one of
+            the arguments above will be overridden by the argument
+            value
+        """
+        from ..mol import _minimisation
+
+        return _minimisation(self, *args, **kwargs)
 
     def dynamics(self, *args, **kwargs):
         """
         Return a Dynamics object that can be used to perform
-        dynamics of the molecule(s) in this view
+        dynamics on the molecule(s) in this System
+
+        cutoff: Length
+            The size of the non-bonded cutoff
+
+        cutoff_type: str
+            The type of cutoff to use, e.g. "PME", "RF" etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options
+
+        timestep: time
+            The size of the dynamics timestep
+
+        save_frequency: time
+            The amount of simulation time between saving energies and frames.
+            This can be overridden using `energy_frequency` or `frame_frequency`,
+            or by these options in individual dynamics runs. Set this
+            to zero if you don't want any saves.
+
+        energy_frequency: time
+            The amount of time between saving energies. This overrides the
+            value in `save_frequency`. Set this to zero if you don't want
+            to save energies during the trajectory. This can be overridden
+            by setting energy_frequency during an individual run.
+
+        frame_frequency: time
+            The amount of time between saving frames. This overrides the
+            value in `save_frequency`. Set this to zero if you don't want
+            to save frames during the trajectory. This can be overridden
+            by setting frame_frequency during an individual run.
+
+        constraint: str
+            The type of constraint to use for bonds and/or angles, e.g.
+            `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            guessed from the timestep if it isn't set.
+
+        schedule: sire.cas.LambdaSchedule
+            The schedule used to control how perturbable forcefield parameters
+            should be morphed as a function of lambda. If this is not set
+            then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+        lambda_value: float
+            The value of lambda at which to run dynamics. This only impacts
+            perturbable molecules, whose forcefield parameters will be
+            scaled according to the lambda schedule for the specified
+            value of lambda.
+
+        swap_end_states: bool
+            Whether or not to swap the end states. If this is True, then
+            the perturbation will run from the perturbed back to the
+            reference molecule (the perturbed molecule will be at lambda=0,
+            while the reference molecule will be at lambda=1). This will
+            use the coordinates of the perturbed molecule as the
+            starting point.
+
+        temperature: temperature
+            The temperature at which to run the simulation. A
+            microcanonical (NVE) simulation will be run if you don't
+            specify the temperature.
+
+        pressure: pressure
+            The pressure at which to run the simulation. A
+            microcanonical (NVE) or canonical (NVT) simulation will be
+            run if the pressure is not set.
+
+        shift_delta: length
+            The shift_delta parameter that controls the electrostatic
+            and van der Waals softening potential that smooths the
+            creation and deletion of ghost atoms during a potential.
+            This defaults to 2.0 A.
+
+        coulomb_power: int
+            The coulomb power parmeter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 0.
+
+        restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+            A single set of restraints, or a list of sets of
+            restraints that will be applied to the atoms during
+            the simulation.
+
+        fixed: molecule(s) view, search string, int, list[int] etc
+            Anything that can be used to identify the atom or atoms
+            that should be fixed in place during the simulation. These
+            atoms will not be moved by dynamics.
+
+        device: str or int
+            The ID of the GPU (or accelerator) used to accelerate
+            the simulation. This would be CUDA_DEVICE_ID or similar
+            if CUDA was used. This can be any valid OpenMM device string
+
+        map: dict
+            A dictionary of additional options. Note that any options
+            set in this dictionary that are also specified via one of
+            the arguments above will be overridden by the argument
+            value
         """
         from ..mol import _dynamics
 
@@ -505,6 +668,86 @@ class System:
                 self._system.set_property(time_property.source(), time)
 
         self._molecules = None
+
+    def energy_trajectory(self, to_pandas=True, map=None):
+        """
+        Return the energy trajectory for this System. This is the history
+        of energies evaluate during any dynamics runs. It could include
+        energies calculated at different values of lambda
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        try:
+            traj = self._system.property(traj_propname)
+        except Exception:
+            traj = None
+
+        if traj is not None:
+            if traj.what() != "SireMaths::EnergyTrajectory":
+                if traj_propname.has_value():
+                    raise TypeError(
+                        f"You cannot force the use of a {type(traj)} "
+                        "as an EnergyTrajectory"
+                    )
+
+                traj = None
+
+        if traj is None:
+            # we need to create this trajectory
+            from ..maths import EnergyTrajectory
+
+            self._system.set_property(
+                traj_propname.source(), EnergyTrajectory()
+            )
+
+            traj = self._system.property(traj_propname)
+
+        if to_pandas:
+            return traj.to_pandas()
+        else:
+            return traj
+
+    def set_energy_trajectory(self, trajectory, map=None):
+        """
+        Set the energy trajectory to the passed value
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        if traj_propname.has_value():
+            return
+
+        if trajectory.what() != "SireMaths::EnergyTrajectory":
+            raise TypeError(
+                f"You cannot set a {type(trajectory)} as an "
+                "energy trajectory!"
+            )
+
+        self._system.set_property(traj_propname.source(), trajectory)
+
+    def clear_energy_trajectory(self, map=None):
+        """
+        Completely clear any existing energy trajectory
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        if traj_propname.has_value():
+            return
+
+        from ..maths import EnergyTrajectory
+
+        self._system.set_property(traj_propname.source(), EnergyTrajectory())
 
     def evaluate(self, *args, **kwargs):
         """Return an evaluator for this Systme (or of the matching

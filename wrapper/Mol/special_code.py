@@ -265,13 +265,18 @@ def fix_ResStructureEditor(c):
     c.decls("transferAll").call_policies = call_policies.return_self()
 
 
-def fix_MolEditor(c):
+def fix_MolEditor(c, include_links=True):
     c.decls("renumber").call_policies = call_policies.return_self()
     c.decls("rename").call_policies = call_policies.return_self()
 
+    if include_links:
+        c.decls("addLink").call_policies = call_policies.return_self()
+        c.decls("removeLink").call_policies = call_policies.return_self()
+        c.decls("removeAllLinks").call_policies = call_policies.return_self()
+
 
 def fix_MolStructureEditor(c):
-    fix_MolEditor(c)
+    fix_MolEditor(c, include_links=False)
 
     c.decls("remove").call_policies = call_policies.return_self()
     c.decls("removeAllAtoms").call_policies = call_policies.return_self()

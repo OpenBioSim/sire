@@ -1,8 +1,16 @@
 __all__ = [
+    "AmberBond",
+    "AmberAngle",
+    "AmberDihPart",
+    "AmberDihedral",
     "Angle",
     "Bond",
+    "BondRestraint",
+    "BondRestraints",
     "Dihedral",
     "Improper",
+    "PositionRestraint",
+    "PositionRestraints",
     "SelectorAngle",
     "SelectorBond",
     "SelectorDihedral",
@@ -36,6 +44,22 @@ from ..mol import (
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
+
+# It would be better if these were called "DistanceRestraints",
+# but there is already a legacy Sire.MM class with this name
+BondRestraint = _MM.BondRestraint
+BondRestraints = _MM.BondRestraints
+
+BoreschRestraint = _MM.BoreschRestraint
+BoreschRestraints = _MM.BoreschRestraints
+
+PositionalRestraint = _MM.PositionalRestraint
+PositionalRestraints = _MM.PositionalRestraints
+
+AmberBond = _MM.AmberBond
+AmberAngle = _MM.AmberAngle
+AmberDihPart = _MM.AmberDihPart
+AmberDihedral = _MM.AmberDihedral
 
 LJParameter = _MM.LJParameter
 

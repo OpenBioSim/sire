@@ -133,5 +133,10 @@ def triclinic_protein_rst7():
 
 
 @pytest.fixture(scope="session")
-def merged_molecule():
+def merged_ethane_methanol():
     return sr.load_test_files("merged_molecule.s3")
+
+
+@pytest.fixture(scope="session")
+def merged_zan_ose():
+    return sr.load_test_files("merged_ligand.s3")

@@ -37,7 +37,7 @@ using namespace SireUnits::Dimension;
 
 using namespace boost::python;
 
-template<class D>
+template <class D>
 struct from_general_unit
 {
     /** Constructor - register the conversion functions
@@ -47,22 +47,22 @@ struct from_general_unit
         boost::python::converter::registry::push_back(
             &convertible,
             &construct,
-            type_id< D >());
+            type_id<D>());
     }
 
     /** Test whether or not it is possible to convert the PyObject
         holding a GeneralUnit to this specific PhysUnit*/
-    static void* convertible(PyObject* obj_ptr)
+    static void *convertible(PyObject *obj_ptr)
     {
-        object obj( handle<>(borrowed(obj_ptr)) );
+        object obj(handle<>(borrowed(obj_ptr)));
 
-        extract<const Dimension::GeneralUnit&> x(obj);
+        extract<const Dimension::GeneralUnit &> x(obj);
 
-        //is this a GeneralUnit?
-        if ( x.check() )
+        // is this a GeneralUnit?
+        if (x.check())
         {
-            //it is ;-)  Get a reference to it and make sure
-            //that it is of the right dimension
+            // it is ;-)  Get a reference to it and make sure
+            // that it is of the right dimension
             const Dimension::GeneralUnit &gen_unit = x();
 
             if (gen_unit.isZero())
@@ -70,64 +70,64 @@ struct from_general_unit
                 // zero is compatible with everything
                 return obj_ptr;
             }
-            else if ( gen_unit.MASS() == D::MASS() and
-                 gen_unit.LENGTH() == D::LENGTH() and
-                 gen_unit.TIME() == D::TIME() and
-                 gen_unit.CHARGE() == D::CHARGE() and
-                 gen_unit.TEMPERATURE() == D::TEMPERATURE() and
-                 gen_unit.QUANTITY() == D::QUANTITY() and
-                 gen_unit.ANGLE() == D::ANGLE() )
+            else if (gen_unit.MASS() == D::MASS() and
+                     gen_unit.LENGTH() == D::LENGTH() and
+                     gen_unit.TIME() == D::TIME() and
+                     gen_unit.CHARGE() == D::CHARGE() and
+                     gen_unit.TEMPERATURE() == D::TEMPERATURE() and
+                     gen_unit.QUANTITY() == D::QUANTITY() and
+                     gen_unit.ANGLE() == D::ANGLE())
             {
-                //this has the right dimension :-)
+                // this has the right dimension :-)
                 return obj_ptr;
             }
         }
 
-        //could not recognise the type or the dimension was wrong
+        // could not recognise the type or the dimension was wrong
         return 0;
     }
 
     /** Construct a PhysUnit from the passed GeneralUnit */
     static void construct(
-        PyObject* obj_ptr,
-        boost::python::converter::rvalue_from_python_stage1_data* data)
+        PyObject *obj_ptr,
+        boost::python::converter::rvalue_from_python_stage1_data *data)
     {
-        object obj( handle<>(borrowed(obj_ptr)) );
+        object obj(handle<>(borrowed(obj_ptr)));
 
-        extract<const Dimension::GeneralUnit&> x(obj);
+        extract<const Dimension::GeneralUnit &> x(obj);
 
-        //is this a GeneralUnit?
-        if ( x.check() )
+        // is this a GeneralUnit?
+        if (x.check())
         {
-            //it is ;-)  Get a reference to it and make sure
-            //that it is of the right dimension
+            // it is ;-)  Get a reference to it and make sure
+            // that it is of the right dimension
             const Dimension::GeneralUnit &gen_unit = x();
 
-            if ( gen_unit.isZero() )
+            if (gen_unit.isZero())
             {
                 // zero is compatible with everything
-                void* storage =
-                    ( (converter::rvalue_from_python_storage<D>*)data )->storage.bytes;
+                void *storage =
+                    ((converter::rvalue_from_python_storage<D> *)data)->storage.bytes;
 
-                //create the T container
+                // create the T container
                 new (storage) D(0.0);
 
                 data->convertible = storage;
             }
-            else if ( gen_unit.MASS() == D::MASS() and
-                 gen_unit.LENGTH() == D::LENGTH() and
-                 gen_unit.TIME() == D::TIME() and
-                 gen_unit.CHARGE() == D::CHARGE() and
-                 gen_unit.TEMPERATURE() == D::TEMPERATURE() and
-                 gen_unit.QUANTITY() == D::QUANTITY() and
-                 gen_unit.ANGLE() == D::ANGLE() )
+            else if (gen_unit.MASS() == D::MASS() and
+                     gen_unit.LENGTH() == D::LENGTH() and
+                     gen_unit.TIME() == D::TIME() and
+                     gen_unit.CHARGE() == D::CHARGE() and
+                     gen_unit.TEMPERATURE() == D::TEMPERATURE() and
+                     gen_unit.QUANTITY() == D::QUANTITY() and
+                     gen_unit.ANGLE() == D::ANGLE())
             {
-                //locate the storage space for the result
-                void* storage =
-                    ( (converter::rvalue_from_python_storage<D>*)data )->storage.bytes;
+                // locate the storage space for the result
+                void *storage =
+                    ((converter::rvalue_from_python_storage<D> *)data)->storage.bytes;
 
-                //create the T container
-                new (storage) D( gen_unit.scaleFactor() );
+                // create the T container
+                new (storage) D(gen_unit.scaleFactor());
 
                 data->convertible = storage;
             }
@@ -135,57 +135,61 @@ struct from_general_unit
     }
 };
 
-template<class D>
+template <class D>
 struct to_general_unit
 {
-    static PyObject* convert(const D &unit)
+    static PyObject *convert(const D &unit)
     {
-        return incref( object(Dimension::GeneralUnit(unit)).ptr() );
+        return incref(object(Dimension::GeneralUnit(unit)).ptr());
     }
 };
 
-template<class D>
+template <class D>
 void register_dimension()
 {
-    to_python_converter< D, to_general_unit<D> >();
+    to_python_converter<D, to_general_unit<D>>();
 
     converter::registry::push_back(
-          &from_general_unit<D>::convertible,
-          &from_general_unit<D>::construct,
-          type_id<D>() );
+        &from_general_unit<D>::convertible,
+        &from_general_unit<D>::construct,
+        type_id<D>());
 }
 
 void register_SireUnits_dimensions()
 {
-    register_dimension< Dimensionless >();
-    register_dimension< Mass >();
-    register_dimension< MolarMass >();
-    register_dimension< Length >();
-    register_dimension< Time >();
-    register_dimension< Charge >();
-    register_dimension< MolarCharge >();
-    register_dimension< Temperature >();
-    register_dimension< Quantity >();
-    register_dimension< Angle >();
-    register_dimension< Area >();
-    register_dimension< Volume >();
-    register_dimension< MolarVolume >();
-    register_dimension< Velocity >();
-    register_dimension< Acceleration >();
-    register_dimension< AngularVelocity >();
-    register_dimension< AngularAcceleration >();
-    register_dimension< Energy >();
-    register_dimension< MolarEnergy >();
-    register_dimension< Power >();
-    register_dimension< MolarPower >();
-    register_dimension< Density >();
-    register_dimension< MolarDensity >();
-    register_dimension< Force >();
-    register_dimension< Pressure >();
-    register_dimension< Current >();
-    register_dimension< Potential >();
-    register_dimension< Capacitance >();
-
-    register_dimension< SireMM::HarmonicDistanceForceConstant >();
-
+    register_dimension<Dimensionless>();
+    register_dimension<Mass>();
+    register_dimension<MolarMass>();
+    register_dimension<Length>();
+    register_dimension<Time>();
+    register_dimension<Charge>();
+    register_dimension<MolarCharge>();
+    register_dimension<Temperature>();
+    register_dimension<Quantity>();
+    register_dimension<Angle>();
+    register_dimension<Area>();
+    register_dimension<Volume>();
+    register_dimension<MolarVolume>();
+    register_dimension<Velocity>();
+    register_dimension<Acceleration>();
+    register_dimension<AngularVelocity>();
+    register_dimension<AngularAcceleration>();
+    register_dimension<Energy>();
+    register_dimension<MolarEnergy>();
+    register_dimension<Power>();
+    register_dimension<MolarPower>();
+    register_dimension<Density>();
+    register_dimension<MolarDensity>();
+    register_dimension<Force>();
+    register_dimension<Pressure>();
+    register_dimension<Current>();
+    register_dimension<Potential>();
+    register_dimension<Capacitance>();
+    register_dimension<HarmonicBondConstant>();
+    register_dimension<HarmonicAngleConstant>();
+    register_dimension<Constant1>();
+    register_dimension<Constant2>();
+    register_dimension<Constant3>();
+    register_dimension<Constant4>();
+    register_dimension<Constant5>();
 }

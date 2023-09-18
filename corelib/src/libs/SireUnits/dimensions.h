@@ -399,6 +399,10 @@ namespace SireUnits
 
         typedef PhysUnit<1, 2, -2, 0, 0, -1, 0> MolarEnergy;
 
+        typedef PhysUnit<1, 0, -2, 0, 0, -1, 0> HarmonicBondConstant;
+
+        typedef PhysUnit<1, 2, -2, 0, 0, -1, -2> HarmonicAngleConstant;
+
         typedef PhysUnit<1, 2, -3, 0, 0, 0, 0> Power;
 
         typedef PhysUnit<1, 2, -3, 0, 0, -1, 0> MolarPower;
@@ -449,6 +453,8 @@ namespace SireUnits
         class Capacitance;
         class Current;
         class Potential;
+        class HarmonicBondConstant;
+        class HarmonicAngleConstant;
 
         class Constant1;
         class Constant2;
@@ -506,6 +512,8 @@ Q_DECLARE_METATYPE(SireUnits::Dimension::Pressure);
 Q_DECLARE_METATYPE(SireUnits::Dimension::Capacitance);
 Q_DECLARE_METATYPE(SireUnits::Dimension::Current);
 Q_DECLARE_METATYPE(SireUnits::Dimension::Potential);
+Q_DECLARE_METATYPE(SireUnits::Dimension::HarmonicBondConstant);
+Q_DECLARE_METATYPE(SireUnits::Dimension::HarmonicAngleConstant);
 
 Q_DECLARE_METATYPE(SireUnits::Dimension::Constant1);
 Q_DECLARE_METATYPE(SireUnits::Dimension::Constant2);

@@ -29,9 +29,12 @@ try:
     _has_rdkit = True
     _register_smarts_search()
 
-except Exception:
+except Exception as e:
+    _rdkit_import_error = e
+
     # RDKit support is not available
     def _no_rdkit():
+        print(_rdkit_import_error)
         raise ModuleNotFoundError(
             "Unable to convert to/from RDKit as it is not installed. "
             "Please install using `mamba install -c conda-forge rdkit` "
@@ -324,11 +327,12 @@ try:
         try:
             from ._sommcontext import SOMMContext
 
-            return SOMMContext(
+            context = SOMMContext(
                 system=system,
                 integrator=integrator,
                 platform=platform,
                 metadata=openmm_metadata,
+                map=map,
             )
         except Exception as e:
             raise ValueError(
@@ -337,18 +341,48 @@ try:
                 f"or on this computer? The error message is: {e}"
             )
 
-    def openmm_extract_coordinates(state, mols, map):
-        return _openmm_extract_coordinates(state, mols, map)
+        return context
 
-    def openmm_extract_coordinates_and_velocities(state, mols, map):
-        return _openmm_extract_coordinates_and_velocities(state, mols, map)
+    def openmm_extract_coordinates(
+        state, mols, perturbable_maps=None, map=None
+    ):
+        from ...base import create_map
+
+        map = create_map(map)
+
+        if perturbable_maps is None:
+            perturbable_maps = {}
+
+        return _openmm_extract_coordinates(
+            state=state, mols=mols, perturbable_maps=perturbable_maps, map=map
+        )
+
+    def openmm_extract_coordinates_and_velocities(
+        state, mols, perturbable_maps=None, map=None
+    ):
+        from ...base import create_map
+
+        map = create_map(map)
+
+        if perturbable_maps is None:
+            from ..Mol import MolNum
+
+            perturbable_maps = {}
+
+        return _openmm_extract_coordinates_and_velocities(
+            state=state, mols=mols, perturbable_maps=perturbable_maps, map=map
+        )
 
     def openmm_extract_space(state):
         return _openmm_extract_space(state)
 
-except Exception:
+except Exception as e:
+    _openmm_import_exception = e
+
     # OpenMM support is not available
     def _no_openmm():
+        print(_openmm_import_exception)
+
         raise ModuleNotFoundError(
             "Unable to convert to/from OpenMM as this code hasn't been "
             "written yet. We hope to support this soon!"
@@ -362,13 +396,13 @@ except Exception:
     def openmm_to_sire(*args, **kwargs):
         _no_openmm()
 
-    def openmm_extract_coordinates(state, mols, map):
+    def openmm_extract_coordinates(*arg, **kwargs):
         _no_openmm()
 
-    def openmm_extract_coordinates_and_velocities(state, mols, map):
+    def openmm_extract_coordinates_and_velocities(*args, **kwargs):
         _no_openmm()
 
-    def openmm_extract_space(state):
+    def openmm_extract_space(*args, **kwargs):
         _no_openmm()
 
 

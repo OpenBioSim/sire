@@ -2,7 +2,7 @@ import sire as sr
 import pytest
 
 
-def _run_test(mols, is_slow=False):
+def _run_test(mols, is_slow=False, use_taylor=False):
     c = mols.cursor()
 
     # can only get the same energies if they have the same coordinates
@@ -40,41 +40,40 @@ def _run_test(mols, is_slow=False):
     mols0 = get_end_state(merge, "0", "1") + water
     mols1 = get_end_state(merge, "1", "0") + water
 
+    # a very basic lambda schedule
+    l = sr.cas.LambdaSchedule()
+    l.add_stage("morph", (1 - l.lam()) * l.initial() + l.lam() * l.final())
+
     # need to use the reference platform on GH Actions
-    map = {"platform": "Reference"}
+    map = {"platform": "Reference", "schedule": l}
+
+    if use_taylor:
+        map["use_taylor_softening"] = True
 
     # create the perturbable OpenMM system
     omm = sr.convert.to(mols, "openmm", map=map)
 
-    # a very basic lambda schedule
-    l = omm.get_lambda_schedule()
-    l.add_stage("morph", (1 - l.lam()) * l.initial() + l.lam() * l.final())
-    omm.set_lambda_schedule(l)
-
-    def e(nrg):
-        return nrg.value_in_unit(nrg.unit)
-
     # now the lambda0 and lambda1 non-perturbable end states
     omm0 = sr.convert.to(mols0, "openmm", map=map)
-    nrg0 = e(omm0.get_energy())
+    nrg0 = omm0.get_energy().value()
 
     omm1 = sr.convert.to(mols1, "openmm", map=map)
-    nrg1 = e(omm1.get_energy())
+    nrg1 = omm1.get_energy().value()
 
     omm.set_lambda(0.0)
-    assert e(omm.get_energy()) == pytest.approx(nrg0)
+    assert omm.get_energy().value() == pytest.approx(nrg0)
 
     omm.set_lambda(0.5)
-    nrg0_5 = e(omm.get_energy())
+    nrg0_5 = omm.get_energy().value()
 
     omm.set_lambda(1.0)
-    assert e(omm.get_energy()) == pytest.approx(nrg1)
+    assert omm.get_energy().value() == pytest.approx(nrg1)
 
     omm.set_lambda(0.5)
-    assert e(omm.get_energy()) == pytest.approx(nrg0_5)
+    assert omm.get_energy().value() == pytest.approx(nrg0_5)
 
     omm.set_lambda(0.0)
-    assert e(omm.get_energy()) == pytest.approx(nrg0)
+    assert omm.get_energy().value() == pytest.approx(nrg0)
 
     # now swap the end states - lambda 0 == 1 and lambda 1 == 0
     map["swap_end_states"] = True
@@ -83,27 +82,35 @@ def _run_test(mols, is_slow=False):
     omm.set_lambda_schedule(l)
 
     omm.set_lambda(0.0)
-    assert e(omm.get_energy()) == pytest.approx(nrg1)
+    assert omm.get_energy().value() == pytest.approx(nrg1)
 
     omm.set_lambda(0.5)
-    assert e(omm.get_energy()) == pytest.approx(nrg0_5)
+    assert omm.get_energy().value() == pytest.approx(nrg0_5)
 
     omm.set_lambda(1.0)
-    assert e(omm.get_energy()) == pytest.approx(nrg0)
+    assert omm.get_energy().value() == pytest.approx(nrg0)
 
     omm.set_lambda(0.5)
-    assert e(omm.get_energy()) == pytest.approx(nrg0_5)
+    assert omm.get_energy().value() == pytest.approx(nrg0_5)
 
     omm.set_lambda(0.0)
-    assert e(omm.get_energy()) == pytest.approx(nrg1)
+    assert omm.get_energy().value() == pytest.approx(nrg1)
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda(merged_molecule):
-    _run_test(merged_molecule.clone(), False)
+def test_openmm_scale_lambda_simple(merged_ethane_methanol):
+    _run_test(merged_ethane_methanol.clone(), False)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_taylor_simple(merged_ethane_methanol):
+    _run_test(merged_ethane_methanol.clone(), False, True)
 
 
 @pytest.mark.veryslow
@@ -111,5 +118,22 @@ def test_openmm_scale_lambda(merged_molecule):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_big_openmm_scale_lambda(merged_molecule):
-    _run_test(merged_molecule.clone(), True)
+def test_big_openmm_scale_lambda_simple(merged_ethane_methanol):
+    _run_test(merged_ethane_methanol.clone(), True)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_ligand(merged_zan_ose):
+    _run_test(merged_zan_ose.clone(), False)
+
+
+@pytest.mark.veryslow
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_big_openmm_scale_lambda_ligand(merged_zan_ose):
+    _run_test(merged_zan_ose.clone(), True)

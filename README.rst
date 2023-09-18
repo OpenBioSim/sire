@@ -1,5 +1,5 @@
 ****
-`Sire <http://sire.openbiosim.org>`__
+`Sire <https://sire.openbiosim.org>`__
 ****
 
 .. image:: https://github.com/openbiosim/sire/workflows/Build/badge.svg
@@ -121,7 +121,7 @@ For bug reports/sugguestions/complains please file an issue on
 
 Developers guide
 ----------------
-Please `visit the website <http://sire.openbiosim.org>`__ for information on how to
+Please `visit the website <https://sire.openbiosim.org>`__ for information on how to
 develop applications using sire.
 
 GitHub actions

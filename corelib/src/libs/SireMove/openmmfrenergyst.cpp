@@ -22,7 +22,7 @@
  *  that should have come with this distribution.
  *
  *  You can contact the authors via the developer's mailing list
- *  at http://sire.openbiosim.org
+ *  at https://sire.openbiosim.org
  *
 \*********************************************/
 
@@ -1826,7 +1826,7 @@ void OpenMMFrEnergyST::initialise()
                     int anchornum =
                         restrainedAtoms.property(QString("Anchor(%1)").arg(i)).asA<VariantProperty>().toInt();
                     int atomnum =
-                        restrainedAtoms.property(QString("Atom(%1)").arg(i)).asA<VariantProperty>().toInt(); 
+                        restrainedAtoms.property(QString("Atom(%1)").arg(i)).asA<VariantProperty>().toInt();
 		    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
                     //double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
                     //double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
@@ -1842,7 +1842,7 @@ void OpenMMFrEnergyST::initialise()
                         //qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
                         //         << yref << " z " << zref << " k " << k << " d " << d;
 			qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
-                        qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;			
+                        qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;
 
                     }
 
@@ -1860,8 +1860,8 @@ void OpenMMFrEnergyST::initialise()
                     //std::vector<double> custom_non_bonded_params{ 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.};
 		    //custom_force_field->addParticle(custom_non_bonded_params);
 		    custom_force_field->addExclusion(anchoropenmmindex, atopenmmindex);
-		    positionalRestraints_openmm->addBond(anchoropenmmindex, atopenmmindex, 
-				                         0 * OpenMM::NmPerAngstrom, 
+		    positionalRestraints_openmm->addBond(anchoropenmmindex, atopenmmindex,
+				                         0 * OpenMM::NmPerAngstrom,
 							 k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm));
                 }
             }

@@ -1,6 +1,7 @@
 __all__ = [
     "get_alignment",
     "is_water",
+    "selection_to_atoms",
     "Atom",
     "AtomIdx",
     "AtomMapping",
@@ -123,6 +124,85 @@ try:
     get_alignment = _Mol.getAlignment
 except AttributeError:
     get_alignment = _Mol.get_alignment
+
+
+def selection_to_atoms(mols, atoms):
+    """
+    Convert the passed selection to a list of atoms.
+
+    Parameters
+    ----------
+    mols : A molecule view or collection
+        The molecule container from which to select the atoms.
+    atoms : str, int, list, molecule view/collection etc.
+        Any valid search string, atom index, list of atom indicies,
+        or molecule view/container that can be used to select
+        atoms from ``mols``
+
+    Returns
+    -------
+    atoms : A SelectorM_Atoms_ or Selector_Atom_ containing the list
+        of atoms.
+
+    Examples
+    --------
+
+    >>> import sire as sr
+    >>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.crd"))
+    >>> sr.mol.selection_to_atoms(mols, "atomname CA")
+    Selector<SireMol::Atom>( size=1
+    0:  Atom( CA:9    [  16.54,    5.03,   15.81] )
+    )
+
+    >>> sr.mol.selection_to_atoms(mols, "resname ALA")
+    Selector<SireMol::Atom>( size=10
+    0:  Atom( N:7     [  17.22,    4.31,   14.71] )
+    1:  Atom( H:8     [  16.68,    3.62,   14.22] )
+    2:  Atom( CA:9    [  16.54,    5.03,   15.81] )
+    3:  Atom( HA:10   [  17.29,    5.15,   16.59] )
+    4:  Atom( CB:11   [  16.05,    6.39,   15.26] )
+    5:  Atom( HB1:12  [  15.63,    6.98,   16.07] )
+    6:  Atom( HB2:13  [  16.90,    6.89,   14.80] )
+    7:  Atom( HB3:14  [  15.24,    6.18,   14.55] )
+    8:  Atom( C:15    [  15.37,    4.19,   16.43] )
+    9:  Atom( O:16    [  14.94,    3.17,   15.88] )
+    )
+
+    >>> sr.mol.selection_to_atoms(mols, [0, 1, 2, 3])
+    SireMol::SelectorM<SireMol::Atom>( size=4
+    0: MolNum(641) Atom( HH31:1  [  18.45,    3.49,   12.44] )
+    1: MolNum(641) Atom( CH3:2   [  18.98,    3.45,   13.39] )
+    2: MolNum(641) Atom( HH32:3  [  20.05,    3.63,   13.29] )
+    3: MolNum(641) Atom( HH33:4  [  18.80,    2.43,   13.73] )
+    )
+
+    >>> sr.mol.selection_to_atoms(mols, mols[0])
+    Selector<SireMol::Atom>( size=22
+    0:  Atom( HH31:1  [  18.45,    3.49,   12.44] )
+    1:  Atom( CH3:2   [  18.98,    3.45,   13.39] )
+    2:  Atom( HH32:3  [  20.05,    3.63,   13.29] )
+    3:  Atom( HH33:4  [  18.80,    2.43,   13.73] )
+    4:  Atom( C:5     [  18.48,    4.55,   14.35] )
+    ...
+    17:  Atom( H:18    [  15.34,    5.45,   17.96] )
+    18:  Atom( CH3:19  [  13.83,    3.94,   18.35] )
+    19:  Atom( HH31:20 [  14.35,    3.41,   19.15] )
+    20:  Atom( HH32:21 [  13.19,    4.59,   18.94] )
+    21:  Atom( HH33:22 [  13.21,    3.33,   17.69] )
+    )
+    """
+    if hasattr(atoms, "atoms"):
+        return atoms.atoms()
+
+    from ..legacy.Base import NumberProperty, IntegerArrayProperty
+
+    if type(atoms) is int or type(atoms) is list:
+        return mols.atoms()[atoms]
+    elif type(atoms) is NumberProperty or type(atoms) is IntegerArrayProperty:
+        atoms = [x.as_integer() for x in atoms.as_array()]
+        return mols.atoms()[atoms]
+    else:
+        return mols[atoms].atoms()
 
 
 def is_water(mol, map=None):
@@ -1319,21 +1399,146 @@ Molecule.cursor = _cursor
 
 def _dynamics(
     view,
-    map=None,
     cutoff=None,
     cutoff_type=None,
     timestep=None,
     save_frequency=None,
+    energy_frequency=None,
+    frame_frequency=None,
     constraint=None,
+    schedule=None,
+    lambda_value=None,
+    swap_end_states=None,
+    temperature=None,
+    pressure=None,
+    shift_delta=None,
+    coulomb_power=None,
+    restraints=None,
+    fixed=None,
+    device=None,
+    map=None,
     **kwargs,
 ):
     """
     Return a Dynamics object that can be used to perform
     dynamics of the molecule(s) in this view
+
+    cutoff: Length
+        The size of the non-bonded cutoff
+
+    cutoff_type: str
+        The type of cutoff to use, e.g. "PME", "RF" etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options
+
+    timestep: time
+        The size of the dynamics timestep
+
+    save_frequency: time
+        The amount of simulation time between saving energies and frames.
+        This can be overridden using `energy_frequency` or `frame_frequency`,
+        or by these options in individual dynamics runs. Set this
+        to zero if you don't want any saves.
+
+    energy_frequency: time
+        The amount of time between saving energies. This overrides the
+        value in `save_frequency`. Set this to zero if you don't want
+        to save energies during the trajectory. This can be overridden
+        by setting energy_frequency during an individual run.
+
+    frame_frequency: time
+        The amount of time between saving frames. This overrides the
+        value in `save_frequency`. Set this to zero if you don't want
+        to save frames during the trajectory. This can be overridden
+        by setting frame_frequency during an individual run.
+
+    constraint: str
+        The type of constraint to use for bonds and/or angles, e.g.
+        `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This will be automatically
+        guessed from the timestep if it isn't set.
+
+    schedule: sire.cas.LambdaSchedule
+        The schedule used to control how perturbable forcefield parameters
+        should be morphed as a function of lambda. If this is not set
+        then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+    lambda_value: float
+        The value of lambda at which to run dynamics. This only impacts
+        perturbable molecules, whose forcefield parameters will be
+        scaled according to the lambda schedule for the specified
+        value of lambda.
+
+    swap_end_states: bool
+        Whether or not to swap the end states. If this is True, then
+        the perturbation will run from the perturbed back to the
+        reference molecule (the perturbed molecule will be at lambda=0,
+        while the reference molecule will be at lambda=1). This will
+        use the coordinates of the perturbed molecule as the
+        starting point.
+
+    temperature: temperature
+        The temperature at which to run the simulation. A
+        microcanonical (NVE) simulation will be run if you don't
+        specify the temperature.
+
+    pressure: pressure
+        The pressure at which to run the simulation. A
+        microcanonical (NVE) or canonical (NVT) simulation will be
+        run if the pressure is not set.
+
+    shift_delta: length
+        The shift_delta parameter that controls the electrostatic
+        and van der Waals softening potential that smooths the
+        creation and deletion of ghost atoms during a potential.
+        This defaults to 2.0 A.
+
+    coulomb_power: int
+        The coulomb power parmeter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 0.
+
+    restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+        A single set of restraints, or a list of sets of
+        restraints that will be applied to the atoms during
+        the simulation.
+
+    fixed: molecule(s) view, search string, int, list[int] etc
+        Anything that can be used to identify the atom or atoms
+        that should be fixed in place during the simulation. These
+        atoms will not be moved by dynamics.
+
+    device: str or int
+        The ID of the GPU (or accelerator) used to accelerate
+        the simulation. This would be CUDA_DEVICE_ID or similar
+        if CUDA was used. This can be any valid OpenMM device string
+
+    map: dict
+        A dictionary of additional options. Note that any options
+        set in this dictionary that are also specified via one of
+        the arguments above will be overridden by the argument
+        value
     """
     from ..base import create_map
+    from ..system import System
+    from .. import u
 
     map = create_map(map, kwargs)
+
+    if not map.specified("space"):
+        map = create_map(map, {"space": "space"})
+
+    if (
+        System.is_system(view)
+        and map.specified("space")
+        and not map["space"].has_value()
+        and not view.shared_properties().has_property(map["space"])
+    ):
+        # space is not a shared property, so may be lost when we
+        # convert to molecules. Make sure this doens't happen by
+        # adding the space directly to the property map
+        map.set("space", view.property(map["space"]))
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1342,15 +1547,20 @@ def _dynamics(
         cutoff = 7.5 * angstrom
 
     if cutoff_type is None and not map.specified("cutoff_type"):
-        cutoff_type = "PME"
+        try:
+            if view.property(map["space"]).is_periodic():
+                cutoff_type = "PME"
+            else:
+                cutoff_type = "RF"
+        except Exception:
+            # no space, use RF
+            cutoff_type = "RF"
 
     if timestep is None and not map.specified("timestep"):
         from ..units import femtosecond
 
         timestep = 1 * femtosecond
     else:
-        from .. import u
-
         timestep = u(timestep)
 
     if save_frequency is None and not map.specified("save_frequency"):
@@ -1358,9 +1568,13 @@ def _dynamics(
 
         save_frequency = 25 * picosecond
     else:
-        from .. import u
-
         save_frequency = u(save_frequency)
+
+    if energy_frequency is not None:
+        map.set("energy_frequency", energy_frequency)
+
+    if frame_frequency is not None:
+        map.set("frame_frequency", frame_frequency)
 
     if constraint is None and not map.specified("constraint"):
         from ..units import femtosecond
@@ -1381,23 +1595,176 @@ def _dynamics(
             # can get away with no constraints
             constraint = "none"
 
+    if temperature is not None:
+        temperature = u(temperature)
+        map.set("temperature", temperature)
+
+    if pressure is not None:
+        pressure = u(pressure)
+        map.set("pressure", pressure)
+
+    if device is not None:
+        map.set("device", str(device))
+
     return Dynamics(
         view,
         cutoff=cutoff,
         cutoff_type=cutoff_type,
         timestep=timestep,
         save_frequency=save_frequency,
-        constraint=constraint,
+        constraint=str(constraint),
+        schedule=schedule,
+        lambda_value=lambda_value,
+        shift_delta=shift_delta,
+        coulomb_power=coulomb_power,
+        swap_end_states=swap_end_states,
+        restraints=restraints,
+        fixed=fixed,
         map=map,
     )
 
 
-def _minimisation(view, map=None):
+def _minimisation(
+    view,
+    cutoff=None,
+    cutoff_type=None,
+    constraint=None,
+    schedule=None,
+    lambda_value=None,
+    swap_end_states=None,
+    shift_delta=None,
+    coulomb_power=None,
+    device=None,
+    restraints=None,
+    fixed=None,
+    map=None,
+    **kwargs,
+):
     """
-    Return a Minimisation object that can be used to minimise the energy
-    of the molecule(s) in this view.
+    Return a Minimisation object that can be used to perform
+    minimisation of the molecule(s) in this view
+
+    cutoff: Length
+        The size of the non-bonded cutoff
+
+    cutoff_type: str
+        The type of cutoff to use, e.g. "PME", "RF" etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options
+
+    constraint: str
+        The type of constraint to use for bonds and/or angles, e.g.
+        `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This will be automatically
+        guessed from the timestep if it isn't set.
+
+    schedule: sire.cas.LambdaSchedule
+        The schedule used to control how perturbable forcefield parameters
+        should be morphed as a function of lambda. If this is not set
+        then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+    lambda_value: float
+        The value of lambda at which to run minimisation. This only impacts
+        perturbable molecules, whose forcefield parameters will be
+        scaled according to the lambda schedule for the specified
+        value of lambda.
+
+    swap_end_states: bool
+        Whether or not to swap the end states. If this is True, then
+        the perturbation will run from the perturbed back to the
+        reference molecule (the perturbed molecule will be at lambda=0,
+        while the reference molecule will be at lambda=1). This will
+        use the coordinates of the perturbed molecule as the
+        starting point.
+
+    shift_delta: length
+        The shift_delta parameter that controls the electrostatic
+        and van der Waals softening potential that smooths the
+        creation and deletion of ghost atoms during a potential.
+        This defaults to 2.0 A.
+
+    coulomb_power: int
+        The coulomb power parmeter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 0.
+
+    restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+        A single set of restraints, or a list of sets of
+        restraints that will be applied to the atoms during
+        the simulation.
+
+    fixed: molecule(s) view, search string, int, list[int] etc
+        Anything that can be used to identify the atom or atoms
+        that should be fixed in place during the simulation. These
+        atoms will not be moved by minimisation.
+
+    device: str or int
+        The ID of the GPU (or accelerator) used to accelerate
+        minimisation. This would be CUDA_DEVICE_ID or similar
+        if CUDA was used. This can be any valid OpenMM device string
+
+    map: dict
+        A dictionary of additional options. Note that any options
+        set in this dictionary that are also specified via one of
+        the arguments above will be overridden by the argument
+        value
     """
-    return Minimisation(view, map=map)
+    from ..base import create_map
+    from ..system import System
+    from .. import u
+
+    map = create_map(map, kwargs)
+
+    if not map.specified("space"):
+        map = create_map(map, {"space": "space"})
+
+    if (
+        System.is_system(view)
+        and map.specified("space")
+        and not map["space"].has_value()
+        and not view.shared_properties().has_property(map["space"])
+    ):
+        # space is not a shared property, so may be lost when we
+        # convert to molecules. Make sure this doens't happen by
+        # adding the space directly to the property map
+        map.set("space", view.property(map["space"]))
+
+    # Set default values if these have not been set
+    if cutoff is None and not map.specified("cutoff"):
+        from ..units import angstrom
+
+        cutoff = 7.5 * angstrom
+
+    if cutoff_type is None and not map.specified("cutoff_type"):
+        try:
+            if view.property(map["space"]).is_periodic():
+                cutoff_type = "PME"
+            else:
+                cutoff_type = "RF"
+        except Exception:
+            # no space, use RF
+            cutoff_type = "RF"
+
+    if device is not None:
+        map.set("device", str(device))
+
+    if constraint is not None:
+        map.set("constraint", str(constraint))
+
+    return Minimisation(
+        view,
+        cutoff=cutoff,
+        cutoff_type=cutoff_type,
+        schedule=schedule,
+        lambda_value=lambda_value,
+        swap_end_states=swap_end_states,
+        shift_delta=shift_delta,
+        coulomb_power=coulomb_power,
+        restraints=restraints,
+        fixed=fixed,
+        map=map,
+    )
 
 
 MoleculeView.dynamics = _dynamics
@@ -1805,6 +2172,32 @@ if not hasattr(AtomMapping, "__orig_find__"):
 
     AtomMapping.find = __mapping_find__
     AtomMapping.map = __mapping_map__
+
+
+if not hasattr(Molecule, "perturbation"):
+
+    def __molecule_perturbation(mol):
+        """
+        Return an interface to the perturbable properties of
+        this molecule. Note that the molecule must be
+        perturbable to call this function
+        """
+        from ..morph._perturbation import Perturbation
+
+        return Perturbation(mol)
+
+    def __molecule_is_perturbable(mol):
+        """
+        Return whether or not this molecule is perturbable
+        (can be morphed with a lambda coordinate)
+        """
+        if mol.has_property("is_perturbable"):
+            return mol.property("is_perturbable").as_boolean()
+        else:
+            return False
+
+    Molecule.perturbation = __molecule_perturbation
+    Molecule.is_perturbable = __molecule_is_perturbable
 
 
 # Remove some temporary variables

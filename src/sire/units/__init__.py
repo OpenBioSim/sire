@@ -375,9 +375,16 @@ def _fix_generalunit():
 
         return int(obj.value())
 
+    def __generalunit__abs__(obj):
+        if obj.value() < 0:
+            return obj * -1
+        else:
+            return obj
+
     GeneralUnit.__bool__ = __generalunit__bool__
     GeneralUnit.__float__ = __generalunit__float__
     GeneralUnit.__int__ = __generalunit__int__
+    GeneralUnit.__abs__ = __generalunit__abs__
 
 
 if not hasattr(GeneralUnit, "to_default"):
@@ -622,6 +629,7 @@ def set_si_units(scaled: bool = True):
                 "J mol-1 s",
                 "W mol-1",
                 "N",
+                "atm",
             ]
         )
     else:
@@ -648,6 +656,7 @@ def set_si_units(scaled: bool = True):
                 "J mol-1 s",
                 "W mol-1",
                 "N",
+                "atm",
             ]
         )
 
@@ -694,6 +703,7 @@ def set_internal_units():
             "kcal mol-1 s",
             "kcal mol-1 s-1",
             "kcal Å-1",
+            "atm",
         ]
     )
 

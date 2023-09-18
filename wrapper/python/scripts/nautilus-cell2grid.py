@@ -1,5 +1,6 @@
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -13,32 +14,60 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description="Generate grid files from cell files containing water parameters over a whole trajectory in a particular volume defined by a grid",
-                                 epilog="nautilus-cell2grid is built using Sire, Numpy and mdtraj and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/nautilus",
-                                 prog="nautilus")
+parser = argparse.ArgumentParser(
+    description="Generate grid files from cell files containing water parameters over a whole trajectory in a particular volume defined by a grid",
+    epilog="nautilus-cell2grid is built using Sire, Numpy and mdtraj and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/nautilus",
+    prog="nautilus",
+)
 
-parser.add_argument('-C', '--config', nargs="?",
-                    help='Supply an optional Nautilus CONFIG file to control the calculation.')
+parser.add_argument(
+    "-C",
+    "--config",
+    nargs="?",
+    help="Supply an optional Nautilus CONFIG file to control the calculation.",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-c', '--cell_dir', nargs="?",
-                    help="The Amber topology file containing the system.")
+parser.add_argument(
+    "-c",
+    "--cell_dir",
+    nargs="?",
+    help="The Amber topology file containing the system.",
+)
 
-parser.add_argument('-s', '--start_frame', nargs="?",
-                    help="The frame number of the first frame to analyse.")
+parser.add_argument(
+    "-s",
+    "--start_frame",
+    nargs="?",
+    help="The frame number of the first frame to analyse.",
+)
 
-parser.add_argument('-e', '--end_frame', nargs="?",
-                    help="The frame number of the last frame to analyse.")
+parser.add_argument(
+    "-e",
+    "--end_frame",
+    nargs="?",
+    help="The frame number of the last frame to analyse.",
+)
 
-parser.add_argument('-b', '--benchmark', action='store_true',
-                    help="Benchmark the Nautilus subroutines.")
+parser.add_argument(
+    "-b",
+    "--benchmark",
+    action="store_true",
+    help="Benchmark the Nautilus subroutines.",
+)
 
 sys.stdout.write("\n")
 
@@ -47,14 +76,22 @@ args = parser.parse_args()
 must_exit = False
 
 if args.author:
-    print("\n nautilus-cell2grid was written by Georgios Gerogiokas and Julien Michel (C) 2014")
+    print(
+        "\n nautilus-cell2grid was written by Georgios Gerogiokas and Julien Michel (C) 2014"
+    )
     print("It is based on the Nautilus Sire module.")
     must_exit = True
 
 if args.version:
-    print("nautilus-cell2grid -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print(
+        "nautilus-cell2grid -- from Sire release version <%s>"
+        % Sire.__version__
+    )
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if must_exit:
@@ -73,7 +110,7 @@ if args.cell_dir:
 elif "cell_dir" in params:
     cell_dir = params["cell_dir"]
 else:
-    cell_dir= "cell"
+    cell_dir = "cell"
     params["cell_dir"] = cell_dir
 
 if args.start_frame:
@@ -92,6 +129,5 @@ if not (os.path.exists(cell_dir)):
     print("\nPlease supply the cell file directory, it is missing")
     sys.exit(-1)
 
-print("\nRunning nautilus-cell2grid.py using files %s " % (cell_dir) )
+print("\nRunning nautilus-cell2grid.py using files %s " % (cell_dir))
 Nautilus.cell2grid(params)
-

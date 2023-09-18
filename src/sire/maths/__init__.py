@@ -2,10 +2,12 @@ __all__ = [
     "align",
     "create_quaternion",
     "get_alignment",
+    "EnergyTrajectory",
     "kabasch",
     "kabasch_fit",
     "Matrix",
     "pi",
+    "RanGenerator",
     "Sphere",
     "Torsion",
     "Transform",
@@ -14,7 +16,16 @@ __all__ = [
 ]
 
 from ..legacy import Maths as _Maths
-from ..legacy.Maths import Matrix, Quaternion, Triangle, Transform, Torsion, pi
+from ..legacy.Maths import (
+    Matrix,
+    Quaternion,
+    RanGenerator,
+    Triangle,
+    Transform,
+    Torsion,
+    pi,
+    EnergyTrajectory,
+)
 
 from ._vector import Vector
 from ._sphere import Sphere
@@ -155,3 +166,27 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
             )
 
         return quaternion
+
+
+if not hasattr(EnergyTrajectory, "to_pandas"):
+
+    def _to_pandas(obj):
+        """
+        Return the energy trajectory as a pandas DataFrame
+        """
+        import pandas as pd
+        from ..units import picosecond, kcal_per_mol
+
+        data = {}
+
+        data["time"] = obj.times(picosecond.get_default())
+
+        keys = obj.keys()
+        keys.sort()
+
+        for key in keys:
+            data[str(key)] = obj.energies(key, kcal_per_mol.get_default())
+
+        return pd.DataFrame(data).set_index("time")
+
+    EnergyTrajectory.to_pandas = _to_pandas

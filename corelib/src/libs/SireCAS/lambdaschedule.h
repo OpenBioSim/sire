@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -76,6 +76,9 @@ namespace SireCAS
 
         bool isNull() const;
 
+        static LambdaSchedule standard_morph();
+        static LambdaSchedule charge_scaled_morph(double scale = 0.2);
+
         static SireCAS::Symbol lam();
         static SireCAS::Symbol initial();
         static SireCAS::Symbol final();
@@ -114,7 +117,7 @@ namespace SireCAS
                          const SireCAS::Expression &equation);
 
         void addMorphStage();
-        void addChargeScaleStages(double scale);
+        void addChargeScaleStages(double scale = 0.2);
 
         void setEquation(const QString &stage,
                          const QString &lever,
@@ -152,6 +155,9 @@ namespace SireCAS
 
         SireCAS::Symbol getConstantSymbol(const QString &constant) const;
 
+        double morph(const QString &lever,
+                     double initial, double final, double lambda_value) const;
+
         QVector<double> morph(const QString &lever,
                               const QVector<double> &initial,
                               const QVector<double> &final,
@@ -162,9 +168,10 @@ namespace SireCAS
                            const QVector<int> &final,
                            double lambda_value) const;
 
+        double clamp(double lambda_value) const;
+
     protected:
         int find_stage(const QString &stage) const;
-        double clamp(double lambda_value) const;
 
         std::tuple<int, double> resolve_lambda(double lambda) const;
 

@@ -25,11 +25,22 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   distance between atoms of two views.
 
 * Added support for perturbable molecules to the OpenMM converter. Have addded
-  `LambdaLever` and `LambdaSchedule` classes that can be used to control
+  ``LambdaLever`` and ``LambdaSchedule`` classes that can be used to control
   how forcefield parameters are changed with lambda. These levers change
   the parameters in the OpenMM context, enabling simulations at different
   values of lambda to be performed. This is initial functionality which
   will be documented and expanded by subsequent PRs.
+
+* Added support for softening potentials used to smooth creation and
+  deletion of ghost atoms during alchemical free energy simulations.
+  Added a new ``sire.morph`` module that includes functions that should
+  make it easier to set up, view and control morphs (perturbations).
+
+* Added an ``EnergyTrajectory`` class that lets us record the energy
+  trajectory along a dynamics simulation. This includes recording energies
+  at different λ-windows to that being simulated, thereby providing
+  the raw data for free energy calculations. By default the
+  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
 
 * Forced all new-style modules to import when `sr.use_new_api()` is called.
   This will make it easier to use sire with multiprocessing.
@@ -66,14 +77,31 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Updated ``FreeEnergyAnalysis.py`` to be compatible with both the new pymbar 4 API
   and the old pymbar 3 API.
 
-* Made sure that a title is written to an AmberRst file, even if the system
-  has no name (issue #99).
+* Added support for restraints to the OpenMM dynamics layer. Initial tested
+  support for positional and distance/bond restraints is included, as well
+  as experimental support for Boresch restraints. The restraint are documented
+  in the :doc:`tutorial <tutorial/part06/03_restraints>`. This also documents
+  new code to let you specify atoms that should be fixed in space.
+
+* Added support for alchemical restraints to the OpenMM dynamics layer.
+  This lets you scale restraints as part of a λ-coordinate. This is
+  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints`.
+  Restraints can be named, meaning that you can scale different restraints
+  at different stages and by different values across the λ-coordinate.
 
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
+`2023.3.2 <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.2>`__ - September 2023
+----------------------------------------------------------------------------------------------
+
+* Made sure that a title is written to an AmberRst file, even if the system
+  has no name (issue #99).
+
 * Modularise the :class:`~sire.vol.TriclinicBox` lattice rotation and reduction functionality
-  and make both optional.
+  and make both optional. (PR #102).
+
+* Updated default units so that units of pressure default to printing out in units of atmospheres
 
 `2023.3.1 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.1>`__ - July 2023
 -----------------------------------------------------------------------------------------

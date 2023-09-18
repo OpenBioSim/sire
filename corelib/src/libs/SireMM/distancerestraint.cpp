@@ -560,7 +560,7 @@ static Expression diffHarmonicFunction(double force_constant)
 /** Return a distance restraint that applies a harmonic potential between
     the points 'point0' and 'point1' using a force constant 'force_constant' */
 DistanceRestraint DistanceRestraint::harmonic(const PointRef &point0, const PointRef &point1,
-                                              const HarmonicDistanceForceConstant &force_constant)
+                                              const SireUnits::Dimension::HarmonicBondConstant &force_constant)
 {
     return DistanceRestraint(point0, point1, ::harmonicFunction(force_constant),
                              ::diffHarmonicFunction(force_constant));
@@ -603,7 +603,7 @@ static Expression diffHalfHarmonicFunction(double force_constant, double distanc
     using a force constant 'force_constant' */
 DistanceRestraint DistanceRestraint::halfHarmonic(const PointRef &point0, const PointRef &point1,
                                                   const Length &distance,
-                                                  const HarmonicDistanceForceConstant &force_constant)
+                                                  const SireUnits::Dimension::HarmonicBondConstant &force_constant)
 {
     return DistanceRestraint(point0, point1, ::halfHarmonicFunction(force_constant, distance),
                              ::diffHalfHarmonicFunction(force_constant, distance));
