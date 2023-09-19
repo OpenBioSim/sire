@@ -149,6 +149,9 @@ try:
 
         friction = friction.to(1.0 / picosecond) / openmm.unit.picosecond
 
+        use_andersen = False
+        temperature = None
+
         if integrator is None:
             if ensemble.is_nve():
                 integrator = openmm.VerletIntegrator(timestep)
@@ -206,6 +209,12 @@ try:
                         temperature, friction, timestep
                     )
 
+                elif integrator == "andersen":
+                    # use a verlet integrator and switch on the
+                    # andersen thermostat with the specified frequency
+                    integrator = openmm.VerletIntegrator(timestep)
+                    use_andersen = True
+
                 else:
                     raise ValueError(f"Unrecognised integrator {integrator}")
 
@@ -219,6 +228,11 @@ try:
 
         # system must be an openmm.System() or else we will crash!
         openmm_metadata = _sire_to_openmm_system(system, mols, map)
+
+        # If we want temperature controlled by an Andersen thermostat
+        # then add this here
+        if use_andersen:
+            system.addForce(openmm.AndersenThermostat(temperature, friction))
 
         # If we want NPT and this is periodic then we have to
         # add the barostat to the system
