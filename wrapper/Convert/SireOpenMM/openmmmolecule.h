@@ -64,6 +64,9 @@ namespace SireOpenMM
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
 
+        QVector<double> getChargeScales() const;
+        QVector<double> getLJScales() const;
+
         bool isGhostAtom(int atom) const;
 
         std::tuple<int, int, double, double, double>
@@ -109,10 +112,7 @@ namespace SireOpenMM
         /** Charge and LJ parameters (sigma / epsilon) */
         QVector<std::tuple<double, double, double>> cljs;
 
-        /** Indexes of all bond pairs */
-        QVector<std::pair<int, int>> bond_pairs;
-
-        /** Set of 1-4 or excluded  pairs
+        /** Set of 1-4 or excluded pairs
             (with coulomb and LJ scaling factors) */
         QVector<std::tuple<int, int, double, double>> exception_params;
 
@@ -165,14 +165,9 @@ namespace SireOpenMM
                                 const SireBase::PropertyMap &map,
                                 bool is_perturbable);
 
-        void buildStandardExceptions(const SireMol::Molecule &mol,
-                                     const SireMM::AmberParams &params,
-                                     QSet<qint64> &constrained_pairs,
-                                     const SireBase::PropertyMap &map);
-
-        void buildPerturbableExceptions(const SireMol::Molecule &mol,
-                                        QSet<qint64> &constrained_pairs,
-                                        const SireBase::PropertyMap &map);
+        void buildExceptions(const SireMol::Molecule &mol,
+                             QSet<qint64> &constrained_pairs,
+                             const SireBase::PropertyMap &map);
 
         void alignInternals(const SireBase::PropertyMap &map);
     };

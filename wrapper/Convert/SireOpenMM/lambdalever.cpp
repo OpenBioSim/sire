@@ -333,7 +333,17 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             perturbable_mol.perturbed->getTorsionKs(),
             lambda_value);
 
-        // will eventually morph the NB14 / exception parameters :-)
+        const auto morphed_charge_scale = this->lambda_schedule.morph(
+            "charge_scale",
+            perturbable_mol.getChargeScales(),
+            perturbable_mol.perturbed->getChargeScales(),
+            lambda_value);
+
+        const auto morphed_lj_scale = this->lambda_schedule.morph(
+            "lj_scale",
+            perturbable_mol.getLJScales(),
+            perturbable_mol.perturbed->getLJScales(),
+            lambda_value);
 
         // now update the forcefields
         int start_index = start_idxs.value("clj", -1);
@@ -397,8 +407,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const auto atom0 = std::get<0>(param);
                     const auto atom1 = std::get<1>(param);
 
-                    const auto coul_14_scale = std::get<2>(param);
-                    const auto lj_14_scale = std::get<3>(param);
+                    const auto coul_14_scale = morphed_charge_scale[j];
+                    const auto lj_14_scale = morphed_lj_scale[j];
 
                     const bool atom0_is_ghost = perturbable_mol.isGhostAtom(atom0);
                     const bool atom1_is_ghost = perturbable_mol.isGhostAtom(atom1);
