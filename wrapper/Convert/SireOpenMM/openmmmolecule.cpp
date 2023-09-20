@@ -38,6 +38,10 @@ using namespace SireMM;
 using namespace SireMol;
 using namespace SireBase;
 
+////////
+//////// Implementation of OpenMMMolecule
+////////
+
 OpenMMMolecule::OpenMMMolecule()
 {
 }
@@ -1355,6 +1359,27 @@ QVector<double> OpenMMMolecule::getTorsionKs() const
     return dih_ks;
 }
 
+/** Return the atom indexes of the atoms in the exceptions, in
+ *  exception order for this molecule
+ */
+QVector<std::pair<int, int>> OpenMMMolecule::getExceptionAtoms() const
+{
+    const int nexceptions = this->exception_params.count();
+
+    QVector<std::pair<int, int>> exception_atoms(nexceptions);
+
+    auto exception_atoms_data = exception_atoms.data();
+    const auto exception_params_data = this->exception_params.constData();
+
+    for (int i = 0; i < nexceptions; ++i)
+    {
+        exception_atoms_data[i] = std::make_pair(std::get<0>(exception_params_data[i]),
+                                                 std::get<1>(exception_params_data[i]));
+    }
+
+    return exception_atoms;
+}
+
 /** Return all of the coulomb intramolecular scale factors (nbscl)
  *  in exception order for this molecule
  */
@@ -1393,4 +1418,319 @@ QVector<double> OpenMMMolecule::getLJScales() const
     }
 
     return lj_scales;
+}
+
+////////
+//////// Implementation of PerturbableOpenMMMolecule
+////////
+
+/** Null constructor */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule()
+{
+}
+
+/** Construct from the passed OpenMMMolecule */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
+{
+    if (mol.perturbed.get() == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "You cannot construct a PerturbableOpenMMMolecule from an "
+                                                "OpenMMMolecule that has not been perturbed!"),
+                                            CODELOC);
+
+    alpha0 = mol.getAlphas();
+    alpha1 = mol.perturbed->getAlphas();
+
+    chg0 = mol.getCharges();
+    chg1 = mol.perturbed->getCharges();
+
+    sig0 = mol.getSigmas();
+    sig1 = mol.perturbed->getSigmas();
+
+    eps0 = mol.getEpsilons();
+    eps1 = mol.perturbed->getEpsilons();
+
+    bond_k0 = mol.getBondKs();
+    bond_k1 = mol.perturbed->getBondKs();
+
+    bond_r0 = mol.getBondLengths();
+    bond_r1 = mol.perturbed->getBondLengths();
+
+    ang_k0 = mol.getAngleKs();
+    ang_k1 = mol.perturbed->getAngleKs();
+
+    ang_t0 = mol.getAngleSizes();
+    ang_t1 = mol.perturbed->getAngleSizes();
+
+    tors_k0 = mol.getTorsionKs();
+    tors_k1 = mol.perturbed->getTorsionKs();
+
+    tors_periodicity0 = mol.getTorsionPeriodicities();
+    tors_periodicity1 = mol.perturbed->getTorsionPeriodicities();
+
+    tors_phase0 = mol.getTorsionPhases();
+    tors_phase1 = mol.perturbed->getTorsionPhases();
+
+    charge_scl0 = mol.getChargeScales();
+    charge_scl1 = mol.perturbed->getChargeScales();
+
+    exception_atoms = mol.getExceptionAtoms();
+
+    lj_scl0 = mol.getLJScales();
+    lj_scl1 = mol.perturbed->getLJScales();
+
+    to_ghost_idxs = mol.to_ghost_idxs;
+    from_ghost_idxs = mol.from_ghost_idxs;
+}
+
+/** Copy constructor */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other)
+    : alpha0(other.alpha0), alpha1(other.alpha1),
+      chg0(other.chg0), chg1(other.chg1),
+      sig0(other.sig0), sig1(other.sig1),
+      eps0(other.eps0), eps1(other.eps1),
+      bond_k0(other.bond_k0), bond_k1(other.bond_k1),
+      bond_r0(other.bond_r0), bond_r1(other.bond_r1),
+      ang_k0(other.ang_k0), ang_k1(other.ang_k1),
+      ang_t0(other.ang_t0), ang_t1(other.ang_t1),
+      tors_k0(other.tors_k0), tors_k1(other.tors_k1),
+      tors_periodicity0(other.tors_periodicity0),
+      tors_periodicity1(other.tors_periodicity1),
+      tors_phase0(other.tors_phase0), tors_phase1(other.tors_phase1),
+      charge_scl0(other.charge_scl0), charge_scl1(other.charge_scl1),
+      lj_scl0(other.lj_scl0), lj_scl1(other.lj_scl1),
+      to_ghost_idxs(other.to_ghost_idxs), from_ghost_idxs(other.from_ghost_idxs),
+      exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs)
+{
+}
+
+/** Destructor */
+PerturbableOpenMMMolecule::~PerturbableOpenMMMolecule()
+{
+}
+
+/** Comparison operator */
+bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &other) const
+{
+    return alpha0 == alpha1 and chg0 == chg1 and sig0 == sig1 and eps0 == eps1 and
+           bond_k0 == bond_k1 and bond_r0 == bond_r1 and ang_k0 == ang_k1 and
+           ang_t0 == ang_t1 and tors_k0 == tors_k1 and tors_periodicity0 == tors_periodicity1 and
+           tors_phase0 == tors_phase1 and charge_scl0 == charge_scl1 and lj_scl0 == lj_scl1 and
+           to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
+           exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs;
+}
+
+/** Comparison operator */
+bool PerturbableOpenMMMolecule::operator!=(const PerturbableOpenMMMolecule &other) const
+{
+    return not this->operator==(other);
+}
+
+/** Return the alpha parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getAlphas0() const
+{
+    return this->alpha0;
+}
+
+/** Return the alpha parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getAlphas1() const
+{
+    return this->alpha1;
+}
+
+/** Return the atom charges of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getCharges0() const
+{
+    return this->chg0;
+}
+
+/** Return the atom charges of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getCharges1() const
+{
+    return this->chg1;
+}
+
+/** Return the LJ sigma parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getSigmas0() const
+{
+    return this->sig0;
+}
+
+/** Return the LJ sigma parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getSigmas1() const
+{
+    return this->sig1;
+}
+
+/** Return the LJ epsilon parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getEpsilons0() const
+{
+    return this->eps0;
+}
+
+/** Return the LJ epsilon parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getEpsilons1() const
+{
+    return this->eps1;
+}
+
+/** Return the bond k parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getBondKs0() const
+{
+    return this->bond_k0;
+}
+
+/** Return the bond k parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getBondKs1() const
+{
+    return this->bond_k1;
+}
+
+/** Return the bond length parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getBondLengths0() const
+{
+    return this->bond_r0;
+}
+
+/** Return the bond length parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getBondLengths1() const
+{
+    return this->bond_r1;
+}
+
+/** Return the angle k parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getAngleKs0() const
+{
+    return this->ang_k0;
+}
+
+/** Return the angle k parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getAngleKs1() const
+{
+    return this->ang_k1;
+}
+
+/** Return the angle size parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getAngleSizes0() const
+{
+    return this->ang_t0;
+}
+
+/** Return the angle size parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getAngleSizes1() const
+{
+    return this->ang_t1;
+}
+
+/** Return the torsion k parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionKs0() const
+{
+    return this->tors_k0;
+}
+
+/** Return the torsion k parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionKs1() const
+{
+    return this->tors_k1;
+}
+
+/** Return the torsion periodicity parameters of the reference state */
+QVector<int> PerturbableOpenMMMolecule::getTorsionPeriodicities0() const
+{
+    return this->tors_periodicity0;
+}
+
+/** Return the torsion periodicity parameters of the perturbed state */
+QVector<int> PerturbableOpenMMMolecule::getTorsionPeriodicities1() const
+{
+    return this->tors_periodicity1;
+}
+
+/** Return the torsion phase parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionPhases0() const
+{
+    return this->tors_phase0;
+}
+
+/** Return the torsion phase parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionPhases1() const
+{
+    return this->tors_phase1;
+}
+
+/** Return the coulomb intramolecular scale factors of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getChargeScales0() const
+{
+    return this->charge_scl0;
+}
+
+/** Return the coulomb intramolecular scale factors of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getChargeScales1() const
+{
+    return this->charge_scl1;
+}
+
+/** Return the LJ intramolecular scale factors of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getLJScales0() const
+{
+    return this->lj_scl0;
+}
+
+/** Return the LJ intramolecular scale factors of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getLJScales1() const
+{
+    return this->lj_scl1;
+}
+
+/** Return the indexes of the atoms that are to be ghosted in the
+ *  perturbed state
+ */
+QSet<int> PerturbableOpenMMMolecule::getToGhostIdxs() const
+{
+    return this->to_ghost_idxs;
+}
+
+/** Return the indexes of the atoms that were ghosts in the
+ *  reference state
+ */
+QSet<int> PerturbableOpenMMMolecule::getFromGhostIdxs() const
+{
+    return this->from_ghost_idxs;
+}
+
+/** Return true if the atom is a ghost atom in the
+ *  referenece or perturbed states */
+bool PerturbableOpenMMMolecule::isGhostAtom(int atom) const
+{
+    return from_ghost_idxs.contains(atom) or to_ghost_idxs.contains(atom);
+}
+
+/** Return the indices of the atoms in the exceptions */
+QVector<std::pair<int, int>> PerturbableOpenMMMolecule::getExceptionAtoms() const
+{
+    return this->exception_atoms;
+}
+
+/** Return the global indexes of the exceptions in the non-bonded and
+ *  ghost-14 forces
+ */
+QVector<std::pair<int, int>> PerturbableOpenMMMolecule::getExceptionIndicies(const QString &name) const
+{
+    return this->exception_idxs.value(name);
+}
+
+/** Set the global indexes of the exceptions in the non-bonded and
+ *  ghost-14 forces
+ */
+void PerturbableOpenMMMolecule::setExceptionIndicies(const QString &name,
+                                                     const QVector<std::pair<int, int>> &exception_idxs)
+{
+    if (exception_idxs.count() != this->exception_atoms.count())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of exception indicies (%1) does not match the number of exceptions (%2)")
+                                                .arg(exception_idxs.count())
+                                                .arg(this->exception_atoms.count()),
+                                            CODELOC);
+
+    this->exception_idxs.insert(name, exception_idxs);
 }

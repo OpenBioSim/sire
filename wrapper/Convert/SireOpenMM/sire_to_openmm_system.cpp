@@ -1437,6 +1437,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                               std::get<4>(p), true);
                 }
 
+                // these are the indexes of the exception in the
+                // non-bonded forcefields and also the ghost-14 forcefield
                 exception_idxs[j] = std::make_pair(idx, nbidx);
 
                 // remove this interaction from the ghost forcefields

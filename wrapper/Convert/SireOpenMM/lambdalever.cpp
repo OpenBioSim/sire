@@ -269,80 +269,80 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // calculate the new parameters for this lambda value
         const auto morphed_charges = this->lambda_schedule.morph(
             "charge",
-            perturbable_mol.getCharges(),
-            perturbable_mol.perturbed->getCharges(),
+            perturbable_mol.getCharges0(),
+            perturbable_mol.getCharges1(),
             lambda_value);
 
         const auto morphed_sigmas = this->lambda_schedule.morph(
             "sigma",
-            perturbable_mol.getSigmas(),
-            perturbable_mol.perturbed->getSigmas(),
+            perturbable_mol.getSigmas0(),
+            perturbable_mol.getSigmas1(),
             lambda_value);
 
         const auto morphed_epsilons = this->lambda_schedule.morph(
             "epsilon",
-            perturbable_mol.getEpsilons(),
-            perturbable_mol.perturbed->getEpsilons(),
+            perturbable_mol.getEpsilons0(),
+            perturbable_mol.getEpsilons1(),
             lambda_value);
 
         const auto morphed_alphas = this->lambda_schedule.morph(
             "alpha",
-            perturbable_mol.getAlphas(),
-            perturbable_mol.perturbed->getAlphas(),
+            perturbable_mol.getAlphas0(),
+            perturbable_mol.getAlphas1(),
             lambda_value);
 
         const auto morphed_bond_k = this->lambda_schedule.morph(
             "bond_k",
-            perturbable_mol.getBondKs(),
-            perturbable_mol.perturbed->getBondKs(),
+            perturbable_mol.getBondKs0(),
+            perturbable_mol.getBondKs1(),
             lambda_value);
 
         const auto morphed_bond_length = this->lambda_schedule.morph(
             "bond_length",
-            perturbable_mol.getBondLengths(),
-            perturbable_mol.perturbed->getBondLengths(),
+            perturbable_mol.getBondLengths0(),
+            perturbable_mol.getBondLengths1(),
             lambda_value);
 
         const auto morphed_angle_k = this->lambda_schedule.morph(
             "angle_k",
-            perturbable_mol.getAngleKs(),
-            perturbable_mol.perturbed->getAngleKs(),
+            perturbable_mol.getAngleKs0(),
+            perturbable_mol.getAngleKs1(),
             lambda_value);
 
         const auto morphed_angle_size = this->lambda_schedule.morph(
             "angle_size",
-            perturbable_mol.getAngleSizes(),
-            perturbable_mol.perturbed->getAngleSizes(),
+            perturbable_mol.getAngleSizes0(),
+            perturbable_mol.getAngleSizes1(),
             lambda_value);
 
         const auto morphed_torsion_phase = this->lambda_schedule.morph(
             "torsion_phase",
-            perturbable_mol.getTorsionPhases(),
-            perturbable_mol.perturbed->getTorsionPhases(),
+            perturbable_mol.getTorsionPhases0(),
+            perturbable_mol.getTorsionPhases1(),
             lambda_value);
 
         const auto morphed_torsion_periodicity = this->lambda_schedule.morph(
             "torsion_periodicity",
-            perturbable_mol.getTorsionPeriodicities(),
-            perturbable_mol.perturbed->getTorsionPeriodicities(),
+            perturbable_mol.getTorsionPeriodicities0(),
+            perturbable_mol.getTorsionPeriodicities1(),
             lambda_value);
 
         const auto morphed_torsion_k = this->lambda_schedule.morph(
             "torsion_k",
-            perturbable_mol.getTorsionKs(),
-            perturbable_mol.perturbed->getTorsionKs(),
+            perturbable_mol.getTorsionKs0(),
+            perturbable_mol.getTorsionKs1(),
             lambda_value);
 
         const auto morphed_charge_scale = this->lambda_schedule.morph(
             "charge_scale",
-            perturbable_mol.getChargeScales(),
-            perturbable_mol.perturbed->getChargeScales(),
+            perturbable_mol.getChargeScales0(),
+            perturbable_mol.getChargeScales1(),
             lambda_value);
 
         const auto morphed_lj_scale = this->lambda_schedule.morph(
             "lj_scale",
-            perturbable_mol.getLJScales(),
-            perturbable_mol.perturbed->getLJScales(),
+            perturbable_mol.getLJScales0(),
+            perturbable_mol.getLJScales1(),
             lambda_value);
 
         // now update the forcefields
@@ -356,8 +356,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             {
                 for (int j = 0; j < nparams; ++j)
                 {
-                    const bool is_from_ghost = perturbable_mol.from_ghost_idxs.contains(j);
-                    const bool is_to_ghost = perturbable_mol.to_ghost_idxs.contains(j);
+                    const bool is_from_ghost = perturbable_mol.getFromGhostIdxs().contains(j);
+                    const bool is_to_ghost = perturbable_mol.getToGhostIdxs().contains(j);
 
                     // reduced charge
                     custom_params[0] = morphed_charges[j];
@@ -396,16 +396,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 }
             }
 
-            const auto idxs = perturbable_mol.exception_idxs.value("clj");
+            const auto idxs = perturbable_mol.getExceptionIndicies("clj");
 
             if (not idxs.isEmpty())
             {
-                for (int j = 0; j < perturbable_mol.exception_params.count(); ++j)
-                {
-                    const auto &param = perturbable_mol.exception_params[j];
+                const auto exception_atoms = perturbable_mol.getExceptionAtoms();
 
-                    const auto atom0 = std::get<0>(param);
-                    const auto atom1 = std::get<1>(param);
+                for (int j = 0; j < exception_atoms.count(); ++j)
+                {
+                    const auto &atoms = exception_atoms[j];
+
+                    const auto atom0 = std::get<0>(atoms);
+                    const auto atom1 = std::get<1>(atoms);
 
                     const auto coul_14_scale = morphed_charge_scale[j];
                     const auto lj_14_scale = morphed_lj_scale[j];
@@ -413,7 +415,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const bool atom0_is_ghost = perturbable_mol.isGhostAtom(atom0);
                     const bool atom1_is_ghost = perturbable_mol.isGhostAtom(atom1);
 
-                    const auto p = get_exception(std::get<0>(param), std::get<1>(param),
+                    const auto p = get_exception(atom0, atom1,
                                                  start_index, coul_14_scale, lj_14_scale,
                                                  morphed_charges, morphed_sigmas, morphed_epsilons,
                                                  morphed_alphas);
@@ -772,7 +774,7 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
                                         const QHash<QString, qint32> &starts)
 {
     // should add in some sanity checks for these inputs
-    this->perturbable_mols.append(molecule);
+    this->perturbable_mols.append(PerturbableOpenMMMolecule(molecule));
     this->start_indicies.append(starts);
     this->perturbable_maps.insert(molecule.number, molecule.perturtable_map);
     return this->perturbable_mols.count() - 1;
@@ -787,8 +789,7 @@ void LambdaLever::setExceptionIndicies(int mol_idx,
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 
-    this->perturbable_mols[mol_idx].exception_idxs.insert(
-        name, exception_idxs);
+    this->perturbable_mols[mol_idx].setExceptionIndicies(name, exception_idxs);
 }
 
 /** Return all of the property maps used to find the perturbable properties
