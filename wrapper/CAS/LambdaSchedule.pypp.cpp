@@ -46,6 +46,18 @@ void register_LambdaSchedule_class(){
                 , "Sandwich the current set of stages with a charge-descaling and\n  a charge-scaling stage. This prepends a charge-descaling stage\n  that scales the charge parameter down from `initial` to\n  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of\n  the exising stages in this schedule are then multiplied\n  by :gamma:. A final charge-rescaling stage is then appended that\n  scales the charge parameter from :gamma:.final to final.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::addChargeScaleStages
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addChargeScaleStages_function_type)( ::QString const &,::QString const &,double ) ;
+            addChargeScaleStages_function_type addChargeScaleStages_function_value( &::SireCAS::LambdaSchedule::addChargeScaleStages );
+            
+            LambdaSchedule_exposer.def( 
+                "addChargeScaleStages"
+                , addChargeScaleStages_function_value
+                , ( bp::arg("decharge_name"), bp::arg("recharge_name"), bp::arg("scale")=0.20000000000000001 )
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::addLever
         
             typedef void ( ::SireCAS::LambdaSchedule::*addLever_function_type)( ::QString const & ) ;
@@ -82,6 +94,19 @@ void register_LambdaSchedule_class(){
                 , addMorphStage_function_value
                 , bp::release_gil_policy()
                 , "Append a morph stage onto this schedule. The morph stage is a\n  standard stage that scales each forcefield parameter by\n  (1-:lambda:).initial + :lambda:.final\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addMorphStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addMorphStage_function_type)( ::QString const & ) ;
+            addMorphStage_function_type addMorphStage_function_value( &::SireCAS::LambdaSchedule::addMorphStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addMorphStage"
+                , addMorphStage_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireCAS::LambdaSchedule::addStage
@@ -382,7 +407,7 @@ void register_LambdaSchedule_class(){
                 , morph_function_value
                 , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
                 , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs floating point parameters. There is an overload\n  of this function that morphs integer parameters, in which\n  case the result would be rounded to the nearest integer.\n" );
+                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs a single floating point parameters.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::morph

@@ -181,8 +181,8 @@ time
 29.98 -38253.351648 -38253.271135 -38253.195882  7186.511174 -38253.271135
 30.00 -38305.305520 -38305.195131 -38305.090002  7234.784841 -38305.195131
 
-Setting up a λ-schedule
------------------------
+Controlling perturbations with a λ-schedule
+-------------------------------------------
 
 So far the perturbation from the reference to the perturbed state has been
 linear. λ has acted on each of the perturbable properties of the molecule
@@ -291,30 +291,116 @@ Through the combination of adding stages and specifyig different equations
 for levers, you can have a lot of control over how the perturbable properties
 are morphed from the reference to the perturbed states.
 
-To make things easier, there are some simple functions that create some
-common schedules.
+To make things easier, there are some simple functions that let you add
+some common stages.
 
->>> s = sr.cas.LambdaSchedule.standard_morph()
+>>> s = sr.cas.LambdaSchedule()
+>>> print(s)
+LambdaSchedule::null
+>>> s.add_morph_stage("morph")
 >>> print(s)
 LambdaSchedule(
-  morph: λ * final + initial * (-λ + 1)
+  morph: final * λ + initial * (-λ + 1)
+)
+>>> s.add_charge_scale_stages("decharge", "recharge", scale=0.2)
+>>> print(s)
+LambdaSchedule(
+  decharge: initial
+    charge: initial * (-λ * (-γ + 1) + 1)
+  morph: final * λ + initial * (-λ + 1)
+    charge: γ * (final * λ + initial * (-λ + 1))
+  recharge: final
+    charge: final * (-(-γ + 1) * (-λ + 1) + 1)
+  γ == 0.2
 )
 
-creates the standard morph of all parameters by the standard perturbation
-equation.
+has created a null schedule, and then added a ``morph`` stage using the
+default perturbation equation. This is then sandwiched by two stages;
+a ``decharge`` stage that scales the charge lever from the ``initial``
+value to γ times that value, and a ``recharge`` stage that scales
+the charge lever from γ times the ``final`` value to the full
+``final`` value. It also scales the charge lever in the ``morph`` stage
+by γ, which is set to 0.2 for all stages.
 
+We can see how this would affect a hyperthetical parameter that goes
+from an ``initial`` value of 2.0 to a ``final`` value of 3.0 via
 
-* ``schedule`` - set the λ-schedule which specifies how λ morphs between
-  the reference and perturbed molecules.
+>>> s.get_lever_values(initial=2.0, final=3.0).plot()
 
-A λ-schedule (represented using the :class:`sire.cas.LambdaSchedule` class)
-specifies how the λ-parameter morphs from the reference to the perturbed
-molecules. The λ-schedule achieves this...
+.. image:: images/06_02_04.jpg
+   :alt: View of the λ-schedule that sandwiches a standard morph stage
+          between two stages that scale the charge lever.
 
-WRITE MORE ABOUT THE λ-schedule
+.. note::
 
-Softening potentials
---------------------
+   Schedules constructed outside of the dynamics simulation do not have
+   the full set of levers (e.g. torsion_k, dih_scale etc) as
+   levers are only added as they are needed (hence why only
+   ``default`` and ``charge`` are shown here). The additional levers
+   are added when the schedule is added to the simulation.
+
+Once you have created your schedule you can add it via the
+:meth:`~sire.mol.Dynamics.set_schedule` function of the
+:class:`~sire.mol.Dynamics` object, e.g.
+
+>>> d.set_schedule(s)
+
+Alternatively, you can set the schedule when you call the
+:meth:`~sire.mol.SelectorMol.dynamics` function, e.g.
+
+>>> d = mols.dynamics(lambda_value=0.5, timestep="4fs", temperature="25oC",
+...                   schedule=s)
+>>> print(d.get_schedule())
+LambdaSchedule(
+  decharge: initial
+    charge: (-(-γ + 1) * λ + 1) * initial
+  morph: final * λ + (-λ + 1) * initial
+    charge: γ * (final * λ + (-λ + 1) * initial)
+  recharge: final
+    charge: (-(-γ + 1) * (-λ + 1) + 1) * final
+  γ == 0.2
+)
+
+Ghost Atoms and Softening potentials
+------------------------------------
+
+Internally the alchemical dynamics simulation works by calculating morphed
+forcefield parameters whenever λ is changed, and then calling the
+OpenMM `updateParametersInContext function <http://docs.openmm.org/latest/api-c++/generated/NonbondedForce.html#classOpenMM_1_1NonbondedForce_1abc68b57ace47dafd3bf2e601b3cfa6eb>`__
+function to update those parameters in all of the OpenMM Force objects that
+are used to calculate atomic forces. This is a very efficient way of
+performing a perturbation, as it allows vanilla (standard) OpenMM forces
+to be used for the dynamics. However, there are challenges with how
+we handle atoms which are created or deleted during the perturbation.
+
+These atoms, which we call "ghost atoms", provide either a space into which
+a new atom is grown, or a space from which an atom is deleted. To ensure
+these ghost atoms don't cause dynamics instabilities, we use a softening
+potential to model their interactions with all other atoms. These
+softening potentials (also called "soft-core" potentials) soften the
+charge and Lennard-Jones interactions between the ghost atoms and all
+other atoms using an α (alpha) parameter. This is a perturbable parameter
+of the atoms, which is equal to 1 when the atom is in a ghost state,
+and 0 when it is not. For example, an atom which exists in the reference
+state but becomes a ghost in the perturbed state would have an α value
+that would go from 0 to 1. Alternatively, an atom which does not exist
+in the reference state, and that appears in the perturbed state, would
+have an α value that would go from 1 to 0.
+
+.. note::
+
+   You can have as many or few ghost atoms as you want in your merged
+   molecule. If all atoms become ghosts, then this is the same as
+   completely decoupling the molecule, as you would do in an
+   absolute binding free energy calculation. Equally, you could
+   run a "dual topology" calculation by two sets of atoms in your
+   merged molecule - the first set start as the reference state atoms,
+   and all become ghosts, while the second set start all as ghosts
+   and become the perturbed state atoms. In "single topology" calculations
+   you would only use ghost atoms for those which don't exist in either
+   of the end states.
+
+There are two parameters that control the softening potential:
 
 * ``shift_delta`` - set the ``shift_delta`` parameter which is used to
   control the electrostatic and van der Waals softening potential that
@@ -337,10 +423,10 @@ alchemical OpenMM context will be returned.
 
 >>> context = sr.convert.to(mols, "openmm")
 >>> print(context)
-OUTPUT
+openmm::Context( num_atoms=12167 integrator=VerletIntegrator timestep=1.0 fs platform=HIP )
 
 The context is held in a low-level class,
-:class:`~sire.Convert.SireOpenMM.SOMMContext`, inherits from the
+:class:`~sire.Convert.SireOpenMM.SOMMContext`, which inherits from the
 standard `OpenMM Context <https://docs.openmm.org/latest/api-python/generated/openmm.openmm.Context.html#openmm.openmm.Context>`__
 class.
 
@@ -365,3 +451,40 @@ are;
 * :func:`~sire.Convert.SireOpenMM.SOMMContext.get_energy` - return the
   current potential energy of the context. This will be in :mod:`sire`
   units if ``to_sire_units`` is ``True`` (the default).
+
+Note that you can also set the ``lambda_value`` and ``lambda_schedule``
+when you create the context using the ``map``, e.g.
+
+>>> context = sr.convert.to(mols, "openmm",
+...                         map={"lambda_value": 0.5, "schedule": s})
+>>> print(context)
+openmm::Context( num_atoms=12167 integrator=VerletIntegrator timestep=1.0 fs platform=HIP )
+>>> print(context.get_lambda())
+0.5
+>>> print(context.get_lambda_schedule())
+LambdaSchedule(
+  decharge: initial
+    charge: (-(-γ + 1) * λ + 1) * initial
+  morph: final * λ + (-λ + 1) * initial
+    charge: γ * (final * λ + (-λ + 1) * initial)
+  recharge: final
+    charge: (-(-γ + 1) * (-λ + 1) + 1) * final
+  γ == 0.2
+)
+
+You can then run dynamics as you would do normally using the standard
+OpenMM python API, e.g.
+
+>>> integrator = context.getIntegrator()
+>>> integrator.step(100)
+
+You can then call ``get_potential_energy()`` and ``set_lambda()`` to
+get the energy during dynamics for different values of λ, e.g.
+
+>>> context.set_lambda(0.0)
+>>> print(context.get_lambda(), context.get_potential_energy())
+0.0 -38727.2 kcal mol-1
+>>> context.set_lambda(0.5)
+>>> print(context.get_lambda(), context.get_potential_energy())
+0.5 -38743.8 kcal mol-1
+

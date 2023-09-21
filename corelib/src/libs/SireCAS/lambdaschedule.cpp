@@ -459,7 +459,9 @@ void LambdaSchedule::addMorphStage()
  *  by :gamma:. A final charge-rescaling stage is then appended that
  *  scales the charge parameter from :gamma:.final to final.
  */
-void LambdaSchedule::addChargeScaleStages(double scale)
+void LambdaSchedule::addChargeScaleStages(const QString &decharge_name,
+                                          const QString &recharge_name,
+                                          double scale)
 {
     auto scl = this->setConstant("γ", scale);
 
@@ -471,11 +473,24 @@ void LambdaSchedule::addChargeScaleStages(double scale)
     }
 
     // now prepend the decharging stage, and append the recharging stage
-    this->prependStage("decharge", this->initial());
-    this->appendStage("recharge", this->final());
+    this->prependStage(decharge_name, this->initial());
+    this->appendStage(recharge_name, this->final());
 
-    this->setEquation("decharge", "charge", (1.0 - ((1.0 - scl) * this->lam())) * this->initial());
-    this->setEquation("recharge", "charge", (1.0 - ((1.0 - scl) * (1.0 - this->lam()))) * this->final());
+    this->setEquation(decharge_name, "charge", (1.0 - ((1.0 - scl) * this->lam())) * this->initial());
+    this->setEquation(recharge_name, "charge", (1.0 - ((1.0 - scl) * (1.0 - this->lam()))) * this->final());
+}
+
+/** Sandwich the current set of stages with a charge-descaling and
+ *  a charge-scaling stage. This prepends a charge-descaling stage
+ *  that scales the charge parameter down from `initial` to
+ *  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of
+ *  the exising stages in this schedule are then multiplied
+ *  by :gamma:. A final charge-rescaling stage is then appended that
+ *  scales the charge parameter from :gamma:.final to final.
+ */
+void LambdaSchedule::addChargeScaleStages(double scale)
+{
+    this->addChargeScaleStages("decharge", "recharge", scale);
 }
 
 /** Prepend a stage called 'name' which uses the passed 'equation'

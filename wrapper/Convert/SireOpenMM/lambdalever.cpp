@@ -107,13 +107,6 @@ bool LambdaLever::hasLever(const QString &lever_name)
 
 void LambdaLever::addLever(const QString &lever_name)
 {
-    if (this->hasLever(lever_name))
-        throw SireError::invalid_key(QObject::tr(
-                                         "You cannot add a new lever called '%1' as a lever with "
-                                         "this name already exists.")
-                                         .arg(lever_name),
-                                     CODELOC);
-
     this->lambda_schedule.addLever(lever_name);
 }
 
@@ -807,5 +800,12 @@ LambdaSchedule LambdaLever::getSchedule() const
 
 void LambdaLever::setSchedule(const LambdaSchedule &sched)
 {
+    QStringList levers = lambda_schedule.getLevers();
+
     lambda_schedule = sched;
+
+    for (const auto &lever : levers)
+    {
+        lambda_schedule.addLever(lever);
+    }
 }
