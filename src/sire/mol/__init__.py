@@ -1405,10 +1405,12 @@ def _dynamics(
     save_frequency=None,
     energy_frequency=None,
     frame_frequency=None,
+    save_velocities=None,
     constraint=None,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
+    ignore_perturbations=None,
     temperature=None,
     pressure=None,
     shift_delta=None,
@@ -1416,6 +1418,7 @@ def _dynamics(
     restraints=None,
     fixed=None,
     device=None,
+    precision=None,
     map=None,
     **kwargs,
 ):
@@ -1452,6 +1455,12 @@ def _dynamics(
         to save frames during the trajectory. This can be overridden
         by setting frame_frequency during an individual run.
 
+    save_velocities: bool
+        Whether or not to save velocities when saving trajectory frames
+        during the simulation. This defaults to False, as velocity
+        trajectories aren't often needed, and they double the amount
+        of space that is required for a trajectory.
+
     constraint: str
         The type of constraint to use for bonds and/or angles, e.g.
         `h-bonds`, `bonds` etc.
@@ -1477,6 +1486,14 @@ def _dynamics(
         while the reference molecule will be at lambda=1). This will
         use the coordinates of the perturbed molecule as the
         starting point.
+
+    ignore_perturbations: bool
+        Whether or not to ignore perturbations. If this is True, then
+        the perturbation will be ignored, and the simulation will
+        be run using the properties of the reference molecule
+        (or the perturbed molecule if swap_end_states is True). This
+        is useful if you just want to run standard molecular dynamics
+        of the reference or perturbed states.
 
     temperature: temperature
         The temperature at which to run the simulation. A
@@ -1513,6 +1530,10 @@ def _dynamics(
         The ID of the GPU (or accelerator) used to accelerate
         the simulation. This would be CUDA_DEVICE_ID or similar
         if CUDA was used. This can be any valid OpenMM device string
+
+    precision: str
+        The desired precision for the simulation (e.g. `single`,
+        `mixed` or `double`)
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -1566,15 +1587,18 @@ def _dynamics(
     if save_frequency is None and not map.specified("save_frequency"):
         from ..units import picosecond
 
-        save_frequency = 25 * picosecond
-    else:
-        save_frequency = u(save_frequency)
+        map.set("save_frequency", 25 * picosecond)
+    elif save_frequency is not None:
+        map.set("save_frequency", u(save_frequency))
 
     if energy_frequency is not None:
-        map.set("energy_frequency", energy_frequency)
+        map.set("energy_frequency", u(energy_frequency))
 
     if frame_frequency is not None:
-        map.set("frame_frequency", frame_frequency)
+        map.set("frame_frequency", u(frame_frequency))
+
+    if save_velocities is not None:
+        map.set("save_velocities", save_velocities)
 
     if constraint is None and not map.specified("constraint"):
         from ..units import femtosecond
@@ -1606,18 +1630,21 @@ def _dynamics(
     if device is not None:
         map.set("device", str(device))
 
+    if precision is not None:
+        map.set("precision", str(precision).lower())
+
     return Dynamics(
         view,
         cutoff=cutoff,
         cutoff_type=cutoff_type,
         timestep=timestep,
-        save_frequency=save_frequency,
         constraint=str(constraint),
         schedule=schedule,
         lambda_value=lambda_value,
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
+        ignore_perturbations=ignore_perturbations,
         restraints=restraints,
         fixed=fixed,
         map=map,
@@ -1632,9 +1659,11 @@ def _minimisation(
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
+    ignore_perturbations=None,
     shift_delta=None,
     coulomb_power=None,
     device=None,
+    precision=None,
     restraints=None,
     fixed=None,
     map=None,
@@ -1678,6 +1707,14 @@ def _minimisation(
         use the coordinates of the perturbed molecule as the
         starting point.
 
+    ignore_perturbations: bool
+        Whether or not to ignore perturbations. If this is True, then
+        the perturbation will be ignored, and the simulation will
+        be run using the properties of the reference molecule
+        (or the perturbed molecule if swap_end_states is True). This
+        is useful if you just want to run standard molecular dynamics
+        of the reference or perturbed states.
+
     shift_delta: length
         The shift_delta parameter that controls the electrostatic
         and van der Waals softening potential that smooths the
@@ -1703,6 +1740,10 @@ def _minimisation(
         The ID of the GPU (or accelerator) used to accelerate
         minimisation. This would be CUDA_DEVICE_ID or similar
         if CUDA was used. This can be any valid OpenMM device string
+
+    precision: str
+        The desired precision for the simulation (e.g. `single`,
+        `mixed` or `double`)
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -1749,6 +1790,9 @@ def _minimisation(
     if device is not None:
         map.set("device", str(device))
 
+    if precision is not None:
+        map.set("precision", str(precision).lower())
+
     if constraint is not None:
         map.set("constraint", str(constraint))
 
@@ -1759,6 +1803,7 @@ def _minimisation(
         schedule=schedule,
         lambda_value=lambda_value,
         swap_end_states=swap_end_states,
+        ignore_perturbations=ignore_perturbations,
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
         restraints=restraints,

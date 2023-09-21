@@ -846,11 +846,11 @@ class Dynamics:
         cutoff=None,
         cutoff_type=None,
         timestep=None,
-        save_frequency=None,
         constraint=None,
         schedule=None,
         lambda_value=None,
         swap_end_states=None,
+        ignore_perturbations=None,
         shift_delta=None,
         coulomb_power=None,
         restraints=None,
@@ -867,11 +867,11 @@ class Dynamics:
         if timestep is not None:
             _add_extra(extras, "timestep", u(timestep))
 
-        _add_extra(extras, "save_frequency", save_frequency)
         _add_extra(extras, "constraint", constraint)
         _add_extra(extras, "schedule", schedule)
         _add_extra(extras, "lambda", lambda_value)
         _add_extra(extras, "swap_end_states", swap_end_states)
+        _add_extra(extras, "ignore_perturbations", ignore_perturbations)
 
         if shift_delta is not None:
             _add_extra(extras, "shift_delta", u(shift_delta))
@@ -929,7 +929,7 @@ class Dynamics:
         frame_frequency=None,
         energy_frequency=None,
         lambda_windows=None,
-        save_velocities: bool = True,
+        save_velocities: bool = None,
         auto_fix_minimise: bool = True,
     ):
         """
@@ -989,7 +989,7 @@ class Dynamics:
 
         save_velocities: bool
             Whether or not to save the velocities when running dynamics.
-            By default this is True. Set this to False if you aren't
+            By default this is False. Set this to True if you are
             interested in saving the velocities.
 
         auto_fix_minimise: bool
@@ -1000,6 +1000,14 @@ class Dynamics:
             in these cases, and then runs the requested dynamics.
         """
         if not self._d.is_null():
+            if save_velocities is None:
+                if self._d._map.specified("save_velocities"):
+                    save_velocities = (
+                        self._d._map["save_velocities"].value().as_bool()
+                    )
+                else:
+                    save_velocities = False
+
             self._d.run(
                 time=time,
                 save_frequency=save_frequency,

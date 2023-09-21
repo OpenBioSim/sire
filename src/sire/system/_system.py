@@ -396,6 +396,14 @@ class System:
             use the coordinates of the perturbed molecule as the
             starting point.
 
+        ignore_perturbations: bool
+            Whether or not to ignore perturbations. If this is True, then
+            the perturbation will be ignored, and the simulation will
+            be run using the properties of the reference molecule
+            (or the perturbed molecule if swap_end_states is True). This
+            is useful if you just want to run standard molecular dynamics
+            of the reference or perturbed states.
+
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
@@ -466,6 +474,12 @@ class System:
             to save frames during the trajectory. This can be overridden
             by setting frame_frequency during an individual run.
 
+        save_velocities: bool
+            Whether or not to save velocities when saving trajectory frames
+            during the simulation. This defaults to False, as velocity
+            trajectories aren't often needed, and they double the amount
+            of space that is required for a trajectory.
+
         constraint: str
             The type of constraint to use for bonds and/or angles, e.g.
             `h-bonds`, `bonds` etc.
@@ -491,6 +505,14 @@ class System:
             while the reference molecule will be at lambda=1). This will
             use the coordinates of the perturbed molecule as the
             starting point.
+
+        ignore_perturbations: bool
+            Whether or not to ignore perturbations. If this is True, then
+            the perturbation will be ignored, and the simulation will
+            be run using the properties of the reference molecule
+            (or the perturbed molecule if swap_end_states is True). This
+            is useful if you just want to run standard molecular dynamics
+            of the reference or perturbed states.
 
         temperature: temperature
             The temperature at which to run the simulation. A
@@ -527,6 +549,10 @@ class System:
             The ID of the GPU (or accelerator) used to accelerate
             the simulation. This would be CUDA_DEVICE_ID or similar
             if CUDA was used. This can be any valid OpenMM device string
+
+        precision: str
+            The desired precision for the simulation (e.g. `single`,
+            `mixed` or `double`)
 
         map: dict
             A dictionary of additional options. Note that any options

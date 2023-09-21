@@ -190,7 +190,7 @@ QString EnergyTrajectory::toString() const
         }
     }
 
-    return QObject::tr("SelectorMol( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
+    return QObject::tr("EnergyTrajectory( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
 }
 
 /** Set the energies at time 'time' to the components contained
