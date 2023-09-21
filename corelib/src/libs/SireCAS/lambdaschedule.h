@@ -117,7 +117,12 @@ namespace SireCAS
                          const SireCAS::Expression &equation);
 
         void addMorphStage();
+        void addMorphStage(const QString &name);
+
         void addChargeScaleStages(double scale = 0.2);
+        void addChargeScaleStages(const QString &scale_name,
+                                  const QString &descale_name,
+                                  double scale = 0.2);
 
         void setEquation(const QString &stage,
                          const QString &lever,

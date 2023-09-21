@@ -184,6 +184,126 @@ time
 Setting up a λ-schedule
 -----------------------
 
+So far the perturbation from the reference to the perturbed state has been
+linear. λ has acted on each of the perturbable properties of the molecule
+by scaling the ``initial`` value from the reference state to the ``final``
+value in the perturbed state using the equation
+
+.. math::
+
+   (1 - \lambda) \times \mathrm{initial} + \lambda \times \mathrm{final}
+
+This shows that at λ=0, the perturbable properties are set to the
+``initial`` value, and at λ=1, the perturbable properties are set to the
+``final`` value. At intermediate values of λ, the perturbable properties
+are linearly interpolated between the ``initial`` and ``final`` values,
+e.g. at λ=0.5, the perturbable properties are set to half-way between the
+``initial`` and ``final`` values.
+
+The perturbation of the parameters is controlled in the code using
+a :class:`sire.cas.LambdaSchedule`.
+
+You can get the λ-schedule used by the dynamics simulation using the
+:func:`~sire.mol.Dynamics.lambda_schedule` function, e.g.
+
+>>> s = d.lambda_schedule()
+>>> print(s)
+LambdaSchedule(
+  morph: λ * final + initial * (-λ + 1)
+)
+
+You can plot how this schedule would morph the perturbable properties
+using the :func:`~sire.cas.LambdaSchedule.plot` function, e.g.
+
+>>> df = get_lever_values(initial=2.0, final=3.0)
+>>> df.plot()
+
+.. image:: images/06_02_01.jpg
+   :alt: View of the default λ-schedule
+
+This shows how the different levers available in this schedule would morph
+a hyperthetical parameter that has an ``initial`` value of ``2.0`` and a
+``final`` value of ``3.0``.
+
+In this case the levers are all identical, so would change the parameter
+in the same way. You can choose your own equation for the λ-schedule.
+For example, maybe we want to scale the charge by the square of λ.
+
+>>> s.set_equation("morph", "charge",
+...                s.lam()**2 * s.final() + s.initial() * (1 - s.lam()**2))
+>>> print(s)
+LambdaSchedule(
+  morph: λ * final + initial * (-λ + 1)
+    charge: λ^2 * final + initial * (-λ^2 + 1)
+)
+
+This shows that in the default ``morph`` stage of this schedule, we will
+scale the ``charge`` parameters by λ^2, while all other parameters (the
+default) will scale using λ. We can plot the result of this using;
+
+>>> s.get_lever_values(initial=2.0, final=3.0).plot()
+
+.. image:: images/06_02_02.jpg
+   :alt: View of the λ-schedule where charge is scaled by λ^2
+
+The above affected the default ``morph`` stage of the schedule. You can
+append or prepend additional stages to the schedule using the
+:meth:`~sire.cas.LambdaSchedule.append_stage` or
+:meth:`~sire.cas.LambdaSchedule.prepend_stage` functions, e.g.
+
+>>> s.append_stage("scale", s.final())
+>>> print(s)
+
+would append a second stage, called ``scale``, which by default would
+use the ``final`` value of the parameter. We could then add a lever to
+this stage that scales down the charge to 0,
+
+>>> s.set_equation("scale", "charge", (1-s.lam()) * s.final())
+>>> print(s)
+LambdaSchedule(
+  morph: λ * final + initial * (-λ + 1)
+    charge: λ^2 * final + initial * (-λ^2 + 1)
+  scale: final
+    charge: final * (-λ + 1)
+)
+
+Again, it is worth plotting the impact of this schedule on a hyperthetical
+parameter.
+
+>>> s.get_lever_values(initial=2.0, final=3.0).plot()
+
+.. image:: images/06_02_03.jpg
+   :alt: View of the λ-schedule where charge is scaled in a second stage to zero.
+
+.. note::
+
+   The value of the stage-local λ in each stage moves from 0 to 1.
+   This is different to the global λ, which moves from 0 to 1 evenly
+   over all stages. For example, in this 2-stage schedule, values of
+   global λ between 0 and 0.5 will be in the ``morph`` stage, while
+   values of global λ between 0.5 and 1 will be in the ``scale`` stage.
+   Within the ``morph`` stage, the local λ will move from 0 to 1
+   (corresponding to global λ values of 0 to 0.5), while
+   within the ``scale`` stage, the local λ will move from 0 to 1
+   (corresponding to gloabl λ values of 0.5 to 1).
+
+Through the combination of adding stages and specifyig different equations
+for levers, you can have a lot of control over how the perturbable properties
+are morphed from the reference to the perturbed states.
+
+To make things easier, there are some simple functions that create some
+common schedules.
+
+>>> s = sr.cas.LambdaSchedule.standard_morph()
+>>> print(s)
+LambdaSchedule(
+  morph: λ * final + initial * (-λ + 1)
+)
+
+creates the standard morph of all parameters by the standard perturbation
+equation.
+
+
 * ``schedule`` - set the λ-schedule which specifies how λ morphs between
   the reference and perturbed molecules.
 

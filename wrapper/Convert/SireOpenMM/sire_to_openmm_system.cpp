@@ -752,6 +752,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.addLever("sigma");
     lambda_lever.addLever("epsilon");
 
+    // and the exceptions
+    lambda_lever.addLever("charge_scale");
+    lambda_lever.addLever("lj_scale");
+
     // Do the same for the bond, angle and torsion forces
     lambda_lever.setForceIndex("bond", system.addForce(bondff));
     lambda_lever.addLever("bond_length");

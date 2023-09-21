@@ -436,10 +436,19 @@ void LambdaSchedule::clear()
  *  standard stage that scales each forcefield parameter by
  *  (1-:lambda:).initial + :lambda:.final
  */
+void LambdaSchedule::addMorphStage(const QString &name)
+{
+    this->addStage(name, (this->lam() * this->final()) +
+                             ((1 - this->lam()) * this->initial()));
+}
+
+/** Append a morph stage onto this schedule. The morph stage is a
+ *  standard stage that scales each forcefield parameter by
+ *  (1-:lambda:).initial + :lambda:.final
+ */
 void LambdaSchedule::addMorphStage()
 {
-    this->addStage("morph", (this->lam() * this->final()) +
-                                ((1 - this->lam()) * this->initial()));
+    this->addMorphStage("morph");
 }
 
 /** Sandwich the current set of stages with a charge-descaling and
