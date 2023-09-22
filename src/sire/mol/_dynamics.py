@@ -209,10 +209,10 @@ class DynamicsData:
                 * kcal_per_mol
             )
 
-            if lambda_windows is not None:
-                sim_lambda_value = self._omm_mols.get_lambda()
-                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+            sim_lambda_value = self._omm_mols.get_lambda()
+            nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
+            if lambda_windows is not None:
                 for lambda_value in lambda_windows:
                     if lambda_value != sim_lambda_value:
                         self._omm_mols.set_lambda(lambda_value)
@@ -225,7 +225,9 @@ class DynamicsData:
 
                 self._omm_mols.set_lambda(sim_lambda_value)
 
-            self._energy_trajectory.set(self._current_time, nrgs)
+            self._energy_trajectory.set(
+                self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
+            )
 
         self._is_running = False
 

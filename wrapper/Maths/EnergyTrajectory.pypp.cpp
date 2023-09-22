@@ -86,7 +86,7 @@ void register_EnergyTrajectory_class(){
                 , get_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the time and energy components at the ith row.\n  Values are returned in internal units\n" );
         
         }
         { //::SireMaths::EnergyTrajectory::get
@@ -98,6 +98,19 @@ void register_EnergyTrajectory_class(){
                 "get"
                 , get_function_value
                 , ( bp::arg("i"), bp::arg("time_unit"), bp::arg("energy_unit") )
+                , bp::release_gil_policy()
+                , "Return the time and energy components at the ith row.\n  Values are returned in the specified units\n" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::getLabels
+        
+            typedef ::QHash< QString, QString > ( ::SireMaths::EnergyTrajectory::*getLabels_function_type)( int ) const;
+            getLabels_function_type getLabels_function_value( &::SireMaths::EnergyTrajectory::getLabels );
+            
+            EnergyTrajectory_exposer.def( 
+                "getLabels"
+                , getLabels_function_value
+                , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -138,6 +151,31 @@ void register_EnergyTrajectory_class(){
                 , "Return all of the energy keys" );
         
         }
+        { //::SireMaths::EnergyTrajectory::labelKeys
+        
+            typedef ::QStringList ( ::SireMaths::EnergyTrajectory::*labelKeys_function_type)(  ) const;
+            labelKeys_function_type labelKeys_function_value( &::SireMaths::EnergyTrajectory::labelKeys );
+            
+            EnergyTrajectory_exposer.def( 
+                "labelKeys"
+                , labelKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::labels
+        
+            typedef ::QVector< QString > ( ::SireMaths::EnergyTrajectory::*labels_function_type)( ::QString const & ) const;
+            labels_function_type labels_function_value( &::SireMaths::EnergyTrajectory::labels );
+            
+            EnergyTrajectory_exposer.def( 
+                "labels"
+                , labels_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         EnergyTrajectory_exposer.def( bp::self != bp::self );
         { //::SireMaths::EnergyTrajectory::operator=
         
@@ -176,6 +214,19 @@ void register_EnergyTrajectory_class(){
                 , ( bp::arg("time"), bp::arg("energies") )
                 , bp::release_gil_policy()
                 , "Set the energies at time time to the components contained\n  in energies\n" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::set
+        
+            typedef void ( ::SireMaths::EnergyTrajectory::*set_function_type)( ::SireUnits::Dimension::GeneralUnit const &,::QHash< QString, SireUnits::Dimension::GeneralUnit > const &,::QHash< QString, QString > const & ) ;
+            set_function_type set_function_value( &::SireMaths::EnergyTrajectory::set );
+            
+            EnergyTrajectory_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("time"), bp::arg("energies"), bp::arg("labels") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMaths::EnergyTrajectory::size

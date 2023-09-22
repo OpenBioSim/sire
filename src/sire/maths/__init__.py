@@ -170,7 +170,7 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
 
 if not hasattr(EnergyTrajectory, "to_pandas"):
 
-    def _to_pandas(obj):
+    def _to_pandas(obj, to_alchemlyb: bool = False):
         """
         Return the energy trajectory as a pandas DataFrame
         """
@@ -181,12 +181,27 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
 
         data["time"] = obj.times(picosecond.get_default())
 
+        keys = obj.label_keys()
+        keys.sort()
+
+        for key in keys:
+            if to_alchemlyb:
+                if key == "lambda":
+                    data["fep-lambda"] = obj.labels(key)
+                else:
+                    data[key] = obj.labels(key)
+            else:
+                data[key] = obj.labels(key)
+
         keys = obj.keys()
         keys.sort()
 
         for key in keys:
-            data[str(key)] = obj.energies(key, kcal_per_mol.get_default())
+            data[key] = obj.energies(key, kcal_per_mol.get_default())
 
-        return pd.DataFrame(data).set_index("time")
+        if to_alchemlyb:
+            return pd.DataFrame(data).set_index(["fep-lambda", "time"])
+        else:
+            return pd.DataFrame(data).set_index("time")
 
     EnergyTrajectory.to_pandas = _to_pandas

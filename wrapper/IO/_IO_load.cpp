@@ -46,7 +46,7 @@ System load_molecules(const QStringList &files,
         {
             const auto &f = files.at(0);
 
-            if (f.endsWith(".s3"))
+            if (f.endsWith(".s3") or f.endsWith(".bss"))
             {
                 // try to load this as a Sire s3 file
                 try

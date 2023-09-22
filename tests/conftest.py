@@ -140,3 +140,8 @@ def merged_ethane_methanol():
 @pytest.fixture(scope="session")
 def merged_zan_ose():
     return sr.load_test_files("merged_ligand.s3")
+
+
+@pytest.fixture(scope="session")
+def ethane_12dichloroethane():
+    return sr.load_test_files("ethane_12dichloroethane.bss")

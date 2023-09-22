@@ -695,11 +695,23 @@ class System:
 
         self._molecules = None
 
-    def energy_trajectory(self, to_pandas=True, map=None):
+    def energy_trajectory(
+        self, to_pandas: bool = True, to_alchemlyb: bool = False, map=None
+    ):
         """
         Return the energy trajectory for this System. This is the history
         of energies evaluate during any dynamics runs. It could include
-        energies calculated at different values of lambda
+        energies calculated at different values of lambda.
+
+        Parameters
+        ----------
+
+        to_pandas: bool
+            Whether or not to return the energy trajectory as a pandas DataFrame.
+
+        to_alchemlyb: bool
+            Whether or not to return the energy trajectory as a pandas DataFrame
+            that is formatted to usable in alchemlyb
         """
         from ..base import create_map
 
@@ -732,8 +744,8 @@ class System:
 
             traj = self._system.property(traj_propname)
 
-        if to_pandas:
-            return traj.to_pandas()
+        if to_pandas or to_alchemlyb:
+            return traj.to_pandas(to_alchemlyb=to_alchemlyb)
         else:
             return traj
 
