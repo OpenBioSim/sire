@@ -827,6 +827,8 @@ class DynamicsData:
             self._energy_trajectory, map=self._map
         )
 
+        self._sire_mols.set_ensemble(self.ensemble())
+
 
 def _add_extra(extras, key, value):
     if value is not None:
@@ -1214,7 +1216,9 @@ class Dynamics:
         """
         return self._d.current_kinetic_energy()
 
-    def energy_trajectory(self, to_pandas: bool = True):
+    def energy_trajectory(
+        self, to_pandas: bool = True, to_alchemlyb: bool = False
+    ):
         """
         Return the energy trajectory. This is the trajectory of
         energy values that have been captured during dynamics.
@@ -1225,8 +1229,18 @@ class Dynamics:
         """
         t = self._d.energy_trajectory()
 
-        if to_pandas:
-            return t.to_pandas()
+        if to_pandas or to_alchemlyb:
+            ensemble = self.ensemble()
+
+            if ensemble.is_constant_temperature():
+                temperature = ensemble.temperature()
+            else:
+                temperature = None
+
+            return t.to_pandas(
+                temperature=temperature,
+                to_alchemlyb=to_alchemlyb,
+            )
         else:
             return t
 

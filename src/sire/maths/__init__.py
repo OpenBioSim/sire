@@ -170,7 +170,7 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
 
 if not hasattr(EnergyTrajectory, "to_pandas"):
 
-    def _to_pandas(obj, to_alchemlyb: bool = False):
+    def _to_pandas(obj, temperature=None, to_alchemlyb: bool = False):
         """
         Return the energy trajectory as a pandas DataFrame
         """
@@ -179,7 +179,26 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
 
         data = {}
 
-        data["time"] = obj.times(picosecond.get_default())
+        if to_alchemlyb:
+            time_unit = picosecond
+            time_unit_string = "ps"
+
+            energy_unit = kcal_per_mol
+            energy_unit_string = "kcal/mol"
+
+            if temperature is None:
+                raise ValueError(
+                    "You must specify the temperature of the simulation "
+                    "when converting to alchemlyb format."
+                )
+        else:
+            time_unit = picosecond.get_default()
+            time_unit_string = time_unit.unit_string()
+
+            energy_unit = kcal_per_mol.get_default()
+            energy_unit_string = energy_unit.unit_string()
+
+        data["time"] = obj.times(time_unit)
 
         keys = obj.label_keys()
         keys.sort()
@@ -196,12 +215,27 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
         keys = obj.keys()
         keys.sort()
 
+        if to_alchemlyb:
+            keys.remove("kinetic")
+            keys.remove("potential")
+
         for key in keys:
-            data[key] = obj.energies(key, kcal_per_mol.get_default())
+            data[key] = obj.energies(key, energy_unit)
 
         if to_alchemlyb:
-            return pd.DataFrame(data).set_index(["fep-lambda", "time"])
+            df = pd.DataFrame(data).set_index(["time", "fep-lambda"])
         else:
-            return pd.DataFrame(data).set_index("time")
+            df = pd.DataFrame(data).set_index("time")
+
+        if temperature is not None:
+            from .. import u
+            from ..units import kelvin
+
+            df.attrs["temperature"] = u(temperature).to(kelvin)
+
+        df.attrs["energy_unit"] = energy_unit_string
+        df.attrs["time_unit"] = time_unit_string
+
+        return df
 
     EnergyTrajectory.to_pandas = _to_pandas

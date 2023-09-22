@@ -767,7 +767,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     lambda_lever.setForceIndex("torsion", system.addForce(dihff));
     lambda_lever.addLever("torsion_phase");
-    lambda_lever.addLever("torsion_periodicity");
     lambda_lever.addLever("torsion_k");
 
     ///

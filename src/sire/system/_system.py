@@ -564,6 +564,33 @@ class System:
 
         return _dynamics(self, *args, **kwargs)
 
+    def ensemble(self, map=None):
+        """
+        Return the last ensemble that was used to simulate this system.
+        This returns a microcanonical ensemble if None was used
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        try:
+            return self._system.property(map["ensemble"])
+        except Exception:
+            from ..move import Ensemble
+
+            return Ensemble.microcanonical()
+
+    def set_ensemble(self, ensemble, map=None):
+        """
+        Set the ensemble that was last used to simulate this system.
+        This is copied into the map["ensemble"] property
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        self._system.set_property(map["ensemble"].source(), ensemble)
+
     def energy(self, *args, **kwargs):
         """Calculate and return the energy of this System
         (or of the matching index/search subset of this System)
@@ -745,7 +772,16 @@ class System:
             traj = self._system.property(traj_propname)
 
         if to_pandas or to_alchemlyb:
-            return traj.to_pandas(to_alchemlyb=to_alchemlyb)
+            ensemble = self.ensemble()
+
+            if ensemble.is_constant_temperature():
+                temperature = ensemble.temperature()
+            else:
+                temperature = None
+
+            return traj.to_pandas(
+                to_alchemlyb=to_alchemlyb, temperature=temperature
+            )
         else:
             return traj
 

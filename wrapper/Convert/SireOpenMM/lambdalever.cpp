@@ -314,12 +314,6 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             perturbable_mol.getTorsionPhases1(),
             lambda_value);
 
-        const auto morphed_torsion_periodicity = this->lambda_schedule.morph(
-            "torsion_periodicity",
-            perturbable_mol.getTorsionPeriodicities0(),
-            perturbable_mol.getTorsionPeriodicities1(),
-            lambda_value);
-
         const auto morphed_torsion_k = this->lambda_schedule.morph(
             "torsion_k",
             perturbable_mol.getTorsionKs0(),
@@ -526,7 +520,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 dihff->setTorsionParameters(index,
                                             particle1, particle2,
                                             particle3, particle4,
-                                            morphed_torsion_periodicity[j],
+                                            periodicity,
                                             morphed_torsion_phase[j],
                                             morphed_torsion_k[j]);
             }

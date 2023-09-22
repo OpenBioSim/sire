@@ -806,10 +806,12 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
             {
                 const auto &dih1 = perturbed->dih_params.at(j);
 
+                // we need to match all of the atoms AND the periodicity
                 if (std::get<0>(dih1) == atom0 and std::get<1>(dih1) == atom1 and
-                    std::get<2>(dih1) == atom2 and std::get<3>(dih1) == atom3)
+                    std::get<2>(dih1) == atom2 and std::get<3>(dih1) == atom3 and
+                    std::get<4>(dih0) == std::get<4>(dih1))
                 {
-                    // we have found the matching bond!
+                    // we have found the matching torsion!
                     dih_params_1.append(dih1);
                     found_index_0[i] = true;
                     found_index_1[j] = true;
@@ -831,7 +833,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     {
         if (not found_index_1[j])
         {
-            // need to add a bond missing in the reference state
+            // need to add a dihedral missing in the reference state
             const auto &dih1 = perturbed->dih_params.at(j);
 
             int atom0 = std::get<0>(dih1);
