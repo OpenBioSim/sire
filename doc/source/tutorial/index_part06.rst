@@ -26,3 +26,4 @@ restraints as you perturb between different molecules.
    part06/02_alchemical_dynamics
    part06/03_restraints
    part06/04_alchemical_restraints
+   part06/05_free_energy_perturbation

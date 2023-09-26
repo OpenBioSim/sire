@@ -204,13 +204,19 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
         keys.sort()
 
         for key in keys:
-            if to_alchemlyb:
-                if key == "lambda":
-                    data["fep-lambda"] = obj.labels(key)
-                else:
-                    data[key] = obj.labels(key)
+            if to_alchemlyb and key == "lambda":
+                data["fep-lambda"] = obj.labels_as_numbers(key)
             else:
-                data[key] = obj.labels(key)
+                # use float keys if possible
+                try:
+                    column_header = float(key)
+                except Exception:
+                    column_header = key
+
+                try:
+                    data[column_header] = obj.labels_as_numbers(key)
+                except Exception:
+                    data[column_header] = obj.labels(key)
 
         keys = obj.keys()
         keys.sort()
@@ -220,7 +226,13 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
             keys.remove("potential")
 
         for key in keys:
-            data[key] = obj.energies(key, energy_unit)
+            # use float keys if possible
+            try:
+                column_header = float(key)
+            except Exception:
+                column_header = key
+
+            data[column_header] = obj.energies(key, energy_unit)
 
         if to_alchemlyb:
             df = pd.DataFrame(data).set_index(["time", "fep-lambda"])

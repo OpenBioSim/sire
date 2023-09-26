@@ -88,6 +88,7 @@ namespace SireMaths
                                    const SireUnits::Dimension::GeneralUnit &energy_unit) const;
 
         QHash<QString, QString> getLabels(int i) const;
+        QHash<QString, double> getLabelsAsNumbers(int i) const;
 
         void set(const SireUnits::Dimension::GeneralUnit &time,
                  const QHash<QString, SireUnits::Dimension::GeneralUnit> &energies);
@@ -102,6 +103,7 @@ namespace SireMaths
         QVector<double> times() const;
         QVector<double> energies(const QString &key) const;
         QVector<QString> labels(const QString &key) const;
+        QVector<double> labelsAsNumbers(const QString &key) const;
 
         QVector<double> times(const SireUnits::Dimension::GeneralUnit &time_unit) const;
         QVector<double> energies(const QString &key,

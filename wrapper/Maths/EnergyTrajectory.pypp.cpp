@@ -115,6 +115,19 @@ void register_EnergyTrajectory_class(){
                 , "" );
         
         }
+        { //::SireMaths::EnergyTrajectory::getLabelsAsNumbers
+        
+            typedef ::QHash< QString, double > ( ::SireMaths::EnergyTrajectory::*getLabelsAsNumbers_function_type)( int ) const;
+            getLabelsAsNumbers_function_type getLabelsAsNumbers_function_value( &::SireMaths::EnergyTrajectory::getLabelsAsNumbers );
+            
+            EnergyTrajectory_exposer.def( 
+                "getLabelsAsNumbers"
+                , getLabelsAsNumbers_function_value
+                , ( bp::arg("i") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMaths::EnergyTrajectory::isEmpty
         
             typedef bool ( ::SireMaths::EnergyTrajectory::*isEmpty_function_type)(  ) const;
@@ -171,6 +184,19 @@ void register_EnergyTrajectory_class(){
             EnergyTrajectory_exposer.def( 
                 "labels"
                 , labels_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::labelsAsNumbers
+        
+            typedef ::QVector< double > ( ::SireMaths::EnergyTrajectory::*labelsAsNumbers_function_type)( ::QString const & ) const;
+            labelsAsNumbers_function_type labelsAsNumbers_function_value( &::SireMaths::EnergyTrajectory::labelsAsNumbers );
+            
+            EnergyTrajectory_exposer.def( 
+                "labelsAsNumbers"
+                , labelsAsNumbers_function_value
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "" );

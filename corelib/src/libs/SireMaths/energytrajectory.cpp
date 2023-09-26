@@ -472,6 +472,43 @@ QHash<QString, QString> EnergyTrajectory::getLabels(int i) const
     return vals;
 }
 
+/** Return the labels at the ith row as numbers */
+QHash<QString, double> EnergyTrajectory::getLabelsAsNumbers(int i) const
+{
+    i = SireID::Index(i).map(this->count());
+
+    QHash<QString, double> vals;
+    vals.reserve(this->label_values.count());
+
+    for (auto it = this->label_values.constBegin();
+         it != this->label_values.constEnd();
+         ++it)
+    {
+        if (it.value()[i].isEmpty())
+        {
+            vals.insert(it.key(), NAN);
+            continue;
+        }
+
+        double val;
+        bool ok = false;
+
+        val = it.value()[i].toDouble(&ok);
+
+        if (not ok)
+            throw SireError::invalid_cast(QObject::tr(
+                                              "Cannot convert label '%1' at index %2 to a number. Value is %3.")
+                                              .arg(it.key())
+                                              .arg(i)
+                                              .arg(it.value()[i]),
+                                          CODELOC);
+
+        vals.insert(it.key(), val);
+    }
+
+    return vals;
+}
+
 /** Return all of the energy keys */
 QStringList EnergyTrajectory::keys() const
 {
@@ -511,7 +548,52 @@ QVector<QString> EnergyTrajectory::labels(const QString &key) const
     return it.value();
 }
 
-/** Return all of the energy values for the passed key (the energy-key column).
+/** Return all of the label values for the passed key (the label-key column)
+ *  as numbers. This is in the same order as the times.
+ */
+QVector<double> EnergyTrajectory::labelsAsNumbers(const QString &key) const
+{
+    auto it = this->label_values.constFind(key);
+
+    if (it == this->label_values.constEnd())
+        throw SireError::invalid_key(QObject::tr(
+                                         "There is no label component with key '%1'. Valid "
+                                         "keys are [ %2 ].")
+                                         .arg(key)
+                                         .arg(this->label_values.keys().join(", ")),
+                                     CODELOC);
+
+    const auto &l = it.value();
+
+    QVector<double> vals;
+    vals.reserve(l.count());
+
+    for (const auto &label : l)
+    {
+        if (label.isEmpty())
+        {
+            vals.append(NAN);
+            continue;
+        }
+
+        bool ok = false;
+        double val = label.toDouble(&ok);
+
+        if (not ok)
+            throw SireError::invalid_cast(QObject::tr(
+                                              "Cannot convert label '%1' to a number. Value is %2.")
+                                              .arg(key)
+                                              .arg(label),
+                                          CODELOC);
+
+        vals.append(val);
+    }
+
+    return vals;
+}
+
+/** Return all of the
+ *  energy values for the passed key (the energy-key column).
  *  This is in the same order as the times, and is in the default internal
  *  unit
  */
