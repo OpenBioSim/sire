@@ -121,7 +121,7 @@ First, we need to import alchemlyb
 Next, we will load all of the DataFrames up into alchemlyb dataframes.
 
 >>> from glob import glob
->>> from alchemlyb.parsing import to_parquet
+>>> from alchemlyb.parsing import parquet
 >>> dfs = []
 >>> for energy_file in glob("energy*.pq"):
 ...     dfs.append(parquet.extract_u_nk(energy_file, T=300))
@@ -132,6 +132,13 @@ Next, we will load all of the DataFrames up into alchemlyb dataframes.
    format is unable to preserve the temperature attribute that is
    added to the DataFrame by the simulation above. This is something
    that we are looking to fix in a later release.
+
+.. note::
+
+   If you wanted, you could have saved the dataframes generated above
+   directly into the ``dfs`` list here, and not saved them to disk via
+   the parquet format. However, this would risk you having to re-run
+   all of the simulation if you wanted to change the analysis below.
 
 Next, we will join together all of these DataFrames into a single
 DataFrame.
@@ -154,6 +161,3 @@ time fep-lambda                                            ...
 5.0  0.0        -37829.192348           NaN           NaN  ...   NaN   NaN   NaN
 
 Now we can tell alchemlyb to calculate the free energy using the BAR method.
-
-
-
