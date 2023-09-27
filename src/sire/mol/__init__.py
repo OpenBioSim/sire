@@ -1559,7 +1559,12 @@ def _dynamics(
         # space is not a shared property, so may be lost when we
         # convert to molecules. Make sure this doens't happen by
         # adding the space directly to the property map
-        map.set("space", view.property(map["space"]))
+        try:
+            map.set("space", view.property(map["space"]))
+        except Exception:
+            from ..vol import Cartesian
+
+            map.set("space", Cartesian())
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1769,7 +1774,12 @@ def _minimisation(
         # space is not a shared property, so may be lost when we
         # convert to molecules. Make sure this doens't happen by
         # adding the space directly to the property map
-        map.set("space", view.property(map["space"]))
+        try:
+            map.set("space", view.property(map["space"]))
+        except Exception:
+            from ..vol import Cartesian
+
+            map.set("space", Cartesian())
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):

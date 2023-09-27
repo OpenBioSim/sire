@@ -636,10 +636,14 @@ class DynamicsData:
                 completed = 0
 
             if completed >= total:
-                return (0, True, True)
+                return (
+                    0,
+                    frame_frequency_steps > 0,
+                    energy_frequency_steps > 0,
+                )
 
             elif frame_frequency_steps <= 0 and energy_frequency_steps <= 0:
-                return (total, True, True)
+                return (total, False, False)
 
             n_to_end = total - completed
 
