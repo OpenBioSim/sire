@@ -131,7 +131,9 @@ Next, we will load all of the DataFrames up into alchemlyb dataframes.
 >>> import sire as sr
 >>> from glob import glob
 >>> dfs = []
->>> for energy_file in glob("energy*.s3"):
+>>> energy_files = glob("energy*.s3")
+>>> energy_files.sort()
+>>> for energy_file in energy_files:
 ...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
 
 .. note::
@@ -147,25 +149,41 @@ Next, we will load all of the DataFrames up into alchemlyb dataframes.
    However, this would risk you having to re-run
    all of the simulation if you wanted to change the analysis below.
 
+.. note::
+
+   Be careful to load the DataFrames in λ-order. The ``glob`` function
+   can return the files in a random order, hence why we need to sort
+   this list. This sort only works because we have used a naming convention
+   for the files that puts them in λ-order. They must be in the right
+   order or else alchemlyb will calculate the free energy incorrectly
+   (it uses the column-order rather than the λ-order when calculating
+   free energies).
+
 Next, we will join together all of these DataFrames into a single
 DataFrame.
 
 >>> import pandas as pd
 >>> df = pd.concat(dfs)
 >>> print(df)
-                         0.75          0.80          0.85  0.90          0.95          1.00  0.05  ...  0.25  0.40  0.45  0.50  0.55  0.30  0.35
-time fep-lambda                                                                                    ...
-2.1  0.8        -40294.138361 -40294.528643 -40294.867959   NaN           NaN           NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-2.2  0.8        -40132.809489 -40133.199771 -40133.479335   NaN           NaN           NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-2.3  0.8        -39940.111114 -39940.292266 -39940.422452   NaN           NaN           NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-2.4  0.8        -39709.709585 -39710.368748 -39711.006821   NaN           NaN           NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-2.5  0.8        -39786.131669 -39786.342696 -39786.532634   NaN           NaN           NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-...                       ...           ...           ...   ...           ...           ...   ...  ...   ...   ...   ...   ...   ...   ...   ...
-4.6  1.0                  NaN           NaN           NaN   NaN -37920.811949 -37921.595875   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-4.7  1.0                  NaN           NaN           NaN   NaN -37794.676672 -37794.833207   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-4.8  1.0                  NaN           NaN           NaN   NaN -37823.895123 -37824.201037   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-4.9  1.0                  NaN           NaN           NaN   NaN -37739.077963 -37739.503380   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
-5.0  1.0                  NaN           NaN           NaN   NaN -37724.349234 -37724.894154   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN
+                         0.00          0.05  0.10  0.15  0.20  0.25  0.30  0.35  ...  0.65  0.70  0.75  0.80  0.85  0.90          0.95          1.00
+time fep-lambda                                                                  ...
+2.1  0.0        -40299.914145 -40300.859816   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.2  0.0        -40028.164623 -40028.811537   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.3  0.0        -39862.145264 -39862.881804   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.4  0.0        -39795.910799 -39796.438210   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.5  0.0        -39597.177529 -39597.256804   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+...                       ...           ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...           ...           ...
+26.6 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37356.997418 -37357.661840
+26.7 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37368.648948 -37368.924986
+26.8 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37380.838240 -37381.920923
+26.9 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37409.937188 -37410.780865
+27.0 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37412.237619 -37412.812414
+
+.. note::
+
+   Do not worry about the large number of ``NaN`` values. These just show that
+   we have only calculated free energy differences along the diagonal of this
+   DataFrame, i.e. only between the simulated and neighbouring λ-windows.
 
 Now we can tell alchemlyb to calculate the free energy using the BAR method.
 
@@ -173,4 +191,98 @@ Now we can tell alchemlyb to calculate the free energy using the BAR method.
 >>> b = BAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])
-0.3736
+-2.9285302096352157
+
+You can get a convergence plot, showing how the free energy changes as
+a function of the simulation length using the ``convergence_plot`` function.
+
+>>> from alchemlyb.convergence import forward_backward_convergence
+>>> from alchemlyb.visualisation import plot_convergence
+>>> f = forward_backward_convergence(dfs, "bar")
+>>> plot_convergence(f)
+
+.. image:: images/06_05_01.jpg
+   :alt: Convergence of the free energy estimate as a function of the fraction of simulation length
+
+All of this shows that the relative free energy for the perturbation of
+ethane to methanol in water is about -2.9 kcal mol-1.
+
+To get the relative hydration free energy, we would need to complete the
+cycle by calculating the relative free energy for the perturbation in the
+gas phase. We could do this using this code (which is almost identical to
+above, except we only simulate the perturbable molecule, and save
+the :class:`~sire.maths.EnergyTable` objects to ``energy_gas_{lambda}.s3``
+instead of ``energy_{lambda}.s3``).
+
+>>> import sire as sr
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
+>>> mol = mols.molecule("molecule property is_perturbable")
+>>> for l in range(0, 105, 5):
+...     # turn l into the lambda value by dividing by 100
+...     lambda_value = l / 100.0
+...     print(f"Simulating lambda={lambda_value:.2f}")
+...     # create a dynamics object for the system
+...     d = mol.dynamics(timestep="1fs", temperature="25oC",
+...                      lambda_value=lambda_value)
+...     # minimise
+...     d.minimise()
+...     # equilibrate, not saving anything
+...     d.run("2ps", save_frequency=0)
+...     print("Equilibration complete")
+...     print(d)
+...     # get the values of lambda for neighbouring windows
+...     lambda_windows = [lambda_value]
+...     if lambda_value > 0:
+...         lambda_windows.insert(0, (l-5)/100.0)
+...     if lambda_value < 1:
+...         lambda_windows.append((l+5)/100.0)
+...     # run the dynamics, saving the energy every 0.1 ps
+...     d.run("25ps", energy_frequency="0.1ps", frame_frequency=0,
+...           lambda_windows=lambda_windows)
+...     print("Dynamics complete")
+...     print(d)
+...     # stream the EnergyTable to a sire save stream object
+...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
+...                    f"energy_gas_{lambda_value:.2f}.s3")
+
+This should run more quickly than the simulation in water, e.g. about
+15 seconds per window (at about 150 nanoseconds per day of sampling).
+
+We can then analyse the results using the same analysis code, except we
+switch to analysing the ``energy_gas_{lambda}.s3`` files instead.
+
+>>> import sire as sr
+>>> from glob import glob
+>>> dfs = []
+>>> energy_files = glob("energy_gas_*.s3")
+>>> energy_files.sort()
+>>> for energy_file in energy_files:
+...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
+>>> import pandas as pd
+>>> df = pd.concat(dfs)
+>>> print(df)
+                     0.00      0.05  0.10  0.15  0.20  0.25  0.30  0.35  0.40  ...  0.60  0.65  0.70  0.75  0.80  0.85  0.90       0.95       1.00
+time fep-lambda                                                                ...
+2.1  0.0         7.707173  7.686233   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
+2.2  0.0         5.048624  5.303638   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
+2.3  0.0         5.797784  5.446916   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
+2.4  0.0         4.080923  4.189452   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
+2.5  0.0         5.386196  5.271694   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
+...                   ...       ...   ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...   ...        ...        ...
+26.6 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  10.989612  11.139099
+26.7 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN   9.000112   9.071128
+26.8 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  11.481547  11.700362
+26.9 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  11.801311  11.934601
+27.0 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  10.316325  10.489984
+>>> from alchemlyb.estimators import BAR
+>>> b = BAR()
+>>> b.fit(df)
+>>> print(b.delta_f_.loc[0.00, 1.00])
+3.177901359408199
+
+This shows that the relative free energy for the perturbation of ethane
+to methanol in the gas phase is about 3.2 kcal mol-1. Subtracting this
+from the free energy in water gives a relative hydration free energy of
+about -6.1 kcal mol-1, which is in reasonable agreement with
+`published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
+which are typically -6.1 kcal mol-1 to -6.2 kcal mol-1.
