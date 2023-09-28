@@ -29,8 +29,8 @@ And lets link the properties to the reference state.
 >>> for mol in mols.molecules("molecule property is_perturbable"):
 ...     mols.update(mol.perturbation().link_to_reference().commit())
 
-Next we will run through 20 evenly-space λ values from 0 to 1. We've picked
-20 because it is a reasonable number that should over-sample the λ-coordinate.
+Next we will run through 21 evenly-space λ values from 0 to 1. We've picked
+21 because it is a reasonable number that should over-sample the λ-coordinate.
 
 For each λ-value, we will minimise the system, equilibrate it for 2 ps, then
 run dynamics for 25 ps. We will calculate the energy of each simulation at
@@ -98,10 +98,8 @@ so take only 45 seconds or so for each of the 21 λ-windows.
    at, e.g. ``0.15000000000000002``).
 
 At the end of the simulation, you should have 21 energy files, one for each
-λ-window. These are called ``energy_0.00.pq``, ``energy_0.05.pq``, ...,
-``energy_1.00.pq``. They are in
-`parquet format <https://parquet.apache.org/>`__ and are ready for processing
-directly in the `alchemlyb <https://alchemlyb.readthedocs.io/en/latest/>`__ package.
+λ-window. These are called ``energy_0.00.s3``, ``energy_0.05.s3``, ...,
+``energy_1.00.s3``.
 
 Processing Free Energy Data using alchemlyb
 --------------------------------------------
@@ -126,7 +124,9 @@ First, we need to import alchemlyb
    alchemlyb. You can do this using conda or mamba, e.g.
    ``mamba install -c conda-forge alchemlyb``.
 
-Next, we will load all of the DataFrames up into alchemlyb dataframes.
+Next, we will load all of the :class:`~sire.maths.EnergyTable` objects
+for each λ-window, and will convert them into pandas DataFrames arranged
+into an alchemlyb-compatible format.
 
 >>> import sire as sr
 >>> from glob import glob
@@ -145,8 +145,8 @@ Next, we will load all of the DataFrames up into alchemlyb dataframes.
 .. note::
 
    If you wanted, you could have put the dataframes generated above
-   directly into the ``dfs`` list here, and not saved them to disk.
-   However, this would risk you having to re-run
+   directly into the ``dfs`` list here, and not saved them to disk
+   via the ``.s3`` files. However, this would risk you having to re-run
    all of the simulation if you wanted to change the analysis below.
 
 .. note::
