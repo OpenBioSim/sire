@@ -374,8 +374,15 @@ class System:
             The type of constraint to use for bonds and/or angles, e.g.
             `h-bonds`, `bonds` etc.
             See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
-            for the full list of options. This will be automatically
-            guessed from the timestep if it isn't set.
+            for the full list of options. This will be `none` if it hasn't
+            been set.
+
+        perturbable_constraint: str
+            The type of constraint to use for perturbable bonds and/or angles,
+            e.g. `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This equal the value of `constraint`
+            if it isn't set.
 
         schedule: sire.cas.LambdaSchedule
             The schedule used to control how perturbable forcefield parameters
@@ -486,6 +493,13 @@ class System:
             See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
             for the full list of options. This will be automatically
             guessed from the timestep if it isn't set.
+
+        perturbable_constraint: str
+            The type of constraint to use for perturbable bonds and/or angles,
+            e.g. `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This equal the value of `constraint`
+            if it isn't set.
 
         schedule: sire.cas.LambdaSchedule
             The schedule used to control how perturbable forcefield parameters

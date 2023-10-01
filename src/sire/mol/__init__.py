@@ -1407,6 +1407,7 @@ def _dynamics(
     frame_frequency=None,
     save_velocities=None,
     constraint=None,
+    perturbable_constraint=None,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
@@ -1467,6 +1468,13 @@ def _dynamics(
         See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
         for the full list of options. This will be automatically
         guessed from the timestep if it isn't set.
+
+    perturbable_constraint: str
+        The type of constraint to use for perturbable bonds and/or angles,
+        e.g. `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This equal the value of `constraint`
+        if it isn't set.
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1624,6 +1632,9 @@ def _dynamics(
             # can get away with no constraints
             constraint = "none"
 
+    if perturbable_constraint is not None:
+        perturbable_constraint = str(perturbable_constraint).lower()
+
     if temperature is not None:
         temperature = u(temperature)
         map.set("temperature", temperature)
@@ -1644,6 +1655,7 @@ def _dynamics(
         cutoff_type=cutoff_type,
         timestep=timestep,
         constraint=str(constraint),
+        perturbable_constraint=perturbable_constraint,
         schedule=schedule,
         lambda_value=lambda_value,
         shift_delta=shift_delta,
@@ -1661,6 +1673,7 @@ def _minimisation(
     cutoff=None,
     cutoff_type=None,
     constraint=None,
+    perturbable_constraint=None,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
@@ -1690,8 +1703,14 @@ def _minimisation(
         The type of constraint to use for bonds and/or angles, e.g.
         `h-bonds`, `bonds` etc.
         See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
-        for the full list of options. This will be automatically
-        guessed from the timestep if it isn't set.
+        for the full list of options. This is `none` if it is not set.
+
+    perturbable_constraint: str
+        The type of constraint to use for perturbable bonds and/or angles,
+        e.g. `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This equal the value of `constraint`
+        if it isn't set.
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1804,7 +1823,10 @@ def _minimisation(
         map.set("precision", str(precision).lower())
 
     if constraint is not None:
-        map.set("constraint", str(constraint))
+        map.set("constraint", str(constraint).lower())
+
+    if perturbable_constraint is not None:
+        map.set("perturbable_constraint", str(perturbable_constraint).lower())
 
     return Minimisation(
         view,

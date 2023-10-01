@@ -30,7 +30,7 @@ namespace SireOpenMM
             CONSTRAIN_NONE = 0x0000,
             CONSTRAIN_BONDS = 0x0001,
             CONSTRAIN_HBONDS = 0x0010,
-            CONSTRAIN_ANGLES = 0x0100
+            CONSTRAIN_HANGLES = 0x1000
         };
 
         OpenMMMolecule();
@@ -161,6 +161,10 @@ namespace SireOpenMM
 
         /** What type of constraint to use */
         qint32 constraint_type;
+
+        /** What type of constraint to use when the bond/angle involves
+         *  perturbable atoms */
+        qint32 perturbable_constraint_type;
 
     private:
         void constructFromAmber(const SireMol::Molecule &mol,

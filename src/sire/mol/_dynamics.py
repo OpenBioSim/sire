@@ -314,6 +314,15 @@ class DynamicsData:
             else:
                 return "none"
 
+    def perturbable_constraint(self):
+        if self.is_null():
+            return None
+        else:
+            if self._map.specified("perturbable_constraint"):
+                return self._map["perturbable_constraint"].source()
+            else:
+                return self.constraint()
+
     def get_schedule(self):
         if self.is_null():
             return None
@@ -436,13 +445,17 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
-    def run_minimisation(self, max_iterations: int):
+    def run_minimisation(self, max_iterations: int, reset_constraints: bool):
         """
         Internal method that runs minimisation on the molecules.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - reset_constraints (bool): Whether or not to reset the bond lengths
+            of constraints to their new lengths after minimisation. This is
+            useful if you minimise at a particular lambda value, and then
+            want to run dynamics at that lambda value.
         """
         from openmm import LocalEnergyMinimizer
         from concurrent.futures import ThreadPoolExecutor
@@ -855,6 +868,7 @@ class Dynamics:
         cutoff_type=None,
         timestep=None,
         constraint=None,
+        perturbable_constraint=None,
         schedule=None,
         lambda_value=None,
         swap_end_states=None,
@@ -876,6 +890,7 @@ class Dynamics:
             _add_extra(extras, "timestep", u(timestep))
 
         _add_extra(extras, "constraint", constraint)
+        _add_extra(extras, "perturbable_constraint", perturbable_constraint)
         _add_extra(extras, "schedule", schedule)
         _add_extra(extras, "lambda", lambda_value)
         _add_extra(extras, "swap_end_states", swap_end_states)
@@ -916,7 +931,11 @@ class Dynamics:
     def __repr__(self):
         return self.__str__()
 
-    def minimise(self, max_iterations: int = 10000):
+    def minimise(
+        self,
+        max_iterations: int = 10000,
+        reset_constraints: bool = True,
+    ):
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.
@@ -924,9 +943,16 @@ class Dynamics:
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - reset_constraints (bool): Whether or not to reset the bond lengths
+            of constraints to their new lengths after minimisation. This is
+            useful if you minimise at a particular lambda value, as the
+            constraints will then update to their new lengths at that lambda
         """
         if not self._d.is_null():
-            self._d.run_minimisation(max_iterations=max_iterations)
+            self._d.run_minimisation(
+                max_iterations=max_iterations,
+                reset_constraints=reset_constraints,
+            )
 
         return self
 
@@ -1082,6 +1108,13 @@ class Dynamics:
         bonds involving hydrogens etc.)
         """
         return self._d.constraint()
+
+    def perturbable_constraint(self):
+        """
+        Return the perturbable constraint used for the dynamics (e.g.
+        constraining bonds involving hydrogens etc.)
+        """
+        return self._d.perturbable_constraint()
 
     def info(self):
         """

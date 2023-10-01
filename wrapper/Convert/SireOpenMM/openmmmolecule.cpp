@@ -99,11 +99,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         }
         else if (c == "h-bonds-h-angles")
         {
-            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_ANGLES;
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
         }
         else if (c == "bonds-h-angles")
         {
-            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_ANGLES;
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
         }
         else
         {
@@ -120,13 +120,56 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         constraint_type = CONSTRAIN_NONE;
     }
 
+    if (map.specified("perturbable_constraint"))
+    {
+        const auto c = map["perturbable_constraint"].source().toLower().simplified();
+
+        if (c == "none")
+        {
+            perturbable_constraint_type = CONSTRAIN_NONE;
+        }
+        else if (c == "h-bonds")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS;
+        }
+        else if (c == "bonds")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS;
+        }
+        else if (c == "h-bonds-h-angles")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
+        }
+        else if (c == "bonds-h-angles")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
+        }
+        else
+        {
+            throw SireError::invalid_key(QObject::tr(
+                                             "Unrecognised perturbable constraint type '%1'. Valid values are "
+                                             "'none', 'h-bonds', 'bonds', 'h-bonds-h-angles' or "
+                                             "'bonds-h-angles',")
+                                             .arg(c),
+                                         CODELOC);
+        }
+    }
+    else
+    {
+        perturbable_constraint_type = constraint_type;
+    }
+
     if (ffinfo.isAmberStyle())
     {
         if (is_perturbable)
         {
             // update the map to find the lambda=0 properties
+            // Note that we don't use the coordinates0 or coordinates1
+            // properties, because we need to build the molecule from
+            // its current coordinates (which should represent the
+            // current lambda state)
             QStringList props = {"LJ", "ambertype", "angle", "atomtype",
-                                 "bond", "charge", "coordinates",
+                                 "bond", "charge",
                                  "dihedral", "element", "forcefield",
                                  "gb_radii", "gb_screening", "improper",
                                  "intrascale", "mass", "name",
@@ -431,7 +474,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const bool has_light_atom = includes_h or (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
         const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
-        if ((not has_massless_atom) and ((constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (constraint_type & CONSTRAIN_HBONDS))))
+        auto this_constraint_type = constraint_type;
+
+        if (is_perturbable)
+        {
+            this_constraint_type = perturbable_constraint_type;
+        }
+
+        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             this->constraints.append(std::make_tuple(atom0, atom1, r0));
             constrained_pairs.insert(to_pair(atom0, atom1));
@@ -470,8 +520,15 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if (not constrained_pairs.contains(key))
         {
+            auto this_constraint_type = constraint_type;
+
+            if (is_perturbable)
+            {
+                this_constraint_type = perturbable_constraint_type;
+            }
+
             // only include the angle X-y-Z if X-Z are not already constrained
-            if ((constraint_type & CONSTRAIN_ANGLES) and is_h_x_h)
+            if ((this_constraint_type & CONSTRAIN_HANGLES) and is_h_x_h)
             {
                 const auto delta = coords[atom2] - coords[atom0];
                 const auto length = std::sqrt((delta[0] * delta[0]) +
