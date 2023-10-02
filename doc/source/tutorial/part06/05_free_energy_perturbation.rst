@@ -49,11 +49,11 @@ This will let us subsequently calculate the free energy across λ using
 ...     # turn l into the lambda value by dividing by 100
 ...     lambda_value = l / 100.0
 ...     print(f"Simulating lambda={lambda_value:.2f}")
+...     # minimise the system at this lambda value
+...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
 ...     # create a dynamics object for the system
-...     d = mols.dynamics(timestep="1fs", temperature="25oC",
-...                       lambda_value=lambda_value)
-...     # minimise
-...     d.minimise()
+...     d = min_mols.dynamics(timestep="1fs", temperature="25oC",
+...                           lambda_value=lambda_value)
 ...     # equilibrate, not saving anything
 ...     d.run("2ps", save_frequency=0)
 ...     print("Equilibration complete")
@@ -217,15 +217,16 @@ instead of ``energy_{lambda}.s3``).
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
 >>> mol = mols.molecule("molecule property is_perturbable")
+>>> mol.update(mol.perturbation().link_to_reference().commit())
 >>> for l in range(0, 105, 5):
 ...     # turn l into the lambda value by dividing by 100
 ...     lambda_value = l / 100.0
 ...     print(f"Simulating lambda={lambda_value:.2f}")
+...     # minimise the system at this lambda value
+...     min_mol = mol.minimisation(lambda_value=lambda_value).run().commit()
 ...     # create a dynamics object for the system
-...     d = mol.dynamics(timestep="1fs", temperature="25oC",
-...                      lambda_value=lambda_value)
-...     # minimise
-...     d.minimise()
+...     d = min_mol.dynamics(timestep="1fs", temperature="25oC",
+...                          lambda_value=lambda_value)
 ...     # equilibrate, not saving anything
 ...     d.run("2ps", save_frequency=0)
 ...     print("Equilibration complete")

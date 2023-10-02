@@ -445,17 +445,13 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
-    def run_minimisation(self, max_iterations: int, reset_constraints: bool):
+    def run_minimisation(self, max_iterations: int):
         """
         Internal method that runs minimisation on the molecules.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
-        - reset_constraints (bool): Whether or not to reset the bond lengths
-            of constraints to their new lengths after minimisation. This is
-            useful if you minimise at a particular lambda value, and then
-            want to run dynamics at that lambda value.
         """
         from openmm import LocalEnergyMinimizer
         from concurrent.futures import ThreadPoolExecutor
@@ -934,7 +930,6 @@ class Dynamics:
     def minimise(
         self,
         max_iterations: int = 10000,
-        reset_constraints: bool = True,
     ):
         """
         Perform minimisation on the molecules, running a maximum
@@ -943,15 +938,10 @@ class Dynamics:
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
-        - reset_constraints (bool): Whether or not to reset the bond lengths
-            of constraints to their new lengths after minimisation. This is
-            useful if you minimise at a particular lambda value, as the
-            constraints will then update to their new lengths at that lambda
         """
         if not self._d.is_null():
             self._d.run_minimisation(
                 max_iterations=max_iterations,
-                reset_constraints=reset_constraints,
             )
 
         return self

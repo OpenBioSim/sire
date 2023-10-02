@@ -55,7 +55,11 @@ def _run_test(mols, is_slow=False, use_taylor=False):
     l.add_stage("morph", (1 - l.lam()) * l.initial() + l.lam() * l.final())
 
     # need to use the reference platform on GH Actions
-    map = {"platform": "Reference", "schedule": l}
+    map = {
+        "platform": "Reference",
+        "schedule": l,
+        "constraint": "bonds-h-angles",
+    }
 
     if use_taylor:
         map["use_taylor_softening"] = True

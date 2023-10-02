@@ -483,13 +483,17 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
-            this->constraints.append(std::make_tuple(atom0, atom1, r0));
+            // add the constraint - this constrains the bond to whatever length it has now
+            const auto delta = coords[atom1] - coords[atom0];
+            const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                     (delta[1] * delta[1]) +
+                                                     (delta[2] * delta[2]));
+
+            this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
             constrained_pairs.insert(to_pair(atom0, atom1));
         }
-        else
-        {
-            this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
-        }
+
+        this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
     }
 
     // now the angles
@@ -531,17 +535,16 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             if ((this_constraint_type & CONSTRAIN_HANGLES) and is_h_x_h)
             {
                 const auto delta = coords[atom2] - coords[atom0];
-                const auto length = std::sqrt((delta[0] * delta[0]) +
-                                              (delta[1] * delta[1]) +
-                                              (delta[2] * delta[2]));
-                constraints.append(std::make_tuple(atom0, atom2, length));
+                const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                         (delta[1] * delta[1]) +
+                                                         (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(atom0, atom2,
+                                                   constraint_length));
                 constrained_pairs.insert(key);
             }
-            else
-            {
-                ang_params.append(std::make_tuple(atom0, atom1, atom2,
-                                                  theta0, k));
-            }
+
+            ang_params.append(std::make_tuple(atom0, atom1, atom2,
+                                              theta0, k));
         }
     }
 
@@ -659,10 +662,6 @@ bool is_ghost_lj(const std::tuple<double, double, double> &clj)
  *  state. Ensure that there is a one-to-one mapping, with them all
  *  in the same order. Any that are missing are added as nulls in
  *  the correct end state.
- *
- *  Note that bonds and angles involved in constraints have been
- *  removed from the list of potentials. This is because we don't
- *  evaluate the energy of constrained degrees of freedom
  */
 void OpenMMMolecule::alignInternals(const PropertyMap &map)
 {
