@@ -336,18 +336,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     }
 
     // extract the coordinates and convert to OpenMM units
-    const auto coords_prop = map["coordinates"];
+    const auto &c = moldata.property(map["coordinates"]).asA<SireMol::AtomCoords>();
+
     this->coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
+    auto coords_data = coords.data();
 
-    if (moldata.hasProperty(coords_prop))
+    for (int i = 0; i < nats; ++i)
     {
-        const auto &c = moldata.property(coords_prop).asA<SireMol::AtomCoords>();
-        auto coords_data = coords.data();
-
-        for (int i = 0; i < nats; ++i)
-        {
-            coords_data[i] = to_vec3(c.at(idx_to_cgatomidx_data[i]));
-        }
+        coords_data[i] = to_vec3(c.at(idx_to_cgatomidx_data[i]));
     }
 
     // extract the velocities and convert to OpenMM units

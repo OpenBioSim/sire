@@ -1620,13 +1620,17 @@ def _dynamics(
             # it must be in the map
             timestep = map["timestep"].value()
 
-        if timestep > 2 * femtosecond:
+        if timestep > 4 * femtosecond:
             # need constraint on everything
             constraint = "bonds-h-angles"
 
+        elif timestep > 2 * femtosecond:
+            # need constraint on everything
+            constraint = "h-bonds-h-angles"
+
         elif timestep > 1 * femtosecond:
             # need it just on H bonds and angles
-            constraint = "h-bonds-h-angles"
+            constraint = "h-bonds"
 
         else:
             # can get away with no constraints

@@ -27,3 +27,4 @@ restraints as you perturb between different molecules.
    part06/03_restraints
    part06/04_alchemical_restraints
    part06/05_free_energy_perturbation
+   part06/06_faster_fep

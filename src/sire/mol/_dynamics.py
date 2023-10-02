@@ -275,13 +275,43 @@ class DynamicsData:
 
             return Ensemble(map=self._map)
 
+    def randomise_velocities(self, temperature=None, random_seed: int = None):
+        """
+        Set the velocities to random values, drawn from the Boltzmann
+        distribution for the current temperature.
+
+        Parameters
+        ----------
+
+        - temperature (temperature): The temperature to use. If None, then
+          the current temperature will be used
+        - random_seed (int): The random seed to use. If None, then
+          a random seed will be generated
+        """
+        if self.is_null():
+            return
+
+        if temperature is not None:
+            self.set_temperature(temperature, rescale_velocities=False)
+
+        from ..units import kelvin
+
+        if random_seed is None:
+            self._omm_mols.setVelocitiesToTemperature(
+                self.ensemble().temperature().to(kelvin)
+            )
+        else:
+            self._omm_mols.setVelocitiesToTemperature(
+                self.ensemble().temperature().to(kelvin), random_seed
+            )
+
     def set_ensemble(self, ensemble, rescale_velocities: bool = True):
         """
         Set the ensemble for the dynamics. Note that this will
         only let you change the temperature and/or pressure of the
         ensemble. You can't change its fundemental nature.
 
-        If rescalse_velocities is True, then the velocities will
+        If rescale_velocities is True, then the velocities will
         be rescaled to the new temperature.
         """
         if self.is_null():
@@ -304,6 +334,41 @@ class DynamicsData:
             if ensemble.pressure() != self.ensemble().pressure():
                 self._map["pressure"] = ensemble.pressure()
                 self._omm_mols.set_pressure(ensemble.pressure())
+
+    def set_temperature(self, temperature, rescale_velocities: bool = True):
+        """
+        Set the temperature for the dynamics. Note that this will only
+        let you change the temperature of the ensemble.
+        You can't change its fundemental nature.
+
+        If rescale_velocities is True, then the velocities will be
+        rescaled to the new temperature.
+        """
+        if self.is_null():
+            return
+
+        ensemble = self.ensemble()
+
+        ensemble.set_temperature(temperature)
+
+        self.set_ensemble(
+            ensemble=ensemble, rescale_velocities=rescale_velocities
+        )
+
+    def set_pressure(self, pressure):
+        """
+        Set the pressure for the dynamics. Note that this will only
+        let you change the pressure of the ensemble.
+        You can't change its fundemental nature.
+        """
+        if self.is_null():
+            return
+
+        ensemble = self.ensemble()
+
+        ensemble.set_pressure(pressure)
+
+        self.set_ensemble(ensemble=ensemble)
 
     def constraint(self):
         if self.is_null():
@@ -1091,6 +1156,44 @@ class Dynamics:
         of the simulation.
         """
         self._d.set_ensemble(ensemble)
+
+    def set_temperature(self, temperature, rescale_velocities: bool = True):
+        """
+        Set the temperature for the dynamics. Note that this will only
+        let you change the temperature of the ensemble.
+        You can't change its fundemental nature.
+
+        If rescale_velocities is True, then the velocities will be
+        rescaled to the new temperature.
+        """
+        self._d.set_temperature(
+            temperature=temperature, rescale_velocities=rescale_velocities
+        )
+
+    def set_pressure(self, pressure):
+        """
+        Set the pressure for the dynamics. Note that this will only
+        let you change the pressure of the ensemble.
+        You can't change its fundemental nature.
+        """
+        self._d.set_pressure(pressure=pressure)
+
+    def randomise_velocities(self, temperature=None, random_seed: int = None):
+        """
+        Set the velocities to random values, drawn from the Boltzmann
+        distribution for the current temperature.
+
+        Parameters
+        ----------
+
+        - temperature (temperature): The temperature to use. If None, then
+          the current temperature will be used
+        - random_seed (int): The random seed to use. If None, then
+          a random seed will be generated
+        """
+        self._d.randomise_velocities(
+            temperature=temperature, random_seed=random_seed
+        )
 
     def constraint(self):
         """

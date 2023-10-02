@@ -24,7 +24,8 @@ merged molecule from the previous section.
 >>> print(mols)
 System( name=BioSimSpace_System num_molecules=4054 num_residues=4054 num_atoms=12167 )
 
-And lets link the properties to the reference state.
+And lets link the properties to the reference state, so that we start the
+simulation using the reference state coordinates.
 
 >>> for mol in mols.molecules("molecule property is_perturbable"):
 ...     mols.update(mol.perturbation().link_to_reference().commit())
@@ -32,7 +33,9 @@ And lets link the properties to the reference state.
 Next we will run through 21 evenly-space λ values from 0 to 1. We've picked
 21 because it is a reasonable number that should over-sample the λ-coordinate.
 
-For each λ-value, we will minimise the system, equilibrate it for 2 ps, then
+For each λ-value, we will minimise the system, generate random velocities
+from a Boltzmann distribution for the simulation temperature,
+equilibrate the molecules for 2 ps, then
 run dynamics for 25 ps. We will calculate the energy of each simulation at
 each λ-value, plus at the neighbouring λ-values. This will allow us to
 calculate energy differences which we will later use to calculate the
@@ -54,6 +57,8 @@ This will let us subsequently calculate the free energy across λ using
 ...     # create a dynamics object for the system
 ...     d = min_mols.dynamics(timestep="1fs", temperature="25oC",
 ...                           lambda_value=lambda_value)
+...     # generate random velocities
+...     d.randomise_velocities()
 ...     # equilibrate, not saving anything
 ...     d.run("2ps", save_frequency=0)
 ...     print("Equilibration complete")
@@ -167,17 +172,17 @@ DataFrame.
 >>> print(df)
                          0.00          0.05  0.10  0.15  0.20  0.25  0.30  0.35  ...  0.65  0.70  0.75  0.80  0.85  0.90          0.95          1.00
 time fep-lambda                                                                  ...
-2.1  0.0        -40299.914145 -40300.859816   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.2  0.0        -40028.164623 -40028.811537   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.3  0.0        -39862.145264 -39862.881804   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.4  0.0        -39795.910799 -39796.438210   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.5  0.0        -39597.177529 -39597.256804   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.1  0.0        -39086.631401 -39087.128936   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.2  0.0        -39061.954059 -39062.600973   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.3  0.0        -38843.084556 -38843.492464   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.4  0.0        -38841.351765 -38841.968803   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.5  0.0        -38809.474375 -38810.061537   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
 ...                       ...           ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...           ...           ...
-26.6 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37356.997418 -37357.661840
-26.7 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37368.648948 -37368.924986
-26.8 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37380.838240 -37381.920923
-26.9 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37409.937188 -37410.780865
-27.0 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37412.237619 -37412.812414
+26.6 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37433.120745 -37433.277280
+26.7 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37306.925716 -37307.769393
+26.8 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37447.401338 -37447.826754
+26.9 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37415.822705 -37416.427376
+27.0 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37371.756022 -37372.181439
 
 .. note::
 
@@ -191,7 +196,7 @@ Now we can tell alchemlyb to calculate the free energy using the BAR method.
 >>> b = BAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])
--2.9285302096352157
+-2.826669414062424
 
 You can get a convergence plot, showing how the free energy changes as
 a function of the simulation length using the ``convergence_plot`` function.
@@ -205,7 +210,7 @@ a function of the simulation length using the ``convergence_plot`` function.
    :alt: Convergence of the free energy estimate as a function of the fraction of simulation length
 
 All of this shows that the relative free energy for the perturbation of
-ethane to methanol in water is about -2.9 kcal mol-1.
+ethane to methanol in water is about -2.8 kcal mol-1.
 
 To get the relative hydration free energy, we would need to complete the
 cycle by calculating the relative free energy for the perturbation in the
@@ -227,6 +232,8 @@ instead of ``energy_{lambda}.s3``).
 ...     # create a dynamics object for the system
 ...     d = min_mol.dynamics(timestep="1fs", temperature="25oC",
 ...                          lambda_value=lambda_value)
+...     # generate random velocities
+...     d.randomise_velocities()
 ...     # equilibrate, not saving anything
 ...     d.run("2ps", save_frequency=0)
 ...     print("Equilibration complete")
@@ -262,28 +269,35 @@ switch to analysing the ``energy_gas_{lambda}.s3`` files instead.
 >>> import pandas as pd
 >>> df = pd.concat(dfs)
 >>> print(df)
-                     0.00      0.05  0.10  0.15  0.20  0.25  0.30  0.35  0.40  ...  0.60  0.65  0.70  0.75  0.80  0.85  0.90       0.95       1.00
+                     0.00      0.05  0.10  0.15  0.20  0.25  0.30  0.35  0.40  ...  0.60  0.65  0.70  0.75  0.80  0.85  0.90      0.95      1.00
 time fep-lambda                                                                ...
-2.1  0.0         7.707173  7.686233   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
-2.2  0.0         5.048624  5.303638   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
-2.3  0.0         5.797784  5.446916   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
-2.4  0.0         4.080923  4.189452   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
-2.5  0.0         5.386196  5.271694   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN        NaN        NaN
-...                   ...       ...   ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...   ...        ...        ...
-26.6 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  10.989612  11.139099
-26.7 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN   9.000112   9.071128
-26.8 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  11.481547  11.700362
-26.9 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  11.801311  11.934601
-27.0 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  10.316325  10.489984
+2.1  0.0         4.085486  4.142311   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.2  0.0         3.664548  3.540637   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.3  0.0         4.288558  4.217284   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.4  0.0         5.630108  5.656710   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.5  0.0         5.823004  5.901361   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+...                   ...       ...   ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...   ...       ...       ...
+26.6 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  9.700262  9.410045
+26.7 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.392478  8.604776
+26.8 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  9.079360  9.535467
+26.9 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.791467  8.723334
+27.0 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.933618  9.388087
 >>> from alchemlyb.estimators import BAR
 >>> b = BAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])
-3.177901359408199
+3.049637014744972
 
 This shows that the relative free energy for the perturbation of ethane
-to methanol in the gas phase is about 3.2 kcal mol-1. Subtracting this
+to methanol in the gas phase is about 3.0 kcal mol-1. Subtracting this
 from the free energy in water gives a relative hydration free energy of
-about -6.1 kcal mol-1, which is in reasonable agreement with
+about -5.9 kcal mol-1, which is in reasonable agreement with
 `published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
 which are typically -6.1 kcal mol-1 to -6.2 kcal mol-1.
+
+.. note::
+
+   There will be some variation between different codes and different
+   protocols, as the convergence of the free energy estimate is sensitive
+   to the length of the dynamics simulation at each λ-value. In this case,
+   we used very short simulations.
