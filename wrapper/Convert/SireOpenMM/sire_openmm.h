@@ -9,6 +9,7 @@
 #include "SireMol/core.h"
 #include "SireMol/selectorm.hpp"
 #include "SireMol/atom.h"
+#include "SireMol/molnum.h"
 
 #include "SireBase/propertymap.h"
 
@@ -82,10 +83,12 @@ namespace SireOpenMM
 
     SireMol::SelectorMol extract_coordinates(const OpenMM::State &state,
                                              const SireMol::SelectorMol &mols,
+                                             const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
                                              const SireBase::PropertyMap &map);
 
     SireMol::SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,
                                                             const SireMol::SelectorMol &mols,
+                                                            const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
                                                             const SireBase::PropertyMap &map);
 
     SireVol::SpacePtr extract_space(const OpenMM::State &state);

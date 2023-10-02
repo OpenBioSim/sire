@@ -1,6 +1,9 @@
 __all__ = ["Dynamics"]
 
 
+from typing import Any
+
+
 class DynamicsData:
     """
     Internal class that is designed to only be used by the Dynamics
@@ -16,16 +19,29 @@ class DynamicsData:
         if mols is not None:
             self._map = map  # this is already a PropertyMap
 
+            # see if there are any fixed atoms
+            if map.specified("fixed"):
+                if map["fixed"].has_value():
+                    fixed_atoms = map["fixed"].value()
+                else:
+                    fixed_atoms = map["fixed"].source()
+
+                from . import selection_to_atoms
+
+                # turn the fixed atoms into a list of atoms
+                map.set(
+                    "fixed",
+                    mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
+                )
+
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
-            from ..system import ForceFieldInfo
+            from ..system import ForceFieldInfo, System
 
             self._ffinfo = ForceFieldInfo(mols, map=self._map)
 
             # We want to store the molecules as a System so that
             # we can more easily track the space and time properties
-            from ..system import System, ForceFieldInfo
-
             if type(mols) is System:
                 # work on our own copy of the system
                 self._sire_mols = mols.clone()
@@ -39,6 +55,11 @@ class DynamicsData:
                     "space", self._ffinfo.space()
                 )
 
+            # find the existing energy trajectory - we will build on this
+            self._energy_trajectory = self._sire_mols.energy_trajectory(
+                to_pandas=False, map=self._map
+            )
+
             self._num_atoms = len(self._sire_mols.atoms())
 
             from ..units import nanosecond
@@ -50,20 +71,19 @@ class DynamicsData:
                 )
             except Exception:
                 current_time = 0 * nanosecond
-
-            self._sire_mols.set_property("time", current_time)
+                self._sire_mols.set_property("time", current_time)
 
             self._current_time = current_time
             self._current_step = 0
             self._elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
-            self._is_running = None
+            self._is_running = False
 
             from ..convert import to
 
             self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
             self._omm_state = None
-            self._omm_state_has_cv = False
+            self._omm_state_has_cv = (False, False)
 
             if self._ffinfo.space().is_periodic():
                 self._enforce_periodic_box = True
@@ -77,26 +97,44 @@ class DynamicsData:
 
         else:
             self._sire_mols = None
+            self._energy_trajectory = None
 
     def is_null(self):
         return self._sire_mols is None
 
     def _clear_state(self):
         self._omm_state = None
-        self._omm_state_has_cv = False
+        self._omm_state_has_cv = (False, False)
 
-    def _update_from(self, state, nsteps_completed):
+    def _update_from(self, state, state_has_cv, nsteps_completed):
         if self.is_null():
+            return
+
+        if not state_has_cv[0]:
+            # there is no information to update
             return
 
         from ..legacy.Convert import (
             openmm_extract_coordinates_and_velocities,
+            openmm_extract_coordinates,
             openmm_extract_space,
         )
 
-        mols = openmm_extract_coordinates_and_velocities(
-            state, self._sire_mols.molecules(), self._map
-        )
+        if state_has_cv[1]:
+            # get velocities too
+            mols = openmm_extract_coordinates_and_velocities(
+                state,
+                self._sire_mols.molecules(),
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                map=self._map,
+            )
+        else:
+            mols = openmm_extract_coordinates(
+                state,
+                self._sire_mols.molecules(),
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                map=self._map,
+            )
 
         space = openmm_extract_space(state)
 
@@ -107,41 +145,41 @@ class DynamicsData:
         self._sire_mols.set_property("time", self._current_time)
         self._ffinfo.set_space(space)
 
-    def _start_dynamics_block(self):
-        if self._is_running is not None:
+    def _enter_dynamics_block(self):
+        if self._is_running:
             raise SystemError(
                 "Cannot start dynamics while it is already running!"
             )
 
-        import datetime
-
-        self._is_running = datetime.datetime.now().timestamp()
+        self._is_running = True
         self._omm_state = None
-        self._omm_state_has_cv = False
+        self._omm_state_has_cv = (False, False)
 
-    def _end_dynamics_block(self, coords_and_vels=False):
-        if self._is_running is None:
+    def _exit_dynamics_block(
+        self,
+        save_frame: bool = False,
+        save_energy: bool = False,
+        lambda_windows=[],
+        save_velocities: bool = False,
+    ):
+        if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
 
-        import datetime
         import openmm
-        from ..units import second, nanosecond
+        from ..units import nanosecond, kcal_per_mol
 
-        self._walltime += (
-            datetime.datetime.now().timestamp() - self._is_running
-        ) * second
-
-        if coords_and_vels:
+        if save_frame:
             self._omm_state = self._omm_mols.getState(
                 getEnergy=True,
                 getPositions=True,
-                getVelocities=True,
+                getVelocities=save_velocities,
                 enforcePeriodicBox=self._enforce_periodic_box,
             )
+
+            self._omm_state_has_cv = (True, save_velocities)
         else:
             self._omm_state = self._omm_mols.getState(getEnergy=True)
-
-        self._omm_state_has_cv = coords_and_vels
+            self._omm_state_has_cv = (False, False)
 
         current_time = (
             self._omm_state.getTime().value_in_unit(openmm.unit.nanosecond)
@@ -153,28 +191,66 @@ class DynamicsData:
         self._elapsed_time = current_time
         self._current_time += delta
 
-        self._is_running = None
+        if save_energy:
+            # should save energy here
+            nrgs = {}
 
-        return self._omm_state
+            nrgs["kinetic"] = (
+                self._omm_state.getKineticEnergy().value_in_unit(
+                    openmm.unit.kilocalorie_per_mole
+                )
+                * kcal_per_mol
+            )
 
-    def _get_current_state(self, coords_and_vels=False):
+            nrgs["potential"] = (
+                self._omm_state.getPotentialEnergy().value_in_unit(
+                    openmm.unit.kilocalorie_per_mole
+                )
+                * kcal_per_mol
+            )
+
+            if lambda_windows is not None:
+                sim_lambda_value = self._omm_mols.get_lambda()
+                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+
+                for lambda_value in lambda_windows:
+                    if lambda_value != sim_lambda_value:
+                        self._omm_mols.set_lambda(lambda_value)
+                        nrgs[str(lambda_value)] = (
+                            self._omm_mols.get_potential_energy(
+                                to_sire_units=False
+                            ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                            * kcal_per_mol
+                        )
+
+                self._omm_mols.set_lambda(sim_lambda_value)
+
+            self._energy_trajectory.set(self._current_time, nrgs)
+
+        self._is_running = False
+
+        return (self._omm_state, self._omm_state_has_cv)
+
+    def _get_current_state(
+        self, include_coords: bool = False, include_velocities: bool = False
+    ):
         if self._omm_state is not None:
-            if self._omm_state_has_cv or (coords_and_vels is False):
+            if self._omm_state_has_cv == (include_coords, include_velocities):
                 return self._omm_state
 
         # we need to get this again as either it doesn't exist,
         # or we now want velocities as well
-        if coords_and_vels:
+        if include_coords or include_velocities:
             self._omm_state = self._omm_mols.getState(
                 getEnergy=True,
-                getPositions=True,
-                getVelocities=True,
+                getPositions=include_coords,
+                getVelocities=include_velocities,
                 enforcePeriodicBox=self._enforce_periodic_box,
             )
         else:
             self._omm_state = self._omm_mols.getState(getEnergy=True)
 
-        self._omm_state_has_cv = coords_and_vels
+        self._omm_state_has_cv = (include_coords, include_velocities)
 
         return self._omm_state
 
@@ -197,6 +273,36 @@ class DynamicsData:
 
             return Ensemble(map=self._map)
 
+    def set_ensemble(self, ensemble, rescale_velocities: bool = True):
+        """
+        Set the ensemble for the dynamics. Note that this will
+        only let you change the temperature and/or pressure of the
+        ensemble. You can't change its fundemental nature.
+
+        If rescalse_velocities is True, then the velocities will
+        be rescaled to the new temperature.
+        """
+        if self.is_null():
+            return
+
+        if ensemble.name() != self.ensemble().name():
+            raise ValueError(
+                "You cannot change the ensemble of the dynamics. "
+                f"Currently the ensemble is {self.ensemble().name()}, "
+                f"but you tried to set it to {ensemble.name()}."
+            )
+
+        if ensemble.temperature() != self.ensemble().temperature():
+            self._map["temperature"] = ensemble.temperature()
+            self._omm_mols.set_temperature(
+                ensemble.temperature(), rescale_velocities=rescale_velocities
+            )
+
+        if ensemble.is_constant_pressure():
+            if ensemble.pressure() != self.ensemble().pressure():
+                self._map["pressure"] = ensemble.pressure()
+                self._omm_mols.set_pressure(ensemble.pressure())
+
     def constraint(self):
         if self.is_null():
             return None
@@ -205,6 +311,38 @@ class DynamicsData:
                 return self._map["constraint"].source()
             else:
                 return "none"
+
+    def get_schedule(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_lambda_schedule()
+
+    def set_schedule(self, schedule):
+        if not self.is_null():
+            self._omm_mols.set_lambda_schedule(schedule)
+
+    def get_lambda(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_lambda()
+
+    def set_lambda(self, lambda_value: float):
+        if not self.is_null():
+            s = self.get_schedule()
+
+            if s is None:
+                return
+
+            lambda_value = s.clamp(lambda_value)
+
+            if lambda_value == self._omm_mols.get_lambda():
+                # nothing to do
+                return
+
+            self._omm_mols.set_lambda(lambda_value)
+            self._clear_state()
 
     def info(self):
         if self.is_null():
@@ -293,18 +431,56 @@ class DynamicsData:
 
             return nrg.value_in_unit(_omm_kcal_mol) * _sire_kcal_mol
 
+    def energy_trajectory(self):
+        return self._energy_trajectory.clone()
+
+    def run_minimisation(self, max_iterations: int):
+        """
+        Internal method that runs minimisation on the molecules.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
+        """
+        from openmm import LocalEnergyMinimizer
+        from concurrent.futures import ThreadPoolExecutor
+
+        if max_iterations <= 0:
+            max_iterations = 0
+
+        from ..base import ProgressBar
+
+        def runfunc(max_its):
+            try:
+                LocalEnergyMinimizer.minimize(
+                    self._omm_mols, maxIterations=max_its
+                )
+
+                return 0
+            except Exception as e:
+                return e
+
+        with ProgressBar(text="minimisation") as spinner:
+            spinner.set_speed_unit("checks / s")
+
+            with ThreadPoolExecutor() as pool:
+                run_promise = pool.submit(runfunc, max_iterations)
+
+                while not run_promise.done():
+                    try:
+                        result = run_promise.result(timeout=0.2)
+                    except Exception:
+                        spinner.tick()
+                        pass
+
+                if result != 0:
+                    raise result
+
     def _rebuild_and_minimise(self):
         if self.is_null():
             return
 
-        from concurrent.futures import ThreadPoolExecutor
         from ..utils import Console
-        import openmm
-
-        def runfunc(max_its):
-            openmm.LocalEnergyMinimizer.minimize(
-                self._omm_mols, maxIterations=max_its
-            )
 
         Console.warning(
             "Something went wrong when running dynamics. Since no steps "
@@ -321,26 +497,30 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        from ..base import ProgressBar
+        self.run_minimisation(max_iterations=10000)
 
-        with ProgressBar(text="minimisation") as spinner:
-            spinner.set_speed_unit("checks / s")
-
-            with ThreadPoolExecutor() as pool:
-                run_promise = pool.submit(runfunc, 0)
-
-                while not run_promise.done():
-                    try:
-                        run_promise.result(timeout=0.2)
-                    except Exception:
-                        spinner.tick()
-                        pass
-
-                spinner.set_completed()
-
-    def run(self, time, save_frequency, auto_fix_minimise: bool = True):
+    def run(
+        self,
+        time,
+        save_frequency=None,
+        frame_frequency=None,
+        energy_frequency=None,
+        lambda_windows=None,
+        save_velocities: bool = None,
+        auto_fix_minimise: bool = True,
+    ):
         if self.is_null():
             return
+
+        orig_args = {
+            "time": time,
+            "save_frequency": save_frequency,
+            "frame_frequency": frame_frequency,
+            "energy_frequency": energy_frequency,
+            "lambda_windows": lambda_windows,
+            "save_velocities": save_velocities,
+            "auto_fix_minimise": auto_fix_minimise,
+        }
 
         from concurrent.futures import ThreadPoolExecutor
         import openmm
@@ -353,37 +533,31 @@ class DynamicsData:
         if save_frequency is not None:
             save_frequency = u(save_frequency)
 
+        if frame_frequency is not None:
+            frame_frequency = u(frame_frequency)
+
+        if energy_frequency is not None:
+            energy_frequency = u(energy_frequency)
+
+        if lambda_windows is not None:
+            if type(lambda_windows) is not list:
+                lambda_windows = [lambda_windows]
+
         try:
-            steps = int(time.to(picosecond) / self.timestep().to(picosecond))
+            steps_to_run = int(
+                time.to(picosecond) / self.timestep().to(picosecond)
+            )
         except Exception:
             # passed in the number of steps instead
-            steps = int(time)
+            steps_to_run = int(time)
 
-        if steps < 1:
-            steps = 1
+        if steps_to_run < 1:
+            steps_to_run = 1
 
-        if steps <= 0:
+        if steps_to_run <= 0:
             return
 
-        def runfunc(num_steps):
-            try:
-                integrator = self._omm_mols.getIntegrator()
-                integrator.step(num_steps)
-                return 0
-            except Exception as e:
-                return e
-
-        def process_block(state, nsteps_completed):
-            self._update_from(state, nsteps_completed)
-            self._sire_mols.save_frame(
-                map={
-                    "space": self.current_space(),
-                    "time": self.current_time(),
-                }
-            )
-
-        completed = 0
-
+        # get the energy and frame save frequencies
         if save_frequency != 0:
             if save_frequency is None:
                 if self._map.specified("save_frequency"):
@@ -395,15 +569,107 @@ class DynamicsData:
             else:
                 save_frequency = save_frequency.to(picosecond)
 
-        if save_frequency <= 0:
-            # don't save any intermediate frames
-            save_size = steps
-        else:
-            save_size = int(save_frequency / self.timestep().to(picosecond))
+        if energy_frequency != 0:
+            if energy_frequency is None:
+                if self._map.specified("energy_frequency"):
+                    energy_frequency = (
+                        self._map["energy_frequency"].value().to(picosecond)
+                    )
+                else:
+                    energy_frequency = save_frequency
+            else:
+                energy_frequency = energy_frequency.to(picosecond)
+
+        if frame_frequency != 0:
+            if frame_frequency is None:
+                if self._map.specified("frame_frequency"):
+                    frame_frequency = (
+                        self._map["frame_frequency"].value().to(picosecond)
+                    )
+                else:
+                    frame_frequency = save_frequency
+            else:
+                frame_frequency = frame_frequency.to(picosecond)
+
+        if lambda_windows is None:
+            if self._map.specified("lambda_windows"):
+                lambda_windows = self._map["lambda_windows"].value()
+
+        def runfunc(num_steps):
+            try:
+                integrator = self._omm_mols.getIntegrator()
+                integrator.step(num_steps)
+                return 0
+            except Exception as e:
+                return e
+
+        def process_block(state, state_has_cv, nsteps_completed):
+            self._update_from(state, state_has_cv, nsteps_completed)
+
+            if state_has_cv[0] or state_has_cv[1]:
+                self._sire_mols.save_frame(
+                    map={
+                        "space": self.current_space(),
+                        "time": self.current_time(),
+                    }
+                )
+
+        completed = 0
+
+        frame_frequency_steps = int(
+            frame_frequency / self.timestep().to(picosecond)
+        )
+
+        energy_frequency_steps = int(
+            energy_frequency / self.timestep().to(picosecond)
+        )
+
+        def get_steps_till_save(completed: int, total: int):
+            """Internal function to calculate the number of steps
+            to run before the next save. This returns a tuple
+            of number of steps, and then if a frame should be
+            saved and if the energy should be saved
+            """
+            if completed < 0:
+                completed = 0
+
+            if completed >= total:
+                return (0, True, True)
+
+            elif frame_frequency_steps <= 0 and energy_frequency_steps <= 0:
+                return (total, True, True)
+
+            n_to_end = total - completed
+
+            if frame_frequency_steps > 0:
+                n_to_frame = min(
+                    frame_frequency_steps
+                    - (completed % frame_frequency_steps),
+                    n_to_end,
+                )
+            else:
+                n_to_frame = total - completed
+
+            if energy_frequency_steps > 0:
+                n_to_energy = min(
+                    energy_frequency_steps
+                    - (completed % energy_frequency_steps),
+                    n_to_end,
+                )
+            else:
+                n_to_energy = total - completed
+
+            if n_to_frame == n_to_energy:
+                return (n_to_frame, True, True)
+            elif n_to_frame < n_to_energy:
+                return (n_to_frame, True, False)
+            else:
+                return (n_to_energy, False, True)
 
         block_size = 50
 
         state = None
+        state_has_cv = (False, False)
         saved_last_frame = False
 
         class NeedsMinimiseError(Exception):
@@ -412,25 +678,34 @@ class DynamicsData:
         nsteps_before_run = self._current_step
 
         from ..base import ProgressBar
+        from ..units import second
+        from datetime import datetime
+        from math import isnan
 
         try:
-            with ProgressBar(total=steps, text="dynamics") as progress:
+            with ProgressBar(total=steps_to_run, text="dynamics") as progress:
                 progress.set_speed_unit("steps / s")
 
-                with ThreadPoolExecutor() as pool:
-                    while completed < steps:
-                        if steps - completed < save_size:
-                            nrun_till_save = steps - completed
-                        else:
-                            nrun_till_save = save_size
+                start_time = datetime.now()
 
-                        self._start_dynamics_block()
+                with ThreadPoolExecutor() as pool:
+                    while completed < steps_to_run:
+                        (
+                            nrun_till_save,
+                            save_frame,
+                            save_energy,
+                        ) = get_steps_till_save(completed, steps_to_run)
+
+                        assert nrun_till_save > 0
+
+                        self._enter_dynamics_block()
 
                         # process the last block in the foreground
                         if state is not None:
                             process_promise = pool.submit(
                                 process_block,
                                 state,
+                                state_has_cv,
                                 nsteps_before_run + completed,
                             )
                         else:
@@ -477,7 +752,13 @@ class DynamicsData:
                             saved_last_frame = True
 
                         # get the state, including coordinates and velocities
-                        state = self._end_dynamics_block(coords_and_vels=True)
+                        state, state_has_cv = self._exit_dynamics_block(
+                            save_frame=save_frame,
+                            save_energy=save_energy,
+                            lambda_windows=lambda_windows,
+                            save_velocities=save_velocities,
+                        )
+
                         saved_last_frame = False
 
                         kinetic_energy = (
@@ -488,7 +769,7 @@ class DynamicsData:
 
                         ke_per_atom = kinetic_energy / self._num_atoms
 
-                        if ke_per_atom > 1000:
+                        if isnan(ke_per_atom) or ke_per_atom > 1000:
                             # The system has blown up!
                             state = None
                             saved_last_frame = True
@@ -505,22 +786,27 @@ class DynamicsData:
                                 "minimising the system and run again."
                             )
 
+                self._walltime += (
+                    datetime.now() - start_time
+                ).total_seconds() * second
+
             if state is not None and not saved_last_frame:
                 # we can process the last block in the main thread
-                process_block(state, nsteps_before_run + completed)
+                process_block(
+                    state=state,
+                    state_has_cv=state_has_cv,
+                    nsteps_completed=nsteps_before_run + completed,
+                )
 
         except NeedsMinimiseError:
             # try to fix this problem by minimising,
             # then running again
-            self._is_running = None
+            self._is_running = False
             self._omm_state = None
-            self._omm_state_has_cv = False
+            self._omm_state_has_cv = (False, False)
             self._rebuild_and_minimise()
-            self.run(
-                time=time,
-                save_frequency=save_frequency * picosecond,
-                auto_fix_minimise=False,
-            )
+            orig_args["auto_fix_minimise"] = False
+            self.run(**orig_args)
             return
 
     def commit(self):
@@ -528,7 +814,15 @@ class DynamicsData:
             return
 
         self._update_from(
-            self._get_current_state(coords_and_vels=True), self._current_step
+            state=self._get_current_state(
+                include_coords=True, include_velocities=True
+            ),
+            state_has_cv=(True, True),
+            nsteps_completed=self._current_step,
+        )
+
+        self._sire_mols.set_energy_trajectory(
+            self._energy_trajectory, map=self._map
         )
 
 
@@ -554,6 +848,13 @@ class Dynamics:
         timestep=None,
         save_frequency=None,
         constraint=None,
+        schedule=None,
+        lambda_value=None,
+        swap_end_states=None,
+        shift_delta=None,
+        coulomb_power=None,
+        restraints=None,
+        fixed=None,
     ):
         from ..base import create_map
         from .. import u
@@ -562,9 +863,22 @@ class Dynamics:
 
         _add_extra(extras, "cutoff", cutoff)
         _add_extra(extras, "cutoff_type", cutoff_type)
-        _add_extra(extras, "timestep", u(timestep))
+
+        if timestep is not None:
+            _add_extra(extras, "timestep", u(timestep))
+
         _add_extra(extras, "save_frequency", save_frequency)
         _add_extra(extras, "constraint", constraint)
+        _add_extra(extras, "schedule", schedule)
+        _add_extra(extras, "lambda", lambda_value)
+        _add_extra(extras, "swap_end_states", swap_end_states)
+
+        if shift_delta is not None:
+            _add_extra(extras, "shift_delta", u(shift_delta))
+
+        _add_extra(extras, "coulomb_power", coulomb_power)
+        _add_extra(extras, "restraints", restraints)
+        _add_extra(extras, "fixed", fixed)
 
         map = create_map(map, extras)
 
@@ -584,7 +898,7 @@ class Dynamics:
                     f"energy={self.current_energy()}, speed=FAST ns day-1)"
                 )
             else:
-                return f"Dynamics(completed=0)"
+                return "Dynamics(completed=0)"
         else:
             return (
                 f"Dynamics(completed={self.current_time()}, "
@@ -594,20 +908,157 @@ class Dynamics:
     def __repr__(self):
         return self.__str__()
 
-    def run(self, time, save_frequency=None):
+    def minimise(self, max_iterations: int = 10000):
         """
-        Perform dynamics on the molecules
+        Perform minimisation on the molecules, running a maximum
+        of max_iterations iterations.
+
+        Parameters:
+
+        - max_iterations (int): The maximum number of iterations to run
         """
         if not self._d.is_null():
-            self._d.run(time=time, save_frequency=save_frequency)
+            self._d.run_minimisation(max_iterations=max_iterations)
 
         return self
+
+    def run(
+        self,
+        time,
+        save_frequency=None,
+        frame_frequency=None,
+        energy_frequency=None,
+        lambda_windows=None,
+        save_velocities: bool = True,
+        auto_fix_minimise: bool = True,
+    ):
+        """
+        Perform dynamics on the molecules.
+
+        Parameters
+
+        time: Time
+            The amount of simulation time to run, e.g.
+            dynamics.run(sr.u("5 ps")) would perform
+            5 picoseconds of dynamics. The number of steps
+            is determined automatically based on the current
+            timestep (e.g. if the timestep was 1 femtosecond,
+            then 5 picoseconds would involve running 5000 steps)
+
+        save_frequency: Time
+            The amount of simulation time between saving frames
+            (coordinates, velocities) and energies from the trajectory. The
+            number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. Note that
+            `frame_frequency` or `energy_frequency` can be used
+            to override the frequency of saving frames or energies,
+            if you want them to be saved with different frequencies.
+            Specifying both will mean that the value of
+            `save_frequency` will be ignored.
+
+        frame_frequency: Time
+            The amount of simulation time between saving
+            frames (coordinates, velocities) from the trajectory.
+            The number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. The energies
+            will be saved into this object and are accessible via the
+            `energy_trajectory` function.
+
+        energy_frequency: Time
+            The amount of simulation time between saving
+            energies (kinetic and potential) from the trajectory.
+            The number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. The energies
+            will be saved into this object and are accessible via the
+            `energy_trajectory` function.
+
+        lambda_windows: list[float]
+            The values of lambda for which the potential energy will be
+            evaluated at every save. If this is None (the default) then
+            only the current energy will be saved every `energy_frequency`
+            time. If this is not None, then the potential energy for
+            each of the lambda values in this list will be saved. Note that
+            we always save the potential energy of the simulated lambda
+            value, even if it is not in the list of lambda windows.
+
+        save_velocities: bool
+            Whether or not to save the velocities when running dynamics.
+            By default this is True. Set this to False if you aren't
+            interested in saving the velocities.
+
+        auto_fix_minimise: bool
+            Whether or not to automatically run minimisation if the
+            trajectory exits with an error in the first few steps.
+            Such failures often indicate that the system needs
+            minimsing. This automatically runs the minimisation
+            in these cases, and then runs the requested dynamics.
+        """
+        if not self._d.is_null():
+            self._d.run(
+                time=time,
+                save_frequency=save_frequency,
+                frame_frequency=frame_frequency,
+                energy_frequency=energy_frequency,
+                lambda_windows=lambda_windows,
+                save_velocities=save_velocities,
+                auto_fix_minimise=auto_fix_minimise,
+            )
+
+        return self
+
+    def get_schedule(self):
+        """
+        Return the LambdaSchedule that shows how lambda changes the
+        underlying forcefield parameters in the system.
+        Returns None if this isn't a perturbable system.
+        """
+        return self._d.get_schedule()
+
+    def set_schedule(self, schedule):
+        """
+        Set the LambdaSchedule that will be used to control how
+        lambda changes the underlying forcefield parameters
+        in the system. This does nothing if this isn't
+        a perturbable system
+        """
+        self._d.set_schedule(schedule)
+
+    def get_lambda(self):
+        """
+        Return the current value of lambda for this system. This
+        does nothing if this isn't a perturbable system
+        """
+        return self._d.get_lambda()
+
+    def set_lambda(self, lambda_value: float):
+        """
+        Set the current value of lambda for this system. This will
+        update the forcefield parameters in the context according
+        to the data in the LambdaSchedule. This does nothing if
+        this isn't a perturbable system
+        """
+        self._d.set_lambda(lambda_value)
 
     def ensemble(self):
         """
         Return the ensemble in which the simulation is being performed
         """
         return self._d.ensemble()
+
+    def set_ensemble(self, ensemble):
+        """
+        Set the ensemble that should be used for this simulation. Note
+        that you can only use this function to change temperature and/or
+        pressure values. You can't change the fundemental ensemble
+        of the simulation.
+        """
+        self._d.set_ensemble(ensemble)
 
     def constraint(self):
         """
@@ -715,11 +1166,37 @@ class Dynamics:
         """
         return self._d.current_energy()
 
-    def current_potential_energy(self):
+    def current_potential_energy(self, lambda_values=None):
         """
-        Return the current potential energy
+        Return the current potential energy.
+
+        If `lambda_values` is passed (which should be a list of
+        lambda values) then this will return the energies
+        (as a list) at the requested lambda values
         """
-        return self._d.current_potential_energy()
+        if lambda_values is None:
+            return self._d.current_potential_energy()
+        else:
+            if not type(lambda_values) is list:
+                lambda_values = [lambda_values]
+
+            # save the current value of lambda so we
+            # can restore it
+            old_lambda = self.get_lambda()
+
+            nrgs = []
+
+            try:
+                for lambda_value in lambda_values:
+                    self.set_lambda(lambda_value)
+                    nrgs.append(self._d.current_potential_energy())
+            except Exception:
+                self.set_lambda(old_lambda)
+                raise
+
+            self.set_lambda(old_lambda)
+
+            return nrgs
 
     def current_kinetic_energy(self):
         """
@@ -727,8 +1204,111 @@ class Dynamics:
         """
         return self._d.current_kinetic_energy()
 
+    def energy_trajectory(self, to_pandas: bool = True):
+        """
+        Return the energy trajectory. This is the trajectory of
+        energy values that have been captured during dynamics.
+
+        If 'to_pandas' is True, (the default) then this will
+        be returned as a pandas dataframe, with times and energies
+        in the defined default units
+        """
+        t = self._d.energy_trajectory()
+
+        if to_pandas:
+            return t.to_pandas()
+        else:
+            return t
+
     def commit(self):
         if not self._d.is_null():
             self._d.commit()
 
         return self._d._sire_mols
+
+    def __call__(
+        self,
+        time,
+        save_frequency=None,
+        frame_frequency=None,
+        energy_frequency=None,
+        lambda_windows=None,
+        save_velocities: bool = True,
+        auto_fix_minimise: bool = True,
+    ):
+        """
+        Perform dynamics on the molecules.
+
+        Parameters
+
+        time: Time
+            The amount of simulation time to run, e.g.
+            dynamics.run(sr.u("5 ps")) would perform
+            5 picoseconds of dynamics. The number of steps
+            is determined automatically based on the current
+            timestep (e.g. if the timestep was 1 femtosecond,
+            then 5 picoseconds would involve running 5000 steps)
+
+        save_frequency: Time
+            The amount of simulation time between saving frames
+            (coordinates, velocities) and energies from the trajectory. The
+            number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. Note that
+            `frame_frequency` or `energy_frequency` can be used
+            to override the frequency of saving frames or energies,
+            if you want them to be saved with different frequencies.
+            Specifying both will mean that the value of
+            `save_frequency` will be ignored.
+
+        frame_frequency: Time
+            The amount of simulation time between saving
+            frames (coordinates, velocities) from the trajectory.
+            The number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. The energies
+            will be saved into this object and are accessible via the
+            `energy_trajectory` function.
+
+        energy_frequency: Time
+            The amount of simulation time between saving
+            energies (kinetic and potential) from the trajectory.
+            The number of timesteps between saves will depend on the
+            timestep. For example, if save_frequency was 0.1 picoseconds
+            and the timestep was 2 femtoseconds, then the coordinates
+            would be saved every 50 steps of dynamics. The energies
+            will be saved into this object and are accessible via the
+            `energy_trajectory` function.
+
+        lambda_windows: list[float]
+            The values of lambda for which the potential energy will be
+            evaluated at every save. If this is None (the default) then
+            only the current energy will be saved every `energy_frequency`
+            time. If this is not None, then the potential energy for
+            each of the lambda values in this list will be saved. Note that
+            we always save the potential energy of the simulated lambda
+            value, even if it is not in the list of lambda windows.
+
+        save_velocities: bool
+            Whether or not to save the velocities when running dynamics.
+            By default this is True. Set this to False if you aren't
+            interested in saving the velocities.
+
+        auto_fix_minimise: bool
+            Whether or not to automatically run minimisation if the
+            trajectory exits with an error in the first few steps.
+            Such failures often indicate that the system needs
+            minimsing. This automatically runs the minimisation
+            in these cases, and then runs the requested dynamics.
+        """
+        return self.run(
+            time=time,
+            save_frequency=save_frequency,
+            frame_frequency=frame_frequency,
+            energy_frequency=energy_frequency,
+            lambda_windows=lambda_windows,
+            save_velocities=save_velocities,
+            auto_fix_minimise=auto_fix_minimise,
+        ).commit()

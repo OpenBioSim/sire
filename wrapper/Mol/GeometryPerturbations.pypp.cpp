@@ -46,6 +46,19 @@ void register_GeometryPerturbations_class(){
         GeometryPerturbations_exposer.def( bp::init< SireMol::GeometryPerturbation const & >(( bp::arg("perturbation") ), "Construct to hold just a single perturbation") );
         GeometryPerturbations_exposer.def( bp::init< QList< SireBase::PropPtr< SireMol::GeometryPerturbation > > const & >(( bp::arg("perturbations") ), "Construct to hold just a single perturbation") );
         GeometryPerturbations_exposer.def( bp::init< SireMol::GeometryPerturbations const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireMol::GeometryPerturbations::append
+        
+            typedef void ( ::SireMol::GeometryPerturbations::*append_function_type)( ::SireMol::GeometryPerturbation const & ) ;
+            append_function_type append_function_value( &::SireMol::GeometryPerturbations::append );
+            
+            GeometryPerturbations_exposer.def( 
+                "append"
+                , append_function_value
+                , ( bp::arg("perturbation") )
+                , bp::release_gil_policy()
+                , "Append the passed perturbation onto the list" );
+        
+        }
         { //::SireMol::GeometryPerturbations::children
         
             typedef ::QList< SireBase::PropPtr< SireMol::Perturbation > > ( ::SireMol::GeometryPerturbations::*children_function_type)(  ) const;

@@ -44,21 +44,6 @@ void *extract_swig_wrapped_pointer(PyObject *obj)
 
 BOOST_PYTHON_MODULE(_SireOpenMM)
 {
-    typedef SireMol::SelectorMol (*openmm_system_to_sire_function_type)(const OpenMM::System &, SireBase::PropertyMap const &);
-    typedef OpenMMMetaData (*sire_to_openmm_system_function_type)(OpenMM::System &, const SireMol::SelectorMol &, SireBase::PropertyMap const &);
-    typedef void (*set_openmm_coordinates_and_velocities_function_type)(OpenMM::Context &, const OpenMMMetaData &);
-    typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
-    typedef SireMol::SelectorMol (*extract_coordinates_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
-    typedef SireMol::SelectorMol (*extract_coordinates_and_velocities_function_type)(OpenMM::State const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &);
-    typedef SireVol::SpacePtr (*extract_space_function_type)(OpenMM::State const &);
-
-    openmm_system_to_sire_function_type openmm_system_to_sire_function_value(&openmm_system_to_sire);
-    sire_to_openmm_system_function_type sire_to_openmm_system_function_value(&sire_to_openmm_system);
-    set_openmm_coordinates_and_velocities_function_type set_openmm_coordinates_and_velocities_function_value(&set_openmm_coordinates_and_velocities);
-    extract_coordinates_function_type extract_coordinates_function_value(&extract_coordinates);
-    extract_coordinates_and_velocities_function_type extract_coordinates_and_velocities_function_value(&extract_coordinates_and_velocities);
-    extract_space_function_type extract_space_function_value(&extract_space);
-
     bp::class_<OpenMMMetaData> OpenMMMetaData_exposer_t("OpenMMMetaData",
                                                         "Internal class used to hold OpenMM coordinates and velocities data");
 
@@ -91,33 +76,37 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "set_schedule", &LambdaLever::setSchedule,
         "Set the LambdaSchedule used to control the parameters by lambda");
 
+    LambdaLever_exposer_t.def(
+        "get_perturbable_molecule_maps", &LambdaLever::getPerturbableMoleculeMaps,
+        "Return the perturbable molecule maps for all of the perturbable molecules");
+
     bp::def("_openmm_system_to_sire",
-            openmm_system_to_sire_function_value,
+            &openmm_system_to_sire,
             (bp::arg("system"), bp::arg("map")),
             "Convert an OpenMM::System to a set of sire molecules.");
 
     bp::def("_sire_to_openmm_system",
-            sire_to_openmm_system_function_value,
+            &sire_to_openmm_system,
             (bp::arg("system"), bp::arg("mols"), bp::arg("map")),
             "Convert sire molecules to an OpenMM::System");
 
     bp::def("_set_openmm_coordinates_and_velocities",
-            set_openmm_coordinates_and_velocities_function_value,
+            &set_openmm_coordinates_and_velocities,
             (bp::arg("context"), bp::arg("coords_and_velocities")),
             "Set the coordinates and velocities in a context");
 
     bp::def("_openmm_extract_coordinates",
-            extract_coordinates_function_value,
-            (bp::arg("state"), bp::arg("mols"), bp::arg("map")),
+            &extract_coordinates,
+            (bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map")),
             "Extract the coordinates from 'state' and copy then into the passed 'mols'");
 
     bp::def("_openmm_extract_coordinates_and_velocities",
-            extract_coordinates_and_velocities_function_value,
-            (bp::arg("state"), bp::arg("mols"), bp::arg("map")),
+            &extract_coordinates_and_velocities,
+            (bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map")),
             "Extract the coordinates and velocities from 'state' and copy then into the passed 'mols'");
 
     bp::def("_openmm_extract_space",
-            extract_space_function_value,
+            &extract_space,
             (bp::arg("state")),
             "Extract and return the space from 'state'");
 

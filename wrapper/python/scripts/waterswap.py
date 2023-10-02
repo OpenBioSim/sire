@@ -40,6 +40,7 @@ If you need more help understanding or interpreting the results of a waterswap c
 
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -53,53 +54,96 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description="Calculate absolute binding free "
-                                             "energies using waterswap",
-                                 epilog="waterswap is built using Sire and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/waterswap.html, or type "
-                                        "'waterswap --description'",
-                                 prog="waterswap")
+parser = argparse.ArgumentParser(
+    description="Calculate absolute binding free " "energies using waterswap",
+    epilog="waterswap is built using Sire and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/waterswap.html, or type "
+    "'waterswap --description'",
+    prog="waterswap",
+)
 
-parser.add_argument('--description', action="store_true",
-                    help="Print a complete description of this program.")
+parser.add_argument(
+    "--description",
+    action="store_true",
+    help="Print a complete description of this program.",
+)
 
-parser.add_argument('-H', '--help-config', action="store_true",
-                    help="Get additional help regarding all of the parameters "
-                         "(and their default values) that can be "
-                         "set in the optionally-supplied CONFIG file")
+parser.add_argument(
+    "-H",
+    "--help-config",
+    action="store_true",
+    help="Get additional help regarding all of the parameters "
+    "(and their default values) that can be "
+    "set in the optionally-supplied CONFIG file",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-l', '--ligand', nargs="?",
-                    help="Supply the name of one of the residues in the ligand whose "
-                         "binding free energy is to be calculated. By default, the ligand "
-                         "will be the first non-protein, non-solvent molecule in the "
-                         "input topology file.")
+parser.add_argument(
+    "-l",
+    "--ligand",
+    nargs="?",
+    help="Supply the name of one of the residues in the ligand whose "
+    "binding free energy is to be calculated. By default, the ligand "
+    "will be the first non-protein, non-solvent molecule in the "
+    "input topology file.",
+)
 
-parser.add_argument('-t', '--topology_file', nargs="?",
-                    help="The Amber topology file containing the solvated complex.")
+parser.add_argument(
+    "-t",
+    "--topology_file",
+    nargs="?",
+    help="The Amber topology file containing the solvated complex.",
+)
 
-parser.add_argument('-c', '--coordinate_file', nargs="?",
-                    help="The Amber coordinate file (with periodic box) giving the coordinates "
-                         "of all of the atoms in the passed topology file.")
+parser.add_argument(
+    "-c",
+    "--coordinate_file",
+    nargs="?",
+    help="The Amber coordinate file (with periodic box) giving the coordinates "
+    "of all of the atoms in the passed topology file.",
+)
 
-parser.add_argument('-C', '--config', nargs="?",
-                    help='Supply an optional CONFIG file to control the calculation.')
+parser.add_argument(
+    "-C",
+    "--config",
+    nargs="?",
+    help="Supply an optional CONFIG file to control the calculation.",
+)
 
-parser.add_argument('--lambda_values', type=float, nargs='+',
-                    help='Lambda values for the windows used in the free energy calculation')
+parser.add_argument(
+    "--lambda_values",
+    type=float,
+    nargs="+",
+    help="Lambda values for the windows used in the free energy calculation",
+)
 
-parser.add_argument('-n', '--num_iterations', type=int, nargs="?",
-                    help='The number of waterswap iterations to perform (default 1000)')
+parser.add_argument(
+    "-n",
+    "--num_iterations",
+    type=int,
+    nargs="?",
+    help="The number of waterswap iterations to perform (default 1000)",
+)
 
-parser.add_argument('-f', '--fast', action="store_true",
-                    help="Activate the 'fast' version of waterswap used for fast, yet "
-                         "potentially inaccurate calculations that are useful for equilibration.")
+parser.add_argument(
+    "-f",
+    "--fast",
+    action="store_true",
+    help="Activate the 'fast' version of waterswap used for fast, yet "
+    "potentially inaccurate calculations that are useful for equilibration.",
+)
 
 sys.stdout.write("\n")
 args = parser.parse_args()
@@ -117,8 +161,11 @@ if args.author:
 
 if args.version:
     print("waterswap -- from Sire release version <%s>" % Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" % Sire.__version__)
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if args.help_config:
@@ -155,7 +202,9 @@ else:
 
 if not (os.path.exists(coord_file) and os.path.exists(top_file)):
     parser.print_help()
-    print("\nPlease supply the name of an existing topology and coordinate file.")
+    print(
+        "\nPlease supply the name of an existing topology and coordinate file."
+    )
     if not os.path.exists(coord_file):
         print("(cannot find coordinate file %s)" % coord_file)
     if not os.path.exists(top_file):
@@ -163,7 +212,10 @@ if not (os.path.exists(coord_file) and os.path.exists(top_file)):
 
     sys.exit(-1)
 
-print("\nRunning a waterswap calculation using files %s and %s." % (top_file, coord_file))
+print(
+    "\nRunning a waterswap calculation using files %s and %s."
+    % (top_file, coord_file)
+)
 
 ligand = None
 if args.ligand:
@@ -173,12 +225,16 @@ elif "ligand name" in params:
     ligand = params["ligand name"]
 
 if ligand:
-    print("The absolute binding free energy of the molecule containing residue %s "
-          "will be calculated.\n" %ligand)
+    print(
+        "The absolute binding free energy of the molecule containing residue %s "
+        "will be calculated.\n" % ligand
+    )
 
 else:
-    print("The absolute binding free energy of the first non-protein, non-solvent "
-          "molecule will be calculated.\n")
+    print(
+        "The absolute binding free energy of the first non-protein, non-solvent "
+        "molecule will be calculated.\n"
+    )
 
 lambda_values = args.lambda_values
 

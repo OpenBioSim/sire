@@ -141,6 +141,13 @@ namespace SireBase
         bool updatePropertyFrom(const QString &key, const V &values,
                                 bool auto_add = true);
 
+        void addLink(const QString &key, const QString &linked_property);
+        void removeLink(const QString &key);
+        void removeAllLinks();
+
+        bool hasLinks() const;
+        QHash<QString, QString> getLinks() const;
+
         void setProperty(const QString &key, const Property &value);
         void setProperty(const QString &key, const Property &value, bool clear_metadata);
 
@@ -183,6 +190,8 @@ namespace SireBase
         void assertContainsMetadata(const PropertyName &key, const PropertyName &metakey) const;
 
     private:
+        QString _getLink(const QString &key) const;
+
         Properties(bool);
 
         Property *getEditableProperty(const QString &key);

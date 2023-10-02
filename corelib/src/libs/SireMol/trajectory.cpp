@@ -1036,7 +1036,7 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
     {
         SharedDataStream sds(ds);
 
-        sds >> frame.coords >> frame.vels >> frame.frcs >> frame.spc >> frame.props;
+        sds >> frame.coords >> frame.vels >> frame.frcs >> frame.spc;
 
         double time;
         sds >> time;
@@ -1046,6 +1046,8 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
         frame.num_atoms = std::max(frame.coords.count(),
                                    std::max(frame.vels.count(),
                                             frame.frcs.count()));
+
+        sds >> frame.props;
     }
     else if (v == 1)
     {

@@ -18,25 +18,59 @@ class SOMMContext(_Context):
     """
 
     def __init__(
-        self, system=None, integrator=None, platform=None, metadata=None
+        self,
+        system=None,
+        integrator=None,
+        platform=None,
+        metadata=None,
+        map=None,
     ):
         """
         Construct from a passed OpenMM Context, the
         atom index, and the lambda lever
         """
         if system is not None:
-            super().__init__(system, integrator, platform)
-
+            from ...base import create_map
             from ._SireOpenMM import _set_openmm_coordinates_and_velocities
+
+            map = create_map(map)
+
+            self._atom_index = metadata.index()
+            self._lambda_lever = metadata.lambdaLever()
+
+            # we need to update the constraints in the system
+            # to match the current value of lambda, before we
+            # turn this system into a context
+            if map.specified("lambda"):
+                lambda_value = map["lambda"].value().as_double()
+            else:
+                lambda_value = 0.0
+
+            # we have space here, if we need it, to update
+            # the system based on the requested value of lambda
+            # There are some things that are unchangeable once
+            # the context has been created (e.g. constraints)
+            #
+            # Note the initialisation of the constraints is slow,
+            # so if there are many constraints then this constructor
+            # can take several seconds to complete. However, the
+            # increase in dynamics performance through having a larger
+            # timestep if we constraint bonds and angles makes this
+            # more than worth it. Note that this is why minimisations
+            # start running more quickly than dynamics jobs. There
+            # are no constraints in minimisations
+            super().__init__(system, integrator, platform)
 
             # place the coordinates and velocities into the context
             _set_openmm_coordinates_and_velocities(self, metadata)
 
-            self._atom_index = metadata.index()
-            self._lambda_lever = metadata.lambdaLever()
+            self._lambda_value = self._lambda_lever.set_lambda(
+                self, lambda_value
+            )
         else:
             self._atom_index = None
             self._lambda_lever = None
+            self._lambda_value = 0.0
 
     def __str__(self):
         p = self.getPlatform()
@@ -100,6 +134,10 @@ class SOMMContext(_Context):
     def set_platform_property(self, key, value):
         """
         Set the value of the platform property 'key' to 'value'
+
+        Note that this probably doesn't do anything as it looks
+        like platform properties cannot be changed after
+        construction. This function may be removed.
         """
         value = str(value)
 
@@ -126,6 +164,12 @@ class SOMMContext(_Context):
         in the openmm context
         """
         return self._atom_index
+
+    def get_lambda(self):
+        """
+        Return the current value of lambda for this context
+        """
+        return self._lambda_value
 
     def get_lambda_lever(self):
         """
@@ -162,17 +206,42 @@ class SOMMContext(_Context):
         if self._lambda_lever is None:
             return
 
-        self._lambda_lever.set_lambda(self, lambda_value)
+        self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
 
-    def get_potential_energy(self):
+    def set_temperature(self, temperature, rescale_velocities=True):
+        """
+        Set the target temperature for the dynamics. If
+        rescale_velocities is True then the velocities will
+        be rescaled to the new temperature
+        """
+        raise NotImplementedError("We can't yet set the temperature")
+
+    def set_pressure(self, pressure):
+        """
+        Set the target pressure for the dynamics.
+        """
+        raise NotImplementedError("We can't yet set the pressure")
+
+    def get_potential_energy(self, to_sire_units: bool = True):
         """
         Calculate and return the potential energy of the system
         """
         s = self.getState(getEnergy=True)
-        return s.getPotentialEnergy()
+        nrg = s.getPotentialEnergy()
 
-    def get_energy(self):
+        if to_sire_units:
+            import openmm
+            from ...units import kcal_per_mol
+
+            return (
+                nrg.value_in_unit(openmm.unit.kilocalorie_per_mole)
+                * kcal_per_mol
+            )
+        else:
+            return nrg
+
+    def get_energy(self, to_sire_units: bool = True):
         """
         Synonym for self.get_potential_energy()
         """
-        return self.get_potential_energy()
+        return self.get_potential_energy(to_sire_units=to_sire_units)

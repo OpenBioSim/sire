@@ -893,7 +893,7 @@ int main(int argc, char **argv)
                                  "under certain conditions; type \"sire -l\" or \"sire --license\"\n"
                                  "for warranty and licensing conditions.\n\n"
                                  "For more information and to contact the authors please visit\n\n"
-                                 "http://sire.openbiosim.org"));
+                                 "https://sire.openbiosim.org"));
 
             printBox(QObject::tr("%4@%5: Starting primary node (%1 of %2): nThreads()=%3")
                          .arg(Cluster::getRank())

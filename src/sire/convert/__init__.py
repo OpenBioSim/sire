@@ -15,16 +15,12 @@ __all__ = [
 
 from .. import use_new_api as _use_new_api
 
-# Imported to ensure that these classes are properly wrapped
-from ..maths import Vector as _Vector
-from ..cas import LambdaSchedule as _LambdaSchedule
-
-from ..mol import SelectorMol as _SelectorMol
-
 _use_new_api()
 
 
 def _to_selectormol(obj):
+    from ..mol import SelectorMol
+
     if hasattr(obj, "molecules"):
         return obj.molecules()
     elif type(obj) is list:
@@ -33,9 +29,9 @@ def _to_selectormol(obj):
         for o in obj:
             mols.append(_to_selectormol(o))
 
-        return _SelectorMol(mols)
+        return SelectorMol(mols)
     else:
-        return _SelectorMol(obj)
+        return SelectorMol(obj)
 
 
 def supported_formats():
@@ -351,6 +347,19 @@ def sire_to_openmm(obj, map=None):
     of molecules) to an OpenMM equivalent
     """
     # will eventually support System too...
+    from ..system import System
+    from ..base import create_map
+
+    map = create_map(map)
+
+    if System.is_system(obj):
+        # bring in system-level properties
+        if not map.specified("space"):
+            map.set("space", obj.space())
+
+        if not map.specified("time"):
+            map.set("time", obj.time())
+
     obj = _to_selectormol(obj)
 
     try:
@@ -361,9 +370,7 @@ def sire_to_openmm(obj, map=None):
             "'mamba install -c conda-forge openmm'"
         )
 
-    from ..base import create_map
-
-    mols = _sire_to_openmm(obj, map=create_map(map))
+    mols = _sire_to_openmm(obj, map=map)
 
     return mols
 

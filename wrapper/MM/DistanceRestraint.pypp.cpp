@@ -148,7 +148,7 @@ void register_DistanceRestraint_class(){
         }
         { //::SireMM::DistanceRestraint::halfHarmonic
         
-            typedef ::SireMM::DistanceRestraint ( *halfHarmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::Length const &,::SireMM::HarmonicDistanceForceConstant const & );
+            typedef ::SireMM::DistanceRestraint ( *halfHarmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::Length const &,::SireUnits::Dimension::HarmonicBondConstant const & );
             halfHarmonic_function_type halfHarmonic_function_value( &::SireMM::DistanceRestraint::halfHarmonic );
             
             DistanceRestraint_exposer.def( 
@@ -161,7 +161,7 @@ void register_DistanceRestraint_class(){
         }
         { //::SireMM::DistanceRestraint::harmonic
         
-            typedef ::SireMM::DistanceRestraint ( *harmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireMM::HarmonicDistanceForceConstant const & );
+            typedef ::SireMM::DistanceRestraint ( *harmonic_function_type )( ::SireFF::PointRef const &,::SireFF::PointRef const &,::SireUnits::Dimension::HarmonicBondConstant const & );
             harmonic_function_type harmonic_function_value( &::SireMM::DistanceRestraint::harmonic );
             
             DistanceRestraint_exposer.def( 

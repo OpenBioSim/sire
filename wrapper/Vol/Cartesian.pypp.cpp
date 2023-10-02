@@ -368,7 +368,7 @@ void register_Cartesian_class(){
                 , getMinimumImage_function_value
                 , ( bp::arg("coords"), bp::arg("center") )
                 , bp::release_gil_policy()
-                , "A cartesian space is not periodic, so this just returns the input point" );
+                , "Return the minimum image copy of group with respect to center.\nIn this case, as this is not a periodic space, this just returns\ngroup" );
         
         }
         { //::SireVol::Cartesian::getMinimumImage
@@ -482,7 +482,7 @@ void register_Cartesian_class(){
                 , minimumDistance_function_value
                 , ( bp::arg("point"), bp::arg("group") )
                 , bp::release_gil_policy()
-                , "Return the minimum distance between the points in group0 and group1." );
+                , "Return the minimum distance between point and all the points in group.\nIf this is a periodic space then this uses the minimum image convention\n(i.e. the minimum distance between the closest periodic replicas are\nused)" );
         
         }
         { //::SireVol::Cartesian::minimumDistance

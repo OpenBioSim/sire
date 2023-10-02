@@ -1,10 +1,10 @@
-
 import os
 import sys
 import tarfile
 
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -31,17 +31,20 @@ unittestdir = os.path.join(testdir, "SireUnitTests", "unittests")
 
 old_cwd = os.getcwd()
 
+
 def downloadTestsFromWebsite():
     """Function downloads the test suite from the website"""
     try:
-        pycurl = try_import("pycurl", package_registry={"pycurl":"PyCurl"})
+        pycurl = try_import("pycurl", package_registry={"pycurl": "PyCurl"})
         test_package = "unittests_%s.tar.bz2" % Sire.Base.getReleaseVersion()
         test_package_file = os.path.join(testdir, "unittests.tar.bz2")
         with open(test_package_file, "wb") as f:
             c = pycurl.Curl()
-            c.setopt(c.URL,
-              "http://sire.openbiosim.org/largefiles/sire_releases/download.php?name=%s" \
-                      % test_package )
+            c.setopt(
+                c.URL,
+                "https://sire.openbiosim.org/largefiles/sire_releases/download.php?name=%s"
+                % test_package,
+            )
             c.setopt(c.WRITEDATA, f)
             c.perform()
             c.close()
@@ -49,10 +52,12 @@ def downloadTestsFromWebsite():
             os.chdir(testdir)
             tar_file = tarfile.open("unittests.tar.bz2", "r:bz2")
             tar_file.extractall()
-            #os.system("tar -jxvf unittests.tar.bz2")
+            # os.system("tar -jxvf unittests.tar.bz2")
 
             if not os.path.exists("SireUnitTests/README.md"):
-                print("Could not find SireUnitTests/README.md in download - everything ok?")
+                print(
+                    "Could not find SireUnitTests/README.md in download - everything ok?"
+                )
                 raise IOError()
 
             os.chdir(old_cwd)
@@ -61,29 +66,33 @@ def downloadTestsFromWebsite():
         os.chdir(old_cwd)
         return False
 
+
 if os.path.exists(unittestdir):
     testdir_exists
 
     try:
         gitexe = Sire.Base.findExe("git").absoluteFilePath()
         os.chdir(os.path.dirname(unittestdir))
-        os.system("\"%s\" fetch" % gitexe)
-        os.system("\"%s\" checkout %s" % (gitexe,"devel"))
-        os.system("\"%s\" pull" % gitexe)
+        os.system('"%s" fetch' % gitexe)
+        os.system('"%s" checkout %s' % (gitexe, "devel"))
+        os.system('"%s" pull' % gitexe)
         os.chdir(old_cwd)
     except:
         pass
 
 else:
-    #if is_clean and branch == "master":
+    # if is_clean and branch == "master":
     #    testdir_exists = downloadTestsFromWebsite()
 
     if not testdir_exists:
-        #things will be cloned
+        # things will be cloned
         try:
             gitexe = Sire.Base.findExe("git").absoluteFilePath()
             os.chdir(testdir)
-            gitcmd = "\"%s\" clone https://github.com/michellab/SireUnitTests.git -b %s" % (gitexe,"devel")
+            gitcmd = (
+                '"%s" clone https://github.com/michellab/SireUnitTests.git -b %s'
+                % (gitexe, "devel")
+            )
             print("Cloning unittests from git repository - %s" % gitcmd)
             os.system(gitcmd)
             os.chdir(old_cwd)
@@ -92,13 +101,13 @@ else:
 
 print("You should find the unit tests in %s" % unittestdir)
 
-#print("\nRunning C++ unit tests...\n")
-#try:
+# print("\nRunning C++ unit tests...\n")
+# try:
 #    Sire.Base.UnitTest.runAll()
-#except:
+# except:
 #    pass
 #
-#print("\nNow running Python-based unit tests...\n")
+# print("\nNow running Python-based unit tests...\n")
 
 testdir = unittestdir
 
@@ -152,8 +161,7 @@ if len(failures) > 0:
         s.append("One of more jobs in %s failed!" % failure)
 
     print("\nEXITING AS FAIL")
-    error_message = "SOME OF THE UNIT TESTS FAILED!\n%s" % \
-                         "\n".join(s)
+    error_message = "SOME OF THE UNIT TESTS FAILED!\n%s" % "\n".join(s)
     raise AssertionError(error_message)
 else:
     print("\n\nHOORAY - ALL OF THE UNIT TESTS PASSED!!!")

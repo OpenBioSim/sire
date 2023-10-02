@@ -23,7 +23,11 @@ set ( PYPP_SOURCES
        Bond.pypp.cpp
        BondComponent.pypp.cpp
        BondParameterName.pypp.cpp
+       BondRestraint.pypp.cpp
+       BondRestraints.pypp.cpp
        BondSymbols.pypp.cpp
+       BoreschRestraint.pypp.cpp
+       BoreschRestraints.pypp.cpp
        CHARMMSwitchingFunction.pypp.cpp
        CLJ14Group.pypp.cpp
        CLJAtom.pypp.cpp
@@ -164,10 +168,13 @@ set ( PYPP_SOURCES
        NoCutoff.pypp.cpp
        NullCLJFunction.pypp.cpp
        NullRestraint.pypp.cpp
+       PositionalRestraint.pypp.cpp
+       PositionalRestraints.pypp.cpp
        Restraint.pypp.cpp
        Restraint3D.pypp.cpp
        RestraintComponent.pypp.cpp
        RestraintFF.pypp.cpp
+       Restraints.pypp.cpp
        ScaledCLJParameterNames3D.pypp.cpp
        ScaledChargeParameterNames3D.pypp.cpp
        ScaledLJParameterNames3D.pypp.cpp

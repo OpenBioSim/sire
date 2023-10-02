@@ -1,4 +1,3 @@
-
 import os
 import sys
 import shutil
@@ -6,18 +5,36 @@ import shutil
 for arg in sys.argv[1:]:
     if arg == "-h" or arg == "--help":
         print("python download_compile_sire.py OPTIONS")
-        print("\nScript to download and (optionally) compile and install Sire.")
+        print(
+            "\nScript to download and (optionally) compile and install Sire."
+        )
         print("\nOptions:")
-        print("    -r / --rebuild    Rebuild Sire from scratch every time you run this script.")
-        print("    --download-only   Download Sire only. Don't compile or install.")
-        print("    -b / --branch     Choose which branch of the source to download and install.")
-        print("                      By default the 'trunk' (most up-to-date, stable version)")
+        print(
+            "    -r / --rebuild    Rebuild Sire from scratch every time you run this script."
+        )
+        print(
+            "    --download-only   Download Sire only. Don't compile or install."
+        )
+        print(
+            "    -b / --branch     Choose which branch of the source to download and install."
+        )
+        print(
+            "                      By default the 'trunk' (most up-to-date, stable version)"
+        )
         print("                      will be downloaded.")
-        print("    -d / --directory  Supply the directory into which the source will be downloaded")
-        print("                      and Sire will be compiled and installed. By default, the")
+        print(
+            "    -d / --directory  Supply the directory into which the source will be downloaded"
+        )
+        print(
+            "                      and Sire will be compiled and installed. By default, the"
+        )
         print("                      current directory will be used.")
-        print("    --no-execute      Only show the commands that will be run. Don't actually run anything.")
-        print("\nSire is released under the GPL. For more information see http://sire.openbiosim.org")
+        print(
+            "    --no-execute      Only show the commands that will be run. Don't actually run anything."
+        )
+        print(
+            "\nSire is released under the GPL. For more information see https://sire.openbiosim.org"
+        )
         sys.exit(0)
 
 
@@ -31,28 +48,37 @@ no_execute = False
 rundir = os.getcwd()
 branch = "trunk"
 
-for i in range(1,len(sys.argv)):
+for i in range(1, len(sys.argv)):
     arg = sys.argv[i]
 
     if arg == "--download-only":
-        print("\nSire will only be downloaded. It will not be compiled or installed.")
+        print(
+            "\nSire will only be downloaded. It will not be compiled or installed."
+        )
         download_only = True
 
     elif arg == "-r" or arg == "--rebuild":
-        print("\nSire will be rebuilt from scratch after download. This will be quite slow...")
+        print(
+            "\nSire will be rebuilt from scratch after download. This will be quite slow..."
+        )
         rebuild = True
 
     elif arg == "--no-execute":
-        print("\nThis script will only print the commands to be run. It won't actually run anything...")
+        print(
+            "\nThis script will only print the commands to be run. It won't actually run anything..."
+        )
         no_execute = True
 
     elif arg == "-d" or arg == "--directory":
-        print("\nDownloading, compiling and installing Sire in directory %s" % sys.argv[i+1])
-        rundir = sys.argv[i+1]
+        print(
+            "\nDownloading, compiling and installing Sire in directory %s"
+            % sys.argv[i + 1]
+        )
+        rundir = sys.argv[i + 1]
 
     elif arg == "-b" or arg == "--branch":
-        print("\nUsing the %s branch of Sire" % sys.argv[i+1])
-        branch = sys.argv[i+1]
+        print("\nUsing the %s branch of Sire" % sys.argv[i + 1])
+        branch = sys.argv[i + 1]
 
 if must_exit:
     sys.exit(0)
@@ -107,7 +133,12 @@ if not os.path.exists("python"):
     if no_execute:
         print("svn co %s ./python" % python)
     elif os.system("svn co %s ./python" % python) != 0:
-        if os.system("svn co %s ./python" % python.replace("python","python2")) != 0:
+        if (
+            os.system(
+                "svn co %s ./python" % python.replace("python", "python2")
+            )
+            != 0
+        ):
             print("Failed to checkout the source for the python wrappers")
             sys.exit(-1)
 else:
@@ -125,7 +156,9 @@ if download_only:
 
 if rebuild:
     if os.path.exists("build"):
-        print("Rebuilding from scratch so removing existing build directory...")
+        print(
+            "Rebuilding from scratch so removing existing build directory..."
+        )
 
         if no_execute:
             print("rm -rf ./build")
@@ -161,7 +194,10 @@ if not no_execute:
 
 if no_execute:
     print("nice cmake ../../corelib -DSIRE_INSTALL_PREFIX=%s" % sire_app)
-elif os.system("nice cmake ../../corelib -DSIRE_INSTALL_PREFIX=%s" % sire_app) != 0:
+elif (
+    os.system("nice cmake ../../corelib -DSIRE_INSTALL_PREFIX=%s" % sire_app)
+    != 0
+):
     print("Could not successfully run cmake on corelib")
     sys.exit(-1)
 

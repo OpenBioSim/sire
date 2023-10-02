@@ -111,6 +111,15 @@ namespace SireMol
         MolEditor &renumber(const QHash<ResNum, ResNum> &resnums);
         MolEditor &renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums);
 
+        bool updateProperty(const QString &key, const Property &value, bool auto_add = true);
+
+        template <class T, class V>
+        bool updatePropertyFrom(const QString &key, const V &value, bool auto_add = true);
+
+        MolEditor &addLink(const QString &key, const QString &linked_property);
+        MolEditor &removeLink(const QString &key);
+        MolEditor &removeAllLinks();
+
         AtomStructureEditor add(const AtomName &atom) const;
         AtomStructureEditor add(const AtomNum &atom) const;
 
@@ -223,6 +232,24 @@ namespace SireMol
         Molecule commit() const;
         operator Molecule() const;
     };
+
+#ifndef SIRE_SKIP_INLINE_FUNCTIONS
+
+    /** Update the property at key 'key' (which must be of type T) with
+     *  the value from 'values'. This called T::copyFrom(const V &values)
+     *  on the property. If 'auto_add' is true then this
+     *  default-constructs and adds the property if it doesn't exist.
+     *
+     *  This returns whether or not a property was updated (or added)
+     */
+    template <class T, class V>
+    SIRE_OUTOFLINE_TEMPLATE bool MolEditor::updatePropertyFrom(const QString &key,
+                                                               const V &value, bool auto_add)
+    {
+        return this->d->updatePropertyFrom<T>(key, value, auto_add);
+    }
+
+#endif
 
 } // namespace SireMol
 

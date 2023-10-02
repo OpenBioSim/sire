@@ -1,5 +1,6 @@
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -15,35 +16,63 @@ import sys
 
 import ast
 
-parser = argparse.ArgumentParser(description="Focusgrid, a protocol where selected coordinates are used to define "
-                                             "regions with a spherical cutoff.  The thermodynamics of these regions are computed."
-                                             "These coordinates are usually selected "
-                                             "by using clustered densities of interest",
-                                 epilog="nautilus-focusgrid is built using Sire, Numpy and mdtraj and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/nautilus",
-                                 prog="nautilus")
+parser = argparse.ArgumentParser(
+    description="Focusgrid, a protocol where selected coordinates are used to define "
+    "regions with a spherical cutoff.  The thermodynamics of these regions are computed."
+    "These coordinates are usually selected "
+    "by using clustered densities of interest",
+    epilog="nautilus-focusgrid is built using Sire, Numpy and mdtraj and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/nautilus",
+    prog="nautilus",
+)
 
-parser.add_argument('-C', '--config', nargs="?",
-                    help='Supply an optional Nautilus CONFIG file to control the calculation.')
+parser.add_argument(
+    "-C",
+    "--config",
+    nargs="?",
+    help="Supply an optional Nautilus CONFIG file to control the calculation.",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-g', '--gridforces', nargs="?",
-                    help="Grid forces file containing averages of parameters in the grid")
+parser.add_argument(
+    "-g",
+    "--gridforces",
+    nargs="?",
+    help="Grid forces file containing averages of parameters in the grid",
+)
 
-parser.add_argument('-R', '--R', nargs="?",
-                    help="Distance from the coordinate defining a sphere")
+parser.add_argument(
+    "-R",
+    "--R",
+    nargs="?",
+    help="Distance from the coordinate defining a sphere",
+)
 
-parser.add_argument('-c', '--coords', nargs="?",
-                    help="Coordinate list defining where spheres begin")
+parser.add_argument(
+    "-c",
+    "--coords",
+    nargs="?",
+    help="Coordinate list defining where spheres begin",
+)
 
-parser.add_argument('-b', '--benchmark', action='store_true',
-                    help="Benchmark the Nautilus subroutines.")
+parser.add_argument(
+    "-b",
+    "--benchmark",
+    action="store_true",
+    help="Benchmark the Nautilus subroutines.",
+)
 sys.stdout.write("\n")
 
 args = parser.parse_args()
@@ -51,14 +80,22 @@ args = parser.parse_args()
 must_exit = False
 
 if args.author:
-    print("\n nautilus-focusgrids was written by George Gerogiokas and Julien Michel (C) 2014")
+    print(
+        "\n nautilus-focusgrids was written by George Gerogiokas and Julien Michel (C) 2014"
+    )
     print("It is based on the Nautilus Sire module.")
     must_exit = True
 
 if args.version:
-    print("nautilus-focusgrids -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print(
+        "nautilus-focusgrids -- from Sire release version <%s>"
+        % Sire.__version__
+    )
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if must_exit:
@@ -92,11 +129,12 @@ if args.benchmark:
 
 if not (os.path.exists(gridforces)):
     parser.print_help()
-    print("\nPlease supply the name of an existing grid force file and coordinates")
+    print(
+        "\nPlease supply the name of an existing grid force file and coordinates"
+    )
     if not os.path.exists(gridforces):
         print("(cannot find grid file %s)" % gridforces)
     sys.exit(-1)
 
-print("\nRunning nautilus-subgrids.py using file %s" % (gridforces) )
+print("\nRunning nautilus-subgrids.py using file %s" % (gridforces))
 Nautilus.subgrids(params)
-

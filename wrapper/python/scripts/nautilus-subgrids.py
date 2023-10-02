@@ -1,5 +1,6 @@
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -13,30 +14,45 @@ import argparse
 import os
 import sys
 
-parser = argparse.ArgumentParser(description="Subgrids, subtracts grids in dx format to get differences where gridf.dx-"
-                                             "gridl.dx=diff.dx.  Grids must be of identical dimensions and grid density ",
-                                 epilog="nautilus-subgrids is built using Sire, Numpy and mdtraj and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/nautilus",
-                                 prog="nautilus")
+parser = argparse.ArgumentParser(
+    description="Subgrids, subtracts grids in dx format to get differences where gridf.dx-"
+    "gridl.dx=diff.dx.  Grids must be of identical dimensions and grid density ",
+    epilog="nautilus-subgrids is built using Sire, Numpy and mdtraj and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/nautilus",
+    prog="nautilus",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-gf', '--gridf', nargs="?",
-                    help="Grid dx file f to be subtracted")
+parser.add_argument(
+    "-gf", "--gridf", nargs="?", help="Grid dx file f to be subtracted"
+)
 
-parser.add_argument('-gl', '--gridl', nargs="?",
-                    help="Grid dx file l used to subtract")
+parser.add_argument(
+    "-gl", "--gridl", nargs="?", help="Grid dx file l used to subtract"
+)
 
-parser.add_argument('-d', '--diffdx', nargs="?",
-                    help="Name of difference dx file")
+parser.add_argument(
+    "-d", "--diffdx", nargs="?", help="Name of difference dx file"
+)
 
-parser.add_argument('-b', '--benchmark', action='store_true',
-                    help="Benchmark the Nautilus subroutines.")
+parser.add_argument(
+    "-b",
+    "--benchmark",
+    action="store_true",
+    help="Benchmark the Nautilus subroutines.",
+)
 sys.stdout.write("\n")
 
 args = parser.parse_args()
@@ -44,14 +60,22 @@ args = parser.parse_args()
 must_exit = False
 
 if args.author:
-    print("\n nautilus-subgrids was written by Georgios Gerogiokas and Julien Michel (C) 2014")
+    print(
+        "\n nautilus-subgrids was written by Georgios Gerogiokas and Julien Michel (C) 2014"
+    )
     print("It is based on the Nautilus Sire module.")
     must_exit = True
 
 if args.version:
-    print("nautilus-subgrids -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print(
+        "nautilus-subgrids -- from Sire release version <%s>"
+        % Sire.__version__
+    )
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if must_exit:
@@ -82,7 +106,7 @@ if args.diffdx:
     diffdx = args.diffdx
     params["diffdx"] = diffdx
 elif "diffdx" in params:
-    diffdx= params["diffdx"]
+    diffdx = params["diffdx"]
 else:
     diffdx = "diff.dx"
     params["diffdx"] = diffdx
@@ -90,7 +114,7 @@ else:
 if args.benchmark:
     params["benchmark"] = True
 
-#print (params)
+# print (params)
 
 if not (os.path.exists(gridf) and os.path.exists(gridl)):
     parser.print_help()
@@ -99,6 +123,5 @@ if not (os.path.exists(gridf) and os.path.exists(gridl)):
         print("(cannot find dx files %s %s)" % (gridf, gridl))
     sys.exit(-1)
 
-print("\nRunning nautilus-subgrids.py using files %s %s" % (gridf, gridl) )
+print("\nRunning nautilus-subgrids.py using files %s %s" % (gridf, gridl))
 Nautilus.subgrids(params)
-

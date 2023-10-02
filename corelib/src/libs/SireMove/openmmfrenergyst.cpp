@@ -22,7 +22,7 @@
  *  that should have come with this distribution.
  *
  *  You can contact the authors via the developer's mailing list
- *  at http://sire.openbiosim.org
+ *  at https://sire.openbiosim.org
  *
 \*********************************************/
 
@@ -1883,22 +1883,23 @@ void OpenMMFrEnergyST::initialise()
                         restrainedAtoms.property(QString("Anchor(%1)").arg(i)).asA<VariantProperty>().toInt();
                     int atomnum =
                         restrainedAtoms.property(QString("Atom(%1)").arg(i)).asA<VariantProperty>().toInt();
-                    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    // double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    // double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    // double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    // double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    // double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
+		    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    //double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
 
                     int atopenmmindex = AtomNumToOpenMMIndex[atomnum];
                     int anchoropenmmindex = AtomNumToOpenMMIndex[anchornum];
 
                     if (Debug)
                     {
-                        // qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
-                        //          << yref << " z " << zref << " k " << k << " d " << d;
+                        //qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
+                        //         << yref << " z " << zref << " k " << k << " d " << d;
                         qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
                         qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;
+
                     }
 
                     // int posrestrdim = 5;

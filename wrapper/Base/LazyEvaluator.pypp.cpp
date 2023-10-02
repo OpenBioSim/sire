@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 #include <tbb/collaborative_call_once.h>
 
+#include <tbb/spin_rw_mutex.h>
+
 #include "lazyevaluator.h"
 
 SireBase::LazyEvaluator __copy__(const SireBase::LazyEvaluator &other){ return SireBase::LazyEvaluator(other); }

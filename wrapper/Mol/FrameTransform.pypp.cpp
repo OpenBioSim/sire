@@ -142,6 +142,18 @@ void register_FrameTransform_class(){
                 , "" );
         
         }
+        { //::SireMol::FrameTransform::isNull
+        
+            typedef bool ( ::SireMol::FrameTransform::*isNull_function_type)(  ) const;
+            isNull_function_type isNull_function_value( &::SireMol::FrameTransform::isNull );
+            
+            FrameTransform_exposer.def( 
+                "isNull"
+                , isNull_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::FrameTransform::nSmooth
         
             typedef int ( ::SireMol::FrameTransform::*nSmooth_function_type)(  ) const;
@@ -281,6 +293,19 @@ void register_FrameTransform_class(){
                 , "" );
         
         }
+        { //::SireMol::FrameTransform::wouldCreateTransform
+        
+            typedef bool ( *wouldCreateTransform_function_type )( ::SireBase::PropertyMap const & );
+            wouldCreateTransform_function_type wouldCreateTransform_function_value( &::SireMol::FrameTransform::wouldCreateTransform );
+            
+            FrameTransform_exposer.def( 
+                "wouldCreateTransform"
+                , wouldCreateTransform_function_value
+                , ( bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::FrameTransform::wrap
         
             typedef bool ( ::SireMol::FrameTransform::*wrap_function_type)(  ) const;
@@ -294,6 +319,7 @@ void register_FrameTransform_class(){
         
         }
         FrameTransform_exposer.staticmethod( "typeName" );
+        FrameTransform_exposer.staticmethod( "wouldCreateTransform" );
         FrameTransform_exposer.def( "__copy__", &__copy__);
         FrameTransform_exposer.def( "__deepcopy__", &__copy__);
         FrameTransform_exposer.def( "clone", &__copy__);

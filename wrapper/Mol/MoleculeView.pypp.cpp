@@ -676,6 +676,43 @@ void register_MoleculeView_class(){
                 , "Extract a copy of this view which contains only the currently\nselected atoms. This allows the used to pull out parts of a larger molecule,\ne.g. if they want to have only selected residues in a protein and do not\nwant to have to store or manipulate the larger protein molecule" );
         
         }
+        { //::SireMol::MoleculeView::getLink
+        
+            typedef ::QString ( ::SireMol::MoleculeView::*getLink_function_type)( ::SireBase::PropertyName const & ) const;
+            getLink_function_type getLink_function_value( &::SireMol::MoleculeView::getLink );
+            
+            MoleculeView_exposer.def( 
+                "getLink"
+                , getLink_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "\n Return the link for the given property name. This will throw\n an exception if there is no link for the given property name.\n" );
+        
+        }
+        { //::SireMol::MoleculeView::getLinks
+        
+            typedef ::QHash< QString, QString > ( ::SireMol::MoleculeView::*getLinks_function_type)(  ) const;
+            getLinks_function_type getLinks_function_value( &::SireMol::MoleculeView::getLinks );
+            
+            MoleculeView_exposer.def( 
+                "getLinks"
+                , getLinks_function_value
+                , bp::release_gil_policy()
+                , "\n Return the property links for this molecule. This returns an\n empty dictionary if there are no links.\n" );
+        
+        }
+        { //::SireMol::MoleculeView::hasLinks
+        
+            typedef bool ( ::SireMol::MoleculeView::*hasLinks_function_type)(  ) const;
+            hasLinks_function_type hasLinks_function_value( &::SireMol::MoleculeView::hasLinks );
+            
+            MoleculeView_exposer.def( 
+                "hasLinks"
+                , hasLinks_function_value
+                , bp::release_gil_policy()
+                , "\n Return whether or not this molecule has any property links\n" );
+        
+        }
         { //::SireMol::MoleculeView::hasMetadata
         
             typedef bool ( ::SireMol::MoleculeView::*hasMetadata_function_type)( ::SireBase::PropertyName const & ) const;
@@ -725,6 +762,19 @@ void register_MoleculeView_class(){
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this molecule view is empty" );
+        
+        }
+        { //::SireMol::MoleculeView::isLink
+        
+            typedef bool ( ::SireMol::MoleculeView::*isLink_function_type)( ::SireBase::PropertyName const & ) const;
+            isLink_function_type isLink_function_value( &::SireMol::MoleculeView::isLink );
+            
+            MoleculeView_exposer.def( 
+                "isLink"
+                , isLink_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "\n Return whether or not this molecule has a link for the given\n property name\n" );
         
         }
         { //::SireMol::MoleculeView::isNull
