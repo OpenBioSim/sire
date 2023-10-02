@@ -67,6 +67,17 @@ print(sire_remote)
 sire_branch = run_cmd(
     f"git --git-dir={gitdir} --work-tree={srcdir} rev-parse --abbrev-ref HEAD"
 )
+
+# If the branch is "HEAD", then we might be in detached head mode. If so, check
+# the tag.
+if sire_branch == "HEAD":
+    sire_branch = run_cmd(
+        f"git --git-dir={gitdir} --work-tree={srcdir} describe --tags"
+    )
+    # Make sure this is a pure tag commit.
+    if "-" in sire_branch:
+        raise RuntimeError("Cannot perform a tag build from a non-tag commit!")
+
 print(sire_branch)
 
 lines = open(template, "r").readlines()
