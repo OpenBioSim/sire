@@ -89,6 +89,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   Restraints can be named, meaning that you can scale different restraints
   at different stages and by different values across the λ-coordinate.
 
+* Added support for one or more "permanent" distance restraints. These are
+  distance restraints that are always applied, and are never scaled by λ.
+  This allows the release of all other distance restraints to a single
+  harmonic or flat-bottomed restraint. When the ligand is fully decoupled,
+  the free energy of release of the single remaining restraint can be
+  computed without simulation. See
+  <https://pubs.acs.org/doi/10.1021/acs.jctc.3c00139> for more details.
+
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
 
