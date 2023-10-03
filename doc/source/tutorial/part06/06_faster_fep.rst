@@ -64,7 +64,7 @@ And this can go a lot faster with a 4 fs timestep...
 >>> d = mols.dynamics(timestep="2fs", constraint="h-bonds")
 >>> d.run("4ps")
 >>> print(d)
-Dynamics(completed=4 ps, energy=-50250.8 kcal mol-1, speed=72.1 ns day-1)
+Dynamics(completed=4 ps, energy=-50267 kcal mol-1, speed=77.0 ns day-1)
 
 However, turning on ``h-bonds`` constraints would not be enough to keep the
 simulation stable for larger timesteps. For example, if we use a timestep
@@ -82,7 +82,7 @@ involving hydrogen, using the ``h-bonds-h-angles`` constraint.
 >>> d = mols.dynamics(timestep="5fs", constraint="h-bonds-h-angles")
 >>> d.run("5ps")
 >>> print(d)
-Dynamics(completed=5 ps, energy=-50251.5 kcal mol-1, speed=181.5 ns day-1)
+Dynamics(completed=5 ps, energy=-50267.3 kcal mol-1, speed=188.2 ns day-1)
 
 You can go even further by constraining all bonds, and all angles involving
 hydrogen using the ``bonds-h-angles`` constraint...
@@ -172,7 +172,7 @@ this bond, meaning that the simulation at λ=1 uses ethane's bond length
    :meth:`~sire.mol.Perturbation.link_to_perturbed` to set the
    default properties.
 
-One solution is to choose a different constraints for perturbable molecules
+One solution is to choose a different constraint for perturbable molecules
 than for the rest of the system. You can do this using the
 ``perturbable_constraint`` keyword, e.g.
 
@@ -197,9 +197,25 @@ The ``perturbable_constraint`` argument accepts the same values as
    By default, ``perturbable_constraint`` will have the same value
    as ``constraint``.
 
+.. note::
+
+   You must set ``perturbable_constraint`` to the string ``none`` if you want
+   to disable constraints. Setting ``perturbable_constraint`` to the Python
+   ``None`` indicates you are providing no preference for any constraint,
+   and so the code automatically assigns ``perturbable_constraint`` as
+   equal to ``constraint``.
+
 Unfortunately, not constraining the bonds and/or angles of the perturbable
 molecules will impact the stability of dynamics, and thus the size of
 timestep that will be achievable. For example,
+
+>>> d = mols.dynamics(timestep="4fs",
+...                   constraint="h-bonds-h-angles",
+...                   perturbable_constraint="none",
+...                   lambda_value=1.0)
+>>> d.run("5ps")
+OpenMMException: Particle coordinate is NaN.  For more information, see
+https://github.com/openmm/openmm/wiki/Frequently-Asked-Questions#nan
 
 .. note::
 
@@ -208,7 +224,7 @@ timestep that will be achievable. For example,
    of λ without using constraints, so that the perturbable bonds and angles
    have the right size for that value of λ. You can then run longer simulations
    with constraints applied, as they will use the bond / angle sizes
-   measured from the coordinates as the constrained values.
+   measured from these starting coordinates as the constrained values.
 
 Hydrogen Mass Repartitioning
 ----------------------------
@@ -227,8 +243,8 @@ molecule as argument, and returns that same molecule with its hydrogen
 masses repartitioned.
 
 >>> mol = mols.molecule("molecule property is_perturbable")
->>> repartioned_mol = sr.morph.repartition_hydrogen_masses(mol)
->>> for atom0, atom1 in zip(mol.atoms(), repartioned_mol.atoms()):
+>>> repartitioned_mol = sr.morph.repartition_hydrogen_masses(mol)
+>>> for atom0, atom1 in zip(mol.atoms(), repartitioned_mol.atoms()):
 ...    print(atom0, atom0.property("mass"), atom1.property("mass"))
 Atom( C1:1    [  25.71,   24.94,   25.25] ) 12.01 g mol-1 2.938 g mol-1
 Atom( C2:2    [  24.29,   25.06,   24.75] ) 12.01 g mol-1 2.938 g mol-1
@@ -252,8 +268,73 @@ no constraints on the perturbable molecules. But, we don't need constraints
 on the perturbable molecules because their hydrogens are heavier, and so the
 vibrations of their atoms should be slower.
 
->>> mols.update(mol)
->>> d = mols.dynamics(timestep="8fs", constraint="bonds-h-angles")
+>>> mols.update(repartitioned_mol)
+>>> d = mols.dynamics(timestep="4fs", constraint="h-bonds-h-angles")
 >>> d.run("5ps")
 >>> print(d)
-Dynamics(completed=5 ps, energy=-50252.1 kcal mol-1, speed=180.7 ns day-1)
+Dynamics(completed=5 ps, energy=-50251.3 kcal mol-1, speed=151.8 ns day-1)
+
+.. note::
+
+   The ``h-bonds-h-angles`` constraint really applies to "light" atoms,
+   i.e. atoms whose mass is less than 4 g mol-1. Hydrogen mass repartitioning
+   makes the hydrogens of the perturbable molecule heavier, with a mass
+   of at least 4 g mol-1. Thus they are not affected by the constraint.
+   You can doubly-ensure this by also setting
+   ``perturbable_constraint="none"``.
+
+This has given us the best of both worlds - a fast simulation with a long
+timestep, plus no constraints on the perturbable molecules.
+
+Using this protocol, we can now recalculate the relative free energy of
+ethane and methanol.
+
+>>> for l in range(0, 105, 5):
+...     # turn l into the lambda value by dividing by 100
+...     lambda_value = l / 100.0
+...     print(f"Simulating lambda={lambda_value:.2f}")
+...     # minimise the system at this lambda value
+...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
+...     # create a dynamics object for the system
+...     d = min_mols.dynamics(timestep="1fs", temperature="25oC",
+...                           lambda_value=lambda_value,
+...                           constraint="none")
+...     # generate random velocities
+...     d.randomise_velocities()
+...     # equilibrate, not saving anything
+...     d.run("2ps", save_frequency=0)
+...     print("Equilibration complete")
+...     print(d)
+...     # get the values of lambda for neighbouring windows
+...     lambda_windows = [lambda_value]
+...     if lambda_value > 0:
+...         lambda_windows.insert(0, (l-5)/100.0)
+...     if lambda_value < 1:
+...         lambda_windows.append((l+5)/100.0)
+...     # run the dynamics, saving the energy every 0.1 ps
+...     d.run("25ps", energy_frequency="0.1ps", frame_frequency=0,
+...           lambda_windows=lambda_windows)
+...     print("Dynamics complete")
+...     print(d)
+...     # stream the EnergyTable to a sire save stream object
+...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
+...                    f"energy_fast_{lambda_value:.2f}.s3")
+
+The simulation runs 50% faster than before, taking about 30 seconds per
+λ-window.
+
+We can now calculate the free energy using alchemlyb as before;
+
+>>> from glob import glob
+>>> dfs = []
+>>> energy_files = glob("energy_fast_*.s3")
+>>> energy_files.sort()
+>>> for energy_file in energy_files:
+...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
+>>> import pandas as pd
+>>> df = pd.concat(dfs)
+>>> from alchemlyb.estimators import BAR
+>>> b = BAR()
+>>> b.fit(df)
+>>> print(b.delta_f_.loc[0.00, 1.00])
+-3.200742699746068
