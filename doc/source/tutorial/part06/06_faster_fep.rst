@@ -133,12 +133,82 @@ exceptions raised at some point!
 Constraints and Perturbable Molecules
 -------------------------------------
 
-Talk about how to avoid constraining a perturbable bond to the wrong
-value. Need to minimise when changing λ (or equilibrating using a
-short timestep with no constraints).
+While constraints are useful for speeding up simulations, they can cause
+problems when used with perturbable (merged) molecules. This is because the
+constraints hold the bonds and/or angles at fixed values based on the
+starting coordinates of the simulation. Changes in λ, which may change the
+equilibrium bond and angle parameters, will not be reflected in the
+free energy. This is because the constraints will stop dynamics from sampling
+these perturbing bonds and angles.
 
-Show how to use ``perturbable_constraint`` to choose a different constraint
-method for perturbable molecules.
+For example, changing the value of λ to 1.0, and sampling with bond and angle
+constraints on would force methanol to adopt ethane's internal geometry.
+
+>>> print(mols[0].bond("element C", "element C").length())
+1.53625 Å
+>>> d = mols.dynamics(timestep="1fs", lambda_value=1.0)
+>>> d.run("5ps")
+>>> print(d.commit()[0].bond("element C", "element C").length())
+1.4224 Å
+>>> d = mols.dynamics(timestep="2fs", constraint="bonds-h-angles",
+...                   lambda_value=1.0)
+>>> d.run("5ps")
+>>> print(d.commit()[0].bond("element C", "element C").length())
+1.53625 Å
+
+As seen here, the C-C bond length for ethane is 1.54 Å, while the C-O
+bond length for methanol is 1.42 Å. Using ``bonds-h-angles`` constrains
+this bond, meaning that the simulation at λ=1 uses ethane's bond length
+(1.54 Å) rather than methanol's (1.42 Å).
+
+.. note::
+
+   The C-C bond morphs into the C-O bond during the perturbation from ethane
+   to methanol. Earlier, we mapped the default parameters to those of
+   ethane, meaning that the elements property of ethane is used by
+   default. This is why we searched for ``bond("element C", "element C")``
+   rather than ``bond("element C", "element O")``. We would use
+   ``bond("element C", "element O")`` if we had used
+   :meth:`~sire.mol.Perturbation.link_to_perturbed` to set the
+   default properties.
+
+One solution is to choose a different constraints for perturbable molecules
+than for the rest of the system. You can do this using the
+``perturbable_constraint`` keyword, e.g.
+
+>>> d = mols.dynamics(timestep="2fs",
+...                   constraint="bonds-h-angles",
+...                   perturbable_constraint="none",
+...                   lambda_value=1.0)
+>>> d.run("5ps")
+>>> print(d.commit()[0].bond("element C", "element C").length())
+1.41687 Å
+
+has run dynamics using no constraints on the perturbable molecules,
+and ``bonds-h-angles`` constraints on all other molecules. This has
+allowed sampling of the C-O bond in methanol, so that it was able to
+vibrate around its equilibrium bond length (1.42 Å).
+
+The ``perturbable_constraint`` argument accepts the same values as
+``constraint``, i.e. ``none``, ``h-bonds``, ``h-bond-h-angles`` etc.
+
+.. note::
+
+   By default, ``perturbable_constraint`` will have the same value
+   as ``constraint``.
+
+Unfortunately, not constraining the bonds and/or angles of the perturbable
+molecules will impact the stability of dynamics, and thus the size of
+timestep that will be achievable. For example,
+
+.. note::
+
+   You can still use constraints on perturbable molecules. Just be careful
+   to minimise and then equilibrate the molecule(s) at the desired value
+   of λ without using constraints, so that the perturbable bonds and angles
+   have the right size for that value of λ. You can then run longer simulations
+   with constraints applied, as they will use the bond / angle sizes
+   measured from the coordinates as the constrained values.
 
 Hydrogen Mass Repartitioning
 ----------------------------
