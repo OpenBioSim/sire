@@ -384,6 +384,12 @@ class System:
             for the full list of options. This equal the value of `constraint`
             if it isn't set.
 
+        include_constrained_energies: bool
+            Whether or not to include the energies of the perturbable bonds
+            and angles. If this is False, then the internal bond or angle
+            energy of the perturbable degrees of freedom are not included
+            in the total energy, and their forces are not evaluated.
+
         schedule: sire.cas.LambdaSchedule
             The schedule used to control how perturbable forcefield parameters
             should be morphed as a function of lambda. If this is not set
@@ -431,6 +437,10 @@ class System:
             Anything that can be used to identify the atom or atoms
             that should be fixed in place during the simulation. These
             atoms will not be moved by minimisation.
+
+        platform: str
+            The name of the OpenMM platform on which to run the dynamics,
+            e.g. "CUDA", "OpenCL", "Metal" etc.
 
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
@@ -501,6 +511,12 @@ class System:
             for the full list of options. This equal the value of `constraint`
             if it isn't set.
 
+        include_constrained_energies: bool
+            Whether or not to include the energies of the perturbable bonds
+            and angles. If this is False, then the internal bond or angle
+            energy of the perturbable degrees of freedom are not included
+            in the total energy, and their forces are not evaluated.
+
         schedule: sire.cas.LambdaSchedule
             The schedule used to control how perturbable forcefield parameters
             should be morphed as a function of lambda. If this is not set
@@ -558,6 +574,10 @@ class System:
             Anything that can be used to identify the atom or atoms
             that should be fixed in place during the simulation. These
             atoms will not be moved by dynamics.
+
+        platform: str
+            The name of the OpenMM platform on which to run the dynamics,
+            e.g. "CUDA", "OpenCL", "Metal" etc.
 
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate

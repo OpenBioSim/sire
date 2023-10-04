@@ -255,3 +255,33 @@ def test_openmm_options(ala_mols):
         except ValueError:
             # maybe OpenCL or CUDA are not supported
             pass
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_ignore_constrained(ala_mols):
+    mols = ala_mols
+
+    mol = mols[0]
+
+    d = mol.dynamics(
+        constraint="bonds-h-angles",
+        include_constrained_energies=True,
+        platform="Reference",
+    )
+
+    nrg1 = d.current_potential_energy()
+
+    d = mol.dynamics(
+        constraint="bonds-h-angles",
+        include_constrained_energies=False,
+        platform="Reference",
+    )
+
+    nrg2 = d.current_potential_energy()
+
+    # these two energies should be different, because
+    # we should be ignoring the constrained bonds and angles
+    assert abs(nrg2.value() - nrg1.value()) > 1.0

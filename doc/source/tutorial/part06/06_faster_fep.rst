@@ -296,7 +296,7 @@ ethane and methanol.
 ...     # minimise the system at this lambda value
 ...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
 ...     # create a dynamics object for the system
-...     d = min_mols.dynamics(timestep="1fs", temperature="25oC",
+...     d = min_mols.dynamics(timestep="4fs", temperature="25oC",
 ...                           lambda_value=lambda_value,
 ...                           constraint="none")
 ...     # generate random velocities

@@ -107,11 +107,13 @@ if not hasattr(PropertyMap, "__orig__set"):
     def __propertymap_set(obj, key, value):
         try:
             obj.__orig__set(key, value)
+            return
         except Exception:
             pass
 
         try:
             obj.__orig__set(key, _Base.PropertyName(value))
+            return
         except Exception:
             pass
 

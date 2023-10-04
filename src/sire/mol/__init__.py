@@ -1408,6 +1408,7 @@ def _dynamics(
     save_velocities=None,
     constraint=None,
     perturbable_constraint=None,
+    include_constrained_energies: bool = True,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
@@ -1418,10 +1419,10 @@ def _dynamics(
     coulomb_power=None,
     restraints=None,
     fixed=None,
+    platform=None,
     device=None,
     precision=None,
     map=None,
-    **kwargs,
 ):
     """
     Return a Dynamics object that can be used to perform
@@ -1475,6 +1476,12 @@ def _dynamics(
         See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
         for the full list of options. This equal the value of `constraint`
         if it isn't set.
+
+    include_constrained_energies: bool
+        Whether or not to include the energies of the constrained bonds
+        and angles. If this is False, then the internal bond or angle
+        energy of the constrained degrees of freedom are not included
+        in the total energy, and their forces are not evaluated.
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1534,6 +1541,10 @@ def _dynamics(
         that should be fixed in place during the simulation. These
         atoms will not be moved by dynamics.
 
+    platform: str
+        The name of the OpenMM platform on which to run the dynamics,
+        e.g. "CUDA", "OpenCL", "Metal" etc.
+
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
         the simulation. This would be CUDA_DEVICE_ID or similar
@@ -1553,7 +1564,7 @@ def _dynamics(
     from ..system import System
     from .. import u
 
-    map = create_map(map, kwargs)
+    map = create_map(map)
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
@@ -1653,6 +1664,12 @@ def _dynamics(
     if precision is not None:
         map.set("precision", str(precision).lower())
 
+    if include_constrained_energies is not None:
+        map.set("include_constrained_energies", include_constrained_energies)
+
+    if platform is not None:
+        map.set("platform", str(platform))
+
     return Dynamics(
         view,
         cutoff=cutoff,
@@ -1678,18 +1695,19 @@ def _minimisation(
     cutoff_type=None,
     constraint=None,
     perturbable_constraint=None,
+    include_constrained_energies: bool = True,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
     ignore_perturbations=None,
     shift_delta=None,
     coulomb_power=None,
+    platform=None,
     device=None,
     precision=None,
     restraints=None,
     fixed=None,
     map=None,
-    **kwargs,
 ):
     """
     Return a Minimisation object that can be used to perform
@@ -1715,6 +1733,12 @@ def _minimisation(
         See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
         for the full list of options. This equal the value of `constraint`
         if it isn't set.
+
+    include_constrained_energies: bool
+        Whether or not to include the energies of the perturbable bonds
+        and angles. If this is False, then the internal bond or angle
+        energy of the perturbable degrees of freedom are not included
+        in the total energy, and their forces are not evaluated.
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1764,6 +1788,10 @@ def _minimisation(
         that should be fixed in place during the simulation. These
         atoms will not be moved by minimisation.
 
+    platform: str
+        The name of the OpenMM platform on which to run the dynamics,
+        e.g. "CUDA", "OpenCL", "Metal" etc.
+
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
         minimisation. This would be CUDA_DEVICE_ID or similar
@@ -1783,7 +1811,7 @@ def _minimisation(
     from ..system import System
     from .. import u
 
-    map = create_map(map, kwargs)
+    map = create_map(map)
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
@@ -1831,6 +1859,12 @@ def _minimisation(
 
     if perturbable_constraint is not None:
         map.set("perturbable_constraint", str(perturbable_constraint).lower())
+
+    if include_constrained_energies is not None:
+        map.set("include_constrained_energies", include_constrained_energies)
+
+    if platform is not None:
+        map.set("platform", str(platform))
 
     return Minimisation(
         view,

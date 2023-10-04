@@ -450,6 +450,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     QSet<qint64> constrained_pairs;
 
+    bool include_constrained_energies = true;
+
+    if (map.specified("include_constrained_energies"))
+    {
+        include_constrained_energies = map["include_constrained_energies"].value().asABoolean();
+    }
+
     for (auto it = params.bonds().constBegin();
          it != params.bonds().constEnd();
          ++it)
@@ -477,6 +484,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             this_constraint_type = perturbable_constraint_type;
         }
 
+        bool bond_is_not_constrained = true;
+
         if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             // add the constraint - this constrains the bond to whatever length it has now
@@ -487,9 +496,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
             this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
             constrained_pairs.insert(to_pair(atom0, atom1));
+            bond_is_not_constrained = false;
         }
 
-        this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
+        if (include_constrained_energies or bond_is_not_constrained)
+            this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
     }
 
     // now the angles
@@ -518,6 +529,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         const auto key = to_pair(atom0, atom2);
 
+        bool angle_is_not_constrained = true;
+
         if (not constrained_pairs.contains(key))
         {
             auto this_constraint_type = constraint_type;
@@ -537,11 +550,15 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 constraints.append(std::make_tuple(atom0, atom2,
                                                    constraint_length));
                 constrained_pairs.insert(key);
+                angle_is_not_constrained = false;
             }
+        }
+        else
+            angle_is_not_constrained = false;
 
+        if (include_constrained_energies or angle_is_not_constrained)
             ang_params.append(std::make_tuple(atom0, atom1, atom2,
                                               theta0, k));
-        }
     }
 
     // now the dihedrals

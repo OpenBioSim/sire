@@ -2323,17 +2323,24 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
     QStringList filenames;
     QStringList fileformats;
 
-    const auto format_property = map["fileformat"];
-
-    if (format_property.hasValue())
+    if (map.specified("fileformat"))
     {
-        try
+        const auto format_property = map["fileformat"];
+
+        if (format_property.hasSource())
         {
-            fileformats = format_property.value().asA<StringProperty>().toString().split(",");
+            fileformats = format_property.source().split(",");
         }
-        catch (...)
+        else
         {
-            fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
+            try
+            {
+                fileformats = format_property.value().asA<StringProperty>().toString().split(",");
+            }
+            catch (...)
+            {
+                fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
+            }
         }
 
         const auto fileinfo = QFileInfo(filename);
@@ -2350,34 +2357,19 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
 
         if (extension.isEmpty())
         {
-            // we need to find the format from the system
-            try
-            {
-                fileformats = system.property(format_property).asA<StringProperty>().toString().split(",");
-            }
-            catch (...)
-            {
-                throw SireError::io_error(
-                    QObject::tr("Cannot work out the fileformat to use to write the System to "
-                                "file '%1'. You need to either supply the format using the "
-                                "'fileformat' property in the passed map, add this to the System "
-                                "as its 'fileformat' property, or pass a filename with an extension "
-                                "whose fileformat can be determined. Supported fileformats are;\n%2")
-                        .arg(filename)
-                        .arg(MoleculeParser::supportedFormats()),
-                    CODELOC);
-            }
+            throw SireError::io_error(
+                QObject::tr("Cannot work out the fileformat to use to write the System to "
+                            "file '%1'. You need to either supply the format using the "
+                            "'fileformat' property in the passed map, add this to the System "
+                            "as its 'fileformat' property, or pass a filename with an extension "
+                            "whose fileformat can be determined. Supported fileformats are;\n%2")
+                    .arg(filename)
+                    .arg(MoleculeParser::supportedFormats()),
+                CODELOC);
+        }
 
-            for (const auto &format : fileformats)
-            {
-                filenames.append(QString("%1.%2").arg(filename).arg(format.toLower()));
-            }
-        }
-        else
-        {
-            filenames.append(filename);
-            fileformats.append(extension.toUpper());
-        }
+        filenames.append(filename);
+        fileformats.append(extension.toUpper());
     }
 
     // now we have a list of filenames and associated formats, actually
