@@ -61,10 +61,10 @@ Dynamics(completed=5 ps, energy=-50250.5 kcal mol-1, speed=69.6 ns day-1)
 
 And this can go a lot faster with a 4 fs timestep...
 
->>> d = mols.dynamics(timestep="2fs", constraint="h-bonds")
+>>> d = mols.dynamics(timestep="4fs", constraint="h-bonds")
 >>> d.run("4ps")
 >>> print(d)
-Dynamics(completed=4 ps, energy=-50267 kcal mol-1, speed=77.0 ns day-1)
+Dynamics(completed=4 ps, energy=-50251.1 kcal mol-1, speed=151.6 ns day-1)
 
 However, turning on ``h-bonds`` constraints would not be enough to keep the
 simulation stable for larger timesteps. For example, if we use a timestep
@@ -72,7 +72,6 @@ of 5 fs...
 
 >>> d = mols.dynamics(timestep="5fs", constraint="h-bonds")
 >>> d.run("5ps")
->>> print(d)
 OpenMMException: Particle coordinate is NaN.  For more information, see
 https://github.com/openmm/openmm/wiki/Frequently-Asked-Questions#nan
 
@@ -122,7 +121,6 @@ e.g.
 >>> print(d.constraint())
 none
 >>> d.run("5ps")
->>> print(d)
 RuntimeError: The kinetic energy has exceeded 1000 kcal mol-1 per atom (it is 2.2202087996265908e+16 kcal mol-1 atom-1, and
 2.701328046505673e+20 kcal mol-1 total). This suggests that the simulation has become unstable. Try reducing the timestep and/or minimising
 the system and run again.
@@ -254,6 +252,15 @@ Atom( H5:5    [  25.86,   25.61,   26.13] ) 1.008 g mol-1 4.032 g mol-1
 Atom( H6:6    [  24.14,   24.39,   23.87] ) 1.008 g mol-1 4.032 g mol-1
 Atom( H7:7    [  24.09,   26.11,   24.44] ) 1.008 g mol-1 4.032 g mol-1
 Atom( H8:8    [  23.57,   24.78,   25.55] ) 1.008 g mol-1 4.032 g mol-1
+
+.. note::
+
+   By default, this function will repartition the masses of the hydrogens
+   in both the standard mass property (``mass``) and also for the end-state
+   mass properties (``mass0`` and ``mass1`` if they exist). You can disable
+   repartitioning of the end-state masses by setting ``include_end_states``
+   to ``False``. You can choose to repartition specific mass properties by
+   passing in a property map, e.g. ``map={"mass": "mass0"}``.
 
 The repartitioned molecule has the same mass as the original molecule, but
 the hydrogens have been made heavier. The mass of the carbon atoms has been

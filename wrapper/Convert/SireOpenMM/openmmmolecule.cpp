@@ -463,7 +463,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         const auto bondid = it.key().map(molinfo);
         const auto &bondparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         int atom0 = bondid.get<0>().value();
         int atom1 = bondid.get<1>().value();
@@ -474,7 +473,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
 
-        const bool has_light_atom = includes_h or (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
+        const bool has_light_atom = (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
         const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
         auto this_constraint_type = constraint_type;
@@ -488,6 +487,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
+            qDebug() << "CONSTRAIN" << has_light_atom << (this_constraint_type & CONSTRAIN_BONDS)
+                     << (this_constraint_type & CONSTRAIN_HBONDS)
+                     << masses_data[atom0] << masses_data[atom1];
+
             // add the constraint - this constrains the bond to whatever length it has now
             const auto delta = coords[atom1] - coords[atom0];
             const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
@@ -572,7 +575,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         const auto dihid = it.key().map(molinfo);
         const auto &dihparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         int atom0 = dihid.get<0>().value();
         int atom1 = dihid.get<1>().value();
@@ -619,7 +621,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         const auto impid = it.key().map(molinfo);
         const auto &impparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         const int atom0 = impid.get<0>().value();
         const int atom1 = impid.get<1>().value();

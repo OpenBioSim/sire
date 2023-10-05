@@ -6,6 +6,7 @@ def repartition_hydrogen_masses(
     mass_factor=4.0,
     ignore_water: bool = False,
     ignore_non_water: bool = False,
+    include_end_states: bool = True,
     map=None,
 ):
     """
@@ -31,6 +32,12 @@ def repartition_hydrogen_masses(
 
     ignore_non_water : bool
         Whether or not to ignore non-water molecules (default False)
+
+    include_end_states : bool
+        Whether or not to repartition the masses of the end states
+        of perturbable molecules (default True) (i.e. this will
+        automatically repartition `mass0` and `mass1` in addition
+        to `mass`)
 
     map : dict
         The property map used to identify molecular properties
@@ -71,6 +78,21 @@ def repartition_hydrogen_masses(
 
     for mol in mols.molecules():
         mol = _repartition_hydrogen_mass(mol, mass_factor, water, map)
+
+        if include_end_states:
+            mass0 = f"{map['mass'].source()}0"
+            mass1 = f"{map['mass'].source()}1"
+
+            if mol.has_property(mass0):
+                map0 = map.clone()
+                map0.set("mass", mass0)
+                mol = _repartition_hydrogen_mass(mol, mass_factor, water, map0)
+
+            if mol.has_property(mass1):
+                map1 = map.clone()
+                map1.set("mass", mass1)
+                mol = _repartition_hydrogen_mass(mol, mass_factor, water, map1)
+
         mols.update(mol)
 
     return mols
