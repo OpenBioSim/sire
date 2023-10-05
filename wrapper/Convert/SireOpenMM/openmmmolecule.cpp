@@ -487,10 +487,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
-            qDebug() << "CONSTRAIN" << has_light_atom << (this_constraint_type & CONSTRAIN_BONDS)
-                     << (this_constraint_type & CONSTRAIN_HBONDS)
-                     << masses_data[atom0] << masses_data[atom1];
-
             // add the constraint - this constrains the bond to whatever length it has now
             const auto delta = coords[atom1] - coords[atom0];
             const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
