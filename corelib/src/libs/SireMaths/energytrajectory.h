@@ -33,6 +33,7 @@
 #include "SireUnits/dimensions.h"
 
 #include "SireBase/property.h"
+#include "SireBase/properties.h"
 
 SIRE_BEGIN_HEADER
 
@@ -109,6 +110,20 @@ namespace SireMaths
         QVector<double> energies(const QString &key,
                                  const SireUnits::Dimension::GeneralUnit &energy_unit) const;
 
+        void setProperty(const QString &key, const SireBase::Property &value);
+
+        const SireBase::Property &property(const SireBase::PropertyName &key) const;
+
+        bool hasProperty(const SireBase::PropertyName &key);
+
+        const SireBase::Properties &properties() const;
+
+        QStringList propertyKeys() const;
+
+        void removeProperty(const QString &key);
+
+        void clearProperties();
+
     private:
         /** All of the time values */
         QVector<double> time_values;
@@ -118,6 +133,9 @@ namespace SireMaths
 
         /** All of the label values */
         QHash<QString, QVector<QString>> label_values;
+
+        /** Additional properties for the table (e.g. temperature) */
+        SireBase::Properties props;
     };
 }
 

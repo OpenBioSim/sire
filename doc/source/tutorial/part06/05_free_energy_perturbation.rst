@@ -131,7 +131,9 @@ First, we need to import alchemlyb
 
 Next, we will load all of the :class:`~sire.maths.EnergyTable` objects
 for each λ-window, and will convert them into pandas DataFrames arranged
-into an alchemlyb-compatible format.
+into an alchemlyb-compatible format. We could do this manually by first
+loading all of the s3 files containing the :class:`~sire.maths.EnergyTable`
+objects...
 
 >>> import sire as sr
 >>> from glob import glob
@@ -139,13 +141,7 @@ into an alchemlyb-compatible format.
 >>> energy_files = glob("energy*.s3")
 >>> energy_files.sort()
 >>> for energy_file in energy_files:
-...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
-
-.. note::
-
-   We have to manually set the temperature to 25°C here because
-   the EnergyTable doesn't (yet) contain the system temperature.
-   This is something that we are looking to fix in a later release.
+...     dfs.append(sr.stream.load(energy_file).to_alchemlyb())
 
 .. note::
 
@@ -164,8 +160,8 @@ into an alchemlyb-compatible format.
    (it uses the column-order rather than the λ-order when calculating
    free energies).
 
-Next, we will join together all of these DataFrames into a single
-DataFrame.
+...then joining them together all of these DataFrames into a single
+DataFrame...
 
 >>> import pandas as pd
 >>> df = pd.concat(dfs)
@@ -189,6 +185,11 @@ time fep-lambda                                                                 
    Do not worry about the large number of ``NaN`` values. These just show that
    we have only calculated free energy differences along the diagonal of this
    DataFrame, i.e. only between the simulated and neighbouring λ-windows.
+
+...or we can use the in-build :func:`sire.motion.alchemlyb` function to
+do all of the above for us.
+
+>>> df = sr.morph.to_alchemlyb("energy*.s3")
 
 Now we can tell alchemlyb to calculate the free energy using the BAR method.
 
@@ -259,15 +260,7 @@ This should run more quickly than the simulation in water, e.g. about
 We can then analyse the results using the same analysis code, except we
 switch to analysing the ``energy_gas_{lambda}.s3`` files instead.
 
->>> import sire as sr
->>> from glob import glob
->>> dfs = []
->>> energy_files = glob("energy_gas_*.s3")
->>> energy_files.sort()
->>> for energy_file in energy_files:
-...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
->>> import pandas as pd
->>> df = pd.concat(dfs)
+>>> df = sr.morph.to_alchemlyb("energy_gas*.s3")
 >>> print(df)
                      0.00      0.05  0.10  0.15  0.20  0.25  0.30  0.35  0.40  ...  0.60  0.65  0.70  0.75  0.80  0.85  0.90      0.95      1.00
 time fep-lambda                                                                ...

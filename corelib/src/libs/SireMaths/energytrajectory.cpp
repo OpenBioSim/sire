@@ -52,7 +52,7 @@ QDataStream &operator<<(QDataStream &ds, const EnergyTrajectory &etraj)
     SharedDataStream sds(ds);
 
     sds << etraj.time_values << etraj.energy_values
-        << etraj.label_values
+        << etraj.label_values << etraj.props
         << static_cast<const Property &>(etraj);
 
     return ds;
@@ -66,7 +66,7 @@ QDataStream &operator>>(QDataStream &ds, EnergyTrajectory &etraj)
     {
         SharedDataStream sds(ds);
 
-        sds >> etraj.time_values >> etraj.energy_values >> etraj.label_values >> static_cast<Property &>(etraj);
+        sds >> etraj.time_values >> etraj.energy_values >> etraj.label_values >> etraj.props >> static_cast<Property &>(etraj);
     }
     else
         throw version_error(v, "1", r_etraj, CODELOC);
@@ -82,7 +82,7 @@ EnergyTrajectory::EnergyTrajectory()
 EnergyTrajectory::EnergyTrajectory(const EnergyTrajectory &other)
     : ConcreteProperty<EnergyTrajectory, Property>(other),
       time_values(other.time_values), energy_values(other.energy_values),
-      label_values(other.label_values)
+      label_values(other.label_values), props(other.props)
 {
 }
 
@@ -97,6 +97,7 @@ EnergyTrajectory &EnergyTrajectory::operator=(const EnergyTrajectory &other)
         time_values = other.time_values;
         energy_values = other.energy_values;
         label_values = other.label_values;
+        props = other.props;
         Property::operator=(other);
     }
 
@@ -107,7 +108,8 @@ bool EnergyTrajectory::operator==(const EnergyTrajectory &other) const
 {
     return time_values == other.time_values and
            energy_values == other.energy_values and
-           label_values == other.label_values;
+           label_values == other.label_values and
+           props == other.props;
 }
 
 bool EnergyTrajectory::operator!=(const EnergyTrajectory &other) const
@@ -649,4 +651,50 @@ QVector<double> EnergyTrajectory::energies(const QString &key,
     }
 
     return e;
+}
+
+/** Set a property on the trajectory. This is used to store additional
+ *  information about the trajectory, such as the simulation temperature
+ */
+void EnergyTrajectory::setProperty(const QString &key, const SireBase::Property &value)
+{
+    props.setProperty(key, value);
+}
+
+/** Get a property on the trajectory. This could be additional
+ *  information about the trajectory, such as the simulation temperature
+ */
+const SireBase::Property &EnergyTrajectory::property(const SireBase::PropertyName &key) const
+{
+    return props.property(key);
+}
+
+/** Return whether or not the trajectory has a property with the passed key */
+bool EnergyTrajectory::hasProperty(const SireBase::PropertyName &key)
+{
+    return props.hasProperty(key);
+}
+
+/** Return all of the properties on the trajectory */
+const SireBase::Properties &EnergyTrajectory::properties() const
+{
+    return props;
+}
+
+/** Return all of the property keys on the trajectory */
+QStringList EnergyTrajectory::propertyKeys() const
+{
+    return props.propertyKeys();
+}
+
+/** Remove a property from the trajectory */
+void EnergyTrajectory::removeProperty(const QString &key)
+{
+    props.removeProperty(key);
+}
+
+/** Clear all of the properties on the trajectory */
+void EnergyTrajectory::clearProperties()
+{
+    props = Properties();
 }

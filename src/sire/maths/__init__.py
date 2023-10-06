@@ -173,6 +173,22 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
     def _to_pandas(obj, temperature=None, to_alchemlyb: bool = False):
         """
         Return the energy trajectory as a pandas DataFrame
+
+        Parameters
+        ----------
+
+        temperature: temperature
+            The temperature of the simulation. If this is
+            not set then the temperature from this table's
+            `ensemble` or `temperature` property will be
+            used. Note that you only need a temperature
+            if you are converting to alchemlyb format.
+
+        to_alchemlyb: bool
+            This will format the DataFrame in a way that is
+            compatible with alchemlyb. This will allow the
+            DataFrame to be used as part of an alchemlyb
+            free energy calculation.
         """
         import pandas as pd
         from ..units import picosecond, kcal_per_mol
@@ -187,10 +203,21 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
             energy_unit_string = "kcal/mol"
 
             if temperature is None:
-                raise ValueError(
-                    "You must specify the temperature of the simulation "
-                    "when converting to alchemlyb format."
-                )
+                # look for the temperature in the ensemble property
+                if obj.has_property("ensemble"):
+                    temperature = obj.property("ensemble").temperature()
+
+                # ok, try the temperature property
+                if temperature is None and obj.has_property("temperature"):
+                    temperature = obj.property("temperature")
+
+                if temperature is None:
+                    raise ValueError(
+                        "You must specify the temperature of the simulation "
+                        "when converting to alchemlyb format, or ensure that "
+                        "the trajectory has an ensemble or temperature "
+                        "property."
+                    )
         else:
             time_unit = picosecond.get_default()
             time_unit_string = time_unit.unit_string()
@@ -250,4 +277,26 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
 
         return df
 
+    def _to_alchemlyb(obj, temperature=None):
+        """
+        Return the energy trajectory as an alchemlyb-formatted pandas DataFrame
+
+        Parameters
+        ----------
+
+        temperature: temperature
+            The temperature of the simulation. If this is
+            not set then the temperature from this table's
+            `ensemble` or `temperature` property will be
+            used.
+
+        Returns
+        -------
+
+        pandas.DataFrame
+            A pandas DataFrame that is compatible with alchemlyb.
+        """
+        return obj.to_pandas(temperature=temperature, to_alchemlyb=True)
+
     EnergyTrajectory.to_pandas = _to_pandas
+    EnergyTrajectory.to_alchemlyb = _to_alchemlyb

@@ -343,14 +343,7 @@ The simulation runs 25% faster than before, taking about 35 seconds per
 
 We can now calculate the free energy using alchemlyb as before;
 
->>> from glob import glob
->>> dfs = []
->>> energy_files = glob("energy_fast_*.s3")
->>> energy_files.sort()
->>> for energy_file in energy_files:
-...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
->>> import pandas as pd
->>> df = pd.concat(dfs)
+>>> df = sr.morph.to_alchemlyb("energy_fast_*.s3")
 >>> from alchemlyb.estimators import BAR
 >>> b = BAR()
 >>> b.fit(df)
@@ -364,67 +357,47 @@ Pushing the limits of speed
 ---------------------------
 
 The previous section showed how to run a faster simulation, but it is possible
-to go even quicker if we are willing to sacrifice accuracy. There are
-three main ways to do this:
-
-1. Constrain all bonds and angles, and use a larger timestep.
-2. Reduce the number of λ windows
-3. Reduce the frequency of calculating energy differences between
-   λ windows.
-
-First, we will re-load the system and will not use hydrogen mass
-repartitioning.
+to go even quicker if we are willing to sacrifice accuracy.
 
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
 >>> for mol in mols.molecules("molecule property is_perturbable"):
 ...     mols.update(mol.perturbation().link_to_reference().commit())
 >>> mols = mols.minimisation().run().commit()
+>>> mol = mols.molecule("molecule property is_perturbable")
+>>> mol = sr.morph.repartition_hydrogen_masses(mol)
+>>> mols.update(mol)
 
-Next, we run dynamics with this very approximate protocol.
 
->>> for l in range(0, 101, 10):
-...     # turn l into the lambda value by dividing by 100
-...     lambda_value = l / 100.0
+>>> lambda_values = [0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35,
+...                  0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75,
+...                  0.80, 0.85, 0.90, 0.95, 1.00]
+>>> for lambda_value in lambda_values:
 ...     print(f"Simulating lambda={lambda_value:.2f}")
 ...     # minimise the system at this lambda value
 ...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
-...     # equilibrate without constraints at this lambda value
-...     eq_mols = min_mols.dynamics(timestep="1fs", lambda_value=lambda_value,
-...                                 temperature="25oC",
-...                                 constraint="none").run("2ps").commit()
+...     # now equilibrate with no constraints at this value of lambda
+...     d = min_mols.dynamics(timestep="1fs", lambda_value=lambda_value,
+...                           temperature="25oC", constraint="none")
+...     d.run("2ps")
+...     eq_mols = d.commit()
+...     print(d)
 ...     print("Equilibration complete")
-...     # create a dynamics object for the system
+...     # run production dynamics, calculating energies at every lambda value
 ...     d = eq_mols.dynamics(timestep="6fs", temperature="25oC",
 ...                          lambda_value=lambda_value,
 ...                          constraint="bonds-h-angles")
-...     # generate random velocities
 ...     d.randomise_velocities()
-...     # get the values of lambda for neighbouring windows
-...     lambda_windows = [lambda_value]
-...     if lambda_value > 0:
-...         lambda_windows.insert(0, (l-10)/100.0)
-...     if lambda_value < 1:
-...         lambda_windows.append((l+10)/100.0)
-...     # run the dynamics, saving the energy every 0.1 ps
-...     d.run("25ps", energy_frequency="0.5ps", frame_frequency=0,
-...           lambda_windows=lambda_windows)
+...     d.run("540ps", energy_frequency="1.8ps", frame_frequency=0,
+...           lambda_windows=lambda_values)
 ...     print("Dynamics complete")
 ...     print(d)
 ...     # stream the EnergyTable to a sire save stream object
 ...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
 ...                    f"energy_superfast_{lambda_value:.2f}.s3")
 
-
->>> from glob import glob
->>> dfs = []
->>> energy_files = glob("energy_superfast_*.s3")
->>> energy_files.sort()
->>> for energy_file in energy_files:
-...     dfs.append(sr.stream.load(energy_file).to_pandas(to_alchemlyb=True, temperature="25oC"))
->>> import pandas as pd
->>> df = pd.concat(dfs)
->>> from alchemlyb.estimators import BAR
->>> b = BAR()
+>>> df = sr.morph.to_alchemlyb("energy_superfast_*.s3")
+>>> from alchemlyb.estimators import MBAR
+>>> b = MBAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])

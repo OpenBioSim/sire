@@ -29,7 +29,7 @@ class DynamicsData:
                 from . import selection_to_atoms
 
                 # turn the fixed atoms into a list of atoms
-                map.set(
+                self._map.set(
                     "fixed",
                     mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
                 )
@@ -59,6 +59,9 @@ class DynamicsData:
             self._energy_trajectory = self._sire_mols.energy_trajectory(
                 to_pandas=False, map=self._map
             )
+
+            # make sure that the ensemble is recorded in the trajectory
+            self._energy_trajectory.set_property("ensemble", self.ensemble())
 
             self._num_atoms = len(self._sire_mols.atoms())
 
@@ -1360,15 +1363,7 @@ class Dynamics:
         t = self._d.energy_trajectory()
 
         if to_pandas or to_alchemlyb:
-            ensemble = self.ensemble()
-
-            if ensemble.is_constant_temperature():
-                temperature = ensemble.temperature()
-            else:
-                temperature = None
-
             return t.to_pandas(
-                temperature=temperature,
                 to_alchemlyb=to_alchemlyb,
             )
         else:
