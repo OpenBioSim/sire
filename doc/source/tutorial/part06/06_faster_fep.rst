@@ -109,7 +109,7 @@ Dynamics(completed=5 ps, energy=-34130.9 kcal mol-1, speed=152.6 ns day-1)
 
 To make things easy, :mod:`sire` automatically chooses a suitable constraint
 based on the timestep. You can see the constraint chosen using the
-:meth:`sire.mol.Dynamics.constraint` function.
+:meth:`~sire.mol.Dynamics.constraint` function.
 
 >>> d = mols.dynamics(timestep="8fs", temperature="25oC")
 >>> print(d.constraint())
@@ -128,6 +128,13 @@ the system and run again.
 
 but do expect to see a ``ParticleException`` or other ``RuntimeError``
 exceptions raised at some point!
+
+.. note::
+
+   Setting ``constraint`` to the Python ``None`` type indicates that you
+   don't have a preference, and so :mod:`sire` will choose a suitable
+   constraint for you. Use the string ``"none"`` to explicitly disable
+   constraints.
 
 Constraints and Perturbable Molecules
 -------------------------------------
@@ -339,7 +346,7 @@ ethane and methanol.
 ...           lambda_windows=lambda_windows)
 ...     print("Dynamics complete")
 ...     print(d)
-...     # stream the EnergyTable to a sire save stream object
+...     # stream the EnergyTrajectory to a sire save stream object
 ...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
 ...                    f"energy_fast_{lambda_value:.2f}.s3")
 
@@ -387,4 +394,22 @@ automatically run more complex protocols.
 .. literalinclude:: scripts/run_md.py
 
 The relative hydration free energy calculated using the above script is:
+
+::
+
+   Water phase:  -3.2587718667371606 kcal mol-1
+   Vacuum phase: 2.980451221216327 kcal mol-1
+   Hydration free energy: -6.239223087953487 kcal mol-1
+
+This is in good agreement with
+`published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
+which are typically -6.1 kcal mol-1 to -6.2 kcal mol-1.
+
+.. note::
+
+   There will be some variation between different codes and different
+   protocols, as the convergence of the free energy estimate is sensitive
+   to the length of the dynamics simulation at each λ-value. In this case,
+   we used very short simulations. Edit the script to increase the amount
+   of simulation time per λ-value to get a more accurate result.
 

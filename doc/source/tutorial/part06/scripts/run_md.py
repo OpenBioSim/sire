@@ -51,7 +51,7 @@ for i, lambda_value in enumerate(lambda_values):
     print("Dynamics complete")
     print(d)
 
-    # stream the EnergyTable to a sire save stream object
+    # stream the EnergyTrajectory to a sire save stream object
     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
                    f"energy_water_{lambda_value:.2f}.s3")
 
@@ -88,7 +88,7 @@ for i, lambda_value in enumerate(lambda_values):
     print("Dynamics complete")
     print(d)
 
-    # stream the EnergyTable to a sire save stream object
+    # stream the EnergyTrajectory to a sire save stream object
     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
                    f"energy_vacuum_{lambda_value:.2f}.s3")
 

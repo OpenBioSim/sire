@@ -74,7 +74,7 @@ This will let us subsequently calculate the free energy across λ using
 ...           lambda_windows=lambda_windows)
 ...     print("Dynamics complete")
 ...     print(d)
-...     # stream the EnergyTable to a sire save stream object
+...     # stream the EnergyTrajectory to a sire save stream object
 ...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
 ...                    f"energy_{lambda_value:.2f}.s3")
 
@@ -129,10 +129,10 @@ First, we need to import alchemlyb
    alchemlyb. You can do this using conda or mamba, e.g.
    ``mamba install -c conda-forge alchemlyb``.
 
-Next, we will load all of the :class:`~sire.maths.EnergyTable` objects
+Next, we will load all of the :class:`~sire.maths.EnergyTrajectory` objects
 for each λ-window, and will convert them into pandas DataFrames arranged
 into an alchemlyb-compatible format. We could do this manually by first
-loading all of the s3 files containing the :class:`~sire.maths.EnergyTable`
+loading all of the s3 files containing the :class:`~sire.maths.EnergyTrajectory`
 objects...
 
 >>> import sire as sr
@@ -186,7 +186,7 @@ time fep-lambda                                                                 
    we have only calculated free energy differences along the diagonal of this
    DataFrame, i.e. only between the simulated and neighbouring λ-windows.
 
-...or we can use the in-build :func:`sire.motion.alchemlyb` function to
+...or we can use the in-build :func:`sire.morph.to_alchemlyb` function to
 do all of the above for us.
 
 >>> df = sr.morph.to_alchemlyb("energy*.s3")
@@ -221,7 +221,7 @@ To get the relative hydration free energy, we would need to complete the
 cycle by calculating the relative free energy for the perturbation in the
 gas phase. We could do this using this code (which is almost identical to
 above, except we only simulate the perturbable molecule, and save
-the :class:`~sire.maths.EnergyTable` objects to ``energy_gas_{lambda}.s3``
+the :class:`~sire.maths.EnergyTrajectory` objects to ``energy_gas_{lambda}.s3``
 instead of ``energy_{lambda}.s3``).
 
 >>> import sire as sr
@@ -256,7 +256,7 @@ instead of ``energy_{lambda}.s3``).
 ...           lambda_windows=lambda_windows)
 ...     print("Dynamics complete")
 ...     print(d)
-...     # stream the EnergyTable to a sire save stream object
+...     # stream the EnergyTrajectory to a sire save stream object
 ...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
 ...                    f"energy_gas_{lambda_value:.2f}.s3")
 
