@@ -1415,6 +1415,7 @@ def _dynamics(
     ignore_perturbations=None,
     temperature=None,
     pressure=None,
+    vacuum=None,
     shift_delta=None,
     coulomb_power=None,
     restraints=None,
@@ -1520,6 +1521,12 @@ def _dynamics(
         microcanonical (NVE) or canonical (NVT) simulation will be
         run if the pressure is not set.
 
+    vacuum: bool (optional)
+        Whether or not to run the simulation in vacuum. If this is
+        set to `True`, then the simulation space automatically be
+        replaced by a `sire.vol.Cartesian` space, and the
+        simulation run in vacuum.
+
     shift_delta: length
         The shift_delta parameter that controls the electrostatic
         and van der Waals softening potential that smooths the
@@ -1565,6 +1572,11 @@ def _dynamics(
     from .. import u
 
     map = create_map(map)
+
+    if vacuum is True:
+        from ..vol import Cartesian
+
+        map.set("space", Cartesian())
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
@@ -1700,6 +1712,7 @@ def _minimisation(
     lambda_value=None,
     swap_end_states=None,
     ignore_perturbations=None,
+    vacuum=None,
     shift_delta=None,
     coulomb_power=None,
     platform=None,
@@ -1767,6 +1780,12 @@ def _minimisation(
         is useful if you just want to run standard molecular dynamics
         of the reference or perturbed states.
 
+    vacuum: bool (optional)
+        Whether or not to run the simulation in vacuum. If this is
+        set to `True`, then the simulation space automatically be
+        replaced by a `sire.vol.Cartesian` space, and the
+        simulation run in vacuum.
+
     shift_delta: length
         The shift_delta parameter that controls the electrostatic
         and van der Waals softening potential that smooths the
@@ -1812,6 +1831,11 @@ def _minimisation(
     from .. import u
 
     map = create_map(map)
+
+    if vacuum is True:
+        from ..vol import Cartesian
+
+        map.set("space", Cartesian())
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})

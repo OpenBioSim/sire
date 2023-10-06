@@ -3,7 +3,7 @@ __all__ = ["repartition_hydrogen_masses"]
 
 def repartition_hydrogen_masses(
     mols,
-    mass_factor=4.0,
+    mass_factor=1.5,
     ignore_water: bool = False,
     ignore_non_water: bool = False,
     include_end_states: bool = True,
@@ -24,8 +24,8 @@ def repartition_hydrogen_masses(
 
     mass_factor : float
         The factor to multiply the mass of hydrogen atoms by. Using
-        the default of 4 will ensure that the atoms. Note that this
-        value can only be set to between 1 and 4.
+        the default of 1.5 is known to be a good value to use to
+        achieve a 4 fs timestep with the (default) LangevinMiddle integrator
 
     ignore_water : bool
         Whether or not to ignore water molecules (default False)

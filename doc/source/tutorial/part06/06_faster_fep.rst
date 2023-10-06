@@ -247,6 +247,23 @@ masses repartitioned.
 >>> repartitioned_mol = sr.morph.repartition_hydrogen_masses(mol)
 >>> for atom0, atom1 in zip(mol.atoms(), repartitioned_mol.atoms()):
 ...    print(atom0, atom0.property("mass"), atom1.property("mass"))
+Atom( C1:1    [  25.71,   24.94,   25.25] ) 12.01 g mol-1 10.498 g mol-1
+Atom( C2:2    [  24.29,   25.06,   24.75] ) 12.01 g mol-1 10.498 g mol-1
+Atom( H3:3    [  25.91,   23.89,   25.56] ) 1.008 g mol-1 1.512 g mol-1
+Atom( H4:4    [  26.43,   25.22,   24.45] ) 1.008 g mol-1 1.512 g mol-1
+Atom( H5:5    [  25.86,   25.61,   26.13] ) 1.008 g mol-1 1.512 g mol-1
+Atom( H6:6    [  24.14,   24.39,   23.87] ) 1.008 g mol-1 1.512 g mol-1
+Atom( H7:7    [  24.09,   26.11,   24.44] ) 1.008 g mol-1 1.512 g mol-1
+Atom( H8:8    [  23.57,   24.78,   25.55] ) 1.008 g mol-1 1.512 g mol-1
+
+This has repartioned the hydrogen masses using a ``mass_factor`` of 1.5.
+This factor is known to be good for using the (default)
+``LangevinMiddleIntegrator`` with a timestep of 4 fs. You may need to use
+a different factor for a different integrator or timestep, e.g.
+
+>>> rep4_mol = sr.morph.repartition_hydrogen_masses(mol, mass_factor=4)
+>>> for atom0, atom1 in zip(mol.atoms(), rep4_mol.atoms()):
+...    print(atom0, atom0.property("mass"), atom1.property("mass"))
 Atom( C1:1    [  25.71,   24.94,   25.25] ) 12.01 g mol-1 2.938 g mol-1
 Atom( C2:2    [  24.29,   25.06,   24.75] ) 12.01 g mol-1 2.938 g mol-1
 Atom( H3:3    [  25.91,   23.89,   25.56] ) 1.008 g mol-1 4.032 g mol-1
@@ -255,6 +272,8 @@ Atom( H5:5    [  25.86,   25.61,   26.13] ) 1.008 g mol-1 4.032 g mol-1
 Atom( H6:6    [  24.14,   24.39,   23.87] ) 1.008 g mol-1 4.032 g mol-1
 Atom( H7:7    [  24.09,   26.11,   24.44] ) 1.008 g mol-1 4.032 g mol-1
 Atom( H8:8    [  23.57,   24.78,   25.55] ) 1.008 g mol-1 4.032 g mol-1
+
+would multiply the hydrogen masses by a factor of 4.
 
 .. note::
 
@@ -269,37 +288,22 @@ The repartitioned molecule has the same mass as the original molecule, but
 the hydrogens have been made heavier. The mass of the carbon atoms has been
 reduced to compensate.
 
->>> print(mol.mass(), repartioned_mol.mass())
+>>> print(mol.mass(), repartitioned_mol.mass())
 30.068 g mol-1 30.068 g mol-1
 
 It is normal to only repartition the hydrogen masses of perturbable molecules.
-This lets us use ``h-bond-h-angles`` constraints for all molecules, with
-no constraints on the perturbable molecules. But, we don't need constraints
-on the perturbable molecules because their hydrogens are heavier, and so the
-vibrations of their atoms should be slower.
+This lets us disable the constraints on the perturbable molecules, but
+still use a large timestep (e.g. 3 fs or 4 fs). This is because
+the hydrogens on the perturbable molecules would become heavier,
+and so the vibrations of those atoms should have a lower frequency.
 
 >>> mols.update(repartitioned_mol)
->>> d = mols.dynamics(timestep="3fs", temperature="25oC",
-...                   constraint="h-bonds-h-angles")
+>>> d = mols.dynamics(timestep="4fs", temperature="25oC",
+...                   constraint="h-bonds",
+...                   perturbable_constraint="none")
 >>> d.run("5ps")
 >>> print(d)
-Dynamics(completed=4.998 ps, energy=-34522.6 kcal mol-1, speed=73.3 ns day-1)
-
-.. note::
-
-   The ``h-bonds-h-angles`` constraint really applies to "light" atoms,
-   i.e. atoms whose mass is less than 4 g mol-1. Hydrogen mass repartitioning
-   makes the hydrogens of the perturbable molecule heavier, with a mass
-   of at least 4 g mol-1. Thus they are not affected by the constraint.
-   You can doubly-ensure this by also setting
-   ``perturbable_constraint="none"``.
-
-.. note::
-
-   We have to use a 3 fs timestep as the simulation is unstable using
-   a 4 fs timestep. Hydrogen mass repartitioning is not able to slow
-   down the perturbable molecule's bond vibrations enough to allow
-   a larger timestep.
+Dynamics(completed=5 ps, energy=-31950.1 kcal mol-1, speed=100.8 ns day-1)
 
 This has given us the best of both worlds - a fast simulation with a larger
 timestep, plus no constraints on the perturbable molecules.
@@ -314,9 +318,10 @@ ethane and methanol.
 ...     # minimise the system at this lambda value
 ...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
 ...     # create a dynamics object for the system
-...     d = min_mols.dynamics(timestep="3fs", temperature="25oC",
+...     d = min_mols.dynamics(timestep="4fs", temperature="25oC",
 ...                           lambda_value=lambda_value,
-...                           constraint="h-bonds-h-angles")
+...                           constraint="h-bonds",
+...                           perturbable_constraint="none")
 ...     # generate random velocities
 ...     d.randomise_velocities()
 ...     # equilibrate, not saving anything
@@ -338,7 +343,7 @@ ethane and methanol.
 ...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
 ...                    f"energy_fast_{lambda_value:.2f}.s3")
 
-The simulation runs 25% faster than before, taking about 35 seconds per
+The simulation runs 33% faster than before, taking about 30 seconds per
 λ-window.
 
 We can now calculate the free energy using alchemlyb as before;
@@ -348,56 +353,38 @@ We can now calculate the free energy using alchemlyb as before;
 >>> b = BAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])
--2.915317671006572
+-2.9972763590251836
 
 Within error, this is the same free energy as before, but calculated in
 a little less time.
 
-Pushing the limits of speed
----------------------------
+.. note::
 
-The previous section showed how to run a faster simulation, but it is possible
-to go even quicker if we are willing to sacrifice accuracy.
+   The random error on these calculations can be seen in ``b.d_delta_f``,
+   which shows the error per λ-window is about 0.02 kcal mol-1. Summed over
+   the whole λ-coordinate suggest an error of about 0.4 kcal mol-1. You
+   could reduce this error by running the simulation for longer
+   (e.g. 250 ps per λ-window) or by running multiple repeats and taking
+   and average.
 
->>> import sire as sr
->>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
->>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
->>> mols = mols.minimisation().run().commit()
->>> mol = mols.molecule("molecule property is_perturbable")
->>> mol = sr.morph.repartition_hydrogen_masses(mol)
->>> mols.update(mol)
+Complete Example Script
+-----------------------
 
+Putting everything together, here is a simple script that does all of the
+work of calculating the relative hydration free energy of ethane
+and methanol. The key parameters (e.g. timestep, constraint, run time,
+λ-values etc) are pulled out as variables at the top. The script then
+runs a dynamics simulation for each λ-window for the water leg, then
+a dynamics simulation using the same parameters and λ-windows for the
+vacuum leg. The free energies are collected and then calculated using BAR
+from alchemlyb. This is a good starting point for you to adapt for your
+own simulations. Or take a look at
+`BioSimSpace <https://biosimspace.openbiosim.org>`__ or the upcoming
+`somd2 software <https://github.com/openbiosim/somd2>`__ if you are
+interested in higher-level interfaces to this functionality that
+automatically run more complex protocols.
 
->>> lambda_values = [0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35,
-...                  0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75,
-...                  0.80, 0.85, 0.90, 0.95, 1.00]
->>> for lambda_value in lambda_values:
-...     print(f"Simulating lambda={lambda_value:.2f}")
-...     # minimise the system at this lambda value
-...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
-...     # now equilibrate with no constraints at this value of lambda
-...     d = min_mols.dynamics(timestep="1fs", lambda_value=lambda_value,
-...                           temperature="25oC", constraint="none")
-...     d.run("2ps")
-...     eq_mols = d.commit()
-...     print(d)
-...     print("Equilibration complete")
-...     # run production dynamics, calculating energies at every lambda value
-...     d = eq_mols.dynamics(timestep="6fs", temperature="25oC",
-...                          lambda_value=lambda_value,
-...                          constraint="bonds-h-angles")
-...     d.randomise_velocities()
-...     d.run("540ps", energy_frequency="1.8ps", frame_frequency=0,
-...           lambda_windows=lambda_values)
-...     print("Dynamics complete")
-...     print(d)
-...     # stream the EnergyTable to a sire save stream object
-...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
-...                    f"energy_superfast_{lambda_value:.2f}.s3")
+.. literalinclude:: scripts/run_md.py
 
->>> df = sr.morph.to_alchemlyb("energy_superfast_*.s3")
->>> from alchemlyb.estimators import MBAR
->>> b = MBAR()
->>> b.fit(df)
->>> print(b.delta_f_.loc[0.00, 1.00])
+The relative hydration free energy calculated using the above script is:
+

@@ -428,6 +428,12 @@ class System:
             softening potential that smooths the creation and deletion
             of ghost atoms during a potential. This defaults to 0.
 
+        vacuum: bool
+            Whether or not to run the simulation in vacuum. If this is
+            set to `True`, then the simulation space automatically be
+            replaced by a `sire.vol.Cartesian` space, and the
+            simulation run in vacuum.
+
         restraints: sire.mm.Restraints or list[sire.mm.Restraints]
             A single set of restraints, or a list of sets of
             restraints that will be applied to the atoms during
@@ -553,6 +559,12 @@ class System:
             The pressure at which to run the simulation. A
             microcanonical (NVE) or canonical (NVT) simulation will be
             run if the pressure is not set.
+
+        vacuum: bool
+            Whether or not to run the simulation in vacuum. If this is
+            set to `True`, then the simulation space automatically be
+            replaced by a `sire.vol.Cartesian` space, and the
+            simulation run in vacuum.
 
         shift_delta: length
             The shift_delta parameter that controls the electrostatic

@@ -191,6 +191,10 @@ do all of the above for us.
 
 >>> df = sr.morph.to_alchemlyb("energy*.s3")
 
+This function is not only quicker, but it will automatically sort the
+data by λ-value, meaning that you don't need to worry about the naming
+convention of your files.
+
 Now we can tell alchemlyb to calculate the free energy using the BAR method.
 
 >>> from alchemlyb.estimators import BAR
@@ -229,10 +233,12 @@ instead of ``energy_{lambda}.s3``).
 ...     lambda_value = l / 100.0
 ...     print(f"Simulating lambda={lambda_value:.2f}")
 ...     # minimise the system at this lambda value
-...     min_mol = mol.minimisation(lambda_value=lambda_value).run().commit()
+...     min_mol = mol.minimisation(lambda_value=lambda_value,
+...                                vacuum=True).run().commit()
 ...     # create a dynamics object for the system
 ...     d = min_mol.dynamics(timestep="1fs", temperature="25oC",
-...                          lambda_value=lambda_value)
+...                          lambda_value=lambda_value,
+...                          vacuum=True)
 ...     # generate random velocities
 ...     d.randomise_velocities()
 ...     # equilibrate, not saving anything
@@ -253,6 +259,13 @@ instead of ``energy_{lambda}.s3``).
 ...     # stream the EnergyTable to a sire save stream object
 ...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
 ...                    f"energy_gas_{lambda_value:.2f}.s3")
+
+.. note::
+
+   The option ``vacuum=True`` tells the minimisation and dynamics to
+   remove any simulation space that may be attached to the molecule(s),
+   and instead set the space to a :class:`~sire.space.Cartesian` space.
+   This has the affect of simulating the molecules in vacuum.
 
 This should run more quickly than the simulation in water, e.g. about
 15 seconds per window (at about 150 nanoseconds per day of sampling).
