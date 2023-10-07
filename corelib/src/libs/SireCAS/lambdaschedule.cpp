@@ -857,13 +857,14 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
     const int nparams = initial.count();
 
     if (final.count() != nparams)
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The number of initial and final parameters for lever %1 is not the same. "
-                                                "%2 versus %3. They need to be the same.")
-                                                .arg(lever_name)
-                                                .arg(initial.count())
-                                                .arg(final.count()),
-                                            CODELOC);
+        return initial;
+    /*throw SireError::incompatible_error(QObject::tr(
+                                            "The number of initial and final parameters for lever %1 is not the same. "
+                                            "%2 versus %3. They need to be the same.")
+                                            .arg(lever_name)
+                                            .arg(initial.count())
+                                            .arg(final.count()),
+                                        CODELOC);*/
 
     if (this->nStages() == 0)
         // just return the initial parameters as we don't know how to morph

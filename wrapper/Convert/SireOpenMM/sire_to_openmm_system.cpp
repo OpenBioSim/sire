@@ -1402,8 +1402,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // non-bonded forcefields and also the ghost-14 forcefield
                 exception_idxs[j] = std::make_pair(idx, nbidx);
 
-                // remove this interaction from the ghost forcefields
-                if (ghost_ghostff != 0)
+                // remove this interaction from the ghost forcefields, only
+                // if it involves ghost atoms. If it doens't involve ghost atoms
+                // then we cannot remove it, because OpenMM doesn't support
+                // having a non-zero exception in NonbondedForce while having
+                // exclusions between the same atoms in CustomNonbondedForce
+                if (ghost_ghostff != 0 and (atom0_is_ghost or atom1_is_ghost))
                 {
                     ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
                     ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
