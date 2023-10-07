@@ -50,17 +50,7 @@ SIRE_BEGIN_HEADER
 #define BOOST_MPL_CFG_NO_PREPROCESSED_HEADERS
 #define BOOST_MPL_LIMIT_LIST_SIZE 40
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_line_pos_iterator.hpp>
-
-#include <boost/phoenix.hpp>
-#include <boost/phoenix/fusion.hpp>
-#include <boost/phoenix/object.hpp>
-#include <boost/phoenix/operator.hpp>
-#include <boost/phoenix/stl.hpp>
-
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/include/io.hpp>
 
 #include <memory>
 
