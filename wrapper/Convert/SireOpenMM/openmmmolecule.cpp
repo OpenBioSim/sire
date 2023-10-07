@@ -959,7 +959,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
         if (not found)
         {
             // add a null exception with the same scale factors
-            perturbed->exception_params.append(std::tuple<int, int, double, double>(atom0, atom1, 1.0, 1.0));
+            exception_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, 1.0, 1.0));
             found_index_0[i] = true;
         }
     }
@@ -990,6 +990,16 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     }
 
     perturbed->exception_params = exception_params_1;
+
+    if (exception_params.count() != perturbed->exception_params.count())
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Different number of exceptions between the reference "
+                                         "(%1) and perturbed (%2) states.")
+                                         .arg(exception_params.count())
+                                         .arg(perturbed->exception_params.count()),
+                                     CODELOC);
+    }
 }
 
 /** Internal function that builds all of the exceptions for all of the
