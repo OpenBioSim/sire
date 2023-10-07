@@ -12,8 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - September 2023
-----------------------------------------------------------------------------------------------
+`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
+--------------------------------------------------------------------------------------------
 
 * Added ``closest`` and ``furthest`` keywords to enable searching for the n closest
   or furthest views. This is very general, and is described in the
