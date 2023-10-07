@@ -331,6 +331,52 @@ QString OpenMMFrEnergyST::toString() const
     return QObject::tr("OpenMMFrEnergyST()");
 }
 
+/** Takes in a molecule, system, and link properties and adds the link bonds to the system.*/
+void OpenMMFrEnergyST::addLinkBonds(OpenMM::System *system,
+                                    const SireMol::Molecule &molecule,
+                                    const SireBase::Properties &linkprop,
+                                    const QHash<int, int> &atom_num_to_openmm_idx,
+                                    OpenMM::CustomBondForce *custom_force,
+                                    const bool debug)
+{
+    std::vector<double> custom_bond_link_par(3);
+    const auto nlinks = linkprop.property(QString("nbondlinks")).asA<VariantProperty>().toInt();
+
+    if (debug)
+        qDebug() << "Adding link bonds to system";
+    qDebug() << "Custom force is " << custom_force;
+    qDebug() << "Number of constraint links = " << nlinks;
+
+    for (int i = 0; i < nlinks; i++)
+    {
+        const auto atomnum0 =
+            linkprop.property(QString("AtomNum0(%1)").arg(i)).asA<VariantProperty>().toInt();
+        const auto atomnum1 =
+            linkprop.property(QString("AtomNum1(%1)").arg(i)).asA<VariantProperty>().toInt();
+        const auto reql = linkprop.property(QString("reql(%1)").arg(i)).asA<VariantProperty>().toDouble();
+        const auto kl = linkprop.property(QString("kl(%1)").arg(i)).asA<VariantProperty>().toDouble();
+        const auto dl = linkprop.property(QString("dl(%1)").arg(i)).asA<VariantProperty>().toDouble();
+
+        const int openmmindex0 = atom_num_to_openmm_idx[atomnum0];
+        const int openmmindex1 = atom_num_to_openmm_idx[atomnum1];
+
+        custom_bond_link_par[0] = reql * OpenMM::NmPerAngstrom; // req
+        custom_bond_link_par[1] =
+            kl * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm); // k
+        custom_bond_link_par[2] = dl * OpenMM::NmPerAngstrom;                           // dl
+
+        if (debug)
+        {
+            qDebug() << "atomnum0 = " << atomnum0 << " openmmindex0 =" << openmmindex0;
+            qDebug() << "atomnum1 = " << atomnum1 << " openmmindex1 =" << openmmindex1;
+            qDebug() << "Req = " << reql << " kl = " << kl << " dl = " << dl;
+        }
+
+        custom_force->addBond(openmmindex0, openmmindex1, custom_bond_link_par);
+    }
+    system->addForce(custom_force);
+}
+
 /**
  * initialises the openMM Free energy single topology calculation
  * Initialise must be called before anything else happens.
@@ -1240,21 +1286,21 @@ void OpenMMFrEnergyST::initialise()
 
     // JM 05/23 CustomExternalForce has been deprecated as it is not recommended for implementing positional restraints
     // see thread https://github.com/openmm/openmm/issues/2262
-    //OpenMM::CustomExternalForce *positionalRestraints_openmm = NULL;
+    // OpenMM::CustomExternalForce *positionalRestraints_openmm = NULL;
     OpenMM::HarmonicBondForce *positionalRestraints_openmm = NULL;
 
     if (Restraint_flag == true)
     {
-        //positionalRestraints_openmm = new OpenMM::CustomExternalForce("k*d2;"
-        //                                                              "d2 = max(0.0, d1 - d^2);"
-        //                                                              "d1 = (x-xref)^2 + (y-yref)^2  + (z-zref)^2");
-        //positionalRestraints_openmm->addPerParticleParameter("xref");
-        //positionalRestraints_openmm->addPerParticleParameter("yref");
-        //positionalRestraints_openmm->addPerParticleParameter("zref");
-        //positionalRestraints_openmm->addPerParticleParameter("k");
-        //positionalRestraints_openmm->addPerParticleParameter("d");
+        // positionalRestraints_openmm = new OpenMM::CustomExternalForce("k*d2;"
+        //                                                               "d2 = max(0.0, d1 - d^2);"
+        //                                                               "d1 = (x-xref)^2 + (y-yref)^2  + (z-zref)^2");
+        // positionalRestraints_openmm->addPerParticleParameter("xref");
+        // positionalRestraints_openmm->addPerParticleParameter("yref");
+        // positionalRestraints_openmm->addPerParticleParameter("zref");
+        // positionalRestraints_openmm->addPerParticleParameter("k");
+        // positionalRestraints_openmm->addPerParticleParameter("d");
 
-	positionalRestraints_openmm = new OpenMM::HarmonicBondForce();
+        positionalRestraints_openmm = new OpenMM::HarmonicBondForce();
         positionalRestraints_openmm->setUsesPeriodicBoundaryConditions(true);
         system_openmm->addForce(positionalRestraints_openmm);
 
@@ -1283,7 +1329,7 @@ void OpenMMFrEnergyST::initialise()
     /****************************************BOND LINK POTENTIAL*****************************/
     /* FC 12/21 CustomBondForce now (OpenMM 7.4.0) allows application of PBC checks*/
 
-    OpenMM::CustomBondForce *custom_link_bond = new OpenMM::CustomBondForce("delta(min(0, r_eff))*lamrest*kl*r_eff^2;"
+    OpenMM::CustomBondForce *custom_link_bond = new OpenMM::CustomBondForce("delta(min(0, r_eff))*(lamrest^5)*kl*r_eff^2;"
                                                                             "r_eff=abs(r-reql)-dl");
     custom_link_bond->addPerBondParameter("reql");
     custom_link_bond->addPerBondParameter("kl");
@@ -1296,6 +1342,16 @@ void OpenMMFrEnergyST::initialise()
     // We are not in turn on receptor-ligand restraints mode - set lamrest to 1
     else
         custom_link_bond->addGlobalParameter("lamrest", 1);
+
+    /*************************************PERMANENT BOND LINK POTENTIAL*****************************/
+    // As above, but unaffected by lamrest
+
+    OpenMM::CustomBondForce *custom_permanent_link_bond = new OpenMM::CustomBondForce("delta(min(0, r_eff))*kl*r_eff^2;"
+                                                                                      "r_eff=abs(r-reql)-dl");
+    custom_permanent_link_bond->addPerBondParameter("reql");
+    custom_permanent_link_bond->addPerBondParameter("kl");
+    custom_permanent_link_bond->addPerBondParameter("dl");
+    custom_permanent_link_bond->setUsesPeriodicBoundaryConditions(true);
 
     /****************************************BORESCH DISTANCE POTENTIAL*****************************/
 
@@ -1841,28 +1897,28 @@ void OpenMMFrEnergyST::initialise()
                     {
                         //qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
                         //         << yref << " z " << zref << " k " << k << " d " << d;
-			qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
+                        qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
                         qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;
 
                     }
 
-                    //int posrestrdim = 5;
-                    //std::vector<double> params(posrestrdim);
+                    // int posrestrdim = 5;
+                    // std::vector<double> params(posrestrdim);
 
-                    //params[0] = xref * OpenMM::NmPerAngstrom;
-                    //params[1] = yref * OpenMM::NmPerAngstrom;
-                    //params[2] = zref * OpenMM::NmPerAngstrom;
-                    //params[3] = k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm);
-                    //params[4] = d * OpenMM::NmPerAngstrom;
+                    // params[0] = xref * OpenMM::NmPerAngstrom;
+                    // params[1] = yref * OpenMM::NmPerAngstrom;
+                    // params[2] = zref * OpenMM::NmPerAngstrom;
+                    // params[3] = k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm);
+                    // params[4] = d * OpenMM::NmPerAngstrom;
 
-                    //positionalRestraints_openmm->addParticle(openmmindex, params);
-		    //int dummyidx = system_openmm->addParticle(0);
-                    //std::vector<double> custom_non_bonded_params{ 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.};
-		    //custom_force_field->addParticle(custom_non_bonded_params);
-		    custom_force_field->addExclusion(anchoropenmmindex, atopenmmindex);
-		    positionalRestraints_openmm->addBond(anchoropenmmindex, atopenmmindex,
-				                         0 * OpenMM::NmPerAngstrom,
-							 k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm));
+                    // positionalRestraints_openmm->addParticle(openmmindex, params);
+                    // int dummyidx = system_openmm->addParticle(0);
+                    // std::vector<double> custom_non_bonded_params{ 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.};
+                    // custom_force_field->addParticle(custom_non_bonded_params);
+                    custom_force_field->addExclusion(anchoropenmmindex, atopenmmindex);
+                    positionalRestraints_openmm->addBond(anchoropenmmindex, atopenmmindex,
+                                                         0 * OpenMM::NmPerAngstrom,
+                                                         k * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm));
                 }
             }
         } // end of restraint flag
@@ -3049,6 +3105,7 @@ void OpenMMFrEnergyST::initialise()
     perturbed_energies = perturbed_energies_tmp;
 
     // IMPORTANT: PERTURBED ENERGY TORSIONS ARE ADDED ABOVE
+
     bool UseLink_flag = true;
 
     // Distance Restraint. All the information is stored in the solute.
@@ -3059,50 +3116,28 @@ void OpenMMFrEnergyST::initialise()
         {
             Molecule molecule = moleculegroup.moleculeAt(i).molecule();
 
-            if (molecule.hasProperty("linkbonds"))
+            if (molecule.hasProperty("linkbonds") || molecule.hasProperty("permanent_linkbonds"))
             {
-                std::vector<double> custom_bond_link_par(3);
-
-                const auto linkprop = molecule.property("linkbonds").asA<Properties>();
-
-                const auto nlinks = linkprop.property(QString("nbondlinks")).asA<VariantProperty>().toInt();
-
-                if (Debug)
-                    qDebug() << "Number of constraint links = " << nlinks;
-
-                for (int i = 0; i < nlinks; i++)
+                if (molecule.hasProperty("linkbonds"))
                 {
-                    const auto atomnum0 =
-                        linkprop.property(QString("AtomNum0(%1)").arg(i)).asA<VariantProperty>().toInt();
-                    const auto atomnum1 =
-                        linkprop.property(QString("AtomNum1(%1)").arg(i)).asA<VariantProperty>().toInt();
-                    const auto reql = linkprop.property(QString("reql(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    const auto kl = linkprop.property(QString("kl(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    const auto dl = linkprop.property(QString("dl(%1)").arg(i)).asA<VariantProperty>().toDouble();
-
-                    const int openmmindex0 = AtomNumToOpenMMIndex[atomnum0];
-                    const int openmmindex1 = AtomNumToOpenMMIndex[atomnum1];
-
-                    custom_bond_link_par[0] = reql * OpenMM::NmPerAngstrom; // req
-                    custom_bond_link_par[1] =
-                        kl * (OpenMM::KJPerKcal * OpenMM::AngstromsPerNm * OpenMM::AngstromsPerNm); // k
-                    custom_bond_link_par[2] = dl * OpenMM::NmPerAngstrom;                           // dl
-
-                    if (Debug)
-                    {
-                        qDebug() << "atomnum0 = " << atomnum0 << " openmmindex0 =" << openmmindex0;
-                        qDebug() << "atomnum1 = " << atomnum1 << " openmmindex1 =" << openmmindex1;
-                        qDebug() << "Req = " << reql << " kl = " << kl << " dl = " << dl;
-                    }
-
-                    custom_link_bond->addBond(openmmindex0, openmmindex1, custom_bond_link_par);
+                    // Set up the link bonds
+                    const auto linkprop = molecule.property("linkbonds").asA<Properties>();
+                    addLinkBonds(system_openmm, molecule, linkprop, AtomNumToOpenMMIndex,
+                                 custom_link_bond, Debug);
                 }
 
-                system_openmm->addForce(custom_link_bond);
+                if (molecule.hasProperty("permanent_linkbonds"))
+                {
+                    // Set up the permanent link bonds
+                    const auto linkprop = molecule.property("permanent_linkbonds").asA<Properties>();
+                    addLinkBonds(system_openmm, molecule, linkprop, AtomNumToOpenMMIndex,
+                                 custom_permanent_link_bond, Debug);
+                }
 
                 // We've found the molecule, exit the outer loop.
                 break;
             }
+
         } // end of loop over molecules in system
     }     // end of bond link flag
 
@@ -3484,8 +3519,8 @@ void OpenMMFrEnergyST::createContext(IntegratorWorkspace &workspace, SireUnits::
                 OpenMM::Vec3(c[j].x() * (OpenMM::NmPerAngstrom), c[j].y() * (OpenMM::NmPerAngstrom),
                              c[j].z() * (OpenMM::NmPerAngstrom));
 
-            //if (m[j] == 0.0)
-            //    qDebug() << "\nWARNING - THE MASS OF PARTICLE " << system_index << " is ZERO\n";
+            // if (m[j] == 0.0)
+            //     qDebug() << "\nWARNING - THE MASS OF PARTICLE " << system_index << " is ZERO\n";
 
             if (m[j] > SireMaths::small)
             {

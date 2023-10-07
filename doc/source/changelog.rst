@@ -93,7 +93,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   an alchemlyb-compatible data frame. Added :func:`sire.morph.to_alchemlyb`
   to convert lots of ``EnergyTrajectory`` objects (or files containing
   s3 streams) into a single alchemlyb-compatible data frame that is
-  ready for analysis.
+  ready for analysis. You can now calculate relative hydration and binding
+  free energies and analyse the results using alchemlyb. This is documented
+  in the :doc:`tutorial <tutorial/part06/05_free_energy_perturbation>`.
 
 * Added a :func:`sire.morph.repartition_hydrogen_masses` to make it easier to
   repartition hydrogen masses during alchemical free energy simulations.
@@ -105,6 +107,14 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added support for scaling intramolecular non-bonded scale factors to the
   ``LambdaLever``, so that we have rudimentary support for perturbations
   that involve bond breaking and forming.
+
+* Added support to somd for one or more "permanent" distance restraints. These
+  are distance restraints that are always applied, and are never scaled by λ.
+  This allows the release of all other distance restraints to a single
+  harmonic or flat-bottomed restraint. When the ligand is fully decoupled,
+  the free energy of release of the single remaining restraint can be
+  computed without simulation. See
+  <https://pubs.acs.org/doi/10.1021/acs.jctc.3c00139> for more details.
 
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
