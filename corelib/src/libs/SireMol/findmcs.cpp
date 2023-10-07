@@ -71,9 +71,6 @@ QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &o
 #pragma clang diagnostic ignored "-Wdeprecated-builtins"
 #endif
 
-#include <boost/describe/detail/config.hpp>
-#include <boost/describe.hpp>
-
 #include <boost/graph/properties.hpp>
 
 // this header causes a compile error on Windows because of missing
