@@ -159,3 +159,17 @@ def test_big_openmm_scale_lambda_ligand(merged_zan_ose):
 )
 def test_openmm_scale_lambda_dichloroethane(ethane_12dichloroethane):
     _run_test(ethane_12dichloroethane.clone(), False)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_cyclopentane(pentane_cyclopentane):
+    mols = pentane_cyclopentane.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mol = mol.edit().add_link("connectivity", "connectivity0").commit()
+        mols.update(mol)
+
+    _run_test(mols, False)

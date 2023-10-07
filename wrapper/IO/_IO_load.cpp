@@ -55,8 +55,22 @@ System load_molecules(const QStringList &files,
                 }
                 catch (...)
                 {
-                    // it couldn't be loaded - try one of the
-                    // parsers below to try to read it
+                }
+
+                // try to load this as a Sire s3 file
+                try
+                {
+                    auto m = SireStream::loadType<Molecule>(f);
+
+                    auto s = System();
+                    s.setName(m.name());
+                    auto g = MoleculeGroup("all");
+                    g.add(m);
+                    s.add(g);
+                    return s;
+                }
+                catch (...)
+                {
                 }
             }
         }

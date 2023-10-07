@@ -36,12 +36,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   Added a new ``sire.morph`` module that includes functions that should
   make it easier to set up, view and control morphs (perturbations).
 
-* Added an ``EnergyTrajectory`` class that lets us record the energy
-  trajectory along a dynamics simulation. This includes recording energies
-  at different λ-windows to that being simulated, thereby providing
-  the raw data for free energy calculations. By default the
-  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
-
 * Forced all new-style modules to import when `sr.use_new_api()` is called.
   This will make it easier to use sire with multiprocessing.
 
@@ -88,6 +82,29 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints`.
   Restraints can be named, meaning that you can scale different restraints
   at different stages and by different values across the λ-coordinate.
+
+* Added an :class:`~sire.maths.EnergyTrajectory` class that lets us record the
+  energy trajectory along a dynamics simulation. This includes recording
+  energies at different λ-windows to that being simulated, thereby providing
+  the raw data for free energy calculations. By default the
+  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
+
+* Added the ability to export an :class:`~sire.maths.EnergyTrajectory` as
+  an alchemlyb-compatible data frame. Added :func:`sire.morph.to_alchemlyb`
+  to convert lots of ``EnergyTrajectory`` objects (or files containing
+  s3 streams) into a single alchemlyb-compatible data frame that is
+  ready for analysis.
+
+* Added a :func:`sire.morph.repartition_hydrogen_masses` to make it easier to
+  repartition hydrogen masses during alchemical free energy simulations.
+  Set the default mass factor to 1.5 to support a 4 fs timestep with the
+  default ``LangevinMiddleIntegrator``.
+
+* Added support for an Andersen thermostat in the OpenMM dynamics layer.
+
+* Added support for scaling intramolecular non-bonded scale factors to the
+  ``LambdaLever``, so that we have rudimentary support for perturbations
+  that involve bond breaking and forming.
 
 * Please add the changelog entry for your PR here. We will add the link to your PR
   during the code review :-)
