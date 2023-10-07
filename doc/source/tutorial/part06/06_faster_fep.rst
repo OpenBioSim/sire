@@ -374,6 +374,8 @@ a little less time.
    (e.g. 250 ps per λ-window) or by running multiple repeats and taking
    and average.
 
+.. _ExampleFEPScript:
+
 Complete Example Script
 -----------------------
 

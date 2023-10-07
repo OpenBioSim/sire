@@ -235,6 +235,54 @@ And you can even run molecular dynamics using the integration with OpenMM.
 18     18  19.0  60.048626  1364.033346  9976.885470  33.771207  9.353054e-08 -59483.125256  144.011481 -64.081234    -838.157968 -48806.614328
 19     19  20.0  61.609644  1363.227511  9935.113811  32.689491  2.968531e-07 -59452.910379  144.467384 -64.420695    -835.410744 -48815.633975
 
+This integration extends to running GPU-accelerated alchemical molecular
+dynamics free energy calculations. For example, load up this merged
+molecule that uses a λ-coordinate to morph between ethane and methanol.
+
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
+
+We'll now select the reference state (ethane)...
+
+>>> for mol in mols.molecules("molecule property is_perturbable"):
+...     mols.update(mol.perturbation().link_to_reference().commit())
+
+To calculate a free energy, we would need to run multiple simulations
+across λ, calculating the difference in energy between neighbouring
+λ-windows. How to do this is
+:doc:`described in full here <../tutorial/index_part06>`. For this
+quick start guide, we'll just run at λ=0.5, calculating the difference
+in energy between λ=0.5 and λ=0.0 and λ=1.0.
+
+First, lets minimise at λ=0.5.
+
+>>> mols = mols.minimisation(lambda_value=0.5).run().commit()
+
+And not lets run a short dynamics simulation at λ=0.5, calculating the
+energy differences to λ=0.0 and λ=1.0.
+
+>>> d = mols.dynamics(lambda_value=0.5, timestep="1fs", temperature="25oC")
+>>> d.run("5ps", energy_frequency="0.5ps", lambda_windows=[0.0, 1.0])
+
+We can now extract the energy differences in an alchemlyb-compatible
+pandas DataFrame.
+
+>>> print(d.commit().energy_trajectory().to_alchemlyb())
+                          0.0           0.5           1.0
+time fep-lambda
+0.5  0.5        -46062.581449 -46066.727158 -46064.969441
+1.0  0.5        -43335.286994 -43351.114108 -43348.340617
+1.5  0.5        -41676.617061 -41685.901393 -41684.741190
+2.0  0.5        -40392.020981 -40449.196087 -40448.185263
+2.5  0.5        -39720.265484 -39743.531651 -39740.788035
+3.0  0.5        -39067.899327 -39094.033563 -39092.723982
+3.5  0.5        -38659.468399 -38677.805074 -38676.375989
+4.0  0.5        -38354.706210 -38366.022091 -38363.577232
+4.5  0.5        -38160.932310 -38175.773525 -38172.820779
+5.0  0.5        -37844.757596 -37850.187961 -37848.280865
+
+See :ref:`the tutorial <ExampleFEPScript>`
+for a complete script to run and analyse relative free energy calculations.
+
 This is just the beginning of what :mod:`sire` can do! To learn more,
 please take a look at :doc:`the detailed guides <../cheatsheet/index>`
 or :doc:`the tutorial <../tutorial/index>`.

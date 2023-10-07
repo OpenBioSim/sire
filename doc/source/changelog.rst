@@ -116,9 +116,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   computed without simulation. See
   <https://pubs.acs.org/doi/10.1021/acs.jctc.3c00139> for more details.
 
-* Please add the changelog entry for your PR here. We will add the link to your PR
-  during the code review :-)
-
 `2023.3.2 <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.2>`__ - September 2023
 ----------------------------------------------------------------------------------------------
 
@@ -162,9 +159,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   is now roughly O(N), using a hash to lookup at the molecule level, so that
   we don't have to test individual atoms.
 
-* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
- the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
- because not all required changes were included.
+* Fixed ``StandardStateCorrection``. This stopped working after
+  the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
+  because not all required changes were included.
 
 * Fix for crash when not passing a map to the SelectorImproper constructor
 
