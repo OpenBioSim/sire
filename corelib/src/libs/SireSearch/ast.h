@@ -51,6 +51,7 @@ SIRE_BEGIN_HEADER
 #define BOOST_MPL_LIMIT_LIST_SIZE 40
 
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/variant.hpp>
 
 #include <memory>
 
