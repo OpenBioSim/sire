@@ -769,7 +769,7 @@ class System:
         self._molecules = None
 
     def energy_trajectory(
-        self, to_pandas: bool = True, to_alchemlyb: bool = False, map=None
+        self, to_pandas: bool = False, to_alchemlyb: bool = False, map=None
     ):
         """
         Return the energy trajectory for this System. This is the history
@@ -818,16 +818,19 @@ class System:
             traj = self._system.property(traj_propname)
 
         if to_pandas or to_alchemlyb:
-            ensemble = self.ensemble()
+            try:
+                return traj.to_pandas(to_alchemlyb=to_alchemlyb)
+            except Exception:
+                ensemble = self.ensemble()
 
-            if ensemble.is_constant_temperature():
-                temperature = ensemble.temperature()
-            else:
-                temperature = None
+                if ensemble.is_constant_temperature():
+                    temperature = ensemble.temperature()
+                else:
+                    temperature = None
 
-            return traj.to_pandas(
-                to_alchemlyb=to_alchemlyb, temperature=temperature
-            )
+                return traj.to_pandas(
+                    to_alchemlyb=to_alchemlyb, temperature=temperature
+                )
         else:
             return traj
 

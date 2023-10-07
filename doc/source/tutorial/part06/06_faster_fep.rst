@@ -347,7 +347,7 @@ ethane and methanol.
 ...     print("Dynamics complete")
 ...     print(d)
 ...     # stream the EnergyTrajectory to a sire save stream object
-...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
+...     sr.stream.save(d.commit().energy_trajectory(),
 ...                    f"energy_fast_{lambda_value:.2f}.s3")
 
 The simulation runs 33% faster than before, taking about 30 seconds per

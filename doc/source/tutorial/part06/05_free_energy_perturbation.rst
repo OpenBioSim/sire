@@ -75,7 +75,7 @@ This will let us subsequently calculate the free energy across λ using
 ...     print("Dynamics complete")
 ...     print(d)
 ...     # stream the EnergyTrajectory to a sire save stream object
-...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
+...     sr.stream.save(d.commit().energy_trajectory(),
 ...                    f"energy_{lambda_value:.2f}.s3")
 
 This is a very simple protocol for a free energy simulation, with simulation
@@ -257,7 +257,7 @@ instead of ``energy_{lambda}.s3``).
 ...     print("Dynamics complete")
 ...     print(d)
 ...     # stream the EnergyTrajectory to a sire save stream object
-...     sr.stream.save(d.commit().energy_trajectory(to_pandas=False),
+...     sr.stream.save(d.commit().energy_trajectory(),
 ...                    f"energy_gas_{lambda_value:.2f}.s3")
 
 .. note::

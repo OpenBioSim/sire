@@ -1,6 +1,7 @@
 
 #include "dimensions.h"
 #include "temperature.h"
+#include "generalunit.h"
 
 namespace SireUnits
 {
