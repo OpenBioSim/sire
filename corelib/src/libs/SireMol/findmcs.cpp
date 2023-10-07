@@ -30,15 +30,61 @@
 
 #include "sireglobal.h"
 
+#ifdef WIN32
+
+#include "evaluator.h"
+
+#include "SireError/errors.h"
+
+using namespace SireMol;
+using namespace SireBase;
+using namespace SireUnits::Dimension;
+
+QHash<AtomIdx, AtomIdx> Evaluator::findMCS(const MoleculeView &other, const AtomMatcher &matcher, const Time &timeout,
+                                           bool match_light_atoms, const PropertyMap &map0, const PropertyMap &map1,
+                                           int min_heavy_protons, bool verbose) const
+{
+    throw SireError::unsupported(QObject::tr(
+                                     "MCS searches are not supported on Windows because of incompatibilities "
+                                     "between boost::describe and the compiler used to build sire on Windows."),
+                                 CODELOC);
+    return QHash<AtomIdx, AtomIdx>();
+}
+
+QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &other, const AtomMatcher &matcher,
+                                                           const Time &timeout, bool match_light_atoms,
+                                                           const PropertyMap &map0, const PropertyMap &map1,
+                                                           int min_heavy_protons, bool verbose) const
+{
+    throw SireError::unsupported(QObject::tr(
+                                     "MCS searches are not supported on Windows because of incompatibilities "
+                                     "between boost::describe and the compiler used to build sire on Windows."),
+                                 CODELOC);
+    return QVector<QHash<AtomIdx, AtomIdx>>();
+}
+
+#else
+
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 #pragma clang diagnostic ignored "-Wdeprecated-builtins"
 #endif
-#include <boost/assert.hpp>
-#include <boost/graph/graphviz.hpp>
-#include <boost/graph/mcgregor_common_subgraphs.hpp>
+
+#include <boost/describe/detail/config.hpp>
+#include <boost/describe.hpp>
+
 #include <boost/graph/properties.hpp>
+
+// this header causes a compile error on Windows because of missing
+// boost_base_descriptor_fn, 'boost_public_member_descriptor_fn
+// boost_protected_member_descriptor_fn and
+// boost_private_member_descriptor_fn. This is because
+// it includes boost/describe.hpp which seems not to build...
+#include <boost/graph/mcgregor_common_subgraphs.hpp>
+
+#include <boost/assert.hpp>
+
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
@@ -1001,3 +1047,5 @@ QVector<QHash<AtomIdx, AtomIdx>> Evaluator::findMCSmatches(const MoleculeView &o
         return pvt_findMCSmatches(*this, other, matcher, timeout, false, map0, map1, false, true, min_heavy_protons,
                                   verbose);
 }
+
+#endif // ifdef WIN32
