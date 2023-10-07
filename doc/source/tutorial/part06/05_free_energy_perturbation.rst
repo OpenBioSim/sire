@@ -299,7 +299,14 @@ to methanol in the gas phase is about 3.0 kcal mol-1. Subtracting this
 from the free energy in water gives a relative hydration free energy of
 about -5.9 kcal mol-1, which is in reasonable agreement with
 `published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
-which are typically -6.1 kcal mol-1 to -6.2 kcal mol-1.
+which are in the range of -5.99 kcal mol-1 to -6.26 kcal mol-1.
+
+.. note::
+
+   The quoted published results are the difference in computed
+   absolute hydration free energies calculated using difference codes
+   and protocols for ethane and methanol, as reported in table 2
+   of the linked paper.
 
 .. note::
 

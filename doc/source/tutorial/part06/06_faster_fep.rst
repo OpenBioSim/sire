@@ -403,7 +403,7 @@ The relative hydration free energy calculated using the above script is:
 
 This is in good agreement with
 `published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
-which are typically -6.1 kcal mol-1 to -6.2 kcal mol-1.
+which are typically -5.99 kcal mol-1 to -6.26 kcal mol-1.
 
 .. note::
 
@@ -413,3 +413,63 @@ which are typically -6.1 kcal mol-1 to -6.2 kcal mol-1.
    we used very short simulations. Edit the script to increase the amount
    of simulation time per λ-value to get a more accurate result.
 
+This script can be edited to run a longer, more statistically accurate
+by setting ``run_time`` to a larger value, e.g. 250 ps. On my machine,
+this results in a simulation that takes 5 minutes per λ-window for the
+water phase at 100 ns day-1, and 45 seconds per λ-window for the vacuum
+phase, at 950 ns day-1 (total run time about 120 minutes). The resulting
+free energy is in remarkable agreement with that from the shorter
+simulation.
+
+::
+
+   Water phase:  -3.3027026336540715 kcal mol-1
+   Vacuum phase: 2.9761399609273567 kcal mol-1
+   Hydration free energy: -6.278842594581429 kcal mol-1
+
+We can check the convergence and get an error estimate as before. First
+the water phase;
+
+>>> import sire as sr
+>>> from glob import glob
+>>> from alchemlyb.convergence import forward_backward_convergence
+>>> from alchemlyb.visualisation import plot_convergence
+>>> dfs = []
+>>> s3files = glob("energy_water*.s3")
+>>> s3files.sort()
+>>> for s3 in s3files:
+...    dfs.append(sr.stream.load(s3).to_alchemlyb())
+>>> f = forward_backward_convergence(dfs, "bar")
+>>> plot_convergence(f)
+
+.. note::
+
+   It is important that the dataframes are passed to alchemlyb in
+   ascending order of λ-value, or else it will calculate the wrong
+   free energy. This is why we had to sort the result of globbing
+   the files, and why a file naming scheme was chosen that names
+   the files in ascending λ order.
+
+.. image:: images/06_06_01.jpg
+   :alt: Convergence of the free energy estimate for the water phase.
+
+And now the vacuum phase;
+
+>>> dfs = []
+>>> s3files = glob("energy_vacuum*.s3")
+>>> s3files.sort()
+>>> for s3 in s3files:
+...    dfs.append(sr.stream.load(s3).to_alchemlyb())
+>>> f = forward_backward_convergence(dfs, "bar")
+>>> plot_convergence(f)
+
+.. image:: images/06_06_02.jpg
+   :alt: Convergence of the free energy estimate for the vacuum phase.
+
+From the convergence plots and the output printed by alchemlyb, we can
+see that the error on the water leg is 0.02 kcal mol-1, and the error
+on the vacuum leg is 0.01 kcal mol-1. Summed in quadrature, this gives
+an error of 0.022 kcal mol-1 on the hydration free energy. This gives
+a final result of -6.279 ± 0.022 kcal mol-1, which is in good agreement with
+`published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
+which are in the range of -5.99 kcal mol-1 to -6.26 kcal mol-1.
