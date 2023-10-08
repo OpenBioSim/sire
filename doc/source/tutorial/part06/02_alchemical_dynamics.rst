@@ -42,6 +42,8 @@ For example, we could minimise our alchemical system at λ=0.5 using
 
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
+>>> for mol in mols.molecules("molecule property is_perturbable"):
+...     mols.update(mol.perturbation().link_to_reference().commit())
 >>> mols = mols.minimisation(lambda_value=0.5).run().commit()
 
 We can then run some dynamics at this λ-value using
@@ -50,7 +52,7 @@ We can then run some dynamics at this λ-value using
 >>> d.run("10ps", save_frequency="1ps")
 >>> mols = d.commit()
 >>> print(d)
-Dynamics(completed=10 ps, energy=-31213.8 kcal mol-1, speed=194.7 ns day-1)
+Dynamics(completed=10 ps, energy=-33741.4 kcal mol-1, speed=90.7 ns day-1)
 
 The result of dynamics is a trajectory run at this λ-value. You can view the
 trajectory as you would any other, using ``mols.view()``.
@@ -64,20 +66,21 @@ sampled by the molecules during the trajectory. You can access this
 energy trajectory via the :func:`~sire.system.System.energy_trajectory`
 function, e.g.
 
->>> df = mols.energy_trajectory()
->>> print(df)
-          kinetic     potential
-time
-1.0   4461.033219 -43523.347617
-2.0   6095.724385 -41312.514682
-3.0   6588.720597 -40003.958276
-4.0   6853.529444 -39283.565112
-5.0   7080.551573 -38722.021135
-6.0   7073.422652 -38677.147808
-7.0   7086.066481 -38527.530217
-8.0   7264.413320 -38408.505361
-9.0   7271.934837 -38589.671709
-10.0  7214.294605 -38444.356221
+>>> t = mols.energy_trajectory()
+>>> print(t)
+EnergyTrajectory( size=10
+time	lambda	0.5	kinetic	potential
+1	0.5	-45509.8	4402.32	-45509.8
+2	0.5	-43644.2	6105.82	-43644.2
+3	0.5	-42466.9	6635.76	-42466.9
+4	0.5	-41678.9	7006.96	-41678.9
+5	0.5	-41306.2	7019.09	-41306.2
+6	0.5	-41201.9	7098.73	-41201.9
+7	0.5	-41046.8	7229.69	-41046.8
+8	0.5	-40949.4	7172.58	-40949.4
+9	0.5	-40928.5	7234.13	-40928.5
+10	0.5	-40855.4	7226.52	-40855.4
+)
 
 .. note::
 
@@ -85,26 +88,31 @@ time
    and temperature control. The exact energies you get from dynamics will
    be different to what is shown here.
 
-By default, this trajectory is returned as a
-`pandas DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`__.
-You can get the underlying :class:`sire.maths.EnergyTrajectory` function
-by passing ``to_pandas=False``, e.g.
+The result is a :class:`sire.maths.EnergyTrajectory` object. If you want,
+you can also ask for the energy trajetory to be returned as a
+`pandas DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/frame.html>`__,
+by using the ``to_pandas`` argument, e.g.
 
->>> t = mols.energy_trajectory(to_pandas=False)
->>> print(t)
-EnergyTrajectory( size=10
-time	kinetic	potential
-1	4461.03	-43523.3
-2	6095.72	-41312.5
-3	6588.72	-40004
-4	6853.53	-39283.6
-5	7080.55	-38722
-6	7073.42	-38677.1
-7	7086.07	-38527.5
-8	7264.41	-38408.5
-9	7271.93	-38589.7
-10	7214.29	-38444.4
-)
+>>> df = mols.energy_trajectory(to_pandas=True)
+>>> print(df)
+      lambda           0.5      kinetic     potential
+time
+1.0      0.5 -45509.784041  4402.317703 -45509.784041
+2.0      0.5 -43644.165016  6105.819473 -43644.165016
+3.0      0.5 -42466.942263  6635.760728 -42466.942263
+4.0      0.5 -41678.910475  7006.955030 -41678.910475
+5.0      0.5 -41306.210905  7019.094675 -41306.210905
+6.0      0.5 -41201.944653  7098.727370 -41201.944653
+7.0      0.5 -41046.829930  7229.685671 -41046.829930
+8.0      0.5 -40949.435093  7172.578640 -40949.435093
+9.0      0.5 -40928.462340  7234.130710 -40928.462340
+10.0     0.5 -40855.386336  7226.516672 -40855.386336
+
+.. note::
+
+   You could also have obtained a DataFrame by calling the
+   :meth:`~sire.maths.EnergyTrajectory.to_pandas` function of
+   the :class:`~sire.maths.EnergyTrajectory` object.
 
 You calculate free energies by evaluating the potential energy for different
 values of λ during dynamics. You can control which values of λ are used
@@ -113,28 +121,29 @@ values of λ during dynamics. You can control which values of λ are used
 >>> d = mols.dynamics(lambda_value=0.5, timestep="4fs", temperature="25oC")
 >>> d.run("10ps", save_frequency="1ps", lambda_windows=[0.4, 0.6])
 >>> mols = d.commit()
->>> print(mols.energy_trajectory())
-               0.4           0.5           0.6      kinetic     potential
+>>> print(mols.energy_trajectory().to_pandas())
+      lambda           0.4           0.5           0.6      kinetic     potential
 time
-1.0            NaN           NaN           NaN  4461.033219 -43523.347617
-2.0            NaN           NaN           NaN  6095.724385 -41312.514682
-3.0            NaN           NaN           NaN  6588.720597 -40003.958276
-4.0            NaN           NaN           NaN  6853.529444 -39283.565112
-5.0            NaN           NaN           NaN  7080.551573 -38722.021135
-6.0            NaN           NaN           NaN  7073.422652 -38677.147808
-7.0            NaN           NaN           NaN  7086.066481 -38527.530217
-8.0            NaN           NaN           NaN  7264.413320 -38408.505361
-9.0            NaN           NaN           NaN  7271.934837 -38589.671709
-10.0           NaN           NaN           NaN  7214.294605 -38444.356221
-11.0 -40712.392040 -40712.520657 -40712.684409  6154.441842 -40712.520657
-12.0 -39714.124832 -39714.253449 -39714.327574  6611.854460 -39714.253449
-13.0 -39152.132719 -39152.769223 -39153.291484  6924.754530 -39152.769223
-14.0 -38791.263933 -38791.601680 -38791.944687  7027.605561 -38791.601680
-15.0 -38568.331333 -38568.519701 -38568.683453  7040.809156 -38568.519701
-16.0 -38558.203465 -38558.302206 -38558.376331  7166.843369 -38558.302206
-17.0 -38605.586352 -38606.133229 -38606.595738  7195.020226 -38606.133229
-18.0 -38618.731667 -38618.412148 -38618.068013  7170.302626 -38618.412148
-19.0 -38611.651122 -38612.317502 -38612.989142  7182.904255 -38612.317502
+1.0      0.5           NaN -45509.784041           NaN  4402.317703 -45509.784041
+2.0      0.5           NaN -43644.165016           NaN  6105.819473 -43644.165016
+3.0      0.5           NaN -42466.942263           NaN  6635.760728 -42466.942263
+4.0      0.5           NaN -41678.910475           NaN  7006.955030 -41678.910475
+5.0      0.5           NaN -41306.210905           NaN  7019.094675 -41306.210905
+6.0      0.5           NaN -41201.944653           NaN  7098.727370 -41201.944653
+7.0      0.5           NaN -41046.829930           NaN  7229.685671 -41046.829930
+8.0      0.5           NaN -40949.435093           NaN  7172.578640 -40949.435093
+9.0      0.5           NaN -40928.462340           NaN  7234.130710 -40928.462340
+10.0     0.5           NaN -40855.386336           NaN  7226.516672 -40855.386336
+11.0     0.5 -43210.778752 -43211.624385 -43211.937516  6219.582732 -43211.624385
+12.0     0.5 -42405.359296 -42405.219032 -42404.934648  6807.796036 -42405.219032
+13.0     0.5 -41724.163073 -41724.470944 -41724.664572  6942.723457 -41724.470944
+14.0     0.5 -41282.749354 -41282.638965 -41282.324706  7174.870863 -41282.638965
+15.0     0.5 -41091.395386 -41090.926489 -41090.283597  7121.938171 -41090.926489
+16.0     0.5 -41020.530186 -41020.300294 -41019.896407  7243.171748 -41020.300294
+17.0     0.5 -41027.939363 -41027.739347 -41027.365337  7112.568694 -41027.739347
+18.0     0.5 -40947.962069 -40948.210188 -40948.254438  7086.990231 -40948.210188
+19.0     0.5 -41063.162834 -41064.038343 -41064.470977  7173.505327 -41064.038343
+20.0     0.5 -40997.466132 -40997.774003 -40997.907880  7211.324644 -40997.774003
 
 This has run a new trajectory, evaluating the potential energy at the
 simulation λ-value (0.5) as well as at λ-windows 0.4 and 0.6. You can pass in
@@ -166,20 +175,20 @@ but saving energies every 20 femtoseconds.
 >>> d.run("10ps", frame_frequency="1ps", energy_frequency="20fs",
 ...       lambda_windows=[0.4, 0.6])
 >>> mols = d.commit()
->>> print(mols.energy_trajectory())
-                0.4           0.5           0.6      kinetic     potential
+>>> print(mols.energy_trajectory().to_pandas())
+       lambda           0.4           0.5           0.6      kinetic     potential
 time
-1.00            NaN           NaN           NaN  4461.033219 -43523.347617
-2.00            NaN           NaN           NaN  6095.724385 -41312.514682
-3.00            NaN           NaN           NaN  6588.720597 -40003.958276
-4.00            NaN           NaN           NaN  6853.529444 -39283.565112
-5.00            NaN           NaN           NaN  7080.551573 -38722.021135
-...             ...           ...           ...          ...           ...
-29.92 -38389.435539 -38389.414777 -38389.279773  7332.296186 -38389.414777
-29.94 -38353.913312 -38354.131556 -38354.235557  7301.874742 -38354.131556
-29.96 -38371.599736 -38371.549099 -38371.384218  7293.633958 -38371.549099
-29.98 -38253.351648 -38253.271135 -38253.195882  7186.511174 -38253.271135
-30.00 -38305.305520 -38305.195131 -38305.090002  7234.784841 -38305.195131
+1.00      0.5           NaN -45509.784041           NaN  4402.317703 -45509.784041
+2.00      0.5           NaN -43644.165016           NaN  6105.819473 -43644.165016
+3.00      0.5           NaN -42466.942263           NaN  6635.760728 -42466.942263
+4.00      0.5           NaN -41678.910475           NaN  7006.955030 -41678.910475
+5.00      0.5           NaN -41306.210905           NaN  7019.094675 -41306.210905
+...       ...           ...           ...           ...          ...           ...
+29.92     0.5 -40892.930998 -40892.850485 -40892.506350  7306.237779 -40892.850485
+29.94     0.5 -40890.720195 -40891.326823 -40891.729581  7314.180669 -40891.326823
+29.96     0.5 -40869.209679 -40868.920036 -40868.426522  7305.782760 -40868.920036
+29.98     0.5 -40828.250071 -40828.378688 -40828.243683  7270.175960 -40828.378688
+30.00     0.5 -40764.913551 -40764.504405 -40763.921264  7140.896560 -40764.504405
 
 Controlling perturbations with a λ-schedule
 -------------------------------------------

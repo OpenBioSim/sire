@@ -168,17 +168,17 @@ DataFrame...
 >>> print(df)
                          0.00          0.05  0.10  0.15  0.20  0.25  0.30  0.35  ...  0.65  0.70  0.75  0.80  0.85  0.90          0.95          1.00
 time fep-lambda                                                                  ...
-2.1  0.0        -39086.631401 -39087.128936   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.2  0.0        -39061.954059 -39062.600973   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.3  0.0        -38843.084556 -38843.492464   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.4  0.0        -38841.351765 -38841.968803   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
-2.5  0.0        -38809.474375 -38810.061537   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.1  0.0        -39300.750665 -39301.636585   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.2  0.0        -39231.737759 -39232.504175   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.3  0.0        -38982.663906 -38982.683430   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.4  0.0        -38950.308505 -38950.357904   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
+2.5  0.0        -38732.275522 -38733.221193   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN           NaN           NaN
 ...                       ...           ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...           ...           ...
-26.6 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37433.120745 -37433.277280
-26.7 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37306.925716 -37307.769393
-26.8 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37447.401338 -37447.826754
-26.9 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37415.822705 -37416.427376
-27.0 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37371.756022 -37372.181439
+26.6 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37208.485229 -37208.880770
+26.7 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37332.051194 -37332.476611
+26.8 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37276.392733 -37276.609020
+26.9 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37234.238097 -37234.603762
+27.0 1.0                  NaN           NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN -37268.684798 -37269.319345
 
 .. note::
 
@@ -201,7 +201,7 @@ Now we can tell alchemlyb to calculate the free energy using the BAR method.
 >>> b = BAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])
--2.826669414062424
+-3.009332126465953
 
 You can get a convergence plot, showing how the free energy changes as
 a function of the simulation length using the ``convergence_plot`` function.
@@ -215,7 +215,7 @@ a function of the simulation length using the ``convergence_plot`` function.
    :alt: Convergence of the free energy estimate as a function of the fraction of simulation length
 
 All of this shows that the relative free energy for the perturbation of
-ethane to methanol in water is about -2.8 kcal mol-1.
+ethane to methanol in water is about -3.0 kcal mol-1.
 
 To get the relative hydration free energy, we would need to complete the
 cycle by calculating the relative free energy for the perturbation in the
@@ -277,27 +277,27 @@ switch to analysing the ``energy_gas_{lambda}.s3`` files instead.
 >>> print(df)
                      0.00      0.05  0.10  0.15  0.20  0.25  0.30  0.35  0.40  ...  0.60  0.65  0.70  0.75  0.80  0.85  0.90      0.95      1.00
 time fep-lambda                                                                ...
-2.1  0.0         4.085486  4.142311   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
-2.2  0.0         3.664548  3.540637   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
-2.3  0.0         4.288558  4.217284   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
-2.4  0.0         5.630108  5.656710   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
-2.5  0.0         5.823004  5.901361   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.1  0.0         6.966376  7.115377   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.2  0.0         6.614100  6.434525   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.3  0.0         6.782235  6.831925   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.4  0.0         4.196341  4.227257   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
+2.5  0.0         4.141862  4.205784   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN       NaN       NaN
 ...                   ...       ...   ...   ...   ...   ...   ...   ...   ...  ...   ...   ...   ...   ...   ...   ...   ...       ...       ...
-26.6 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  9.700262  9.410045
-26.7 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.392478  8.604776
-26.8 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  9.079360  9.535467
-26.9 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.791467  8.723334
-27.0 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.933618  9.388087
+26.6 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  8.246601  8.707174
+26.7 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  7.169596  7.100342
+26.8 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  6.422485  6.466972
+26.9 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  5.892950  6.129184
+27.0 1.0              NaN       NaN   NaN   NaN   NaN   NaN   NaN   NaN   NaN  ...   NaN   NaN   NaN   NaN   NaN   NaN   NaN  7.487893  7.618827
 >>> from alchemlyb.estimators import BAR
 >>> b = BAR()
 >>> b.fit(df)
 >>> print(b.delta_f_.loc[0.00, 1.00])
-3.049637014744972
+3.186998316374265
 
 This shows that the relative free energy for the perturbation of ethane
-to methanol in the gas phase is about 3.0 kcal mol-1. Subtracting this
+to methanol in the gas phase is about 3.2 kcal mol-1. Subtracting this
 from the free energy in water gives a relative hydration free energy of
-about -5.9 kcal mol-1, which is in reasonable agreement with
+about -6.2 kcal mol-1, which is in reasonable agreement with
 `published results from other codes <https://www.pure.ed.ac.uk/ws/portalfiles/portal/75900057/20181010_Michel_reprod.pdf>`__
 which are in the range of -5.99 kcal mol-1 to -6.26 kcal mol-1.
 
