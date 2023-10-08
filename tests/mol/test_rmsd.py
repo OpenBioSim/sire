@@ -4,7 +4,7 @@ import pytest
 import sys
 
 
-@pytest.skipif(sys.platform == "win32", reason="Does not run on windows")
+@pytest.mark.skipif(sys.platform == "win32", reason="Does not run on windows")
 def test_rmsd(ala_trr, ala_mols):
     mols = ala_trr.clone()
     mols2 = ala_mols.clone()
