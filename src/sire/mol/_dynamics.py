@@ -1350,7 +1350,7 @@ class Dynamics:
         return self._d.current_kinetic_energy()
 
     def energy_trajectory(
-        self, to_pandas: bool = True, to_alchemlyb: bool = False
+        self, to_pandas: bool = False, to_alchemlyb: bool = False
     ):
         """
         Return the energy trajectory. This is the trajectory of
