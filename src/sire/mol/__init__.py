@@ -1405,19 +1405,25 @@ def _dynamics(
     save_frequency=None,
     energy_frequency=None,
     frame_frequency=None,
+    save_velocities=None,
     constraint=None,
+    perturbable_constraint=None,
+    include_constrained_energies: bool = True,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
+    ignore_perturbations=None,
     temperature=None,
     pressure=None,
+    vacuum=None,
     shift_delta=None,
     coulomb_power=None,
     restraints=None,
     fixed=None,
+    platform=None,
     device=None,
+    precision=None,
     map=None,
-    **kwargs,
 ):
     """
     Return a Dynamics object that can be used to perform
@@ -1452,12 +1458,31 @@ def _dynamics(
         to save frames during the trajectory. This can be overridden
         by setting frame_frequency during an individual run.
 
+    save_velocities: bool
+        Whether or not to save velocities when saving trajectory frames
+        during the simulation. This defaults to False, as velocity
+        trajectories aren't often needed, and they double the amount
+        of space that is required for a trajectory.
+
     constraint: str
         The type of constraint to use for bonds and/or angles, e.g.
         `h-bonds`, `bonds` etc.
         See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
         for the full list of options. This will be automatically
         guessed from the timestep if it isn't set.
+
+    perturbable_constraint: str
+        The type of constraint to use for perturbable bonds and/or angles,
+        e.g. `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This equal the value of `constraint`
+        if it isn't set.
+
+    include_constrained_energies: bool
+        Whether or not to include the energies of the constrained bonds
+        and angles. If this is False, then the internal bond or angle
+        energy of the constrained degrees of freedom are not included
+        in the total energy, and their forces are not evaluated.
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1478,6 +1503,14 @@ def _dynamics(
         use the coordinates of the perturbed molecule as the
         starting point.
 
+    ignore_perturbations: bool
+        Whether or not to ignore perturbations. If this is True, then
+        the perturbation will be ignored, and the simulation will
+        be run using the properties of the reference molecule
+        (or the perturbed molecule if swap_end_states is True). This
+        is useful if you just want to run standard molecular dynamics
+        of the reference or perturbed states.
+
     temperature: temperature
         The temperature at which to run the simulation. A
         microcanonical (NVE) simulation will be run if you don't
@@ -1487,6 +1520,12 @@ def _dynamics(
         The pressure at which to run the simulation. A
         microcanonical (NVE) or canonical (NVT) simulation will be
         run if the pressure is not set.
+
+    vacuum: bool (optional)
+        Whether or not to run the simulation in vacuum. If this is
+        set to `True`, then the simulation space automatically be
+        replaced by a `sire.vol.Cartesian` space, and the
+        simulation run in vacuum.
 
     shift_delta: length
         The shift_delta parameter that controls the electrostatic
@@ -1509,10 +1548,18 @@ def _dynamics(
         that should be fixed in place during the simulation. These
         atoms will not be moved by dynamics.
 
+    platform: str
+        The name of the OpenMM platform on which to run the dynamics,
+        e.g. "CUDA", "OpenCL", "Metal" etc.
+
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
         the simulation. This would be CUDA_DEVICE_ID or similar
         if CUDA was used. This can be any valid OpenMM device string
+
+    precision: str
+        The desired precision for the simulation (e.g. `single`,
+        `mixed` or `double`)
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -1524,7 +1571,12 @@ def _dynamics(
     from ..system import System
     from .. import u
 
-    map = create_map(map, kwargs)
+    map = create_map(map)
+
+    if vacuum is True:
+        from ..vol import Cartesian
+
+        map.set("space", Cartesian())
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
@@ -1538,7 +1590,12 @@ def _dynamics(
         # space is not a shared property, so may be lost when we
         # convert to molecules. Make sure this doens't happen by
         # adding the space directly to the property map
-        map.set("space", view.property(map["space"]))
+        try:
+            map.set("space", view.property(map["space"]))
+        except Exception:
+            from ..vol import Cartesian
+
+            map.set("space", Cartesian())
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1566,15 +1623,18 @@ def _dynamics(
     if save_frequency is None and not map.specified("save_frequency"):
         from ..units import picosecond
 
-        save_frequency = 25 * picosecond
-    else:
-        save_frequency = u(save_frequency)
+        map.set("save_frequency", 25 * picosecond)
+    elif save_frequency is not None:
+        map.set("save_frequency", u(save_frequency))
 
     if energy_frequency is not None:
-        map.set("energy_frequency", energy_frequency)
+        map.set("energy_frequency", u(energy_frequency))
 
     if frame_frequency is not None:
-        map.set("frame_frequency", frame_frequency)
+        map.set("frame_frequency", u(frame_frequency))
+
+    if save_velocities is not None:
+        map.set("save_velocities", save_velocities)
 
     if constraint is None and not map.specified("constraint"):
         from ..units import femtosecond
@@ -1583,17 +1643,24 @@ def _dynamics(
             # it must be in the map
             timestep = map["timestep"].value()
 
-        if timestep > 2 * femtosecond:
+        if timestep > 4 * femtosecond:
             # need constraint on everything
             constraint = "bonds-h-angles"
 
+        elif timestep > 2 * femtosecond:
+            # need constraint on everything
+            constraint = "h-bonds-h-angles"
+
         elif timestep > 1 * femtosecond:
             # need it just on H bonds and angles
-            constraint = "h-bonds-h-angles"
+            constraint = "h-bonds"
 
         else:
             # can get away with no constraints
             constraint = "none"
+
+    if perturbable_constraint is not None:
+        perturbable_constraint = str(perturbable_constraint).lower()
 
     if temperature is not None:
         temperature = u(temperature)
@@ -1606,18 +1673,28 @@ def _dynamics(
     if device is not None:
         map.set("device", str(device))
 
+    if precision is not None:
+        map.set("precision", str(precision).lower())
+
+    if include_constrained_energies is not None:
+        map.set("include_constrained_energies", include_constrained_energies)
+
+    if platform is not None:
+        map.set("platform", str(platform))
+
     return Dynamics(
         view,
         cutoff=cutoff,
         cutoff_type=cutoff_type,
         timestep=timestep,
-        save_frequency=save_frequency,
         constraint=str(constraint),
+        perturbable_constraint=perturbable_constraint,
         schedule=schedule,
         lambda_value=lambda_value,
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
+        ignore_perturbations=ignore_perturbations,
         restraints=restraints,
         fixed=fixed,
         map=map,
@@ -1629,16 +1706,21 @@ def _minimisation(
     cutoff=None,
     cutoff_type=None,
     constraint=None,
+    perturbable_constraint=None,
+    include_constrained_energies: bool = True,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
+    ignore_perturbations=None,
+    vacuum=None,
     shift_delta=None,
     coulomb_power=None,
+    platform=None,
     device=None,
+    precision=None,
     restraints=None,
     fixed=None,
     map=None,
-    **kwargs,
 ):
     """
     Return a Minimisation object that can be used to perform
@@ -1656,8 +1738,20 @@ def _minimisation(
         The type of constraint to use for bonds and/or angles, e.g.
         `h-bonds`, `bonds` etc.
         See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
-        for the full list of options. This will be automatically
-        guessed from the timestep if it isn't set.
+        for the full list of options. This is `none` if it is not set.
+
+    perturbable_constraint: str
+        The type of constraint to use for perturbable bonds and/or angles,
+        e.g. `h-bonds`, `bonds` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This equal the value of `constraint`
+        if it isn't set.
+
+    include_constrained_energies: bool
+        Whether or not to include the energies of the perturbable bonds
+        and angles. If this is False, then the internal bond or angle
+        energy of the perturbable degrees of freedom are not included
+        in the total energy, and their forces are not evaluated.
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1677,6 +1771,20 @@ def _minimisation(
         while the reference molecule will be at lambda=1). This will
         use the coordinates of the perturbed molecule as the
         starting point.
+
+    ignore_perturbations: bool
+        Whether or not to ignore perturbations. If this is True, then
+        the perturbation will be ignored, and the simulation will
+        be run using the properties of the reference molecule
+        (or the perturbed molecule if swap_end_states is True). This
+        is useful if you just want to run standard molecular dynamics
+        of the reference or perturbed states.
+
+    vacuum: bool (optional)
+        Whether or not to run the simulation in vacuum. If this is
+        set to `True`, then the simulation space automatically be
+        replaced by a `sire.vol.Cartesian` space, and the
+        simulation run in vacuum.
 
     shift_delta: length
         The shift_delta parameter that controls the electrostatic
@@ -1699,10 +1807,18 @@ def _minimisation(
         that should be fixed in place during the simulation. These
         atoms will not be moved by minimisation.
 
+    platform: str
+        The name of the OpenMM platform on which to run the dynamics,
+        e.g. "CUDA", "OpenCL", "Metal" etc.
+
     device: str or int
         The ID of the GPU (or accelerator) used to accelerate
         minimisation. This would be CUDA_DEVICE_ID or similar
         if CUDA was used. This can be any valid OpenMM device string
+
+    precision: str
+        The desired precision for the simulation (e.g. `single`,
+        `mixed` or `double`)
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -1714,7 +1830,12 @@ def _minimisation(
     from ..system import System
     from .. import u
 
-    map = create_map(map, kwargs)
+    map = create_map(map)
+
+    if vacuum is True:
+        from ..vol import Cartesian
+
+        map.set("space", Cartesian())
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
@@ -1728,7 +1849,12 @@ def _minimisation(
         # space is not a shared property, so may be lost when we
         # convert to molecules. Make sure this doens't happen by
         # adding the space directly to the property map
-        map.set("space", view.property(map["space"]))
+        try:
+            map.set("space", view.property(map["space"]))
+        except Exception:
+            from ..vol import Cartesian
+
+            map.set("space", Cartesian())
 
     # Set default values if these have not been set
     if cutoff is None and not map.specified("cutoff"):
@@ -1749,8 +1875,20 @@ def _minimisation(
     if device is not None:
         map.set("device", str(device))
 
+    if precision is not None:
+        map.set("precision", str(precision).lower())
+
     if constraint is not None:
-        map.set("constraint", str(constraint))
+        map.set("constraint", str(constraint).lower())
+
+    if perturbable_constraint is not None:
+        map.set("perturbable_constraint", str(perturbable_constraint).lower())
+
+    if include_constrained_energies is not None:
+        map.set("include_constrained_energies", include_constrained_energies)
+
+    if platform is not None:
+        map.set("platform", str(platform))
 
     return Minimisation(
         view,
@@ -1759,6 +1897,7 @@ def _minimisation(
         schedule=schedule,
         lambda_value=lambda_value,
         swap_end_states=swap_end_states,
+        ignore_perturbations=ignore_perturbations,
         shift_delta=shift_delta,
         coulomb_power=coulomb_power,
         restraints=restraints,

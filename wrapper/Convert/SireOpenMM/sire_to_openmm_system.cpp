@@ -752,6 +752,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.addLever("sigma");
     lambda_lever.addLever("epsilon");
 
+    // and the exceptions
+    lambda_lever.addLever("charge_scale");
+    lambda_lever.addLever("lj_scale");
+
     // Do the same for the bond, angle and torsion forces
     lambda_lever.setForceIndex("bond", system.addForce(bondff));
     lambda_lever.addLever("bond_length");
@@ -763,7 +767,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     lambda_lever.setForceIndex("torsion", system.addForce(dihff));
     lambda_lever.addLever("torsion_phase");
-    lambda_lever.addLever("torsion_periodicity");
     lambda_lever.addLever("torsion_k");
 
     ///
@@ -1256,65 +1259,23 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                               std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
         }
 
-        // now add the constraints
-        if (any_perturbable and mol.isPerturbable())
+        for (const auto &constraint : mol.constraints)
         {
-            // we may want to select out constraints that involve
-            // perturbing atoms... For now we will include them all,
-            // but will use the current coordinates to set the
-            // constrained values, rather than using the
-            // forcefield parameters. This will work as long
-            // as the user has minimised the system at the desired
-            // lambda value before running dynamics...
-            for (const auto &constraint : mol.constraints)
+            const auto atom0 = std::get<0>(constraint);
+            const auto atom1 = std::get<1>(constraint);
+
+            const auto mass0 = system.getParticleMass(atom0 + start_index);
+            const auto mass1 = system.getParticleMass(atom1 + start_index);
+
+            if (mass0 != 0 and mass1 != 0)
             {
-                const auto atom0 = std::get<0>(constraint);
-                const auto atom1 = std::get<1>(constraint);
 
-                const auto mass0 = system.getParticleMass(atom0 + start_index);
-                const auto mass1 = system.getParticleMass(atom1 + start_index);
-
-                if (mass0 != 0 and mass1 != 0)
-                {
-                    // we can add the constraint
-                    const auto coords0 = mol.coords[atom0];
-                    const auto coords1 = mol.coords[atom1];
-
-                    const auto delta = coords1 - coords0;
-
-                    const auto length = std::sqrt((delta[0] * delta[0]) +
-                                                  (delta[1] * delta[1]) +
-                                                  (delta[2] * delta[2]));
-
-                    system.addConstraint(
-                        atom0 + start_index,
-                        atom1 + start_index,
-                        length);
-                }
-                // else we will need to think about how to constrain bonds
-                // involving fixed atoms. Could we fix the other atom too?
+                system.addConstraint(atom0 + start_index,
+                                     atom1 + start_index,
+                                     std::get<2>(constraint));
             }
-        }
-        else
-        {
-            for (const auto &constraint : mol.constraints)
-            {
-                const auto atom0 = std::get<0>(constraint);
-                const auto atom1 = std::get<1>(constraint);
-
-                const auto mass0 = system.getParticleMass(atom0 + start_index);
-                const auto mass1 = system.getParticleMass(atom1 + start_index);
-
-                if (mass0 != 0 and mass1 != 0)
-                {
-
-                    system.addConstraint(atom0 + start_index,
-                                         atom1 + start_index,
-                                         std::get<2>(constraint));
-                }
-                // else we will need to think about how to constrain bonds
-                // involving fixed atoms. Could we fix the other atom too?
-            }
+            // else we will need to think about how to constrain bonds
+            // involving fixed atoms. Could we fix the other atom too?
         }
 
         start_index += mol.masses.count();
@@ -1437,10 +1398,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                               std::get<4>(p), true);
                 }
 
+                // these are the indexes of the exception in the
+                // non-bonded forcefields and also the ghost-14 forcefield
                 exception_idxs[j] = std::make_pair(idx, nbidx);
 
-                // remove this interaction from the ghost forcefields
-                if (ghost_ghostff != 0)
+                // remove this interaction from the ghost forcefields, only
+                // if it involves ghost atoms. If it doens't involve ghost atoms
+                // then we cannot remove it, because OpenMM doesn't support
+                // having a non-zero exception in NonbondedForce while having
+                // exclusions between the same atoms in CustomNonbondedForce
+                if (ghost_ghostff != 0 and (atom0_is_ghost or atom1_is_ghost))
                 {
                     ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
                     ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));

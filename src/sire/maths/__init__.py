@@ -170,23 +170,133 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
 
 if not hasattr(EnergyTrajectory, "to_pandas"):
 
-    def _to_pandas(obj):
+    def _to_pandas(obj, temperature=None, to_alchemlyb: bool = False):
         """
         Return the energy trajectory as a pandas DataFrame
+
+        Parameters
+        ----------
+
+        temperature: temperature
+            The temperature of the simulation. If this is
+            not set then the temperature from this table's
+            `ensemble` or `temperature` property will be
+            used. Note that you only need a temperature
+            if you are converting to alchemlyb format.
+
+        to_alchemlyb: bool
+            This will format the DataFrame in a way that is
+            compatible with alchemlyb. This will allow the
+            DataFrame to be used as part of an alchemlyb
+            free energy calculation.
         """
         import pandas as pd
         from ..units import picosecond, kcal_per_mol
 
         data = {}
 
-        data["time"] = obj.times(picosecond.get_default())
+        if to_alchemlyb:
+            time_unit = picosecond
+            time_unit_string = "ps"
+
+            energy_unit = kcal_per_mol
+            energy_unit_string = "kcal/mol"
+
+            if temperature is None:
+                # look for the temperature in the ensemble property
+                if obj.has_property("ensemble"):
+                    temperature = obj.property("ensemble").temperature()
+
+                # ok, try the temperature property
+                if temperature is None and obj.has_property("temperature"):
+                    temperature = obj.property("temperature")
+
+                if temperature is None:
+                    raise ValueError(
+                        "You must specify the temperature of the simulation "
+                        "when converting to alchemlyb format, or ensure that "
+                        "the trajectory has an ensemble or temperature "
+                        "property."
+                    )
+        else:
+            time_unit = picosecond.get_default()
+            time_unit_string = time_unit.unit_string()
+
+            energy_unit = kcal_per_mol.get_default()
+            energy_unit_string = energy_unit.unit_string()
+
+        data["time"] = obj.times(time_unit)
+
+        keys = obj.label_keys()
+        keys.sort()
+
+        for key in keys:
+            if to_alchemlyb and key == "lambda":
+                data["fep-lambda"] = obj.labels_as_numbers(key)
+            else:
+                # use float keys if possible
+                try:
+                    column_header = float(key)
+                except Exception:
+                    column_header = key
+
+                try:
+                    data[column_header] = obj.labels_as_numbers(key)
+                except Exception:
+                    data[column_header] = obj.labels(key)
 
         keys = obj.keys()
         keys.sort()
 
-        for key in keys:
-            data[str(key)] = obj.energies(key, kcal_per_mol.get_default())
+        if to_alchemlyb:
+            keys.remove("kinetic")
+            keys.remove("potential")
 
-        return pd.DataFrame(data).set_index("time")
+        for key in keys:
+            # use float keys if possible
+            try:
+                column_header = float(key)
+            except Exception:
+                column_header = key
+
+            data[column_header] = obj.energies(key, energy_unit)
+
+        if to_alchemlyb:
+            df = pd.DataFrame(data).set_index(["time", "fep-lambda"])
+        else:
+            df = pd.DataFrame(data).set_index("time")
+
+        if temperature is not None:
+            from .. import u
+            from ..units import kelvin
+
+            df.attrs["temperature"] = u(temperature).to(kelvin)
+
+        df.attrs["energy_unit"] = energy_unit_string
+        df.attrs["time_unit"] = time_unit_string
+
+        return df
+
+    def _to_alchemlyb(obj, temperature=None):
+        """
+        Return the energy trajectory as an alchemlyb-formatted pandas DataFrame
+
+        Parameters
+        ----------
+
+        temperature: temperature
+            The temperature of the simulation. If this is
+            not set then the temperature from this table's
+            `ensemble` or `temperature` property will be
+            used.
+
+        Returns
+        -------
+
+        pandas.DataFrame
+            A pandas DataFrame that is compatible with alchemlyb.
+        """
+        return obj.to_pandas(temperature=temperature, to_alchemlyb=True)
 
     EnergyTrajectory.to_pandas = _to_pandas
+    EnergyTrajectory.to_alchemlyb = _to_alchemlyb

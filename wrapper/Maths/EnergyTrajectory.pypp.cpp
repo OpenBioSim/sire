@@ -3,6 +3,7 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
+#include "Helpers/clone_const_reference.hpp"
 #include "EnergyTrajectory.pypp.hpp"
 
 namespace bp = boost::python;
@@ -38,6 +39,18 @@ void register_EnergyTrajectory_class(){
         EnergyTrajectory_exposer_t EnergyTrajectory_exposer = EnergyTrajectory_exposer_t( "EnergyTrajectory", "This class holds the trajectory of energies, organised by\ntimestep the energy was recorded and the types of energy\n(e.g. kinetic, potential, values at different lambda windows)\n", bp::init< >("") );
         bp::scope EnergyTrajectory_scope( EnergyTrajectory_exposer );
         EnergyTrajectory_exposer.def( bp::init< SireMaths::EnergyTrajectory const & >(( bp::arg("other") ), "") );
+        { //::SireMaths::EnergyTrajectory::clearProperties
+        
+            typedef void ( ::SireMaths::EnergyTrajectory::*clearProperties_function_type)(  ) ;
+            clearProperties_function_type clearProperties_function_value( &::SireMaths::EnergyTrajectory::clearProperties );
+            
+            EnergyTrajectory_exposer.def( 
+                "clearProperties"
+                , clearProperties_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMaths::EnergyTrajectory::count
         
             typedef int ( ::SireMaths::EnergyTrajectory::*count_function_type)(  ) const;
@@ -86,7 +99,7 @@ void register_EnergyTrajectory_class(){
                 , get_function_value
                 , ( bp::arg("i") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the time and energy components at the ith row.\n  Values are returned in internal units\n" );
         
         }
         { //::SireMaths::EnergyTrajectory::get
@@ -98,6 +111,45 @@ void register_EnergyTrajectory_class(){
                 "get"
                 , get_function_value
                 , ( bp::arg("i"), bp::arg("time_unit"), bp::arg("energy_unit") )
+                , bp::release_gil_policy()
+                , "Return the time and energy components at the ith row.\n  Values are returned in the specified units\n" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::getLabels
+        
+            typedef ::QHash< QString, QString > ( ::SireMaths::EnergyTrajectory::*getLabels_function_type)( int ) const;
+            getLabels_function_type getLabels_function_value( &::SireMaths::EnergyTrajectory::getLabels );
+            
+            EnergyTrajectory_exposer.def( 
+                "getLabels"
+                , getLabels_function_value
+                , ( bp::arg("i") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::getLabelsAsNumbers
+        
+            typedef ::QHash< QString, double > ( ::SireMaths::EnergyTrajectory::*getLabelsAsNumbers_function_type)( int ) const;
+            getLabelsAsNumbers_function_type getLabelsAsNumbers_function_value( &::SireMaths::EnergyTrajectory::getLabelsAsNumbers );
+            
+            EnergyTrajectory_exposer.def( 
+                "getLabelsAsNumbers"
+                , getLabelsAsNumbers_function_value
+                , ( bp::arg("i") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::hasProperty
+        
+            typedef bool ( ::SireMaths::EnergyTrajectory::*hasProperty_function_type)( ::SireBase::PropertyName const & ) ;
+            hasProperty_function_type hasProperty_function_value( &::SireMaths::EnergyTrajectory::hasProperty );
+            
+            EnergyTrajectory_exposer.def( 
+                "hasProperty"
+                , hasProperty_function_value
+                , ( bp::arg("key") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -138,6 +190,44 @@ void register_EnergyTrajectory_class(){
                 , "Return all of the energy keys" );
         
         }
+        { //::SireMaths::EnergyTrajectory::labelKeys
+        
+            typedef ::QStringList ( ::SireMaths::EnergyTrajectory::*labelKeys_function_type)(  ) const;
+            labelKeys_function_type labelKeys_function_value( &::SireMaths::EnergyTrajectory::labelKeys );
+            
+            EnergyTrajectory_exposer.def( 
+                "labelKeys"
+                , labelKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::labels
+        
+            typedef ::QVector< QString > ( ::SireMaths::EnergyTrajectory::*labels_function_type)( ::QString const & ) const;
+            labels_function_type labels_function_value( &::SireMaths::EnergyTrajectory::labels );
+            
+            EnergyTrajectory_exposer.def( 
+                "labels"
+                , labels_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::labelsAsNumbers
+        
+            typedef ::QVector< double > ( ::SireMaths::EnergyTrajectory::*labelsAsNumbers_function_type)( ::QString const & ) const;
+            labelsAsNumbers_function_type labelsAsNumbers_function_value( &::SireMaths::EnergyTrajectory::labelsAsNumbers );
+            
+            EnergyTrajectory_exposer.def( 
+                "labelsAsNumbers"
+                , labelsAsNumbers_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         EnergyTrajectory_exposer.def( bp::self != bp::self );
         { //::SireMaths::EnergyTrajectory::operator=
         
@@ -165,6 +255,56 @@ void register_EnergyTrajectory_class(){
                 , "" );
         
         }
+        { //::SireMaths::EnergyTrajectory::properties
+        
+            typedef ::SireBase::Properties const & ( ::SireMaths::EnergyTrajectory::*properties_function_type)(  ) const;
+            properties_function_type properties_function_value( &::SireMaths::EnergyTrajectory::properties );
+            
+            EnergyTrajectory_exposer.def( 
+                "properties"
+                , properties_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::property
+        
+            typedef ::SireBase::Property const & ( ::SireMaths::EnergyTrajectory::*property_function_type)( ::SireBase::PropertyName const & ) const;
+            property_function_type property_function_value( &::SireMaths::EnergyTrajectory::property );
+            
+            EnergyTrajectory_exposer.def( 
+                "property"
+                , property_function_value
+                , ( bp::arg("key") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::propertyKeys
+        
+            typedef ::QStringList ( ::SireMaths::EnergyTrajectory::*propertyKeys_function_type)(  ) const;
+            propertyKeys_function_type propertyKeys_function_value( &::SireMaths::EnergyTrajectory::propertyKeys );
+            
+            EnergyTrajectory_exposer.def( 
+                "propertyKeys"
+                , propertyKeys_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::removeProperty
+        
+            typedef void ( ::SireMaths::EnergyTrajectory::*removeProperty_function_type)( ::QString const & ) ;
+            removeProperty_function_type removeProperty_function_value( &::SireMaths::EnergyTrajectory::removeProperty );
+            
+            EnergyTrajectory_exposer.def( 
+                "removeProperty"
+                , removeProperty_function_value
+                , ( bp::arg("key") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMaths::EnergyTrajectory::set
         
             typedef void ( ::SireMaths::EnergyTrajectory::*set_function_type)( ::SireUnits::Dimension::GeneralUnit const &,::QHash< QString, SireUnits::Dimension::GeneralUnit > const & ) ;
@@ -176,6 +316,32 @@ void register_EnergyTrajectory_class(){
                 , ( bp::arg("time"), bp::arg("energies") )
                 , bp::release_gil_policy()
                 , "Set the energies at time time to the components contained\n  in energies\n" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::set
+        
+            typedef void ( ::SireMaths::EnergyTrajectory::*set_function_type)( ::SireUnits::Dimension::GeneralUnit const &,::QHash< QString, SireUnits::Dimension::GeneralUnit > const &,::QHash< QString, QString > const & ) ;
+            set_function_type set_function_value( &::SireMaths::EnergyTrajectory::set );
+            
+            EnergyTrajectory_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("time"), bp::arg("energies"), bp::arg("labels") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMaths::EnergyTrajectory::setProperty
+        
+            typedef void ( ::SireMaths::EnergyTrajectory::*setProperty_function_type)( ::QString const &,::SireBase::Property const & ) ;
+            setProperty_function_type setProperty_function_value( &::SireMaths::EnergyTrajectory::setProperty );
+            
+            EnergyTrajectory_exposer.def( 
+                "setProperty"
+                , setProperty_function_value
+                , ( bp::arg("key"), bp::arg("value") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMaths::EnergyTrajectory::size

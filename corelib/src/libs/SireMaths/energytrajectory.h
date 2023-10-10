@@ -33,6 +33,7 @@
 #include "SireUnits/dimensions.h"
 
 #include "SireBase/property.h"
+#include "SireBase/properties.h"
 
 SIRE_BEGIN_HEADER
 
@@ -87,17 +88,41 @@ namespace SireMaths
                                    const SireUnits::Dimension::GeneralUnit &time_unit,
                                    const SireUnits::Dimension::GeneralUnit &energy_unit) const;
 
+        QHash<QString, QString> getLabels(int i) const;
+        QHash<QString, double> getLabelsAsNumbers(int i) const;
+
         void set(const SireUnits::Dimension::GeneralUnit &time,
                  const QHash<QString, SireUnits::Dimension::GeneralUnit> &energies);
 
+        void set(const SireUnits::Dimension::GeneralUnit &time,
+                 const QHash<QString, SireUnits::Dimension::GeneralUnit> &energies,
+                 const QHash<QString, QString> &labels);
+
         QStringList keys() const;
+        QStringList labelKeys() const;
 
         QVector<double> times() const;
         QVector<double> energies(const QString &key) const;
+        QVector<QString> labels(const QString &key) const;
+        QVector<double> labelsAsNumbers(const QString &key) const;
 
         QVector<double> times(const SireUnits::Dimension::GeneralUnit &time_unit) const;
         QVector<double> energies(const QString &key,
                                  const SireUnits::Dimension::GeneralUnit &energy_unit) const;
+
+        void setProperty(const QString &key, const SireBase::Property &value);
+
+        const SireBase::Property &property(const SireBase::PropertyName &key) const;
+
+        bool hasProperty(const SireBase::PropertyName &key);
+
+        const SireBase::Properties &properties() const;
+
+        QStringList propertyKeys() const;
+
+        void removeProperty(const QString &key);
+
+        void clearProperties();
 
     private:
         /** All of the time values */
@@ -105,6 +130,12 @@ namespace SireMaths
 
         /** All of the energy values */
         QHash<QString, QVector<double>> energy_values;
+
+        /** All of the label values */
+        QHash<QString, QVector<QString>> label_values;
+
+        /** Additional properties for the table (e.g. temperature) */
+        SireBase::Properties props;
     };
 }
 

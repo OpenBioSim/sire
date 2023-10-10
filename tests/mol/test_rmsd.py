@@ -1,7 +1,10 @@
 import sire as sr
+
 import pytest
+import sys
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="Does not run on windows")
 def test_rmsd(ala_trr, ala_mols):
     mols = ala_trr.clone()
     mols2 = ala_mols.clone()

@@ -311,18 +311,7 @@ of the atoms. Here,
 >>> d.run("10ps")
 >>> mols = d.commit()
 
-we have run dynamics where all of the carbon atoms are fixed.
-
-.. note::
-
-   Be careful using constraints with fixed atoms. If a constraint involves
-   a fixed atom and a mobile atom, then there is a high risk that the
-   constraint won't be able to be satisfied during dynamics, and
-   ``Particle coordinate is NaN`` error or similar will occur.
-   It it safest to use a small timestep (e.g. 1 fs) when constraining
-   only parts of molecules.
-
-while
+we have run dynamics where all of the carbon atoms are fixed, while
 
 >>> d = mols.dynamics(timestep="1fs", temperature="25oC",
 ...                   fixed=[0, 2, 4, 6, 8])
@@ -345,3 +334,24 @@ molecules within the sphere of mobile atoms, e.g.
 ...                   fixed=f"not molecules within {radius} of {center}")
 >>> d.run("10ps")
 >>> mols = d.commit()
+
+This implements the restraints in OpenMM by setting the masses of the fixed
+atoms to zero. This signals the OpenMM integrator to skip over these
+atoms and not move them.
+
+.. note::
+
+   Be careful using constraints with fixed atoms. If a constraint involves
+   a fixed atom and a mobile atom, then there is a high risk that the
+   constraint won't be able to be satisfied during dynamics, and
+   ``Particle coordinate is NaN`` error or similar will occur.
+   It it safest to use a small timestep (e.g. 1 fs) when constraining
+   only parts of molecules.
+
+.. note::
+
+   While the fixed atoms are not moved by the integrator, they are still
+   included in the energy calculation. This means that the computational
+   cost of the simulation will still be high, and also that energies
+   will not be conserved. Make sure you use an integrator that provides
+   a heat bath (e.g. NVT or NPT integrators).

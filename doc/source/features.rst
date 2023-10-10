@@ -5,6 +5,8 @@ Features
 :mod:`sire` is a powerful Python/C++ module for loading and manipulating
 molecular (predominantly biomolecular) systems.
 
+* :doc:`Calculate alchemical free energies <tutorial/index_part06>` using
+  GPU-accelerated molecular dynamics simulations.
 * :doc:`Load and save <tutorial/part01/02_loading_a_molecule>`
   molecules from a number of
   :doc:`molecular file formats <tutorial/part01/06_supported_file_formats>`.

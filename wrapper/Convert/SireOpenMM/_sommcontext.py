@@ -43,6 +43,8 @@ class SOMMContext(_Context):
             # turn this system into a context
             if map.specified("lambda"):
                 lambda_value = map["lambda"].value().as_double()
+            elif map.specified("lambda_value"):
+                lambda_value = map["lambda_value"].value().as_double()
             else:
                 lambda_value = 0.0
 

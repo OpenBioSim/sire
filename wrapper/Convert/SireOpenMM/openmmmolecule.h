@@ -18,7 +18,9 @@ namespace SireOpenMM
 {
 
     /** Internal class used to hold all of the extracted information
-     *  of an OpenMM Molecule
+     *  of an OpenMM Molecule. You should not use this outside
+     *  of the sire_to_openmm_system function. It holds lots of scratch
+     *  data that may change in the future.
      */
     class OpenMMMolecule
     {
@@ -28,7 +30,7 @@ namespace SireOpenMM
             CONSTRAIN_NONE = 0x0000,
             CONSTRAIN_BONDS = 0x0001,
             CONSTRAIN_HBONDS = 0x0010,
-            CONSTRAIN_ANGLES = 0x0100
+            CONSTRAIN_HANGLES = 0x1000
         };
 
         OpenMMMolecule();
@@ -63,6 +65,11 @@ namespace SireOpenMM
         QVector<int> getTorsionPeriodicities() const;
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
+
+        QVector<std::pair<int, int>> getExceptionAtoms() const;
+
+        QVector<double> getChargeScales() const;
+        QVector<double> getLJScales() const;
 
         bool isGhostAtom(int atom) const;
 
@@ -109,10 +116,7 @@ namespace SireOpenMM
         /** Charge and LJ parameters (sigma / epsilon) */
         QVector<std::tuple<double, double, double>> cljs;
 
-        /** Indexes of all bond pairs */
-        QVector<std::pair<int, int>> bond_pairs;
-
-        /** Set of 1-4 or excluded  pairs
+        /** Set of 1-4 or excluded pairs
             (with coulomb and LJ scaling factors) */
         QVector<std::tuple<int, int, double, double>> exception_params;
 
@@ -158,6 +162,10 @@ namespace SireOpenMM
         /** What type of constraint to use */
         qint32 constraint_type;
 
+        /** What type of constraint to use when the bond/angle involves
+         *  perturbable atoms */
+        qint32 perturbable_constraint_type;
+
     private:
         void constructFromAmber(const SireMol::Molecule &mol,
                                 const SireMM::AmberParams &params,
@@ -165,16 +173,110 @@ namespace SireOpenMM
                                 const SireBase::PropertyMap &map,
                                 bool is_perturbable);
 
-        void buildStandardExceptions(const SireMol::Molecule &mol,
-                                     const SireMM::AmberParams &params,
-                                     QSet<qint64> &constrained_pairs,
-                                     const SireBase::PropertyMap &map);
-
-        void buildPerturbableExceptions(const SireMol::Molecule &mol,
-                                        QSet<qint64> &constrained_pairs,
-                                        const SireBase::PropertyMap &map);
+        void buildExceptions(const SireMol::Molecule &mol,
+                             QSet<qint64> &constrained_pairs,
+                             const SireBase::PropertyMap &map);
 
         void alignInternals(const SireBase::PropertyMap &map);
+    };
+
+    /** This class holds all of the information of an OpenMM molecule
+     *  that can be perturbed using a LambdaSchedule. The data is held
+     *  in easy-to-access arrays, with guarantees that the arrays are
+     *  compatible and the data is aligned.
+     */
+    class PerturbableOpenMMMolecule
+    {
+    public:
+        PerturbableOpenMMMolecule();
+
+        PerturbableOpenMMMolecule(const OpenMMMolecule &mol);
+        PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other);
+
+        ~PerturbableOpenMMMolecule();
+
+        bool operator==(const PerturbableOpenMMMolecule &other) const;
+        bool operator!=(const PerturbableOpenMMMolecule &other) const;
+
+        QVector<double> getAlphas0() const;
+        QVector<double> getAlphas1() const;
+
+        QVector<double> getCharges0() const;
+        QVector<double> getCharges1() const;
+
+        QVector<double> getSigmas0() const;
+        QVector<double> getSigmas1() const;
+        QVector<double> getEpsilons0() const;
+        QVector<double> getEpsilons1() const;
+
+        QVector<double> getBondKs0() const;
+        QVector<double> getBondKs1() const;
+        QVector<double> getBondLengths0() const;
+        QVector<double> getBondLengths1() const;
+
+        QVector<double> getAngleKs0() const;
+        QVector<double> getAngleKs1() const;
+        QVector<double> getAngleSizes0() const;
+        QVector<double> getAngleSizes1() const;
+
+        QVector<double> getTorsionKs0() const;
+        QVector<double> getTorsionKs1() const;
+        QVector<int> getTorsionPeriodicities0() const;
+        QVector<int> getTorsionPeriodicities1() const;
+        QVector<double> getTorsionPhases0() const;
+        QVector<double> getTorsionPhases1() const;
+
+        QVector<double> getChargeScales0() const;
+        QVector<double> getChargeScales1() const;
+        QVector<double> getLJScales0() const;
+        QVector<double> getLJScales1() const;
+
+        QSet<int> getToGhostIdxs() const;
+        QSet<int> getFromGhostIdxs() const;
+
+        bool isGhostAtom(int atom) const;
+
+        QVector<std::pair<int, int>> getExceptionAtoms() const;
+
+        QVector<std::pair<int, int>> getExceptionIndicies(const QString &name) const;
+
+        void setExceptionIndicies(const QString &name,
+                                  const QVector<std::pair<int, int>> &exception_idxs);
+
+    private:
+        /** The array of parameters for the two end states, aligned
+         *  so that they can be morphed via the LambdaLever
+         */
+        QVector<double> alpha0, alpha1;
+        QVector<double> chg0, chg1;
+        QVector<double> sig0, sig1;
+        QVector<double> eps0, eps1;
+        QVector<double> bond_k0, bond_k1;
+        QVector<double> bond_r0, bond_r1;
+        QVector<double> ang_k0, ang_k1;
+        QVector<double> ang_t0, ang_t1;
+        QVector<double> tors_k0, tors_k1;
+        QVector<int> tors_periodicity0, tors_periodicity1;
+        QVector<double> tors_phase0, tors_phase1;
+        QVector<double> charge_scl0, charge_scl1;
+        QVector<double> lj_scl0, lj_scl1;
+
+        /** The indexes of atoms that become ghosts in the
+         *  perturbed state
+         */
+        QSet<int> to_ghost_idxs;
+
+        /** The indexes of atoms that are ghosts in the reference
+         *  state and are real in the perturbed state
+         */
+        QSet<int> from_ghost_idxs;
+
+        /** The indicies of the atoms in the exceptions, in exception order */
+        QVector<std::pair<int, int>> exception_atoms;
+
+        /** The indicies of the added exceptions - only populated
+         *  if this is a peturbable molecule */
+        QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
     };
 
 }

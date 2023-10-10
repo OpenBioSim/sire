@@ -38,6 +38,10 @@ using namespace SireMM;
 using namespace SireMol;
 using namespace SireBase;
 
+////////
+//////// Implementation of OpenMMMolecule
+////////
+
 OpenMMMolecule::OpenMMMolecule()
 {
 }
@@ -95,11 +99,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         }
         else if (c == "h-bonds-h-angles")
         {
-            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_ANGLES;
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
         }
         else if (c == "bonds-h-angles")
         {
-            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_ANGLES;
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
         }
         else
         {
@@ -116,13 +120,56 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         constraint_type = CONSTRAIN_NONE;
     }
 
+    if (map.specified("perturbable_constraint"))
+    {
+        const auto c = map["perturbable_constraint"].source().toLower().simplified();
+
+        if (c == "none")
+        {
+            perturbable_constraint_type = CONSTRAIN_NONE;
+        }
+        else if (c == "h-bonds")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS;
+        }
+        else if (c == "bonds")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS;
+        }
+        else if (c == "h-bonds-h-angles")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
+        }
+        else if (c == "bonds-h-angles")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
+        }
+        else
+        {
+            throw SireError::invalid_key(QObject::tr(
+                                             "Unrecognised perturbable constraint type '%1'. Valid values are "
+                                             "'none', 'h-bonds', 'bonds', 'h-bonds-h-angles' or "
+                                             "'bonds-h-angles',")
+                                             .arg(c),
+                                         CODELOC);
+        }
+    }
+    else
+    {
+        perturbable_constraint_type = constraint_type;
+    }
+
     if (ffinfo.isAmberStyle())
     {
         if (is_perturbable)
         {
             // update the map to find the lambda=0 properties
+            // Note that we don't use the coordinates0 or coordinates1
+            // properties, because we need to build the molecule from
+            // its current coordinates (which should represent the
+            // current lambda state)
             QStringList props = {"LJ", "ambertype", "angle", "atomtype",
-                                 "bond", "charge", "coordinates",
+                                 "bond", "charge",
                                  "dihedral", "element", "forcefield",
                                  "gb_radii", "gb_screening", "improper",
                                  "intrascale", "mass", "name",
@@ -289,18 +336,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     }
 
     // extract the coordinates and convert to OpenMM units
-    const auto coords_prop = map["coordinates"];
+    const auto &c = moldata.property(map["coordinates"]).asA<SireMol::AtomCoords>();
+
     this->coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
+    auto coords_data = coords.data();
 
-    if (moldata.hasProperty(coords_prop))
+    for (int i = 0; i < nats; ++i)
     {
-        const auto &c = moldata.property(coords_prop).asA<SireMol::AtomCoords>();
-        auto coords_data = coords.data();
-
-        for (int i = 0; i < nats; ++i)
-        {
-            coords_data[i] = to_vec3(c.at(idx_to_cgatomidx_data[i]));
-        }
+        coords_data[i] = to_vec3(c.at(idx_to_cgatomidx_data[i]));
     }
 
     // extract the velocities and convert to OpenMM units
@@ -398,7 +441,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         cljs_data[i] = std::make_tuple(chg, sig, eps);
     }
 
-    this->bond_pairs.clear();
     this->bond_params.clear();
     this->constraints.clear();
 
@@ -408,13 +450,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     QSet<qint64> constrained_pairs;
 
+    bool include_constrained_energies = true;
+
+    if (map.specified("include_constrained_energies"))
+    {
+        include_constrained_energies = map["include_constrained_energies"].value().asABoolean();
+    }
+
     for (auto it = params.bonds().constBegin();
          it != params.bonds().constEnd();
          ++it)
     {
         const auto bondid = it.key().map(molinfo);
         const auto &bondparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         int atom0 = bondid.get<0>().value();
         int atom1 = bondid.get<1>().value();
@@ -425,20 +473,33 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
 
-        const bool has_light_atom = includes_h or (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
+        const bool has_light_atom = (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
         const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
-        this->bond_pairs.append(std::make_pair(atom0, atom1));
+        auto this_constraint_type = constraint_type;
 
-        if ((not has_massless_atom) and ((constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (constraint_type & CONSTRAIN_HBONDS))))
+        if (is_perturbable)
         {
-            this->constraints.append(std::make_tuple(atom0, atom1, r0));
+            this_constraint_type = perturbable_constraint_type;
+        }
+
+        bool bond_is_not_constrained = true;
+
+        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+        {
+            // add the constraint - this constrains the bond to whatever length it has now
+            const auto delta = coords[atom1] - coords[atom0];
+            const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                     (delta[1] * delta[1]) +
+                                                     (delta[2] * delta[2]));
+
+            this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
             constrained_pairs.insert(to_pair(atom0, atom1));
+            bond_is_not_constrained = false;
         }
-        else
-        {
+
+        if (include_constrained_energies or bond_is_not_constrained)
             this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
-        }
     }
 
     // now the angles
@@ -467,24 +528,36 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         const auto key = to_pair(atom0, atom2);
 
+        bool angle_is_not_constrained = true;
+
         if (not constrained_pairs.contains(key))
         {
+            auto this_constraint_type = constraint_type;
+
+            if (is_perturbable)
+            {
+                this_constraint_type = perturbable_constraint_type;
+            }
+
             // only include the angle X-y-Z if X-Z are not already constrained
-            if ((constraint_type & CONSTRAIN_ANGLES) and is_h_x_h)
+            if ((this_constraint_type & CONSTRAIN_HANGLES) and is_h_x_h)
             {
                 const auto delta = coords[atom2] - coords[atom0];
-                const auto length = std::sqrt((delta[0] * delta[0]) +
-                                              (delta[1] * delta[1]) +
-                                              (delta[2] * delta[2]));
-                constraints.append(std::make_tuple(atom0, atom2, length));
+                const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                         (delta[1] * delta[1]) +
+                                                         (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(atom0, atom2,
+                                                   constraint_length));
                 constrained_pairs.insert(key);
-            }
-            else
-            {
-                ang_params.append(std::make_tuple(atom0, atom1, atom2,
-                                                  theta0, k));
+                angle_is_not_constrained = false;
             }
         }
+        else
+            angle_is_not_constrained = false;
+
+        if (include_constrained_energies or angle_is_not_constrained)
+            ang_params.append(std::make_tuple(atom0, atom1, atom2,
+                                              theta0, k));
     }
 
     // now the dihedrals
@@ -498,7 +571,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         const auto dihid = it.key().map(molinfo);
         const auto &dihparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         int atom0 = dihid.get<0>().value();
         int atom1 = dihid.get<1>().value();
@@ -545,7 +617,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     {
         const auto impid = it.key().map(molinfo);
         const auto &impparam = it.value().first;
-        const auto includes_h = it.value().second;
 
         const int atom0 = impid.get<0>().value();
         const int atom1 = impid.get<1>().value();
@@ -579,22 +650,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
-    this->buildPerturbableExceptions(mol, constrained_pairs, map);
-
-    /*if (is_perturbable)
-    {
-        // build all of the exceptions for perturbable molecules.
-        // This is because the exceptions could change during the
-        // perturbation, so we need more control over them
-        this->buildPerturbableExceptions(mol, constrained_pairs, map);
-    }
-    else
-    {
-        // just find any exceptions that would be missing based on just
-        // a cursary look at the bonding
-        this->buildStandardExceptions(mol, params,
-                                      constrained_pairs, map);
-    }*/
+    this->buildExceptions(mol, constrained_pairs, map);
 }
 
 bool is_ghost(const std::tuple<double, double, double> &clj)
@@ -616,10 +672,6 @@ bool is_ghost_lj(const std::tuple<double, double, double> &clj)
  *  state. Ensure that there is a one-to-one mapping, with them all
  *  in the same order. Any that are missing are added as nulls in
  *  the correct end state.
- *
- *  Note that bonds and angles involved in constraints have been
- *  removed from the list of potentials. This is because we don't
- *  evaluate the energy of constrained degrees of freedom
  */
 void OpenMMMolecule::alignInternals(const PropertyMap &map)
 {
@@ -872,82 +924,90 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
 
     perturbed->dih_params = dih_params_1;
 
-    // we may need to align the the standard_14_pairs
-    // and the custom_14_pairs - this is the work that will be needed
-    // if the bonding changes across the perturbation!
-}
+    // now align all of the exceptions - this should allow the bonding
+    // to change during the perturbation
+    QVector<std::tuple<int, int, double, double>> exception_params_1;
+    exception_params_1.reserve(exception_params.count());
 
-void OpenMMMolecule::buildStandardExceptions(const Molecule &mol,
-                                             const AmberParams &params,
-                                             QSet<qint64> &constrained_pairs,
-                                             const PropertyMap &map)
-{
-    exception_params.clear();
+    found_index_0 = QVector<bool>(exception_params.count(), false);
+    found_index_1 = QVector<bool>(perturbed->exception_params.count(), false);
 
-    // add all of the 1-4 terms
-    for (auto it = params.nb14s().constBegin();
-         it != params.nb14s().constEnd();
-         ++it)
+    for (int i = 0; i < exception_params.count(); ++i)
     {
-        const double cscl = it.value().cscl();
-        const double ljscl = it.value().ljscl();
+        const auto &ex0 = exception_params.at(i);
 
-        const auto nbid = it.key().map(molinfo);
+        int atom0 = std::get<0>(ex0);
+        int atom1 = std::get<1>(ex0);
 
-        const int atom0 = nbid.get<0>().value();
-        const int atom1 = nbid.get<1>().value();
+        bool found = false;
 
-        exception_params.append(std::make_tuple(
-            atom0, atom1, cscl, ljscl));
-    }
-
-    // add in all of the excluded atoms
-    const auto excl_pairs = ExcludedPairs(mol, map);
-
-    if (excl_pairs.count() > 0)
-    {
-        for (int i = 0; i < excl_pairs.count(); ++i)
+        for (int j = 0; j < perturbed->exception_params.count(); ++j)
         {
-            auto pair = excl_pairs[i];
+            const auto &ex1 = perturbed->exception_params.at(j);
 
-            exception_params.append(std::make_tuple(
-                std::get<0>(pair).value(), std::get<1>(pair).value(),
-                0.0, 0.0));
-        }
-
-        // and finally (finally!) find any atoms that are not bonded to
-        // anything else and make sure that they are constrained. These
-        // atoms will be excluded atoms (by definition) so just look
-        // through those
-        const auto &connectivity = mol.property(map["connectivity"]).asA<Connectivity>();
-
-        for (int i = 0; i < excl_pairs.count(); ++i)
-        {
-            auto pair = excl_pairs[i];
-
-            const int atom0 = std::get<0>(pair).value();
-            const int atom1 = std::get<1>(pair).value();
-
-            if (not constrained_pairs.contains(to_pair(atom0, atom1)))
+            if (std::get<0>(ex1) == atom0 and std::get<1>(ex1) == atom1)
             {
-                if (connectivity.nConnections(std::get<0>(pair)) == 0 or
-                    connectivity.nConnections(std::get<1>(pair)) == 0)
-                {
-                    const auto delta = coords[atom1] - coords[atom0];
-                    const auto length = std::sqrt((delta[0] * delta[0]) +
-                                                  (delta[1] * delta[1]) +
-                                                  (delta[2] * delta[2]));
-                    constraints.append(std::make_tuple(atom0, atom1, length));
-                    constrained_pairs.insert(to_pair(atom0, atom1));
-                }
+                // we have found the matching exception!
+                exception_params_1.append(ex1);
+                found_index_0[i] = true;
+                found_index_1[j] = true;
+                found = true;
+                break;
             }
         }
+
+        if (not found)
+        {
+            // add a null exception with the same scale factors
+            exception_params_1.append(std::tuple<int, int, double, double>(atom0, atom1, 1.0, 1.0));
+            found_index_0[i] = true;
+        }
+    }
+
+    for (int j = 0; j < perturbed->exception_params.count(); ++j)
+    {
+        if (not found_index_1[j])
+        {
+            // need to add an exception missing in the reference state
+            const auto &ex1 = perturbed->exception_params.at(j);
+
+            int atom0 = std::get<0>(ex1);
+            int atom1 = std::get<1>(ex1);
+
+            // add a null exception
+            exception_params.append(std::tuple<int, int, double, double>(atom0, atom1, 1.0, 1.0));
+            exception_params_1.append(ex1);
+            found_index_1[j] = true;
+        }
+    }
+
+    // all of found_index_0 and found_index_1 should be true...
+    if (found_index_0.indexOf(false) != -1 or found_index_1.indexOf(false) != -1)
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Failed to align the exceptions!"),
+                                     CODELOC);
+    }
+
+    perturbed->exception_params = exception_params_1;
+
+    if (exception_params.count() != perturbed->exception_params.count())
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Different number of exceptions between the reference "
+                                         "(%1) and perturbed (%2) states.")
+                                         .arg(exception_params.count())
+                                         .arg(perturbed->exception_params.count()),
+                                     CODELOC);
     }
 }
 
-void OpenMMMolecule::buildPerturbableExceptions(const Molecule &mol,
-                                                QSet<qint64> &constrained_pairs,
-                                                const PropertyMap &map)
+/** Internal function that builds all of the exceptions for all of the
+    atoms in the molecule
+*/
+void OpenMMMolecule::buildExceptions(const Molecule &mol,
+                                     QSet<qint64> &constrained_pairs,
+                                     const PropertyMap &map)
 {
     // we will build the complete exception list, and will not rely
     // on this list being built by an OpenMM forcefield. This is because
@@ -1183,11 +1243,15 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
     }
 }
 
+/** Return the alpha parameters of all atoms in atom order for
+ *  this molecule
+ */
 QVector<double> OpenMMMolecule::getAlphas() const
 {
     return this->alphas;
 }
 
+/** Return all of the atom charges in atom order for this molecule */
 QVector<double> OpenMMMolecule::getCharges() const
 {
     const int natoms = this->cljs.count();
@@ -1205,6 +1269,7 @@ QVector<double> OpenMMMolecule::getCharges() const
     return charges;
 }
 
+/** Return all of the LJ sigma parameters in atom order for this molecule */
 QVector<double> OpenMMMolecule::getSigmas() const
 {
     const int natoms = this->cljs.count();
@@ -1222,6 +1287,7 @@ QVector<double> OpenMMMolecule::getSigmas() const
     return sigmas;
 }
 
+/** Return all of the LJ epsilon parameters in atom order for this molecule */
 QVector<double> OpenMMMolecule::getEpsilons() const
 {
     const int natoms = this->cljs.count();
@@ -1239,6 +1305,7 @@ QVector<double> OpenMMMolecule::getEpsilons() const
     return epsilons;
 }
 
+/** Return all of the bond k parameters in bond order for this molecule */
 QVector<double> OpenMMMolecule::getBondKs() const
 {
     const int nbonds = this->bond_params.count();
@@ -1256,6 +1323,7 @@ QVector<double> OpenMMMolecule::getBondKs() const
     return bond_ks;
 }
 
+/** Return all of the bond length parameters in bond order for this molecule */
 QVector<double> OpenMMMolecule::getBondLengths() const
 {
     const int nbonds = this->bond_params.count();
@@ -1273,6 +1341,7 @@ QVector<double> OpenMMMolecule::getBondLengths() const
     return bond_lengths;
 }
 
+/** Return all of the angle K parameters in angle order for this molecule */
 QVector<double> OpenMMMolecule::getAngleKs() const
 {
     const int nangs = this->ang_params.count();
@@ -1290,6 +1359,7 @@ QVector<double> OpenMMMolecule::getAngleKs() const
     return ang_ks;
 }
 
+/** Return all of the angle size parameters in angle order for this molecule */
 QVector<double> OpenMMMolecule::getAngleSizes() const
 {
     const int nangs = this->ang_params.count();
@@ -1307,6 +1377,9 @@ QVector<double> OpenMMMolecule::getAngleSizes() const
     return ang_sizes;
 }
 
+/** Return all of the dihedral torsion periodicities in dihedral order
+ *  for this molecule
+ */
 QVector<int> OpenMMMolecule::getTorsionPeriodicities() const
 {
     const int ndihs = this->dih_params.count();
@@ -1324,6 +1397,9 @@ QVector<int> OpenMMMolecule::getTorsionPeriodicities() const
     return dih_periodicities;
 }
 
+/** Return all of the torsion phase parameters for all of the dihedrals
+ *  in dihedral order for this molecule
+ */
 QVector<double> OpenMMMolecule::getTorsionPhases() const
 {
     const int ndihs = this->dih_params.count();
@@ -1341,6 +1417,9 @@ QVector<double> OpenMMMolecule::getTorsionPhases() const
     return dih_phases;
 }
 
+/** Return all of the torsion K values for all of the dihedrals in
+ *  dihedral order for this molecule
+ */
 QVector<double> OpenMMMolecule::getTorsionKs() const
 {
     const int ndihs = this->dih_params.count();
@@ -1356,4 +1435,380 @@ QVector<double> OpenMMMolecule::getTorsionKs() const
     }
 
     return dih_ks;
+}
+
+/** Return the atom indexes of the atoms in the exceptions, in
+ *  exception order for this molecule
+ */
+QVector<std::pair<int, int>> OpenMMMolecule::getExceptionAtoms() const
+{
+    const int nexceptions = this->exception_params.count();
+
+    QVector<std::pair<int, int>> exception_atoms(nexceptions);
+
+    auto exception_atoms_data = exception_atoms.data();
+    const auto exception_params_data = this->exception_params.constData();
+
+    for (int i = 0; i < nexceptions; ++i)
+    {
+        exception_atoms_data[i] = std::make_pair(std::get<0>(exception_params_data[i]),
+                                                 std::get<1>(exception_params_data[i]));
+    }
+
+    return exception_atoms;
+}
+
+/** Return all of the coulomb intramolecular scale factors (nbscl)
+ *  in exception order for this molecule
+ */
+QVector<double> OpenMMMolecule::getChargeScales() const
+{
+    const int nexceptions = this->exception_params.count();
+
+    QVector<double> charge_scales(nexceptions);
+
+    auto charge_scales_data = charge_scales.data();
+    const auto exception_params_data = this->exception_params.constData();
+
+    for (int i = 0; i < nexceptions; ++i)
+    {
+        charge_scales_data[i] = std::get<2>(exception_params_data[i]);
+    }
+
+    return charge_scales;
+}
+
+/** Return all of the LJ intramolecular scale factors (nbscl)
+ *  in exception order for this molecule
+ */
+QVector<double> OpenMMMolecule::getLJScales() const
+{
+    const int nexceptions = this->exception_params.count();
+
+    QVector<double> lj_scales(nexceptions);
+
+    auto lj_scales_data = lj_scales.data();
+    const auto exception_params_data = this->exception_params.constData();
+
+    for (int i = 0; i < nexceptions; ++i)
+    {
+        lj_scales_data[i] = std::get<3>(exception_params_data[i]);
+    }
+
+    return lj_scales;
+}
+
+////////
+//////// Implementation of PerturbableOpenMMMolecule
+////////
+
+/** Null constructor */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule()
+{
+}
+
+/** Construct from the passed OpenMMMolecule */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
+{
+    if (mol.perturbed.get() == 0)
+        throw SireError::incompatible_error(QObject::tr(
+                                                "You cannot construct a PerturbableOpenMMMolecule from an "
+                                                "OpenMMMolecule that has not been perturbed!"),
+                                            CODELOC);
+
+    alpha0 = mol.getAlphas();
+    alpha1 = mol.perturbed->getAlphas();
+
+    chg0 = mol.getCharges();
+    chg1 = mol.perturbed->getCharges();
+
+    sig0 = mol.getSigmas();
+    sig1 = mol.perturbed->getSigmas();
+
+    eps0 = mol.getEpsilons();
+    eps1 = mol.perturbed->getEpsilons();
+
+    bond_k0 = mol.getBondKs();
+    bond_k1 = mol.perturbed->getBondKs();
+
+    bond_r0 = mol.getBondLengths();
+    bond_r1 = mol.perturbed->getBondLengths();
+
+    ang_k0 = mol.getAngleKs();
+    ang_k1 = mol.perturbed->getAngleKs();
+
+    ang_t0 = mol.getAngleSizes();
+    ang_t1 = mol.perturbed->getAngleSizes();
+
+    tors_k0 = mol.getTorsionKs();
+    tors_k1 = mol.perturbed->getTorsionKs();
+
+    tors_periodicity0 = mol.getTorsionPeriodicities();
+    tors_periodicity1 = mol.perturbed->getTorsionPeriodicities();
+
+    tors_phase0 = mol.getTorsionPhases();
+    tors_phase1 = mol.perturbed->getTorsionPhases();
+
+    charge_scl0 = mol.getChargeScales();
+    charge_scl1 = mol.perturbed->getChargeScales();
+
+    exception_atoms = mol.getExceptionAtoms();
+
+    lj_scl0 = mol.getLJScales();
+    lj_scl1 = mol.perturbed->getLJScales();
+
+    to_ghost_idxs = mol.to_ghost_idxs;
+    from_ghost_idxs = mol.from_ghost_idxs;
+}
+
+/** Copy constructor */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other)
+    : alpha0(other.alpha0), alpha1(other.alpha1),
+      chg0(other.chg0), chg1(other.chg1),
+      sig0(other.sig0), sig1(other.sig1),
+      eps0(other.eps0), eps1(other.eps1),
+      bond_k0(other.bond_k0), bond_k1(other.bond_k1),
+      bond_r0(other.bond_r0), bond_r1(other.bond_r1),
+      ang_k0(other.ang_k0), ang_k1(other.ang_k1),
+      ang_t0(other.ang_t0), ang_t1(other.ang_t1),
+      tors_k0(other.tors_k0), tors_k1(other.tors_k1),
+      tors_periodicity0(other.tors_periodicity0),
+      tors_periodicity1(other.tors_periodicity1),
+      tors_phase0(other.tors_phase0), tors_phase1(other.tors_phase1),
+      charge_scl0(other.charge_scl0), charge_scl1(other.charge_scl1),
+      lj_scl0(other.lj_scl0), lj_scl1(other.lj_scl1),
+      to_ghost_idxs(other.to_ghost_idxs), from_ghost_idxs(other.from_ghost_idxs),
+      exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs)
+{
+}
+
+/** Destructor */
+PerturbableOpenMMMolecule::~PerturbableOpenMMMolecule()
+{
+}
+
+/** Comparison operator */
+bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &other) const
+{
+    return alpha0 == alpha1 and chg0 == chg1 and sig0 == sig1 and eps0 == eps1 and
+           bond_k0 == bond_k1 and bond_r0 == bond_r1 and ang_k0 == ang_k1 and
+           ang_t0 == ang_t1 and tors_k0 == tors_k1 and tors_periodicity0 == tors_periodicity1 and
+           tors_phase0 == tors_phase1 and charge_scl0 == charge_scl1 and lj_scl0 == lj_scl1 and
+           to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
+           exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs;
+}
+
+/** Comparison operator */
+bool PerturbableOpenMMMolecule::operator!=(const PerturbableOpenMMMolecule &other) const
+{
+    return not this->operator==(other);
+}
+
+/** Return the alpha parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getAlphas0() const
+{
+    return this->alpha0;
+}
+
+/** Return the alpha parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getAlphas1() const
+{
+    return this->alpha1;
+}
+
+/** Return the atom charges of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getCharges0() const
+{
+    return this->chg0;
+}
+
+/** Return the atom charges of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getCharges1() const
+{
+    return this->chg1;
+}
+
+/** Return the LJ sigma parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getSigmas0() const
+{
+    return this->sig0;
+}
+
+/** Return the LJ sigma parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getSigmas1() const
+{
+    return this->sig1;
+}
+
+/** Return the LJ epsilon parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getEpsilons0() const
+{
+    return this->eps0;
+}
+
+/** Return the LJ epsilon parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getEpsilons1() const
+{
+    return this->eps1;
+}
+
+/** Return the bond k parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getBondKs0() const
+{
+    return this->bond_k0;
+}
+
+/** Return the bond k parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getBondKs1() const
+{
+    return this->bond_k1;
+}
+
+/** Return the bond length parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getBondLengths0() const
+{
+    return this->bond_r0;
+}
+
+/** Return the bond length parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getBondLengths1() const
+{
+    return this->bond_r1;
+}
+
+/** Return the angle k parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getAngleKs0() const
+{
+    return this->ang_k0;
+}
+
+/** Return the angle k parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getAngleKs1() const
+{
+    return this->ang_k1;
+}
+
+/** Return the angle size parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getAngleSizes0() const
+{
+    return this->ang_t0;
+}
+
+/** Return the angle size parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getAngleSizes1() const
+{
+    return this->ang_t1;
+}
+
+/** Return the torsion k parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionKs0() const
+{
+    return this->tors_k0;
+}
+
+/** Return the torsion k parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionKs1() const
+{
+    return this->tors_k1;
+}
+
+/** Return the torsion periodicity parameters of the reference state */
+QVector<int> PerturbableOpenMMMolecule::getTorsionPeriodicities0() const
+{
+    return this->tors_periodicity0;
+}
+
+/** Return the torsion periodicity parameters of the perturbed state */
+QVector<int> PerturbableOpenMMMolecule::getTorsionPeriodicities1() const
+{
+    return this->tors_periodicity1;
+}
+
+/** Return the torsion phase parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionPhases0() const
+{
+    return this->tors_phase0;
+}
+
+/** Return the torsion phase parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getTorsionPhases1() const
+{
+    return this->tors_phase1;
+}
+
+/** Return the coulomb intramolecular scale factors of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getChargeScales0() const
+{
+    return this->charge_scl0;
+}
+
+/** Return the coulomb intramolecular scale factors of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getChargeScales1() const
+{
+    return this->charge_scl1;
+}
+
+/** Return the LJ intramolecular scale factors of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getLJScales0() const
+{
+    return this->lj_scl0;
+}
+
+/** Return the LJ intramolecular scale factors of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getLJScales1() const
+{
+    return this->lj_scl1;
+}
+
+/** Return the indexes of the atoms that are to be ghosted in the
+ *  perturbed state
+ */
+QSet<int> PerturbableOpenMMMolecule::getToGhostIdxs() const
+{
+    return this->to_ghost_idxs;
+}
+
+/** Return the indexes of the atoms that were ghosts in the
+ *  reference state
+ */
+QSet<int> PerturbableOpenMMMolecule::getFromGhostIdxs() const
+{
+    return this->from_ghost_idxs;
+}
+
+/** Return true if the atom is a ghost atom in the
+ *  referenece or perturbed states */
+bool PerturbableOpenMMMolecule::isGhostAtom(int atom) const
+{
+    return from_ghost_idxs.contains(atom) or to_ghost_idxs.contains(atom);
+}
+
+/** Return the indices of the atoms in the exceptions */
+QVector<std::pair<int, int>> PerturbableOpenMMMolecule::getExceptionAtoms() const
+{
+    return this->exception_atoms;
+}
+
+/** Return the global indexes of the exceptions in the non-bonded and
+ *  ghost-14 forces
+ */
+QVector<std::pair<int, int>> PerturbableOpenMMMolecule::getExceptionIndicies(const QString &name) const
+{
+    return this->exception_idxs.value(name);
+}
+
+/** Set the global indexes of the exceptions in the non-bonded and
+ *  ghost-14 forces
+ */
+void PerturbableOpenMMMolecule::setExceptionIndicies(const QString &name,
+                                                     const QVector<std::pair<int, int>> &exception_idxs)
+{
+    if (exception_idxs.count() != this->exception_atoms.count())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of exception indicies (%1) does not match the number of exceptions (%2)")
+                                                .arg(exception_idxs.count())
+                                                .arg(this->exception_atoms.count()),
+                                            CODELOC);
+
+    this->exception_idxs.insert(name, exception_idxs);
 }

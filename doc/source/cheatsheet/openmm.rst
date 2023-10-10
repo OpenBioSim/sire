@@ -76,6 +76,11 @@ Available keys and allowable values are listed below.
 +---------------------------+----------------------------------------------------------+
 | Key                       | Valid values                                             |
 +===========================+==========================================================+
+| com_reset_frequency       | The frequency at which the ``CMMotionRemover`` acts to   |
+|                           | remove center of mass relative motion. If this is not    |
+|                           | set (the default) then center of mass motion is not      |
+|                           | removed.                                                 |
++---------------------------+----------------------------------------------------------+
 | constraint                | Type of constraint to use for bonds and/or angles.       |
 |                           | Valid strings are ``none``, ``h-bonds``, ``bonds``,      |
 |                           | ``h-bonds-h-angles`` and ``bonds-h-angles``.             |
@@ -109,7 +114,7 @@ Available keys and allowable values are listed below.
 | integrator                | The MD integrator to use, e.g.                           |
 |                           | ``verlet``, ``leapfrog``, ``langevin``,                  |
 |                           | ``langevin_middle``, ``nose_hoover``,                    |
-|                           | ``brownian``                                             |
+|                           | ``brownian``, ``andersen``                               |
 +---------------------------+----------------------------------------------------------+
 | friction                  | Friction value for the integrator, in inverse time, e.g. |
 |                           | ``5.0 / sr.units.picosecond``                            |

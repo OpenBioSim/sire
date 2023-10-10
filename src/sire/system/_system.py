@@ -374,8 +374,21 @@ class System:
             The type of constraint to use for bonds and/or angles, e.g.
             `h-bonds`, `bonds` etc.
             See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
-            for the full list of options. This will be automatically
-            guessed from the timestep if it isn't set.
+            for the full list of options. This will be `none` if it hasn't
+            been set.
+
+        perturbable_constraint: str
+            The type of constraint to use for perturbable bonds and/or angles,
+            e.g. `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This equal the value of `constraint`
+            if it isn't set.
+
+        include_constrained_energies: bool
+            Whether or not to include the energies of the perturbable bonds
+            and angles. If this is False, then the internal bond or angle
+            energy of the perturbable degrees of freedom are not included
+            in the total energy, and their forces are not evaluated.
 
         schedule: sire.cas.LambdaSchedule
             The schedule used to control how perturbable forcefield parameters
@@ -396,6 +409,14 @@ class System:
             use the coordinates of the perturbed molecule as the
             starting point.
 
+        ignore_perturbations: bool
+            Whether or not to ignore perturbations. If this is True, then
+            the perturbation will be ignored, and the simulation will
+            be run using the properties of the reference molecule
+            (or the perturbed molecule if swap_end_states is True). This
+            is useful if you just want to run standard molecular dynamics
+            of the reference or perturbed states.
+
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
@@ -407,6 +428,12 @@ class System:
             softening potential that smooths the creation and deletion
             of ghost atoms during a potential. This defaults to 0.
 
+        vacuum: bool
+            Whether or not to run the simulation in vacuum. If this is
+            set to `True`, then the simulation space automatically be
+            replaced by a `sire.vol.Cartesian` space, and the
+            simulation run in vacuum.
+
         restraints: sire.mm.Restraints or list[sire.mm.Restraints]
             A single set of restraints, or a list of sets of
             restraints that will be applied to the atoms during
@@ -416,6 +443,10 @@ class System:
             Anything that can be used to identify the atom or atoms
             that should be fixed in place during the simulation. These
             atoms will not be moved by minimisation.
+
+        platform: str
+            The name of the OpenMM platform on which to run the dynamics,
+            e.g. "CUDA", "OpenCL", "Metal" etc.
 
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
@@ -466,12 +497,31 @@ class System:
             to save frames during the trajectory. This can be overridden
             by setting frame_frequency during an individual run.
 
+        save_velocities: bool
+            Whether or not to save velocities when saving trajectory frames
+            during the simulation. This defaults to False, as velocity
+            trajectories aren't often needed, and they double the amount
+            of space that is required for a trajectory.
+
         constraint: str
             The type of constraint to use for bonds and/or angles, e.g.
             `h-bonds`, `bonds` etc.
             See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
             for the full list of options. This will be automatically
             guessed from the timestep if it isn't set.
+
+        perturbable_constraint: str
+            The type of constraint to use for perturbable bonds and/or angles,
+            e.g. `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This equal the value of `constraint`
+            if it isn't set.
+
+        include_constrained_energies: bool
+            Whether or not to include the energies of the perturbable bonds
+            and angles. If this is False, then the internal bond or angle
+            energy of the perturbable degrees of freedom are not included
+            in the total energy, and their forces are not evaluated.
 
         schedule: sire.cas.LambdaSchedule
             The schedule used to control how perturbable forcefield parameters
@@ -492,6 +542,14 @@ class System:
             use the coordinates of the perturbed molecule as the
             starting point.
 
+        ignore_perturbations: bool
+            Whether or not to ignore perturbations. If this is True, then
+            the perturbation will be ignored, and the simulation will
+            be run using the properties of the reference molecule
+            (or the perturbed molecule if swap_end_states is True). This
+            is useful if you just want to run standard molecular dynamics
+            of the reference or perturbed states.
+
         temperature: temperature
             The temperature at which to run the simulation. A
             microcanonical (NVE) simulation will be run if you don't
@@ -501,6 +559,12 @@ class System:
             The pressure at which to run the simulation. A
             microcanonical (NVE) or canonical (NVT) simulation will be
             run if the pressure is not set.
+
+        vacuum: bool
+            Whether or not to run the simulation in vacuum. If this is
+            set to `True`, then the simulation space automatically be
+            replaced by a `sire.vol.Cartesian` space, and the
+            simulation run in vacuum.
 
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
@@ -523,10 +587,18 @@ class System:
             that should be fixed in place during the simulation. These
             atoms will not be moved by dynamics.
 
+        platform: str
+            The name of the OpenMM platform on which to run the dynamics,
+            e.g. "CUDA", "OpenCL", "Metal" etc.
+
         device: str or int
             The ID of the GPU (or accelerator) used to accelerate
             the simulation. This would be CUDA_DEVICE_ID or similar
             if CUDA was used. This can be any valid OpenMM device string
+
+        precision: str
+            The desired precision for the simulation (e.g. `single`,
+            `mixed` or `double`)
 
         map: dict
             A dictionary of additional options. Note that any options
@@ -537,6 +609,33 @@ class System:
         from ..mol import _dynamics
 
         return _dynamics(self, *args, **kwargs)
+
+    def ensemble(self, map=None):
+        """
+        Return the last ensemble that was used to simulate this system.
+        This returns a microcanonical ensemble if None was used
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        try:
+            return self._system.property(map["ensemble"])
+        except Exception:
+            from ..move import Ensemble
+
+            return Ensemble.microcanonical()
+
+    def set_ensemble(self, ensemble, map=None):
+        """
+        Set the ensemble that was last used to simulate this system.
+        This is copied into the map["ensemble"] property
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        self._system.set_property(map["ensemble"].source(), ensemble)
 
     def energy(self, *args, **kwargs):
         """Calculate and return the energy of this System
@@ -669,11 +768,23 @@ class System:
 
         self._molecules = None
 
-    def energy_trajectory(self, to_pandas=True, map=None):
+    def energy_trajectory(
+        self, to_pandas: bool = False, to_alchemlyb: bool = False, map=None
+    ):
         """
         Return the energy trajectory for this System. This is the history
         of energies evaluate during any dynamics runs. It could include
-        energies calculated at different values of lambda
+        energies calculated at different values of lambda.
+
+        Parameters
+        ----------
+
+        to_pandas: bool
+            Whether or not to return the energy trajectory as a pandas DataFrame.
+
+        to_alchemlyb: bool
+            Whether or not to return the energy trajectory as a pandas DataFrame
+            that is formatted to usable in alchemlyb
         """
         from ..base import create_map
 
@@ -706,8 +817,20 @@ class System:
 
             traj = self._system.property(traj_propname)
 
-        if to_pandas:
-            return traj.to_pandas()
+        if to_pandas or to_alchemlyb:
+            try:
+                return traj.to_pandas(to_alchemlyb=to_alchemlyb)
+            except Exception:
+                ensemble = self.ensemble()
+
+                if ensemble.is_constant_temperature():
+                    temperature = ensemble.temperature()
+                else:
+                    temperature = None
+
+                return traj.to_pandas(
+                    to_alchemlyb=to_alchemlyb, temperature=temperature
+                )
         else:
             return traj
 

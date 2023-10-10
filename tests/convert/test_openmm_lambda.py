@@ -11,14 +11,17 @@ def _run_test(mols, is_slow=False, use_taylor=False):
 
     mols = c.commit()
 
+    has_water = len(mols) > 1
+
     # in this case the perturbable molecule is the first one
     merge = mols[0]
 
     # and everything else is water
-    if is_slow:
-        water = mols["water"]
-    else:
-        water = mols["closest 5 waters to molidx 0"]
+    if has_water:
+        if is_slow:
+            water = mols["water"]
+        else:
+            water = mols["closest 5 waters to molidx 0"]
 
     # this function will extract the lambda0 or lambda1 end state
     def get_end_state(mol, state, remove_state):
@@ -34,18 +37,29 @@ def _run_test(mols, is_slow=False, use_taylor=False):
         return c.commit()
 
     # this is the perturbable system
-    mols = merge + water
+    if has_water:
+        mols = merge + water
 
-    # these are the non-perturbable systems at lambda 0 and lambda 1
-    mols0 = get_end_state(merge, "0", "1") + water
-    mols1 = get_end_state(merge, "1", "0") + water
+        # these are the non-perturbable systems at lambda 0 and lambda 1
+        mols0 = get_end_state(merge, "0", "1") + water
+        mols1 = get_end_state(merge, "1", "0") + water
+    else:
+        mols = merge
+
+        # these are the non-perturbable systems at lambda 0 and lambda 1
+        mols0 = get_end_state(merge, "0", "1")
+        mols1 = get_end_state(merge, "1", "0")
 
     # a very basic lambda schedule
     l = sr.cas.LambdaSchedule()
     l.add_stage("morph", (1 - l.lam()) * l.initial() + l.lam() * l.final())
 
     # need to use the reference platform on GH Actions
-    map = {"platform": "Reference", "schedule": l}
+    map = {
+        "platform": "Reference",
+        "schedule": l,
+        "constraint": "bonds-h-angles",
+    }
 
     if use_taylor:
         map["use_taylor_softening"] = True
@@ -137,3 +151,25 @@ def test_openmm_scale_lambda_ligand(merged_zan_ose):
 )
 def test_big_openmm_scale_lambda_ligand(merged_zan_ose):
     _run_test(merged_zan_ose.clone(), True)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_dichloroethane(ethane_12dichloroethane):
+    _run_test(ethane_12dichloroethane.clone(), False)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_cyclopentane(pentane_cyclopentane):
+    mols = pentane_cyclopentane.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mol = mol.edit().add_link("connectivity", "connectivity0").commit()
+        mols.update(mol)
+
+    _run_test(mols, False)

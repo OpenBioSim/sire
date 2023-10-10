@@ -11,7 +11,11 @@ def test_openmm_single_energy(kigaki_mols):
 
     mol = mols[0]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {
+        "space": sr.vol.Cartesian(),
+        "platform": "Reference",
+        "constraint": "bonds-h-angles",
+    }
 
     omm = sr.convert.to(mol, "openmm", map=map)
 
@@ -35,7 +39,9 @@ def test_openmm_single_energy(kigaki_mols):
     energy = energy.value_in_unit(energy.unit)
 
     # these won't be exactly the same - this is 5227 +/- 0.1 kJ mol-1
-    assert mol.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(energy, abs=0.1)
+    assert mol.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy, abs=0.1
+    )
 
 
 @pytest.mark.skipif(
@@ -46,7 +52,11 @@ def test_openmm_multi_energy_small_cart(kigaki_mols):
     # first, try just 50 molecules in a cartesian space
     mols = kigaki_mols[0:50]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {
+        "space": sr.vol.Cartesian(),
+        "platform": "Reference",
+        "constraint": "bonds-h-angles",
+    }
 
     omm = sr.convert.to(mols, "openmm", map=map)
 
@@ -78,6 +88,7 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 1.0,
         "platform": "Reference",
+        "constraint": "bonds-h-angles",
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -109,6 +120,7 @@ def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
         "platform": "Reference",
+        "constraint": "bonds-h-angles",
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -139,6 +151,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
         "platform": "Reference",
+        "constraint": "bonds-h-angles",
     }
 
     omm = sr.convert.to(mols, "openmm", map=map)
@@ -169,7 +182,8 @@ def test_openmm_dynamics(ala_mols):
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
         "temperature": 25 * sr.units.celsius,
-        "platform": "Reference"
+        "platform": "Reference",
+        "constraint": "bonds-h-angles",
         # "pressure": 1 * sr.units.atm,   # currently disagree with energies for NPT...
     }
 
@@ -228,6 +242,7 @@ def test_openmm_options(ala_mols):
         "pressure": 1 * sr.units.atm,
         "friction": 5 / sr.units.picosecond,
         "platform": "Reference",
+        "constraint": "bonds-h-angles",
     }
 
     omm = sr.convert.to(mol, "openmm", map=m)
@@ -240,3 +255,33 @@ def test_openmm_options(ala_mols):
         except ValueError:
             # maybe OpenCL or CUDA are not supported
             pass
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_ignore_constrained(ala_mols):
+    mols = ala_mols
+
+    mol = mols[0]
+
+    d = mol.dynamics(
+        constraint="bonds-h-angles",
+        include_constrained_energies=True,
+        platform="Reference",
+    )
+
+    nrg1 = d.current_potential_energy()
+
+    d = mol.dynamics(
+        constraint="bonds-h-angles",
+        include_constrained_energies=False,
+        platform="Reference",
+    )
+
+    nrg2 = d.current_potential_energy()
+
+    # these two energies should be different, because
+    # we should be ignoring the constrained bonds and angles
+    assert abs(nrg2.value() - nrg1.value()) > 1.0

@@ -29,7 +29,7 @@ class DynamicsData:
                 from . import selection_to_atoms
 
                 # turn the fixed atoms into a list of atoms
-                map.set(
+                self._map.set(
                     "fixed",
                     mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
                 )
@@ -59,6 +59,9 @@ class DynamicsData:
             self._energy_trajectory = self._sire_mols.energy_trajectory(
                 to_pandas=False, map=self._map
             )
+
+            # make sure that the ensemble is recorded in the trajectory
+            self._energy_trajectory.set_property("ensemble", self.ensemble())
 
             self._num_atoms = len(self._sire_mols.atoms())
 
@@ -209,10 +212,10 @@ class DynamicsData:
                 * kcal_per_mol
             )
 
-            if lambda_windows is not None:
-                sim_lambda_value = self._omm_mols.get_lambda()
-                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+            sim_lambda_value = self._omm_mols.get_lambda()
+            nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
+            if lambda_windows is not None:
                 for lambda_value in lambda_windows:
                     if lambda_value != sim_lambda_value:
                         self._omm_mols.set_lambda(lambda_value)
@@ -225,7 +228,9 @@ class DynamicsData:
 
                 self._omm_mols.set_lambda(sim_lambda_value)
 
-            self._energy_trajectory.set(self._current_time, nrgs)
+            self._energy_trajectory.set(
+                self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
+            )
 
         self._is_running = False
 
@@ -273,13 +278,43 @@ class DynamicsData:
 
             return Ensemble(map=self._map)
 
+    def randomise_velocities(self, temperature=None, random_seed: int = None):
+        """
+        Set the velocities to random values, drawn from the Boltzmann
+        distribution for the current temperature.
+
+        Parameters
+        ----------
+
+        - temperature (temperature): The temperature to use. If None, then
+          the current temperature will be used
+        - random_seed (int): The random seed to use. If None, then
+          a random seed will be generated
+        """
+        if self.is_null():
+            return
+
+        if temperature is not None:
+            self.set_temperature(temperature, rescale_velocities=False)
+
+        from ..units import kelvin
+
+        if random_seed is None:
+            self._omm_mols.setVelocitiesToTemperature(
+                self.ensemble().temperature().to(kelvin)
+            )
+        else:
+            self._omm_mols.setVelocitiesToTemperature(
+                self.ensemble().temperature().to(kelvin), random_seed
+            )
+
     def set_ensemble(self, ensemble, rescale_velocities: bool = True):
         """
         Set the ensemble for the dynamics. Note that this will
         only let you change the temperature and/or pressure of the
         ensemble. You can't change its fundemental nature.
 
-        If rescalse_velocities is True, then the velocities will
+        If rescale_velocities is True, then the velocities will
         be rescaled to the new temperature.
         """
         if self.is_null():
@@ -303,6 +338,41 @@ class DynamicsData:
                 self._map["pressure"] = ensemble.pressure()
                 self._omm_mols.set_pressure(ensemble.pressure())
 
+    def set_temperature(self, temperature, rescale_velocities: bool = True):
+        """
+        Set the temperature for the dynamics. Note that this will only
+        let you change the temperature of the ensemble.
+        You can't change its fundemental nature.
+
+        If rescale_velocities is True, then the velocities will be
+        rescaled to the new temperature.
+        """
+        if self.is_null():
+            return
+
+        ensemble = self.ensemble()
+
+        ensemble.set_temperature(temperature)
+
+        self.set_ensemble(
+            ensemble=ensemble, rescale_velocities=rescale_velocities
+        )
+
+    def set_pressure(self, pressure):
+        """
+        Set the pressure for the dynamics. Note that this will only
+        let you change the pressure of the ensemble.
+        You can't change its fundemental nature.
+        """
+        if self.is_null():
+            return
+
+        ensemble = self.ensemble()
+
+        ensemble.set_pressure(pressure)
+
+        self.set_ensemble(ensemble=ensemble)
+
     def constraint(self):
         if self.is_null():
             return None
@@ -311,6 +381,15 @@ class DynamicsData:
                 return self._map["constraint"].source()
             else:
                 return "none"
+
+    def perturbable_constraint(self):
+        if self.is_null():
+            return None
+        else:
+            if self._map.specified("perturbable_constraint"):
+                return self._map["perturbable_constraint"].source()
+            else:
+                return self.constraint()
 
     def get_schedule(self):
         if self.is_null():
@@ -634,10 +713,14 @@ class DynamicsData:
                 completed = 0
 
             if completed >= total:
-                return (0, True, True)
+                return (
+                    0,
+                    frame_frequency_steps > 0,
+                    energy_frequency_steps > 0,
+                )
 
             elif frame_frequency_steps <= 0 and energy_frequency_steps <= 0:
-                return (total, True, True)
+                return (total, False, False)
 
             n_to_end = total - completed
 
@@ -825,6 +908,8 @@ class DynamicsData:
             self._energy_trajectory, map=self._map
         )
 
+        self._sire_mols.set_ensemble(self.ensemble())
+
 
 def _add_extra(extras, key, value):
     if value is not None:
@@ -846,11 +931,12 @@ class Dynamics:
         cutoff=None,
         cutoff_type=None,
         timestep=None,
-        save_frequency=None,
         constraint=None,
+        perturbable_constraint=None,
         schedule=None,
         lambda_value=None,
         swap_end_states=None,
+        ignore_perturbations=None,
         shift_delta=None,
         coulomb_power=None,
         restraints=None,
@@ -867,11 +953,12 @@ class Dynamics:
         if timestep is not None:
             _add_extra(extras, "timestep", u(timestep))
 
-        _add_extra(extras, "save_frequency", save_frequency)
         _add_extra(extras, "constraint", constraint)
+        _add_extra(extras, "perturbable_constraint", perturbable_constraint)
         _add_extra(extras, "schedule", schedule)
         _add_extra(extras, "lambda", lambda_value)
         _add_extra(extras, "swap_end_states", swap_end_states)
+        _add_extra(extras, "ignore_perturbations", ignore_perturbations)
 
         if shift_delta is not None:
             _add_extra(extras, "shift_delta", u(shift_delta))
@@ -908,7 +995,10 @@ class Dynamics:
     def __repr__(self):
         return self.__str__()
 
-    def minimise(self, max_iterations: int = 10000):
+    def minimise(
+        self,
+        max_iterations: int = 10000,
+    ):
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.
@@ -918,7 +1008,9 @@ class Dynamics:
         - max_iterations (int): The maximum number of iterations to run
         """
         if not self._d.is_null():
-            self._d.run_minimisation(max_iterations=max_iterations)
+            self._d.run_minimisation(
+                max_iterations=max_iterations,
+            )
 
         return self
 
@@ -929,7 +1021,7 @@ class Dynamics:
         frame_frequency=None,
         energy_frequency=None,
         lambda_windows=None,
-        save_velocities: bool = True,
+        save_velocities: bool = None,
         auto_fix_minimise: bool = True,
     ):
         """
@@ -989,7 +1081,7 @@ class Dynamics:
 
         save_velocities: bool
             Whether or not to save the velocities when running dynamics.
-            By default this is True. Set this to False if you aren't
+            By default this is False. Set this to True if you are
             interested in saving the velocities.
 
         auto_fix_minimise: bool
@@ -1000,6 +1092,14 @@ class Dynamics:
             in these cases, and then runs the requested dynamics.
         """
         if not self._d.is_null():
+            if save_velocities is None:
+                if self._d._map.specified("save_velocities"):
+                    save_velocities = (
+                        self._d._map["save_velocities"].value().as_bool()
+                    )
+                else:
+                    save_velocities = False
+
             self._d.run(
                 time=time,
                 save_frequency=save_frequency,
@@ -1060,12 +1160,57 @@ class Dynamics:
         """
         self._d.set_ensemble(ensemble)
 
+    def set_temperature(self, temperature, rescale_velocities: bool = True):
+        """
+        Set the temperature for the dynamics. Note that this will only
+        let you change the temperature of the ensemble.
+        You can't change its fundemental nature.
+
+        If rescale_velocities is True, then the velocities will be
+        rescaled to the new temperature.
+        """
+        self._d.set_temperature(
+            temperature=temperature, rescale_velocities=rescale_velocities
+        )
+
+    def set_pressure(self, pressure):
+        """
+        Set the pressure for the dynamics. Note that this will only
+        let you change the pressure of the ensemble.
+        You can't change its fundemental nature.
+        """
+        self._d.set_pressure(pressure=pressure)
+
+    def randomise_velocities(self, temperature=None, random_seed: int = None):
+        """
+        Set the velocities to random values, drawn from the Boltzmann
+        distribution for the current temperature.
+
+        Parameters
+        ----------
+
+        - temperature (temperature): The temperature to use. If None, then
+          the current temperature will be used
+        - random_seed (int): The random seed to use. If None, then
+          a random seed will be generated
+        """
+        self._d.randomise_velocities(
+            temperature=temperature, random_seed=random_seed
+        )
+
     def constraint(self):
         """
         Return the constraint used for the dynamics (e.g. constraining
         bonds involving hydrogens etc.)
         """
         return self._d.constraint()
+
+    def perturbable_constraint(self):
+        """
+        Return the perturbable constraint used for the dynamics (e.g.
+        constraining bonds involving hydrogens etc.)
+        """
+        return self._d.perturbable_constraint()
 
     def info(self):
         """
@@ -1204,7 +1349,9 @@ class Dynamics:
         """
         return self._d.current_kinetic_energy()
 
-    def energy_trajectory(self, to_pandas: bool = True):
+    def energy_trajectory(
+        self, to_pandas: bool = False, to_alchemlyb: bool = False
+    ):
         """
         Return the energy trajectory. This is the trajectory of
         energy values that have been captured during dynamics.
@@ -1215,8 +1362,10 @@ class Dynamics:
         """
         t = self._d.energy_trajectory()
 
-        if to_pandas:
-            return t.to_pandas()
+        if to_pandas or to_alchemlyb:
+            return t.to_pandas(
+                to_alchemlyb=to_alchemlyb,
+            )
         else:
             return t
 

@@ -12,8 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - September 2023
-----------------------------------------------------------------------------------------------
+`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
+--------------------------------------------------------------------------------------------
 
 * Added ``closest`` and ``furthest`` keywords to enable searching for the n closest
   or furthest views. This is very general, and is described in the
@@ -35,12 +35,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   deletion of ghost atoms during alchemical free energy simulations.
   Added a new ``sire.morph`` module that includes functions that should
   make it easier to set up, view and control morphs (perturbations).
-
-* Added an ``EnergyTrajectory`` class that lets us record the energy
-  trajectory along a dynamics simulation. This includes recording energies
-  at different λ-windows to that being simulated, thereby providing
-  the raw data for free energy calculations. By default the
-  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
 
 * Forced all new-style modules to import when `sr.use_new_api()` is called.
   This will make it easier to use sire with multiprocessing.
@@ -89,16 +83,38 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   Restraints can be named, meaning that you can scale different restraints
   at different stages and by different values across the λ-coordinate.
 
-* Added support for one or more "permanent" distance restraints. These are
-  distance restraints that are always applied, and are never scaled by λ.
+* Added an :class:`~sire.maths.EnergyTrajectory` class that lets us record the
+  energy trajectory along a dynamics simulation. This includes recording
+  energies at different λ-windows to that being simulated, thereby providing
+  the raw data for free energy calculations. By default the
+  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
+
+* Added the ability to export an :class:`~sire.maths.EnergyTrajectory` as
+  an alchemlyb-compatible data frame. Added :func:`sire.morph.to_alchemlyb`
+  to convert lots of ``EnergyTrajectory`` objects (or files containing
+  s3 streams) into a single alchemlyb-compatible data frame that is
+  ready for analysis. You can now calculate relative hydration and binding
+  free energies and analyse the results using alchemlyb. This is documented
+  in the :doc:`tutorial <tutorial/part06/05_free_energy_perturbation>`.
+
+* Added a :func:`sire.morph.repartition_hydrogen_masses` to make it easier to
+  repartition hydrogen masses during alchemical free energy simulations.
+  Set the default mass factor to 1.5 to support a 4 fs timestep with the
+  default ``LangevinMiddleIntegrator``.
+
+* Added support for an Andersen thermostat in the OpenMM dynamics layer.
+
+* Added support for scaling intramolecular non-bonded scale factors to the
+  ``LambdaLever``, so that we have rudimentary support for perturbations
+  that involve bond breaking and forming.
+
+* Added support to somd for one or more "permanent" distance restraints. These
+  are distance restraints that are always applied, and are never scaled by λ.
   This allows the release of all other distance restraints to a single
   harmonic or flat-bottomed restraint. When the ligand is fully decoupled,
   the free energy of release of the single remaining restraint can be
   computed without simulation. See
   <https://pubs.acs.org/doi/10.1021/acs.jctc.3c00139> for more details.
-
-* Please add the changelog entry for your PR here. We will add the link to your PR
-  during the code review :-)
 
 `2023.3.2 <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.2>`__ - September 2023
 ----------------------------------------------------------------------------------------------
@@ -143,9 +159,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   is now roughly O(N), using a hash to lookup at the molecule level, so that
   we don't have to test individual atoms.
 
-* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
- the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
- because not all required changes were included.
+* Fixed ``StandardStateCorrection``. This stopped working after
+  the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
+  because not all required changes were included.
 
 * Fix for crash when not passing a map to the SelectorImproper constructor
 

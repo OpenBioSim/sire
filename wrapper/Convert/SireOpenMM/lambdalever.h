@@ -109,7 +109,7 @@ namespace SireOpenMM
         SireCAS::LambdaSchedule lambda_schedule;
 
         /** The list of perturbable molecules */
-        QVector<OpenMMMolecule> perturbable_mols;
+        QVector<PerturbableOpenMMMolecule> perturbable_mols;
 
         /** The start indicies of the parameters in each named
             forcefield for each perturbable moleucle */
