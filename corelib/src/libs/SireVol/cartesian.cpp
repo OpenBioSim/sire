@@ -913,6 +913,33 @@ bool Cartesian::beyond(double dist, const CoordGroup &group0, const CoordGroup &
     return Cartesian::beyond(dist, group0.aaBox(), group1.aaBox());
 }
 
+/** Return the minimum distance between 'point' and all the points in 'group'.
+    If this is a periodic space then this uses the minimum image convention
+    (i.e. the minimum distance between the closest periodic replicas are
+    used) */
+double Cartesian::minimumDistance(const Vector &point, const CoordGroup &group) const
+{
+    double mindist2(std::numeric_limits<double>::max());
+
+    const int n = group.count();
+
+    // get raw pointers to the arrays - this provides more efficient access
+    const Vector *array = group.constData();
+
+    for (int i = 0; i < n; ++i)
+    {
+        // calculate the distance between the two atoms
+        double tmpdist = Vector::distance2(point, array[i]);
+
+        // store the minimum distance, the value expected to be the minimum
+        // value is most efficiently placed as the second argument
+        mindist2 = std::min(tmpdist, mindist2);
+    }
+
+    // return the minimum distance
+    return sqrt(mindist2);
+}
+
 /** Return the minimum distance between the points in 'group0' and 'group1'. */
 double Cartesian::minimumDistance(const CoordGroup &group0, const CoordGroup &group1) const
 {

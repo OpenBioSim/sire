@@ -513,6 +513,35 @@ namespace parser_idengine
         int value;
     };
 
+    /** Internal class used to select objects based on the closest or
+     *  furthest from other objects
+     */
+    class IDClosestEngine : public SelectEngine
+    {
+    public:
+        static SelectEnginePtr construct(SelectEnginePtr search_set,
+                                         bool is_closest,
+                                         int n,
+                                         SelectEnginePtr reference_set,
+                                         const SireMaths::Vector &point);
+
+        ~IDClosestEngine();
+
+        ObjType objectType() const;
+        SelectEnginePtr simplify();
+
+    protected:
+        IDClosestEngine();
+        SelectResult select(const SelectResult &mols, const PropertyMap &map) const;
+
+    private:
+        SelectEnginePtr search_set;
+        SelectEnginePtr reference_set;
+        SireMaths::Vector point;
+        int n;
+        bool is_closest;
+    };
+
     /** Internal class used to select all water molecules.
 
         @author Lester Hedges

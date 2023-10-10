@@ -596,6 +596,19 @@ void register_Space_class(){
         }
         { //::SireVol::Space::minimumDistance
         
+            typedef double ( ::SireVol::Space::*minimumDistance_function_type)( ::SireMaths::Vector const &,::SireVol::CoordGroup const & ) const;
+            minimumDistance_function_type minimumDistance_function_value( &::SireVol::Space::minimumDistance );
+            
+            Space_exposer.def( 
+                "minimumDistance"
+                , minimumDistance_function_value
+                , ( bp::arg("point"), bp::arg("group") )
+                , bp::release_gil_policy()
+                , "Return the minimum distance between point and all the points in group.\nIf this is a periodic space then this uses the minimum image convention\n(i.e. the minimum distance between the closest periodic replicas are\nused)" );
+        
+        }
+        { //::SireVol::Space::minimumDistance
+        
             typedef double ( ::SireVol::Space::*minimumDistance_function_type)( ::SireVol::CoordGroup const & ) const;
             minimumDistance_function_type minimumDistance_function_value( &::SireVol::Space::minimumDistance );
             

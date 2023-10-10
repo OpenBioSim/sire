@@ -165,6 +165,11 @@ def _fix_vector():
     _Vector.__str__ = __str__
     _Vector.__repr__ = __str__
 
+    def __format__(obj, format):
+        return f"({obj.x().value():{format}}, {obj.y().value():{format}}, {obj.z().value():{format}})"
+
+    _Vector.__format__ = __format__
+
     def __add__(obj, other):
         try:
             other = Vector(other)
