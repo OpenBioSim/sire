@@ -20,10 +20,12 @@ class System:
             from ..vol import Cartesian
             from ..units import picosecond
             from ..base import wrap
+            from ..legacy.Mol import MoleculeGroup
 
             self._system = _System()
             self._system.add_shared_property("space", Cartesian())
             self._system.add_shared_property("time", wrap(0 * picosecond))
+            self._system.add(MoleculeGroup("all"))
         else:
             if _System not in type(system).mro():
                 raise TypeError(
@@ -318,11 +320,30 @@ class System:
         Return an iterator over the trajectory of frames of this view.
 
         align:
-            Pass in a selection string to select atoms against which
-            every frame will be aligned. These atoms will be moved
-            to the center of the periodic box (if a periodic box
-            is used). If 'True' is passed then this will align
-            against all of the atoms in the view.
+          Pass in a selection string to select atoms against which
+          every frame will be aligned. These atoms will be moved
+          to the center of the periodic box (if a periodic box
+          is used). If "True" is passed, then this will attempt
+          to align *ALL* of the coordinates in the view.
+
+          You can also choose to pass in a molecular container,
+          and it will align against the atoms in that container,
+          assuming they are contained in this view. If not, then
+          you need to supply a mapping that maps from the
+          atoms in the align container, to the atoms in this view.
+
+        frame:
+          The frame of the trajectory against which the alignment
+          should be based. For example, `frame=3` would align based
+          on the coordinates of the aligned atoms in frame 3 of
+          the trajectory. If this is `None` (the default) then the
+          first frame will be used.
+
+        mapping: AtomMapping
+            An AtomMapping object that maps from atoms in the alignment
+            container to atoms in this view. You only need to supply
+            this if all of the alignment atoms are not contained
+            in this view.
 
         smooth:
             Pass in the number of frames to smooth (average) the view
@@ -331,29 +352,290 @@ class System:
 
         wrap: bool
             Whether or not to wrap the coordinates into the periodic box
-
         """
         from ..mol._trajectory import TrajectoryIterator
 
         return TrajectoryIterator(self, *args, **kwargs)
 
-    def minimisation(self, map=None):
+    def minimisation(self, *args, **kwargs):
         """
-        Return a Minimisation object that can be used to minimise the energy
-        of the molecule(s) in this view.
-        """
-        from ..mol import Minimisation
+        Return a Minimisation object that can be used to perform
+        minimisation of the molecule(s) in this System
 
-        return Minimisation(self, map=map)
+        cutoff: Length
+            The size of the non-bonded cutoff
+
+        cutoff_type: str
+            The type of cutoff to use, e.g. "PME", "RF" etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options
+
+        constraint: str
+            The type of constraint to use for bonds and/or angles, e.g.
+            `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be `none` if it hasn't
+            been set.
+
+        perturbable_constraint: str
+            The type of constraint to use for perturbable bonds and/or angles,
+            e.g. `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This equal the value of `constraint`
+            if it isn't set.
+
+        include_constrained_energies: bool
+            Whether or not to include the energies of the perturbable bonds
+            and angles. If this is False, then the internal bond or angle
+            energy of the perturbable degrees of freedom are not included
+            in the total energy, and their forces are not evaluated.
+
+        schedule: sire.cas.LambdaSchedule
+            The schedule used to control how perturbable forcefield parameters
+            should be morphed as a function of lambda. If this is not set
+            then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+        lambda_value: float
+            The value of lambda at which to run minimisation. This only impacts
+            perturbable molecules, whose forcefield parameters will be
+            scaled according to the lambda schedule for the specified
+            value of lambda.
+
+        swap_end_states: bool
+            Whether or not to swap the end states. If this is True, then
+            the perturbation will run from the perturbed back to the
+            reference molecule (the perturbed molecule will be at lambda=0,
+            while the reference molecule will be at lambda=1). This will
+            use the coordinates of the perturbed molecule as the
+            starting point.
+
+        ignore_perturbations: bool
+            Whether or not to ignore perturbations. If this is True, then
+            the perturbation will be ignored, and the simulation will
+            be run using the properties of the reference molecule
+            (or the perturbed molecule if swap_end_states is True). This
+            is useful if you just want to run standard molecular dynamics
+            of the reference or perturbed states.
+
+        shift_delta: length
+            The shift_delta parameter that controls the electrostatic
+            and van der Waals softening potential that smooths the
+            creation and deletion of ghost atoms during a potential.
+            This defaults to 2.0 A.
+
+        coulomb_power: int
+            The coulomb power parmeter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 0.
+
+        vacuum: bool
+            Whether or not to run the simulation in vacuum. If this is
+            set to `True`, then the simulation space automatically be
+            replaced by a `sire.vol.Cartesian` space, and the
+            simulation run in vacuum.
+
+        restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+            A single set of restraints, or a list of sets of
+            restraints that will be applied to the atoms during
+            the simulation.
+
+        fixed: molecule(s) view, search string, int, list[int] etc
+            Anything that can be used to identify the atom or atoms
+            that should be fixed in place during the simulation. These
+            atoms will not be moved by minimisation.
+
+        platform: str
+            The name of the OpenMM platform on which to run the dynamics,
+            e.g. "CUDA", "OpenCL", "Metal" etc.
+
+        device: str or int
+            The ID of the GPU (or accelerator) used to accelerate
+            minimisation. This would be CUDA_DEVICE_ID or similar
+            if CUDA was used. This can be any valid OpenMM device string
+
+        map: dict
+            A dictionary of additional options. Note that any options
+            set in this dictionary that are also specified via one of
+            the arguments above will be overridden by the argument
+            value
+        """
+        from ..mol import _minimisation
+
+        return _minimisation(self, *args, **kwargs)
 
     def dynamics(self, *args, **kwargs):
         """
         Return a Dynamics object that can be used to perform
-        dynamics of the molecule(s) in this view
+        dynamics on the molecule(s) in this System
+
+        cutoff: Length
+            The size of the non-bonded cutoff
+
+        cutoff_type: str
+            The type of cutoff to use, e.g. "PME", "RF" etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options
+
+        timestep: time
+            The size of the dynamics timestep
+
+        save_frequency: time
+            The amount of simulation time between saving energies and frames.
+            This can be overridden using `energy_frequency` or `frame_frequency`,
+            or by these options in individual dynamics runs. Set this
+            to zero if you don't want any saves.
+
+        energy_frequency: time
+            The amount of time between saving energies. This overrides the
+            value in `save_frequency`. Set this to zero if you don't want
+            to save energies during the trajectory. This can be overridden
+            by setting energy_frequency during an individual run.
+
+        frame_frequency: time
+            The amount of time between saving frames. This overrides the
+            value in `save_frequency`. Set this to zero if you don't want
+            to save frames during the trajectory. This can be overridden
+            by setting frame_frequency during an individual run.
+
+        save_velocities: bool
+            Whether or not to save velocities when saving trajectory frames
+            during the simulation. This defaults to False, as velocity
+            trajectories aren't often needed, and they double the amount
+            of space that is required for a trajectory.
+
+        constraint: str
+            The type of constraint to use for bonds and/or angles, e.g.
+            `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            guessed from the timestep if it isn't set.
+
+        perturbable_constraint: str
+            The type of constraint to use for perturbable bonds and/or angles,
+            e.g. `h-bonds`, `bonds` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This equal the value of `constraint`
+            if it isn't set.
+
+        include_constrained_energies: bool
+            Whether or not to include the energies of the perturbable bonds
+            and angles. If this is False, then the internal bond or angle
+            energy of the perturbable degrees of freedom are not included
+            in the total energy, and their forces are not evaluated.
+
+        schedule: sire.cas.LambdaSchedule
+            The schedule used to control how perturbable forcefield parameters
+            should be morphed as a function of lambda. If this is not set
+            then a sire.cas.LambdaSchedule.standard_morph() is used.
+
+        lambda_value: float
+            The value of lambda at which to run dynamics. This only impacts
+            perturbable molecules, whose forcefield parameters will be
+            scaled according to the lambda schedule for the specified
+            value of lambda.
+
+        swap_end_states: bool
+            Whether or not to swap the end states. If this is True, then
+            the perturbation will run from the perturbed back to the
+            reference molecule (the perturbed molecule will be at lambda=0,
+            while the reference molecule will be at lambda=1). This will
+            use the coordinates of the perturbed molecule as the
+            starting point.
+
+        ignore_perturbations: bool
+            Whether or not to ignore perturbations. If this is True, then
+            the perturbation will be ignored, and the simulation will
+            be run using the properties of the reference molecule
+            (or the perturbed molecule if swap_end_states is True). This
+            is useful if you just want to run standard molecular dynamics
+            of the reference or perturbed states.
+
+        temperature: temperature
+            The temperature at which to run the simulation. A
+            microcanonical (NVE) simulation will be run if you don't
+            specify the temperature.
+
+        pressure: pressure
+            The pressure at which to run the simulation. A
+            microcanonical (NVE) or canonical (NVT) simulation will be
+            run if the pressure is not set.
+
+        vacuum: bool
+            Whether or not to run the simulation in vacuum. If this is
+            set to `True`, then the simulation space automatically be
+            replaced by a `sire.vol.Cartesian` space, and the
+            simulation run in vacuum.
+
+        shift_delta: length
+            The shift_delta parameter that controls the electrostatic
+            and van der Waals softening potential that smooths the
+            creation and deletion of ghost atoms during a potential.
+            This defaults to 2.0 A.
+
+        coulomb_power: int
+            The coulomb power parmeter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 0.
+
+        restraints: sire.mm.Restraints or list[sire.mm.Restraints]
+            A single set of restraints, or a list of sets of
+            restraints that will be applied to the atoms during
+            the simulation.
+
+        fixed: molecule(s) view, search string, int, list[int] etc
+            Anything that can be used to identify the atom or atoms
+            that should be fixed in place during the simulation. These
+            atoms will not be moved by dynamics.
+
+        platform: str
+            The name of the OpenMM platform on which to run the dynamics,
+            e.g. "CUDA", "OpenCL", "Metal" etc.
+
+        device: str or int
+            The ID of the GPU (or accelerator) used to accelerate
+            the simulation. This would be CUDA_DEVICE_ID or similar
+            if CUDA was used. This can be any valid OpenMM device string
+
+        precision: str
+            The desired precision for the simulation (e.g. `single`,
+            `mixed` or `double`)
+
+        map: dict
+            A dictionary of additional options. Note that any options
+            set in this dictionary that are also specified via one of
+            the arguments above will be overridden by the argument
+            value
         """
         from ..mol import _dynamics
 
         return _dynamics(self, *args, **kwargs)
+
+    def ensemble(self, map=None):
+        """
+        Return the last ensemble that was used to simulate this system.
+        This returns a microcanonical ensemble if None was used
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        try:
+            return self._system.property(map["ensemble"])
+        except Exception:
+            from ..move import Ensemble
+
+            return Ensemble.microcanonical()
+
+    def set_ensemble(self, ensemble, map=None):
+        """
+        Set the ensemble that was last used to simulate this system.
+        This is copied into the map["ensemble"] property
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        self._system.set_property(map["ensemble"].source(), ensemble)
 
     def energy(self, *args, **kwargs):
         """Calculate and return the energy of this System
@@ -485,6 +767,110 @@ class System:
                 self._system.set_property(time_property.source(), time)
 
         self._molecules = None
+
+    def energy_trajectory(
+        self, to_pandas: bool = False, to_alchemlyb: bool = False, map=None
+    ):
+        """
+        Return the energy trajectory for this System. This is the history
+        of energies evaluate during any dynamics runs. It could include
+        energies calculated at different values of lambda.
+
+        Parameters
+        ----------
+
+        to_pandas: bool
+            Whether or not to return the energy trajectory as a pandas DataFrame.
+
+        to_alchemlyb: bool
+            Whether or not to return the energy trajectory as a pandas DataFrame
+            that is formatted to usable in alchemlyb
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        try:
+            traj = self._system.property(traj_propname)
+        except Exception:
+            traj = None
+
+        if traj is not None:
+            if traj.what() != "SireMaths::EnergyTrajectory":
+                if traj_propname.has_value():
+                    raise TypeError(
+                        f"You cannot force the use of a {type(traj)} "
+                        "as an EnergyTrajectory"
+                    )
+
+                traj = None
+
+        if traj is None:
+            # we need to create this trajectory
+            from ..maths import EnergyTrajectory
+
+            self._system.set_property(
+                traj_propname.source(), EnergyTrajectory()
+            )
+
+            traj = self._system.property(traj_propname)
+
+        if to_pandas or to_alchemlyb:
+            try:
+                return traj.to_pandas(to_alchemlyb=to_alchemlyb)
+            except Exception:
+                ensemble = self.ensemble()
+
+                if ensemble.is_constant_temperature():
+                    temperature = ensemble.temperature()
+                else:
+                    temperature = None
+
+                return traj.to_pandas(
+                    to_alchemlyb=to_alchemlyb, temperature=temperature
+                )
+        else:
+            return traj
+
+    def set_energy_trajectory(self, trajectory, map=None):
+        """
+        Set the energy trajectory to the passed value
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        if traj_propname.has_value():
+            return
+
+        if trajectory.what() != "SireMaths::EnergyTrajectory":
+            raise TypeError(
+                f"You cannot set a {type(trajectory)} as an "
+                "energy trajectory!"
+            )
+
+        self._system.set_property(traj_propname.source(), trajectory)
+
+    def clear_energy_trajectory(self, map=None):
+        """
+        Completely clear any existing energy trajectory
+        """
+        from ..base import create_map
+
+        map = create_map(map)
+
+        traj_propname = map["energy_trajectory"]
+
+        if traj_propname.has_value():
+            return
+
+        from ..maths import EnergyTrajectory
+
+        self._system.set_property(traj_propname.source(), EnergyTrajectory())
 
     def evaluate(self, *args, **kwargs):
         """Return an evaluator for this Systme (or of the matching

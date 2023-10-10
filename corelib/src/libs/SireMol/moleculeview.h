@@ -49,6 +49,7 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::MoleculeView &);
 namespace SireBase
 {
     class Slice;
+    class LazyEvaluator;
 }
 
 namespace SireMol
@@ -284,6 +285,12 @@ namespace SireMol
         void update(const Molecules &molecules);
         void update(const SelectorMol &molecules);
 
+        bool hasLinks() const;
+        QHash<QString, QString> getLinks() const;
+
+        bool isLink(const PropertyName &key) const;
+        QString getLink(const PropertyName &key) const;
+
         /** Return whether or not this view has the property at key 'key'
              - note that this returns true only if there is a property,
                *and* it fits the view (e.g. is an AtomProperty if this
@@ -325,12 +332,15 @@ namespace SireMol
         int nFrames(const SireBase::PropertyMap &map) const;
 
         void loadFrame(int frame);
+        void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator);
         void saveFrame(int frame);
         void saveFrame();
         void deleteFrame(int frame);
         void deleteAllFrames();
 
         void loadFrame(int frame, const SireBase::PropertyMap &map);
+        void loadFrame(int frame, const SireBase::LazyEvaluator &evaluator,
+                       const SireBase::PropertyMap &map);
         void saveFrame(int frame, const SireBase::PropertyMap &map);
         void saveFrame(const SireBase::PropertyMap &map);
         void deleteFrame(int frame, const SireBase::PropertyMap &map);

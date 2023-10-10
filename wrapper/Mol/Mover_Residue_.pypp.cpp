@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectorm.hpp"
+
 #include "residue.h"
 
 #include "SireMaths/align.h"

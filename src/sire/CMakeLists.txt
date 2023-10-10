@@ -101,7 +101,9 @@ add_subdirectory (io)
 add_subdirectory (maths)
 add_subdirectory (mm)
 add_subdirectory (mol)
+add_subdirectory (morph)
 add_subdirectory (move)
+add_subdirectory (restraints)
 add_subdirectory (search)
 add_subdirectory (stream)
 add_subdirectory (squire)
@@ -109,7 +111,7 @@ add_subdirectory (system)
 add_subdirectory (units)
 add_subdirectory (vol)
 
-install( FILES __init__.py _load.py
+install( FILES __init__.py _load.py _match.py
                _parallel.py _pythonize.py
                _measure.py _colname.py
          DESTINATION ${SIRE_PYTHON}/sire

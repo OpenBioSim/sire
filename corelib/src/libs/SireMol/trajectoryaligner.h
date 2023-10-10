@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -83,6 +83,10 @@ namespace SireMol
 
         static const char *typeName();
 
+        bool isNull() const;
+
+        static bool wouldCreateTransform(const PropertyMap &map);
+
         QString toString() const;
 
         SireVol::SpacePtr apply(const SireVol::Space &space) const;
@@ -138,6 +142,9 @@ namespace SireMol
         TrajectoryAligner(const SireMaths::Vector &center,
                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
         TrajectoryAligner(const SelectorM<Atom> &atoms,
+                          const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        TrajectoryAligner(const SelectorM<Atom> &atoms,
+                          const SelectorM<Atom> &reference,
                           const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         TrajectoryAligner(const TrajectoryAligner &other);

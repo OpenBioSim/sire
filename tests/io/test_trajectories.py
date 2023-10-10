@@ -64,11 +64,11 @@ def test_trajectories(tmpdir, ala_traj):
 
     d = tmpdir.mkdir("test_trajectories")
 
-    f = sr.save(
-        mols.trajectory()[0:5],
-        d.join("test"),
-        format=["PRMTOP", "TRAJ", "DCD", "TRR", "XTC", "RST"],
-    )
+    f = []
+
+    for format in ["PRMTOP", "TRAJ", "DCD", "TRR", "XTC", "RST"]:
+        f.append(sr.save(mols.trajectory()[0:5],
+                         d.join("test"), format=[format])[0])
 
     for traj in f[1:]:
         print(traj)
@@ -89,6 +89,7 @@ def test_trajectories(tmpdir, ala_traj):
             # at 0.2 ps)
             time_delta = 0.2 * sr.units.picosecond
 
+        print(f"LOAD {f[0]} + {traj}")
         mols2 = sr.load(f[0], traj)
 
         assert mols2.num_frames() == 5
@@ -96,12 +97,31 @@ def test_trajectories(tmpdir, ala_traj):
         m = mols.trajectory()[3].current()
         m2 = mols2.trajectory()[3].current()
 
+        print(m.property("time"))
+        print(m2.property("time"))
+
         assert m.num_molecules() == m2.num_molecules()
 
         if check_time:
-            assert m.property("time").value() == pytest.approx(
+            correct_time = m.property("time").value() == pytest.approx(
                 m2.property("time").value() + time_delta, precision
             )
+
+            if not correct_time:
+                print("NOT CORRECT TIME!")
+                print(m.property("time"))
+                print(m2.property("time"))
+                m2 = mols2.trajectory()[3].current()
+                print(m2.property("time"))
+                mols2 = sr.load(f[0], traj)
+                m2 = mols2.trajectory()[3].current()
+
+                for frame in mols2.trajectory():
+                    print(frame.property("time"))
+
+                assert m.property("time").value() == pytest.approx(
+	                m2.property("time").value() + time_delta, precision)
+
         else:
             assert m2.property("time").value() == 0
 

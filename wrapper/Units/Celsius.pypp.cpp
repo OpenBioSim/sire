@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "generalunit.h"
+
 #include "temperature.h"
 
 #include "temperature.h"

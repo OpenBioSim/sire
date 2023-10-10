@@ -4,7 +4,15 @@ def fix_Array2D(c):
             o.exclude()
 
 
-special_code = {"SireBase::Array2D<double>": fix_Array2D}
+def fix_LazyEvaluator(c):
+    for f in c.decls("evaluate"):
+        f.exclude()
+
+
+special_code = {
+    "SireBase::Array2D<double>": fix_Array2D,
+    "SireBase::LazyEvaluator": fix_LazyEvaluator,
+}
 
 implicitly_convertible = [
     ("QString", "SireBase::PropertyName"),

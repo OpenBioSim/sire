@@ -148,15 +148,6 @@ namespace SireMol
         bool operator==(const Selector<T> &other) const;
         bool operator!=(const Selector<T> &other) const;
 
-        Selector<T> operator+(const Selector<T> &other) const;
-        Selector<T> operator-(const Selector<T> &other) const;
-
-        Selector<T> operator+(const typename T::ID &id) const;
-        Selector<T> operator-(const typename T::ID &id) const;
-
-        Selector<T> operator+(const T &view) const;
-        Selector<T> operator-(const T &view) const;
-
         int nViews() const;
 
         MolViewPtr operator[](int i) const;
@@ -180,6 +171,26 @@ namespace SireMol
         Selector<CutGroup> operator()(const CGID &cgid) const;
         Selector<Chain> operator()(const ChainID &chainid) const;
         Selector<Segment> operator()(const SegID &segid) const;
+
+        SelectorM<T> operator+(const SelectorM<T> &views) const;
+        SelectorM<T> operator+(const Selector<T> &views) const;
+        SelectorM<T> operator+(const T &view) const;
+        Selector<T> operator+(const typename T::ID &id) const;
+
+        SelectorM<T> operator-(const SelectorM<T> &views) const;
+        SelectorM<T> operator-(const Selector<T> &views) const;
+        SelectorM<T> operator-(const T &view) const;
+        Selector<T> operator-(const typename T::ID &id) const;
+
+        Selector<T> &operator+=(const Selector<T> &other);
+        Selector<T> &operator+=(const SelectorM<T> &views);
+        Selector<T> &operator+=(const T &view);
+        Selector<T> &operator+=(const typename T::ID &id);
+
+        Selector<T> &operator-=(const Selector<T> &other);
+        Selector<T> &operator-=(const SelectorM<T> &views);
+        Selector<T> &operator-=(const T &view);
+        Selector<T> &operator-=(const typename T::ID &id);
 
         typename T::Index index(int i) const;
 
@@ -589,7 +600,11 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::add(const Selector<T> &other) const
     {
-        if (this->selectedAll())
+        if (this->isEmpty())
+        {
+            return other;
+        }
+        else if (this->selectedAll())
         {
             if (other.isEmpty())
                 return *this;
@@ -670,7 +685,7 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::add(const typename T::ID &id) const
     {
-        return this->operator+(Selector<T>(this->data(), id));
+        return this->add(Selector<T>(this->data(), id));
     }
 
     /** Subtract all of the views in 'other' from this set
@@ -740,16 +755,18 @@ namespace SireMol
 
     /** Syntactic sugar for add() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator+(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator+=(const Selector<T> &other)
     {
-        return this->add(other);
+        this->operator=(this->add(other));
+        return *this;
     }
 
     /** Syntactic sugar for subtract() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator-(const Selector<T> &other) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator-=(const Selector<T> &other)
     {
-        return this->subtract(other);
+        this->operator=(this->subtract(other));
+        return *this;
     }
 
     /** Syntactic sugar for add() */
@@ -768,16 +785,34 @@ namespace SireMol
 
     /** Syntactic sugar for add() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator+(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator+=(const typename T::ID &id)
     {
-        return this->add(view);
+        this->operator=(this->add(id));
+        return *this;
     }
 
     /** Syntactic sugar for subtract() */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::operator-(const T &view) const
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator-=(const typename T::ID &id)
     {
-        return this->subtract(view);
+        this->operator=(this->subtract(id));
+        return *this;
+    }
+
+    /** Syntactic sugar for add() */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator+=(const T &view)
+    {
+        this->operator=(this->add(view));
+        return *this;
+    }
+
+    /** Syntactic sugar for subtract() */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> &Selector<T>::operator-=(const T &view)
+    {
+        this->operator=(this->subtract(view));
+        return *this;
     }
 
     /** Return the ith view in this set (this supports negative indexing!)
@@ -1291,16 +1326,16 @@ namespace SireMol
 
         if (MoleculeView::isSameMolecule(view))
         {
-            if (this->selectedAll())
-            {
-                matches.append(view.index().value());
-            }
-            else if (not this->isEmpty())
+            if (not this->idxs.isEmpty())
             {
                 int match = this->idxs.indexOf(view.index());
 
                 if (match != -1)
                     matches.append(match);
+            }
+            else if (this->selectedAll())
+            {
+                matches.append(view.index().value());
             }
         }
 
@@ -1318,7 +1353,27 @@ namespace SireMol
 
         if (MoleculeView::isSameMolecule(views))
         {
-            if (this->selectedAll())
+            if (not this->idxs.isEmpty())
+            {
+                if (views.selectedAll())
+                {
+                    for (int i = 0; i < this->idxs.count(); ++i)
+                    {
+                        matches.append(this->idxs[i]);
+                    }
+                }
+                else if (not views.isEmpty())
+                {
+                    for (const auto &idx : views.idxs)
+                    {
+                        int match = this->idxs.indexOf(idx);
+
+                        if (match != -1)
+                            matches.append(match);
+                    }
+                }
+            }
+            else if (this->selectedAll())
             {
                 if (views.selectedAll())
                 {
@@ -1332,26 +1387,6 @@ namespace SireMol
                     for (const auto &idx : views.idxs)
                     {
                         matches.append(idx.value());
-                    }
-                }
-            }
-            else if (not this->isEmpty())
-            {
-                if (views.selectedAll())
-                {
-                    for (int i = 0; i < this->count(); ++i)
-                    {
-                        matches.append(i);
-                    }
-                }
-                else if (not views.isEmpty())
-                {
-                    for (const auto &idx : views.idxs)
-                    {
-                        int match = this->idxs.indexOf(idx);
-
-                        if (match != -1)
-                            matches.append(match);
                     }
                 }
             }

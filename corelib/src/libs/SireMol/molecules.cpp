@@ -44,6 +44,8 @@
 
 #include "select.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireMol/errors.h"
 
 #include "SireStream/datastream.h"
@@ -1052,6 +1054,11 @@ void Molecules::loadFrame(int frame)
     this->loadFrame(frame, PropertyMap());
 }
 
+void Molecules::loadFrame(int frame, const LazyEvaluator &evaluator)
+{
+    this->loadFrame(frame, evaluator, PropertyMap());
+}
+
 void Molecules::saveFrame(int frame)
 {
     this->saveFrame(frame, PropertyMap());
@@ -1125,6 +1132,14 @@ void _update_hash(T &mols, const QVector<Molecule> &molvector)
 
 void Molecules::loadFrame(int frame, const SireBase::PropertyMap &map)
 {
+    LazyEvaluator evaluator;
+
+    this->loadFrame(frame, evaluator, map);
+}
+
+void Molecules::loadFrame(int frame, const LazyEvaluator &evaluator,
+                          const SireBase::PropertyMap &map)
+{
     int n = this->nFrames(map);
 
     if (n == 0)
@@ -1137,7 +1152,7 @@ void Molecules::loadFrame(int frame, const SireBase::PropertyMap &map)
 
     for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
     {
-        it->loadFrame(frame, map);
+        it->loadFrame(frame, evaluator, map);
     }
 }
 

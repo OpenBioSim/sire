@@ -474,6 +474,19 @@ void register_Cartesian_class(){
         }
         { //::SireVol::Cartesian::minimumDistance
         
+            typedef double ( ::SireVol::Cartesian::*minimumDistance_function_type)( ::SireMaths::Vector const &,::SireVol::CoordGroup const & ) const;
+            minimumDistance_function_type minimumDistance_function_value( &::SireVol::Cartesian::minimumDistance );
+            
+            Cartesian_exposer.def( 
+                "minimumDistance"
+                , minimumDistance_function_value
+                , ( bp::arg("point"), bp::arg("group") )
+                , bp::release_gil_policy()
+                , "Return the minimum distance between point and all the points in group.\nIf this is a periodic space then this uses the minimum image convention\n(i.e. the minimum distance between the closest periodic replicas are\nused)" );
+        
+        }
+        { //::SireVol::Cartesian::minimumDistance
+        
             typedef double ( ::SireVol::Cartesian::*minimumDistance_function_type)( ::SireVol::CoordGroup const & ) const;
             minimumDistance_function_type minimumDistance_function_value( &::SireVol::Cartesian::minimumDistance );
             

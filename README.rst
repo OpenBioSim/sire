@@ -1,5 +1,5 @@
 ****
-`Sire <http://sire.openbiosim.org>`__
+`Sire <https://sire.openbiosim.org>`__
 ****
 
 .. image:: https://github.com/openbiosim/sire/workflows/Build/badge.svg
@@ -45,7 +45,7 @@ To create a new environment:
 
     mamba create -n openbiosim "python<3.11"
     mamba activate openbiosim
-    mamba install -c openbiosim sire
+    mamba install -c conda-forge -c openbiosim sire
 
 To install the latest development version you can use:
 
@@ -53,7 +53,7 @@ To install the latest development version you can use:
 
     mamba create -n openbiosim-dev "python<3.11"
     mamba activate openbiosim-dev
-    mamba install -c openbiosim/label/dev sire
+    mamba install -c conda-forge -c openbiosim/label/dev sire
 
 However, as you are here, it is likely you want to download the latest,
 greatest version of the code, which you will need to compile. To compile
@@ -121,7 +121,7 @@ For bug reports/sugguestions/complains please file an issue on
 
 Developers guide
 ----------------
-Please `visit the website <http://sire.openbiosim.org>`__ for information on how to
+Please `visit the website <https://sire.openbiosim.org>`__ for information on how to
 develop applications using sire.
 
 GitHub actions

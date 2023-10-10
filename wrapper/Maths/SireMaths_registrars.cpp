@@ -8,6 +8,7 @@
 #include "axisset.h"
 #include "complex.h"
 #include "distvector.h"
+#include "energytrajectory.h"
 #include "freeenergyaverage.h"
 #include "histogram.h"
 #include "line.h"
@@ -41,6 +42,7 @@ void register_SireMaths_objects()
     ObjectRegistry::registerConverterFor< SireMaths::AxisSet >();
     ObjectRegistry::registerConverterFor< SireMaths::Complex >();
     ObjectRegistry::registerConverterFor< SireMaths::DistVector >();
+    ObjectRegistry::registerConverterFor< SireMaths::EnergyTrajectory >();
     ObjectRegistry::registerConverterFor< SireMaths::FreeEnergyAverage >();
     ObjectRegistry::registerConverterFor< SireMaths::BennettsFreeEnergyAverage >();
     ObjectRegistry::registerConverterFor< SireMaths::Histogram >();

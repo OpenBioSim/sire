@@ -148,6 +148,19 @@ void register_MolEditor_class(){
                 , "Add a segment called name and return an editor that can\nbe used to edit it" );
         
         }
+        { //::SireMol::MolEditor::addLink
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*addLink_function_type)( ::QString const &,::QString const & ) ;
+            addLink_function_type addLink_function_value( &::SireMol::MolEditor::addLink );
+            
+            MolEditor_exposer.def( 
+                "addLink"
+                , addLink_function_value
+                , ( bp::arg("key"), bp::arg("linked_property") )
+                , bp::return_self< >()
+                , "Add a link from the property key to the property linked_property.\n  The linked_property will be returned if there is no property\n  called key in this set.\n\n  Note that the linked property must already be contained in this set.\n" );
+        
+        }
         { //::SireMol::MolEditor::commit
         
             typedef ::SireMol::Molecule ( ::SireMol::MolEditor::*commit_function_type)(  ) const;
@@ -287,6 +300,18 @@ void register_MolEditor_class(){
                 , "Remove all CutGroups from this molecule. This returns an editor that\ncan be used to further edit the structure of this molecule" );
         
         }
+        { //::SireMol::MolEditor::removeAllLinks
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*removeAllLinks_function_type)(  ) ;
+            removeAllLinks_function_type removeAllLinks_function_value( &::SireMol::MolEditor::removeAllLinks );
+            
+            MolEditor_exposer.def( 
+                "removeAllLinks"
+                , removeAllLinks_function_value
+                , bp::return_self< >()
+                , "Remove all property links from this set" );
+        
+        }
         { //::SireMol::MolEditor::removeAllResidues
         
             typedef ::SireMol::MolStructureEditor ( ::SireMol::MolEditor::*removeAllResidues_function_type)(  ) const;
@@ -309,6 +334,19 @@ void register_MolEditor_class(){
                 , removeAllSegments_function_value
                 , bp::release_gil_policy()
                 , "Remove all segments from this molecule. This returns an editor that\ncan be used to further edit the structure of this molecule" );
+        
+        }
+        { //::SireMol::MolEditor::removeLink
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*removeLink_function_type)( ::QString const & ) ;
+            removeLink_function_type removeLink_function_value( &::SireMol::MolEditor::removeLink );
+            
+            MolEditor_exposer.def( 
+                "removeLink"
+                , removeLink_function_value
+                , ( bp::arg("key") )
+                , bp::return_self< >()
+                , "Remove the link associated with the key key" );
         
         }
         { //::SireMol::MolEditor::rename
@@ -410,6 +448,18 @@ void register_MolEditor_class(){
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::MolEditor::updateProperty
+        
+            typedef bool ( ::SireMol::MolEditor::*updateProperty_function_type)( ::QString const &,::SireBase::Property const &,bool ) ;
+            updateProperty_function_type updateProperty_function_value( &::SireMol::MolEditor::updateProperty );
+            
+            MolEditor_exposer.def( 
+                "updateProperty"
+                , updateProperty_function_value
+                , ( bp::arg("key"), bp::arg("value"), bp::arg("auto_add")=(bool)(true) )
+                , "Update the passed property to have the value value. This does\n  an in-place update on the existing property (which must have\n  a compatible type). If auto-add is true, then this will add\n  the property if it doesnt exist. This returns whether or not\n  a property was updated (or added)\n" );
         
         }
         MolEditor_exposer.staticmethod( "typeName" );

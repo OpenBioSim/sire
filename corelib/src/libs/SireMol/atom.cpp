@@ -40,6 +40,7 @@
 #include "residue.h"
 #include "segment.h"
 #include "selector.hpp"
+#include "selectorm.hpp"
 
 #include "SireBase/errors.h"
 #include "SireMol/errors.h"
@@ -424,6 +425,36 @@ void Atom::assertContainsMetadata(const PropertyName &key, const PropertyName &m
                                                      "for the property at key '%2' for this atom.")
                                              .arg(metakey.toString(), key.toString()),
                                          CODELOC);
+}
+
+SelectorM<Atom> Atom::operator+(const SelectorM<Atom> &atoms) const
+{
+    return SelectorM<Atom>(*this) + atoms;
+}
+
+SelectorM<Atom> Atom::operator+(const Selector<Atom> &atoms) const
+{
+    return SelectorM<Atom>(*this) + atoms;
+}
+
+SelectorM<Atom> Atom::operator+(const Atom &other) const
+{
+    return SelectorM<Atom>(*this) + other;
+}
+
+SelectorM<Atom> Atom::operator-(const SelectorM<Atom> &atoms) const
+{
+    return SelectorM<Atom>(*this) - atoms;
+}
+
+SelectorM<Atom> Atom::operator-(const Selector<Atom> &atoms) const
+{
+    return SelectorM<Atom>(*this) - atoms;
+}
+
+SelectorM<Atom> Atom::operator-(const Atom &other) const
+{
+    return SelectorM<Atom>(*this) - other;
 }
 
 const char *Atom::typeName()

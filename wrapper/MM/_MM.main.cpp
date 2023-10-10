@@ -53,7 +53,15 @@
 
 #include "BondParameterName.pypp.hpp"
 
+#include "BondRestraint.pypp.hpp"
+
+#include "BondRestraints.pypp.hpp"
+
 #include "BondSymbols.pypp.hpp"
+
+#include "BoreschRestraint.pypp.hpp"
+
+#include "BoreschRestraints.pypp.hpp"
 
 #include "CHARMMSwitchingFunction.pypp.hpp"
 
@@ -335,6 +343,10 @@
 
 #include "NullRestraint.pypp.hpp"
 
+#include "PositionalRestraint.pypp.hpp"
+
+#include "PositionalRestraints.pypp.hpp"
+
 #include "Restraint.pypp.hpp"
 
 #include "Restraint3D.pypp.hpp"
@@ -342,6 +354,8 @@
 #include "RestraintComponent.pypp.hpp"
 
 #include "RestraintFF.pypp.hpp"
+
+#include "Restraints.pypp.hpp"
 
 #include "ScaledCLJParameterNames3D.pypp.hpp"
 
@@ -564,7 +578,17 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_BondParameterName_class();
 
+    register_BondRestraint_class();
+
+    register_Restraints_class();
+
+    register_BondRestraints_class();
+
     register_BondSymbols_class();
+
+    register_BoreschRestraint_class();
+
+    register_BoreschRestraints_class();
 
     register_SwitchingFunction_class();
 
@@ -751,6 +775,10 @@ BOOST_PYTHON_MODULE(_MM){
     register_NullCLJFunction_class();
 
     register_NullRestraint_class();
+
+    register_PositionalRestraint_class();
+
+    register_PositionalRestraints_class();
 
     register_RestraintComponent_class();
 

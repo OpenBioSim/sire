@@ -12,6 +12,110 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
+--------------------------------------------------------------------------------------------
+
+* Added ``closest`` and ``furthest`` keywords to enable searching for the n closest
+  or furthest views. This is very general, and is described in the
+  :doc:`detailed search guide <cheatsheet/search>`. Searches such as
+  ``closest 10 waters to protein`` or
+  ``furthest (residue in protein) from water`` are supported.
+
+* Added a :func:`sire.minimum_distance` function to calculate the minimum
+  distance between atoms of two views.
+
+* Added support for perturbable molecules to the OpenMM converter. Have addded
+  ``LambdaLever`` and ``LambdaSchedule`` classes that can be used to control
+  how forcefield parameters are changed with lambda. These levers change
+  the parameters in the OpenMM context, enabling simulations at different
+  values of lambda to be performed. This is initial functionality which
+  will be documented and expanded by subsequent PRs.
+
+* Added support for softening potentials used to smooth creation and
+  deletion of ghost atoms during alchemical free energy simulations.
+  Added a new ``sire.morph`` module that includes functions that should
+  make it easier to set up, view and control morphs (perturbations).
+
+* Forced all new-style modules to import when `sr.use_new_api()` is called.
+  This will make it easier to use sire with multiprocessing.
+
+* Added option to allow GROMACS water molecules to be flagged as crystal waters.
+  This means that they will be ignored by ``gmx genion`` when choosing water
+  molecules to replace with ions.
+
+* Added the ability to align trajectories and views against molecule views
+  or containers. Added the :class:`sire.mol.AtomMapping` class to control
+  how to map from atoms in one group of molecules to another. This can
+  be used to align trajectories and views against atoms / molecules that
+  are not part of that trajectory.
+
+* Added the :func:`sire.mol.TrajectoryIterator.rmsd` function to make it
+  easier to calculate RMSDs across trajectories. The RMSD can be calculated
+  against all atoms, a subset of atoms, or even against a different
+  set of atoms that are matched via an :class:`~sire.mol.AtomMapping` object.
+  Full details in the :doc:`tutorial <tutorial/part04/02_trajectory>`.
+
+* Significantly optimised the loading of trajectory frames and of updating
+  properties in molecules. Switched from ``CentralCache`` to a new
+  ``LazyEvaluator`` class that uses ``tbb::collaborative_call`` to
+  lazy-calculate the results of functions in a thread-safe and
+  thread-cooperative manner. Moved ``PropertyMap`` to use a shared
+  pointer to assigned properties (removing costs of unnecessary
+  allocations and deallocations) and added ``update`` and ``updateFrom``
+  functions to ``Properties`` and ``MoleculeData`` so that properties
+  can be updated in place, thereby minimising new/free.
+
+* Fixed a bug that prevented ``mols.trajectory().view()`` from working.
+  You can now view trajectory subsets again, e.g. ``mols.trajectory()[0:5].view()``.
+
+* Updated ``FreeEnergyAnalysis.py`` to be compatible with both the new pymbar 4 API
+  and the old pymbar 3 API.
+
+* Added support for restraints to the OpenMM dynamics layer. Initial tested
+  support for positional and distance/bond restraints is included, as well
+  as experimental support for Boresch restraints. The restraint are documented
+  in the :doc:`tutorial <tutorial/part06/03_restraints>`. This also documents
+  new code to let you specify atoms that should be fixed in space.
+
+* Added support for alchemical restraints to the OpenMM dynamics layer.
+  This lets you scale restraints as part of a λ-coordinate. This is
+  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints`.
+  Restraints can be named, meaning that you can scale different restraints
+  at different stages and by different values across the λ-coordinate.
+
+* Added an :class:`~sire.maths.EnergyTrajectory` class that lets us record the
+  energy trajectory along a dynamics simulation. This includes recording
+  energies at different λ-windows to that being simulated, thereby providing
+  the raw data for free energy calculations. By default the
+  ``EnergyTrajectory`` is returned to the user as a pandas DataFrame.
+
+* Added the ability to export an :class:`~sire.maths.EnergyTrajectory` as
+  an alchemlyb-compatible data frame. Added :func:`sire.morph.to_alchemlyb`
+  to convert lots of ``EnergyTrajectory`` objects (or files containing
+  s3 streams) into a single alchemlyb-compatible data frame that is
+  ready for analysis. You can now calculate relative hydration and binding
+  free energies and analyse the results using alchemlyb. This is documented
+  in the :doc:`tutorial <tutorial/part06/05_free_energy_perturbation>`.
+
+* Added a :func:`sire.morph.repartition_hydrogen_masses` to make it easier to
+  repartition hydrogen masses during alchemical free energy simulations.
+  Set the default mass factor to 1.5 to support a 4 fs timestep with the
+  default ``LangevinMiddleIntegrator``.
+
+* Added support for an Andersen thermostat in the OpenMM dynamics layer.
+
+* Added support for scaling intramolecular non-bonded scale factors to the
+  ``LambdaLever``, so that we have rudimentary support for perturbations
+  that involve bond breaking and forming.
+
+* Added support to somd for one or more "permanent" distance restraints. These
+  are distance restraints that are always applied, and are never scaled by λ.
+  This allows the release of all other distance restraints to a single
+  harmonic or flat-bottomed restraint. When the ligand is fully decoupled,
+  the free energy of release of the single remaining restraint can be
+  computed without simulation. See
+  <https://pubs.acs.org/doi/10.1021/acs.jctc.3c00139> for more details.
+
 `2023.3.2 <https://github.com/openbiosim/sire/compare/2023.3.1...2023.3.2>`__ - September 2023
 ----------------------------------------------------------------------------------------------
 
@@ -28,7 +132,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed a bug in ``analyse_freenrg`` which produced incorrect TI results
   when not all lambda windows were run for equal lengths of time.
-  
+
 * Make sure atom serial number in PDB files are capped when renumbering when
   TER records are present.
 
@@ -48,20 +152,20 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   trying to read the same frame lead to starvation of the thread that had progressed to
   read the frame. Now a single thread loads the frame, with subsequent threads using
   this cached load (`fix_88 <https://github.com/OpenBioSim/sire/issues/88>`__).
-  
+
 * Optimised the speed of viewing large molecules in NGLView, plus of searching
   for water molecules. Added a new ``is_water`` function. Optimised the
   find function in ``SelectorM<T>`` so that it is not an O(N^2) search. It
   is now roughly O(N), using a hash to lookup at the molecule level, so that
   we don't have to test individual atoms.
-  
-* Fixed :module:`sire.wrapper.tools.standardstatecorrection`. This stopped working after
- the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
- because not all required changes were included.
-  
+
+* Fixed ``StandardStateCorrection``. This stopped working after
+  the commit https://github.com/OpenBioSim/sire/commit/e2e370940894315838fb8f65e141baaf07050ce0,
+  because not all required changes were included.
+
 * Fix for crash when not passing a map to the SelectorImproper constructor
-  
-* Fix for crash when checking a list of atoms rather than a list of molecules  
+
+* Fix for crash when checking a list of atoms rather than a list of molecules
 
 `2023.3.0 <https://github.com/openbiosim/sire/compare/2023.2.3...2023.3.0>`__ - June 2023
 -----------------------------------------------------------------------------------------

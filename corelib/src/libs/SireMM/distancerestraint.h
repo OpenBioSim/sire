@@ -66,9 +66,6 @@ namespace SireMM
     using SireCAS::Symbol;
     using SireCAS::Symbols;
 
-    // typedef the unit of a harmonic force constant ( MolarEnergy / Length^2 )
-    typedef SireUnits::Dimension::PhysUnit<1, 0, -2, 0, 0, -1, 0> HarmonicDistanceForceConstant;
-
     /** This is a restraint that operates on the distance between
         two SireMM::Point objects (e.g. two atoms in a molecule,
         a point in space and the center of a molecule, the
@@ -136,11 +133,11 @@ namespace SireMM
         bool usesMoleculesIn(const Molecules &molecules) const;
 
         static DistanceRestraint harmonic(const PointRef &point0, const PointRef &point1,
-                                          const HarmonicDistanceForceConstant &force_constant);
+                                          const SireUnits::Dimension::HarmonicBondConstant &force_constant);
 
         static DistanceRestraint halfHarmonic(const PointRef &point0, const PointRef &point1,
                                               const SireUnits::Dimension::Length &distance,
-                                              const HarmonicDistanceForceConstant &force_constant);
+                                              const SireUnits::Dimension::HarmonicBondConstant &force_constant);
 
     protected:
         DistanceRestraint(const PointRef &point0, const PointRef &point1, const Expression &nrg_restraint,
@@ -358,8 +355,6 @@ namespace SireMM
 Q_DECLARE_METATYPE(SireMM::DistanceRestraint)
 Q_DECLARE_METATYPE(SireMM::DoubleDistanceRestraint)
 Q_DECLARE_METATYPE(SireMM::TripleDistanceRestraint)
-
-Q_DECLARE_METATYPE(SireMM::HarmonicDistanceForceConstant)
 
 SIRE_EXPOSE_CLASS(SireMM::DistanceRestraint)
 SIRE_EXPOSE_CLASS(SireMM::DoubleDistanceRestraint)

@@ -72,6 +72,8 @@ def _pythonize(C, delete_old: bool = True) -> None:
             new_attr = new_attr.replace("asA", "as")
         elif new_attr.startswith("isAn"):
             new_attr = new_attr.replace("isAn", "is")
+        elif new_attr.startswith("isAtom"):
+            new_attr = new_attr.replace("isAtom", "is_atom")
         elif new_attr.startswith("isA"):
             new_attr = new_attr.replace("isA", "is")
 
@@ -153,6 +155,146 @@ def _pythonize_modules(modules, delete_old: bool = True):
 _is_using_old_api = None
 _is_using_new_api = None
 
+_is_in_loading_process = False
+
+
+def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
+    """
+    Internal function to load the new API modules, pythonizing
+    the function names as we go. If `delete_old` is True, then
+    the old function names will be deleted. Otherwise, they will
+    be kept. Keeping the names is only needed for the mixed API.
+    """
+    global _is_using_new_api
+
+    _is_using_new_api = True
+
+    global _is_in_loading_process
+
+    if _is_in_loading_process:
+        return
+
+    _is_in_loading_process = True
+
+    # call Pythonize on all of the new modules
+    from .legacy import (
+        Base,
+        Move,
+        IO,
+        System,
+        Squire,
+        MM,
+        FF,
+        Mol,
+        Analysis,
+        CAS,
+        Cluster,
+        Convert,  # does not need pythonizing, but importing will make it visible
+        Error,
+        ID,
+        Maths,
+        Qt,
+        Stream,
+        Units,
+        Vol,
+    )
+
+    _pythonize_modules(
+        [
+            Base._Base,
+            Analysis._Analysis,
+            CAS._CAS,
+            Cluster._Cluster,
+            Error._Error,
+            FF._FF,
+            ID._ID,
+            IO._IO,
+            Maths._Maths,
+            MM._MM,
+            Mol._Mol,
+            Move._Move,
+            Qt._Qt,
+            Squire._Squire,
+            Stream._Stream,
+            System._System,
+            Units._Units,
+            Vol._Vol,
+        ],
+        delete_old=delete_old,
+    )
+
+    try:
+        import lazy_import
+
+        have_lazy_import = True
+    except ImportError:
+        have_lazy_import = False
+
+    if have_lazy_import:
+        # Now make sure that all new modules have been loaded
+        # (we need to import base first)
+        from . import base
+
+        if lazy_import.LazyModule in type(base).mro():
+            # this module is lazily loaded - use 'dir' to load it
+            dir(base)
+
+        if is_base:
+            # return, as we will only import base here
+            _is_in_loading_process = False
+            return
+
+        from . import (
+            move,
+            io,
+            system,
+            squire,
+            mm,
+            convert,
+            ff,
+            mol,
+            analysis,
+            cas,
+            cluster,
+            error,
+            id,
+            maths,
+            morph,
+            restraints,
+            qt,
+            stream,
+            units,
+            vol,
+        )
+
+        for M in [
+            move,
+            io,
+            system,
+            squire,
+            mm,
+            convert,
+            ff,
+            mol,
+            analysis,
+            cas,
+            cluster,
+            error,
+            id,
+            maths,
+            morph,
+            restraints,
+            qt,
+            stream,
+            units,
+            vol,
+        ]:
+            if lazy_import.LazyModule in type(M).mro():
+                # this module is lazily loaded - use 'dir' to load it
+                dir(M)
+
+    _is_in_loading_process = False
+
 
 def use_mixed_api(support_old_module_names: bool = False):
     """Load Sire using both the new (python-style) and old APIs. This
@@ -188,60 +330,23 @@ def use_mixed_api(support_old_module_names: bool = False):
     else:
         _is_using_old_api = True
 
-    # Now, bring in the new API
-    _is_using_new_api = True
-
-    # call Pythonize on all of the new modules
-    from . import (
-        move,
-        io,
-        system,
-        squire,
-        mm,
-        ff,
-        mol,
-        analysis,
-        base,
-        cas,
-        cluster,
-        error,
-        id,
-        maths,
-        qt,
-        stream,
-        units,
-        vol,
-    )
-
-    _pythonize_modules(
-        [
-            analysis._Analysis,
-            base._Base,
-            cas._CAS,
-            cluster._Cluster,
-            error._Error,
-            ff._FF,
-            id._ID,
-            io._IO,
-            maths._Maths,
-            mm._MM,
-            mol._Mol,
-            move._Move,
-            qt._Qt,
-            squire._Squire,
-            stream._Stream,
-            system._System,
-            units._Units,
-            vol._Vol,
-        ],
-        delete_old=False,
-    )
+    # Now bring in the new API
+    _load_new_api_modules(delete_old=False)
 
 
-def use_new_api():
-    """Load Sire using the new (python-style) API. This will be called
+def use_new_api(is_base: bool = False):
+    """
+    Load Sire using the new (python-style) API. This will be called
     automatically when you load any of the new Python modules, so you
     shouldn't need to call this yourself.
+
+    Parameters
+    ----------
+
+    is_base: bool (defaults to False)
+        Whether or not this is being called by the sire.base module.
+        This triggers a special case where we only load sire.base,
+        and thus avoid circular imports
     """
     global _is_using_new_api, _is_using_old_api
 
@@ -264,53 +369,8 @@ def use_new_api():
 
         raise ImportError(msg)
 
-    _is_using_new_api = True
-
-    # call Pythonize on all of the new modules
-    from .legacy import (
-        Move,
-        IO,
-        System,
-        Squire,
-        MM,
-        FF,
-        Mol,
-        Analysis,
-        Base,
-        CAS,
-        Cluster,
-        Convert,  # does not need pythonizing, but importing will make it visible
-        Error,
-        ID,
-        Maths,
-        Qt,
-        Stream,
-        Units,
-        Vol,
-    )
-
-    _pythonize_modules(
-        [
-            Analysis._Analysis,
-            Base._Base,
-            CAS._CAS,
-            Cluster._Cluster,
-            Error._Error,
-            FF._FF,
-            ID._ID,
-            IO._IO,
-            Maths._Maths,
-            MM._MM,
-            Mol._Mol,
-            Move._Move,
-            Qt._Qt,
-            Squire._Squire,
-            Stream._Stream,
-            System._System,
-            Units._Units,
-            Vol._Vol,
-        ]
-    )
+    # Now bring in the new API
+    _load_new_api_modules(delete_old=True, is_base=is_base)
 
 
 def use_old_api():

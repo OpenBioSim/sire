@@ -29,9 +29,12 @@ try:
     _has_rdkit = True
     _register_smarts_search()
 
-except Exception:
+except Exception as e:
+    _rdkit_import_error = e
+
     # RDKit support is not available
     def _no_rdkit():
+        print(_rdkit_import_error)
         raise ModuleNotFoundError(
             "Unable to convert to/from RDKit as it is not installed. "
             "Please install using `mamba install -c conda-forge rdkit` "
@@ -66,7 +69,6 @@ try:
     from ._SireOpenMM import (
         _sire_to_openmm_system,
         _openmm_system_to_sire,
-        _set_openmm_coordinates_and_velocities,
         _openmm_extract_coordinates,
         _openmm_extract_coordinates_and_velocities,
         _openmm_extract_space,
@@ -147,6 +149,9 @@ try:
 
         friction = friction.to(1.0 / picosecond) / openmm.unit.picosecond
 
+        use_andersen = False
+        temperature = None
+
         if integrator is None:
             if ensemble.is_nve():
                 integrator = openmm.VerletIntegrator(timestep)
@@ -204,6 +209,12 @@ try:
                         temperature, friction, timestep
                     )
 
+                elif integrator == "andersen":
+                    # use a verlet integrator and switch on the
+                    # andersen thermostat with the specified frequency
+                    integrator = openmm.VerletIntegrator(timestep)
+                    use_andersen = True
+
                 else:
                     raise ValueError(f"Unrecognised integrator {integrator}")
 
@@ -216,7 +227,12 @@ try:
         # Next, convert the sire system to an openmm system
 
         # system must be an openmm.System() or else we will crash!
-        coords_and_vels = _sire_to_openmm_system(system, mols, map)
+        openmm_metadata = _sire_to_openmm_system(system, mols, map)
+
+        # If we want temperature controlled by an Andersen thermostat
+        # then add this here
+        if use_andersen:
+            system.addForce(openmm.AndersenThermostat(temperature, friction))
 
         # If we want NPT and this is periodic then we have to
         # add the barostat to the system
@@ -302,35 +318,36 @@ try:
             precision = map["precision"].source()
             platform.setPropertyDefaultValue("Precision", precision)
 
-        if map.specified("device"):
-            device_index = None
-            device_name = None
+        if "Threads" in supported_properties and map.specified("threads"):
+            try:
+                threads = map["threads"].value().as_integer()
+            except Exception:
+                threads = map["threads"].source()
 
+            platform.setPropertyDefaultValue("Threads", str(threads))
+
+        if "DeviceIndex" in supported_properties and map.specified("device"):
             try:
                 device_index = map["device"].value().as_integer()
             except Exception:
-                device_name = map["device"].source()
+                device_index = map["device"].source()
 
-            if (
-                "DeviceIndex" in supported_properties
-                and device_index is not None
-            ):
-                platform.setPropertyDefaultValue(
-                    "DeviceIndex", str(device_index)
-                )
-
-            elif (
-                "DeviceName" in supported_properties
-                and device_name is not None
-            ):
-                platform.setPropertyDefaultValue("DeviceName", device_name)
+            platform.setPropertyDefaultValue("DeviceIndex", str(device_index))
 
         if map.specified("cpu_pme") and "UseCpuPme" in supported_properties:
             usecpu = int(map["cpu_pme"].value().as_boolean())
-            platform.setPropertyDefaultValue("UseCpuPme", str(usecpu))
+            platform.setPropertyDefaultValue("UseCpuPme", str(usecpu).lower())
 
         try:
-            context = openmm.Context(system, integrator, platform)
+            from ._sommcontext import SOMMContext
+
+            context = SOMMContext(
+                system=system,
+                integrator=integrator,
+                platform=platform,
+                metadata=openmm_metadata,
+                map=map,
+            )
         except Exception as e:
             raise ValueError(
                 "There was a problem creating the OpenMM context. Perhaps "
@@ -338,23 +355,48 @@ try:
                 f"or on this computer? The error message is: {e}"
             )
 
-        # place the coordinates and velocities into the context
-        _set_openmm_coordinates_and_velocities(context, coords_and_vels)
-
         return context
 
-    def openmm_extract_coordinates(state, mols, map):
-        return _openmm_extract_coordinates(state, mols, map)
+    def openmm_extract_coordinates(
+        state, mols, perturbable_maps=None, map=None
+    ):
+        from ...base import create_map
 
-    def openmm_extract_coordinates_and_velocities(state, mols, map):
-        return _openmm_extract_coordinates_and_velocities(state, mols, map)
+        map = create_map(map)
+
+        if perturbable_maps is None:
+            perturbable_maps = {}
+
+        return _openmm_extract_coordinates(
+            state=state, mols=mols, perturbable_maps=perturbable_maps, map=map
+        )
+
+    def openmm_extract_coordinates_and_velocities(
+        state, mols, perturbable_maps=None, map=None
+    ):
+        from ...base import create_map
+
+        map = create_map(map)
+
+        if perturbable_maps is None:
+            from ..Mol import MolNum
+
+            perturbable_maps = {}
+
+        return _openmm_extract_coordinates_and_velocities(
+            state=state, mols=mols, perturbable_maps=perturbable_maps, map=map
+        )
 
     def openmm_extract_space(state):
         return _openmm_extract_space(state)
 
-except Exception:
+except Exception as e:
+    _openmm_import_exception = e
+
     # OpenMM support is not available
     def _no_openmm():
+        print(_openmm_import_exception)
+
         raise ModuleNotFoundError(
             "Unable to convert to/from OpenMM as this code hasn't been "
             "written yet. We hope to support this soon!"
@@ -368,13 +410,13 @@ except Exception:
     def openmm_to_sire(*args, **kwargs):
         _no_openmm()
 
-    def openmm_extract_coordinates(state, mols, map):
+    def openmm_extract_coordinates(*arg, **kwargs):
         _no_openmm()
 
-    def openmm_extract_coordinates_and_velocities(state, mols, map):
+    def openmm_extract_coordinates_and_velocities(*args, **kwargs):
         _no_openmm()
 
-    def openmm_extract_space(state):
+    def openmm_extract_space(*args, **kwargs):
         _no_openmm()
 
 

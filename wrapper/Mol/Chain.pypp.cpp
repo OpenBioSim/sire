@@ -35,6 +35,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectorm.hpp"
+
 #include "chain.h"
 
 #include "chainproperty.hpp"
@@ -408,6 +410,12 @@ void register_Chain_class(){
         
         }
         Chain_exposer.def( bp::self != bp::self );
+        Chain_exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::Chain > >() );
+        Chain_exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Chain > >() );
+        Chain_exposer.def( bp::self + bp::self );
+        Chain_exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::Chain > >() );
+        Chain_exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Chain > >() );
+        Chain_exposer.def( bp::self - bp::self );
         { //::SireMol::Chain::operator=
         
             typedef ::SireMol::Chain & ( ::SireMol::Chain::*assign_function_type)( ::SireMol::Chain const & ) ;

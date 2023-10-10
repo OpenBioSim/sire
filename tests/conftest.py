@@ -77,6 +77,11 @@ def ala_traj():
 
 
 @pytest.fixture(scope="session")
+def ala_trr():
+    return sr.load_test_files("ala.top", "ala.trr")
+
+
+@pytest.fixture(scope="session")
 def p38_mols():
     return sr.load_test_files("p38.pdb")
 
@@ -125,3 +130,23 @@ def triclinic_protein_rst7():
     return sr.load_test_files(
         "triclinic_protein.prm7", "triclinic_protein.rst"
     )
+
+
+@pytest.fixture(scope="session")
+def merged_ethane_methanol():
+    return sr.load_test_files("merged_molecule.s3")
+
+
+@pytest.fixture(scope="session")
+def merged_zan_ose():
+    return sr.load_test_files("merged_ligand.s3")
+
+
+@pytest.fixture(scope="session")
+def ethane_12dichloroethane():
+    return sr.load_test_files("ethane_12dichloroethane.bss")
+
+
+@pytest.fixture(scope="session")
+def pentane_cyclopentane():
+    return sr.load_test_files("pentane_cyclopentane.bss")

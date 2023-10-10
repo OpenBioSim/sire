@@ -10,6 +10,8 @@ namespace bp = boost::python;
 
 #include "SireBase/generalunitproperty.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireBase/slice.h"
 
 #include "SireError/errors.h"

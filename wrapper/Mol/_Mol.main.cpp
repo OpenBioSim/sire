@@ -59,6 +59,8 @@
 
 #include "AtomMCSMatcher.pypp.hpp"
 
+#include "AtomMapping.pypp.hpp"
+
 #include "AtomMasses.pypp.hpp"
 
 #include "AtomMatch.pypp.hpp"
@@ -705,6 +707,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_AtomIdxMatcher_class();
 
     register_AtomMCSMatcher_class();
+
+    register_AtomMapping_class();
 
     register_PartialMolecule_class();
 

@@ -31,6 +31,8 @@
 
 #include "DistVector.pypp.hpp"
 
+#include "EnergyTrajectory.pypp.hpp"
+
 #include "ExpAverage.pypp.hpp"
 
 #include "FreeEnergyAverage.pypp.hpp"
@@ -157,6 +159,8 @@ BOOST_PYTHON_MODULE(_Maths){
     register_Complex_class();
 
     register_DistVector_class();
+
+    register_EnergyTrajectory_class();
 
     register_Histogram_class();
 

@@ -19,6 +19,7 @@ set ( SIREMATHS_HEADERS
       complex.h
       constants.h
       distvector.h
+      energytrajectory.h
       errors.h
       freeenergyaverage.h
       gamma.h
@@ -66,6 +67,7 @@ set ( SIREMATHS_SOURCES
       boys.cpp
       complex.cpp
       distvector.cpp
+      energytrajectory.cpp
       errors.cpp
       freeenergyaverage.cpp
       gamma.cpp

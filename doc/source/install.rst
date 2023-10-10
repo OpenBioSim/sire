@@ -108,28 +108,30 @@ And then... Install sire into a new environment
 We recommend that :mod:`sire` is installed into a new (clean) environment.
 This minimises the risk of failures caused by incompatible dependencies.
 
-Sire is currently packaged for Python 3.8, 3.9 and Python 3.10. We will start
-by creating a Python 3.10 environment that we will call ``openbiosim``.
+Sire is currently packaged for Python 3.9, 3.10 and Python 3.11. We will start
+by creating a Python 3.11 environment that we will call ``openbiosim``.
 
 .. code-block:: bash
 
-   $ mamba create -n openbiosim "python<3.11"
+   $ mamba create -n openbiosim "python<3.12"
 
 .. note::
 
-   We use ``python<3.11`` as this will install the most recent 3.10
+   We use ``python<3.12`` as this will install the most recent 3.11
    release of python.
 
 We can now install :mod:`sire` into that environment by typing
 
 .. code-block:: bash
 
-   $ mamba install -n openbiosim -c openbiosim sire
+   $ mamba install -n openbiosim -c conda-forge -c openbiosim sire
 
 .. note::
 
    The option ``-n openbiosim`` tells ``mamba`` to install :mod:`sire`
-   into the ``openbiosim`` environment. The option ``-c openbiosim``
+   into the ``openbiosim`` environment. The option ``-c conda-forge``
+   tells ``mamba`` to use the ``conda-forge`` channel for all
+   dependencies. The option ``-c openbiosim``
    tells ``mamba`` to install :mod:`sire` from the ``openbiosim``
    conda channel.
 
@@ -137,7 +139,7 @@ If you want the latest development release, then install by typing
 
 .. code-block:: bash
 
-   $ mamba install -n openbiosim -c "openbiosim/label/dev" sire
+   $ mamba install -n openbiosim -c conda-forge -c "openbiosim/label/dev" sire
 
 You may (optionally) want to install additional tools such as
 ``ipython`` and ``jupyterlab``. To do this, type
@@ -166,6 +168,14 @@ to learn how to use :mod:`sire` or the
 
 3. Also easy installation - Run in a container
 ==============================================
+
+.. warning::
+
+   Because of low demand, pre-built containers are created only for
+   major releases, and may be out of date compared to the newest release.
+   Please `get in touch <https://github.com/OpenBioSim/sire/issues>`__
+   if you want to use a container and would like us to build the latest
+   release.
 
 Another route to install :mod:`sire` is to download and run our
 pre-built containers. These can be run via
@@ -233,7 +243,7 @@ branch if you are a developer).
 You compile :mod:`sire` into an existing anaconda / miniconda environment.
 Please create and activate an environment, e.g. by following
 `the instructions <_Install_Mambaforge>` to install a fresh ``mambaforge`` and
-then creating and activating Python 3.10 environment called
+then creating and activating Python 3.11 environment called
 ``openbiosim``.
 
 Next, download the source code. You could download the latest development
@@ -430,6 +440,14 @@ file was in the current directory).
 The recipe is written to ``recipes/sire/meta.yaml``. You can (optionally)
 edit the pins in this file too, if you want to do some fine-tuning.
 
+.. note::
+
+   You may need to edit the recipe to fix version inconsistencies.
+   This is especially the case for ``rdkit`` - you need to to make
+   sure that if you specify a version for ``rdkit`` in your
+   ``environment.yml`` that you also use the same version
+   for the ``rdkit-devel`` package.
+
 E. Building the package
 -----------------------
 
@@ -445,14 +463,33 @@ sire conda package, e.g.
 .. note::
 
    The above command assumes that you don't need any other channels included
-   to install all of the packages included in your ``environment.yml``. 
-   The ``actions/update_recipe.py`` script will print out the correct 
+   to install all of the packages included in your ``environment.yml``.
+   The ``actions/update_recipe.py`` script will print out the correct
    ``conda mambabuild`` command at the end, which includes any extra
    channels that are needed.
 
 ::
 
-    /path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_19.tar.bz2
+   # To have conda build upload to anaconda.org automatically, use
+   # conda config --set anaconda_upload yes
+   anaconda upload \
+       /path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2
+   anaconda_upload is not set.  Not uploading wheels: []
+
+   INFO :: The inputs making up the hashes for the built packages are as follows:
+   {
+     "sire-2023.3.0-py310hf95ea87_25": {
+       "recipe": {
+         "c_compiler": "clang",
+         "cxx_compiler": "clangxx",
+         "numpy": "1.22",
+         "target_platform": "osx-64"
+       }
+     }
+   }
+
+In this case, you can see that the package is the file
+``/path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2``.
 
 Copy this conda package to wherever you need (e.g. into a channel, upload
 to conda, etc.).
@@ -460,10 +497,10 @@ to conda, etc.).
 .. note::
 
    A full set of tests will be run on the package after it has been built.
-   Some of these tests may fail if you have edited the recipe to remove 
-   some of the dependencies. If this happens, you can decide to ignore 
+   Some of these tests may fail if you have edited the recipe to remove
+   some of the dependencies. If this happens, you can decide to ignore
    the tests, e.g. by removing them from the conda recipe (``meta.yml``)
-   or by just copying the file that is produced and has been placed into 
+   or by just copying the file that is produced and has been placed into
    the ``conda-bld/broken`` directory.
 
 You can then install it, either via the channel you've uploaded to, or by

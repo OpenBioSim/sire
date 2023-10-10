@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -1237,6 +1237,8 @@ Frame AmberRstFile::readFrame(int i, bool use_parallel) const
 
     // we've finished with the buffer - can release the mutex
     lkr.unlock();
+
+    use_parallel = false;
 
     // now need to convert the coords, vels and frcs into the right units
     // Can do this in parallel if allowed :-)

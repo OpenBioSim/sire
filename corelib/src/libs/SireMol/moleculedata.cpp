@@ -522,6 +522,56 @@ const char *MoleculeData::metadataType(const PropertyName &key, const PropertyNa
     return props.metadataType(key, metakey);
 }
 
+/** Add a link from the property 'key' to the property 'linked_property'.
+ *  The linked_property will be returned if there is no property
+ *  called 'key' in this set.
+ *
+ *  Note that the linked property must already be contained in this set.
+ */
+void MoleculeData::addLink(const QString &key, const QString &linked_property)
+{
+    props.addLink(key, linked_property);
+
+    // increment the global version number
+    vrsn = vrsns->increment();
+}
+
+/** Remove the link associated with the key 'key' */
+void MoleculeData::removeLink(const QString &key)
+{
+    if (this->getLinks().contains(key))
+    {
+        props.removeLink(key);
+
+        // increment the global version number
+        vrsn = vrsns->increment();
+    }
+}
+
+/** Remove all property links from this set */
+void MoleculeData::removeAllLinks()
+{
+    if (this->hasLinks())
+    {
+        props.removeAllLinks();
+
+        // increment the global version number
+        vrsn = vrsns->increment();
+    }
+}
+
+/** Return whether or not there are any property links */
+bool MoleculeData::hasLinks() const
+{
+    return props.hasLinks();
+}
+
+/** Return all of the property links */
+QHash<QString, QString> MoleculeData::getLinks() const
+{
+    return props.getLinks();
+}
+
 /** Return the property at key 'key'
 
     \throw SireBase::missing_property
@@ -959,6 +1009,30 @@ void MoleculeData::renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash
     }
 }
 
+/** Update the passed property to have the value 'value'. This does
+ *  an in-place update on the existing property (which must have
+ *  a compatible type). If 'auto-add' is true, then this will add
+ *  the property if it doesn't exist. This returns whether or not
+ *  a property was updated (or added)
+ */
+bool MoleculeData::updateProperty(const QString &key, const Property &value, bool auto_add)
+{
+    if (key.isEmpty())
+        throw SireError::invalid_arg(QObject::tr("You cannot update a property with an empty key!"), CODELOC);
+
+    bool updated = props.updateProperty(key, value, auto_add);
+
+    if (updated)
+    {
+        SireBase::assert_true(vrsns.get() != 0, CODELOC);
+
+        // now the property version number
+        prop_vrsns[key] = vrsns->increment(key, vrsn);
+    }
+
+    return updated;
+}
+
 /** Set the property with the key 'key' to the value 'value'.
     This replaces any current property with that key. This
     also checks to ensure that this property is compatible
@@ -976,7 +1050,7 @@ void MoleculeData::setProperty(const QString &key, const Property &value, bool c
     SireBase::assert_true(vrsns.get() != 0, CODELOC);
 
     // now the property version number
-    prop_vrsns.insert(key, vrsns->increment(key, vrsn));
+    prop_vrsns[key] = vrsns->increment(key, vrsn);
 
     // now save the property itself
     props.setProperty(key, value, clear_metadata);

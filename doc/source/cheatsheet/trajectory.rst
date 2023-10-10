@@ -300,6 +300,10 @@ carbon atoms.
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.traj"))
 >>> mols.view(align="element C")
 
+or
+
+>>> mols.view(align=mols["element C"])
+
 And here we will smooth trajectories by averaging over 20 frames
 
 >>> mols.view(smooth=20)
@@ -323,6 +327,10 @@ file ``smoothed.rst``.
 Similarly
 
 >>> f = sr.save(mols.trajectory(align="element C"), "aligned", format=["DCD"])
+
+or
+
+>>> f = sr.save(mols.trajectory(align=mols["element C"], "aligned", format=["DCD"]))
 
 saves the result of aligning every frame against carbon atoms to a
 file ``aligned.dcd``,
@@ -350,6 +358,41 @@ To automatically wrap the frames use
    save it (i.e. you don't want an unwrapped trajectory that was loaded
    to be automatically wrapped on save). Make sure that you set the
    value of ``wrap`` if you want to ensure a particular behaviour.
+
+Aligning to molecules outside the trajectory
+--------------------------------------------
+
+You can also align to molecules that are not part of a trajectory. You
+do this by giving a view of the reference molecules againt
+which to align the trajectory, and also supplying
+an :class:`sire.mol.AtomMapping` object that describes how atoms in
+the reference map to atoms in the trajectory.
+
+For example, imagine you have loaded the same molecule in two files.
+
+>>> import sire as sr
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.traj"))
+>>> ref_mols = sr.load(sr.expand(sr.tutorial_url, "ala.top", "ala.crd"))
+
+You could align the trajectory in ``mols`` against the molecules in
+``ref_mols`` by building a mapping. For example, the mapping could be
+between the alanine dipeptide molecule in both trajectories. You can
+build the mapping using the :func:`sire.match_atoms` function.
+
+>>> mapping = sr.match_atoms(ref_mols[0], mols[0], match_light_atoms=True)
+
+Now you can align ``mols`` against ``ref_mols`` by passing in this mapping,
+e.g.
+
+>>> f = sr.save(mols.trajectory(align=ref_mols[0], mapping=mapping), "aligned", format=["DCD"])
+
+You could also use mappings to calculate RMSDs against this molecule, e.g.
+
+>>> mols.trajectory().rmsd(ref_mols[0], mapping=mapping)
+
+or when viewing the trajectory
+
+>>> mols.view(align=ref_mols[0], mapping=mapping)
 
 Calculating energies across frames
 ----------------------------------

@@ -358,7 +358,7 @@ QString Ensemble::toString() const
 
     if (this->isConstantTemperature())
     {
-        parts.append(QObject::tr("temperature = %1 C").arg(this->temperature().to(Celsius())));
+        parts.append(QObject::tr("temperature = %1").arg(Celsius(this->temperature()).toString()));
     }
 
     if (parts.isEmpty())

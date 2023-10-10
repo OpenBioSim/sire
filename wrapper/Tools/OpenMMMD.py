@@ -26,9 +26,7 @@ try:
     openmm_dir = os.environ["OPENMM_PLUGIN_DIR"]
 except KeyError:
     # Set to the default location of the bundled OpenMM package.
-    openmm_dir = os.environ["OPENMM_PLUGIN_DIR"] = (
-        Sire.Base.getLibDir() + "/plugins"
-    )
+    openmm_dir = os.environ["OPENMM_PLUGIN_DIR"] = Sire.Base.getLibDir() + "/plugins"
 finally:
     if not os.path.isdir(openmm_dir):
         warnings.warn("OPENMM_PLUGIN_DIR is not accessible")
@@ -80,9 +78,7 @@ temperature = Parameter(
     "temperature", 25.0 * Sire.Units.celsius, """Simulation temperature"""
 )
 
-pressure = Parameter(
-    "pressure", 1.0 * Sire.Units.atm, """Simulation pressure"""
-)
+pressure = Parameter("pressure", 1.0 * Sire.Units.atm, """Simulation pressure""")
 
 topfile = Parameter(
     "topfile",
@@ -107,8 +103,7 @@ s3file = Parameter(
 restart_file = Parameter(
     "restart file",
     "sim_restart.s3",
-    "Filename of the restart file to use to save progress during the "
-    "simulation.",
+    "Filename of the restart file to use to save progress during the " "simulation.",
 )
 
 dcd_root = Parameter(
@@ -120,8 +115,7 @@ dcd_root = Parameter(
 nmoves = Parameter(
     "nmoves",
     1000,
-    "Number of Molecular Dynamics moves to be performed during the "
-    "simulation.",
+    "Number of Molecular Dynamics moves to be performed during the " "simulation.",
 )
 
 debug_seed = Parameter(
@@ -164,8 +158,7 @@ buffered_coords_freq = Parameter(
 minimal_coordinate_saving = Parameter(
     "minimal coordinate saving",
     False,
-    "Reduce the number of coordiantes writing for states"
-    "with lambda in ]0,1[",
+    "Reduce the number of coordiantes writing for states" "with lambda in ]0,1[",
 )
 
 time_to_skip = Parameter(
@@ -356,9 +349,26 @@ distance_restraints_dict = Parameter(
     "Dictionary of pair of atoms whose distance is restrained, and restraint "
     "parameters. Syntax is {(atom0,atom1):(reql, kl, Dl)} where atom0, atom1 "
     "are atomic indices. reql the equilibrium distance. Kl the force constant "
-    "of the restraint. D the flat bottom radius. WARNING: PBC distance checks "
-    "not implemented, avoid restraining pair of atoms that may diffuse out of "
-    "the box.",
+    "of the restraint. D the flat bottom radius.",
+)
+
+use_permanent_distance_restraints = Parameter(
+    "use permanent distance restraints",
+    False,
+    """
+    Whether or not to use permanent (not affected by turn-on-restraints mode)
+    distance restraints distances between pairs of atoms.
+    """,
+)
+
+permanent_distance_restraints_dict = Parameter(
+    "permanent distance restraints dictionary",
+    {},
+    "Dictionary of pair of atoms whose distance is restrained, and restraint "
+    "parameters. Syntax is {(atom0,atom1):(reql, kl, Dl)} where atom0, atom1 "
+    "are atomic indices. reql the equilibrium distance. Kl the force constant "
+    "of the restraint. D the flat bottom radius. Permanent restraints are not "
+    "affected by turn-on-restraints mode and are always at full strength.",
 )
 
 turn_on_restraints_mode = Parameter(
@@ -416,8 +426,7 @@ hydrogen_mass_repartitioning_factor = Parameter(
 morphfile = Parameter(
     "morphfile",
     "MORPH.pert",
-    "Name of the morph file containing the perturbation to apply to the "
-    "system.",
+    "Name of the morph file containing the perturbation to apply to the " "system.",
 )
 
 lambda_val = Parameter(
@@ -528,9 +537,7 @@ def setupDCD(system):
 def writeSystemData(system, moves, Trajectory, block, softcore_lambda=False):
     if softcore_lambda:
         if block == ncycles.val or block == 1:
-            Trajectory.writeModel(
-                system[MGName("all")], system.property("space")
-            )
+            Trajectory.writeModel(system[MGName("all")], system.property("space"))
     else:
         if block % ncycles_per_snap.val == 0:
             if buffered_coords_freq.val > 0:
@@ -539,13 +546,9 @@ def writeSystemData(system, moves, Trajectory, block, softcore_lambda=False):
                 for prop in sysprops:
                     if prop.startswith("buffered_space"):
                         dimensions[str(prop)] = system.property(prop)
-                Trajectory.writeBufferedModels(
-                    system[MGName("all")], dimensions
-                )
+                Trajectory.writeBufferedModels(system[MGName("all")], dimensions)
             else:
-                Trajectory.writeModel(
-                    system[MGName("all")], system.property("space")
-                )
+                Trajectory.writeModel(system[MGName("all")], system.property("space"))
 
     # Write a PDB coordinate file each cycle.
     pdb = Sire.IO.PDB2(system, {"use_atom_numbers": Sire.Base.wrap(True)})
@@ -596,9 +599,7 @@ def centerSolute(system, space):
             box_center = space.dimensions() / 2
         # TriclincBox.
         except:
-            box_center = 0.5 * (
-                space.vector0() + space.vector1() + space.vector2()
-            )
+            box_center = 0.5 * (space.vector0() + space.vector1() + space.vector2())
     else:
         box_center = Sire.Maths.Vector(0.0, 0.0, 0.0)
 
@@ -683,14 +684,10 @@ def setupForcefields(system, space):
 
     inter_ions_nonbondedff.add(ions)
 
-    inter_ions_molecules_nonbondedff = Sire.MM.InterGroupCLJFF(
-        "ions:molecules"
-    )
+    inter_ions_molecules_nonbondedff = Sire.MM.InterGroupCLJFF("ions:molecules")
     if cutoff_type.val != "nocutoff":
         inter_ions_molecules_nonbondedff.setUseReactionField(True)
-        inter_ions_molecules_nonbondedff.setReactionFieldDielectric(
-            rf_dielectric.val
-        )
+        inter_ions_molecules_nonbondedff.setReactionFieldDielectric(rf_dielectric.val)
 
     inter_ions_molecules_nonbondedff.add(ions, MGIdx(0))
     inter_ions_molecules_nonbondedff.add(molecules, MGIdx(1))
@@ -758,9 +755,7 @@ def setupForcefields(system, space):
     system.setProperty(
         "switchingFunction", Sire.MM.CHARMMSwitchingFunction(cutoff_dist.val)
     )
-    system.setProperty(
-        "combiningRules", Sire.Base.VariantProperty(combining_rules.val)
-    )
+    system.setProperty("combiningRules", Sire.Base.VariantProperty(combining_rules.val))
 
     total_nrg = (
         internonbondedff.components().total()
@@ -873,9 +868,7 @@ def atomNumVectorListToProperty(list):
     i = 0
 
     for value in list:
-        prop.setProperty(
-            "AtomNum(%d)" % i, Sire.Base.VariantProperty(value[0].value())
-        )
+        prop.setProperty("AtomNum(%d)" % i, Sire.Base.VariantProperty(value[0].value()))
         prop.setProperty("x(%d)" % i, Sire.Base.VariantProperty(value[1].x()))
         prop.setProperty("y(%d)" % i, Sire.Base.VariantProperty(value[1].y()))
         prop.setProperty("z(%d)" % i, Sire.Base.VariantProperty(value[1].z()))
@@ -888,17 +881,26 @@ def atomNumVectorListToProperty(list):
 
 
 def linkbondVectorListToProperty(list):
+    """
+    Converts a list of linkbond vectors to a Sire property.
+
+    Parameters
+    ----------
+    list : list
+        List of linkbond vectors.
+
+    Returns
+    -------
+    prop : Sire.Base.Properties
+        Sire property containing the linkbond vectors.
+    """
     prop = Sire.Base.Properties()
 
     i = 0
 
     for value in list:
-        prop.setProperty(
-            "AtomNum0(%d)" % i, Sire.Base.VariantProperty(value[0])
-        )
-        prop.setProperty(
-            "AtomNum1(%d)" % i, Sire.Base.VariantProperty(value[1])
-        )
+        prop.setProperty("AtomNum0(%d)" % i, Sire.Base.VariantProperty(value[0]))
+        prop.setProperty("AtomNum1(%d)" % i, Sire.Base.VariantProperty(value[1]))
         prop.setProperty("reql(%d)" % i, Sire.Base.VariantProperty(value[2]))
         prop.setProperty("kl(%d)" % i, Sire.Base.VariantProperty(value[3]))
         prop.setProperty("dl(%d)" % i, Sire.Base.VariantProperty(value[4]))
@@ -907,6 +909,7 @@ def linkbondVectorListToProperty(list):
     prop.setProperty("nbondlinks", Sire.Base.VariantProperty(i))
 
     return prop
+
 
 def PositionalRestraintsToProperty(posrest_list):
     """Generates properties to store positional restraint parameters.
@@ -929,6 +932,7 @@ def PositionalRestraintsToProperty(posrest_list):
     prop.setProperty("nrestrainedatoms", Sire.Base.VariantProperty(i))
 
     return prop
+
 
 def boreschDistRestraintToProperty(boresch_dict):
     """Generates properties to store information needed to set up the single
@@ -988,9 +992,7 @@ def boreschAngleRestraintsToProperty(boresch_dict):
                 prop.setProperty(
                     f"AtomNum{j}-{i}",
                     Sire.Base.VariantProperty(
-                        boresch_dict["anchor_points"][
-                            angle_anchor_dict[angle][j]
-                        ]
+                        boresch_dict["anchor_points"][angle_anchor_dict[angle][j]]
                     ),
                 )
             prop.setProperty(
@@ -1001,16 +1003,12 @@ def boreschAngleRestraintsToProperty(boresch_dict):
             )
             prop.setProperty(
                 f"force_const-{i}",
-                Sire.Base.VariantProperty(
-                    boresch_dict["force_constants"][f"k{angle}"]
-                ),
+                Sire.Base.VariantProperty(boresch_dict["force_constants"][f"k{angle}"]),
             )
 
             i += 1
 
-    prop.setProperty(
-        "n_boresch_angle_restraints", Sire.Base.VariantProperty(i)
-    )
+    prop.setProperty("n_boresch_angle_restraints", Sire.Base.VariantProperty(i))
 
     return prop
 
@@ -1041,9 +1039,7 @@ def boreschDihedralRestraintsToProperty(boresch_dict):
                 prop.setProperty(
                     f"AtomNum{j}-{i}",
                     Sire.Base.VariantProperty(
-                        boresch_dict["anchor_points"][
-                            dihedral_anchor_dict[dihedral][j]
-                        ]
+                        boresch_dict["anchor_points"][dihedral_anchor_dict[dihedral][j]]
                     ),
                 )
             prop.setProperty(
@@ -1061,9 +1057,7 @@ def boreschDihedralRestraintsToProperty(boresch_dict):
 
             i += 1
 
-    prop.setProperty(
-        "n_boresch_dihedral_restraints", Sire.Base.VariantProperty(i)
-    )
+    prop.setProperty("n_boresch_dihedral_restraints", Sire.Base.VariantProperty(i))
 
     return prop
 
@@ -1099,6 +1093,7 @@ def propertyToAtomNumVectorList(prop):
 
     return list
 
+
 def setupPositionalRestraints(system):
     # Tag atoms in the system that are listed in the provided restrained atoms file
     # this is used to activate positional restraints during initialisation
@@ -1106,7 +1101,9 @@ def setupPositionalRestraints(system):
 
     # parse restrained atoms file
     if restrained_atoms is None:
-        print ("""Error: if positional restraints are activated you must supply a keyword argument restrained atoms = /path/to/file.""")
+        print(
+            """Error: if positional restraints are activated you must supply a keyword argument restrained atoms = /path/to/file."""
+        )
         sys.exit(-1)
     restrained_dict = restrained_atoms.val
     keys = restrained_dict.keys()
@@ -1127,7 +1124,9 @@ def setupPositionalRestraints(system):
             atnumber = at.number()
             atnumberval = atnumber.value()
             if atnumberval in keys:
-                restrainedAtoms.append((atnumberval, restrained_dict[atnumberval] , k_restraint.val))
+                restrainedAtoms.append(
+                    (atnumberval, restrained_dict[atnumberval], k_restraint.val)
+                )
 
         if len(restrainedAtoms) > 0:
             mol = (
@@ -1141,6 +1140,7 @@ def setupPositionalRestraints(system):
             system.update(mol)
 
     return system
+
 
 def setupRestraints(system):
     molecules = system[MGName("all")].molecules()
@@ -1206,14 +1206,38 @@ def saveTurnOnRestraintsModeProperty(system):
     return system
 
 
-def setupDistanceRestraints(system, restraints=None):
+def setupDistanceRestraints(system, restraints=None, permanent=False):
+    """
+    Sets up distance restraints between pairs of atoms in the system.
+
+    Parameters
+    ----------
+    system : Sire System
+        The system to which the restraints will be added.
+    restraints : dict, optional, default=None
+        A dictionary of the form {(atom0,atom1):(reql, kl, Dl)} where atom0, atom1
+        are atomic indices, reql is the equilibrium distance, Kl is the force constant
+        of the restraint and Dl is the flat bottom radius. If none, this will be read
+        from the cfg file.
+    permanent : bool, optional, default=False
+        If True, the restraints are 'permanent' and will not be scaled by lambda
+        in turn-on-restraints mode (they will always be at full strength).
+
+    Returns
+    -------
+    None
+    """
     prop_list = []
 
     molecules = system[MGName("all")].molecules()
 
+    # Get the provided restraints, or read them from the cfg file
+    # if none are provided
     if restraints is None:
-        # dic_items = list(distance_restraints_dict.val.items())
-        dic_items = list(dict(distance_restraints_dict.val).items())
+        if not permanent:
+            dic_items = list(dict(distance_restraints_dict.val).items())
+        else:  # Permanent restraints
+            dic_items = list(dict(permanent_distance_restraints_dict.val).items())
     else:
         dic_items = list(restraints.items())
 
@@ -1257,10 +1281,12 @@ def setupDistanceRestraints(system, restraints=None):
     print(unique_prop_list)
     # The solute will store all the information related to the receptor-ligand restraints
     solute = getSolute(system)
+    property_name = "linkbonds" if not permanent else "permanent_linkbonds"
     solute = (
         solute.edit()
         .setProperty(
-            "linkbonds", linkbondVectorListToProperty(unique_prop_list)
+            property_name,
+            linkbondVectorListToProperty(unique_prop_list),
         )
         .commit()
     )
@@ -1360,9 +1386,7 @@ def setupBoreschRestraints(system):
                     print(anchor + "=" + str(at))
 
     if anchors_not_present:
-        print(
-            "Error! The following anchor points do not not exist in the system:"
-        )
+        print("Error! The following anchor points do not not exist in the system:")
         for anchor in anchors_not_present:
             print(f"{anchor}: index {anchors_dict[anchor]-1}")
         sys.exit(-1)
@@ -1412,13 +1436,10 @@ def freezeResidues(system):
             atnumber = at.number()
             if at.residue().name().value() in frozen_residues.val:
                 print(
-                    "Freezing %s %s %s "
-                    % (at, atnumber, at.residue().name().value())
+                    "Freezing %s %s %s " % (at, atnumber, at.residue().name().value())
                 )
                 mol = (
-                    at.edit()
-                    .setProperty("mass", 0.0 * Sire.Units.g_per_mol)
-                    .molecule()
+                    at.edit().setProperty("mass", 0.0 * Sire.Units.g_per_mol).molecule()
                 )
 
         system.update(mol)
@@ -1522,8 +1543,7 @@ def repartitionMasses(system, hmassfactor=4.0):
             print(
                 "WARNING! The mass repartitioning algorithm is not conserving "
                 "atomic masses for molecule %s (total delta is %s). "
-                "Report bug to a Sire developer."
-                % (molnum, total_delta.value()),
+                "Report bug to a Sire developer." % (molnum, total_delta.value()),
             )
             sys.exit(-1)
 
@@ -1544,12 +1564,7 @@ def repartitionMasses(system, hmassfactor=4.0):
                 )
                 sys.exit(-1)
 
-            mol = (
-                mol.edit()
-                .atom(atidx)
-                .setProperty("mass", newmass)[0]
-                .molecule()
-            )
+            mol = mol.edit().atom(atidx).setProperty("mass", newmass)[0].molecule()
 
         system.update(mol)
         # import pdb; pdb.set_trace()
@@ -1567,26 +1582,54 @@ def getDummies(molecule):
     to_dummies = None
     from_non_dummies = []
     to_non_dummies = []
+    # For simulations in which restraints are modified while ligand is non-interacting
+    always_dummies = None
 
     for x in range(0, natoms):
         atom = atoms[x]
 
-        if atom.property("initial_ambertype") == "du":
-            if from_dummies is None:
-                from_dummies = molecule.selectAll(atom.index())
+        # First, check for special case where we are going from a dummy to a
+        # dummy.
+        if (
+            atom.property("initial_ambertype") == "du"
+            and atom.property("final_ambertype") == "du"
+        ):
+            if always_dummies is None:
+                always_dummies = molecule.selectAll(atom.index())
             else:
-                from_dummies += molecule.selectAll(atom.index())
+                always_dummies += molecule.selectAll(atom.index())
+        # Otherwise, this is a standard stage in a free energy calculation
+        # where we are going from a dummy to a non-dummy or vice versa.
         else:
-            from_non_dummies.append(atom.index())
-        if atom.property("final_ambertype") == "du":
-            if to_dummies is None:
-                to_dummies = molecule.selectAll(atom.index())
+            if atom.property("initial_ambertype") == "du":
+                if from_dummies is None:
+                    from_dummies = molecule.selectAll(atom.index())
+                else:
+                    from_dummies += molecule.selectAll(atom.index())
             else:
-                to_dummies += molecule.selectAll(atom.index())
-        else:
-            to_non_dummies.append(atom.index())
+                from_non_dummies.append(atom.index())
+            if atom.property("final_ambertype") == "du":
+                if to_dummies is None:
+                    to_dummies = molecule.selectAll(atom.index())
+                else:
+                    to_dummies += molecule.selectAll(atom.index())
+            else:
+                to_non_dummies.append(atom.index())
 
-    return to_dummies, from_dummies, to_non_dummies, from_non_dummies
+    # Check that if we have any "always_dummies" then we don't have any other types of dummies
+    # because we expect the entire ligand to be non-interacting (and the logic to handle this
+    # is not implemented).
+    if always_dummies is not None:
+        if from_dummies is not None or to_dummies is not None:
+            raise RuntimeError(
+                "Cannot have any dummy atoms in a ligand that is always non-interacting"
+            )
+        if not (len(from_non_dummies) == 0 and len(to_non_dummies) == 0):
+            raise RuntimeError(
+                "Cannot have any non-dummy atoms in a ligand that is always non-interacting"
+            )
+
+    return to_dummies, from_dummies, to_non_dummies, from_non_dummies, always_dummies
 
 
 def createSystemFreeEnergy(molecules):
@@ -1618,9 +1661,7 @@ def createSystemFreeEnergy(molecules):
 
     # FIXME: assumption that perturbed molecule is at a fixed location
     for molecule in moleculeList:
-        if molecule.residue(ResIdx(0)).number() == ResNum(
-            perturbed_resnum.val
-        ):
+        if molecule.residue(ResIdx(0)).number() == ResNum(perturbed_resnum.val):
             solute = molecule
             moleculeList.remove(molecule)
             break
@@ -1657,12 +1698,13 @@ def createSystemFreeEnergy(molecules):
         .commit()
     )
 
-    # We put atoms in three groups depending on what happens in the
+    # We put atoms in four groups depending on what happens in the
     # perturbation
     # non dummy to non dummy --> the hard group, use a normal intermolecular FF
     # non dummy to dummy --> the todummy group, uses SoftFF with alpha = Lambda
     # dummy to non dummy --> the fromdummy group, uses SoftFF with
     #                        alpha = 1 - Lambda
+    # dummy to dummy --> the alwaysdummy group, uses SoftFF with alpha = 1
     # We start assuming all atoms are hard atoms. Then we call getDummies to
     # find which atoms
     # start/end as dummies and update the hard, todummy and fromdummy groups
@@ -1672,10 +1714,12 @@ def createSystemFreeEnergy(molecules):
     solute_grp_ref_hard = MoleculeGroup("solute_ref_hard")
     solute_grp_ref_todummy = MoleculeGroup("solute_ref_todummy")
     solute_grp_ref_fromdummy = MoleculeGroup("solute_ref_fromdummy")
+    solute_grp_ref_alwaysdummy = MoleculeGroup("solute_ref_alwaysdummy")
 
     solute_ref_hard = solute.selectAllAtoms()
     solute_ref_todummy = solute.selectAllAtoms()
     solute_ref_fromdummy = solute.selectAllAtoms()
+    solute_ref_alwaysdummy = solute.selectAllAtoms()
 
     # N.B.: Currently Sire 2023 doesn't behave consistently with Sire < 2023 for
     # selections with zero items. Previously it was possible to create an empty
@@ -1688,9 +1732,13 @@ def createSystemFreeEnergy(molecules):
     # in order to add only the desired atoms. This can then be converted to a
     # Selector_Atom_ by passing the solute and selection to the constructor.
 
-    to_dummies, from_dummies, to_non_dummies, from_non_dummies = getDummies(
-        solute
-    )
+    (
+        to_dummies,
+        from_dummies,
+        to_non_dummies,
+        from_non_dummies,
+        always_dummies,
+    ) = getDummies(solute)
 
     if to_dummies is not None:
         ndummies = to_dummies.count()
@@ -1698,14 +1746,10 @@ def createSystemFreeEnergy(molecules):
 
         for x in range(0, ndummies):
             dummy_index = dummies[x].index()
-            solute_ref_hard = solute_ref_hard.subtract(
-                solute.select(dummy_index)
-            )
+            solute_ref_hard = solute_ref_hard.subtract(solute.select(dummy_index))
 
     for non_dummy in to_non_dummies:
-        solute_ref_todummy = solute_ref_todummy.subtract(
-            solute.select(non_dummy)
-        )
+        solute_ref_todummy = solute_ref_todummy.subtract(solute.select(non_dummy))
 
     if from_dummies is not None:
         ndummies = from_dummies.count()
@@ -1713,18 +1757,34 @@ def createSystemFreeEnergy(molecules):
 
         for x in range(0, ndummies):
             dummy_index = dummies[x].index()
-            solute_ref_hard = solute_ref_hard.subtract(
+            solute_ref_hard = solute_ref_hard.subtract(solute.select(dummy_index))
+
+    for non_dummy in from_non_dummies:
+        solute_ref_fromdummy = solute_ref_fromdummy.subtract(solute.select(non_dummy))
+
+    if always_dummies is not None:
+        # Remove all the atoms from the hard group, the todummy group and the
+        # fromdummy group
+        ndummies = always_dummies.count()
+        dummies = always_dummies.atoms()
+
+        for x in range(0, ndummies):
+            dummy_index = dummies[x].index()
+            solute_ref_hard = solute_ref_hard.subtract(solute.select(dummy_index))
+            solute_ref_todummy = solute_ref_todummy.subtract(solute.select(dummy_index))
+            solute_ref_fromdummy = solute_ref_fromdummy.subtract(
                 solute.select(dummy_index)
             )
 
-    for non_dummy in from_non_dummies:
-        solute_ref_fromdummy = solute_ref_fromdummy.subtract(
-            solute.select(non_dummy)
+    else:  # We have no alwaysdummy atoms - remove all atoms from the always dummy group
+        solute_ref_alwaysdummy = solute_ref_alwaysdummy.subtract(
+            solute.selectAllAtoms()
         )
 
     solute_grp_ref_hard.add(solute_ref_hard)
     solute_grp_ref_todummy.add(solute_ref_todummy)
     solute_grp_ref_fromdummy.add(solute_ref_fromdummy)
+    solute_grp_ref_alwaysdummy.add(solute_ref_alwaysdummy)
 
     solutes = MoleculeGroup("solutes")
     solutes.add(solute)
@@ -1748,6 +1808,7 @@ def createSystemFreeEnergy(molecules):
     all.add(solute_grp_ref_hard)
     all.add(solute_grp_ref_todummy)
     all.add(solute_grp_ref_fromdummy)
+    all.add(solute_grp_ref_alwaysdummy)
 
     # Add these groups to the System
     system = Sire.System.System()
@@ -1758,6 +1819,7 @@ def createSystemFreeEnergy(molecules):
     system.add(solute_grp_ref_hard)
     system.add(solute_grp_ref_todummy)
     system.add(solute_grp_ref_fromdummy)
+    system.add(solute_grp_ref_alwaysdummy)
 
     system.add(molecules)
 
@@ -1791,6 +1853,7 @@ def setupForceFieldsFreeEnergy(system, space):
     solute_hard = system[MGName("solute_ref_hard")]
     solute_todummy = system[MGName("solute_ref_todummy")]
     solute_fromdummy = system[MGName("solute_ref_fromdummy")]
+    solute_alwaysdummy = system[MGName("solute_ref_alwaysdummy")]
 
     solvent = system[MGName("solvent")]
 
@@ -1831,15 +1894,21 @@ def setupForceFieldsFreeEnergy(system, space):
         solute_todummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
     solute_todummy_intraclj.add(solute_todummy)
 
-    solute_fromdummy_intraclj = Sire.MM.IntraSoftCLJFF(
-        "solute_fromdummy_intraclj"
-    )
+    solute_fromdummy_intraclj = Sire.MM.IntraSoftCLJFF("solute_fromdummy_intraclj")
     solute_fromdummy_intraclj.setShiftDelta(shift_delta.val)
     solute_fromdummy_intraclj.setCoulombPower(coulomb_power.val)
     if cutoff_type.val != "nocutoff":
         solute_fromdummy_intraclj.setUseReactionField(True)
         solute_fromdummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
     solute_fromdummy_intraclj.add(solute_fromdummy)
+
+    solute_alwaysdummy_intraclj = Sire.MM.IntraSoftCLJFF("solute_alwaysdummy_intraclj")
+    solute_alwaysdummy_intraclj.setShiftDelta(shift_delta.val)
+    solute_alwaysdummy_intraclj.setCoulombPower(coulomb_power.val)
+    if cutoff_type.val != "nocutoff":
+        solute_alwaysdummy_intraclj.setUseReactionField(True)
+        solute_alwaysdummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
+    solute_alwaysdummy_intraclj.add(solute_alwaysdummy)
 
     solute_hard_todummy_intraclj = Sire.MM.IntraGroupSoftCLJFF(
         "solute_hard:todummy_intraclj"
@@ -1848,9 +1917,7 @@ def setupForceFieldsFreeEnergy(system, space):
     solute_hard_todummy_intraclj.setCoulombPower(coulomb_power.val)
     if cutoff_type.val != "nocutoff":
         solute_hard_todummy_intraclj.setUseReactionField(True)
-        solute_hard_todummy_intraclj.setReactionFieldDielectric(
-            rf_dielectric.val
-        )
+        solute_hard_todummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
     solute_hard_todummy_intraclj.add(solute_hard, MGIdx(0))
     solute_hard_todummy_intraclj.add(solute_todummy, MGIdx(1))
 
@@ -1861,9 +1928,7 @@ def setupForceFieldsFreeEnergy(system, space):
     solute_hard_fromdummy_intraclj.setCoulombPower(coulomb_power.val)
     if cutoff_type.val != "nocutoff":
         solute_hard_fromdummy_intraclj.setUseReactionField(True)
-        solute_hard_fromdummy_intraclj.setReactionFieldDielectric(
-            rf_dielectric.val
-        )
+        solute_hard_fromdummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
     solute_hard_fromdummy_intraclj.add(solute_hard, MGIdx(0))
     solute_hard_fromdummy_intraclj.add(solute_fromdummy, MGIdx(1))
 
@@ -1874,9 +1939,7 @@ def setupForceFieldsFreeEnergy(system, space):
     solute_todummy_fromdummy_intraclj.setCoulombPower(coulomb_power.val)
     if cutoff_type.val != "nocutoff":
         solute_todummy_fromdummy_intraclj.setUseReactionField(True)
-        solute_todummy_fromdummy_intraclj.setReactionFieldDielectric(
-            rf_dielectric.val
-        )
+        solute_todummy_fromdummy_intraclj.setReactionFieldDielectric(rf_dielectric.val)
     solute_todummy_fromdummy_intraclj.add(solute_todummy, MGIdx(0))
     solute_todummy_fromdummy_intraclj.add(solute_fromdummy, MGIdx(1))
 
@@ -1888,23 +1951,17 @@ def setupForceFieldsFreeEnergy(system, space):
     solute_hard_solventff.add(solute_hard, MGIdx(0))
     solute_hard_solventff.add(solvent, MGIdx(1))
 
-    solute_todummy_solventff = Sire.MM.InterGroupSoftCLJFF(
-        "solute_todummy:solvent"
-    )
+    solute_todummy_solventff = Sire.MM.InterGroupSoftCLJFF("solute_todummy:solvent")
     if cutoff_type.val != "nocutoff":
         solute_todummy_solventff.setUseReactionField(True)
         solute_todummy_solventff.setReactionFieldDielectric(rf_dielectric.val)
     solute_todummy_solventff.add(solute_todummy, MGIdx(0))
     solute_todummy_solventff.add(solvent, MGIdx(1))
 
-    solute_fromdummy_solventff = Sire.MM.InterGroupSoftCLJFF(
-        "solute_fromdummy:solvent"
-    )
+    solute_fromdummy_solventff = Sire.MM.InterGroupSoftCLJFF("solute_fromdummy:solvent")
     if cutoff_type.val != "nocutoff":
         solute_fromdummy_solventff.setUseReactionField(True)
-        solute_fromdummy_solventff.setReactionFieldDielectric(
-            rf_dielectric.val
-        )
+        solute_fromdummy_solventff.setReactionFieldDielectric(rf_dielectric.val)
     solute_fromdummy_solventff.add(solute_fromdummy, MGIdx(0))
     solute_fromdummy_solventff.add(solvent, MGIdx(1))
 
@@ -1914,6 +1971,7 @@ def setupForceFieldsFreeEnergy(system, space):
         solute_hard_intraclj,
         solute_todummy_intraclj,
         solute_fromdummy_intraclj,
+        solute_alwaysdummy_intraclj,
         solute_hard_todummy_intraclj,
         solute_hard_fromdummy_intraclj,
         solute_todummy_fromdummy_intraclj,
@@ -1938,15 +1996,9 @@ def setupForceFieldsFreeEnergy(system, space):
     else:
         system.setProperty("switchingFunction", Sire.MM.NoCutoff())
 
-    system.setProperty(
-        "combiningRules", Sire.Base.VariantProperty(combining_rules.val)
-    )
-    system.setProperty(
-        "coulombPower", Sire.Base.VariantProperty(coulomb_power.val)
-    )
-    system.setProperty(
-        "shiftDelta", Sire.Base.VariantProperty(shift_delta.val)
-    )
+    system.setProperty("combiningRules", Sire.Base.VariantProperty(combining_rules.val))
+    system.setProperty("coulombPower", Sire.Base.VariantProperty(coulomb_power.val))
+    system.setProperty("shiftDelta", Sire.Base.VariantProperty(shift_delta.val))
 
     # TOTAL
     total_nrg = (
@@ -1954,6 +2006,7 @@ def setupForceFieldsFreeEnergy(system, space):
         + solute_hard_intraclj.components().total()
         + solute_todummy_intraclj.components().total(0)
         + solute_fromdummy_intraclj.components().total(0)
+        + solute_alwaysdummy_intraclj.components().total(0)
         + solute_hard_todummy_intraclj.components().total(0)
         + solute_hard_fromdummy_intraclj.components().total(0)
         + solute_todummy_fromdummy_intraclj.components().total(0)
@@ -1985,6 +2038,11 @@ def setupForceFieldsFreeEnergy(system, space):
     system.add(
         Sire.System.PropertyConstraint(
             "alpha0", Sire.FF.FFName("solute_fromdummy_intraclj"), 1 - lam
+        )
+    )
+    system.add(
+        Sire.System.PropertyConstraint(
+            "alpha0", Sire.FF.FFName("solute_alwaysdummy_intraclj"), 1
         )
     )
     system.add(
@@ -2336,9 +2394,7 @@ def computeOpenMMEnergy(prmtop_filename, inpcrd_filename, cutoff):
 
     state = context.getState(getEnergy=True)
 
-    return state.getPotentialEnergy().value_in_unit(
-        units.kilocalorie / units.mole
-    )
+    return state.getPotentialEnergy().value_in_unit(units.kilocalorie / units.mole)
 
 
 ### This is how a TIP3P specific template for Cl- looks like
@@ -2485,15 +2541,9 @@ def run():
 
     print("\n### Running Molecular Dynamics simulation on %s ###" % host)
     if verbose.val:
-        print(
-            "###================= Simulation Parameters====================="
-            "###"
-        )
+        print("###================= Simulation Parameters=====================" "###")
         Parameter.printAll()
-        print(
-            "###==========================================================="
-            "###\n"
-        )
+        print("###===========================================================" "###\n")
 
     timer = Sire.Qt.QTime()
     timer.start()
@@ -2544,11 +2594,12 @@ def run():
                         % distance_restraints_dict
                     )
                     stream = open("restraints.cfg", "w")
-                    stream.write(
-                        "distance restraints dictionary = %s\n" % restraints
-                    )
+                    stream.write("distance restraints dictionary = %s\n" % restraints)
                     stream.close()
             system = setupDistanceRestraints(system, restraints=restraints)
+
+        if use_permanent_distance_restraints.val:
+            system = setupDistanceRestraints(system, permanent=True)
 
         if use_boresch_restraints.val:
             print("Setting up Boresch restraints...")
@@ -2567,10 +2618,7 @@ def run():
         system = setupForcefields(system, space)
 
         if debug_seed.val != 0:
-            print(
-                "Setting up the simulation with debugging seed %s"
-                % debug_seed.val
-            )
+            print("Setting up the simulation with debugging seed %s" % debug_seed.val)
 
         moves = setupMoves(system, debug_seed.val, gpu.val)
 
@@ -2584,9 +2632,7 @@ def run():
         move0.setIntegrator(integrator)
         moves = Sire.Move.WeightedMoves()
         moves.add(move0)
-        print(
-            "Index GPU = %s " % moves.moves()[0].integrator().getDeviceIndex()
-        )
+        print("Index GPU = %s " % moves.moves()[0].integrator().getDeviceIndex())
         print(
             "Loaded a restart file on which we have performed %d moves."
             % moves.nMoves()
@@ -2612,17 +2658,13 @@ def run():
     mdmoves = moves.moves()[0]
     integrator = mdmoves.integrator()
 
-    print(
-        "###===========================================================###\n"
-    )
+    print("###===========================================================###\n")
 
     # energy = computeOpenMMEnergy(topfile.val, crdfile.val, cutoff_dist.val)
     # print(f'OpenMM Energy (PME): {energy}\n')
 
     if minimise.val:
-        print(
-            "###=======================Minimisation========================###"
-        )
+        print("###=======================Minimisation========================###")
         print("Running minimization.")
         if verbose.val:
             print("Energy before the minimization: " + str(system.energy()))
@@ -2641,22 +2683,17 @@ def run():
             print("Energy minimization done.")
         integrator.setConstraintType(constraint.val)
         print(
-            "###==========================================================="
-            "###\n",
+            "###===========================================================" "###\n",
             flush=True,
         )
 
     if equilibrate.val:
-        print(
-            "###======================Equilibration========================###"
-        )
+        print("###======================Equilibration========================###")
         print("Running equilibration.")
         # Here we anneal lambda (To be determined)
         if verbose.val:
             print("Equilibration timestep " + str(equil_timestep.val))
-            print(
-                "Number of equilibration steps: " + str(equil_iterations.val)
-            )
+            print("Number of equilibration steps: " + str(equil_iterations.val))
         system = integrator.equilibrateSystem(
             system, equil_timestep.val, equil_iterations.val
         )
@@ -2665,18 +2702,14 @@ def run():
             print("Energy after the equilibration: " + str(system.energy()))
             print("Equilibration done.\n")
         print(
-            "###==========================================================="
-            "###\n",
+            "###===========================================================" "###\n",
             flush=True,
         )
 
     simtime = nmoves.val * ncycles.val * timestep.val
     print("###=======================somd run============================###")
     print("Starting somd run...")
-    print(
-        "%s moves %s cycles, %s simulation time"
-        % (nmoves.val, ncycles.val, simtime)
-    )
+    print("%s moves %s cycles, %s simulation time" % (nmoves.val, ncycles.val, simtime))
 
     s1 = timer.elapsed() / 1000.0
     for i in range(cycle_start, cycle_end):
@@ -2707,15 +2740,9 @@ def runFreeNrg():
     )
 
     if verbose.val:
-        print(
-            "###================= Simulation Parameters====================="
-            "###"
-        )
+        print("###================= Simulation Parameters=====================" "###")
         Parameter.printAll()
-        print(
-            "###==========================================================="
-            "###\n"
-        )
+        print("###===========================================================" "###\n")
 
     timer = Sire.Qt.QTime()
     timer.start()
@@ -2771,11 +2798,14 @@ def runFreeNrg():
                     % distance_restraints_dict
                 )
                 stream = open("restraints.cfg", "w")
-                stream.write(
-                    "distance restraints dictionary = %s\n" % restraints
-                )
+                stream.write("distance restraints dictionary = %s\n" % restraints)
                 stream.close()
-            system = setupDistanceRestraints(system, restraints=restraints)
+            system = setupDistanceRestraints(
+                system, restraints=restraints, permanent=False
+            )
+
+        if use_permanent_distance_restraints.val:
+            system = setupDistanceRestraints(system, permanent=True)
 
         if use_boresch_restraints.val:
             print("Setting up Boresch restraints...")
@@ -2794,18 +2824,13 @@ def runFreeNrg():
         system = setupForceFieldsFreeEnergy(system, space)
 
         if debug_seed.val != 0:
-            print(
-                "Setting up the simulation with debugging seed %s"
-                % debug_seed.val
-            )
+            print("Setting up the simulation with debugging seed %s" % debug_seed.val)
 
         if charge_diff.val != 0:
             print("The difference in charge is", charge_diff.val)
             system = selectWatersForPerturbation(system, charge_diff.val)
 
-        moves = setupMovesFreeEnergy(
-            system, debug_seed.val, gpu.val, lambda_val.val
-        )
+        moves = setupMovesFreeEnergy(system, debug_seed.val, gpu.val, lambda_val.val)
 
         print("Saving restart")
         Sire.Stream.save([system, moves], restart_file.val)
@@ -2842,9 +2867,7 @@ def runFreeNrg():
                 "UTF-8",
             )
         )
-        outfile.write(
-            bytes("#Generating lambda is\t\t " + lam_str + "\n", "UTF-8")
-        )
+        outfile.write(bytes("#Generating lambda is\t\t " + lam_str + "\n", "UTF-8"))
         outfile.write(
             bytes(
                 "#Alchemical array is\t\t " + str(lambda_array.val) + "\n",
@@ -2890,9 +2913,7 @@ def runFreeNrg():
         moves.add(move0)
         cycle_start = int(moves.nMoves() / nmoves.val)
         cycle_end = cycle_start + ncycles.val
-        print(
-            "Index GPU = %s " % moves.moves()[0].integrator().getDeviceIndex()
-        )
+        print("Index GPU = %s " % moves.moves()[0].integrator().getDeviceIndex())
         print(
             "Loaded a restart file on which we have performed %d moves."
             % moves.nMoves()
@@ -2903,8 +2924,7 @@ def runFreeNrg():
     if cycle_start > maxcycles.val:
         print(
             "Maxinum number of MD cycles reached (%s). If you wish to extend the "
-            "simulation increase the value of the parameter maxcycle."
-            % maxcycles.val
+            "simulation increase the value of the parameter maxcycle." % maxcycles.val
         )
         sys.exit(-1)
 
@@ -2922,9 +2942,7 @@ def runFreeNrg():
     mdmoves = moves.moves()[0]
     integrator = mdmoves.integrator()
 
-    print(
-        "###===========================================================###\n"
-    )
+    print("###===========================================================###\n")
 
     print(f"Initial energy: {integrator.getPotentialEnergy(system)}")
 
@@ -2933,9 +2951,7 @@ def runFreeNrg():
     #    f'({cutoff_type}): {energy:.2f} kcal mol-1\n')
 
     if minimise.val:
-        print(
-            "###=======================Minimisation========================###"
-        )
+        print("###=======================Minimisation========================###")
         print("Running minimization.")
         print(f"Tolerance for minimization: {str(minimise_tol.val)}")
         print(
@@ -2950,26 +2966,18 @@ def runFreeNrg():
         system.mustNowRecalculateFromScratch()
 
         print(
-            "Energy after the minimization: "
-            f"{integrator.getPotentialEnergy(system)}"
+            "Energy after the minimization: " f"{integrator.getPotentialEnergy(system)}"
         )
         print("Energy minimization done.")
-        print(
-            "###==========================================================="
-            "###\n"
-        )
+        print("###===========================================================" "###\n")
 
     if equilibrate.val:
-        print(
-            "###======================Equilibration========================###"
-        )
+        print("###======================Equilibration========================###")
         print("Running lambda equilibration to lambda=%s." % lambda_val.val)
         # Here we anneal lambda (To be determined)
         if verbose.val:
             print("Equilibration timestep " + str(equil_timestep.val))
-            print(
-                "Number of equilibration steps: " + str(equil_iterations.val)
-            )
+            print("Number of equilibration steps: " + str(equil_iterations.val))
         system = integrator.annealSystemToLambda(
             system, equil_timestep.val, equil_iterations.val
         )
@@ -2979,17 +2987,11 @@ def runFreeNrg():
                 f"Energy after the annealing: {integrator.getPotentialEnergy(system)}"
             )
             print("Lambda annealing done.\n")
-        print(
-            "###==========================================================="
-            "###\n"
-        )
+        print("###===========================================================" "###\n")
 
     print("###====================somd-freenrg run=======================###")
     print("Starting somd-freenrg run...")
-    print(
-        "%s moves %s cycles, %s simulation time"
-        % (nmoves.val, ncycles.val, simtime)
-    )
+    print("%s moves %s cycles, %s simulation time" % (nmoves.val, ncycles.val, simtime))
 
     softcore_lambda = False
     if minimal_coordinate_saving.val:
@@ -3045,9 +3047,7 @@ def runFreeNrg():
     outgradients.close()
     outfile.close()
     print("Simulation took %d s " % (s2 - s1))
-    print(
-        "###===========================================================###\n"
-    )
+    print("###===========================================================###\n")
 
     if os.path.exists("gradients.s3"):
         siregrads = Sire.Stream.load("gradients.s3")

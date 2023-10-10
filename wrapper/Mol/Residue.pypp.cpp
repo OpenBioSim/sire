@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 #include "selector.hpp"
 
+#include "selectorm.hpp"
+
 #include "residue.h"
 
 #include "resproperty.hpp"
@@ -371,6 +373,12 @@ void register_Residue_class(){
         
         }
         Residue_exposer.def( bp::self != bp::self );
+        Residue_exposer.def( bp::self + bp::other< SireMol::SelectorM< SireMol::Residue > >() );
+        Residue_exposer.def( bp::self + bp::other< SireMol::Selector< SireMol::Residue > >() );
+        Residue_exposer.def( bp::self + bp::self );
+        Residue_exposer.def( bp::self - bp::other< SireMol::SelectorM< SireMol::Residue > >() );
+        Residue_exposer.def( bp::self - bp::other< SireMol::Selector< SireMol::Residue > >() );
+        Residue_exposer.def( bp::self - bp::self );
         { //::SireMol::Residue::operator=
         
             typedef ::SireMol::Residue & ( ::SireMol::Residue::*assign_function_type)( ::SireMol::Residue const & ) ;

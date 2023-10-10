@@ -23,6 +23,7 @@ in touch via the Sire users mailing list, or by creating a github issue.
 
 try:
     import sire
+
     sire.use_old_api()
 except ImportError:
     pass
@@ -33,36 +34,63 @@ import argparse
 import sys
 import os
 
-parser = argparse.ArgumentParser(description="Analyse Sire restart files to get information "
-                                             "about the replica exchange moves performed during the simulation.",
-                                 epilog="analyse_reti is built using Sire and is distributed "
-                                        "under the GPL. For more information please visit "
-                                        "http://sire.openbiosim.org/analyse_reti",
-                                 prog="analyse_reti")
+parser = argparse.ArgumentParser(
+    description="Analyse Sire restart files to get information "
+    "about the replica exchange moves performed during the simulation.",
+    epilog="analyse_reti is built using Sire and is distributed "
+    "under the GPL. For more information please visit "
+    "https://sire.openbiosim.org/analyse_reti",
+    prog="analyse_reti",
+)
 
-parser.add_argument('--description', action="store_true",
-                    help="Print a complete description of this program.")
+parser.add_argument(
+    "--description",
+    action="store_true",
+    help="Print a complete description of this program.",
+)
 
-parser.add_argument('--author', action="store_true",
-                    help="Get information about the authors of this script.")
+parser.add_argument(
+    "--author",
+    action="store_true",
+    help="Get information about the authors of this script.",
+)
 
-parser.add_argument('--version', action="store_true",
-                    help="Get version information about this script.")
+parser.add_argument(
+    "--version",
+    action="store_true",
+    help="Get version information about this script.",
+)
 
-parser.add_argument('-i', '--input', nargs=1,
-                    help="Supply the name of the Sire Streamed Save (.s3) file containing the "
-                         "free energies to be analysed.")
+parser.add_argument(
+    "-i",
+    "--input",
+    nargs=1,
+    help="Supply the name of the Sire Streamed Save (.s3) file containing the "
+    "free energies to be analysed.",
+)
 
-parser.add_argument('-o', '--output', nargs=1,
-                    help="""Supply the name of the file in which to write the output.""")
+parser.add_argument(
+    "-o",
+    "--output",
+    nargs=1,
+    help="""Supply the name of the file in which to write the output.""",
+)
 
-parser.add_argument('-r', '--range', nargs=2,
-                    help="Supply the range of iterations over which to analyse. "
-                         "By default, this will be over the last 60 percent of iterations.")
+parser.add_argument(
+    "-r",
+    "--range",
+    nargs=2,
+    help="Supply the range of iterations over which to analyse. "
+    "By default, this will be over the last 60 percent of iterations.",
+)
 
-parser.add_argument('-p', '--percent', nargs=1,
-                    help="Supply the percentage of iterations over which to analyse. By default "
-                         "the analysis will be over the last 100 percent of iterations.")
+parser.add_argument(
+    "-p",
+    "--percent",
+    nargs=1,
+    help="Supply the percentage of iterations over which to analyse. By default "
+    "the analysis will be over the last 100 percent of iterations.",
+)
 
 sys.stdout.write("\n")
 args = parser.parse_args()
@@ -78,9 +106,12 @@ if args.author:
     must_exit = True
 
 if args.version:
-    print("analyse_reti -- from Sire release version <%s>" %Sire.__version__)
-    print("This particular release can be downloaded here: "
-          "https://github.com/openbiosim/sire/releases/tag/v%s" %Sire.__version__)
+    print("analyse_reti -- from Sire release version <%s>" % Sire.__version__)
+    print(
+        "This particular release can be downloaded here: "
+        "https://github.com/openbiosim/sire/releases/tag/v%s"
+        % Sire.__version__
+    )
     must_exit = True
 
 if must_exit:
@@ -118,12 +149,16 @@ else:
 
 if not input_file:
     parser.print_help()
-    print("\nPlease supply the name of the .s3 file containing the Sire restart file.")
+    print(
+        "\nPlease supply the name of the .s3 file containing the Sire restart file."
+    )
     sys.exit(-1)
 
 elif not os.path.exists(input_file):
     parser.print_help()
-    print("\nPlease supply the name of the .s3 file containing the Sire restart file.")
+    print(
+        "\nPlease supply the name of the .s3 file containing the Sire restart file."
+    )
     print("(cannot find file %s)" % input_file)
     sys.exit(-1)
 
@@ -136,9 +171,13 @@ else:
 
 input_file = os.path.realpath(input_file)
 
-FILE.write("Analysing the replica exchange moves contained in file \"%s\"\n" % input_file)
+FILE.write(
+    'Analysing the replica exchange moves contained in file "%s"\n'
+    % input_file
+)
 
 (system, moves) = Sire.Stream.load(input_file)
+
 
 def getRepExMoves(moves):
     if moves.what() == "SireMove::RepExMove":
@@ -151,41 +190,51 @@ def getRepExMoves(moves):
         except:
             pass
 
-        FILE.write("Cannot find any Replica Exchange moves (SireMove::RepExMove) objects to analyse!\n")
+        FILE.write(
+            "Cannot find any Replica Exchange moves (SireMove::RepExMove) objects to analyse!\n"
+        )
         sys.exit(0)
+
 
 # get the replica exchange move object and print out the acceptance ratio
 repex = getRepExMoves(moves)
-FILE.write("\nReplica exchange moves: %s accepted, %s attempted, acceptance ratio = %.1f %%\n" % \
-              (repex.nAccepted(), repex.nAttempted(), 100 * repex.acceptanceRatio()) )
+FILE.write(
+    "\nReplica exchange moves: %s accepted, %s attempted, acceptance ratio = %.1f %%\n"
+    % (repex.nAccepted(), repex.nAttempted(), 100 * repex.acceptanceRatio())
+)
 
 # Now get the replica exchange history
 try:
     hist = system.lambdaTrajectoryHistory()
 except:
-    FILE.write("Cannot extract the lambda trajectory history from the RETI system file!\n")
+    FILE.write(
+        "Cannot extract the lambda trajectory history from the RETI system file!\n"
+    )
     sys.exit(0)
 
 nits = len(hist)
 
 if range_start:
-    if range_start > nits-1:
-        start = nits-1
+    if range_start > nits - 1:
+        start = nits - 1
     else:
         start = range_start
 
-    if range_end > nits-1:
-        end = nits-1
+    if range_end > nits - 1:
+        end = nits - 1
     else:
         end = range_end
 else:
-    end = nits-1
+    end = nits - 1
     start = end - int(percent * end / 100.0)
 
-FILE.write("\nPrinting lambda trajectory history from iterations %s to %s\n\n" % (start+1, end+1))
+FILE.write(
+    "\nPrinting lambda trajectory history from iterations %s to %s\n\n"
+    % (start + 1, end + 1)
+)
 
-for i in range(start, end+1):
-    FILE.write("%d " % (i+1))
+for i in range(start, end + 1):
+    FILE.write("%d " % (i + 1))
     for val in hist[i]:
         FILE.write("%s " % val)
     FILE.write("\n")

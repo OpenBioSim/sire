@@ -2323,17 +2323,24 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
     QStringList filenames;
     QStringList fileformats;
 
-    const auto format_property = map["fileformat"];
-
-    if (format_property.hasValue())
+    if (map.specified("fileformat"))
     {
-        try
+        const auto format_property = map["fileformat"];
+
+        if (format_property.hasSource())
         {
-            fileformats = format_property.value().asA<StringProperty>().toString().split(",");
+            fileformats = format_property.source().split(",");
         }
-        catch (...)
+        else
         {
-            fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
+            try
+            {
+                fileformats = format_property.value().asA<StringProperty>().toString().split(",");
+            }
+            catch (...)
+            {
+                fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
+            }
         }
 
         const auto fileinfo = QFileInfo(filename);
@@ -2353,7 +2360,7 @@ QStringList MoleculeParser::write(const System &system, const QString &filename,
             // we need to find the format from the system
             try
             {
-                fileformats = system.property(format_property).asA<StringProperty>().toString().split(",");
+                fileformats = system.property(map["fileformat"]).asA<StringProperty>().toString().split(",");
             }
             catch (...)
             {
@@ -2404,17 +2411,24 @@ QStringList MoleculeParser::write(const System &system, const QStringList &files
     QStringList filenames;
     QStringList fileformats;
 
-    const auto format_property = map["fileformat"];
-
-    if (format_property.hasValue())
+    if (map.specified("fileformat"))
     {
-        try
+        const auto format_property = map["fileformat"];
+
+        if (format_property.hasSource())
         {
-            fileformats = format_property.value().asA<StringProperty>().toString().split(",");
+            fileformats = format_property.source().split(",");
         }
-        catch (...)
+        else
         {
-            fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
+            try
+            {
+                fileformats = format_property.value().asA<StringProperty>().toString().split(",");
+            }
+            catch (...)
+            {
+                fileformats.append(format_property.value().asA<MoleculeParser>().formatName());
+            }
         }
 
         if (files.count() != fileformats.count())
@@ -2449,7 +2463,7 @@ QStringList MoleculeParser::write(const System &system, const QStringList &files
         // we may need to find the format from the system
         try
         {
-            fileformats = system.property(format_property).asA<StringProperty>().toString().split(",");
+            fileformats = system.property(map["fileformat"]).asA<StringProperty>().toString().split(",");
         }
         catch (...)
         {

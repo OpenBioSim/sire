@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -35,17 +35,7 @@
 
 SIRE_BEGIN_HEADER
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/support_line_pos_iterator.hpp>
-
-#include <boost/phoenix.hpp>
-#include <boost/phoenix/fusion.hpp>
-#include <boost/phoenix/object.hpp>
-#include <boost/phoenix/operator.hpp>
-#include <boost/phoenix/stl.hpp>
-
 #include <boost/fusion/include/adapt_struct.hpp>
-#include <boost/fusion/include/io.hpp>
 
 #include <QDebug>
 

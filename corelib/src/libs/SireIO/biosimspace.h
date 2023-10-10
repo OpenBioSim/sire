@@ -97,7 +97,7 @@ namespace SireIO
                                 const PropertyMap &map = PropertyMap());
 
     Molecule _pvt_setGromacsWater(Molecule &molecule, const Molecule &water, const QString &model, bool has_virtual,
-                                  const PropertyMap &map = PropertyMap());
+                                  const PropertyMap &map = PropertyMap(), bool is_crystal = false);
 
     //! Set all water molecules in the passed system to the appropriate AMBER
     /*! format topology.
@@ -128,11 +128,15 @@ namespace SireIO
         \param map
             A dictionary of user-defined molecular property names.
 
+        \param is_crystal
+            Whether this is a crystal water molecule. If true, then the molecule
+            and residue name will be set to XTL rather than SOL.
+
         \retval system
             The system with updated water topology.
      */
     SIREIO_EXPORT SireSystem::System setGromacsWater(const SireSystem::System &system, const QString &model,
-                                                     const PropertyMap &map = PropertyMap());
+                                                     const PropertyMap &map = PropertyMap(), bool is_crystal = false);
 
     //! Set all water molecules in the passed system to the appropriate AMBER
     /*! format topology.

@@ -30,9 +30,10 @@ Tutorial
 Blog Posts
 ==========
 
-* `What's in a file? Using sire search <https://www.openbiosim.org/ten-minute-sire-challenge/>`__
-* `Working with RDKit <https://www.openbiosim.org/working-with-rdkit/>`__
-* `Working with OpenMM <https://www.openbiosim.org/sire-diaries-working-with-openmm/>`__
+.. toctree::
+   :maxdepth: 2
+
+   blogposts
 
 Detailed Guides
 ===============

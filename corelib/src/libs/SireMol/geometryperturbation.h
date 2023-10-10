@@ -168,6 +168,8 @@ namespace SireMol
 
         QString toString() const;
 
+        void append(const GeometryPerturbation &perturbation);
+
         QList<GeomPertPtr> perturbations() const;
 
         PerturbationPtr recreate(const SireCAS::Expression &mapping_function) const;

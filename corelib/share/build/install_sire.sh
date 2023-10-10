@@ -48,7 +48,7 @@ if [ ! -d "$install_dir" ]; then
   echo "* WARNING - INSTALLATION FAILED"
   echo "* PLEASE CHECK THAT YOU CAN WRITE TO $install_dir"
   echo "* IF YOU CAN, PLEASE CONTACT THE DEVELOPERS AT"
-  echo "* http://sire.openbiosim.org"
+  echo "* https://sire.openbiosim.org"
   echo "************************************************"
   echo " "
   exit -1

@@ -16,8 +16,9 @@ from ._load import (
     smarts,
 )
 
-from ._measure import measure
+from ._measure import measure, minimum_distance
 from ._colname import colname, colnames
+from ._match import match_atoms
 from ._parallel import (
     get_max_num_threads,
     set_max_num_threads,
@@ -33,6 +34,8 @@ __all__ = [
     "get_max_num_threads",
     "load",
     "load_test_files",
+    "match_atoms",
+    "minimum_distance",
     "measure",
     "molid",
     "save",
@@ -692,8 +695,10 @@ if _can_lazy_import:
     maths = _lazy_import.lazy_module("sire.maths")
     mm = _lazy_import.lazy_module("sire.mm")
     mol = _lazy_import.lazy_module("sire.mol")
+    morph = _lazy_import.lazy_module("sire.morph")
     move = _lazy_import.lazy_module("sire.move")
     qt = _lazy_import.lazy_module("sire.qt")
+    restraints = _lazy_import.lazy_module("sire.restraints")
     search = _lazy_import.lazy_module("sire.search")
     squire = _lazy_import.lazy_module("sire.squire")
     stream = _lazy_import.lazy_module("sire.stream")

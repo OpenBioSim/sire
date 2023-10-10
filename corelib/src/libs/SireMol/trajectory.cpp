@@ -40,6 +40,7 @@
 #include "SireUnits/units.h"
 
 #include "SireBase/generalunitproperty.h"
+#include "SireBase/lazyevaluator.h"
 
 #include "SireBase/slice.h"
 
@@ -146,6 +147,39 @@ QList<Frame> TrajectoryData::getFrames(int start_atom, int natoms) const
     for (int i = 0; i < n; ++i)
     {
         frames.append(this->getFrame(i).subset(start_atom, natoms));
+    }
+
+    return frames;
+}
+
+QList<Frame> TrajectoryData::getFrames(const LazyEvaluator &evaluator) const
+{
+    QList<Frame> frames;
+
+    const int n = this->nFrames();
+
+    frames.reserve(n);
+
+    for (int i = 0; i < n; ++i)
+    {
+        frames.append(this->getFrame(i, evaluator));
+    }
+
+    return frames;
+}
+
+QList<Frame> TrajectoryData::getFrames(int start_atom, int natoms,
+                                       const LazyEvaluator &evaluator) const
+{
+    QList<Frame> frames;
+
+    const int n = this->nFrames();
+
+    frames.reserve(n);
+
+    for (int i = 0; i < n; ++i)
+    {
+        frames.append(this->getFrame(i, evaluator).subset(start_atom, natoms));
     }
 
     return frames;
@@ -345,6 +379,11 @@ Frame MolTrajectoryData::getFrame(int i) const
     i = SireID::Index(i).map(this->nFrames());
 
     return frames[i];
+}
+
+Frame MolTrajectoryData::getFrame(int i, const LazyEvaluator &) const
+{
+    return MolTrajectoryData::getFrame(i);
 }
 
 bool MolTrajectoryData::isEditable() const
@@ -757,6 +796,20 @@ Frame Trajectory::getFrame(int i) const
         return frame.subset(start_atom, natoms);
 }
 
+Frame Trajectory::getFrame(int i, const LazyEvaluator &evaluator) const
+{
+    i = Index(i).map(this->nFrames());
+
+    int idx = _getIndexForFrame(i);
+
+    auto frame = d[idx]->getFrame(i, evaluator);
+
+    if (frame.nAtoms() == natoms)
+        return frame;
+    else
+        return frame.subset(start_atom, natoms);
+}
+
 Frame Trajectory::getFrame(int i, const FrameTransform &transform) const
 {
     const auto nframes = this->nFrames();
@@ -795,6 +848,53 @@ Frame Trajectory::getFrame(int i, const FrameTransform &transform) const
         {
             if (i != j)
                 frames.append(this->getFrame(j));
+        }
+
+        frame = frame.smooth(frames);
+    }
+
+    return frame.transform(transform);
+}
+
+Frame Trajectory::getFrame(int i, const FrameTransform &transform,
+                           const LazyEvaluator &evaluator) const
+{
+    const auto nframes = this->nFrames();
+
+    i = Index(i).map(nframes);
+
+    auto smooth = transform.nSmooth();
+
+    if (smooth > nframes)
+        smooth = nframes;
+
+    Frame frame = this->getFrame(i, evaluator);
+
+    if (smooth > 1)
+    {
+        int half = int(smooth / 2);
+        int start_frame = i - half;
+        int end_frame = i + half + 1;
+
+        if (smooth % 2 == 1)
+            end_frame += 1;
+
+        if (start_frame < 0)
+        {
+            start_frame = 0;
+        }
+
+        if (end_frame > nframes)
+        {
+            end_frame = nframes;
+        }
+
+        QList<Frame> frames;
+
+        for (int j = start_frame; j < end_frame; ++j)
+        {
+            if (i != j)
+                frames.append(this->getFrame(j, evaluator));
         }
 
         frame = frame.smooth(frames);
@@ -922,7 +1022,7 @@ SIREMOL_EXPORT QDataStream &operator<<(QDataStream &ds, const Frame &frame)
 
     SharedDataStream sds(ds);
 
-    sds << frame.coords << frame.vels << frame.frcs << frame.spc
+    sds << frame.coordinates() << frame.velocities() << frame.forces() << frame.spc
         << frame.t.to(picosecond) << frame.props;
 
     return ds;
@@ -936,12 +1036,18 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
     {
         SharedDataStream sds(ds);
 
-        sds >> frame.coords >> frame.vels >> frame.frcs >> frame.spc >> frame.props;
+        sds >> frame.coords >> frame.vels >> frame.frcs >> frame.spc;
 
         double time;
         sds >> time;
 
         frame.t = time * picosecond;
+        frame.start_atom = 0;
+        frame.num_atoms = std::max(frame.coords.count(),
+                                   std::max(frame.vels.count(),
+                                            frame.frcs.count()));
+
+        sds >> frame.props;
     }
     else if (v == 1)
     {
@@ -953,6 +1059,10 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
         sds >> time;
 
         frame.t = time * picosecond;
+        frame.start_atom = 0;
+        frame.num_atoms = std::max(frame.coords.count(),
+                                   std::max(frame.vels.count(),
+                                            frame.frcs.count()));
 
         frame.props = Properties();
     }
@@ -962,18 +1072,22 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &ds, Frame &frame)
     return ds;
 }
 
-Frame::Frame() : ConcreteProperty<Frame, MoleculeProperty>(), spc(Space::null()), t(0)
+Frame::Frame()
+    : ConcreteProperty<Frame, MoleculeProperty>(),
+      spc(Space::null()), t(0), start_atom(-1), num_atoms(0)
 {
 }
 
 Frame::Frame(const Molecule &mol, const PropertyMap &map)
-    : ConcreteProperty<Frame, MoleculeProperty>(), spc(Space::null()), t(0)
+    : ConcreteProperty<Frame, MoleculeProperty>(),
+      spc(Space::null()), t(0), start_atom(-1), num_atoms(0)
 {
     this->operator=(Frame(mol.data(), map));
 }
 
 Frame::Frame(const MoleculeData &mol, const PropertyMap &map)
-    : ConcreteProperty<Frame, MoleculeProperty>(), spc(Space::null()), t(0)
+    : ConcreteProperty<Frame, MoleculeProperty>(),
+      spc(Space::null()), t(0), start_atom(-1), num_atoms(0)
 {
     int natoms = 0;
     int broken = false;
@@ -1065,40 +1179,57 @@ Frame::Frame(const MoleculeData &mol, const PropertyMap &map)
         }
     }
 
+    num_atoms = std::max(coords.count(), std::max(vels.count(),
+                                                  frcs.count()));
+
     this->assertSane();
 }
 
 Frame::Frame(const QVector<Vector> &coordinates, const Space &space, Time time)
-    : ConcreteProperty<Frame, MoleculeProperty>(), coords(coordinates), spc(space), t(time)
+    : ConcreteProperty<Frame, MoleculeProperty>(),
+      coords(coordinates), spc(space), t(time),
+      start_atom(-1), num_atoms(coordinates.count())
 {
     this->assertSane();
 }
 
 Frame::Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocities, const Space &space, Time time)
-    : ConcreteProperty<Frame, MoleculeProperty>(), coords(coordinates), vels(velocities), spc(space), t(time)
+    : ConcreteProperty<Frame, MoleculeProperty>(),
+      coords(coordinates), vels(velocities), spc(space), t(time),
+      start_atom(-1)
 {
+    num_atoms = std::max(coords.count(), vels.count());
+
     this->assertSane();
 }
 
 Frame::Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocities, const QVector<Force3D> &forces,
              const Space &space, Time time)
     : ConcreteProperty<Frame, MoleculeProperty>(), coords(coordinates), vels(velocities), frcs(forces), spc(space),
-      t(time)
+      t(time), start_atom(-1)
 {
+    num_atoms = std::max(coords.count(), std::max(vels.count(),
+                                                  frcs.count()));
+
     this->assertSane();
 }
 
 Frame::Frame(const QVector<Vector> &coordinates, const QVector<Velocity3D> &velocities, const QVector<Force3D> &forces,
              const Space &space, Time time, const Properties &properties)
     : ConcreteProperty<Frame, MoleculeProperty>(), coords(coordinates), vels(velocities),
-      frcs(forces), spc(space), t(time), props(properties)
+      frcs(forces), spc(space), t(time), props(properties),
+      start_atom(-1)
 {
+    num_atoms = std::max(coords.count(), std::max(vels.count(),
+                                                  frcs.count()));
+
     this->assertSane();
 }
 
 Frame::Frame(const Frame &other)
     : ConcreteProperty<Frame, MoleculeProperty>(), coords(other.coords), vels(other.vels), frcs(other.frcs),
-      spc(other.spc), t(other.t), props(other.props)
+      spc(other.spc), t(other.t), props(other.props),
+      start_atom(other.start_atom), num_atoms(other.num_atoms)
 {
 }
 
@@ -1115,6 +1246,8 @@ Frame &Frame::operator=(const Frame &other)
         frcs = other.frcs;
         spc = other.spc;
         t = other.t;
+        start_atom = other.start_atom;
+        num_atoms = other.num_atoms;
         props = other.props;
     }
 
@@ -1124,7 +1257,13 @@ Frame &Frame::operator=(const Frame &other)
 bool Frame::operator==(const Frame &other) const
 {
     return (this == &other) or
-           (coords == other.coords and vels == other.vels and frcs == other.frcs and spc == other.spc and t == other.t and props == other.props);
+           (start_atom == other.start_atom and
+            num_atoms == other.num_atoms and
+            coords == other.coords and
+            vels == other.vels and
+            frcs == other.frcs and
+            spc == other.spc and
+            t == other.t and props == other.props);
 }
 
 bool Frame::operator!=(const Frame &other) const
@@ -1170,13 +1309,17 @@ void Frame::assertSane() const
         broken = true;
     }
 
+    if (natoms != num_atoms)
+        broken = true;
+
     if (broken)
     {
         throw SireError::program_bug(QObject::tr("Somehow the Frame has got into an invalid state! "
-                                                 "%1 | %2 | %3")
+                                                 "%1 | %2 | %3 | %4")
                                          .arg(coords.count())
                                          .arg(vels.count())
-                                         .arg(frcs.count()),
+                                         .arg(frcs.count())
+                                         .arg(num_atoms),
                                      CODELOC);
     }
 
@@ -1214,12 +1357,32 @@ QString Frame::toString() const
 
 bool Frame::isEmpty() const
 {
-    return coords.isEmpty() and vels.isEmpty() and frcs.isEmpty() and props.isEmpty();
+    return num_atoms == 0 and coords.isEmpty() and
+           vels.isEmpty() and frcs.isEmpty() and props.isEmpty();
+}
+
+Frame Frame::extract() const
+{
+    if (start_atom == -1)
+        return *this;
+    else
+    {
+        Frame ret(*this);
+        ret.coords = this->coordinates();
+        ret.vels = this->velocities();
+        ret.frcs = this->forces();
+        ret.start_atom = -1;
+        ret.num_atoms = std::max(ret.coords.count(),
+                                 std::max(ret.vels.count(),
+                                          ret.frcs.count()));
+
+        return ret;
+    }
 }
 
 Frame Frame::transform(const FrameTransform &tform) const
 {
-    Frame ret(*this);
+    Frame ret = this->extract();
     ret.coords = tform.apply(ret.coords, ret.spc.read());
     ret.spc = tform.apply(ret.spc.read());
     return ret;
@@ -1227,7 +1390,7 @@ Frame Frame::transform(const FrameTransform &tform) const
 
 Frame Frame::reverse(const FrameTransform &tform) const
 {
-    Frame ret(*this);
+    Frame ret = this->extract();
     ret.coords = tform.reverse(ret.coords);
     ret.spc = tform.reverse(ret.spc.read());
     return ret;
@@ -1244,21 +1407,24 @@ Frame Frame::smooth(const QList<Frame> &frames) const
     }
 
     Frame ret(*this);
+    ret.vels = this->velocities();
+    ret.frcs = this->forces();
+    ret.start_atom = -1;
+    ret.num_atoms = this->num_atoms;
 
     const double weight = 1.0 / (1 + frames.count());
 
-    // all frames must have the same number of atoms...
-    const int nats = this->coords.count();
-
-    QVector<Vector> smoothed(nats);
+    QVector<Vector> smoothed(this->num_atoms);
     auto smoothed_data = smoothed.data();
 
     Vector mincoords = this->coords[0];
     Vector maxcoords = this->coords[0];
 
-    for (int i = 0; i < nats; ++i)
+    const Vector *coords_data = this->coordinatesData();
+
+    for (int i = 0; i < this->num_atoms; ++i)
     {
-        const auto &c = this->coords[i];
+        const auto &c = coords_data[i];
 
         mincoords.setMin(c);
         maxcoords.setMax(c);
@@ -1270,9 +1436,9 @@ Frame Frame::smooth(const QList<Frame> &frames) const
 
     for (int i = 0; i < frames.count(); ++i)
     {
-        auto c = frames.at(i).coords;
+        const auto frame_coords_data = frames.at(i).coordinatesData();
 
-        if (c.count() != nats)
+        if (frames.at(i).nAtoms() != num_atoms)
         {
             throw SireError::incompatible_error(
                 QObject::tr(
@@ -1281,22 +1447,20 @@ Frame Frame::smooth(const QList<Frame> &frames) const
                 CODELOC);
         }
 
-        const auto coords_data = c.constData();
-
-        Vector delta = coords_data[0] - this->coords[0];
+        Vector delta = frame_coords_data[0] - coords_data[0];
 
         if (delta.length2() > 30)
         {
             // the first atom has jumped by 5-6 A. This suggests that this
             // frame may have been wrapped. We will now check the delta
             // between the centers of the two frames...
-            mincoords = coords_data[0];
+            mincoords = frame_coords_data[0];
             maxcoords = mincoords;
 
-            for (int j = 1; j < nats; ++j)
+            for (int j = 1; j < num_atoms; ++j)
             {
-                mincoords.setMin(coords_data[j]);
-                maxcoords.setMax(coords_data[j]);
+                mincoords.setMin(frame_coords_data[j]);
+                maxcoords.setMax(frame_coords_data[j]);
             }
 
             Vector frame_center = mincoords + (0.5 * (maxcoords - mincoords));
@@ -1307,26 +1471,26 @@ Frame Frame::smooth(const QList<Frame> &frames) const
             {
                 // Yes - the center has moved too - suggests a frame offset
                 // Translate to remove the center offset
-                for (int j = 0; j < nats; ++j)
+                for (int j = 0; j < num_atoms; ++j)
                 {
-                    smoothed_data[j] += weight * (coords_data[j] + delta);
+                    smoothed_data[j] += weight * (frame_coords_data[j] + delta);
                 }
             }
             else
             {
                 // No - not enough of a change - just use the
                 // original coordinates
-                for (int j = 0; j < nats; ++j)
+                for (int j = 0; j < num_atoms; ++j)
                 {
-                    smoothed_data[j] += weight * coords_data[j];
+                    smoothed_data[j] += weight * frame_coords_data[j];
                 }
             }
         }
         else
         {
-            for (int j = 0; j < nats; ++j)
+            for (int j = 0; j < num_atoms; ++j)
             {
-                smoothed_data[j] += weight * coords_data[j];
+                smoothed_data[j] += weight * frame_coords_data[j];
             }
         }
     }
@@ -1355,19 +1519,74 @@ bool Frame::hasProperties() const
     return not props.isEmpty();
 }
 
+template <class T>
+QVector<T> _mid(const QVector<T> &v, int start, int count)
+{
+    if (v.count() == 0)
+        return v;
+
+    if (start < 0 or count < 0 or start + count > v.count())
+        throw SireError::incompatible_error(QObject::tr("Cannot subset a vector of length %1 using start %2, count %3.")
+                                                .arg(v.count())
+                                                .arg(start)
+                                                .arg(count),
+                                            CODELOC);
+
+    return v.mid(start, count);
+}
+
+const Vector *Frame::coordinatesData() const
+{
+    if (coords.isEmpty())
+        return 0;
+    else if (start_atom == -1)
+        return coords.constData();
+    else
+        return coords.constData() + start_atom;
+}
+
+const Velocity3D *Frame::velocitiesData() const
+{
+    if (vels.isEmpty())
+        return 0;
+    else if (start_atom == -1)
+        return vels.constData();
+    else
+        return vels.constData() + start_atom;
+}
+
+const Force3D *Frame::forcesData() const
+{
+    if (frcs.isEmpty())
+        return 0;
+    else if (start_atom == -1)
+        return frcs.constData();
+    else
+        return frcs.constData() + start_atom;
+}
+
 QVector<Vector> Frame::coordinates() const
 {
-    return coords;
+    if (start_atom == -1)
+        return coords;
+    else
+        return _mid(coords, start_atom, num_atoms);
 }
 
 QVector<Velocity3D> Frame::velocities() const
 {
-    return vels;
+    if (start_atom == -1)
+        return vels;
+    else
+        return _mid(vels, start_atom, num_atoms);
 }
 
 QVector<Force3D> Frame::forces() const
 {
-    return frcs;
+    if (start_atom == -1)
+        return frcs;
+    else
+        return _mid(frcs, start_atom, num_atoms);
 }
 
 SireUnits::Dimension::Time Frame::time() const
@@ -1409,47 +1628,33 @@ int Frame::numBytes() const
 
 int Frame::nAtoms() const
 {
-    int nats = coords.count();
-
-    if (nats == 0)
-    {
-        nats = vels.count();
-    }
-
-    if (nats == 0)
-    {
-        nats = frcs.count();
-    }
-
-    return nats;
+    return num_atoms;
 }
 
-template <class T>
-QVector<T> _mid(const QVector<T> &v, int start, int count)
+Frame Frame::subset(int start, int natoms) const
 {
-    if (v.count() == 0)
-        return v;
-
-    if (start < 0 or count < 0 or start + count > v.count())
-        throw SireError::incompatible_error(QObject::tr("Cannot subset a vector of length %1 using start %2, count %3.")
-                                                .arg(v.count())
-                                                .arg(start)
-                                                .arg(count),
-                                            CODELOC);
-
-    return v.mid(start, count);
-}
-
-Frame Frame::subset(int start_atom, int natoms) const
-{
-    if (start_atom == 0 and natoms == this->nAtoms())
+    if (start == 0 and natoms == this->nAtoms())
         return *this;
 
     Frame ret(*this);
 
-    ret.coords = _mid(coords, start_atom, natoms);
-    ret.vels = _mid(vels, start_atom, natoms);
-    ret.frcs = _mid(frcs, start_atom, natoms);
+    if (start < 0 or natoms < 0 or start + natoms > num_atoms)
+        throw SireError::incompatible_error(QObject::tr("Cannot subset a Frame of length %1 using start %2, count %3.")
+                                                .arg(num_atoms)
+                                                .arg(start)
+                                                .arg(natoms),
+                                            CODELOC);
+
+    if (start_atom == -1)
+    {
+        ret.start_atom = start;
+        ret.num_atoms = natoms;
+    }
+    else
+    {
+        ret.start_atom = start_atom + start;
+        ret.num_atoms = natoms;
+    }
 
     return ret;
 }
@@ -1508,6 +1713,7 @@ Frame Frame::join(const QVector<Frame> &frames,
     // take all of the global data from the values
     // of the first frame
     Frame ret(frames.at(0));
+    ret = ret.extract();
 
     Vector *coords_data = 0;
     Velocity3D *vels_data = 0;
@@ -1549,7 +1755,7 @@ Frame Frame::join(const QVector<Frame> &frames,
                           {
             for (int i=r.begin(); i<r.end(); ++i)
             {
-                const Frame &frame = frames_data[i];
+                const Frame frame = frames_data[i].extract();
                 const int start_idx = start_idxs_data[i];
 
                 if (have_coords and frame.hasCoordinates())
@@ -1572,7 +1778,7 @@ Frame Frame::join(const QVector<Frame> &frames,
     {
         for (int i = 0; i < nframes; ++i)
         {
-            const Frame &frame = frames_data[i];
+            const Frame frame = frames_data[i].extract();
             const int start_idx = start_idxs_data[i];
 
             if (have_coords and frame.hasCoordinates())

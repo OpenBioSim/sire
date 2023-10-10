@@ -22,6 +22,8 @@ set ( SIREMM_HEADERS
       atomljs.h
       atompairs.hpp
       bond.h
+      bondrestraints.h
+      boreschrestraints.h
       clj14group.h
       cljatoms.h
       cljboxes.h
@@ -75,7 +77,9 @@ set ( SIREMM_HEADERS
       ljpotential.h
       mmdetail.h
       multicljcomponent.h
+      positionalrestraints.h
       restraint.h
+      restraints.h
       restraintcomponent.h
       restraintff.h
       selectorangle.h
@@ -109,6 +113,8 @@ set ( SIREMM_SOURCES
       atomfunctions.cpp
       atomljs.cpp
       bond.cpp
+      bondrestraints.cpp
+      boreschrestraints.cpp
       clj14group.cpp
       cljatoms.cpp
       cljboxes.cpp
@@ -161,7 +167,9 @@ set ( SIREMM_SOURCES
       ljpotential.cpp
       mmdetail.cpp
       multicljcomponent.cpp
+      positionalrestraints.cpp
       restraint.cpp
+      restraints.cpp
       restraintcomponent.cpp
       restraintff.cpp
       selectorangle.cpp

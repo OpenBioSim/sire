@@ -377,6 +377,15 @@ QList<GeomPertPtr> GeometryPerturbations::perturbations() const
     return perts;
 }
 
+/** Append the passed perturbation onto the list */
+void GeometryPerturbations::append(const GeometryPerturbation &perturbation)
+{
+    if (perturbation.isA<GeometryPerturbations>())
+        perts += perturbation.asA<GeometryPerturbations>().perts;
+    else
+        perts.append(perturbation);
+}
+
 /** Return a re-created version of this set of perturbations where all child
     perturbations are changed to use the passed mapping function */
 PerturbationPtr GeometryPerturbations::recreate(const Expression &mapping_function) const

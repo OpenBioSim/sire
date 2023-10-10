@@ -19,6 +19,8 @@
 #include "SireMol/atomelements.h"
 #include "SireMol/core.h"
 
+#include "SireStream/streamdata.hpp"
+
 #include "SireVol/cartesian.h"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -40,6 +42,39 @@ System load_molecules(const QStringList &files,
 
     try
     {
+        if (files.count() == 1)
+        {
+            const auto &f = files.at(0);
+
+            if (f.endsWith(".s3") or f.endsWith(".bss"))
+            {
+                // try to load this as a Sire s3 file
+                try
+                {
+                    return SireStream::loadType<System>(f);
+                }
+                catch (...)
+                {
+                }
+
+                // try to load this as a Sire s3 file
+                try
+                {
+                    auto m = SireStream::loadType<Molecule>(f);
+
+                    auto s = System();
+                    s.setName(m.name());
+                    auto g = MoleculeGroup("all");
+                    g.add(m);
+                    s.add(g);
+                    return s;
+                }
+                catch (...)
+                {
+                }
+            }
+        }
+
         auto mols = MoleculeParser::load(files, map);
 
         // get the name of this system - if it doesn't exist, then

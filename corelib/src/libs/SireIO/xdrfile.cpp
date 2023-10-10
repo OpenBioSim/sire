@@ -22,7 +22,7 @@
   *  that should have come with this distribution.
   *
   *  You can contact the authors via the website
-  *  at http://sire.openbiosim.org
+  *  at https://sire.openbiosim.org
   *
 \*********************************************/
 
@@ -62,6 +62,8 @@ using namespace SireUnits;
 ////////
 //////// Implementation of XDRFile
 ////////
+
+QMutex XDRFile::mutex;
 
 XDRFile::XDRFile()
     : boost::noncopyable(),
@@ -247,7 +249,7 @@ namespace SireIO
         {
         public:
             XDRFrameBuffer(const Frame &frame)
-                : current_frame(0), natoms(0),
+                : current_frame(-1), natoms(0),
                   coords(0), vels(0), frcs(0),
                   lambda(0), time(0), step(0),
                   precision(1000),
@@ -272,7 +274,7 @@ namespace SireIO
             }
 
             XDRFrameBuffer(int num_atoms, qint32 frame_type)
-                : current_frame(0), natoms(0),
+                : current_frame(-1), natoms(0),
                   coords(0), vels(0), frcs(0),
                   lambda(0), time(0), step(0),
                   precision(1000),
@@ -741,6 +743,8 @@ void TRRFile::_lkr_readFrameIntoBuffer(int i)
                                       CODELOC);
         }
     }
+
+    frame_buffer->current_frame = i;
 }
 
 Frame TRRFile::readFrame(int i, bool use_parallel) const
@@ -1417,6 +1421,8 @@ void XTCFile::_lkr_readFrameIntoBuffer(int i)
                                       .arg(this->filename()),
                                   CODELOC);
     }
+
+    frame_buffer->current_frame = i;
 }
 
 Frame XTCFile::readFrame(int i, bool use_parallel) const
