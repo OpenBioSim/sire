@@ -25,7 +25,9 @@ print("\nWater leg")
 for i, lambda_value in enumerate(lambda_values):
     print(f"Simulating lambda={lambda_value:.2f}")
     # minimise the system at this lambda value
-    min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
+    min_mols = mols.minimisation(lambda_value=lambda_value,
+                                 constraint=constraint,
+                                 perturbable_constraint="none").run().commit()
 
     # create a dynamics object for the system
     d = min_mols.dynamics(
@@ -68,10 +70,14 @@ print("\nVacuum leg")
 
 for i, lambda_value in enumerate(lambda_values):
     print(f"Simulating lambda={lambda_value:.2f}")
-    # minimise the system at this lambda value
+    # minimise the system at this lambda value using the
+    # same constraints as the dynamics (but switching
+    # off the perturbable constraint)
     min_mols = (
         mols[0]
-        .minimisation(lambda_value=lambda_value, vacuum=True)
+        .minimisation(lambda_value=lambda_value, vacuum=True,
+                      constraint=constraint,
+                      perturbable_constraint="none")
         .run()
         .commit()
     )
