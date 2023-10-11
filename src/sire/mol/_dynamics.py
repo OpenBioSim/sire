@@ -545,12 +545,20 @@ class DynamicsData:
             with ThreadPoolExecutor() as pool:
                 run_promise = pool.submit(runfunc, max_iterations)
 
+                result = None
+
                 while not run_promise.done():
                     try:
                         result = run_promise.result(timeout=0.2)
                     except Exception:
                         spinner.tick()
                         pass
+
+                # catch rare edge case where the promise timed
+                # out, but then completed before the .done()
+                # test in the next loop iteration
+                if result is None:
+                    result = run_promise.result()
 
                 if result != 0:
                     raise result
@@ -803,11 +811,19 @@ class DynamicsData:
                             # run the current block in the background
                             run_promise = pool.submit(runfunc, nrun)
 
+                            result = None
+
                             while not run_promise.done():
                                 try:
                                     result = run_promise.result(timeout=1.0)
                                 except Exception:
                                     pass
+
+                            # catch rare edge case where the promise timed
+                            # out, but then completed before the .done()
+                            # test in the next loop iteration
+                            if result is None:
+                                result = run_promise.result()
 
                             if result == 0:
                                 completed += nrun
