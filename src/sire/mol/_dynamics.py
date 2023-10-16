@@ -522,46 +522,11 @@ class DynamicsData:
         - max_iterations (int): The maximum number of iterations to run
         """
         from ..legacy.Convert import minimise_openmm_context
-        from concurrent.futures import ThreadPoolExecutor
 
         if max_iterations <= 0:
             max_iterations = 0
 
-        from ..base import ProgressBar
-
-        def runfunc(max_its):
-            try:
-                minimise_openmm_context(
-                    self._omm_mols, max_iterations=max_its
-                )
-
-                return 0
-            except Exception as e:
-                return e
-
-        with ProgressBar(text="minimisation") as spinner:
-            spinner.set_speed_unit("checks / s")
-
-            with ThreadPoolExecutor() as pool:
-                run_promise = pool.submit(runfunc, max_iterations)
-
-                result = None
-
-                while not run_promise.done():
-                    try:
-                        result = run_promise.result(timeout=0.2)
-                    except Exception:
-                        spinner.tick()
-                        pass
-
-                # catch rare edge case where the promise timed
-                # out, but then completed before the .done()
-                # test in the next loop iteration
-                if result is None:
-                    result = run_promise.result()
-
-                if result != 0:
-                    raise result
+        minimise_openmm_context(self._omm_mols, max_iterations=max_iterations)
 
     def _rebuild_and_minimise(self):
         if self.is_null():
