@@ -7,6 +7,8 @@
 
 #include "lambdalever.h"
 
+#include "openmmminimise.h"
+
 #include "Helpers/convertlist.hpp"
 
 #include <QDebug>
@@ -114,6 +116,11 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             &set_context_platform_property,
             (bp::arg("context"), bp::arg("key"), bp::arg("value")),
             "Set the Platform property for the passed context.");
+
+    bp::def("_minimise_openmm_context",
+            &minimise_openmm_context,
+            (bp::arg("context"), bp::arg("tolerance") = 10, bp::arg("max_iterations") = -1),
+            "Minimise the passed context");
 
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::System>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Context>());

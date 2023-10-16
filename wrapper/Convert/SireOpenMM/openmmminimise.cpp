@@ -1,0 +1,340 @@
+
+#include "openmmminimise.h"
+
+/**
+ *  This code is heavily inspired / adapted from the LocalEnergyMinimizer
+ *  in LocalEnergyMinimizer.cpp in the OpenMM source code (version 8.1 beta).
+ *
+ *  The copyright notice for that file is copied below.
+ *
+ */
+
+/* -------------------------------------------------------------------------- *
+ *                                   OpenMM                                   *
+ * -------------------------------------------------------------------------- *
+ * This is part of the OpenMM molecular simulation toolkit originating from   *
+ * Simbios, the NIH National Center for Physics-Based Simulation of           *
+ * Biological Structures at Stanford, funded under the NIH Roadmap for        *
+ * Medical Research, grant U54 GM072970. See https://simtk.org.               *
+ *                                                                            *
+ * Portions copyright (c) 2010-2020 Stanford University and the Authors.      *
+ * Authors: Peter Eastman                                                     *
+ * Contributors:                                                              *
+ *                                                                            *
+ * Permission is hereby granted, free of charge, to any person obtaining a    *
+ * copy of this software and associated documentation files (the "Software"), *
+ * to deal in the Software without restriction, including without limitation  *
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,   *
+ * and/or sell copies of the Software, and to permit persons to whom the      *
+ * Software is furnished to do so, subject to the following conditions:       *
+ *                                                                            *
+ * The above copyright notice and this permission notice shall be included in *
+ * all copies or substantial portions of the Software.                        *
+ *                                                                            *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,   *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL    *
+ * THE AUTHORS, CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,    *
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR      *
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE  *
+ * USE OR OTHER DEALINGS IN THE SOFTWARE.                                     *
+ * -------------------------------------------------------------------------- */
+
+#include "openmm/OpenMMException.h"
+#include "openmm/Platform.h"
+#include "openmm/VerletIntegrator.h"
+#include "lbgfs/lbfgs.h"
+#include <cmath>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace OpenMM;
+using namespace std;
+
+struct MinimizerData
+{
+    Context &context;
+    double k;
+    MinimizationReporter *reporter;
+    bool checkLargeForces;
+    VerletIntegrator cpuIntegrator;
+    Context *cpuContext;
+    MinimizerData(Context &context, double k, MinimizationReporter *reporter) : context(context), k(k), reporter(reporter), cpuIntegrator(1.0), cpuContext(NULL)
+    {
+        string platformName = context.getPlatform().getName();
+        checkLargeForces = (platformName == "CUDA" || platformName == "OpenCL" || platformName == "HIP" || platformName == "Metal");
+    }
+    ~MinimizerData()
+    {
+        if (cpuContext != NULL)
+            delete cpuContext;
+    }
+    Context &getCpuContext()
+    {
+        // Get an alternate context that runs on the CPU and doesn't place any limits
+        // on the magnitude of forces.
+
+        if (cpuContext == NULL)
+        {
+            Platform *cpuPlatform;
+            try
+            {
+                cpuPlatform = &Platform::getPlatformByName("CPU");
+
+                // The CPU context sometimes fails to initialize because it flags
+                // a different number of exclusions / exceptions, despite this
+                // working for all other platforms...
+                cpuContext = new Context(context.getSystem(), cpuIntegrator, *cpuPlatform);
+            }
+            catch (...)
+            {
+                cpuPlatform = &Platform::getPlatformByName("Reference");
+
+                // In those cases, we will fall back to the Reference platform,
+                // which does work
+                cpuContext = new Context(context.getSystem(), cpuIntegrator, *cpuPlatform);
+            }
+            cpuContext->setState(context.getState(State::Positions | State::Velocities | State::Parameters));
+        }
+        return *cpuContext;
+    }
+};
+
+static double computeForcesAndEnergy(Context &context, const vector<Vec3> &positions, lbfgsfloatval_t *g)
+{
+    context.setPositions(positions);
+    context.computeVirtualSites();
+    State state = context.getState(State::Forces | State::Energy, false, context.getIntegrator().getIntegrationForceGroups());
+    const vector<Vec3> &forces = state.getForces();
+    const System &system = context.getSystem();
+    for (int i = 0; i < forces.size(); i++)
+    {
+        if (system.getParticleMass(i) == 0)
+        {
+            g[3 * i] = 0.0;
+            g[3 * i + 1] = 0.0;
+            g[3 * i + 2] = 0.0;
+        }
+        else
+        {
+            g[3 * i] = -forces[i][0];
+            g[3 * i + 1] = -forces[i][1];
+            g[3 * i + 2] = -forces[i][2];
+        }
+    }
+    return state.getPotentialEnergy();
+}
+
+static lbfgsfloatval_t evaluate(void *instance, const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step)
+{
+    MinimizerData *data = reinterpret_cast<MinimizerData *>(instance);
+    Context &context = data->context;
+    const System &system = context.getSystem();
+    int numParticles = system.getNumParticles();
+
+    // Compute the force and energy for this configuration.
+
+    vector<Vec3> positions(numParticles);
+    for (int i = 0; i < numParticles; i++)
+        positions[i] = Vec3(x[3 * i], x[3 * i + 1], x[3 * i + 2]);
+    double energy = computeForcesAndEnergy(context, positions, g);
+    if (data->checkLargeForces)
+    {
+        // The CUDA, OpenCL and HIP platforms accumulate forces in fixed point, so they
+        // can't handle very large forces.  Check for problematic forces (very large,
+        // infinite, or NaN) and if necessary recompute them on the CPU.
+
+        for (int i = 0; i < 3 * numParticles; i++)
+        {
+            if (!(fabs(g[i]) < 2e9))
+            {
+                energy = computeForcesAndEnergy(data->getCpuContext(), positions, g);
+                break;
+            }
+        }
+    }
+
+    // Add harmonic forces for any constraints.
+
+    int numConstraints = system.getNumConstraints();
+    double k = data->k;
+    for (int i = 0; i < numConstraints; i++)
+    {
+        int particle1, particle2;
+        double distance;
+        system.getConstraintParameters(i, particle1, particle2, distance);
+        Vec3 delta = positions[particle2] - positions[particle1];
+        double r2 = delta.dot(delta);
+        double r = sqrt(r2);
+        delta *= 1 / r;
+        double dr = r - distance;
+        double kdr = k * dr;
+        energy += 0.5 * kdr * dr;
+        if (system.getParticleMass(particle1) != 0)
+        {
+            g[3 * particle1] -= kdr * delta[0];
+            g[3 * particle1 + 1] -= kdr * delta[1];
+            g[3 * particle1 + 2] -= kdr * delta[2];
+        }
+        if (system.getParticleMass(particle2) != 0)
+        {
+            g[3 * particle2] += kdr * delta[0];
+            g[3 * particle2 + 1] += kdr * delta[1];
+            g[3 * particle2 + 2] += kdr * delta[2];
+        }
+    }
+    return energy;
+}
+
+static int report(void *instance, const lbfgsfloatval_t *x, const lbfgsfloatval_t *g, const lbfgsfloatval_t fx,
+                  const lbfgsfloatval_t xnorm, const lbfgsfloatval_t gnorm, const lbfgsfloatval_t step, int n, int iteration, int ls)
+{
+    // Copy over the positions and gradients.
+
+    vector<double> xout(n), gradout(n);
+    for (int i = 0; i < n; i++)
+    {
+        xout[i] = x[i];
+        gradout[i] = g[i];
+    }
+
+    // Compute the other arguments passed to the reporter.
+
+    MinimizerData *data = reinterpret_cast<MinimizerData *>(instance);
+    Context &context = data->context;
+    const System &system = context.getSystem();
+    double restraintEnergy = 0.0, maxError = 0.0;
+    double k = data->k;
+    for (int i = 0; i < system.getNumConstraints(); i++)
+    {
+        int p1, p2;
+        double distance;
+        system.getConstraintParameters(i, p1, p2, distance);
+        Vec3 delta(x[3 * p1] - x[3 * p2], x[3 * p1 + 1] - x[3 * p2 + 1], x[3 * p1 + 2] - x[3 * p2 + 2]);
+        double r2 = delta.dot(delta);
+        double r = sqrt(r2);
+        double dr = r - distance;
+        restraintEnergy += 0.5 * k * dr * dr;
+        maxError = max(maxError, fabs(dr) / distance);
+    }
+    map<string, double> args;
+    args["restraint energy"] = restraintEnergy;
+    args["system energy"] = fx - restraintEnergy;
+    args["restraint strength"] = k;
+    args["max constraint error"] = maxError;
+
+    // Invoke the reporter.
+
+    MinimizationReporter *reporter = reinterpret_cast<MinimizationReporter *>(data->reporter);
+    if (reporter->report(iteration - 1, xout, gradout, args))
+        return 1;
+    return 0;
+}
+
+void SireOpenMM::minimise_openmm_context(Context &context, double tolerance, int max_iterations)
+{
+    MinimizationReporter *reporter = NULL;
+
+    const System &system = context.getSystem();
+    int numParticles = system.getNumParticles();
+    double constraintTol = context.getIntegrator().getConstraintTolerance();
+    double workingConstraintTol = std::max(1e-4, constraintTol);
+    double k = 100 / workingConstraintTol;
+    lbfgsfloatval_t *x = lbfgs_malloc(numParticles * 3);
+    if (x == NULL)
+        throw OpenMMException("LocalEnergyMinimizer: Failed to allocate memory");
+    try
+    {
+
+        // Initialize the minimizer.
+
+        lbfgs_parameter_t param;
+        lbfgs_parameter_init(&param);
+        if (!context.getPlatform().supportsDoublePrecision())
+            param.xtol = 1e-7;
+        param.max_iterations = max_iterations;
+        param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE;
+
+        // Make sure the initial configuration satisfies all constraints.
+
+        context.applyConstraints(workingConstraintTol);
+
+        // Record the initial positions and determine a normalization constant for scaling the tolerance.
+
+        vector<Vec3> initialPos = context.getState(State::Positions).getPositions();
+        double norm = 0.0;
+        for (int i = 0; i < numParticles; i++)
+        {
+            x[3 * i] = initialPos[i][0];
+            x[3 * i + 1] = initialPos[i][1];
+            x[3 * i + 2] = initialPos[i][2];
+            norm += initialPos[i].dot(initialPos[i]);
+        }
+        norm /= numParticles;
+        norm = (norm < 1 ? 1 : sqrt(norm));
+        param.epsilon = tolerance / norm;
+
+        // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
+
+        double prevMaxError = 1e10;
+        MinimizerData data(context, k, reporter);
+        while (true)
+        {
+            // Perform the minimization.
+
+            lbfgsfloatval_t fx;
+            lbfgs_progress_t reportFn = (reporter == NULL ? NULL : report);
+            lbfgs(numParticles * 3, x, &fx, evaluate, reportFn, &data, &param);
+
+            // Check whether all constraints are satisfied.
+
+            vector<Vec3> positions = context.getState(State::Positions).getPositions();
+            int numConstraints = system.getNumConstraints();
+            double maxError = 0.0;
+            for (int i = 0; i < numConstraints; i++)
+            {
+                int particle1, particle2;
+                double distance;
+                system.getConstraintParameters(i, particle1, particle2, distance);
+                Vec3 delta = positions[particle2] - positions[particle1];
+                double r = sqrt(delta.dot(delta));
+                double error = fabs(r - distance) / distance;
+                if (error > maxError)
+                    maxError = error;
+            }
+            if (maxError <= workingConstraintTol)
+                break; // All constraints are satisfied.
+            context.setPositions(initialPos);
+            if (maxError >= prevMaxError)
+                break; // Further tightening the springs doesn't seem to be helping, so just give up.
+            prevMaxError = maxError;
+            data.k *= 10;
+            if (maxError > 100 * workingConstraintTol)
+            {
+                // We've gotten far enough from a valid state that we might have trouble getting
+                // back, so reset to the original positions.
+
+                for (int i = 0; i < numParticles; i++)
+                {
+                    x[3 * i] = initialPos[i][0];
+                    x[3 * i + 1] = initialPos[i][1];
+                    x[3 * i + 2] = initialPos[i][2];
+                }
+            }
+        }
+    }
+    catch (...)
+    {
+        lbfgs_free(x);
+        throw;
+    }
+    lbfgs_free(x);
+
+    // If necessary, do a final constraint projection to make sure they are satisfied
+    // to the full precision requested by the user.
+
+    if (constraintTol < workingConstraintTol)
+        context.applyConstraints(workingConstraintTol);
+}

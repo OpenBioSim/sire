@@ -521,7 +521,7 @@ class DynamicsData:
 
         - max_iterations (int): The maximum number of iterations to run
         """
-        from openmm import LocalEnergyMinimizer
+        from ..legacy.Convert import minimise_openmm_context
         from concurrent.futures import ThreadPoolExecutor
 
         if max_iterations <= 0:
@@ -531,8 +531,8 @@ class DynamicsData:
 
         def runfunc(max_its):
             try:
-                LocalEnergyMinimizer.minimize(
-                    self._omm_mols, maxIterations=max_its
+                minimise_openmm_context(
+                    self._omm_mols, max_iterations=max_its
                 )
 
                 return 0
