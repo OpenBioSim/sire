@@ -15,6 +15,23 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2023.4.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
+* Fixed regression introduced in 2023.4.0 that meant that removed the constraints
+  from water molecules that had no internal bonds. These waters would blow up
+  as there was nothing holding them together. The need for these constraints is
+  now better detected and explicitly added.
+
+* Significantly sped up the OpenMM layer by checking for similar constraint lengths
+  and matching them all to be the same (within 0.05 A for calculated constraints,
+  e.g. unbonded atoms or angle constraints) or to R0 for bonds where the bond
+  length is within 0.1 A of R0 and the molecule isn't perturbable.
+
+* Added a custom minimiser that is based on OpenMM's LocalEnergyMinimizer,
+  but that copes better with exclusion errors, and that has deep integration
+  with the progress bar / interuption system.
+
+* Fixed a bug where the exclusions and exceptions were mismatched for the
+  OpenMM CPU platform, leading to exclusion errors.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023

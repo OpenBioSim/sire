@@ -6,8 +6,8 @@ import sire as sr
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_simple_minimise(kigaki_mols):
-    mols = kigaki_mols
+def test_openmm_simple_minimise(ala_mols):
+    mols = ala_mols
 
     nrg = mols.energy()
 
@@ -39,4 +39,45 @@ def test_openmm_minimise_lambda(merged_ethane_methanol):
 
     mols = (
         mols[0].minimisation(platform="cpu", lambda_value=0.5).run(5).commit()
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_minimise_unbonded_water(kigaki_mols):
+    mols = kigaki_mols
+
+    atoms = mols[100].atoms()
+
+    # the water molecules have no internal bonds, so this tests
+    # whether or not constraints have been added correctly
+    mols = mols.minimisation(platform="cpu").run(10).commit()
+
+    new_atoms = mols[100].atoms()
+
+    # make sure the water has not blown up... (low tolerance as
+    # the water bond lengths will be constrained to a common shared
+    # value)
+    assert (
+        sr.measure(atoms[0], atoms[1]).value()
+        == pytest.approx(
+            sr.measure(new_atoms[0], new_atoms[1]).value(), abs=1e-2
+        )
+    ) or (
+        sr.measure(new_atoms[0], new_atoms[2]).value() == pytest.approx(0.9572)
+    )
+
+    assert (
+        sr.measure(atoms[0], atoms[2]).value()
+        == pytest.approx(
+            sr.measure(new_atoms[0], new_atoms[2]).value(), abs=1e-2
+        )
+    ) or (
+        sr.measure(new_atoms[0], new_atoms[2]).value() == pytest.approx(0.9572)
+    )
+
+    assert sr.measure(atoms[1], atoms[2]).value() == pytest.approx(
+        sr.measure(new_atoms[1], new_atoms[2]).value(), abs=1e-2
     )
