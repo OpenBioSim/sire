@@ -1401,32 +1401,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // these are the indexes of the exception in the
                 // non-bonded forcefields and also the ghost-14 forcefield
                 exception_idxs[j] = std::make_pair(idx, nbidx);
-
-                // remove this interaction from the ghost forcefields, only
-                // if it involves ghost atoms. If it doens't involve ghost atoms
-                // then we cannot remove it, because OpenMM doesn't support
-                // having a non-zero exception in NonbondedForce while having
-                // exclusions between the same atoms in CustomNonbondedForce
-                if (ghost_ghostff != 0 and (atom0_is_ghost or atom1_is_ghost))
-                {
-                    ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
-                    ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
-                }
             }
             else
             {
                 cljff->addException(std::get<0>(p), std::get<1>(p),
                                     std::get<2>(p), std::get<3>(p),
                                     std::get<4>(p), true);
+            }
 
-                // we need to make sure that the list of exclusions in
-                // the NonbondedForce match those in the CustomNonbondedForces
-                if (ghost_ghostff != 0 and std::get<2>(p) == 0 and
-                    std::get<3>(p) == 0 and std::get<4>(p) == 0)
-                {
-                    ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
-                    ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
-                }
+            // we need to make sure that the list of exclusions in
+            // the NonbondedForce match those in the CustomNonbondedForces
+            if (ghost_ghostff != 0)
+            {
+                ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
+                ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
             }
         }
 

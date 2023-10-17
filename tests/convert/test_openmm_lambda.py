@@ -56,7 +56,7 @@ def _run_test(mols, is_slow=False, use_taylor=False):
 
     # need to use the reference platform on GH Actions
     map = {
-        "platform": "Reference",
+        "platform": "cpu",
         "schedule": l,
         "constraint": "bonds-h-angles",
     }
