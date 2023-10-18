@@ -1,7 +1,7 @@
 __all__ = ["TrajectoryIterator"]
 
 # make sure that GeneralUnit has been modernised
-from ..units import GeneralUnit as _GeneralUnit
+from ..units import GeneralUnit as _GeneralUnit  # noqa: F401
 
 
 def _get_align_atoms_and_reference(

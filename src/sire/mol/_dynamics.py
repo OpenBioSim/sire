@@ -1,9 +1,6 @@
 __all__ = ["Dynamics"]
 
 
-from typing import Any
-
-
 class DynamicsData:
     """
     Internal class that is designed to only be used by the Dynamics
@@ -128,14 +125,16 @@ class DynamicsData:
             mols = openmm_extract_coordinates_and_velocities(
                 state,
                 self._sire_mols.molecules(),
-                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                # black auto-formats this to a long line
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
         else:
             mols = openmm_extract_coordinates(
                 state,
                 self._sire_mols.molecules(),
-                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                # black auto-formats this to a long line
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
 
@@ -842,12 +841,13 @@ class DynamicsData:
                                 raise NeedsMinimiseError()
 
                             raise RuntimeError(
-                                "The kinetic energy has exceeded 1000 kcal mol-1 "
-                                f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
-                                f" and {kinetic_energy} kcal mol-1 total). This "
-                                "suggests that the simulation has become "
-                                "unstable. Try reducing the timestep and/or "
-                                "minimising the system and run again."
+                                "The kinetic energy has exceeded 1000 kcal "
+                                f"mol-1 per atom (it is {ke_per_atom} kcal "
+                                f"mol-1 atom-1, and {kinetic_energy} kcal "
+                                "mol-1 total). This suggests that the "
+                                "simulation has become unstable. Try reducing "
+                                "the timestep and/or minimising the system "
+                                "and run again."
                             )
 
                 self._walltime += (

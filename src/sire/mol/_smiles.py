@@ -10,7 +10,8 @@ __all__ = [
 _rdkit_import_error = None
 
 try:
-    from rdkit import Chem as _Chem
+    # imported to check if it is available
+    from rdkit import Chem as _Chem  # noqa: F401
 
     _has_rdkit = True
 except ImportError:
@@ -497,7 +498,6 @@ if _has_rdkit:
 
         from rdkit.Chem import rdDepictor
         from rdkit.Chem.Draw import rdMolDraw2D
-        from rdkit.Chem.Draw import IPythonConsole
 
         rdDepictor.SetPreferCoordGen(True)
 

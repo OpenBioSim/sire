@@ -47,7 +47,9 @@ __all__ = [
 from ..legacy import Mol as _Mol
 from .. import use_new_api as _use_new_api
 
-from ..legacy import Base as _Base
+# Imported as we need to ensure that Base is pythonized before
+# loading the rest of this module
+from ..legacy import Base as _Base  # noqa: F401
 
 
 from ..legacy.Mol import (
@@ -114,8 +116,8 @@ from ._smiles import (
     _selector_view2d,
 )
 
-# make sure that Vector has units attached
-from ..maths import Vector as _Vector
+# Imported to make sure that Vector has units attached
+from ..maths import Vector as _Vector  # noqa: F401
 
 _use_new_api()
 
@@ -1828,7 +1830,6 @@ def _minimisation(
     """
     from ..base import create_map
     from ..system import System
-    from .. import u
 
     map = create_map(map)
 

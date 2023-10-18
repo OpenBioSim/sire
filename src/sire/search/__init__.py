@@ -18,7 +18,8 @@ __all__ = [
     "set_token",
 ]
 
-from ..legacy import Search as _Search
+# Imported so that it is pythonized
+from ..legacy import Search as _Search  # noqa: F401
 
 from .. import use_new_api as _use_new_api
 

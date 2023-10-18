@@ -166,7 +166,10 @@ def _fix_vector():
     _Vector.__repr__ = __str__
 
     def __format__(obj, format):
-        return f"({obj.x().value():{format}}, {obj.y().value():{format}}, {obj.z().value():{format}})"
+        return (
+            f"({obj.x().value():{format}}, {obj.y().value():{format}}, "
+            f"{obj.z().value():{format}})"
+        )
 
     _Vector.__format__ = __format__
 
