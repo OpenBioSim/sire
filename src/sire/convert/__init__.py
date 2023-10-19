@@ -143,7 +143,7 @@ def to_sire(obj, map=None):
         else:
             raise TypeError(f"Unrecognised type {typ[0]}")
 
-        if isinstance(c, System):
+        if not isinstance(c, System):
             c = c.molecules()
 
         converted.append(c)

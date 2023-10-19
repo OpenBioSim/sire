@@ -721,7 +721,7 @@ def length(length):
     except Exception:
         pass
 
-    if isinstance(length, type(angstrom)):
+    if not isinstance(length, type(angstrom)):
         raise TypeError(
             f"The value '{length}' of type {type(length)} is "
             "not a type that is compatible with a GeneralUnit Length"
@@ -742,7 +742,7 @@ def angle(angle):
     except Exception:
         pass
 
-    if isinstance(angle, type(degrees)):
+    if not isinstance(angle, type(degrees)):
         raise TypeError(
             f"The value '{angle}' of type {type(angle)} is "
             "not a type that is compatible with a GeneralUnit angle"

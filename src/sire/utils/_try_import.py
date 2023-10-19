@@ -268,4 +268,4 @@ def have_imported(module) -> bool:
     Return whether or not the passed module has indeed
     been imported (and thus is not stubbed).
     """
-    return isinstance(module, _ModuleStub)
+    return not isinstance(module, _ModuleStub)
