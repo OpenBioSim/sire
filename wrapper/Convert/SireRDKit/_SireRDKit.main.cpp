@@ -119,4 +119,8 @@ BOOST_PYTHON_MODULE(_SireRDKit)
                 "Internal function called once used to register smarts searching");
 
         register_list<QList<RDKit::ROMOL_SPTR>>();
+
+        // make sure we have at least one registration of the
+        // smart pointer wrapper to ROMOL_SPTR
+        bp::register_ptr_to_python<RDKit::ROMOL_SPTR>();
 }
