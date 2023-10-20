@@ -1580,6 +1580,13 @@ def _dynamics(
 
         map.set("space", Cartesian())
 
+        view = view.clone()
+
+        try:
+            view.set_property("space", Cartesian())
+        except Exception:
+            pass
+
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
 
@@ -1590,7 +1597,7 @@ def _dynamics(
         and not view.shared_properties().has_property(map["space"])
     ):
         # space is not a shared property, so may be lost when we
-        # convert to molecules. Make sure this doens't happen by
+        # convert to molecules. Make sure this doesn't happen by
         # adding the space directly to the property map
         try:
             map.set("space", view.property(map["space"]))
@@ -1837,6 +1844,13 @@ def _minimisation(
         from ..vol import Cartesian
 
         map.set("space", Cartesian())
+
+        view = view.clone()
+
+        try:
+            view.set_property("space", Cartesian())
+        except Exception:
+            pass
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})

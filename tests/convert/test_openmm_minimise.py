@@ -81,3 +81,23 @@ def test_openmm_minimise_unbonded_water(kigaki_mols):
     assert sr.measure(atoms[1], atoms[2]).value() == pytest.approx(
         sr.measure(new_atoms[1], new_atoms[2]).value(), abs=1e-2
     )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_minimise_vacuum(kigaki_mols):
+    mols = kigaki_mols
+
+    mols = mols.minimisation(platform="cpu", vacuum=True).run(10).commit()
+
+    assert not mols.property("space").is_periodic()
+
+    mols = kigaki_mols.clone()
+
+    mols.add_shared_property("space", sr.vol.Cartesian())
+
+    mols = mols.minimisation(platform="cpu", vacuum=True).run(10).commit()
+
+    assert not mols.property("space").is_periodic()

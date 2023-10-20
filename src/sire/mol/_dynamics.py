@@ -138,14 +138,19 @@ class DynamicsData:
                 map=self._map,
             )
 
-        space = openmm_extract_space(state)
-
         self._current_step = nsteps_completed
 
         self._sire_mols.update(mols.to_molecules())
-        self._sire_mols.set_property("space", space)
+
+        if self._ffinfo.space().is_periodic():
+            # don't change the space if it is infinite - this
+            # cannot change during the simulation and OpenMM
+            # likes giving back fake spaces
+            space = openmm_extract_space(state)
+            self._sire_mols.set_property("space", space)
+            self._ffinfo.set_space(space)
+
         self._sire_mols.set_property("time", self._current_time)
-        self._ffinfo.set_space(space)
 
     def _enter_dynamics_block(self):
         if self._is_running:
