@@ -12,7 +12,7 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.4.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
+`2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
 * Fixed regression introduced in 2023.4.0 that meant that removed the constraints
@@ -31,6 +31,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed a bug where the exclusions and exceptions were mismatched for the
   OpenMM CPU platform, leading to exclusion errors.
+
+* Fixed an issue where the vacuum dynamics and minimisation simulations still
+  had a spurious periodic box added when ``.commit()`` was called.
 
 * Please add an item to this changelog when you create your PR
 
