@@ -381,19 +381,13 @@ class DynamicsData:
         if self.is_null():
             return None
         else:
-            if self._map.specified("constraint"):
-                return self._map["constraint"].source()
-            else:
-                return "none"
+            return self._omm_mols.get_constraint()
 
     def perturbable_constraint(self):
         if self.is_null():
             return None
         else:
-            if self._map.specified("perturbable_constraint"):
-                return self._map["perturbable_constraint"].source()
-            else:
-                return self.constraint()
+            return self._omm_mols.get_perturbable_constraint()
 
     def get_schedule(self):
         if self.is_null():

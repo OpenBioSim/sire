@@ -129,6 +129,7 @@ try:
                 f"'{timestep}'"
             )
 
+        timestep_in_fs = timestep.to(femtosecond)
         timestep = timestep.to(picosecond) * openmm.unit.picosecond
 
         ensemble = Ensemble(map=map)
@@ -167,8 +168,10 @@ try:
                     ensemble.temperature().to(kelvin) * openmm.unit.kelvin
                 )
 
-        elif type(integrator) is str:
-            integrator = integrator.lower()
+        elif isinstance(integrator, str):
+            from ...options import Integrator
+
+            integrator = Integrator.create(integrator)
 
             if integrator == "verlet" or integrator == "leapfrog":
                 if not ensemble.is_nve():
@@ -225,6 +228,40 @@ try:
                 "type. It should be a string or an openmm.Integrator object"
             )
 
+        if map.specified("constraint"):
+            from ...options import Constraint
+
+            desired_constraint = Constraint.create(map["constraint"].source())
+
+            if desired_constraint == "auto":
+                # choose the constraint based on the timestep
+                if timestep_in_fs > 4:
+                    # need constraint on everything
+                    desired_constraint = "bonds"
+
+                elif timestep_in_fs > 1:
+                    # need it just on H bonds and angles
+                    desired_constraint = "h-bonds"
+
+                else:
+                    # can get away with no constraints
+                    desired_constraint = "none"
+
+            map.set("constraint", desired_constraint)
+
+        if map.specified("perturbable_constraint"):
+            from ...options import PerturbableConstraint
+
+            desired_constraint = PerturbableConstraint.create(
+                map["perturbable_constraint"].source()
+            )
+
+            if desired_constraint == "auto":
+                # we don't apply the constraint to perturbable molecules
+                desired_constraint = "none"
+
+            map.set("perturbable_constraint", desired_constraint)
+
         # Next, convert the sire system to an openmm system
 
         # system must be an openmm.System() or else we will crash!
@@ -250,31 +287,35 @@ try:
         platform = None
 
         if map.specified("platform"):
-            desired_platform = map["platform"].source()
+            from ...options import Platform
 
-            platform = None
-            platforms = []
+            desired_platform = Platform.create(map["platform"].source())
 
-            for i in range(0, openmm.Platform.getNumPlatforms()):
-                p = openmm.Platform.getPlatform(i)
+            # only look for the desired platform if it is not "auto"
+            if desired_platform != "auto":
+                platforms = []
 
-                if (p.getName().lower() == desired_platform.lower()) or (
-                    p.getName() == "HIP"
-                    and desired_platform.lower() == "metal"
-                ):
-                    platform = p
-                    break
-                else:
-                    platforms.append(p.getName())
+                for i in range(0, openmm.Platform.getNumPlatforms()):
+                    p = openmm.Platform.getPlatform(i)
 
-            if platform is None:
-                platforms = ", ".join(platforms)
-                raise ValueError(
-                    f"Cannot create the openmm platform {desired_platform} "
-                    "as this is not supported by this installation of "
-                    f"openmm. Available platforms are [{platforms}]"
-                )
-        else:
+                    if (p.getName().lower() == desired_platform.lower()) or (
+                        p.getName() == "HIP"
+                        and desired_platform.lower() == "metal"
+                    ):
+                        platform = p
+                        break
+                    else:
+                        platforms.append(p.getName())
+
+                if platform is None:
+                    platforms = ", ".join(platforms)
+                    raise ValueError(
+                        f"Cannot create the openmm platform {desired_platform} "
+                        "as this is not supported by this installation of "
+                        f"openmm. Available platforms are [{platforms}]"
+                    )
+
+        if platform is None:
             # just find the fastest platform - this will be "metal" if that
             # is available and we are on Mac, or CUDA if CUDA works,
             # or OpenCL if OpenCL works, or CPU if nothing is left...

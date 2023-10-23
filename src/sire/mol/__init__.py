@@ -1646,27 +1646,7 @@ def _dynamics(
         map.set("save_velocities", save_velocities)
 
     if constraint is None and not map.specified("constraint"):
-        from ..units import femtosecond
-
-        if timestep is None:
-            # it must be in the map
-            timestep = map["timestep"].value()
-
-        if timestep > 4 * femtosecond:
-            # need constraint on everything
-            constraint = "bonds-h-angles"
-
-        elif timestep > 2 * femtosecond:
-            # need constraint on everything
-            constraint = "h-bonds-h-angles"
-
-        elif timestep > 1 * femtosecond:
-            # need it just on H bonds and angles
-            constraint = "h-bonds"
-
-        else:
-            # can get away with no constraints
-            constraint = "none"
+        map.set("constraint", "auto")
 
     if perturbable_constraint is not None:
         perturbable_constraint = str(perturbable_constraint).lower()
