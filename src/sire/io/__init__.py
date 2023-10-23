@@ -4,9 +4,10 @@ from ..legacy import IO as _IO
 from .. import use_new_api as _use_new_api
 
 # Imported to ensure that sire.maths.Vector is properly wrapped
-from ..maths import Vector as _Vector
+from ..maths import Vector as _Vector  # noqa: F401
 
-from . import parser
+# Importing the parser sub-module so that it autocompletes when used
+from . import parser  # noqa: F401
 
 _use_new_api()
 

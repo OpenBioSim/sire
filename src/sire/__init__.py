@@ -90,7 +90,7 @@ def _fix_openmm_path():
     if need_path:
         # importing openmm should add this path
         try:
-            import openmm
+            import openmm  # noqa: F401 (imported but unused)
         except Exception:
             print("OpenMM import failed!")
             # Copy the files

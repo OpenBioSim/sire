@@ -70,8 +70,8 @@ class Profiler:
             lines.append(f"  \\-{clines[0]}")
 
             if len(clines) > 1:
-                for l in clines[1:]:
-                    lines.append(f"    {l}")
+                for line in clines[1:]:
+                    lines.append(f"    {line}")
 
         return lines
 

@@ -30,9 +30,12 @@ if (${SIRE_USE_OPENMM})
           _SireOpenMM.main.cpp
 
           lambdalever.cpp
+          openmmminimise.cpp
           openmmmolecule.cpp
           sire_openmm.cpp
           sire_to_openmm_system.cpp
+
+          lbgfs/lbfgs.cpp
 
       )
 

@@ -72,6 +72,7 @@ try:
         _openmm_extract_coordinates,
         _openmm_extract_coordinates_and_velocities,
         _openmm_extract_space,
+        _minimise_openmm_context,
     )
 
     _has_openmm = True
@@ -390,6 +391,11 @@ try:
     def openmm_extract_space(state):
         return _openmm_extract_space(state)
 
+    def minimise_openmm_context(
+        context, tolerance: float = 10, max_iterations: int = -1
+    ):
+        return _minimise_openmm_context(context, tolerance, max_iterations)
+
 except Exception as e:
     _openmm_import_exception = e
 
@@ -417,6 +423,9 @@ except Exception as e:
         _no_openmm()
 
     def openmm_extract_space(*args, **kwargs):
+        _no_openmm()
+
+    def minimise_openmm_context(*args, **kwargs):
         _no_openmm()
 
 

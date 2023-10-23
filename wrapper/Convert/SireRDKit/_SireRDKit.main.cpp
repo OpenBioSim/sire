@@ -2,6 +2,7 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
+#include "boost/python/converter/registry.hpp"
 
 #include "sire_rdkit.h"
 
@@ -119,4 +120,13 @@ BOOST_PYTHON_MODULE(_SireRDKit)
                 "Internal function called once used to register smarts searching");
 
         register_list<QList<RDKit::ROMOL_SPTR>>();
+
+        // make sure we have at least one registration of the
+        // smart pointer wrapper to ROMOL_SPTR
+        const auto info = boost::python::type_id<RDKit::ROMOL_SPTR>();
+        const auto *reg = bp::converter::registry::query(info);
+        if (reg == NULL)
+        {
+                bp::register_ptr_to_python<RDKit::ROMOL_SPTR>();
+        }
 }

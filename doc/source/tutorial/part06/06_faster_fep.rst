@@ -323,7 +323,9 @@ ethane and methanol.
 ...     lambda_value = l / 100.0
 ...     print(f"Simulating lambda={lambda_value:.2f}")
 ...     # minimise the system at this lambda value
-...     min_mols = mols.minimisation(lambda_value=lambda_value).run().commit()
+...     min_mols = mols.minimisation(lambda_value=lambda_value,
+...                                  constraint="h-bonds",
+...                                  perturbable_constraint="none").run().commit()
 ...     # create a dynamics object for the system
 ...     d = min_mols.dynamics(timestep="4fs", temperature="25oC",
 ...                           lambda_value=lambda_value,

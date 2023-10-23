@@ -26,6 +26,14 @@ if (SIRE_HAS_CPP_17)
       add_definitions(-DRDKIT_DYN_LINK)
     endif()
 
+    if (APPLE)
+      # RDKit uses std::bad_any_cast, which isn't available by default
+      # with MacOS 10.9. But it is supplied with conda, so need to mark
+      # that, e.g. see
+      # https://conda-forge.org/docs/maintainer/knowledge_base.html#newer-c-features-with-old-sdk
+      add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
+    endif()
+
     # Sire include paths
     include_directories( BEFORE ${SIRE_INCLUDE_DIR} )
 

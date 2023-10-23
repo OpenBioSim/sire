@@ -54,8 +54,8 @@ class _CursorData:
                     from ..utils import Console
 
                     Console.warning(
-                        f"Cannot auto-generate a connectivity for {self.molecule}."
-                        f" The error is:\n\n{e}"
+                        "Cannot auto-generate a connectivity for "
+                        f"{self.molecule}. The error is:\n\n{e}"
                     )
 
     def number(self):

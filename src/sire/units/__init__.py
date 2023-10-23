@@ -155,7 +155,8 @@ __all__ = [
     "yards",
 ]
 
-from ..legacy import Units as _Units
+# Imported so that it is pythonized
+from ..legacy import Units as _Units  # noqa: F401
 
 from .. import use_new_api as _use_new_api
 
@@ -720,7 +721,7 @@ def length(length):
     except Exception:
         pass
 
-    if type(length) != type(angstrom):
+    if not isinstance(length, type(angstrom)):
         raise TypeError(
             f"The value '{length}' of type {type(length)} is "
             "not a type that is compatible with a GeneralUnit Length"
@@ -741,7 +742,7 @@ def angle(angle):
     except Exception:
         pass
 
-    if type(angle) != type(degrees):
+    if not isinstance(angle, type(degrees)):
         raise TypeError(
             f"The value '{angle}' of type {type(angle)} is "
             "not a type that is compatible with a GeneralUnit angle"

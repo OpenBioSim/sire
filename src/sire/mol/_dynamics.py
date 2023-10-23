@@ -1,9 +1,6 @@
 __all__ = ["Dynamics"]
 
 
-from typing import Any
-
-
 class DynamicsData:
     """
     Internal class that is designed to only be used by the Dynamics
@@ -128,25 +125,32 @@ class DynamicsData:
             mols = openmm_extract_coordinates_and_velocities(
                 state,
                 self._sire_mols.molecules(),
-                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                # black auto-formats this to a long line
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
         else:
             mols = openmm_extract_coordinates(
                 state,
                 self._sire_mols.molecules(),
-                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),
+                # black auto-formats this to a long line
+                perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
-
-        space = openmm_extract_space(state)
 
         self._current_step = nsteps_completed
 
         self._sire_mols.update(mols.to_molecules())
-        self._sire_mols.set_property("space", space)
+
+        if self._ffinfo.space().is_periodic():
+            # don't change the space if it is infinite - this
+            # cannot change during the simulation and OpenMM
+            # likes giving back fake spaces
+            space = openmm_extract_space(state)
+            self._sire_mols.set_property("space", space)
+            self._ffinfo.set_space(space)
+
         self._sire_mols.set_property("time", self._current_time)
-        self._ffinfo.set_space(space)
 
     def _enter_dynamics_block(self):
         if self._is_running:
@@ -521,39 +525,12 @@ class DynamicsData:
 
         - max_iterations (int): The maximum number of iterations to run
         """
-        from openmm import LocalEnergyMinimizer
-        from concurrent.futures import ThreadPoolExecutor
+        from ..legacy.Convert import minimise_openmm_context
 
         if max_iterations <= 0:
             max_iterations = 0
 
-        from ..base import ProgressBar
-
-        def runfunc(max_its):
-            try:
-                LocalEnergyMinimizer.minimize(
-                    self._omm_mols, maxIterations=max_its
-                )
-
-                return 0
-            except Exception as e:
-                return e
-
-        with ProgressBar(text="minimisation") as spinner:
-            spinner.set_speed_unit("checks / s")
-
-            with ThreadPoolExecutor() as pool:
-                run_promise = pool.submit(runfunc, max_iterations)
-
-                while not run_promise.done():
-                    try:
-                        result = run_promise.result(timeout=0.2)
-                    except Exception:
-                        spinner.tick()
-                        pass
-
-                if result != 0:
-                    raise result
+        minimise_openmm_context(self._omm_mols, max_iterations=max_iterations)
 
     def _rebuild_and_minimise(self):
         if self.is_null():
@@ -803,11 +780,19 @@ class DynamicsData:
                             # run the current block in the background
                             run_promise = pool.submit(runfunc, nrun)
 
+                            result = None
+
                             while not run_promise.done():
                                 try:
                                     result = run_promise.result(timeout=1.0)
                                 except Exception:
                                     pass
+
+                            # catch rare edge case where the promise timed
+                            # out, but then completed before the .done()
+                            # test in the next loop iteration
+                            if result is None:
+                                result = run_promise.result()
 
                             if result == 0:
                                 completed += nrun
@@ -861,12 +846,13 @@ class DynamicsData:
                                 raise NeedsMinimiseError()
 
                             raise RuntimeError(
-                                "The kinetic energy has exceeded 1000 kcal mol-1 "
-                                f"per atom (it is {ke_per_atom} kcal mol-1 atom-1,"
-                                f" and {kinetic_energy} kcal mol-1 total). This "
-                                "suggests that the simulation has become "
-                                "unstable. Try reducing the timestep and/or "
-                                "minimising the system and run again."
+                                "The kinetic energy has exceeded 1000 kcal "
+                                f"mol-1 per atom (it is {ke_per_atom} kcal "
+                                f"mol-1 atom-1, and {kinetic_energy} kcal "
+                                "mol-1 total). This suggests that the "
+                                "simulation has become unstable. Try reducing "
+                                "the timestep and/or minimising the system "
+                                "and run again."
                             )
 
                 self._walltime += (

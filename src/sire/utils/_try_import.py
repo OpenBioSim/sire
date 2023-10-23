@@ -20,11 +20,6 @@ def _find_conda():
     else:
         conda = None
 
-    if "CONDA_DEFAULT_ENV" in os.environ:
-        conda_env = os.environ["CONDA_DEFAULT_ENV"]
-    else:
-        conda_env = None
-
     if os.path.exists(os.path.join(conda_base, "python.exe")):
         # Windows
         conda_bin = os.path.join(conda_base, "Library", "bin")
@@ -80,7 +75,8 @@ def _install_package(name, package_registry, version=None):
     try:
         if version is not None:
             try:
-                _v = float(version)
+                # Check first that 'version' is a number
+                _v = float(version)  # noqa: F841
                 version = "==%s" % version
             except Exception:
                 pass
@@ -263,7 +259,7 @@ def assert_imported(module):
     This will raise a ModuleNotFoundError if the module
     has not been imported, and has instead been stubbed.
     """
-    if type(module) == _ModuleStub:
+    if isinstance(module, _ModuleStub):
         module.this_will_break()
 
 
@@ -272,4 +268,4 @@ def have_imported(module) -> bool:
     Return whether or not the passed module has indeed
     been imported (and thus is not stubbed).
     """
-    return type(module) != _ModuleStub
+    return not isinstance(module, _ModuleStub)
