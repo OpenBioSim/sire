@@ -293,7 +293,8 @@ def expand(base: str, path: _Union[str, _List[str]], *args, **kwargs):
 
      Examples:
          >>> expand("https://sire.openbiosim.org/m", "urea.gro", "urea.top")
-         ["https://sire.openbiosim.org/m/urea.gro", "https://sire.openbiosim.org/n/urea.top"]
+         ["https://sire.openbiosim.org/m/urea.gro",
+          "https://sire.openbiosim.org/n/urea.top"]
 
          >>> expand("input", ["ala.top", "ala.crd"])
          ["input/ala.top", "input/ala.crd"]
@@ -437,8 +438,6 @@ def load(
 
     for key in kwargs.keys():
         m[key] = kwargs[key]
-
-    from .base import create_map
 
     map = create_map(map, m)
 

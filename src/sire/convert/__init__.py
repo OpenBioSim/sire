@@ -143,7 +143,7 @@ def to_sire(obj, map=None):
         else:
             raise TypeError(f"Unrecognised type {typ[0]}")
 
-        if type(c) != System:
+        if not isinstance(c, System):
             c = c.molecules()
 
         converted.append(c)
@@ -157,7 +157,7 @@ def to_sire(obj, map=None):
         for i in range(1, len(converted)):
             mols += converted[i]
 
-    if type(mols) == System:
+    if isinstance(mols, System):
         return mols
     elif len(mols) == 1:
         return mols[0]
@@ -286,7 +286,7 @@ def sire_to_biosimspace(obj, map=None):
 
     from ..system import System
 
-    if type(obj) == System:
+    if isinstance(obj, System):
         return _BSS._SireWrappers.System(obj._system)
 
     obj = _to_selectormol(obj)

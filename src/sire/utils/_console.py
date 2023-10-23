@@ -2,8 +2,6 @@ from typing import Union as _Union
 from typing import List as _List
 from typing import IO as _IO
 
-from datetime import datetime as _datetime
-
 from contextlib import contextmanager as _contextmanager
 
 

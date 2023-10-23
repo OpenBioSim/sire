@@ -31,6 +31,8 @@
 
 #include <QSet>
 
+#include <QReadWriteLock>
+
 #include <QDebug>
 
 using namespace SireOpenMM;
@@ -310,6 +312,60 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
                            charge, sigma, epsilon);
 }
 
+/** Return closest constraint length to 'length' based on what
+ *  we have seen before and the constraint_length_tolerance
+ */
+double getSharedConstraintLength(double length)
+{
+    // distance below which constraints are considered to be equal (e.g. to
+    // r0 or to another angle - units in nanometers)
+    const double constraint_length_tolerance = 0.005;
+
+    // is this close to a O-H bond length of water?
+    if (std::abs(length - 0.09572) < constraint_length_tolerance)
+    {
+        return 0.09572;
+    }
+
+    static QVector<double> angle_constraint_lengths;
+    static QReadWriteLock l;
+
+    // most of the time we expect a hit, so a read lock is ok
+    QReadLocker locker(&l);
+
+    // is this close to any of the existing angle constraints?
+    for (const auto &cl : angle_constraint_lengths)
+    {
+        if (std::abs(cl - length) < constraint_length_tolerance)
+        {
+            // this is close enough to an existing constraint
+            // so we will use that instead
+            return cl;
+        }
+    }
+
+    locker.unlock();
+
+    // ok, we didn't find it - we should append it to the list
+    // unless another thread has got here first
+    QWriteLocker locker2(&l);
+
+    for (const auto &cl : angle_constraint_lengths)
+    {
+        if (std::abs(cl - length) < constraint_length_tolerance)
+        {
+            // this is close enough to an existing constraint
+            // so we will use that instead
+            return cl;
+        }
+    }
+
+    // this is a new constraint, so add it to the list
+    angle_constraint_lengths.append(length);
+
+    return length;
+}
+
 void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                         const AmberParams &params,
                                         const AmberParams &params1,
@@ -444,6 +500,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     this->bond_params.clear();
     this->constraints.clear();
 
+    // initialise all atoms as being unbonded
+    this->unbonded_atoms.reserve(nats);
+
+    for (int i = 0; i < nats; ++i)
+    {
+        this->unbonded_atoms.insert(i);
+    }
+
     // now the bonds
     const double bond_k_to_openmm = 2.0 * (SireUnits::kcal_per_mol / (SireUnits::angstrom * SireUnits::angstrom)).to(SireUnits::kJ_per_mol / (SireUnits::nanometer * SireUnits::nanometer));
     const double bond_r0_to_openmm = SireUnits::angstrom.to(SireUnits::nanometer);
@@ -473,6 +537,12 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
 
+        if (k != 0)
+        {
+            this->unbonded_atoms.remove(atom0);
+            this->unbonded_atoms.remove(atom1);
+        }
+
         const bool has_light_atom = (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
         const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
@@ -489,9 +559,16 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         {
             // add the constraint - this constrains the bond to whatever length it has now
             const auto delta = coords[atom1] - coords[atom0];
-            const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
-                                                     (delta[1] * delta[1]) +
-                                                     (delta[2] * delta[2]));
+            auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                               (delta[1] * delta[1]) +
+                                               (delta[2] * delta[2]));
+
+            // use the r0 for the bond if this is close to the measured length and this
+            // is not a perturbable molecule
+            if (not is_perturbable and std::abs(constraint_length - r0) < 0.01)
+            {
+                constraint_length = r0;
+            }
 
             this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
             constrained_pairs.insert(to_pair(atom0, atom1));
@@ -543,9 +620,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             if ((this_constraint_type & CONSTRAIN_HANGLES) and is_h_x_h)
             {
                 const auto delta = coords[atom2] - coords[atom0];
-                const auto constraint_length = std::sqrt((delta[0] * delta[0]) +
-                                                         (delta[1] * delta[1]) +
-                                                         (delta[2] * delta[2]));
+                auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                   (delta[1] * delta[1]) +
+                                                   (delta[2] * delta[2]));
+
+                // we can speed up OpenMM by making sure that constraints are
+                // equal if they operate on similar molecules (e.g. all water
+                // constraints are the same. We will check for this if this is
+                // a non-perturbable small molecule
+                if (mol.nAtoms() < 10 and not is_perturbable)
+                {
+                    constraint_length = getSharedConstraintLength(constraint_length);
+                }
+
                 constraints.append(std::make_tuple(atom0, atom2,
                                                    constraint_length));
                 constrained_pairs.insert(key);
@@ -765,6 +852,9 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
             bond_params_1.append(bond1);
 
             found_index_1[j] = true;
+
+            unbonded_atoms.remove(atom0);
+            unbonded_atoms.remove(atom1);
         }
     }
 
@@ -1014,10 +1104,13 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
     // we need to allow this set to morph
     exception_params.clear();
 
+    // save memory
+    if (unbonded_atoms.isEmpty())
+        unbonded_atoms = QSet<qint32>();
+
     const int nats = this->cljs.count();
 
     const auto &nbpairs = mol.property(map["intrascale"]).asA<CLJNBPairs>();
-    const auto &connectivity = mol.property(map["connectivity"]).asA<Connectivity>();
 
     const int ncgs = mol.nCutGroups();
 
@@ -1036,8 +1129,7 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
                 // are any of these atoms unbonded? If so, then
                 // we will need to add a constraint to hold them
                 // in place
-                if (connectivity.nConnections(AtomIdx(i)) == 0 or
-                    connectivity.nConnections(AtomIdx(j)) == 0)
+                if (unbonded_atoms.contains(i) or unbonded_atoms.contains(j))
                 {
                     if (not constrained_pairs.contains(to_pair(i, j)))
                     {
@@ -1045,7 +1137,7 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
                         const auto length = std::sqrt((delta[0] * delta[0]) +
                                                       (delta[1] * delta[1]) +
                                                       (delta[2] * delta[2]));
-                        constraints.append(std::make_tuple(i, j, length));
+                        constraints.append(std::make_tuple(i, j, getSharedConstraintLength(length)));
                         constrained_pairs.insert(to_pair(i, j));
                     }
                 }
@@ -1064,13 +1156,51 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
         {
             // two atoms must be excluded
             exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
+
+            if (unbonded_atoms.contains(0) or unbonded_atoms.contains(1))
+            {
+                // these atoms are not bonded - we need to add a constraint
+                // to keep them in place
+                const auto delta = coords[1] - coords[0];
+                const auto length = std::sqrt((delta[0] * delta[0]) +
+                                              (delta[1] * delta[1]) +
+                                              (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(0, 1, getSharedConstraintLength(length)));
+                constrained_pairs.insert(to_pair(0, 1));
+            }
         }
-        else if (nats <= 3)
+        else if (nats == 3)
         {
             // three atoms must be excluded
             exception_params.append(std::make_tuple(0, 1, 0.0, 0.0));
             exception_params.append(std::make_tuple(1, 2, 0.0, 0.0));
             exception_params.append(std::make_tuple(0, 2, 0.0, 0.0));
+
+            if (unbonded_atoms.contains(0) or unbonded_atoms.contains(1) or unbonded_atoms.contains(2))
+            {
+                // these atoms are not bonded - we need to add a constraint
+                // to keep them in place
+                auto delta = coords[1] - coords[0];
+                auto length = std::sqrt((delta[0] * delta[0]) +
+                                        (delta[1] * delta[1]) +
+                                        (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(0, 1, getSharedConstraintLength(length)));
+                constrained_pairs.insert(to_pair(0, 1));
+
+                delta = coords[2] - coords[0];
+                length = std::sqrt((delta[0] * delta[0]) +
+                                   (delta[1] * delta[1]) +
+                                   (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(0, 2, getSharedConstraintLength(length)));
+                constrained_pairs.insert(to_pair(0, 2));
+
+                delta = coords[2] - coords[1];
+                length = std::sqrt((delta[0] * delta[0]) +
+                                   (delta[1] * delta[1]) +
+                                   (delta[2] * delta[2]));
+                constraints.append(std::make_tuple(1, 2, getSharedConstraintLength(length)));
+                constrained_pairs.insert(to_pair(1, 2));
+            }
         }
         else
         {

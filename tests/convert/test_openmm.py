@@ -87,7 +87,7 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
         "cutoff": 10000 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 1.0,
-        "platform": "Reference",
+        "platform": "cpu",
         "constraint": "bonds-h-angles",
     }
 
@@ -119,7 +119,7 @@ def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
-        "platform": "Reference",
+        "platform": "cpu",
         "constraint": "bonds-h-angles",
     }
 

@@ -47,7 +47,9 @@ __all__ = [
 from ..legacy import Mol as _Mol
 from .. import use_new_api as _use_new_api
 
-from ..legacy import Base as _Base
+# Imported as we need to ensure that Base is pythonized before
+# loading the rest of this module
+from ..legacy import Base as _Base  # noqa: F401
 
 
 from ..legacy.Mol import (
@@ -114,8 +116,8 @@ from ._smiles import (
     _selector_view2d,
 )
 
-# make sure that Vector has units attached
-from ..maths import Vector as _Vector
+# Imported to make sure that Vector has units attached
+from ..maths import Vector as _Vector  # noqa: F401
 
 _use_new_api()
 
@@ -1578,6 +1580,13 @@ def _dynamics(
 
         map.set("space", Cartesian())
 
+        view = view.clone()
+
+        try:
+            view.set_property("space", Cartesian())
+        except Exception:
+            pass
+
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})
 
@@ -1588,7 +1597,7 @@ def _dynamics(
         and not view.shared_properties().has_property(map["space"])
     ):
         # space is not a shared property, so may be lost when we
-        # convert to molecules. Make sure this doens't happen by
+        # convert to molecules. Make sure this doesn't happen by
         # adding the space directly to the property map
         try:
             map.set("space", view.property(map["space"]))
@@ -1828,7 +1837,6 @@ def _minimisation(
     """
     from ..base import create_map
     from ..system import System
-    from .. import u
 
     map = create_map(map)
 
@@ -1836,6 +1844,13 @@ def _minimisation(
         from ..vol import Cartesian
 
         map.set("space", Cartesian())
+
+        view = view.clone()
+
+        try:
+            view.set_property("space", Cartesian())
+        except Exception:
+            pass
 
     if not map.specified("space"):
         map = create_map(map, {"space": "space"})

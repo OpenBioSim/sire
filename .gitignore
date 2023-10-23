@@ -65,3 +65,4 @@ tests/cache/*
 
 .DS_Store
 
+.coverage

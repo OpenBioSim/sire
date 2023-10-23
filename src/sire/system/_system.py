@@ -33,7 +33,7 @@ class System:
                     f"not a {type(system)}"
                 )
 
-            if type(system) == System:
+            if isinstance(system, System):
                 self._system == system._system
             else:
                 self._system = system
@@ -48,7 +48,7 @@ class System:
         """
         from ..legacy.System import System as _System
 
-        return type(obj) == System or type(obj) == _System
+        return isinstance(obj, System) or isinstance(obj, _System)
 
     def _to_legacy_system(self):
         """
@@ -458,7 +458,7 @@ class System:
             set in this dictionary that are also specified via one of
             the arguments above will be overridden by the argument
             value
-        """
+        """  # noqa: E501
         from ..mol import _minimisation
 
         return _minimisation(self, *args, **kwargs)
@@ -605,7 +605,7 @@ class System:
             set in this dictionary that are also specified via one of
             the arguments above will be overridden by the argument
             value
-        """
+        """  # noqa: E501
         from ..mol import _dynamics
 
         return _dynamics(self, *args, **kwargs)
@@ -711,9 +711,10 @@ class System:
 
         if not issubclass(type(space), Space):
             raise TypeError(
-                "You can only set the space to a type derived from sire.vol.Space, "
-                "e.g. sire.vol.PeriodicBox, sire.vol.TriclinicBox or "
-                f"sire.vol.Cartesian. You cannot use a {type(space)}."
+                "You can only set the space to a type derived from "
+                "sire.vol.Space, e.g. sire.vol.PeriodicBox, "
+                "sire.vol.TriclinicBox or sire.vol.Cartesian. "
+                f"You cannot use a {type(space)}."
             )
 
         if map is None:
@@ -742,8 +743,9 @@ class System:
         else:
             if not hasattr(time, "has_same_units"):
                 raise TypeError(
-                    "You can only set the time to a value with units 'time', e.g. "
-                    f"5 * sire.units.picosecond. YOu cannot use a {type(time)}."
+                    "You can only set the time to a value with units 'time', "
+                    "e.g. 5 * sire.units.picosecond. "
+                    f"You cannot use a {type(time)}."
                 )
 
             if not time.has_same_units(picosecond):
@@ -780,11 +782,12 @@ class System:
         ----------
 
         to_pandas: bool
-            Whether or not to return the energy trajectory as a pandas DataFrame.
+            Whether or not to return the energy trajectory as a
+            pandas DataFrame.
 
         to_alchemlyb: bool
-            Whether or not to return the energy trajectory as a pandas DataFrame
-            that is formatted to usable in alchemlyb
+            Whether or not to return the energy trajectory as a
+            pandas DataFrame that is formatted to usable in alchemlyb
         """
         from ..base import create_map
 

@@ -177,7 +177,7 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
     _is_in_loading_process = True
 
     # call Pythonize on all of the new modules
-    from .legacy import (
+    from .legacy import (  # noqa: F401
         Base,
         Move,
         IO,
@@ -189,7 +189,8 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
         Analysis,
         CAS,
         Cluster,
-        Convert,  # does not need pythonizing, but importing will make it visible
+        # doesn't need pythonizing but importing will make it visible
+        Convert,
         Error,
         ID,
         Maths,

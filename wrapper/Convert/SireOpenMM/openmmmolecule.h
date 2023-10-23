@@ -144,6 +144,9 @@ namespace SireOpenMM
          */
         SireBase::PropertyMap perturtable_map;
 
+        /** The atoms that are missing any internal parameters */
+        QSet<qint32> unbonded_atoms;
+
         /** Alpha values for all of the atoms. This is equal to zero for
          *  non-ghost atoms, and one for ghost atoms
          */
