@@ -154,21 +154,7 @@ try:
         use_andersen = False
         temperature = None
 
-        if integrator is None:
-            if ensemble.is_nve():
-                integrator = openmm.VerletIntegrator(timestep)
-            else:
-                integrator = openmm.LangevinMiddleIntegrator(
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin,
-                    friction,
-                    timestep,
-                )
-
-                temperature = (
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
-                )
-
-        elif isinstance(integrator, str):
+        if isinstance(integrator, str):
             from ...options import Integrator
 
             integrator = Integrator.create(integrator)
@@ -182,7 +168,7 @@ try:
 
                 integrator = openmm.VerletIntegrator(timestep)
 
-            else:
+            elif integrator != "auto":
                 temperature = (
                     ensemble.temperature().to(kelvin) * openmm.unit.kelvin
                 )
@@ -222,6 +208,19 @@ try:
                 else:
                     raise ValueError(f"Unrecognised integrator {integrator}")
 
+        if integrator is None:
+            if ensemble.is_nve():
+                integrator = openmm.VerletIntegrator(timestep)
+            else:
+                integrator = openmm.LangevinMiddleIntegrator(
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin,
+                    friction,
+                    timestep,
+                )
+
+                temperature = (
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
+                )
         elif openmm.Integrator not in type(integrator).mro():
             raise TypeError(
                 f"Cannot cast the integrator {integrator} to the correct "
@@ -231,36 +230,36 @@ try:
         if map.specified("constraint"):
             from ...options import Constraint
 
-            desired_constraint = Constraint.create(map["constraint"].source())
+            constraint = Constraint.create(map.get_string("constraint"))
 
-            if desired_constraint == "auto":
+            if constraint == "auto":
                 # choose the constraint based on the timestep
                 if timestep_in_fs > 4:
                     # need constraint on everything
-                    desired_constraint = "bonds"
+                    constraint = "bonds"
 
                 elif timestep_in_fs > 1:
                     # need it just on H bonds and angles
-                    desired_constraint = "h-bonds"
+                    constraint = "h-bonds"
 
                 else:
                     # can get away with no constraints
-                    desired_constraint = "none"
+                    constraint = "none"
 
-            map.set("constraint", desired_constraint)
+            map.set("constraint", constraint)
 
         if map.specified("perturbable_constraint"):
             from ...options import PerturbableConstraint
 
-            desired_constraint = PerturbableConstraint.create(
-                map["perturbable_constraint"].source()
+            constraint = PerturbableConstraint.create(
+                map.get_string("perturbable_constraint")
             )
 
-            if desired_constraint == "auto":
+            if constraint == "auto":
                 # we don't apply the constraint to perturbable molecules
-                desired_constraint = "none"
+                constraint = "none"
 
-            map.set("perturbable_constraint", desired_constraint)
+            map.set("perturbable_constraint", constraint)
 
         # Next, convert the sire system to an openmm system
 
@@ -289,7 +288,7 @@ try:
         if map.specified("platform"):
             from ...options import Platform
 
-            desired_platform = Platform.create(map["platform"].source())
+            desired_platform = Platform.create(map.get_string("platform"))
 
             # only look for the desired platform if it is not "auto"
             if desired_platform != "auto":
@@ -305,7 +304,7 @@ try:
                         platform = p
                         break
                     else:
-                        platforms.append(p.getName())
+                        platforms.append(p.getName().lower())
 
                 if platform is None:
                     platforms = ", ".join(platforms)
@@ -357,7 +356,7 @@ try:
         supported_properties = platform.getPropertyNames()
 
         if "Precision" in supported_properties and map.specified("precision"):
-            precision = map["precision"].source()
+            precision = map.get_string("precision")
             platform.setPropertyDefaultValue("Precision", precision)
 
         if "Threads" in supported_properties and map.specified("threads"):

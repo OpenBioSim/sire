@@ -421,6 +421,12 @@ class DynamicsData:
             self._omm_mols.set_lambda(lambda_value)
             self._clear_state()
 
+    def integrator(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.getIntegrator()
+
     def info(self):
         if self.is_null():
             return None
@@ -1191,6 +1197,12 @@ class Dynamics:
         constraining bonds involving hydrogens etc.)
         """
         return self._d.perturbable_constraint()
+
+    def integrator(self):
+        """
+        Return the integrator that is used to run dynamics
+        """
+        return self._d.integrator()
 
     def info(self):
         """

@@ -1411,6 +1411,7 @@ def _dynamics(
     constraint=None,
     perturbable_constraint=None,
     include_constrained_energies: bool = True,
+    integrator=None,
     schedule=None,
     lambda_value=None,
     swap_end_states=None,
@@ -1485,6 +1486,13 @@ def _dynamics(
         and angles. If this is False, then the internal bond or angle
         energy of the constrained degrees of freedom are not included
         in the total energy, and their forces are not evaluated.
+
+    integrator: str
+        The type of integrator to use, e.g. `langevin`, `verlet` etc.
+        See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+        for the full list of options. This will be automatically
+        set to `langevin_middle` (NVT/NPT) or `verlet` (NVE) depending
+        on the ensemble if this is not set (or is set to `auto`)
 
     schedule: sire.cas.LambdaSchedule
         The schedule used to control how perturbable forcefield parameters
@@ -1613,14 +1621,7 @@ def _dynamics(
         cutoff = 7.5 * angstrom
 
     if cutoff_type is None and not map.specified("cutoff_type"):
-        try:
-            if view.property(map["space"]).is_periodic():
-                cutoff_type = "PME"
-            else:
-                cutoff_type = "RF"
-        except Exception:
-            # no space, use RF
-            cutoff_type = "RF"
+        cutoff_type = "auto"
 
     if timestep is None and not map.specified("timestep"):
         from ..units import femtosecond
@@ -1646,7 +1647,7 @@ def _dynamics(
         map.set("save_velocities", save_velocities)
 
     if constraint is None and not map.specified("constraint"):
-        map.set("constraint", "auto")
+        constraint = "auto"
 
     if perturbable_constraint is not None:
         perturbable_constraint = str(perturbable_constraint).lower()
@@ -1670,6 +1671,9 @@ def _dynamics(
 
     if platform is not None:
         map.set("platform", str(platform))
+
+    if integrator is not None:
+        map.set("integrator", str(integrator))
 
     return Dynamics(
         view,
@@ -1858,14 +1862,7 @@ def _minimisation(
         cutoff = 7.5 * angstrom
 
     if cutoff_type is None and not map.specified("cutoff_type"):
-        try:
-            if view.property(map["space"]).is_periodic():
-                cutoff_type = "PME"
-            else:
-                cutoff_type = "RF"
-        except Exception:
-            # no space, use RF
-            cutoff_type = "RF"
+        cutoff_type = "auto"
 
     if device is not None:
         map.set("device", str(device))

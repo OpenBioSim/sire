@@ -450,6 +450,14 @@ void ForceFieldInfo::setCutoffType(QString cutoff_type)
 void ForceFieldInfo::setCutoffType(QString s_cutoff_type,
                                    const PropertyMap &map)
 {
+    if (s_cutoff_type == "auto")
+    {
+        if (this->space().isPeriodic())
+            s_cutoff_type = "PME";
+        else
+            s_cutoff_type = "RF";
+    }
+
     auto cutoff_type = string_to_cutoff_type(s_cutoff_type);
 
     if (cutoff_type == NO_CUTOFF)
