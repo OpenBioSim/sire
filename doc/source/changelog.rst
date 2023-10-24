@@ -15,6 +15,19 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
+* Added a new :mod:`sire.options` module that contains new
+  :cls:`sire.options.Option` objects to represent configurable options.
+  These include documentation, and make it easier to validate and expose
+  possible values of configurable options. The API docs for
+  :cls:`~sire.options.Option` shows how to create your own Option type.
+  The unit test in ``tests/options/test_options.py`` show how to use
+  the options. This is integrated into the sire/OpenMM layer.
+
+* Please add an item to this changelog when you create your PR
+
+`2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
+---------------------------------------------------------------------------------------------
+
 * Fixed regression introduced in 2023.4.0 that meant that removed the constraints
   from water molecules that had no internal bonds. These waters would blow up
   as there was nothing holding them together. The need for these constraints is
@@ -34,8 +47,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed an issue where the vacuum dynamics and minimisation simulations still
   had a spurious periodic box added when ``.commit()`` was called.
-
-* Please add an item to this changelog when you create your PR
 
 `2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
 --------------------------------------------------------------------------------------------
