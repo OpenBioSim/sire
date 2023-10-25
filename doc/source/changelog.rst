@@ -23,6 +23,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   The unit test in ``tests/options/test_options.py`` show how to use
   the options. This is integrated into the sire/OpenMM layer.
 
+* Have :cls:`~sire.io.parser.RST7` return a list of angles from the
+  ``box_angles()`` function, rather than a :cls:`~sire.maths.Vector`.
+  This prevents the confusing behaviour where the angles are wrongly
+  shown in units of angstroms... This fixes issues #106.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
