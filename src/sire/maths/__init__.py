@@ -7,6 +7,7 @@ __all__ = [
     "kabasch_fit",
     "Matrix",
     "pi",
+    "rotate",
     "RanGenerator",
     "Sphere",
     "Torsion",
@@ -45,6 +46,58 @@ except AttributeError:
 
 kabasch = _Maths.kabasch
 align = _Maths.align
+
+
+def rotate(
+    point, angle=None, axis=None, matrix=None, quaternion=None, center=None
+):
+    """
+    Rotate the passed point by the passed angle and axis, or the
+    passed matrix, or the passed quaternion, optionally centering
+    the rotation about the passed center.
+
+     point: sire.maths.Vector
+         The vector to be rotated
+
+     angle: (float or angle)
+         The angle to rotate by - this is interpreted as
+         degrees if you pass in a float. Otherwise use
+         sire.units.degrees or sire.units.radians to specify
+         the angle unit. This is superseded by the
+         matrix and quaternion arguments.
+
+     axis: sire.maths.Vector (or anything that can convert to a Vector)
+         The vector about which to rotate. If this is not
+         specified, and no other rotation specification is
+         used, then the rotation is about the z axis.
+         This is superseded by the matrix and
+         quaternion arguments.
+
+     quaternion: sire.maths.Quaternion
+         The Quaternion description of the rotation. Note that,
+         if you pass this, then the angle, axis and matrix
+         arguments will be ignored.
+
+     matrix: sire.maths.Matrix
+         The 3x3 rotation matrix that describes the rotation.
+         Note that, if you pass this, then the angle and axis
+         arguments will be ignored. This is superseded by
+         the quaternion argument.
+
+     center: sire.maths.Vector
+         The center of rotation. Defaults to (0,0,0) if not set.
+
+     Returns: sire.maths.Vector
+         The rotated vector
+    """
+    q = create_quaternion(
+        angle=angle, axis=axis, matrix=matrix, quaternion=quaternion
+    )
+
+    if center is None:
+        center = Vector(0, 0, 0)
+
+    return _Maths.rotate(point, q.to_matrix(), center)
 
 
 def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
@@ -104,14 +157,13 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
             from ..units import degrees
 
             try:
-                angle = float(angle) * degrees
-            except TypeError:
-                pass
-
-            try:
                 valid_angle = angle.has_same_units(degrees)
             except Exception:
-                valid_angle = False
+                try:
+                    angle = float(angle) * degrees
+                    valid_angle = True
+                except Exception:
+                    valid_angle = False
 
             if not valid_angle:
                 raise TypeError(

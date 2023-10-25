@@ -28,6 +28,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   This prevents the confusing behaviour where the angles are wrongly
   shown in units of angstroms... This fixes issues #106.
 
+* Added a new :func:`sire.maths.rotate` function, and added the option
+  (default True) to rotate velocities as well as coordinates when usign
+  a cursor to rotate molecule views. This fixes issue #103.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023

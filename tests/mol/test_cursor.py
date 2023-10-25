@@ -1,12 +1,17 @@
 import pytest
 
+import sire as sr
+
 
 def test_cursor(ala_mols):
     mols = ala_mols
     mol = mols[0]
 
     mol = (
-        mol.cursor().atoms("element O").apply(lambda a: a.set("special", True)).commit()
+        mol.cursor()
+        .atoms("element O")
+        .apply(lambda a: a.set("special", True))
+        .commit()
     )
 
     assert len(mol.property("special")) == mol.num_atoms()
@@ -240,10 +245,54 @@ def test_cursor_indexing(ala_mols):
     assert cursor["element C"].molecule().view().selected_all()
     assert cursor["element C"].molecule().is_same_editor(c)
 
-    assert c["element C"]["element"][0] == mol["element C"][0].property("element")
+    assert c["element C"]["element"][0] == mol["element C"][0].property(
+        "element"
+    )
 
     with pytest.raises(Exception):
         c("element")
 
     with pytest.raises(KeyError):
         c["elemen"]
+
+
+def test_cursor_rotate_velocities(ala_mols):
+    mol = ala_mols[0]
+
+    c = mol.cursor()
+
+    v = c[0]["velocity"]
+
+    for i in range(0, 3):
+        v.set(i, sr.units.angstrom / sr.units.picosecond)
+
+    c[0]["velocity"] = v
+
+    vels = c["velocity"]
+
+    c.rotate(37 * sr.units.degrees, rotate_velocities=False)
+
+    assert c["velocity"] == vels
+
+    c.rotate(37 * sr.units.degrees, rotate_velocities=True)
+
+    assert c["velocity"] != vels
+
+    c.rotate(53 * sr.units.degrees)
+
+    assert c["velocity"] != vels
+
+    rvels = c["velocity"]
+
+    for v, rv in zip(vels, rvels):
+        assert v != rv
+        # rotation should not change the magnitude
+        assert v.value().magnitude() == pytest.approx(rv.value().magnitude())
+
+        # rotate by 53 + 37, so 90 degrees
+        tv = sr.maths.rotate(v.value(), 90 * sr.units.degrees)
+        rv = rv.value()
+
+        assert tv.x().value() == pytest.approx(rv.x().value())
+        assert tv.y().value() == pytest.approx(rv.y().value())
+        assert tv.z().value() == pytest.approx(rv.z().value())
