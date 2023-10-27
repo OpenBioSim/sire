@@ -32,6 +32,19 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   (default True) to rotate velocities as well as coordinates when usign
   a cursor to rotate molecule views. This fixes issue #103.
 
+* Extended the ``.atom(s)``, ``.residue(s)``, ``.bond(s)`` and all other
+  indexing functions so that you can pass in an existing view or views as
+  the key. This lets you look up views in a container by other views, e.g.
+  ``mols.bond(mols.atoms()[0], mols.atoms()[1])`` would return the bond
+  between the first two atoms in the container ``mols``. Also added
+  a ``error_on_missing`` flag to the ``atoms``, ``residues``, ``bonds`` etc
+  functions, so that you get a ``KeyError`` exception if there is no match,
+  and ``error_on_missing`` is ``True``. For example,
+  ``mols.atoms("element C", error_on_missing=True)`` would raise an exception
+  if there are no carbon atoms in this container. This is default ``False``
+  to keep existing behaviour, but we would recommend setting this to ``True``
+  and would like to change the default in the future.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023

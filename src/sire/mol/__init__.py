@@ -535,6 +535,61 @@ def __fixed__getitem__(obj, key):
         return obj.dihedrals(key, auto_reduce=True)
     elif ImproperID in type(key).mro():
         return obj.impropers(key, auto_reduce=True)
+    elif Atom in type(key).mro():
+        atoms = obj.atoms(key, auto_reduce=True)
+
+        if __is_selector_class(atoms) and len(atoms) == 1:
+            return atoms[0]
+        else:
+            return atoms
+    elif Residue in type(key).mro():
+        res = obj.residues(key, auto_reduce=True)
+
+        if __is_selector_class(res) and len(res) == 1:
+            return res[0]
+        else:
+            return res
+    elif Chain in type(key).mro():
+        chains = obj.chains(key, auto_reduce=True)
+
+        if __is_selector_class(chains) and len(chains) == 1:
+            return chains[0]
+        else:
+            return chains
+    elif Segment in type(key).mro():
+        segs = obj.segments(key, auto_reduce=True)
+
+        if __is_selector_class(segs) and len(segs) == 1:
+            return segs[0]
+        else:
+            return segs
+    elif Molecule in type(key).mro():
+        mols = obj.molecules(key, auto_reduce=True)
+
+        if __is_selector_class(mols) and len(mols) == 1:
+            return mols[0]
+        else:
+            return mols
+    elif __is_selector_class(key):
+        if len(key) == 0:
+            raise KeyError("Nothing matched the search.")
+        elif len(key) == 1:
+            return __fixed__getitem__(obj, key[0])
+
+        T = type(key[0])
+
+        if Atom in T.mro():
+            return obj.atoms(key, auto_reduce=True)
+        elif Residue in T.mro():
+            return obj.residues(key, auto_reduce=True)
+        elif Chain in T.mro():
+            return obj.chains(key, auto_reduce=True)
+        elif Segment in T.mro():
+            return obj.segments(key, auto_reduce=True)
+        elif Molecule in T.mro():
+            return obj.molecules(key, auto_reduce=True)
+        else:
+            raise TypeError(f"You cannot search using an index of type {T}")
 
     if __is_selector_class(obj):
         return obj.__orig__getitem__(key)
@@ -544,29 +599,70 @@ def __fixed__getitem__(obj, key):
         return obj.atoms(key, auto_reduce=True)
 
 
-def __fixed__atoms__(obj, idx=None, auto_reduce=False, map=None):
+def __idx_to_atoms(obj, idx, map):
+    if hasattr(idx, "atoms"):
+        atoms = obj.atoms()
+        return atoms[atoms.find(idx.atoms())]
+    else:
+        return obj.atoms(idx, map=map)
+
+
+def __fixed__atoms__(
+    obj, idx=None, auto_reduce=False, error_on_missing: bool = False, map=None
+):
     from ..base import create_map
 
     if idx is None:
         result = obj.__orig__atoms()
     elif type(idx) is range:
         result = obj.__orig__atoms(list(idx), map=create_map(map))
+    elif hasattr(idx, "atoms"):
+        atoms = obj.atoms()
+        idxs = atoms.find(idx.atoms())
+        return atoms.__orig__atoms(idxs, map=create_map(map))
     else:
         result = obj.__orig__atoms(idx, map=create_map(map))
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching atom in this view.")
     else:
         return result
 
 
-def __fixed__bonds__(obj, idx=None, idx1=None, auto_reduce=False, map=None):
+def __fixed__atom__(obj, idx=None, map=None):
+    if isinstance(idx, int):
+        return obj.__orig__atom(idx)
+
+    atoms = __fixed__atoms__(obj, idx, auto_reduce=False, map=map)
+
+    if len(atoms) == 0:
+        raise KeyError("There is no matching atom in this view.")
+    elif len(atoms) > 1:
+        raise KeyError(
+            f"More than one atom matches. Number of matches is {len(atoms)}."
+        )
+
+    return atoms[0]
+
+
+def __fixed__bonds__(
+    obj,
+    idx=None,
+    idx1=None,
+    auto_reduce=False,
+    error_on_missing: bool = False,
+    map=None,
+):
     if idx is None and idx1 is not None:
         idx = idx1
         idx1 = None
 
     from . import MoleculeView
     from ..base import create_map
+
+    map = create_map(map)
 
     if issubclass(type(obj), MoleculeView):
         # this is a single-molecule view
@@ -575,7 +671,7 @@ def __fixed__bonds__(obj, idx=None, idx1=None, auto_reduce=False, map=None):
         C = SelectorBond
 
         def _fromBondID(obj, bondid):
-            return SelectorBond(obj, bondid, map=create_map(map))
+            return SelectorBond(obj, bondid, map=map)
 
     else:
         # this is a multi-molecule container
@@ -584,31 +680,41 @@ def __fixed__bonds__(obj, idx=None, idx1=None, auto_reduce=False, map=None):
         C = SelectorMBond
 
         def _fromBondID(obj, bondid):
-            return SelectorMBond(
-                obj.to_select_result(), bondid, map=create_map(map)
-            )
+            return SelectorMBond(obj.to_select_result(), bondid, map=map)
 
     if idx is None:
         try:
-            result = C(obj, map=create_map(map))
+            result = C(obj, map=map)
         except Exception:
-            result = C(obj.to_select_result(), map=create_map(map))
+            result = C(obj.to_select_result(), map=map)
     elif idx1 is None:
         if BondID in type(idx).mro():
             result = _fromBondID(obj, idx)
         else:
-            result = C(obj.atoms(idx, map=create_map(map)))
+            result = C(__idx_to_atoms(obj, idx, map), map=map)
     else:
-        result = C(obj.atoms(idx), obj.atoms(idx1), map=create_map(map))
+        result = C(
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            map=map,
+        )
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching bond in this view.")
     else:
         return result
 
 
 def __fixed__angles__(
-    obj, idx=None, idx1=None, idx2=None, auto_reduce=False, map=None
+    obj,
+    idx=None,
+    idx1=None,
+    idx2=None,
+    auto_reduce=False,
+    error_on_missing: bool = False,
+    map=None,
 ):
     if idx1 is None and idx2 is not None:
         idx1 = idx2
@@ -620,6 +726,8 @@ def __fixed__angles__(
 
     from . import MoleculeView
     from ..base import create_map
+
+    map = create_map(map)
 
     if issubclass(type(obj), MoleculeView):
         # this is a single-molecule view
@@ -628,7 +736,7 @@ def __fixed__angles__(
         C = SelectorAngle
 
         def _fromAngleID(obj, angid):
-            return SelectorAngle(obj, angid, map=create_map(map))
+            return SelectorAngle(obj, angid, map=map)
 
     else:
         # this is a multi-molecule container
@@ -637,38 +745,49 @@ def __fixed__angles__(
         C = SelectorMAngle
 
         def _fromAngleID(obj, angid):
-            return SelectorMAngle(
-                obj.to_select_result(), angid, map=create_map(map)
-            )
+            return SelectorMAngle(obj.to_select_result(), angid, map=map)
 
     if idx is None:
         try:
-            result = C(obj, map=create_map(map))
+            result = C(obj, map=map)
         except Exception:
-            result = C(obj.to_select_result(), map=create_map(map))
+            result = C(obj.to_select_result(), map=map)
     elif idx1 is None:
         if AngleID in type(idx).mro():
             result = _fromAngleID(obj, idx)
         else:
-            result = C(obj.atoms(idx, map=create_map(map)))
+            result = C(__idx_to_atoms(obj, idx, map), map=map)
     elif idx2 is None:
-        result = C(obj.atoms(idx), obj.atoms(idx1), map=create_map(map))
+        result = C(
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            map=map,
+        )
     else:
         result = C(
-            obj.atoms(idx),
-            obj.atoms(idx1),
-            obj.atoms(idx2),
-            map=create_map(map),
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            __idx_to_atoms(obj, idx2, map),
+            map=map,
         )
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching angle in this view.")
     else:
         return result
 
 
 def __fixed__dihedrals__(
-    obj, idx=None, idx1=None, idx2=None, idx3=None, auto_reduce=False, map=None
+    obj,
+    idx=None,
+    idx1=None,
+    idx2=None,
+    idx3=None,
+    auto_reduce=False,
+    error_on_missing: bool = False,
+    map=None,
 ):
     if idx2 is None and idx3 is not None:
         idx2 = idx3
@@ -684,6 +803,8 @@ def __fixed__dihedrals__(
 
     from . import MoleculeView
     from ..base import create_map
+
+    map = create_map(map)
 
     if issubclass(type(obj), MoleculeView):
         # this is a single-molecule view
@@ -692,7 +813,7 @@ def __fixed__dihedrals__(
         C = SelectorDihedral
 
         def _fromDihedralID(obj, dihid):
-            return SelectorDihedral(obj, dihid, map=create_map(map))
+            return SelectorDihedral(obj, dihid, map=map)
 
     else:
         # this is a multi-molecule container
@@ -701,46 +822,57 @@ def __fixed__dihedrals__(
         C = SelectorMDihedral
 
         def _fromDihedralID(obj, dihid):
-            return SelectorMDihedral(
-                obj.to_select_result(), dihid, map=create_map(map)
-            )
+            return SelectorMDihedral(obj.to_select_result(), dihid, map=map)
 
     if idx is None:
         try:
             result = C(obj, map=create_map(map))
         except Exception:
-            result = C(obj.to_select_result(), map=create_map(map))
+            result = C(obj.to_select_result(), map=map)
     elif idx1 is None:
         if DihedralID in type(idx).mro():
             result = _fromDihedralID(obj, idx)
         else:
-            result = C(obj.atoms(idx), map=create_map(map))
+            result = C(__idx_to_atoms(obj, idx, map), map=map)
     elif idx2 is None:
-        result = C(obj.atoms(idx), obj.atoms(idx1), map=create_map(map))
+        result = C(
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            map=map,
+        )
     elif idx3 is None:
         result = C(
-            obj.atoms(idx),
-            obj.atoms(idx1),
-            obj.atoms(idx2),
-            map=create_map(map),
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            __idx_to_atoms(obj, idx2, map),
+            map=map,
         )
     else:
         result = C(
-            obj.atoms(idx),
-            obj.atoms(idx1),
-            obj.atoms(idx2),
-            obj.atoms(idx3),
-            map=create_map(map),
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            __idx_to_atoms(obj, idx2, map),
+            __idx_to_atoms(obj, idx3, map),
+            map=map,
         )
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching dihedral in this view.")
     else:
         return result
 
 
 def __fixed__impropers__(
-    obj, idx=None, idx1=None, idx2=None, idx3=None, auto_reduce=False, map=None
+    obj,
+    idx=None,
+    idx1=None,
+    idx2=None,
+    idx3=None,
+    auto_reduce=False,
+    error_on_missing: bool = False,
+    map=None,
 ):
     if idx2 is None and idx3 is not None:
         idx2 = idx3
@@ -757,6 +889,8 @@ def __fixed__impropers__(
     from . import MoleculeView
     from ..base import create_map
 
+    map = create_map(map)
+
     if issubclass(type(obj), MoleculeView):
         # this is a single-molecule view
         from ..mm import SelectorImproper
@@ -764,7 +898,7 @@ def __fixed__impropers__(
         C = SelectorImproper
 
         def _fromImproperID(obj, impid):
-            return SelectorImproper(obj, impid, map=create_map(map))
+            return SelectorImproper(obj, impid, map=map)
 
     else:
         # this is a multi-molecule container
@@ -773,40 +907,44 @@ def __fixed__impropers__(
         C = SelectorMImproper
 
         def _fromImproperID(obj, impid):
-            return SelectorMImproper(
-                obj.to_select_result(), impid, map=create_map(map)
-            )
+            return SelectorMImproper(obj.to_select_result(), impid, map=map)
 
     if idx is None:
         try:
-            result = C(obj, map=create_map(map))
+            result = C(obj, map=map)
         except Exception:
-            result = C(obj.to_select_result(), map=create_map(map))
+            result = C(obj.to_select_result(), map=map)
     elif idx1 is None:
         if ImproperID in type(idx).mro():
             result = _fromImproperID(obj, idx)
         else:
-            result = C(obj.atoms(idx), map=create_map(map))
+            result = C(__idx_to_atoms(obj, idx, map), map=map)
     elif idx2 is None:
-        result = C(obj.atoms(idx), obj.atoms(idx1), map=create_map(map))
+        result = C(
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            map=map,
+        )
     elif idx3 is None:
         result = C(
-            obj.atoms(idx),
-            obj.atoms(idx1),
-            obj.atoms(idx2),
-            map=create_map(map),
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            __idx_to_atoms(obj, idx2, map),
+            map=map,
         )
     else:
         result = C(
-            obj.atoms(idx),
-            obj.atoms(idx1),
-            obj.atoms(idx2),
-            obj.atoms(idx3),
-            map=create_map(map),
+            __idx_to_atoms(obj, idx, map),
+            __idx_to_atoms(obj, idx1, map),
+            __idx_to_atoms(obj, idx2, map),
+            __idx_to_atoms(obj, idx3, map),
+            map=map,
         )
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching improper in this view.")
     else:
         return result
 
@@ -875,45 +1013,67 @@ def __fixed__improper__(
     return impropers[0]
 
 
-def __fixed__residues__(obj, idx=None, auto_reduce=False, map=None):
+def __fixed__residues__(
+    obj, idx=None, auto_reduce=False, error_on_missing: bool = False, map=None
+):
     from ..base import create_map
 
     if idx is None:
         result = obj.__orig__residues()
     elif type(idx) is range:
         result = obj.__orig__residues(list(idx), map=create_map(map))
+    elif hasattr(idx, "residues"):
+        residues = obj.residues()
+        idxs = residues.find(idx.residues())
+        return residues.__orig__residues(idxs, map=create_map(map))
     else:
         result = obj.__orig__residues(idx, map=create_map(map))
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching residue in this view.")
     else:
         return result
 
 
-def __fixed__chains__(obj, idx=None, auto_reduce=False, map=None):
+def __fixed__chains__(
+    obj, idx=None, auto_reduce=False, error_on_missing: bool = False, map=None
+):
     from ..base import create_map
 
     if idx is None:
         result = obj.__orig__chains()
     elif type(idx) is range:
         result = obj.__orig__chains(list(idx), map=create_map(map))
+    elif hasattr(idx, "chains"):
+        chains = obj.chains()
+        idxs = chains.find(idx.chains())
+        return chains.__orig__chains(idxs, map=create_map(map))
     else:
         result = obj.__orig__chains(idx, map=create_map(map))
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching chain in this view.")
     else:
         return result
 
 
-def __fixed__segments__(obj, idx=None, auto_reduce=False, map=None):
+def __fixed__segments__(
+    obj, idx=None, auto_reduce=False, error_on_missing: bool = False, map=None
+):
     from ..base import create_map
 
     if idx is None:
         result = obj.__orig__segments()
     elif type(idx) is range:
         result = obj.__orig__segments(list(idx), map=create_map(map))
+    elif hasattr(idx, "segments"):
+        segments = obj.segments()
+        idxs = segments.find(idx.segments())
+        return segments.__orig__segments(idxs, map=create_map(map))
     else:
         from ..base import create_map
 
@@ -921,22 +1081,32 @@ def __fixed__segments__(obj, idx=None, auto_reduce=False, map=None):
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching segment in this view.")
     else:
         return result
 
 
-def __fixed__molecules__(obj, idx=None, auto_reduce=False, map=None):
+def __fixed__molecules__(
+    obj, idx=None, auto_reduce=False, error_on_missing: bool = False, map=None
+):
     from ..base import create_map
 
     if idx is None:
         result = obj.__orig__molecules()
     elif type(idx) is range:
         result = obj.__orig__molecules(list(idx), map=create_map(map))
+    elif hasattr(idx, "molecules"):
+        molecules = obj.molecules()
+        idxs = molecules.find(idx.molecules())
+        return molecules.__orig__molecules(idxs, map=create_map(map))
     else:
         result = obj.__orig__molecules(idx, map=create_map(map))
 
     if auto_reduce and len(result) == 1:
         return result[0]
+    elif error_on_missing and len(result) == 0:
+        raise KeyError("There is no matching molecule in this view.")
     else:
         return result
 
@@ -944,6 +1114,9 @@ def __fixed__molecules__(obj, idx=None, auto_reduce=False, map=None):
 def __fix_getitem(C):
     if not hasattr(C, "__orig__getitem__"):
         C.__orig__getitem__ = C.__getitem__
+
+    if not hasattr(C, "__orig_atom"):
+        C.__orig__atom = C.atom
 
     if not hasattr(C, "__orig__atoms"):
         C.__orig__atoms = C.atoms
@@ -958,6 +1131,7 @@ def __fix_getitem(C):
         C.__orig__segments = C.segments
 
     C.__getitem__ = __fixed__getitem__
+    C.atom = __fixed__atom__
     C.atoms = __fixed__atoms__
     C.residues = __fixed__residues__
     C.chains = __fixed__chains__
