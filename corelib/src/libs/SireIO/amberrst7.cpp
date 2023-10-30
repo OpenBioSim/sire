@@ -1175,9 +1175,15 @@ SireMaths::Vector AmberRst7::boxDimensions() const
 }
 
 /** Return the parsed box angles */
-SireMaths::Vector AmberRst7::boxAngles() const
+QVector<SireUnits::Dimension::Angle> AmberRst7::boxAngles() const
 {
-    return box_angs;
+    QVector<SireUnits::Dimension::Angle> angs(3);
+
+    angs[0] = box_angs.x() * SireUnits::degree;
+    angs[1] = box_angs.y() * SireUnits::degree;
+    angs[2] = box_angs.z() * SireUnits::degree;
+
+    return angs;
 }
 
 /** Return this parser constructed from the passed filename */

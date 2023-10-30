@@ -550,6 +550,13 @@ class System:
             is useful if you just want to run standard molecular dynamics
             of the reference or perturbed states.
 
+        integrator: str
+            The type of integrator to use, e.g. `langevin`, `verlet` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            set to `langevin_middle` (NVT/NPT) or `verlet` (NVE) depending
+            on the ensemble if this is not set (or is set to `auto`)
+
         temperature: temperature
             The temperature at which to run the simulation. A
             microcanonical (NVE) simulation will be run if you don't

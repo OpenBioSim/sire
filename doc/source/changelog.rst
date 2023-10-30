@@ -15,6 +15,41 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
+* Added a new :mod:`sire.options` module that contains new
+  :cls:`sire.options.Option` objects to represent configurable options.
+  These include documentation, and make it easier to validate and expose
+  possible values of configurable options. The API docs for
+  :cls:`~sire.options.Option` shows how to create your own Option type.
+  The unit test in ``tests/options/test_options.py`` show how to use
+  the options. This is integrated into the sire/OpenMM layer.
+
+* Have :cls:`~sire.io.parser.RST7` return a list of angles from the
+  ``box_angles()`` function, rather than a :cls:`~sire.maths.Vector`.
+  This prevents the confusing behaviour where the angles are wrongly
+  shown in units of angstroms... This fixes issues #106.
+
+* Added a new :func:`sire.maths.rotate` function, and added the option
+  (default True) to rotate velocities as well as coordinates when usign
+  a cursor to rotate molecule views. This fixes issue #103.
+
+* Extended the ``.atom(s)``, ``.residue(s)``, ``.bond(s)`` and all other
+  indexing functions so that you can pass in an existing view or views as
+  the key. This lets you look up views in a container by other views, e.g.
+  ``mols.bond(mols.atoms()[0], mols.atoms()[1])`` would return the bond
+  between the first two atoms in the container ``mols``. Also added
+  a ``error_on_missing`` flag to the ``atoms``, ``residues``, ``bonds`` etc
+  functions, so that you get a ``KeyError`` exception if there is no match,
+  and ``error_on_missing`` is ``True``. For example,
+  ``mols.atoms("element C", error_on_missing=True)`` would raise an exception
+  if there are no carbon atoms in this container. This is default ``False``
+  to keep existing behaviour, but we would recommend setting this to ``True``
+  and would like to change the default in the future.
+
+* Please add an item to this changelog when you create your PR
+
+`2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
+---------------------------------------------------------------------------------------------
+
 * Fixed regression introduced in 2023.4.0 that meant that removed the constraints
   from water molecules that had no internal bonds. These waters would blow up
   as there was nothing holding them together. The need for these constraints is
@@ -34,8 +69,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed an issue where the vacuum dynamics and minimisation simulations still
   had a spurious periodic box added when ``.commit()`` was called.
-
-* Please add an item to this changelog when you create your PR
 
 `2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
 --------------------------------------------------------------------------------------------

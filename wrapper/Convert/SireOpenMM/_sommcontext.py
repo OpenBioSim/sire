@@ -69,10 +69,13 @@ class SOMMContext(_Context):
             self._lambda_value = self._lambda_lever.set_lambda(
                 self, lambda_value
             )
+
+            self._map = map
         else:
             self._atom_index = None
             self._lambda_lever = None
             self._lambda_value = 0.0
+            self._map = None
 
     def __str__(self):
         p = self.getPlatform()
@@ -87,6 +90,24 @@ class SOMMContext(_Context):
 
     def __repr__(self):
         return self.__str__()
+
+    def get_constraint(self):
+        """
+        Return the constraint applied to the system
+        """
+        if self._map.specified("constraint"):
+            return self._map["constraint"].source()
+        else:
+            return "none"
+
+    def get_perturbable_constraint(self):
+        """
+        Return the perturbable constraint applied to the system
+        """
+        if self._map.specified("perturbable_constraint"):
+            return self._map["perturbable_constraint"].source()
+        else:
+            return "none"
 
     def get_platform(self):
         """

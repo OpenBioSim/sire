@@ -129,6 +129,7 @@ try:
                 f"'{timestep}'"
             )
 
+        timestep_in_fs = timestep.to(femtosecond)
         timestep = timestep.to(picosecond) * openmm.unit.picosecond
 
         ensemble = Ensemble(map=map)
@@ -153,22 +154,10 @@ try:
         use_andersen = False
         temperature = None
 
-        if integrator is None:
-            if ensemble.is_nve():
-                integrator = openmm.VerletIntegrator(timestep)
-            else:
-                integrator = openmm.LangevinMiddleIntegrator(
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin,
-                    friction,
-                    timestep,
-                )
+        if isinstance(integrator, str):
+            from ...options import Integrator
 
-                temperature = (
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
-                )
-
-        elif type(integrator) is str:
-            integrator = integrator.lower()
+            integrator = Integrator.create(integrator)
 
             if integrator == "verlet" or integrator == "leapfrog":
                 if not ensemble.is_nve():
@@ -179,7 +168,7 @@ try:
 
                 integrator = openmm.VerletIntegrator(timestep)
 
-            else:
+            elif integrator != "auto":
                 temperature = (
                     ensemble.temperature().to(kelvin) * openmm.unit.kelvin
                 )
@@ -219,11 +208,58 @@ try:
                 else:
                     raise ValueError(f"Unrecognised integrator {integrator}")
 
+        if integrator is None:
+            if ensemble.is_nve():
+                integrator = openmm.VerletIntegrator(timestep)
+            else:
+                integrator = openmm.LangevinMiddleIntegrator(
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin,
+                    friction,
+                    timestep,
+                )
+
+                temperature = (
+                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
+                )
         elif openmm.Integrator not in type(integrator).mro():
             raise TypeError(
                 f"Cannot cast the integrator {integrator} to the correct "
                 "type. It should be a string or an openmm.Integrator object"
             )
+
+        if map.specified("constraint"):
+            from ...options import Constraint
+
+            constraint = Constraint.create(map.get_string("constraint"))
+
+            if constraint == "auto":
+                # choose the constraint based on the timestep
+                if timestep_in_fs > 4:
+                    # need constraint on everything
+                    constraint = "bonds"
+
+                elif timestep_in_fs > 1:
+                    # need it just on H bonds and angles
+                    constraint = "h-bonds"
+
+                else:
+                    # can get away with no constraints
+                    constraint = "none"
+
+            map.set("constraint", constraint)
+
+        if map.specified("perturbable_constraint"):
+            from ...options import PerturbableConstraint
+
+            constraint = PerturbableConstraint.create(
+                map.get_string("perturbable_constraint")
+            )
+
+            if constraint == "auto":
+                # we don't apply the constraint to perturbable molecules
+                constraint = "none"
+
+            map.set("perturbable_constraint", constraint)
 
         # Next, convert the sire system to an openmm system
 
@@ -250,31 +286,35 @@ try:
         platform = None
 
         if map.specified("platform"):
-            desired_platform = map["platform"].source()
+            from ...options import Platform
 
-            platform = None
-            platforms = []
+            desired_platform = Platform.create(map.get_string("platform"))
 
-            for i in range(0, openmm.Platform.getNumPlatforms()):
-                p = openmm.Platform.getPlatform(i)
+            # only look for the desired platform if it is not "auto"
+            if desired_platform != "auto":
+                platforms = []
 
-                if (p.getName().lower() == desired_platform.lower()) or (
-                    p.getName() == "HIP"
-                    and desired_platform.lower() == "metal"
-                ):
-                    platform = p
-                    break
-                else:
-                    platforms.append(p.getName())
+                for i in range(0, openmm.Platform.getNumPlatforms()):
+                    p = openmm.Platform.getPlatform(i)
 
-            if platform is None:
-                platforms = ", ".join(platforms)
-                raise ValueError(
-                    f"Cannot create the openmm platform {desired_platform} "
-                    "as this is not supported by this installation of "
-                    f"openmm. Available platforms are [{platforms}]"
-                )
-        else:
+                    if (p.getName().lower() == desired_platform.lower()) or (
+                        p.getName() == "HIP"
+                        and desired_platform.lower() == "metal"
+                    ):
+                        platform = p
+                        break
+                    else:
+                        platforms.append(p.getName().lower())
+
+                if platform is None:
+                    platforms = ", ".join(platforms)
+                    raise ValueError(
+                        f"Cannot create the openmm platform {desired_platform} "
+                        "as this is not supported by this installation of "
+                        f"openmm. Available platforms are [{platforms}]"
+                    )
+
+        if platform is None:
             # just find the fastest platform - this will be "metal" if that
             # is available and we are on Mac, or CUDA if CUDA works,
             # or OpenCL if OpenCL works, or CPU if nothing is left...
@@ -316,7 +356,7 @@ try:
         supported_properties = platform.getPropertyNames()
 
         if "Precision" in supported_properties and map.specified("precision"):
-            precision = map["precision"].source()
+            precision = map.get_string("precision")
             platform.setPropertyDefaultValue("Precision", precision)
 
         if "Threads" in supported_properties and map.specified("threads"):
