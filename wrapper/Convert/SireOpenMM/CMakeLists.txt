@@ -24,11 +24,34 @@ if (${SIRE_USE_OPENMM})
     # Other python wrapping directories
     include_directories(${CMAKE_SOURCE_DIR})
 
+    include(CheckCXXSourceRuns)
+
+    # Whether or not we have CustomCPPForceImpl (OpenMM 8.1+)
+    CHECK_CXX_SOURCE_RUNS("
+          #include \"openmm/internal/ContextImpl.h\"
+          #include \"openmm/internal/CustomCPPForceImpl.h\"
+
+          int main()
+          {
+              OpenMM::ContextImpl* context = NULL;
+              OpenMM::CustomCPPForceImpl* force = NULL;
+              return 0;
+          }"
+        CAN_USE_CUSTOMCPPFORCE)
+
+    if (CAN_USE_CUSTOMCPPFORCE)
+      message(STATUS "OpenMM version supports CustomCPPForce")
+      add_definitions("-DSIRE_USE_CUSTOMCPPFORCE")
+    else()
+      message(STATUS "OpenMM version does not support CustomCPPForce")
+    endif()
+
     # Define the sources in SireOpenMM
     set ( SIREOPENMM_SOURCES
 
           _SireOpenMM.main.cpp
 
+          customforce.cpp
           lambdalever.cpp
           openmmminimise.cpp
           openmmmolecule.cpp
