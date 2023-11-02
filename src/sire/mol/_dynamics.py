@@ -596,7 +596,7 @@ class DynamicsData:
             energy_frequency = u(energy_frequency)
 
         if lambda_windows is not None:
-            if type(lambda_windows) is not list:
+            if isinstance(lambda_windows, list):
                 lambda_windows = [lambda_windows]
 
         try:
@@ -1314,7 +1314,7 @@ class Dynamics:
         if lambda_values is None:
             return self._d.current_potential_energy()
         else:
-            if not type(lambda_values) is list:
+            if not isinstance(lambda_values, list):
                 lambda_values = [lambda_values]
 
             # save the current value of lambda so we

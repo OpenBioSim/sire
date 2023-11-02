@@ -161,6 +161,26 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         perturbable_constraint_type = constraint_type;
     }
 
+    // extract out the indicies of any field atoms, if there are any.
+    // Field atoms are those that only exist via the interaction field
+    // they produce (i.e. their potentials are combined into a grid,
+    // which affects the energy/forces of other particles that are
+    // on that grid)
+    const auto field_atom_prop = map["is_field_atom"];
+
+    if (mol.hasProperty(field_atom_prop))
+    {
+        const auto atoms = mol.atoms("atom property is_field_atom == True");
+
+        for (int i = 0; i < atoms.count(); ++i)
+        {
+            field_atoms.append(atoms(i).index().value());
+        }
+
+        // should not need to sort it, but just in case
+        qSort(field_atoms);
+    }
+
     if (ffinfo.isAmberStyle())
     {
         if (is_perturbable)
@@ -222,6 +242,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
                                          .arg(ffinfo.toString()),
                                      CODELOC);
     }
+
+    if (this->hasFieldAtoms())
+    {
+        this->processFieldAtoms();
+    }
 }
 
 OpenMMMolecule::~OpenMMMolecule()
@@ -246,6 +271,21 @@ bool OpenMMMolecule::isPerturbable() const
 bool OpenMMMolecule::isGhostAtom(int atom) const
 {
     return from_ghost_idxs.contains(atom) or to_ghost_idxs.contains(atom);
+}
+
+bool OpenMMMolecule::isFieldAtom(int atom) const
+{
+    return field_atoms.contains(atom);
+}
+
+bool OpenMMMolecule::isFieldMolecule() const
+{
+    return field_atoms.count() == atoms.count();
+}
+
+bool OpenMMMolecule::hasFieldAtoms() const
+{
+    return not field_atoms.isEmpty();
 }
 
 OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
@@ -1370,6 +1410,76 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
             *v = vels_data[i];
             v += 1;
         }
+    }
+}
+
+/** Process this molecule to remove unnecessary parameters associated
+ *  with field atoms. Field atoms are massless atoms that are not
+ *  bonded to any other atom
+ */
+void OpenMMMolecule::processFieldAtoms()
+{
+    if (not this->hasFieldAtoms())
+        return;
+
+    if (this->isPerturbable())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "We cannot (yet) support perturbable molecules that also "
+                                                "contain field atoms. Please raise an issue if you would "
+                                                "like us to write the code to do this."),
+                                            CODELOC);
+
+    if (this->isFieldMolecule())
+    {
+        qDebug() << "This is a field molecule";
+
+        // very easy case - all atoms are field atoms
+        field_points.reserve(field_atoms.count());
+
+        for (int i = 0; i < this->atoms.count(); ++i)
+        {
+            const auto &clj = cljs.at(i);
+            field_points.append(std::make_tuple(coords[i],
+                                                std::get<0>(clj),
+                                                std::get<1>(clj),
+                                                std::get<2>(clj)));
+        }
+
+        coords.clear();
+        vels.clear();
+        masses.clear();
+        light_atoms.clear();
+        virtual_sites.clear();
+        cljs.clear();
+        exception_params.clear();
+        bond_params.clear();
+        ang_params.clear();
+        dih_params.clear();
+        constraints.clear();
+        perturbed.reset();
+        exception_idxs.clear();
+        unbonded_atoms.clear();
+        alphas.clear();
+        to_ghost_idxs.clear();
+        from_ghost_idxs.clear();
+
+        return;
+    }
+
+    // more difficult case - a mixture of field and non-field atoms.
+    // This is almost certainly a protein or similar
+
+    // to start, the easiest is to create a bitmask to indicate
+    // which atoms are field atoms - we can then go through the
+    // atoms in sequence and then sort them into the appropriate
+    // bins
+    field_points.reserve(field_atoms.count());
+
+    QVector<bool> is_field_atom(this->atoms.count(), false);
+
+    for (const auto &atom : field_atoms)
+    {
+        is_field_atom[atom] = true;
     }
 }
 

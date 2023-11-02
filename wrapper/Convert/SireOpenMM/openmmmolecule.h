@@ -73,6 +73,11 @@ namespace SireOpenMM
 
         bool isGhostAtom(int atom) const;
 
+        bool isFieldAtom(int atom) const;
+        bool isFieldMolecule() const;
+
+        bool hasFieldAtoms() const;
+
         std::tuple<int, int, double, double, double>
         getException(int atom0, int atom1,
                      int start_index,
@@ -112,6 +117,12 @@ namespace SireOpenMM
 
         /** Indexes of virtual sites */
         QList<int> virtual_sites;
+
+        /** Indexes of all of the field atoms */
+        QList<int> field_atoms;
+
+        /** All of the field points with their parameters */
+        QVector<std::tuple<OpenMM::Vec3, double, double, double>> field_points;
 
         /** Charge and LJ parameters (sigma / epsilon) */
         QVector<std::tuple<double, double, double>> cljs;
@@ -181,6 +192,8 @@ namespace SireOpenMM
                              const SireBase::PropertyMap &map);
 
         void alignInternals(const SireBase::PropertyMap &map);
+
+        void processFieldAtoms();
     };
 
     /** This class holds all of the information of an OpenMM molecule
