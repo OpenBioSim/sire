@@ -596,7 +596,7 @@ class DynamicsData:
             energy_frequency = u(energy_frequency)
 
         if lambda_windows is not None:
-            if isinstance(lambda_windows, list):
+            if not isinstance(lambda_windows, list):
                 lambda_windows = [lambda_windows]
 
         try:
