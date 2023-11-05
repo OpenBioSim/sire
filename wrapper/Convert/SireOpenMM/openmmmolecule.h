@@ -16,6 +16,37 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
+    /** Internal class used to hold information about field molecules
+     *
+     *  These are either entire or parts of molecules that contribute
+     *  to a fixed potential field
+     */
+    class FieldMolecule
+    {
+    public:
+        FieldMolecule(const SireMol::Selector<SireMol::Atom> &atoms,
+                      const SireBase::PropertyMap &map);
+        ~FieldMolecule();
+
+        int nAtoms() const;
+
+        QVector<OpenMM::Vec3> getCoords() const;
+        QVector<double> getCharges() const;
+        QVector<double> getSigmas() const;
+        QVector<double> getEpsilons() const;
+
+        bool isFieldAtom(int atom) const;
+
+        int getAtomFieldIndex(int atom) const;
+
+    private:
+        QVector<OpenMM::Vec3> coords;
+        QVector<double> charges;
+        QVector<double> sigmas;
+        QVector<double> epsilons;
+
+        QHash<int, int> atomidx_to_fieldidx;
+    };
 
     /** Internal class used to hold all of the extracted information
      *  of an OpenMM Molecule. You should not use this outside
@@ -51,6 +82,8 @@ namespace SireOpenMM
 
         bool isPerturbable() const;
 
+        int nAtoms() const;
+
         QVector<double> getCharges() const;
         QVector<double> getSigmas() const;
         QVector<double> getEpsilons() const;
@@ -73,10 +106,12 @@ namespace SireOpenMM
 
         bool isGhostAtom(int atom) const;
 
-        bool isFieldAtom(int atom) const;
         bool isFieldMolecule() const;
-
         bool hasFieldAtoms() const;
+
+        int nFieldAtoms() const;
+
+        std::shared_ptr<FieldMolecule> getFieldMolecule() const;
 
         std::tuple<int, int, double, double, double>
         getException(int atom0, int atom1,
@@ -118,12 +153,6 @@ namespace SireOpenMM
         /** Indexes of virtual sites */
         QList<int> virtual_sites;
 
-        /** Indexes of all of the field atoms */
-        QList<int> field_atoms;
-
-        /** All of the field points with their parameters */
-        QVector<std::tuple<OpenMM::Vec3, double, double, double>> field_points;
-
         /** Charge and LJ parameters (sigma / epsilon) */
         QVector<std::tuple<double, double, double>> cljs;
 
@@ -145,6 +174,9 @@ namespace SireOpenMM
 
         /** The molecule perturbed molecule, if this is perturbable */
         std::shared_ptr<OpenMMMolecule> perturbed;
+
+        /** The field atoms for the molecule, if this has field atoms */
+        std::shared_ptr<FieldMolecule> field_mol;
 
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
@@ -188,6 +220,7 @@ namespace SireOpenMM
                                 bool is_perturbable);
 
         void buildExceptions(const SireMol::Molecule &mol,
+                             const QVector<int> &atomidx_to_idx,
                              QSet<qint64> &constrained_pairs,
                              const SireBase::PropertyMap &map);
 

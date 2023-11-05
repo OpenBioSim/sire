@@ -40,6 +40,113 @@ using namespace SireMM;
 using namespace SireMol;
 using namespace SireBase;
 
+///////
+/////// Helper functions
+///////
+
+OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
+{
+    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
+
+    return OpenMM::Vec3(internal_to_nm * coords.x(),
+                        internal_to_nm * coords.y(),
+                        internal_to_nm * coords.z());
+}
+
+OpenMM::Vec3 to_vec3(const SireMol::Velocity3D &vel)
+{
+    return OpenMM::Vec3(vel.x().to(SireUnits::nanometers_per_ps),
+                        vel.y().to(SireUnits::nanometers_per_ps),
+                        vel.z().to(SireUnits::nanometers_per_ps));
+}
+
+inline qint64 to_pair(qint64 x, qint64 y)
+{
+    if (y < x)
+        return to_pair(y, x);
+    else
+        return x << 32 | y & 0x00000000FFFFFFFF;
+}
+
+////////
+//////// Implementation of FieldMolecule
+////////
+
+FieldMolecule::FieldMolecule(const Selector<Atom> &atoms,
+                             const PropertyMap &map)
+{
+    const int nats = atoms.count();
+
+    const auto coords_prop = map["coordinates"];
+    const auto charge_prop = map["charge"];
+    const auto lj_prop = map["LJ"];
+
+    coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
+    charges = QVector<double>(nats, 0.0);
+    sigmas = QVector<double>(nats, 0.0);
+    epsilons = QVector<double>(nats, 0.0);
+
+    auto coords_data = coords.data();
+    auto charges_data = charges.data();
+    auto sigmas_data = sigmas.data();
+    auto epsilons_data = epsilons.data();
+
+    for (int i = 0; i < nats; ++i)
+    {
+        const auto &atom = atoms(i);
+
+        coords_data[i] = to_vec3(atom.property<SireMaths::Vector>(coords_prop));
+        charges_data[i] = atom.property<SireUnits::Dimension::Charge>(charge_prop).to(SireUnits::mod_electron);
+
+        const auto &lj = atom.property<SireMM::LJParameter>(lj_prop);
+
+        const double sig = lj.sigma().to(SireUnits::nanometer);
+        const double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
+    }
+}
+
+FieldMolecule::~FieldMolecule()
+{
+}
+
+int FieldMolecule::nAtoms() const
+{
+    return coords.count();
+}
+
+QVector<OpenMM::Vec3> FieldMolecule::getCoords() const
+{
+    return coords;
+}
+
+QVector<double> FieldMolecule::getCharges() const
+{
+    return charges;
+}
+
+QVector<double> FieldMolecule::getSigmas() const
+{
+    return sigmas;
+}
+
+QVector<double> FieldMolecule::getEpsilons() const
+{
+    return epsilons;
+}
+
+bool FieldMolecule::isFieldAtom(int atomidx) const
+{
+    return this->atomidx_to_fieldidx.isEmpty() or this->atomidx_to_fieldidx.contains(atomidx);
+}
+
+int FieldMolecule::getAtomFieldIndex(int atomidx) const
+{
+    if (this->atomidx_to_fieldidx.isEmpty())
+        return atomidx;
+    else
+        return this->atomidx_to_fieldidx.value(atomidx, -1);
+}
+
 ////////
 //////// Implementation of OpenMMMolecule
 ////////
@@ -172,13 +279,8 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     {
         const auto atoms = mol.atoms("atom property is_field_atom == True");
 
-        for (int i = 0; i < atoms.count(); ++i)
-        {
-            field_atoms.append(atoms(i).index().value());
-        }
-
-        // should not need to sort it, but just in case
-        qSort(field_atoms);
+        if (not atoms.isEmpty())
+            field_mol.reset(new FieldMolecule(atoms, map));
     }
 
     if (ffinfo.isAmberStyle())
@@ -242,11 +344,6 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
                                          .arg(ffinfo.toString()),
                                      CODELOC);
     }
-
-    if (this->hasFieldAtoms())
-    {
-        this->processFieldAtoms();
-    }
 }
 
 OpenMMMolecule::~OpenMMMolecule()
@@ -263,6 +360,21 @@ bool OpenMMMolecule::operator!=(const OpenMMMolecule &other) const
     return not this->operator==(other);
 }
 
+/** The number of non-field atoms */
+int OpenMMMolecule::nAtoms() const
+{
+    return coords.count();
+}
+
+/** The number of field atoms */
+int OpenMMMolecule::nFieldAtoms() const
+{
+    if (field_mol.get() != 0)
+        return field_mol->nAtoms();
+    else
+        return 0;
+}
+
 bool OpenMMMolecule::isPerturbable() const
 {
     return perturbed.get() != 0;
@@ -273,43 +385,9 @@ bool OpenMMMolecule::isGhostAtom(int atom) const
     return from_ghost_idxs.contains(atom) or to_ghost_idxs.contains(atom);
 }
 
-bool OpenMMMolecule::isFieldAtom(int atom) const
-{
-    return field_atoms.contains(atom);
-}
-
-bool OpenMMMolecule::isFieldMolecule() const
-{
-    return field_atoms.count() == atoms.count();
-}
-
 bool OpenMMMolecule::hasFieldAtoms() const
 {
-    return not field_atoms.isEmpty();
-}
-
-OpenMM::Vec3 to_vec3(const SireMaths::Vector &coords)
-{
-    const double internal_to_nm = (1 * SireUnits::angstrom).to(SireUnits::nanometer);
-
-    return OpenMM::Vec3(internal_to_nm * coords.x(),
-                        internal_to_nm * coords.y(),
-                        internal_to_nm * coords.z());
-}
-
-OpenMM::Vec3 to_vec3(const SireMol::Velocity3D &vel)
-{
-    return OpenMM::Vec3(vel.x().to(SireUnits::nanometers_per_ps),
-                        vel.y().to(SireUnits::nanometers_per_ps),
-                        vel.z().to(SireUnits::nanometers_per_ps));
-}
-
-inline qint64 to_pair(qint64 x, qint64 y)
-{
-    if (y < x)
-        return to_pair(y, x);
-    else
-        return x << 32 | y & 0x00000000FFFFFFFF;
+    return field_mol.get() != 0;
 }
 
 std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
@@ -414,7 +492,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 {
     const auto &moldata = mol.data();
     atoms = mol.atoms();
-    const int nats = atoms.count();
+    const int nats = atoms.count() - this->nFieldAtoms();
 
     if (nats <= 0)
     {
@@ -422,13 +500,37 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     }
 
     // look up the CGAtomIdx of each atom - this is because we
-    // will use AtomIdx for the ordering and atom identifiers
+    // will use AtomIdx for the ordering and atom identifiers,
+    // and also we may be skipping some atoms if they are field
+    // atoms
     auto idx_to_cgatomidx = QVector<SireMol::CGAtomIdx>(nats);
     auto idx_to_cgatomidx_data = idx_to_cgatomidx.data();
 
-    for (int i = 0; i < nats; ++i)
+    auto atomidx_to_idx = QVector<int>(atoms.count(), 0);
+    auto atomidx_to_idx_data = atomidx_to_idx.data();
+
+    if (this->hasFieldAtoms())
     {
-        idx_to_cgatomidx_data[i] = molinfo.cgAtomIdx(SireMol::AtomIdx(i));
+        const int natoms = atoms.count();
+        int idx = 0;
+
+        for (int i = 0; i < natoms; ++i)
+        {
+            if (not field_mol->isFieldAtom(i))
+            {
+                idx_to_cgatomidx_data[idx] = molinfo.cgAtomIdx(SireMol::AtomIdx(i));
+                atomidx_to_idx_data[i] = idx;
+                idx += 1;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < nats; ++i)
+        {
+            idx_to_cgatomidx_data[i] = molinfo.cgAtomIdx(SireMol::AtomIdx(i));
+            atomidx_to_idx_data[i] = i;
+        }
     }
 
     // extract the coordinates and convert to OpenMM units
@@ -545,7 +647,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     for (int i = 0; i < nats; ++i)
     {
-        this->unbonded_atoms.insert(i);
+        this->unbonded_atoms.insert(atomidx_to_idx_data[i]);
     }
 
     // now the bonds
@@ -568,8 +670,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto bondid = it.key().map(molinfo);
         const auto &bondparam = it.value().first;
 
-        int atom0 = bondid.get<0>().value();
-        int atom1 = bondid.get<1>().value();
+        int atom0 = atomidx_to_idx_data[bondid.get<0>().value()];
+        int atom1 = atomidx_to_idx_data[bondid.get<1>().value()];
 
         if (atom0 > atom1)
             std::swap(atom0, atom1);
@@ -631,9 +733,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto angid = it.key().map(molinfo);
         const auto &angparam = it.value().first;
 
-        int atom0 = angid.get<0>().value();
-        int atom1 = angid.get<1>().value();
-        int atom2 = angid.get<2>().value();
+        int atom0 = atomidx_to_idx_data[angid.get<0>().value()];
+        int atom1 = atomidx_to_idx_data[angid.get<1>().value()];
+        int atom2 = atomidx_to_idx_data[angid.get<2>().value()];
 
         if (atom0 > atom2)
             std::swap(atom0, atom2);
@@ -699,10 +801,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto dihid = it.key().map(molinfo);
         const auto &dihparam = it.value().first;
 
-        int atom0 = dihid.get<0>().value();
-        int atom1 = dihid.get<1>().value();
-        int atom2 = dihid.get<2>().value();
-        int atom3 = dihid.get<3>().value();
+        int atom0 = atomidx_to_idx_data[dihid.get<0>().value()];
+        int atom1 = atomidx_to_idx_data[dihid.get<1>().value()];
+        int atom2 = atomidx_to_idx_data[dihid.get<2>().value()];
+        int atom3 = atomidx_to_idx_data[dihid.get<3>().value()];
 
         if (atom0 > atom3)
         {
@@ -745,10 +847,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto impid = it.key().map(molinfo);
         const auto &impparam = it.value().first;
 
-        const int atom0 = impid.get<0>().value();
-        const int atom1 = impid.get<1>().value();
-        const int atom2 = impid.get<2>().value();
-        const int atom3 = impid.get<3>().value();
+        const int atom0 = atomidx_to_idx_data[impid.get<0>().value()];
+        const int atom1 = atomidx_to_idx_data[impid.get<1>().value()];
+        const int atom2 = atomidx_to_idx_data[impid.get<2>().value()];
+        const int atom3 = atomidx_to_idx_data[impid.get<3>().value()];
 
         for (const auto &term : impparam.terms())
         {
@@ -777,7 +879,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
-    this->buildExceptions(mol, constrained_pairs, map);
+    this->buildExceptions(mol, atomidx_to_idx, constrained_pairs, map);
 }
 
 bool is_ghost(const std::tuple<double, double, double> &clj)
@@ -1136,6 +1238,7 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
     atoms in the molecule
 */
 void OpenMMMolecule::buildExceptions(const Molecule &mol,
+                                     const QVector<int> &atomidx_to_idx,
                                      QSet<qint64> &constrained_pairs,
                                      const PropertyMap &map)
 {
@@ -1159,8 +1262,8 @@ void OpenMMMolecule::buildExceptions(const Molecule &mol,
     {
         if (cscl != 1 or ljscl != 1)
         {
-            const int i = atom0.value();
-            const int j = atom1.value();
+            const int i = atomidx_to_idx[atom0.value()];
+            const int j = atomidx_to_idx[atom1.value()];
 
             exception_params.append(std::make_tuple(i, j, cscl, ljscl));
 
@@ -1410,76 +1513,6 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
             *v = vels_data[i];
             v += 1;
         }
-    }
-}
-
-/** Process this molecule to remove unnecessary parameters associated
- *  with field atoms. Field atoms are massless atoms that are not
- *  bonded to any other atom
- */
-void OpenMMMolecule::processFieldAtoms()
-{
-    if (not this->hasFieldAtoms())
-        return;
-
-    if (this->isPerturbable())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "We cannot (yet) support perturbable molecules that also "
-                                                "contain field atoms. Please raise an issue if you would "
-                                                "like us to write the code to do this."),
-                                            CODELOC);
-
-    if (this->isFieldMolecule())
-    {
-        qDebug() << "This is a field molecule";
-
-        // very easy case - all atoms are field atoms
-        field_points.reserve(field_atoms.count());
-
-        for (int i = 0; i < this->atoms.count(); ++i)
-        {
-            const auto &clj = cljs.at(i);
-            field_points.append(std::make_tuple(coords[i],
-                                                std::get<0>(clj),
-                                                std::get<1>(clj),
-                                                std::get<2>(clj)));
-        }
-
-        coords.clear();
-        vels.clear();
-        masses.clear();
-        light_atoms.clear();
-        virtual_sites.clear();
-        cljs.clear();
-        exception_params.clear();
-        bond_params.clear();
-        ang_params.clear();
-        dih_params.clear();
-        constraints.clear();
-        perturbed.reset();
-        exception_idxs.clear();
-        unbonded_atoms.clear();
-        alphas.clear();
-        to_ghost_idxs.clear();
-        from_ghost_idxs.clear();
-
-        return;
-    }
-
-    // more difficult case - a mixture of field and non-field atoms.
-    // This is almost certainly a protein or similar
-
-    // to start, the easiest is to create a bitmask to indicate
-    // which atoms are field atoms - we can then go through the
-    // atoms in sequence and then sort them into the appropriate
-    // bins
-    field_points.reserve(field_atoms.count());
-
-    QVector<bool> is_field_atom(this->atoms.count(), false);
-
-    for (const auto &atom : field_atoms)
-    {
-        is_field_atom[atom] = true;
     }
 }
 

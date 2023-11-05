@@ -46,6 +46,7 @@
 #include "tostring.h"
 
 #include "openmmmolecule.h"
+#include "customforce.h"
 
 #include <QDebug>
 
@@ -660,6 +661,18 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
+    // check to see if there are any field molecules
+    bool any_field_mols = false;
+
+    for (int i = 0; i < nmols; ++i)
+    {
+        if (openmm_mols_data[i].hasFieldAtoms())
+        {
+            any_field_mols = true;
+            break;
+        }
+    }
+
     QSet<int> fixed_atoms;
 
     if (map.specified("fixed"))
@@ -713,6 +726,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
     OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
     OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
+
+    // now create the grid potential for field atoms
+    GridForce *gridff = 0;
+
+    if (any_field_mols)
+    {
+        gridff = new GridForce();
+    }
 
     // end of stage 2 - we now have the base forces
 
@@ -768,6 +789,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.setForceIndex("torsion", system.addForce(dihff));
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_k");
+
+    if (gridff != 0)
+    {
+        lambda_lever.setForceIndex("field", system.addForce(gridff));
+        lambda_lever.addLever("field_scale");
+    }
 
     ///
     /// Stage 4 - define the forces for ghost atoms
@@ -1126,7 +1153,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         if (any_perturbable and mol.isPerturbable())
         {
             // This is a perturbable molecule and we're modelling perturbations
-            for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
+            for (int j = 0; j < mol.nAtoms(); ++j)
             {
                 const bool is_from_ghost = mol.from_ghost_idxs.contains(j);
                 const bool is_to_ghost = mol.to_ghost_idxs.contains(j);
@@ -1136,6 +1163,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // masses is used
                 const int atom_index = start_index + j;
 
+                // NEED TO UPDATE FIXED ATOMS WITH FIELD ATOMS INDEXES!!!
                 if (fixed_atoms.contains(atom_index))
                 {
                     // this is a fixed (zero mass) atom
@@ -1191,11 +1219,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             // Code path if this isn't a perturbable molecule or
             // we don't want to model perturbations
-            for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
+            for (int j = 0; j < mol.nAtoms(); ++j)
             {
                 // Add the particle to the system
                 const int atom_index = start_index + j;
 
+                // NEED TO UPDATE FIXED ATOMS WITH FIELD ATOMS INDEXES!!!
                 if (fixed_atoms.contains(atom_index))
                 {
                     // this is a fixed (zero mass) atom
