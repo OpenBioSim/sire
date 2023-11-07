@@ -1569,5 +1569,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     // All done - we can return the metadata (atoms are always added in
     // molidx/atomidx order)
-    return OpenMMMetaData(mols.atoms(), coords, vels, boxvecs, lambda_lever);
+    SireMol::SelectorM<SireMol::Atom> atom_indexes;
+
+    if (any_field_mols)
+    {
+        atom_indexes = mols.atoms("not atom property is_field_atom");
+    }
+    else
+    {
+        atom_indexes = mols.atoms();
+    }
+
+    return OpenMMMetaData(atom_indexes, coords, vels, boxvecs, lambda_lever);
 }

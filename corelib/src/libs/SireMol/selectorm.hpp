@@ -326,6 +326,9 @@ namespace SireMol
         template <class V>
         QList<V> metadata(const PropertyName &key, const PropertyName &metakey) const;
 
+        QList<Selector<T>> toSelectorList() const;
+        QVector<Selector<T>> toSelectorVector() const;
+
     protected:
         void _append(const T &view);
         void _append(const Selector<T> &views);
@@ -2857,6 +2860,24 @@ namespace SireMol
             return vws.at(0).template metadata<V>(key, metakey);
 
         return ret;
+    }
+
+    /** Return a QList containing all of the underlying Selector<T>
+     *  objects that make up this container
+     */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QList<Selector<T>> SelectorM<T>::toSelectorList() const
+    {
+        return vws;
+    }
+
+    /** Return a QVector containing all of the underlying Selector<T>
+     *  objects that make up this container
+     */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QVector<Selector<T>> SelectorM<T>::toSelectorVector() const
+    {
+        return vws.toVector();
     }
 
     template <class T>

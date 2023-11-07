@@ -97,15 +97,55 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             (bp::arg("context"), bp::arg("coords_and_velocities")),
             "Set the coordinates and velocities in a context");
 
+    typedef SireMol::SelectorMol (*extract_coordinates_function_type1)(
+        const OpenMM::State &,
+        const SireMol::SelectorMol &,
+        const QHash<SireMol::MolNum, SireBase::PropertyMap> &,
+        const SireBase::PropertyMap &);
+
+    typedef SireMol::SelectorM<SireMol::Atom> (*extract_coordinates_function_type2)(
+        const OpenMM::State &,
+        const SireMol::SelectorM<SireMol::Atom> &,
+        const QHash<SireMol::MolNum, SireBase::PropertyMap> &,
+        const SireBase::PropertyMap &);
+
+    extract_coordinates_function_type1 extract_coordinates_value1(&extract_coordinates);
+    extract_coordinates_function_type2 extract_coordinates_value2(&extract_coordinates);
+
     bp::def("_openmm_extract_coordinates",
-            &extract_coordinates,
+            extract_coordinates_value1,
             (bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map")),
             "Extract the coordinates from 'state' and copy then into the passed 'mols'");
 
+    bp::def("_openmm_extract_coordinates",
+            extract_coordinates_value2,
+            (bp::arg("state"), bp::arg("atoms"), bp::arg("perturbable_maps"), bp::arg("map")),
+            "Extract the coordinates from 'state' and copy then into the passed 'atoms'");
+
+    typedef SireMol::SelectorMol (*extract_coordinates_and_velocities_function_type1)(
+        const OpenMM::State &,
+        const SireMol::SelectorMol &,
+        const QHash<SireMol::MolNum, SireBase::PropertyMap> &,
+        const SireBase::PropertyMap &);
+
+    typedef SireMol::SelectorM<SireMol::Atom> (*extract_coordinates_and_velocities_function_type2)(
+        const OpenMM::State &,
+        const SireMol::SelectorM<SireMol::Atom> &,
+        const QHash<SireMol::MolNum, SireBase::PropertyMap> &,
+        const SireBase::PropertyMap &);
+
+    extract_coordinates_and_velocities_function_type1 extract_coordinates_and_velocities_value1(&extract_coordinates_and_velocities);
+    extract_coordinates_and_velocities_function_type2 extract_coordinates_and_velocities_value2(&extract_coordinates_and_velocities);
+
     bp::def("_openmm_extract_coordinates_and_velocities",
-            &extract_coordinates_and_velocities,
+            extract_coordinates_and_velocities_value1,
             (bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map")),
             "Extract the coordinates and velocities from 'state' and copy then into the passed 'mols'");
+
+    bp::def("_openmm_extract_coordinates_and_velocities",
+            extract_coordinates_and_velocities_value2,
+            (bp::arg("state"), bp::arg("atoms"), bp::arg("perturbable_maps"), bp::arg("map")),
+            "Extract the coordinates and velocities from 'state' and copy then into the passed 'atoms'");
 
     bp::def("_openmm_extract_space",
             &extract_space,
