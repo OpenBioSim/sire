@@ -162,16 +162,13 @@ try:
             if integrator == "verlet" or integrator == "leapfrog":
                 if not ensemble.is_nve():
                     raise ValueError(
-                        "You cannot use a verlet integrator with the "
-                        f"{ensemble}"
+                        "You cannot use a verlet integrator with the " f"{ensemble}"
                     )
 
                 integrator = openmm.VerletIntegrator(timestep)
 
             elif integrator != "auto":
-                temperature = (
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
-                )
+                temperature = ensemble.temperature().to(kelvin) * openmm.unit.kelvin
 
                 if ensemble.is_nve():
                     raise ValueError(
@@ -218,9 +215,7 @@ try:
                     timestep,
                 )
 
-                temperature = (
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
-                )
+                temperature = ensemble.temperature().to(kelvin) * openmm.unit.kelvin
         elif openmm.Integrator not in type(integrator).mro():
             raise TypeError(
                 f"Cannot cast the integrator {integrator} to the correct "
@@ -298,8 +293,7 @@ try:
                     p = openmm.Platform.getPlatform(i)
 
                     if (p.getName().lower() == desired_platform.lower()) or (
-                        p.getName() == "HIP"
-                        and desired_platform.lower() == "metal"
+                        p.getName() == "HIP" and desired_platform.lower() == "metal"
                     ):
                         platform = p
                         break
@@ -398,9 +392,7 @@ try:
 
         return context
 
-    def openmm_extract_coordinates(
-        state, mols, perturbable_maps=None, map=None
-    ):
+    def openmm_extract_coordinates(state, mols, perturbable_maps=None, map=None):
         from ...base import create_map
 
         map = create_map(map)

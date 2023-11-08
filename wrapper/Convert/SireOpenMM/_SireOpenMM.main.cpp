@@ -119,7 +119,7 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
 
     bp::def("_openmm_extract_coordinates",
             extract_coordinates_value2,
-            (bp::arg("state"), bp::arg("atoms"), bp::arg("perturbable_maps"), bp::arg("map")),
+            (bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map")),
             "Extract the coordinates from 'state' and copy then into the passed 'atoms'");
 
     typedef SireMol::SelectorMol (*extract_coordinates_and_velocities_function_type1)(
@@ -144,7 +144,7 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
 
     bp::def("_openmm_extract_coordinates_and_velocities",
             extract_coordinates_and_velocities_value2,
-            (bp::arg("state"), bp::arg("atoms"), bp::arg("perturbable_maps"), bp::arg("map")),
+            (bp::arg("state"), bp::arg("mols"), bp::arg("perturbable_maps"), bp::arg("map")),
             "Extract the coordinates and velocities from 'state' and copy then into the passed 'atoms'");
 
     bp::def("_openmm_extract_space",

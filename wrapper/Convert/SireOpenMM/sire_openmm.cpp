@@ -553,7 +553,220 @@ namespace SireOpenMM
                                                        const QHash<SireMol::MolNum, SireBase::PropertyMap> &perturbable_maps,
                                                        const SireBase::PropertyMap &map)
     {
-        return atoms;
+        const auto positions = state.getPositions();
+        const auto velocities = state.getVelocities();
+
+        const int natoms = positions.size();
+        const auto positions_data = positions.data();
+        const auto velocities_data = velocities.data();
+
+        if (atoms.count() > natoms)
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "Different number of atoms from OpenMM and sire. "
+                                                    "%1 versus %2. Cannot extract the coordinates.")
+                                                    .arg(natoms)
+                                                    .arg(atoms.count()),
+                                                CODELOC);
+        }
+
+        const auto mols = atoms.toSelectorVector();
+        const auto mols_data = mols.constData();
+        const int nmols = mols.count();
+
+        QVector<SireMol::Selector<Atom>> ret(nmols);
+        auto ret_data = ret.data();
+
+        const auto coords_prop = map["coordinates"];
+        const auto vels_prop = map["velocity"];
+
+        QVector<int> offsets(nmols);
+
+        int offset = 0;
+
+        for (int i = 0; i < nmols; ++i)
+        {
+            offsets[i] = offset;
+            offset += mols_data[i].count();
+        }
+
+        const auto offsets_data = offsets.constData();
+
+        if (SireBase::should_run_in_parallel(nmols, map))
+        {
+            tbb::parallel_for(tbb::blocked_range<int>(0, nmols), [&](const tbb::blocked_range<int> &r)
+                              {
+                QVector<SireMaths::Vector> converted_coords;
+                QVector<SireMol::Velocity3D> converted_vels;
+
+                for (int i=r.begin(); i<r.end(); ++i)
+                {
+                    const auto &mol = mols_data[i];
+                    const int mol_natoms = mol.count();
+
+                    if (mol_natoms == 0)
+                        continue;
+
+                    _populate_coords(converted_coords, positions_data+offsets_data[i], mol_natoms);
+                    _populate_vels(converted_vels, velocities_data+offsets_data[i], mol_natoms);
+
+                    auto my_coords_prop = coords_prop.source();
+                    auto my_vels_prop = vels_prop.source();
+
+                    if (perturbable_maps.contains(mol.data().number()))
+                    {
+                        my_coords_prop = perturbable_maps[mol.data().number()]["coordinates"].source();
+                        my_vels_prop = perturbable_maps[mol.data().number()]["velocity"].source();
+                    }
+
+                    if (mol.selectedAll())
+                    {
+                        auto molecule = mol.molecule().edit();
+
+                        if (not molecule.updatePropertyFrom<SireMol::AtomCoords>(my_coords_prop,
+                                                                                 converted_coords, false))
+                        {
+                            SireMol::AtomCoords c(mol.data().info());
+                            c.copyFrom(converted_coords);
+                            molecule.setProperty(my_coords_prop, c);
+                        }
+
+                        if (not molecule.updatePropertyFrom<SireMol::AtomVelocities>(my_vels_prop,
+                                                                                    converted_vels, false))
+                        {
+                            SireMol::AtomVelocities v(mol.data().info());
+                            v.copyFrom(converted_vels);
+                            molecule.setProperty(my_vels_prop, v);
+                        }
+
+                        ret_data[i] = mol;
+                        ret_data[i].update(molecule.commit().data());
+                    }
+                    else
+                    {
+                        auto molecule = mol.molecule().edit();
+
+                        SireMol::AtomCoords atomcoords;
+
+                        if (molecule.hasProperty(coords_prop))
+                        {
+                            atomcoords = molecule.property(coords_prop).asA<SireMol::AtomCoords>();
+                        }
+                        else
+                        {
+                            atomcoords = SireMol::AtomCoords(molecule.data().info());
+                        }
+
+                        atomcoords.copyFrom(converted_coords, mol.selection());
+
+                        SireMol::AtomVelocities atomvels;
+
+                        if (molecule.hasProperty(vels_prop))
+                        {
+                            atomvels = molecule.property(vels_prop).asA<SireMol::AtomVelocities>();
+                        }
+                        else
+                        {
+                            atomvels = SireMol::AtomVelocities(molecule.data().info());
+                        }
+
+                        atomvels.copyFrom(converted_vels, mol.selection());
+
+                        molecule.setProperty(coords_prop, atomcoords);
+                        molecule.setProperty(vels_prop, atomvels);
+
+                        ret_data[i] = mol;
+                        ret_data[i].update(molecule.commit().data());
+                    }
+                } });
+        }
+        else
+        {
+            QVector<SireMaths::Vector> converted_coords;
+            QVector<SireMol::Velocity3D> converted_vels;
+
+            for (int i = 0; i < nmols; ++i)
+            {
+                const auto &mol = mols_data[i];
+                const int mol_natoms = mol.count();
+
+                if (mol_natoms == 0)
+                    continue;
+
+                _populate_coords(converted_coords, positions_data + offsets_data[i], mol_natoms);
+                _populate_vels(converted_vels, velocities_data + offsets_data[i], mol_natoms);
+
+                auto my_coords_prop = coords_prop.source();
+                auto my_vels_prop = vels_prop.source();
+
+                if (perturbable_maps.contains(mol.data().number()))
+                {
+                    my_coords_prop = perturbable_maps[mol.data().number()]["coordinates"].source();
+                    my_vels_prop = perturbable_maps[mol.data().number()]["velocity"].source();
+                }
+
+                if (mol.selectedAll())
+                {
+                    auto molecule = mol.molecule().edit();
+
+                    if (not molecule.updatePropertyFrom<SireMol::AtomCoords>(my_coords_prop,
+                                                                             converted_coords, false))
+                    {
+                        SireMol::AtomCoords c(mol.data().info());
+                        c.copyFrom(converted_coords);
+                        molecule.setProperty(my_coords_prop, c);
+                    }
+
+                    if (not molecule.updatePropertyFrom<SireMol::AtomVelocities>(my_vels_prop,
+                                                                                 converted_vels, false))
+                    {
+                        SireMol::AtomVelocities v(mol.data().info());
+                        v.copyFrom(converted_vels);
+                        molecule.setProperty(my_vels_prop, v);
+                    }
+
+                    ret_data[i] = mol;
+                    ret_data[i].update(molecule.commit().data());
+                }
+                else
+                {
+                    auto molecule = mol.molecule().edit();
+
+                    SireMol::AtomCoords atomcoords;
+                    SireMol::AtomVelocities atomvels;
+
+                    if (molecule.hasProperty(coords_prop))
+                    {
+                        atomcoords = molecule.property(coords_prop).asA<SireMol::AtomCoords>();
+                    }
+                    else
+                    {
+                        atomcoords = SireMol::AtomCoords(molecule.data().info());
+                    }
+
+                    atomcoords.copyFrom(converted_coords, mol.selection());
+
+                    if (molecule.hasProperty(vels_prop))
+                    {
+                        atomvels = molecule.property(vels_prop).asA<SireMol::AtomVelocities>();
+                    }
+                    else
+                    {
+                        atomvels = SireMol::AtomVelocities(molecule.data().info());
+                    }
+
+                    atomvels.copyFrom(converted_vels, mol.selection());
+
+                    molecule.setProperty(coords_prop, atomcoords);
+                    molecule.setProperty(vels_prop, atomvels);
+
+                    ret_data[i] = mol;
+                    ret_data[i].update(molecule.commit().data());
+                }
+            }
+        }
+
+        return SelectorM<Atom>(ret.toList());
     }
 
     SelectorMol extract_coordinates_and_velocities(const OpenMM::State &state,

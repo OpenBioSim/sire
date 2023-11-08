@@ -491,8 +491,23 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                         bool is_perturbable)
 {
     const auto &moldata = mol.data();
-    atoms = mol.atoms();
-    const int nats = atoms.count() - this->nFieldAtoms();
+
+    if (this->hasFieldAtoms())
+    {
+        if (this->nFieldAtoms() == molinfo.nAtoms())
+        {
+            // this is a field molecule, so we don't need to do anything
+            return;
+        }
+
+        atoms = mol.atoms("atom property is_field_atom == False");
+    }
+    else
+    {
+        atoms = mol.atoms();
+    }
+
+    const int nats = atoms.count();
 
     if (nats <= 0)
     {
@@ -506,22 +521,16 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     auto idx_to_cgatomidx = QVector<SireMol::CGAtomIdx>(nats);
     auto idx_to_cgatomidx_data = idx_to_cgatomidx.data();
 
-    auto atomidx_to_idx = QVector<int>(atoms.count(), 0);
+    auto atomidx_to_idx = QVector<int>(molinfo.nAtoms(), 0);
     auto atomidx_to_idx_data = atomidx_to_idx.data();
 
     if (this->hasFieldAtoms())
     {
-        const int natoms = atoms.count();
-        int idx = 0;
-
-        for (int i = 0; i < natoms; ++i)
+        for (int i = 0; i < nats; ++i)
         {
-            if (not field_mol->isFieldAtom(i))
-            {
-                idx_to_cgatomidx_data[idx] = molinfo.cgAtomIdx(SireMol::AtomIdx(i));
-                atomidx_to_idx_data[i] = idx;
-                idx += 1;
-            }
+            const auto &atom = atoms(i);
+            idx_to_cgatomidx_data[i] = molinfo.cgAtomIdx(atom.index());
+            atomidx_to_idx_data[atom.index().value()] = i;
         }
     }
     else
@@ -537,7 +546,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     const auto &c = moldata.property(map["coordinates"]).asA<SireMol::AtomCoords>();
 
     this->coords = QVector<OpenMM::Vec3>(nats, OpenMM::Vec3(0, 0, 0));
-    auto coords_data = coords.data();
+    auto coords_data = this->coords.data();
 
     for (int i = 0; i < nats; ++i)
     {

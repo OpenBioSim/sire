@@ -116,22 +116,29 @@ class DynamicsData:
             openmm_extract_space,
         )
 
-        atoms = self._omm_mols.get_atom_index().clone()
-        atoms.update(self._sire_mols.molecules())
+        if self._sire_mols.num_atoms() == self._omm_mols.get_atom_index().count():
+            # all of the atoms in all molecules are in the context,
+            # and we can assume they are in atom index order
+            mols_to_update = self._sire_mols.molecules()
+        else:
+            # some of the atoms aren't in the context, and they may be
+            # in a different order
+            mols_to_update = self._omm_mols.get_atom_index().atoms()
+            mols_to_update.update(self._sire_mols.molecules())
 
         if state_has_cv[1]:
             # get velocities too
-            atoms = openmm_extract_coordinates_and_velocities(
+            mols_to_update = openmm_extract_coordinates_and_velocities(
                 state,
-                self._omm_mols.get_atom_index(),
+                mols_to_update,
                 # black auto-formats this to a long line
                 perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
             )
         else:
-            atoms = openmm_extract_coordinates(
+            mols_to_update = openmm_extract_coordinates(
                 state,
-                self._omm_mols.get_atom_index(),
+                mols_to_update,
                 # black auto-formats this to a long line
                 perturbable_maps=self._omm_mols.get_lambda_lever().get_perturbable_molecule_maps(),  # noqa: E501
                 map=self._map,
@@ -139,7 +146,7 @@ class DynamicsData:
 
         self._current_step = nsteps_completed
 
-        self._sire_mols.update(atoms.to_molecules())
+        self._sire_mols.update(mols_to_update.molecules())
 
         if self._ffinfo.space().is_periodic():
             # don't change the space if it is infinite - this

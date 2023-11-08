@@ -1055,6 +1055,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // start_index keeps track of the index of the first atom in each molecule
     int start_index = 0;
 
+    // this is the list of atoms added, in atom order
+    QList<SireMol::Selector<SireMol::Atom>> order_of_added_atoms;
+
     // get the 1-4 scaling factors from the first molecule
     const double coul_14_scl = openmm_mols_data[0].ffinfo.electrostatic14ScaleFactor();
     const double lj_14_scl = openmm_mols_data[0].ffinfo.vdw14ScaleFactor();
@@ -1087,6 +1090,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // particle for the first atom in this molecule
         start_indexes[i] = start_index;
         const auto &mol = openmm_mols_data[i];
+
+        order_of_added_atoms.append(mol.atoms);
 
         // double-check that the molecule has a compatible forcefield with
         // the other molecules in this system
@@ -1567,18 +1572,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
-    // All done - we can return the metadata (atoms are always added in
-    // molidx/atomidx order)
-    SireMol::SelectorM<SireMol::Atom> atom_indexes;
-
-    if (any_field_mols)
-    {
-        atom_indexes = mols.atoms("not atom property is_field_atom");
-    }
-    else
-    {
-        atom_indexes = mols.atoms();
-    }
-
-    return OpenMMMetaData(atom_indexes, coords, vels, boxvecs, lambda_lever);
+    // All done - we can return the metadata
+    return OpenMMMetaData(SireMol::SelectorM<SireMol::Atom>(order_of_added_atoms),
+                          coords, vels, boxvecs, lambda_lever);
 }
