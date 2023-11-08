@@ -69,11 +69,15 @@ inline qint64 to_pair(qint64 x, qint64 y)
 }
 
 ////////
-//////// Implementation of FieldMolecule
+//////// Implementation of FieldAtoms
 ////////
 
-FieldMolecule::FieldMolecule(const Selector<Atom> &atoms,
-                             const PropertyMap &map)
+FieldAtoms::FieldAtoms()
+{
+}
+
+FieldAtoms::FieldAtoms(const Selector<Atom> &atoms,
+                       const PropertyMap &map)
 {
     const int nats = atoms.count();
 
@@ -105,46 +109,52 @@ FieldMolecule::FieldMolecule(const Selector<Atom> &atoms,
     }
 }
 
-FieldMolecule::~FieldMolecule()
+FieldAtoms::~FieldAtoms()
 {
 }
 
-int FieldMolecule::nAtoms() const
+int FieldAtoms::nAtoms() const
 {
     return coords.count();
 }
 
-QVector<OpenMM::Vec3> FieldMolecule::getCoords() const
+int FieldAtoms::count() const
+{
+    return this->nAtoms();
+}
+
+QVector<OpenMM::Vec3> FieldAtoms::getCoords() const
 {
     return coords;
 }
 
-QVector<double> FieldMolecule::getCharges() const
+QVector<double> FieldAtoms::getCharges() const
 {
     return charges;
 }
 
-QVector<double> FieldMolecule::getSigmas() const
+QVector<double> FieldAtoms::getSigmas() const
 {
     return sigmas;
 }
 
-QVector<double> FieldMolecule::getEpsilons() const
+QVector<double> FieldAtoms::getEpsilons() const
 {
     return epsilons;
 }
 
-bool FieldMolecule::isFieldAtom(int atomidx) const
+void FieldAtoms::append(const FieldAtoms &other)
 {
-    return this->atomidx_to_fieldidx.isEmpty() or this->atomidx_to_fieldidx.contains(atomidx);
+    coords += other.coords;
+    charges += other.charges;
+    sigmas += other.sigmas;
+    epsilons += other.epsilons;
 }
 
-int FieldMolecule::getAtomFieldIndex(int atomidx) const
+FieldAtoms &FieldAtoms::operator+=(const FieldAtoms &other)
 {
-    if (this->atomidx_to_fieldidx.isEmpty())
-        return atomidx;
-    else
-        return this->atomidx_to_fieldidx.value(atomidx, -1);
+    this->append(other);
+    return *this;
 }
 
 ////////
@@ -277,10 +287,10 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     if (mol.hasProperty(field_atom_prop))
     {
-        const auto atoms = mol.atoms("atom property is_field_atom == True");
+        const auto atms = mol.atoms("atom property is_field_atom == True");
 
-        if (not atoms.isEmpty())
-            field_mol.reset(new FieldMolecule(atoms, map));
+        if (not atms.isEmpty())
+            field_atoms.reset(new FieldAtoms(atms, map));
     }
 
     if (ffinfo.isAmberStyle())
@@ -369,10 +379,22 @@ int OpenMMMolecule::nAtoms() const
 /** The number of field atoms */
 int OpenMMMolecule::nFieldAtoms() const
 {
-    if (field_mol.get() != 0)
-        return field_mol->nAtoms();
+    if (field_atoms.get() != 0)
+        return field_atoms->nAtoms();
     else
         return 0;
+}
+
+/** Return the field atoms */
+const FieldAtoms &OpenMMMolecule::getFieldAtoms() const
+{
+    if (field_atoms.get() != 0)
+        return *field_atoms;
+    else
+    {
+        static const FieldAtoms empty;
+        return empty;
+    }
 }
 
 bool OpenMMMolecule::isPerturbable() const
@@ -387,7 +409,10 @@ bool OpenMMMolecule::isGhostAtom(int atom) const
 
 bool OpenMMMolecule::hasFieldAtoms() const
 {
-    return field_mol.get() != 0;
+    if (field_atoms.get() != 0)
+        return field_atoms->nAtoms() > 0;
+    else
+        return false;
 }
 
 std::tuple<int, int, double, double, double> OpenMMMolecule::getException(

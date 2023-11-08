@@ -4,7 +4,9 @@
 #include "openmm.h"
 #include "openmm/Force.h"
 
-#include "sireglobal.h"
+#include "openmmmolecule.h"
+
+#include "SireVol/aabox.h"
 
 SIRE_BEGIN_HEADER
 
@@ -16,40 +18,23 @@ namespace SireOpenMM
         GridForce();
         ~GridForce();
 
-        int addFixedAtom(const OpenMM::Vec3 &position,
-                         float charge, float sigma, float epsilon);
+        void addFieldAtoms(const FieldAtoms &atoms);
 
-        void getFixedAtom(int idx, OpenMM::Vec3 &position,
-                          float &charge, float &sigma, float &epsilon) const;
+        const FieldAtoms &getFieldAtoms() const;
 
-        void updateFixedAtom(int idx, const OpenMM::Vec3 &position,
-                             float charge, float sigma, float epsilon);
+        void addParticle(double charge, double sigma, double epsilon);
+
+        const QVector<std::tuple<double, double, double>> &getParticleParameters() const;
 
     protected:
         OpenMM::ForceImpl *createImpl() const;
 
     private:
-        /** All of the data for the fixed atoms */
-        std::vector<std::tuple<OpenMM::Vec3, float, float, float>> fixed_atoms;
+        /** All of the field atoms */
+        FieldAtoms field_atoms;
 
-        /** The coulomb potential grid */
-        std::vector<double> coulomb_grid;
-
-        /** The center of the grid */
-        OpenMM::Vec3 grid_center;
-
-        /** The half-extents of this grid (plus or minus this to
-            get the grid boundaries) */
-        OpenMM::Vec3 grid_half_extents;
-
-        /** The coulomb cutoff (applies from the center of the grid) */
-        double coulomb_cutoff;
-
-        /** The grid spacing */
-        double grid_spacing;
-
-        /** The number of grid points along x, y and z */
-        unsigned int dimx, dimy, dimz;
+        /** All of the particle parameters */
+        QVector<std::tuple<double, double, double>> params;
     };
 }
 

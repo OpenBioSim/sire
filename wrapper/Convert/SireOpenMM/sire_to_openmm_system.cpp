@@ -1218,6 +1218,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                        std::get<2>(clj));
                     non_ghost_atoms.insert(atom_index);
                 }
+
+                if (gridff != 0)
+                {
+                    gridff->addParticle(std::get<0>(clj), std::get<1>(clj),
+                                        std::get<2>(clj));
+                }
             }
         }
         else
@@ -1262,6 +1268,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
                     non_ghost_atoms.insert(atom_index);
+                }
+
+                if (gridff != 0)
+                {
+                    gridff->addParticle(std::get<0>(clj), std::get<1>(clj),
+                                        std::get<2>(clj));
                 }
             }
         }
@@ -1310,6 +1322,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             }
             // else we will need to think about how to constrain bonds
             // involving fixed atoms. Could we fix the other atom too?
+        }
+
+        // add any field atoms
+        if (gridff != 0 and mol.hasFieldAtoms())
+        {
+            gridff->addFieldAtoms(mol.getFieldAtoms());
         }
 
         start_index += mol.masses.count();

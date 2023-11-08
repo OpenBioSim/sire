@@ -21,31 +21,31 @@ namespace SireOpenMM
      *  These are either entire or parts of molecules that contribute
      *  to a fixed potential field
      */
-    class FieldMolecule
+    class FieldAtoms
     {
     public:
-        FieldMolecule(const SireMol::Selector<SireMol::Atom> &atoms,
-                      const SireBase::PropertyMap &map);
-        ~FieldMolecule();
+        FieldAtoms();
+        FieldAtoms(const SireMol::Selector<SireMol::Atom> &atoms,
+                   const SireBase::PropertyMap &map);
+        ~FieldAtoms();
 
         int nAtoms() const;
+        int count() const;
 
         QVector<OpenMM::Vec3> getCoords() const;
         QVector<double> getCharges() const;
         QVector<double> getSigmas() const;
         QVector<double> getEpsilons() const;
 
-        bool isFieldAtom(int atom) const;
+        void append(const FieldAtoms &other);
 
-        int getAtomFieldIndex(int atom) const;
+        FieldAtoms &operator+=(const FieldAtoms &other);
 
     private:
         QVector<OpenMM::Vec3> coords;
         QVector<double> charges;
         QVector<double> sigmas;
         QVector<double> epsilons;
-
-        QHash<int, int> atomidx_to_fieldidx;
     };
 
     /** Internal class used to hold all of the extracted information
@@ -106,12 +106,12 @@ namespace SireOpenMM
 
         bool isGhostAtom(int atom) const;
 
-        bool isFieldMolecule() const;
+        bool isFieldAtoms() const;
         bool hasFieldAtoms() const;
 
         int nFieldAtoms() const;
 
-        std::shared_ptr<FieldMolecule> getFieldMolecule() const;
+        const FieldAtoms &getFieldAtoms() const;
 
         std::tuple<int, int, double, double, double>
         getException(int atom0, int atom1,
@@ -176,7 +176,7 @@ namespace SireOpenMM
         std::shared_ptr<OpenMMMolecule> perturbed;
 
         /** The field atoms for the molecule, if this has field atoms */
-        std::shared_ptr<FieldMolecule> field_mol;
+        std::shared_ptr<FieldAtoms> field_atoms;
 
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
