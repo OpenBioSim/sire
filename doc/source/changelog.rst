@@ -12,6 +12,12 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.4.2 <https://github.com/openbiosim/sire/compare/2023.4.1...2023.4.2>`__
+------------------------------------------------------------------------------
+
+* Fixed use of ``QString::compare`` when comparing molecular properties during
+  a water topology swap.
+
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
 ---------------------------------------------------------------------------------------------
 
