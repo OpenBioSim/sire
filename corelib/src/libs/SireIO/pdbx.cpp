@@ -50,6 +50,8 @@
 #include "SireUnits/units.h"
 
 #include "third_party/gemmi/cif.hpp"
+#include "third_party/gemmi/mmcif.hpp"
+#include "third_party/gemmi/modify.hpp"
 
 #include <iostream>
 
@@ -292,6 +294,38 @@ void PDBx::assertSane() const
     // check state, raise SireError::program_bug if we are in an invalid state
 }
 
+void parseBlock(cif::Block &block, MoleculeGroup &mols)
+{
+    auto structure = gemmi::make_structure_from_block(block);
+
+    gemmi::standardize_crystal_frame(structure);
+
+    for (auto model : structure.models)
+    {
+        qDebug() << "model" << QString::fromStdString(model.name.c_str());
+
+        for (auto chain : model.chains)
+        {
+            qDebug() << "chain" << QString::fromStdString(chain.name.c_str());
+
+            qDebug() << "ligands" << chain.get_ligands().size();
+            qDebug() << "polymers" << chain.get_polymer().size();
+            qDebug() << "water" << chain.get_waters().size();
+
+            for (auto residue : chain.residues)
+            {
+                qDebug() << "residue" << QString::fromStdString(residue.name.c_str())
+                         << "is_water" << residue.is_water();
+
+                for (auto atom : residue.atoms)
+                {
+                    qDebug() << "atom" << QString::fromStdString(atom.name.c_str());
+                }
+            }
+        }
+    }
+}
+
 /** Internal function that is used to actually parse the data contained
     in the lines of the file */
 void PDBx::parseLines(const PropertyMap &map)
@@ -305,9 +339,13 @@ void PDBx::parseLines(const PropertyMap &map)
 
     input_string.clear();
 
-    for (cif::Block &block : doc->blocks)
-        for (auto cc : block.find("_chem_comp.", {"id", "formula_weight"}))
-            std::cout << cc[0] << " weights " << cc[1] << std::endl;
+    // construct each molecule
+    MoleculeGroup mols("all");
+
+    for (auto &block : doc->blocks)
+    {
+        parseBlock(block, mols);
+    }
 
     this->setScore(nAtoms());
 }

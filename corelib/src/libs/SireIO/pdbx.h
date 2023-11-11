@@ -56,7 +56,7 @@ namespace gemmi
 {
     namespace cif
     {
-        class Document;
+        struct Document;
     }
 }
 
