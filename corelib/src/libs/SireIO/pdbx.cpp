@@ -49,11 +49,17 @@
 
 #include "SireUnits/units.h"
 
+#include "third_party/gemmi/cif.hpp"
+
+#include <iostream>
+
 using namespace SireBase;
 using namespace SireIO;
 using namespace SireMol;
 using namespace SireSystem;
 using namespace SireStream;
+
+namespace cif = gemmi::cif;
 
 const RegisterParser<PDBx> register_pdbx;
 
@@ -290,6 +296,19 @@ void PDBx::assertSane() const
     in the lines of the file */
 void PDBx::parseLines(const PropertyMap &map)
 {
+    // assemble all of the line into a single string
+    auto input_string = QStringList(lines().toList()).join("\n").toStdString();
+
+    QMutexLocker lkr(&mutex);
+
+    doc.reset(new cif::Document(cif::read_string(input_string)));
+
+    input_string.clear();
+
+    for (cif::Block &block : doc->blocks)
+        for (auto cc : block.find("_chem_comp.", {"id", "formula_weight"}))
+            std::cout << cc[0] << " weights " << cc[1] << std::endl;
+
     this->setScore(nAtoms());
 }
 

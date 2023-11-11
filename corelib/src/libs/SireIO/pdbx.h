@@ -52,6 +52,14 @@ namespace SireMol
 SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::PDBx &);
 SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::PDBx &);
 
+namespace gemmi
+{
+    namespace cif
+    {
+        class Document;
+    }
+}
+
 namespace SireIO
 {
     /** This class holds a parser for reading and writing PDBx/mmcif files */
@@ -112,6 +120,12 @@ namespace SireIO
 
         /** Any warnings that were raised when reading the file. */
         QStringList parse_warnings;
+
+        /** Mutex to protect access to the underlying document */
+        QMutex mutex;
+
+        /** Pointer to the underlying CIF document */
+        std::shared_ptr<gemmi::cif::Document> doc;
     };
 
 } // namespace SireIO
