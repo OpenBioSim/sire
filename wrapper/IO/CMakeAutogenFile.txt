@@ -11,6 +11,7 @@ set ( PYPP_SOURCES
        _IO_free_functions.pypp.cpp
        PDB.pypp.cpp
        IOBase.pypp.cpp
+       PDBx.pypp.cpp
        FlexibilityTemplate.pypp.cpp
        GroSystem.pypp.cpp
        DCD.pypp.cpp

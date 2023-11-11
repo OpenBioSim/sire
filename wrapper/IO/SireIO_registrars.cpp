@@ -29,6 +29,7 @@
 #include "ambertraj.h"
 #include "sdf.h"
 #include "pdb.h"
+#include "pdbx.h"
 
 #include "Helpers/objectregistry.hpp"
 
@@ -74,6 +75,7 @@ void register_SireIO_objects()
     ObjectRegistry::registerConverterFor< SireIO::AmberTraj >();
     ObjectRegistry::registerConverterFor< SireIO::SDF >();
     ObjectRegistry::registerConverterFor< SireIO::PDB >();
+    ObjectRegistry::registerConverterFor< SireIO::PDBx >();
 
 }
 
