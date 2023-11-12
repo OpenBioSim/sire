@@ -4,19 +4,23 @@
 #
 ##########################################
 
-# Find RDKit libraries
+# Find gemmi and pybind11 libraries
 find_package(gemmi)
+find_package(pybind11)
 
-if (${gemmi_FOUND})
+if (${gemmi_FOUND} AND ${pybind11_FOUND})
   # Only compile and install if we have gemmi
   message( STATUS "Compiling SireGemmi converter" )
 
   get_target_property(GEMMI_LOCATION gemmi::gemmi_cpp LOCATION)
 
   message( STATUS "GEMMI LIBRARY ${GEMMI_LOCATION}" )
+  message( STATUS "PYBIND11 INCLUDE ${pybind11_INCLUDE_DIR}")
+  message( STATUS "PYBIND11 LIBRARY ${pybind11_LIBRARIES}" )
 
   # Third Party dependencies of this module
   include_directories( ${PYTHON_INCLUDE_DIR}
+                       ${pybind11_INCLUDE_DIR}
                        ${gemmi_INCLUDE_DIR} )
 
   # Sire include paths
@@ -55,6 +59,7 @@ if (${gemmi_FOUND})
                           SIRE_SireStream
                           SIRE_SireError
                           gemmi::gemmi_cpp
+                          ${pybind11_LIBRARIES}
                         )
 
 

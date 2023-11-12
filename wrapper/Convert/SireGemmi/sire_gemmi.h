@@ -9,6 +9,8 @@
 
 #include "SireBase/propertymap.h"
 
+#include <memory>
+
 namespace SireGemmi
 {
 

@@ -19,3 +19,4 @@ rdkit-dev>=2023.0.0
 # These packages are needed to compile
 # the SireGemmi plugin
 gemmi>=0.6.0
+pybind11

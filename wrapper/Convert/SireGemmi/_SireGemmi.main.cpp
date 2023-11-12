@@ -6,6 +6,8 @@
 
 #include "sire_gemmi.h"
 
+#include "Helpers/pyboost11.hpp"
+
 namespace bp = boost::python;
 
 using namespace SireGemmi;
@@ -25,4 +27,6 @@ BOOST_PYTHON_MODULE(_SireGemmi)
     bp::def("_register_pdbx_loader",
             &register_pdbx_loader,
             "Internal function called once used to register PDBx support");
+
+    pyboost11::converter<gemmi::Structure>();
 }

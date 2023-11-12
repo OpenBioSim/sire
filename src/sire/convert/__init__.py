@@ -476,10 +476,15 @@ def sire_to_gemmi(obj, map=None):
 
     from ..system import System
 
-    if not System.is_system(obj):
+    if System.is_system(obj):
+        try:
+            obj = obj._system
+        except Exception:
+            pass
+    else:
         s = System()
         s.add(_to_selectormol(obj))
-        obj = s
+        obj = s._system
 
     from ..base import create_map
 
