@@ -466,6 +466,10 @@ except Exception as e:
 try:
     from ._SireGemmi import sire_to_gemmi, gemmi_to_sire, _register_pdbx_loader
 
+    # make sure we have also import gemmi so that we
+    # have the gemmi objects registered with python
+    import gemmi as _gemmi  # noqa: F401
+
     _has_gemmi = True
     _register_pdbx_loader()
 except Exception as e:

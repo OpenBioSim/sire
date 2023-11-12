@@ -25,7 +25,7 @@ def _to_selectormol(obj):
 
     if hasattr(obj, "molecules"):
         return obj.molecules()
-    elif type(obj) is list:
+    elif not isinstance(obj, list):
         mols = []
 
         for o in obj:
@@ -90,7 +90,7 @@ def to_sire(obj, map=None):
         # already a sire object?
         return obj
 
-    if type(obj) is not list:
+    if not isinstance(obj, list):
         obj = [obj]
 
     # create lists of objects of the same type (in the same order)
@@ -109,6 +109,8 @@ def to_sire(obj, map=None):
             return "rdkit"
         elif "openmm" in t:
             return "openmm"
+        elif "gemmi" in t:
+            return "gemmi"
         else:
             raise TypeError(
                 f"Cannot convert '{o}' as it is of unrecognised type {type(0)}"
@@ -142,6 +144,9 @@ def to_sire(obj, map=None):
 
         elif typ[0] == "openmm":
             c = openmm_to_sire(typ[1], map=map)
+
+        elif typ[0] == "gemmi":
+            c = gemmi_to_sire(typ[1], map=map)
 
         else:
             raise TypeError(f"Unrecognised type {typ[0]}")
@@ -207,7 +212,7 @@ def biosimspace_to_sire(obj, map=None):
     """
     from ..system import System
 
-    if type(obj) is list:
+    if isinstance(obj, list):
         if len(obj) == 0:
             return None
         elif len(obj) == 1:
@@ -319,7 +324,7 @@ def openmm_to_sire(obj, map=None):
     """
     Convert the passed OpenMM.System to the sire equivalent
     """
-    if type(obj) is not list:
+    if not isinstance(obj, list):
         obj = [obj]
 
     try:
@@ -391,7 +396,7 @@ def rdkit_to_sire(obj, map=None):
     Convert the passed rdkit object (either a molecule or
     list of molecules) to the sire equivalent
     """
-    if type(obj) is not list:
+    if not isinstance(obj, list):
         obj = [obj]
 
     try:
@@ -459,7 +464,22 @@ def gemmi_to_sire(obj, map=None):
 
     from ..base import create_map
 
-    return _gemmi_to_sire(obj, map=create_map(map))
+    map = create_map(map)
+
+    if not isinstance(obj, list):
+        obj = [obj]
+
+    results = []
+
+    from ..system import System
+
+    for o in obj:
+        results.append(System(_gemmi_to_sire(o, map=map)))
+
+    if len(results) == 1:
+        return results[0]
+    else:
+        return results
 
 
 def sire_to_gemmi(obj, map=None):
@@ -474,18 +494,30 @@ def sire_to_gemmi(obj, map=None):
             "'mamba install -c conda-forge rdkit'"
         )
 
+    if not isinstance(obj, list):
+        obj = [obj]
+
     from ..system import System
-
-    if System.is_system(obj):
-        try:
-            obj = obj._system
-        except Exception:
-            pass
-    else:
-        s = System()
-        s.add(_to_selectormol(obj))
-        obj = s._system
-
     from ..base import create_map
 
-    return _sire_to_gemmi(obj, map=create_map(map))
+    map = create_map(map)
+
+    result = []
+
+    for o in obj:
+        if System.is_system(o):
+            try:
+                o = o._system
+            except Exception:
+                pass
+        else:
+            s = System()
+            s.add(_to_selectormol(o))
+            o = s._system
+
+        result.append(_sire_to_gemmi(o, map=map))
+
+    if len(result) == 1:
+        return result[0]
+    else:
+        return result
