@@ -84,6 +84,16 @@ QDataStream &operator>>(QDataStream &ds, PDBx &pdbx)
     return ds;
 }
 
+static PDBxReaderFunction reader_function;
+static PDBxWriterFunction writer_function;
+
+void SireIO::register_pdbx_loader_functions(const PDBxWriterFunction &writer,
+                                            const PDBxReaderFunction &reader)
+{
+    writer_function = writer;
+    reader_function = reader;
+}
+
 /** Constructor */
 PDBx::PDBx() : ConcreteProperty<PDBx, MoleculeParser>()
 {
@@ -132,19 +142,13 @@ PDBx::PDBx(const QStringList &lines, const PropertyMap &map) : ConcreteProperty<
     in the passed property map */
 PDBx::PDBx(const SireSystem::System &system, const PropertyMap &map) : ConcreteProperty<PDBx, MoleculeParser>(system, map)
 {
-    // Get the MolNums of each molecule in the System - this returns the
-    // numbers in MolIdx order.
-    const QVector<MolNum> molnums = system.getMoleculeNumbers().toVector();
-
-    // Store the number of molecules.
-    const int nmols = molnums.count();
-
-    // No molecules in the system.
-    if (nmols == 0)
-    {
-        this->operator=(PDBx());
-        return;
-    }
+    if (writer_function.empty())
+        throw SireError::unsupported(
+            "No PDBx writer function has been registered. You need to "
+            "install a library to write PDBx/mmCIF files, e.g. gemmi. "
+            "Do this by running 'mamba install -c conda-forge gemmi' "
+            "and then re-running this script.",
+            CODELOC);
 }
 
 /** Copy constructor */
@@ -292,6 +296,14 @@ void PDBx::assertSane() const
     in the lines of the file */
 void PDBx::parseLines(const PropertyMap &map)
 {
+    if (reader_function.empty())
+        throw SireError::unsupported(
+            "No PDBx reader function has been registered. You need to "
+            "install a library to read PDBx/mmCIF files, e.g. gemmi. "
+            "Do this by running 'mamba install -c conda-forge gemmi' "
+            "and then re-running this script.",
+            CODELOC);
+
     this->setScore(nAtoms());
 }
 

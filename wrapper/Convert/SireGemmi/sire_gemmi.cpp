@@ -1,9 +1,11 @@
 
 #include "sire_gemmi.h"
 
+#include "SireIO/pdbx.h"
+
 namespace cif = gemmi::cif;
 
-namespace SireGemi
+namespace SireGemmi
 {
     SireSystem::System gemmi_to_sire(const gemmi::Structure &structure,
                                      const SireBase::PropertyMap &map)
@@ -19,9 +21,26 @@ namespace SireGemi
         return gemmi::Structure();
     }
 
-    void register_pdbx_loader()
+    SireSystem::System pdbx_reader_function(const QStringList &lines,
+                                            const SireBase::PropertyMap &map)
     {
         // TODO
+        return SireSystem::System();
+    }
+
+    QStringList pdbx_writer_function(const SireSystem::System &system,
+                                     const SireBase::PropertyMap &map)
+    {
+        // TODO
+        return QStringList();
+    }
+
+    void register_pdbx_loader()
+    {
+        SireIO::PDBxReaderFunction reader_function(&pdbx_reader_function);
+        SireIO::PDBxWriterFunction writer_function(&pdbx_writer_function);
+
+        SireIO::register_pdbx_loader_functions(writer_function, reader_function);
     }
 }
 

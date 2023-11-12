@@ -33,6 +33,8 @@
 
 #include "SireMaths/vector.h"
 
+#include <boost/function.hpp>
+
 SIRE_BEGIN_HEADER
 
 namespace SireIO
@@ -127,6 +129,12 @@ namespace SireIO
         /** Pointer to the underlying CIF document */
         std::shared_ptr<gemmi::cif::Document> doc;
     };
+
+    typedef boost::function<QStringList(const SireSystem::System &, const SireBase::PropertyMap &)> PDBxWriterFunction;
+    typedef boost::function<SireSystem::System(const QStringList &, const SireBase::PropertyMap &)> PDBxReaderFunction;
+
+    SIREIO_EXPORT void register_pdbx_loader_functions(const PDBxWriterFunction &writer,
+                                                      const PDBxReaderFunction &reader);
 
 } // namespace SireIO
 
