@@ -12,9 +12,9 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
   # Only compile and install if we have gemmi
   message( STATUS "Compiling SireGemmi converter" )
 
-  get_target_property(GEMMI_LOCATION gemmi::gemmi_cpp LOCATION)
+  get_target_property(GEMMI_LIBRARY gemmi::gemmi_cpp LOCATION)
 
-  message( STATUS "GEMMI LIBRARY ${GEMMI_LOCATION}" )
+  message( STATUS "GEMMI LIBRARY ${GEMMI_LIBRARY}" )
   message( STATUS "PYBIND11 INCLUDE ${pybind11_INCLUDE_DIR}")
   message( STATUS "PYBIND11 LIBRARY ${pybind11_LIBRARIES}" )
 
@@ -31,6 +31,9 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
 
   # Define the sources in SireRDKit
   set ( SIREGEMMI_SOURCES
+
+        # need this as it isn't linked in property from the gemmi static lib?
+        third_party/mmcif.cpp
 
         _SireGemmi.main.cpp
 
@@ -58,7 +61,7 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
-                          gemmi::gemmi_cpp
+                          ${GEMMI_LIBRARY}
                           ${pybind11_LIBRARIES}
                         )
 

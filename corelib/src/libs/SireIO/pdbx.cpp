@@ -65,7 +65,9 @@ QDataStream &operator<<(QDataStream &ds, const PDBx &pdbx)
 {
     writeHeader(ds, r_pdbx, 1);
 
-    ds << static_cast<const MoleculeParser &>(pdbx);
+    SharedDataStream sds(ds);
+
+    sds << pdbx.parsed_system << static_cast<const MoleculeParser &>(pdbx);
 
     return ds;
 }
@@ -76,7 +78,8 @@ QDataStream &operator>>(QDataStream &ds, PDBx &pdbx)
 
     if (v == 1)
     {
-        ds >> static_cast<MoleculeParser &>(pdbx);
+        SharedDataStream sds(ds);
+        sds >> pdbx.parsed_system >> static_cast<MoleculeParser &>(pdbx);
     }
     else
         throw version_error(v, "1", r_pdbx, CODELOC);
@@ -149,11 +152,15 @@ PDBx::PDBx(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
             "Do this by running 'mamba install -c conda-forge gemmi' "
             "and then re-running this script.",
             CODELOC);
+
+    MoleculeParser::setLines(writer_function(system, map).toVector());
+    parsed_system = system;
 }
 
 /** Copy constructor */
 PDBx::PDBx(const PDBx &other)
-    : ConcreteProperty<PDBx, MoleculeParser>(other), parse_warnings(other.parse_warnings)
+    : ConcreteProperty<PDBx, MoleculeParser>(other),
+      parsed_system(other.parsed_system), parse_warnings(other.parse_warnings)
 {
 }
 
@@ -167,6 +174,7 @@ PDBx &PDBx::operator=(const PDBx &other)
 {
     if (this != &other)
     {
+        parsed_system = other.parsed_system;
         parse_warnings = other.parse_warnings;
 
         MoleculeParser::operator=(other);
@@ -178,7 +186,8 @@ PDBx &PDBx::operator=(const PDBx &other)
 /** Comparison operator */
 bool PDBx::operator==(const PDBx &other) const
 {
-    return MoleculeParser::operator==(other);
+    return parsed_system == other.parsed_system and
+           MoleculeParser::operator==(other);
 }
 
 /** Comparison operator */
@@ -218,7 +227,11 @@ Frame PDBx::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    return SireMol::Frame();
+    throw SireError::unsupported(QObject::tr(
+                                     "You cannot extra frame data from a PDBx/mmCIF file."),
+                                 CODELOC);
+
+    return Frame();
 }
 
 /** Return the parser that has been constructed by reading in the passed
@@ -257,7 +270,15 @@ QString PDBx::toString() const
 /** Convert the the parsed data to a collection of PDBx record lines. */
 QVector<QString> PDBx::toLines() const
 {
-    return QVector<QString>();
+    if (writer_function.empty())
+        throw SireError::unsupported(
+            "No PDBx writer function has been registered. You need to "
+            "install a library to write PDBx/mmCIF files, e.g. gemmi. "
+            "Do this by running 'mamba install -c conda-forge gemmi' "
+            "and then re-running this script.",
+            CODELOC);
+
+    return writer_function(this->parsed_system, this->propertyMap()).toVector();
 }
 
 /** Return the format name that is used to identify this file format within Sire */
@@ -304,14 +325,38 @@ void PDBx::parseLines(const PropertyMap &map)
             "and then re-running this script.",
             CODELOC);
 
-    this->setScore(nAtoms());
+    // only parse if the file contains a line with
+    // '_audit_conform.dict_name       mmcif_pdbx.dic'
+
+    bool is_conformant = false;
+
+    for (const auto &line : lines())
+    {
+        if (line.contains("_audit_conform.dict_name") and line.contains("mmcif_pdbx.dic"))
+        {
+            is_conformant = true;
+            break;
+        }
+    }
+
+    if (not is_conformant)
+        throw SireError::unsupported(
+            QObject::tr("The file does not appear to be a PDBx/mmCIF file. "
+                        "It does not contain the line '_audit_conform.dict_name mmcif_pdbx.dic'"),
+            CODELOC);
+
+    parsed_system = reader_function(lines().toList(), map);
+
+    parsed_system.setProperty(map["fileformat"].source(), StringProperty(this->formatName()));
+
+    this->setScore(parsed_system.nAtoms());
 }
 
 /** Use the data contained in this parser to create a new System of molecules,
     assigning properties based on the mapping in 'map' */
 System PDBx::startSystem(const PropertyMap &map) const
 {
-    return System();
+    return parsed_system;
 }
 
 /** Use the data contained in this parser to add information from the file to
@@ -322,5 +367,8 @@ void PDBx::addToSystem(System &system, const PropertyMap &map) const
 {
     // you should loop through each molecule in the system and work out
     // which ones are described in the file, and then add data from the file
-    // to thise molecules.
+    // to those molecules.
+    throw SireError::unsupported(QObject::tr(
+                                     "You cannot add data from a PDBx/mmCIF file to an existing system."),
+                                 CODELOC);
 }

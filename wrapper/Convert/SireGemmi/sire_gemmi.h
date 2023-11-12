@@ -1,9 +1,7 @@
 #ifndef SIRE_GEMMI_H
 #define SIRE_GEMMI_H
 
-#include "gemmi/cif.hpp"
 #include "gemmi/mmcif.hpp"
-#include "gemmi/modify.hpp"
 
 #include "SireSystem/system.h"
 

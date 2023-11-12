@@ -33,6 +33,8 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireSystem/system.h"
+
 #include <boost/function.hpp>
 
 SIRE_BEGIN_HEADER
@@ -53,14 +55,6 @@ namespace SireMol
 
 SIREIO_EXPORT QDataStream &operator<<(QDataStream &, const SireIO::PDBx &);
 SIREIO_EXPORT QDataStream &operator>>(QDataStream &, SireIO::PDBx &);
-
-namespace gemmi
-{
-    namespace cif
-    {
-        struct Document;
-    }
-}
 
 namespace SireIO
 {
@@ -120,14 +114,11 @@ namespace SireIO
         void assertSane() const;
         void parseLines(const PropertyMap &map);
 
+        /** The system that has been read (or to be written) */
+        SireSystem::System parsed_system;
+
         /** Any warnings that were raised when reading the file. */
         QStringList parse_warnings;
-
-        /** Mutex to protect access to the underlying document */
-        QMutex mutex;
-
-        /** Pointer to the underlying CIF document */
-        std::shared_ptr<gemmi::cif::Document> doc;
     };
 
     typedef boost::function<QStringList(const SireSystem::System &, const SireBase::PropertyMap &)> PDBxWriterFunction;
