@@ -30,6 +30,7 @@ pydot
 pygtail
 pyyaml
 rdkit>=2023.0.0
+gemmi>=0.6.0
 
 # The below are packages that aren't available on all
 # platforms/OSs and so need to be conditionally included

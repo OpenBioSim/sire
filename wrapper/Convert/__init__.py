@@ -11,6 +11,8 @@ __all__ = [
     "openmm_extract_coordinates",
     "openmm_extract_coordinates_and_velocities",
     "openmm_extract_space",
+    "sire_to_gemmi",
+    "gemmi_to_sire",
     "supported_formats",
 ]
 
@@ -162,16 +164,13 @@ try:
             if integrator == "verlet" or integrator == "leapfrog":
                 if not ensemble.is_nve():
                     raise ValueError(
-                        "You cannot use a verlet integrator with the "
-                        f"{ensemble}"
+                        "You cannot use a verlet integrator with the " f"{ensemble}"
                     )
 
                 integrator = openmm.VerletIntegrator(timestep)
 
             elif integrator != "auto":
-                temperature = (
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
-                )
+                temperature = ensemble.temperature().to(kelvin) * openmm.unit.kelvin
 
                 if ensemble.is_nve():
                     raise ValueError(
@@ -218,9 +217,7 @@ try:
                     timestep,
                 )
 
-                temperature = (
-                    ensemble.temperature().to(kelvin) * openmm.unit.kelvin
-                )
+                temperature = ensemble.temperature().to(kelvin) * openmm.unit.kelvin
         elif openmm.Integrator not in type(integrator).mro():
             raise TypeError(
                 f"Cannot cast the integrator {integrator} to the correct "
@@ -298,8 +295,7 @@ try:
                     p = openmm.Platform.getPlatform(i)
 
                     if (p.getName().lower() == desired_platform.lower()) or (
-                        p.getName() == "HIP"
-                        and desired_platform.lower() == "metal"
+                        p.getName() == "HIP" and desired_platform.lower() == "metal"
                     ):
                         platform = p
                         break
@@ -398,9 +394,7 @@ try:
 
         return context
 
-    def openmm_extract_coordinates(
-        state, mols, perturbable_maps=None, map=None
-    ):
+    def openmm_extract_coordinates(state, mols, perturbable_maps=None, map=None):
         from ...base import create_map
 
         map = create_map(map)
@@ -469,6 +463,32 @@ except Exception as e:
         _no_openmm()
 
 
+try:
+    from ._SireGemmi import sire_to_gemmi, gemmi_to_sire, _register_pdbx_loader
+
+    _has_gemmi = True
+    _register_pdbx_loader()
+except Exception as e:
+    _gemmi_import_error = e
+
+    # Gemmi support is not available
+    def _no_gemmi():
+        print(_gemmi_import_error)
+        raise ModuleNotFoundError(
+            "Unable to convert to/from Gemmi as it is not installed. "
+            "Please install using `mamba install -c conda-forge gemmi` "
+            "and then re-run this script."
+        )
+
+    _has_gemmi = False
+
+    def sire_to_gemmi(*args, **kwargs):
+        _no_gemmi()
+
+    def gemmi_to_sire(*args, **kwargs):
+        _no_gemmi()
+
+
 def supported_formats():
     """Return all of the formats supported by this installation"""
     f = ["sire"]
@@ -478,6 +498,9 @@ def supported_formats():
 
     if _has_rdkit:
         f.append("rdkit")
+
+    if _has_gemmi:
+        f.append("gemmi")
 
     import sys
 

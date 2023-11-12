@@ -1,8 +1,10 @@
 __all__ = [
     "biosimspace_to_sire",
+    "gemmi_to_sire",
     "openmm_to_sire",
     "rdkit_to_sire",
     "sire_to_biosimspace",
+    "sire_to_gemmi",
     "sire_to_rdkit",
     "sire_to_openmm",
     "supported_formats",
@@ -64,14 +66,15 @@ def to(obj, format: str = "sire", map=None):
         return to_sire(obj, map=map)
     elif format == "rdkit":
         return to_rdkit(obj, map=map)
+    elif format == "gemmi":
+        return to_gemmi(obj, map=map)
     elif format == "biosimspace":
         return to_biosimspace(obj, map=map)
     elif format == "openmm":
         return to_openmm(obj, map=map)
     else:
         raise ValueError(
-            f"Cannot convert {obj} as the format '{format}' is "
-            "not recognised."
+            f"Cannot convert {obj} as the format '{format}' is " "not recognised."
         )
 
 
@@ -179,6 +182,14 @@ def to_rdkit(obj, map=None):
     rdkit object format.
     """
     return sire_to_rdkit(to_sire(obj, map=map), map=map)
+
+
+def to_gemmi(obj, map=None):
+    """
+    Convert the passed object from its current object format to a
+    gemmi object format.
+    """
+    return sire_to_gemmi(to_sire(obj, map=map), map=map)
 
 
 def to_openmm(obj, map=None):
@@ -432,3 +443,44 @@ def sire_to_rdkit(obj, map=None):
         return mols[0]
     else:
         return mols
+
+
+def gemmi_to_sire(obj, map=None):
+    """
+    Convert the passed gemmi Structure to the sire equivalent
+    """
+    try:
+        from ..legacy.Convert import gemmi_to_sire as _gemmi_to_sire
+    except Exception:
+        raise ModuleNotFoundError(
+            "gemmi is not available. Please install via "
+            "'mamba install -c conda-forge gemmi'"
+        )
+
+    from ..base import create_map
+
+    return _gemmi_to_sire(obj, map=create_map(map))
+
+
+def sire_to_gemmi(obj, map=None):
+    """
+    Convert the passed sire object to a gemmi structure
+    """
+    try:
+        from ..legacy.Convert import sire_to_gemmi as _sire_to_gemmi
+    except Exception:
+        raise ModuleNotFoundError(
+            "rdkit is not available. Please install via "
+            "'mamba install -c conda-forge rdkit'"
+        )
+
+    from ..system import System
+
+    if not System.is_system(obj):
+        s = System()
+        s.add(_to_selectormol(obj))
+        obj = s
+
+    from ..base import create_map
+
+    return _sire_to_gemmi(obj, map=create_map(map))

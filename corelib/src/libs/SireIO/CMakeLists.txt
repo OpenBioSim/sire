@@ -72,8 +72,6 @@ set ( SIREIO_SOURCES
       third_party/xdrfile.c
       third_party/xtc_seek.c
 
-      third_party/gemmi/mmcif.cpp
-
       amber.cpp
       amberformat.cpp
       amberprm.cpp

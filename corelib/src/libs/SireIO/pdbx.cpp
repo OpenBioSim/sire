@@ -49,10 +49,6 @@
 
 #include "SireUnits/units.h"
 
-#include "third_party/gemmi/cif.hpp"
-#include "third_party/gemmi/mmcif.hpp"
-#include "third_party/gemmi/modify.hpp"
-
 #include <iostream>
 
 using namespace SireBase;
@@ -60,8 +56,6 @@ using namespace SireIO;
 using namespace SireMol;
 using namespace SireSystem;
 using namespace SireStream;
-
-namespace cif = gemmi::cif;
 
 const RegisterParser<PDBx> register_pdbx;
 
@@ -294,59 +288,10 @@ void PDBx::assertSane() const
     // check state, raise SireError::program_bug if we are in an invalid state
 }
 
-void parseBlock(cif::Block &block, MoleculeGroup &mols)
-{
-    auto structure = gemmi::make_structure_from_block(block);
-
-    gemmi::standardize_crystal_frame(structure);
-
-    for (auto model : structure.models)
-    {
-        qDebug() << "model" << QString::fromStdString(model.name.c_str());
-
-        for (auto chain : model.chains)
-        {
-            qDebug() << "chain" << QString::fromStdString(chain.name.c_str());
-
-            qDebug() << "ligands" << chain.get_ligands().size();
-            qDebug() << "polymers" << chain.get_polymer().size();
-            qDebug() << "water" << chain.get_waters().size();
-
-            for (auto residue : chain.residues)
-            {
-                qDebug() << "residue" << QString::fromStdString(residue.name.c_str())
-                         << "is_water" << residue.is_water();
-
-                for (auto atom : residue.atoms)
-                {
-                    qDebug() << "atom" << QString::fromStdString(atom.name.c_str());
-                }
-            }
-        }
-    }
-}
-
 /** Internal function that is used to actually parse the data contained
     in the lines of the file */
 void PDBx::parseLines(const PropertyMap &map)
 {
-    // assemble all of the line into a single string
-    auto input_string = QStringList(lines().toList()).join("\n").toStdString();
-
-    QMutexLocker lkr(&mutex);
-
-    doc.reset(new cif::Document(cif::read_string(input_string)));
-
-    input_string.clear();
-
-    // construct each molecule
-    MoleculeGroup mols("all");
-
-    for (auto &block : doc->blocks)
-    {
-        parseBlock(block, mols);
-    }
-
     this->setScore(nAtoms());
 }
 

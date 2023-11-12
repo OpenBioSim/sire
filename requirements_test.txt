@@ -2,3 +2,4 @@
 # enable test to run to validate advanced functionality
 
 rdkit>=2023.0.0
+gemmi>=0.6.0
