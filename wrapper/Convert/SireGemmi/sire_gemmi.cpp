@@ -9,6 +9,12 @@
 
 #include "SireMol/core.h"
 #include "SireMol/moleditor.h"
+#include "SireMol/element.h"
+
+#include "SireMol/atomproperty.hpp"
+#include "SireMol/atomelements.h"
+#include "SireMol/atomcoords.h"
+#include "SireMol/atomcharges.h"
 
 #include "SireError/errors.h"
 
@@ -16,27 +22,122 @@ namespace cif = gemmi::cif;
 
 namespace SireGemmi
 {
-    void parse_waters(const gemmi::Entity &entity, SireMol::MoleculeGroup &mols,
-                      const QHash<QString, int> &subchains,
-                      const gemmi::Structure &structure)
+    template <class T, class V>
+    void set_prop(T &atom, const QString &key, const V &value,
+                  const SireBase::PropertyMap &map)
+    {
+        const auto name = map[key];
+
+        if (name.hasSource())
+            atom.setProperty(name.source(), value);
+    }
+
+    SireMaths::Vector from_vec(const gemmi::Position &pos)
+    {
+        return SireMaths::Vector(pos.x, pos.y, pos.z);
+    }
+
+    void populate_atom(SireMol::AtomStructureEditor &atm,
+                       const gemmi::Atom &atom,
+                       const SireBase::PropertyMap &map)
+    {
+        set_prop(atm, "element", SireMol::Element(atom.element.atomic_number()), map);
+        set_prop(atm, "formal_charge", SireUnits::Dimension::Charge(atom.charge), map);
+        set_prop(atm, "occupancy", double(atom.occ), map);
+        set_prop(atm, "beta_factor", double(atom.b_iso), map);
+        set_prop(atm, "is_het", QString("False"), map);
+        set_prop(atm, "is_ter", QString("False"), map);
+        set_prop(atm, "alt_loc", QString(atom.altloc), map);
+        set_prop(atm, "coordinates", from_vec(atom.pos), map);
+    }
+
+    void parse_molecules(const gemmi::Entity &entity, SireMol::MoleculeGroup &mols,
+                         const QHash<QString, int> &subchains,
+                         const gemmi::Structure &structure,
+                         const SireBase::PropertyMap &map)
     {
         for (const auto &subchain : entity.subchains)
         {
             auto model_id = subchains.value(QString::fromStdString(subchain), 0);
 
+            auto cg0 = SireMol::Molecule().edit().rename(QString("MOL_%1").arg(QString::fromStdString(entity.name.c_str()))).add(SireMol::CGName("0"));
+
+            int cg_num = 0;
+
             for (const auto &residue : structure.models[model_id].get_subchain(subchain))
             {
-                auto cg = SireMol::Molecule().edit().rename("WAT").add(SireMol::CGName("0"));
-                auto res = cg.molecule().add(SireMol::ResNum(1));
-                res.rename(SireMol::ResName("WAT"));
+                auto cg = cg0;
+
+                if (cg_num > 0)
+                    cg = cg0.molecule().add(SireMol::CGName(QString::number(cg_num)));
+
+                cg_num += 1;
+
+                int resnum = cg_num;
+
+                if (residue.seqid.num.has_value())
+                    resnum = residue.seqid.num.value;
+
+                auto res = cg.molecule().add(SireMol::ResNum(resnum));
+                res.rename(SireMol::ResName(QString::fromStdString(residue.name)));
+
+                if (residue.seqid.has_icode())
+                    set_prop(res, "insert_code", QString(residue.seqid.icode), map);
 
                 for (const auto &atom : residue.atoms)
                 {
-                    auto atm = cg.add(SireMol::AtomName(QString::fromStdString(atom.name.c_str())));
-                    atm.reparent(res.index());
+                    auto atm = cg.add(SireMol::AtomNum(atom.serial));
+                    atm.reparent(res.number());
+                    atm.rename(SireMol::AtomName(QString::fromStdString(atom.name)));
+                    populate_atom(atm, atom, map);
                 }
 
-                mols.add(cg.molecule().commit());
+                auto mol = cg.molecule().commit().edit();
+
+                mols.add(mol.commit());
+            }
+        }
+    }
+
+    void parse_waters(const gemmi::Entity &entity, SireMol::MoleculeGroup &mols,
+                      const QHash<QString, int> &subchains,
+                      const gemmi::Structure &structure,
+                      const SireBase::PropertyMap &map)
+    {
+        for (const auto &subchain : entity.subchains)
+        {
+            auto model_id = subchains.value(QString::fromStdString(subchain), 0);
+
+            int num_waters = 0;
+
+            for (const auto &residue : structure.models[model_id].get_subchain(subchain))
+            {
+                num_waters += 1;
+                auto cg = SireMol::Molecule().edit().rename("WAT").add(SireMol::CGName("0"));
+
+                int resnum = num_waters;
+
+                if (residue.seqid.num.has_value())
+                    resnum = residue.seqid.num.value;
+
+                auto res = cg.molecule().add(SireMol::ResNum(resnum));
+                res.rename(SireMol::ResName("WAT"));
+
+                if (residue.seqid.has_icode())
+                    set_prop(res, "insert_code", QString(residue.seqid.icode), map);
+
+                for (const auto &atom : residue.atoms)
+                {
+                    auto atm = cg.add(SireMol::AtomNum(atom.serial));
+                    atm.reparent(res.number());
+                    atm.rename(SireMol::AtomName(QString::fromStdString(atom.name)));
+                    populate_atom(atm, atom, map);
+                }
+
+                auto mol = cg.molecule().commit().edit();
+                mol.setProperty(map["is_water"], SireBase::BooleanProperty(true));
+
+                mols.add(mol.commit());
             }
         }
     }
@@ -80,17 +181,16 @@ namespace SireGemmi
                 qDebug() << "POLYMER";
                 break;
             case gemmi::EntityType::NonPolymer:
-                qDebug() << "NONPOLYMER";
+                parse_molecules(entity, mols, subchains, structure, map);
                 break;
             case gemmi::EntityType::Branched:
-                qDebug() << "LIGAND";
+                parse_molecules(entity, mols, subchains, structure, map);
                 break;
             case gemmi::EntityType::Water:
-                qDebug() << "WATER";
-                parse_waters(entity, mols, subchains, structure);
+                parse_waters(entity, mols, subchains, structure, map);
                 break;
             default:
-                qDebug() << "UNKNOWN";
+                parse_molecules(entity, mols, subchains, structure, map);
             }
         }
 
