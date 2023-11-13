@@ -319,8 +319,7 @@ namespace SireGemmi
 
         structure.merge_chain_parts();
 
-        // this does not seem to exist in conda version?
-        // gemmi::ensure_entities(structure);
+        gemmi::ensure_entities(structure);
 
         // create a dictionary of to locate which model contains which subchain
         QHash<QString, int> subchains;
