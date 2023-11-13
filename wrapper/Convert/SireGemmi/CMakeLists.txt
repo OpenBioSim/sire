@@ -36,6 +36,8 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
         third_party/mmcif.cpp
         third_party/to_mmcif.cpp
         third_party/sprintf.cpp
+        third_party/polyheur.cpp
+        third_party/resinfo.cpp
 
         _SireGemmi.main.cpp
 

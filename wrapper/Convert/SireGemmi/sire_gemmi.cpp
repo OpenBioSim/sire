@@ -20,10 +20,15 @@
 #include "SireMol/connectivity.h"
 #include "SireMol/bondhunter.h"
 
+#include "SireMol/iswater.h"
+
+#include "SireUnits/units.h"
+
 #include "SireError/errors.h"
 
 #include <string>
-#include <strstream>
+#include <sstream>
+#include <iostream>
 
 namespace cif = gemmi::cif;
 
@@ -489,11 +494,159 @@ namespace SireGemmi
         return system;
     }
 
+    bool populate_atom(gemmi::Atom &gemmi_atom,
+                       const SireMol::Atom &atom,
+                       const SireBase::PropertyMap &map)
+    {
+        gemmi_atom.name = atom.name().value().toStdString();
+        gemmi_atom.serial = atom.number().value();
+
+        auto coords = atom.property<SireMaths::Vector>(map["coordinates"]);
+        gemmi_atom.pos = gemmi::Position(coords.x(), coords.y(), coords.z());
+
+        try
+        {
+            auto element = atom.property<SireMol::Element>(map["element"]);
+            gemmi_atom.element = gemmi::Element(element.nProtons());
+        }
+        catch (...)
+        {
+        }
+
+        try
+        {
+            auto chg = atom.property<SireUnits::Dimension::Charge>(map["formal_charge"]).to(SireUnits::mod_electron);
+            gemmi_atom.charge = int(chg);
+        }
+        catch (...)
+        {
+        }
+
+        try
+        {
+            auto occ = atom.property<double>(map["occupancy"]);
+            gemmi_atom.occ = occ;
+        }
+        catch (...)
+        {
+        }
+
+        try
+        {
+            auto b_iso = atom.property<double>(map["beta_factor"]);
+            gemmi_atom.b_iso = b_iso;
+        }
+        catch (...)
+        {
+        }
+
+        bool is_hetatm = false;
+
+        try
+        {
+            auto is_hetatm = atom.property<QString>(map["is_het"]);
+
+            if (is_hetatm == "True")
+                is_hetatm = true;
+        }
+        catch (...)
+        {
+        }
+
+        try
+        {
+            auto alt_loc = atom.property<QString>(map["alt_loc"]);
+
+            if (not alt_loc.isEmpty())
+                gemmi_atom.altloc = alt_loc.toStdString()[0];
+        }
+        catch (...)
+        {
+        }
+
+        return is_hetatm;
+    }
+
+    void convert_water(const SireMol::Molecule &mol, gemmi::Chain &chain,
+                       const SireBase::PropertyMap &map)
+    {
+        gemmi::Residue residue;
+        residue.entity_type = gemmi::EntityType::Water;
+
+        auto first_res = mol.residues()(0);
+        residue.name = first_res.name().value().toStdString();
+        residue.seqid.num = first_res.number().value();
+
+        const auto atoms = mol.atoms();
+
+        bool is_hetatm_residue = false;
+
+        for (int i = 0; i < atoms.count(); ++i)
+        {
+            const auto atom = atoms(i);
+
+            gemmi::Atom gemmi_atom;
+            auto is_hetatm = populate_atom(gemmi_atom, atom, map);
+
+            is_hetatm_residue = is_hetatm_residue or is_hetatm;
+
+            residue.atoms.push_back(gemmi_atom);
+        }
+
+        chain.residues.push_back(residue);
+    }
+
     gemmi::Structure sire_to_gemmi(const SireSystem::System &system,
                                    const SireBase::PropertyMap &map)
     {
-        // TODO
-        return gemmi::Structure();
+        if (system.nAtoms() == 0)
+            return gemmi::Structure();
+
+        const auto mols = SireMol::SelectorMol(system);
+
+        gemmi::Structure structure;
+        gemmi::Model model(system.name().value().toStdString());
+
+        gemmi::Chain water_chain("W");
+        water_chain.name = "W";
+
+        for (const auto &mol : mols)
+        {
+            if (SireMol::is_water(mol, map))
+            {
+                convert_water(mol, water_chain, map);
+            }
+            else if (mol.nAtoms() == 1)
+            {
+                if (mol.atoms()(0).property<SireMol::Element>(map["element"]) == SireMol::Element(8))
+                {
+                    // single oxygen is a water without hydrogens
+                    convert_water(mol, water_chain, map);
+                }
+                else
+                {
+                    // convert as a normal molecule
+                }
+            }
+            else if (mol.nResidues() > 5)
+            {
+                // convert as a polymer
+            }
+            else
+            {
+                // convert as a normal molecule
+            }
+        }
+
+        model.chains.push_back(water_chain);
+
+        structure.models.push_back(model);
+
+        structure.renumber_models();
+        gemmi::setup_entities(structure);
+        gemmi::assign_serial_numbers(structure);
+
+        return structure;
     }
 
     SireSystem::System pdbx_reader_function(const QStringList &lines,
@@ -529,12 +682,15 @@ namespace SireGemmi
 
         auto doc = gemmi::make_mmcif_document(structure);
 
-        std::string s;
-        std::stringstream stream(s);
+        std::stringstream stream;
 
         gemmi::cif::write_cif_to_stream(stream, doc);
 
-        return QString::fromStdString(s).split("\n");
+        stream.flush();
+
+        auto lines = QString::fromStdString(stream.str()).split("\n");
+
+        return lines;
     }
 
     void register_pdbx_loader()

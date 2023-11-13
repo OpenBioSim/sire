@@ -337,6 +337,11 @@ void PDBx::parseLines(const PropertyMap &map)
             is_conformant = true;
             break;
         }
+        else if (line.contains("_atom_site."))
+        {
+            is_conformant = true;
+            break;
+        }
     }
 
     if (not is_conformant)
