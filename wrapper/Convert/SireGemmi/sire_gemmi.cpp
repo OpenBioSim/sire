@@ -610,6 +610,8 @@ namespace SireGemmi
 
             if (is_hetatm_residue)
                 gemmi_residue.het_flag = 'H';
+            else
+                gemmi_residue.het_flag = 'A';
 
             chain.residues.push_back(gemmi_residue);
         }
@@ -659,6 +661,8 @@ namespace SireGemmi
 
             if (is_hetatm_residue)
                 gemmi_residue.het_flag = 'H';
+            else
+                gemmi_residue.het_flag = 'A';
 
             chain.residues.push_back(gemmi_residue);
         }
@@ -692,6 +696,8 @@ namespace SireGemmi
 
         if (is_hetatm_residue)
             residue.het_flag = 'H';
+        else
+            residue.het_flag = 'A';
 
         chain.residues.push_back(residue);
     }
@@ -734,12 +740,15 @@ namespace SireGemmi
                     convert_molecule(mol, mol_chain, map);
                 }
             }
-            else if (mol.nResidues() > 5)
+            else if (mol.nResidues() > 1)
             {
                 // convert as a polymer
                 gemmi::Chain poly_chain(QString(chain_id).toStdString());
                 poly_chain.name = chain_id;
                 chain_id += 1;
+
+                if (chain_id > 'Y')
+                    chain_id = 'A';
 
                 convert_polymer(mol, poly_chain, map);
                 model.chains.push_back(poly_chain);
@@ -758,7 +767,7 @@ namespace SireGemmi
 
         structure.renumber_models();
         gemmi::setup_entities(structure);
-        gemmi::assign_serial_numbers(structure);
+        gemmi::assign_serial_numbers(structure, true);
 
         return structure;
     }
