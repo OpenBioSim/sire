@@ -566,6 +566,104 @@ namespace SireGemmi
         return is_hetatm;
     }
 
+    void convert_polymer(const SireMol::Molecule &mol, gemmi::Chain &chain,
+                         const SireBase::PropertyMap &map)
+    {
+        const auto residues = mol.residues();
+
+        for (int i = 0; i < residues.count(); ++i)
+        {
+            const auto residue = residues(i);
+
+            gemmi::Residue gemmi_residue;
+            gemmi_residue.entity_type = gemmi::EntityType::Polymer;
+
+            gemmi_residue.name = residue.name().value().toStdString();
+            gemmi_residue.seqid.num = residue.number().value();
+
+            if (residue.isWithinChain())
+                gemmi_residue.subchain = residue.chain().name().value().toStdString();
+
+            const auto atoms = residue.atoms();
+
+            bool is_hetatm_residue = false;
+
+            QString seg;
+
+            for (int j = 0; j < atoms.count(); ++j)
+            {
+                const auto atom = atoms(j);
+
+                gemmi::Atom gemmi_atom;
+                auto is_hetatm = populate_atom(gemmi_atom, atom, map);
+
+                is_hetatm_residue = is_hetatm_residue or is_hetatm;
+
+                gemmi_residue.atoms.push_back(gemmi_atom);
+
+                if (atom.isWithinSegment())
+                    seg = atom.segment().name().value();
+            }
+
+            if (not seg.isEmpty())
+                gemmi_residue.segment = seg.toStdString();
+
+            if (is_hetatm_residue)
+                gemmi_residue.het_flag = 'H';
+
+            chain.residues.push_back(gemmi_residue);
+        }
+    }
+
+    void convert_molecule(const SireMol::Molecule &mol, gemmi::Chain &chain,
+                          const SireBase::PropertyMap &map)
+    {
+        const auto residues = mol.residues();
+
+        for (int i = 0; i < residues.count(); ++i)
+        {
+            const auto residue = residues(i);
+
+            gemmi::Residue gemmi_residue;
+            gemmi_residue.entity_type = gemmi::EntityType::NonPolymer;
+
+            gemmi_residue.name = residue.name().value().toStdString();
+            gemmi_residue.seqid.num = residue.number().value();
+
+            if (residue.isWithinChain())
+                gemmi_residue.subchain = residue.chain().name().value().toStdString();
+
+            const auto atoms = residue.atoms();
+
+            bool is_hetatm_residue = false;
+
+            QString seg;
+
+            for (int j = 0; j < atoms.count(); ++j)
+            {
+                const auto atom = atoms(j);
+
+                gemmi::Atom gemmi_atom;
+                auto is_hetatm = populate_atom(gemmi_atom, atom, map);
+
+                is_hetatm_residue = is_hetatm_residue or is_hetatm;
+
+                if (atom.isWithinSegment())
+                    seg = atom.segment().name().value();
+
+                gemmi_residue.atoms.push_back(gemmi_atom);
+            }
+
+            if (not seg.isEmpty())
+                gemmi_residue.segment = seg.toStdString();
+
+            if (is_hetatm_residue)
+                gemmi_residue.het_flag = 'H';
+
+            chain.residues.push_back(gemmi_residue);
+        }
+    }
+
     void convert_water(const SireMol::Molecule &mol, gemmi::Chain &chain,
                        const SireBase::PropertyMap &map)
     {
@@ -592,6 +690,9 @@ namespace SireGemmi
             residue.atoms.push_back(gemmi_atom);
         }
 
+        if (is_hetatm_residue)
+            residue.het_flag = 'H';
+
         chain.residues.push_back(residue);
     }
 
@@ -606,8 +707,13 @@ namespace SireGemmi
         gemmi::Structure structure;
         gemmi::Model model(system.name().value().toStdString());
 
-        gemmi::Chain water_chain("W");
-        water_chain.name = "W";
+        gemmi::Chain water_chain("Z");
+        water_chain.name = "Z";
+
+        gemmi::Chain mol_chain("Y");
+        mol_chain.name = "Y";
+
+        char chain_id = 'A';
 
         for (const auto &mol : mols)
         {
@@ -625,18 +731,27 @@ namespace SireGemmi
                 else
                 {
                     // convert as a normal molecule
+                    convert_molecule(mol, mol_chain, map);
                 }
             }
             else if (mol.nResidues() > 5)
             {
                 // convert as a polymer
+                gemmi::Chain poly_chain(QString(chain_id).toStdString());
+                poly_chain.name = chain_id;
+                chain_id += 1;
+
+                convert_polymer(mol, poly_chain, map);
+                model.chains.push_back(poly_chain);
             }
             else
             {
                 // convert as a normal molecule
+                convert_molecule(mol, mol_chain, map);
             }
         }
 
+        model.chains.push_back(mol_chain);
         model.chains.push_back(water_chain);
 
         structure.models.push_back(model);
