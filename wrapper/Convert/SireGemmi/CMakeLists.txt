@@ -34,6 +34,8 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
 
         # need this as it isn't linked in property from the gemmi static lib?
         third_party/mmcif.cpp
+        third_party/to_mmcif.cpp
+        third_party/sprintf.cpp
 
         _SireGemmi.main.cpp
 

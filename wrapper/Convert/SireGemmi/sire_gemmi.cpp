@@ -4,6 +4,8 @@
 #include "gemmi/cif.hpp"
 #include "gemmi/modify.hpp"
 #include "gemmi/polyheur.hpp"
+#include "gemmi/to_cif.hpp"
+#include "gemmi/to_mmcif.hpp"
 
 #include "SireIO/pdbx.h"
 
@@ -19,6 +21,9 @@
 #include "SireMol/bondhunter.h"
 
 #include "SireError/errors.h"
+
+#include <string>
+#include <strstream>
 
 namespace cif = gemmi::cif;
 
@@ -520,8 +525,16 @@ namespace SireGemmi
     QStringList pdbx_writer_function(const SireSystem::System &system,
                                      const SireBase::PropertyMap &map)
     {
-        // TODO
-        return QStringList();
+        auto structure = sire_to_gemmi(system, map);
+
+        auto doc = gemmi::make_mmcif_document(structure);
+
+        std::string s;
+        std::stringstream stream(s);
+
+        gemmi::cif::write_cif_to_stream(stream, doc);
+
+        return QString::fromStdString(s).split("\n");
     }
 
     void register_pdbx_loader()
