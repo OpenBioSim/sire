@@ -721,11 +721,14 @@ namespace SireGemmi
 
         char chain_id = 'A';
 
+        QHash<SireMol::MolNum, std::string> molnum_to_chain;
+
         for (const auto &mol : mols)
         {
             if (SireMol::is_water(mol, map))
             {
                 convert_water(mol, water_chain, map);
+                molnum_to_chain.insert(mol.number(), water_chain.name);
             }
             else if (mol.nAtoms() == 1)
             {
@@ -733,11 +736,13 @@ namespace SireGemmi
                 {
                     // single oxygen is a water without hydrogens
                     convert_water(mol, water_chain, map);
+                    molnum_to_chain.insert(mol.number(), water_chain.name);
                 }
                 else
                 {
                     // convert as a normal molecule
                     convert_molecule(mol, mol_chain, map);
+                    molnum_to_chain.insert(mol.number(), mol_chain.name);
                 }
             }
             else if (mol.nResidues() > 1)
@@ -752,11 +757,13 @@ namespace SireGemmi
 
                 convert_polymer(mol, poly_chain, map);
                 model.chains.push_back(poly_chain);
+                molnum_to_chain.insert(mol.number(), poly_chain.name);
             }
             else
             {
                 // convert as a normal molecule
                 convert_molecule(mol, mol_chain, map);
+                molnum_to_chain.insert(mol.number(), mol_chain.name);
             }
         }
 
@@ -768,6 +775,73 @@ namespace SireGemmi
         structure.renumber_models();
         gemmi::setup_entities(structure);
         gemmi::assign_serial_numbers(structure, true);
+
+        // now we have done this, we need to add in all of the bonds
+        const auto connectivity_property = map["connectivity"];
+
+        for (const auto &mol : mols)
+        {
+            if (SireMol::is_water(mol) or mol.nAtoms() <= 3)
+            {
+                // no need to add connections for small molecules or water
+                continue;
+            }
+
+            try
+            {
+                const auto &connectivity = mol.property(connectivity_property).asA<SireMol::Connectivity>();
+
+                const auto chain_name = molnum_to_chain.value(mol.number());
+
+                const int nats = mol.nAtoms();
+
+                for (int i = 0; i < nats - 1; ++i)
+                {
+                    const auto idx0 = SireMol::AtomIdx(i);
+                    const auto atom0 = mol.atom(idx0);
+
+                    auto connections = connectivity.connectionsTo(idx0);
+
+                    if (connections.isEmpty())
+                        continue;
+
+                    gemmi::AtomAddress addr0;
+                    addr0.chain_name = chain_name;
+                    addr0.res_id.name = atom0.residue().name().value().toStdString();
+                    addr0.res_id.seqid.num = atom0.residue().number().value();
+                    addr0.atom_name = atom0.name().value().toStdString();
+
+                    auto cra0 = model.find_cra(addr0, true);
+
+                    for (const auto &idx1 : connections)
+                    {
+                        if (idx1.value() <= i)
+                            continue;
+
+                        const auto atom1 = mol.atom(idx1);
+
+                        gemmi::AtomAddress addr1;
+                        addr1.chain_name = chain_name;
+                        addr1.res_id.name = atom1.residue().name().value().toStdString();
+                        addr1.res_id.seqid.num = atom1.residue().number().value();
+                        addr1.atom_name = atom1.name().value().toStdString();
+
+                        auto cra1 = model.find_cra(addr1, true);
+
+                        gemmi::Connection connection;
+                        connection.partner1 = addr0;
+                        connection.partner2 = addr1;
+
+                        structure.connections.push_back(connection);
+                    }
+                }
+            }
+            catch (...)
+            {
+                // no connectivity for this molecule
+                continue;
+            }
+        }
 
         return structure;
     }

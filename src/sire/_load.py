@@ -17,9 +17,7 @@ __all__ = [
 class _tutorial_url:
     def __init__(self, value):
         self._value = value
-        self.__doc__ = (
-            "The base URL for all molecule files used in the tutorial."
-        )
+        self.__doc__ = "The base URL for all molecule files used in the tutorial."
 
     def __str__(self):
         return self._value
@@ -81,9 +79,7 @@ def _get_gromacs_dir():
         try:
             import urllib.request
 
-            urllib.request.urlretrieve(
-                f"{tutorial_url}/gromacs.tar.bz2", gromacs_tbz2
-            )
+            urllib.request.urlretrieve(f"{tutorial_url}/gromacs.tar.bz2", gromacs_tbz2)
         except Exception:
             # we cannot download - just give up
             return None
@@ -194,13 +190,10 @@ def _resolve_path(path, directory=".", auto_unzip=True, silent=False):
             if os.path.isfile(filename):
                 if not silent:
                     print(f"Using cached download of '{path}'...")
-                return _resolve_path(
-                    filename, directory=directory, silent=silent
-                )
+                return _resolve_path(filename, directory=directory, silent=silent)
             else:
                 raise IOError(
-                    f"Cannot overwrite {filename} as it is an "
-                    "existing directory!"
+                    f"Cannot overwrite {filename} as it is an " "existing directory!"
                 )
 
         if not silent:
@@ -242,12 +235,32 @@ def _resolve_path(path, directory=".", auto_unzip=True, silent=False):
 
         if is_code:
             code = path.lower()
-            # https://files.rcsb.org/download/4hhb.pdb.gz
+
+            from .convert import supported_formats
+
+            if "gemmi" in supported_formats():
+                ext = "cif"
+            else:
+                ext = "pdb"
+
+            # https://files.rcsb.org/download/4hhb.ext.gz
             return _resolve_path(
-                f"https://files.rcsb.org/download/{path}.pdb.gz",
+                f"https://files.rcsb.org/download/{path}.{ext}.gz",
                 directory=directory,
                 silent=silent,
             )
+
+    elif path.startswith("pdb_") and len(path) == 12:
+        # this is a new PDB ID code, of format pdb_00003nss
+        if not path.startswith("pdb_0000"):
+            raise IOError(
+                f"Unable to load {path} as we don't yet support new-style "
+                "PDB codes that cannot be converted into old-style codes."
+            )
+
+        pdbid = path[8:].upper()
+        return _resolve_path(pdbid, directory=directory, silent=silent)
+
     elif path.startswith("alphafold:"):
         # alphafold code
         code = path[10:]
@@ -661,9 +674,7 @@ def load_test_files(files: _Union[_List[str], str], *args, map=None):
             cache_dir = os.path.join(d, "cache")
 
     files = expand(tutorial_url, files, suffix=".bz2")
-    return load(
-        files, directory=cache_dir, silent=True, show_warnings=False, map=map
-    )
+    return load(files, directory=cache_dir, silent=True, show_warnings=False, map=map)
 
 
 def smiles(
