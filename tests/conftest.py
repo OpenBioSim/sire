@@ -43,9 +43,7 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_slow)
 
     if not runveryslow:
-        skip_veryslow = pytest.mark.skip(
-            reason="need --runveryslow option to run"
-        )
+        skip_veryslow = pytest.mark.skip(reason="need --runveryslow option to run")
         for item in items:
             if "veryslow" in item.keywords:
                 item.add_marker(skip_veryslow)
@@ -113,23 +111,17 @@ def wrapped_mols():
 
 @pytest.fixture(scope="session")
 def openmm_interchange_mols():
-    return sr.load_test_files(
-        "openmm_interchange.rst7", "openmm_interchange.prm7"
-    )
+    return sr.load_test_files("openmm_interchange.rst7", "openmm_interchange.prm7")
 
 
 @pytest.fixture(scope="session")
 def triclinic_protein():
-    return sr.load_test_files(
-        "triclinic_protein.prm7", "triclinic_protein.crd"
-    )
+    return sr.load_test_files("triclinic_protein.prm7", "triclinic_protein.crd")
 
 
 @pytest.fixture(scope="session")
 def triclinic_protein_rst7():
-    return sr.load_test_files(
-        "triclinic_protein.prm7", "triclinic_protein.rst"
-    )
+    return sr.load_test_files("triclinic_protein.prm7", "triclinic_protein.rst")
 
 
 @pytest.fixture(scope="session")
@@ -150,3 +142,36 @@ def ethane_12dichloroethane():
 @pytest.fixture(scope="session")
 def pentane_cyclopentane():
     return sr.load_test_files("pentane_cyclopentane.bss")
+
+
+@pytest.fixture(scope="session")
+def pdb_3nss():
+    return sr.load_test_files("3NSS.pdb")
+
+
+@pytest.fixture(scope="session")
+def pdbx_3nss():
+    if "gemmi" in sr.convert.supported_formats():
+        return sr.load_test_files("3NSS.cif")
+    else:
+        return None
+
+
+@pytest.fixture(scope="session")
+def testfile_cache_dir():
+    import os
+
+    d = os.path.abspath(os.path.curdir)
+
+    if d.endswith("tests"):
+        # we are running in the tests directory, so cache downloads here
+        cache_dir = os.path.join(d, "cache")
+    else:
+        d2 = os.path.split(d)[0]
+        if d2.endswith("tests"):
+            # we are a subdirectory of the parent directory
+            cache_dir = os.path.join(d2, "cache")
+        else:
+            cache_dir = os.path.join(d, "cache")
+
+    return cache_dir

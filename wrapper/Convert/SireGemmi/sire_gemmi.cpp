@@ -781,12 +781,6 @@ namespace SireGemmi
 
         for (const auto &mol : mols)
         {
-            if (SireMol::is_water(mol) or mol.nAtoms() <= 3)
-            {
-                // no need to add connections for small molecules or water
-                continue;
-            }
-
             try
             {
                 const auto &connectivity = mol.property(connectivity_property).asA<SireMol::Connectivity>();
