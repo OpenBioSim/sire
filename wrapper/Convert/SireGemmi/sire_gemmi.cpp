@@ -571,12 +571,15 @@ namespace SireGemmi
     {
         const auto residues = mol.residues();
 
+        const auto entity_id = mol.name().value().toStdString();
+
         for (int i = 0; i < residues.count(); ++i)
         {
             const auto residue = residues(i);
 
             gemmi::Residue gemmi_residue;
             gemmi_residue.entity_type = gemmi::EntityType::Polymer;
+            gemmi_residue.entity_id = entity_id;
 
             gemmi_residue.name = residue.name().value().toStdString();
             gemmi_residue.seqid.num = residue.number().value();
@@ -622,12 +625,15 @@ namespace SireGemmi
     {
         const auto residues = mol.residues();
 
+        const auto entity_id = mol.name().value().toStdString();
+
         for (int i = 0; i < residues.count(); ++i)
         {
             const auto residue = residues(i);
 
             gemmi::Residue gemmi_residue;
             gemmi_residue.entity_type = gemmi::EntityType::NonPolymer;
+            gemmi_residue.entity_id = entity_id;
 
             gemmi_residue.name = residue.name().value().toStdString();
             gemmi_residue.seqid.num = residue.number().value();
@@ -673,6 +679,7 @@ namespace SireGemmi
     {
         gemmi::Residue residue;
         residue.entity_type = gemmi::EntityType::Water;
+        residue.entity_id = "WATER";
 
         auto first_res = mol.residues()(0);
         residue.name = first_res.name().value().toStdString();

@@ -39,4 +39,4 @@ def test_gemmi(testfile_cache_dir, pdbx_3nss):
     s2 = sr.convert.to(mols, "gemmi")
 
     assert len(s) == len(s2)
-    assert len(s[0]) == len(s2[0])
+    assert len(list(s[0].all())) == len(list(s2[0].all()))
