@@ -40,3 +40,11 @@ def test_gemmi(testfile_cache_dir, pdbx_3nss):
 
     assert len(s) == len(s2)
     assert len(list(s[0].all())) == len(list(s2[0].all()))
+
+    r0 = s[0].get_all_residue_names()
+    r1 = s2[0].get_all_residue_names()
+
+    assert len(r0) == len(r1)
+
+    for r in r0:
+        assert r in r1

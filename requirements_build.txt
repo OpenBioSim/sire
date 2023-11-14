@@ -13,10 +13,10 @@ sysroot_linux-64==2.17 ; sys_platform == "linux"
 
 # These packages are needed to compile
 # the SireRDKit plugin
-rdkit>=2023.0.0
-rdkit-dev>=2023.0.0
+rdkit >=2023.0.0
+rdkit-dev >=2023.0.0
 
 # These packages are needed to compile
 # the SireGemmi plugin
-gemmi>=0.6.0
+gemmi >=0.6.0,<0.7.0
 pybind11
