@@ -56,11 +56,17 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
   set(CMAKE_REQUIRED_LIBRARIES ${GEMMI_LIBRARY})
   check_cxx_source_runs(
     "
-    #include <gemmi/cif.hpp>
-    #include <gemmi/mmcif.hpp>
+    #include \"gemmi/cif.hpp\"
+    #include \"gemmi/mmcif.hpp\"
+    #include \"gemmi/modify.hpp\"
+    #include \"gemmi/polyheur.hpp\"
+    #include \"gemmi/to_cif.hpp\"
+    #include \"gemmi/to_mmcif.hpp\"
+
     int main() {
-      gemmi::CifFile cf;
-      gemmi::MmcifFile mf;
+      auto doc = gemmi::cif::Document(gemmi::cif::read_string(\"data_1\"));
+      auto structure = gemmi::make_structure_from_block(doc.blocks.at(0));
+      doc = gemmi::make_mmcif_document(structure);
       return 0;
     }
     "
