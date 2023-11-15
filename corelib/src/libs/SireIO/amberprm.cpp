@@ -383,7 +383,6 @@ void AmberPrm::rebuildLJParameters()
 
     const auto acoeffs = float_data.value("LENNARD_JONES_ACOEF");
     const auto bcoeffs = float_data.value("LENNARD_JONES_BCOEF");
-    const auto ccoeffs = float_data.value("LENNARD_JONES_CCOEF");
 
     const auto hbond_acoeffs = float_data.value("HBOND_ACOEF");
     const auto hbond_bcoeffs = float_data.value("HBOND_BCOEF");
@@ -399,17 +398,6 @@ void AmberPrm::rebuildLJParameters()
                                       .arg(ntypes)
                                       .arg(acoeffs.count())
                                       .arg(bcoeffs.count()),
-                                  CODELOC);
-    }
-
-    if ((not ccoeffs.isEmpty()) and (ccoeffs.count() != acoeffs.count()))
-    {
-        throw SireIO::parse_error(QObject::tr("Incorrect number of LJ coefficients for the number of specified "
-                                              "atom types! Should be %1 for %2 types, but actually have "
-                                              "%3 LJ C-coefficients")
-                                      .arg((ntypes * (ntypes + 1)) / 2)
-                                      .arg(ntypes)
-                                      .arg(ccoeffs.count()),
                                   CODELOC);
     }
 
@@ -436,12 +424,11 @@ void AmberPrm::rebuildLJParameters()
 
     const auto acoeffs_data = acoeffs.constData();
     const auto bcoeffs_data = bcoeffs.constData();
-
     const auto hbond_acoeffs_data = hbond_acoeffs.constData();
     const auto hbond_bcoeffs_data = hbond_bcoeffs.constData();
     const auto nb_parm_index_data = nb_parm_index.constData();
 
-    for (int i = 0; i < ntypes; ++i)
+    auto build_lj = [&](int i)
     {
         // amber stores the A and B coefficients as the product of all
         // possible combinations. We need to find the values from the
@@ -474,39 +461,22 @@ void AmberPrm::rebuildLJParameters()
 
             lj_data_array[i] = LJParameter(sigma * angstrom, epsilon * kcal_per_mol);
         }
-    }
+    };
 
-    if (not ccoeffs.isEmpty())
+    if (usesParallel())
     {
-        // we need to create a matrix mapping the C4 terms for pairs
-        // of LJ parameters
-        QHash<LJParameter, QHash<LJParameter, double>> lj_c4_values;
-
-        const auto ccoeffs_data = ccoeffs.constData();
-
-        // find all of the C4 co-efficients for all of the types
-        for (int i = 0; i < ntypes; ++i)
-        {
-            for (int j = 0; i < ntypes; ++j)
+        tbb::parallel_for(tbb::blocked_range<int>(0, ntypes), [&](tbb::blocked_range<int> r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
             {
-                const int idx = nb_parm_index_data[ntypes * i + j];
-
-                const double ccoeff = ccoeffs_data[idx - 1];
-
-                if (ccoeff != 0)
-                {
-                    const auto &lj0 = lj_data_array[i];
-                    const auto &lj1 = lj_data_array[j];
-
-                    lj_c4_values[lj0][lj1] = ccoeff;
-                    lj_c4_values[lj1][lj0] = ccoeff;
-                }
-            }
-        }
-
-        // now give each LJParameter its C4 values for all other types
+                build_lj(i);
+            } });
+    }
+    else
+    {
         for (int i = 0; i < ntypes; ++i)
         {
+            build_lj(i);
         }
     }
 
