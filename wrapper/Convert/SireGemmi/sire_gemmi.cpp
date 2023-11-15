@@ -720,6 +720,25 @@ namespace SireGemmi
         gemmi::Structure structure;
         gemmi::Model model(system.name().value().toStdString());
 
+        auto name = system.name().value().toStdString();
+
+        if (name.empty())
+        {
+            // try to find a name from the molecules
+            for (const auto &mol : mols)
+            {
+                name = mol.name().value().toStdString();
+
+                if (not name.empty())
+                    break;
+            }
+
+            if (name.empty())
+                name = "sire_system";
+        }
+
+        structure.name = name;
+
         gemmi::Chain water_chain("Z");
         water_chain.name = "Z";
 

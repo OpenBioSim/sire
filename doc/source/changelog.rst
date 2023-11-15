@@ -48,6 +48,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   to keep existing behaviour, but we would recommend setting this to ``True``
   and would like to change the default in the future.
 
+* Added :func:`sire.convert` support for converting between :mod:`sire`
+  objects and `Gemmi <https://gemmi.readthedocs.io>`__ objects. This
+  has allowed us to support reading and writing of PDBx/mmCIF files.
+  We've updated :func:`sire.load` to automatically choose PDBs/mmCIF
+  files if gemmi-support is available. We've also added support for the
+  new-style PDB codes (e.g. "pdb_00003nss" instead of "3NSS").
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
