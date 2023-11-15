@@ -1,7 +1,7 @@
 #ifndef SIRE_OPENMM_CUSTOMFORCE_H
 #define SIRE_OPENMM_CUSTOMFORCE_H
 
-#include "openmm.h"
+#include "OpenMM.h"
 #include "openmm/Force.h"
 
 #include "openmmmolecule.h"
