@@ -51,43 +51,14 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
   # Other python wrapping directories
   include_directories(${CMAKE_SOURCE_DIR})
 
-  # Do we need to manually add in the functions from GEMMI_EXTRA_SOURCE?
-  set(OLD_CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
-  set(CMAKE_REQUIRED_LIBRARIES ${GEMMI_LIBRARY})
-  check_cxx_source_runs(
-    "
-    #include \"gemmi/cif.hpp\"
-    #include \"gemmi/mmcif.hpp\"
-    #include \"gemmi/modify.hpp\"
-    #include \"gemmi/polyheur.hpp\"
-    #include \"gemmi/to_cif.hpp\"
-    #include \"gemmi/to_mmcif.hpp\"
-
-    int main() {
-      auto doc = gemmi::cif::Document(gemmi::cif::read_string(\"data_1\"));
-      auto structure = gemmi::make_structure_from_block(doc.blocks.at(0));
-      doc = gemmi::make_mmcif_document(structure);
-      return 0;
-    }
-    "
-    GEMMI_EXTRA_SOURCE_WORKS
-  )
-  set(CMAKE_REQUIRED_LIBRARIES ${OLD_CMAKE_REQUIRED_LIBRARIES})
-
-  if (GEMMI_EXTRA_SOURCE_WORKS)
-    message( STATUS "Gemmi library links ok and contains the necessary functions.")
-    unset( GEMMI_EXTRA_SOURCE )
-  else()
-    message( STATUS "GEMMI_EXTRA_SOURCE_WORKS is false, so we need to add in the extra source files" )
-    set ( GEMMI_EXTRA_SOURCE
-          # need this as it isn't linked in property from the gemmi static lib?
-          third_party/mmcif.cpp
-          third_party/to_mmcif.cpp
-          third_party/sprintf.cpp
-          third_party/polyheur.cpp
-          third_party/resinfo.cpp
-        )
-  endif()
+  set ( GEMMI_EXTRA_SOURCE
+        # need this as it isn't linked in property from the gemmi static lib?
+        third_party/mmcif.cpp
+        third_party/to_mmcif.cpp
+        third_party/sprintf.cpp
+        third_party/polyheur.cpp
+        third_party/resinfo.cpp
+      )
 
   # Define the sources in SireRDKit
   set ( SIREGEMMI_SOURCES
@@ -120,7 +91,6 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
-                          ${GEMMI_LIBRARY}
                           ${pybind11_LIBRARIES}
                           ${ZLIB_LIBRARIES}
                         )
