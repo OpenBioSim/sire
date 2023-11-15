@@ -15,9 +15,16 @@ PDB code as the argument to :func:`sire.load`. We will load structure
 
 >>> mols = sr.load("3NSS")
 >>> print(mols)
-Downloading from 'https://files.rcsb.org/download/3NSS.pdb.gz'...
-Unzipping './3NSS.pdb.gz'...
+Downloading from 'https://files.rcsb.org/download/3NSS.cif.gz'...
+Unzipping './3NSS.cif.gz'...
 System( name=3NSS num_molecules=1 num_residues=1679 num_atoms=6984 )
+
+.. note::
+
+   This will download a PDBx/mmCIF file from the RCSB website if
+   `gemmi <https://gemmi.readthedocs.io>`__ is installed. Otherwise,
+   it will download an (older format) PDB file. You can use either
+   traditional ("3NSS") or new-style ("pdb_00003nss") PDB codes.
 
 If you are running in a Jupyter Notebook (or similar) you can view
 the molecule by calling the :func:`~sire.mol.SelectorMol.view` function,
