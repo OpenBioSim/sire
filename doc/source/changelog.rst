@@ -15,6 +15,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
+* Fix use of ``QString::compare`` when comparing molecular properties during
+  a water topology swap.
+
 * Added a new :mod:`sire.options` module that contains new
   :cls:`sire.options.Option` objects to represent configurable options.
   These include documentation, and make it easier to validate and expose
