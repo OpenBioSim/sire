@@ -8,24 +8,15 @@
 find_package(gemmi)
 find_package(pybind11)
 
-# gemmi needs zlib, at least on Linux. Make sure we find and
-# link to this
-cmake_policy(SET CMP0074 NEW)
-set( ZLIB_ROOT "${ANACONDA_BASE}" NO_DEFAULT_PATH)
-find_package(ZLIB)
+if (${gemmi_FOUND})
+  # We can only link against the dynamic library - static doesn't work
+  get_target_property(GEMMI_LIBRARY gemmi::gemmi_cpp LOCATION)
 
-if (${ZLIB_FOUND})
-  # test if ${ZLIB_LIBRARIES} starts with ${ANACONDA_BASE}
-  if (NOT ${ZLIB_LIBRARIES} MATCHES "^${ANACONDA_BASE}")
-    message( STATUS "ZLIB found, but not in ${ANACONDA_BASE}. This may cause problems." )
-    set( ZLIB_LIBRARIES "${ANACONDA_BASE}/lib/libz.a" )
-    if (EXISTS "${ZLIB_LIBRARIES}")
-      message("Manually using ${ZLIB_LIBRARIES} for ZLIB_LIBRARIES")
-    else()
-      message( WARNING "ZLIB not found in ${ANACONDA_BASE}/lib." )
-      set(ZLIB_FOUND FALSE)
-      unset(ZLIB_LIBRARIES)
-    endif()
+  # test if GEMMI_LIBRARY ends with .a
+  if (${GEMMI_LIBRARY} MATCHES "\\.a$")
+    message( STATUS "GEMMI_LIBRARY is a static library." )
+    message( STATUS "We can only link against the dynamic library." )
+    unset(gemmi_FOUND)
   endif()
 endif()
 
@@ -51,19 +42,8 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
   # Other python wrapping directories
   include_directories(${CMAKE_SOURCE_DIR})
 
-  set ( GEMMI_EXTRA_SOURCE
-        # need this as it isn't linked in property from the gemmi static lib?
-        third_party/mmcif.cpp
-        third_party/to_mmcif.cpp
-        third_party/sprintf.cpp
-        third_party/polyheur.cpp
-        third_party/resinfo.cpp
-      )
-
   # Define the sources in SireRDKit
   set ( SIREGEMMI_SOURCES
-
-        ${GEMMI_EXTRA_SOURCE}
 
         _SireGemmi.main.cpp
 
@@ -91,10 +71,9 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
+                          ${GEMMI_LIBRARY}
                           ${pybind11_LIBRARIES}
-                          ${ZLIB_LIBRARIES}
                         )
-
 
   include( LimitSirePythonExportSymbols )
   export_this_symbol_only( "init_SireRDKit" "_init_SireGemmi" )
