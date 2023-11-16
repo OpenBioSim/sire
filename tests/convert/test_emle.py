@@ -1,5 +1,3 @@
-from functools import partialmethod
-
 from sire.legacy.Convert._SireOpenMM import EMLECallback
 
 # Create some lists to hold test data.
