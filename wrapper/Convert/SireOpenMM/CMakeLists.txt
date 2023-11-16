@@ -52,6 +52,7 @@ if (${SIRE_USE_OPENMM})
           _SireOpenMM.main.cpp
 
           customforce.cpp
+          emlecallback.cpp
           lambdalever.cpp
           openmmminimise.cpp
           openmmmolecule.cpp

@@ -5,6 +5,8 @@
 
 #include "sire_openmm.h"
 
+#include "emlecallback.h"
+
 #include "lambdalever.h"
 
 #include "openmmminimise.h"
@@ -48,7 +50,6 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
 {
     bp::class_<OpenMMMetaData> OpenMMMetaData_exposer_t("OpenMMMetaData",
                                                         "Internal class used to hold OpenMM coordinates and velocities data");
-
     OpenMMMetaData_exposer_t.def(
         "index", &OpenMMMetaData::index,
         "Return the index used to locate atoms in the OpenMM system");
@@ -57,6 +58,14 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "lambdaLever", &OpenMMMetaData::lambdaLever,
         "Return the lambda lever used to update the parameters in the "
         "OpenMM system according to lambda");
+
+    bp::class_<EMLECallback>("EMLECallback", 
+            bp::init<bp::object, bp::object>(
+                "Constructor: A callback wrapper class to enable electrostatic embedding"
+                "of machine learning potentials via emle-engine."
+                )
+            )
+        .def("call", &EMLECallback::call, "Call the callback");
 
     bp::class_<LambdaLever, bp::bases<SireBase::Property>> LambdaLever_exposer_t(
         "LambdaLever",
