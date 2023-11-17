@@ -32,7 +32,9 @@
 #include "boost/python.hpp"
 #include <boost/tuple/tuple.hpp>
 
-#include "openmmmolecule.h"
+#include <QVector>
+
+#include "sireglobal.h"
 
 namespace bp = boost::python;
 

@@ -15,7 +15,6 @@
 #include "Helpers/convertlist.hpp"
 #include "Helpers/tuples.hpp"
 
-#include <QDebug>
 #include <QVector>
 
 using namespace SireOpenMM;
