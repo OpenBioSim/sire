@@ -30,7 +30,7 @@
 
 using namespace SireOpenMM;
 
-EMLECallback::EMLECallback(bp::object py_object, bp::object callback) : 
+EMLECallback::EMLECallback(bp::object py_object, QString callback) :
     py_object(py_object), callback(callback)
 {
 }
@@ -41,6 +41,12 @@ QVector<double> EMLECallback::call(
     QVector<double> xyz_qm,
     QVector<double> xyz_mm)
 {
-    bp::object result = this->callback(this->py_object, numbers_qm, charges_mm, xyz_qm, xyz_mm);
-    return bp::extract<QVector<double>>(result);
+    return bp::call_method<QVector<double>>(
+            this->py_object.ptr(),
+            this->callback.toStdString().c_str(),
+            numbers_qm,
+            charges_mm,
+            xyz_qm,
+            xyz_mm
+    );
 }

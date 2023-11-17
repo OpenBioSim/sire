@@ -46,16 +46,16 @@ namespace SireOpenMM
     public:
         //! Constructor
         /*! \param py_object
-                A Python object that contains the callback function. 
+                A Python object that contains the callback function.
 
             \param callback
-                A Python function that takes the following arguments:
+                The name of a callback method that take the following arguments:
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
                     - charges_mm: A list of the MM charges.
                     - xyz_qm: A flattened list of the QM coordinates of the atoms in the ML region.
                     - xyz_mm: A flattened list of the MM coordinates of the point charges.
          */
-        EMLECallback(bp::object object, bp::object callback);
+        EMLECallback(bp::object object, QString callback);
 
         //! Constructor
         /*! \param numbers_qm
@@ -80,7 +80,7 @@ namespace SireOpenMM
 
     private:
         bp::object py_object;
-        bp::object callback;
+        QString callback;
     };
 }
 

@@ -59,8 +59,8 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "Return the lambda lever used to update the parameters in the "
         "OpenMM system according to lambda");
 
-    bp::class_<EMLECallback>("EMLECallback", 
-            bp::init<bp::object, bp::object>(
+    bp::class_<EMLECallback>("EMLECallback",
+            bp::init<bp::object, QString>(
                 "Constructor: A callback wrapper class to enable electrostatic embedding"
                 "of machine learning potentials via emle-engine."
                 )
