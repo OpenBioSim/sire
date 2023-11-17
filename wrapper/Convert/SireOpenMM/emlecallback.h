@@ -58,7 +58,7 @@ namespace SireOpenMM
                     - xyz_qm: A vector of positions for the atoms in the ML region.
                     - xyz_mm: A vector of positions for the atoms in the MM region.
          */
-        EMLECallback(bp::object object, QString callback);
+        EMLECallback(bp::object object, QString callback="_sire_callback");
 
         //! Constructor
         /*! \param numbers_qm
@@ -74,7 +74,7 @@ namespace SireOpenMM
                 A vector of positions for the atoms in the MM region.
 
             \returns
-                A flattened vector of forces for the QM and MM atoms.
+                A vector of forces for the QM and MM atoms.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
                 QVector<int> numbers_qm,
