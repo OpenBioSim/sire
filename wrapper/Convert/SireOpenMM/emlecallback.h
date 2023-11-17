@@ -56,7 +56,7 @@ namespace SireOpenMM
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
                     - charges_mm: A list of the MM charges.
                     - xyz_qm: A vector of positions for the atoms in the ML region.
-                    - xyz_mm: A vector of positions for the atoms in the MM region..
+                    - xyz_mm: A vector of positions for the atoms in the MM region.
          */
         EMLECallback(bp::object object, QString callback);
 
@@ -65,13 +65,13 @@ namespace SireOpenMM
                 A vector of atomic numbers for the atoms in the ML region.
 
             \param charges_mm
-                A vector of the MM charges.
+                A vector of the charges on the MM atoms.
 
             \param xyz_qm
-                A flattened vector of the QM coordinates of the atoms in the ML region.
+                A vector of positions for the atoms in the ML region.
 
             \param xyz_mm
-                A flattened vector of the MM coordinates of the point charges.
+                A vector of positions for the atoms in the MM region.
 
             \returns
                 A flattened vector of forces for the QM and MM atoms.
