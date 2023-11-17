@@ -35,13 +35,13 @@ EMLECallback::EMLECallback(bp::object py_object, QString callback) :
 {
 }
 
-QVector<double> EMLECallback::call(
+boost::tuple<double, QVector<double>, QVector<double>> EMLECallback::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<double> xyz_qm,
     QVector<double> xyz_mm)
 {
-    return bp::call_method<QVector<double>>(
+    return bp::call_method<boost::tuple<double, QVector<double>, QVector<double>>>(
             this->py_object.ptr(),
             this->callback.toStdString().c_str(),
             numbers_qm,

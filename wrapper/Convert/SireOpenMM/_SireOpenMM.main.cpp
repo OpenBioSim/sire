@@ -2,6 +2,7 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
+#include <boost/tuple/tuple.hpp>
 
 #include "sire_openmm.h"
 
@@ -12,12 +13,16 @@
 #include "openmmminimise.h"
 
 #include "Helpers/convertlist.hpp"
+#include "Helpers/tuples.hpp"
 
 #include <QDebug>
-
-namespace bp = boost::python;
+#include <QVector>
 
 using namespace SireOpenMM;
+
+using boost::python::register_tuple;
+
+namespace bp = boost::python;
 
 /** Thanks to this page for instructions on how to convert from SWIG to Boost
  *  https://wiki.python.org/moin/boost.python/HowTo
@@ -58,6 +63,9 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "lambdaLever", &OpenMMMetaData::lambdaLever,
         "Return the lambda lever used to update the parameters in the "
         "OpenMM system according to lambda");
+
+    // Return container for EMLECallback.
+    register_tuple<boost::tuple<double, QVector<double>, QVector<double>>>();
 
     bp::class_<EMLECallback>("EMLECallback",
             bp::init<bp::object, QString>(

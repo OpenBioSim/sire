@@ -30,6 +30,7 @@
 #define SIREOPENMM_EMLECALLBACK_H
 
 #include "boost/python.hpp"
+#include <boost/tuple/tuple.hpp>
 
 #include "openmmmolecule.h"
 
@@ -73,10 +74,12 @@ namespace SireOpenMM
             \returns
                 A flattened vector of forces for the QM and MM atoms.
          */
-        QVector<double> call(QVector<int> numbers_qm,
-                             QVector<double> charges_mm,
-                             QVector<double> xyz_qm,
-                             QVector<double> xyz_mm);
+        boost::tuple<double, QVector<double>, QVector<double>> call(
+                QVector<int> numbers_qm,
+                QVector<double> charges_mm,
+                QVector<double> xyz_qm,
+                QVector<double> xyz_mm
+        );
 
     private:
         bp::object py_object;
