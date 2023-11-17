@@ -64,8 +64,8 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "Return the lambda lever used to update the parameters in the "
         "OpenMM system according to lambda");
 
-    // Return container for EMLECallback.
-    register_tuple<boost::tuple<double, QVector<double>, QVector<double>>>();
+    // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
+    register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
 
     bp::class_<EMLECallback>("EMLECallback",
             bp::init<bp::object, QString>(

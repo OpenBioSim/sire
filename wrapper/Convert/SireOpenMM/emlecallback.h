@@ -74,7 +74,7 @@ namespace SireOpenMM
             \returns
                 A flattened vector of forces for the QM and MM atoms.
          */
-        boost::tuple<double, QVector<double>, QVector<double>> call(
+        boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
                 QVector<int> numbers_qm,
                 QVector<double> charges_mm,
                 QVector<double> xyz_qm,

@@ -6,11 +6,7 @@ def test_callback():
 
     class Test:
         def callback(self, a, b, c, d):
-            return (
-                sum(a + b + c + d),
-                [sum(x) for x in zip(a, b)],
-                [sum(x) for x in zip(c, d)],
-            )
+            return (sum(a + b + c + d), [a, b], [c, d])
 
     # Instantiate the class.
     test = Test()
@@ -28,4 +24,8 @@ def test_callback():
     result = cb.call(a, b, c, d)
 
     # Make sure the result is correct.
-    assert result == (136, [6, 8, 10, 12], [22, 24, 26, 28]) == test.callback(a, b, c, d)
+    assert (
+        result
+        == (136, [[1, 2, 3, 4], [5, 6, 7, 8]], [[9, 10, 11, 12], [13, 14, 15, 16]])
+        == test.callback(a, b, c, d)
+    )
