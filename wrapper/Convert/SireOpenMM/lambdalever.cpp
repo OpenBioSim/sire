@@ -35,6 +35,125 @@
 using namespace SireOpenMM;
 using namespace SireCAS;
 
+//////
+////// Implementation of MolLambdaCache
+//////
+
+MolLambdaCache::MolLambdaCache() : lam_val(0)
+{
+}
+
+MolLambdaCache::MolLambdaCache(double lam) : lam_val(lam)
+{
+}
+
+MolLambdaCache::MolLambdaCache(const MolLambdaCache &other)
+    : lam_val(other.lam_val), cache(other.cache)
+{
+}
+
+MolLambdaCache::~MolLambdaCache()
+{
+}
+
+MolLambdaCache &MolLambdaCache::operator=(const MolLambdaCache &other)
+{
+    if (this != &other)
+    {
+        lam_val = other.lam_val;
+        cache = other.cache;
+    }
+
+    return *this;
+}
+
+const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
+                                             const QString &key,
+                                             const QVector<double> &initial,
+                                             const QVector<double> &final) const
+{
+    auto nonconst_this = const_cast<MolLambdaCache *>(this);
+
+    QReadLocker lkr(&(nonconst_this->lock));
+
+    auto it = cache.constFind(key);
+
+    if (it != cache.constEnd())
+        return it.value();
+
+    lkr.unlock();
+
+    QWriteLocker wkr(&(nonconst_this->lock));
+
+    // check that someone didn't beat us to create the values
+    it = cache.constFind(key);
+
+    if (it != cache.constEnd())
+        return it.value();
+
+    // create the values
+    nonconst_this->cache.insert(key, schedule.morph(key, initial, final, lam_val));
+
+    return cache.constFind(key).value();
+}
+
+//////
+////// Implementation of LeverCache
+//////
+
+LeverCache::LeverCache()
+{
+}
+
+LeverCache::LeverCache(const LeverCache &other) : cache(other.cache)
+{
+}
+
+LeverCache::~LeverCache()
+{
+}
+
+LeverCache &LeverCache::operator=(const LeverCache &other)
+{
+    if (this != &other)
+    {
+        cache = other.cache;
+    }
+
+    return *this;
+}
+
+const MolLambdaCache &LeverCache::get(int molidx, double lam_val) const
+{
+    auto nonconst_this = const_cast<LeverCache *>(this);
+
+    if (not this->cache.contains(molidx))
+    {
+        nonconst_this->cache.insert(molidx, QHash<double, MolLambdaCache>());
+    }
+
+    auto &mol_cache = nonconst_this->cache.find(molidx).value();
+
+    auto it = mol_cache.constFind(lam_val);
+
+    if (it == mol_cache.constEnd())
+    {
+        // need to create a new cache for this lambda value
+        it = mol_cache.insert(lam_val, MolLambdaCache(lam_val));
+    }
+
+    return it.value();
+}
+
+void LeverCache::clear()
+{
+    cache.clear();
+}
+
+//////
+////// Implementation of LambdaLever
+//////
+
 LambdaLever::LambdaLever() : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>()
 {
 }
@@ -46,7 +165,8 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
       start_indicies(other.start_indicies),
-      perturbable_maps(other.perturbable_maps)
+      perturbable_maps(other.perturbable_maps),
+      lambda_cache(other.lambda_cache)
 {
 }
 
@@ -64,6 +184,7 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
         perturbable_mols = other.perturbable_mols;
         start_indicies = other.start_indicies;
         perturbable_maps = other.perturbable_maps;
+        lambda_cache = other.lambda_cache;
         Property::operator=(other);
     }
 
@@ -108,6 +229,7 @@ bool LambdaLever::hasLever(const QString &lever_name)
 void LambdaLever::addLever(const QString &lever_name)
 {
     this->lambda_schedule.addLever(lever_name);
+    this->lambda_cache.clear();
 }
 
 /** Get the index of the force called 'name'. Returns -1 if
@@ -259,78 +381,80 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         const auto &perturbable_mol = this->perturbable_mols[i];
         const auto &start_idxs = this->start_indicies[i];
 
+        const auto &cache = this->lambda_cache.get(i, lambda_value);
+
         // calculate the new parameters for this lambda value
-        const auto morphed_charges = this->lambda_schedule.morph(
+        const auto morphed_charges = cache.morph(
+            this->lambda_schedule,
             "charge",
             perturbable_mol.getCharges0(),
-            perturbable_mol.getCharges1(),
-            lambda_value);
+            perturbable_mol.getCharges1());
 
-        const auto morphed_sigmas = this->lambda_schedule.morph(
+        const auto morphed_sigmas = cache.morph(
+            this->lambda_schedule,
             "sigma",
             perturbable_mol.getSigmas0(),
-            perturbable_mol.getSigmas1(),
-            lambda_value);
+            perturbable_mol.getSigmas1());
 
-        const auto morphed_epsilons = this->lambda_schedule.morph(
+        const auto morphed_epsilons = cache.morph(
+            this->lambda_schedule,
             "epsilon",
             perturbable_mol.getEpsilons0(),
-            perturbable_mol.getEpsilons1(),
-            lambda_value);
+            perturbable_mol.getEpsilons1());
 
-        const auto morphed_alphas = this->lambda_schedule.morph(
+        const auto morphed_alphas = cache.morph(
+            this->lambda_schedule,
             "alpha",
             perturbable_mol.getAlphas0(),
-            perturbable_mol.getAlphas1(),
-            lambda_value);
+            perturbable_mol.getAlphas1());
 
-        const auto morphed_bond_k = this->lambda_schedule.morph(
+        const auto morphed_bond_k = cache.morph(
+            this->lambda_schedule,
             "bond_k",
             perturbable_mol.getBondKs0(),
-            perturbable_mol.getBondKs1(),
-            lambda_value);
+            perturbable_mol.getBondKs1());
 
-        const auto morphed_bond_length = this->lambda_schedule.morph(
+        const auto morphed_bond_length = cache.morph(
+            this->lambda_schedule,
             "bond_length",
             perturbable_mol.getBondLengths0(),
-            perturbable_mol.getBondLengths1(),
-            lambda_value);
+            perturbable_mol.getBondLengths1());
 
-        const auto morphed_angle_k = this->lambda_schedule.morph(
+        const auto morphed_angle_k = cache.morph(
+            this->lambda_schedule,
             "angle_k",
             perturbable_mol.getAngleKs0(),
-            perturbable_mol.getAngleKs1(),
-            lambda_value);
+            perturbable_mol.getAngleKs1());
 
-        const auto morphed_angle_size = this->lambda_schedule.morph(
+        const auto morphed_angle_size = cache.morph(
+            this->lambda_schedule,
             "angle_size",
             perturbable_mol.getAngleSizes0(),
-            perturbable_mol.getAngleSizes1(),
-            lambda_value);
+            perturbable_mol.getAngleSizes1());
 
-        const auto morphed_torsion_phase = this->lambda_schedule.morph(
+        const auto morphed_torsion_phase = cache.morph(
+            this->lambda_schedule,
             "torsion_phase",
             perturbable_mol.getTorsionPhases0(),
-            perturbable_mol.getTorsionPhases1(),
-            lambda_value);
+            perturbable_mol.getTorsionPhases1());
 
-        const auto morphed_torsion_k = this->lambda_schedule.morph(
+        const auto morphed_torsion_k = cache.morph(
+            this->lambda_schedule,
             "torsion_k",
             perturbable_mol.getTorsionKs0(),
-            perturbable_mol.getTorsionKs1(),
-            lambda_value);
+            perturbable_mol.getTorsionKs1());
 
-        const auto morphed_charge_scale = this->lambda_schedule.morph(
+        const auto morphed_charge_scale = cache.morph(
+            this->lambda_schedule,
             "charge_scale",
             perturbable_mol.getChargeScales0(),
-            perturbable_mol.getChargeScales1(),
-            lambda_value);
+            perturbable_mol.getChargeScales1());
 
-        const auto morphed_lj_scale = this->lambda_schedule.morph(
+        const auto morphed_lj_scale = cache.morph(
+            this->lambda_schedule,
             "lj_scale",
             perturbable_mol.getLJScales0(),
-            perturbable_mol.getLJScales1(),
-            lambda_value);
+            perturbable_mol.getLJScales1());
 
         // now update the forcefields
         int start_index = start_idxs.value("clj", -1);
@@ -767,6 +891,7 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
     this->perturbable_mols.append(PerturbableOpenMMMolecule(molecule));
     this->start_indicies.append(starts);
     this->perturbable_maps.insert(molecule.number, molecule.perturtable_map);
+    this->lambda_cache.clear();
     return this->perturbable_mols.count() - 1;
 }
 
@@ -805,4 +930,6 @@ void LambdaLever::setSchedule(const LambdaSchedule &sched)
     {
         lambda_schedule.addLever(lever);
     }
+
+    this->lambda_cache.clear();
 }
