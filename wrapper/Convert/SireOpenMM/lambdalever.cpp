@@ -664,9 +664,6 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (ghost_14ff)
         ghost_14ff->updateParametersInContext(context);
 
-    // in OpenMM 8.1beta updating the bond parameters past lambda=0.25
-    // causes a "All Forces must have identical exclusions" error,
-    // when running minimisation without h-bond constraints...
     if (bondff)
         bondff->updateParametersInContext(context);
 
