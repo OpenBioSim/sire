@@ -55,8 +55,8 @@ namespace SireOpenMM
                 The name of a callback method that take the following arguments:
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
                     - charges_mm: A list of the MM charges.
-                    - xyz_qm: A flattened list of the QM coordinates of the atoms in the ML region.
-                    - xyz_mm: A flattened list of the MM coordinates of the point charges.
+                    - xyz_qm: A vector of positions for the atoms in the ML region.
+                    - xyz_mm: A vector of positions for the atoms in the MM region..
          */
         EMLECallback(bp::object object, QString callback);
 
@@ -79,8 +79,8 @@ namespace SireOpenMM
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
                 QVector<int> numbers_qm,
                 QVector<double> charges_mm,
-                QVector<double> xyz_qm,
-                QVector<double> xyz_mm
+                QVector<QVector<double>> xyz_qm,
+                QVector<QVector<double>> xyz_mm
         );
 
     private:

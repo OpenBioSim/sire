@@ -39,8 +39,8 @@ boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
 EMLECallback::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
-    QVector<double> xyz_qm,
-    QVector<double> xyz_mm)
+    QVector<QVector<double>> xyz_qm,
+    QVector<QVector<double>> xyz_mm)
 {
     return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
             this->py_object.ptr(),
