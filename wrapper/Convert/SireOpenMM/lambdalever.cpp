@@ -375,6 +375,10 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
 
+    // record the range of indicies of the atoms which change
+    int start_change_atom = -1;
+    int end_change_atom = -1;
+
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
     {
@@ -462,6 +466,16 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         if (start_index != -1 and cljff != 0)
         {
             const int nparams = morphed_charges.count();
+
+            if (start_change_atom == -1)
+            {
+                start_change_atom = start_index;
+                end_change_atom = start_index + nparams;
+            }
+            else if (start_index >= end_change_atom)
+            {
+                end_change_atom = start_index + nparams;
+            }
 
             if (have_ghost_atoms)
             {
@@ -656,9 +670,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         cljff->updateParametersInContext(context);
 
     if (ghost_ghostff)
+        // ghost_ghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
         ghost_ghostff->updateParametersInContext(context);
 
     if (ghost_nonghostff)
+        // ghost_nonghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
         ghost_nonghostff->updateParametersInContext(context);
 
     if (ghost_14ff)
