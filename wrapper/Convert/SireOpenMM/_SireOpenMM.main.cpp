@@ -6,7 +6,7 @@
 
 #include "sire_openmm.h"
 
-#include "emlecallback.h"
+#include "emle.h"
 
 #include "lambdalever.h"
 
@@ -62,17 +62,6 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
         "lambdaLever", &OpenMMMetaData::lambdaLever,
         "Return the lambda lever used to update the parameters in the "
         "OpenMM system according to lambda");
-
-    // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
-    register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
-
-    bp::class_<EMLECallback>("EMLECallback",
-            bp::init<bp::object, QString>(
-                "Constructor: A callback wrapper class to enable electrostatic embedding"
-                "of machine learning potentials via emle-engine."
-                )
-            )
-        .def("call", &EMLECallback::call, "Call the callback");
 
     bp::class_<LambdaLever, bp::bases<SireBase::Property>> LambdaLever_exposer_t(
         "LambdaLever",
@@ -182,4 +171,30 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Context>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::State>());
     bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Integrator>());
+
+    // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
+    register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
+
+    bp::class_<EMLEEngine>("EMLEEngine",
+            bp::init<bp::object, SireUnits::Dimension::Length, double>(
+                (
+                    bp::arg("py_object"), bp::arg("cutoff")=SireUnits::Dimension::Length(8.0), bp::arg("lambda")=1.0
+                ),
+                    "Constructor: An engine that can be used to enable electrostatic embedding"
+                    "of machine learning potentials via emle-engine."
+                )
+            )
+            .def("getLambda", &EMLEEngine::getLambda, "Get the lambda value")
+            .def("setLambda", &EMLEEngine::setLambda, "Set the lambda value")
+            .def("getCutoff", &EMLEEngine::getCutoff, "Get the cutoff value")
+            .def("setCutoff", &EMLEEngine::setCutoff, "Set the cutoff value")
+            .def("call", &EMLEEngine::call, "Call the callback");
+
+    bp::class_<EMLECallback>("EMLECallback",
+            bp::init<bp::object, QString>(
+                "Constructor: A callback wrapper class to enable electrostatic embedding"
+                "of machine learning potentials via emle-engine."
+                )
+            )
+        .def("call", &EMLECallback::call, "Call the callback");
 }

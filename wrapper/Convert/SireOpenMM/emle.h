@@ -26,8 +26,15 @@
   *
 \*********************************************/
 
-#ifndef SIREOPENMM_EMLECALLBACK_H
-#define SIREOPENMM_EMLECALLBACK_H
+#ifndef SIREOPENMM_EMLE_H
+#define SIREOPENMM_EMLE_H
+
+#include "OpenMM.h"
+#include "openmm/Force.h"
+#ifdef SIRE_USE_CUSTOMCPPFORCE
+#include "openmm/internal/ContextImpl.h"
+#include "openmm/internal/CustomCPPForceImpl.h"
+#endif
 
 #include "boost/python.hpp"
 #include <boost/tuple/tuple.hpp>
@@ -35,6 +42,11 @@
 #include <QVector>
 
 #include "sireglobal.h"
+
+#include "SireUnits/dimensions.h"
+#include "SireUnits/units.h"
+
+#include "qmmm.h"
 
 namespace bp = boost::python;
 
@@ -58,7 +70,7 @@ namespace SireOpenMM
                     - xyz_qm: A vector of positions for the atoms in the ML region.
                     - xyz_mm: A vector of positions for the atoms in the MM region.
          */
-        EMLECallback(bp::object object, QString callback="_sire_callback");
+        EMLECallback(bp::object, QString callback="_sire_callback");
 
         //! Constructor
         /*! \param numbers_qm
@@ -87,6 +99,85 @@ namespace SireOpenMM
         bp::object py_object;
         QString callback;
     };
+
+	class EMLEEngine : public QMMMEngine
+    {
+    public:
+        //! Constructor
+        /*! \param py_object
+                An EMLECalculator Python object.
+
+            \param cutoff
+                The ML cutoff distance.
+
+            \param lambda
+                The lambda weighting factor. This can be used to interpolate between
+                potentials for end-state correction calculations.
+         */
+        EMLEEngine(
+            bp::object,
+            SireUnits::Dimension::Length cutoff=8.0*SireUnits::angstrom, 
+            double lambda=1.0
+        );
+
+        double getLambda() const;
+
+        void setLambda(double lambda);
+
+        SireUnits::Dimension::Length getCutoff() const;
+
+        void setCutoff(SireUnits::Dimension::Length cutoff);
+
+        //! Constructor
+        /*! \param numbers_qm
+                A vector of atomic numbers for the atoms in the ML region.
+
+            \param charges_mm
+                A vector of the charges on the MM atoms.
+
+            \param xyz_qm
+                A vector of positions for the atoms in the ML region.
+
+            \param xyz_mm
+                A vector of positions for the atoms in the MM region.
+
+            \returns
+                A vector of forces for the QM and MM atoms.
+         */
+        boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
+                QVector<int> numbers_qm,
+                QVector<double> charges_mm,
+                QVector<QVector<double>> xyz_qm,
+                QVector<QVector<double>> xyz_mm
+        );
+
+    protected:
+        OpenMM::ForceImpl *createImpl() const;
+
+    private:
+        EMLECallback callback;
+        SireUnits::Dimension::Length cutoff;
+        double lambda;
+    };
+
+#ifdef SIRE_USE_CUSTOMCPPFORCE
+    class EMLEEngineImpl : public OpenMM::CustomCPPForceImpl
+    {
+    public:
+        EMLEEngineImpl(const EMLEEngine &owner);
+
+        ~EMLEEngineImpl();
+
+        double computeForce(OpenMM::ContextImpl &context,
+                            const std::vector<OpenMM::Vec3> &positions,
+                            std::vector<OpenMM::Vec3> &forces);
+
+        const EMLEEngine &getOwner() const;
+
+    private:
+        const EMLEEngine &owner;
+    };
+#endif
 }
 
 SIRE_END_HEADER

@@ -26,28 +26,28 @@
   *
 \*********************************************/
 
-#include "emlecallback.h"
+#ifndef SIREOPENMM_QMMM_H
+#define SIREOPENMM_QMMM_H
 
-using namespace SireOpenMM;
+#include "OpenMM.h"
+#include "openmm/Force.h"
 
-EMLECallback::EMLECallback(bp::object py_object, QString callback) :
-    py_object(py_object), callback(callback)
+#include "sireglobal.h"
+
+SIRE_BEGIN_HEADER
+
+namespace SireOpenMM
 {
+    class QMMMEngine : public OpenMM::Force
+    {
+    public:
+        QMMMEngine();
+
+    protected:
+        virtual OpenMM::ForceImpl *createImpl() const = 0;
+    };
 }
 
-boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
-EMLECallback::call(
-    QVector<int> numbers_qm,
-    QVector<double> charges_mm,
-    QVector<QVector<double>> xyz_qm,
-    QVector<QVector<double>> xyz_mm)
-{
-    return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
-            this->py_object.ptr(),
-            this->callback.toStdString().c_str(),
-            numbers_qm,
-            charges_mm,
-            xyz_qm,
-            xyz_mm
-    );
-}
+SIRE_END_HEADER
+
+#endif

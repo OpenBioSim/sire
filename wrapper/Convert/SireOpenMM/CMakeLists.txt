@@ -52,10 +52,11 @@ if (${SIRE_USE_OPENMM})
           _SireOpenMM.main.cpp
 
           customforce.cpp
-          emlecallback.cpp
+          emle.cpp
           lambdalever.cpp
           openmmminimise.cpp
           openmmmolecule.cpp
+          qmmm.cpp
           sire_openmm.cpp
           sire_to_openmm_system.cpp
 
