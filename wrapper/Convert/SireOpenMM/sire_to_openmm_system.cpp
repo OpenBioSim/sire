@@ -47,6 +47,7 @@
 
 #include "openmmmolecule.h"
 #include "customforce.h"
+#include "emle.h"
 
 #include <QDebug>
 
