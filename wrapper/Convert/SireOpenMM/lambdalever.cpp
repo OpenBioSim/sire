@@ -670,12 +670,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         cljff->updateParametersInContext(context);
 
     if (ghost_ghostff)
-        // ghost_ghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        ghost_ghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
+#else
         ghost_ghostff->updateParametersInContext(context);
+#endif
 
     if (ghost_nonghostff)
-        // ghost_nonghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        ghost_nonghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
+#else
         ghost_nonghostff->updateParametersInContext(context);
+#endif
 
     if (ghost_14ff)
         ghost_14ff->updateParametersInContext(context);

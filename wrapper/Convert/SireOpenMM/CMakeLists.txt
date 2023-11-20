@@ -24,6 +24,25 @@ if (${SIRE_USE_OPENMM})
     # Other python wrapping directories
     include_directories(${CMAKE_SOURCE_DIR})
 
+    # Check to see if we have support for updating some parameters in context
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles( "#include <openmm/CustomNonbondedForce.h>
+                                 int main() {
+                                   OpenMM::CustomNonbondedForce *force;
+                                   OpenMM::Context *context;
+                                   force->updateSomeParametersInContext(0, 0, *context);
+                                   return 0;
+                                 }"
+                               SIREOPENMM_HAS_UPDATESOMEPARAMETERSINCONTEXT )
+
+    if ( ${SIREOPENMM_HAS_UPDATESOMEPARAMETERSINCONTEXT} )
+      message( STATUS "OpenMM has support for updating some parameters in context")
+      add_definitions("-DSIRE_HAS_UPDATE_SOME_IN_CONTEXT")
+    else()
+      message( STATUS "OpenMM does not have support for updating some parameters in context")
+      message( STATUS "The free energy code will be a little slower.")
+    endif()
+
     # Define the sources in SireOpenMM
     set ( SIREOPENMM_SOURCES
 
