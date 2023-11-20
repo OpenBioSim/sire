@@ -30,6 +30,10 @@
 
 using namespace SireOpenMM;
 
+EMLECallback::EMLECallback()
+{
+}
+
 EMLECallback::EMLECallback(bp::object py_object, QString callback) :
     py_object(py_object), callback(callback)
 {
@@ -50,6 +54,10 @@ EMLECallback::call(
             xyz_qm,
             xyz_mm
     );
+}
+
+EMLEEngine::EMLEEngine()
+{
 }
 
 EMLEEngine::EMLEEngine(bp::object py_object, SireUnits::Dimension::Length cutoff, double lambda) :
@@ -77,6 +85,21 @@ void EMLEEngine::setCutoff(SireUnits::Dimension::Length cutoff)
 SireUnits::Dimension::Length EMLEEngine::getCutoff() const
 {
     return this->cutoff;
+}
+
+void EMLEEngine::setAtoms(QVector<int> ml_indices)
+{
+    this->ml_indices = ml_indices;
+}
+
+const char *EMLEEngine::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<EMLEEngine>());
+}
+
+const char *EMLEEngine::what() const
+{
+    return EMLEEngine::typeName();
 }
 
 OpenMM::ForceImpl *EMLEEngine::createImpl() const

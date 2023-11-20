@@ -910,6 +910,7 @@ class Dynamics:
         coulomb_power=None,
         restraints=None,
         fixed=None,
+        qm_engine=None,
     ):
         from ..base import create_map
         from .. import u
@@ -935,6 +936,7 @@ class Dynamics:
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
         _add_extra(extras, "fixed", fixed)
+        _add_extra(extras, "qm_engine", qm_engine)
 
         map = create_map(map, extras)
 

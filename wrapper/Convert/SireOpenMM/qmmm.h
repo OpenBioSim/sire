@@ -34,14 +34,23 @@
 
 #include "sireglobal.h"
 
+#include "SireBase/property.h"
+
 SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
-    class QMMMEngine : public OpenMM::Force
+    class QMMMEngine;
+}
+
+namespace SireOpenMM
+{
+    typedef SireBase::PropPtr<SireOpenMM::QMMMEngine> QMMEnginePtr;
+
+    class QMMMEngine : public SireBase::Property, public OpenMM::Force
     {
     public:
-        QMMMEngine();
+        virtual ~QMMMEngine();
 
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;

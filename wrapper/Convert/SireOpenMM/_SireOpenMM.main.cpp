@@ -175,7 +175,9 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
     register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
 
-    bp::class_<EMLEEngine>("EMLEEngine",
+    bp::class_<QMMMEngine, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMEngine", bp::no_init);
+
+    bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMMMEngine, SireBase::Property>>("EMLEEngine",
             bp::init<bp::object, SireUnits::Dimension::Length, double>(
                 (
                     bp::arg("py_object"), bp::arg("cutoff")=SireUnits::Dimension::Length(8.0), bp::arg("lambda")=1.0
@@ -188,6 +190,8 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             .def("setLambda", &EMLEEngine::setLambda, "Set the lambda value")
             .def("getCutoff", &EMLEEngine::getCutoff, "Get the cutoff value")
             .def("setCutoff", &EMLEEngine::setCutoff, "Set the cutoff value")
+            .def("what", &EMLEEngine::what, "Call the callback")
+            .def("typeName", &EMLEEngine::typeName, "Call the callback")
             .def("call", &EMLEEngine::call, "Call the callback");
 
     bp::class_<EMLECallback>("EMLECallback",

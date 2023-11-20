@@ -59,6 +59,9 @@ namespace SireOpenMM
     class EMLECallback
     {
     public:
+        //! Default constructor.
+        EMLECallback();
+
         //! Constructor
         /*! \param py_object
                 A Python object that contains the callback function.
@@ -100,9 +103,12 @@ namespace SireOpenMM
         QString callback;
     };
 
-	class EMLEEngine : public QMMMEngine
+    class EMLEEngine : public SireBase::ConcreteProperty<EMLEEngine, QMMMEngine>
     {
     public:
+        //! Default constructor.
+        EMLEEngine();
+
         //! Constructor
         /*! \param py_object
                 An EMLECalculator Python object.
@@ -116,17 +122,30 @@ namespace SireOpenMM
          */
         EMLEEngine(
             bp::object,
-            SireUnits::Dimension::Length cutoff=8.0*SireUnits::angstrom, 
+            SireUnits::Dimension::Length cutoff=8.0*SireUnits::angstrom,
             double lambda=1.0
         );
 
+        //! Get the lambda weighting factor.
         double getLambda() const;
 
+        //! Set the lambda weighting factor.
         void setLambda(double lambda);
 
+        //! Get the QM cutoff distance.
         SireUnits::Dimension::Length getCutoff() const;
 
+        //! Set the QM cutoff distance.
         void setCutoff(SireUnits::Dimension::Length cutoff);
+
+        //! Set the list of atom indices for the QM region.
+        void setAtoms(QVector<int> ml_indices);
+
+        //! Return the C++ name for this class.
+        static const char *typeName();
+
+        //! Return the C++ name for this class.
+        const char *what() const;
 
         //! Constructor
         /*! \param numbers_qm
@@ -158,6 +177,7 @@ namespace SireOpenMM
         EMLECallback callback;
         SireUnits::Dimension::Length cutoff;
         double lambda;
+        QVector<int> ml_indices;
     };
 
 #ifdef SIRE_USE_CUSTOMCPPFORCE
@@ -179,6 +199,8 @@ namespace SireOpenMM
     };
 #endif
 }
+
+Q_DECLARE_METATYPE(SireOpenMM::EMLEEngine)
 
 SIRE_END_HEADER
 

@@ -594,6 +594,10 @@ class System:
             that should be fixed in place during the simulation. These
             atoms will not be moved by dynamics.
 
+        qm_engine:
+            A QMMMEngine object to used to compute QM/MM forces and energies
+            on a subset of the atoms in the system.
+
         platform: str
             The name of the OpenMM platform on which to run the dynamics,
             e.g. "CUDA", "OpenCL", "Metal" etc.

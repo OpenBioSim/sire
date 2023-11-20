@@ -1600,6 +1600,7 @@ def _dynamics(
     platform=None,
     device=None,
     precision=None,
+    qm_engine=None,
     map=None,
 ):
     """
@@ -1864,6 +1865,7 @@ def _dynamics(
         ignore_perturbations=ignore_perturbations,
         restraints=restraints,
         fixed=fixed,
+        qm_engine=qm_engine,
         map=map,
     )
 
