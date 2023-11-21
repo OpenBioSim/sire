@@ -42,13 +42,6 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
-    class QMMMEngine;
-}
-
-namespace SireOpenMM
-{
-    typedef SireBase::PropPtr<SireOpenMM::QMMMEngine> QMMEnginePtr;
-
     class QMMMEngine : public SireBase::Property, public OpenMM::Force
     {
     public:
@@ -69,6 +62,8 @@ namespace SireOpenMM
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };
+
+    typedef SireBase::PropPtr<SireOpenMM::QMMMEngine> QMMEnginePtr;
 }
 
 SIRE_END_HEADER
