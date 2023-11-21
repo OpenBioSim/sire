@@ -736,6 +736,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         gridff = new GridForce();
     }
 
+    // now create the engine for computing QM or ML forces on atoms
+    QMMMEngine *qmff = 0;
+
+    if (map.specified("qm_engine"))
+    {
+        auto &qmff = map["qm_engine"].value().asA<QMMMEngine>();
+    }
+
     // end of stage 2 - we now have the base forces
 
     ///
