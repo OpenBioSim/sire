@@ -17,7 +17,7 @@ if (${SIRE_USE_OPENMM})
     # Third Party dependencies of this module
     include_directories( ${OpenMM_INCLUDE_DIR} )
     add_definitions("-DSIRE_USE_OPENMM")
-    add_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS)
+    add_definitions("-DQT_NO_SIGNALS_SLOTS_KEYWORDS")
 
     # Sire include paths
     include_directories( BEFORE ${SIRE_INCLUDE_DIR} )
