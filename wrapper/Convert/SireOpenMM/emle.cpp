@@ -30,6 +30,15 @@
 
 using namespace SireOpenMM;
 
+class GILLock
+{
+public:
+    GILLock()  { state_ = PyGILState_Ensure(); }
+    ~GILLock() { PyGILState_Release(state_);   }
+private:
+    PyGILState_STATE state_;
+};
+
 EMLECallback::EMLECallback()
 {
 }
@@ -46,13 +55,16 @@ EMLECallback::call(
     QVector<QVector<double>> xyz_qm,
     QVector<QVector<double>> xyz_mm) const
 {
+    // Acquire GIL before calling Python code.
+    GILLock lock;
+
     return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
-            this->py_object.ptr(),
-            this->callback.toStdString().c_str(),
-            numbers_qm,
-            charges_mm,
-            xyz_qm,
-            xyz_mm
+        this->py_object.ptr(),
+        this->callback.toStdString().c_str(),
+        numbers_qm,
+        charges_mm,
+        xyz_qm,
+        xyz_mm
     );
 }
 
