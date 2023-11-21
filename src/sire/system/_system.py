@@ -825,9 +825,7 @@ class System:
             # we need to create this trajectory
             from ..maths import EnergyTrajectory
 
-            self._system.set_property(
-                traj_propname.source(), EnergyTrajectory()
-            )
+            self._system.set_property(traj_propname.source(), EnergyTrajectory())
 
             traj = self._system.property(traj_propname)
 
@@ -863,8 +861,7 @@ class System:
 
         if trajectory.what() != "SireMaths::EnergyTrajectory":
             raise TypeError(
-                f"You cannot set a {type(trajectory)} as an "
-                "energy trajectory!"
+                f"You cannot set a {type(trajectory)} as an " "energy trajectory!"
             )
 
         self._system.set_property(traj_propname.source(), trajectory)
@@ -873,7 +870,7 @@ class System:
         """
         Set the specified molecule to be a QM molecule.
         """
-        if index < 0 or index > self.num_molecules()-1:
+        if index < 0 or index > self.num_molecules() - 1:
             raise ValueError(
                 f"Index {index} is out of range for the number of "
                 f"molecules in this system ({self.num_molecules()})"
@@ -893,9 +890,7 @@ class System:
             qm_mols = []
 
         if len(qm_mols) > 0:
-            raise ValueError(
-                "This system already contains a QM molecule!"
-            )
+            raise ValueError("This system already contains a QM molecule!")
 
         # Extract the molecule.
         mol = self[index]
