@@ -805,6 +805,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         lambda_lever.addLever("field_scale");
     }
 
+    if (qmff != 0)
+    {
+        lambda_lever.setForceIndex("qm", system.addForce(qmff));
+        lambda_lever.addLever("qm_scale");
+    }
+
     ///
     /// Stage 4 - define the forces for ghost atoms
     ///

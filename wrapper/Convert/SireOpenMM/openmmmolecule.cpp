@@ -179,6 +179,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     }
 
     bool is_perturbable = false;
+    bool is_qm = false;
     bool swap_end_states = false;
 
     if (mol.hasProperty(map["is_perturbable"]))
@@ -189,6 +190,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             swap_end_states = map["swap_end_states"].value().asABoolean();
         }
+    }
+
+    if (mol.hasProperty(map["is_qm"]))
+    {
+        is_qm = mol.property(map["is_qm"]).asABoolean();
     }
 
     if (is_perturbable)
@@ -293,6 +299,22 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             field_atoms.reset(new FieldAtoms(atms, map));
     }
 
+    if (mol.hasProperty(map["is_qm"]))
+    {
+        if (mol.property(map["is_qm"]).asABoolean())
+        {
+            // remove all internal terms
+            bond_params.clear();
+            ang_params.clear();
+            dih_params.clear();
+            constraints.clear();
+            virtual_sites.clear();
+            light_atoms.clear();
+            unbonded_atoms.clear();
+            perturbed.reset();
+        }
+    }
+
     if (ffinfo.isAmberStyle())
     {
         if (is_perturbable)
@@ -331,16 +353,21 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             const auto params1 = SireMM::AmberParams(mol, map1);
 
             perturbed.reset(new OpenMMMolecule(*this));
-            perturbed->constructFromAmber(mol, params1, params, map1, true);
+            perturbed->constructFromAmber(mol, params1, params, map1, true, false);
 
-            this->constructFromAmber(mol, params, params1, map0, true);
+            this->constructFromAmber(mol, params, params1, map0, true, false);
 
             this->alignInternals(map);
+        }
+        else if (is_qm)
+        {
+            const auto params = SireMM::AmberParams(mol, map);
+            this->constructFromAmber(mol, params, params, map, false, true);
         }
         else
         {
             const auto params = SireMM::AmberParams(mol, map);
-            this->constructFromAmber(mol, params, params, map, false);
+            this->constructFromAmber(mol, params, params, map, false, false);
         }
     }
     else
@@ -513,8 +540,15 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                         const AmberParams &params,
                                         const AmberParams &params1,
                                         const PropertyMap &map,
-                                        bool is_perturbable)
+                                        bool is_perturbable,
+                                        bool is_qm)
 {
+    if (is_perturbable and is_qm)
+    {
+        throw SireError::invalid_key(QObject::tr(
+            "We currently do not support perturbable QM molecules."), CODELOC);
+    }
+
     const auto &moldata = mol.data();
 
     if (this->hasFieldAtoms())
@@ -660,17 +694,21 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     this->cljs = QVector<std::tuple<double, double, double>>(nats, std::make_tuple(0.0, 0.0, 0.0));
     auto cljs_data = cljs.data();
 
-    for (int i = 0; i < nats; ++i)
+    // cljs are zeroed for QM molecules
+    if (not is_qm)
     {
-        const auto &cgatomidx = idx_to_cgatomidx_data[i];
+        for (int i = 0; i < nats; ++i)
+        {
+            const auto &cgatomidx = idx_to_cgatomidx_data[i];
 
-        const double chg = params_charges.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
+            const double chg = params_charges.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
 
-        const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
-        const double sig = lj.sigma().to(SireUnits::nanometer);
-        const double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
+            const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
+            const double sig = lj.sigma().to(SireUnits::nanometer);
+            const double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
 
-        cljs_data[i] = std::make_tuple(chg, sig, eps);
+            cljs_data[i] = std::make_tuple(chg, sig, eps);
+        }
     }
 
     this->bond_params.clear();

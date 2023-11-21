@@ -217,7 +217,8 @@ namespace SireOpenMM
                                 const SireMM::AmberParams &params,
                                 const SireMM::AmberParams &params1,
                                 const SireBase::PropertyMap &map,
-                                bool is_perturbable);
+                                bool is_perturbable=false,
+                                bool is_qm=false);
 
         void buildExceptions(const SireMol::Molecule &mol,
                              const QVector<int> &atomidx_to_idx,
