@@ -879,10 +879,16 @@ class System:
                 f"molecules in this system ({self.num_molecules()})"
             )
 
+        from ..base import create_map
+
+        map = create_map(map)
+
+        qm_propname = map["is_qm"]
+
         # Check for existing QM molecules. Currently we only support a single
         # molecule.
         try:
-            qm_mols = self["property is_qm"].molecules()
+            qm_mols = self[f"property {qm_propname}"].molecules()
         except:
             qm_mols = []
 
@@ -898,7 +904,7 @@ class System:
         c = mol.cursor()
 
         # Flag the molecule as QM.
-        c["is_qm"] = True
+        c[qm_propname] = True
 
         # Commit the changes and update.
         mol = c.commit()
@@ -909,11 +915,17 @@ class System:
         Unset the QM molecule.
         """
         try:
+            from ..base import create_map
+
+            map = create_map(map)
+
+            qm_propname = map["is_qm"]
+
             # Loop over the QM molecules and unset them.
-            qm_mols = self["property is_qm"].molecules()
+            qm_mols = self[f"property {qm_propname}"].molecules()
             for mol in qm_mols:
                 c = mol.cursor()
-                c["is_qm"] = False
+                c[qm_propname] = False
                 mol = c.commit()
                 self.update(mol)
         except:
