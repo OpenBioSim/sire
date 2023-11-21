@@ -44,7 +44,7 @@ EMLECallback::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
-    QVector<QVector<double>> xyz_mm)
+    QVector<QVector<double>> xyz_mm) const
 {
     return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
             this->py_object.ptr(),
@@ -148,7 +148,7 @@ EMLEEngine::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
-    QVector<QVector<double>> xyz_mm)
+    QVector<QVector<double>> xyz_mm) const
 {
     return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
 }

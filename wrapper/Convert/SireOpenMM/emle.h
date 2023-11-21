@@ -96,7 +96,7 @@ namespace SireOpenMM
                 QVector<double> charges_mm,
                 QVector<QVector<double>> xyz_qm,
                 QVector<QVector<double>> xyz_mm
-        );
+        ) const;
 
     private:
         bp::object py_object;
@@ -171,7 +171,7 @@ namespace SireOpenMM
                 QVector<double> charges_mm,
                 QVector<QVector<double>> xyz_qm,
                 QVector<QVector<double>> xyz_mm
-        );
+        ) const;
 
     protected:
         OpenMM::ForceImpl *createImpl() const;
