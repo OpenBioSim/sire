@@ -915,6 +915,15 @@ class Dynamics:
         from ..base import create_map
         from .. import u
 
+        # Set the global indices of the QM atoms in the engine.
+        if qm_engine is not None and mols is not None:
+            try:
+                atoms_to_find = mols["property is_qm"].atoms()
+                idxs = mols.atoms().find(atoms_to_find)
+                qm_engine.setAtoms(idxs)
+            except:
+                raise ValueError("Unable to set QM atoms in the engine.")
+
         extras = {}
 
         _add_extra(extras, "cutoff", cutoff)
