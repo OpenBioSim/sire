@@ -138,8 +138,11 @@ namespace SireOpenMM
         //! Set the QM cutoff distance.
         void setCutoff(SireUnits::Dimension::Length cutoff);
 
+        //! Get the indices of the atoms in the QM region.
+        QVector<int> getAtoms() const;
+
         //! Set the list of atom indices for the QM region.
-        void setAtoms(QVector<int> ml_indices);
+        void setAtoms(QVector<int> atoms);
 
         //! Return the C++ name for this class.
         static const char *typeName();
@@ -177,7 +180,7 @@ namespace SireOpenMM
         EMLECallback callback;
         SireUnits::Dimension::Length cutoff;
         double lambda;
-        QVector<int> ml_indices;
+        QVector<int> atoms;
     };
 
 #ifdef SIRE_USE_CUSTOMCPPFORCE

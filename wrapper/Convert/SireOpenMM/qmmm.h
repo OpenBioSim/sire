@@ -36,6 +36,8 @@
 
 #include "SireBase/property.h"
 
+#include "SireUnits/dimensions.h"
+
 SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
@@ -51,6 +53,18 @@ namespace SireOpenMM
     {
     public:
         virtual ~QMMMEngine();
+
+        //! Get the QM cutoff distance.
+        virtual SireUnits::Dimension::Length getCutoff() const = 0;
+
+        //! Set the QM cutoff distance.
+        virtual void setCutoff(SireUnits::Dimension::Length cutoff) = 0;
+
+        //! Get the indices of the atoms in the QM region.
+        virtual QVector<int> getAtoms() const = 0;
+
+        //! Set the list of atom indices for the QM region.
+        virtual void setAtoms(QVector<int>) = 0;
 
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;

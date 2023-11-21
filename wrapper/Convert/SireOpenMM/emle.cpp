@@ -87,9 +87,14 @@ SireUnits::Dimension::Length EMLEEngine::getCutoff() const
     return this->cutoff;
 }
 
-void EMLEEngine::setAtoms(QVector<int> ml_indices)
+QVector<int> EMLEEngine::getAtoms() const
 {
-    this->ml_indices = ml_indices;
+    return this->atoms;
+}
+
+void EMLEEngine::setAtoms(QVector<int> atoms)
+{
+    this->atoms = atoms;
 }
 
 const char *EMLEEngine::typeName()

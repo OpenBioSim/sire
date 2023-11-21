@@ -190,6 +190,8 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             .def("setLambda", &EMLEEngine::setLambda, "Set the lambda value")
             .def("getCutoff", &EMLEEngine::getCutoff, "Get the cutoff value")
             .def("setCutoff", &EMLEEngine::setCutoff, "Set the cutoff value")
+            .def("getAtoms", &EMLEEngine::getAtoms, "Get QM atom indices")
+            .def("setAtoms", &EMLEEngine::setAtoms, "Set the QM atom indices")
             .def("what", &EMLEEngine::what, "Call the callback")
             .def("typeName", &EMLEEngine::typeName, "Call the callback")
             .def("call", &EMLEEngine::call, "Call the callback");
