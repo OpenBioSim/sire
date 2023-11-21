@@ -741,7 +741,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     if (map.specified("qm_engine"))
     {
-        auto &qmff = map["qm_engine"].value().asA<QMMMEngine>();
+        qmff = const_cast<QMMMEngine*>(&map["qm_engine"].value().asA<QMMMEngine>());
     }
 
     // end of stage 2 - we now have the base forces
