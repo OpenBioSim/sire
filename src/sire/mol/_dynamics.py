@@ -922,7 +922,10 @@ class Dynamics:
                 idxs = mols.atoms().find(atoms_to_find)
                 qm_engine.setAtoms(idxs)
             except:
-                raise ValueError("Unable to set QM atoms in the engine.")
+                raise ValueError(
+                    "Unable to set QM atoms in the engine. "
+                    "Have you set a QM molecule?"
+                )
 
         extras = {}
 
