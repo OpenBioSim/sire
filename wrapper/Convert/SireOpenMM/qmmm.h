@@ -59,6 +59,12 @@ namespace SireOpenMM
         //! Set the list of atom indices for the QM region.
         virtual void setAtoms(QVector<int>) = 0;
 
+        //! Get the atomic numbers of the atoms in the QM region.
+        virtual QVector<int> getNumbers() const = 0;
+
+        //! Set the list of atomic numbers for the QM region.
+        virtual void setNumbers(QVector<int>) = 0;
+
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };
