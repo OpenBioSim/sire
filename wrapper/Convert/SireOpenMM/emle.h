@@ -126,6 +126,18 @@ namespace SireOpenMM
             double lambda=1.0
         );
 
+        //! Copy constructor.
+        EMLEEngine(const EMLEEngine &other);
+
+        //! Assignment operator.
+        EMLEEngine &operator=(const EMLEEngine &other);
+
+        //! Set the callback object.
+        void setCallback(EMLECallback callback);
+
+        //! Get the callback object.
+        EMLECallback getCallback() const;
+
         //! Get the lambda weighting factor.
         double getLambda() const;
 

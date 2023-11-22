@@ -79,6 +79,31 @@ EMLEEngine::EMLEEngine(bp::object py_object, SireUnits::Dimension::Length cutoff
 {
 }
 
+EMLEEngine::EMLEEngine(const EMLEEngine &other) :
+    callback(other.callback),
+    cutoff(other.cutoff),
+    lambda(other.lambda)
+{
+}
+
+EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
+{
+    this->callback = other.callback;
+    this->cutoff = other.cutoff;
+    this->lambda = other.lambda;
+    return *this;
+}
+
+void EMLEEngine::setCallback(EMLECallback callback)
+{
+    this->callback = callback;
+}
+
+EMLECallback EMLEEngine::getCallback() const
+{
+    return this->callback;
+}
+
 void EMLEEngine::setLambda(double lambda)
 {
     this->lambda = lambda;
@@ -152,6 +177,15 @@ double EMLEEngineImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
+    qDebug() << "Hello from C++!";
+
+    // Create some dummy data so that we can test the Python callback.
+    QVector<int> a = {1, 2, 3};
+    QVector<double> b = {1.0, 2.0, 3.0};
+    QVector<QVector<double>> c = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+    QVector<QVector<double>> d = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
+    auto result = this->owner.call(a, b, c, d);
+
     return 0;
 }
 
