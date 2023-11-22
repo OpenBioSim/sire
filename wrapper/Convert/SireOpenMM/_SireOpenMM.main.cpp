@@ -50,6 +50,9 @@ void *extract_swig_wrapped_pointer(PyObject *obj)
     return pointer;
 }
 
+// Copy constructor for Python bindings.
+SireOpenMM::EMLEEngine __copy__(const SireOpenMM::EMLEEngine &other){ return SireOpenMM::EMLEEngine(other); }
+
 BOOST_PYTHON_MODULE(_SireOpenMM)
 {
     bp::class_<OpenMMMetaData> OpenMMMetaData_exposer_t("OpenMMMetaData",
@@ -194,7 +197,10 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             .def("setAtoms", &EMLEEngine::setAtoms, "Set the QM atom indices")
             .def("what", &EMLEEngine::what, "Call the callback")
             .def("typeName", &EMLEEngine::typeName, "Call the callback")
-            .def("call", &EMLEEngine::call, "Call the callback");
+            .def("call", &EMLEEngine::call, "Call the callback")
+            .def( "__copy__", &__copy__)
+            .def( "__deepcopy__", &__copy__)
+            .def( "clone", &__copy__);
 
     bp::class_<EMLECallback>("EMLECallback",
             bp::init<bp::object, QString>(
