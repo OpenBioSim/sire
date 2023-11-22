@@ -741,9 +741,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     if (map.specified("qm_engine"))
     {
-        // we need to cast away constness since the OpenMM::System::addForce
-        // method expects a non-const pointer.
-        qmff = const_cast<QMMMEngine*>(&map["qm_engine"].value().asA<QMMMEngine>());
+        try
+        {
+            auto &engine = map["qm_engine"].value().asA<EMLEEngine>();
+            qmff = new EMLEEngine(engine);
+        }
+        catch (...)
+        {
+            throw SireError::incompatible_error(QObject::tr("Invalid QM engine!"), CODELOC);
+        }
     }
 
     // end of stage 2 - we now have the base forces
