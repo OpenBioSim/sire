@@ -920,7 +920,7 @@ class Dynamics:
             try:
                 atoms_to_find = mols["property is_qm"].atoms()
                 idxs = mols.atoms().find(atoms_to_find)
-                qm_engine.setAtoms(idxs)
+                qm_engine.set_atoms(idxs)
             except:
                 raise ValueError(
                     "Unable to set QM atoms in the engine. "

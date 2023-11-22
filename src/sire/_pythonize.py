@@ -224,6 +224,9 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
         delete_old=delete_old,
     )
 
+    # Pythonize the EMLEEngine class.
+    _pythonize(Convert._SireOpenMM.EMLEEngine, delete_old=delete_old)
+
     try:
         import lazy_import
 
