@@ -162,6 +162,12 @@ namespace SireOpenMM
         //! Set the atomic numbers for the atoms in the QM region.
         void setNumbers(QVector<int> numbers);
 
+        //! Get the atomic charges of all atoms in the system.
+        QVector<double> getCharges() const;
+
+        //! Set the atomic charges of all atoms in the system.
+        void setCharges(QVector<double> charges);
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -200,6 +206,7 @@ namespace SireOpenMM
         double lambda;
         QVector<int> atoms;
         QVector<int> numbers;
+        QVector<double> charges;
     };
 
 #ifdef SIRE_USE_CUSTOMCPPFORCE

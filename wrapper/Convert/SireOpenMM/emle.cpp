@@ -26,9 +26,14 @@
   *
 \*********************************************/
 
+#include "SireMaths/vector.h"
+#include "SireVol/triclinicbox.h"
+
 #include "emle.h"
 
+using namespace SireMaths;
 using namespace SireOpenMM;
+using namespace SireVol;
 
 class GILLock
 {
@@ -84,7 +89,8 @@ EMLEEngine::EMLEEngine(const EMLEEngine &other) :
     cutoff(other.cutoff),
     lambda(other.lambda),
     atoms(other.atoms),
-    numbers(other.numbers)
+    numbers(other.numbers),
+    charges(other.charges)
 {
 }
 
@@ -95,6 +101,7 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     this->lambda = other.lambda;
     this->atoms = other.atoms;
     this->numbers = other.numbers;
+    this->charges = other.charges;
     return *this;
 }
 
@@ -148,6 +155,16 @@ void EMLEEngine::setNumbers(QVector<int> numbers)
     this->numbers = numbers;
 }
 
+QVector<double> EMLEEngine::getCharges() const
+{
+    return this->charges;
+}
+
+void EMLEEngine::setCharges(QVector<double> charges)
+{
+    this->charges = charges;
+}
+
 const char *EMLEEngine::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<EMLEEngine>());
@@ -191,22 +208,143 @@ double EMLEEngineImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
-    qDebug() << "Hello from C++!";
+    // Get the current box vectors. (OpenMM units, i.e. nm)
+    OpenMM::Vec3 omm_box_x, omm_box_y, omm_box_z;
+    context.getPeriodicBoxVectors(omm_box_x, omm_box_y, omm_box_z);
 
-    // Create some dummy data so that we can test the Python callback.
-    QVector<int> a = {1, 2, 3};
-    QVector<double> b = {1.0, 2.0, 3.0};
-    QVector<QVector<double>> c = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-    QVector<QVector<double>> d = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
-    auto result = this->owner.call(a, b, c, d);
+    // Convert to Sire vectors. (Sire units, i.e. Angstrom)
+    Vector box_x(0.1*omm_box_x[0], 0.1*omm_box_x[1], 0.1*omm_box_x[2]);
+    Vector box_y(0.1*omm_box_y[0], 0.1*omm_box_y[1], 0.1*omm_box_y[2]);
+    Vector box_z(0.1*omm_box_z[0], 0.1*omm_box_z[1], 0.1*omm_box_z[2]);
 
-    const auto ref_pos = positions[this->owner.getAtoms()[0]];
+    // Create a triclinic space.
+    TriclinicBox space(box_x, box_y, box_z);
 
-    qDebug() << "Reference position:" << ref_pos[0] << ref_pos[1] << ref_pos[2];
-    qDebug() << this->owner.getAtoms();
-    qDebug() << this->owner.getNumbers();
+    // Initialise a vector to hold the current positions for the QM atoms.
+    QVector<QVector<double>> xyz_qm(this->owner.getAtoms().size());
+    QVector<Vector> xyz_qm_vec(this->owner.getAtoms().size());
 
-    return 0;
+    // Loop over all atoms in the QM region, get the OpenMM posistion,
+    // then store it in Angstroms. We also store in Sire Vector format
+    // so that we can use the Sire space to compute the distances.
+    int i = 0;
+    for (const auto &idx : this->owner.getAtoms())
+    {
+        const auto &omm_pos = positions[idx];
+        QVector<double> pos = {0.1*omm_pos[0], 0.1*omm_pos[1], 0.1*omm_pos[2]};
+        Vector vec(pos[0], pos[1], pos[2]);
+        xyz_qm[i] = pos;
+        xyz_qm_vec[i] = vec;
+        i++;
+    }
+
+    // Next we need to work out the position of the MM atoms within the cutoff,
+    // along with their charges. Here the cutoff is applied by including MM atoms
+    // within the cutoff distance from any QM atom.
+
+    // Initialise a vector to hold the current positions for the MM atoms.
+    QVector<QVector<double>> xyz_mm;
+
+    // Initialise a vector to hold the charges for the MM atoms.
+    QVector<double> charges_mm;
+
+    // Initialise a list to hold the indices of the MM atoms.
+    QVector<int> idx_mm;
+
+    // Store the cutoff as a double.
+    const auto cutoff = this->owner.getCutoff().value();
+
+    // Loop over all of the OpenMM positions.
+    i = 0;
+    for (const auto &pos : positions)
+    {
+        // Exclude QM atoms.
+        if (not this->owner.getAtoms().contains(i))
+        {
+            // Whether to add the atom, i.e. it is an MM atom and is
+            // within the cutoff.
+            bool to_add = false;
+
+            // Store the position as a Vector.
+            const Vector mm_vec(0.1*pos[0], 0.1*pos[1], 0.1*pos[2]);
+
+            // Loop over all of the QM atoms.
+            for (const auto &qm_vec : xyz_qm_vec)
+            {
+                if (space.calcDist(mm_vec, qm_vec) < cutoff)
+                {
+                    // The current MM atom is within the cutoff, add it.
+                    to_add = true;
+                    break;
+                }
+            }
+
+            // Store the MM atom information.
+            if (to_add)
+            {
+                QVector<double> xyz = {mm_vec[0], mm_vec[1], mm_vec[2]};
+                xyz_mm.append(xyz);
+                charges_mm.append(this->owner.getCharges()[i]);
+                idx_mm.append(i);
+            }
+        }
+
+        // Update the atom index.
+        i++;
+    }
+
+    // Call the callback.
+    auto result = this->owner.call(
+        this->owner.getNumbers(),
+        charges_mm,
+        xyz_qm,
+        xyz_mm
+    );
+
+    // Extract the results. This will automatically be returned in
+    // OpenMM units.
+    auto energy = result.get<0>();
+    auto forces_qm = result.get<1>();
+    auto forces_mm = result.get<2>();
+
+    // Now update the force vector.
+
+    // First the QM atoms.
+    i = 0;
+    for (const auto &force : forces_qm)
+    {
+        // Get the index of the atom.
+        const auto idx = this->owner.getAtoms()[i];
+
+        // Convert to OpenMM format.
+        OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
+
+        // Update the force vector.
+        forces[idx] = omm_force;
+
+        // Update the atom index.
+        i++;
+    }
+
+    // Now the MM atoms.
+    i = 0;
+    for (const auto &force : forces_mm)
+    {
+        // Get the index of the atom.
+        const auto idx = idx_mm[i];
+
+        // Convert to OpenMM format.
+        OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
+
+        // Update the force vector.
+        forces[idx] = omm_force;
+
+        // Update the atom index.
+        i++;
+    }
+
+    // Finally, return the energy.
+    return energy;
 }
 
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>

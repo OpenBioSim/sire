@@ -65,6 +65,12 @@ namespace SireOpenMM
         //! Set the list of atomic numbers for the QM region.
         virtual void setNumbers(QVector<int>) = 0;
 
+        //! Get the atomic charges of all atoms in the system.
+        virtual QVector<double> getCharges() const = 0;
+
+        //! Set the atomic charges of all atoms in the system.
+        virtual void setCharges(QVector<double>) = 0;
+
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };
