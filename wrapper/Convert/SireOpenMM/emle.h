@@ -156,6 +156,12 @@ namespace SireOpenMM
         //! Set the list of atom indices for the QM region.
         void setAtoms(QVector<int> atoms);
 
+        //! Get the atomic numbers for the atoms in the QM region.
+        QVector<int> getNumbers() const;
+
+        //! Set the atomic numbers for the atoms in the QM region.
+        void setNumbers(QVector<int> numbers);
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -193,6 +199,7 @@ namespace SireOpenMM
         SireUnits::Dimension::Length cutoff;
         double lambda;
         QVector<int> atoms;
+        QVector<int> numbers;
     };
 
 #ifdef SIRE_USE_CUSTOMCPPFORCE

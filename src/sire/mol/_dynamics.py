@@ -918,9 +918,15 @@ class Dynamics:
         # Set the global indices of the QM atoms in the engine.
         if qm_engine is not None and mols is not None:
             try:
+                # Work out the indices of the QM atoms.
                 atoms_to_find = mols["property is_qm"].atoms()
                 idxs = mols.atoms().find(atoms_to_find)
                 qm_engine.set_atoms(idxs)
+
+                # Work out the atomic numbers of the QM atoms.
+                elem_prop = map["element"]
+                numbers = [atom.property(f"{elem_prop}").num_protons() for atom in atoms_to_find]
+                qm_engine.set_numbers(numbers)
             except:
                 raise ValueError(
                     "Unable to set QM atoms in the engine. "

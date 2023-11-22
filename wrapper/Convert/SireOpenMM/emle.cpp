@@ -82,7 +82,9 @@ EMLEEngine::EMLEEngine(bp::object py_object, SireUnits::Dimension::Length cutoff
 EMLEEngine::EMLEEngine(const EMLEEngine &other) :
     callback(other.callback),
     cutoff(other.cutoff),
-    lambda(other.lambda)
+    lambda(other.lambda),
+    atoms(other.atoms),
+    numbers(other.numbers)
 {
 }
 
@@ -91,6 +93,8 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     this->callback = other.callback;
     this->cutoff = other.cutoff;
     this->lambda = other.lambda;
+    this->atoms = other.atoms;
+    this->numbers = other.numbers;
     return *this;
 }
 
@@ -132,6 +136,16 @@ QVector<int> EMLEEngine::getAtoms() const
 void EMLEEngine::setAtoms(QVector<int> atoms)
 {
     this->atoms = atoms;
+}
+
+QVector<int> EMLEEngine::getNumbers() const
+{
+    return this->numbers;
+}
+
+void EMLEEngine::setNumbers(QVector<int> numbers)
+{
+    this->numbers = numbers;
 }
 
 const char *EMLEEngine::typeName()
@@ -185,6 +199,12 @@ double EMLEEngineImpl::computeForce(
     QVector<QVector<double>> c = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
     QVector<QVector<double>> d = {{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}};
     auto result = this->owner.call(a, b, c, d);
+
+    const auto ref_pos = positions[this->owner.getAtoms()[0]];
+
+    qDebug() << "Reference position:" << ref_pos[0] << ref_pos[1] << ref_pos[2];
+    qDebug() << this->owner.getAtoms();
+    qDebug() << this->owner.getNumbers();
 
     return 0;
 }
