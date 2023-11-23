@@ -262,6 +262,12 @@ def parse_args():
         "compatibility between Sire's and BioSimSpace's dependencies.",
     )
     parser.add_argument(
+        "--install-emle-deps",
+        action="store_true",
+        default=False,
+        help="Install emle-engine's dependencies too.",
+    )
+    parser.add_argument(
         "--skip-deps",
         action="store_true",
         default=False,
@@ -323,7 +329,7 @@ def _add_to_dependencies(dependencies, lines):
 _is_conda_prepped = False
 
 
-def conda_install(dependencies, install_bss_reqs=False):
+def conda_install(dependencies, install_bss_reqs=False, install_emle_reqs=False):
     """Install the passed list of dependencies using conda"""
 
     conda_exe = conda
@@ -332,9 +338,7 @@ def conda_install(dependencies, install_bss_reqs=False):
 
     if not _is_conda_prepped:
         if install_bss_reqs:
-            cmd = (
-                "%s config --prepend channels openbiosim/label/dev" % conda_exe
-            )
+            cmd = "%s config --prepend channels openbiosim/label/dev" % conda_exe
             print("Activating openbiosim channel channel using: '%s'" % cmd)
             status = subprocess.run(cmd.split())
             if status.returncode != 0:
@@ -384,8 +388,46 @@ def conda_install(dependencies, install_bss_reqs=False):
             print("from running again. Please re-execute this script.")
             sys.exit(-1)
 
+    # Install additional requirements for EMLE.
+    if install_emle_reqs:
+        # OpenMM 8.1.0beta.
+        cmd = [
+            "mamba",
+            "install",
+            "--yes",
+            "-c",
+            "conda-forge/label/openmm_rc",
+            "openmm=8.1.0beta",
+        ]
+        status = subprocess.run(cmd)
+        if status.returncode != 0:
+            print("Something went wrong installing OpenMM 8.1.0beta!")
+            sys.exit(-1)
 
-def install_requires(install_bss_reqs=False):
+        # librascal.
+        cmd = [
+            "pip",
+            "install",
+            "git+https://github.com/lab-cosmo/librascal.git",
+        ]
+        status = subprocess.run(cmd)
+        if status.returncode != 0:
+            print("Something went wrong installing librascal!")
+            sys.exit(-1)
+
+        # emle-engine.
+        cmd = [
+            "pip",
+            "install",
+            "git+https://github.com/chemle/emle-engine.git",
+        ]
+        status = subprocess.run(cmd)
+        if status.returncode != 0:
+            print("Something went wrong installing emle-engine!")
+            sys.exit(-1)
+
+
+def install_requires(install_bss_reqs=False, install_emle_reqs=False):
     """Installs all of the dependencies. This can safely be called
     multiple times, as it will cache the result to prevent future
     installs taking too long
@@ -393,9 +435,7 @@ def install_requires(install_bss_reqs=False):
     print(f"Installing requirements for {platform_string}")
 
     if not os.path.exists(conda):
-        print(
-            "\nSire can only be installed into a conda or miniconda environment."
-        )
+        print("\nSire can only be installed into a conda or miniconda environment.")
         print(
             "Please install conda, miniconda, miniforge or similar, then "
             "activate the conda environment, then rerun this installation "
@@ -408,7 +448,7 @@ def install_requires(install_bss_reqs=False):
 
     if mamba is None:
         # install mamba first!
-        conda_install(["mamba"], install_bss_reqs)
+        conda_install(["mamba"], install_bss_reqs, install_emle_reqs)
         mamba = find_mamba()
 
     try:
@@ -417,14 +457,14 @@ def install_requires(install_bss_reqs=False):
     except Exception:
         # this didn't import - maybe we are missing pip-requirements-parser
         print("Installing pip-requirements-parser")
-        conda_install(["pip-requirements-parser"], install_bss_reqs)
+        conda_install(
+            ["pip-requirements-parser"], install_bss_reqs, install_emle_reqs=False
+        )
         try:
             from parse_requirements import parse_requirements
         except ImportError as e:
             print("\n\n[ERROR] ** You need to install pip-requirements-parser")
-            print(
-                "Run `conda install -c conda-forge pip-requirements-parser\n\n"
-            )
+            print("Run `conda install -c conda-forge pip-requirements-parser\n\n")
             raise e
 
     reqs = parse_requirements("requirements_host.txt")
@@ -434,8 +474,12 @@ def install_requires(install_bss_reqs=False):
         bss_reqs = parse_requirements("requirements_bss.txt")
         reqs = reqs + bss_reqs
 
+    if install_emle_reqs:
+        emle_reqs = parse_requirements("requirements_emle.txt")
+        reqs = reqs + emle_reqs
+
     dependencies = build_reqs + reqs
-    conda_install(dependencies, install_bss_reqs)
+    conda_install(dependencies, install_bss_reqs, install_emle_reqs)
 
 
 def add_default_cmake_defs(cmake_defs, ncores):
@@ -481,10 +525,7 @@ def _get_build_ext():
         else:
             ext = ""
 
-        return (
-            os.path.basename(conda_base.replace(" ", "_").replace(".", "_"))
-            + ext
-        )
+        return os.path.basename(conda_base.replace(" ", "_").replace(".", "_")) + ext
 
 
 def _get_bin_dir():
@@ -533,12 +574,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
         print(f"{CC} => {CC_bin}")
 
         if CXX_bin is None or CC_bin is None:
-            print(
-                "Cannot find the compilers requested by conda-build in the PATH"
-            )
-            print(
-                "Please check that the compilers are installed and available."
-            )
+            print("Cannot find the compilers requested by conda-build in the PATH")
+            print("Please check that the compilers are installed and available.")
             sys.exit(-1)
 
         # use the full paths, in case CMake struggles
@@ -669,9 +706,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # Compile and install, as need to install to compile the wrappers
     make_args = make_cmd(ncores, True)
 
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -735,9 +770,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # Just compile the wrappers
     make_args = make_cmd(npycores, False)
 
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -810,9 +843,7 @@ def install_module(ncores: int = 1):
     make_args = make_cmd(ncores, True)
 
     # Now that cmake has run, we can compile and install wrapper
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -852,9 +883,7 @@ def install(ncores: int = 1, npycores: int = 1):
     # Now install the wrappers
     make_args = make_cmd(npycores, True)
 
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -875,6 +904,10 @@ if __name__ == "__main__":
         sys.exit(-1)
 
     install_bss = args.install_bss_deps
+    install_emle = args.install_emle_deps
+
+    if install_emle and is_windows:
+        raise NotImplementedError("EMLE is current not supported on Windows")
 
     action = args.action[0]
 
@@ -890,7 +923,9 @@ if __name__ == "__main__":
 
     if action == "install":
         if not (args.skip_deps or args.skip_build):
-            install_requires(install_bss_reqs=install_bss)
+            install_requires(
+                install_bss_reqs=install_bss, install_emle_reqs=install_emle
+            )
 
         if not args.skip_build:
             build(
@@ -914,7 +949,7 @@ if __name__ == "__main__":
         )
 
     elif action == "install_requires":
-        install_requires(install_bss_reqs=install_bss)
+        install_requires(install_bss_reqs=install_bss, install_emle_reqs=install_emle)
 
     elif action == "install_module":
         install_module(ncores=args.ncores[0])

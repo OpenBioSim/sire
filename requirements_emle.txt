@@ -1,0 +1,13 @@
+ambertools
+ase
+deepmd-kit
+eigen
+pip
+pybind11
+pytorch
+python < 3.11
+torchani
+xtb-python
+
+gcc< 13 ; sys_platform == "linux"
+gxx< 13 ; sys_platform == "linux"
