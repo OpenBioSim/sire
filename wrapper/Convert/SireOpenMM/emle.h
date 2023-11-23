@@ -70,8 +70,8 @@ namespace SireOpenMM
                 The name of a callback method that take the following arguments:
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
                     - charges_mm: A list of the MM charges in mod electron charge.
-                    - xyz_qm: A vector of positions for the atoms in the ML region in nanometers.
-                    - xyz_mm: A vector of positions for the atoms in the MM region in nanometers.
+                    - xyz_qm: A vector of positions for the atoms in the ML region in Angstrom.
+                    - xyz_mm: A vector of positions for the atoms in the MM region in Angstrom.
          */
         EMLECallback(bp::object, QString callback="_sire_callback");
 
@@ -83,10 +83,10 @@ namespace SireOpenMM
                 A vector of the charges on the MM atoms in mod electron charge.
 
             \param xyz_qm
-                A vector of positions for the atoms in the ML region in nanometers.
+                A vector of positions for the atoms in the ML region in Angstrom.
 
             \param xyz_mm
-                A vector of positions for the atoms in the MM region in nanometers.
+                A vector of positions for the atoms in the MM region in Angstrom.
 
             \returns
                 A tuple containing:
@@ -185,10 +185,10 @@ namespace SireOpenMM
                 A vector of the charges on the MM atoms in mod electron charge.
 
             \param xyz_qm
-                A vector of positions for the atoms in the ML region in nanometers.
+                A vector of positions for the atoms in the ML region in Angstrom.
 
             \param xyz_mm
-                A vector of positions for the atoms in the MM region in nanometers.
+                A vector of positions for the atoms in the MM region in Angstrom.
 
             \returns
                 A tuple containing:

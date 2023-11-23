@@ -33,7 +33,6 @@
 
 using namespace SireMaths;
 using namespace SireOpenMM;
-using namespace SireUnits;
 using namespace SireVol;
 
 class GILLock
@@ -209,17 +208,15 @@ double EMLEEngineImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
-    // Get the current box vectors. (OpenMM units, i.e. nm)
+    // Get the current box vectors in nanometers.
     OpenMM::Vec3 box_x, box_y, box_z;
     context.getPeriodicBoxVectors(box_x, box_y, box_z);
 
-    // Create a triclinic space. Internally, Sire would assume lengths are in
-    // Angstroms, but we will just convert the cutoff when comparing distances
-    // in this space.
+    // Create a triclinic space, converting to Angstrom.
     TriclinicBox space(
-        Vector(box_x[0], box_x[1], box_x[2]),
-        Vector(box_y[0], box_y[1], box_y[2]),
-        Vector(box_z[0], box_z[1], box_z[2])
+        Vector(0.1*box_x[0], 0.1*box_x[1], 0.1*box_x[2]),
+        Vector(0.1*box_y[0], 0.1*box_y[1], 0.1*box_y[2]),
+        Vector(0.1*box_z[0], 0.1*box_z[1], 0.1*box_z[2])
     );
 
     // Initialise a vector to hold the current positions for the QM atoms.
@@ -233,7 +230,7 @@ double EMLEEngineImpl::computeForce(
     for (const auto &idx : this->owner.getAtoms())
     {
         const auto &omm_pos = positions[idx];
-        QVector<double> pos = {omm_pos[0], omm_pos[1], omm_pos[2]};
+        QVector<double> pos = {0.1*omm_pos[0], 0.1*omm_pos[1], 0.1*omm_pos[2]};
         Vector vec(pos[0], pos[1], pos[2]);
         xyz_qm[i] = pos;
         xyz_qm_vec[i] = vec;
@@ -253,8 +250,8 @@ double EMLEEngineImpl::computeForce(
     // Initialise a list to hold the indices of the MM atoms.
     QVector<int> idx_mm;
 
-    // Store the cutoff as a double in nanometers.
-    const auto cutoff = this->owner.getCutoff().to(nanometer);
+    // Store the cutoff as a double in Angstom.
+    const auto cutoff = this->owner.getCutoff().value();
 
     // Loop over all of the OpenMM positions.
     i = 0;
@@ -267,7 +264,7 @@ double EMLEEngineImpl::computeForce(
             // within the cutoff.
             bool to_add = false;
 
-            const Vector mm_vec(pos[0], pos[1], pos[2]);
+            const Vector mm_vec(0.1*pos[0], 0.1*pos[1], 0.1*pos[2]);
 
             // Loop over all of the QM atoms.
             for (const auto &qm_vec : xyz_qm_vec)
