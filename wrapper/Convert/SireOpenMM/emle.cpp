@@ -33,6 +33,7 @@
 
 using namespace SireMaths;
 using namespace SireOpenMM;
+using namespace SireUnits;
 using namespace SireVol;
 
 class GILLock
@@ -209,16 +210,17 @@ double EMLEEngineImpl::computeForce(
     std::vector<OpenMM::Vec3> &forces)
 {
     // Get the current box vectors. (OpenMM units, i.e. nm)
-    OpenMM::Vec3 omm_box_x, omm_box_y, omm_box_z;
-    context.getPeriodicBoxVectors(omm_box_x, omm_box_y, omm_box_z);
+    OpenMM::Vec3 box_x, box_y, box_z;
+    context.getPeriodicBoxVectors(box_x, box_y, box_z);
 
-    // Convert to Sire vectors. (Sire units, i.e. Angstrom)
-    Vector box_x(0.1*omm_box_x[0], 0.1*omm_box_x[1], 0.1*omm_box_x[2]);
-    Vector box_y(0.1*omm_box_y[0], 0.1*omm_box_y[1], 0.1*omm_box_y[2]);
-    Vector box_z(0.1*omm_box_z[0], 0.1*omm_box_z[1], 0.1*omm_box_z[2]);
-
-    // Create a triclinic space.
-    TriclinicBox space(box_x, box_y, box_z);
+    // Create a triclinic space. Internally, Sire would assume lengths are in
+    // Angstroms, but we will just convert the cutoff when comparing distances
+    // in this space.
+    TriclinicBox space(
+        Vector(box_x[0], box_x[1], box_x[2]),
+        Vector(box_y[0], box_y[1], box_y[2]),
+        Vector(box_z[0], box_z[1], box_z[2])
+    );
 
     // Initialise a vector to hold the current positions for the QM atoms.
     QVector<QVector<double>> xyz_qm(this->owner.getAtoms().size());
@@ -231,7 +233,7 @@ double EMLEEngineImpl::computeForce(
     for (const auto &idx : this->owner.getAtoms())
     {
         const auto &omm_pos = positions[idx];
-        QVector<double> pos = {0.1*omm_pos[0], 0.1*omm_pos[1], 0.1*omm_pos[2]};
+        QVector<double> pos = {omm_pos[0], omm_pos[1], omm_pos[2]};
         Vector vec(pos[0], pos[1], pos[2]);
         xyz_qm[i] = pos;
         xyz_qm_vec[i] = vec;
@@ -251,8 +253,8 @@ double EMLEEngineImpl::computeForce(
     // Initialise a list to hold the indices of the MM atoms.
     QVector<int> idx_mm;
 
-    // Store the cutoff as a double.
-    const auto cutoff = this->owner.getCutoff().value();
+    // Store the cutoff as a double in nanometers.
+    const auto cutoff = this->owner.getCutoff().to(nanometer);
 
     // Loop over all of the OpenMM positions.
     i = 0;
@@ -265,8 +267,7 @@ double EMLEEngineImpl::computeForce(
             // within the cutoff.
             bool to_add = false;
 
-            // Store the position as a Vector.
-            const Vector mm_vec(0.1*pos[0], 0.1*pos[1], 0.1*pos[2]);
+            const Vector mm_vec(pos[0], pos[1], pos[2]);
 
             // Loop over all of the QM atoms.
             for (const auto &qm_vec : xyz_qm_vec)

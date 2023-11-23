@@ -69,9 +69,9 @@ namespace SireOpenMM
             \param callback
                 The name of a callback method that take the following arguments:
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
-                    - charges_mm: A list of the MM charges.
-                    - xyz_qm: A vector of positions for the atoms in the ML region.
-                    - xyz_mm: A vector of positions for the atoms in the MM region.
+                    - charges_mm: A list of the MM charges in mod electron charge.
+                    - xyz_qm: A vector of positions for the atoms in the ML region in nanometers.
+                    - xyz_mm: A vector of positions for the atoms in the MM region in nanometers.
          */
         EMLECallback(bp::object, QString callback="_sire_callback");
 
@@ -80,16 +80,19 @@ namespace SireOpenMM
                 A vector of atomic numbers for the atoms in the ML region.
 
             \param charges_mm
-                A vector of the charges on the MM atoms.
+                A vector of the charges on the MM atoms in mod electron charge.
 
             \param xyz_qm
-                A vector of positions for the atoms in the ML region.
+                A vector of positions for the atoms in the ML region in nanometers.
 
             \param xyz_mm
-                A vector of positions for the atoms in the MM region.
+                A vector of positions for the atoms in the MM region in nanometers.
 
             \returns
-                A vector of forces for the QM and MM atoms.
+                A tuple containing:
+                    - The energy in kJ/mol.
+                    - A vector of forces for the QM atoms in kJ/mol/nm.
+                    - A vector of forces for the MM atoms in kJ/mol/nm.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
                 QVector<int> numbers_qm,
@@ -179,16 +182,19 @@ namespace SireOpenMM
                 A vector of atomic numbers for the atoms in the ML region.
 
             \param charges_mm
-                A vector of the charges on the MM atoms.
+                A vector of the charges on the MM atoms in mod electron charge.
 
             \param xyz_qm
-                A vector of positions for the atoms in the ML region.
+                A vector of positions for the atoms in the ML region in nanometers.
 
             \param xyz_mm
-                A vector of positions for the atoms in the MM region.
+                A vector of positions for the atoms in the MM region in nanometers.
 
             \returns
-                A vector of forces for the QM and MM atoms.
+                A tuple containing:
+                    - The energy in kJ/mol.
+                    - A vector of forces for the QM atoms in kJ/mol/nm.
+                    - A vector of forces for the MM atoms in kJ/mol/nm.
          */
         boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
                 QVector<int> numbers_qm,
