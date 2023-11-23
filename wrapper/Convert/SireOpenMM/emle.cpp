@@ -214,9 +214,9 @@ double EMLEEngineImpl::computeForce(
 
     // Create a triclinic space, converting to Angstrom.
     TriclinicBox space(
-        Vector(0.1*box_x[0], 0.1*box_x[1], 0.1*box_x[2]),
-        Vector(0.1*box_y[0], 0.1*box_y[1], 0.1*box_y[2]),
-        Vector(0.1*box_z[0], 0.1*box_z[1], 0.1*box_z[2])
+        Vector(10*box_x[0], 10*box_x[1], 10*box_x[2]),
+        Vector(10*box_y[0], 10*box_y[1], 10*box_y[2]),
+        Vector(10*box_z[0], 10*box_z[1], 10*box_z[2])
     );
 
     // Initialise a vector to hold the current positions for the QM atoms.
@@ -230,7 +230,7 @@ double EMLEEngineImpl::computeForce(
     for (const auto &idx : this->owner.getAtoms())
     {
         const auto &omm_pos = positions[idx];
-        QVector<double> pos = {0.1*omm_pos[0], 0.1*omm_pos[1], 0.1*omm_pos[2]};
+        QVector<double> pos = {10*omm_pos[0], 10*omm_pos[1], 10*omm_pos[2]};
         Vector vec(pos[0], pos[1], pos[2]);
         xyz_qm[i] = pos;
         xyz_qm_vec[i] = vec;
@@ -264,7 +264,7 @@ double EMLEEngineImpl::computeForce(
             // within the cutoff.
             bool to_add = false;
 
-            const Vector mm_vec(0.1*pos[0], 0.1*pos[1], 0.1*pos[2]);
+            const Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
 
             // Loop over all of the QM atoms.
             for (const auto &qm_vec : xyz_qm_vec)
