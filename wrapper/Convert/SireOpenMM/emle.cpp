@@ -345,7 +345,7 @@ double EMLEEngineImpl::computeForce(
     for (const auto &force : forces_qm)
     {
         // Get the index of the atom.
-        const auto idx = this->owner.getAtoms()[i];
+        const auto idx = qm_atoms[i];
 
         // Convert to OpenMM format.
         OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
