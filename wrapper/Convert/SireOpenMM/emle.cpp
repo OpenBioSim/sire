@@ -226,47 +226,30 @@ double EMLEEngineImpl::computeForce(
     QVector<QVector<double>> xyz_qm(qm_atoms.size());
     QVector<Vector> xyz_qm_vec(qm_atoms.size());
 
-    // Loop over all atoms in the QM region, get the OpenMM position, then
-    // store it in Angstroms. We also store in Sire Vector format so that
-    // we can use the Sire space to compute the distances. Positions are
-    // stored using the minimum image convention with respect to the center
-    // of geometry of the QM atoms.
-
-    // Get the reference position. (First QM atom.)
-    const auto ref_omm_pos = positions[this->owner.getAtoms()[0]];
-
-    // Convert to Sire Vector format.
-    Vector ref_vec(10*ref_omm_pos[0], 10*ref_omm_pos[1], 10*ref_omm_pos[2]);
-
-    // Work out the center of geometry of the QM atoms.
+    // First loop over all QM atoms and store the positions.
     int i = 0;
-    Vector center;
     for (const auto &idx : qm_atoms)
     {
         const auto &pos = positions[idx];
         Vector qm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
-        center += space.getMinimumImage(qm_vec, ref_vec);
+        xyz_qm_vec[i] = qm_vec;
+        i++;
+    }
+
+    // Next sure that the QM atoms are whole (unwrapped).
+    xyz_qm_vec = space.makeWhole(xyz_qm_vec);
+
+    // Get the center of the QM atoms. We will use this as a reference when
+    // re-imaging the MM atoms. Also store the QM atoms in the xyz_qm vector.
+    Vector center;
+    i = 0;
+    for (const auto &qm_vec : xyz_qm_vec)
+    {
+        xyz_qm[i] = QVector<double>({qm_vec[0], qm_vec[1], qm_vec[2]});
+        center += qm_vec;
         i++;
     }
     center /= i;
-
-    // Loop over all of the QM atoms and store the positions with respect to
-    // the reference position.
-    i = 0;
-    for (const auto &idx : qm_atoms)
-    {
-        const auto &pos = positions[idx];
-        Vector qm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
-        const auto qm_vec_min = space.getMinimumImage(qm_vec, center);
-        xyz_qm[i] = QVector<double>({qm_vec_min[0], qm_vec_min[1], qm_vec_min[2]});
-        xyz_qm_vec[i] = qm_vec_min;
-        i++;
-    }
-
-    // Next we need to work out the position of the MM atoms within the cutoff,
-    // along with their charges. Here the cutoff is applied by including MM atoms
-    // within the cutoff distance from any QM atom. Again we store the positions
-    // using the minimum image with respect to the reference position.
 
     // Initialise a vector to hold the current positions for the MM atoms.
     QVector<QVector<double>> xyz_mm;
@@ -287,19 +270,18 @@ double EMLEEngineImpl::computeForce(
         // Exclude QM atoms.
         if (not qm_atoms.contains(i))
         {
-            // Whether to add the atom, i.e. it is an MM atom and is
-            // within the cutoff.
+            // Initialise a flag for whether to add the atom.
             bool to_add = false;
 
-            // Current MM atom position in Sire Vector format.
-            const Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+            // Store the MM atom position in Sire Vector format.
+            Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
 
             // Loop over all of the QM atoms.
             for (const auto &qm_vec : xyz_qm_vec)
             {
+                // The current MM atom is within the cutoff, add it.
                 if (space.calcDist(mm_vec, qm_vec) < cutoff)
                 {
-                    // The current MM atom is within the cutoff, add it.
                     to_add = true;
                     break;
                 }
@@ -309,10 +291,9 @@ double EMLEEngineImpl::computeForce(
             if (to_add)
             {
                 // Work out the minimum image position with respect to the
-                // reference positions and add to the vector.
-                const auto mm_vec_min = space.getMinimumImage(mm_vec, center);
-                QVector<double> xyz = {mm_vec_min[0], mm_vec_min[1], mm_vec_min[2]};
-                xyz_mm.append(xyz);
+                // reference position and add to the vector.
+                mm_vec = space.getMinimumImage(mm_vec, center);
+                xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
 
                 // Add the charge and index.
                 charges_mm.append(this->owner.getCharges()[i]);
@@ -332,8 +313,7 @@ double EMLEEngineImpl::computeForce(
         xyz_mm
     );
 
-    // Extract the results. This will automatically be returned in
-    // OpenMM units.
+    // Extract the results. This will automatically be returned in OpenMM units.
     auto energy = result.get<0>();
     auto forces_qm = result.get<1>();
     auto forces_mm = result.get<2>();
