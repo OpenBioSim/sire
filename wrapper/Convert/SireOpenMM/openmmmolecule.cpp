@@ -694,21 +694,27 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     this->cljs = QVector<std::tuple<double, double, double>>(nats, std::make_tuple(0.0, 0.0, 0.0));
     auto cljs_data = cljs.data();
 
-    // cljs are zeroed for QM molecules
-    if (not is_qm)
+    for (int i = 0; i < nats; ++i)
     {
-        for (int i = 0; i < nats; ++i)
+        const auto &cgatomidx = idx_to_cgatomidx_data[i];
+
+        double chg;
+        
+        // No Coulomb interactions for QM atoms.
+        if (is_qm)
         {
-            const auto &cgatomidx = idx_to_cgatomidx_data[i];
-
-            const double chg = params_charges.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
-
-            const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
-            const double sig = lj.sigma().to(SireUnits::nanometer);
-            const double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
-
-            cljs_data[i] = std::make_tuple(chg, sig, eps);
+            chg = 0;
         }
+        else
+        {
+            chg = params_charges.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
+        }
+
+        const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
+        const double sig = lj.sigma().to(SireUnits::nanometer);
+        const double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
+
+        cljs_data[i] = std::make_tuple(chg, sig, eps);
     }
 
     this->bond_params.clear();
