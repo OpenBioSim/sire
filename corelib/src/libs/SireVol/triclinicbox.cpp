@@ -51,7 +51,7 @@ static const RegisterMetaType<TriclinicBox> r_box;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const TriclinicBox &box)
 {
-    writeHeader(ds, r_box, 1) << box.v0 << box.v1 << box.v2
+    writeHeader(ds, r_box, 2) << box.v0 << box.v1 << box.v2
                               << box.rotation_matrix << box.cell_matrix << box.cell_matrix_inverse
                               << box.dist_max << box._alpha << box._beta << box._gamma << box.vol
                               << box.is_rotated << box.is_reduced << box.invlength;
@@ -65,12 +65,20 @@ QDataStream &operator>>(QDataStream &ds, TriclinicBox &box)
 
     if (v == 1)
     {
+        Vector v0, v1, v2;
+        ds >> v0 >> v1 >> v2;
+
+        // Reconstruct the box.
+        box = TriclinicBox(v0, v1, v2, true, true);
+    }
+    else if (v == 2)
+    {
         ds >> box.v0 >> box.v1 >> box.v2 >> box.rotation_matrix >> box.cell_matrix >> box.cell_matrix_inverse
-            >> box.dist_max >> box._alpha >> box._beta >> box._gamma >> box.vol >> box.is_rotated >> box.is_reduced
-            >> box.invlength;
+           >> box.dist_max >> box._alpha >> box._beta >> box._gamma >> box.vol >> box.is_rotated >> box.is_reduced
+           >> box.invlength;
     }
     else
-        throw version_error(v, "1", r_box, CODELOC);
+        throw version_error(v, "1,2", r_box, CODELOC);
 
     return ds;
 }
