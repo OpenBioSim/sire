@@ -51,6 +51,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix validation of ``perturbable_constraint`` dynamics option when the string
   includes hyphens. This fixes issue #130.
 
+* Fix streaming of :cls:`~sire.vol.TriclinicBox` objects. This fixes issue #128.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
