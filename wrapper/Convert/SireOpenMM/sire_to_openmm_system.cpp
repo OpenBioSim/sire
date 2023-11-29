@@ -621,6 +621,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // should we just ignore perturbations?
     bool ignore_perturbations = false;
     bool any_perturbable = false;
+    bool is_qm = false;
 
     if (map.specified("ignore_perturbations"))
     {
@@ -738,6 +739,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     // now create the engine for computing QM or ML forces on atoms
     QMMMEngine *qmff = 0;
+    QString qm_engine;
 
     if (map.specified("qm_engine"))
     {
@@ -745,6 +747,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             auto &engine = map["qm_engine"].value().asA<EMLEEngine>();
             qmff = new EMLEEngine(engine);
+            qm_engine = "emle";
+            is_qm = true;
         }
         catch (...)
         {
@@ -772,7 +776,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         lambda_lever.setSchedule(
             map["schedule"].value().asA<LambdaSchedule>());
     }
-    else if (any_perturbable)
+    else if (any_perturbable or is_qm)
     {
         // use a standard morph if we have an alchemical perturbation
         lambda_lever.setSchedule(
@@ -815,7 +819,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     if (qmff != 0)
     {
-        lambda_lever.setForceIndex("qm", system.addForce(qmff));
+        lambda_lever.setForceIndex(qm_engine, system.addForce(qmff));
         lambda_lever.addLever("qm_scale");
     }
 
@@ -1089,9 +1093,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     // particle in that molecule
     QVector<int> start_indexes(nmols);
 
-    // the index to the perturbable molecule for the specified molecule
+    // the index to the perturbable or QM molecule for the specified molecule
     // (i.e. the 5th perturbable molecule is the 10th molecule in the System)
     QHash<int, int> idx_to_pert_idx;
+    QHash<int, int> idx_to_qm_idx;
 
     // just a holder for all of the custom parameters for the
     // ghost forces (prevents us having to continually re-allocate it)
@@ -1132,14 +1137,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                                 CODELOC);
         }
 
-        // this hash holds the start indicies for the various
-        // parameters for this molecule (e.g. bond, angle, CLJ parameters)
-        // We only need to record this if this is a perturbable molecule
-        QHash<QString, qint32> start_indicies;
-
         // is this a perturbable molecule (and we haven't disabled perturbations)?
         if (any_perturbable and mol.isPerturbable())
         {
+            // this hash holds the start indicies for the various
+            // parameters for this molecule (e.g. bond, angle, CLJ parameters)
+            QHash<QString, qint32> start_indicies;
+
             // add a perturbable molecule, recording the start index
             // for each of the forcefields
             start_indicies.reserve(7);
@@ -1167,6 +1171,39 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // and we can record the map from the molecule index
             // to the perturbable molecule index
             idx_to_pert_idx.insert(i, pert_idx);
+        }
+
+        if (mol.isQM())
+        {
+            // this hash holds the start indicies for the various
+            // parameters for this molecule (e.g. bond, angle, CLJ parameters)
+            QHash<QString, qint32> start_indicies;
+
+            // add a QM molecule, recording the start index
+            // for each of the forcefields
+            start_indicies.reserve(4);
+
+            start_indicies.insert("clj", start_index);
+
+            // the start index for this molecules first bond, angle or
+            // torsion parameters will be however many of these
+            // parameters exist already (parameters are added
+            // contiguously for each molecule)
+            start_indicies.insert("bond", bondff->getNumBonds());
+            start_indicies.insert("angle", angff->getNumAngles());
+            start_indicies.insert("torsion", dihff->getNumTorsions());
+
+            // we can now record this as a perturbable molecule
+            // in the lambda lever. The returned index is the
+            // index of this perturbable molecule in the list
+            // of perturbable molecules (e.g. the first perturbable
+            // molecule we find has index 0)
+            auto qm_idx = lambda_lever.addQMMolecule(mol,
+                                                     start_indicies);
+
+            // and we can record the map from the molecule index
+            // to the perturbable molecule index
+            idx_to_qm_idx.insert(i, qm_idx);
         }
 
         // Copy in all of the atom (particle) parameters. These
@@ -1399,13 +1436,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         int start_index = start_indexes[i];
         const auto &mol = openmm_mols_data[i];
 
-        QVector<std::pair<int, int>> exception_idxs;
+        QVector<std::pair<int, int>> perturbable_exception_idxs;
+        QVector<std::pair<int, int>> qm_exception_idxs;
 
         const bool is_perturbable = any_perturbable and mol.isPerturbable();
 
         if (is_perturbable)
         {
-            exception_idxs = QVector<std::pair<int, int>>(mol.exception_params.count(),
+            perturbable_exception_idxs = QVector<std::pair<int, int>>(mol.exception_params.count(),
+                                                          std::make_pair(-1, -1));
+        }
+
+        if (is_qm)
+        {
+            qm_exception_idxs = QVector<std::pair<int, int>>(mol.exception_params.count(),
                                                           std::make_pair(-1, -1));
         }
 
@@ -1475,7 +1519,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                 // these are the indexes of the exception in the
                 // non-bonded forcefields and also the ghost-14 forcefield
-                exception_idxs[j] = std::make_pair(idx, nbidx);
+                perturbable_exception_idxs[j] = std::make_pair(idx, nbidx);
+            }
+            else if (mol.isQM())
+            {
+                const auto idx = cljff->addException(std::get<0>(p), std::get<1>(p),
+                                          std::get<2>(p), std::get<3>(p),
+                                          std::get<4>(p), true);
+                qm_exception_idxs[j] = std::make_pair(idx, -1);
             }
             else
             {
@@ -1496,8 +1547,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         if (is_perturbable)
         {
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
-            lambda_lever.setExceptionIndicies(pert_idx,
-                                              "clj", exception_idxs);
+            lambda_lever.setExceptionIndices(pert_idx,
+                                             "clj", perturbable_exception_idxs);
+        }
+
+        if (mol.isQM())
+        {
+            auto qm_idx = idx_to_qm_idx.value(i, openmm_mols.count() + 1);
+            lambda_lever.setExceptionIndices(qm_idx,
+                                             "clj", qm_exception_idxs, true);
         }
     }
 

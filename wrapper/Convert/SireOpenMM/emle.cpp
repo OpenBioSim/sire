@@ -318,6 +318,9 @@ double EMLEEngineImpl::computeForce(
     auto forces_qm = result.get<1>();
     auto forces_mm = result.get<2>();
 
+    // Store the current lambda weighting factor.
+    const auto lambda = this->owner.getLambda();
+
     // Now update the force vector.
 
     // First the QM atoms.
@@ -331,7 +334,7 @@ double EMLEEngineImpl::computeForce(
         OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
 
         // Update the force vector.
-        forces[idx] = omm_force;
+        forces[idx] = lambda * omm_force;
 
         // Update the atom index.
         i++;
@@ -348,14 +351,14 @@ double EMLEEngineImpl::computeForce(
         OpenMM::Vec3 omm_force(force[0], force[1], force[2]);
 
         // Update the force vector.
-        forces[idx] = omm_force;
+        forces[idx] = lambda * omm_force;
 
         // Update the atom index.
         i++;
     }
 
     // Finally, return the energy.
-    return energy;
+    return lambda * energy;
 }
 
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>

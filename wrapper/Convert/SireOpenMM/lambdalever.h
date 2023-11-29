@@ -69,10 +69,14 @@ namespace SireOpenMM
         void addRestraintIndex(const QString &force, int index);
 
         int addPerturbableMolecule(const OpenMMMolecule &molecule,
-                                   const QHash<QString, qint32> &start_indicies);
+                                   const QHash<QString, qint32> &start_indices);
 
-        void setExceptionIndicies(int idx, const QString &ff,
-                                  const QVector<std::pair<int, int>> &exception_idxs);
+        int addQMMolecule(const OpenMMMolecule &molecule,
+                          const QHash<QString, qint32> &start_indices);
+
+        void setExceptionIndices(int idx, const QString &ff,
+                                 const QVector<std::pair<int, int>> &exception_idxs,
+                                 bool is_qm = false);
 
         void setSchedule(const SireCAS::LambdaSchedule &schedule);
 
@@ -111,12 +115,22 @@ namespace SireOpenMM
         /** The list of perturbable molecules */
         QVector<PerturbableOpenMMMolecule> perturbable_mols;
 
-        /** The start indicies of the parameters in each named
-            forcefield for each perturbable moleucle */
-        QVector<QHash<QString, qint32>> start_indicies;
+        /** The list of QM molecules */
+        QVector<OpenMMMolecule> qm_mols;
+
+        /** The start indices of the parameters in each named
+            forcefield for each perturbable molecule */
+        QVector<QHash<QString, qint32>> start_indices_pert;
+
+        /** The start indices of the parameters in each named
+            forcefield for each QM molecule */
+        QVector<QHash<QString, qint32>> start_indices_qm;
 
         /** All of the property maps for the perturbable molecules */
         QHash<SireMol::MolNum, SireBase::PropertyMap> perturbable_maps;
+
+        /** All of the property maps for the QM molecules */
+        QHash<SireMol::MolNum, SireBase::PropertyMap> qm_maps;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTION

@@ -47,6 +47,12 @@ namespace SireOpenMM
     public:
         virtual ~QMMMEngine();
 
+        //! Get the lambda weighting factor.
+        virtual double getLambda() const = 0;
+
+        //! Set the lambda weighting factor.
+        virtual void setLambda(double lambda) = 0;
+
         //! Get the QM cutoff distance.
         virtual SireUnits::Dimension::Length getCutoff() const = 0;
 

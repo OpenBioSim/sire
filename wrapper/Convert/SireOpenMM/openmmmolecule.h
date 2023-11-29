@@ -81,6 +81,7 @@ namespace SireOpenMM
                                        OpenMM::Vec3 *velocities) const;
 
         bool isPerturbable() const;
+        bool isQM() const;
 
         int nAtoms() const;
 
@@ -118,6 +119,11 @@ namespace SireOpenMM
                      int start_index,
                      double coul_14_scl,
                      double lj_14_scl) const;
+
+        QVector<std::pair<int, int>> getExceptionIndices(const QString &name) const;
+
+        void setExceptionIndices(const QString &name,
+                                 const QVector<std::pair<int, int>> &exception_idxs);
 
         /** All the member data is public as this is an internal
          *  class. This class should not be used outside of
@@ -178,10 +184,6 @@ namespace SireOpenMM
         /** The field atoms for the molecule, if this has field atoms */
         std::shared_ptr<FieldAtoms> field_atoms;
 
-        /** The indicies of the added exceptions - only populated
-         *  if this is a peturbable molecule */
-        QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
-
         /** The property map used to get the perturbable properties -
          *  this is only non-default if the molecule is perturbable
          */
@@ -228,6 +230,16 @@ namespace SireOpenMM
         void alignInternals(const SireBase::PropertyMap &map);
 
         void processFieldAtoms();
+
+        /** Whether this is a QM molecule. */
+        bool is_qm = false;
+
+        /** The indicies of the atoms in the exceptions, in exception order */
+        QVector<std::pair<int, int>> exception_atoms;
+
+        /** The indicies of the added exceptions - only populated
+         *  if this is a QM molecule */
+        QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
     };
 
     /** This class holds all of the information of an OpenMM molecule
@@ -288,10 +300,10 @@ namespace SireOpenMM
 
         QVector<std::pair<int, int>> getExceptionAtoms() const;
 
-        QVector<std::pair<int, int>> getExceptionIndicies(const QString &name) const;
+        QVector<std::pair<int, int>> getExceptionIndices(const QString &name) const;
 
-        void setExceptionIndicies(const QString &name,
-                                  const QVector<std::pair<int, int>> &exception_idxs);
+        void setExceptionIndices(const QString &name,
+                                 const QVector<std::pair<int, int>> &exception_idxs);
 
     private:
         /** The array of parameters for the two end states, aligned
@@ -328,7 +340,6 @@ namespace SireOpenMM
          *  if this is a peturbable molecule */
         QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
     };
-
 }
 
 SIRE_END_HEADER
