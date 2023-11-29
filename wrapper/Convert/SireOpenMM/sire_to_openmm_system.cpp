@@ -663,6 +663,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
+    // check to see if there are any QM molecules.
+    for (int i = 0; i < nmols; ++i)
+    {
+        if (openmm_mols_data[i].isQM())
+        {
+            is_qm = true;
+            break;
+        }
+    }
+
     // check to see if there are any field molecules
     bool any_field_mols = false;
 
@@ -748,11 +758,19 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             auto &engine = map["qm_engine"].value().asA<EMLEEngine>();
             qmff = new EMLEEngine(engine);
             qm_engine = "emle";
-            is_qm = true;
         }
         catch (...)
         {
             throw SireError::incompatible_error(QObject::tr("Invalid QM engine!"), CODELOC);
+        }
+    }
+    else
+    {
+        if (is_qm)
+        {
+            throw SireError::incompatible_error(
+                QObject::tr("The system contains QM molecules but no QM engine is specified!"),
+                CODELOC);
         }
     }
 
