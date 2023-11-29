@@ -490,6 +490,13 @@ namespace SireGemmi
 
         system.add(mols);
 
+        // convert everything in the structure metadata and
+        // the structure info object into metadata that is
+        // added to this system
+        SireBase::Properties metadata;
+
+        system.setProperty("metadata", metadata);
+
         return system;
     }
 
@@ -876,18 +883,31 @@ namespace SireGemmi
 
         input_string.clear();
 
+        int structure_block = -1;
+
         // mmCIF files for deposition may have more than one block:
         // coordinates in the first block and restraints in the others.
-        for (size_t i = 1; i < doc.blocks.size(); ++i)
+        for (size_t i = 0; i < doc.blocks.size(); ++i)
+        {
             if (doc.blocks[i].has_tag("_atom_site.id"))
-                throw SireError::unsupported(
-                    QObject::tr("2+ blocks are ok if only the first one has coordinates. "
-                                "_atom_site in block #%1 : %2")
-                        .arg(i + 1)
-                        .arg(QString::fromStdString(doc.source)),
-                    CODELOC);
+            {
+                if (structure_block != -1)
+                    throw SireError::unsupported(
+                        QObject::tr("2+ blocks are ok if only the first one has coordinates. "
+                                    "_atom_site in block #%1 : %2")
+                            .arg(i + 1)
+                            .arg(QString::fromStdString(doc.source)),
+                        CODELOC);
 
-        auto structure = gemmi::make_structure_from_block(doc.blocks.at(0));
+                structure_block = i;
+            }
+        }
+
+        if (structure_block == -1)
+            // just use the first block
+            structure_block = 0;
+
+        auto structure = gemmi::make_structure_from_block(doc.blocks.at(structure_block));
 
         return gemmi_to_sire(structure, map);
     }
