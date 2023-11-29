@@ -308,15 +308,6 @@ namespace SireVol
         /** The third box vector */
         Vector v2;
 
-        /** The first box vector (original copy) */
-        Vector v0_orig;
-
-        /** The second box vector (original copy) */
-        Vector v1_orig;
-
-        /** The third box vector (original copy) */
-        Vector v2_orig;
-
         /** The rotation matrix used to transform the box to meet the requirements
             of molecular dynamics engines.
           */

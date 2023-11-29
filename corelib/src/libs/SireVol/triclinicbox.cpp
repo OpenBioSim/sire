@@ -41,16 +41,6 @@
 #include "SireError/errors.h"
 #include "SireStream/datastream.h"
 
-// Helper struct for sorting based on first pair value.
-struct QPairFirstComparer
-{
-    template <typename T1, typename T2>
-    bool operator()(const QPair<T1, T2> &a, const QPair<T1, T2> &b) const
-    {
-        return a.first < b.first;
-    }
-};
-
 using namespace SireVol;
 using namespace SireBase;
 using namespace SireMaths;
@@ -61,10 +51,10 @@ static const RegisterMetaType<TriclinicBox> r_box;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const TriclinicBox &box)
 {
-    writeHeader(ds, r_box, 1) << box.v0_orig << box.v1_orig << box.v2_orig;
-
-    // no need to store anything else as it can be regenerated
-
+    writeHeader(ds, r_box, 2) << box.v0 << box.v1 << box.v2
+                              << box.rotation_matrix << box.cell_matrix << box.cell_matrix_inverse
+                              << box.dist_max << box._alpha << box._beta << box._gamma << box.vol
+                              << box.is_rotated << box.is_reduced << box.invlength;
     return ds;
 }
 
@@ -76,15 +66,19 @@ QDataStream &operator>>(QDataStream &ds, TriclinicBox &box)
     if (v == 1)
     {
         Vector v0, v1, v2;
-
-        // Load in the original box vectors.
         ds >> v0 >> v1 >> v2;
 
         // Reconstruct the box.
-        box = TriclinicBox(v0, v1, v2);
+        box = TriclinicBox(v0, v1, v2, true, true);
+    }
+    else if (v == 2)
+    {
+        ds >> box.v0 >> box.v1 >> box.v2 >> box.rotation_matrix >> box.cell_matrix >> box.cell_matrix_inverse
+           >> box.dist_max >> box._alpha >> box._beta >> box._gamma >> box.vol >> box.is_rotated >> box.is_reduced
+           >> box.invlength;
     }
     else
-        throw version_error(v, "1", r_box, CODELOC);
+        throw version_error(v, "1,2", r_box, CODELOC);
 
     return ds;
 }
@@ -101,7 +95,7 @@ TriclinicBox::TriclinicBox() : ConcreteProperty<TriclinicBox, Cartesian>()
 
 /** Construct a TriclinicBox with the specified lattice vectors */
 TriclinicBox::TriclinicBox(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate, bool auto_reduce)
-    : ConcreteProperty<TriclinicBox, Cartesian>(), v0(v0), v1(v1), v2(v2), v0_orig(v0), v1_orig(v1), v2_orig(v2)
+    : ConcreteProperty<TriclinicBox, Cartesian>(), v0(v0), v1(v1), v2(v2)
 {
     this->construct(v0, v1, v2, auto_rotate, auto_reduce);
 }
@@ -142,12 +136,6 @@ TriclinicBox::TriclinicBox(double a, double b, double c, const SireUnits::Dimens
 /** Construct a TriclinicBox with the specified lattice vectors */
 void TriclinicBox::construct(const Vector &v0, const Vector &v1, const Vector &v2, bool auto_rotate, bool auto_reduce)
 {
-    // Store the original lattice vectors. These are needed for streaming
-    // support.
-    this->v0_orig = v0;
-    this->v1_orig = v1;
-    this->v2_orig = v2;
-
     // Set the initial lattice vectors.
     this->v0 = v0;
     this->v1 = v1;
@@ -375,8 +363,8 @@ void TriclinicBox::setAttributes()
 /** Copy constructor */
 TriclinicBox::TriclinicBox(const TriclinicBox &other)
     : ConcreteProperty<TriclinicBox, Cartesian>(other), v0(other.v0), v1(other.v1), v2(other.v2),
-      v0_orig(other.v0_orig), v1_orig(other.v1_orig), v2_orig(other.v2_orig), rotation_matrix(other.rotation_matrix),
-      cell_matrix(other.cell_matrix), cell_matrix_inverse(other.cell_matrix_inverse), M(other.M),
+      rotation_matrix(other.rotation_matrix), cell_matrix(other.cell_matrix),
+      cell_matrix_inverse(other.cell_matrix_inverse), M(other.M),
       dist_max(other.dist_max), max_length(other.max_length), _alpha(other._alpha), _beta(other._beta),
       _gamma(other._gamma), vol(other.vol), is_rotated(other.is_rotated), is_reduced(other.is_reduced), invlength(other.invlength)
 {
@@ -395,9 +383,6 @@ TriclinicBox &TriclinicBox::operator=(const TriclinicBox &other)
         v0 = other.v0;
         v1 = other.v1;
         v2 = other.v2;
-        v0_orig = other.v0_orig;
-        v1_orig = other.v1_orig;
-        v2_orig = other.v2_orig;
         rotation_matrix = other.rotation_matrix;
         cell_matrix = other.cell_matrix;
         dist_max = other.dist_max;
@@ -418,15 +403,26 @@ TriclinicBox &TriclinicBox::operator=(const TriclinicBox &other)
 /** Comparison operator */
 bool TriclinicBox::operator==(const TriclinicBox &other) const
 {
-    return v0 == other.v0 and v1 == other.v1 and v2 == other.v2 and v0_orig == other.v0_orig and
-           v1_orig == other.v1_orig and v2_orig == other.v2_orig;
+    return v0 == other.v0 and
+           v1 == other.v1 and
+           v2 == other.v2 and
+           rotation_matrix == other.rotation_matrix and
+           cell_matrix == other.cell_matrix and
+           cell_matrix_inverse == other.cell_matrix_inverse and
+           dist_max == other.dist_max and
+           _alpha == other._alpha and
+           _beta == other._beta and
+           _gamma == other._gamma and
+           vol == other.vol and
+           is_rotated == other.is_rotated and
+           is_reduced == other.is_reduced and
+           invlength == other.invlength;
 }
 
 /** Comparison operator */
 bool TriclinicBox::operator!=(const TriclinicBox &other) const
 {
-    return v0 != other.v0 or v1 != other.v1 or v2 != other.v2 or v0_orig != other.v0_orig or v1_orig != other.v1_orig or
-           v2_orig != other.v2_orig;
+    return !(*this == other);
 }
 
 /** A Triclinic box is periodic! */
