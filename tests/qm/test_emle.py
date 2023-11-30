@@ -70,7 +70,7 @@ def test_interpolate(ala_mols):
     )
 
     # Get the pure EMLE energy.
-    nrq_emle = d.current_potential_energy()
+    nrg_emle = d.current_potential_energy()
 
     # Get interpolated MM energy.
     d.set_lambda(0.0)
@@ -85,5 +85,5 @@ def test_interpolate(ala_mols):
 
     # Make sure the interpolated energy is correct.
     assert math.isclose(
-        nrg_interp.value(), 0.5 * (nrg_mm + nrq_emle).value(), rel_tol=1e-4
+        nrg_interp.value(), 0.5 * (nrg_mm + nrg_emle).value(), rel_tol=1e-4
     )
