@@ -413,7 +413,7 @@ double EMLEEngineImpl::computeForce(
         xyz_mm
     );
 
-    // Extract the results. This will automatically be returned in OpenMM units.
+    // Extract the results. These will automatically be returned in OpenMM units.
     auto energy = result.get<0>();
     auto forces_qm = result.get<1>();
     auto forces_mm = result.get<2>();
