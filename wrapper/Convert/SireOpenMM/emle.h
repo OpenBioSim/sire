@@ -119,6 +119,10 @@ namespace SireOpenMM
             \param cutoff
                 The ML cutoff distance.
 
+            \param neighbour_list_frequency
+                The frequency at which the neighbour list is updated. (Number of steps.)
+                If zero, then no neighbour list is used.
+
             \param lambda
                 The lambda weighting factor. This can be used to interpolate between
                 potentials for end-state correction calculations.
@@ -126,6 +130,7 @@ namespace SireOpenMM
         EMLEEngine(
             bp::object,
             SireUnits::Dimension::Length cutoff=8.0*SireUnits::angstrom,
+            int neighbour_list_frequency=20,
             double lambda=1.0
         );
 
@@ -152,6 +157,12 @@ namespace SireOpenMM
 
         //! Set the QM cutoff distance.
         void setCutoff(SireUnits::Dimension::Length cutoff);
+
+        //! Get the neighbour list frequency.
+        int getNeighbourListFrequency() const;
+
+        //! Set the neighbour list frequency.
+        void setNeighbourListFrequency(int neighbour_list_frequency);
 
         //! Get the indices of the atoms in the QM region.
         QVector<int> getAtoms() const;
@@ -209,6 +220,7 @@ namespace SireOpenMM
     private:
         EMLECallback callback;
         SireUnits::Dimension::Length cutoff;
+        int neighbour_list_frequency;
         double lambda;
         QVector<int> atoms;
         QVector<int> numbers;
@@ -231,6 +243,12 @@ namespace SireOpenMM
 
     private:
         const EMLEEngine &owner;
+        unsigned long long step_count=0;
+        double cutoff;
+        bool is_neighbour_list;
+        int neighbour_list_frequency;
+        double neighbour_list_cutoff;
+        QSet<int> neighbour_list;
     };
 #endif
 }

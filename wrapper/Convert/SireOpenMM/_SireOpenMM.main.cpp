@@ -181,9 +181,12 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     bp::class_<QMMMEngine, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMEngine", bp::no_init);
 
     bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMMMEngine, SireBase::Property>>("EMLEEngine",
-            bp::init<bp::object, SireUnits::Dimension::Length, double>(
+            bp::init<bp::object, SireUnits::Dimension::Length, int, double>(
                 (
-                    bp::arg("py_object"), bp::arg("cutoff")=SireUnits::Dimension::Length(8.0), bp::arg("lambda")=1.0
+                    bp::arg("py_object"),
+                    bp::arg("cutoff")=SireUnits::Dimension::Length(8.0),
+                    bp::arg("neighbour_list_frequency")=20,
+                    bp::arg("lambda")=1.0
                 ),
                     "Constructor: An engine that can be used to enable electrostatic embedding"
                     "of machine learning potentials via emle-engine."
@@ -193,6 +196,8 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             .def("setLambda", &EMLEEngine::setLambda, "Set the lambda value")
             .def("getCutoff", &EMLEEngine::getCutoff, "Get the cutoff value")
             .def("setCutoff", &EMLEEngine::setCutoff, "Set the cutoff value")
+            .def("getNeighbourListFrequency", &EMLEEngine::getNeighbourListFrequency, "Get the neighbour list frequency")
+            .def("setNeighbourListFrequency", &EMLEEngine::setNeighbourListFrequency, "Set the neighbour list frequency")
             .def("getAtoms", &EMLEEngine::getAtoms, "Get QM atom indices")
             .def("setAtoms", &EMLEEngine::setAtoms, "Set the QM atom indices")
             .def("getNumbers", &EMLEEngine::getNumbers, "Get QM atomic numbers")

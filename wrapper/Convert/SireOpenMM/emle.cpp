@@ -77,16 +77,34 @@ EMLEEngine::EMLEEngine()
 {
 }
 
-EMLEEngine::EMLEEngine(bp::object py_object, SireUnits::Dimension::Length cutoff, double lambda) :
+EMLEEngine::EMLEEngine(
+    bp::object py_object,
+    SireUnits::Dimension::Length cutoff,
+    int neighbour_list_frequency,
+    double lambda) :
     callback(py_object, "_sire_callback"),
     cutoff(cutoff),
+    neighbour_list_frequency(neighbour_list_frequency),
     lambda(lambda)
 {
+    if (this->neighbour_list_frequency < 0)
+    {
+        neighbour_list_frequency = 0;
+    }
+    if (this->lambda < 0.0)
+    {
+        this->lambda = 0.0;
+    }
+    else if (this->lambda > 1.0)
+    {
+        this->lambda = 1.0;
+    }
 }
 
 EMLEEngine::EMLEEngine(const EMLEEngine &other) :
     callback(other.callback),
     cutoff(other.cutoff),
+    neighbour_list_frequency(other.neighbour_list_frequency),
     lambda(other.lambda),
     atoms(other.atoms),
     numbers(other.numbers),
@@ -98,6 +116,7 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
 {
     this->callback = other.callback;
     this->cutoff = other.cutoff;
+    this->neighbour_list_frequency = other.neighbour_list_frequency;
     this->lambda = other.lambda;
     this->atoms = other.atoms;
     this->numbers = other.numbers;
@@ -117,6 +136,15 @@ EMLECallback EMLEEngine::getCallback() const
 
 void EMLEEngine::setLambda(double lambda)
 {
+    // Clamp the lambda value.
+    if (lambda < 0.0)
+    {
+        lambda = 0.0;
+    }
+    else if (lambda > 1.0)
+    {
+        lambda = 1.0;
+    }
     this->lambda = lambda;
 }
 
@@ -133,6 +161,21 @@ void EMLEEngine::setCutoff(SireUnits::Dimension::Length cutoff)
 SireUnits::Dimension::Length EMLEEngine::getCutoff() const
 {
     return this->cutoff;
+}
+
+int EMLEEngine::getNeighbourListFrequency() const
+{
+    return this->neighbour_list_frequency;
+}
+
+void EMLEEngine::setNeighbourListFrequency(int neighbour_list_frequency)
+{
+    // Assume anything less than zero means no neighbour list.
+    if (neighbour_list_frequency < 0)
+    {
+        neighbour_list_frequency = 0;
+    }
+    this->neighbour_list_frequency = neighbour_list_frequency;
 }
 
 QVector<int> EMLEEngine::getAtoms() const
@@ -208,6 +251,22 @@ double EMLEEngineImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
+    // If this is the first step, then setup information for the neighbour list.
+    if (this->step_count == 0)
+    {
+        // Store the cutoff as a double in Angstom.
+        this->cutoff = this->owner.getCutoff().value();
+
+        // The neighbour list cutoff is 20% larger than the cutoff.
+        this->neighbour_list_cutoff = 1.2*this->cutoff;
+
+        // Store the neighbour list update frequency.
+        this->neighbour_list_frequency = this->owner.getNeighbourListFrequency();
+
+        // Flag whether a neighbour list is used.
+        this->is_neighbour_list = this->neighbour_list_frequency > 0;
+    }
+
     // Get the current box vectors in nanometers.
     OpenMM::Vec3 box_x, box_y, box_z;
     context.getPeriodicBoxVectors(box_x, box_y, box_z);
@@ -260,21 +319,68 @@ double EMLEEngineImpl::computeForce(
     // Initialise a list to hold the indices of the MM atoms.
     QVector<int> idx_mm;
 
-    // Store the cutoff as a double in Angstom.
-    const auto cutoff = this->owner.getCutoff().value();
-
-    // Loop over all of the OpenMM positions.
-    i = 0;
-    for (const auto &pos : positions)
+    // Manually work out the MM point charges and build the neigbour list.
+    if (not this->is_neighbour_list or this->step_count % this->neighbour_list_frequency == 0)
     {
-        // Exclude QM atoms.
-        if (not qm_atoms.contains(i))
+        // Clear the neighbour list.
+        if (this->is_neighbour_list)
         {
-            // Initialise a flag for whether to add the atom.
-            bool to_add = false;
+            this->neighbour_list.clear();
+        }
 
+        i = 0;
+        // Loop over all of the OpenMM positions.
+        for (const auto &pos : positions)
+        {
+            // Exclude QM atoms.
+            if (not qm_atoms.contains(i))
+            {
+                // Store the MM atom position in Sire Vector format.
+                Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+
+                // Loop over all of the QM atoms.
+                for (const auto &qm_vec : xyz_qm_vec)
+                {
+                    // Work out the distance between the current MM atom and QM atoms.
+                    const auto dist = space.calcDist(mm_vec, qm_vec);
+
+                    // The current MM atom is within the neighbour list cutoff.
+                    if (this->is_neighbour_list and dist < this->neighbour_list_cutoff)
+                    {
+                        // Insert the MM atom index into the neighbour list.
+                        this->neighbour_list.insert(i);
+                    }
+
+                    // The current MM atom is within the cutoff, add it.
+                    if (dist < cutoff)
+                    {
+                        // Work out the minimum image position with respect to the
+                        // reference position and add to the vector.
+                        mm_vec = space.getMinimumImage(mm_vec, center);
+                        xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
+
+                        // Add the charge and index.
+                        charges_mm.append(this->owner.getCharges()[i]);
+                        idx_mm.append(i);
+
+                        // Exit the inner loop.
+                        break;
+                    }
+                }
+            }
+
+            // Update the atom index.
+            i++;
+        }
+    }
+    // Use the neighbour list.
+    else
+    {
+        // Loop over the MM atoms in the neighbour list.
+        for (const auto &idx : this->neighbour_list)
+        {
             // Store the MM atom position in Sire Vector format.
-            Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+            Vector mm_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
 
             // Loop over all of the QM atoms.
             for (const auto &qm_vec : xyz_qm_vec)
@@ -282,27 +388,21 @@ double EMLEEngineImpl::computeForce(
                 // The current MM atom is within the cutoff, add it.
                 if (space.calcDist(mm_vec, qm_vec) < cutoff)
                 {
-                    to_add = true;
+                    // Work out the minimum image position with respect to the
+                    // reference position and add to the vector.
+                    mm_vec = space.getMinimumImage(mm_vec, center);
+                    xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
+
+                    // Add the charge and index.
+                    charges_mm.append(this->owner.getCharges()[idx]);
+                    idx_mm.append(idx);
+
+                    // Exit the inner loop.
                     break;
                 }
             }
 
-            // Store the MM atom information.
-            if (to_add)
-            {
-                // Work out the minimum image position with respect to the
-                // reference position and add to the vector.
-                mm_vec = space.getMinimumImage(mm_vec, center);
-                xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
-
-                // Add the charge and index.
-                charges_mm.append(this->owner.getCharges()[i]);
-                idx_mm.append(i);
-            }
         }
-
-        // Update the atom index.
-        i++;
     }
 
     // Call the callback.
@@ -356,6 +456,9 @@ double EMLEEngineImpl::computeForce(
         // Update the atom index.
         i++;
     }
+
+    // Update the step count.
+    this->step_count++;
 
     // Finally, return the energy.
     return lambda * energy;
