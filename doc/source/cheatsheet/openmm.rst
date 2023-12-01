@@ -73,91 +73,97 @@ by setting values for the ``temperature`` and ``pressure`` keys.
 
 Available keys and allowable values are listed below.
 
-+---------------------------+----------------------------------------------------------+
-| Key                       | Valid values                                             |
-+===========================+==========================================================+
-| com_reset_frequency       | The frequency at which the ``CMMotionRemover`` acts to   |
-|                           | remove center of mass relative motion. If this is not    |
-|                           | set (the default) then center of mass motion is not      |
-|                           | removed.                                                 |
-+---------------------------+----------------------------------------------------------+
-| constraint                | Type of constraint to use for bonds and/or angles.       |
-|                           | Valid strings are ``none``, ``h-bonds``, ``bonds``,      |
-|                           | ``h-bonds-h-angles`` and ``bonds-h-angles``.             |
-+---------------------------+----------------------------------------------------------+
-| coulomb_power             | The coulomb power parameter used by the softening        |
-|                           | potential used to soften interactions involving          |
-|                           | ghost atoms.                                             |
-+---------------------------+----------------------------------------------------------+
-| cutoff                    | Size of the non-bonded cutoff, e.g.                      |
-|                           | ``7.5*sr.units.angstrom``                                |
-+---------------------------+----------------------------------------------------------+
-| cutoff_type               | Type of cutoff, e.g. ``PARTICLE_MESH_EWALD``, ``PME``,   |
-|                           | ``NO_CUTOFF``, ``REACTION_FIELD``, ``RF``, ``EWALD``     |
-+---------------------------+----------------------------------------------------------+
-| cpu_pme                   | Boolean value, e.g. ``True`` or ``False`` as to whether  |
-|                           | or not PME should be evaluated on the CPU rather than    |
-|                           | on the GPU.                                              |
-+---------------------------+----------------------------------------------------------+
-| device                    | Any valid OpenMM device number or device string, e.g.    |
-|                           | ``0`` would select device 0                              |
-+---------------------------+----------------------------------------------------------+
-| dielectric                | Dielectric value if a reaction field cutoff is used,     |
-|                           | e.g. ``78.0``                                            |
-+---------------------------+----------------------------------------------------------+
-| fixed                     | The atoms in the system that should be fixed (not moved) |
-+---------------------------+----------------------------------------------------------+
-| ignore_perturbations      | Whether or not to ignore any perturbations and only set  |
-|                           | up a perturbable molecule as a non-perurbable molecule   |
-|                           | from only the reference state.                           |
-+---------------------------+----------------------------------------------------------+
-| integrator                | The MD integrator to use, e.g.                           |
-|                           | ``verlet``, ``leapfrog``, ``langevin``,                  |
-|                           | ``langevin_middle``, ``nose_hoover``,                    |
-|                           | ``brownian``, ``andersen``                               |
-+---------------------------+----------------------------------------------------------+
-| friction                  | Friction value for the integrator, in inverse time, e.g. |
-|                           | ``5.0 / sr.units.picosecond``                            |
-+---------------------------+----------------------------------------------------------+
-| lambda                    | The λ-value at which to set up the system (assuming this |
-|                           | contains any perturbable molecules or restraints)        |
-+---------------------------+----------------------------------------------------------+
-| platform                  | Any valid OpenMM platform string, e.g. ``CUDA``,         |
-|                           | ``OpenCL``, ``Metal``, ```CPU``, ``Reference``           |
-+---------------------------+----------------------------------------------------------+
-| precision                 | Any valid OpenMM platform precision value, e.g.          |
-|                           | ``single``, ``mixed`` or ``double``.                     |
-+---------------------------+----------------------------------------------------------+
-| pressure                  | Any pressure value, e.g. ``1*sr.units.atm``              |
-+---------------------------+----------------------------------------------------------+
-| restraints                | The :class:`~sire.mm.Restraints` object (or list of      |
-|                           | objects) that describe the restraints that should be     |
-|                           | added to the system.                                     |
-+---------------------------+----------------------------------------------------------+
-| schedule                  | The :class:`~sire.cas.LambdaSchedule` to use that        |
-|                           | controls how parameters are modified with λ              |
-+---------------------------+----------------------------------------------------------+
-| shift_delta               | The shift_delta parameter to use for the softening       |
-|                           | potential used to soften interactions involving          |
-|                           | ghost atoms.                                             |
-+---------------------------+----------------------------------------------------------+
-| space                     | Space in which the simulation should be conducted, e.g.  |
-|                           | `sr.vol.Cartesian`                                       |
-+---------------------------+----------------------------------------------------------+
-| swap_end_states           | Whether to swap the end states of a perturbable molecule |
-|                           | (i.e. treat the perturbed state as the reference state   |
-|                           | and vice versa).                                         |
-+---------------------------+----------------------------------------------------------+
-| temperature               | Any temperature value, e.g. ``25*sr.units.celsius``      |
-+---------------------------+----------------------------------------------------------+
-| threads                   | The number of threads to use in the CPU platform         |
-+---------------------------+----------------------------------------------------------+
-| timestep                  | Time between integration steps, e.g.                     |
-|                           | ``2 * sr.units.femtosecond``                             |
-+---------------------------+----------------------------------------------------------+
-| use_dispersion_correction | Whether or not to use the dispersion correction to       |
-|                           | deal with cutoff issues. This is very expensive.         |
-+---------------------------+----------------------------------------------------------+
++------------------------------+----------------------------------------------------------+
+| Key                          | Valid values                                             |
++==============================+==========================================================+
+| com_reset_frequency          | The frequency at which the ``CMMotionRemover`` acts to   |
+|                              | remove center of mass relative motion. If this is not    |
+|                              | set (the default) then center of mass motion is not      |
+|                              | removed.                                                 |
++------------------------------+----------------------------------------------------------+
+| constraint                   | Type of constraint to use for bonds and/or angles.       |
+|                              | Valid strings are ``none``, ``h-bonds``, ``bonds``,      |
+|                              | ``h-bonds-h-angles`` and ``bonds-h-angles``.             |
++------------------------------+----------------------------------------------------------+
+| coulomb_power                | The coulomb power parameter used by the softening        |
+|                              | potential used to soften interactions involving          |
+|                              | ghost atoms.                                             |
++------------------------------+----------------------------------------------------------+
+| cutoff                       | Size of the non-bonded cutoff, e.g.                      |
+|                              | ``7.5*sr.units.angstrom``                                |
++------------------------------+----------------------------------------------------------+
+| cutoff_type                  | Type of cutoff, e.g. ``PARTICLE_MESH_EWALD``, ``PME``,   |
+|                              | ``NO_CUTOFF``, ``REACTION_FIELD``, ``RF``, ``EWALD``     |
++------------------------------+----------------------------------------------------------+
+| cpu_pme                      | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | or not PME should be evaluated on the CPU rather than    |
+|                              | on the GPU.                                              |
++------------------------------+----------------------------------------------------------+
+| device                       | Any valid OpenMM device number or device string, e.g.    |
+|                              | ``0`` would select device 0                              |
++------------------------------+----------------------------------------------------------+
+| dielectric                   | Dielectric value if a reaction field cutoff is used,     |
+|                              | e.g. ``78.0``                                            |
++------------------------------+----------------------------------------------------------+
+| fixed                        | The atoms in the system that should be fixed (not moved) |
++------------------------------+----------------------------------------------------------+
+| ignore_perturbations         | Whether or not to ignore any perturbations and only set  |
+|                              | up a perturbable molecule as a non-perurbable molecule   |
+|                              | from only the reference state.                           |
++------------------------------+----------------------------------------------------------+
+| include_constrained_energies | Whether or not to include the bond and angle energies    |
+|                              | of bonds and angles that are constrained.                |
+|                              | This defaults to ``True``, as we normally do want        |
+|                              | to calculate all of the energies of the internals,       |
+|                              | even if they are constrained.                            |
++------------------------------+----------------------------------------------------------+
+| integrator                   | The MD integrator to use, e.g.                           |
+|                              | ``verlet``, ``leapfrog``, ``langevin``,                  |
+|                              | ``langevin_middle``, ``nose_hoover``,                    |
+|                              | ``brownian``, ``andersen``                               |
++------------------------------+----------------------------------------------------------+
+| friction                     | Friction value for the integrator, in inverse time, e.g. |
+|                              | ``5.0 / sr.units.picosecond``                            |
++------------------------------+----------------------------------------------------------+
+| lambda                       | The λ-value at which to set up the system (assuming this |
+|                              | contains any perturbable molecules or restraints)        |
++------------------------------+----------------------------------------------------------+
+| platform                     | Any valid OpenMM platform string, e.g. ``CUDA``,         |
+|                              | ``OpenCL``, ``Metal``, ```CPU``, ``Reference``           |
++------------------------------+----------------------------------------------------------+
+| precision                    | Any valid OpenMM platform precision value, e.g.          |
+|                              | ``single``, ``mixed`` or ``double``.                     |
++------------------------------+----------------------------------------------------------+
+| pressure                     | Any pressure value, e.g. ``1*sr.units.atm``              |
++------------------------------+----------------------------------------------------------+
+| restraints                   | The :class:`~sire.mm.Restraints` object (or list of      |
+|                              | objects) that describe the restraints that should be     |
+|                              | added to the system.                                     |
++------------------------------+----------------------------------------------------------+
+| schedule                     | The :class:`~sire.cas.LambdaSchedule` to use that        |
+|                              | controls how parameters are modified with λ              |
++------------------------------+----------------------------------------------------------+
+| shift_delta                  | The shift_delta parameter to use for the softening       |
+|                              | potential used to soften interactions involving          |
+|                              | ghost atoms.                                             |
++------------------------------+----------------------------------------------------------+
+| space                        | Space in which the simulation should be conducted, e.g.  |
+|                              | `sr.vol.Cartesian`                                       |
++------------------------------+----------------------------------------------------------+
+| swap_end_states              | Whether to swap the end states of a perturbable molecule |
+|                              | (i.e. treat the perturbed state as the reference state   |
+|                              | and vice versa).                                         |
++------------------------------+----------------------------------------------------------+
+| temperature                  | Any temperature value, e.g. ``25*sr.units.celsius``      |
++------------------------------+----------------------------------------------------------+
+| threads                      | The number of threads to use in the CPU platform         |
++------------------------------+----------------------------------------------------------+
+| timestep                     | Time between integration steps, e.g.                     |
+|                              | ``2 * sr.units.femtosecond``                             |
++------------------------------+----------------------------------------------------------+
+| use_dispersion_correction    | Whether or not to use the dispersion correction to       |
+|                              | deal with cutoff issues. This is very expensive.         |
++------------------------------+----------------------------------------------------------+
 
 Higher level API
 ----------------
@@ -336,4 +342,3 @@ from files (e.g. via that property of the ``.trajectory()`` function).
 The energies are saved to the ``energy_trajectory`` property of the
 returned molecules, and accessible via that property or the
 :func:`~sire.system.System.energy_trajectory` function.
-

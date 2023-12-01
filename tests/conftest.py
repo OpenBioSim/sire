@@ -175,3 +175,7 @@ def testfile_cache_dir():
             cache_dir = os.path.join(d, "cache")
 
     return cache_dir
+
+
+def zero_lj_mols():
+    return sr.load_test_files("zero_lj.prm7", "zero_lj.rst7")
