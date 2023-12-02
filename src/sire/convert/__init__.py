@@ -113,7 +113,7 @@ def to_sire(obj, map=None):
             return "gemmi"
         else:
             raise TypeError(
-                f"Cannot convert '{o}' as it is of unrecognised type {type(0)}"
+                f"Cannot convert '{o}' as it is of unrecognised type {type(o)}"
             )
 
     # sort all the objects into lists of types (preserving the order)
@@ -477,7 +477,10 @@ def gemmi_to_sire(obj, map=None):
         s = System(_gemmi_to_sire(o, map=map))
 
         if hasattr(o, "_sire_metadata"):
-            s.set_property("metadata", o._sire_metadata)
+            metadata = o._sire_metadata()
+
+            if metadata is not None:
+                s.set_property("metadata", metadata)
 
         results.append(s)
 
@@ -485,6 +488,21 @@ def gemmi_to_sire(obj, map=None):
         return results[0]
     else:
         return results
+
+
+_gemmi_metadata = {}
+
+
+def _find_sire_gemmi_metadata(obj):
+    """
+    Find the sire metadata associated with the passed gemmi object
+    """
+    global _gemmi_metadata
+
+    if obj in _gemmi_metadata:
+        return _gemmi_metadata[obj]
+    else:
+        return None
 
 
 def sire_to_gemmi(obj, map=None):
@@ -527,9 +545,14 @@ def sire_to_gemmi(obj, map=None):
 
         g = _sire_to_gemmi(o, map=map)
 
-        # if metadata is not None:
-        # add metadata to the gemmi structure
-        # g._sire_metadata = metadata
+        if metadata is not None:
+            # add metadata to the gemmi structure. We have to use
+            # this convoluted way of doing it as gemmi doesn't
+            # allow us to add arbitrary metadata to the structure
+            # and the class is not extensible (can't be monkey patched)
+            global _gemmi_metadata
+            _gemmi_metadata[g] = metadata
+            g.__class__._sire_metadata = _find_sire_gemmi_metadata
 
         result.append(g)
 
