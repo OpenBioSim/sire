@@ -22,6 +22,8 @@
 
 #include "SireMol/iswater.h"
 
+#include "SireBase/propertylist.h"
+
 #include "SireUnits/units.h"
 
 #include "SireError/errors.h"
@@ -909,6 +911,8 @@ namespace SireGemmi
 
         auto structure = gemmi::make_structure_from_block(doc.blocks.at(structure_block));
 
+        // check for any metadata - if there is, then add it to the map
+
         return gemmi_to_sire(structure, map);
     }
 
@@ -918,6 +922,73 @@ namespace SireGemmi
         auto structure = sire_to_gemmi(system, map);
 
         auto doc = gemmi::make_mmcif_document(structure);
+
+        if (system.containsProperty(map["metadata"]))
+        {
+            auto &block = doc.add_new_block("sire");
+
+            auto metadata = system.property(map["metadata"]).asA<SireBase::Properties>();
+
+            auto keys = metadata.propertyKeys();
+            keys.sort();
+
+            block.set_pair("_version", "1.0");
+
+            for (const auto &key : keys)
+            {
+                const auto &value = metadata.property(key);
+
+                if (value.isA<SireBase::Properties>())
+                {
+                    const auto &props2 = value.asA<SireBase::Properties>();
+                    auto keys2 = props2.propertyKeys();
+                    keys2.sort();
+
+                    std::vector<std::string> tags;
+
+                    for (const auto &key2 : keys2)
+                    {
+                        tags.push_back(QString(".%1").arg(key2).toStdString());
+                    }
+
+                    auto &loop = block.init_loop(QString("_%1").arg(key).toStdString(), tags);
+
+                    std::vector<std::string> values;
+
+                    for (const auto &key2 : keys2)
+                    {
+                        values.push_back(props2.property(key2).asAString().toStdString());
+                    }
+
+                    loop.add_row(values);
+                }
+                else if (value.isAnArray())
+                {
+                    auto tag = QString("_%1").arg(key);
+
+                    auto array = value.asAnArray();
+
+                    if (array.count() == 1)
+                    {
+                        block.set_pair(tag.toStdString(), array[0].asAString().toStdString());
+                    }
+                    else
+                    {
+                        auto &loop = block.init_loop(tag.toStdString(), {".value"});
+
+                        for (int i = 0; i < array.size(); ++i)
+                        {
+                            loop.add_row({array[i].asAString().toStdString()});
+                        }
+                    }
+                }
+                else
+                {
+                    auto tag = QString("_%1").arg(key);
+                    doc.blocks[0].set_pair(tag.toStdString(), value.asAString().toStdString());
+                }
+            }
+        }
 
         std::stringstream stream;
 
