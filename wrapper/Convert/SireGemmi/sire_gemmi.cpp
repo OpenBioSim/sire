@@ -23,6 +23,7 @@
 #include "SireMol/iswater.h"
 
 #include "SireBase/propertylist.h"
+#include "SireBase/stringproperty.h"
 
 #include "SireUnits/units.h"
 
@@ -912,8 +913,87 @@ namespace SireGemmi
         auto structure = gemmi::make_structure_from_block(doc.blocks.at(structure_block));
 
         // check for any metadata - if there is, then add it to the map
+        auto *block = doc.find_block("sire");
+        SireBase::Properties metadata;
 
-        return gemmi_to_sire(structure, map);
+        if (block != nullptr)
+        {
+            for (const auto &item : block->items)
+            {
+                switch (item.type)
+                {
+                case cif::ItemType::Pair:
+                {
+                    const auto &p = item.pair;
+
+                    QString tag = QString::fromStdString(p[0]);
+                    QString value = QString::fromStdString(p[1]);
+
+                    if (tag.startsWith("_"))
+                        tag = tag.mid(1);
+
+                    if (tag == "version")
+                        // ignore the version
+                        break;
+
+                    metadata.setProperty(tag, SireBase::StringProperty(value));
+                    break;
+                }
+                case cif::ItemType::Loop:
+                {
+                    const auto &l = item.loop;
+
+                    QStringList tags;
+
+                    for (const auto &tag : l.tags)
+                    {
+                        tags.append(QString::fromStdString(tag));
+                    }
+
+                    QStringList values;
+
+                    for (const auto &value : l.values)
+                    {
+                        values.append(QString::fromStdString(value));
+                    }
+
+                    if (tags.size() == 1 and tags[0].endsWith(".value"))
+                    {
+                        // this is an array of values
+                        auto array = SireBase::PropertyList();
+
+                        for (const auto &value : values)
+                        {
+                            array.append(SireBase::StringProperty(value));
+                        }
+
+                        auto tag = tags[0];
+
+                        if (tag.startsWith("_"))
+                            tag = tag.mid(1);
+
+                        // remove the .value on the end
+                        tag = tag.left(tag.size() - 6);
+
+                        metadata.setProperty(tag, array);
+                    }
+
+                    break;
+                }
+                }
+            }
+
+            qDebug() << metadata.toString();
+        }
+
+        auto m = map;
+
+        if (not metadata.isEmpty())
+        {
+            m.set("metadata", metadata);
+        }
+
+        return gemmi_to_sire(structure, m);
     }
 
     QStringList pdbx_writer_function(const SireSystem::System &system,
