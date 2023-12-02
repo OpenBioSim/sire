@@ -292,7 +292,9 @@ def test_openmm_ignore_constrained(ala_mols):
 def test_openmm_no_zero_sigmas(zero_lj_mols):
     mols = zero_lj_mols
 
-    omm = sr.convert.to(mols, "openmm", map={"constraint": "h-bonds"})
+    omm = sr.convert.to(mols, "openmm", 
+                        map={"constraint": "h-bonds",
+                             "platform": "Reference"})
 
     from openmm import XmlSerializer
 
@@ -312,14 +314,26 @@ def test_openmm_skipped_constrained_bonds(zero_lj_mols):
     omm1 = sr.convert.to(
         mols,
         "openmm",
-        map={"constraint": "h-bonds", "include_constrained_energies": True},
+        map={"constraint": "h-bonds", 
+             "include_constrained_energies": True,
+             "platform": "Reference"},
     )
 
     omm2 = sr.convert.to(
         mols,
         "openmm",
-        map={"constraint": "h-bonds", "include_constrained_energies": False},
+        map={"constraint": "h-bonds", 
+             "include_constrained_energies": False,
+             "platform": "Reference"},
     )
+
+    nrg1 = omm1.get_potential_energy().to(sr.units.kcal_per_mol)
+    nrg2 = omm2.get_potential_energy().to(sr.units.kcal_per_mol)
+
+    # Check the energies haven't changed
+    # (regression check - here are the current values)
+    assert nrg1 == pytest.approx(-447.44, 1e-3)
+    assert nrg2 == pytest.approx(-3279.87, 1e-3)
 
     from openmm import XmlSerializer
 
