@@ -474,7 +474,12 @@ def gemmi_to_sire(obj, map=None):
     from ..system import System
 
     for o in obj:
-        results.append(System(_gemmi_to_sire(o, map=map)))
+        s = System(_gemmi_to_sire(o, map=map))
+
+        if hasattr(o, "_sire_metadata"):
+            s.set_property("metadata", o._sire_metadata)
+
+        results.append(s)
 
     if len(results) == 1:
         return results[0]
@@ -515,7 +520,18 @@ def sire_to_gemmi(obj, map=None):
             s.add(_to_selectormol(o))
             o = s._system
 
-        result.append(_sire_to_gemmi(o, map=map))
+        if o.contains_property("metadata"):
+            metadata = o.property("metadata")
+        else:
+            metadata = None
+
+        g = _sire_to_gemmi(o, map=map)
+
+        # if metadata is not None:
+        # add metadata to the gemmi structure
+        # g._sire_metadata = metadata
+
+        result.append(g)
 
     if len(result) == 1:
         return result[0]
