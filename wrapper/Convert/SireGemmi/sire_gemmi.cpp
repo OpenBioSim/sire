@@ -493,12 +493,11 @@ namespace SireGemmi
 
         system.add(mols);
 
-        // convert everything in the structure metadata and
-        // the structure info object into metadata that is
-        // added to this system
-        SireBase::Properties metadata;
-
-        system.setProperty("metadata", metadata);
+        if (map.specified("metadata"))
+        {
+            auto metadata = map["metadata"].value().asA<SireBase::Properties>();
+            system.setProperty("metadata", metadata);
+        }
 
         return system;
     }
@@ -932,10 +931,6 @@ namespace SireGemmi
                     if (tag.startsWith("_"))
                         tag = tag.mid(1);
 
-                    if (tag == "version")
-                        // ignore the version
-                        break;
-
                     metadata.setProperty(tag, SireBase::StringProperty(value));
                     break;
                 }
@@ -977,13 +972,50 @@ namespace SireGemmi
 
                         metadata.setProperty(tag, array);
                     }
+                    else
+                    {
+                        // this is a set of property values
+                        auto props = SireBase::Properties();
+
+                        if (tags.size() == values.size())
+                        {
+                            // one value per key
+                            for (int i = 0; i < tags.size(); ++i)
+                            {
+                                auto subtag = tags[i].split(".").mid(1).join(".");
+                                props.setProperty(subtag, SireBase::StringProperty(values[i]));
+                            }
+                        }
+                        else
+                        {
+                            // multiple values per key
+                            for (int i = 0; i < tags.size(); ++i)
+                            {
+                                auto subtag = tags[i].split(".").mid(1).join(".");
+
+                                auto subvals = SireBase::StringArrayProperty();
+
+                                for (int j = i; j < values.size(); j += tags.size())
+                                {
+                                    subvals.append(values[j]);
+                                }
+
+                                props.setProperty(subtag, subvals);
+                            }
+                        }
+
+                        auto tag = tags[0].split(".").at(0);
+
+                        if (tag.startsWith("_"))
+                            tag = tag.mid(1);
+
+                        metadata.setProperty(tag, props);
+                    }
 
                     break;
                 }
                 }
             }
-
-            qDebug() << metadata.toString();
         }
 
         auto m = map;
@@ -1012,8 +1044,6 @@ namespace SireGemmi
             auto keys = metadata.propertyKeys();
             keys.sort();
 
-            block.set_pair("_version", "1.0");
-
             for (const auto &key : keys)
             {
                 const auto &value = metadata.property(key);
@@ -1026,21 +1056,65 @@ namespace SireGemmi
 
                     std::vector<std::string> tags;
 
+                    int nrows = 0;
+
                     for (const auto &key2 : keys2)
                     {
                         tags.push_back(QString(".%1").arg(key2).toStdString());
+
+                        const auto &value2 = props2.property(key2);
+
+                        if (value2.isAnArray())
+                        {
+                            nrows = std::max(nrows, value2.asAnArray().count());
+                        }
                     }
 
                     auto &loop = block.init_loop(QString("_%1").arg(key).toStdString(), tags);
 
-                    std::vector<std::string> values;
-
-                    for (const auto &key2 : keys2)
+                    for (int i = 0; i < nrows; ++i)
                     {
-                        values.push_back(props2.property(key2).asAString().toStdString());
-                    }
+                        std::vector<std::string> values;
 
-                    loop.add_row(values);
+                        for (const auto &key2 : keys2)
+                        {
+                            const auto &value2 = props2.property(key2);
+
+                            if (value2.isAnArray())
+                            {
+                                const auto &array2 = value2.asAnArray();
+
+                                if (i < array2.count())
+                                {
+                                    try
+                                    {
+                                        values.push_back(array2[i].asAString().toStdString());
+                                    }
+                                    catch (...)
+                                    {
+                                        values.push_back(array2[i].toString().toStdString());
+                                    }
+                                }
+                                else
+                                {
+                                    values.push_back("");
+                                }
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    values.push_back(value2.asAString().toStdString());
+                                }
+                                catch (...)
+                                {
+                                    values.push_back(value2.toString().toStdString());
+                                }
+                            }
+                        }
+
+                        loop.add_row(values);
+                    }
                 }
                 else if (value.isAnArray())
                 {
@@ -1050,7 +1124,14 @@ namespace SireGemmi
 
                     if (array.count() == 1)
                     {
-                        block.set_pair(tag.toStdString(), array[0].asAString().toStdString());
+                        try
+                        {
+                            block.set_pair(tag.toStdString(), array[0].asAString().toStdString());
+                        }
+                        catch (...)
+                        {
+                            block.set_pair(tag.toStdString(), array[0].toString().toStdString());
+                        }
                     }
                     else
                     {
@@ -1058,14 +1139,29 @@ namespace SireGemmi
 
                         for (int i = 0; i < array.size(); ++i)
                         {
-                            loop.add_row({array[i].asAString().toStdString()});
+                            try
+                            {
+                                loop.add_row({array[i].asAString().toStdString()});
+                            }
+                            catch (...)
+                            {
+                                loop.add_row({array[i].toString().toStdString()});
+                            }
                         }
                     }
                 }
                 else
                 {
                     auto tag = QString("_%1").arg(key);
-                    doc.blocks[0].set_pair(tag.toStdString(), value.asAString().toStdString());
+
+                    try
+                    {
+                        doc.blocks[0].set_pair(tag.toStdString(), value.asAString().toStdString());
+                    }
+                    catch (...)
+                    {
+                        doc.blocks[0].set_pair(tag.toStdString(), value.toString().toStdString());
+                    }
                 }
             }
         }
