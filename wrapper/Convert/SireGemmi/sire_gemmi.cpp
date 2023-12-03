@@ -748,62 +748,43 @@ namespace SireGemmi
 
         structure.name = name;
 
-        gemmi::Chain water_chain("Z");
-        water_chain.name = "Z";
+        const std::string chain_name = "1";
 
-        gemmi::Chain mol_chain("Y");
-        mol_chain.name = "Y";
-
-        char chain_id = 'A';
-
-        QHash<SireMol::MolNum, std::string> molnum_to_chain;
+        gemmi::Chain chain(chain_name);
 
         for (const auto &mol : mols)
         {
             if (SireMol::is_water(mol, map))
             {
-                convert_water(mol, water_chain, map);
-                molnum_to_chain.insert(mol.number(), water_chain.name);
+                convert_water(mol, chain, map);
             }
             else if (mol.nAtoms() == 1)
             {
                 if (mol.atoms()(0).property<SireMol::Element>(map["element"]) == SireMol::Element(8))
                 {
                     // single oxygen is a water without hydrogens
-                    convert_water(mol, water_chain, map);
-                    molnum_to_chain.insert(mol.number(), water_chain.name);
+                    convert_water(mol, chain, map);
                 }
                 else
                 {
                     // convert as a normal molecule
-                    convert_molecule(mol, mol_chain, map);
-                    molnum_to_chain.insert(mol.number(), mol_chain.name);
+                    convert_molecule(mol, chain, map);
                 }
             }
             else if (mol.nResidues() > 1)
             {
-                // convert as a polymer
-                gemmi::Chain poly_chain(QString(chain_id).toStdString());
-                poly_chain.name = chain_id;
-                chain_id += 1;
-
-                if (chain_id > 'Y')
-                    chain_id = 'A';
-
-                convert_polymer(mol, poly_chain, map);
-                model.chains.push_back(poly_chain);
-                molnum_to_chain.insert(mol.number(), poly_chain.name);
+                convert_polymer(mol, chain, map);
             }
             else
             {
                 // convert as a normal molecule
-                convert_molecule(mol, mol_chain, map);
-                molnum_to_chain.insert(mol.number(), mol_chain.name);
+                convert_molecule(mol, chain, map);
             }
         }
 
-        model.chains.push_back(mol_chain);
-        model.chains.push_back(water_chain);
+        // just put everything in the same chain. We use sub-chains
+        // to map the sire concept of a chain to the gemmi concept
+        model.chains.push_back(chain);
 
         structure.models.push_back(model);
 
@@ -819,8 +800,6 @@ namespace SireGemmi
             try
             {
                 const auto &connectivity = mol.property(connectivity_property).asA<SireMol::Connectivity>();
-
-                const auto chain_name = molnum_to_chain.value(mol.number());
 
                 const int nats = mol.nAtoms();
 
