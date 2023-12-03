@@ -93,9 +93,16 @@ namespace SireGemmi
         {
             auto model_id = subchains.value(QString::fromStdString(subchain), 0);
 
+            auto subchain_residues = structure.models[model_id].get_subchain(subchain);
+
+            if (subchain_residues.empty())
+            {
+                continue;
+            }
+
             auto chain = mol.add(SireMol::ChainName(QString::fromStdString(subchain.c_str())));
 
-            for (const auto &residue : structure.models[model_id].get_subchain(subchain))
+            for (const auto &residue : subchain_residues)
             {
                 auto cg = cg0;
 
@@ -111,8 +118,7 @@ namespace SireGemmi
                 if (residue.seqid.num.has_value())
                     resnum = residue.seqid.num.value;
 
-                auto res = mol.add(SireMol::ResName(QString::fromStdString(residue.name)));
-                res.reparent(chain.index());
+                auto res = chain.add(SireMol::ResName(QString::fromStdString(residue.name)));
                 res.renumber(SireMol::ResNum(resnum));
 
                 if (residue.seqid.has_icode())
@@ -183,6 +189,8 @@ namespace SireGemmi
 
             int cg_num = 0;
 
+            auto chain = mol.add(SireMol::ChainName(QString::fromStdString(subchain.c_str())));
+
             for (const auto &residue : structure.models[model_id].get_subchain(subchain))
             {
                 auto cg = cg0;
@@ -206,6 +214,7 @@ namespace SireGemmi
 
                 auto res = mol.add(SireMol::ResNum(resnum));
                 res.rename(SireMol::ResName(QString::fromStdString(residue.name)));
+                res.reparent(chain.name());
 
                 if (residue.seqid.has_icode())
                     set_prop(res, "insert_code", QString(residue.seqid.icode), map);
@@ -274,6 +283,7 @@ namespace SireGemmi
                 auto mol = SireMol::MolStructureEditor(SireMol::Molecule().edit());
                 mol.renumber();
                 mol.rename(SireMol::MolName("WAT"));
+                auto chain = mol.add(SireMol::ChainName(QString::fromStdString(subchain.c_str())));
 
                 auto cg = mol.add(SireMol::CGName("0"));
 
@@ -286,6 +296,7 @@ namespace SireGemmi
 
                 auto res = mol.add(SireMol::ResNum(resnum));
                 res.rename(SireMol::ResName(QString::fromStdString(residue.name)));
+                res.reparent(chain.name());
 
                 if (residue.seqid.has_icode())
                     set_prop(res, "insert_code", QString(residue.seqid.icode), map);
@@ -575,12 +586,14 @@ namespace SireGemmi
         return is_hetatm;
     }
 
-    void convert_polymer(const SireMol::Molecule &mol, gemmi::Chain &chain,
+    void convert_polymer(int molid,
+                         const SireMol::Molecule &mol, gemmi::Chain &chain,
+                         QHash<QString, gemmi::Chain> &chains,
                          const SireBase::PropertyMap &map)
     {
         const auto residues = mol.residues();
 
-        const auto entity_id = mol.name().value().toStdString();
+        const auto entity_id = QString::number(molid).toStdString();
 
         for (int i = 0; i < residues.count(); ++i)
         {
@@ -593,9 +606,6 @@ namespace SireGemmi
             gemmi_residue.name = residue.name().value().toStdString();
             gemmi_residue.seqid.num = residue.number().value();
 
-            if (residue.isWithinChain())
-                gemmi_residue.subchain = residue.chain().name().value().toStdString();
-
             const auto atoms = residue.atoms();
 
             bool is_hetatm_residue = false;
@@ -625,16 +635,26 @@ namespace SireGemmi
             else
                 gemmi_residue.het_flag = 'A';
 
-            chain.residues.push_back(gemmi_residue);
+            if (residue.isWithinChain())
+            {
+                gemmi_residue.subchain = residue.chain().name().value().toStdString();
+                chains.find(residue.chain().name().value()).value().residues.push_back(gemmi_residue);
+            }
+            else
+            {
+                chain.residues.push_back(gemmi_residue);
+            }
         }
     }
 
-    void convert_molecule(const SireMol::Molecule &mol, gemmi::Chain &chain,
+    void convert_molecule(int molid,
+                          const SireMol::Molecule &mol, gemmi::Chain &chain,
+                          QHash<QString, gemmi::Chain> &chains,
                           const SireBase::PropertyMap &map)
     {
         const auto residues = mol.residues();
 
-        const auto entity_id = mol.name().value().toStdString();
+        const auto entity_id = QString::number(molid).toStdString();
 
         for (int i = 0; i < residues.count(); ++i)
         {
@@ -647,9 +667,6 @@ namespace SireGemmi
             gemmi_residue.name = residue.name().value().toStdString();
             gemmi_residue.seqid.num = residue.number().value();
 
-            if (residue.isWithinChain())
-                gemmi_residue.subchain = residue.chain().name().value().toStdString();
-
             const auto atoms = residue.atoms();
 
             bool is_hetatm_residue = false;
@@ -679,22 +696,35 @@ namespace SireGemmi
             else
                 gemmi_residue.het_flag = 'A';
 
-            chain.residues.push_back(gemmi_residue);
+            if (residue.isWithinChain())
+            {
+                gemmi_residue.subchain = residue.chain().name().value().toStdString();
+                chains.find(residue.chain().name().value()).value().residues.push_back(gemmi_residue);
+            }
+            else
+            {
+                chain.residues.push_back(gemmi_residue);
+            }
         }
     }
 
-    void convert_water(const SireMol::Molecule &mol, gemmi::Chain &chain,
+    void convert_water(int molid,
+                       const SireMol::Molecule &mol, gemmi::Chain &chain,
+                       QHash<QString, gemmi::Chain> &chains,
                        const SireBase::PropertyMap &map)
     {
         gemmi::Residue residue;
         residue.entity_type = gemmi::EntityType::Water;
-        residue.entity_id = "WATER";
-
-        auto first_res = mol.residues()(0);
-        residue.name = first_res.name().value().toStdString();
-        residue.seqid.num = first_res.number().value();
+        residue.entity_id = QString::number(molid).toStdString();
 
         const auto atoms = mol.atoms();
+
+        if (atoms.isEmpty())
+            return;
+
+        auto first_res = atoms(0).residue();
+        residue.name = first_res.name().value().toStdString();
+        residue.seqid.num = first_res.number().value();
 
         bool is_hetatm_residue = false;
 
@@ -715,7 +745,15 @@ namespace SireGemmi
         else
             residue.het_flag = 'A';
 
-        chain.residues.push_back(residue);
+        if (first_res.isWithinChain())
+        {
+            residue.subchain = first_res.chain().name().value().toStdString();
+            chains.find(first_res.chain().name().value()).value().residues.push_back(residue);
+        }
+        else
+        {
+            chain.residues.push_back(residue);
+        }
     }
 
     gemmi::Structure sire_to_gemmi(const SireSystem::System &system,
@@ -748,58 +786,91 @@ namespace SireGemmi
 
         structure.name = name;
 
-        bool last_chain_was_poly = false;
-        int chain_number = 1;
-        std::string chain_name = QString::number(chain_number).toStdString();
-
-        gemmi::Chain chain(chain_name);
-
-        QHash<SireMol::MolNum, int> molnum_to_chain;
+        // create a real chain for each named chain in the molecules
+        QHash<QString, gemmi::Chain> chains;
 
         for (const auto &mol : mols)
         {
-            if (last_chain_was_poly)
+            if (mol.nChains() > 0)
             {
-                // each poly needs to be in its own chain
-                chain_number += 1;
-                chain_name = QString::number(chain_number).toStdString();
-                model.chains.push_back(chain);
-                chain = gemmi::Chain(chain_name);
-                last_chain_was_poly = false;
+                const auto c = mol.chains();
+
+                for (int i = 0; i < c.count(); ++i)
+                {
+                    auto name = c(i).name().value();
+
+                    if (not chains.contains(name))
+                        chains.insert(name, gemmi::Chain(name.toStdString()));
+                }
             }
+        }
+
+        // also create a single chain for all other molecules
+        int chain_num = 1;
+        auto chain_name = QString::number(chain_num).toStdString();
+
+        while (true)
+        {
+            if (not chains.contains(QString::number(chain_num)))
+            {
+                break;
+            }
+
+            chain_num += 1;
+            chain_name = QString::number(chain_num).toStdString();
+        }
+
+        auto chain = gemmi::Chain(chain_name);
+
+        QHash<SireMol::MolNum, int> molnum_to_chain;
+
+        int molid = 0;
+
+        for (const auto &mol : mols)
+        {
+            molid += 1;
 
             if (SireMol::is_water(mol, map))
             {
-                convert_water(mol, chain, map);
+                convert_water(molid, mol, chain, chains, map);
             }
             else if (mol.nAtoms() == 1)
             {
                 if (mol.atoms()(0).property<SireMol::Element>(map["element"]) == SireMol::Element(8))
                 {
                     // single oxygen is a water without hydrogens
-                    convert_water(mol, chain, map);
+                    convert_water(molid, mol, chain, chains, map);
                 }
                 else
                 {
                     // convert as a normal molecule
-                    convert_molecule(mol, chain, map);
+                    convert_molecule(molid, mol, chain, chains, map);
                 }
             }
             else if (mol.nResidues() > 1)
             {
-                convert_polymer(mol, chain, map);
-                last_chain_was_poly = true;
+                convert_polymer(molid, mol, chain, chains, map);
             }
             else
             {
                 // convert as a normal molecule
-                convert_molecule(mol, chain, map);
+                convert_molecule(molid, mol, chain, chains, map);
             }
         }
 
-        // just put everything in the same chain. We use sub-chains
-        // to map the sire concept of a chain to the gemmi concept
-        model.chains.push_back(chain);
+        auto chain_names = chains.keys();
+        chain_names.sort();
+
+        for (const auto &name : chain_names)
+        {
+            auto &chain = chains.find(name).value();
+
+            if (not chain.residues.empty())
+                model.chains.push_back(chain);
+        }
+
+        if (not chain.residues.empty())
+            model.chains.push_back(chain);
 
         structure.models.push_back(model);
 
@@ -814,14 +885,34 @@ namespace SireGemmi
         {
             try
             {
-                const auto &connectivity = mol.property(connectivity_property).asA<SireMol::Connectivity>();
+                const auto atoms = mol.atoms();
+                const int nats = atoms.count();
 
-                const int nats = mol.nAtoms();
+                std::vector<std::string> chain_names;
+
+                const auto residues = mol.residues();
+
+                for (int i = 0; i < residues.count(); ++i)
+                {
+                    const auto res = residues(i);
+
+                    if (res.isWithinChain())
+                    {
+                        auto name = res.chain().name().value().toStdString();
+                        chain_names.push_back(name);
+                    }
+                    else
+                    {
+                        chain_names.push_back(chain_name);
+                    }
+                }
+
+                const auto &connectivity = mol.property(connectivity_property).asA<SireMol::Connectivity>();
 
                 for (int i = 0; i < nats - 1; ++i)
                 {
                     const auto idx0 = SireMol::AtomIdx(i);
-                    const auto atom0 = mol.atom(idx0);
+                    const auto atom0 = atoms(i);
 
                     auto connections = connectivity.connectionsTo(idx0);
 
@@ -829,9 +920,12 @@ namespace SireGemmi
                         continue;
 
                     gemmi::AtomAddress addr0;
-                    addr0.chain_name = QString::number(molnum_to_chain[mol.number()]).toStdString();
-                    addr0.res_id.name = atom0.residue().name().value().toStdString();
-                    addr0.res_id.seqid.num = atom0.residue().number().value();
+
+                    auto res0 = atom0.residue();
+
+                    addr0.chain_name = chain_names[res0.index().value()];
+                    addr0.res_id.name = res0.name().value().toStdString();
+                    addr0.res_id.seqid.num = res0.number().value();
                     addr0.atom_name = atom0.name().value().toStdString();
 
                     auto cra0 = model.find_cra(addr0, true);
@@ -841,12 +935,14 @@ namespace SireGemmi
                         if (idx1.value() <= i)
                             continue;
 
-                        const auto atom1 = mol.atom(idx1);
+                        const auto atom1 = atoms(idx1.value());
+                        const auto res1 = atom1.residue();
 
                         gemmi::AtomAddress addr1;
-                        addr1.chain_name = addr0.chain_name;
-                        addr1.res_id.name = atom1.residue().name().value().toStdString();
-                        addr1.res_id.seqid.num = atom1.residue().number().value();
+
+                        addr1.chain_name = chain_names[res1.index().value()];
+                        addr1.res_id.name = res1.name().value().toStdString();
+                        addr1.res_id.seqid.num = res1.number().value();
                         addr1.atom_name = atom1.name().value().toStdString();
 
                         auto cra1 = model.find_cra(addr1, true);
