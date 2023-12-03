@@ -748,12 +748,26 @@ namespace SireGemmi
 
         structure.name = name;
 
-        const std::string chain_name = "1";
+        bool last_chain_was_poly = false;
+        int chain_number = 1;
+        std::string chain_name = QString::number(chain_number).toStdString();
 
         gemmi::Chain chain(chain_name);
 
+        QHash<SireMol::MolNum, int> molnum_to_chain;
+
         for (const auto &mol : mols)
         {
+            if (last_chain_was_poly)
+            {
+                // each poly needs to be in its own chain
+                chain_number += 1;
+                chain_name = QString::number(chain_number).toStdString();
+                model.chains.push_back(chain);
+                chain = gemmi::Chain(chain_name);
+                last_chain_was_poly = false;
+            }
+
             if (SireMol::is_water(mol, map))
             {
                 convert_water(mol, chain, map);
@@ -774,6 +788,7 @@ namespace SireGemmi
             else if (mol.nResidues() > 1)
             {
                 convert_polymer(mol, chain, map);
+                last_chain_was_poly = true;
             }
             else
             {
@@ -814,7 +829,7 @@ namespace SireGemmi
                         continue;
 
                     gemmi::AtomAddress addr0;
-                    addr0.chain_name = chain_name;
+                    addr0.chain_name = QString::number(molnum_to_chain[mol.number()]).toStdString();
                     addr0.res_id.name = atom0.residue().name().value().toStdString();
                     addr0.res_id.seqid.num = atom0.residue().number().value();
                     addr0.atom_name = atom0.name().value().toStdString();
@@ -829,7 +844,7 @@ namespace SireGemmi
                         const auto atom1 = mol.atom(idx1);
 
                         gemmi::AtomAddress addr1;
-                        addr1.chain_name = chain_name;
+                        addr1.chain_name = addr0.chain_name;
                         addr1.res_id.name = atom1.residue().name().value().toStdString();
                         addr1.res_id.seqid.num = atom1.residue().number().value();
                         addr1.atom_name = atom1.name().value().toStdString();
