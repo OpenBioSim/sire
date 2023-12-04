@@ -595,8 +595,16 @@ class System:
             atoms will not be moved by dynamics.
 
         qm_engine:
-            A QMMMEngine object to used to compute QM/MM forces and energies
-            on a subset of the atoms in the system.
+            A sire.qm.QMMMEngine object to used to compute QM/MM forces
+            and energies on a subset of the atoms in the system.
+
+        lambda_interpolate: float
+            The lambda value at which to interpolate the QM/MM forces and
+            energies, which can be used to perform end-state correction
+            simulations. A value of 1.0 is full QM, whereas a value of 0.0 is
+            full MM. If two values are specified, then lambda will be linearly
+            interpolated between the two values over the course of the
+            simulation, which lambda updated at the energy_frequency.
 
         platform: str
             The name of the OpenMM platform on which to run the dynamics,

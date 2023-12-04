@@ -31,6 +31,33 @@ class DynamicsData:
                     mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
                 )
 
+            # see if this is an interpolation simulation
+            if map.specified("lambda_interpolate"):
+                if map["lambda_interpolate"].has_value():
+                    lambda_interpolate = map["lambda_interpolate"].value()
+                else:
+                    lambda_interpolate = map["lambda_interpolate"].source()
+
+                # Single lambda value.
+                try:
+                    lambda_interpolate = float(lambda_interpolate)
+                    map.set("lambda_value", lambda_interpolate)
+                # Two lambda values.
+                except:
+                    try:
+                        if not len(lambda_interpolate) == 2:
+                            raise
+                        lambda_interpolate = [float(x) for x in lambda_interpolate]
+                        map.set("lambda_value", lambda_interpolate[0])
+                    except:
+                        raise ValueError(
+                            "'lambda_interpolate' must be a float or a list of two floats"
+                        )
+                self._is_interpolate = True
+                self._lambda_interpolate = lambda_interpolate
+            else:
+                self._is_interpolate = False
+
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
             from ..system import ForceFieldInfo, System
@@ -172,6 +199,7 @@ class DynamicsData:
         save_energy: bool = False,
         lambda_windows=[],
         save_velocities: bool = False,
+        delta_lambda: float = None,
     ):
         if not self._is_running:
             raise SystemError("Cannot stop dynamics that is not running!")
@@ -220,24 +248,66 @@ class DynamicsData:
             )
 
             sim_lambda_value = self._omm_mols.get_lambda()
-            nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
-            if lambda_windows is not None:
-                for lambda_value in lambda_windows:
-                    if lambda_value != sim_lambda_value:
-                        self._omm_mols.set_lambda(lambda_value)
-                        nrgs[str(lambda_value)] = (
-                            self._omm_mols.get_potential_energy(
-                                to_sire_units=False
-                            ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                            * kcal_per_mol
-                        )
+            if self._is_interpolate:
+                nrgs["E(lambda)"] = nrgs["potential"]
+                nrgs.pop("potential")
+                if sim_lambda_value != 0.0:
+                    self._omm_mols.set_lambda(0.0)
+                    nrgs["E(lambda=0)"] = (
+                        self._omm_mols.get_potential_energy(
+                            to_sire_units=False
+                        ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                        * kcal_per_mol
+                    )
+                else:
+                    nrgs["E(lambda=0)"] = nrgs["E(lambda)"]
+                if sim_lambda_value != 1.0:
+                    self._omm_mols.set_lambda(1.0)
+                    nrgs["E(lambda=1)"] = (
+                        self._omm_mols.get_potential_energy(
+                            to_sire_units=False
+                        ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                        * kcal_per_mol
+                    )
+                else:
+                    nrgs["E(lambda=1)"] = nrgs["E(lambda)"]
+
+            else:
+                nrgs[str(sim_lambda_value)] = nrgs["potential"]
+
+                if lambda_windows is not None:
+                    for lambda_value in lambda_windows:
+                        if lambda_value != sim_lambda_value:
+                            self._omm_mols.set_lambda(lambda_value)
+                            nrgs[str(lambda_value)] = (
+                                self._omm_mols.get_potential_energy(
+                                    to_sire_units=False
+                                ).value_in_unit(openmm.unit.kilocalorie_per_mole)
+                                * kcal_per_mol
+                            )
 
                 self._omm_mols.set_lambda(sim_lambda_value)
 
-            self._energy_trajectory.set(
-                self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
-            )
+            if self._is_interpolate:
+                self._energy_trajectory.set(
+                    self._current_time, nrgs, {"lambda": f"{sim_lambda_value:.8f}"}
+                )
+            else:
+                self._energy_trajectory.set(
+                    self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
+                )
+
+            # update the interpolation lambda value
+            if self._is_interpolate:
+                if delta_lambda:
+                    sim_lambda_value += delta_lambda
+                    # clamp to [0, 1]
+                    if sim_lambda_value < 0.0:
+                        sim_lambda_value = 0.0
+                    elif sim_lambda_value > 1.0:
+                        sim_lambda_value = 1.0
+                self._omm_mols.set_lambda(sim_lambda_value)
 
         self._is_running = False
 
@@ -596,10 +666,6 @@ class DynamicsData:
         if energy_frequency is not None:
             energy_frequency = u(energy_frequency)
 
-        if lambda_windows is not None:
-            if not isinstance(lambda_windows, list):
-                lambda_windows = [lambda_windows]
-
         try:
             steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
         except Exception:
@@ -644,9 +710,33 @@ class DynamicsData:
             else:
                 frame_frequency = frame_frequency.to(picosecond)
 
-        if lambda_windows is None:
-            if self._map.specified("lambda_windows"):
-                lambda_windows = self._map["lambda_windows"].value()
+        completed = 0
+
+        frame_frequency_steps = int(frame_frequency / self.timestep().to(picosecond))
+
+        energy_frequency_steps = int(energy_frequency / self.timestep().to(picosecond))
+
+        # If performing QM/MM lambda interpolation, then we just compute energies
+        # for the pure MM (0.0) and QM (1.0) potentials.
+        if self._is_interpolate:
+            lambda_windows = [0.0, 1.0]
+            # Work out the lambda increment.
+            if isinstance(self._lambda_interpolate, list):
+                divisor = (steps_to_run / energy_frequency_steps) - 1.0
+                delta_lambda = (
+                    self._lambda_interpolate[1] - self._lambda_interpolate[0]
+                ) / divisor
+            # Fixed lambda value.
+            else:
+                delta_lambda = None
+        else:
+            delta_lambda = None
+            if lambda_windows is not None:
+                if not isinstance(lambda_windows, list):
+                    lambda_windows = [lambda_windows]
+            else:
+                if self._map.specified("lambda_windows"):
+                    lambda_windows = self._map["lambda_windows"].value()
 
         def runfunc(num_steps):
             try:
@@ -666,12 +756,6 @@ class DynamicsData:
                         "time": self.current_time(),
                     }
                 )
-
-        completed = 0
-
-        frame_frequency_steps = int(frame_frequency / self.timestep().to(picosecond))
-
-        energy_frequency_steps = int(energy_frequency / self.timestep().to(picosecond))
 
         def get_steps_till_save(completed: int, total: int):
             """Internal function to calculate the number of steps
@@ -816,6 +900,7 @@ class DynamicsData:
                             save_energy=save_energy,
                             lambda_windows=lambda_windows,
                             save_velocities=save_velocities,
+                            delta_lambda=delta_lambda,
                         )
 
                         saved_last_frame = False
@@ -911,6 +996,7 @@ class Dynamics:
         restraints=None,
         fixed=None,
         qm_engine=None,
+        lambda_interpolate=None,
     ):
         from ..base import create_map
         from .. import u
@@ -965,6 +1051,7 @@ class Dynamics:
         _add_extra(extras, "restraints", restraints)
         _add_extra(extras, "fixed", fixed)
         _add_extra(extras, "qm_engine", qm_engine)
+        _add_extra(extras, "lambda_interpolate", lambda_interpolate)
 
         map = create_map(map, extras)
 
