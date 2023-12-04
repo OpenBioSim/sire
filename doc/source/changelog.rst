@@ -19,15 +19,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   a water topology swap.
 
 * Added a new :mod:`sire.options` module that contains new
-  :cls:`sire.options.Option` objects to represent configurable options.
+  :class:`sire.options.Option` objects to represent configurable options.
   These include documentation, and make it easier to validate and expose
   possible values of configurable options. The API docs for
-  :cls:`~sire.options.Option` shows how to create your own Option type.
+  :class:`~sire.options.Option` shows how to create your own Option type.
   The unit test in ``tests/options/test_options.py`` show how to use
   the options. This is integrated into the sire/OpenMM layer.
 
-* Have :cls:`~sire.io.parser.RST7` return a list of angles from the
-  ``box_angles()`` function, rather than a :cls:`~sire.maths.Vector`.
+* Have :class:`~sire.io.parser.RST7` return a list of angles from the
+  ``box_angles()`` function, rather than a :class:`~sire.maths.Vector`.
   This prevents the confusing behaviour where the angles are wrongly
   shown in units of angstroms... This fixes issues #106.
 
@@ -51,7 +51,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix validation of ``perturbable_constraint`` dynamics option when the string
   includes hyphens. This fixes issue #130.
 
-* Fix streaming of :cls:`~sire.vol.TriclinicBox` objects. This fixes issue #128.
+* Fix streaming of :class:`~sire.vol.TriclinicBox` objects. This fixes issue #128.
+
+* Fix the sire to OpenMM conversion so that null LJ parameters will never have
+  a zero sigma value. They will either be sigma=1/epsilon=0 for non-perturbable
+  atoms, or sigma=1e-9/epsilon=1e-9 for perturbable atoms.
 
 * Please add an item to this changelog when you create your PR
 
@@ -145,7 +149,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for alchemical restraints to the OpenMM dynamics layer.
   This lets you scale restraints as part of a λ-coordinate. This is
-  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints`.
+  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints>`.
   Restraints can be named, meaning that you can scale different restraints
   at different stages and by different values across the λ-coordinate.
 
@@ -448,7 +452,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for performing minimisation and molecular dynamics simulations
   based on the OpenMM integration. This is documented in full via both
-  :doc:`a tutorial <tutorial/part05/04_dynamics>` and a
+  :doc:`a tutorial <tutorial/part05/05_dynamics>` and a
   :doc:`detailed guide <cheatsheet/openmm>`.
 
 * Fixed the Amber PRMTOP `dihedral ring bug <https://github.com/OpenBioSim/sire/commit/397271f4229f3cbed6a4c3b425e4baaf4aae4ec5>`__.
