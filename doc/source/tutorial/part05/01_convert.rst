@@ -328,6 +328,76 @@ back to a :class:`~sire.system.System` object, e.g.
 >>> print(mols)
 System( name= num_molecules=1 num_residues=3 num_atoms=22 )
 
+This conversion also preserves user-supplied System metadata, e.g.
+
+>>> mols.set_metadata("name", "alanine dipeptide")
+>>> mols.set_metadata("residues", ["ACE", "ALA", "NME"])
+>>> mols.set_metadata("atoms", {"element": ["C", "N", "O"],
+...                             "x_coords": [0.0, 1.0, 2.0],
+...                             "y_coords": [3.0, 4.0, 5.0],
+...                             "z_coords": [6.0, 7.0, 8.0]})
+>>> sr.save(mols, "test.pdbx")
+
+would add the following to the PDBx/mmCIF file:
+
+.. code-block:: none
+
+   data_sire
+   loop_
+   _atoms.element
+   _atoms.x_coords
+   _atoms.y_coords
+   _atoms.z_coords
+   C 0 3 6
+   N 1 4 7
+   O 2 5 8
+
+   _name "alanine dipeptide"
+
+   loop_
+   _residues.value
+   ACE
+   ALA
+   NME
+
+which could be recovered when loading the file...
+
+>>> mols = sr.load("test.pdbx")
+>>> print(mols.metadata())
+Properties(
+    residues => [ ACE,ALA,NME ],
+    name => alanine dipeptide,
+    atoms => Properties(
+    element => SireBase::StringArrayProperty( size=3
+0: C
+1: N
+2: O
+),
+    x_coords => SireBase::StringArrayProperty( size=3
+0: 0
+1: 1
+2: 2
+),
+    y_coords => SireBase::StringArrayProperty( size=3
+0: 3
+1: 4
+2: 5
+),
+    z_coords => SireBase::StringArrayProperty( size=3
+0: 6
+1: 7
+2: 8
+)
+)
+)
+
+.. note::
+
+   Note that metadata values loaded from a PDBx/mmCIF file are always
+   stored as strings. You may need to convert them to the appropriate
+   type for your application (e.g., here the coordinate values are
+   the strings "0", "1", "2" etc. rather than the numbers 0, 1, 2 etc.).
+
 Anything to Anything
 --------------------
 

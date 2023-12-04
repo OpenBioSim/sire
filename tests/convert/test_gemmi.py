@@ -94,3 +94,43 @@ def test_gemmi_roundtrip(tmpdir, pdbx_3nss):
     assert v["car"].as_array() == ["mercedes", "ferrari", "jaguar"]
     assert v["bike"].as_array() == ["yamaha", "harley", "honda"]
     assert v["numbers"].as_array() == ["2", "4", "6"]
+
+
+@pytest.mark.skipif(
+    "gemmi" not in sr.convert.supported_formats(), reason="gemmi not available"
+)
+def test_gemmi_complex_metadata(tmpdir, ala_mols):
+    mols = ala_mols.clone()
+
+    mols.set_metadata("name", "alanine dipeptide")
+    mols.set_metadata("residues", ["ACE", "ALA", "NME"])
+    mols.set_metadata(
+        "atoms",
+        {
+            "element": ["C", "N", "O"],
+            "x_coords": [0.0, 1.0, 2.0],
+            "y_coords": [3.0, 4.0, 5.0],
+            "z_coords": [6.0, 7.0, 8.0],
+        },
+    )
+
+    d = tmpdir.mkdir("test_gemmi_complex_metadata")
+
+    f = sr.save(mols, d.join("test.pdbx"))
+
+    if isinstance(f, list):
+        f = f[0]
+
+    mols2 = sr.load(f)
+
+    m = mols2.metadata()
+
+    assert m["name"] == "alanine dipeptide"
+    assert m["residues"] == ["ACE", "ALA", "NME"]
+
+    a = m["atoms"]
+
+    assert a["element"].as_array() == ["C", "N", "O"]
+    assert a["x_coords"].as_array() == ["0", "1", "2"]
+    assert a["y_coords"].as_array() == ["3", "4", "5"]
+    assert a["z_coords"].as_array() == ["6", "7", "8"]

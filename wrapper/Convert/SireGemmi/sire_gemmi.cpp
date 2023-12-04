@@ -965,6 +965,18 @@ namespace SireGemmi
         return structure;
     }
 
+    QString _string_to_property(const std::string &s)
+    {
+        QString q = QString::fromStdString(s);
+
+        if (q.startsWith("\"") and q.endsWith("\""))
+            q = q.mid(1, q.size() - 2);
+        else if (q.startsWith("'") and q.endsWith("'"))
+            q = q.mid(1, q.size() - 2);
+
+        return q;
+    }
+
     SireSystem::System pdbx_reader_function(const QStringList &lines,
                                             const SireBase::PropertyMap &map)
     {
@@ -1016,7 +1028,7 @@ namespace SireGemmi
                     const auto &p = item.pair;
 
                     QString tag = QString::fromStdString(p[0]);
-                    QString value = QString::fromStdString(p[1]);
+                    QString value = _string_to_property(p[1]);
 
                     if (tag.startsWith("_"))
                         tag = tag.mid(1);
@@ -1039,7 +1051,7 @@ namespace SireGemmi
 
                     for (const auto &value : l.values)
                     {
-                        values.append(QString::fromStdString(value));
+                        values.append(_string_to_property(value));
                     }
 
                     if (tags.size() == 1 and tags[0].endsWith(".value"))
@@ -1118,6 +1130,26 @@ namespace SireGemmi
         return gemmi_to_sire(structure, m);
     }
 
+    std::string _property_to_string(const SireBase::Property &p)
+    {
+        QString s;
+
+        try
+        {
+            s = p.asAString();
+        }
+        catch (...)
+        {
+            s = p.toString();
+        }
+
+        // make sure we put any strings that contain spaces into quotes
+        if (s.contains(" "))
+            s = QString("\"%1\"").arg(s);
+
+        return s.toStdString();
+    }
+
     QStringList pdbx_writer_function(const SireSystem::System &system,
                                      const SireBase::PropertyMap &map)
     {
@@ -1150,7 +1182,7 @@ namespace SireGemmi
 
                     for (const auto &key2 : keys2)
                     {
-                        tags.push_back(QString(".%1").arg(key2).toStdString());
+                        tags.push_back(QString(".%1").arg(key2.simplified().replace(" ", "_")).toStdString());
 
                         const auto &value2 = props2.property(key2);
 
@@ -1160,7 +1192,7 @@ namespace SireGemmi
                         }
                     }
 
-                    auto &loop = block.init_loop(QString("_%1").arg(key).toStdString(), tags);
+                    auto &loop = block.init_loop(QString("_%1").arg(key.simplified().replace(" ", "_")).toStdString(), tags);
 
                     for (int i = 0; i < nrows; ++i)
                     {
@@ -1176,30 +1208,16 @@ namespace SireGemmi
 
                                 if (i < array2.count())
                                 {
-                                    try
-                                    {
-                                        values.push_back(array2[i].asAString().toStdString());
-                                    }
-                                    catch (...)
-                                    {
-                                        values.push_back(array2[i].toString().toStdString());
-                                    }
+                                    values.push_back(_property_to_string(array2[i]));
                                 }
                                 else
                                 {
-                                    values.push_back("");
+                                    values.push_back("\"\"");
                                 }
                             }
                             else
                             {
-                                try
-                                {
-                                    values.push_back(value2.asAString().toStdString());
-                                }
-                                catch (...)
-                                {
-                                    values.push_back(value2.toString().toStdString());
-                                }
+                                values.push_back(_property_to_string(value2));
                             }
                         }
 
@@ -1208,20 +1226,13 @@ namespace SireGemmi
                 }
                 else if (value.isAnArray())
                 {
-                    auto tag = QString("_%1").arg(key);
+                    auto tag = QString("_%1").arg(key.simplified().replace(" ", "_"));
 
                     auto array = value.asAnArray();
 
                     if (array.count() == 1)
                     {
-                        try
-                        {
-                            block.set_pair(tag.toStdString(), array[0].asAString().toStdString());
-                        }
-                        catch (...)
-                        {
-                            block.set_pair(tag.toStdString(), array[0].toString().toStdString());
-                        }
+                        block.set_pair(tag.toStdString(), _property_to_string(array[0]));
                     }
                     else
                     {
@@ -1229,29 +1240,15 @@ namespace SireGemmi
 
                         for (int i = 0; i < array.size(); ++i)
                         {
-                            try
-                            {
-                                loop.add_row({array[i].asAString().toStdString()});
-                            }
-                            catch (...)
-                            {
-                                loop.add_row({array[i].toString().toStdString()});
-                            }
+                            loop.add_row({_property_to_string(array[i])});
                         }
                     }
                 }
                 else
                 {
-                    auto tag = QString("_%1").arg(key);
+                    auto tag = QString("_%1").arg(key.simplified().replace(" ", "_"));
 
-                    try
-                    {
-                        doc.blocks[0].set_pair(tag.toStdString(), value.asAString().toStdString());
-                    }
-                    catch (...)
-                    {
-                        doc.blocks[0].set_pair(tag.toStdString(), value.toString().toStdString());
-                    }
+                    doc.blocks[0].set_pair(tag.toStdString(), _property_to_string(value));
                 }
             }
         }
