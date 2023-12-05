@@ -64,6 +64,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   files if gemmi-support is available. We've also added support for the
   new-style PDB codes (e.g. "pdb_00003nss" instead of "3NSS").
 
+* Optimised the ``LambaLever`` class so that it caches the forcefield parameters
+  calculated at different lambda values. This means that we don't have to
+  re-calculate the parameters at each lambda update step. This is a
+  significant speed-up for alchemical free energy simulations.
+
+* Now catch ``std::bad_alloc`` and raise it as a ``MemoryError``. This
+  means that we can catch out-of-memory errors and raise a more
+  informative exception.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023

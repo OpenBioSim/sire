@@ -152,15 +152,31 @@ namespace SireError
     void exception_translator(const SireError::exception &ex)
     {
         boost::python::release_gil_policy::acquire_gil_no_raii();
-        PyErr_SetString(PyExc_UserWarning,
+        PyErr_SetString(PyExc_RuntimeError,
                         get_exception_string(ex).toUtf8());
+    }
+
+    void bad_alloc_exception_translator(const std::bad_alloc &ex)
+    {
+        boost::python::release_gil_policy::acquire_gil_no_raii();
+        PyErr_SetString(PyExc_MemoryError,
+                        QString("%1").arg(ex.what()).toUtf8());
     }
 
     void std_exception_translator(const std::exception &ex)
     {
         boost::python::release_gil_policy::acquire_gil_no_raii();
-        PyErr_SetString(PyExc_UserWarning,
-                        QString("%1").arg(ex.what()).toUtf8());
+
+        if (dynamic_cast<const std::bad_alloc *>(&ex) != 0)
+        {
+            PyErr_SetString(PyExc_MemoryError,
+                            "Memory error - out of memory?");
+        }
+        else
+        {
+            PyErr_SetString(PyExc_RuntimeError,
+                            QString("%1").arg(ex.what()).toUtf8());
+        }
     }
 
     SireError::FastExceptionFlag *fast_exception_flag(0);
