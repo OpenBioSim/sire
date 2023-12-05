@@ -233,7 +233,12 @@ class DynamicsData:
             # should save energy here
             nrgs = {}
 
-            nrgs["kinetic"] = (
+            if self._is_interpolate:
+                ke = "KE"
+            else:
+                ke = "kinetic"
+
+            nrgs[ke] = (
                 self._omm_state.getKineticEnergy().value_in_unit(
                     openmm.unit.kilocalorie_per_mole
                 )
@@ -250,28 +255,28 @@ class DynamicsData:
             sim_lambda_value = self._omm_mols.get_lambda()
 
             if self._is_interpolate:
-                nrgs["E(lambda)"] = nrgs["potential"]
+                nrgs["PE(lambda)"] = nrgs["potential"]
                 nrgs.pop("potential")
                 if sim_lambda_value != 0.0:
                     self._omm_mols.set_lambda(0.0)
-                    nrgs["E(lambda=0)"] = (
+                    nrgs["PE(lambda=0)"] = (
                         self._omm_mols.get_potential_energy(
                             to_sire_units=False
                         ).value_in_unit(openmm.unit.kilocalorie_per_mole)
                         * kcal_per_mol
                     )
                 else:
-                    nrgs["E(lambda=0)"] = nrgs["E(lambda)"]
+                    nrgs["PE(lambda=0)"] = nrgs["PE(lambda)"]
                 if sim_lambda_value != 1.0:
                     self._omm_mols.set_lambda(1.0)
-                    nrgs["E(lambda=1)"] = (
+                    nrgs["PE(lambda=1)"] = (
                         self._omm_mols.get_potential_energy(
                             to_sire_units=False
                         ).value_in_unit(openmm.unit.kilocalorie_per_mole)
                         * kcal_per_mol
                     )
                 else:
-                    nrgs["E(lambda=1)"] = nrgs["E(lambda)"]
+                    nrgs["PE(lambda=1)"] = nrgs["PE(lambda)"]
 
             else:
                 nrgs[str(sim_lambda_value)] = nrgs["potential"]
