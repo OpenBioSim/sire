@@ -57,6 +57,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   a zero sigma value. They will either be sigma=1/epsilon=0 for non-perturbable
   atoms, or sigma=1e-9/epsilon=1e-9 for perturbable atoms.
 
+* Optimised the ``LambaLever`` class so that it caches the forcefield parameters
+  calculated at different lambda values. This means that we don't have to
+  re-calculate the parameters at each lambda update step. This is a
+  significant speed-up for alchemical free energy simulations.
+
+* Now catch ``std::bad_alloc`` and raise it as a ``MemoryError``. This
+  means that we can catch out-of-memory errors and raise a more
+  informative exception.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
