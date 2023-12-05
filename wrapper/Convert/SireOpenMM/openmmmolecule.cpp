@@ -450,7 +450,7 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
         epsilon = lj_14_scl * std::sqrt(std::get<2>(clj0) * std::get<2>(clj1));
     }
 
-    if ((this->isPerturbable() or this->isQM()) and charge == 0 and epsilon == 0)
+    if ((this->isPerturbable() or this->isQM()) and charge == 0 and std::abs(epsilon) < 1e-9)
     {
         // openmm tries to optimise away zero parameters - this is an issue
         // as perturbation requires that we don't remove them!
@@ -459,6 +459,12 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
         /// exception when we update parameters in context
         sigma = 1e-9;
         epsilon = 1e-9;
+    }
+    else if (sigma == 0)
+    {
+        // make sure we never have zero sigma values - this is a null parameter
+        sigma = 1;
+        epsilon = 0;
     }
 
     return std::make_tuple(atom0 + start_index,
@@ -708,8 +714,15 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         const auto chg = params_charges.at(idx_to_cgatomidx_data[i]).to(SireUnits::mod_electron);
         const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
-        const double sig = lj.sigma().to(SireUnits::nanometer);
-        const double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
+        double sig = lj.sigma().to(SireUnits::nanometer);
+        double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
+
+        if (std::abs(sig) < 1e-9)
+        {
+            // this must be a null parameter
+            eps = 0;
+            sig = 1;
+        }
 
         cljs_data[i] = std::make_tuple(chg, sig, eps);
     }
