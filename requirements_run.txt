@@ -4,7 +4,7 @@ boost
 gsl
 lazy_import
 libnetcdf
-openmm>=8.1
+openmm
 pandas
 python
 qt-main
