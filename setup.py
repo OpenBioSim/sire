@@ -390,20 +390,6 @@ def conda_install(dependencies, install_bss_reqs=False, install_emle_reqs=False)
 
     # Install additional requirements for EMLE.
     if install_emle_reqs:
-        # OpenMM 8.1.0beta.
-        cmd = [
-            "mamba",
-            "install",
-            "--yes",
-            "-c",
-            "conda-forge/label/openmm_rc",
-            "openmm=8.1.0beta",
-        ]
-        status = subprocess.run(cmd)
-        if status.returncode != 0:
-            print("Something went wrong installing OpenMM 8.1.0beta!")
-            sys.exit(-1)
-
         # librascal.
         cmd = [
             "pip",
