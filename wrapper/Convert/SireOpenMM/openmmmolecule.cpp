@@ -91,7 +91,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             constraint_type = CONSTRAIN_NONE;
         }
-        else if (c == "h-bonds")
+        else if (c == "h-bonds" or c == "h_bonds")
         {
             constraint_type = CONSTRAIN_HBONDS;
         }
@@ -99,11 +99,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             constraint_type = CONSTRAIN_BONDS;
         }
-        else if (c == "h-bonds-h-angles")
+        else if (c == "h-bonds-h-angles" or c == "h_bonds_h_angles")
         {
             constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
         }
-        else if (c == "bonds-h-angles")
+        else if (c == "bonds-h-angles" or c == "bonds_h_angles")
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
         }
@@ -130,7 +130,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             perturbable_constraint_type = CONSTRAIN_NONE;
         }
-        else if (c == "h-bonds")
+        else if (c == "h-bonds" or c == "h_bonds")
         {
             perturbable_constraint_type = CONSTRAIN_HBONDS;
         }
@@ -138,11 +138,11 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             perturbable_constraint_type = CONSTRAIN_BONDS;
         }
-        else if (c == "h-bonds-h-angles")
+        else if (c == "h-bonds-h-angles" or c == "h_bonds_h_angles")
         {
             perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
         }
-        else if (c == "bonds-h-angles")
+        else if (c == "bonds-h-angles" or c == "bonds_h_angles")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
         }

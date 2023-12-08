@@ -113,3 +113,31 @@ def test_cresset_box():
 
     # Try to set the periodic box vectors using those from the inpcrd file.
     topology.setPeriodicBoxVectors(inpcrd.boxVectors)
+
+
+def test_stream():
+    """
+    Test that a rotated and reduced TriclinicBox is correctly recovered when
+    streaming to and from a file.
+    """
+
+    # Create a temporary working directory.
+    tmp_dir = tempfile.TemporaryDirectory()
+    tmp_path = tmp_dir.name
+    s3_file = f"{tmp_path}/box.s3"
+
+    # Create a triclinic box.
+    box = sr.vol.TriclinicBox.truncated_octahedron(1.0, True, True)
+
+    # Make sure the box has been rotated and reduced.
+    assert box.is_rotated()
+    assert box.is_reduced()
+
+    # Stream to file.
+    sr.stream.save(box, s3_file)
+
+    # Load the file.
+    recovered_box = sr.stream.load(s3_file)
+
+    # Make sure the boxes are the same.
+    assert recovered_box == box
