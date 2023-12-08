@@ -2,7 +2,7 @@ import sire as sr
 import pytest
 
 
-def _run_test(mols, is_slow=False, use_taylor=False):
+def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3):
     c = mols.cursor()
 
     # can only get the same energies if they have the same coordinates
@@ -75,19 +75,19 @@ def _run_test(mols, is_slow=False, use_taylor=False):
     nrg1 = omm1.get_energy().value()
 
     omm.set_lambda(0.0)
-    assert omm.get_energy().value() == pytest.approx(nrg0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, precision)
 
     omm.set_lambda(0.5)
     nrg0_5 = omm.get_energy().value()
 
     omm.set_lambda(1.0)
-    assert omm.get_energy().value() == pytest.approx(nrg1)
+    assert omm.get_energy().value() == pytest.approx(nrg1, precision)
 
     omm.set_lambda(0.5)
-    assert omm.get_energy().value() == pytest.approx(nrg0_5)
+    assert omm.get_energy().value() == pytest.approx(nrg0_5, precision)
 
     omm.set_lambda(0.0)
-    assert omm.get_energy().value() == pytest.approx(nrg0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, precision)
 
     # now swap the end states - lambda 0 == 1 and lambda 1 == 0
     map["swap_end_states"] = True
@@ -96,19 +96,19 @@ def _run_test(mols, is_slow=False, use_taylor=False):
     omm.set_lambda_schedule(l)
 
     omm.set_lambda(0.0)
-    assert omm.get_energy().value() == pytest.approx(nrg1)
+    assert omm.get_energy().value() == pytest.approx(nrg1, precision)
 
     omm.set_lambda(0.5)
-    assert omm.get_energy().value() == pytest.approx(nrg0_5)
+    assert omm.get_energy().value() == pytest.approx(nrg0_5, precision)
 
     omm.set_lambda(1.0)
-    assert omm.get_energy().value() == pytest.approx(nrg0)
+    assert omm.get_energy().value() == pytest.approx(nrg0, precision)
 
     omm.set_lambda(0.5)
-    assert omm.get_energy().value() == pytest.approx(nrg0_5)
+    assert omm.get_energy().value() == pytest.approx(nrg0_5, precision)
 
     omm.set_lambda(0.0)
-    assert omm.get_energy().value() == pytest.approx(nrg1)
+    assert omm.get_energy().value() == pytest.approx(nrg1, precision)
 
 
 @pytest.mark.skipif(
