@@ -12,12 +12,23 @@ if (${gemmi_FOUND})
   # We can only link against the dynamic library - static doesn't work
   get_target_property(GEMMI_LIBRARY gemmi::gemmi_cpp LOCATION)
 
-  # test if GEMMI_LIBRARY ends with .a
-  if (${GEMMI_LIBRARY} MATCHES "\\.a$")
-    message( STATUS "GEMMI_LIBRARY is a static library." )
-    message( STATUS "We can only link against the dynamic library." )
-    message( STATUS "Disabling gemmi PDBx/mmCIF support.")
-    set(gemmi_FOUND FALSE)
+  # Test if we can link to Gemmi on Windows
+  if (WIN32)
+    # test if GEMMI_LIBRARY ends with .lib
+    if (${GEMMI_LIBRARY} MATCHES "\\.lib$")
+      message( STATUS "GEMMI_LIBRARY is a static library." )
+      message( STATUS "We can only link against the dynamic library." )
+      message( STATUS "Disabling gemmi PDBx/mmCIF support.")
+      set(gemmi_FOUND FALSE)
+    endif()
+  else()
+    # test if GEMMI_LIBRARY ends with .a
+    if (${GEMMI_LIBRARY} MATCHES "\\.a$")
+      message( STATUS "GEMMI_LIBRARY is a static library." )
+      message( STATUS "We can only link against the dynamic library." )
+      message( STATUS "Disabling gemmi PDBx/mmCIF support.")
+      set(gemmi_FOUND FALSE)
+    endif()
   endif()
 endif()
 
