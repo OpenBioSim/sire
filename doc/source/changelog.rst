@@ -66,6 +66,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   means that we can catch out-of-memory errors and raise a more
   informative exception.
 
+* Fixed the bug where the wrong return type from ``.minimisation()`` and
+  ``.dynamics()`` was returned. This fixes issue #137.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
@@ -90,9 +93,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed an issue where the vacuum dynamics and minimisation simulations still
   had a spurious periodic box added when ``.commit()`` was called.
-
-* Fixed the bug where the wrong return type from ``.minimsation()`` and
-  ``.dynamics()`` was returned (fix-137)
 
 `2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
 --------------------------------------------------------------------------------------------
