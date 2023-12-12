@@ -70,9 +70,9 @@ class Minimisation:
         minimised molecules.
         """
         if not self._d.is_null():
-            self._d.commit()
-
-        return self._d._sire_mols
+            return self._d.commit()
+        else:
+            return None
 
     def __call__(self, max_iterations: int = 10000):
         """
