@@ -13,6 +13,10 @@ class DynamicsData:
 
         map = create_map(map, kwargs)
 
+        # Save the original view, so that we can return an object
+        # of the same type in .commit()
+        self._orig_mols = mols
+
         if mols is not None:
             self._map = map  # this is already a PropertyMap
 
@@ -45,12 +49,8 @@ class DynamicsData:
             else:
                 # create a system to work on
                 self._sire_mols = System()
-                self._sire_mols._system.add(
-                    mols.molecules().to_molecule_group()
-                )
-                self._sire_mols._system.set_property(
-                    "space", self._ffinfo.space()
-                )
+                self._sire_mols._system.add(mols.molecules().to_molecule_group())
+                self._sire_mols._system.set_property("space", self._ffinfo.space())
 
             # find the existing energy trajectory - we will build on this
             self._energy_trajectory = self._sire_mols.energy_trajectory(
@@ -154,9 +154,7 @@ class DynamicsData:
 
     def _enter_dynamics_block(self):
         if self._is_running:
-            raise SystemError(
-                "Cannot start dynamics while it is already running!"
-            )
+            raise SystemError("Cannot start dynamics while it is already running!")
 
         self._is_running = True
         self._omm_state = None
@@ -189,8 +187,7 @@ class DynamicsData:
             self._omm_state_has_cv = (False, False)
 
         current_time = (
-            self._omm_state.getTime().value_in_unit(openmm.unit.nanosecond)
-            * nanosecond
+            self._omm_state.getTime().value_in_unit(openmm.unit.nanosecond) * nanosecond
         )
 
         delta = current_time - self._elapsed_time
@@ -358,9 +355,7 @@ class DynamicsData:
 
         ensemble.set_temperature(temperature)
 
-        self.set_ensemble(
-            ensemble=ensemble, rescale_velocities=rescale_velocities
-        )
+        self.set_ensemble(ensemble=ensemble, rescale_velocities=rescale_velocities)
 
     def set_pressure(self, pressure):
         """
@@ -381,19 +376,13 @@ class DynamicsData:
         if self.is_null():
             return None
         else:
-            if self._map.specified("constraint"):
-                return self._map["constraint"].source()
-            else:
-                return "none"
+            return self._omm_mols.get_constraint()
 
     def perturbable_constraint(self):
         if self.is_null():
             return None
         else:
-            if self._map.specified("perturbable_constraint"):
-                return self._map["perturbable_constraint"].source()
-            else:
-                return self.constraint()
+            return self._omm_mols.get_perturbable_constraint()
 
     def get_schedule(self):
         if self.is_null():
@@ -426,6 +415,12 @@ class DynamicsData:
 
             self._omm_mols.set_lambda(lambda_value)
             self._clear_state()
+
+    def integrator(self):
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.getIntegrator()
 
     def info(self):
         if self.is_null():
@@ -600,9 +595,7 @@ class DynamicsData:
                 lambda_windows = [lambda_windows]
 
         try:
-            steps_to_run = int(
-                time.to(picosecond) / self.timestep().to(picosecond)
-            )
+            steps_to_run = int(time.to(picosecond) / self.timestep().to(picosecond))
         except Exception:
             # passed in the number of steps instead
             steps_to_run = int(time)
@@ -617,9 +610,7 @@ class DynamicsData:
         if save_frequency != 0:
             if save_frequency is None:
                 if self._map.specified("save_frequency"):
-                    save_frequency = (
-                        self._map["save_frequency"].value().to(picosecond)
-                    )
+                    save_frequency = self._map["save_frequency"].value().to(picosecond)
                 else:
                     save_frequency = 25
             else:
@@ -672,13 +663,9 @@ class DynamicsData:
 
         completed = 0
 
-        frame_frequency_steps = int(
-            frame_frequency / self.timestep().to(picosecond)
-        )
+        frame_frequency_steps = int(frame_frequency / self.timestep().to(picosecond))
 
-        energy_frequency_steps = int(
-            energy_frequency / self.timestep().to(picosecond)
-        )
+        energy_frequency_steps = int(energy_frequency / self.timestep().to(picosecond))
 
         def get_steps_till_save(completed: int, total: int):
             """Internal function to calculate the number of steps
@@ -703,8 +690,7 @@ class DynamicsData:
 
             if frame_frequency_steps > 0:
                 n_to_frame = min(
-                    frame_frequency_steps
-                    - (completed % frame_frequency_steps),
+                    frame_frequency_steps - (completed % frame_frequency_steps),
                     n_to_end,
                 )
             else:
@@ -712,8 +698,7 @@ class DynamicsData:
 
             if energy_frequency_steps > 0:
                 n_to_energy = min(
-                    energy_frequency_steps
-                    - (completed % energy_frequency_steps),
+                    energy_frequency_steps - (completed % energy_frequency_steps),
                     n_to_end,
                 )
             else:
@@ -829,10 +814,8 @@ class DynamicsData:
 
                         saved_last_frame = False
 
-                        kinetic_energy = (
-                            state.getKineticEnergy().value_in_unit(
-                                openmm.unit.kilocalorie_per_mole
-                            )
+                        kinetic_energy = state.getKineticEnergy().value_in_unit(
+                            openmm.unit.kilocalorie_per_mole
                         )
 
                         ke_per_atom = kinetic_energy / self._num_atoms
@@ -855,9 +838,7 @@ class DynamicsData:
                                 "and run again."
                             )
 
-                self._walltime += (
-                    datetime.now() - start_time
-                ).total_seconds() * second
+                self._walltime += (datetime.now() - start_time).total_seconds() * second
 
             if state is not None and not saved_last_frame:
                 # we can process the last block in the main thread
@@ -883,18 +864,26 @@ class DynamicsData:
             return
 
         self._update_from(
-            state=self._get_current_state(
-                include_coords=True, include_velocities=True
-            ),
+            state=self._get_current_state(include_coords=True, include_velocities=True),
             state_has_cv=(True, True),
             nsteps_completed=self._current_step,
         )
 
-        self._sire_mols.set_energy_trajectory(
-            self._energy_trajectory, map=self._map
-        )
+        self._sire_mols.set_energy_trajectory(self._energy_trajectory, map=self._map)
 
         self._sire_mols.set_ensemble(self.ensemble())
+
+        if self._orig_mols is not None:
+            from ..system import System
+
+            if System.is_system(self._orig_mols):
+                return self._sire_mols
+            else:
+                r = self._orig_mols.clone()
+                r.update(self._sire_mols.molecules())
+                return r
+        else:
+            return self._sire_mols.clone()
 
 
 def _add_extra(extras, key, value):
@@ -1080,9 +1069,7 @@ class Dynamics:
         if not self._d.is_null():
             if save_velocities is None:
                 if self._d._map.specified("save_velocities"):
-                    save_velocities = (
-                        self._d._map["save_velocities"].value().as_bool()
-                    )
+                    save_velocities = self._d._map["save_velocities"].value().as_bool()
                 else:
                     save_velocities = False
 
@@ -1180,9 +1167,7 @@ class Dynamics:
         - random_seed (int): The random seed to use. If None, then
           a random seed will be generated
         """
-        self._d.randomise_velocities(
-            temperature=temperature, random_seed=random_seed
-        )
+        self._d.randomise_velocities(temperature=temperature, random_seed=random_seed)
 
     def constraint(self):
         """
@@ -1197,6 +1182,12 @@ class Dynamics:
         constraining bonds involving hydrogens etc.)
         """
         return self._d.perturbable_constraint()
+
+    def integrator(self):
+        """
+        Return the integrator that is used to run dynamics
+        """
+        return self._d.integrator()
 
     def info(self):
         """
@@ -1335,9 +1326,7 @@ class Dynamics:
         """
         return self._d.current_kinetic_energy()
 
-    def energy_trajectory(
-        self, to_pandas: bool = False, to_alchemlyb: bool = False
-    ):
+    def energy_trajectory(self, to_pandas: bool = False, to_alchemlyb: bool = False):
         """
         Return the energy trajectory. This is the trajectory of
         energy values that have been captured during dynamics.
@@ -1357,9 +1346,9 @@ class Dynamics:
 
     def commit(self):
         if not self._d.is_null():
-            self._d.commit()
-
-        return self._d._sire_mols
+            return self._d.commit()
+        else:
+            return None
 
     def __call__(
         self,
