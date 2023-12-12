@@ -91,6 +91,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed an issue where the vacuum dynamics and minimisation simulations still
   had a spurious periodic box added when ``.commit()`` was called.
 
+* Fixed the bug where the wrong return type from ``.minimsation()`` and
+  ``.dynamics()`` was returned (fix-137)
+
 `2023.4.0 <https://github.com/openbiosim/sire/compare/2023.3.0...2023.4.0>`__ - October 2023
 --------------------------------------------------------------------------------------------
 
