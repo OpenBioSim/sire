@@ -161,6 +161,9 @@ Available keys and allowable values are listed below.
 | timestep                     | Time between integration steps, e.g.                     |
 |                              | ``2 * sr.units.femtosecond``                             |
 +------------------------------+----------------------------------------------------------+
+| tolerance                    | The tolerance to use for the PME calculation, e.g.       |
+|                              | ``0.0001``                                               |
++------------------------------+----------------------------------------------------------+
 | use_dispersion_correction    | Whether or not to use the dispersion correction to       |
 |                              | deal with cutoff issues. This is very expensive.         |
 +------------------------------+----------------------------------------------------------+
