@@ -859,7 +859,7 @@ class DynamicsData:
             self.run(**orig_args)
             return
 
-    def commit(self):
+    def commit(self, return_as_system: bool = False):
         if self.is_null():
             return
 
@@ -873,7 +873,10 @@ class DynamicsData:
 
         self._sire_mols.set_ensemble(self.ensemble())
 
-        if self._orig_mols is not None:
+        if return_as_system:
+            return self._sire_mols.clone()
+
+        elif self._orig_mols is not None:
             from ..system import System
 
             if System.is_system(self._orig_mols):
@@ -1344,9 +1347,15 @@ class Dynamics:
         else:
             return t
 
-    def commit(self):
+    def commit(self, return_as_system: bool = False):
+        """
+        Commit the dynamics and return the molecules after the simulation.
+        Normally this will return the same view of as was used for
+        construction. If `return_as_system` is True, then this will
+        return a System object instead.
+        """
         if not self._d.is_null():
-            return self._d.commit()
+            return self._d.commit(return_as_system=return_as_system)
         else:
             return None
 
