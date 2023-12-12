@@ -18,6 +18,31 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed use of ``QString::compare`` when comparing molecular properties during
   a water topology swap.
 
+* Have :class:`~sire.io.parser.RST7` return a list of angles from the
+  ``box_angles()`` function, rather than a :class:`~sire.maths.Vector`.
+  This prevents the confusing behaviour where the angles are wrongly
+  shown in units of angstroms... This fixes issues #106.
+
+* Added a new :func:`sire.maths.rotate` function, and added the option
+  (default True) to rotate velocities as well as coordinates when usign
+  a cursor to rotate molecule views. This fixes issue #103.
+
+* Fix validation of ``perturbable_constraint`` dynamics option when the string
+  includes hyphens. This fixes issue #130.
+
+* Fix streaming of :class:`~sire.vol.TriclinicBox` objects. This fixes issue #128.
+
+* Fix the sire to OpenMM conversion so that null LJ parameters will never have
+  a zero sigma value. They will either be sigma=1/epsilon=0 for non-perturbable
+  atoms, or sigma=1e-9/epsilon=1e-9 for perturbable atoms.
+
+* Now catch ``std::bad_alloc`` and raise it as a ``MemoryError``. This
+  means that we can catch out-of-memory errors and raise a more
+  informative exception.
+
+* Fixed the bug where the wrong return type from ``.minimisation()`` and
+  ``.dynamics()`` was returned. This fixes issue #137.
+
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
 ---------------------------------------------------------------------------------------------
 

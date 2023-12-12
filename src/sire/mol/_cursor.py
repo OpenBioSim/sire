@@ -72,7 +72,9 @@ class _CursorData:
         if map is None:
             return self.map
         else:
-            return self.map.merge(map)
+            from ..base import create_map
+
+            return self.map.merge(create_map(map))
 
     def remove_internal_property(self, internal, key):
         self.connectivity.remove_property(internal, key)
@@ -1537,6 +1539,7 @@ class Cursor:
         center=None,
         quaternion=None,
         matrix=None,
+        rotate_velocities: bool = None,
         map=None,
     ):
         """Rotate all of the atoms operated on by this cursor
@@ -1576,6 +1579,10 @@ class Cursor:
              arguments will be ignored. This is superseded by
              the quaternion argument.
 
+         rotate_velocities: bool
+            Whether or not to rotate the velocities as well as
+            the coordinates (default True)
+
          map: None, dict or sire.base.PropertyMap
              The property map used to find the coordinates property
         """
@@ -1588,6 +1595,17 @@ class Cursor:
         view = self.commit()
 
         map = self._d.merge(map)
+
+        if map is None:
+            from ..base import create_map
+
+            map = create_map({})
+
+        if rotate_velocities is None:
+            if not map.specified("rotate_velocities"):
+                map.set("rotate_velocities", True)
+        else:
+            map.set("rotate_velocities", bool(rotate_velocities))
 
         if center is None:
             center = view.evaluate().center_of_mass(map=map)
@@ -2596,6 +2614,7 @@ class Cursors:
         center=None,
         quaternion=None,
         matrix=None,
+        rotate_velocities: bool = None,
         map=None,
     ):
         """Rotate all of the atoms operated on by this cursor
@@ -2635,6 +2654,10 @@ class Cursors:
              arguments will be ignored. This is superseded by
              the quaternion argument.
 
+         rotate_velocities: bool
+            Whether or not to rotate the velocities as well as
+            the coordinates (default True)
+
          map: None, dict or sire.base.PropertyMap
              The property map used to find the coordinates property
         """
@@ -2645,7 +2668,12 @@ class Cursors:
         )
 
         for cursor in self._cursors:
-            cursor.rotate(quaternion=quaternion, center=center, map=map)
+            cursor.rotate(
+                quaternion=quaternion,
+                center=center,
+                rotate_velocities=rotate_velocities,
+                map=map,
+            )
 
         return self
 
@@ -3755,6 +3783,7 @@ class CursorsM:
         center=None,
         quaternion=None,
         matrix=None,
+        rotate_velocities: bool = None,
         map=None,
     ):
         """Rotate all of the atoms operated on by this cursor
@@ -3794,6 +3823,10 @@ class CursorsM:
              arguments will be ignored. This is superseded by
              the quaternion argument.
 
+         rotate_velocities: bool
+            Whether or not to rotate the velocities as well as
+            the coordinates (default True)
+
          map: None, dict or sire.base.PropertyMap
              The property map used to find the coordinates property
         """
@@ -3804,7 +3837,12 @@ class CursorsM:
         )
 
         for cursor in self._cursors:
-            cursor.rotate(quaternion=quaternion, center=center, map=map)
+            cursor.rotate(
+                quaternion=quaternion,
+                center=center,
+                rotate_velocities=rotate_velocities,
+                map=map,
+            )
 
         return self
 

@@ -42,3 +42,15 @@ def test_ambrst7_velocities(tmpdir, kigaki_mols):
     for i, mol in enumerate(mols[30::100]):
         for atom in mol.atoms():
             compare(atom.property("velocity"), sr.legacy.Mol.Velocity3D())
+
+
+def test_amberrst7_boxangs(ala_mols):
+    rst7 = sr.io.parser.RST7(ala_mols._system)
+
+    angs = rst7.box_angles()
+
+    assert len(angs) == 3
+
+    assert angs[0].to(sr.units.degree) == pytest.approx(90)
+    assert angs[1].to(sr.units.degree) == pytest.approx(90)
+    assert angs[2].to(sr.units.degree) == pytest.approx(90)

@@ -37,6 +37,8 @@
 #include "dihedralid.h"
 #include "improperid.h"
 
+#include "atomvelocities.h"
+
 #include "tostring.h"
 
 #include "SireMaths/align.h"
@@ -697,6 +699,25 @@ void MoverBase::translate(MoleculeData &moldata, const AtomSelection &selected_a
     }
 }
 
+/** Rotate the velocities (in 'vels') of the specified selected
+    atoms using the rotation matrix 'rotmat'.
+    This function assumes that coords and selected_atoms are compatible */
+void rotate_velocities(AtomVelocities &vels, const AtomSelection &selected_atoms,
+                       const Matrix &rotmat)
+{
+    if (selected_atoms.selectedNone())
+        return;
+
+    auto velocities = vels.toVector(selected_atoms);
+
+    for (auto &velocity : velocities)
+    {
+        velocity = Velocity3D(rotmat * velocity.value());
+    }
+
+    vels.copyFrom(velocities, selected_atoms);
+}
+
 /** Rotate the selected atoms in the molecule whose data
     is in 'moldata' using the rotation matrix 'rotmat'
     around the point 'point', using 'coord_property'
@@ -736,6 +757,26 @@ void MoverBase::rotate(MoleculeData &moldata, const AtomSelection &selected_atom
             if (center != point)
                 moldata.setProperty(center_property.source(), VectorProperty(SireMaths::rotate(center, rotmat, point)));
         }
+    }
+
+    // should we rotate the velocities too?
+    bool rotate_velocities = false;
+
+    if (map.specified("rotate_velocities"))
+    {
+        rotate_velocities = map["rotate_velocities"].value().asABoolean();
+    }
+
+    PropertyName vel_property = map["velocity"];
+
+    if (rotate_velocities and moldata.hasProperty(vel_property))
+    {
+        auto velocities = moldata.property(vel_property).asA<AtomVelocities>();
+
+        ::rotate_velocities(velocities, selected_atoms, rotmat);
+
+        if (vel_property.hasSource())
+            moldata.setProperty(vel_property.source(), velocities);
     }
 }
 

@@ -73,7 +73,7 @@ void register_AmberRst7_class(){
         AmberRst7_exposer.def( bp::init< SireIO::AmberRst7 const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireIO::AmberRst7::boxAngles
         
-            typedef ::SireMaths::Vector ( ::SireIO::AmberRst7::*boxAngles_function_type)(  ) const;
+            typedef ::QVector< SireUnits::Dimension::PhysUnit< 0, 0, 0, 0, 0, 0, 1 > > ( ::SireIO::AmberRst7::*boxAngles_function_type)(  ) const;
             boxAngles_function_type boxAngles_function_value( &::SireIO::AmberRst7::boxAngles );
             
             AmberRst7_exposer.def( 

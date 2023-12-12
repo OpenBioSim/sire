@@ -32,6 +32,8 @@
 
 #include "SireMaths/vector.h"
 
+#include "SireUnits/dimensions.h"
+
 SIRE_BEGIN_HEADER
 
 namespace SireIO
@@ -112,7 +114,7 @@ namespace SireIO
         QVector<SireMaths::Vector> velocities() const;
 
         SireMaths::Vector boxDimensions() const;
-        SireMaths::Vector boxAngles() const;
+        QVector<SireUnits::Dimension::Angle> boxAngles() const;
 
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
