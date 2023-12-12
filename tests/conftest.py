@@ -178,5 +178,10 @@ def testfile_cache_dir():
 
 
 @pytest.fixture(scope="session")
+def neopentane_methane():
+    return sr.load_test_files("neo_meth_scratch.bss")
+
+
+@pytest.fixture(scope="session")
 def zero_lj_mols():
     return sr.load_test_files("zero_lj.prm7", "zero_lj.rst7")
