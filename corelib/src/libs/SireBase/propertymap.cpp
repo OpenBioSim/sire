@@ -405,6 +405,13 @@ bool PropertyMap::specified(const PropertyName &propname) const
         return propname.hasValue();
 }
 
+/** Unset the property called 'name'. This will return it to default */
+void PropertyMap::unset(const QString &name)
+{
+    if (propmap.contains(name))
+        propmap.remove(name);
+}
+
 /** Set the property called 'name' to have the source or value
     in 'source'. This replaces any existing source or value
     for any existing property of this name in this map */

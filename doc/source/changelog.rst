@@ -43,6 +43,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed the bug where the wrong return type from ``.minimisation()`` and
   ``.dynamics()`` was returned. This fixes issue #137.
 
+* Fixed the bug where the cutoff would not be set correctly if a string
+  was passed. You can now do ``mol.dynamics(cutoff="10A")`` or
+  ``mol.dynamics(cutoff="infinite")`` and it will be processed correctly.
+  This also required adding a ``map.unset("key")`` option to ``PropertyMap``,
+  to make it easier to unset mapped properties.
+
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
 ---------------------------------------------------------------------------------------------
 
