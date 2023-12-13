@@ -25,7 +25,7 @@ def _to_selectormol(obj):
 
     if hasattr(obj, "molecules"):
         return obj.molecules()
-    elif not isinstance(obj, list):
+    elif isinstance(obj, list):
         mols = []
 
         for o in obj:
