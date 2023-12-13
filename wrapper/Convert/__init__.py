@@ -136,6 +136,23 @@ try:
 
         ensemble = Ensemble(map=map)
 
+        if map.specified("cutoff"):
+            # we need to make sure that this is a unit
+            cutoff = map["cutoff"]
+
+            if cutoff.has_source():
+                cutoff = cutoff.source()
+
+                if cutoff.lower() == "none" or cutoff.lower().startswith("infinit"):
+                    map.set("cutoff_type", "NONE")
+                    map.unset("cutoff")
+                elif cutoff.lower() == "auto":
+                    map.unset("cutoff")
+                elif cutoff != "cutoff":
+                    from ... import u
+
+                    map.set("cutoff", u(cutoff))
+
         if map.specified("integrator"):
             integrator = map["integrator"]
 

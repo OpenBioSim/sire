@@ -35,6 +35,22 @@ class DynamicsData:
                     mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
                 )
 
+            if map.specified("cutoff"):
+                cutoff = map["cutoff"]
+
+                if cutoff.has_source():
+                    cutoff = cutoff.source()
+
+                    if cutoff.lower() == "none" or cutoff.lower().startswith("infinit"):
+                        self._map.set("cutoff_type", "NONE")
+                        self._map.unset("cutoff")
+                    elif cutoff.lower() == "auto":
+                        self._map.unset("cutoff")
+                    elif cutoff != "cutoff":
+                        from .. import u
+
+                        self._map.set("cutoff", u(cutoff))
+
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
             from ..system import ForceFieldInfo, System
