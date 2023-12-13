@@ -12,11 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.5.0>`__ - December 2023
+`2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.2...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
-
-* Fix use of ``QString::compare`` when comparing molecular properties during
-  a water topology swap.
 
 * Added a new :mod:`sire.options` module that contains new
   :class:`sire.options.Option` objects to represent configurable options.
@@ -25,15 +22,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   :class:`~sire.options.Option` shows how to create your own Option type.
   The unit test in ``tests/options/test_options.py`` show how to use
   the options. This is integrated into the sire/OpenMM layer.
-
-* Have :class:`~sire.io.parser.RST7` return a list of angles from the
-  ``box_angles()`` function, rather than a :class:`~sire.maths.Vector`.
-  This prevents the confusing behaviour where the angles are wrongly
-  shown in units of angstroms... This fixes issues #106.
-
-* Added a new :func:`sire.maths.rotate` function, and added the option
-  (default True) to rotate velocities as well as coordinates when usign
-  a cursor to rotate molecule views. This fixes issue #103.
 
 * Extended the ``.atom(s)``, ``.residue(s)``, ``.bond(s)`` and all other
   indexing functions so that you can pass in an existing view or views as
@@ -48,6 +36,41 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   to keep existing behaviour, but we would recommend setting this to ``True``
   and would like to change the default in the future.
 
+* Added :func:`sire.convert` support for converting between :mod:`sire`
+  objects and `Gemmi <https://gemmi.readthedocs.io>`__ objects. This
+  has allowed us to support reading and writing of PDBx/mmCIF files.
+  We've updated :func:`sire.load` to automatically choose PDBs/mmCIF
+  files if gemmi-support is available. We've also added support for the
+  new-style PDB codes (e.g. "pdb_00003nss" instead of "3NSS"). Note that
+  this needs a custom Gemmi package build, where "shared libraries" are
+  turned on. This should be available from conda-forge in 2024, but for now,
+  you will need to clone the `Gemmi feedstock <https://github.com/conda-forge/gemmi-feedstock>`__
+  and build the conda package yourself. You will then need to recompile
+  sire from source. We will release 2023.5.1 as a conda package once
+  the conda-forge Gemmi package with shared library support is available.
+
+* Optimised the ``LambaLever`` class so that it caches the forcefield parameters
+  calculated at different lambda values. This means that we don't have to
+  re-calculate the parameters at each lambda update step. This is a
+  significant speed-up for alchemical free energy simulations.
+
+* Please add an item to this changelog when you create your PR
+
+`2023.4.2 <https://github.com/openbiosim/sire/compare/2023.4.1...2023.4.2>`__ - December 2023
+---------------------------------------------------------------------------------------------
+
+* Fixed use of ``QString::compare`` when comparing molecular properties during
+  a water topology swap.
+
+* Have :class:`~sire.io.parser.RST7` return a list of angles from the
+  ``box_angles()`` function, rather than a :class:`~sire.maths.Vector`.
+  This prevents the confusing behaviour where the angles are wrongly
+  shown in units of angstroms... This fixes issues #106.
+
+* Added a new :func:`sire.maths.rotate` function, and added the option
+  (default True) to rotate velocities as well as coordinates when usign
+  a cursor to rotate molecule views. This fixes issue #103.
+
 * Fix validation of ``perturbable_constraint`` dynamics option when the string
   includes hyphens. This fixes issue #130.
 
@@ -56,18 +79,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fix the sire to OpenMM conversion so that null LJ parameters will never have
   a zero sigma value. They will either be sigma=1/epsilon=0 for non-perturbable
   atoms, or sigma=1e-9/epsilon=1e-9 for perturbable atoms.
-
-* Added :func:`sire.convert` support for converting between :mod:`sire`
-  objects and `Gemmi <https://gemmi.readthedocs.io>`__ objects. This
-  has allowed us to support reading and writing of PDBx/mmCIF files.
-  We've updated :func:`sire.load` to automatically choose PDBs/mmCIF
-  files if gemmi-support is available. We've also added support for the
-  new-style PDB codes (e.g. "pdb_00003nss" instead of "3NSS").
-
-* Optimised the ``LambaLever`` class so that it caches the forcefield parameters
-  calculated at different lambda values. This means that we don't have to
-  re-calculate the parameters at each lambda update step. This is a
-  significant speed-up for alchemical free energy simulations.
 
 * Now catch ``std::bad_alloc`` and raise it as a ``MemoryError``. This
   means that we can catch out-of-memory errors and raise a more
@@ -82,10 +93,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   This also required adding a ``map.unset("key")`` option to ``PropertyMap``,
   to make it easier to unset mapped properties.
 
-* Please add an item to this changelog when you create your PR
-
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
----------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 * Fixed regression introduced in 2023.4.0 that meant that removed the constraints
   from water molecules that had no internal bonds. These waters would blow up
