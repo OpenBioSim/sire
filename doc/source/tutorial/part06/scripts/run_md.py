@@ -25,9 +25,15 @@ print("\nWater leg")
 for i, lambda_value in enumerate(lambda_values):
     print(f"Simulating lambda={lambda_value:.2f}")
     # minimise the system at this lambda value
-    min_mols = mols.minimisation(lambda_value=lambda_value,
-                                 constraint=constraint,
-                                 perturbable_constraint="none").run().commit()
+    min_mols = (
+        mols.minimisation(
+            lambda_value=lambda_value,
+            constraint=constraint,
+            perturbable_constraint="none",
+        )
+        .run()
+        .commit()
+    )
 
     # create a dynamics object for the system
     d = min_mols.dynamics(
@@ -47,9 +53,7 @@ for i, lambda_value in enumerate(lambda_values):
     print(d)
 
     # get the values of lambda for neighbouring windows
-    lambda_windows = lambda_values[
-        max(i - 1, 0) : min(len(lambda_values), i + 2)
-    ]
+    lambda_windows = lambda_values[max(i - 1, 0) : min(len(lambda_values), i + 2)]
 
     # run the dynamics, saving the energy every 0.1 ps
     d.run(
@@ -75,11 +79,14 @@ for i, lambda_value in enumerate(lambda_values):
     # off the perturbable constraint)
     min_mols = (
         mols[0]
-        .minimisation(lambda_value=lambda_value, vacuum=True,
-                      constraint=constraint,
-                      perturbable_constraint="none")
+        .minimisation(
+            lambda_value=lambda_value,
+            vacuum=True,
+            constraint=constraint,
+            perturbable_constraint="none",
+        )
         .run()
-        .commit()
+        .commit(return_as_system=True)
     )
 
     # create a dynamics object for the system
@@ -101,9 +108,7 @@ for i, lambda_value in enumerate(lambda_values):
     print(d)
 
     # get the values of lambda for neighbouring windows
-    lambda_windows = lambda_values[
-        max(i - 1, 0) : min(len(lambda_values), i + 2)
-    ]
+    lambda_windows = lambda_values[max(i - 1, 0) : min(len(lambda_values), i + 2)]
 
     # run the dynamics, saving the energy every 0.1 ps
     d.run(
