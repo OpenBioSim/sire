@@ -23,6 +23,7 @@
 #include "moleculeparser.h"
 #include "pdb.h"
 #include "pdb2.h"
+#include "pdbx.h"
 #include "perturbationslibrary.h"
 #include "protoms.h"
 #include "sdf.h"

@@ -24,6 +24,8 @@ namespace bp = boost::python;
 
 #include <QHash>
 
+#include <memory>
+
 #include "properties.h"
 
 SireBase::Properties __copy__(const SireBase::Properties &other){ return SireBase::Properties(other); }
@@ -53,7 +55,7 @@ void register_Properties_class(){
                 , addLink_function_value
                 , ( bp::arg("key"), bp::arg("linked_property") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Add a link from the property key to the property linked_property.\n  The linked_property will be returned if there is no property\n  called key in this set.\n\n  Note that the linked property must already be contained in this set.\n" );
         
         }
         { //::SireBase::Properties::allMetadata
@@ -153,7 +155,7 @@ void register_Properties_class(){
                 "getLinks"
                 , getLinks_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return all of the property links" );
         
         }
         { //::SireBase::Properties::hasLinks
@@ -165,7 +167,7 @@ void register_Properties_class(){
                 "hasLinks"
                 , hasLinks_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return whether or not there are any property links" );
         
         }
         { //::SireBase::Properties::hasMetadata
@@ -422,7 +424,7 @@ void register_Properties_class(){
                 "removeAllLinks"
                 , removeAllLinks_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove all property links from this set" );
         
         }
         { //::SireBase::Properties::removeAllMetadata
@@ -460,7 +462,7 @@ void register_Properties_class(){
                 , removeLink_function_value
                 , ( bp::arg("key") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Remove the link associated with the key key" );
         
         }
         { //::SireBase::Properties::removeMetadata

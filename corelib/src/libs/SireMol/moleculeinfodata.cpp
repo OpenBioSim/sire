@@ -940,10 +940,12 @@ MoleculeInfoData::MoleculeInfoData(const StructureEditor &editor) : RefCountData
 
     // ALL chains must contain at least one residue
     if (not empty_chains.isEmpty())
+    {
         throw SireMol::missing_residue(QObject::tr("ALL chains must contain at least one residue. "
                                                    "Chains missing residues are %1.")
                                            .arg(Sire::toString(empty_chains)),
                                        CODELOC);
+    }
 
     /// Finally convert the segments
     ///

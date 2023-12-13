@@ -190,6 +190,15 @@ ForceFieldInfo::ForceFieldInfo(const System &system,
     {
         this->setCutoff(cutoff_prop.value().asA<GeneralUnitProperty>().toUnit<Length>());
     }
+    else if (cutoff_prop.source() != "cutoff")
+    {
+        throw SireError::invalid_arg(QObject::tr(
+                                         "The cutoff property should have a value. It cannot be the string "
+                                         "'%1'. If you want to specify the cutoff type, using "
+                                         "the 'cutoff_type' property.")
+                                         .arg(cutoff_prop.source()),
+                                     CODELOC);
+    }
 
     const auto cutoff_type = map["cutoff_type"];
 

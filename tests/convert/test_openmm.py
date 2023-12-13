@@ -6,6 +6,61 @@ import pytest
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+def test_openmm_single_energy_neopentane(neopentane_methane):
+    mol = neopentane_methane[0]
+
+    # this function will extract the lambda0 or lambda1 end state
+    def get_end_state(mol, state, remove_state):
+        c = mol.cursor()
+        for key in c.keys():
+            if key.endswith(state):
+                c[key.removesuffix(state)] = c[key]
+                del c[key]
+            elif key.endswith(remove_state):
+                del c[key]
+
+        c["is_perturbable"] = False
+        return c.commit()
+
+    mol0 = get_end_state(mol, "0", "1")
+    mol1 = get_end_state(mol, "1", "0")
+
+    map = {
+        "space": sr.vol.Cartesian(),
+        "platform": "Reference",
+        "constraint": "none",
+        "ignore_perturbations": True,
+    }
+
+    omm0 = sr.convert.to(mol0, "openmm", map=map)
+
+    state0 = omm0.getState(getEnergy=True)
+
+    energy0 = state0.getPotentialEnergy()
+
+    energy0 = energy0.value_in_unit(energy0.unit)
+
+    assert mol0.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy0, abs=0.1
+    )
+
+    omm1 = sr.convert.to(mol1, "openmm", map=map)
+
+    state1 = omm1.getState(getEnergy=True)
+
+    energy1 = state1.getPotentialEnergy()
+
+    energy1 = energy1.value_in_unit(energy1.unit)
+
+    assert mol1.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy1, abs=0.1
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 def test_openmm_single_energy(kigaki_mols):
     mols = kigaki_mols
 
@@ -292,9 +347,9 @@ def test_openmm_ignore_constrained(ala_mols):
 def test_openmm_no_zero_sigmas(zero_lj_mols):
     mols = zero_lj_mols
 
-    omm = sr.convert.to(mols, "openmm", 
-                        map={"constraint": "h-bonds",
-                             "platform": "Reference"})
+    omm = sr.convert.to(
+        mols, "openmm", map={"constraint": "h-bonds", "platform": "Reference"}
+    )
 
     from openmm import XmlSerializer
 
@@ -314,23 +369,27 @@ def test_openmm_skipped_constrained_bonds(zero_lj_mols):
     omm1 = sr.convert.to(
         mols,
         "openmm",
-        map={"constraint": "h-bonds", 
-             "include_constrained_energies": True,
-             "platform": "Reference"},
+        map={
+            "constraint": "h-bonds",
+            "include_constrained_energies": True,
+            "platform": "Reference",
+        },
     )
 
     omm2 = sr.convert.to(
         mols,
         "openmm",
-        map={"constraint": "h-bonds", 
-             "include_constrained_energies": False,
-             "platform": "Reference"},
+        map={
+            "constraint": "h-bonds",
+            "include_constrained_energies": False,
+            "platform": "Reference",
+        },
     )
 
     nrg1 = omm1.get_potential_energy().to(sr.units.kcal_per_mol)
     nrg2 = omm2.get_potential_energy().to(sr.units.kcal_per_mol)
 
-    # Check the energies haven't changed
+    # Check the energies haven't changed
     # (regression check - here are the current values)
     assert nrg1 == pytest.approx(-447.44, 1e-3)
     assert nrg2 == pytest.approx(-3279.87, 1e-3)

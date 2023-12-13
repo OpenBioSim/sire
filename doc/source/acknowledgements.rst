@@ -156,8 +156,10 @@ OpenMM
 ------
 
 :mod:`sire` links to `OpenMM <https://openmm.org>`__ to perform accelerated
-dynamics (e.g. as part of the ``somd`` program). This is licensed
-under either the MIT or LGPL licenses, so compatible with the GPL.
+dynamics (e.g. as part of the ``somd`` program), and also via an
+interconversion layer to switch between sire and OpenMM system representations.
+This is licensed under either the MIT or LGPL licenses,
+so compatible with the GPL.
 
 Regress
 -------
@@ -399,6 +401,44 @@ The algorithm is `described here <https://blog.matteoferla.com/2020/02/guess-bon
 and `here <https://docs.mdanalysis.org/2.0.0/_modules/MDAnalysis/converters/RDKit.html#_infer_bo_and_charges>`__.
 
 The code was written by Matteo Ferla and was released under the GPL.
+
+gemmi
+-----
+
+:mod:`sire` uses the `gemmi <https://gemmi.readthedocs.io/en/latest/>`__ library
+for reading and writing PDBx/mmCIF files. This is used under the terms of
+the LGPL3 license. Thanks to this project for providing such a useful
+header-only C++ library that is easy to bring incorporate into other
+programs, and that is so well documented and feature-rich. This is provided
+via an integration that supports interconversion between sire and gemmi objects.
+
+PEGTL
+-----
+
+`gemmi <https://gemmi.readthedocs.io/en/latest/>`__ uses the
+`PEGTL <https://github.com/taocpp/PEGTL>`__ library
+for parsing mmCIF files. This is used under the terms of the MIT
+or Boost Software License (the version bundled with gemmi is MIT,
+while the version on GitHub is BSL)
+
+pyboost11
+---------
+
+Thanks to Yung-Yu's excellent
+`blog post <https://yyc.solvcon.net/en/latest/writing/2021/pyboost11/pyboost11.html>`__
+on how to interconvert between boost::python and pybind11, and for providing
+`pyboost11.hpp <https://yyc.solvcon.net/en/latest/writing/2021/pyboost11/code.html#pyboost11-code-pyboost11-hpp>`__
+as a header-only library to support interconversion. This was really useful
+to let me mix pybind11-wrapped gemmi objects with boost::python-wrapped sire.
+The code is used under the terms of the liberal open source license
+given at the top of the header file.
+
+RDKit
+-----
+
+:mod:`sire` provides an integration with the `RDKit <https://www.rdkit.org>`__
+package, supporting interconversion between the sire and RDKit
+molecular representations. This is used under the terms of the BSD3 license.
 
 Python Dependencies
 ===================

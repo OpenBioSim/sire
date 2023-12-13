@@ -227,6 +227,19 @@ void register_PropertyMap_class(){
                 , "" );
         
         }
+        { //::SireBase::PropertyMap::unset
+        
+            typedef void ( ::SireBase::PropertyMap::*unset_function_type)( ::QString const & ) ;
+            unset_function_type unset_function_value( &::SireBase::PropertyMap::unset );
+            
+            PropertyMap_exposer.def( 
+                "unset"
+                , unset_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "Unset the property called name. This will return it to default" );
+        
+        }
         { //::SireBase::PropertyMap::what
         
             typedef char const * ( ::SireBase::PropertyMap::*what_function_type)(  ) const;

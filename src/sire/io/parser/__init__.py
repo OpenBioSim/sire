@@ -4,6 +4,7 @@ __all__ = [
     "GTOP",
     "MOL2",
     "PDB",
+    "PDBx",
     "PRM",
     "PSF",
     "RST",
@@ -21,6 +22,7 @@ G87 = _IO.Gro87
 GTOP = _IO.GroTop
 MOL2 = _IO.Mol2
 PDB = _IO.PDB2
+PDBx = _IO.PDBx
 PRM = _IO.AmberPrm
 PSF = _IO.CharmmPSF
 RST = _IO.AmberRst

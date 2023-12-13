@@ -1,8 +1,10 @@
 __all__ = [
     "biosimspace_to_sire",
+    "gemmi_to_sire",
     "openmm_to_sire",
     "rdkit_to_sire",
     "sire_to_biosimspace",
+    "sire_to_gemmi",
     "sire_to_rdkit",
     "sire_to_openmm",
     "supported_formats",
@@ -23,7 +25,7 @@ def _to_selectormol(obj):
 
     if hasattr(obj, "molecules"):
         return obj.molecules()
-    elif type(obj) is list:
+    elif not isinstance(obj, list):
         mols = []
 
         for o in obj:
@@ -64,14 +66,15 @@ def to(obj, format: str = "sire", map=None):
         return to_sire(obj, map=map)
     elif format == "rdkit":
         return to_rdkit(obj, map=map)
+    elif format == "gemmi":
+        return to_gemmi(obj, map=map)
     elif format == "biosimspace":
         return to_biosimspace(obj, map=map)
     elif format == "openmm":
         return to_openmm(obj, map=map)
     else:
         raise ValueError(
-            f"Cannot convert {obj} as the format '{format}' is "
-            "not recognised."
+            f"Cannot convert {obj} as the format '{format}' is " "not recognised."
         )
 
 
@@ -87,7 +90,7 @@ def to_sire(obj, map=None):
         # already a sire object?
         return obj
 
-    if type(obj) is not list:
+    if not isinstance(obj, list):
         obj = [obj]
 
     # create lists of objects of the same type (in the same order)
@@ -106,9 +109,11 @@ def to_sire(obj, map=None):
             return "rdkit"
         elif "openmm" in t:
             return "openmm"
+        elif "gemmi" in t:
+            return "gemmi"
         else:
             raise TypeError(
-                f"Cannot convert '{o}' as it is of unrecognised type {type(0)}"
+                f"Cannot convert '{o}' as it is of unrecognised type {type(o)}"
             )
 
     # sort all the objects into lists of types (preserving the order)
@@ -139,6 +144,9 @@ def to_sire(obj, map=None):
 
         elif typ[0] == "openmm":
             c = openmm_to_sire(typ[1], map=map)
+
+        elif typ[0] == "gemmi":
+            c = gemmi_to_sire(typ[1], map=map)
 
         else:
             raise TypeError(f"Unrecognised type {typ[0]}")
@@ -181,6 +189,14 @@ def to_rdkit(obj, map=None):
     return sire_to_rdkit(to_sire(obj, map=map), map=map)
 
 
+def to_gemmi(obj, map=None):
+    """
+    Convert the passed object from its current object format to a
+    gemmi object format.
+    """
+    return sire_to_gemmi(to_sire(obj, map=map), map=map)
+
+
 def to_openmm(obj, map=None):
     """
     Convert the passed object from its current object format to an
@@ -196,7 +212,7 @@ def biosimspace_to_sire(obj, map=None):
     """
     from ..system import System
 
-    if type(obj) is list:
+    if isinstance(obj, list):
         if len(obj) == 0:
             return None
         elif len(obj) == 1:
@@ -308,7 +324,7 @@ def openmm_to_sire(obj, map=None):
     """
     Convert the passed OpenMM.System to the sire equivalent
     """
-    if type(obj) is not list:
+    if not isinstance(obj, list):
         obj = [obj]
 
     try:
@@ -380,7 +396,7 @@ def rdkit_to_sire(obj, map=None):
     Convert the passed rdkit object (either a molecule or
     list of molecules) to the sire equivalent
     """
-    if type(obj) is not list:
+    if not isinstance(obj, list):
         obj = [obj]
 
     try:
@@ -432,3 +448,115 @@ def sire_to_rdkit(obj, map=None):
         return mols[0]
     else:
         return mols
+
+
+def gemmi_to_sire(obj, map=None):
+    """
+    Convert the passed gemmi Structure to the sire equivalent
+    """
+    try:
+        from ..legacy.Convert import gemmi_to_sire as _gemmi_to_sire
+    except Exception:
+        raise ModuleNotFoundError(
+            "gemmi is not available. Please install via "
+            "'mamba install -c conda-forge gemmi'"
+        )
+
+    from ..base import create_map
+
+    map = create_map(map)
+
+    if not isinstance(obj, list):
+        obj = [obj]
+
+    results = []
+
+    from ..system import System
+
+    for o in obj:
+        s = System(_gemmi_to_sire(o, map=map))
+
+        if hasattr(o, "_sire_metadata"):
+            metadata = o._sire_metadata()
+
+            if metadata is not None:
+                s.set_property("metadata", metadata)
+
+        results.append(s)
+
+    if len(results) == 1:
+        return results[0]
+    else:
+        return results
+
+
+_gemmi_metadata = {}
+
+
+def _find_sire_gemmi_metadata(obj):
+    """
+    Find the sire metadata associated with the passed gemmi object
+    """
+    global _gemmi_metadata
+
+    if obj in _gemmi_metadata:
+        return _gemmi_metadata[obj]
+    else:
+        return None
+
+
+def sire_to_gemmi(obj, map=None):
+    """
+    Convert the passed sire object to a gemmi structure
+    """
+    try:
+        from ..legacy.Convert import sire_to_gemmi as _sire_to_gemmi
+    except Exception:
+        raise ModuleNotFoundError(
+            "rdkit is not available. Please install via "
+            "'mamba install -c conda-forge rdkit'"
+        )
+
+    if not isinstance(obj, list):
+        obj = [obj]
+
+    from ..system import System
+    from ..base import create_map
+
+    map = create_map(map)
+
+    result = []
+
+    for o in obj:
+        if System.is_system(o):
+            try:
+                o = o._system
+            except Exception:
+                pass
+        else:
+            s = System()
+            s.add(_to_selectormol(o))
+            o = s._system
+
+        if o.contains_property("metadata"):
+            metadata = o.property("metadata")
+        else:
+            metadata = None
+
+        g = _sire_to_gemmi(o, map=map)
+
+        if metadata is not None:
+            # add metadata to the gemmi structure. We have to use
+            # this convoluted way of doing it as gemmi doesn't
+            # allow us to add arbitrary metadata to the structure
+            # and the class is not extensible (can't be monkey patched)
+            global _gemmi_metadata
+            _gemmi_metadata[g] = metadata
+            g.__class__._sire_metadata = _find_sire_gemmi_metadata
+
+        result.append(g)
+
+    if len(result) == 1:
+        return result[0]
+    else:
+        return result
