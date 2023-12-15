@@ -1,10 +1,10 @@
-__all__ = ["create_map", "wrap", "PropertyMap", "ProgressBar"]
+__all__ = ["create_map", "wrap", "PropertyMap", "ProgressBar", "Properties"]
 
 from ..legacy import Base as _Base
 
 from .. import use_new_api as _use_new_api
 
-from ..legacy.Base import PropertyMap
+from ..legacy.Base import PropertyMap, Properties
 
 from ._progressbar import ProgressBar
 
@@ -121,6 +121,25 @@ if not hasattr(PropertyMap, "__orig__set"):
 
     PropertyMap.__orig__set = PropertyMap.set
     PropertyMap.set = __propertymap_set
+
+    def __propertymap_get_string(obj, key: str):
+        """
+        Return the string value associated with the passed 'key'
+
+        This returns 'key' if there is no value associated
+        """
+        key = str(key)
+        if obj.specified(key):
+            val = obj[key]
+
+            if val.has_value():
+                return val.value().as_string()
+            else:
+                return val.source()
+        else:
+            return key
+
+    PropertyMap.get_string = __propertymap_get_string
 
 
 def create_map(values, extras=None):

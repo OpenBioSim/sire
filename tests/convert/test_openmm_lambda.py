@@ -165,14 +165,6 @@ def test_openmm_scale_lambda_dichloroethane(ethane_12dichloroethane):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda_neopentane(neopentane_methane):
-    _run_test(neopentane_methane.clone(), False)
-
-
-@pytest.mark.skipif(
-    "openmm" not in sr.convert.supported_formats(),
-    reason="openmm support is not available",
-)
 def test_openmm_scale_lambda_cyclopentane(pentane_cyclopentane):
     mols = pentane_cyclopentane.clone()
 

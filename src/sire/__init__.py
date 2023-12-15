@@ -697,6 +697,7 @@ if _can_lazy_import:
     mol = _lazy_import.lazy_module("sire.mol")
     morph = _lazy_import.lazy_module("sire.morph")
     move = _lazy_import.lazy_module("sire.move")
+    options = _lazy_import.lazy_module("sire.options")
     qt = _lazy_import.lazy_module("sire.qt")
     restraints = _lazy_import.lazy_module("sire.restraints")
     search = _lazy_import.lazy_module("sire.search")

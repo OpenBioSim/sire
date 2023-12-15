@@ -40,6 +40,13 @@ System load_molecules(const QStringList &files,
 {
     auto gil = SireBase::release_gil();
 
+    bool auto_connect = true;
+
+    if (map.specified("auto_connect"))
+    {
+        auto_connect = map["auto_connect"].value().asABoolean();
+    }
+
     try
     {
         if (files.count() == 1)
@@ -121,7 +128,7 @@ System load_molecules(const QStringList &files,
                 }
             }
 
-            if (not mol.hasProperty("connectivity"))
+            if (auto_connect and not mol.hasProperty("connectivity"))
             {
                 try
                 {

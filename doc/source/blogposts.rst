@@ -38,7 +38,7 @@ enables :mod:`sire` to perform GPU-accelerated molecular dynamics simulations.
 GPU-accelerated free energies
 -----------------------------
 
-* `GPU-accelerated free energies <https://www.openbiosim.org/sire-diaries-gpu-accelerated-free-energies/>`__
+* `GPU-accelerated free energies <https://www.openbiosim.org/sire-diaries-gpu-free-energy/>`__
 
 In this fourth post, written around the 2023.4 release,
 we show how the OpenMM integration has been extended to

@@ -12,8 +12,50 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2023.4.2 <https://github.com/openbiosim/sire/compare/2023.4.1...2023.4.2>`__
-------------------------------------------------------------------------------
+`2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.2...2023.5.0>`__ - December 2023
+---------------------------------------------------------------------------------------------
+
+* Added a new :mod:`sire.options` module that contains new
+  :class:`sire.options.Option` objects to represent configurable options.
+  These include documentation, and make it easier to validate and expose
+  possible values of configurable options. The API docs for
+  :class:`~sire.options.Option` shows how to create your own Option type.
+  The unit test in ``tests/options/test_options.py`` show how to use
+  the options. This is integrated into the sire/OpenMM layer.
+
+* Extended the ``.atom(s)``, ``.residue(s)``, ``.bond(s)`` and all other
+  indexing functions so that you can pass in an existing view or views as
+  the key. This lets you look up views in a container by other views, e.g.
+  ``mols.bond(mols.atoms()[0], mols.atoms()[1])`` would return the bond
+  between the first two atoms in the container ``mols``. Also added
+  a ``error_on_missing`` flag to the ``atoms``, ``residues``, ``bonds`` etc
+  functions, so that you get a ``KeyError`` exception if there is no match,
+  and ``error_on_missing`` is ``True``. For example,
+  ``mols.atoms("element C", error_on_missing=True)`` would raise an exception
+  if there are no carbon atoms in this container. This is default ``False``
+  to keep existing behaviour, but we would recommend setting this to ``True``
+  and would like to change the default in the future.
+
+* Added :func:`sire.convert` support for converting between :mod:`sire`
+  objects and `Gemmi <https://gemmi.readthedocs.io>`__ objects. This
+  has allowed us to support reading and writing of PDBx/mmCIF files.
+  We've updated :func:`sire.load` to automatically choose PDBs/mmCIF
+  files if gemmi-support is available. We've also added support for the
+  new-style PDB codes (e.g. "pdb_00003nss" instead of "3NSS"). Note that
+  this needs a custom Gemmi package build, where "shared libraries" are
+  turned on. This should be available from conda-forge in 2024, but for now,
+  you will need to clone the `Gemmi feedstock <https://github.com/conda-forge/gemmi-feedstock>`__
+  and build the conda package yourself. You will then need to recompile
+  sire from source. We will release 2023.5.1 as a conda package once
+  the conda-forge Gemmi package with shared library support is available.
+
+* Optimised the ``LambdaLever`` class so that it caches the forcefield parameters
+  calculated at different lambda values. This means that we don't have to
+  re-calculate the parameters at each lambda update step. This is a
+  significant speed-up for alchemical free energy simulations.
+
+`2023.4.2 <https://github.com/openbiosim/sire/compare/2023.4.1...2023.4.2>`__ - December 2023
+---------------------------------------------------------------------------------------------
 
 * Fixed use of ``QString::compare`` when comparing molecular properties during
   a water topology swap.
@@ -50,7 +92,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   to make it easier to unset mapped properties.
 
 `2023.4.1 <https://github.com/openbiosim/sire/compare/2023.4.0...2023.4.1>`__ - October 2023
----------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
 * Fixed regression introduced in 2023.4.0 that meant that removed the constraints
   from water molecules that had no internal bonds. These waters would blow up
@@ -139,7 +181,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for alchemical restraints to the OpenMM dynamics layer.
   This lets you scale restraints as part of a λ-coordinate. This is
-  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints`.
+  documented in the :doc:`tutorial <tutorial/part06/04_alchemical_restraints>`.
   Restraints can be named, meaning that you can scale different restraints
   at different stages and by different values across the λ-coordinate.
 
@@ -442,7 +484,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added support for performing minimisation and molecular dynamics simulations
   based on the OpenMM integration. This is documented in full via both
-  :doc:`a tutorial <tutorial/part05/04_dynamics>` and a
+  :doc:`a tutorial <tutorial/part05/05_dynamics>` and a
   :doc:`detailed guide <cheatsheet/openmm>`.
 
 * Fixed the Amber PRMTOP `dihedral ring bug <https://github.com/OpenBioSim/sire/commit/397271f4229f3cbed6a4c3b425e4baaf4aae4ec5>`__.

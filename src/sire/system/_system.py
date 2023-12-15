@@ -550,6 +550,13 @@ class System:
             is useful if you just want to run standard molecular dynamics
             of the reference or perturbed states.
 
+        integrator: str
+            The type of integrator to use, e.g. `langevin`, `verlet` etc.
+            See https://sire.openbiosim.org/cheatsheet/openmm.html#choosing-options
+            for the full list of options. This will be automatically
+            set to `langevin_middle` (NVT/NPT) or `verlet` (NVE) depending
+            on the ensemble if this is not set (or is set to `auto`)
+
         temperature: temperature
             The temperature at which to run the simulation. A
             microcanonical (NVE) simulation will be run if you don't
@@ -814,9 +821,7 @@ class System:
             # we need to create this trajectory
             from ..maths import EnergyTrajectory
 
-            self._system.set_property(
-                traj_propname.source(), EnergyTrajectory()
-            )
+            self._system.set_property(traj_propname.source(), EnergyTrajectory())
 
             traj = self._system.property(traj_propname)
 
@@ -852,8 +857,7 @@ class System:
 
         if trajectory.what() != "SireMaths::EnergyTrajectory":
             raise TypeError(
-                f"You cannot set a {type(trajectory)} as an "
-                "energy trajectory!"
+                f"You cannot set a {type(trajectory)} as an " "energy trajectory!"
             )
 
         self._system.set_property(traj_propname.source(), trajectory)
@@ -946,6 +950,73 @@ class System:
         (copied) to all contained molecules
         """
         return self._system.shared_properties()
+
+    def set_metadata(self, key, value):
+        """
+        Set the metadata for this System so that the metadata associated
+        with the key 'key' is equal to 'value'
+        """
+        from ..base import Properties, wrap
+
+        if self._system.contains_property("metadata"):
+            metadata = self._system.property("metadata")
+
+            if not isinstance(metadata, Properties):
+                metadata = Properties()
+
+        else:
+            metadata = Properties()
+
+        metadata.set_property(str(key), wrap(value))
+
+        self._system.set_property("metadata", metadata)
+
+    def has_metadata(self, key):
+        """
+        Return whether or not this System has metadata associated
+        with the requested key
+        """
+        if self._system.contains_property("metadata"):
+            return self._system.property("metadata").has_property(str(key))
+        else:
+            return False
+
+    def metadata(self, key: str = None):
+        """
+        Return the metadata associated with the passed 'key', or
+        all metadata if 'key' is None. This returns None if there
+        is no metadata associated with this key, or no metadata
+        has been set
+        """
+        if self._system.contains_property("metadata"):
+            if key is None:
+                return self._system.property("metadata")
+
+            try:
+                value = self._system.property("metadata").property(str(key))
+            except Exception:
+                return None
+
+            if hasattr(value, "is_integer"):
+                if value.is_integer():
+                    return value.as_integer()
+
+            if hasattr(value, "value"):
+                return value.value()
+
+            return value
+        else:
+            return None
+
+    def metadata_keys(self):
+        """
+        Return the keys of all metadata set in this System
+        This returns an empty list if no metadata has been set
+        """
+        if self._system.contains_property("metadata"):
+            return self._system.property("metadata").property_keys()
+        else:
+            return []
 
     def cursor(self):
         """

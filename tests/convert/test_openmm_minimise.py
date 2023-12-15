@@ -98,6 +98,6 @@ def test_openmm_minimise_vacuum(kigaki_mols):
 
     mols.add_shared_property("space", sr.vol.Cartesian())
 
-    mols = mols.minimisation(platform="cpu").run(10).commit()
+    mols = mols.minimisation(platform="cpu", vacuum=True).run(10).commit()
 
     assert not mols.property("space").is_periodic()
