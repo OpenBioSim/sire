@@ -649,7 +649,7 @@ elif _nglview_import_error is not None:
             f"when nglview was loaded ({_nglview_import_error}). One "
             "possibility is that nglview is incompatible with the installed "
             "version of ipywidgets. Try to downgrade ipywidgets, e.g. "
-            "\"mamba install 'ipywidgets>=7.6.0,<8'\". You will need to "
+            "\"conda install 'ipywidgets>=7.6.0,<8'\". You will need to "
             "restart Python and run this script/notebook again."
         )
 
@@ -659,6 +659,6 @@ else:
         raise ImportError(
             "You need to install nglview to be able to view "
             "molecules. Do this by typing, e.g. "
-            "'mamba install nglview' and then restarting Python "
+            "'conda install nglview' and then restarting Python "
             "and running this script/notebook again."
         )

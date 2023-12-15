@@ -126,8 +126,8 @@ First, we need to import alchemlyb
 .. note::
 
    If you see an error then you may need to install (or reinstall)
-   alchemlyb. You can do this using conda or mamba, e.g.
-   ``mamba install -c conda-forge alchemlyb``.
+   alchemlyb. You can do this using conda e.g.
+   ``conda install -c conda-forge alchemlyb``.
 
 Next, we will load all of the :class:`~sire.maths.EnergyTrajectory` objects
 for each λ-window, and will convert them into pandas DataFrames arranged

@@ -119,11 +119,11 @@ does not affect :mod:`sire`. CMake is excellent. You can read more about it
 Anaconda
 ---------
 
-:mod:`sire` uses Anaconda Python (specifically mambaforge and conda-forge) to
+:mod:`sire` uses Anaconda Python (specifically miniforge and conda-forge) to
 simplify the management and installation of Python and the various
 modules on which :mod:`sire` depends.
 
-Anaconda (and miniconda) are distributed as
+Anaconda (and miniforge) are distributed as
 `open source projects <https://www.continuum.io/open-source-core-modern-software>`__.
 As :mod:`sire` does not explicitly link with them, the license is not an issue.
 You can find out more about Anaconda `from here <https://www.continuum.io/>`__.

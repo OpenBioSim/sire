@@ -39,7 +39,7 @@ e.g.
 
     You may see a warning instructing you to install ``nglview``.
     If you see this, install ``nglview`` by typing
-    ``mamba install nglview`` at the command line.
+    ``conda install nglview`` at the command line.
 
 This uses `nglviewer <https://nglviewer.org>`__ to view the molecule.
 There are lots of options to the :func:`~sire.mol.SelectorMol.view`

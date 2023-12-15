@@ -149,7 +149,7 @@ PDBx::PDBx(const SireSystem::System &system, const PropertyMap &map) : ConcreteP
         throw SireError::unsupported(
             "No PDBx writer function has been registered. You need to "
             "install a library to write PDBx/mmCIF files, e.g. gemmi. "
-            "Do this by running 'mamba install -c conda-forge gemmi' "
+            "Do this by running 'conda install -c conda-forge gemmi' "
             "and then re-running this script.",
             CODELOC);
 
@@ -274,7 +274,7 @@ QVector<QString> PDBx::toLines() const
         throw SireError::unsupported(
             "No PDBx writer function has been registered. You need to "
             "install a library to write PDBx/mmCIF files, e.g. gemmi. "
-            "Do this by running 'mamba install -c conda-forge gemmi' "
+            "Do this by running 'conda install -c conda-forge gemmi' "
             "and then re-running this script.",
             CODELOC);
 
@@ -321,7 +321,7 @@ void PDBx::parseLines(const PropertyMap &map)
         throw SireError::unsupported(
             "No PDBx reader function has been registered. You need to "
             "install a library to read PDBx/mmCIF files, e.g. gemmi. "
-            "Do this by running 'mamba install -c conda-forge gemmi' "
+            "Do this by running 'conda install -c conda-forge gemmi' "
             "and then re-running this script.",
             CODELOC);
 

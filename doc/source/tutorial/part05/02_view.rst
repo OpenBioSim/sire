@@ -37,7 +37,7 @@ e.g. ``.png`` for PNG, ``.pdf`` for PDF and ``.svg`` for SVG.
    to PNG or PDF format. You will see a warning printed to the screen
    if this package is needed, and the image will instead be saved
    in SVG format. You can install ``cairosvg`` using
-   ``mamba install cairosvg``.
+   ``conda install cairosvg``.
 
 You can control the height and width of the image using the ``height``
 and ``width`` arguments (measured in pixels), e.g.

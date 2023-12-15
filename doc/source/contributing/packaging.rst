@@ -127,7 +127,7 @@ There are a number of stages to go through to create a release:
     the Python versions that :mod:`sire` should support. Activate
     this environment, and then checkout the ``main`` branch, run
     ``python actions/update_recipe.py`` and then run ``conda-build``
-    via the command ``conda mambabuild -c conda-forge -c openbiosim/label/dev recipes/sire``.
+    via the command ``conda build -c conda-forge -c openbiosim/label/dev recipes/sire``.
     This will result in a conda package in the ``conda-bld`` directory
     in the root directory of your conda environment. You then need
     to upload these packages to anaconda.org, e.g. via the command
