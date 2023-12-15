@@ -12,6 +12,11 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
+------------------------------------------------------------------------------------------
+
+* Please add an item to this changelog when you create your PR
+
 `2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.2...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
@@ -49,12 +54,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   sire from source. We will release 2023.5.1 as a conda package once
   the conda-forge Gemmi package with shared library support is available.
 
-* Optimised the ``LambaLever`` class so that it caches the forcefield parameters
+* Optimised the ``LambdaLever`` class so that it caches the forcefield parameters
   calculated at different lambda values. This means that we don't have to
   re-calculate the parameters at each lambda update step. This is a
   significant speed-up for alchemical free energy simulations.
-
-* Please add an item to this changelog when you create your PR
 
 `2023.4.2 <https://github.com/openbiosim/sire/compare/2023.4.1...2023.4.2>`__ - December 2023
 ---------------------------------------------------------------------------------------------
@@ -920,14 +923,14 @@ Here is the changelog for this stage of development.
                only pythonize the C++ layer, and avoid the circular dependencies
                that were causing random import errors (particularly on Windows).
 
-    [2023.0.2] December 2023: Fix multiple distance restraint bug in SOMD
+    [2023.0.2] December 2022: Fix multiple distance restraint bug in SOMD
                (@fjclark). Add support for PME FEP with SOMD and fix
                associated bugs (@halx, @jmichel80). Fix CI issues so that
                PRs use the correct URL when triggered by external forks.
                Exclude dummy atoms when repartitioning hydrogen masses.
                Deprecate py37.
 
-    [2023.0.1] November 2023: Improve handling of HETATM and TER records in
+    [2023.0.1] November 2022: Improve handling of HETATM and TER records in
                PDB files. Fix SOMD selection issues following update to the
                2023 API. Fix writing of steps to SOMD simfile.dat (@fjclark).
                Throw exception when CHAMBER format AMBER topology files are
@@ -942,7 +945,7 @@ Here is the changelog for this stage of development.
                order. Ensure Sire is built against packages with the "dev"
                label.
 
-    [2023.0.0] July 2023 - Updated Sire's API to a more pythonic style.
+    [2023.0.0] July 2022 - Updated Sire's API to a more pythonic style.
                Module names are in lower case, e.g. `import Sire` becomes
                `import sire`, or `import sire as sr`. Functions are in
                underscore_case. This change is not backwards compatible. To
