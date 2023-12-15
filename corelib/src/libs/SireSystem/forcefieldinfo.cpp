@@ -186,25 +186,40 @@ ForceFieldInfo::ForceFieldInfo(const System &system,
 
     const auto cutoff_prop = map["cutoff"];
 
+    bool requested_no_cutoff = false;
+
     if (cutoff_prop.hasValue())
     {
         this->setCutoff(cutoff_prop.value().asA<GeneralUnitProperty>().toUnit<Length>());
     }
-    else if (cutoff_prop.source() != "cutoff")
+    else
     {
-        throw SireError::invalid_arg(QObject::tr(
-                                         "The cutoff property should have a value. It cannot be the string "
-                                         "'%1'. If you want to specify the cutoff type, using "
-                                         "the 'cutoff_type' property.")
-                                         .arg(cutoff_prop.source()),
-                                     CODELOC);
+        auto s = cutoff_prop.source().toLower().simplified();
+
+        if (s.startsWith("infinit") or s == "none")
+        {
+            requested_no_cutoff = true;
+            this->setNoCutoff();
+        }
+        else if (s != "cutoff")
+        {
+            throw SireError::invalid_arg(QObject::tr(
+                                             "The cutoff property should have a value. It cannot be the string "
+                                             "'%1'. If you want to specify the cutoff type, using "
+                                             "the 'cutoff_type' property.")
+                                             .arg(cutoff_prop.source()),
+                                         CODELOC);
+        }
     }
 
-    const auto cutoff_type = map["cutoff_type"];
-
-    if (cutoff_type.hasSource() and cutoff_type.source() != "cutoff_type")
+    if (not requested_no_cutoff)
     {
-        this->setCutoffType(cutoff_type.source(), map);
+        const auto cutoff_type = map["cutoff_type"];
+
+        if (cutoff_type.hasSource() and cutoff_type.source() != "cutoff_type")
+        {
+            this->setCutoffType(cutoff_type.source(), map);
+        }
     }
 
     const auto ff_prop = map["forcefield"];
