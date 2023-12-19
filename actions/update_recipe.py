@@ -54,6 +54,7 @@ if not is_emle:
 else:
     emle_reqs = parse_requirements(os.path.join(srcdir, "requirements_emle.txt"))
     print(emle_reqs)
+    bss_reqs = []
 test_reqs = parse_requirements(os.path.join(srcdir, "requirements_test.txt"))
 
 
