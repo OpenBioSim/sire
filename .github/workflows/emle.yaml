@@ -15,6 +15,9 @@ on:
         description: "Upload packages to anaconda (yes/no)?"
         required: true
         default: "no"
+  push:
+    branches: [feature_emle]
+
 jobs:
   build:
     name: build (${{ matrix.python-version }}, ${{ matrix.platform.name }})
