@@ -27,6 +27,10 @@ if (${SIRE_USE_OPENMM})
 
     include(CheckCXXSourceRuns)
 
+    # Temporarily add OpenMM include directory to CMAKE_REQUIRED_INCLUDES.
+    set(CMAKE_OLD_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
+    set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES} ${OpenMM_INCLUDE_DIR})
+
     # Whether or not we have CustomCPPForceImpl (OpenMM 8.1+)
     CHECK_CXX_SOURCE_RUNS("
           #include \"openmm/internal/ContextImpl.h\"
@@ -39,6 +43,9 @@ if (${SIRE_USE_OPENMM})
               return 0;
           }"
         CAN_USE_CUSTOMCPPFORCE)
+
+    # Restore CMAKE_REQUIRED_INCLUDES.
+    set(CMAKE_REQUIRED_INCLUDES ${CMAKE_OLD_REQUIRED_INCLUDES})
 
     if (CAN_USE_CUSTOMCPPFORCE)
       message(STATUS "OpenMM version supports CustomCPPForce")
