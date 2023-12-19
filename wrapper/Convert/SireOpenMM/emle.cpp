@@ -26,6 +26,7 @@
   *
 \*********************************************/
 
+#include "SireError/errors.h"
 #include "SireMaths/vector.h"
 #include "SireVol/triclinicbox.h"
 
