@@ -2,7 +2,7 @@ import sire as sr
 import pytest
 
 
-def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3):
+def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3, platform="CPU"):
     c = mols.cursor()
 
     # can only get the same energies if they have the same coordinates
@@ -56,7 +56,7 @@ def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3):
 
     # need to use the reference platform on GH Actions
     map = {
-        "platform": "cpu",
+        "platform": platform,
         "schedule": l,
         "constraint": "bonds-h-angles",
     }
@@ -115,16 +115,16 @@ def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda_simple(merged_ethane_methanol):
-    _run_test(merged_ethane_methanol.clone(), False)
+def test_openmm_scale_lambda_simple(merged_ethane_methanol, openmm_platform):
+    _run_test(merged_ethane_methanol.clone(), False, platform=openmm_platform)
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda_taylor_simple(merged_ethane_methanol):
-    _run_test(merged_ethane_methanol.clone(), False, True)
+def test_openmm_scale_lambda_taylor_simple(merged_ethane_methanol, openmm_platform):
+    _run_test(merged_ethane_methanol.clone(), False, True, platform=openmm_platform)
 
 
 @pytest.mark.veryslow
@@ -132,16 +132,16 @@ def test_openmm_scale_lambda_taylor_simple(merged_ethane_methanol):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_big_openmm_scale_lambda_simple(merged_ethane_methanol):
-    _run_test(merged_ethane_methanol.clone(), True)
+def test_big_openmm_scale_lambda_simple(merged_ethane_methanol, openmm_platform):
+    _run_test(merged_ethane_methanol.clone(), True, platform=openmm_platform)
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda_ligand(merged_zan_ose):
-    _run_test(merged_zan_ose.clone(), False)
+def test_openmm_scale_lambda_ligand(merged_zan_ose, openmm_platform):
+    _run_test(merged_zan_ose.clone(), False, platform=openmm_platform)
 
 
 @pytest.mark.veryslow
@@ -149,27 +149,27 @@ def test_openmm_scale_lambda_ligand(merged_zan_ose):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_big_openmm_scale_lambda_ligand(merged_zan_ose):
-    _run_test(merged_zan_ose.clone(), True)
+def test_big_openmm_scale_lambda_ligand(merged_zan_ose, openmm_platform):
+    _run_test(merged_zan_ose.clone(), True, platform=openmm_platform)
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda_dichloroethane(ethane_12dichloroethane):
-    _run_test(ethane_12dichloroethane.clone(), False)
+def test_openmm_scale_lambda_dichloroethane(ethane_12dichloroethane, openmm_platform):
+    _run_test(ethane_12dichloroethane.clone(), False, platform=openmm_platform)
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_scale_lambda_cyclopentane(pentane_cyclopentane):
+def test_openmm_scale_lambda_cyclopentane(pentane_cyclopentane, openmm_platform):
     mols = pentane_cyclopentane.clone()
 
     for mol in mols.molecules("property is_perturbable"):
         mol = mol.edit().add_link("connectivity", "connectivity0").commit()
         mols.update(mol)
 
-    _run_test(mols, False)
+    _run_test(mols, False, platform=openmm_platform)

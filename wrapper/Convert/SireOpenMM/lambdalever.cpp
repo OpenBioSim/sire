@@ -666,22 +666,31 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     }
 
     // update the parameters in the context
-    if (cljff)
-        cljff->updateParametersInContext(context);
+    const auto num_changed_atoms = end_change_atom - start_change_atom;
 
-    if (ghost_ghostff)
+    if (num_changed_atoms > 0)
+    {
+        if (cljff)
 #ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        ghost_ghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
+            cljff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
 #else
-        ghost_ghostff->updateParametersInContext(context);
+            cljff->updateParametersInContext(context);
 #endif
 
-    if (ghost_nonghostff)
+        if (ghost_ghostff)
 #ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
-        ghost_nonghostff->updateSomeParametersInContext(start_change_atom, end_change_atom - start_change_atom, context);
+            ghost_ghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
 #else
-        ghost_nonghostff->updateParametersInContext(context);
+            ghost_ghostff->updateParametersInContext(context);
 #endif
+
+        if (ghost_nonghostff)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+            ghost_nonghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
+#else
+            ghost_nonghostff->updateParametersInContext(context);
+#endif
+    }
 
     if (ghost_14ff)
         ghost_14ff->updateParametersInContext(context);
