@@ -47,14 +47,13 @@ host_reqs = parse_requirements(os.path.join(srcdir, "requirements_host.txt"))
 print(host_reqs)
 run_reqs = parse_requirements(os.path.join(srcdir, "requirements_run.txt"))
 print(run_reqs)
-if not is_emle:
-    bss_reqs = parse_requirements(os.path.join(srcdir, "requirements_bss.txt"))
-    print(bss_reqs)
-    emle_reqs = []
-else:
+bss_reqs = parse_requirements(os.path.join(srcdir, "requirements_bss.txt"))
+print(bss_reqs)
+if is_emle:
     emle_reqs = parse_requirements(os.path.join(srcdir, "requirements_emle.txt"))
     print(emle_reqs)
-    bss_reqs = []
+else:
+    emle_reqs = []
 test_reqs = parse_requirements(os.path.join(srcdir, "requirements_test.txt"))
 
 
