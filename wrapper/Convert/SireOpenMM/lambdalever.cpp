@@ -375,9 +375,16 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
 
-    // record the range of indicies of the atoms which change
+    // record the range of indicies of the atoms, bonds, angles,
+    // torsions which change
     int start_change_atom = -1;
     int end_change_atom = -1;
+    int start_change_bond = -1;
+    int end_change_bond = -1;
+    int start_change_angle = -1;
+    int end_change_angle = -1;
+    int start_change_torsion = -1;
+    int end_change_torsion = -1;
 
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
@@ -596,6 +603,21 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         {
             const int nparams = morphed_bond_k.count();
 
+            if (start_change_bond == -1)
+            {
+                start_change_bond = start_index;
+                end_change_bond = start_index + nparams;
+            }
+            else if (start_index < start_change_bond)
+            {
+                start_change_bond = start_index;
+            }
+
+            if (start_index + nparams > end_change_bond)
+            {
+                end_change_bond = start_index + nparams;
+            }
+
             for (int j = 0; j < nparams; ++j)
             {
                 const int index = start_index + j;
@@ -617,6 +639,21 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         if (start_index != -1 and angff != 0)
         {
             const int nparams = morphed_angle_k.count();
+
+            if (start_change_angle == -1)
+            {
+                start_change_angle = start_index;
+                end_change_angle = start_index + nparams;
+            }
+            else if (start_index < start_change_angle)
+            {
+                start_change_angle = start_index;
+            }
+
+            if (start_index + nparams > end_change_angle)
+            {
+                end_change_angle = start_index + nparams;
+            }
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -641,6 +678,21 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         if (start_index != -1 and dihff != 0)
         {
             const int nparams = morphed_torsion_k.count();
+
+            if (start_change_torsion == -1)
+            {
+                start_change_torsion = start_index;
+                end_change_torsion = start_index + nparams;
+            }
+            else if (start_index < start_change_torsion)
+            {
+                start_change_torsion = start_index;
+            }
+
+            if (start_index + nparams > end_change_torsion)
+            {
+                end_change_torsion = start_index + nparams;
+            }
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -667,6 +719,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     // update the parameters in the context
     const auto num_changed_atoms = end_change_atom - start_change_atom;
+    const auto num_changed_bonds = end_change_bond - start_change_bond;
+    const auto num_changed_angles = end_change_angle - start_change_angle;
+    const auto num_changed_torsions = end_change_torsion - start_change_torsion;
 
     if (num_changed_atoms > 0)
     {
@@ -695,14 +750,26 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     if (ghost_14ff)
         ghost_14ff->updateParametersInContext(context);
 
-    if (bondff)
+    if (bondff and num_changed_bonds > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        bondff->updateSomeParametersInContext(start_change_bond, num_changed_bonds, context);
+#else
         bondff->updateParametersInContext(context);
+#endif
 
-    if (angff)
+    if (angff and num_changed_angles > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        angff->updateSomeParametersInContext(start_change_angle, num_changed_angles, context);
+#else
         angff->updateParametersInContext(context);
+#endif
 
-    if (dihff)
+    if (dihff and num_changed_torsions > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        dihff->updateSomeParametersInContext(start_change_torsion, num_changed_torsions, context);
+#else
         dihff->updateParametersInContext(context);
+#endif
 
     // now update any restraints that are scaled
     for (const auto &restraint : this->name_to_restraintidx.keys())
