@@ -379,6 +379,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // torsions which change
     int start_change_atom = -1;
     int end_change_atom = -1;
+    int start_change_14 = -1;
+    int end_change_14 = -1;
     int start_change_bond = -1;
     int end_change_bond = -1;
     int start_change_angle = -1;
@@ -578,6 +580,20 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                     {std::get<2>(p), std::get<3>(p),
                                      4.0 * std::get<4>(p), std::get<5>(p)};
 
+                                if (start_change_14 == -1)
+                                {
+                                    start_change_14 = nbidx;
+                                    end_change_14 = nbidx+1;
+                                }
+                                else
+                                {
+                                    if (nbidx < start_change_14)
+                                        start_change_14 = nbidx;
+
+                                    if (nbidx+1 > end_change_14)
+                                        end_change_14 = nbidx+1;
+                                }
+
                                 ghost_14ff->setBondParameters(nbidx,
                                                               std::get<0>(p),
                                                               std::get<1>(p),
@@ -722,6 +738,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     const auto num_changed_bonds = end_change_bond - start_change_bond;
     const auto num_changed_angles = end_change_angle - start_change_angle;
     const auto num_changed_torsions = end_change_torsion - start_change_torsion;
+    const auto num_changed_14 = end_change_14 - start_change_14;
 
     if (num_changed_atoms > 0)
     {
@@ -747,8 +764,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 #endif
     }
 
-    if (ghost_14ff)
+    if (ghost_14ff and num_changed_14 > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        ghost_14ff->updateSomeParametersInContext(start_change_14, num_changed_14, context);
+#else
         ghost_14ff->updateParametersInContext(context);
+#endif
 
     if (bondff and num_changed_bonds > 0)
 #ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
