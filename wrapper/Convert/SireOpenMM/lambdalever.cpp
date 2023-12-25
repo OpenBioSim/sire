@@ -583,15 +583,15 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                 if (start_change_14 == -1)
                                 {
                                     start_change_14 = nbidx;
-                                    end_change_14 = nbidx+1;
+                                    end_change_14 = nbidx + 1;
                                 }
                                 else
                                 {
                                     if (nbidx < start_change_14)
                                         start_change_14 = nbidx;
 
-                                    if (nbidx+1 > end_change_14)
-                                        end_change_14 = nbidx+1;
+                                    if (nbidx + 1 > end_change_14)
+                                        end_change_14 = nbidx + 1;
                                 }
 
                                 ghost_14ff->setBondParameters(nbidx,
