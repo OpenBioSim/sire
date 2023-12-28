@@ -528,6 +528,21 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
+    def step(self, num_steps: int = 1):
+        """
+        Just perform 'num_steps' steps of dynamics, without saving
+        anything or running anything in a background thread. This is
+        designed for times when we want a minimial overhead, e.g.
+        when we want to run a small number of steps quickly.
+        """
+        if self._is_running:
+            raise SystemError("Cannot step dynamics while it is already running!")
+
+        self._omm_state = None
+        self._omm_state_has_cv = (False, False)
+
+        self._omm_mols.getIntegrator().step(num_steps)
+
     def run_minimisation(self, max_iterations: int):
         """
         Internal method that runs minimisation on the molecules.
@@ -1005,6 +1020,18 @@ class Dynamics:
             self._d.run_minimisation(
                 max_iterations=max_iterations,
             )
+
+        return self
+
+    def step(self, num_steps: int = 1):
+        """
+        Simple function that performs `num_steps` steps of dynamics.
+        This does not save any frames or energies - it is designed for
+        times when you want to run a small number of steps quickly
+        with minimal overhead.
+        """
+        if not self._d.is_null():
+            self._d.step(num_steps=num_steps)
 
         return self
 
