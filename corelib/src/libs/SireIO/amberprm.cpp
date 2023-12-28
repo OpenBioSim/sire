@@ -381,8 +381,11 @@ void AmberPrm::rebuildLJParameters()
     lj_data = QVector<LJParameter>(ntypes);
     auto lj_data_array = lj_data.data();
 
+    auto lj_exceptions = QVector<std::tuple<int, int, LJ1264Parameter>>();
+
     const auto acoeffs = float_data.value("LENNARD_JONES_ACOEF");
     const auto bcoeffs = float_data.value("LENNARD_JONES_BCOEF");
+    const auto ccoeffs = float_data.value("LENNARD_JONES_CCOEF");
 
     const auto hbond_acoeffs = float_data.value("HBOND_ACOEF");
     const auto hbond_bcoeffs = float_data.value("HBOND_BCOEF");
@@ -424,6 +427,7 @@ void AmberPrm::rebuildLJParameters()
 
     const auto acoeffs_data = acoeffs.constData();
     const auto bcoeffs_data = bcoeffs.constData();
+    const auto ccoeffs_data = ccoeffs.constData();
     const auto hbond_acoeffs_data = hbond_acoeffs.constData();
     const auto hbond_bcoeffs_data = hbond_bcoeffs.constData();
     const auto nb_parm_index_data = nb_parm_index.constData();
@@ -494,8 +498,8 @@ void AmberPrm::rebuildLJParameters()
 
             if (idx < 0)
             {
-                auto a = hbond_acoeffs_data[idx];
-                auto b = hbond_bcoeffs_data[idx];
+                auto a = hbond_acoeffs_data[1 - idx];
+                auto b = hbond_bcoeffs_data[1 - idx];
 
                 if ((a > 1e-6) and (b > 1e-6))
                 {
@@ -503,6 +507,94 @@ void AmberPrm::rebuildLJParameters()
                     throw SireError::unsupported(QObject::tr("Sire does not yet support Amber Parm files that "
                                                              "use 10-12 HBond parameters."),
                                                  CODELOC);
+                }
+            }
+        }
+    }
+
+    // While most LJ parameters use combining rules to form the i,j pairs,
+    // Amber parm files support custom (exception) LJ parameters for specific
+    // pairs of atoms. This is increasingly used by researchers to control
+    // interactions between molecules, or to support the 12-6-4 potential
+    // (which doesn't use combining rules?). Here, we loop over all pairs
+    // of parameters to find those that don't use combining rules, and
+    // so should be treated as exceptions.
+    const bool has_c_coeffs = not ccoeffs.isEmpty();
+
+    for (int i = 0; i < ntypes; ++i)
+    {
+        const auto &lj_i = lj_data_array[i];
+
+        // include i==j pair as we also need to check for c-coeffs
+        for (int j = i; j < ntypes; ++j)
+        {
+            const auto &lj_j = lj_data_array[j];
+
+            int idx = nb_parm_index_data[ntypes * i + j];
+
+            if (idx > 0)
+            {
+                auto a = acoeffs_data[idx - 1];
+                auto b = bcoeffs_data[idx - 1];
+
+                // convert A and B into sigma and epsilon
+                double sigma = 0;
+                double epsilon = 0;
+
+                // numeric imprecision means that any parameter with acoeff less
+                // than 1e-10 is really equal to 0
+                if (a > 1e-10)
+                {
+                    // convert a_coeff & b_coeff into angstroms and kcal/mol-1
+                    sigma = std::pow(a / b, 1 / 6.);
+                    epsilon = pow_2(b) / (4 * a);
+                }
+
+                auto lj_ij = LJParameter(sigma * angstrom, epsilon * kcal_per_mol);
+
+                auto expect = lj_i.combine(lj_j, LJParameter::ARITHMETIC);
+
+                bool is_exception = false;
+
+                if (std::abs(lj_ij.epsilon().value() - expect.epsilon().value()) <= 1e-6)
+                {
+                    if (std::abs(lj_ij.sigma().value() - expect.sigma().value()) > 1e-6)
+                    {
+                        // not arithmetic combining rules - try geometric
+                        expect = lj_i.combine(lj_j, LJParameter::GEOMETRIC);
+
+                        is_exception = std::abs(lj_ij.sigma().value() - expect.sigma().value()) > 1e-6;
+                    }
+                }
+                else
+                {
+                    is_exception = true;
+                }
+
+                if (has_c_coeffs)
+                {
+                    // we have C coefficients, so we need to check if this is an exception
+                    // or not
+                    if (std::abs(ccoeffs_data[idx - 1]) > 1e-6)
+                    {
+                        // this is an exception
+                        is_exception = true;
+                    }
+                }
+
+                if (is_exception)
+                {
+                    // this is an exception parameter
+                    double a = acoeffs_data[idx - 1];
+                    double b = bcoeffs_data[idx - 1];
+                    double c = 0;
+
+                    if (has_c_coeffs)
+                    {
+                        c = ccoeffs_data[idx - 1];
+                    }
+
+                    qDebug() << "FOUND EXCEPTION " << i << j << a << b << c;
                 }
             }
         }
@@ -2493,7 +2585,9 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         return std::make_tuple(writeIntData(collapse(atom_types), AmberFormat(AmberPrm::INTEGER, 10, 8)),
                                writeIntData(ico, AmberFormat(AmberPrm::INTEGER, 10, 8)),
                                writeFloatData(cn1, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)),
-                               writeFloatData(cn2, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)));
+                               writeFloatData(cn2, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)),
+                               QStringList() // this will eventually be the LJ C coefficients
+        );
     };
 
     // function used to generate the text for the excluded atoms
@@ -3088,7 +3182,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
     QStringList name_lines, charge_lines, number_lines, mass_lines, radius_lines, ambtyp_lines, screening_lines,
         treechain_lines;
-    std::tuple<QStringList, QStringList, QStringList, QStringList> lj_lines;
+    std::tuple<QStringList, QStringList, QStringList, QStringList, QStringList> lj_lines;
     std::tuple<QStringList, QStringList, int> excl_lines;
     std::tuple<QStringList, QStringList, int, int> res_lines;
     std::tuple<QStringList, QStringList, QStringList, QStringList, int, int, int, int> bond_lines;
@@ -3243,6 +3337,12 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
     lines.append("%FLAG LENNARD_JONES_BCOEF");
     lines += std::get<3>(lj_lines);
+
+    if (not std::get<4>(lj_lines).isEmpty())
+    {
+        lines.append("%FLAG LENNARD_JONES_CCOEF");
+        lines += std::get<4>(lj_lines);
+    }
 
     lines.append("%FLAG BONDS_INC_HYDROGEN");
     lines += std::get<2>(bond_lines);
