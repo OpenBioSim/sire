@@ -12,6 +12,6 @@ qt-main
 rich
 tbb
 tbb-devel
-gemmi >=0.6.3,<0.7.0
+gemmi >=0.6.4
 rdkit >=2023.0.0
 
