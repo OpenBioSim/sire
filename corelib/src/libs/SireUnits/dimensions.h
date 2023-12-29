@@ -119,6 +119,11 @@ namespace SireUnits
 
         SIREUNITS_EXPORT QPair<double, QString> getUnitString(int M, int L, int T, int C, int t, int Q, int A);
 
+        namespace detail
+        {
+
+        } // namespace detail
+
         /** Construct a physical unit with the specified
             Mass, Length, Time, Charge, temperature,
             Quantity and Angle dimensions
@@ -154,9 +159,34 @@ namespace SireUnits
             {
             }
 
+        private:
+            template <bool isRegistered>
+            static const char *_typeName()
+            {
+                static QString typenam = QString("SireUnits::Dimension::PhysUnit<%1-%2-%3-%4-%5-%6-%7>")
+                                             .arg(M)
+                                             .arg(L)
+                                             .arg(T)
+                                             .arg(C)
+                                             .arg(t)
+                                             .arg(Q)
+                                             .arg(A);
+
+                static auto s = typenam.toStdString();
+
+                return s.c_str();
+            }
+
+            template <>
+            static const char *_typeName<true>()
+            {
+                return QMetaType::typeName(qMetaTypeId<SireUnits::Dimension::PhysUnit<M, L, T, C, t, Q, A>>());
+            }
+
+        public:
             static const char *typeName()
             {
-                return QMetaType::typeName(qMetaTypeId<PhysUnit<M, L, T, C, t, Q, A>>());
+                return _typeName<QMetaTypeId2<PhysUnit<M, L, T, C, t, Q, A>>::Defined>();
             }
 
             const char *what() const

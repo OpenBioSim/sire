@@ -71,6 +71,7 @@
 #include "SireMM/cljnbpairs.h"
 #include "SireMM/internalff.h"
 #include "SireMM/ljparameter.h"
+#include "SireMM/lj1264parameter.h"
 
 #include "SireVol/cartesian.h"
 #include "SireVol/periodicbox.h"
@@ -595,6 +596,8 @@ void AmberPrm::rebuildLJParameters()
                     }
 
                     qDebug() << "FOUND EXCEPTION " << i << j << a << b << c;
+
+                    qDebug() << LJ1264Parameter(a, b, c).toString();
                 }
             }
         }
