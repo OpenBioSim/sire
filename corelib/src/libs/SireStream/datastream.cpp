@@ -120,10 +120,19 @@ namespace SireStream
         MagicID id;
         VersionID v;
 
+        // do this in a transaction, so that any exceptions thrown here
+        // will not affect the stream (i.e. we can try to read this again)
+        ds.startTransaction();
+
         ds >> id >> v;
 
         if (not(id == r_type.magicID() or detail::matchesMagic(r_type, id)))
+        {
+            ds.rollbackTransaction();
             throw SireStream::magic_error(id, r_type, CODELOC);
+        }
+
+        ds.commitTransaction();
 
         return v;
     }
@@ -135,10 +144,19 @@ namespace SireStream
         MagicID id;
         VersionID v;
 
+        // do this in a transaction, so that any exceptions thrown here
+        // will not affect the stream (i.e. we can try to read this again)
+        ds.startTransaction();
+
         ds >> id >> v;
 
         if (id != magicid)
+        {
+            ds.rollbackTransaction();
             throw SireStream::magic_error(id, magicid, type_name, CODELOC);
+        }
+
+        ds.commitTransaction();
 
         return v;
     }

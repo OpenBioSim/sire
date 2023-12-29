@@ -7,6 +7,12 @@
 
 namespace bp = boost::python;
 
+#include "SireStream/datastream.h"
+
+#include "SireStream/magic_error.h"
+
+#include "SireStream/shareddatastream.h"
+
 #include "atomljs.h"
 
 #include "atomljs.h"

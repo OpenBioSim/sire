@@ -34,23 +34,141 @@
 
 SIRE_BEGIN_HEADER
 
+namespace SireMol
+{
+    template <>
+    class AtomProperty<SireMM::LJParameter>;
+}
+
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomProperty<SireMM::LJParameter> &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomProperty<SireMM::LJParameter> &);
+
+namespace SireMol
+{
+    /** This is an explicit specialisation of AtomProperty<T> for the LJParameter
+        class, as the AtomLJs also has to store atom-pair exceptions
+
+        @author Christopher Woods
+    */
+    template <>
+    class SIREMM_EXPORT AtomProperty<SireMM::LJParameter> : public SireBase::ConcreteProperty<AtomProperty<SireMM::LJParameter>, AtomProp>
+    {
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomProperty<SireMM::LJParameter> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomProperty<SireMM::LJParameter> &);
+
+    public:
+        typedef typename PackedArray2D<SireMM::LJParameter>::Array Array;
+
+        AtomProperty();
+
+        AtomProperty(const MoleculeInfo &molinfo);
+        AtomProperty(const MoleculeInfo &molinfo, const SireMM::LJParameter &default_value);
+
+        AtomProperty(const MoleculeView &molview);
+        AtomProperty(const MoleculeView &molview, const SireMM::LJParameter &default_value);
+
+        AtomProperty(const MoleculeInfoData &molinfo);
+        AtomProperty(const MoleculeInfoData &molinfo, const SireMM::LJParameter &default_value);
+
+        AtomProperty(const SireMM::LJParameter &value);
+        AtomProperty(const PackedArray2D<SireMM::LJParameter> &values);
+
+        AtomProperty(const AtomProperty<SireMM::LJParameter> &other);
+
+        ~AtomProperty();
+
+        AtomProperty<SireMM::LJParameter> &operator=(const AtomProperty<SireMM::LJParameter> &other);
+
+        static const char *typeName();
+
+        AtomProperty<SireMM::LJParameter> *clone() const;
+
+        bool operator==(const AtomProperty<SireMM::LJParameter> &other) const;
+        bool operator!=(const AtomProperty<SireMM::LJParameter> &other) const;
+
+        bool isEmpty() const;
+
+        QString toString() const;
+
+        AtomProperty<QVariant> toVariant() const;
+        static AtomProperty<SireMM::LJParameter> fromVariant(const AtomProperty<QVariant> &variant);
+
+        void assignFrom(const AtomProperty<QVariant> &values);
+
+        const typename PackedArray2D<SireMM::LJParameter>::Array &operator[](CGIdx cgidx) const;
+        const typename PackedArray2D<SireMM::LJParameter>::Array &at(CGIdx cgidx) const;
+        const typename PackedArray2D<SireMM::LJParameter>::Array &get(CGIdx cgidx) const;
+
+        const SireMM::LJParameter &operator[](int i) const;
+        const SireMM::LJParameter &operator[](const CGAtomIdx &cgatomidx) const;
+        QList<SireMM::LJParameter> operator[](const QList<qint64> &idxs) const;
+        QList<SireMM::LJParameter> operator[](const SireBase::Slice &slice) const;
+
+        const SireMM::LJParameter &at(int i) const;
+        const SireMM::LJParameter &at(const CGAtomIdx &cgatomidx) const;
+        const SireMM::LJParameter &get(int i) const;
+        const SireMM::LJParameter &get(const CGAtomIdx &cgatomidx) const;
+
+        QVariant getAsVariant(const CGAtomIdx &cgatomidx) const;
+        SireBase::PropertyPtr getAsProperty(const CGAtomIdx &cgatomidx) const;
+
+        AtomProperty<SireMM::LJParameter> &set(const CGAtomIdx &cgatomidx, const SireMM::LJParameter &value);
+
+        AtomProperty<SireMM::LJParameter> &set(CGIdx cgidx, const QVector<SireMM::LJParameter> &values);
+
+        const PackedArray2D<SireMM::LJParameter> &array() const;
+
+        const typename PackedArray2D<SireMM::LJParameter>::Array *data() const;
+        const typename PackedArray2D<SireMM::LJParameter>::Array *constData() const;
+
+        const SireMM::LJParameter *data(CGIdx cgidx) const;
+        const SireMM::LJParameter *constData(CGIdx cgidx) const;
+
+        int size() const;
+        int count() const;
+
+        int nCutGroups() const;
+
+        int nAtoms() const;
+        int nAtoms(CGIdx cgidx) const;
+
+        bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+        bool isCompatibleWith(const MoleculeInfo &molinfo) const;
+
+        AtomProperty<SireMM::LJParameter> matchToSelection(const AtomSelection &selection) const;
+
+        QVector<SireMM::LJParameter> toVector() const;
+        QVector<SireMM::LJParameter> toVector(const AtomSelection &selection) const;
+
+        QList<SireMM::LJParameter> toList() const;
+        QList<SireMM::LJParameter> toList(const AtomSelection &selection) const;
+
+        PropertyPtr merge(const MoleculeInfoData &molinfo) const;
+        PropertyPtr divide(const QVector<AtomSelection> &beads) const;
+        PropertyPtr divideByResidue(const MoleculeInfoData &molinfo) const;
+
+        void copyFrom(const QVector<SireMM::LJParameter> &values);
+        void copyFrom(const QVector<SireMM::LJParameter> &values, const AtomSelection &selection);
+
+        bool canConvert(const QVariant &value) const;
+
+        void assertCanConvert(const QVariant &value) const;
+
+    private:
+        /** The actual atomic property values */
+        SireBase::PackedArray2D<SireMM::LJParameter> props;
+    };
+
+}
+
 namespace SireMM
 {
-
     typedef SireMol::AtomProperty<LJParameter> AtomLJs;
-
 }
 
 Q_DECLARE_METATYPE(SireMM::AtomLJs);
 
 SIRE_EXPOSE_ATOM_PROPERTY(SireMM::LJParameter, SireMM::AtomLJs)
-
-#ifdef SIRE_INSTANTIATE_TEMPLATES
-namespace SireMol
-{
-    template class SireMol::AtomProperty<SireMM::LJParameter>;
-}
-#endif
 
 SIRE_END_HEADER
 

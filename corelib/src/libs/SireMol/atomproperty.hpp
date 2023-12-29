@@ -133,7 +133,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const AtomProperty<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, AtomProperty<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, AtomProperty<T> &);
 
     public:
         typedef typename PackedArray2D<T>::Array Array;

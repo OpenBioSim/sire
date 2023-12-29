@@ -595,9 +595,8 @@ void AmberPrm::rebuildLJParameters()
                         c = ccoeffs_data[idx - 1];
                     }
 
-                    qDebug() << "FOUND EXCEPTION " << i << j << a << b << c;
-
-                    qDebug() << LJ1264Parameter(a, b, c).toString();
+                    // already in internal units (kcal mol-1, Angstroms)
+                    auto lj_ij = LJ1264Parameter(a, b, c);
                 }
             }
         }
