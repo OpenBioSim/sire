@@ -8,37 +8,13 @@
 find_package(gemmi)
 find_package(pybind11)
 
-if (${gemmi_FOUND})
-  # We can only link against the dynamic library - static doesn't work
-  get_target_property(GEMMI_LIBRARY gemmi::gemmi_cpp LOCATION)
-
-  # Test if we can link to Gemmi on Windows
-  if (WIN32)
-    # test if GEMMI_LIBRARY ends with .lib
-    if (${GEMMI_LIBRARY} MATCHES "\\.lib$")
-      message( STATUS "GEMMI_LIBRARY is a static library." )
-      message( STATUS "We can only link against the dynamic library." )
-      message( STATUS "Disabling gemmi PDBx/mmCIF support.")
-      set(gemmi_FOUND FALSE)
-    endif()
-  else()
-    # test if GEMMI_LIBRARY ends with .a
-    if (${GEMMI_LIBRARY} MATCHES "\\.a$")
-      message( STATUS "GEMMI_LIBRARY is a static library." )
-      message( STATUS "We can only link against the dynamic library." )
-      message( STATUS "Disabling gemmi PDBx/mmCIF support.")
-      set(gemmi_FOUND FALSE)
-    endif()
-  endif()
-endif()
-
 if (${gemmi_FOUND} AND ${pybind11_FOUND})
   # Only compile and install if we have gemmi
   message( STATUS "Compiling SireGemmi converter" )
 
-  get_target_property(GEMMI_LIBRARY gemmi::gemmi_cpp LOCATION)
-
-  message( STATUS "GEMMI LIBRARY ${GEMMI_LIBRARY}" )
+  get_target_property(GEMMI_LOCATION gemmi::gemmi_cpp IMPORTED_LOCATION_RELEASE)
+  message( STATUS "gemmi location: ${GEMMI_LOCATION}" )
+  message( STATUS "gemmi include dir: ${gemmi_INCLUDE_DIR}" )
   message( STATUS "PYBIND11 INCLUDE ${pybind11_INCLUDE_DIR}")
   message( STATUS "PYBIND11 LIBRARY ${pybind11_LIBRARIES}" )
   message( STATUS "ZLIB LIBRARIES ${ZLIB_LIBRARIES}" )
@@ -83,7 +59,7 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
                           SIRE_SireBase
                           SIRE_SireStream
                           SIRE_SireError
-                          ${GEMMI_LIBRARY}
+                          gemmi::gemmi_cpp
                           ${pybind11_LIBRARIES}
                         )
 
