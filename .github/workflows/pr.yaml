@@ -45,11 +45,6 @@ jobs:
       SIRE_SILENT_PHONEHOME: 1
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
-      #     Need to install and use VS 2017 for conda-compliant builds
-      - name: Set up Visual Studio 2017 Build Tools (required for Python modules)
-        run: |
-          choco install visualstudio2017-workload-vctools
-        if: matrix.platform.name == 'windows'
       #
       - uses: conda-incubator/setup-miniconda@v2
         with:
@@ -59,6 +54,11 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
           use-mamba: true
+      #     Need to install and use VS 2017 for conda-compliant builds
+      - name: Set up Visual Studio 2017 Build Tools (required for Python modules)
+        run: |
+          mamba install -y -c conda-forge vs2017_win-64
+        if: matrix.platform.name == 'windows'
       #
       - name: Clone the feature branch (pull request to devel)
         run: git clone -b ${{ github.head_ref }} --single-branch https://github.com/${{ env.REPO }} sire
