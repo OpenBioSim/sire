@@ -233,6 +233,15 @@ def parse_args():
         help="pass CMake generator",
     )
     parser.add_argument(
+        "-A",
+        "--architecture",
+        action="append",
+        nargs=1,
+        metavar=("ARCHITECTURE",),
+        default=[],
+        help="pass CMake generator architecture, e.g. WIN64",
+    )
+    parser.add_argument(
         "-n",
         "--ncores",
         action="store",
@@ -332,9 +341,7 @@ def conda_install(dependencies, install_bss_reqs=False):
 
     if not _is_conda_prepped:
         if install_bss_reqs:
-            cmd = (
-                "%s config --prepend channels openbiosim/label/dev" % conda_exe
-            )
+            cmd = "%s config --prepend channels openbiosim/label/dev" % conda_exe
             print("Activating openbiosim channel channel using: '%s'" % cmd)
             status = subprocess.run(cmd.split())
             if status.returncode != 0:
@@ -393,9 +400,7 @@ def install_requires(install_bss_reqs=False):
     print(f"Installing requirements for {platform_string}")
 
     if not os.path.exists(conda):
-        print(
-            "\nSire can only be installed into a conda or miniconda environment."
-        )
+        print("\nSire can only be installed into a conda or miniconda environment.")
         print(
             "Please install conda, miniconda, miniforge or similar, then "
             "activate the conda environment, then rerun this installation "
@@ -422,9 +427,7 @@ def install_requires(install_bss_reqs=False):
             from parse_requirements import parse_requirements
         except ImportError as e:
             print("\n\n[ERROR] ** You need to install pip-requirements-parser")
-            print(
-                "Run `conda install -c conda-forge pip-requirements-parser\n\n"
-            )
+            print("Run `conda install -c conda-forge pip-requirements-parser\n\n")
             raise e
 
     reqs = parse_requirements("requirements_host.txt")
@@ -481,10 +484,7 @@ def _get_build_ext():
         else:
             ext = ""
 
-        return (
-            os.path.basename(conda_base.replace(" ", "_").replace(".", "_"))
-            + ext
-        )
+        return os.path.basename(conda_base.replace(" ", "_").replace(".", "_")) + ext
 
 
 def _get_bin_dir():
@@ -533,12 +533,8 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
         print(f"{CC} => {CC_bin}")
 
         if CXX_bin is None or CC_bin is None:
-            print(
-                "Cannot find the compilers requested by conda-build in the PATH"
-            )
-            print(
-                "Please check that the compilers are installed and available."
-            )
+            print("Cannot find the compilers requested by conda-build in the PATH")
+            print("Please check that the compilers are installed and available.")
             sys.exit(-1)
 
         # use the full paths, in case CMake struggles
@@ -632,6 +628,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             cmake,
             *sum([["-D", d[0]] for d in args.corelib], []),
             *sum([["-G", g[0]] for g in args.generator], []),
+            *sum([["-A", a[0]] for a in args.architecture], []),
             sourcedir,
         ]
 
@@ -669,9 +666,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # Compile and install, as need to install to compile the wrappers
     make_args = make_cmd(ncores, True)
 
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -721,6 +716,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             cmake,
             *sum([["-D", d[0]] for d in args.wrapper], []),
             *sum([["-G", g[0]] for g in args.generator], []),
+            *sum([["-A", a[0]] for a in args.architecture], []),
             sourcedir,
         ]
 
@@ -735,9 +731,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
     # Just compile the wrappers
     make_args = make_cmd(npycores, False)
 
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -797,6 +791,7 @@ def install_module(ncores: int = 1):
             cmake,
             *sum([["-D", d[0]] for d in args.wrapper], []),
             *sum([["-G", g[0]] for g in args.generator], []),
+            *sum([["-A", a[0]] for a in args.architecture], []),
             sourcedir,
         ]
         print(" ".join(cmake_cmd))
@@ -810,9 +805,7 @@ def install_module(ncores: int = 1):
     make_args = make_cmd(ncores, True)
 
     # Now that cmake has run, we can compile and install wrapper
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -852,9 +845,7 @@ def install(ncores: int = 1, npycores: int = 1):
     # Now install the wrappers
     make_args = make_cmd(npycores, True)
 
-    print(
-        'NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args))
-    )
+    print('NOW RUNNING "%s" --build . --target %s' % (cmake, " ".join(make_args)))
     sys.stdout.flush()
     status = subprocess.run([cmake, "--build", ".", "--target", *make_args])
 
@@ -879,10 +870,8 @@ if __name__ == "__main__":
     action = args.action[0]
 
     if is_windows and (args.generator is None or len(args.generator) == 0):
-        # args.generator = [["Visual Studio 17 2022"]]
-        args.generator = [
-            ["Visual Studio 15 2017 Win64"]
-        ]  # preferred VC version for conda
+        args.generator = [["Visual Studio 17 2022"]]
+        args.architecture = [["x64"]]
     elif is_macos:
         # fix compile bug when INSTALL_NAME_TOOL is not set
         if "INSTALL_NAME_TOOL" not in os.environ:
