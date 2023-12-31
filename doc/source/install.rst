@@ -289,17 +289,17 @@ as compilation can take quite a while!
 
 .. note::
 
-   You need to have Visual Studio 2017 C++ compiler installed to compile on Windows.
-   The easiest way to do this is to `install chocolatey <https://chocolatey.org/install>`__
-   and then install the compilers using the command
-   ``choco install visualstudio2017-workload-vctools``. This is all free, but
-   you will need admin access to install chocolatey. If this doesn't work, then
-   go to `this page <https://visualstudio.microsoft.com/vs/older-downloads>`__
-   and download the "Build Tools for Visual Studio 2017". Use the installer
-   to select and install only the build tools. You will need a free Microsoft
-   developer account to access this page. If this doesn't work, then
-   follow the `excellent guidance here <https://beenje.github.io/blog/posts/how-to-setup-a-windows-vm-to-build-conda-packages/>`__
-   to set up your Windows computer for compiling conda packages.
+   You need to have Visual Studio C++ (2017 or newer) installed to compile on Windows.
+   The easiest way to do this is to install the free
+   `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/vs/community>`__.
+   Make sure to install "Desktop development with C++",
+   including the options "MSVC v143 - VS 2022 C++ x64/x86 build tools (v14.30)",
+   "C++ CMake tools for Windows", and at least one of "Windows 11 SDK" and/or
+   "Windows 10 SDK" (any version will do). You can, optionally, install the
+   older C++ compilers too, e.g. "MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.29)",
+   and/or "MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)". Currently
+   only the X64 compilers have been tested - we are interested to try
+   Windows/ARM64 once more of the dependencies are available.
 
 If you plan to install `BioSimSpace <https://biosimspace.org>`__ on
 top of :mod:`sire`, then you should install using;
