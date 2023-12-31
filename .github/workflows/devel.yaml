@@ -55,11 +55,6 @@ jobs:
           miniforge-version: latest
           miniforge-variant: Mambaforge
           use-mamba: true
-      #     Need to install and use VS 2017 for conda-compliant builds
-      - name: Set up Visual Studio 2017 Build Tools (required for Python modules)
-        run: |
-          mamba install -y -c conda-forge vs2017_win-64
-        if: matrix.platform.name == 'windows'
       #
       - name: Clone the devel branch (push to devel)
         run: git clone https://github.com/${{ env.REPO }} sire
