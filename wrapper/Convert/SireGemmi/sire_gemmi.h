@@ -1,7 +1,10 @@
 #ifndef SIRE_GEMMI_H
 #define SIRE_GEMMI_H
 
-#include "gemmi/mmcif.hpp"
+namespace gemmi
+{
+    struct Structure;
+}
 
 #include "SireSystem/system.h"
 

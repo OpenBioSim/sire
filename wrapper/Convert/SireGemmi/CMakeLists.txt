@@ -14,7 +14,6 @@ if (${gemmi_FOUND} AND ${pybind11_FOUND})
 
   get_target_property(GEMMI_LOCATION gemmi::gemmi_cpp IMPORTED_LOCATION_RELEASE)
   message( STATUS "gemmi location: ${GEMMI_LOCATION}" )
-  message( STATUS "gemmi include dir: ${gemmi_INCLUDE_DIR}" )
   message( STATUS "PYBIND11 INCLUDE ${pybind11_INCLUDE_DIR}")
   message( STATUS "PYBIND11 LIBRARY ${pybind11_LIBRARIES}" )
   message( STATUS "ZLIB LIBRARIES ${ZLIB_LIBRARIES}" )

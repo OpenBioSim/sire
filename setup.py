@@ -561,7 +561,9 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
             CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
         except Exception:
-            conda_install(["gcc", "gxx"], False)
+            # Need this version of gcc to stay compatible with conda-forge
+            # (i.e. gemmi needs the exact same compiler version)
+            conda_install(["gcc==12.3.0", "gxx==12.3.0"], False)
             try:
                 CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
                 CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
