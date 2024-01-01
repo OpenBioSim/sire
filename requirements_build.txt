@@ -1,5 +1,14 @@
 # Build requirements for Sire.
 
+# Need to specify the compiler as we have to control the version
+gcc==12.3.0 ; sys_platform == "linux"
+gxx==12.3.0 ; sys_platform == "linux"
+
+clang ; sys_platform == "darwin"
+clangxx ; sys_platform == "darwin"
+
+vc ; sys_platform == "win32"
+
 cmake
 git
 python
