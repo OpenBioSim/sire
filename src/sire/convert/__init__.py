@@ -332,7 +332,7 @@ def openmm_to_sire(obj, map=None):
     except Exception:
         raise ModuleNotFoundError(
             "openmm is not available. Please install via "
-            "'mamba install -c conda-forge openmm'"
+            "'conda install -c conda-forge openmm'"
         )
 
     from ..base import create_map
@@ -383,7 +383,7 @@ def sire_to_openmm(obj, map=None):
     except Exception:
         raise ModuleNotFoundError(
             "openmm is not available. Please install via "
-            "'mamba install -c conda-forge openmm'"
+            "'conda install -c conda-forge openmm'"
         )
 
     mols = _sire_to_openmm(obj, map=map)
@@ -404,7 +404,7 @@ def rdkit_to_sire(obj, map=None):
     except Exception:
         raise ModuleNotFoundError(
             "rdkit is not available. Please install via "
-            "'mamba install -c conda-forge rdkit'"
+            "'conda install -c conda-forge rdkit'"
         )
 
     from ..base import create_map
@@ -435,7 +435,7 @@ def sire_to_rdkit(obj, map=None):
     except Exception:
         raise ModuleNotFoundError(
             "rdkit is not available. Please install via "
-            "'mamba install -c conda-forge rdkit'"
+            "'conda install -c conda-forge rdkit'"
         )
 
     from ..base import create_map
@@ -459,7 +459,7 @@ def gemmi_to_sire(obj, map=None):
     except Exception:
         raise ModuleNotFoundError(
             "gemmi is not available. Please install via "
-            "'mamba install -c conda-forge gemmi'"
+            "'conda install -c conda-forge gemmi'"
         )
 
     from ..base import create_map
@@ -514,7 +514,7 @@ def sire_to_gemmi(obj, map=None):
     except Exception:
         raise ModuleNotFoundError(
             "rdkit is not available. Please install via "
-            "'mamba install -c conda-forge rdkit'"
+            "'conda install -c conda-forge rdkit'"
         )
 
     if not isinstance(obj, list):

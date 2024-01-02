@@ -56,6 +56,13 @@ QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
     return ds;
 }
 
+Symbol LambdaSchedule::lambda_symbol("λ");
+Symbol LambdaSchedule::initial_symbol("initial");
+Symbol LambdaSchedule::final_symbol("final");
+
+Expression LambdaSchedule::default_morph_equation = (1.0 - LambdaSchedule::lam()) * LambdaSchedule::initial() +
+                                                    LambdaSchedule::lam() * LambdaSchedule::final();
+
 QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
 {
     VersionID v = readHeader(ds, r_schedule);
@@ -68,6 +75,21 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
             schedule.lever_names >> schedule.stage_names >>
             schedule.default_equations >> schedule.stage_equations >>
             static_cast<Property &>(schedule);
+
+        for (auto &expression : schedule.default_equations)
+        {
+            if (expression == LambdaSchedule::default_morph_equation)
+                expression = LambdaSchedule::default_morph_equation;
+        }
+
+        for (auto &stage_equations : schedule.stage_equations)
+        {
+            for (auto &expression : stage_equations)
+            {
+                if (expression == LambdaSchedule::default_morph_equation)
+                    expression = LambdaSchedule::default_morph_equation;
+            }
+        }
     }
     else
         throw version_error(v, "1", r_schedule, CODELOC);
@@ -202,10 +224,6 @@ LambdaSchedule LambdaSchedule::charge_scaled_morph(double scale)
 
     return l;
 }
-
-Symbol LambdaSchedule::lambda_symbol("λ");
-Symbol LambdaSchedule::initial_symbol("initial");
-Symbol LambdaSchedule::final_symbol("final");
 
 /** Return the symbol used to represent the :lambda: coordinate.
  *  This symbol is used to represent the per-stage :lambda:
@@ -438,8 +456,7 @@ void LambdaSchedule::clear()
  */
 void LambdaSchedule::addMorphStage(const QString &name)
 {
-    this->addStage(name, (this->lam() * this->final()) +
-                             ((1 - this->lam()) * this->initial()));
+    this->addStage(name, default_morph_equation);
 }
 
 /** Append a morph stage onto this schedule. The morph stage is a
@@ -501,9 +518,14 @@ void LambdaSchedule::addChargeScaleStages(double scale)
 void LambdaSchedule::prependStage(const QString &name,
                                   const SireCAS::Expression &equation)
 {
+    auto e = equation;
+
+    if (e == default_morph_equation)
+        e = default_morph_equation;
+
     if (this->nStages() == 0)
     {
-        this->appendStage(name, equation);
+        this->appendStage(name, e);
         return;
     }
 
@@ -514,7 +536,7 @@ void LambdaSchedule::prependStage(const QString &name,
                                      CODELOC);
 
     this->stage_names.prepend(name);
-    this->default_equations.prepend(equation);
+    this->default_equations.prepend(e);
     this->stage_equations.prepend(QHash<QString, Expression>());
 }
 
@@ -532,8 +554,13 @@ void LambdaSchedule::appendStage(const QString &name,
                                          .arg(name),
                                      CODELOC);
 
+    auto e = equation;
+
+    if (e == default_morph_equation)
+        e = default_morph_equation;
+
     this->stage_names.append(name);
-    this->default_equations.append(equation);
+    this->default_equations.append(e);
     this->stage_equations.append(QHash<QString, Expression>());
 }
 
@@ -546,14 +573,19 @@ void LambdaSchedule::insertStage(int i,
                                  const QString &name,
                                  const SireCAS::Expression &equation)
 {
+    auto e = equation;
+
+    if (e == default_morph_equation)
+        e = default_morph_equation;
+
     if (i == 0)
     {
-        this->prependStage(name, equation);
+        this->prependStage(name, e);
         return;
     }
     else if (i >= this->nStages())
     {
-        this->appendStage(name, equation);
+        this->appendStage(name, e);
         return;
     }
 
@@ -564,7 +596,7 @@ void LambdaSchedule::insertStage(int i,
                                      CODELOC);
 
     this->stage_names.insert(i, name);
-    this->default_equations.insert(i, equation);
+    this->default_equations.insert(i, e);
     this->stage_equations.insert(i, QHash<QString, Expression>());
 }
 
@@ -605,7 +637,12 @@ int LambdaSchedule::find_stage(const QString &stage) const
 void LambdaSchedule::setDefaultEquation(const QString &stage,
                                         const Expression &equation)
 {
-    this->default_equations[this->find_stage(stage)] = equation;
+    auto e = equation;
+
+    if (e == default_morph_equation)
+        e = default_morph_equation;
+
+    this->default_equations[this->find_stage(stage)] = e;
 }
 
 /** Set the custom equation used to control the specified
@@ -617,12 +654,17 @@ void LambdaSchedule::setEquation(const QString &stage,
                                  const QString &lever,
                                  const Expression &equation)
 {
+    auto e = equation;
+
+    if (e == default_morph_equation)
+        e = default_morph_equation;
+
     auto &lever_expressions = this->stage_equations[this->find_stage(stage)];
 
     if (not this->lever_names.contains(lever))
         this->addLever(lever);
 
-    lever_expressions[lever] = equation;
+    lever_expressions[lever] = e;
 }
 
 /** Remove the custom equation for the specified `lever` at the
@@ -875,21 +917,31 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
     const auto equation = this->stage_equations[stage].value(
         lever_name, this->default_equations[stage]);
 
-    Values input_values = this->constant_values;
-    input_values.set(this->lam(), std::get<1>(resolved));
-
     QVector<double> morphed(nparams);
-
     auto morphed_data = morphed.data();
     const auto initial_data = initial.constData();
     const auto final_data = final.constData();
 
-    for (int i = 0; i < nparams; ++i)
+    if (equation == default_morph_equation)
     {
-        input_values.set(this->initial(), initial_data[i]);
-        input_values.set(this->final(), final_data[i]);
+        for (int i = 0; i < nparams; ++i)
+        {
+            morphed_data[i] = (1.0 - lambda_value) * initial_data[i] +
+                              lambda_value * final_data[i];
+        }
+    }
+    else
+    {
+        Values input_values = this->constant_values;
+        input_values.set(this->lam(), std::get<1>(resolved));
 
-        morphed_data[i] = equation(input_values);
+        for (int i = 0; i < nparams; ++i)
+        {
+            input_values.set(this->initial(), initial_data[i]);
+            input_values.set(this->final(), final_data[i]);
+
+            morphed_data[i] = equation(input_values);
+        }
     }
 
     return morphed;

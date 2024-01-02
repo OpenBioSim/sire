@@ -139,7 +139,7 @@ with support for that package.
 .. note::
 
    If ``rdkit`` isn't listed, then you should quit Python and install
-   it, e.g. using the command ``mamba install -c conda-forge rdkit``.
+   it, e.g. using the command ``conda install -c conda-forge rdkit``.
    If it still isn't listed then please raise an issue on the
    `sire GitHub repository <https://github.com/OpenBioSim/sire/issues>`__.
 
@@ -224,7 +224,7 @@ with support for that package.
 .. note::
 
    If ``openmm`` isn't listed, then you should quit Python and install
-   it, e.g. using the command ``mamba install -c conda-forge openmm``.
+   it, e.g. using the command ``conda install -c conda-forge openmm``.
    If it still isn't listed then please raise an issue on the
    `sire GitHub repository <https://github.com/OpenBioSim/sire/issues>`__.
 

@@ -12,6 +12,20 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
+--------------------------------------------------------------------------------------------
+
+* Added a ``.dynamics().step(num_steps)`` function to make it easier to quickly run
+  steps of OpenMM dynamics with minimal overhead (this directly called ``Integrator.step()``)
+
+* Some optimisations to the OpenMM layer that make full use of the
+  experimental "updateSomeParametersInContext" functions.
+
+* Updated gemmi to 0.6.4, so that it can be default-enabled on all supported platforms.
+  As part of this, had to change the version of the compilers used on Windows and Linux
+  to make the conda packages. Windows now uses Visual Studio 2022 instead of 2017,
+  and Linux now uses GCC 12.3.0 instead of GCC 13.
+
 `2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.2...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
 
@@ -918,14 +932,14 @@ Here is the changelog for this stage of development.
                only pythonize the C++ layer, and avoid the circular dependencies
                that were causing random import errors (particularly on Windows).
 
-    [2023.0.2] December 2023: Fix multiple distance restraint bug in SOMD
+    [2023.0.2] December 2022: Fix multiple distance restraint bug in SOMD
                (@fjclark). Add support for PME FEP with SOMD and fix
                associated bugs (@halx, @jmichel80). Fix CI issues so that
                PRs use the correct URL when triggered by external forks.
                Exclude dummy atoms when repartitioning hydrogen masses.
                Deprecate py37.
 
-    [2023.0.1] November 2023: Improve handling of HETATM and TER records in
+    [2023.0.1] November 2022: Improve handling of HETATM and TER records in
                PDB files. Fix SOMD selection issues following update to the
                2023 API. Fix writing of steps to SOMD simfile.dat (@fjclark).
                Throw exception when CHAMBER format AMBER topology files are
@@ -940,7 +954,7 @@ Here is the changelog for this stage of development.
                order. Ensure Sire is built against packages with the "dev"
                label.
 
-    [2023.0.0] July 2023 - Updated Sire's API to a more pythonic style.
+    [2023.0.0] July 2022 - Updated Sire's API to a more pythonic style.
                Module names are in lower case, e.g. `import Sire` becomes
                `import sire`, or `import sire as sr`. Functions are in
                underscore_case. This change is not backwards compatible. To

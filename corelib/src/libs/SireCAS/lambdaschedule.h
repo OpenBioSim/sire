@@ -204,6 +204,9 @@ namespace SireCAS
 
         /** The symbol used to represent the final value */
         static SireCAS::Symbol final_symbol;
+
+        /** The default morph equation */
+        static SireCAS::Expression default_morph_equation;
     };
 
 }

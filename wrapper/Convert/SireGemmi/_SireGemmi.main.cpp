@@ -12,6 +12,8 @@ namespace bp = boost::python;
 
 using namespace SireGemmi;
 
+#include <gemmi/model.hpp>
+
 BOOST_PYTHON_MODULE(_SireGemmi)
 {
     bp::def("sire_to_gemmi",

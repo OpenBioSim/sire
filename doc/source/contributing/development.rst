@@ -9,12 +9,11 @@ Setting up your computer
 =========================
 
 You first need to create an anaconda, miniconda or
-mambaforce environment as described in
+miniforge environment as described in
 the :doc:`installation page <../install>`.
 
-We recommend using mambaforge, as this sets the right
-priority for the conda-forge channel, and it bundles
-mamba, which we find to be much faster than conda.
+We recommend using miniforge, as this sets the right
+priority for the conda-forge channel.
 
 Virtual environments
 --------------------
@@ -42,7 +41,7 @@ or by running
 of your environment - e.g. ``openbiosim``).
 
 This will update your shell so that all python commands (such as
-``python``, ``mamba`` etc.) will use the virtual environment. You can
+``python``, ``conda`` etc.) will use the virtual environment. You can
 deactivate the environment and return to the "standard" Python using;
 
 .. code-block:: bash
@@ -445,7 +444,7 @@ additional packages as described in the
 
 .. code-block:: bash
 
-   mamba install sphinx sphinxcontrib-programoutput sphinx_issues furo
+   conda install sphinx sphinxcontrib-programoutput sphinx_issues furo
 
 Then move to the ``doc`` directory and run:
 

@@ -6,12 +6,12 @@ import pytest
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_positional_restraints(kigaki_mols):
+def test_openmm_positional_restraints(kigaki_mols, openmm_platform):
     mols = kigaki_mols
 
     mol = mols[0]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {"space": sr.vol.Cartesian(), "platform": openmm_platform}
 
     # test restraining all C atoms
     restraints = sr.restraints.positional(mol, atoms="element C")
@@ -40,12 +40,12 @@ def test_openmm_positional_restraints(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_distance_restraints(ala_mols):
+def test_openmm_distance_restraints(ala_mols, openmm_platform):
     mols = ala_mols
 
     mols = mols[0:2]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {"space": sr.vol.Cartesian(), "platform": openmm_platform}
 
     # test restraining the distance between the first and last molecule
     restraints = sr.restraints.distance(
@@ -77,21 +77,19 @@ def test_openmm_distance_restraints(ala_mols):
 
     new_coords = [mols[0][0].coordinates(), mols[-1][0].coordinates()]
 
-    assert (new_coords[0] - new_coords[1]).length().value() == pytest.approx(
-        5.0, 1e-2
-    )
+    assert (new_coords[0] - new_coords[1]).length().value() == pytest.approx(5.0, 1e-2)
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_fixed_atoms(kigaki_mols):
+def test_openmm_fixed_atoms(kigaki_mols, openmm_platform):
     mols = kigaki_mols
 
     mol = mols[0]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {"space": sr.vol.Cartesian(), "platform": openmm_platform}
 
     # test fixing all C atoms
     coords = []
@@ -106,21 +104,19 @@ def test_openmm_fixed_atoms(kigaki_mols):
     mol = d.commit()
 
     for atom, coords in zip(mol.atoms("element C"), coords):
-        assert (
-            atom.coordinates() - coords
-        ).length() < 0.001 * sr.units.angstrom
+        assert (atom.coordinates() - coords).length() < 0.001 * sr.units.angstrom
 
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_alchemical_restraints(ala_mols):
+def test_openmm_alchemical_restraints(ala_mols, openmm_platform):
     mols = ala_mols
 
     mol = mols[0]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {"space": sr.vol.Cartesian(), "platform": openmm_platform}
 
     # test scaling a positional restraint
     restraints = sr.restraints.positional(mol, atoms="element C")
@@ -143,21 +139,15 @@ def test_openmm_alchemical_restraints(ala_mols):
     l.add_stage("restraints", l.lam() * l.initial())
     l.set_equation("restraints", "restraint", l.lam() * l.initial())
 
-    d = mol.dynamics(
-        timestep="1fs", restraints=restraints, schedule=l, map=map
-    )
+    d = mol.dynamics(timestep="1fs", restraints=restraints, schedule=l, map=map)
 
     d.set_lambda(0)
 
-    assert d.current_potential_energy().value() == pytest.approx(
-        nrg_0.value(), 1e-6
-    )
+    assert d.current_potential_energy().value() == pytest.approx(nrg_0.value(), 1e-6)
 
     d.set_lambda(1)
 
-    assert d.current_potential_energy().value() == pytest.approx(
-        nrg_1.value(), 1e-6
-    )
+    assert d.current_potential_energy().value() == pytest.approx(nrg_1.value(), 1e-6)
 
     d.set_lambda(0.3)
 
@@ -170,17 +160,15 @@ def test_openmm_alchemical_restraints(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_named_restraints(ala_mols):
+def test_openmm_named_restraints(ala_mols, openmm_platform):
     mols = ala_mols
 
     mol = mols[0]
 
-    map = {"space": sr.vol.Cartesian(), "platform": "Reference"}
+    map = {"space": sr.vol.Cartesian(), "platform": openmm_platform}
 
     # test using named restraints, that we can scale these independently
-    posrests = sr.restraints.positional(
-        mol, atoms="element C", name="positional"
-    )
+    posrests = sr.restraints.positional(mol, atoms="element C", name="positional")
 
     dstrests = sr.restraints.distance(
         mol, atoms0=mol[0], atoms1=mol[-1], name="distance", r0="5A"
@@ -224,21 +212,15 @@ def test_openmm_named_restraints(ala_mols):
     l.set_equation("3", "positional", l.lam() * l.initial())
     l.set_equation("3", "distance", l.lam() * l.initial())
 
-    d = mol.dynamics(
-        timestep="1fs", restraints=restraints, schedule=l, map=map
-    )
+    d = mol.dynamics(timestep="1fs", restraints=restraints, schedule=l, map=map)
 
     d.set_lambda(0)
 
-    assert d.current_potential_energy().value() == pytest.approx(
-        nrg_0.value(), 1e-6
-    )
+    assert d.current_potential_energy().value() == pytest.approx(nrg_0.value(), 1e-6)
 
     d.set_lambda(1)
 
-    assert d.current_potential_energy().value() == pytest.approx(
-        nrg_1_1.value(), 1e-6
-    )
+    assert d.current_potential_energy().value() == pytest.approx(nrg_1_1.value(), 1e-6)
 
     d.set_lambda(0.99999999999 / 3.0)
 
@@ -248,9 +230,7 @@ def test_openmm_named_restraints(ala_mols):
 
     d.set_lambda(1.0 / 3.0)
 
-    assert d.current_potential_energy().value() == pytest.approx(
-        nrg_0.value(), 1e-6
-    )
+    assert d.current_potential_energy().value() == pytest.approx(nrg_0.value(), 1e-6)
 
     d.set_lambda(1.99999999999 / 3.0)
 
@@ -260,6 +240,4 @@ def test_openmm_named_restraints(ala_mols):
 
     d.set_lambda(2.0 / 3.0)
 
-    assert d.current_potential_energy().value() == pytest.approx(
-        nrg_0.value(), 1e-6
-    )
+    assert d.current_potential_energy().value() == pytest.approx(nrg_0.value(), 1e-6)

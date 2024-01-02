@@ -37,23 +37,23 @@ Installation
 The easiest way to install Sire is using our `conda channel <https://anaconda.org/openbiosim/repo>`__.
 Sire is built using dependencies from `conda-forge <https://conda-forge.org/>`__,
 so please ensure that the channel takes strict priority. We recommend using
-`mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`__.
+`miniforge3 <https://github.com/conda-forge/miniforge#miniforge3>`__.
 
 To create a new environment:
 
 .. code-block:: bash
 
-    mamba create -n openbiosim "python<3.11"
-    mamba activate openbiosim
-    mamba install -c conda-forge -c openbiosim sire
+    conda create -n openbiosim "python<3.12"
+    conda activate openbiosim
+    conda install -c conda-forge -c openbiosim sire
 
 To install the latest development version you can use:
 
 .. code-block:: bash
 
-    mamba create -n openbiosim-dev "python<3.11"
-    mamba activate openbiosim-dev
-    mamba install -c conda-forge -c openbiosim/label/dev sire
+    conda create -n openbiosim-dev "python<3.12"
+    conda activate openbiosim-dev
+    conda install -c conda-forge -c openbiosim/label/dev sire
 
 However, as you are here, it is likely you want to download the latest,
 greatest version of the code, which you will need to compile. To compile
@@ -65,32 +65,32 @@ First, you need to create and activate a conda environment, e.g.
 
 .. code-block:: bash
 
-    mamba create -n openbiosim-dev "python<3.11"
-    mamba activate openbiosim-dev
+    conda create -n openbiosim-dev "python<3.12"
+    conda activate openbiosim-dev
 
 Next, you need to install the Sire build dependencies.
 
 .. code-block:: bash
 
-    mamba install cmake pip-requirements-parser
+    conda install cmake pip-requirements-parser
 
 You will also need to install compilers, e.g. on Linux use
 
 .. code-block:: bash
 
-    mamba install gcc gxx
+    conda install gcc gxx
 
 on MacOS use
 
 .. code-block:: bash
 
-    mamba install clang clangxx
+    conda install clang clangxx
 
 and on Windows use
 
 .. code-block:: bash
 
-    mamba install conda-build
+    conda install conda-build
 
 Next, you can clone the sire source code and compile and install sire::
 

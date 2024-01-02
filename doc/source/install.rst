@@ -52,27 +52,25 @@ The easiest way to install :mod:`sire` is in a new
 `conda environment <https://anaconda.org>`__.
 
 You can use any conda environment or installation. We recommend using
-`mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`__,
-as this is pre-configured to use `conda-forge <https://conda-forge.org>`__,
-and bundles `mamba <https://mamba.readthedocs.io/en/latest/>`__, which
-is a fast drop-in replacement for `conda <https://conda.io>`__.
+`miniforge3 <https://github.com/conda-forge/miniforge#miniforge3>`__,
+as this is pre-configured to use `conda-forge <https://conda-forge.org>`__.
 
-.. _Install_Mambaforge:
-Either... Install a new copy of ``mambaforge``
+.. _Install_miniforge:
+Either... Install a new copy of ``miniforge``
 ----------------------------------------------
 
 To install a new copy of
-`mambaforge <https://github.com/conda-forge/miniforge#mambaforge>`__,
-first download a ``Mambaforge`` from
-`this page <https://github.com/conda-forge/miniforge#mambaforge>`__ that
+`miniforge <https://github.com/conda-forge/miniforge#miniforge3>`__,
+first download a ``miniforge3`` from
+`this page <https://github.com/conda-forge/miniforge#miniforge3>`__ that
 matches your operating system and processor.
 
-Install ``Mambaforge`` following the
+Install ``miniforge`` following the
 `instructions here <https://github.com/conda-forge/miniforge#install>`__.
 
-Once installed, you should be able to run the ``mamba`` command to
-install other packages (e.g. ``mamba -h`` will print out help on
-how to use the ``mamba`` command).
+Once installed, you should be able to run the ``conda`` command to
+install other packages (e.g. ``conda -h`` will print out help on
+how to use the ``conda`` command).
 
 Or... Use an existing anaconda/miniconda install
 ------------------------------------------------
@@ -86,21 +84,7 @@ the full path to your anaconda or miniconda installation.
 
 You should now be able to run the ``conda`` command to install other
 packages (e.g. ``conda -h`` will print out help on how to use the
-``conda`` command). We highly recommend that you use ``mamba`` as a
-drop-in replacement for ``conda``, so first install ``mamba``.
-
-.. code-block:: bash
-
-   $ conda install -c conda-forge mamba
-
-This should install mamba. If this fails, then your anaconda or miniconda
-environment is likely quite full, or else it is outdated. We recommend
-going back and following `the instructions <_Install_Mambaforge>`
-to install a new copy of ``mambaforge``.
-
-If this works, then you should now be able to run the ``mamba`` command
-to install other packages (e.g. ``mamba -h`` will print out help
-on how to use the ``mamba`` command).
+``conda`` command).
 
 And then... Install sire into a new environment
 -----------------------------------------------
@@ -113,7 +97,7 @@ by creating a Python 3.11 environment that we will call ``openbiosim``.
 
 .. code-block:: bash
 
-   $ mamba create -n openbiosim "python<3.12"
+   $ conda create -n openbiosim "python<3.12"
 
 .. note::
 
@@ -124,29 +108,29 @@ We can now install :mod:`sire` into that environment by typing
 
 .. code-block:: bash
 
-   $ mamba install -n openbiosim -c conda-forge -c openbiosim sire
+   $ conda install -n openbiosim -c conda-forge -c openbiosim sire
 
 .. note::
 
-   The option ``-n openbiosim`` tells ``mamba`` to install :mod:`sire`
+   The option ``-n openbiosim`` tells ``conda`` to install :mod:`sire`
    into the ``openbiosim`` environment. The option ``-c conda-forge``
-   tells ``mamba`` to use the ``conda-forge`` channel for all
+   tells ``conda`` to use the ``conda-forge`` channel for all
    dependencies. The option ``-c openbiosim``
-   tells ``mamba`` to install :mod:`sire` from the ``openbiosim``
+   tells ``conda`` to install :mod:`sire` from the ``openbiosim``
    conda channel.
 
 If you want the latest development release, then install by typing
 
 .. code-block:: bash
 
-   $ mamba install -n openbiosim -c conda-forge -c "openbiosim/label/dev" sire
+   $ conda install -n openbiosim -c conda-forge -c "openbiosim/label/dev" sire
 
 You may (optionally) want to install additional tools such as
 ``ipython`` and ``jupyterlab``. To do this, type
 
 .. code-block:: bash
 
-   $ mamba install -n openbiosim ipython jupyterlab
+   $ conda install -n openbiosim ipython jupyterlab
 
 To run :mod:`sire`, you must now activate the ``openbiosim`` environment.
 You can do this by typing
@@ -242,7 +226,7 @@ branch if you are a developer).
 
 You compile :mod:`sire` into an existing anaconda / miniconda environment.
 Please create and activate an environment, e.g. by following
-`the instructions <_Install_Mambaforge>` to install a fresh ``mambaforge`` and
+`the instructions <_Install_miniforge>` to install a fresh ``miniforge`` and
 then creating and activating Python 3.11 environment called
 ``openbiosim``.
 
@@ -259,8 +243,8 @@ this directory (e.g. ``cd sire``).
 .. note::
 
    This will fail if ``git`` is not installed on your computer.
-   You can easily install ``git`` using ``mamba``, e.g.
-   run ``mamba install git``.
+   You can easily install ``git`` using ``conda``, e.g.
+   run ``conda install git``.
 
 You can change to a different branch using the ``git checkout BRANCH``
 command, e.g.
@@ -299,24 +283,23 @@ type
 
    $ python setup.py install
 
-This will download and install all of the dependencies via ``mamba``
-(or ``conda`` if you haven't installed ``mamba``). It will then compile
+This will download and install all of the dependencies via ``conda``. It will then compile
 the :mod:`sire` C++ libraries, and then the Python wrappers. Be patient,
 as compilation can take quite a while!
 
 .. note::
 
-   You need to have Visual Studio 2017 C++ compiler installed to compile on Windows.
-   The easiest way to do this is to `install chocolatey <https://chocolatey.org/install>`__
-   and then install the compilers using the command
-   ``choco install visualstudio2017-workload-vctools``. This is all free, but
-   you will need admin access to install chocolatey. If this doesn't work, then
-   go to `this page <https://visualstudio.microsoft.com/vs/older-downloads>`__
-   and download the "Build Tools for Visual Studio 2017". Use the installer
-   to select and install only the build tools. You will need a free Microsoft
-   developer account to access this page. If this doesn't work, then
-   follow the `excellent guidance here <https://beenje.github.io/blog/posts/how-to-setup-a-windows-vm-to-build-conda-packages/>`__
-   to set up your Windows computer for compiling conda packages.
+   You need to have Visual Studio C++ (2017 or newer) installed to compile on Windows.
+   The easiest way to do this is to install the free
+   `Visual Studio 2022 Community Edition <https://visualstudio.microsoft.com/vs/community>`__.
+   Make sure to install "Desktop development with C++",
+   including the options "MSVC v143 - VS 2022 C++ x64/x86 build tools (v14.30)",
+   "C++ CMake tools for Windows", and at least one of "Windows 11 SDK" and/or
+   "Windows 10 SDK" (any version will do). You can, optionally, install the
+   older C++ compilers too, e.g. "MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.29)",
+   and/or "MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)". Currently
+   only the X64 compilers have been tested - we are interested to try
+   Windows/ARM64 once more of the dependencies are available.
 
 If you plan to install `BioSimSpace <https://biosimspace.org>`__ on
 top of :mod:`sire`, then you should install using;
@@ -325,7 +308,7 @@ top of :mod:`sire`, then you should install using;
 
    $ python --install-bss-deps install
 
-This will use ``mamba`` (or ``conda``) to download and install all of
+This will use ``conda`` to download and install all of
 BioSimSpace's dependencies as well. This ensures that incompatible versions
 of shared dependencies are not accidentally installed.
 
@@ -418,8 +401,7 @@ And then install the tools needed to run conda-build
 
 .. code-block:: bash
 
-   $ conda install -y -c conda-forge mamba
-   $ mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
+   $ conda install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
 
 D. Create the conda recipe
 --------------------------
@@ -455,7 +437,7 @@ You can now run ``conda-build`` to create the package.
 
 .. code-block:: bash
 
-   $ conda mambabuild -c conda-forge -c openbiosim/label/dev recipes/sire
+   $ conda build -c conda-forge -c openbiosim/label/dev recipes/sire
 
 This will take a while. At the end, it will print out the location of the
 sire conda package, e.g.
@@ -465,7 +447,7 @@ sire conda package, e.g.
    The above command assumes that you don't need any other channels included
    to install all of the packages included in your ``environment.yml``.
    The ``actions/update_recipe.py`` script will print out the correct
-   ``conda mambabuild`` command at the end, which includes any extra
+   ``conda build`` command at the end, which includes any extra
    channels that are needed.
 
 ::
@@ -473,7 +455,7 @@ sire conda package, e.g.
    # To have conda build upload to anaconda.org automatically, use
    # conda config --set anaconda_upload yes
    anaconda upload \
-       /path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2
+       /path/to/miniforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2
    anaconda_upload is not set.  Not uploading wheels: []
 
    INFO :: The inputs making up the hashes for the built packages are as follows:
@@ -489,7 +471,7 @@ sire conda package, e.g.
    }
 
 In this case, you can see that the package is the file
-``/path/to/mambaforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2``.
+``/path/to/miniforge/envs/build_sire/conda-bld/osx-64/sire-2023.3.0-py310hf95ea87_25.tar.bz2``.
 
 Copy this conda package to wherever you need (e.g. into a channel, upload
 to conda, etc.).

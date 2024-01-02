@@ -6,12 +6,12 @@ import sire as sr
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_simple_minimise(ala_mols):
+def test_openmm_simple_minimise(ala_mols, openmm_platform):
     mols = ala_mols
 
     nrg = mols.energy()
 
-    mols = mols.minimisation(platform="cpu").run(5).commit()
+    mols = mols.minimisation(platform=openmm_platform).run(5).commit()
 
     nrg2 = mols.energy()
 
@@ -22,7 +22,7 @@ def test_openmm_simple_minimise(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_minimise_lambda(merged_ethane_methanol):
+def test_openmm_minimise_lambda(merged_ethane_methanol, openmm_platform):
     mols = merged_ethane_methanol.clone()
 
     for mol in mols.molecules("molecule property is_perturbable"):
@@ -30,15 +30,15 @@ def test_openmm_minimise_lambda(merged_ethane_methanol):
 
     # this blows up because of incompatible exceptions/exclusions
     mol = (
-        mols[0].minimisation(platform="cpu", lambda_value=1.0).run(5).commit()
+        mols[0].minimisation(platform=openmm_platform, lambda_value=1.0).run(5).commit()
     )
 
     mols = (
-        mols[0].minimisation(platform="cpu", lambda_value=0.0).run(5).commit()
+        mols[0].minimisation(platform=openmm_platform, lambda_value=0.0).run(5).commit()
     )
 
     mols = (
-        mols[0].minimisation(platform="cpu", lambda_value=0.5).run(5).commit()
+        mols[0].minimisation(platform=openmm_platform, lambda_value=0.5).run(5).commit()
     )
 
 
@@ -46,14 +46,14 @@ def test_openmm_minimise_lambda(merged_ethane_methanol):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_minimise_unbonded_water(kigaki_mols):
+def test_openmm_minimise_unbonded_water(kigaki_mols, openmm_platform):
     mols = kigaki_mols
 
     atoms = mols[100].atoms()
 
     # the water molecules have no internal bonds, so this tests
     # whether or not constraints have been added correctly
-    mols = mols.minimisation(platform="cpu").run(10).commit()
+    mols = mols.minimisation(platform=openmm_platform).run(10).commit()
 
     new_atoms = mols[100].atoms()
 
@@ -62,21 +62,13 @@ def test_openmm_minimise_unbonded_water(kigaki_mols):
     # value)
     assert (
         sr.measure(atoms[0], atoms[1]).value()
-        == pytest.approx(
-            sr.measure(new_atoms[0], new_atoms[1]).value(), abs=1e-2
-        )
-    ) or (
-        sr.measure(new_atoms[0], new_atoms[2]).value() == pytest.approx(0.9572)
-    )
+        == pytest.approx(sr.measure(new_atoms[0], new_atoms[1]).value(), abs=1e-2)
+    ) or (sr.measure(new_atoms[0], new_atoms[2]).value() == pytest.approx(0.9572))
 
     assert (
         sr.measure(atoms[0], atoms[2]).value()
-        == pytest.approx(
-            sr.measure(new_atoms[0], new_atoms[2]).value(), abs=1e-2
-        )
-    ) or (
-        sr.measure(new_atoms[0], new_atoms[2]).value() == pytest.approx(0.9572)
-    )
+        == pytest.approx(sr.measure(new_atoms[0], new_atoms[2]).value(), abs=1e-2)
+    ) or (sr.measure(new_atoms[0], new_atoms[2]).value() == pytest.approx(0.9572))
 
     assert sr.measure(atoms[1], atoms[2]).value() == pytest.approx(
         sr.measure(new_atoms[1], new_atoms[2]).value(), abs=1e-2
@@ -87,10 +79,10 @@ def test_openmm_minimise_unbonded_water(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_minimise_vacuum(kigaki_mols):
+def test_openmm_minimise_vacuum(kigaki_mols, openmm_platform):
     mols = kigaki_mols
 
-    mols = mols.minimisation(platform="cpu", vacuum=True).run(10).commit()
+    mols = mols.minimisation(platform=openmm_platform, vacuum=True).run(10).commit()
 
     assert not mols.property("space").is_periodic()
 
@@ -98,6 +90,6 @@ def test_openmm_minimise_vacuum(kigaki_mols):
 
     mols.add_shared_property("space", sr.vol.Cartesian())
 
-    mols = mols.minimisation(platform="cpu", vacuum=True).run(10).commit()
+    mols = mols.minimisation(platform=openmm_platform, vacuum=True).run(10).commit()
 
     assert not mols.property("space").is_periodic()

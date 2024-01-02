@@ -313,7 +313,7 @@ if _has_rdkit:
                         "any other format than SVG. As "
                         "this is not available, we will save the file as a "
                         "SVG. To install `cairosvg` run the command "
-                        "'mamba install -c conda-forge cairosvg'"
+                        "'conda install -c conda-forge cairosvg'"
                     )
 
                     format = "svg"
@@ -530,7 +530,7 @@ if _has_rdkit:
                         "any other format than SVG. As "
                         "this is not available, we will save the file as a "
                         "SVG. To install `cairosvg` run the command "
-                        "'mamba install -c conda-forge cairosvg'"
+                        "'conda install -c conda-forge cairosvg'"
                     )
 
                     format = "svg"
@@ -596,7 +596,7 @@ else:
         raise ImportError(
             "You need to install rdkit to be able to generate "
             "2D views of molecules. Do this by typing, e.g. "
-            "'mamba install -c conda-forge rdkit' and then restarting "
+            "'conda install -c conda-forge rdkit' and then restarting "
             "Python and running this script/notebook again."
         )
 
@@ -604,7 +604,7 @@ else:
         raise ImportError(
             "You need to install rdkit to be able to generate "
             "smiles strings Do this by typing, e.g. "
-            "'mamba install -c conda-forge rdkit' and then restarting "
+            "'conda install -c conda-forge rdkit' and then restarting "
             "Python and running this script/notebook again."
         )
 
@@ -612,7 +612,7 @@ else:
         raise ImportError(
             "You need to install rdkit to be able to generate "
             "smarts strings Do this by typing, e.g. "
-            "'mamba install -c conda-forge rdkit' and then restarting "
+            "'conda install -c conda-forge rdkit' and then restarting "
             "Python and running this script/notebook again."
         )
 
@@ -623,7 +623,7 @@ else:
         raise ImportError(
             "You need to install rdkit to be able to generate "
             "smarts strings Do this by typing, e.g. "
-            "'mamba install -c conda-forge rdkit' and then restarting "
+            "'conda install -c conda-forge rdkit' and then restarting "
             "Python and running this script/notebook again."
         )
 

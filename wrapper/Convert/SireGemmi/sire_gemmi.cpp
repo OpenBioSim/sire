@@ -6,6 +6,7 @@
 #include "gemmi/polyheur.hpp"
 #include "gemmi/to_cif.hpp"
 #include "gemmi/to_mmcif.hpp"
+#include "gemmi/mmcif.hpp"
 
 #include "SireIO/pdbx.h"
 

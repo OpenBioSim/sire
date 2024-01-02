@@ -185,3 +185,20 @@ def neopentane_methane():
 @pytest.fixture(scope="session")
 def zero_lj_mols():
     return sr.load_test_files("zero_lj.prm7", "zero_lj.rst7")
+
+
+@pytest.fixture(scope="session")
+def openmm_platform():
+    if "openmm" not in sr.convert.supported_formats():
+        return None
+
+    mols = sr.load_test_files("ala.top", "ala.crd")
+
+    for platform in ["CUDA", "OpenCL", "CPU"]:
+        try:
+            mols.dynamics(platform=platform)
+            return platform
+        except Exception:
+            pass
+
+    return "Reference"

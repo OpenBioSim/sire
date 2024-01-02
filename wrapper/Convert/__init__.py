@@ -39,7 +39,7 @@ except Exception as e:
         print(_rdkit_import_error)
         raise ModuleNotFoundError(
             "Unable to convert to/from RDKit as it is not installed. "
-            "Please install using `mamba install -c conda-forge rdkit` "
+            "Please install using `conda install -c conda-forge rdkit` "
             "and then re-run this script."
         )
 
@@ -497,7 +497,7 @@ except Exception as e:
         print(_gemmi_import_error)
         raise ModuleNotFoundError(
             "Unable to convert to/from Gemmi as it is not installed. "
-            "Please install using `mamba install -c conda-forge gemmi` "
+            "Please install using `conda install -c conda-forge gemmi` "
             "and then re-run this script."
         )
 

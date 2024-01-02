@@ -4,13 +4,13 @@
 
 As we have limited resource, we only support the latest major release
 of sire with security updates. For example, if the current version
-is 2023.1.0, then only versions 2023.1.0 to 2023.1.X wil have updates,
-which will be released as 2023.1.X+1.
+is 2023.5.0, then only versions 2023.5.0 to 2023.5.X wil have updates,
+which will be released as 2023.5.X+1.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 2023.1.x | :white_check_mark: |
-| < 2023.1.x| :x:                |
+| 2023.5.x | :white_check_mark: |
+| < 2023.5.x| :x:                |
 
 ## Reporting a Vulnerability
 
