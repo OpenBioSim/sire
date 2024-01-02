@@ -382,7 +382,8 @@ void AmberPrm::rebuildLJParameters()
     lj_data = QVector<LJParameter>(ntypes);
     auto lj_data_array = lj_data.data();
 
-    auto lj_exceptions = QVector<std::tuple<int, int, LJ1264Parameter>>();
+    // create the exception matrix as symmetric with no default values
+    lj_exceptions = SparseMatrix<LJ1264Parameter>(LJ1264Parameter::dummy(), true, false);
 
     const auto acoeffs = float_data.value("LENNARD_JONES_ACOEF");
     const auto bcoeffs = float_data.value("LENNARD_JONES_BCOEF");
@@ -596,7 +597,7 @@ void AmberPrm::rebuildLJParameters()
                     }
 
                     // already in internal units (kcal mol-1, Angstroms)
-                    auto lj_ij = LJ1264Parameter(a, b, c);
+                    lj_exceptions.set(i, j, LJ1264Parameter(a, b, c));
                 }
             }
         }

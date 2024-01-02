@@ -30,9 +30,13 @@
 
 #include "moleculeparser.h"
 
+#include "SireBase/sparsematrix.hpp"
+
 #include "SireMM/mmdetail.h"
 
 #include "SireMM/ljparameter.h"
+#include "SireMM/lj1264parameter.h"
+
 #include "SireMaths/vector.h"
 
 #include <QHash>
@@ -207,6 +211,9 @@ namespace SireIO
 
         /** All of the LJ parameters, indexed by atom type */
         QVector<SireMM::LJParameter> lj_data;
+
+        /** All of the atom-pair LJ exceptions, indexed by atom pair */
+        SireBase::SparseMatrix<SireMM::LJ1264Parameter> lj_exceptions;
 
         /** The indicies of the bonds for each molecule */
         QVector<QVector<int>> bonds_inc_h, bonds_exc_h;
