@@ -28,14 +28,137 @@
 #include "atomljs.h"
 
 #include "SireBase/quickcopy.hpp"
+#include "SireBase/incremint.h"
 
 #include "SireStream/magic_error.h"
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
+#include <QUuid>
+#include <QMutex>
+
 using namespace SireMM;
 using namespace SireMol;
 using namespace SireStream;
+
+///////
+/////// Implementation of LJExceptionID
+///////
+
+static const RegisterMetaType<LJExceptionID> r_ljexceptionid(NO_ROOT);
+
+// we need to transparently map unique IDs on streaming. We do this
+// by using a UUID mapping on streaming and loading
+
+static QMutex lj_exception_mutex;
+static QHash<quint64, QUuid> uuid_to_id;
+static QHash<QUuid, LJExceptionID> uuid_to_ljexceptionid;
+
+QUuid get_uid(quint64 id)
+{
+    QMutexLocker lkr(&lj_exception_mutex);
+
+    if (id_to_uuid.contains(id))
+    {
+        return id_to_uuid[id];
+    }
+    else
+    {
+        QUuid ret = QUuid::createUuid();
+        id_to_uuid[id] = ret;
+        return ret;
+    }
+}
+
+LJExceptionID get_ljexceptionid(const QUuid &uuid)
+{
+    QMutexLocker lkr(&lj_exception_mutex);
+
+    if (uuid_to_ljexceptionid.contains(uuid))
+    {
+        return uuid_to_ljexceptionid[uuid];
+    }
+    else
+    {
+        LJExceptionID ret = LJExceptionID::generate();
+        uuid_to_ljexceptionid[uuid] = ret;
+        return ret;
+    }
+}
+
+QDataStream &operator<<(QDataStream &ds, const LJExceptionID &id)
+{
+    writeHeader(ds, r_ljexceptionid, 1);
+
+    auto uid = get_uid(id.id);
+
+    ds << uid;
+
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, LJExceptionID &id)
+{
+    VersionID v = readHeader(ds, r_ljexceptionid);
+
+    if (v == 1)
+    {
+        QUuid uid;
+        ds >> uid;
+
+        id = get_ljexceptionid(uid);
+    }
+    else
+        throw SireStream::version_error(v, "1", r_ljexceptionid, CODELOC);
+
+    return ds;
+}
+
+LJExceptionID::LJExceptionID() : id(0)
+{
+}
+
+LJExceptionID::LJExceptionID(const LJExceptionID &other) : id(other.id)
+{
+}
+
+LJExceptionID::~LJExceptionID()
+{
+}
+
+static SireBase::Incremint global_ljexceptionid;
+
+LJExceptionID LJExceptionID::generate()
+{
+    LJExceptionID ret;
+    ret.id = global_ljexceptionid.increment();
+    return ret;
+}
+
+LJExceptionID &LJExceptionID::operator=(const LJExceptionID &other)
+{
+    id = other.id;
+    return *this;
+}
+
+bool LJExceptionID::operator==(const LJExceptionID &other) const
+{
+    return id == other.id;
+}
+
+bool LJExceptionID::operator!=(const LJExceptionID &other) const
+{
+    return id != other.id;
+}
+
+QString LJExceptionID::toString() const
+{
+    return QString("LJExceptionID(%1)").arg(id);
+}
+
+///////
+/////// Implementation of LJParameter
+///////
 
 static const RegisterMetaType<AtomLJs> r_atomljs;
 
@@ -389,6 +512,19 @@ QVariant AtomProperty<LJParameter>::getAsVariant(const CGAtomIdx &cgatomidx) con
 SireBase::PropertyPtr AtomProperty<LJParameter>::getAsProperty(const CGAtomIdx &cgatomidx) const
 {
     return SireBase::convert_property(this->get(cgatomidx));
+}
+
+/** Set the value of the property of the ith atoms to 'value'
+ *
+ * \throw SireError::invalid_index
+ */
+AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, const LJParameter &value)
+{
+    i = SireID::Index(i).map(this->nAtoms());
+
+    props.valueData()[i] = value;
+
+    return *this;
 }
 
 /** Set the value of the property for the atom at index 'cgatomidx'
@@ -980,4 +1116,70 @@ PropertyPtr AtomProperty<LJParameter>::divideByResidue(const MoleculeInfoData &m
     }
 
     return AtomProperty<LJParameter>(res_vals);
+}
+
+/** Return the combined LJ parameter for atoms i and j, assuming either
+ *  standard combining rules (arithmetic) or returning the exception
+ *  if one has been set
+ */
+LJ1264Parameter AtomProperty<LJParameter>::get(int i, int j) const
+{
+    return LJ1264Parameter(this->get(i).combine(this->get(j)));
+}
+
+/** Return the LJ exception between atom 'i' and the exception representing
+ *  atom 'j'. If no exception has been set, then the standard LJ parameter
+ *  for atom 'i' is returned
+ */
+LJ1264Parameter AtomProperty<LJParameter>::get(int i, LJExceptionID j) const
+{
+    return LJ1264Parameter(this->get(i));
+}
+
+/** Return the LJ exception between the exception representing atom 'i' and
+ *  atom 'j'. If no exception has been set, then the standard LJ parameter
+ * for atom 'j' is returned
+ */
+LJ1264Parameter AtomProperty<LJParameter>::get(LJExceptionID i, int j) const
+{
+    return LJ1264Parameter(this->get(j));
+}
+
+/** Return the LJ exception between atom 'i' in this set and atom 'j'
+ *  in other. If no exception has been set, then the standard LJ parameter
+ *  combination using arithmetic combining rules is returned.
+ */
+LJ1264Parameter AtomProperty<LJParameter>::get(int i, int j, const AtomProperty<LJParameter> &other) const
+{
+    return LJ1264Parameter(this->get(i).combine(other.get(j)));
+}
+
+/** Set the exception for atoms i and j equal to 'value' */
+AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, int j, const LJ1264Parameter &value)
+{
+    return *this;
+}
+
+/** Set the exception for atom i and the exception representing 'j' to 'value' */
+AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, LJExceptionID j, const LJ1264Parameter &value)
+{
+    return *this;
+}
+
+/** Set the exception for the exception representing 'i' and atom j to 'value' */
+AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(LJExceptionID i, int j, const LJ1264Parameter &value)
+{
+    return *this;
+}
+
+/** Return whether or not there are any exceptions in this AtomProperty */
+bool AtomProperty<LJParameter>::hasExceptions() const
+{
+    return false;
+}
+
+/** Return all of the exceptions between this LJ set and 'other' */
+QList<std::tuple<int, int, SireMM::LJ1264Parameter>> AtomProperty<LJParameter>::getExceptions(const AtomProperty<SireMM::LJParameter> &other) const
+{
+    return QList<std::tuple<int, int, SireMM::LJ1264Parameter>>();
 }

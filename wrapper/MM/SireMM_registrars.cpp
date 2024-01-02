@@ -83,6 +83,7 @@ void register_SireMM_objects()
     ObjectRegistry::registerConverterFor< SireMM::ExcludedPairs >();
     ObjectRegistry::registerConverterFor< SireMM::SelectorMAngle >();
     ObjectRegistry::registerConverterFor< SireMM::AtomLJs >();
+    ObjectRegistry::registerConverterFor< SireMM::LJExceptionID >();
     ObjectRegistry::registerConverterFor< SireMM::InterCLJFFBase >();
     ObjectRegistry::registerConverterFor< SireMM::InterCLJFF >();
     ObjectRegistry::registerConverterFor< SireMM::InterGroupCLJFFBase >();

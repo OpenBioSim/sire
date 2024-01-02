@@ -183,6 +183,7 @@ set ( PYPP_SOURCES
        TwoAtomFunctions.pypp.cpp
        IntraSoftCLJFFBase.pypp.cpp
        BondSymbols.pypp.cpp
+       LJExceptionID.pypp.cpp
        CLJBoxDistance.pypp.cpp
        IntraGroupLJFFBase.pypp.cpp
        GroupInternalParameters.pypp.cpp

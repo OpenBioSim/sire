@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 #include "atomeditor.h"
 
+#include "SireBase/quickcopy.hpp"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/magic_error.h"
@@ -78,8 +80,6 @@ namespace bp = boost::python;
 #include "atomenergies.h"
 
 #include "atombeads.h"
-
-#include "SireBase/quickcopy.hpp"
 
 #include "SireBase/slice.h"
 

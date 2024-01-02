@@ -31,6 +31,9 @@
 #include "SireMol/atomproperty.hpp"
 
 #include "ljparameter.h"
+#include "lj1264parameter.h"
+
+#include <tuple>
 
 SIRE_BEGIN_HEADER
 
@@ -42,6 +45,56 @@ namespace SireMol
 
 SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomProperty<SireMM::LJParameter> &);
 SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomProperty<SireMM::LJParameter> &);
+
+namespace SireMM
+{
+    class LJExceptionID;
+}
+
+SIREMM_EXPORT QDataStream &operator<<(QDataStream &, const SireMM::LJExceptionID &);
+SIREMM_EXPORT QDataStream &operator>>(QDataStream &, SireMM::LJExceptionID &);
+
+namespace SireMM
+{
+    /** This is a simple ID number that is used to match up LJ exceptions
+     *  across different molecules. Each pair of atom-pair exceptions will
+     *  have thier own ID number, and will recognise each other by this
+     *  number. Note that this number is per-session, and will be changed
+     *  when a molecule is streamed and re-loaded
+     */
+    class SIREMM_EXPORT LJExceptionID
+    {
+        friend QDataStream & ::operator<<(QDataStream &, const LJExceptionID &);
+        friend QDataStream & ::operator>>(QDataStream &, LJExceptionID &);
+
+    public:
+        LJExceptionID();
+        LJExceptionID(const LJExceptionID &other);
+        ~LJExceptionID();
+
+        static LJExceptionID generate();
+
+        LJExceptionID &operator=(const LJExceptionID &other);
+
+        bool operator==(const LJExceptionID &other) const;
+        bool operator!=(const LJExceptionID &other) const;
+
+        QString toString() const;
+
+        quint64 hash() const
+        {
+            return qHash(id);
+        }
+
+    private:
+        quint64 id;
+    };
+}
+
+inline uint qHash(const SireMM::LJExceptionID &id)
+{
+    return id.hash();
+}
 
 namespace SireMol
 {
@@ -109,12 +162,22 @@ namespace SireMol
         const SireMM::LJParameter &get(int i) const;
         const SireMM::LJParameter &get(const CGAtomIdx &cgatomidx) const;
 
+        SireMM::LJ1264Parameter get(int i, int j) const;
+        SireMM::LJ1264Parameter get(int i, SireMM::LJExceptionID j) const;
+        SireMM::LJ1264Parameter get(SireMM::LJExceptionID i, int j) const;
+        SireMM::LJ1264Parameter get(int i, int j, const AtomProperty<SireMM::LJParameter> &other) const;
+
         QVariant getAsVariant(const CGAtomIdx &cgatomidx) const;
         SireBase::PropertyPtr getAsProperty(const CGAtomIdx &cgatomidx) const;
 
+        AtomProperty<SireMM::LJParameter> &set(int i, const SireMM::LJParameter &value);
         AtomProperty<SireMM::LJParameter> &set(const CGAtomIdx &cgatomidx, const SireMM::LJParameter &value);
 
         AtomProperty<SireMM::LJParameter> &set(CGIdx cgidx, const QVector<SireMM::LJParameter> &values);
+
+        AtomProperty<SireMM::LJParameter> &set(int i, int j, const SireMM::LJ1264Parameter &value);
+        AtomProperty<SireMM::LJParameter> &set(int i, SireMM::LJExceptionID j, const SireMM::LJ1264Parameter &value);
+        AtomProperty<SireMM::LJParameter> &set(SireMM::LJExceptionID i, int j, const SireMM::LJ1264Parameter &value);
 
         const PackedArray2D<SireMM::LJParameter> &array() const;
 
@@ -154,9 +217,24 @@ namespace SireMol
 
         void assertCanConvert(const QVariant &value) const;
 
+        bool hasExceptions() const;
+
+        QList<std::tuple<int, int, SireMM::LJ1264Parameter>> getExceptions(const AtomProperty<SireMM::LJParameter> &other) const;
+
     private:
         /** The actual atomic property values */
         SireBase::PackedArray2D<SireMM::LJParameter> props;
+
+        /** The set of exceptions used by this molecule, indexed
+         *  by LJExceptionID
+         */
+        QHash<SireMM::LJExceptionID, SireMM::LJ1264Parameter> exceptions;
+
+        /** The LJExceptionIDs of any atoms that have them - note that
+         *  a single atom may have multiple exceptions, so this is a
+         *  multi-hash
+         */
+        QMultiHash<quint32, SireMM::LJExceptionID> atomExceptions;
     };
 
 }
@@ -167,6 +245,10 @@ namespace SireMM
 }
 
 Q_DECLARE_METATYPE(SireMM::AtomLJs);
+Q_DECLARE_METATYPE(SireMM::LJExceptionID);
+Q_DECLARE_TYPEINFO(SireMM::LJExceptionID, Q_MOVABLE_TYPE);
+
+SIRE_EXPOSE_CLASS(SireMM::LJExceptionID)
 
 SIRE_EXPOSE_ATOM_PROPERTY(SireMM::LJParameter, SireMM::AtomLJs)
 
