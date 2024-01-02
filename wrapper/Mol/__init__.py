@@ -23,8 +23,6 @@ def __get_property__(molview, key):
     else:
         property_type = molview.propertyType(key).replace("::", "_")
 
-    print("Getting property %s of type %s" % (key, property_type))
-
     return getattr(molview, "_get_property_%s" % property_type)(key)
 
 
