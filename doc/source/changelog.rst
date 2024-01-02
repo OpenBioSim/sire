@@ -21,8 +21,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Some optimisations to the OpenMM layer that make full use of the 
   experimental "updateSomeParametersInContext" functions.
 
-* Updated gemmi to 0.6.4, so that it can be default-enabled on 
-  all supported platforms.
+* Updated gemmi to 0.6.4, so that it can be default-enabled on all supported platforms. 
+  As part of this, had to change the version of the compilers used on Windows and Linux
+  to make the conda packages. Windows now uses Visual Studio 2022 instead of 2017,
+  and Linux now uses GCC 12.3.0 instead of GCC 13.
 
 * Please add an item to this changelog when you create your PR
 
