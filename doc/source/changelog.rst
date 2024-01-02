@@ -15,18 +15,21 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
-* Added a `.dynamics().step(num_steps)` function to make it easier to quickly run
-  steps of OpenMM dynamics with minimal overhead (this directly called Integrator.step())
+* Please add an item to this changelog when you create your PR
 
-* Some optimisations to the OpenMM layer that make full use of the 
+`2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
+--------------------------------------------------------------------------------------------
+
+* Added a ``.dynamics().step(num_steps)`` function to make it easier to quickly run
+  steps of OpenMM dynamics with minimal overhead (this directly called ``Integrator.step()``)
+
+* Some optimisations to the OpenMM layer that make full use of the
   experimental "updateSomeParametersInContext" functions.
 
-* Updated gemmi to 0.6.4, so that it can be default-enabled on all supported platforms. 
+* Updated gemmi to 0.6.4, so that it can be default-enabled on all supported platforms.
   As part of this, had to change the version of the compilers used on Windows and Linux
   to make the conda packages. Windows now uses Visual Studio 2022 instead of 2017,
   and Linux now uses GCC 12.3.0 instead of GCC 13.
-
-* Please add an item to this changelog when you create your PR
 
 `2023.5.0 <https://github.com/openbiosim/sire/compare/2023.4.2...2023.5.0>`__ - December 2023
 ---------------------------------------------------------------------------------------------
