@@ -610,60 +610,40 @@ QDataStream &operator>>(QDataStream &ds, SireBase::SparseMatrix<T> &matrix)
 {
     auto v = SireBase::detail::checkSparseMatrixMagic(ds);
 
+    qint32 typ;
+
     if (v == 2)
     {
-        qint32 typ;
-
         SireStream::SharedDataStream sds(ds);
 
         sds >> typ >> matrix.def >> matrix.data >> matrix.has_default;
-
-        switch (typ)
-        {
-        case SireBase::SparseMatrix<T>::NORMAL:
-            matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
-            break;
-
-        case SireBase::SparseMatrix<T>::TRANSPOSE:
-            matrix.current_state = SireBase::SparseMatrix<T>::TRANSPOSE;
-            break;
-
-        case SireBase::SparseMatrix<T>::SYMMETRIC:
-            matrix.current_state = SireBase::SparseMatrix<T>::SYMMETRIC;
-            break;
-
-        default:
-            matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
-        }
     }
     else if (v == 1)
     {
-        qint32 typ;
-
         ds >> typ >> matrix.def >> matrix.data;
 
         matrix.has_default = true;
-
-        switch (typ)
-        {
-        case SireBase::SparseMatrix<T>::NORMAL:
-            matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
-            break;
-
-        case SireBase::SparseMatrix<T>::TRANSPOSE:
-            matrix.current_state = SireBase::SparseMatrix<T>::TRANSPOSE;
-            break;
-
-        case SireBase::SparseMatrix<T>::SYMMETRIC:
-            matrix.current_state = SireBase::SparseMatrix<T>::SYMMETRIC;
-            break;
-
-        default:
-            matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
-        }
     }
     else
         SireBase::detail::throwSparseMatrixMagicError(v, "1, 2");
+
+    switch (typ)
+    {
+    case SireBase::SparseMatrix<T>::NORMAL:
+        matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
+        break;
+
+    case SireBase::SparseMatrix<T>::TRANSPOSE:
+        matrix.current_state = SireBase::SparseMatrix<T>::TRANSPOSE;
+        break;
+
+    case SireBase::SparseMatrix<T>::SYMMETRIC:
+        matrix.current_state = SireBase::SparseMatrix<T>::SYMMETRIC;
+        break;
+
+    default:
+        matrix.current_state = SireBase::SparseMatrix<T>::NORMAL;
+    }
 
     return ds;
 }

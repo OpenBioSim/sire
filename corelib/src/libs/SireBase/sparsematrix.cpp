@@ -41,30 +41,20 @@ namespace SireBase
     {
         void writeSparseMatrixMagic(QDataStream &ds, VersionID v)
         {
-            ds << sparse_magic << v;
+            SireStream::writeHeader(ds, sparse_magic, v);
         }
 
         VersionID checkSparseMatrixMagic(QDataStream &ds)
         {
-            Sire::MagicID id;
-            VersionID v;
-
-            // do this in a transaction, so that any exceptions thrown here
-            // will not affect the stream (i.e. we can try to read this again)
-            ds.startTransaction();
-
-            ds >> id >> v;
-
-            if (id != sparse_magic)
+            try
             {
-                ds.rollbackTransaction();
-                // we have to assume this is an older SparseMatrix
+                return SireStream::readHeader(ds, sparse_magic, "SireBase::SparseMatrix");
+            }
+            catch (const SireStream::magic_error &)
+            {
+                // have to assume this is an old-style sparse matrix
                 return 1;
             }
-
-            ds.commitTransaction();
-
-            return v;
         }
 
         void throwSparseMatrixMagicError(VersionID v, const QString &supported)
