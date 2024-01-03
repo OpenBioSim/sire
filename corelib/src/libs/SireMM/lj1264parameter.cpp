@@ -158,10 +158,13 @@ LJ1264Parameter LJ1264Parameter::dummy()
 /** Return a string representation of the LJ parameter */
 QString LJ1264Parameter::toString() const
 {
-    return QString("LJ( A = %1, B = %2, C = %3 )")
-        .arg((this->A() * AUnit()).toString())
-        .arg((this->B() * BUnit()).toString())
-        .arg((this->C() * CUnit()).toString());
+    if (c == 0)
+        return this->toLJParameter().toString();
+    else
+        return QString("LJ( A = %1, B = %2, C = %3 )")
+            .arg((this->A() * AUnit()).toString())
+            .arg((this->B() * BUnit()).toString())
+            .arg((this->C() * CUnit()).toString());
 }
 
 const char *LJ1264Parameter::typeName()
@@ -206,11 +209,21 @@ void LJ1264Parameter::assertIsLJParameter() const
 /** Return this converted to a standard 12-6 LJ parameter */
 LJParameter LJ1264Parameter::toLJParameter() const
 {
-    return LJParameter::fromAAndB(a, b);
+    this->assertIsLJParameter();
+
+    if (a == 0 or b == 0)
+        return LJParameter::dummy();
+    else
+        return LJParameter::fromAAndB(a, b);
 }
 
 /** Return this converted to a standard 12-6 LJ parameter */
 LJPair LJ1264Parameter::toLJPair() const
 {
-    return LJPair::fromAAndB(a, b);
+    this->assertIsLJParameter();
+
+    if (a == 0 or b == 0)
+        return LJPair::dummy();
+    else
+        return LJPair::fromAAndB(a, b);
 }

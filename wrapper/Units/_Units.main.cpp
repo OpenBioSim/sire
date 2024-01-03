@@ -50,6 +50,8 @@ BOOST_PYTHON_MODULE(_Units){
 
     bp::implicitly_convertible< double, SireUnits::Dimension::GeneralUnit >();
 
+    bp::implicitly_convertible< QString, SireUnits::Dimension::GeneralUnit >();
+
     register_SireUnits_dimensions();
 
     register_man_global_variables();

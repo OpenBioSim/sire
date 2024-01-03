@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/incremint.h"
+
 #include "SireBase/quickcopy.hpp"
 
 #include "SireStream/datastream.h"
@@ -16,6 +18,10 @@ namespace bp = boost::python;
 #include "SireStream/shareddatastream.h"
 
 #include "atomljs.h"
+
+#include <QMutex>
+
+#include <QUuid>
 
 #include "atomljs.h"
 
@@ -46,14 +52,14 @@ void register_LJExceptionID_class(){
                 , "" );
         
         }
-        { //::SireMM::LJExceptionID::hash
+        { //::SireMM::LJExceptionID::getPair
         
-            typedef ::quint64 ( ::SireMM::LJExceptionID::*hash_function_type)(  ) const;
-            hash_function_type hash_function_value( &::SireMM::LJExceptionID::hash );
+            typedef ::SireMM::LJExceptionID ( ::SireMM::LJExceptionID::*getPair_function_type)(  ) const;
+            getPair_function_type getPair_function_value( &::SireMM::LJExceptionID::getPair );
             
             LJExceptionID_exposer.def( 
-                "hash"
-                , hash_function_value
+                "getPair"
+                , getPair_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -73,6 +79,19 @@ void register_LJExceptionID_class(){
         
         }
         LJExceptionID_exposer.def( bp::self == bp::self );
+        { //::SireMM::LJExceptionID::pairsWith
+        
+            typedef bool ( ::SireMM::LJExceptionID::*pairsWith_function_type)( ::SireMM::LJExceptionID const & ) const;
+            pairsWith_function_type pairsWith_function_value( &::SireMM::LJExceptionID::pairsWith );
+            
+            LJExceptionID_exposer.def( 
+                "pairsWith"
+                , pairsWith_function_value
+                , ( bp::arg("other") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::LJExceptionID::toString
         
             typedef ::QString ( ::SireMM::LJExceptionID::*toString_function_type)(  ) const;
@@ -85,7 +104,32 @@ void register_LJExceptionID_class(){
                 , "" );
         
         }
+        { //::SireMM::LJExceptionID::typeName
+        
+            typedef char const * ( *typeName_function_type )(  );
+            typeName_function_type typeName_function_value( &::SireMM::LJExceptionID::typeName );
+            
+            LJExceptionID_exposer.def( 
+                "typeName"
+                , typeName_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::LJExceptionID::what
+        
+            typedef char const * ( ::SireMM::LJExceptionID::*what_function_type)(  ) const;
+            what_function_type what_function_value( &::SireMM::LJExceptionID::what );
+            
+            LJExceptionID_exposer.def( 
+                "what"
+                , what_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         LJExceptionID_exposer.staticmethod( "generate" );
+        LJExceptionID_exposer.staticmethod( "typeName" );
         LJExceptionID_exposer.def( "__copy__", &__copy__);
         LJExceptionID_exposer.def( "__deepcopy__", &__copy__);
         LJExceptionID_exposer.def( "clone", &__copy__);
@@ -96,7 +140,6 @@ void register_LJExceptionID_class(){
         LJExceptionID_exposer.def_pickle(sire_pickle_suite< ::SireMM::LJExceptionID >());
         LJExceptionID_exposer.def( "__str__", &__str__< ::SireMM::LJExceptionID > );
         LJExceptionID_exposer.def( "__repr__", &__str__< ::SireMM::LJExceptionID > );
-        LJExceptionID_exposer.def( "__hash__", &::SireMM::LJExceptionID::hash );
     }
 
 }

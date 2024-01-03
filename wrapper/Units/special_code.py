@@ -118,4 +118,5 @@ special_code = {
 implicitly_convertible = [
     ("SireUnits::Dimension::TempBase", "SireUnits::Dimension::Temperature"),
     ("double", "SireUnits::Dimension::GeneralUnit"),
+    ("QString", "SireUnits::Dimension::GeneralUnit")
 ]

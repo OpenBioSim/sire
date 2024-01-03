@@ -142,6 +142,8 @@ namespace SireUnits
             {
             }
 
+            PhysUnit(const QString &value);
+
             explicit PhysUnit(const TempBase &temperature) : Unit(temperature)
             {
                 // this must be a Temperature!
