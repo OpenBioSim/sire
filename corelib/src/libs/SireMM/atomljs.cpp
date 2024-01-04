@@ -117,6 +117,18 @@ QDataStream &operator>>(QDataStream &ds, LJExceptionID &id)
     return ds;
 }
 
+QDataStream &operator<<(QDataStream &ds, const SireMM::detail::LJException &e)
+{
+    ds << e.id << e.value;
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, SireMM::detail::LJException &e)
+{
+    ds >> e.id >> e.value;
+    return ds;
+}
+
 LJExceptionID::LJExceptionID() : id(0), is_first(true)
 {
 }
@@ -199,7 +211,7 @@ QDataStream &operator<<(QDataStream &ds, const AtomProperty<LJParameter> &atomlj
     SharedDataStream sds(ds);
 
     sds << static_cast<const SireMol::AtomProp &>(atomljs);
-    sds << atomljs.props << atomljs.id_to_exception << atomljs.atom_to_exception_id;
+    sds << atomljs.props << atomljs.atom_to_exception;
 
     return ds;
 }
@@ -223,7 +235,7 @@ QDataStream &operator>>(QDataStream &ds, AtomProperty<LJParameter> &atomljs)
         SharedDataStream sds(ds);
 
         sds >> static_cast<SireMol::AtomProp &>(atomljs);
-        sds >> atomljs.props >> atomljs.id_to_exception >> atomljs.atom_to_exception_id;
+        sds >> atomljs.props >> atomljs.atom_to_exception;
     }
     else if (v == 2)
     {
@@ -232,8 +244,7 @@ QDataStream &operator>>(QDataStream &ds, AtomProperty<LJParameter> &atomljs)
         sds >> static_cast<SireMol::AtomProp &>(atomljs);
         sds >> atomljs.props;
 
-        atomljs.id_to_exception.clear();
-        atomljs.atom_to_exception_id.clear();
+        atomljs.atom_to_exception.clear();
     }
     else if (v == 1)
     {
@@ -370,7 +381,7 @@ AtomProperty<LJParameter>::AtomProperty(const PackedArray2D<LJParameter> &values
 /** Copy constructor */
 AtomProperty<LJParameter>::AtomProperty(const AtomProperty<LJParameter> &other)
     : SireBase::ConcreteProperty<AtomProperty<LJParameter>, AtomProp>(), props(other.props),
-      id_to_exception(other.id_to_exception), atom_to_exception_id(other.atom_to_exception_id)
+      atom_to_exception(other.atom_to_exception)
 {
 }
 
@@ -383,8 +394,7 @@ AtomProperty<LJParameter>::~AtomProperty()
 AtomProperty<LJParameter> &AtomProperty<LJParameter>::operator=(const AtomProperty<LJParameter> &other)
 {
     props = other.props;
-    id_to_exception = other.id_to_exception;
-    atom_to_exception_id = other.atom_to_exception_id;
+    atom_to_exception = other.atom_to_exception;
 
     return *this;
 }
@@ -392,8 +402,7 @@ AtomProperty<LJParameter> &AtomProperty<LJParameter>::operator=(const AtomProper
 /** Comparison operator */
 bool AtomProperty<LJParameter>::operator==(const AtomProperty<LJParameter> &other) const
 {
-    return props == other.props and id_to_exception == other.id_to_exception and
-           atom_to_exception_id == other.atom_to_exception_id;
+    return props == other.props and atom_to_exception == other.atom_to_exception;
 }
 
 /** Comparison operator */
@@ -1169,17 +1178,17 @@ PropertyPtr AtomProperty<LJParameter>::divideByResidue(const MoleculeInfoData &m
  */
 LJ1264Parameter AtomProperty<LJParameter>::get(int i, int j) const
 {
-    if (atom_to_exception_id.contains(i) and atom_to_exception_id.contains(j))
+    if (atom_to_exception.contains(i) and atom_to_exception.contains(j))
     {
         // we need to go through all of the possible exceptions and see if there
         // is a match
-        for (const auto &lj_i : atom_to_exception_id.values(i))
+        for (const auto &lj_i : atom_to_exception.values(i))
         {
-            for (const auto &lj_j : atom_to_exception_id.values(j))
+            for (const auto &lj_j : atom_to_exception.values(j))
             {
                 if (lj_i.pairsWith(lj_j))
                 {
-                    return id_to_exception[lj_i];
+                    return lj_i.value;
                 }
             }
         }
@@ -1189,61 +1198,21 @@ LJ1264Parameter AtomProperty<LJParameter>::get(int i, int j) const
     return LJ1264Parameter(this->get(i).combine(this->get(j), LJParameter::ARITHMETIC));
 }
 
-/** Return the LJ exception between atom 'i' and the exception representing
- *  atom 'j'. If no exception has been set, then the standard LJ parameter
- *  for atom 'i' is returned
- */
-LJ1264Parameter AtomProperty<LJParameter>::get(int i, LJExceptionID j) const
-{
-    if (atom_to_exception_id.contains(i))
-    {
-        for (const auto &lj_i : atom_to_exception_id.values(i))
-        {
-            if (lj_i.pairsWith(j))
-            {
-                return id_to_exception[lj_i];
-            }
-        }
-    }
-
-    return LJ1264Parameter(this->get(i));
-}
-
-/** Return the LJ exception between the exception representing atom 'i' and
- *  atom 'j'. If no exception has been set, then the standard LJ parameter
- * for atom 'j' is returned
- */
-LJ1264Parameter AtomProperty<LJParameter>::get(LJExceptionID i, int j) const
-{
-    if (atom_to_exception_id.contains(j))
-    {
-        for (const auto &lj_j : atom_to_exception_id.values(j))
-        {
-            if (lj_j.pairsWith(i))
-            {
-                return id_to_exception[lj_j];
-            }
-        }
-    }
-
-    return LJ1264Parameter(this->get(j));
-}
-
 /** Return the LJ exception between atom 'i' in this set and atom 'j'
  *  in other. If no exception has been set, then the standard LJ parameter
  *  combination using arithmetic combining rules is returned.
  */
 LJ1264Parameter AtomProperty<LJParameter>::get(int i, int j, const AtomProperty<LJParameter> &other) const
 {
-    if (atom_to_exception_id.contains(i) and other.atom_to_exception_id.contains(j))
+    if (atom_to_exception.contains(i) and other.atom_to_exception.contains(j))
     {
-        for (const auto &lj_i : atom_to_exception_id.values(i))
+        for (const auto &lj_i : atom_to_exception.values(i))
         {
-            for (const auto &lj_j : other.atom_to_exception_id.values(j))
+            for (const auto &lj_j : other.atom_to_exception.values(j))
             {
                 if (lj_i.pairsWith(lj_j))
                 {
-                    return id_to_exception[lj_i];
+                    return lj_i.value;
                 }
             }
         }
@@ -1263,7 +1232,7 @@ AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, int j,
     j = SireID::Index(j).map(other.nAtoms());
 
     // we first need to remove any existing exception between these two atoms
-    if (this->atom_to_exception_id.contains(i) and other.atom_to_exception_id.contains(j))
+    if (this->atom_to_exception.contains(i) and other.atom_to_exception.contains(j))
     {
         bool found_ij = true;
 
@@ -1271,14 +1240,14 @@ AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, int j,
         {
             found_ij = false;
 
-            for (const auto &lj_i : this->atom_to_exception_id.values(i))
+            for (const auto &lj_i : this->atom_to_exception.values(i))
             {
-                for (const auto &lj_j : other.atom_to_exception_id.values(j))
+                for (const auto &lj_j : other.atom_to_exception.values(j))
                 {
                     if (lj_i.pairsWith(lj_j))
                     {
-                        this->atom_to_exception_id.remove(i, lj_i);
-                        other.atom_to_exception_id.remove(j, lj_j);
+                        this->atom_to_exception.remove(i, lj_i);
+                        other.atom_to_exception.remove(j, lj_j);
                         found_ij = true;
                         break;
                     }
@@ -1290,13 +1259,16 @@ AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, int j,
         }
     }
 
-    LJExceptionID id = LJExceptionID::generate();
+    SireMM::detail::LJException lj_i, lj_j;
 
-    this->id_to_exception[id] = value;
-    other.id_to_exception[id.getPair()] = value;
+    lj_i.id = LJExceptionID::generate();
+    lj_j.id = lj_i.id.getPair();
 
-    this->atom_to_exception_id.insert(i, id);
-    other.atom_to_exception_id.insert(j, id.getPair());
+    lj_i.value = value;
+    lj_j.value = value;
+
+    this->atom_to_exception.insert(i, lj_i);
+    other.atom_to_exception.insert(j, lj_j);
 
     return *this;
 }
@@ -1307,34 +1279,10 @@ AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, int j, const LJ
     return this->set(i, j, *this, value);
 }
 
-/** Set the exception for atom i and the exception representing 'j' to 'value' */
-AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, LJExceptionID j, const LJ1264Parameter &value)
-{
-    i = SireID::Index(i).map(this->nAtoms());
-
-    id_to_exception[j.getPair()] = value;
-
-    atom_to_exception_id.insert(i, j.getPair());
-
-    return *this;
-}
-
-/** Set the exception for the exception representing 'i' and atom j to 'value' */
-AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(LJExceptionID i, int j, const LJ1264Parameter &value)
-{
-    j = SireID::Index(j).map(this->nAtoms());
-
-    id_to_exception[i.getPair()] = value;
-
-    atom_to_exception_id.insert(j, i.getPair());
-
-    return *this;
-}
-
 /** Return whether or not there are any exceptions in this AtomProperty */
 bool AtomProperty<LJParameter>::hasExceptions() const
 {
-    return not atom_to_exception_id.isEmpty();
+    return not atom_to_exception.isEmpty();
 }
 
 /** Return all of the exceptions between this LJ set and 'other' */
@@ -1347,10 +1295,10 @@ QList<boost::tuple<int, int, SireMM::LJ1264Parameter>> AtomProperty<LJParameter>
     // use boost::tuple as we can wrap it with boost::python
     QList<boost::tuple<int, int, LJ1264Parameter>> ret;
 
-    auto atoms_i = this->atom_to_exception_id.uniqueKeys();
+    auto atoms_i = this->atom_to_exception.uniqueKeys();
     std::sort(atoms_i.begin(), atoms_i.end());
 
-    auto atoms_j = other.atom_to_exception_id.uniqueKeys();
+    auto atoms_j = other.atom_to_exception.uniqueKeys();
     std::sort(atoms_j.begin(), atoms_j.end());
 
     for (const auto &i : atoms_i)
@@ -1359,13 +1307,13 @@ QList<boost::tuple<int, int, SireMM::LJ1264Parameter>> AtomProperty<LJParameter>
         {
             bool found_ij = false;
 
-            for (const auto &lj_i : this->atom_to_exception_id.values(i))
+            for (const auto &lj_i : this->atom_to_exception.values(i))
             {
-                for (const auto &lj_j : other.atom_to_exception_id.values(j))
+                for (const auto &lj_j : other.atom_to_exception.values(j))
                 {
                     if (lj_i.pairsWith(lj_j))
                     {
-                        ret.append(boost::make_tuple<int, int, LJ1264Parameter>(i, j, id_to_exception[lj_i]));
+                        ret.append(boost::make_tuple<int, int, LJ1264Parameter>(i, j, lj_i.value));
                         found_ij = true;
                         break;
                     }

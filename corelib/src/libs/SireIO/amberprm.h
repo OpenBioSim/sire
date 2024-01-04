@@ -212,7 +212,7 @@ namespace SireIO
         /** All of the LJ parameters, indexed by atom type */
         QVector<SireMM::LJParameter> lj_data;
 
-        /** All of the atom-pair LJ exceptions, indexed by atom pair */
+        /** All of the LJ exceptions, indexed by LJ parameter ID */
         SireBase::SparseMatrix<SireMM::LJ1264Parameter> lj_exceptions;
 
         /** The indicies of the bonds for each molecule */

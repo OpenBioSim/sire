@@ -610,7 +610,7 @@ QDataStream &operator>>(QDataStream &ds, SireBase::SparseMatrix<T> &matrix)
 {
     auto v = SireBase::detail::checkSparseMatrixMagic(ds);
 
-    qint32 typ;
+    qint32 typ = SireBase::SparseMatrix<T>::NORMAL;
 
     if (v == 2)
     {

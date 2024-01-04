@@ -120,12 +120,12 @@ const RegisterParser<AmberPrm> register_amberparm;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const AmberPrm &parm)
 {
-    writeHeader(ds, r_parm, 2);
+    writeHeader(ds, r_parm, 3);
 
     SharedDataStream sds(ds);
 
     sds << parm.flag_to_line << parm.int_data << parm.float_data << parm.string_data << parm.ffield
-        << static_cast<const MoleculeParser &>(parm);
+        << parm.lj_exceptions << static_cast<const MoleculeParser &>(parm);
 
     return ds;
 }
@@ -871,7 +871,7 @@ QDataStream &operator>>(QDataStream &ds, AmberPrm &parm)
 {
     VersionID v = readHeader(ds, r_parm);
 
-    if (v == 1 or v == 2)
+    if (v == 1 or v == 2 or v == 3)
     {
         SharedDataStream sds(ds);
 
@@ -884,12 +884,17 @@ QDataStream &operator>>(QDataStream &ds, AmberPrm &parm)
         else
             parm.ffield = MMDetail();
 
+        if (v == 3)
+            sds >> parm.lj_exceptions;
+        else
+            parm.lj_exceptions = SparseMatrix<LJ1264Parameter>(LJ1264Parameter::dummy(), true, false);
+
         sds >> static_cast<MoleculeParser &>(parm);
 
         parm.rebuildAfterReload();
     }
     else
-        throw version_error(v, "1,2", r_parm, CODELOC);
+        throw version_error(v, "1,2,3", r_parm, CODELOC);
 
     return ds;
 }
@@ -3557,6 +3562,7 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
 AmberPrm::AmberPrm(const AmberPrm &other)
     : ConcreteProperty<AmberPrm, MoleculeParser>(other), flag_to_line(other.flag_to_line), int_data(other.int_data),
       float_data(other.float_data), string_data(other.string_data), lj_data(other.lj_data),
+      lj_exceptions(other.lj_exceptions),
       bonds_inc_h(other.bonds_inc_h), bonds_exc_h(other.bonds_exc_h), angs_inc_h(other.angs_inc_h),
       angs_exc_h(other.angs_exc_h), dihs_inc_h(other.dihs_inc_h), dihs_exc_h(other.dihs_exc_h),
       excl_atoms(other.excl_atoms), molnum_to_atomnums(other.molnum_to_atomnums), pointers(other.pointers),
@@ -3579,6 +3585,7 @@ AmberPrm &AmberPrm::operator=(const AmberPrm &other)
         float_data = other.float_data;
         string_data = other.string_data;
         lj_data = other.lj_data;
+        lj_exceptions = other.lj_exceptions;
         bonds_inc_h = other.bonds_inc_h;
         bonds_exc_h = other.bonds_exc_h;
         angs_inc_h = other.angs_inc_h;
@@ -4648,8 +4655,8 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     if (nmols == 0)
         return System();
 
-    QVector<Molecule> mols(nmols);
-    Molecule *mols_array = mols.data();
+    QVector<MolEditor> mols(nmols);
+    auto *mols_array = mols.data();
 
     if (usesParallel())
     {
@@ -4669,12 +4676,106 @@ System AmberPrm::startSystem(const PropertyMap &map) const
         }
     }
 
+    const auto ljprop = map["LJ"];
+
+    if (not(ljprop.hasValue() or lj_exceptions.isEmpty()))
+    {
+        // we need to add the LJ exceptions
+        const auto paramsprop = map["parameters"];
+
+        const auto exceptions = lj_exceptions.nonDefaultElements();
+
+        const auto amber_type = this->intData("ATOM_TYPE_INDEX");
+        const auto amber_type_array = amber_type.constData();
+        const int nats = amber_type.count();
+
+        QSet<int> changed_mols;
+
+        for (const auto &exception : exceptions)
+        {
+            auto ljid0 = std::get<0>(exception);
+            auto ljid1 = std::get<1>(exception);
+            const auto &ljparam = std::get<2>(exception);
+
+            qDebug() << "Adding LJ exception for types" << ljid0 << ljid1 << "with parameters" << ljparam.toString();
+
+            // find all of the atom pairs that have this pair of LJ parameters
+            for (int i = 0; i < nats; ++i)
+            {
+                auto ljid_i = amber_type_array[i];
+
+                if (not(ljid_i == ljid0 or ljid_i == ljid1))
+                    continue;
+
+                for (int j = i; j < nats; ++j)
+                {
+                    auto ljid_j = amber_type_array[j];
+
+                    if (not(ljid_j == ljid0 or ljid_j == ljid1))
+                        continue;
+
+                    if (not(ljid_i == ljid0 and ljid_j == ljid1) and not(ljid_i == ljid1 and ljid_j == ljid0))
+                        continue;
+
+                    // we have a match - the order is unimportant
+                    // now need to assign the parameters
+                    int imol = 0;
+                    int jmol = 0;
+
+                    int iatom = i;
+                    int jatom = j;
+
+                    while (iatom >= mols_array[imol].nAtoms())
+                    {
+                        iatom -= mols_array[imol].nAtoms();
+                        imol += 1;
+                    }
+
+                    while (jatom >= mols_array[jmol].nAtoms())
+                    {
+                        jatom -= mols_array[jmol].nAtoms();
+                        jmol += 1;
+                    }
+
+                    qDebug() << "ADD TO" << imol << jmol << iatom << jatom;
+
+                    if (imol == jmol)
+                    {
+                        auto params = mols_array[imol].property(paramsprop).asA<AmberParams>();
+                        params.set(AtomIdx(iatom), AtomIdx(jatom), ljparam);
+                        mols_array[imol].updateProperty(paramsprop.source(), params);
+                        changed_mols.insert(imol);
+                    }
+                    else
+                    {
+                        auto params_i = mols_array[imol].property(paramsprop).asA<AmberParams>();
+                        auto params_j = mols_array[jmol].property(paramsprop).asA<AmberParams>();
+
+                        params_i.set(AtomIdx(iatom), AtomIdx(jatom), params_j, ljparam);
+
+                        mols_array[imol].updateProperty(paramsprop.source(), params_i);
+                        mols_array[jmol].updateProperty(paramsprop.source(), params_j);
+
+                        changed_mols.insert(imol);
+                        changed_mols.insert(jmol);
+                    }
+                }
+            }
+        }
+
+        for (const auto changed_mol : changed_mols)
+        {
+            auto &mol = mols_array[changed_mol];
+            mol.updateProperty(ljprop.source(), mol.property(paramsprop).asA<AmberParams>().ljs());
+        }
+    }
+
     MoleculeGroup molgroup("all");
 
     for (auto mol : mols)
     {
         if (mol.nAtoms() > 0)
-            molgroup.add(mol);
+            molgroup.add(mol.commit());
     }
 
     System system(this->title());

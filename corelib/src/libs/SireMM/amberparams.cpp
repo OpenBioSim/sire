@@ -1737,6 +1737,49 @@ void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, S
     amber_treechains.set(idx, treechain);
 }
 
+/** Set the LJ exception between atom0 in this set and atom1 in the
+ *  passed set of parameters to 'ljparam'
+ */
+void AmberParams::set(const AtomID &atom0, const AtomID &atom1,
+                      AmberParams &other, const LJ1264Parameter &ljparam)
+{
+    if (amber_charges.isEmpty())
+    {
+        // set up the objects to hold these parameters
+        amber_charges = AtomCharges(molinfo);
+        amber_ljs = AtomLJs(molinfo);
+        amber_masses = AtomMasses(molinfo);
+        amber_elements = AtomElements(molinfo);
+        amber_types = AtomStringProperty(molinfo);
+        born_radii = AtomRadii(molinfo);
+        amber_screens = AtomFloatProperty(molinfo);
+        amber_treechains = AtomStringProperty(molinfo);
+    }
+
+    if (other.amber_charges.isEmpty())
+    {
+        // set up the objects to hold these parameters
+        other.amber_charges = AtomCharges(other.molinfo);
+        other.amber_ljs = AtomLJs(other.molinfo);
+        other.amber_masses = AtomMasses(other.molinfo);
+        other.amber_elements = AtomElements(other.molinfo);
+        other.amber_types = AtomStringProperty(other.molinfo);
+        other.born_radii = AtomRadii(other.molinfo);
+        other.amber_screens = AtomFloatProperty(other.molinfo);
+        other.amber_treechains = AtomStringProperty(other.molinfo);
+    }
+
+    amber_ljs.set(molinfo.atomIdx(atom0).value(),
+                  other.molinfo.atomIdx(atom1).value(),
+                  other.amber_ljs, ljparam);
+}
+
+/** Set the LJ exception between atom0 and atom1 to 'ljparam' */
+void AmberParams::set(const AtomID &atom0, const AtomID &atom1, const LJ1264Parameter &ljparam)
+{
+    this->set(atom0, atom1, *this, ljparam);
+}
+
 /** Return the connectivity of the molecule implied by the
     the bonds */
 Connectivity AmberParams::connectivity() const

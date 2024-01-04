@@ -692,6 +692,32 @@ void register_AmberParams_class(){
                 , "" );
         
         }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::LJ1264Parameter const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("ljparam") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::AmberParams &,::SireMM::LJ1264Parameter const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("params1"), bp::arg("ljparam") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::AmberParams::setExcludedAtoms
         
             typedef void ( ::SireMM::AmberParams::*setExcludedAtoms_function_type)( ::SireMM::CLJNBPairs const & ) ;

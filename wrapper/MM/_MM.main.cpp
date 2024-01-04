@@ -301,8 +301,6 @@
 
 #include "LJComponent.pypp.hpp"
 
-#include "LJExceptionID.pypp.hpp"
-
 #include "LJNBPairs.pypp.hpp"
 
 #include "LJParameter.pypp.hpp"
@@ -761,8 +759,6 @@ BOOST_PYTHON_MODULE(_MM){
     register_LJ1264Parameter_class();
 
     register_LJComponent_class();
-
-    register_LJExceptionID_class();
 
     register_LJNBPairs_class();
 
