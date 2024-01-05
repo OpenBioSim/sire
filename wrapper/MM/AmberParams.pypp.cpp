@@ -702,7 +702,7 @@ void register_AmberParams_class(){
                 , set_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("ljparam") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the LJ exception between atom0 and atom1 to ljparam" );
         
         }
         { //::SireMM::AmberParams::set
@@ -715,7 +715,7 @@ void register_AmberParams_class(){
                 , set_function_value
                 , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("params1"), bp::arg("ljparam") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the LJ exception between atom0 in this set and atom1 in the\n  passed set of parameters to ljparam\n" );
         
         }
         { //::SireMM::AmberParams::setExcludedAtoms

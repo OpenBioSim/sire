@@ -149,6 +149,33 @@ void register_AtomLJs_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMM::LJParameter >::clearExceptions
+        
+            typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
+            typedef void ( ::SireMol::AtomProperty< SireMM::LJParameter >::*clearExceptions_function_type)(  ) ;
+            clearExceptions_function_type clearExceptions_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::clearExceptions );
+            
+            AtomLJs_exposer.def( 
+                "clearExceptions"
+                , clearExceptions_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMM::LJParameter >::clearExceptions
+        
+            typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
+            typedef void ( ::SireMol::AtomProperty< SireMM::LJParameter >::*clearExceptions_function_type)( int ) ;
+            clearExceptions_function_type clearExceptions_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::clearExceptions );
+            
+            AtomLJs_exposer.def( 
+                "clearExceptions"
+                , clearExceptions_function_value
+                , ( bp::arg("i") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMM::LJParameter >::copyFrom
         
             typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
@@ -333,6 +360,20 @@ void register_AtomLJs_class(){
         { //::SireMol::AtomProperty< SireMM::LJParameter >::getExceptions
         
             typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
+            typedef ::QList< SireMM::LJException > ( ::SireMol::AtomProperty< SireMM::LJParameter >::*getExceptions_function_type)( int ) const;
+            getExceptions_function_type getExceptions_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::getExceptions );
+            
+            AtomLJs_exposer.def( 
+                "getExceptions"
+                , getExceptions_function_value
+                , ( bp::arg("i") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMM::LJParameter >::getExceptions
+        
+            typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
             typedef ::QList< boost::tuples::tuple< int, int, SireMM::LJ1264Parameter, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > ( ::SireMol::AtomProperty< SireMM::LJParameter >::*getExceptions_function_type)(  ) const;
             getExceptions_function_type getExceptions_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::getExceptions );
             
@@ -366,6 +407,20 @@ void register_AtomLJs_class(){
             AtomLJs_exposer.def( 
                 "hasExceptions"
                 , hasExceptions_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMM::LJParameter >::hasExceptions
+        
+            typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
+            typedef bool ( ::SireMol::AtomProperty< SireMM::LJParameter >::*hasExceptions_function_type)( int ) const;
+            hasExceptions_function_type hasExceptions_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::hasExceptions );
+            
+            AtomLJs_exposer.def( 
+                "hasExceptions"
+                , hasExceptions_function_value
+                , ( bp::arg("i") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -601,6 +656,20 @@ void register_AtomLJs_class(){
                 "set"
                 , set_function_value
                 , ( bp::arg("cgidx"), bp::arg("values") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMM::LJParameter >::set
+        
+            typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMM::LJParameter > & ( ::SireMol::AtomProperty< SireMM::LJParameter >::*set_function_type)( int,::QList< SireMM::LJException > const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::set );
+            
+            AtomLJs_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("values") )
                 , bp::return_self< >()
                 , "" );
         
