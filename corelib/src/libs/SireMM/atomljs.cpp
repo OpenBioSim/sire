@@ -1228,8 +1228,18 @@ AtomProperty<LJParameter> &AtomProperty<LJParameter>::set(int i, int j,
                                                           AtomProperty<LJParameter> &other,
                                                           const LJ1264Parameter &value)
 {
-    i = SireID::Index(i).map(this->nAtoms());
-    j = SireID::Index(j).map(other.nAtoms());
+    const int nats_i = this->nAtoms();
+    const int nats_j = this->nAtoms();
+
+    if (i < 0 or i >= nats_i)
+    {
+        i = SireID::Index(i).map(nats_i);
+    }
+
+    if (j < 0 or j >= nats_j)
+    {
+        j = SireID::Index(j).map(nats_j);
+    }
 
     // we first need to remove any existing exception between these two atoms
     if (this->atom_to_exception.contains(i) and other.atom_to_exception.contains(j))
