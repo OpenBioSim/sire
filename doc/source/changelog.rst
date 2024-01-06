@@ -18,6 +18,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added support for LJ 12-6-4 potentials, plus the ability to read and write
   LJ parameter exceptions to Amber topology files. This fixes issue #125.
 
+* Added peek support to the datastream reader, so that it can recover
+  when it doesn't find the magic value it expects on reading.
+
+* Added functionality to SparseMatrix to make it easier to detect when
+  non-default values have been added, and also to set up a matrix which
+  has a concept of unset values.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
