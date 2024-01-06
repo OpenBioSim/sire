@@ -33,6 +33,7 @@
 
 #include "SireMaths/constants.h"
 
+#include <boost/predef.h>
 #include <boost/static_assert.hpp>
 
 SIRE_BEGIN_HEADER
@@ -161,6 +162,23 @@ namespace SireUnits
             {
             }
 
+#if BOOST_COMP_GNUC
+            static const char *typeName()
+            {
+                static QString typenam = QString("SireUnits::Dimension::PhysUnit<%1-%2-%3-%4-%5-%6-%7>")
+                                             .arg(M)
+                                             .arg(L)
+                                             .arg(T)
+                                             .arg(C)
+                                             .arg(t)
+                                             .arg(Q)
+                                             .arg(A);
+
+                static auto s = typenam.toStdString();
+
+                return s.c_str();
+            }
+#else
         private:
             template <bool isRegistered>
             static const char *_typeName()
@@ -190,6 +208,7 @@ namespace SireUnits
             {
                 return _typeName<QMetaTypeId2<PhysUnit<M, L, T, C, t, Q, A>>::Defined>();
             }
+#endif
 
             const char *what() const
             {

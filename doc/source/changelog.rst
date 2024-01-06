@@ -25,6 +25,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
 
+* Add more automatic conversions, so that string will more readily auto-convert
+  to units where possible.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
