@@ -194,8 +194,8 @@ namespace SireUnits
                 typedef PhysUnit<M, L, T, C, t, Q, A> PhysUnitT;
 
                 return std::conditional<QMetaTypeId2<PhysUnitT>::Defined,
-                                        detail::_simple_typename<PhysUnitT>,
-                                        detail::_registered_typename<PhysUnitT>>::type::typeName();
+                                        detail::_registered_typename<PhysUnitT>,
+                                        detail::_simple_typename<PhysUnitT>>::type::typeName();
             }
 
             const char *what() const
