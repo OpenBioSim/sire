@@ -122,7 +122,34 @@ namespace SireUnits
 
         namespace detail
         {
+            template <class T>
+            struct _simple_typename
+            {
+                static const char *typeName()
+                {
+                    static QString typenam = QString("SireUnits::Dimension::PhysUnit<%1-%2-%3-%4-%5-%6-%7>")
+                                                 .arg(T::MASS())
+                                                 .arg(T::LENGTH())
+                                                 .arg(T::TIME())
+                                                 .arg(T::CHARGE())
+                                                 .arg(T::TEMPERATURE())
+                                                 .arg(T::QUANTITY())
+                                                 .arg(T::ANGLE());
 
+                    static auto s = typenam.toStdString();
+
+                    return s.c_str();
+                }
+            };
+
+            template <class T>
+            struct _registered_typename
+            {
+                static const char *typeName()
+                {
+                    return QMetaType::typeName(qMetaTypeId<T>());
+                }
+            };
         } // namespace detail
 
         /** Construct a physical unit with the specified
@@ -162,53 +189,14 @@ namespace SireUnits
             {
             }
 
-#if BOOST_COMP_GNUC
             static const char *typeName()
             {
-                static QString typenam = QString("SireUnits::Dimension::PhysUnit<%1-%2-%3-%4-%5-%6-%7>")
-                                             .arg(M)
-                                             .arg(L)
-                                             .arg(T)
-                                             .arg(C)
-                                             .arg(t)
-                                             .arg(Q)
-                                             .arg(A);
+                typedef PhysUnit<M, L, T, C, t, Q, A> PhysUnitT;
 
-                static auto s = typenam.toStdString();
-
-                return s.c_str();
+                return std::conditional<QMetaTypeId2<PhysUnitT>::Defined,
+                                        detail::_simple_typename<PhysUnitT>,
+                                        detail::_registered_typename<PhysUnitT>>::type::typeName();
             }
-#else
-        private:
-            template <bool isRegistered>
-            static const char *_typeName()
-            {
-                static QString typenam = QString("SireUnits::Dimension::PhysUnit<%1-%2-%3-%4-%5-%6-%7>")
-                                             .arg(M)
-                                             .arg(L)
-                                             .arg(T)
-                                             .arg(C)
-                                             .arg(t)
-                                             .arg(Q)
-                                             .arg(A);
-
-                static auto s = typenam.toStdString();
-
-                return s.c_str();
-            }
-
-            template <>
-            static const char *_typeName<true>()
-            {
-                return QMetaType::typeName(qMetaTypeId<SireUnits::Dimension::PhysUnit<M, L, T, C, t, Q, A>>());
-            }
-
-        public:
-            static const char *typeName()
-            {
-                return _typeName<QMetaTypeId2<PhysUnit<M, L, T, C, t, Q, A>>::Defined>();
-            }
-#endif
 
             const char *what() const
             {
