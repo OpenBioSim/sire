@@ -597,16 +597,20 @@ void AmberPrm::rebuildLJParameters()
                     }
 
                     // already in internal units (kcal mol-1, Angstroms)
-                    auto lj_exception = LJ1264Parameter(a, b, c);
+                    auto lj_exception = LJException(LJ1264Parameter(a, b, c));
 
                     if (not lj_exceptions.contains(i))
-                        lj_exceptions.insert(i, QHash<quint64, LJ1264Parameter>());
+                    {
+                        lj_exceptions.insert(i, QList<LJException>());
+                    }
 
                     if (not lj_exceptions.contains(j))
-                        lj_exceptions.insert(j, QHash<quint64, LJ1264Parameter>());
+                    {
+                        lj_exceptions.insert(j, QList<LJException>());
+                    }
 
-                    lj_exceptions[i].insert(j, lj_exception);
-                    lj_exceptions[j].insert(i, lj_exception);
+                    lj_exceptions[i].append(lj_exception);
+                    lj_exceptions[j].append(lj_exception.getPair());
                 }
             }
         }
@@ -4199,10 +4203,15 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
                 element = Element(int(atomic_num_array[atom_idx]));
             }
 
+            auto amber_type = amber_type_array[atom_idx] - 1;
+
             params.add(AtomNum(atom_num), (charge_array[atom_idx] / AMBERCHARGECONV) * mod_electron,
-                       mass_array[atom_idx] * g_per_mol, element, lj_data[amber_type_array[atom_idx] - 1],
+                       mass_array[atom_idx] * g_per_mol, element, lj_data[amber_type],
                        ambertype_array[atom_idx].trimmed(), born_radii_array[atom_idx] * angstrom,
                        born_screening_array[atom_idx], treechains_array[atom_idx]);
+
+            if (lj_exceptions.contains(amber_type))
+                params.set(AtomNum(atom_num), lj_exceptions[amber_type]);
         }
 
         return params;
@@ -4654,150 +4663,6 @@ QString AmberPrm::formatDescription() const
     return QObject::tr("Amber topology/parameter format files supported from Amber 7 upwards.");
 }
 
-/** Add all of the LJ exceptions to the molecules */
-void AmberPrm::addLJExceptions(QVector<MolEditor> &mols, const PropertyMap &map) const
-{
-    const auto ljprop = map["LJ"];
-    const auto paramsprop = map["parameters"];
-
-    if (ljprop.hasValue() or paramsprop.hasValue() or lj_exceptions.isEmpty())
-        return;
-
-    // we need to add the LJ exceptions
-    const auto *atom_type_array = this->intData("ATOM_TYPE_INDEX").constData();
-
-    const int nmols = mols.count();
-
-    if (nmols == 0)
-        return;
-
-    QVector<int> start_atom_idx(nmols, 0);
-    QVector<AmberParams> params(nmols);
-    QVector<bool> params_changed(nmols, false);
-
-    auto *start_atom_idx_array = start_atom_idx.data();
-    auto *params_data = params.data();
-    auto *params_changed_data = params_changed.data();
-
-    auto *mols_array = mols.data();
-    params[0] = mols_array[0].property(paramsprop.source()).asA<AmberParams>();
-
-    for (int i = 1; i < nmols; ++i)
-    {
-        start_atom_idx_array[i] = start_atom_idx_array[i - 1] + mols_array[i - 1].nAtoms();
-        params[i] = mols_array[i].property(paramsprop.source()).asA<AmberParams>();
-    }
-
-    SireBase::ProgressBar bar("Adding LJ exceptions", nmols);
-    bar.setSpeedUnit("mols / sec");
-    bar = bar.enter();
-
-    for (int imol = 0; imol < nmols; ++imol)
-    {
-        auto &mol_i = mols_array[imol];
-
-        const int natoms_i = mol_i.nAtoms();
-
-        if (natoms_i == 0)
-            continue;
-
-        const int start_atom_i = start_atom_idx_array[imol];
-
-        QVector<int> atoms_with_exceptions;
-        atoms_with_exceptions.reserve(natoms_i);
-
-        for (int iatom = 0; iatom < natoms_i; ++iatom)
-        {
-            auto atom_type = atom_type_array[start_atom_i + iatom];
-
-            if (lj_exceptions.contains(atom_type))
-            {
-                atoms_with_exceptions.append(iatom);
-            }
-        }
-
-        if (atoms_with_exceptions.isEmpty())
-            continue;
-
-        const auto *atoms_with_exceptions_data = atoms_with_exceptions.constData();
-        const int natoms_with_exceptions = atoms_with_exceptions.count();
-
-        auto &params_i = params_data[imol];
-
-        // add any exceptions with this molecule
-        for (int i = 0; i < natoms_with_exceptions; ++i)
-        {
-            auto atom_idx_i = SireMol::AtomIdx(atoms_with_exceptions_data[i]);
-            auto atom_type_i = atom_type_array[start_atom_i + atom_idx_i.value()];
-
-            const auto &exceptions_i = *(lj_exceptions.constFind(atom_type_i));
-
-            for (int j = i; j < natoms_with_exceptions; ++j)
-            {
-                auto atom_idx_j = SireMol::AtomIdx(atoms_with_exceptions_data[j]);
-                auto atom_type_j = atom_type_array[start_atom_i + atom_idx_j.value()];
-
-                if (exceptions_i.contains(atom_type_j))
-                {
-                    // this is an exception
-                    params_i.set(atom_idx_i, atom_idx_j, exceptions_i.value(atom_type_j));
-                    params_changed_data[imol] = true;
-                }
-            }
-        }
-
-        // now any with the other molecules
-        for (int jmol = imol + 1; jmol < nmols; ++jmol)
-        {
-            auto &mol_j = mols_array[jmol];
-            const int natoms_j = mol_j.nAtoms();
-
-            if (natoms_j == 0)
-                continue;
-
-            const int start_atom_j = start_atom_idx_array[jmol];
-
-            auto &params_j = params_data[jmol];
-
-            for (int i = 0; i < natoms_with_exceptions; ++i)
-            {
-                auto atom_idx_i = SireMol::AtomIdx(atoms_with_exceptions[i]);
-                auto atom_type_i = atom_type_array[start_atom_i + atom_idx_i.value()];
-
-                const auto &exceptions_i = *(lj_exceptions.constFind(atom_type_i));
-
-                for (int jatom = 0; jatom < natoms_j; ++jatom)
-                {
-                    auto atom_idx_j = SireMol::AtomIdx(jatom);
-                    auto atom_type_j = atom_type_array[start_atom_j + jatom];
-
-                    if (exceptions_i.contains(atom_type_j))
-                    {
-                        // this is an exception
-                        params_i.set(atom_idx_i, atom_idx_j, params_j, exceptions_i.value(atom_type_j));
-                        params_changed_data[imol] = true;
-                        params_changed_data[jmol] = true;
-                    }
-                }
-            }
-        }
-
-        bar.tick();
-    }
-
-    for (int imol = 0; imol < nmols; ++imol)
-    {
-        if (params_changed_data[imol])
-        {
-            mols_array[imol].updateProperty(paramsprop.source(), params_data[imol]);
-            mols_array[imol].updateProperty(ljprop.source(), params_data[imol].ljs());
-        }
-    }
-
-    bar.success();
-    bar.exit();
-}
-
 /** Return the System that is described by this AmberPrm file. Note that
     the molecules in this system don't have any coordinates (as these aren't
     provided by the file */
@@ -4827,11 +4692,6 @@ System AmberPrm::startSystem(const PropertyMap &map) const
         {
             mols_array[i] = this->getMoleculeEditor(i, map);
         }
-    }
-
-    if (not lj_exceptions.isEmpty())
-    {
-        this->addLJExceptions(mols, map);
     }
 
     MoleculeGroup molgroup("all");

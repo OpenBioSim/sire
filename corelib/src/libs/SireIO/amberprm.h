@@ -34,6 +34,7 @@
 
 #include "SireMM/mmdetail.h"
 
+#include "SireMM/atomljs.h"
 #include "SireMM/ljparameter.h"
 #include "SireMM/lj1264parameter.h"
 
@@ -191,8 +192,6 @@ namespace SireIO
 
         SireMol::MolEditor getMoleculeEditor(int molidx, const PropertyMap &map) const;
 
-        void addLJExceptions(QVector<SireMol::MolEditor> &mols, const PropertyMap &map) const;
-
         QVector<int> getAtomIndexToMolIndex() const;
 
         /** Function to process all flags, returning the parsing score */
@@ -215,7 +214,7 @@ namespace SireIO
         QVector<SireMM::LJParameter> lj_data;
 
         /** All of the LJ exceptions, indexed by LJ parameter ID */
-        QHash<quint64, QHash<quint64, SireMM::LJ1264Parameter>> lj_exceptions;
+        QHash<quint64, QList<SireMM::LJException>> lj_exceptions;
 
         /** The indicies of the bonds for each molecule */
         QVector<QVector<int>> bonds_inc_h, bonds_exc_h;

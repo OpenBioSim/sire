@@ -1707,13 +1707,8 @@ AtomStringProperty AmberParams::treeChains() const
     return amber_treechains;
 }
 
-/** Set the atom parameters for the specified atom to the provided values */
-void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, SireUnits::Dimension::MolarMass mass,
-                      const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
-                      SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain)
+void AmberParams::createContainers()
 {
-    CGAtomIdx idx = molinfo.cgAtomIdx(atom);
-
     if (amber_charges.isEmpty())
     {
         // set up the objects to hold these parameters
@@ -1726,6 +1721,16 @@ void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, S
         amber_screens = AtomFloatProperty(molinfo);
         amber_treechains = AtomStringProperty(molinfo);
     }
+}
+
+/** Set the atom parameters for the specified atom to the provided values */
+void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, SireUnits::Dimension::MolarMass mass,
+                      const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
+                      SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain)
+{
+    createContainers();
+
+    CGAtomIdx idx = molinfo.cgAtomIdx(atom);
 
     amber_charges.set(idx, charge);
     amber_ljs.set(idx, ljparam);
@@ -1737,37 +1742,23 @@ void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, S
     amber_treechains.set(idx, treechain);
 }
 
+/** Set the LJ exceptions for the specified atom - this replaces any
+ *  existing exceptions
+ */
+void AmberParams::set(const AtomID &atom, const QList<LJException> &exceptions)
+{
+    createContainers();
+    amber_ljs.set(molinfo.atomIdx(atom).value(), exceptions);
+}
+
 /** Set the LJ exception between atom0 in this set and atom1 in the
  *  passed set of parameters to 'ljparam'
  */
 void AmberParams::set(const AtomID &atom0, const AtomID &atom1,
                       AmberParams &other, const LJ1264Parameter &ljparam)
 {
-    if (amber_charges.isEmpty())
-    {
-        // set up the objects to hold these parameters
-        amber_charges = AtomCharges(molinfo);
-        amber_ljs = AtomLJs(molinfo);
-        amber_masses = AtomMasses(molinfo);
-        amber_elements = AtomElements(molinfo);
-        amber_types = AtomStringProperty(molinfo);
-        born_radii = AtomRadii(molinfo);
-        amber_screens = AtomFloatProperty(molinfo);
-        amber_treechains = AtomStringProperty(molinfo);
-    }
-
-    if (other.amber_charges.isEmpty())
-    {
-        // set up the objects to hold these parameters
-        other.amber_charges = AtomCharges(other.molinfo);
-        other.amber_ljs = AtomLJs(other.molinfo);
-        other.amber_masses = AtomMasses(other.molinfo);
-        other.amber_elements = AtomElements(other.molinfo);
-        other.amber_types = AtomStringProperty(other.molinfo);
-        other.born_radii = AtomRadii(other.molinfo);
-        other.amber_screens = AtomFloatProperty(other.molinfo);
-        other.amber_treechains = AtomStringProperty(other.molinfo);
-    }
+    createContainers();
+    other.createContainers();
 
     amber_ljs.set(molinfo.atomIdx(atom0).value(),
                   other.molinfo.atomIdx(atom1).value(),

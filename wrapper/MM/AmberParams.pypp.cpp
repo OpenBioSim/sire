@@ -718,6 +718,19 @@ void register_AmberParams_class(){
                 , "Set the LJ exception between atom0 in this set and atom1 in the\n  passed set of parameters to ljparam\n" );
         
         }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::QList< SireMM::LJException > const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom"), bp::arg("exceptions") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMM::AmberParams::setExcludedAtoms
         
             typedef void ( ::SireMM::AmberParams::*setExcludedAtoms_function_type)( ::SireMM::CLJNBPairs const & ) ;
