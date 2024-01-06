@@ -111,3 +111,86 @@ def test_reverse_dihedral(tmpdir, openmm_interchange_mols):
             included += 1
 
     assert included == 1
+
+
+def test_lj_1264_exceptions(apo_1264):
+    mols = apo_1264
+
+    # mols[3] is an ion with LJ 12-6-4 exceptions - check this is the case
+    ex = mols[0].property("LJ").get_exceptions(mols[1].property("LJ"))
+    assert len(ex) == 0
+
+    ex = mols[0].property("LJ").get_exceptions(mols[2].property("LJ"))
+    assert len(ex) == 0
+
+    ex = mols[0].property("LJ").get_exceptions(mols[3].property("LJ"))
+    assert len(ex) == 4647
+
+    # for some reason, there aren't any 12-6-4 exceptions involving
+    # amber type HO
+    assert len(ex) == mols[0]["atom property ambertype != HO"].num_atoms()
+
+    # there should be one exception with a water molecule - check this
+    # for a couple of water molecules
+    water_ex = mols["water[0]"].property("LJ").get_exceptions(mols[3].property("LJ"))
+    assert len(water_ex) == 1
+
+    water_ex2 = mols["water[10]"].property("LJ").get_exceptions(mols[3].property("LJ"))
+    assert len(water_ex2) == 1
+
+    assert water_ex == water_ex2
+
+    assert water_ex[0][0] == 0
+    assert water_ex[0][1] == 0
+    assert water_ex[0][2] == sr.mm.LJ1264Parameter(
+        "127672 kcal mol-1 Å^12", "1497.12 kcal mol-1 Å^6", "1 kcal mol-1 Å^4"
+    )
+
+    # there should be one exception with the ion - its self 12-6-4 term
+    self_ex = mols[3].property("LJ").get_exceptions(mols[3].property("LJ"))
+    assert len(self_ex) == 1
+
+
+@pytest.mark.slow
+def test_lj_1264_load_save(tmpdir, apo_1264):
+    mols = apo_1264
+
+    dir = tmpdir.mkdir("test_lj_1264_load_save")
+
+    f = sr.save(mols, dir.join("output"), format=["prm7", "rst7"])
+
+    mols2 = sr.load(f)
+
+    assert mols[0:10].energy().value() == pytest.approx(
+        mols2[0:10].energy().value(), 1e-3
+    )
+
+    # mols[3] is an ion with LJ 12-6-4 exceptions - check this is the case
+    ex = mols2[0].property("LJ").get_exceptions(mols2[1].property("LJ"))
+    assert len(ex) == 0
+
+    ex = mols2[0].property("LJ").get_exceptions(mols2[2].property("LJ"))
+    assert len(ex) == 0
+
+    ex = mols2[0].property("LJ").get_exceptions(mols2[3].property("LJ"))
+    assert len(ex) == 4647
+
+    # for some reason, there aren't any 12-6-4 exceptions involving
+    # amber type HO
+    assert len(ex) == mols2[0]["atom property ambertype != HO"].num_atoms()
+
+    # there should be one exception with a water molecule - check this
+    # for a couple of water molecules
+    water_ex = mols2["water[0]"].property("LJ").get_exceptions(mols2[3].property("LJ"))
+    assert len(water_ex) == 1
+
+    water_ex2 = (
+        mols2["water[10]"].property("LJ").get_exceptions(mols2[3].property("LJ"))
+    )
+    assert len(water_ex2) == 1
+
+    assert water_ex == water_ex2
+
+    # there should be one exception with the ion - its self 12-6-4 term
+    self_ex = mols2[3].property("LJ").get_exceptions(mols2[3].property("LJ"))
+    assert len(self_ex) == 1

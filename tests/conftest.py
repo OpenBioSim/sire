@@ -178,6 +178,11 @@ def testfile_cache_dir():
 
 
 @pytest.fixture(scope="session")
+def apo_1264():
+    return sr.load_test_files("apo_1264.prm7", "apo_1264.rst7")
+
+
+@pytest.fixture(scope="session")
 def neopentane_methane():
     return sr.load_test_files("neo_meth_scratch.bss")
 

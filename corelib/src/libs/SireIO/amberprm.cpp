@@ -2525,14 +2525,19 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     {
         // we need to go through each atom and work out if the atom type
         // is unique
-        QVector<LJParameter> ljparams;
+        QVector<std::pair<LJParameter, QList<LJException>>> ljparams;
         QVector<QVector<qint64>> atom_types(params.count());
         auto atom_types_data = atom_types.data();
+
+        bool has_ccoeff = false;
+        bool has_ljexceptions = false;
 
         for (int i = 0; i < params.count(); ++i)
         {
             const auto info = params_data[i].info();
             const auto ljs = params_data[i].ljs();
+
+            const bool mol_has_lj_exceptions = ljs.hasExceptions();
 
             QVector<qint64> mol_atom_types(info.nAtoms());
             auto mol_atom_types_data = mol_atom_types.data();
@@ -2541,11 +2546,33 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             {
                 const LJParameter lj = ljs[info.cgAtomIdx(AtomIdx(j))];
 
-                int idx = ljparams.indexOf(lj);
+                QList<LJException> ljexceptions;
+
+                if (mol_has_lj_exceptions)
+                {
+                    has_ljexceptions = true;
+                    ljexceptions = ljs.getExceptions(j);
+
+                    if (not has_ccoeff)
+                    {
+                        for (const auto &ljexception : ljexceptions)
+                        {
+                            if (ljexception.value().hasC())
+                            {
+                                has_ccoeff = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                auto lj_with_exceptions = std::make_pair(lj, ljexceptions);
+
+                int idx = ljparams.indexOf(lj_with_exceptions);
 
                 if (idx == -1)
                 {
-                    ljparams.append(lj);
+                    ljparams.append(lj_with_exceptions);
                     mol_atom_types_data[j] = ljparams.count();
                 }
                 else
@@ -2565,6 +2592,12 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         QVector<qint64> ico(ntypes * ntypes);
         QVector<double> cn1((ntypes * (ntypes + 1)) / 2);
         QVector<double> cn2((ntypes * (ntypes + 1)) / 2);
+        QVector<double> cn3;
+
+        if (has_ccoeff)
+        {
+            cn3 = QVector<double>((ntypes * (ntypes + 1)) / 2, 0.0);
+        }
 
         auto ico_data = ico.data();
         auto cn1_data = cn1.data();
@@ -2576,13 +2609,13 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
         for (int i = 0; i < ntypes; ++i)
         {
-            const auto &lj0 = ljparams_data[i];
+            const auto &lj0 = std::get<0>(ljparams_data[i]);
 
             // now we need to (wastefully) save the A/B parameters for
             // all mixed LJ parameters i+j
             for (int j = 0; j < i; ++j)
             {
-                LJParameter lj01 = lj0.combineArithmetic(ljparams.constData()[j]);
+                LJParameter lj01 = lj0.combineArithmetic(std::get<0>(ljparams.constData()[j]));
 
                 cn1_data[lj_idx] = lj01.A();
                 cn2_data[lj_idx] = lj01.B();
@@ -2602,13 +2635,92 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             ico_data[i * ntypes + i] = lj_idx;
         }
 
+        if (has_ljexceptions)
+        {
+            int check_lj_idx = lj_idx;
+
+            // go through every pair of parameters and see if they have
+            // an exception - if they do, then update the arrays to have
+            // the exception values
+            int lj_idx = 0;
+
+            for (int i = 0; i < ntypes; ++i)
+            {
+                const auto &lj_exceptions0 = std::get<1>(ljparams_data[i]);
+
+                if (lj_exceptions0.isEmpty())
+                {
+                    lj_idx += (i + 1);
+                    continue;
+                }
+
+                for (int j = 0; j < i; ++j)
+                {
+                    const auto &lj_exceptions1 = std::get<1>(ljparams_data[j]);
+
+                    if (lj_exceptions1.isEmpty())
+                    {
+                        lj_idx += 1;
+                        continue;
+                    }
+
+                    // see if there is a match - use the first match
+                    bool found_match = false;
+
+                    for (const auto &lj_exception0 : lj_exceptions0)
+                    {
+                        for (const auto &lj_exception1 : lj_exceptions1)
+                        {
+                            if (lj_exception0.pairsWith(lj_exception1))
+                            {
+                                // we have a match - update the arrays
+                                found_match = true;
+                                const auto &lj = lj_exception0.value();
+
+                                cn1_data[lj_idx] = lj.A();
+                                cn2_data[lj_idx] = lj.B();
+
+                                if (lj_exception0.value().hasC())
+                                {
+                                    cn3[lj_idx] = lj.C();
+                                }
+
+                                break;
+                            }
+                        }
+
+                        if (found_match)
+                            break;
+                    }
+
+                    lj_idx += 1;
+                }
+
+                lj_idx += 1;
+            }
+
+            if (lj_idx != check_lj_idx)
+            {
+                throw SireError::program_bug(QObject::tr("The number of LJ parameters with exceptions (%1) does not match the number of LJ parameters (%2)")
+                                                 .arg(lj_idx)
+                                                 .arg(check_lj_idx),
+                                             CODELOC);
+            }
+        }
+
+        QStringList cn3_strings;
+
+        if (has_ccoeff)
+        {
+            cn3_strings = writeFloatData(cn3, AmberFormat(AmberPrm::FLOAT, 5, 16, 8));
+        }
+
         // now return all of the arrays
         return std::make_tuple(writeIntData(collapse(atom_types), AmberFormat(AmberPrm::INTEGER, 10, 8)),
                                writeIntData(ico, AmberFormat(AmberPrm::INTEGER, 10, 8)),
                                writeFloatData(cn1, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)),
                                writeFloatData(cn2, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)),
-                               QStringList() // this will eventually be the LJ C coefficients
-        );
+                               cn3_strings);
     };
 
     // function used to generate the text for the excluded atoms
@@ -3486,6 +3598,11 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             lines += writeFloatData(box_dims, AmberFormat(AmberPrm::FLOAT, 5, 16, 8));
         }
     }
+
+    // we currently only support fixed-charge forcefields (IPOL = 0)
+    lines.append("%FLAG IPOL");
+    lines.append("%FORMAT(1I8)");
+    lines.append("       0");
 
     // we don't currently support IFCAP > 0, IFPERT > 0 or IFPOL > 0
 
