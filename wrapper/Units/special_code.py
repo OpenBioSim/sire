@@ -49,9 +49,7 @@ def findGlobals():
 
             if match:
                 name = match.group(1)
-                print(
-                    '    scope().attr("%s") = %s;\n' % (name, name), file=FILE
-                )
+                print('    scope().attr("%s") = %s;\n' % (name, name), file=FILE)
 
     # add Celsius and Fahrenheit manually
     print('    scope().attr("celsius") = celsius;\n', file=FILE)
@@ -118,5 +116,32 @@ special_code = {
 implicitly_convertible = [
     ("SireUnits::Dimension::TempBase", "SireUnits::Dimension::Temperature"),
     ("double", "SireUnits::Dimension::GeneralUnit"),
-    ("QString", "SireUnits::Dimension::GeneralUnit")
+    ("QString", "SireUnits::Dimension::GeneralUnit"),
+    ("QString", "SireUnits::Dimension::Mass"),
+    ("QString", "SireUnits::Dimension::MolarMass"),
+    ("QString", "SireUnits::Dimension::Length"),
+    ("QString", "SireUnits::Dimension::Time"),
+    ("QString", "SireUnits::Dimension::Charge"),
+    ("QString", "SireUnits::Dimension::MolarCharge"),
+    ("QString", "SireUnits::Dimension::Temperature"),
+    ("QString", "SireUnits::Dimension::Angle"),
+    ("QString", "SireUnits::Dimension::Area"),
+    ("QString", "SireUnits::Dimension::Volume"),
+    ("QString", "SireUnits::Dimension::Velocity"),
+    ("QString", "SireUnits::Dimension::AngularVelocity"),
+    ("QString", "SireUnits::Dimension::Acceleration"),
+    ("QString", "SireUnits::Dimension::AngularAcceleration"),
+    ("QString", "SireUnits::Dimension::Energy"),
+    ("QString", "SireUnits::Dimension::MolarEnergy"),
+    ("QString", "SireUnits::Dimension::Power"),
+    ("QString", "SireUnits::Dimension::MolarPower"),
+    ("QString", "SireUnits::Dimension::Density"),
+    ("QString", "SireUnits::Dimension::MolarDensity"),
+    ("QString", "SireUnits::Dimension::Force"),
+    ("QString", "SireUnits::Dimension::Pressure"),
+    ("QString", "SireUnits::Dimension::Capacitance"),
+    ("QString", "SireUnits::Dimension::Current"),
+    ("QString", "SireUnits::Dimension::Potential"),
+    ("QString", "SireUnits::Dimension::HarmonicBondConstant"),
+    ("QString", "SireUnits::Dimension::HarmonicAngleConstant"),
 ]
