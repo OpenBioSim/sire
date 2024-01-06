@@ -140,15 +140,29 @@ def test_lj_1264_exceptions(apo_1264):
 
     assert water_ex == water_ex2
 
+    expected = sr.mm.LJ1264Parameter(
+        "127671.961 kcal mol-1 Å^12", "1497.11929 kcal mol-1 Å^6", "1 kcal mol-1 Å^4"
+    )
+
     assert water_ex[0][0] == 0
     assert water_ex[0][1] == 0
-    assert water_ex[0][2] == sr.mm.LJ1264Parameter(
-        "127672 kcal mol-1 Å^12", "1497.12 kcal mol-1 Å^6", "1 kcal mol-1 Å^4"
-    )
+    assert water_ex[0][2].a() == pytest.approx(expected.a(), 1e-3)
+    assert water_ex[0][2].b() == pytest.approx(expected.b(), 1e-3)
+    assert water_ex[0][2].c() == pytest.approx(expected.c(), 1e-3)
 
     # there should be one exception with the ion - its self 12-6-4 term
     self_ex = mols[3].property("LJ").get_exceptions(mols[3].property("LJ"))
     assert len(self_ex) == 1
+
+    expected = sr.mm.LJ1264Parameter(
+        "688.170884 kcal mol-1 Å^12",
+        "570.788131 kcal mol-1 Å^6",
+        "0.0332409972 kcal mol-1 Å^4",
+    )
+
+    assert self_ex[0][2].a() == pytest.approx(expected.a(), 1e-3)
+    assert self_ex[0][2].b() == pytest.approx(expected.b(), 1e-3)
+    assert self_ex[0][2].c() == pytest.approx(expected.c(), 1e-3)
 
 
 @pytest.mark.slow
@@ -191,6 +205,26 @@ def test_lj_1264_load_save(tmpdir, apo_1264):
 
     assert water_ex == water_ex2
 
+    expected = sr.mm.LJ1264Parameter(
+        "127671.961 kcal mol-1 Å^12", "1497.11929 kcal mol-1 Å^6", "1 kcal mol-1 Å^4"
+    )
+
+    assert water_ex[0][0] == 0
+    assert water_ex[0][1] == 0
+    assert water_ex[0][2].a() == pytest.approx(expected.a(), 1e-3)
+    assert water_ex[0][2].b() == pytest.approx(expected.b(), 1e-3)
+    assert water_ex[0][2].c() == pytest.approx(expected.c(), 1e-3)
+
     # there should be one exception with the ion - its self 12-6-4 term
     self_ex = mols2[3].property("LJ").get_exceptions(mols2[3].property("LJ"))
     assert len(self_ex) == 1
+
+    expected = sr.mm.LJ1264Parameter(
+        "688.170884 kcal mol-1 Å^12",
+        "570.788131 kcal mol-1 Å^6",
+        "0.0332409972 kcal mol-1 Å^4",
+    )
+
+    assert self_ex[0][2].a() == pytest.approx(expected.a(), 1e-3)
+    assert self_ex[0][2].b() == pytest.approx(expected.b(), 1e-3)
+    assert self_ex[0][2].c() == pytest.approx(expected.c(), 1e-3)
