@@ -126,7 +126,8 @@ QDataStream &operator<<(QDataStream &ds, const AmberPrm &parm)
     SharedDataStream sds(ds);
 
     sds << parm.flag_to_line << parm.int_data << parm.float_data << parm.string_data << parm.ffield
-        << parm.lj_exceptions << static_cast<const MoleculeParser &>(parm);
+        << parm.lj_exceptions << parm.warns << parm.comb_rules
+        << static_cast<const MoleculeParser &>(parm);
 
     return ds;
 }
@@ -523,6 +524,9 @@ void AmberPrm::rebuildLJParameters()
     // so should be treated as exceptions.
     const bool has_c_coeffs = not ccoeffs.isEmpty();
 
+    bool use_arithmetic_combining_rules = false;
+    bool use_geometric_combining_rules = false;
+
     for (int i = 0; i < ntypes; ++i)
     {
         const auto &lj_i = lj_data_array[i];
@@ -566,6 +570,18 @@ void AmberPrm::rebuildLJParameters()
                         expect = lj_i.combine(lj_j, LJParameter::GEOMETRIC);
 
                         is_exception = std::abs(lj_ij.sigma().value() - expect.sigma().value()) > 1e-6;
+
+                        if (not is_exception)
+                        {
+                            if (has_c_coeffs)
+                                use_geometric_combining_rules = ccoeffs_data[idx - 1] != 0;
+                            else
+                                use_geometric_combining_rules = true;
+                        }
+                    }
+                    else
+                    {
+                        use_arithmetic_combining_rules = true;
                     }
                 }
                 else
@@ -614,6 +630,23 @@ void AmberPrm::rebuildLJParameters()
                 }
             }
         }
+    }
+
+    if (use_arithmetic_combining_rules and use_geometric_combining_rules)
+    {
+        warns.append(QObject::tr("The LJ parameters in this Amber Parm file use both arithmetic and geometric "
+                                 "combining rules. Sire will use arithmetic combining rules for all LJ "
+                                 "parameters."));
+        use_geometric_combining_rules = false;
+    }
+
+    if (use_geometric_combining_rules)
+    {
+        this->comb_rules = "geometric";
+    }
+    else
+    {
+        this->comb_rules = "arithmetic";
     }
 }
 
@@ -897,8 +930,11 @@ QDataStream &operator>>(QDataStream &ds, AmberPrm &parm)
         else
             parm.ffield = MMDetail();
 
+        parm.lj_exceptions.clear();
+        parm.comb_rules = "arithmetic";
+
         if (v == 3)
-            sds >> parm.lj_exceptions;
+            sds >> parm.lj_exceptions >> parm.warns >> parm.comb_rules;
         else
             parm.lj_exceptions.clear();
 
@@ -1248,11 +1284,20 @@ void AmberPrm::parse(const PropertyMap &map)
                             "molecules using the forcefield\n%1")
                     .arg(ffield.toString()),
                 CODELOC);
+
+        if (ffield.usesGeometricCombiningRules())
+        {
+            comb_rules = "geometric";
+        }
+        else
+        {
+            comb_rules = "arithmetic";
+        }
     }
     else
     {
         // now guess the forcefield based on what we know about the potential
-        ffield = MMDetail::guessFrom("arithmetic", "coulomb", "lj", 1.0 / 1.2, 0.5, "harmonic", "harmonic", "cosine");
+        ffield = MMDetail::guessFrom(comb_rules, "coulomb", "lj", 1.0 / 1.2, 0.5, "harmonic", "harmonic", "cosine");
     }
 
     // finally, make sure that we have been constructed sane
@@ -2025,7 +2070,8 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberNBDihPart, qint64>> getD
 
 /** Internal function that converts the passed list of parameters into a list
     of text lines */
-QStringList toLines(const QVector<AmberParams> &params, const Space &space, int num_dummies, bool use_parallel = true,
+QStringList toLines(const QVector<AmberParams> &params, const Space &space, int num_dummies,
+                    bool use_geometric_rules, bool use_parallel = true,
                     QStringList *all_errors = 0)
 {
     if (params.isEmpty())
@@ -2617,6 +2663,9 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             {
                 LJParameter lj01 = lj0.combineArithmetic(std::get<0>(ljparams.constData()[j]));
 
+                if (use_geometric_rules)
+                    lj01 = lj0.combineGeometric(std::get<0>(ljparams.constData()[j]));
+
                 cn1_data[lj_idx] = lj01.A();
                 cn2_data[lj_idx] = lj01.B();
 
@@ -2694,6 +2743,34 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
                     }
 
                     lj_idx += 1;
+                }
+
+                // now check for the self-exception
+                bool found_match = false;
+                for (const auto &lj_exception0 : lj_exceptions0)
+                {
+                    for (const auto &lj_exception1 : lj_exceptions0)
+                    {
+                        if (lj_exception0.pairsWith(lj_exception1))
+                        {
+                            // we have a match - update the arrays
+                            found_match = true;
+                            const auto &lj = lj_exception0.value();
+
+                            cn1_data[lj_idx] = lj.A();
+                            cn2_data[lj_idx] = lj.B();
+
+                            if (lj_exception0.value().hasC())
+                            {
+                                cn3[lj_idx] = lj.C();
+                            }
+
+                            break;
+                        }
+                    }
+
+                    if (found_match)
+                        break;
                 }
 
                 lj_idx += 1;
@@ -3625,6 +3702,24 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
         return;
     }
 
+    try
+    {
+        ffield = system.property(map["forcefield"]).asA<MMDetail>();
+    }
+    catch (...)
+    {
+        ffield = MMDetail::guessFrom("arithmetic", "coulomb", "lj", 1.0 / 1.2, 0.5, "harmonic", "harmonic", "cosine");
+    }
+
+    if (ffield.usesGeometricCombiningRules())
+    {
+        comb_rules = "geometric";
+    }
+    else
+    {
+        comb_rules = "arithmetic";
+    }
+
     // generate the AmberParams object for each molecule in the system
     QVector<AmberParams> params(molnums.count());
     auto params_data = params.data();
@@ -3664,6 +3759,7 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
 
     // now convert these into text lines that can be written as the file
     QStringList lines = ::toLines(params, space, num_dummies,
+                                  this->comb_rules == "geometric",
                                   this->usesParallel(), &errors);
 
     if (not errors.isEmpty())
@@ -3696,7 +3792,7 @@ AmberPrm::AmberPrm(const AmberPrm &other)
       bonds_inc_h(other.bonds_inc_h), bonds_exc_h(other.bonds_exc_h), angs_inc_h(other.angs_inc_h),
       angs_exc_h(other.angs_exc_h), dihs_inc_h(other.dihs_inc_h), dihs_exc_h(other.dihs_exc_h),
       excl_atoms(other.excl_atoms), molnum_to_atomnums(other.molnum_to_atomnums), pointers(other.pointers),
-      ffield(other.ffield)
+      ffield(other.ffield), warns(other.warns), comb_rules(other.comb_rules)
 {
 }
 
@@ -3726,6 +3822,8 @@ AmberPrm &AmberPrm::operator=(const AmberPrm &other)
         molnum_to_atomnums = other.molnum_to_atomnums;
         pointers = other.pointers;
         ffield = other.ffield;
+        warns = other.warns;
+        comb_rules = other.comb_rules;
         MoleculeParser::operator=(other);
     }
 
@@ -3768,6 +3866,11 @@ QString AmberPrm::toString() const
             .arg(nResidues())
             .arg(nAtoms());
     }
+}
+
+QStringList AmberPrm::warnings() const
+{
+    return warns;
 }
 
 /** Return the title of the parameter file */

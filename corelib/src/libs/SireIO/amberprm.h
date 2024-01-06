@@ -174,6 +174,8 @@ namespace SireIO
 
         SireMM::MMDetail forcefield() const;
 
+        QStringList warnings() const;
+
     protected:
         SireSystem::System startSystem(const PropertyMap &map) const;
 
@@ -236,6 +238,12 @@ namespace SireIO
 
         /** The forcefield for the molecules in this file */
         SireMM::MMDetail ffield;
+
+        /** Warnings when parsing this file */
+        QStringList warns;
+
+        /** The combining rules defined in this file */
+        QString comb_rules;
     };
 
 } // namespace SireIO
