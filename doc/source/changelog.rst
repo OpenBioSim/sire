@@ -15,6 +15,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
+* Added support for LJ 12-6-4 potentials, plus the ability to read and write
+  LJ parameter exceptions to Amber topology files. This fixes issue #125.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
