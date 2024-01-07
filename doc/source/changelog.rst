@@ -15,6 +15,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
+* Added more automatic conversions, so that string will more readily auto-convert
+  to units where possible. Also added a ``sire.v`` function to make it easier to
+  create vectors of units, e.g. ``sire.v("1.0A", "2.0A", "3.0A")`` will create
+  a ``sire.maths.Vector(1, 2, 3)``, while ``sire.v([3, 4, 5], units="A ps-1")``
+  will create a ``Velocity3D``. This is documented in the units cheat sheet.
+
 * Added support for LJ 12-6-4 potentials, plus the ability to read and write
   LJ parameter exceptions to Amber topology files. This fixes issue #125.
 
@@ -24,9 +30,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added functionality to SparseMatrix to make it easier to detect when
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
-
-* Add more automatic conversions, so that string will more readily auto-convert
-  to units where possible.
 
 * Please add an item to this changelog when you create your PR
 
