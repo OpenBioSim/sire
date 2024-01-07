@@ -27,10 +27,11 @@ namespace SireOpenMM
     public:
         enum CONSTRAIN_TYPE
         {
-            CONSTRAIN_NONE = 0x0000,
-            CONSTRAIN_BONDS = 0x0001,
-            CONSTRAIN_HBONDS = 0x0010,
-            CONSTRAIN_HANGLES = 0x1000
+            CONSTRAIN_NONE = 0x00000000,
+            CONSTRAIN_BONDS = 0x00000001,
+            CONSTRAIN_HBONDS = 0x00000010,
+            CONSTRAIN_HANGLES = 0x00001000,
+            CONSTRAIN_NOT_PERTURBED = 0x00010000
         };
 
         OpenMMMolecule();

@@ -95,24 +95,42 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             constraint_type = CONSTRAIN_HBONDS;
         }
+        else if (c == "h-bonds-not-perturbed" or c == "h_bonds_not_perturbed")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_NOT_PERTURBED;
+        }
         else if (c == "bonds")
         {
             constraint_type = CONSTRAIN_BONDS;
+        }
+        else if (c == "bonds-not-perturbed" or c == "bond_not_perturbed")
+        {
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_PERTURBED;
         }
         else if (c == "h-bonds-h-angles" or c == "h_bonds_h_angles")
         {
             constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
         }
+        else if (c == "h-bonds-h-angles-not-perturbed" or c == "h_bonds_h_angles_not_perturbed")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
+        }
         else if (c == "bonds-h-angles" or c == "bonds_h_angles")
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
+        }
+        else if (c == "bonds-h-angles-not-perturbed" or c == "bonds_h_angles_not_perturbed")
+        {
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
         }
         else
         {
             throw SireError::invalid_key(QObject::tr(
                                              "Unrecognised constraint type '%1'. Valid values are "
-                                             "'none', 'h-bonds', 'bonds', 'h-bonds-h-angles' or "
-                                             "'bonds-h-angles',")
+                                             "'none', 'h-bonds', 'h-bonds-not-perturbed', 'bonds', "
+                                             "'bonds-not-perturbed', 'h-bonds-h-angles', "
+                                             "'h-bonds-h-angles-not-perturbed', "
+                                             "'bonds-h-angles', or 'bonds-h-angles-not-perturbed'.")
                                              .arg(c),
                                          CODELOC);
         }
@@ -134,24 +152,42 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             perturbable_constraint_type = CONSTRAIN_HBONDS;
         }
+        else if (c == "h-bonds-not-perturbed" or c == "h_bonds_not_perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_NOT_PERTURBED;
+        }
         else if (c == "bonds")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS;
+        }
+        else if (c == "bonds-not-perturbed" or c == "bond_not_perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_PERTURBED;
         }
         else if (c == "h-bonds-h-angles" or c == "h_bonds_h_angles")
         {
             perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
         }
+        else if (c == "h-bonds-h-angles-not-perturbed" or c == "h_bonds_h_angles_not_perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
+        }
         else if (c == "bonds-h-angles" or c == "bonds_h_angles")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
+        }
+        else if (c == "bonds-h-angles-not-perturbed" or c == "bonds_h_angles_not_perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
         }
         else
         {
             throw SireError::invalid_key(QObject::tr(
                                              "Unrecognised perturbable constraint type '%1'. Valid values are "
-                                             "'none', 'h-bonds', 'bonds', 'h-bonds-h-angles' or "
-                                             "'bonds-h-angles',")
+                                             "'none', 'h-bonds', 'h-bonds-not-perturbed', 'bonds', "
+                                             "'bonds-not-perturbed', 'h-bonds-h-angles', "
+                                             "'h-bonds-h-angles-not-perturbed', "
+                                             "'bonds-h-angles', or 'bonds-h-angles-not-perturbed'.")
                                              .arg(c),
                                          CODELOC);
         }
@@ -576,22 +612,62 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
-            // add the constraint - this constrains the bond to whatever length it has now
-            const auto delta = coords[atom1] - coords[atom0];
-            auto constraint_length = std::sqrt((delta[0] * delta[0]) +
-                                               (delta[1] * delta[1]) +
-                                               (delta[2] * delta[2]));
+            bool should_constrain_bond = true;
 
-            // use the r0 for the bond if this is close to the measured length and this
-            // is not a perturbable molecule
-            if (not is_perturbable and std::abs(constraint_length - r0) < 0.01)
+            if (is_perturbable and this_constraint_type & CONSTRAIN_NOT_PERTURBED)
             {
-                constraint_length = r0;
+                // we need to see if this bond is being perturbed - if so, then don't constraint
+                auto cgatom0 = idx_to_cgatomidx_data[atom0];
+                auto cgatom1 = idx_to_cgatomidx_data[atom1];
+
+                const auto &masses0 = params.masses();
+                const auto &masses1 = params1.masses();
+
+                auto mass0_0 = masses0.at(cgatom0);
+                auto mass1_0 = masses0.at(cgatom1);
+
+                auto mass0_1 = masses1.at(cgatom0);
+                auto mass1_1 = masses1.at(cgatom1);
+
+                // do the masses change?
+                if (std::abs(mass0_0.value() - mass0_1.value()) > 1e-3 or
+                    std::abs(mass1_0.value() - mass1_1.value()) > 1e-3)
+                {
+                    should_constrain_bond = false;
+                }
+                else
+                {
+                    auto bondparam1 = params1.bonds().value(it.key());
+
+                    double k_1 = bondparam.k() * bond_k_to_openmm;
+                    double r0_1 = bondparam.r0() * bond_r0_to_openmm;
+
+                    if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
+                    {
+                        should_constrain_bond = false;
+                    }
+                }
             }
 
-            this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
-            constrained_pairs.insert(to_pair(atom0, atom1));
-            bond_is_not_constrained = false;
+            if (should_constrain_bond)
+            {
+                // add the constraint - this constrains the bond to whatever length it has now
+                const auto delta = coords[atom1] - coords[atom0];
+                auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                   (delta[1] * delta[1]) +
+                                                   (delta[2] * delta[2]));
+
+                // use the r0 for the bond if this is close to the measured length and this
+                // is not a perturbable molecule
+                if (not is_perturbable and std::abs(constraint_length - r0) < 0.01)
+                {
+                    constraint_length = r0;
+                }
+
+                this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
+                constrained_pairs.insert(to_pair(atom0, atom1));
+                bond_is_not_constrained = false;
+            }
         }
 
         if (include_constrained_energies or bond_is_not_constrained)
@@ -638,24 +714,68 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             // only include the angle X-y-Z if X-Z are not already constrained
             if ((this_constraint_type & CONSTRAIN_HANGLES) and is_h_x_h)
             {
-                const auto delta = coords[atom2] - coords[atom0];
-                auto constraint_length = std::sqrt((delta[0] * delta[0]) +
-                                                   (delta[1] * delta[1]) +
-                                                   (delta[2] * delta[2]));
+                bool should_constrain_angle = true;
 
-                // we can speed up OpenMM by making sure that constraints are
-                // equal if they operate on similar molecules (e.g. all water
-                // constraints are the same. We will check for this if this is
-                // a non-perturbable small molecule
-                if (mol.nAtoms() < 10 and not is_perturbable)
+                if (is_perturbable and this_constraint_type & CONSTRAIN_NOT_PERTURBED)
                 {
-                    constraint_length = getSharedConstraintLength(constraint_length);
+                    // we need to see if this bond is being perturbed - if so, then don't constraint
+                    auto cgatom0 = idx_to_cgatomidx_data[atom0];
+                    auto cgatom1 = idx_to_cgatomidx_data[atom1];
+                    auto cgatom2 = idx_to_cgatomidx_data[atom2];
+
+                    const auto &masses0 = params.masses();
+                    const auto &masses1 = params1.masses();
+
+                    auto mass0_0 = masses0.at(cgatom0);
+                    auto mass1_0 = masses0.at(cgatom1);
+                    auto mass2_0 = masses0.at(cgatom2);
+
+                    auto mass0_1 = masses1.at(cgatom0);
+                    auto mass1_1 = masses1.at(cgatom1);
+                    auto mass2_1 = masses1.at(cgatom2);
+
+                    // do the masses change?
+                    if (std::abs(mass0_0.value() - mass0_1.value()) > 1e-3 or
+                        std::abs(mass1_0.value() - mass1_1.value()) > 1e-3 or
+                        std::abs(mass2_0.value() - mass2_1.value()) > 1e-3)
+                    {
+                        should_constrain_angle = false;
+                    }
+                    else
+                    {
+                        auto angparam1 = params1.angles().value(it.key());
+
+                        double k_1 = angparam.k() * angle_k_to_openmm;
+                        double theta0_1 = angparam.theta0();
+
+                        if (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3)
+                        {
+                            should_constrain_angle = false;
+                        }
+                    }
                 }
 
-                constraints.append(std::make_tuple(atom0, atom2,
-                                                   constraint_length));
-                constrained_pairs.insert(key);
-                angle_is_not_constrained = false;
+                if (should_constrain_angle)
+                {
+                    const auto delta = coords[atom2] - coords[atom0];
+                    auto constraint_length = std::sqrt((delta[0] * delta[0]) +
+                                                       (delta[1] * delta[1]) +
+                                                       (delta[2] * delta[2]));
+
+                    // we can speed up OpenMM by making sure that constraints are
+                    // equal if they operate on similar molecules (e.g. all water
+                    // constraints are the same. We will check for this if this is
+                    // a non-perturbable small molecule
+                    if (mol.nAtoms() < 10 and not is_perturbable)
+                    {
+                        constraint_length = getSharedConstraintLength(constraint_length);
+                    }
+
+                    constraints.append(std::make_tuple(atom0, atom2,
+                                                       constraint_length));
+                    constrained_pairs.insert(key);
+                    angle_is_not_constrained = false;
+                }
             }
         }
         else

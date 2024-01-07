@@ -46,14 +46,30 @@ class Constraint(_Option):
     NONE = "none", "Do not use constraints"
     AUTO = "auto", "Choose the constraints automatically"
     HBONDS = "h_bonds", "Constrain bonds involving hydrogens"
+    HBONDS_NOT_PERTURBED = (
+        "h_bonds_not_perturbed",
+        "Constrain bonds involving hydrogens, but that are not perturbed",
+    )
     BONDS = "bonds", "Constrain all bonds"
+    BONDS_NOT_PERTURBED = (
+        "bonds_not_perturbed",
+        "Constrain all bonds, but that are not perturbed",
+    )
     HBONDS_HANGLES = (
         "h_bonds_h_angles",
         "Constrain bonds and angles involving hydrogens",
     )
+    HBONDS_HANGLES_NOT_PERTURBED = (
+        "h_bonds_h_angles_not_perturbed",
+        "Constrain bonds and angles involving hydrogens, but that are not perturbed",
+    )
     BOND_HANGLES = (
         "bonds_h_angles",
         "Constrain all bonds, and angles involving hydrogens",
+    )
+    BOND_HANGLES_NOT_PERTURBED = (
+        "bonds_h_angles_not_perturbed",
+        "Constrain all bonds, and angles involving hydrogens, but that are not perturbed",
     )
 
     @staticmethod
@@ -88,9 +104,7 @@ class Cutoff(_Option):
 
         if option == "reaction_field" or option == "reaction field":
             return "rf"
-        elif (
-            option == "particle_mesh_ewald" or option == "particle mesh ewald"
-        ):
+        elif option == "particle_mesh_ewald" or option == "particle mesh ewald":
             return "pme"
         elif option == "no_cutoff" or option == "no cutoff":
             return "none"

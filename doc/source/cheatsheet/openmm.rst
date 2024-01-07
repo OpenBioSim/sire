@@ -82,8 +82,11 @@ Available keys and allowable values are listed below.
 |                              | removed.                                                 |
 +------------------------------+----------------------------------------------------------+
 | constraint                   | Type of constraint to use for bonds and/or angles.       |
-|                              | Valid strings are ``none``, ``h-bonds``, ``bonds``,      |
-|                              | ``h-bonds-h-angles`` and ``bonds-h-angles``.             |
+|                              | Valid strings are ``none``, ``h-bonds``,                 |
+|                              | ``h-bonds-not-perturbed``, ``bonds``,                    |
+|                              | ``bonds-not-perturbed`` ``h-bonds-h-angles``,            |
+|                              | ``h-bonds-h-angles-not-perturbed``, ``bonds-h-angles``,  |
+|                              | and ``bonds-h-angles-not-perturbed``                     |
 +------------------------------+----------------------------------------------------------+
 | coulomb_power                | The coulomb power parameter used by the softening        |
 |                              | potential used to soften interactions involving          |
