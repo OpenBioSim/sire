@@ -252,6 +252,7 @@ double EMLEEngineImpl::computeForce(
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
 {
+#ifdef SIRE_USE_CUSTOMCPPFORCE
     // If this is the first step, then setup information for the neighbour list.
     if (this->step_count == 0)
     {
@@ -463,6 +464,7 @@ double EMLEEngineImpl::computeForce(
 
     // Finally, return the energy.
     return lambda * energy;
+#endif
 }
 
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
