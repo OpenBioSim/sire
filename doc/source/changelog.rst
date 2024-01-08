@@ -31,6 +31,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
 
+* MacOS/ARM64 now includes AmberTools and Gromacs dependencies when built
+  for BioSimSpace (matching MacOS/X64 and Linux).
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024

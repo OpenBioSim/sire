@@ -50,6 +50,28 @@ class Minimisation:
     def __repr__(self):
         return self.__str__()
 
+    def constraint(self):
+        """
+        Return the constraint used for the minimisation (e.g. constraining
+        bonds involving hydrogens etc.)
+        """
+        return self._d.constraint()
+
+    def perturbable_constraint(self):
+        """
+        Return the perturbable constraint used for the minimisation (e.g.
+        constraining bonds involving hydrogens etc.)
+        """
+        return self._d.perturbable_constraint()
+
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        return self._d.get_constraints()
+
     def run(self, max_iterations: int = 10000):
         """
         Perform minimisation on the molecules, running a maximum

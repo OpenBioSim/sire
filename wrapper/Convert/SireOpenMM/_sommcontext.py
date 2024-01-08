@@ -263,3 +263,29 @@ class SOMMContext(_Context):
         Synonym for self.get_potential_energy()
         """
         return self.get_potential_energy(to_sire_units=to_sire_units)
+
+    def get_constraints(self):
+        """
+        Return all pairs of atoms that are constrained, together with
+        the constraint distance
+        """
+        s = self.getSystem()
+
+        num_constraints = s.getNumConstraints()
+
+        constraints = []
+
+        import openmm
+        from ...units import nanometer
+
+        for i in range(num_constraints):
+            a1, a2, dist = s.getConstraintParameters(i)
+
+            constraints.append(
+                (
+                    self._atom_index[a1] + self._atom_index[a2],
+                    dist.value_in_unit(openmm.unit.nanometer) * nanometer,
+                )
+            )
+
+        return constraints

@@ -400,6 +400,17 @@ class DynamicsData:
         else:
             return self._omm_mols.get_perturbable_constraint()
 
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_constraints()
+
     def get_schedule(self):
         if self.is_null():
             return None
@@ -1228,6 +1239,14 @@ class Dynamics:
         constraining bonds involving hydrogens etc.)
         """
         return self._d.perturbable_constraint()
+
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        return self._d.get_constraints()
 
     def integrator(self):
         """

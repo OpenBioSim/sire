@@ -65,7 +65,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const SelectorM<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, SelectorM<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, SelectorM<T> &);
 
     public:
         typedef typename QList<Selector<T>>::const_iterator iterator;
@@ -93,7 +93,7 @@ namespace SireMol
         template <class U>
         SelectorM(const SelectorM<U> &other, const QList<qint64> &idxs);
         template <class U>
-        SelectorM(const SelectorM<U> &other, const QString &name);
+        SelectorM(const SelectorM<U> &other, const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap());
         template <class U>
         SelectorM(const SelectorM<U> &other, const typename T::ID &id);
 
@@ -1072,7 +1072,9 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other, const QString &name)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other,
+                                                    const QString &name,
+                                                    const SireBase::PropertyMap &map)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &view : other)
@@ -1093,7 +1095,7 @@ namespace SireMol
             // try a search
             try
             {
-                this->operator=(SelectorM<T>(other.search(name)));
+                this->operator=(SelectorM<T>(other.search(name, map)));
             }
             catch (...)
             {
