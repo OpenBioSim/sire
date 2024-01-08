@@ -103,7 +103,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             constraint_type = CONSTRAIN_BONDS;
         }
-        else if (c == "bonds-not-perturbed" or c == "bond_not_perturbed")
+        else if (c == "bonds-not-perturbed" or c == "bonds_not_perturbed")
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_PERTURBED;
         }
@@ -160,7 +160,7 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             perturbable_constraint_type = CONSTRAIN_BONDS;
         }
-        else if (c == "bonds-not-perturbed" or c == "bond_not_perturbed")
+        else if (c == "bonds-not-perturbed" or c == "bonds_not_perturbed")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_PERTURBED;
         }
@@ -228,18 +228,34 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             // updating coordinates after minimisation
             perturtable_map = map0;
 
+            bool ignore_perturbations = false;
+
+            if (map.specified("ignore_perturbations"))
+            {
+                ignore_perturbations = map["ignore_perturbations"].value().asABoolean();
+            }
+
             // extract the parameters in amber format - this should work,
             // as the 'forcefield' property has promised that this is
             // an amber-style molecule
             const auto params = SireMM::AmberParams(mol, map0);
-            const auto params1 = SireMM::AmberParams(mol, map1);
 
-            perturbed.reset(new OpenMMMolecule(*this));
-            perturbed->constructFromAmber(mol, params1, params, map1, true);
+            if (ignore_perturbations)
+            {
+                const auto params = SireMM::AmberParams(mol, map0);
+                this->constructFromAmber(mol, params, params, map0, false);
+            }
+            else
+            {
+                const auto params1 = SireMM::AmberParams(mol, map1);
 
-            this->constructFromAmber(mol, params, params1, map0, true);
+                perturbed.reset(new OpenMMMolecule(*this));
+                perturbed->constructFromAmber(mol, params1, params, map1, true);
 
-            this->alignInternals(map);
+                this->constructFromAmber(mol, params, params1, map0, true);
+
+                this->alignInternals(map);
+            }
         }
         else
         {
