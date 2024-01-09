@@ -874,66 +874,6 @@ class System:
 
         self._system.set_property(traj_propname.source(), trajectory)
 
-    def set_qm_molecule(self, index, map=None):
-        """
-        Set the specified molecule to be a QM molecule.
-        """
-        if index < 0 or index > self.num_molecules() - 1:
-            raise ValueError(
-                f"Index {index} is out of range for the number of "
-                f"molecules in this system ({self.num_molecules()})"
-            )
-
-        from ..base import create_map
-
-        map = create_map(map)
-
-        qm_propname = map["is_qm"]
-
-        # Check for existing QM molecules. Currently we only support a single
-        # molecule.
-        try:
-            qm_mols = self[f"property {qm_propname}"].molecules()
-        except:
-            qm_mols = []
-
-        if len(qm_mols) > 0:
-            raise ValueError("This system already contains a QM molecule!")
-
-        # Extract the molecule.
-        mol = self[index]
-
-        # Create a cursor.
-        c = mol.cursor()
-
-        # Flag the molecule as QM.
-        c[qm_propname] = True
-
-        # Commit the changes and update.
-        mol = c.commit()
-        self.update(mol)
-
-    def unset_qm_molecule(self, map=None):
-        """
-        Unset the QM molecule.
-        """
-        try:
-            from ..base import create_map
-
-            map = create_map(map)
-
-            qm_propname = map["is_qm"]
-
-            # Loop over the QM molecules and unset them.
-            qm_mols = self[f"property {qm_propname}"].molecules()
-            for mol in qm_mols:
-                c = mol.cursor()
-                c[qm_propname] = False
-                mol = c.commit()
-                self.update(mol)
-        except:
-            pass
-
     def clear_energy_trajectory(self, map=None):
         """
         Completely clear any existing energy trajectory

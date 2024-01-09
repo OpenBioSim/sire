@@ -2,9 +2,9 @@ import math
 import pytest
 import tempfile
 
-from sire.legacy.Convert._SireOpenMM import EMLECallback
+from sire.legacy.Convert._SireOpenMM import EMLECallback, EMLEEngine
 
-from sire.qm import EMLEEngine
+from sire.qm import emle
 
 try:
     from emle.emle import EMLECalculator
@@ -52,17 +52,14 @@ def test_interpolate(ala_mols):
     # Create an EMLE calculator.
     calculator = EMLECalculator(device="cpu", log=0, save_settings=False)
 
-    # Create an EMLEE engine bound to the calculator.
-    engine = EMLEEngine(calculator)
-
     # Create a dynamics object.
     d = mols.dynamics(timestep="1fs", constraint="none", platform="cpu")
 
     # Get the pure MM energy.
     nrg_mm = d.current_potential_energy()
 
-    # Set the first molecule as QM.
-    mols.set_qm_molecule(0)
+    # Create an EMLE engine bound to the calculator.
+    engine = emle(mols, calculator, 0)
 
     # Create a QM/MM capable dynamics object.
     d = mols.dynamics(

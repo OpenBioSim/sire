@@ -25,7 +25,7 @@ if (${SIRE_USE_OPENMM})
     # Other python wrapping directories
     include_directories(${CMAKE_SOURCE_DIR})
 
-    include(CheckCXXSourceRuns)
+    #include(CheckCXXSourceRuns)
 
     # Temporarily add OpenMM include directory to CMAKE_REQUIRED_INCLUDES.
     #set(CMAKE_OLD_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})

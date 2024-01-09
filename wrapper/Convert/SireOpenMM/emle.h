@@ -129,7 +129,7 @@ namespace SireOpenMM
          */
         EMLEEngine(
             bp::object,
-            SireUnits::Dimension::Length cutoff=8.0*SireUnits::angstrom,
+            SireUnits::Dimension::Length cutoff=7.5*SireUnits::angstrom,
             int neighbour_list_frequency=20,
             double lambda=1.0
         );

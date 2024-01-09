@@ -1006,34 +1006,6 @@ class Dynamics:
         from ..base import create_map
         from .. import u
 
-        # Set the global indices of the QM atoms in the engine.
-        if qm_engine is not None and mols is not None:
-            try:
-                # Work out the indices of the QM atoms.
-                atoms_to_find = mols["property is_qm"].atoms()
-                idxs = mols.atoms().find(atoms_to_find)
-                qm_engine.set_atoms(idxs)
-
-                # Work out the atomic numbers of the QM atoms.
-                elem_prop = map["element"]
-                numbers = [
-                    atom.property(f"{elem_prop}").num_protons()
-                    for atom in atoms_to_find
-                ]
-                qm_engine.set_numbers(numbers)
-
-                # Work out the atomic charge for all atoms in the system.
-                charge_prop = map["charge"]
-                charges = [
-                    atom.property(f"{charge_prop}").value() for atom in mols.atoms()
-                ]
-                qm_engine.set_charges(charges)
-            except:
-                raise ValueError(
-                    "Unable to set QM atoms in the engine. "
-                    "Have you set a QM molecule?"
-                )
-
         extras = {}
 
         _add_extra(extras, "cutoff", cutoff)
