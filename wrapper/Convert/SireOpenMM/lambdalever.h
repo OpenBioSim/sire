@@ -52,7 +52,7 @@ namespace SireOpenMM
         MolLambdaCache &operator=(const MolLambdaCache &other);
 
         const QVector<double> &morph(const SireCAS::LambdaSchedule &schedule,
-                                     const QString &key,
+                                     const QString &force, const QString &key,
                                      const QVector<double> &initial,
                                      const QVector<double> &final) const;
 
@@ -183,6 +183,14 @@ namespace SireOpenMM
     {
         return "OpenMM::CustomBondForce";
     }
+
+    // LESTER - UNCOMMENT BELOW FOR FEATURE_EMLE
+
+    /*template <>
+    inline QString _get_typename<SireOpenMM::QMMMForce>()
+    {
+        return "SireOpenMM::QMMMForce";
+    }*/
 
     /** Return the OpenMM::Force (of type T) that is called 'name'
      *  from the passed OpenMM::System. This returns 0 if the force

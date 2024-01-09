@@ -3,6 +3,7 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
+#include "Helpers/clone_const_reference.hpp"
 #include "LambdaSchedule.pypp.hpp"
 
 namespace bp = boost::python;
@@ -55,7 +56,7 @@ void register_LambdaSchedule_class(){
                 "addChargeScaleStages"
                 , addChargeScaleStages_function_value
                 , ( bp::arg("decharge_name"), bp::arg("recharge_name"), bp::arg("scale")=0.20000000000000001 )
-                , "" );
+                , "Sandwich the current set of stages with a charge-descaling and\n  a charge-scaling stage. This prepends a charge-descaling stage\n  that scales the charge parameter down from `initial` to\n  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of\n  the exising stages in this schedule are then multiplied\n  by :gamma:. A final charge-rescaling stage is then appended that\n  scales the charge parameter from :gamma:.final to final.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addLever
@@ -106,7 +107,7 @@ void register_LambdaSchedule_class(){
                 , addMorphStage_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Append a morph stage onto this schedule. The morph stage is a\n  standard stage that scales each forcefield parameter by\n  (1-:lambda:).initial + :lambda:.final\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addStage
@@ -249,6 +250,19 @@ void register_LambdaSchedule_class(){
                 , "Return the equation used to control the specified `lever`\n  at the specified `stage`. This will be a custom equation\n  if that has been set for this lever, or else the\n  default equation for this stage.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::getEquation
+        
+            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const &,::QString const &,::QString const & ) const;
+            getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
+            
+            LambdaSchedule_exposer.def( 
+                "getEquation"
+                , getEquation_function_value
+                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::getLambdaInStage
         
             typedef double ( ::SireCAS::LambdaSchedule::*getLambdaInStage_function_type)( double ) const;
@@ -323,6 +337,19 @@ void register_LambdaSchedule_class(){
                 , "Return all of the levers that have been explicitly added\n  to the schedule. Note that levers will be automatically added\n  by any perturbation run that needs them, so you dont normally\n  need to manage them manually yourself.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::getMoleculeSchedule
+        
+            typedef ::SireCAS::LambdaSchedule const & ( ::SireCAS::LambdaSchedule::*getMoleculeSchedule_function_type)( int ) const;
+            getMoleculeSchedule_function_type getMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::getMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "getMoleculeSchedule"
+                , getMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::getStage
         
             typedef ::QString ( ::SireCAS::LambdaSchedule::*getStage_function_type)( double ) const;
@@ -346,6 +373,32 @@ void register_LambdaSchedule_class(){
                 , getStages_function_value
                 , bp::release_gil_policy()
                 , "Return the names of all of the stages in this schedule, in\n  the order they will be performed\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::hasForceSpecificEquation
+        
+            typedef bool ( ::SireCAS::LambdaSchedule::*hasForceSpecificEquation_function_type)( ::QString const &,::QString const &,::QString const & ) const;
+            hasForceSpecificEquation_function_type hasForceSpecificEquation_function_value( &::SireCAS::LambdaSchedule::hasForceSpecificEquation );
+            
+            LambdaSchedule_exposer.def( 
+                "hasForceSpecificEquation"
+                , hasForceSpecificEquation_function_value
+                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::hasMoleculeSchedule
+        
+            typedef bool ( ::SireCAS::LambdaSchedule::*hasMoleculeSchedule_function_type)( int ) const;
+            hasMoleculeSchedule_function_type hasMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::hasMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "hasMoleculeSchedule"
+                , hasMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireCAS::LambdaSchedule::initial
@@ -436,6 +489,45 @@ void register_LambdaSchedule_class(){
                 , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This function morphs integer parameters. In this case,\n  the result will be the rounded to the nearest integer.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::morph
+        
+            typedef double ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,double,double,double ) const;
+            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
+            
+            LambdaSchedule_exposer.def( 
+                "morph"
+                , morph_function_value
+                , ( bp::arg("force"), bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::morph
+        
+            typedef ::QVector< double > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,::QVector< double > const &,::QVector< double > const &,double ) const;
+            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
+            
+            LambdaSchedule_exposer.def( 
+                "morph"
+                , morph_function_value
+                , ( bp::arg("force"), bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::morph
+        
+            typedef ::QVector< int > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,::QVector< int > const &,::QVector< int > const &,double ) const;
+            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
+            
+            LambdaSchedule_exposer.def( 
+                "morph"
+                , morph_function_value
+                , ( bp::arg("force"), bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::nLevers
         
             typedef int ( ::SireCAS::LambdaSchedule::*nLevers_function_type)(  ) const;
@@ -501,6 +593,19 @@ void register_LambdaSchedule_class(){
                 , "Remove the custom equation for the specified `lever` at the\n  specified `stage`. The lever will now use the default\n  equation at this stage.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::removeEquation
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeEquation_function_type)( ::QString const &,::QString const &,::QString const & ) ;
+            removeEquation_function_type removeEquation_function_value( &::SireCAS::LambdaSchedule::removeEquation );
+            
+            LambdaSchedule_exposer.def( 
+                "removeEquation"
+                , removeEquation_function_value
+                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::removeLever
         
             typedef void ( ::SireCAS::LambdaSchedule::*removeLever_function_type)( ::QString const & ) ;
@@ -525,6 +630,19 @@ void register_LambdaSchedule_class(){
                 , ( bp::arg("levers") )
                 , bp::release_gil_policy()
                 , "Remove some levers from the schedule. This will not impact any\n  perturbation runs that use this schedule, as any missing\n  levers will be re-added.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::removeMoleculeSchedule
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeMoleculeSchedule_function_type)( int ) ;
+            removeMoleculeSchedule_function_type removeMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::removeMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "removeMoleculeSchedule"
+                , removeMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireCAS::LambdaSchedule::setConstant
@@ -579,6 +697,32 @@ void register_LambdaSchedule_class(){
                 , "Set the custom equation used to control the specified\n  `lever` at the stage `stage` to `equation`. This equation\n  will only be used to control the parameters for the\n  specified lever at the specified stage.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::setEquation
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*setEquation_function_type)( ::QString const &,::QString const &,::QString const &,::SireCAS::Expression const & ) ;
+            setEquation_function_type setEquation_function_value( &::SireCAS::LambdaSchedule::setEquation );
+            
+            LambdaSchedule_exposer.def( 
+                "setEquation"
+                , setEquation_function_value
+                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever"), bp::arg("equation") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::setMoleculeSchedule
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*setMoleculeSchedule_function_type)( int,::SireCAS::LambdaSchedule const & ) ;
+            setMoleculeSchedule_function_type setMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::setMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "setMoleculeSchedule"
+                , setMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id"), bp::arg("schedule") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::standard_morph
         
             typedef ::SireCAS::LambdaSchedule ( *standard_morph_function_type )(  );
@@ -589,6 +733,19 @@ void register_LambdaSchedule_class(){
                 , standard_morph_function_value
                 , bp::release_gil_policy()
                 , "Return a LambdaSchedule that represents a standard morph,\n  where every forcefield parameter is scaled by\n  (1-:lambda:).initial + :lambda:.final\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::takeMoleculeSchedule
+        
+            typedef ::SireCAS::LambdaSchedule ( ::SireCAS::LambdaSchedule::*takeMoleculeSchedule_function_type)( int ) ;
+            takeMoleculeSchedule_function_type takeMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::takeMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "takeMoleculeSchedule"
+                , takeMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireCAS::LambdaSchedule::toString

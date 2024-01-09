@@ -89,3 +89,19 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     constraints = d.get_constraints()
 
     assert len(d.get_constraints()) == 3
+
+    d = mols[0].dynamics(
+        constraint="none",
+        perturbable_constraint="h-bonds-not-perturbed",
+        platform=openmm_platform,
+    )
+
+    assert len(d.get_constraints()) == 3
+
+    d = mols[0].dynamics(
+        constraint="none",
+        perturbable_constraint="bonds-not-perturbed",
+        platform=openmm_platform,
+    )
+
+    assert len(d.get_constraints()) == 3

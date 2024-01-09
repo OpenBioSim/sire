@@ -128,16 +128,44 @@ namespace SireCAS
                          const QString &lever,
                          const SireCAS::Expression &equation);
 
+        void setEquation(const QString &stage,
+                         const QString &force,
+                         const QString &lever,
+                         const SireCAS::Expression &equation);
+
         void setDefaultEquation(const QString &stage,
                                 const SireCAS::Expression &equation);
 
         void removeEquation(const QString &stage,
                             const QString &lever);
 
+        void removeEquation(const QString &stage,
+                            const QString &force,
+                            const QString &lever);
+
         SireCAS::Expression getEquation(const QString &stage) const;
 
         SireCAS::Expression getEquation(const QString &stage,
                                         const QString &lever) const;
+
+        SireCAS::Expression getEquation(const QString &stage,
+                                        const QString &force,
+                                        const QString &lever) const;
+
+        bool hasForceSpecificEquation(const QString &stage,
+                                      const QString &force,
+                                      const QString &lever) const;
+
+        void setMoleculeSchedule(int pert_mol_id,
+                                 const LambdaSchedule &schedule);
+
+        bool hasMoleculeSchedule(int pert_mol_id) const;
+
+        void removeMoleculeSchedule(int pert_mol_id);
+
+        LambdaSchedule takeMoleculeSchedule(int pert_mol_id);
+
+        const LambdaSchedule &getMoleculeSchedule(int pert_mol_id) const;
 
         QHash<QString, QVector<double>> getLeverValues(const QVector<double> &lambda_values,
                                                        double initial = 1.0,
@@ -173,12 +201,32 @@ namespace SireCAS
                            const QVector<int> &final,
                            double lambda_value) const;
 
+        double morph(const QString &force, const QString &lever,
+                     double initial, double final, double lambda_value) const;
+
+        QVector<double> morph(const QString &force,
+                              const QString &lever,
+                              const QVector<double> &initial,
+                              const QVector<double> &final,
+                              double lambda_value) const;
+
+        QVector<int> morph(const QString &force,
+                           const QString &lever,
+                           const QVector<int> &initial,
+                           const QVector<int> &final,
+                           double lambda_value) const;
+
         double clamp(double lambda_value) const;
 
     protected:
         int find_stage(const QString &stage) const;
 
         std::tuple<int, double> resolve_lambda(double lambda) const;
+
+        /** Additional schedules for extra molecules, i.e. that
+         *  run in parallel alongside the default schedule
+         */
+        QHash<qint32, LambdaSchedule> mol_schedules;
 
         /** The set of all constants used across all stages */
         SireCAS::Values constant_values;
