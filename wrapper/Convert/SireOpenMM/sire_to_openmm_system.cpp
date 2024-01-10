@@ -748,7 +748,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     }
 
     // now create the engine for computing QM or ML forces on atoms
-    QMMMEngine *qmff = 0;
+    QMMMForce *qmff = 0;
     QString qm_engine;
 
     if (map.specified("qm_engine"))

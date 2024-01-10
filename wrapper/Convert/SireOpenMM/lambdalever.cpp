@@ -460,7 +460,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     else
     {
         // get copies of the forcefields in which the parameters will be changed
-        //auto qmff = this->getForce<QMMMEngine>("qmmm", system);
+        auto qmff = this->getForce<QMMMForce>("qmmm", system);
         auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
         auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
         auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
@@ -474,11 +474,11 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
 
-        /*if (qmff != 0)
+        if (qmff != 0)
         {
             double lam = this->lambda_schedule.morph("qm", 1.0, 0.0, lambda_value);
             qmff->setLambda(lam);
-        }*/
+        }
 
         // change the parameters for all of the perturbable molecules
         for (int i = 0; i < this->perturbable_mols.count(); ++i)

@@ -42,10 +42,10 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
-    class QMMMEngine : public SireBase::Property, public OpenMM::Force
+    class QMMMForce : public SireBase::Property, public OpenMM::Force
     {
     public:
-        virtual ~QMMMEngine();
+        virtual ~QMMMForce();
 
         //! Get the lambda weighting factor.
         virtual double getLambda() const = 0;
@@ -81,7 +81,7 @@ namespace SireOpenMM
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };
 
-    typedef SireBase::PropPtr<SireOpenMM::QMMMEngine> QMMEnginePtr;
+    typedef SireBase::PropPtr<SireOpenMM::QMMMForce> QMMEnginePtr;
 }
 
 SIRE_END_HEADER

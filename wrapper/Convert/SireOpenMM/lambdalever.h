@@ -30,6 +30,7 @@
 #define SIREOPENMM_LAMBDALEVER_H
 
 #include "openmmmolecule.h"
+#include "qmmm.h"
 
 #include "SireCAS/lambdaschedule.h"
 
@@ -151,6 +152,12 @@ namespace SireOpenMM
     inline QString _get_typename<OpenMM::CustomBondForce>()
     {
         return "OpenMM::CustomBondForce";
+    }
+
+    template <>
+    inline QString _get_typename<SireOpenMM::QMMMForce>()
+    {
+        return "SireOpenMM::QMMMForce";
     }
 
     /** Return the OpenMM::Force (of type T) that is called 'name'

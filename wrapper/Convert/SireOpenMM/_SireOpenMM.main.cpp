@@ -178,9 +178,9 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
     register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
 
-    bp::class_<QMMMEngine, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMEngine", bp::no_init);
+    bp::class_<QMMMForce, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMForce", bp::no_init);
 
-    bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMMMEngine, SireBase::Property>>("EMLEEngine",
+    bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMMMForce, SireBase::Property>>("EMLEEngine",
             bp::init<bp::object, SireUnits::Dimension::Length, int, double>(
                 (
                     bp::arg("py_object"),
