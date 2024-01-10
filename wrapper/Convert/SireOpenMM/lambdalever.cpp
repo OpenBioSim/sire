@@ -257,7 +257,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
     if (qmff != 0)
     {
-        double lam = this->lambda_schedule.morph("qmff", 1.0, 0.0, lambda_value);
+        double lam = this->lambda_schedule.morph("qmff", 0.0, 1.0, lambda_value);
         qmff->setLambda(lam);
     }
 

@@ -59,12 +59,12 @@ def _create_merged_mol(qm_mol, map):
     for prop in qm_mol.property_keys():
         # Bonds.
         if prop == bond_prop:
-            # Copy the bonds to the lambda = 1 state.
+            # Copy the bonds to the lambda = 0 state.
             edit_mol = edit_mol.set_property(
-                prop + "1", qm_mol.property(prop)
+                prop + "0", qm_mol.property(prop)
             ).molecule()
 
-            # Create an equivalent set of bonds for the lambda = 0 state with
+            # Create an equivalent set of bonds for the lambda = 1 state with
             # zeroed force constants.
 
             bonds = _MM.TwoAtomFunctions(info)
@@ -83,20 +83,20 @@ def _create_merged_mol(qm_mol, map):
                 # Set the new bond.
                 bonds.set(atom0, atom1, amber_bond.to_expression(r))
 
-            # Set the bonds for the lambda = 0 state.
-            edit_mol = edit_mol.set_property(prop + "0", bonds).molecule()
+            # Set the bonds for the lambda = 1 state.
+            edit_mol = edit_mol.set_property(prop + "1", bonds).molecule()
 
             # Finally, delete the existing property.
             edit_mol = edit_mol.remove_property(prop).molecule()
 
         # Angles.
         elif prop == angle_prop:
-            # Copy the angles to the lambda = 1 state.
+            # Copy the angles to the lambda = 0 state.
             edit_mol = edit_mol.set_property(
-                prop + "1", qm_mol.property(prop)
+                prop + "0", qm_mol.property(prop)
             ).molecule()
 
-            # Create an equivalent set of angles for the lambda = 0 state with
+            # Create an equivalent set of angles for the lambda = 1 state with
             # zeroed force constants.
 
             angles = _MM.ThreeAtomFunctions(info)
@@ -116,20 +116,20 @@ def _create_merged_mol(qm_mol, map):
                 # Set the new angle.
                 angles.set(atom0, atom1, atom2, amber_angle.to_expression(theta))
 
-            # Set the angles for the lambda = 0 state.
-            edit_mol = edit_mol.set_property(prop + "0", angles).molecule()
+            # Set the angles for the lambda = 1 state.
+            edit_mol = edit_mol.set_property(prop + "1", angles).molecule()
 
             # Finally, delete the existing property.
             edit_mol = edit_mol.remove_property(prop).molecule()
 
         # Dihedrals.
         elif prop == dihedral_prop:
-            # Copy the dihedrals to the lambda = 1 state.
+            # Copy the dihedrals to the lambda = 0 state.
             edit_mol = edit_mol.set_property(
-                prop + "1", qm_mol.property(prop)
+                prop + "0", qm_mol.property(prop)
             ).molecule()
 
-            # Create an equivalent set of dihedrals for the lambda = 0 state
+            # Create an equivalent set of dihedrals for the lambda = 1 state
             # with zeroed force constants.
 
             dihedrals = _MM.FourAtomFunctions(info)
@@ -156,20 +156,20 @@ def _create_merged_mol(qm_mol, map):
                     amber_dihedral.to_expression(phi),
                 )
 
-            # Set the dihedrals for the lambda = 0 state.
-            edit_mol = edit_mol.set_property(prop + "0", dihedrals).molecule()
+            # Set the dihedrals for the lambda = 1 state.
+            edit_mol = edit_mol.set_property(prop + "1", dihedrals).molecule()
 
             # Finally, delete the existing property.
             edit_mol = edit_mol.remove_property(prop).molecule()
 
         # Impropers.
         elif prop == improper_prop:
-            # Copy the impropers to the lambda = 1 state.
+            # Copy the impropers to the lambda = 0 state.
             edit_mol = edit_mol.set_property(
-                prop + "1", qm_mol.property(prop)
+                prop + "0", qm_mol.property(prop)
             ).molecule()
 
-            # Create an equivalent set of impropers for the lambda = 0 state
+            # Create an equivalent set of impropers for the lambda = 1 state
             # with zeroed force constants.
 
             impropers = _MM.FourAtomFunctions(info)
@@ -196,22 +196,22 @@ def _create_merged_mol(qm_mol, map):
                     amber_improper.to_expression(psi),
                 )
 
-            # Set the impropers for the lambda = 0 state.
-            edit_mol = edit_mol.set_property(prop + "0", impropers).molecule()
+            # Set the impropers for the lambda = 1 state.
+            edit_mol = edit_mol.set_property(prop + "1", impropers).molecule()
 
             # Finally, delete the existing property.
             edit_mol = edit_mol.remove_property(prop).molecule()
 
         # Charge.
         elif prop == charge_prop:
-            # Copy the charges to the lambda = 1 state.
+            # Copy the charges to the lambda = 0 state.
             edit_mol = edit_mol.set_property(
-                prop + "1", qm_mol.property(prop)
+                prop + "0", qm_mol.property(prop)
             ).molecule()
 
-            # Create a set of null charges for the lambda = 0 state.
+            # Create a set of null charges for the lambda = 1 state.
             charges = _Mol.AtomCharges(info)
-            edit_mol = edit_mol.set_property(prop + "0", charges).molecule()
+            edit_mol = edit_mol.set_property(prop + "1", charges).molecule()
 
             # Finally, delete the existing property.
             edit_mol = edit_mol.remove_property(prop).molecule()

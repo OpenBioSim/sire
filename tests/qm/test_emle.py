@@ -70,7 +70,7 @@ def test_interpolate(ala_mols):
     nrg_emle = d.current_potential_energy()
 
     # Get interpolated MM energy.
-    d.set_lambda(1.0)
+    d.set_lambda(0.0)
     nrg_mm_interp = d.current_potential_energy()
 
     # Make sure this agrees with the standard MM energy.
