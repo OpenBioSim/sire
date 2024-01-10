@@ -179,7 +179,6 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
     }
 
     bool is_perturbable = false;
-    bool is_qm = false;
     bool swap_end_states = false;
 
     if (mol.hasProperty(map["is_perturbable"]))
@@ -190,11 +189,6 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             swap_end_states = map["swap_end_states"].value().asABoolean();
         }
-    }
-
-    if (mol.hasProperty(map["is_qm"]))
-    {
-        this->is_qm = mol.property(map["is_qm"]).asABoolean();
     }
 
     if (is_perturbable)
@@ -337,16 +331,16 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
             const auto params1 = SireMM::AmberParams(mol, map1);
 
             perturbed.reset(new OpenMMMolecule(*this));
-            perturbed->constructFromAmber(mol, params1, params, map1, true, false);
+            perturbed->constructFromAmber(mol, params1, params, map1, true);
 
-            this->constructFromAmber(mol, params, params1, map0, true, false);
+            this->constructFromAmber(mol, params, params1, map0, true);
 
             this->alignInternals(map);
         }
         else
         {
             const auto params = SireMM::AmberParams(mol, map);
-            this->constructFromAmber(mol, params, params, map, false, this->isQM());
+            this->constructFromAmber(mol, params, params, map, false);
         }
     }
     else
@@ -408,11 +402,6 @@ bool OpenMMMolecule::isPerturbable() const
     return perturbed.get() != 0;
 }
 
-bool OpenMMMolecule::isQM() const
-{
-    return this->is_qm;
-}
-
 bool OpenMMMolecule::isGhostAtom(int atom) const
 {
     return from_ghost_idxs.contains(atom) or to_ghost_idxs.contains(atom);
@@ -450,7 +439,7 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
         epsilon = lj_14_scl * std::sqrt(std::get<2>(clj0) * std::get<2>(clj1));
     }
 
-    if ((this->isPerturbable() or this->isQM()) and charge == 0 and std::abs(epsilon) < 1e-9)
+    if (this->isPerturbable() and charge == 0 and std::abs(epsilon) < 1e-9)
     {
         // openmm tries to optimise away zero parameters - this is an issue
         // as perturbation requires that we don't remove them!
@@ -470,30 +459,6 @@ std::tuple<int, int, double, double, double> OpenMMMolecule::getException(
     return std::make_tuple(atom0 + start_index,
                            atom1 + start_index,
                            charge, sigma, epsilon);
-}
-
-/** Return the global indexes of the exceptions in the non-bonded and
- *  ghost-14 forces
- */
-QVector<std::pair<int, int>> OpenMMMolecule::getExceptionIndices(const QString &name) const
-{
-    return this->exception_idxs.value(name);
-}
-
-/** Set the global indexes of the exceptions in the non-bonded and
- *  ghost-14 forces
- */
-void OpenMMMolecule::setExceptionIndices(const QString &name,
-                                         const QVector<std::pair<int, int>> &exception_idxs)
-{
-    if (exception_idxs.count() != this->exception_atoms.count())
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The number of exception indicies (%1) does not match the number of exceptions (%2)")
-                                                .arg(exception_idxs.count())
-                                                .arg(this->exception_atoms.count()),
-                                            CODELOC);
-
-    this->exception_idxs.insert(name, exception_idxs);
 }
 
 /** Return closest constraint length to 'length' based on what
@@ -554,15 +519,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                         const AmberParams &params,
                                         const AmberParams &params1,
                                         const PropertyMap &map,
-                                        bool is_perturbable,
-                                        bool is_qm)
+                                        bool is_perturbable)
 {
-    if (is_perturbable and is_qm)
-    {
-        throw SireError::invalid_key(QObject::tr(
-            "We currently do not support perturbable QM molecules."), CODELOC);
-    }
-
     const auto &moldata = mol.data();
 
     if (this->hasFieldAtoms())
@@ -968,12 +926,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     }
 
     this->buildExceptions(mol, atomidx_to_idx, constrained_pairs, map);
-
-    // Set the exception indices for this molecule.
-    if (is_qm)
-    {
-        this->exception_atoms = this->getExceptionAtoms();
-    }
 }
 
 bool is_ghost(const std::tuple<double, double, double> &clj)

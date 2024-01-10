@@ -46,11 +46,8 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       name_to_restraintidx(other.name_to_restraintidx),
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
-      qm_mols(other.qm_mols),
       start_indices_pert(other.start_indices_pert),
-      start_indices_qm(other.start_indices_qm),
-      perturbable_maps(other.perturbable_maps),
-      qm_maps(other.qm_maps)
+      perturbable_maps(other.perturbable_maps)
 {
 }
 
@@ -66,11 +63,8 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
         name_to_restraintidx = other.name_to_restraintidx;
         lambda_schedule = other.lambda_schedule;
         perturbable_mols = other.perturbable_mols;
-        qm_mols = other.qm_mols;
         start_indices_pert = other.start_indices_pert;
-        start_indices_qm = other.start_indices_qm;
         perturbable_maps = other.perturbable_maps;
-        qm_maps = other.qm_maps;
         Property::operator=(other);
     }
 
@@ -83,11 +77,8 @@ bool LambdaLever::operator==(const LambdaLever &other) const
            name_to_restraintidx == other.name_to_restraintidx and
            lambda_schedule == other.lambda_schedule and
            perturbable_mols == other.perturbable_mols and
-           qm_mols == other.qm_mols and
            start_indices_pert == other.start_indices_pert and
-           start_indices_qm == other.start_indices_qm and
-           perturbable_maps == other.perturbable_maps and
-           qm_maps == other.qm_maps;
+           perturbable_maps == other.perturbable_maps;
 }
 
 bool LambdaLever::operator!=(const LambdaLever &other) const
@@ -787,36 +778,16 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
     return this->perturbable_mols.count() - 1;
 }
 
-/** Add infor for the passed OpenMMMolecule, returning its index
- *  in the list of QM molecules
- */
-int LambdaLever::addQMMolecule(const OpenMMMolecule &molecule,
-                               const QHash<QString, qint32> &starts)
-{
-    // should add in some sanity checks for these inputs
-    this->qm_mols.append(molecule);
-    this->start_indices_qm.append(starts);
-    return this->qm_mols.count() - 1;
-}
 
 /** Set the exception indices for the perturbable molecule at
  *  index 'mol_idx'
  */
 void LambdaLever::setExceptionIndices(int mol_idx,
                                       const QString &name,
-                                      const QVector<std::pair<int, int>> &exception_idxs,
-                                      bool is_qm)
+                                      const QVector<std::pair<int, int>> &exception_idxs)
 {
-    if (is_qm)
-    {
-        mol_idx = SireID::Index(mol_idx).map(this->qm_mols.count());
-        this->qm_mols[mol_idx].setExceptionIndices(name, exception_idxs);
-    }
-    else
-    {
-        mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
-        this->perturbable_mols[mol_idx].setExceptionIndices(name, exception_idxs);
-    }
+    mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
+    this->perturbable_mols[mol_idx].setExceptionIndices(name, exception_idxs);
 }
 
 /** Return all of the property maps used to find the perturbable properties
