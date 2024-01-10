@@ -46,10 +46,7 @@ class SOMMContext(_Context):
             elif map.specified("lambda_value"):
                 lambda_value = map["lambda_value"].value().as_double()
             elif map.specified("qm_engine"):
-                # If there is a QM engine then default lambda = 1.0 unless
-                # explcitly specified. This means that the QM region will
-                # be modelled with full QM.
-                lambda_value = 1.0
+                lambda_value = 0.0
             else:
                 lambda_value = 0.0
 

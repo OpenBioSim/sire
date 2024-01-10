@@ -108,32 +108,15 @@ def emle(
         neighbourlist_update_frequency,
     )
 
-    from ._utils import _configure_engine
+    from ._utils import _configure_engine, _create_merged_mol
 
     # Configure the engine.
     engine = _configure_engine(engine, mols, qm_mol, map)
 
-    # Get the QM property flag.
-    qm_propname = map["is_qm"]
+    # Create the merged molecule.
+    qm_mol = _create_merged_mol(qm_mol, map)
 
-    # Check for existing QM molecules. Currently we only support a single
-    # molecule.
-    try:
-        qm_mols = mols[f"property {qm_propname}"].molecules()
-    except:
-        qm_mols = []
-
-    if len(qm_mols) > 0:
-        raise ValueError("This system already contains a QM molecule!")
-
-    # Create a cursor.
-    c = qm_mol.cursor()
-
-    # Flag the molecule as QM.
-    c[qm_propname] = True
-
-    # Commit the changes and update.
-    qm_mol = c.commit()
+    # Update the molecule in the system.
     mols.update(qm_mol)
 
     return mols, engine

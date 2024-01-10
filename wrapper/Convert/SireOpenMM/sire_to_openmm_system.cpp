@@ -749,7 +749,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     // now create the engine for computing QM or ML forces on atoms
     QMMMForce *qmff = 0;
-    QString qm_engine;
 
     if (map.specified("qm_engine"))
     {
@@ -757,7 +756,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             auto &engine = map["qm_engine"].value().asA<EMLEEngine>();
             qmff = new EMLEEngine(engine);
-            qm_engine = "emle";
         }
         catch (...)
         {
@@ -837,7 +835,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     if (qmff != 0)
     {
-        lambda_lever.setForceIndex(qm_engine, system.addForce(qmff));
+        lambda_lever.setForceIndex("qmff", system.addForce(qmff));
         lambda_lever.addLever("qm_scale");
     }
 

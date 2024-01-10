@@ -249,111 +249,216 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // pointers to the forces...
     OpenMM::System &system = const_cast<OpenMM::System &>(context.getSystem());
 
-    // First try to get the QM forcefield. If it exists, then we will updated the
-    // forcefield parameters and set the lambda value in the customCCPForce.
-    if (this->getForceIndex("emle") != -1)
+    // get copies of the forcefields in which the parameters will be changed
+    auto qmff = this->getForce<QMMMForce>("qmff", system);
+    auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
+    auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
+    auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
+    auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
+    auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
+    auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
+    auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
+
+    // we know if we have peturbable ghost atoms if we have the ghost forcefields
+    const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
+
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
+
+    if (qmff != 0)
     {
-        // First update the lambda value in the QM/MM engine.
-        auto qmff = this->getForce<EMLEEngine>("emle", system);
-        qmff->setLambda(lambda_value);
+        double lam = this->lambda_schedule.morph("qmff", 1.0, 0.0, lambda_value);
+        qmff->setLambda(lam);
+    }
 
-        // get copies of the forcefields in which the parameters will be changed
-        auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
-        auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
-        auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
-        auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
+    // change the parameters for all of the perturbable molecules
+    for (int i = 0; i < this->perturbable_mols.count(); ++i)
+    {
+        const auto &perturbable_mol = this->perturbable_mols[i];
+        const auto &start_idxs = this->start_indices_pert[i];
 
-        // Now scale the MM contributions to QM molecules by 1.0 - lambda.
-        // This allows the use of lambda interpolation for end-state correction
-        // simulations.
-        const auto lam = 1.0 - lambda_value;
+        // calculate the new parameters for this lambda value
+        const auto morphed_charges = this->lambda_schedule.morph(
+            "charge",
+            perturbable_mol.getCharges0(),
+            perturbable_mol.getCharges1(),
+            lambda_value);
 
-        // Change the parameters for all of the QM molecules. We only change the
-        // force constant of bonded terms and update the charge scale factor for
-        // the Coulomb interaction. The LJ parameters are not changed.
-        for (int i = 0; i < this->qm_mols.size(); ++i)
+        const auto morphed_sigmas = this->lambda_schedule.morph(
+            "sigma",
+            perturbable_mol.getSigmas0(),
+            perturbable_mol.getSigmas1(),
+            lambda_value);
+
+        const auto morphed_epsilons = this->lambda_schedule.morph(
+            "epsilon",
+            perturbable_mol.getEpsilons0(),
+            perturbable_mol.getEpsilons1(),
+            lambda_value);
+
+        const auto morphed_alphas = this->lambda_schedule.morph(
+            "alpha",
+            perturbable_mol.getAlphas0(),
+            perturbable_mol.getAlphas1(),
+            lambda_value);
+
+        const auto morphed_bond_k = this->lambda_schedule.morph(
+            "bond_k",
+            perturbable_mol.getBondKs0(),
+            perturbable_mol.getBondKs1(),
+            lambda_value);
+
+        const auto morphed_bond_length = this->lambda_schedule.morph(
+            "bond_length",
+            perturbable_mol.getBondLengths0(),
+            perturbable_mol.getBondLengths1(),
+            lambda_value);
+
+        const auto morphed_angle_k = this->lambda_schedule.morph(
+            "angle_k",
+            perturbable_mol.getAngleKs0(),
+            perturbable_mol.getAngleKs1(),
+            lambda_value);
+
+        const auto morphed_angle_size = this->lambda_schedule.morph(
+            "angle_size",
+            perturbable_mol.getAngleSizes0(),
+            perturbable_mol.getAngleSizes1(),
+            lambda_value);
+
+        const auto morphed_torsion_phase = this->lambda_schedule.morph(
+            "torsion_phase",
+            perturbable_mol.getTorsionPhases0(),
+            perturbable_mol.getTorsionPhases1(),
+            lambda_value);
+
+        const auto morphed_torsion_k = this->lambda_schedule.morph(
+            "torsion_k",
+            perturbable_mol.getTorsionKs0(),
+            perturbable_mol.getTorsionKs1(),
+            lambda_value);
+
+        const auto morphed_charge_scale = this->lambda_schedule.morph(
+            "charge_scale",
+            perturbable_mol.getChargeScales0(),
+            perturbable_mol.getChargeScales1(),
+            lambda_value);
+
+        const auto morphed_lj_scale = this->lambda_schedule.morph(
+            "lj_scale",
+            perturbable_mol.getLJScales0(),
+            perturbable_mol.getLJScales1(),
+            lambda_value);
+
+        // now update the forcefields
+        int start_index = start_idxs.value("clj", -1);
+
+        if (start_index != -1 and cljff != 0)
         {
-            const auto &qm_mol = this->qm_mols[i];
-            const auto &start_idxs = this->start_indices_qm[i];
+            const int nparams = morphed_charges.count();
 
-            // calculate the new parameters for this lambda value
-
-            const auto morphed_charges = this->lambda_schedule.morph(
-                "charge",
-                QVector<double>(qm_mol.getCharges().size(), 0.0),
-                qm_mol.getCharges(),
-                lam);
-
-            const auto sigmas = qm_mol.getSigmas();
-
-            const auto epsilons = qm_mol.getEpsilons();
-
-            const auto alphas = qm_mol.getAlphas();
-
-            const auto morphed_bond_k = this->lambda_schedule.morph(
-                "bond_k",
-                QVector<double>(qm_mol.getBondKs().size(), 0.0),
-                qm_mol.getBondKs(),
-                lam);
-
-            const auto bond_length = qm_mol.getBondLengths();
-
-            const auto morphed_angle_k = this->lambda_schedule.morph(
-                "angle_k",
-                QVector<double>(qm_mol.getAngleKs().size(), 0.0),
-                qm_mol.getAngleKs(),
-                lam);
-
-            const auto angle_size = qm_mol.getAngleSizes();
-
-            const auto torsion_phase = qm_mol.getTorsionPhases();
-
-            const auto morphed_torsion_k = this->lambda_schedule.morph(
-                "torsion_k",
-                QVector<double>(qm_mol.getTorsionKs().size(), 0.0),
-                qm_mol.getTorsionKs(),
-                lam);
-
-            const auto morphed_charge_scale = this->lambda_schedule.morph(
-                "charge_scale",
-                QVector<double>(qm_mol.getChargeScales().size(), 0.0),
-                qm_mol.getChargeScales(),
-                lam);
-
-            const auto lj_scale = qm_mol.getLJScales();
-
-            // now update the forcefields
-            int start_index = start_idxs.value("clj", -1);
-
-            if (start_index != -1 and cljff != 0)
+            if (have_ghost_atoms)
             {
-                const int nparams = morphed_charges.count();
-
                 for (int j = 0; j < nparams; ++j)
                 {
-                    cljff->setParticleParameters(start_index + j, morphed_charges[j], sigmas[j], epsilons[j]);
-                }
+                    const bool is_from_ghost = perturbable_mol.getFromGhostIdxs().contains(j);
+                    const bool is_to_ghost = perturbable_mol.getToGhostIdxs().contains(j);
 
-                const auto idxs = qm_mol.getExceptionIndices("clj");
+                    // reduced charge
+                    custom_params[0] = morphed_charges[j];
+                    // half_sigma
+                    custom_params[1] = 0.5 * morphed_sigmas[j];
+                    // two_sqrt_epsilon
+                    custom_params[2] = 2.0 * std::sqrt(morphed_epsilons[j]);
+                    // alpha
+                    custom_params[3] = morphed_alphas[j];
 
-                if (not idxs.isEmpty())
-                {
-                    const auto exception_atoms = qm_mol.getExceptionAtoms();
+                    // clamp alpha between 0 and 1
+                    if (custom_params[3] < 0)
+                        custom_params[3] = 0;
+                    else if (custom_params[3] > 1)
+                        custom_params[3] = 1;
 
-                    for (int j = 0; j < exception_atoms.count(); ++j)
+                    ghost_ghostff->setParticleParameters(start_index + j, custom_params);
+                    ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
+
+                    if (is_from_ghost or is_to_ghost)
                     {
-                        const auto &atoms = exception_atoms[j];
+                        // don't set the LJ parameters in the cljff
+                        cljff->setParticleParameters(start_index + j, morphed_charges[j], 0.0, 0.0);
+                    }
+                    else
+                    {
+                        cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < nparams; ++j)
+                {
+                    cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
+                }
+            }
 
-                        const auto atom0 = std::get<0>(atoms);
-                        const auto atom1 = std::get<1>(atoms);
+            const auto idxs = perturbable_mol.getExceptionIndices("clj");
 
-                        const auto coul_14_scale = morphed_charge_scale[j];
-                        const auto lj_14_scale = lj_scale[j];
+            if (not idxs.isEmpty())
+            {
+                const auto exception_atoms = perturbable_mol.getExceptionAtoms();
 
-                        const auto p = get_exception(atom0, atom1,
-                                                    start_index, coul_14_scale, lj_14_scale,
-                                                    morphed_charges, sigmas, epsilons, alphas);
+                for (int j = 0; j < exception_atoms.count(); ++j)
+                {
+                    const auto &atoms = exception_atoms[j];
 
+                    const auto atom0 = std::get<0>(atoms);
+                    const auto atom1 = std::get<1>(atoms);
+
+                    const auto coul_14_scale = morphed_charge_scale[j];
+                    const auto lj_14_scale = morphed_lj_scale[j];
+
+                    const bool atom0_is_ghost = perturbable_mol.isGhostAtom(atom0);
+                    const bool atom1_is_ghost = perturbable_mol.isGhostAtom(atom1);
+
+                    const auto p = get_exception(atom0, atom1,
+                                                start_index, coul_14_scale, lj_14_scale,
+                                                morphed_charges, morphed_sigmas, morphed_epsilons,
+                                                morphed_alphas);
+
+                    // don't set LJ terms for ghost atoms
+                    if (atom0_is_ghost or atom1_is_ghost)
+                    {
+                        cljff->setExceptionParameters(
+                            std::get<0>(idxs[j]),
+                            std::get<0>(p), std::get<1>(p),
+                            std::get<2>(p), 1e-9, 1e-9);
+
+                        if (coul_14_scale != 0 or lj_14_scale != 0)
+                        {
+                            // this is a 1-4 parameter - need to update
+                            // the ghost 1-4 forcefield
+                            int nbidx = std::get<1>(idxs[j]);
+
+                            if (nbidx < 0)
+                                throw SireError::program_bug(QObject::tr(
+                                                                "Unset NB14 index for a ghost atom?"),
+                                                            CODELOC);
+
+                            if (ghost_14ff != 0)
+                            {
+                                // parameters are q, sigma, four_epsilon and alpha
+                                std::vector<double> params14 =
+                                    {std::get<2>(p), std::get<3>(p),
+                                    4.0 * std::get<4>(p), std::get<5>(p)};
+
+                                ghost_14ff->setBondParameters(nbidx,
+                                                            std::get<0>(p),
+                                                            std::get<1>(p),
+                                                            params14);
+                            }
+                        }
+                    }
+                    else
+                    {
                         cljff->setExceptionParameters(
                             std::get<0>(idxs[j]),
                             std::get<0>(p), std::get<1>(p),
@@ -362,444 +467,128 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     }
                 }
             }
+        }
 
-            start_index = start_idxs.value("bond", -1);
+        start_index = start_idxs.value("bond", -1);
 
-            if (start_index != -1 and bondff != 0)
+        if (start_index != -1 and bondff != 0)
+        {
+            const int nparams = morphed_bond_k.count();
+
+            for (int j = 0; j < nparams; ++j)
             {
-                const int nparams = morphed_bond_k.count();
+                const int index = start_index + j;
 
-                for (int j = 0; j < nparams; ++j)
-                {
-                    const int index = start_index + j;
+                int particle1, particle2;
+                double length, k;
 
-                    int particle1, particle2;
-                    double length, k;
+                bondff->getBondParameters(index, particle1, particle2,
+                                        length, k);
 
-                    bondff->getBondParameters(index, particle1, particle2,
-                                              length, k);
-
-                    bondff->setBondParameters(index, particle1, particle2,
-                                              bond_length[j],
-                                              morphed_bond_k[j]);
-                }
-            }
-
-            start_index = start_idxs.value("angle", -1);
-
-            if (start_index != -1 and angff != 0)
-            {
-                const int nparams = morphed_angle_k.count();
-
-                for (int j = 0; j < nparams; ++j)
-                {
-                    const int index = start_index + j;
-
-                    int particle1, particle2, particle3;
-                    double size, k;
-
-                    angff->getAngleParameters(index,
-                                              particle1, particle2, particle3,
-                                              size, k);
-
-                    angff->setAngleParameters(index,
-                                              particle1, particle2, particle3,
-                                              angle_size[j],
-                                              morphed_angle_k[j]);
-                }
-            }
-
-            start_index = start_idxs.value("torsion", -1);
-
-            if (start_index != -1 and dihff != 0)
-            {
-                const int nparams = morphed_torsion_k.count();
-
-                for (int j = 0; j < nparams; ++j)
-                {
-                    const int index = start_index + j;
-
-                    int particle1, particle2, particle3, particle4;
-                    double phase, k;
-                    int periodicity;
-
-                    dihff->getTorsionParameters(index,
-                                                particle1, particle2,
-                                                particle3, particle4,
-                                                periodicity, phase, k);
-
-                    dihff->setTorsionParameters(index,
-                                                particle1, particle2,
-                                                particle3, particle4,
-                                                periodicity,
-                                                torsion_phase[j],
-                                                morphed_torsion_k[j]);
-                }
+                bondff->setBondParameters(index, particle1, particle2,
+                                        morphed_bond_length[j],
+                                        morphed_bond_k[j]);
             }
         }
 
-        // update the parameters in the context
-        if (cljff)
-            cljff->updateParametersInContext(context);
+        start_index = start_idxs.value("angle", -1);
 
-        // in OpenMM 8.1beta updating the bond parameters past lambda=0.25
-        // causes a "All Forces must have identical exclusions" error,
-        // when running minimisation without h-bond constraints...
-        if (bondff)
-            bondff->updateParametersInContext(context);
+        if (start_index != -1 and angff != 0)
+        {
+            const int nparams = morphed_angle_k.count();
 
-        if (angff)
-            angff->updateParametersInContext(context);
+            for (int j = 0; j < nparams; ++j)
+            {
+                const int index = start_index + j;
 
-        if (dihff)
-            dihff->updateParametersInContext(context);
+                int particle1, particle2, particle3;
+                double size, k;
 
-        return lambda_value;
+                angff->getAngleParameters(index,
+                                        particle1, particle2, particle3,
+                                        size, k);
+
+                angff->setAngleParameters(index,
+                                        particle1, particle2, particle3,
+                                        morphed_angle_size[j],
+                                        morphed_angle_k[j]);
+            }
+        }
+
+        start_index = start_idxs.value("torsion", -1);
+
+        if (start_index != -1 and dihff != 0)
+        {
+            const int nparams = morphed_torsion_k.count();
+
+            for (int j = 0; j < nparams; ++j)
+            {
+                const int index = start_index + j;
+
+                int particle1, particle2, particle3, particle4;
+                double phase, k;
+                int periodicity;
+
+                dihff->getTorsionParameters(index,
+                                            particle1, particle2,
+                                            particle3, particle4,
+                                            periodicity, phase, k);
+
+                dihff->setTorsionParameters(index,
+                                            particle1, particle2,
+                                            particle3, particle4,
+                                            periodicity,
+                                            morphed_torsion_phase[j],
+                                            morphed_torsion_k[j]);
+            }
+        }
     }
 
-    else
+    // update the parameters in the context
+    if (cljff)
+        cljff->updateParametersInContext(context);
+
+    if (ghost_ghostff)
+        ghost_ghostff->updateParametersInContext(context);
+
+    if (ghost_nonghostff)
+        ghost_nonghostff->updateParametersInContext(context);
+
+    if (ghost_14ff)
+        ghost_14ff->updateParametersInContext(context);
+
+    // in OpenMM 8.1beta updating the bond parameters past lambda=0.25
+    // causes a "All Forces must have identical exclusions" error,
+    // when running minimisation without h-bond constraints...
+    if (bondff)
+        bondff->updateParametersInContext(context);
+
+    if (angff)
+        angff->updateParametersInContext(context);
+
+    if (dihff)
+        dihff->updateParametersInContext(context);
+
+    // now update any restraints that are scaled
+    for (const auto &restraint : this->name_to_restraintidx.keys())
     {
-        // get copies of the forcefields in which the parameters will be changed
-        auto qmff = this->getForce<QMMMForce>("qmmm", system);
-        auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
-        auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
-        auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
-        auto ghost_14ff = this->getForce<OpenMM::CustomBondForce>("ghost-14", system);
-        auto bondff = this->getForce<OpenMM::HarmonicBondForce>("bond", system);
-        auto angff = this->getForce<OpenMM::HarmonicAngleForce>("angle", system);
-        auto dihff = this->getForce<OpenMM::PeriodicTorsionForce>("torsion", system);
+        // restraints always morph between 1 and 1 (i.e. they fully
+        // follow whatever is set by lambda, e.g. 'initial*lambda'
+        // to switch them on, or `final*lambda` to switch them off)
+        const double rho = lambda_schedule.morph(restraint,
+                                                1.0, 1.0,
+                                                lambda_value);
 
-        // we know if we have peturbable ghost atoms if we have the ghost forcefields
-        const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
-
-        std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
-
-        if (qmff != 0)
+        for (auto &ff : this->getRestraints(restraint, system))
         {
-            double lam = this->lambda_schedule.morph("qm", 1.0, 0.0, lambda_value);
-            qmff->setLambda(lam);
-        }
-
-        // change the parameters for all of the perturbable molecules
-        for (int i = 0; i < this->perturbable_mols.count(); ++i)
-        {
-            const auto &perturbable_mol = this->perturbable_mols[i];
-            const auto &start_idxs = this->start_indices_pert[i];
-
-            // calculate the new parameters for this lambda value
-            const auto morphed_charges = this->lambda_schedule.morph(
-                "charge",
-                perturbable_mol.getCharges0(),
-                perturbable_mol.getCharges1(),
-                lambda_value);
-
-            const auto morphed_sigmas = this->lambda_schedule.morph(
-                "sigma",
-                perturbable_mol.getSigmas0(),
-                perturbable_mol.getSigmas1(),
-                lambda_value);
-
-            const auto morphed_epsilons = this->lambda_schedule.morph(
-                "epsilon",
-                perturbable_mol.getEpsilons0(),
-                perturbable_mol.getEpsilons1(),
-                lambda_value);
-
-            const auto morphed_alphas = this->lambda_schedule.morph(
-                "alpha",
-                perturbable_mol.getAlphas0(),
-                perturbable_mol.getAlphas1(),
-                lambda_value);
-
-            const auto morphed_bond_k = this->lambda_schedule.morph(
-                "bond_k",
-                perturbable_mol.getBondKs0(),
-                perturbable_mol.getBondKs1(),
-                lambda_value);
-
-            const auto morphed_bond_length = this->lambda_schedule.morph(
-                "bond_length",
-                perturbable_mol.getBondLengths0(),
-                perturbable_mol.getBondLengths1(),
-                lambda_value);
-
-            const auto morphed_angle_k = this->lambda_schedule.morph(
-                "angle_k",
-                perturbable_mol.getAngleKs0(),
-                perturbable_mol.getAngleKs1(),
-                lambda_value);
-
-            const auto morphed_angle_size = this->lambda_schedule.morph(
-                "angle_size",
-                perturbable_mol.getAngleSizes0(),
-                perturbable_mol.getAngleSizes1(),
-                lambda_value);
-
-            const auto morphed_torsion_phase = this->lambda_schedule.morph(
-                "torsion_phase",
-                perturbable_mol.getTorsionPhases0(),
-                perturbable_mol.getTorsionPhases1(),
-                lambda_value);
-
-            const auto morphed_torsion_k = this->lambda_schedule.morph(
-                "torsion_k",
-                perturbable_mol.getTorsionKs0(),
-                perturbable_mol.getTorsionKs1(),
-                lambda_value);
-
-            const auto morphed_charge_scale = this->lambda_schedule.morph(
-                "charge_scale",
-                perturbable_mol.getChargeScales0(),
-                perturbable_mol.getChargeScales1(),
-                lambda_value);
-
-            const auto morphed_lj_scale = this->lambda_schedule.morph(
-                "lj_scale",
-                perturbable_mol.getLJScales0(),
-                perturbable_mol.getLJScales1(),
-                lambda_value);
-
-            // now update the forcefields
-            int start_index = start_idxs.value("clj", -1);
-
-            if (start_index != -1 and cljff != 0)
+            if (ff != 0)
             {
-                const int nparams = morphed_charges.count();
-
-                if (have_ghost_atoms)
-                {
-                    for (int j = 0; j < nparams; ++j)
-                    {
-                        const bool is_from_ghost = perturbable_mol.getFromGhostIdxs().contains(j);
-                        const bool is_to_ghost = perturbable_mol.getToGhostIdxs().contains(j);
-
-                        // reduced charge
-                        custom_params[0] = morphed_charges[j];
-                        // half_sigma
-                        custom_params[1] = 0.5 * morphed_sigmas[j];
-                        // two_sqrt_epsilon
-                        custom_params[2] = 2.0 * std::sqrt(morphed_epsilons[j]);
-                        // alpha
-                        custom_params[3] = morphed_alphas[j];
-
-                        // clamp alpha between 0 and 1
-                        if (custom_params[3] < 0)
-                            custom_params[3] = 0;
-                        else if (custom_params[3] > 1)
-                            custom_params[3] = 1;
-
-                        ghost_ghostff->setParticleParameters(start_index + j, custom_params);
-                        ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
-
-                        if (is_from_ghost or is_to_ghost)
-                        {
-                            // don't set the LJ parameters in the cljff
-                            cljff->setParticleParameters(start_index + j, morphed_charges[j], 0.0, 0.0);
-                        }
-                        else
-                        {
-                            cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
-                        }
-                    }
-                }
-                else
-                {
-                    for (int j = 0; j < nparams; ++j)
-                    {
-                        cljff->setParticleParameters(start_index + j, morphed_charges[j], morphed_sigmas[j], morphed_epsilons[j]);
-                    }
-                }
-
-                const auto idxs = perturbable_mol.getExceptionIndices("clj");
-
-                if (not idxs.isEmpty())
-                {
-                    const auto exception_atoms = perturbable_mol.getExceptionAtoms();
-
-                    for (int j = 0; j < exception_atoms.count(); ++j)
-                    {
-                        const auto &atoms = exception_atoms[j];
-
-                        const auto atom0 = std::get<0>(atoms);
-                        const auto atom1 = std::get<1>(atoms);
-
-                        const auto coul_14_scale = morphed_charge_scale[j];
-                        const auto lj_14_scale = morphed_lj_scale[j];
-
-                        const bool atom0_is_ghost = perturbable_mol.isGhostAtom(atom0);
-                        const bool atom1_is_ghost = perturbable_mol.isGhostAtom(atom1);
-
-                        const auto p = get_exception(atom0, atom1,
-                                                    start_index, coul_14_scale, lj_14_scale,
-                                                    morphed_charges, morphed_sigmas, morphed_epsilons,
-                                                    morphed_alphas);
-
-                        // don't set LJ terms for ghost atoms
-                        if (atom0_is_ghost or atom1_is_ghost)
-                        {
-                            cljff->setExceptionParameters(
-                                std::get<0>(idxs[j]),
-                                std::get<0>(p), std::get<1>(p),
-                                std::get<2>(p), 1e-9, 1e-9);
-
-                            if (coul_14_scale != 0 or lj_14_scale != 0)
-                            {
-                                // this is a 1-4 parameter - need to update
-                                // the ghost 1-4 forcefield
-                                int nbidx = std::get<1>(idxs[j]);
-
-                                if (nbidx < 0)
-                                    throw SireError::program_bug(QObject::tr(
-                                                                    "Unset NB14 index for a ghost atom?"),
-                                                                CODELOC);
-
-                                if (ghost_14ff != 0)
-                                {
-                                    // parameters are q, sigma, four_epsilon and alpha
-                                    std::vector<double> params14 =
-                                        {std::get<2>(p), std::get<3>(p),
-                                        4.0 * std::get<4>(p), std::get<5>(p)};
-
-                                    ghost_14ff->setBondParameters(nbidx,
-                                                                std::get<0>(p),
-                                                                std::get<1>(p),
-                                                                params14);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            cljff->setExceptionParameters(
-                                std::get<0>(idxs[j]),
-                                std::get<0>(p), std::get<1>(p),
-                                std::get<2>(p), std::get<3>(p),
-                                std::get<4>(p));
-                        }
-                    }
-                }
-            }
-
-            start_index = start_idxs.value("bond", -1);
-
-            if (start_index != -1 and bondff != 0)
-            {
-                const int nparams = morphed_bond_k.count();
-
-                for (int j = 0; j < nparams; ++j)
-                {
-                    const int index = start_index + j;
-
-                    int particle1, particle2;
-                    double length, k;
-
-                    bondff->getBondParameters(index, particle1, particle2,
-                                            length, k);
-
-                    bondff->setBondParameters(index, particle1, particle2,
-                                            morphed_bond_length[j],
-                                            morphed_bond_k[j]);
-                }
-            }
-
-            start_index = start_idxs.value("angle", -1);
-
-            if (start_index != -1 and angff != 0)
-            {
-                const int nparams = morphed_angle_k.count();
-
-                for (int j = 0; j < nparams; ++j)
-                {
-                    const int index = start_index + j;
-
-                    int particle1, particle2, particle3;
-                    double size, k;
-
-                    angff->getAngleParameters(index,
-                                            particle1, particle2, particle3,
-                                            size, k);
-
-                    angff->setAngleParameters(index,
-                                            particle1, particle2, particle3,
-                                            morphed_angle_size[j],
-                                            morphed_angle_k[j]);
-                }
-            }
-
-            start_index = start_idxs.value("torsion", -1);
-
-            if (start_index != -1 and dihff != 0)
-            {
-                const int nparams = morphed_torsion_k.count();
-
-                for (int j = 0; j < nparams; ++j)
-                {
-                    const int index = start_index + j;
-
-                    int particle1, particle2, particle3, particle4;
-                    double phase, k;
-                    int periodicity;
-
-                    dihff->getTorsionParameters(index,
-                                                particle1, particle2,
-                                                particle3, particle4,
-                                                periodicity, phase, k);
-
-                    dihff->setTorsionParameters(index,
-                                                particle1, particle2,
-                                                particle3, particle4,
-                                                periodicity,
-                                                morphed_torsion_phase[j],
-                                                morphed_torsion_k[j]);
-                }
+                this->updateRestraintInContext(*ff, rho, context);
             }
         }
-
-        // update the parameters in the context
-        if (cljff)
-            cljff->updateParametersInContext(context);
-
-        if (ghost_ghostff)
-            ghost_ghostff->updateParametersInContext(context);
-
-        if (ghost_nonghostff)
-            ghost_nonghostff->updateParametersInContext(context);
-
-        if (ghost_14ff)
-            ghost_14ff->updateParametersInContext(context);
-
-        // in OpenMM 8.1beta updating the bond parameters past lambda=0.25
-        // causes a "All Forces must have identical exclusions" error,
-        // when running minimisation without h-bond constraints...
-        if (bondff)
-            bondff->updateParametersInContext(context);
-
-        if (angff)
-            angff->updateParametersInContext(context);
-
-        if (dihff)
-            dihff->updateParametersInContext(context);
-
-        // now update any restraints that are scaled
-        for (const auto &restraint : this->name_to_restraintidx.keys())
-        {
-            // restraints always morph between 1 and 1 (i.e. they fully
-            // follow whatever is set by lambda, e.g. 'initial*lambda'
-            // to switch them on, or `final*lambda` to switch them off)
-            const double rho = lambda_schedule.morph(restraint,
-                                                    1.0, 1.0,
-                                                    lambda_value);
-
-            for (auto &ff : this->getRestraints(restraint, system))
-            {
-                if (ff != 0)
-                {
-                    this->updateRestraintInContext(*ff, rho, context);
-                }
-            }
-        }
-
-        return lambda_value;
     }
+
+    return lambda_value;
 }
 
 /** Update the parameters for a CustomCompoundBondForce for scale factor 'rho'
