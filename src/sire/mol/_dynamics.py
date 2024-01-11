@@ -13,6 +13,10 @@ class DynamicsData:
 
         map = create_map(map, kwargs)
 
+        # Save the original view, so that we can return an object
+        # of the same type in .commit()
+        self._orig_mols = mols
+
         if mols is not None:
             self._map = map  # this is already a PropertyMap
 
@@ -57,6 +61,22 @@ class DynamicsData:
                 self._lambda_interpolate = lambda_interpolate
             else:
                 self._is_interpolate = False
+
+            if map.specified("cutoff"):
+                cutoff = map["cutoff"]
+
+                if cutoff.has_source():
+                    cutoff = cutoff.source()
+
+                    if cutoff.lower() == "none" or cutoff.lower().startswith("infinit"):
+                        self._map.set("cutoff_type", "NONE")
+                        self._map.unset("cutoff")
+                    elif cutoff.lower() == "auto":
+                        self._map.unset("cutoff")
+                    elif cutoff != "cutoff":
+                        from .. import u
+
+                        self._map.set("cutoff", u(cutoff))
 
             # get the forcefield info from the passed parameters
             # and from whatever we can glean from the molecules
@@ -593,6 +613,21 @@ class DynamicsData:
     def energy_trajectory(self):
         return self._energy_trajectory.clone()
 
+    def step(self, num_steps: int = 1):
+        """
+        Just perform 'num_steps' steps of dynamics, without saving
+        anything or running anything in a background thread. This is
+        designed for times when we want a minimial overhead, e.g.
+        when we want to run a small number of steps quickly.
+        """
+        if self._is_running:
+            raise SystemError("Cannot step dynamics while it is already running!")
+
+        self._omm_state = None
+        self._omm_state_has_cv = (False, False)
+
+        self._omm_mols.getIntegrator().step(num_steps)
+
     def run_minimisation(self, max_iterations: int):
         """
         Internal method that runs minimisation on the molecules.
@@ -955,7 +990,7 @@ class DynamicsData:
             self.run(**orig_args)
             return
 
-    def commit(self):
+    def commit(self, return_as_system: bool = False):
         if self.is_null():
             return
 
@@ -968,6 +1003,21 @@ class DynamicsData:
         self._sire_mols.set_energy_trajectory(self._energy_trajectory, map=self._map)
 
         self._sire_mols.set_ensemble(self.ensemble())
+
+        if return_as_system:
+            return self._sire_mols.clone()
+
+        elif self._orig_mols is not None:
+            from ..system import System
+
+            if System.is_system(self._orig_mols):
+                return self._sire_mols
+            else:
+                r = self._orig_mols.clone()
+                r.update(self._sire_mols.molecules())
+                return r
+        else:
+            return self._sire_mols.clone()
 
 
 def _add_extra(extras, key, value):
@@ -1074,6 +1124,18 @@ class Dynamics:
             self._d.run_minimisation(
                 max_iterations=max_iterations,
             )
+
+        return self
+
+    def step(self, num_steps: int = 1):
+        """
+        Simple function that performs `num_steps` steps of dynamics.
+        This does not save any frames or energies - it is designed for
+        times when you want to run a small number of steps quickly
+        with minimal overhead.
+        """
+        if not self._d.is_null():
+            self._d.step(num_steps=num_steps)
 
         return self
 
@@ -1432,11 +1494,17 @@ class Dynamics:
         else:
             return t
 
-    def commit(self):
+    def commit(self, return_as_system: bool = False):
+        """
+        Commit the dynamics and return the molecules after the simulation.
+        Normally this will return the same view of as was used for
+        construction. If `return_as_system` is True, then this will
+        return a System object instead.
+        """
         if not self._d.is_null():
-            self._d.commit()
-
-        return self._d._sire_mols
+            return self._d.commit(return_as_system=return_as_system)
+        else:
+            return None
 
     def __call__(
         self,

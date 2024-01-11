@@ -1929,8 +1929,19 @@ MoleculeParserPtr MoleculeParser::parse(const System &system, const QString &for
     cannot be recognised, or if there is an error in parsing. */
 MoleculeParserPtr MoleculeParser::parse(const QString &filename, const PropertyMap &map)
 {
-    MoleculeParserPtr parser = MoleculeParser::_pvt_parse(filename, map);
-    getFileCache()->clear();
+    MoleculeParserPtr parser;
+
+    try
+    {
+        parser = MoleculeParser::_pvt_parse(filename, map);
+        getFileCache()->clear();
+    }
+    catch (...)
+    {
+        getFileCache()->clear();
+        throw;
+    }
+
     return parser;
 }
 
@@ -1939,48 +1950,56 @@ QList<MoleculeParserPtr> MoleculeParser::parse(const QStringList &filenames, con
 {
     QList<MoleculeParserPtr> result;
 
-    if (filenames.count() == 1)
+    try
     {
-        result.append(MoleculeParser::_pvt_parse(filenames[0], map));
-    }
-    else
-    {
-        QVector<MoleculeParserPtr> parsers(filenames.count());
-
-        bool run_parallel = true;
-
-        if (map["parallel"].hasValue())
+        if (filenames.count() == 1)
         {
-            run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
-        }
-
-        if (run_parallel)
-        {
-            // parse the files in parallel - we use a grain size of 1
-            // as each file can be pretty big, and there won't be many of them
-            tbb::parallel_for(
-                tbb::blocked_range<int>(0, filenames.count(), 1),
-                [&](tbb::blocked_range<int> r)
-                {
-                    for (int i = r.begin(); i < r.end(); ++i)
-                    {
-                        parsers[i] = MoleculeParser::_pvt_parse(filenames[i], map);
-                    }
-                },
-                tbb::simple_partitioner());
+            result.append(MoleculeParser::_pvt_parse(filenames[0], map));
         }
         else
         {
-            for (int i = 0; i < filenames.count(); ++i)
+            QVector<MoleculeParserPtr> parsers(filenames.count());
+
+            bool run_parallel = true;
+
+            if (map["parallel"].hasValue())
             {
-                parsers[i] = MoleculeParser::_pvt_parse(filenames[i], map);
+                run_parallel = map["parallel"].value().asA<BooleanProperty>().value();
             }
+
+            if (run_parallel)
+            {
+                // parse the files in parallel - we use a grain size of 1
+                // as each file can be pretty big, and there won't be many of them
+                tbb::parallel_for(
+                    tbb::blocked_range<int>(0, filenames.count(), 1),
+                    [&](tbb::blocked_range<int> r)
+                    {
+                        for (int i = r.begin(); i < r.end(); ++i)
+                        {
+                            parsers[i] = MoleculeParser::_pvt_parse(filenames[i], map);
+                        }
+                    },
+                    tbb::simple_partitioner());
+            }
+            else
+            {
+                for (int i = 0; i < filenames.count(); ++i)
+                {
+                    parsers[i] = MoleculeParser::_pvt_parse(filenames[i], map);
+                }
+            }
+
+            result = parsers.toList();
         }
 
-        result = parsers.toList();
+        getFileCache()->clear();
     }
-
-    getFileCache()->clear();
+    catch (...)
+    {
+        getFileCache()->clear();
+        throw;
+    }
 
     return result;
 }

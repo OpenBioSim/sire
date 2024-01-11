@@ -34,10 +34,52 @@
 
 #include "SireCAS/lambdaschedule.h"
 
+#include <QReadWriteLock>
+
+#include <memory>
+
 SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
+    class MolLambdaCache
+    {
+    public:
+        MolLambdaCache();
+        MolLambdaCache(double lam_val);
+        MolLambdaCache(const MolLambdaCache &other);
+        ~MolLambdaCache();
+
+        MolLambdaCache &operator=(const MolLambdaCache &other);
+
+        const QVector<double> &morph(const SireCAS::LambdaSchedule &schedule,
+                                     const QString &key,
+                                     const QVector<double> &initial,
+                                     const QVector<double> &final) const;
+
+    private:
+        QHash<QString, QVector<double>> cache;
+        QReadWriteLock lock;
+        double lam_val;
+    };
+
+    class LeverCache
+    {
+    public:
+        LeverCache();
+        LeverCache(const LeverCache &other);
+        ~LeverCache();
+
+        LeverCache &operator=(const LeverCache &other);
+
+        const MolLambdaCache &get(int molidx, double lam_val) const;
+
+        void clear();
+
+    private:
+        QHash<int, QHash<double, MolLambdaCache>> cache;
+    };
+
     /** This is a lever that is used to change the parameters in an OpenMM
      *  context according to a lambda value. This is actually a collection
      *  of levers, each of which is controlled by the main lever.
@@ -114,10 +156,13 @@ namespace SireOpenMM
 
         /** The start indices of the parameters in each named
             forcefield for each perturbable molecule */
-        QVector<QHash<QString, qint32>> start_indices_pert;
+        QVector<QHash<QString, qint32>> start_indices;
 
         /** All of the property maps for the perturbable molecules */
         QHash<SireMol::MolNum, SireBase::PropertyMap> perturbable_maps;
+
+        /** Cache of the parameters for different lambda values */
+        LeverCache lambda_cache;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTION

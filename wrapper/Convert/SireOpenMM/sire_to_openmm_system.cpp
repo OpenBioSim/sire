@@ -481,6 +481,10 @@ void _set_clj_cutoff(OpenMM::NonbondedForce &cljff,
         const auto cutoff = ffinfo.cutoff().to(SireUnits::nanometers);
         cljff.setCutoffDistance(cutoff);
     }
+    else
+    {
+        cljff.setNonbondedMethod(OpenMM::NonbondedForce::NoCutoff);
+    }
 }
 
 /** Set the periodic space box vectors in the system, returning

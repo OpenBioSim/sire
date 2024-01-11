@@ -1,10 +1,10 @@
-__all__ = ["create_map", "wrap", "PropertyMap", "ProgressBar"]
+__all__ = ["create_map", "wrap", "PropertyMap", "ProgressBar", "Properties"]
 
 from ..legacy import Base as _Base
 
 from .. import use_new_api as _use_new_api
 
-from ..legacy.Base import PropertyMap
+from ..legacy.Base import PropertyMap, Properties
 
 from ._progressbar import ProgressBar
 

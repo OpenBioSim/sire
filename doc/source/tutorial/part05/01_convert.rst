@@ -134,12 +134,12 @@ environment as :mod:`sire`, and whether or not :mod:`sire` was compiled
 with support for that package.
 
 >>> print(sr.convert.supported_formats())
-['biosimspace', 'openmm', 'rdkit', 'sire']
+['biosimspace', 'gemmi', 'openmm', 'rdkit', 'sire']
 
 .. note::
 
    If ``rdkit`` isn't listed, then you should quit Python and install
-   it, e.g. using the command ``mamba install -c conda-forge rdkit``.
+   it, e.g. using the command ``conda install -c conda-forge rdkit``.
    If it still isn't listed then please raise an issue on the
    `sire GitHub repository <https://github.com/OpenBioSim/sire/issues>`__.
 
@@ -219,12 +219,12 @@ environment as :mod:`sire`, and whether or not :mod:`sire` was compiled
 with support for that package.
 
 >>> print(sr.convert.supported_formats())
-['biosimspace', 'openmm', 'rdkit', 'sire']
+['biosimspace', 'gemmi', 'openmm', 'rdkit', 'sire']
 
 .. note::
 
    If ``openmm`` isn't listed, then you should quit Python and install
-   it, e.g. using the command ``mamba install -c conda-forge openmm``.
+   it, e.g. using the command ``conda install -c conda-forge openmm``.
    If it still isn't listed then please raise an issue on the
    `sire GitHub repository <https://github.com/OpenBioSim/sire/issues>`__.
 
@@ -273,6 +273,131 @@ extracted from the Context. Please do get in touch with us if you would like
 to learn about these functions, and would like to contribute to coding
 a more complete OpenMM to sire converter.
 
+Gemmi
+-----
+
+`Gemmi <https://gemmi.readthedocs.io/en/latest/>`__ is a Python library
+developed primarily for use in macromolecular crystallography (MX).
+In particular it can be used to parse PDBx/mmCIF files, refinement
+restraints, reflection data, 3D grid data and dealing with
+crystallographic symmetry. This is useful for structural bioinformatics.
+
+The :func:`sire.convert.supported_formats` function lists the formats that
+:mod:`sire.convert` supports for the current installation. This will
+depend on whether or not you have the package installed in the same conda
+environment as :mod:`sire`, and whether or not :mod:`sire` was compiled
+with support for that package.
+
+>>> print(sr.convert.supported_formats())
+['biosimspace', 'gemmi', 'openmm', 'rdkit', 'sire']
+
+.. note::
+
+   If ``gemmi`` isn't listed, then you should quit Python and install
+   it, e.g. using the command ``conda install -c conda-forge gemmi``.
+   If it still isn't listed then please raise an issue on the
+   `sire GitHub repository <https://github.com/OpenBioSim/sire/issues>`__.
+
+:func:`sire.convert.to` can convert a :class:`~sire.system.System`, list
+of molecules, or single molecule into a
+`Gemmi Structure <https://gemmi.readthedocs.io/en/latest/mol.html#structure>`__
+object.
+
+>>> mols = sr.load(sr.expand(sr.tutorial_url, "ala.crd", "ala.top"))
+>>> gemmi_struct = sr.convert.to(mols, "gemmi")
+>>> print(gemmi_struct)
+<gemmi.Structure  with 1 model(s)>
+>>> print(gemmi_struct[0].get_all_residue_names())
+['ACE', 'ALA', 'NME', 'WAT']
+
+Passing in a single molecule or subset of molecules will return a
+`Gemmi Structure <https://gemmi.readthedocs.io/en/latest/mol.html#structure>`__
+with just those molecules, e.g.
+
+>>> gemmi_struct = sr.convert.to(mols[0], "gemmi")
+>>> print(gemmi_struct)
+<gemmi.Structure  with 1 model(s)>
+>>> print(gemmi_struct[0].get_all_residue_names())
+['ACE', 'ALA', 'NME']
+
+You can convert a
+`Gemmi Structure <https://gemmi.readthedocs.io/en/latest/mol.html#structure>`__
+back to a :class:`~sire.system.System` object, e.g.
+
+>>> mols = sr.convert.to(gemmi_struct, "sire")
+>>> print(mols)
+System( name= num_molecules=1 num_residues=3 num_atoms=22 )
+
+This conversion also preserves user-supplied System metadata, e.g.
+
+>>> mols.set_metadata("name", "alanine dipeptide")
+>>> mols.set_metadata("residues", ["ACE", "ALA", "NME"])
+>>> mols.set_metadata("atoms", {"element": ["C", "N", "O"],
+...                             "x_coords": [0.0, 1.0, 2.0],
+...                             "y_coords": [3.0, 4.0, 5.0],
+...                             "z_coords": [6.0, 7.0, 8.0]})
+>>> sr.save(mols, "test.pdbx")
+
+would add the following to the PDBx/mmCIF file:
+
+.. code-block:: none
+
+   data_sire
+   loop_
+   _atoms.element
+   _atoms.x_coords
+   _atoms.y_coords
+   _atoms.z_coords
+   C 0 3 6
+   N 1 4 7
+   O 2 5 8
+
+   _name "alanine dipeptide"
+
+   loop_
+   _residues.value
+   ACE
+   ALA
+   NME
+
+which could be recovered when loading the file...
+
+>>> mols = sr.load("test.pdbx")
+>>> print(mols.metadata())
+Properties(
+    residues => [ ACE,ALA,NME ],
+    name => alanine dipeptide,
+    atoms => Properties(
+    element => SireBase::StringArrayProperty( size=3
+0: C
+1: N
+2: O
+),
+    x_coords => SireBase::StringArrayProperty( size=3
+0: 0
+1: 1
+2: 2
+),
+    y_coords => SireBase::StringArrayProperty( size=3
+0: 3
+1: 4
+2: 5
+),
+    z_coords => SireBase::StringArrayProperty( size=3
+0: 6
+1: 7
+2: 8
+)
+)
+)
+
+.. note::
+
+   Note that metadata values loaded from a PDBx/mmCIF file are always
+   stored as strings. You may need to convert them to the appropriate
+   type for your application (e.g., here the coordinate values are
+   the strings "0", "1", "2" etc. rather than the numbers 0, 1, 2 etc.).
+
 Anything to Anything
 --------------------
 
@@ -315,6 +440,22 @@ convert it to an OpenMM Context ready for minimisation or dynamics...
 >>> integrator.step(10)
 >>> print(omm.getState().getTime())
 0.010000000000000002 ps
+
+or you could load a PDBx file from Gemmi and convert a "MAN" moelcule within it
+into an RDKit structure...
+
+>>> import gemmi
+>>> import sire as sr
+>>> import rdkit
+>>> from rdkit import Chem
+>>> import urllib
+>>> urllib.request.urlretrieve("https://files.rcsb.org/download/3NSS.cif.gz",
+...                            filename="3NSS.cif.gz")
+>>> struct = gemmi.read_structure("3NSS.cif.gz")
+>>> mol = gemmi.Selection("(MAN)").copy_structure_selection(struct)
+>>> rdkit_mol = sr.convert.to(mol, "rdkit")
+>>> print(Chem.MolToSmiles(rdkit_mol))
+O=C=C1OC(OC2=C(=O)C(=C=O)O[C-]=C2[O-])=C(=O)=C(=O)C1=O
 
 Supporting other formats
 ------------------------

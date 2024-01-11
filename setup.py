@@ -233,6 +233,15 @@ def parse_args():
         help="pass CMake generator",
     )
     parser.add_argument(
+        "-A",
+        "--architecture",
+        action="append",
+        nargs=1,
+        metavar=("ARCHITECTURE",),
+        default=[],
+        help="pass CMake generator architecture, e.g. WIN64",
+    )
+    parser.add_argument(
         "-n",
         "--ncores",
         action="store",
@@ -588,7 +597,9 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
             CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
         except Exception:
-            conda_install(["gcc", "gxx"], False)
+            # Need this version of gcc to stay compatible with conda-forge
+            # (i.e. gemmi needs the exact same compiler version)
+            conda_install(["gcc==12.3.0", "gxx==12.3.0"], False)
             try:
                 CXX = glob.glob(os.path.join(bindir, "*-g++"))[0]
                 CC = glob.glob(os.path.join(bindir, "*-gcc"))[0]
@@ -655,6 +666,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             cmake,
             *sum([["-D", d[0]] for d in args.corelib], []),
             *sum([["-G", g[0]] for g in args.generator], []),
+            *sum([["-A", a[0]] for a in args.architecture], []),
             sourcedir,
         ]
 
@@ -742,6 +754,7 @@ def build(ncores: int = 1, npycores: int = 1, coredefs=[], pydefs=[]):
             cmake,
             *sum([["-D", d[0]] for d in args.wrapper], []),
             *sum([["-G", g[0]] for g in args.generator], []),
+            *sum([["-A", a[0]] for a in args.architecture], []),
             sourcedir,
         ]
 
@@ -816,6 +829,7 @@ def install_module(ncores: int = 1):
             cmake,
             *sum([["-D", d[0]] for d in args.wrapper], []),
             *sum([["-G", g[0]] for g in args.generator], []),
+            *sum([["-A", a[0]] for a in args.architecture], []),
             sourcedir,
         ]
         print(" ".join(cmake_cmd))
@@ -898,10 +912,8 @@ if __name__ == "__main__":
     action = args.action[0]
 
     if is_windows and (args.generator is None or len(args.generator) == 0):
-        # args.generator = [["Visual Studio 17 2022"]]
-        args.generator = [
-            ["Visual Studio 15 2017 Win64"]
-        ]  # preferred VC version for conda
+        args.generator = [["Visual Studio 17 2022"]]
+        args.architecture = [["x64"]]
     elif is_macos:
         # fix compile bug when INSTALL_NAME_TOOL is not set
         if "INSTALL_NAME_TOOL" not in os.environ:

@@ -64,15 +64,19 @@ class Minimisation:
 
         return self
 
-    def commit(self):
+    def commit(self, return_as_system: bool = False):
         """
         Commit the minimisation to the molecules, returning the
         minimised molecules.
+
+        Normally this will return the same view of as was used for
+        construction. If `return_as_system` is True, then this will
+        return a System object instead.
         """
         if not self._d.is_null():
-            self._d.commit()
-
-        return self._d._sire_mols
+            return self._d.commit(return_as_system=return_as_system)
+        else:
+            return None
 
     def __call__(self, max_iterations: int = 10000):
         """

@@ -6,14 +6,69 @@ import pytest
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_single_energy(kigaki_mols):
+def test_openmm_single_energy_neopentane(neopentane_methane, openmm_platform):
+    mol = neopentane_methane[0]
+
+    # this function will extract the lambda0 or lambda1 end state
+    def get_end_state(mol, state, remove_state):
+        c = mol.cursor()
+        for key in c.keys():
+            if key.endswith(state):
+                c[key.removesuffix(state)] = c[key]
+                del c[key]
+            elif key.endswith(remove_state):
+                del c[key]
+
+        c["is_perturbable"] = False
+        return c.commit()
+
+    mol0 = get_end_state(mol, "0", "1")
+    mol1 = get_end_state(mol, "1", "0")
+
+    map = {
+        "space": sr.vol.Cartesian(),
+        "platform": openmm_platform,
+        "constraint": "none",
+        "ignore_perturbations": True,
+    }
+
+    omm0 = sr.convert.to(mol0, "openmm", map=map)
+
+    state0 = omm0.getState(getEnergy=True)
+
+    energy0 = state0.getPotentialEnergy()
+
+    energy0 = energy0.value_in_unit(energy0.unit)
+
+    assert mol0.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy0, abs=0.1
+    )
+
+    omm1 = sr.convert.to(mol1, "openmm", map=map)
+
+    state1 = omm1.getState(getEnergy=True)
+
+    energy1 = state1.getPotentialEnergy()
+
+    energy1 = energy1.value_in_unit(energy1.unit)
+
+    assert mol1.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
+        energy1, abs=0.1
+    )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_single_energy(kigaki_mols, openmm_platform):
     mols = kigaki_mols
 
     mol = mols[0]
 
     map = {
         "space": sr.vol.Cartesian(),
-        "platform": "Reference",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
     }
 
@@ -46,13 +101,13 @@ def test_openmm_single_energy(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_multi_energy_small_cart(kigaki_mols):
+def test_openmm_multi_energy_small_cart(kigaki_mols, openmm_platform):
     # first, try just 50 molecules in a cartesian space
     mols = kigaki_mols[0:50]
 
     map = {
         "space": sr.vol.Cartesian(),
-        "platform": "Reference",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
     }
 
@@ -76,7 +131,7 @@ def test_openmm_multi_energy_small_cart(kigaki_mols):
     reason="openmm support is not available",
 )
 @pytest.mark.slow
-def test_openmm_multi_energy_all_cart(kigaki_mols):
+def test_openmm_multi_energy_all_cart(kigaki_mols, openmm_platform):
     # use all of the molecules
     mols = kigaki_mols
 
@@ -85,7 +140,7 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
         "cutoff": 10000 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 1.0,
-        "platform": "cpu",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
     }
 
@@ -108,7 +163,7 @@ def test_openmm_multi_energy_all_cart(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
+def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols, openmm_platform):
     # use all of the molecules
     mols = kigaki_mols
 
@@ -117,7 +172,7 @@ def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
-        "platform": "cpu",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
     }
 
@@ -140,7 +195,7 @@ def test_openmm_multi_energy_all_cart_cutoff(kigaki_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
+def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols, openmm_platform):
     # use all of the molecules
     mols = kigaki_mols
 
@@ -148,7 +203,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
         "cutoff": 10 * sr.units.angstrom,
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
-        "platform": "Reference",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
     }
 
@@ -172,7 +227,7 @@ def test_openmm_multi_energy_all_periodic_cutoff(kigaki_mols):
     reason="openmm support is not available",
 )
 @pytest.mark.slow
-def test_openmm_dynamics(ala_mols):
+def test_openmm_dynamics(ala_mols, openmm_platform):
     mols = ala_mols
 
     map = {
@@ -180,7 +235,7 @@ def test_openmm_dynamics(ala_mols):
         "cutoff_type": "REACTION_FIELD",
         "dielectric": 78.0,
         "temperature": 25 * sr.units.celsius,
-        "platform": "Reference",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
         # "pressure": 1 * sr.units.atm,   # currently disagree with energies for NPT...
     }
@@ -229,7 +284,7 @@ def test_openmm_dynamics(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_options(ala_mols):
+def test_openmm_options(ala_mols, openmm_platform):
     mols = ala_mols
 
     mol = mols[0]
@@ -239,7 +294,7 @@ def test_openmm_options(ala_mols):
         "temperature": 25 * sr.units.celsius,
         "pressure": 1 * sr.units.atm,
         "friction": 5 / sr.units.picosecond,
-        "platform": "Reference",
+        "platform": openmm_platform,
         "constraint": "bonds-h-angles",
     }
 
@@ -259,7 +314,7 @@ def test_openmm_options(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_ignore_constrained(ala_mols):
+def test_openmm_ignore_constrained(ala_mols, openmm_platform):
     mols = ala_mols
 
     mol = mols[0]
@@ -267,7 +322,7 @@ def test_openmm_ignore_constrained(ala_mols):
     d = mol.dynamics(
         constraint="bonds-h-angles",
         include_constrained_energies=True,
-        platform="Reference",
+        platform=openmm_platform,
     )
 
     nrg1 = d.current_potential_energy()
@@ -275,7 +330,7 @@ def test_openmm_ignore_constrained(ala_mols):
     d = mol.dynamics(
         constraint="bonds-h-angles",
         include_constrained_energies=False,
-        platform="Reference",
+        platform=openmm_platform,
     )
 
     nrg2 = d.current_potential_energy()
@@ -289,12 +344,12 @@ def test_openmm_ignore_constrained(ala_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_no_zero_sigmas(zero_lj_mols):
+def test_openmm_no_zero_sigmas(zero_lj_mols, openmm_platform):
     mols = zero_lj_mols
 
-    omm = sr.convert.to(mols, "openmm", 
-                        map={"constraint": "h-bonds",
-                             "platform": "Reference"})
+    omm = sr.convert.to(
+        mols, "openmm", map={"constraint": "h-bonds", "platform": openmm_platform}
+    )
 
     from openmm import XmlSerializer
 
@@ -308,29 +363,33 @@ def test_openmm_no_zero_sigmas(zero_lj_mols):
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
-def test_openmm_skipped_constrained_bonds(zero_lj_mols):
+def test_openmm_skipped_constrained_bonds(zero_lj_mols, openmm_platform):
     mols = zero_lj_mols
 
     omm1 = sr.convert.to(
         mols,
         "openmm",
-        map={"constraint": "h-bonds", 
-             "include_constrained_energies": True,
-             "platform": "Reference"},
+        map={
+            "constraint": "h-bonds",
+            "include_constrained_energies": True,
+            "platform": openmm_platform,
+        },
     )
 
     omm2 = sr.convert.to(
         mols,
         "openmm",
-        map={"constraint": "h-bonds", 
-             "include_constrained_energies": False,
-             "platform": "Reference"},
+        map={
+            "constraint": "h-bonds",
+            "include_constrained_energies": False,
+            "platform": openmm_platform,
+        },
     )
 
     nrg1 = omm1.get_potential_energy().to(sr.units.kcal_per_mol)
     nrg2 = omm2.get_potential_energy().to(sr.units.kcal_per_mol)
 
-    # Check the energies haven't changed
+    # Check the energies haven't changed
     # (regression check - here are the current values)
     assert nrg1 == pytest.approx(-447.44, 1e-3)
     assert nrg2 == pytest.approx(-3279.87, 1e-3)

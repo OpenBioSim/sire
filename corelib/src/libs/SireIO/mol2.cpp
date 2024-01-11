@@ -2380,6 +2380,9 @@ void Mol2::addToSystem(System &system, const PropertyMap &map) const
     // you should loop through each molecule in the system and work out
     // which ones are described in the file, and then add data from the file
     // to thise molecules.
+    throw SireError::unsupported(QObject::tr(
+                                     "You cannot add data from a mol2 file to an existing system!"),
+                                 CODELOC);
 }
 
 /** Internal function used to get the molecule structure for molecule 'imol'. */

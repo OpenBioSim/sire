@@ -126,8 +126,8 @@ First, we need to import alchemlyb
 .. note::
 
    If you see an error then you may need to install (or reinstall)
-   alchemlyb. You can do this using conda or mamba, e.g.
-   ``mamba install -c conda-forge alchemlyb``.
+   alchemlyb. You can do this using conda e.g.
+   ``conda install -c conda-forge alchemlyb``.
 
 Next, we will load all of the :class:`~sire.maths.EnergyTrajectory` objects
 for each λ-window, and will convert them into pandas DataFrames arranged
@@ -234,7 +234,7 @@ instead of ``energy_{lambda}.s3``).
 ...     print(f"Simulating lambda={lambda_value:.2f}")
 ...     # minimise the system at this lambda value
 ...     min_mol = mol.minimisation(lambda_value=lambda_value,
-...                                vacuum=True).run().commit()
+...                                vacuum=True).run().commit(return_as_system=True)
 ...     # create a dynamics object for the system
 ...     d = min_mol.dynamics(timestep="1fs", temperature="25oC",
 ...                          lambda_value=lambda_value,
@@ -266,6 +266,14 @@ instead of ``energy_{lambda}.s3``).
    remove any simulation space that may be attached to the molecule(s),
    and instead set the space to a :class:`~sire.space.Cartesian` space.
    This has the affect of simulating the molecules in vacuum.
+
+.. note::
+
+   The option ``return_as_system`` tells the minimisation's ``commit``
+   function to return the result as a :class:`~sire.system.System` object,
+   rather than a molecule. This way, ``min_mol`` is a :class:`~sire.system.System`,
+   and so you can access the energy trajectory via the
+   ``energy_trajectory()`` function.
 
 This should run more quickly than the simulation in water, e.g. about
 15 seconds per window (at about 150 nanoseconds per day of sampling).

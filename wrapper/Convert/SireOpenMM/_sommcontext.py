@@ -69,9 +69,7 @@ class SOMMContext(_Context):
             # place the coordinates and velocities into the context
             _set_openmm_coordinates_and_velocities(self, metadata)
 
-            self._lambda_value = self._lambda_lever.set_lambda(
-                self, lambda_value
-            )
+            self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
 
             self._map = map
         else:
@@ -101,7 +99,7 @@ class SOMMContext(_Context):
         if self._map.specified("constraint"):
             return self._map["constraint"].source()
         else:
-            return "none"
+            return None
 
     def get_perturbable_constraint(self):
         """
@@ -110,7 +108,7 @@ class SOMMContext(_Context):
         if self._map.specified("perturbable_constraint"):
             return self._map["perturbable_constraint"].source()
         else:
-            return "none"
+            return None
 
     def get_platform(self):
         """
@@ -259,10 +257,7 @@ class SOMMContext(_Context):
             import openmm
             from ...units import kcal_per_mol
 
-            return (
-                nrg.value_in_unit(openmm.unit.kilocalorie_per_mole)
-                * kcal_per_mol
-            )
+            return nrg.value_in_unit(openmm.unit.kilocalorie_per_mole) * kcal_per_mol
         else:
             return nrg
 

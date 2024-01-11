@@ -319,8 +319,8 @@ this data by passing it into the ``DataFrame`` constructor, e.g.
 
 .. note::
 
-   You may need to install pandas. You can do this with ``conda`` or ``mamba``,
-   e.g. ``mamba install pandas``
+   You may need to install pandas. You can do this with ``conda``,
+   e.g. ``conda install pandas``
 
 .. note::
 
@@ -501,7 +501,7 @@ plots.
 
 .. note::
 
-   You can install jupyter using mamba via ``mamba install jupyter jupyterlab``.
+   You can install jupyter using conda via ``conda install jupyter jupyterlab``.
    Once installed, you can start a jupyter lab instance by running
    ``jupyter lab``
 
@@ -509,7 +509,7 @@ plots.
 
    You must also install matplotlib if you want to use pandas to
    generate plots. You can install matplotlib using the
-   command ``mamba install matplotlib``
+   command ``conda install matplotlib``
 
 For example, you could plot all of the bond lengths using
 

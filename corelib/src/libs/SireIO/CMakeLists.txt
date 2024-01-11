@@ -48,6 +48,7 @@ set ( SIREIO_HEADERS
       netcdffile.h
       pdb.h
       pdb2.h
+      pdbx.h
       perturbationslibrary.h
       protoms.h
       sdf.h
@@ -95,6 +96,7 @@ set ( SIREIO_SOURCES
       netcdffile.cpp
       pdb.cpp
       pdb2.cpp
+      pdbx.cpp
       perturbationslibrary.cpp
       protoms.cpp
       sdf.cpp

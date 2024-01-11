@@ -11,6 +11,8 @@ __all__ = [
     "openmm_extract_coordinates",
     "openmm_extract_coordinates_and_velocities",
     "openmm_extract_space",
+    "sire_to_gemmi",
+    "gemmi_to_sire",
     "supported_formats",
 ]
 
@@ -37,7 +39,7 @@ except Exception as e:
         print(_rdkit_import_error)
         raise ModuleNotFoundError(
             "Unable to convert to/from RDKit as it is not installed. "
-            "Please install using `mamba install -c conda-forge rdkit` "
+            "Please install using `conda install -c conda-forge rdkit` "
             "and then re-run this script."
         )
 
@@ -133,6 +135,23 @@ try:
         timestep = timestep.to(picosecond) * openmm.unit.picosecond
 
         ensemble = Ensemble(map=map)
+
+        if map.specified("cutoff"):
+            # we need to make sure that this is a unit
+            cutoff = map["cutoff"]
+
+            if cutoff.has_source():
+                cutoff = cutoff.source()
+
+                if cutoff.lower() == "none" or cutoff.lower().startswith("infinit"):
+                    map.set("cutoff_type", "NONE")
+                    map.unset("cutoff")
+                elif cutoff.lower() == "auto":
+                    map.unset("cutoff")
+                elif cutoff != "cutoff":
+                    from ... import u
+
+                    map.set("cutoff", u(cutoff))
 
         if map.specified("integrator"):
             integrator = map["integrator"]
@@ -461,6 +480,36 @@ except Exception as e:
         _no_openmm()
 
 
+try:
+    from ._SireGemmi import sire_to_gemmi, gemmi_to_sire, _register_pdbx_loader
+
+    # make sure we have also import gemmi so that we
+    # have the gemmi objects registered with python
+    import gemmi as _gemmi  # noqa: F401
+
+    _has_gemmi = True
+    _register_pdbx_loader()
+except Exception as e:
+    _gemmi_import_error = e
+
+    # Gemmi support is not available
+    def _no_gemmi():
+        print(_gemmi_import_error)
+        raise ModuleNotFoundError(
+            "Unable to convert to/from Gemmi as it is not installed. "
+            "Please install using `conda install -c conda-forge gemmi` "
+            "and then re-run this script."
+        )
+
+    _has_gemmi = False
+
+    def sire_to_gemmi(*args, **kwargs):
+        _no_gemmi()
+
+    def gemmi_to_sire(*args, **kwargs):
+        _no_gemmi()
+
+
 def supported_formats():
     """Return all of the formats supported by this installation"""
     f = ["sire"]
@@ -470,6 +519,9 @@ def supported_formats():
 
     if _has_rdkit:
         f.append("rdkit")
+
+    if _has_gemmi:
+        f.append("gemmi")
 
     import sys
 

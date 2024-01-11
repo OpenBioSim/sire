@@ -675,11 +675,17 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         double sig = lj.sigma().to(SireUnits::nanometer);
         double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
 
-        if (std::abs(sig) < 1e-9)
+        if (sig == 0)
         {
             // this must be a null parameter
+            // Using eps=0 sig=1 causes instability though (NaN errors)
+            // so we will set sig=1e-9. This seems to be more stable
             eps = 0;
-            sig = 1;
+            sig = 1e-9;
+        }
+        else if (std::abs(sig) < 1e-9)
+        {
+            sig = 1e-9;
         }
 
         cljs_data[i] = std::make_tuple(chg, sig, eps);

@@ -57,6 +57,8 @@
 
 #include "PDBParameters.pypp.hpp"
 
+#include "PDBx.pypp.hpp"
+
 #include "PerturbationsLibrary.pypp.hpp"
 
 #include "PerturbationsTemplate.pypp.hpp"
@@ -149,6 +151,8 @@ BOOST_PYTHON_MODULE(_IO){
     register_PDB2_class();
 
     register_PDBParameters_class();
+
+    register_PDBx_class();
 
     register_PerturbationsLibrary_class();
 

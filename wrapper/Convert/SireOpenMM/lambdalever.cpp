@@ -36,6 +36,125 @@
 using namespace SireOpenMM;
 using namespace SireCAS;
 
+//////
+////// Implementation of MolLambdaCache
+//////
+
+MolLambdaCache::MolLambdaCache() : lam_val(0)
+{
+}
+
+MolLambdaCache::MolLambdaCache(double lam) : lam_val(lam)
+{
+}
+
+MolLambdaCache::MolLambdaCache(const MolLambdaCache &other)
+    : lam_val(other.lam_val), cache(other.cache)
+{
+}
+
+MolLambdaCache::~MolLambdaCache()
+{
+}
+
+MolLambdaCache &MolLambdaCache::operator=(const MolLambdaCache &other)
+{
+    if (this != &other)
+    {
+        lam_val = other.lam_val;
+        cache = other.cache;
+    }
+
+    return *this;
+}
+
+const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
+                                             const QString &key,
+                                             const QVector<double> &initial,
+                                             const QVector<double> &final) const
+{
+    auto nonconst_this = const_cast<MolLambdaCache *>(this);
+
+    QReadLocker lkr(&(nonconst_this->lock));
+
+    auto it = cache.constFind(key);
+
+    if (it != cache.constEnd())
+        return it.value();
+
+    lkr.unlock();
+
+    QWriteLocker wkr(&(nonconst_this->lock));
+
+    // check that someone didn't beat us to create the values
+    it = cache.constFind(key);
+
+    if (it != cache.constEnd())
+        return it.value();
+
+    // create the values
+    nonconst_this->cache.insert(key, schedule.morph(key, initial, final, lam_val));
+
+    return cache.constFind(key).value();
+}
+
+//////
+////// Implementation of LeverCache
+//////
+
+LeverCache::LeverCache()
+{
+}
+
+LeverCache::LeverCache(const LeverCache &other) : cache(other.cache)
+{
+}
+
+LeverCache::~LeverCache()
+{
+}
+
+LeverCache &LeverCache::operator=(const LeverCache &other)
+{
+    if (this != &other)
+    {
+        cache = other.cache;
+    }
+
+    return *this;
+}
+
+const MolLambdaCache &LeverCache::get(int molidx, double lam_val) const
+{
+    auto nonconst_this = const_cast<LeverCache *>(this);
+
+    if (not this->cache.contains(molidx))
+    {
+        nonconst_this->cache.insert(molidx, QHash<double, MolLambdaCache>());
+    }
+
+    auto &mol_cache = nonconst_this->cache.find(molidx).value();
+
+    auto it = mol_cache.constFind(lam_val);
+
+    if (it == mol_cache.constEnd())
+    {
+        // need to create a new cache for this lambda value
+        it = mol_cache.insert(lam_val, MolLambdaCache(lam_val));
+    }
+
+    return it.value();
+}
+
+void LeverCache::clear()
+{
+    cache.clear();
+}
+
+//////
+////// Implementation of LambdaLever
+//////
+
 LambdaLever::LambdaLever() : SireBase::ConcreteProperty<LambdaLever, SireBase::Property>()
 {
 }
@@ -46,8 +165,9 @@ LambdaLever::LambdaLever(const LambdaLever &other)
       name_to_restraintidx(other.name_to_restraintidx),
       lambda_schedule(other.lambda_schedule),
       perturbable_mols(other.perturbable_mols),
-      start_indices_pert(other.start_indices_pert),
-      perturbable_maps(other.perturbable_maps)
+      start_indices(other.start_indices),
+      perturbable_maps(other.perturbable_maps),
+      lambda_cache(other.lambda_cache)
 {
 }
 
@@ -63,8 +183,9 @@ LambdaLever &LambdaLever::operator=(const LambdaLever &other)
         name_to_restraintidx = other.name_to_restraintidx;
         lambda_schedule = other.lambda_schedule;
         perturbable_mols = other.perturbable_mols;
-        start_indices_pert = other.start_indices_pert;
+        start_indices = other.start_indices;
         perturbable_maps = other.perturbable_maps;
+        lambda_cache = other.lambda_cache;
         Property::operator=(other);
     }
 
@@ -77,7 +198,7 @@ bool LambdaLever::operator==(const LambdaLever &other) const
            name_to_restraintidx == other.name_to_restraintidx and
            lambda_schedule == other.lambda_schedule and
            perturbable_mols == other.perturbable_mols and
-           start_indices_pert == other.start_indices_pert and
+           start_indices == other.start_indices and
            perturbable_maps == other.perturbable_maps;
 }
 
@@ -109,6 +230,7 @@ bool LambdaLever::hasLever(const QString &lever_name)
 void LambdaLever::addLever(const QString &lever_name)
 {
     this->lambda_schedule.addLever(lever_name);
+    this->lambda_cache.clear();
 }
 
 /** Get the index of the force called 'name'. Returns -1 if
@@ -261,84 +383,99 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         qmff->setLambda(lam);
     }
 
+    // record the range of indices of the atoms, bonds, angles,
+    // torsions which change
+    int start_change_atom = -1;
+    int end_change_atom = -1;
+    int start_change_14 = -1;
+    int end_change_14 = -1;
+    int start_change_bond = -1;
+    int end_change_bond = -1;
+    int start_change_angle = -1;
+    int end_change_angle = -1;
+    int start_change_torsion = -1;
+    int end_change_torsion = -1;
+
     // change the parameters for all of the perturbable molecules
     for (int i = 0; i < this->perturbable_mols.count(); ++i)
     {
         const auto &perturbable_mol = this->perturbable_mols[i];
-        const auto &start_idxs = this->start_indices_pert[i];
+        const auto &start_idxs = this->start_indices[i];
+
+        const auto &cache = this->lambda_cache.get(i, lambda_value);
 
         // calculate the new parameters for this lambda value
-        const auto morphed_charges = this->lambda_schedule.morph(
+        const auto morphed_charges = cache.morph(
+            this->lambda_schedule,
             "charge",
             perturbable_mol.getCharges0(),
-            perturbable_mol.getCharges1(),
-            lambda_value);
+            perturbable_mol.getCharges1());
 
-        const auto morphed_sigmas = this->lambda_schedule.morph(
+        const auto morphed_sigmas = cache.morph(
+            this->lambda_schedule,
             "sigma",
             perturbable_mol.getSigmas0(),
-            perturbable_mol.getSigmas1(),
-            lambda_value);
+            perturbable_mol.getSigmas1());
 
-        const auto morphed_epsilons = this->lambda_schedule.morph(
+        const auto morphed_epsilons = cache.morph(
+            this->lambda_schedule,
             "epsilon",
             perturbable_mol.getEpsilons0(),
-            perturbable_mol.getEpsilons1(),
-            lambda_value);
+            perturbable_mol.getEpsilons1());
 
-        const auto morphed_alphas = this->lambda_schedule.morph(
+        const auto morphed_alphas = cache.morph(
+            this->lambda_schedule,
             "alpha",
             perturbable_mol.getAlphas0(),
-            perturbable_mol.getAlphas1(),
-            lambda_value);
+            perturbable_mol.getAlphas1());
 
-        const auto morphed_bond_k = this->lambda_schedule.morph(
+        const auto morphed_bond_k = cache.morph(
+            this->lambda_schedule,
             "bond_k",
             perturbable_mol.getBondKs0(),
-            perturbable_mol.getBondKs1(),
-            lambda_value);
+            perturbable_mol.getBondKs1());
 
-        const auto morphed_bond_length = this->lambda_schedule.morph(
+        const auto morphed_bond_length = cache.morph(
+            this->lambda_schedule,
             "bond_length",
             perturbable_mol.getBondLengths0(),
-            perturbable_mol.getBondLengths1(),
-            lambda_value);
+            perturbable_mol.getBondLengths1());
 
-        const auto morphed_angle_k = this->lambda_schedule.morph(
+        const auto morphed_angle_k = cache.morph(
+            this->lambda_schedule,
             "angle_k",
             perturbable_mol.getAngleKs0(),
-            perturbable_mol.getAngleKs1(),
-            lambda_value);
+            perturbable_mol.getAngleKs1());
 
-        const auto morphed_angle_size = this->lambda_schedule.morph(
+        const auto morphed_angle_size = cache.morph(
+            this->lambda_schedule,
             "angle_size",
             perturbable_mol.getAngleSizes0(),
-            perturbable_mol.getAngleSizes1(),
-            lambda_value);
+            perturbable_mol.getAngleSizes1());
 
-        const auto morphed_torsion_phase = this->lambda_schedule.morph(
+        const auto morphed_torsion_phase = cache.morph(
+            this->lambda_schedule,
             "torsion_phase",
             perturbable_mol.getTorsionPhases0(),
-            perturbable_mol.getTorsionPhases1(),
-            lambda_value);
+            perturbable_mol.getTorsionPhases1());
 
-        const auto morphed_torsion_k = this->lambda_schedule.morph(
+        const auto morphed_torsion_k = cache.morph(
+            this->lambda_schedule,
             "torsion_k",
             perturbable_mol.getTorsionKs0(),
-            perturbable_mol.getTorsionKs1(),
-            lambda_value);
+            perturbable_mol.getTorsionKs1());
 
-        const auto morphed_charge_scale = this->lambda_schedule.morph(
+        const auto morphed_charge_scale = cache.morph(
+            this->lambda_schedule,
             "charge_scale",
             perturbable_mol.getChargeScales0(),
-            perturbable_mol.getChargeScales1(),
-            lambda_value);
+            perturbable_mol.getChargeScales1());
 
-        const auto morphed_lj_scale = this->lambda_schedule.morph(
+        const auto morphed_lj_scale = cache.morph(
+            this->lambda_schedule,
             "lj_scale",
             perturbable_mol.getLJScales0(),
-            perturbable_mol.getLJScales1(),
-            lambda_value);
+            perturbable_mol.getLJScales1());
 
         // now update the forcefields
         int start_index = start_idxs.value("clj", -1);
@@ -346,6 +483,16 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         if (start_index != -1 and cljff != 0)
         {
             const int nparams = morphed_charges.count();
+
+            if (start_change_atom == -1)
+            {
+                start_change_atom = start_index;
+                end_change_atom = start_index + nparams;
+            }
+            else if (start_index >= end_change_atom)
+            {
+                end_change_atom = start_index + nparams;
+            }
 
             if (have_ghost_atoms)
             {
@@ -441,6 +588,20 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                     {std::get<2>(p), std::get<3>(p),
                                     4.0 * std::get<4>(p), std::get<5>(p)};
 
+                                if (start_change_14 == -1)
+                                {
+                                    start_change_14 = nbidx;
+                                    end_change_14 = nbidx + 1;
+                                }
+                                else
+                                {
+                                    if (nbidx < start_change_14)
+                                        start_change_14 = nbidx;
+
+                                    if (nbidx + 1 > end_change_14)
+                                        end_change_14 = nbidx + 1;
+                                }
+
                                 ghost_14ff->setBondParameters(nbidx,
                                                             std::get<0>(p),
                                                             std::get<1>(p),
@@ -466,6 +627,21 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         {
             const int nparams = morphed_bond_k.count();
 
+            if (start_change_bond == -1)
+            {
+                start_change_bond = start_index;
+                end_change_bond = start_index + nparams;
+            }
+            else if (start_index < start_change_bond)
+            {
+                start_change_bond = start_index;
+            }
+
+            if (start_index + nparams > end_change_bond)
+            {
+                end_change_bond = start_index + nparams;
+            }
+
             for (int j = 0; j < nparams; ++j)
             {
                 const int index = start_index + j;
@@ -487,6 +663,21 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         if (start_index != -1 and angff != 0)
         {
             const int nparams = morphed_angle_k.count();
+
+            if (start_change_angle == -1)
+            {
+                start_change_angle = start_index;
+                end_change_angle = start_index + nparams;
+            }
+            else if (start_index < start_change_angle)
+            {
+                start_change_angle = start_index;
+            }
+
+            if (start_index + nparams > end_change_angle)
+            {
+                end_change_angle = start_index + nparams;
+            }
 
             for (int j = 0; j < nparams; ++j)
             {
@@ -512,6 +703,21 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         {
             const int nparams = morphed_torsion_k.count();
 
+            if (start_change_torsion == -1)
+            {
+                start_change_torsion = start_index;
+                end_change_torsion = start_index + nparams;
+            }
+            else if (start_index < start_change_torsion)
+            {
+                start_change_torsion = start_index;
+            }
+
+            if (start_index + nparams > end_change_torsion)
+            {
+                end_change_torsion = start_index + nparams;
+            }
+
             for (int j = 0; j < nparams; ++j)
             {
                 const int index = start_index + j;
@@ -536,29 +742,63 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     }
 
     // update the parameters in the context
-    if (cljff)
-        cljff->updateParametersInContext(context);
+    const auto num_changed_atoms = end_change_atom - start_change_atom;
+    const auto num_changed_bonds = end_change_bond - start_change_bond;
+    const auto num_changed_angles = end_change_angle - start_change_angle;
+    const auto num_changed_torsions = end_change_torsion - start_change_torsion;
+    const auto num_changed_14 = end_change_14 - start_change_14;
 
-    if (ghost_ghostff)
-        ghost_ghostff->updateParametersInContext(context);
+    if (num_changed_atoms > 0)
+    {
+        if (cljff)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+            cljff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
+#else
+            cljff->updateParametersInContext(context);
+#endif
 
-    if (ghost_nonghostff)
-        ghost_nonghostff->updateParametersInContext(context);
+        if (ghost_ghostff)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+            ghost_ghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
+#else
+            ghost_ghostff->updateParametersInContext(context);
+#endif
 
-    if (ghost_14ff)
+        if (ghost_nonghostff)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+            ghost_nonghostff->updateSomeParametersInContext(start_change_atom, num_changed_atoms, context);
+#else
+            ghost_nonghostff->updateParametersInContext(context);
+#endif
+    }
+
+    if (ghost_14ff and num_changed_14 > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        ghost_14ff->updateSomeParametersInContext(start_change_14, num_changed_14, context);
+#else
         ghost_14ff->updateParametersInContext(context);
+#endif
 
-    // in OpenMM 8.1beta updating the bond parameters past lambda=0.25
-    // causes a "All Forces must have identical exclusions" error,
-    // when running minimisation without h-bond constraints...
-    if (bondff)
+    if (bondff and num_changed_bonds > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        bondff->updateSomeParametersInContext(start_change_bond, num_changed_bonds, context);
+#else
         bondff->updateParametersInContext(context);
+#endif
 
-    if (angff)
+    if (angff and num_changed_angles > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        angff->updateSomeParametersInContext(start_change_angle, num_changed_angles, context);
+#else
         angff->updateParametersInContext(context);
+#endif
 
-    if (dihff)
+    if (dihff and num_changed_torsions > 0)
+#ifdef SIRE_HAS_UPDATE_SOME_IN_CONTEXT
+        dihff->updateSomeParametersInContext(start_change_torsion, num_changed_torsions, context);
+#else
         dihff->updateParametersInContext(context);
+#endif
 
     // now update any restraints that are scaled
     for (const auto &restraint : this->name_to_restraintidx.keys())
@@ -773,8 +1013,9 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
 {
     // should add in some sanity checks for these inputs
     this->perturbable_mols.append(PerturbableOpenMMMolecule(molecule));
-    this->start_indices_pert.append(starts);
+    this->start_indices.append(starts);
     this->perturbable_maps.insert(molecule.number, molecule.perturtable_map);
+    this->lambda_cache.clear();
     return this->perturbable_mols.count() - 1;
 }
 
@@ -813,4 +1054,6 @@ void LambdaLever::setSchedule(const LambdaSchedule &sched)
     {
         lambda_schedule.addLever(lever);
     }
+
+    this->lambda_cache.clear();
 }
