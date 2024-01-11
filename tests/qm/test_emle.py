@@ -7,7 +7,7 @@ from sire.legacy.Convert._SireOpenMM import EMLECallback, EMLEEngine
 from sire.qm import emle
 
 try:
-    from emle.emle import EMLECalculator
+    from emle.calculator import EMLECalculator
 
     has_emle = True
 except:

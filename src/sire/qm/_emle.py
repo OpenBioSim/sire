@@ -9,7 +9,7 @@ _use_new_api()
 _EMLEEngine = _Convert._SireOpenMM.EMLEEngine
 
 try:
-    from emle.emle import EMLECalculator as _EMLECalculator
+    from emle.calculator import EMLECalculator as _EMLECalculator
 
     _has_emle = True
 except:
@@ -33,7 +33,7 @@ def emle(
     mols : sire.system.System
         The molecular system.
 
-    calculator : emle.emle.EMLECalculator
+    calculator : emle.calculator.EMLECalculator
         The EMLECalculator object to use for elecotrostatic embedding calculations.
 
     qm_index : int
@@ -53,7 +53,7 @@ def emle(
     """
     if not _has_emle:
         raise ImportError(
-            "Could not import emle. Please install emle-egine and try again."
+            "Could not import emle. Please install emle-engine and try again."
         )
 
     from ..base import create_map as _create_map
@@ -66,7 +66,7 @@ def emle(
         raise TypeError("mols must be a of type 'sire.System'")
 
     if not isinstance(calculator, _EMLECalculator):
-        raise TypeError("'calculator' must be a of type 'emle.emle.EMLECalculator'")
+        raise TypeError("'calculator' must be a of type 'emle.calculator.EMLECalculator'")
 
     if not isinstance(qm_index, int):
         raise TypeError("'qm_index' must be of type 'int'")
