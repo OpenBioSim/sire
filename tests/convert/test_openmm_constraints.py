@@ -105,3 +105,96 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     )
 
     assert len(d.get_constraints()) == 3
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_neo_constraints(neopentane_methane, openmm_platform):
+    mols_fwds = neopentane_methane.clone()
+    mols_bwds = neopentane_methane.clone()
+
+    for mol in mols_fwds.molecules("property is_perturbable"):
+        mols_fwds.update(mol.perturbation().link_to_reference().commit())
+
+    for mol in mols_bwds.molecules("property is_perturbable"):
+        mols_bwds.update(mol.perturbation().link_to_perturbed().commit())
+
+    mols_fwds = sr.morph.repartition_hydrogen_masses(mols_fwds)
+    mols_bwds = sr.morph.repartition_hydrogen_masses(mols_bwds)
+
+    d_fwds = mols_fwds.dynamics(constraint="none", platform=openmm_platform)
+    d_bwds = mols_bwds.dynamics(
+        constraint="none", swap_end_states=True, platform=openmm_platform
+    )
+
+    c_fwds = d_fwds.get_constraints()
+    c_bwds = d_bwds.get_constraints()
+
+    assert len(c_fwds) == len(c_bwds) == 0
+
+    d_fwds = mols_fwds.dynamics(constraint="bonds", platform=openmm_platform)
+    d_bwds = mols_bwds.dynamics(
+        constraint="bonds", swap_end_states=True, platform=openmm_platform
+    )
+
+    c_fwds = d_fwds.get_constraints()
+    c_bwds = d_bwds.get_constraints()
+
+    assert len(c_fwds) == len(c_bwds) == len(mols_fwds[0].bonds())
+
+    for f, b in zip(c_fwds, c_bwds):
+        assert f[0][0].name() == b[0][0].name()
+        assert f[0][1].name() == b[0][1].name()
+
+    d_fwds = mols_fwds.dynamics(constraint="h-bonds", platform=openmm_platform)
+    d_bwds = mols_bwds.dynamics(
+        constraint="h-bonds", swap_end_states=True, platform=openmm_platform
+    )
+
+    c_fwds = d_fwds.get_constraints()
+    c_bwds = d_bwds.get_constraints()
+
+    assert len(c_fwds) == len(c_bwds) == len(mols_fwds[0].bonds("element H"))
+
+    for f, b in zip(c_fwds, c_bwds):
+        assert f[0][0].name() == b[0][0].name()
+        assert f[0][1].name() == b[0][1].name()
+
+    d_fwds = mols_fwds.dynamics(
+        constraint="bonds-not-perturbed", platform=openmm_platform
+    )
+
+    d_bwds = mols_bwds.dynamics(
+        constraint="bonds-not-perturbed", swap_end_states=True, platform=openmm_platform
+    )
+
+    c_fwds = d_fwds.get_constraints()
+    c_bwds = d_bwds.get_constraints()
+
+    assert len(c_fwds) == len(c_bwds) != len(mols_fwds[0].bonds())
+
+    for f, b in zip(c_fwds, c_bwds):
+        assert f[0][0].name() == b[0][0].name()
+        assert f[0][1].name() == b[0][1].name()
+
+    d_fwds = mols_fwds.dynamics(
+        constraint="h-bonds-not-perturbed",
+        platform=openmm_platform,
+        swap_end_states=True,
+    )
+
+    d_bwds = mols_bwds.dynamics(
+        constraint="h-bonds-not-perturbed",
+        platform=openmm_platform,
+    )
+
+    c_fwds = d_fwds.get_constraints()
+    c_bwds = d_bwds.get_constraints()
+
+    assert len(c_fwds) == len(c_bwds)
+
+    for f, b in zip(c_fwds, c_bwds):
+        assert f[0][0].name() == b[0][0].name()
+        assert f[0][1].name() == b[0][1].name()

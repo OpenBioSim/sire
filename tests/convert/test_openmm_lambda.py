@@ -273,6 +273,22 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
             lam_val
         ] = d.current_potential_energy().value()
 
+    d = mols.dynamics(
+        constraint="h_bonds_not_perturbed",
+        cutoff="10 A",
+        include_constrained_energies=False,
+        swap_end_states=True,
+        platform=openmm_platform,
+    )
+
+    calc_hbonds_not_perturbed_no_energy_swap = {}
+
+    for lam_val, nrg in expected_hbonds_not_perturbed.items():
+        d.set_lambda(lam_val)
+        calc_hbonds_not_perturbed_no_energy_swap[
+            lam_val
+        ] = d.current_potential_energy().value()
+
     # should match the no_constraints somd energy at the end points
     assert calc_none[0.0] == pytest.approx(expected_none[0.0], 1e-3)
     assert calc_none[1.0] == pytest.approx(expected_none[1.0], 1e-3)
@@ -288,6 +304,14 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
     )
     assert calc_hbonds_not_perturbed_no_energy[1.0] == pytest.approx(
         expected_hbonds_not_perturbed[1.0], 1e-2
+    )
+
+    assert calc_hbonds_not_perturbed_no_energy_swap[0.0] == pytest.approx(
+        expected_hbonds_not_perturbed[1.0], 1e-2
+    )
+
+    assert calc_hbonds_not_perturbed_no_energy_swap[1.0] == pytest.approx(
+        expected_hbonds_not_perturbed[0.0], 1e-2
     )
 
     for lam_val in expected_none.keys():
@@ -308,4 +332,15 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
             lam_val
         ] == pytest.approx(
             expected_none[lam_val] - expected_hbonds_not_perturbed[lam_val], 1e-2
+        )
+
+    # check backwards is the reverse of forwards
+    lamvals_f = list(calc_hbonds_not_perturbed_no_energy.keys())
+    lamvals_b = list(calc_hbonds_not_perturbed_no_energy_swap.keys())
+
+    lamvals_b.reverse()
+
+    for lam_f, lam_b in zip(lamvals_f, lamvals_b):
+        assert calc_hbonds_not_perturbed_no_energy[lam_f] == pytest.approx(
+            calc_hbonds_not_perturbed_no_energy_swap[lam_b], 1e-3
         )
