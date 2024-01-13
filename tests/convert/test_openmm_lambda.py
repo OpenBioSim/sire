@@ -246,7 +246,7 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
         calc_none[lam_val] = d.current_potential_energy().value()
 
     d = mols.dynamics(
-        constraint="h_bonds_not_perturbed",
+        constraint="bonds_not_perturbed",
         cutoff="10 A",
         include_constrained_energies=True,
         platform=openmm_platform,
@@ -259,7 +259,7 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
         calc_hbonds_not_perturbed[lam_val] = d.current_potential_energy().value()
 
     d = mols.dynamics(
-        constraint="h_bonds_not_perturbed",
+        constraint="bonds_not_perturbed",
         cutoff="10 A",
         include_constrained_energies=False,
         platform=openmm_platform,
@@ -274,7 +274,7 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
         ] = d.current_potential_energy().value()
 
     d = mols.dynamics(
-        constraint="h_bonds_not_perturbed",
+        constraint="bonds-not-perturbed",
         cutoff="10 A",
         include_constrained_energies=False,
         swap_end_states=True,
