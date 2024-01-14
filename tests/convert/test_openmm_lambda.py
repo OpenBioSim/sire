@@ -344,3 +344,154 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
         assert calc_hbonds_not_perturbed_no_energy[lam_f] == pytest.approx(
             calc_hbonds_not_perturbed_no_energy_swap[lam_b], 1e-3
         )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_neopentane_methane_scan_no_cutoff(neopentane_methane, openmm_platform):
+    mols = neopentane_methane.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation().link_to_reference().commit())
+
+    mols = sr.morph.repartition_hydrogen_masses(mols)
+
+    # these were calculated using somd, no constraints
+    expected_none = {
+        0.0: 0.0158906,
+        0.1: -1.55981,
+        0.2: 0.72506,
+        0.3: 4.523,
+        0.4: 9.51135,
+        0.5: 15.709,
+        0.6: 23.1774,
+        0.7: 31.9727,
+        0.8: 42.1424,
+        0.9: 53.7287,
+        1.0: 66.773,
+    }
+
+    # these were calculated using somd, hbonds_notperturbed
+    expected_hbonds_not_perturbed = {
+        0.0: -0.832059,
+        0.1: -2.40776,
+        0.2: -0.12289,
+        0.3: 3.67505,
+        0.4: 8.6634,
+        0.5: 14.8611,
+        0.6: 22.3295,
+        0.7: 31.1247,
+        0.8: 41.2944,
+        0.9: 52.8808,
+        1.0: 65.9251,
+    }
+
+    d = mols.dynamics(constraint="none", cutoff="infinite", platform=openmm_platform)
+
+    calc_none = {}
+
+    for lam_val, nrg in expected_none.items():
+        d.set_lambda(lam_val)
+        calc_none[lam_val] = d.current_potential_energy().value()
+
+    d = mols.dynamics(
+        constraint="bonds_not_perturbed",
+        cutoff="infinite",
+        include_constrained_energies=True,
+        platform=openmm_platform,
+    )
+
+    calc_hbonds_not_perturbed = {}
+
+    for lam_val, nrg in expected_hbonds_not_perturbed.items():
+        d.set_lambda(lam_val)
+        calc_hbonds_not_perturbed[lam_val] = d.current_potential_energy().value()
+
+    d = mols.dynamics(
+        constraint="bonds_not_perturbed",
+        cutoff="infinite",
+        include_constrained_energies=False,
+        platform=openmm_platform,
+    )
+
+    calc_hbonds_not_perturbed_no_energy = {}
+
+    for lam_val, nrg in expected_hbonds_not_perturbed.items():
+        d.set_lambda(lam_val)
+        calc_hbonds_not_perturbed_no_energy[
+            lam_val
+        ] = d.current_potential_energy().value()
+
+    d = mols.dynamics(
+        constraint="bonds-not-perturbed",
+        cutoff="infinite",
+        include_constrained_energies=False,
+        swap_end_states=True,
+        platform=openmm_platform,
+    )
+
+    calc_hbonds_not_perturbed_no_energy_swap = {}
+
+    for lam_val, nrg in expected_hbonds_not_perturbed.items():
+        d.set_lambda(lam_val)
+        calc_hbonds_not_perturbed_no_energy_swap[
+            lam_val
+        ] = d.current_potential_energy().value()
+
+    # should match the no_constraints somd energy at the end points
+    assert calc_none[0.0] == pytest.approx(expected_none[0.0], abs=1e-2)
+    assert calc_none[1.0] == pytest.approx(expected_none[1.0], 1e-2)
+
+    assert calc_hbonds_not_perturbed[0.0] == pytest.approx(expected_none[0.0], abs=1e-3)
+    assert calc_hbonds_not_perturbed[1.0] == pytest.approx(expected_none[1.0], 1e-3)
+
+    # but the hbonds_not_perturbed energy should be different if constraints
+    # are not included - should equal to the somd constraints energy
+    # (somd does not calculate energies of constrained bonds)
+    assert calc_hbonds_not_perturbed_no_energy[0.0] == pytest.approx(
+        expected_hbonds_not_perturbed[0.0], 1e-2
+    )
+    assert calc_hbonds_not_perturbed_no_energy[1.0] == pytest.approx(
+        expected_hbonds_not_perturbed[1.0], 1e-2
+    )
+
+    assert calc_hbonds_not_perturbed_no_energy_swap[0.0] == pytest.approx(
+        expected_hbonds_not_perturbed[1.0], 1e-2
+    )
+
+    assert calc_hbonds_not_perturbed_no_energy_swap[1.0] == pytest.approx(
+        expected_hbonds_not_perturbed[0.0], 1e-2
+    )
+
+    for lam_val in expected_none.keys():
+        # Including the energy should give the same energy regardless
+        # of whether constraints are included or not
+        assert calc_none[lam_val] == pytest.approx(
+            calc_hbonds_not_perturbed[lam_val], 1e-3
+        )
+
+        # But not including the constraints should give a different energy
+        assert calc_none[lam_val] != calc_hbonds_not_perturbed_no_energy[lam_val]
+
+    # The paths through lambda space for somd and sire will be slightly
+    # different - but should be consistently different comparing
+    # including and not including constraints
+    for lam_val in expected_none.keys():
+        assert calc_none[lam_val] - calc_hbonds_not_perturbed_no_energy[
+            lam_val
+        ] == pytest.approx(
+            expected_none[lam_val] - expected_hbonds_not_perturbed[lam_val], 1e-2
+        )
+
+    # check backwards is the reverse of forwards
+    lamvals_f = list(calc_hbonds_not_perturbed_no_energy.keys())
+    lamvals_b = list(calc_hbonds_not_perturbed_no_energy_swap.keys())
+
+    lamvals_b.reverse()
+
+    for lam_f, lam_b in zip(lamvals_f, lamvals_b):
+        assert calc_hbonds_not_perturbed_no_energy[lam_f] == pytest.approx(
+            calc_hbonds_not_perturbed_no_energy_swap[lam_b], 1e-3
+        )
