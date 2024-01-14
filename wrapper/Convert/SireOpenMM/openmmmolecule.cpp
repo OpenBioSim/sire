@@ -929,7 +929,9 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
                                             CODELOC);
 
     this->alphas = QVector<double>(cljs.count(), 0.0);
+    this->kappas = QVector<double>(cljs.count(), 0.0);
     this->perturbed->alphas = this->alphas;
+    this->perturbed->kappas = this->kappas;
 
     for (int i = 0; i < cljs.count(); ++i)
     {
@@ -941,12 +943,26 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
             if (is_ghost(clj0))
             {
                 from_ghost_idxs.insert(i);
+
+                // alpha is 1 for the reference state for ghost atoms
+                // (and will be 0 for the perturbed state)
                 this->alphas[i] = 1.0;
+
+                // kappa is 1 for both end states for ghost atoms
+                this->kappas[i] = 1.0;
+                this->perturbed->kappas[i] = 1.0;
             }
             else if (is_ghost(clj1))
             {
                 to_ghost_idxs.insert(i);
+
+                // alpha is 1 for the perturbed state for ghost atoms
+                // (and will be 0 for the reference state)
                 this->perturbed->alphas[i] = 1.0;
+
+                // kappa is 1 for both end states for ghost atoms
+                this->kappas[i] = 1.0;
+                this->perturbed->kappas[i] = 1.0;
             }
         }
     }
@@ -1536,6 +1552,14 @@ QVector<double> OpenMMMolecule::getAlphas() const
     return this->alphas;
 }
 
+/** Return the kappa parameters for all atoms in atom order for
+ *  this molecule
+ */
+QVector<double> OpenMMMolecule::getKappas() const
+{
+    return this->kappas;
+}
+
 /** Return all of the atom charges in atom order for this molecule */
 QVector<double> OpenMMMolecule::getCharges() const
 {
@@ -1804,6 +1828,9 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
     alpha0 = mol.getAlphas();
     alpha1 = mol.perturbed->getAlphas();
 
+    kappa0 = mol.getKappas();
+    kappa1 = mol.perturbed->getKappas();
+
     chg0 = mol.getCharges();
     chg1 = mol.perturbed->getCharges();
 
@@ -1849,6 +1876,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
 /** Copy constructor */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other)
     : alpha0(other.alpha0), alpha1(other.alpha1),
+      kappa0(other.kappa0), kappa1(other.kappa1),
       chg0(other.chg0), chg1(other.chg1),
       sig0(other.sig0), sig1(other.sig1),
       eps0(other.eps0), eps1(other.eps1),
@@ -1875,10 +1903,20 @@ PerturbableOpenMMMolecule::~PerturbableOpenMMMolecule()
 /** Comparison operator */
 bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &other) const
 {
-    return alpha0 == alpha1 and chg0 == chg1 and sig0 == sig1 and eps0 == eps1 and
-           bond_k0 == bond_k1 and bond_r0 == bond_r1 and ang_k0 == ang_k1 and
-           ang_t0 == ang_t1 and tors_k0 == tors_k1 and tors_periodicity0 == tors_periodicity1 and
-           tors_phase0 == tors_phase1 and charge_scl0 == charge_scl1 and lj_scl0 == lj_scl1 and
+    return alpha0 == other.alpha0 and alpha1 == other.alpha1 and
+           kappa0 == other.kappa0 and kappa1 == other.kappa1 and
+           chg0 == other.chg0 and chg1 == other.chg1 and
+           sig0 == other.sig0 and sig1 == other.sig1 and
+           eps0 == other.eps0 and eps1 == other.eps1 and
+           bond_k0 == other.bond_k0 and bond_k1 == other.bond_k1 and
+           bond_r0 == other.bond_r0 and bond_r1 == other.bond_r1 and
+           ang_k0 == other.ang_k0 and ang_k1 == other.ang_k1 and
+           ang_t0 == other.ang_t0 and ang_t1 == other.ang_t1 and
+           tors_k0 == other.tors_k0 and tors_k1 == other.tors_k1 and
+           tors_periodicity0 == other.tors_periodicity0 and tors_periodicity1 == other.tors_periodicity1 and
+           tors_phase0 == other.tors_phase0 and tors_phase1 == other.tors_phase1 and
+           charge_scl0 == other.charge_scl0 and charge_scl1 == other.charge_scl1 and
+           lj_scl0 == other.lj_scl0 and lj_scl1 == other.lj_scl1 and
            to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
            exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs;
 }
@@ -1899,6 +1937,18 @@ QVector<double> PerturbableOpenMMMolecule::getAlphas0() const
 QVector<double> PerturbableOpenMMMolecule::getAlphas1() const
 {
     return this->alpha1;
+}
+
+/** Return the kappa parameters of the reference state */
+QVector<double> PerturbableOpenMMMolecule::getKappas0() const
+{
+    return this->kappa0;
+}
+
+/** Return the kappa parameters of the perturbed state */
+QVector<double> PerturbableOpenMMMolecule::getKappas1() const
+{
+    return this->kappa1;
 }
 
 /** Return the atom charges of the reference state */

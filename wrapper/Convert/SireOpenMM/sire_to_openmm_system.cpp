@@ -789,6 +789,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     if (any_perturbable)
     {
         lambda_lever.addLever("alpha");
+        lambda_lever.addLever("kappa");
 
         // somd uses a default shift_delta of 2.0 A
         SireUnits::Dimension::Length shift_delta = 2.0 * SireUnits::angstrom;
@@ -875,7 +876,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(1.0/r));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(kappa/r));"
                                   "lj_nrg=four_epsilon*((sig6^2)-sig6);"
                                   "sig6=(sigma^6)/(%2*sigma^6 + r^6);")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
@@ -886,7 +887,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(1.0/r));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(kappa/r));"
                                   "lj_nrg=four_epsilon*((sig6^2)-sig6);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
                                   "delta=%2*alpha;")
@@ -901,6 +902,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_14ff->addPerBondParameter("sigma");
         ghost_14ff->addPerBondParameter("four_epsilon");
         ghost_14ff->addPerBondParameter("alpha");
+        ghost_14ff->addPerBondParameter("kappa");
 
         // short-range intramolecular term that should not use
         // periodic boundaries or cutoffs
@@ -928,9 +930,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(1.0/r));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(max_kappa/r));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
                                      "sig6=(sigma^6)/(%2*sigma^6 + r^6);"
+                                     "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
@@ -961,10 +964,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(1.0/r));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(max_kappa/r));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
                                      "delta=%2*max_alpha;"
+                                     "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
@@ -979,11 +983,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_ghostff->addPerParticleParameter("half_sigma");
         ghost_ghostff->addPerParticleParameter("two_sqrt_epsilon");
         ghost_ghostff->addPerParticleParameter("alpha");
+        ghost_ghostff->addPerParticleParameter("kappa");
 
         ghost_nonghostff->addPerParticleParameter("q");
         ghost_nonghostff->addPerParticleParameter("half_sigma");
         ghost_nonghostff->addPerParticleParameter("two_sqrt_epsilon");
         ghost_nonghostff->addPerParticleParameter("alpha");
+        ghost_nonghostff->addPerParticleParameter("kappa");
 
         // this will be slow if switched on, as it needs recalculating
         // for every change in parameters
@@ -1046,7 +1052,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     // just a holder for all of the custom parameters for the
     // ghost forces (prevents us having to continually re-allocate it)
-    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // the sets of particle indexes for the ghost atoms and non-ghost atoms
     std::set<int> ghost_atoms;
@@ -1126,6 +1132,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         auto masses_data = mol.masses.constData();
         auto cljs_data = mol.cljs.constData();
         auto alphas_data = mol.alphas.constData();
+        auto kappas_data = mol.kappas.constData();
 
         if (any_perturbable and mol.isPerturbable())
         {
@@ -1162,6 +1169,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 custom_params[2] = 2.0 * std::sqrt(std::get<2>(clj));
                 // alpha
                 custom_params[3] = alphas_data[j];
+                // kappa
+                custom_params[4] = kappas_data[j];
 
                 // Add the particle to the ghost and nonghost forcefields
                 ghost_ghostff->addParticle(custom_params);
@@ -1229,6 +1238,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     custom_params[2] = 2.0 * std::sqrt(std::get<2>(clj));
                     // alpha - is zero for non-ghost atoms
                     custom_params[3] = 0.0;
+                    // kappa - is 0 for non-ghost atoms
+                    custom_params[4] = 0.0;
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
                     non_ghost_atoms.insert(atom_index);
@@ -1376,10 +1387,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         // to the ghost-14 forcefield
                         if (ghost_14ff != 0)
                         {
-                            // parameters are q, sigma, four_epsilon and alpha
+                            // parameters are q, sigma, four_epsilon, alpha(0) and kappa(1)
                             std::vector<double> params14 =
                                 {std::get<2>(p), std::get<3>(p),
-                                 4.0 * std::get<4>(p), 0.0};
+                                 4.0 * std::get<4>(p), 0.0, 1.0};
 
                             if (params14[0] == 0)
                                 // cannot use zero params in case they are

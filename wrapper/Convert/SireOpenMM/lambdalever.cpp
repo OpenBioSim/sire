@@ -304,18 +304,20 @@ QString LambdaLever::getForceType(const QString &name,
     return QString::fromStdString(force.getName());
 }
 
-std::tuple<int, int, double, double, double, double>
+std::tuple<int, int, double, double, double, double, double>
 get_exception(int atom0, int atom1, int start_index,
               double coul_14_scl, double lj_14_scl,
               const QVector<double> &morphed_charges,
               const QVector<double> &morphed_sigmas,
               const QVector<double> &morphed_epsilons,
-              const QVector<double> &morphed_alphas)
+              const QVector<double> &morphed_alphas,
+              const QVector<double> &morphed_kappas)
 {
     double charge = 0.0;
     double sigma = 0.0;
     double epsilon = 0.0;
     double alpha = 0.0;
+    double kappa = 0.0;
 
     if (coul_14_scl != 0 or lj_14_scl != 0)
     {
@@ -355,6 +357,17 @@ get_exception(int atom0, int atom1, int start_index,
             alpha = 0;
         else if (alpha > 1)
             alpha = 1;
+
+        if (not morphed_kappas.isEmpty())
+        {
+            kappa = std::max(morphed_kappas[atom0], morphed_kappas[atom1]);
+        }
+
+        // clamp kappa between 0 and 1
+        if (kappa < 0)
+            kappa = 0;
+        else if (kappa > 1)
+            kappa = 1;
     }
 
     if (charge == 0 and epsilon == 0)
@@ -371,7 +384,7 @@ get_exception(int atom0, int atom1, int start_index,
     return std::make_tuple(atom0 + start_index,
                            atom1 + start_index,
                            charge, sigma, epsilon,
-                           alpha);
+                           alpha, kappa);
 }
 
 /** Set the value of lambda in the passed context. Returns the
@@ -403,7 +416,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
 
-    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // record the range of indicies of the atoms, bonds, angles,
     // torsions which change
@@ -456,6 +469,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 perturbable_mol.getAlphas0(),
                 perturbable_mol.getAlphas1());
 
+            const auto morphed_kappas = cache.morph(
+                schedule,
+                "clj", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
             const auto morphed_charge_scale = cache.morph(
                 schedule,
                 "clj", "charge_scale",
@@ -492,6 +511,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 perturbable_mol.getAlphas0(),
                 perturbable_mol.getAlphas1());
 
+            const auto morphed_ghost_kappas = cache.morph(
+                schedule,
+                "ghost/ghost", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
             const auto morphed_nonghost_charges = cache.morph(
                 schedule,
                 "ghost/non-ghost", "charge",
@@ -516,6 +541,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 perturbable_mol.getAlphas0(),
                 perturbable_mol.getAlphas1());
 
+            const auto morphed_nonghost_kappas = cache.morph(
+                schedule,
+                "ghost/non-ghost", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
             const auto morphed_ghost14_charges = cache.morph(
                 schedule,
                 "ghost-14", "charge",
@@ -539,6 +570,12 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 "ghost-14", "alpha",
                 perturbable_mol.getAlphas0(),
                 perturbable_mol.getAlphas1());
+
+            const auto morphed_ghost14_kappas = cache.morph(
+                schedule,
+                "ghost-14", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
 
             const auto morphed_ghost14_charge_scale = cache.morph(
                 schedule,
@@ -579,12 +616,20 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     custom_params[2] = 2.0 * std::sqrt(morphed_ghost_epsilons[j]);
                     // alpha
                     custom_params[3] = morphed_ghost_alphas[j];
+                    // kappa
+                    custom_params[4] = morphed_ghost_kappas[j];
 
                     // clamp alpha between 0 and 1
                     if (custom_params[3] < 0)
                         custom_params[3] = 0;
                     else if (custom_params[3] > 1)
                         custom_params[3] = 1;
+
+                    // clamp kappa between 0 and 1
+                    if (custom_params[4] < 0)
+                        custom_params[4] = 0;
+                    else if (custom_params[4] > 1)
+                        custom_params[4] = 1;
 
                     ghost_ghostff->setParticleParameters(start_index + j, custom_params);
 
@@ -596,12 +641,20 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     custom_params[2] = 2.0 * std::sqrt(morphed_nonghost_epsilons[j]);
                     // alpha
                     custom_params[3] = morphed_nonghost_alphas[j];
+                    // kappa
+                    custom_params[4] = morphed_nonghost_kappas[j];
 
                     // clamp alpha between 0 and 1
                     if (custom_params[3] < 0)
                         custom_params[3] = 0;
                     else if (custom_params[3] > 1)
                         custom_params[3] = 1;
+
+                    // clamp kappa between 0 and 1
+                    if (custom_params[4] < 0)
+                        custom_params[4] = 0;
+                    else if (custom_params[4] > 1)
+                        custom_params[4] = 1;
 
                     ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
 
@@ -646,7 +699,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     auto p = get_exception(atom0, atom1,
                                            start_index, coul_14_scale, lj_14_scale,
                                            morphed_charges, morphed_sigmas, morphed_epsilons,
-                                           morphed_alphas);
+                                           morphed_alphas, morphed_kappas);
 
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
@@ -675,12 +728,14 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                                                          morphed_ghost14_charges,
                                                          morphed_ghost14_sigmas,
                                                          morphed_ghost14_epsilons,
-                                                         morphed_ghost14_alphas);
+                                                         morphed_ghost14_alphas,
+                                                         morphed_ghost14_kappas);
 
                             // parameters are q, sigma, four_epsilon and alpha
                             std::vector<double> params14 =
                                 {std::get<2>(p), std::get<3>(p),
-                                 4.0 * std::get<4>(p), std::get<5>(p)};
+                                 4.0 * std::get<4>(p), std::get<5>(p),
+                                 std::get<6>(p)};
 
                             if (start_change_14 == -1)
                             {

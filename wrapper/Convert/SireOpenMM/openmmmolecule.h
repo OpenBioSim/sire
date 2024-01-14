@@ -56,6 +56,7 @@ namespace SireOpenMM
         QVector<double> getSigmas() const;
         QVector<double> getEpsilons() const;
         QVector<double> getAlphas() const;
+        QVector<double> getKappas() const;
 
         QVector<double> getBondKs() const;
         QVector<double> getBondLengths() const;
@@ -153,6 +154,11 @@ namespace SireOpenMM
          */
         QVector<double> alphas;
 
+        /** Kappa values for all of the atoms. This is equal to zero for
+         *  non-ghost atoms, and one for ghost atoms
+         */
+        QVector<double> kappas;
+
         /** The indexes of atoms that become ghosts in the
          *  perturbed state
          */
@@ -205,6 +211,9 @@ namespace SireOpenMM
         QVector<double> getAlphas0() const;
         QVector<double> getAlphas1() const;
 
+        QVector<double> getKappas0() const;
+        QVector<double> getKappas1() const;
+
         QVector<double> getCharges0() const;
         QVector<double> getCharges1() const;
 
@@ -252,6 +261,7 @@ namespace SireOpenMM
          *  so that they can be morphed via the LambdaLever
          */
         QVector<double> alpha0, alpha1;
+        QVector<double> kappa0, kappa1;
         QVector<double> chg0, chg1;
         QVector<double> sig0, sig1;
         QVector<double> eps0, eps1;
