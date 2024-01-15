@@ -156,7 +156,9 @@ def test_neo_constraints(neopentane_methane, openmm_platform):
     c_fwds = d_fwds.get_constraints()
     c_bwds = d_bwds.get_constraints()
 
-    assert len(c_fwds) == len(c_bwds) == len(mols_fwds[0].bonds("element H"))
+    # this ends up constraining all bonds, as in either end state
+    # they will always have a hydrogen
+    assert len(c_fwds) == len(c_bwds) == len(mols_fwds[0].bonds())
 
     for f, b in zip(c_fwds, c_bwds):
         assert f[0][0].name() == b[0][0].name()

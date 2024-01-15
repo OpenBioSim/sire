@@ -607,6 +607,11 @@ class System:
             The desired precision for the simulation (e.g. `single`,
             `mixed` or `double`)
 
+        com_reset_frequency:
+            Either the number of steps between center-of-mass resets,
+            or the time between resets. If this is unset, then
+            the center-of-mass is not reset during the simulation.
+
         map: dict
             A dictionary of additional options. Note that any options
             set in this dictionary that are also specified via one of
