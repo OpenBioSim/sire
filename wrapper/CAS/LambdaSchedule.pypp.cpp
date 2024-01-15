@@ -59,6 +59,30 @@ void register_LambdaSchedule_class(){
                 , "Sandwich the current set of stages with a charge-descaling and\n  a charge-scaling stage. This prepends a charge-descaling stage\n  that scales the charge parameter down from `initial` to\n  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of\n  the exising stages in this schedule are then multiplied\n  by :gamma:. A final charge-rescaling stage is then appended that\n  scales the charge parameter from :gamma:.final to final.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::addDecoupleStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addDecoupleStage_function_type)( bool ) ;
+            addDecoupleStage_function_type addDecoupleStage_function_value( &::SireCAS::LambdaSchedule::addDecoupleStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addDecoupleStage"
+                , addDecoupleStage_function_value
+                , ( bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addDecoupleStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addDecoupleStage_function_type)( ::QString const &,bool ) ;
+            addDecoupleStage_function_type addDecoupleStage_function_value( &::SireCAS::LambdaSchedule::addDecoupleStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addDecoupleStage"
+                , addDecoupleStage_function_value
+                , ( bp::arg("name"), bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::addLever
         
             typedef void ( ::SireCAS::LambdaSchedule::*addLever_function_type)( ::QString const & ) ;
@@ -134,6 +158,18 @@ void register_LambdaSchedule_class(){
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
                 , "Append a stage called name which uses the passed equation\n  to the end of this schedule. The equation will be the default\n  equation that scales all parameters (levers) that dont have\n  a custom lever for this stage.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::charge_scaled_decouple
+        
+            typedef ::SireCAS::LambdaSchedule ( *charge_scaled_decouple_function_type )( double,bool );
+            charge_scaled_decouple_function_type charge_scaled_decouple_function_value( &::SireCAS::LambdaSchedule::charge_scaled_decouple );
+            
+            LambdaSchedule_exposer.def( 
+                "charge_scaled_decouple"
+                , charge_scaled_decouple_function_value
+                , ( bp::arg("scale")=0.20000000000000001, bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "" );
         
         }
         { //::SireCAS::LambdaSchedule::charge_scaled_morph
@@ -723,6 +759,18 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::standard_decouple
+        
+            typedef ::SireCAS::LambdaSchedule ( *standard_decouple_function_type )( bool );
+            standard_decouple_function_type standard_decouple_function_value( &::SireCAS::LambdaSchedule::standard_decouple );
+            
+            LambdaSchedule_exposer.def( 
+                "standard_decouple"
+                , standard_decouple_function_value
+                , ( bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::standard_morph
         
             typedef ::SireCAS::LambdaSchedule ( *standard_morph_function_type )(  );
@@ -784,10 +832,12 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        LambdaSchedule_exposer.staticmethod( "charge_scaled_decouple" );
         LambdaSchedule_exposer.staticmethod( "charge_scaled_morph" );
         LambdaSchedule_exposer.staticmethod( "final" );
         LambdaSchedule_exposer.staticmethod( "initial" );
         LambdaSchedule_exposer.staticmethod( "lam" );
+        LambdaSchedule_exposer.staticmethod( "standard_decouple" );
         LambdaSchedule_exposer.staticmethod( "standard_morph" );
         LambdaSchedule_exposer.staticmethod( "typeName" );
         LambdaSchedule_exposer.def( "__copy__", &__copy__);

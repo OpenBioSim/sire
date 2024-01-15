@@ -491,8 +491,10 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             const auto cgatomidx = idx_to_cgatomidx_data[i];
 
             // use the largest mass of the perturbing atoms
-            double mass = std::max(params_masses.at(cgatomidx).to(SireUnits::g_per_mol),
-                                   params1_masses.at(cgatomidx).to(SireUnits::g_per_mol));
+            const double mass0 = params_masses.at(cgatomidx).to(SireUnits::g_per_mol);
+            const double mass1 = params1_masses.at(cgatomidx).to(SireUnits::g_per_mol);
+
+            double mass = std::max(mass0, mass1);
 
             if (mass < 0.05)
             {
@@ -501,11 +503,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
             if (mass < 0.5)
             {
-                virtual_sites.append(i);
+                virtual_sites.insert(i);
             }
-            else if (mass < 2.5)
+            else if (mass0 < 2.5 or mass1 < 2.5) // either end state is light!
             {
-                light_atoms.append(i);
+                light_atoms.insert(i);
             }
 
             masses_data[i] = mass;
@@ -524,11 +526,11 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
             if (mass < 0.5)
             {
-                virtual_sites.append(i);
+                virtual_sites.insert(i);
             }
             else if (mass < 2.5)
             {
-                light_atoms.append(i);
+                light_atoms.insert(i);
             }
 
             masses_data[i] = mass;
@@ -614,7 +616,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             this->unbonded_atoms.remove(atom1);
         }
 
-        const bool has_light_atom = (masses_data[atom0] < 2.5 or masses_data[atom1] < 2.5);
+        const bool has_light_atom = (light_atoms.contains(atom0) or light_atoms.contains(atom1));
         const bool has_massless_atom = masses_data[atom0] < 0.5 or masses_data[atom1] < 0.5;
 
         auto this_constraint_type = constraint_type;
@@ -687,7 +689,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
 
         if (include_constrained_energies or bond_is_not_constrained)
+        {
             this->bond_params.append(std::make_tuple(atom0, atom1, r0, k));
+        }
     }
 
     // now the angles
@@ -712,7 +716,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double k = angparam.k() * angle_k_to_openmm;
         const double theta0 = angparam.theta0(); // already in radians
 
-        const bool is_h_x_h = masses_data[atom0] < 2.5 and masses_data[atom2] < 2.5;
+        const bool is_h_x_h = light_atoms.contains(atom0) and light_atoms.contains(atom2);
 
         const auto key = to_pair(atom0, atom2);
 

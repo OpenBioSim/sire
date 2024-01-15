@@ -245,6 +245,23 @@ LambdaSchedule LambdaSchedule::charge_scaled_morph(double scale)
     return l;
 }
 
+LambdaSchedule LambdaSchedule::standard_decouple(bool perturbed_is_decoupled)
+{
+    LambdaSchedule l;
+    l.addDecoupleStage(perturbed_is_decoupled);
+
+    return l;
+}
+
+LambdaSchedule LambdaSchedule::charge_scaled_decouple(double scale, bool perturbed_is_decoupled)
+{
+    LambdaSchedule l;
+    l.addDecoupleStage(perturbed_is_decoupled);
+    l.addChargeScaleStages(scale);
+
+    return l;
+}
+
 /** Return the symbol used to represent the :lambda: coordinate.
  *  This symbol is used to represent the per-stage :lambda:
  *  variable that goes from 0.0-1.0 within that stage.
@@ -486,6 +503,18 @@ void LambdaSchedule::addMorphStage(const QString &name)
 void LambdaSchedule::addMorphStage()
 {
     this->addMorphStage("morph");
+}
+
+void LambdaSchedule::addDecoupleStage(bool perturbed_is_decoupled)
+{
+    this->addDecoupleStage("decouple", perturbed_is_decoupled);
+}
+
+void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_decoupled)
+{
+    throw SireError::incomplete_code(QObject::tr(
+                                         "Decouple stages are not yet implemented."),
+                                     CODELOC);
 }
 
 /** Sandwich the current set of stages with a charge-descaling and

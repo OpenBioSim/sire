@@ -222,6 +222,21 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
         1.0: 66.773,
     }
 
+    # these were calculated using somd, hbonds
+    expected_hbonds = {
+        0.0: -3.70711,
+        0.1: -5.5007,
+        0.2: -4.67283,
+        0.3: -3.60548,
+        0.4: -2.65583,
+        0.5: -1.83948,
+        0.6: -1.12953,
+        0.7: -0.504399,
+        0.8: 0.0490519,
+        0.9: 0.538499,
+        1.0: 0.970649,
+    }
+
     # these were calculated using somd, hbonds_notperturbed
     expected_hbonds_not_perturbed = {
         0.0: -3.70499,
@@ -289,12 +304,28 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
             lam_val
         ] = d.current_potential_energy().value()
 
+    d = mols.dynamics(
+        constraint="h-bonds",
+        cutoff="10 A",
+        include_constrained_energies=False,
+        platform=openmm_platform,
+    )
+
+    calc_hbonds_no_energy = {}
+
+    for lam_val, nrg in expected_hbonds.items():
+        d.set_lambda(lam_val)
+        calc_hbonds_no_energy[lam_val] = d.current_potential_energy().value()
+
     # should match the no_constraints somd energy at the end points
     assert calc_none[0.0] == pytest.approx(expected_none[0.0], 1e-3)
     assert calc_none[1.0] == pytest.approx(expected_none[1.0], 1e-3)
 
     assert calc_hbonds_not_perturbed[0.0] == pytest.approx(expected_none[0.0], 1e-3)
     assert calc_hbonds_not_perturbed[1.0] == pytest.approx(expected_none[1.0], 1e-3)
+
+    assert calc_hbonds_no_energy[0.0] == pytest.approx(expected_hbonds[0.0], 1e-2)
+    assert calc_hbonds_no_energy[1.0] == pytest.approx(expected_hbonds[1.0], 1e-2)
 
     # but the hbonds_not_perturbed energy should be different if constraints
     # are not included - should equal to the somd constraints energy

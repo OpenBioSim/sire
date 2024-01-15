@@ -110,10 +110,10 @@ namespace SireOpenMM
         QVector<double> masses;
 
         /** Indexes of light atoms */
-        QList<int> light_atoms;
+        QSet<int> light_atoms;
 
         /** Indexes of virtual sites */
-        QList<int> virtual_sites;
+        QSet<int> virtual_sites;
 
         /** Charge and LJ parameters (sigma / epsilon) */
         QVector<std::tuple<double, double, double>> cljs;
