@@ -540,8 +540,23 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
 
     mols = sr.morph.repartition_hydrogen_masses(mols)
 
-    # these were calculated using somd, no constraints
-    expected = {
+    # these were calculated using somd, hbonds
+    expected_hbonds = {
+        0.0: 2.69409,
+        0.1: -0.00735767,
+        0.2: -0.0258584,
+        0.3: 0.2558,
+        0.4: 0.479681,
+        0.5: 0.629462,
+        0.6: 0.731321,
+        0.7: 0.806166,
+        0.8: 0.866469,
+        0.9: 0.919267,
+        1.0: 0.970649,
+    }
+
+    # these were calculated using somd, hbonds-notperturbed
+    expected_hbonds_not_perturbed = {
         0.0: 2.69621,
         0.1: 0.655753,
         0.2: 2.50249,
@@ -555,6 +570,54 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
         1.0: 65.9251,
     }
 
+    # these were calculated using somd, no constraints
+    expected_none = {
+        0.0: 3.54416,
+        0.1: 1.5037,
+        0.2: 3.35044,
+        0.3: 6.73618,
+        0.4: 11.3376,
+        0.5: 17.1729,
+        0.6: 24.3029,
+        0.7: 32.7831,
+        0.8: 42.6606,
+        0.9: 53.977,
+        1.0: 66.773,
+    }
+
+    d = mols.dynamics(
+        constraint="none",
+        cutoff="10 A",
+        platform=openmm_platform,
+    )
+
+    # Use the schedule to set all charges to zero
+    s = d.get_schedule()
+    s.set_equation("morph", "charge", 0.0)
+    d.set_schedule(s)
+
+    for lam_val, nrg in expected_none.items():
+        d.set_lambda(lam_val)
+        calc = d.current_potential_energy().value()
+        assert calc == pytest.approx(nrg, abs=1e-4)
+
+    d = mols.dynamics(
+        constraint="h-bonds",
+        cutoff="10 A",
+        include_constrained_energies=False,
+        platform=openmm_platform,
+    )
+
+    # Use the schedule to set all charges to zero
+    s = d.get_schedule()
+    s.set_equation("morph", "charge", 0.0)
+    d.set_schedule(s)
+
+    for lam_val, nrg in expected_hbonds.items():
+        d.set_lambda(lam_val)
+        calc = d.current_potential_energy().value()
+        assert calc == pytest.approx(nrg, abs=1e-4)
+
     d = mols.dynamics(
         constraint="h-bonds-not-perturbed",
         cutoff="10 A",
@@ -567,7 +630,7 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
     s.set_equation("morph", "charge", 0.0)
     d.set_schedule(s)
 
-    for lam_val, nrg in expected.items():
+    for lam_val, nrg in expected_hbonds_not_perturbed.items():
         d.set_lambda(lam_val)
         calc = d.current_potential_energy().value()
-        assert calc == pytest.approx(nrg, abs=1e-2)
+        assert calc == pytest.approx(nrg, abs=1e-4)

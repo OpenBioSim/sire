@@ -635,35 +635,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             if (is_perturbable and this_constraint_type & CONSTRAIN_NOT_PERTURBED)
             {
                 // we need to see if this bond is being perturbed - if so, then don't constraint
-                auto cgatom0 = idx_to_cgatomidx_data[atom0];
-                auto cgatom1 = idx_to_cgatomidx_data[atom1];
+                const auto bondparam1 = params1.bonds().value(it.key()).first;
 
-                const auto &masses0 = params.masses();
-                const auto &masses1 = params1.masses();
+                double k_1 = bondparam1.k() * bond_k_to_openmm;
+                double r0_1 = bondparam1.r0() * bond_r0_to_openmm;
 
-                auto mass0_0 = masses0.at(cgatom0);
-                auto mass1_0 = masses0.at(cgatom1);
-
-                auto mass0_1 = masses1.at(cgatom0);
-                auto mass1_1 = masses1.at(cgatom1);
-
-                // do the masses change?
-                if (std::abs(mass0_0.value() - mass0_1.value()) > 1e-3 or
-                    std::abs(mass1_0.value() - mass1_1.value()) > 1e-3)
+                if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
                 {
                     should_constrain_bond = false;
-                }
-                else
-                {
-                    auto bondparam1 = params1.bonds().value(it.key());
-
-                    double k_1 = bondparam.k() * bond_k_to_openmm;
-                    double r0_1 = bondparam.r0() * bond_r0_to_openmm;
-
-                    if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
-                    {
-                        should_constrain_bond = false;
-                    }
                 }
             }
 
