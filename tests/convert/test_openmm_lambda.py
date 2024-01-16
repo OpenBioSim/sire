@@ -526,3 +526,48 @@ def test_neopentane_methane_scan_no_cutoff(neopentane_methane, openmm_platform):
         assert calc_hbonds_not_perturbed_no_energy[lam_f] == pytest.approx(
             calc_hbonds_not_perturbed_no_energy_swap[lam_b], 1e-3
         )
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
+    mols = neopentane_methane.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation().link_to_reference().commit())
+
+    mols = sr.morph.repartition_hydrogen_masses(mols)
+
+    # these were calculated using somd, no constraints
+    expected = {
+        0.0: 2.69621,
+        0.1: 0.655753,
+        0.2: 2.50249,
+        0.3: 5.88823,
+        0.4: 10.4896,
+        0.5: 16.3249,
+        0.6: 23.455,
+        0.7: 31.9352,
+        0.8: 41.8127,
+        0.9: 53.1291,
+        1.0: 65.9251,
+    }
+
+    d = mols.dynamics(
+        constraint="h-bonds-not-perturbed",
+        cutoff="10 A",
+        include_constrained_energies=False,
+        platform=openmm_platform,
+    )
+
+    # Use the schedule to set all charges to zero
+    s = d.get_schedule()
+    s.set_equation("morph", "charge", 0.0)
+    d.set_schedule(s)
+
+    for lam_val, nrg in expected.items():
+        d.set_lambda(lam_val)
+        calc = d.current_potential_energy().value()
+        assert calc == pytest.approx(nrg, abs=1e-2)

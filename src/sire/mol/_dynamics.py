@@ -94,6 +94,7 @@ class DynamicsData:
             self._elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
             self._is_running = False
+            self._schedule_changed = False
 
             from ..convert import to
 
@@ -420,6 +421,7 @@ class DynamicsData:
     def set_schedule(self, schedule):
         if not self.is_null():
             self._omm_mols.set_lambda_schedule(schedule)
+            self._schedule_changed = True
 
     def get_lambda(self):
         if self.is_null():
@@ -436,11 +438,14 @@ class DynamicsData:
 
             lambda_value = s.clamp(lambda_value)
 
-            if lambda_value == self._omm_mols.get_lambda():
+            if (not self._schedule_changed) and (
+                lambda_value == self._omm_mols.get_lambda()
+            ):
                 # nothing to do
                 return
 
             self._omm_mols.set_lambda(lambda_value)
+            self._schedule_changed = False
             self._clear_state()
 
     def integrator(self):
