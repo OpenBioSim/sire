@@ -39,7 +39,7 @@
 #include "boost/python.hpp"
 #include <boost/tuple/tuple.hpp>
 
-#include <QHash>
+#include <QMap>
 #include <QVector>
 
 #include "sireglobal.h"
@@ -203,17 +203,43 @@ namespace SireOpenMM
 
         //! Get the link atoms associated with each QM atom.
         /*! \returns
-                A dictionary of link atom indices (MM1) to a list of MM
-                atom indices to which they are bonded (MM2 atoms).
-        */
-        QHash<int, QVector<int>> getLinkAtoms() const;
+                A tuple containing:
 
-        //! Set the link atoms associated with each QM atom.
-        /*! \param link_atoms
+            mm1_to_qm
+                A dictionary mapping link atom (MM1) indices to the QM atoms to
+                which they are bonded.
+            
+            mm1_to_mm2
                 A dictionary of link atoms indices (MM1) to a list of the MM
                 atoms to which they are bonded (MM2).
+
+            bond_lengths
+                A dictionary of link atom indices (MM1) to a list of the bond
+                lengths between the MM1 and QM atoms.
         */
-        void setLinkAtoms(QHash<int, QVector<int>> link_atoms);
+        boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const;
+
+        //! Set the link atoms associated with each QM atom.
+        /*! \param mm1_to_qm
+                A dictionary mapping link atom (MM1) indices to the QM atoms to
+                which they are bonded.
+            
+            \param mm1_to_mm2
+                A dictionary of link atoms indices (MM1) to a list of the MM
+                atoms to which they are bonded (MM2).
+
+            \param bond_lengths
+                A dictionary of link atom indices (MM1) to a list of the bond
+                lengths between the MM1 and QM atoms.
+
+        */
+        void setLinkAtoms(QMap<int, int> mm1_to_qm, QMap<int, QVector<int>> mm1_to_mm2, QMap<int, double> bond_lengths);
+
+        //! Get the vector of MM2 atoms.
+        /*! \returns
+                A vector of MM2 atom indices.
+         */
+        QVector<int> getMM2Atoms() const;
 
         //! Get the atomic numbers for the atoms in the QM region.
         /*! \returns
@@ -280,7 +306,9 @@ namespace SireOpenMM
         int neighbour_list_frequency;
         double lambda;
         QVector<int> atoms;
-        QHash<int, QVector<int>> link_atoms;
+        QMap<int, int> mm1_to_qm;
+        QMap<int, QVector<int>> mm1_to_mm2;
+        QMap<int, double> bond_lengths;
         QVector<int> mm2_atoms;
         QVector<int> numbers;
         QVector<double> charges;

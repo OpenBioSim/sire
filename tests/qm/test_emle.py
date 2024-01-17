@@ -41,13 +41,14 @@ def test_callback():
 
 
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
-def test_interpolate(ala_mols):
+@pytest.mark.parametrize("selection", ["molidx 0", "resname ALA"])
+def test_interpolate(ala_mols, selection):
     """
     Make sure that lambda interpolation between pure MM and EMLE potentials works.
     """
 
     # Create a local copy of the test system.
-    mols = ala_mols
+    mols = ala_mols.__copy__()
 
     # Create an EMLE calculator.
     calculator = EMLECalculator(device="cpu", log=0, save_settings=False)
@@ -59,7 +60,7 @@ def test_interpolate(ala_mols):
     nrg_mm = d.current_potential_energy()
 
     # Create an EMLE engine bound to the calculator.
-    mols, engine = emle(mols, mols[0], calculator)
+    mols, engine = emle(mols, selection, calculator)
 
     # Create a QM/MM capable dynamics object.
     d = mols.dynamics(

@@ -16,7 +16,7 @@
 #include "Helpers/convertlist.hpp"
 #include "Helpers/tuples.hpp"
 
-#include <QHash>
+#include <QMap>
 #include <QVector>
 
 using namespace SireOpenMM;
@@ -180,8 +180,13 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
     register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
 
-    // A dictionary mapping link atoms (MM1) to the other MM atoms to which they are bonded (MM2).
-    register_dict<QHash<int, QVector<int>>>();
+    // Dictionary for mapping link atoms to QM and MM2 atoms.
+    register_dict<QMap<int, int>>();
+    register_dict<QMap<int, double>>();
+    register_dict<QMap<int, QVector<int>>>();
+
+    // A tuple for passing link atom information to EMLEEngine.
+    register_tuple<boost::tuple<QMap<int, int>, QMap<int, QVector<int>>>>();
 
     bp::class_<QMMMForce, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMForce", bp::no_init);
 

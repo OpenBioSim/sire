@@ -32,7 +32,9 @@
 #include "OpenMM.h"
 #include "openmm/Force.h"
 
-#include <QHash>
+#include <boost/tuple/tuple.hpp>
+
+#include <QMap>
 #include <QVector>
 
 #include "sireglobal.h"
@@ -69,10 +71,10 @@ namespace SireOpenMM
         virtual void setAtoms(QVector<int>) = 0;
 
         //! Get the link atoms associated with each QM atom.
-        QHash<int, QVector<int>> getLinkAtoms() const;
+        boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const;
 
         //! Set the link atoms associated with each QM atom.
-        virtual void setLinkAtoms(QHash<int, QVector<int>>) = 0;
+        virtual void setLinkAtoms(QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>) = 0;
 
         //! Get the atomic numbers of the atoms in the QM region.
         virtual QVector<int> getNumbers() const = 0;

@@ -1,4 +1,4 @@
-def _configure_engine(engine, mols, qm_atoms, link_atoms, map):
+def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_lengths, map):
     """
     Internal helper function to configure a QM engine ready for dynamics.
     """
@@ -28,7 +28,7 @@ def _configure_engine(engine, mols, qm_atoms, link_atoms, map):
 
     # Set the link atom information.
     try:
-        engine.set_link_atoms(link_atoms)
+        engine.set_link_atoms(mm1_to_qm, mm1_to_mm2, bond_lengths)
     except:
         raise Exception("Unable to set link atom information.")
 
@@ -227,14 +227,15 @@ def _get_link_atoms(mols, qm_mol, qm_atoms, map):
     Internal helper function to get a dictionary with link atoms for each QM atom.
     """
 
-    from ..legacy.Mol import Connectivity as _Connectivity
-    from ..legacy.Mol import CovalentBondHunter as _CovalentBondHunter
+    from ..legacy import CAS as _CAS
+    from ..legacy import Mol as _Mol
+    from ..legacy import MM as _MM
 
     # Store the indices of the QM atoms.
     qm_idxs = [atom.index() for atom in qm_atoms]
 
     # Create a connectivity object.
-    connectivity = _Connectivity(qm_mol, _CovalentBondHunter(), map)
+    connectivity = _Mol.Connectivity(qm_mol, _Mol.CovalentBondHunter(), map)
 
     mm1_atoms = {}
 
@@ -278,38 +279,121 @@ def _get_link_atoms(mols, qm_mol, qm_atoms, map):
 
         # Store the list of MM atoms.
         if len(mm_bonds) > 0:
-            mm1_atoms[idx] = mm_bonds
+            if len(mm_bonds) > 1:
+                raise Exception(f"QM atom {idx} has more than one MM bond!")
+            else:
+                mm1_atoms[idx] = mm_bonds[0]
 
     # Now work out the MM atoms that are bonded to the link atoms.
     mm2_atoms = {}
-    for k, v in mm1_atoms.items():
-        for idx in v:
-            if idx not in mm2_atoms:
-                bonds = connectivity.get_bonds(idx)
-                mm_bonds = []
-                for bond in bonds:
-                    idx0 = bond.atom0()
-                    idx1 = bond.atom1()
-                    if idx0 != idx:
-                        bond_idx = idx0
-                    else:
-                        bond_idx = idx1
-                    if bond_idx not in qm_idxs:
-                        mm_bonds.append(bond_idx)
-                mm2_atoms[idx] = mm_bonds
+    for qm_idx, mm1_idx in mm1_atoms.items():
+        if mm1_idx not in mm2_atoms:
+            bonds = connectivity.get_bonds(mm1_idx)
+            mm_bonds = []
+            for bond in bonds:
+                idx0 = bond.atom0()
+                idx1 = bond.atom1()
+                if idx0 != mm1_idx:
+                    bond_idx = idx0
+                else:
+                    bond_idx = idx1
+                if bond_idx not in qm_idxs:
+                    mm_bonds.append(bond_idx)
+            mm2_atoms[mm1_idx] = mm_bonds
 
     # Convert MM1 atoms dictionary to absolute indices.
-    abs_mm1_atoms = {}
+    mm1_to_qm = {}
     for k, v in mm1_atoms.items():
         qm_idx = mols.atoms().find(qm_mol.atoms()[k])
-        link_idx = [mols.atoms().find(qm_mol.atoms()[x]) for x in v]
-        abs_mm1_atoms[qm_idx] = link_idx
+        link_idx = mols.atoms().find(qm_mol.atoms()[v])
+        mm1_to_qm[link_idx] = qm_idx
 
     # Convert MM2 atoms dictionary to absolute indices.
-    abs_mm2_atoms = {}
+    mm1_to_mm2 = {}
     for k, v in mm2_atoms.items():
         link_idx = mols.atoms().find(qm_mol.atoms()[k])
         mm_idx = [mols.atoms().find(qm_mol.atoms()[x]) for x in v]
-        abs_mm2_atoms[link_idx] = mm_idx
+        mm1_to_mm2[link_idx] = mm_idx
 
-    return abs_mm1_atoms, abs_mm2_atoms
+    # Now work out the QM-MM1 bond distances based on the equilibrium
+    # MM bond lengths.
+
+    # A dictionary to store the bond lengths.
+    bond_lengths = {}
+    link_bond_lengths = {}
+
+    # Get the MM bond potentials.
+    bonds = qm_mol.property(map["bond"]).potentials()
+
+    # Store the info for the QM molecule.
+    info = qm_mol.info()
+
+    # Store the bond potential symbol.
+    r = _CAS.Symbol("r")
+
+    # Loop over the link atoms.
+    for qm_idx, mm1_idx in mm1_atoms.items():
+        # Convert to cg_atom_idx objects.
+        cg_qm_idx = info.cg_atom_idx(qm_idx)
+        cg_mm1_idx = info.cg_atom_idx(mm1_idx)
+
+        # Store the element of the QM atom.
+        qm_elem = qm_mol[cg_qm_idx].element()
+        hydrogen = _Mol.Element("H")
+
+        qm_m1_bond_found = False
+        qm_link_bond_found = False
+
+        # Loop over the bonds.
+        for bond in bonds:
+            # Get the indices of the atoms in the bond.
+            bond_idx0 = bond.atom0()
+            bond_idx1 = bond.atom1()
+
+            # If the bond is between the QM atom and the MM atom, store the
+            # bond length.
+            if (
+                not qm_m1_bond_found
+                and cg_qm_idx == bond_idx0
+                and cg_mm1_idx == bond_idx1
+                or cg_qm_idx == bond_idx1
+                and cg_mm1_idx == bond_idx0
+            ):
+                # Cast as an AmberBond.
+                ab = _MM.AmberBond(bond.function(), r)
+                bond_lengths[mm1_idx] = ab.r0()
+                qm_m1_bond_found = True
+                if qm_link_bond_found:
+                    break
+            else:
+                # Check to see if this bond is between a hydrogen and and the
+                # same element as the QM atom.
+                elem0 = qm_mol[bond_idx0].element()
+                elem1 = qm_mol[bond_idx1].element()
+
+                if (
+                    not qm_link_bond_found
+                    and elem0 == hydrogen
+                    and elem1 == qm_elem
+                    or elem0 == qm_elem
+                    and elem1 == hydrogen
+                ):
+                    # Cast as an AmberBond.
+                    ab = _MM.AmberBond(bond.function(), r)
+                    link_bond_lengths[mm1_idx] = ab.r0()
+                    qm_link_bond_found = True
+                    if qm_m1_bond_found:
+                        break
+
+    # Work out the rescaled bond length: R0(Q-H) / R0(Q-MM1)
+    try:
+        scaled_bond_lengths = {}
+        for idx in bond_lengths:
+            abs_idx = mols.atoms().find(qm_mol.atoms()[idx])
+            scaled_bond_lengths[abs_idx] = link_bond_lengths[idx] / bond_lengths[idx]
+    except:
+        raise Exception(
+            f"Unable to compute the scaled the QM-MM1 bond lengths for MM1 atom {idx}!"
+        )
+
+    return mm1_to_qm, mm1_to_mm2, scaled_bond_lengths

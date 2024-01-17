@@ -108,8 +108,10 @@ EMLEEngine::EMLEEngine(const EMLEEngine &other) :
     neighbour_list_frequency(other.neighbour_list_frequency),
     lambda(other.lambda),
     atoms(other.atoms),
-    link_atoms(other.link_atoms),
+    mm1_to_qm(other.mm1_to_qm),
+    mm1_to_mm2(other.mm1_to_mm2),
     mm2_atoms(other.mm2_atoms),
+    bond_lengths(other.bond_lengths),
     numbers(other.numbers),
     charges(other.charges)
 {
@@ -122,8 +124,10 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     this->neighbour_list_frequency = other.neighbour_list_frequency;
     this->lambda = other.lambda;
     this->atoms = other.atoms;
-    this->link_atoms = other.link_atoms;
+    this->mm1_to_qm = other.mm1_to_qm;
+    this->mm1_to_mm2 = other.mm1_to_mm2;
     this->mm2_atoms = other.mm2_atoms;
+    this->bond_lengths = other.bond_lengths;
     this->numbers = other.numbers;
     this->charges = other.charges;
     return *this;
@@ -193,21 +197,31 @@ void EMLEEngine::setAtoms(QVector<int> atoms)
     this->atoms = atoms;
 }
 
-QHash<int, QVector<int>> EMLEEngine::getLinkAtoms() const
+boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEEngine::getLinkAtoms() const
 {
-    return this->link_atoms;
+    return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_lengths);
 }
 
-void EMLEEngine::setLinkAtoms(QHash<int, QVector<int>> link_atoms)
+void EMLEEngine::setLinkAtoms(
+    QMap<int, int> mm1_to_qm,
+    QMap<int, QVector<int>> mm1_to_mm2,
+    QMap<int, double> bond_lengths)
 {
-    this->link_atoms = link_atoms;
-    
+    this->mm1_to_qm = mm1_to_qm;
+    this->mm1_to_mm2 = mm1_to_mm2;
+    this->bond_lengths = bond_lengths;
+
     // Build a vector of all of the MM2 atoms.
     this->mm2_atoms.clear();
-    for (const auto &mm2 : this->link_atoms.values())
+    for (const auto &mm2 : this->mm1_to_mm2.values())
     {
         this->mm2_atoms.append(mm2);
     }
+}
+
+QVector<int> EMLEEngine::getMM2Atoms() const
+{
+    return this->mm2_atoms;
 }
 
 QVector<int> EMLEEngine::getNumbers() const
@@ -301,8 +315,16 @@ double EMLEEngineImpl::computeForce(
         Vector(10*box_z[0], 10*box_z[1], 10*box_z[2])
     );
 
-    // Store the QM atom indices.
+    // Store the QM atomic indices and numbers.
     const auto qm_atoms = this->owner.getAtoms();
+    auto numbers = this->owner.getNumbers();
+
+    // Store the link atom info.
+    const auto link_atoms = this->owner.getLinkAtoms();
+    const auto mm1_to_qm = link_atoms.get<0>();
+    const auto mm1_to_mm2 = link_atoms.get<1>();
+    const auto bond_lengths = link_atoms.get<2>();
+    const auto mm2_atoms = this->owner.getMM2Atoms();
 
     // Initialise a vector to hold the current positions for the QM atoms.
     QVector<QVector<double>> xyz_qm(qm_atoms.size());
@@ -334,10 +356,13 @@ double EMLEEngineImpl::computeForce(
     center /= i;
 
     // Initialise a vector to hold the current positions for the MM atoms.
+    // and dipoles.
     QVector<QVector<double>> xyz_mm;
+    QVector<QVector<double>> xyz_dipole;
 
-    // Initialise a vector to hold the charges for the MM atoms.
+    // Initialise a vector to hold the charges for the MM atoms and dipoles.
     QVector<double> charges_mm;
+    QVector<double> charges_dipole;
 
     // Initialise a list to hold the indices of the MM atoms.
     QVector<int> idx_mm;
@@ -355,8 +380,10 @@ double EMLEEngineImpl::computeForce(
         // Loop over all of the OpenMM positions.
         for (const auto &pos : positions)
         {
-            // Exclude QM atoms.
-            if (not qm_atoms.contains(i))
+            // Exclude QM atoms or link atoms, which are handled later.
+            if (not qm_atoms.contains(i) and
+                not mm1_to_mm2.contains(i) and
+                not mm2_atoms.contains(i))
             {
                 // Store the MM atom position in Sire Vector format.
                 Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
@@ -424,13 +451,91 @@ double EMLEEngineImpl::computeForce(
                     break;
                 }
             }
-
         }
+    }
+
+    // Store the current number of QM.
+    const auto num_qm = xyz_qm.size();
+
+    // Handle link atoms.
+    for (const auto &idx: mm1_to_mm2.keys())
+    {
+        // Get the QM atom to which the current MM atom is bonded.
+        const auto qm_idx = mm1_to_qm[idx];
+
+        // Store the MM1 position in Sire Vector format, along with the
+        // position of the QM atom to which it is bonded.
+        Vector mm1_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
+        Vector qm_vec(10*positions[qm_idx][0], 10*positions[qm_idx][1], 10*positions[qm_idx][2]);
+
+        // Work out the minimum image positions with respect to the reference position.
+        mm1_vec = space.getMinimumImage(mm1_vec, center);
+        qm_vec = space.getMinimumImage(qm_vec, center);
+
+        // Work out the normal vector between the MM1 and QM atoms.
+        const auto normal = (qm_vec - mm1_vec).normalise();
+
+        // Work out the position of the link atom.
+        const auto link_vec = mm1_vec + 10*bond_lengths[idx]*normal;
+
+        // Add to the QM positions.
+        xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
+
+        // Append a hydrogen element to the numbers vector.
+        numbers.append(1);
+
+        // Store the number of MM2 atoms.
+        const auto num_mm2 = mm1_to_mm2[idx].size();
+
+        // Store the fractional charge contribution to the MM2 atoms and dipoles.
+        const auto frac_charge = this->owner.getCharges()[idx] / num_mm2;
+
+        // Loop over the MM2 atoms.
+        for (const auto& mm2_idx : mm1_to_mm2[idx])
+        {
+            // Store the MM2 position in Sire Vector format.
+            Vector mm2_vec(10*positions[mm2_idx][0], 10*positions[mm2_idx][1], 10*positions[mm2_idx][2]);
+
+            // Work out the minimum image position with respect to the reference position.
+            mm2_vec = space.getMinimumImage(mm2_vec, center);
+
+            // Add to the MM positions.
+            xyz_mm.append(QVector<double>({mm2_vec[0], mm2_vec[1], mm2_vec[2]}));
+
+            // Add the charge and index.
+            charges_mm.append(this->owner.getCharges()[mm2_idx] + frac_charge);
+            idx_mm.append(mm2_idx);
+
+            // Now add the dipoles.
+
+            // Compute the normal vector from the MM1 to MM2 atom.
+            const auto normal = (mm2_vec - mm1_vec).normalise();
+
+            // Positive direction. (Away from MM1 atom.)
+            auto xyz = mm2_vec + 0.01*normal;
+            xyz_dipole.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
+            charges_dipole.append(-frac_charge);
+
+            // Negative direction (Towards MM1 atom.)
+            xyz = mm2_vec - 0.01*normal;
+            xyz_dipole.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
+            charges_dipole.append(frac_charge);
+        }
+    }
+
+    // Store the current number of MM atoms.
+    const auto num_mm = xyz_mm.size();
+
+    // If there are any dipoles, then add to the MM positions and charges.
+    if (xyz_dipole.size() > 0)
+    {
+        xyz_mm.append(xyz_dipole);
+        charges_mm.append(charges_dipole);
     }
 
     // Call the callback.
     auto result = this->owner.call(
-        this->owner.getNumbers(),
+        numbers,
         charges_mm,
         xyz_qm,
         xyz_mm
@@ -461,6 +566,12 @@ double EMLEEngineImpl::computeForce(
 
         // Update the atom index.
         i++;
+
+        // Exit if we have reached the end of the QM atoms, i.e. ignore link atoms.
+        if (i == num_qm)
+        {
+            break;
+        }
     }
 
     // Now the MM atoms.
@@ -478,6 +589,12 @@ double EMLEEngineImpl::computeForce(
 
         // Update the atom index.
         i++;
+
+        // Exit if we have reached the end of the MM atoms, i.e. ignore dipoles.
+        if (i == num_mm)
+        {
+            break;
+        }
     }
 
     // Update the step count.

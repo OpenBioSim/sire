@@ -120,12 +120,13 @@ def emle(
 
     from ._utils import _configure_engine, _create_merged_mol, _get_link_atoms
 
-    # Get dictionary of link atoms for each QM atom (mm1_atoms) and the
-    # dictionary of bonded MM atoms for each link atom (mm2_atoms).
-    mm1_atoms, mm2_atoms = _get_link_atoms(mols, qm_mol, qm_atoms, map)
+    # Get link atom information.
+    mm1_to_qm, mm1_to_mm2, bond_lengths = _get_link_atoms(mols, qm_mol, qm_atoms, map)
 
     # Configure the engine.
-    engine = _configure_engine(engine, mols, qm_atoms, mm2_atoms, map)
+    engine = _configure_engine(
+        engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_lengths, map
+    )
 
     # Create the merged molecule.
     qm_mol = _create_merged_mol(qm_mol, qm_atoms, map)
