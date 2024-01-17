@@ -236,7 +236,9 @@ class DynamicsData:
             if lambda_windows is not None:
                 for lambda_value in lambda_windows:
                     if lambda_value != sim_lambda_value:
-                        self._omm_mols.set_lambda(lambda_value)
+                        self._omm_mols.set_lambda(
+                            lambda_value, update_constraints=False
+                        )
                         nrgs[str(lambda_value)] = (
                             self._omm_mols.get_potential_energy(
                                 to_sire_units=False
@@ -244,7 +246,7 @@ class DynamicsData:
                             * kcal_per_mol
                         )
 
-                self._omm_mols.set_lambda(sim_lambda_value)
+                self._omm_mols.set_lambda(sim_lambda_value, update_constraints=False)
 
             self._energy_trajectory.set(
                 self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
@@ -429,7 +431,7 @@ class DynamicsData:
         else:
             return self._omm_mols.get_lambda()
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         if not self.is_null():
             s = self.get_schedule()
 
@@ -444,7 +446,9 @@ class DynamicsData:
                 # nothing to do
                 return
 
-            self._omm_mols.set_lambda(lambda_value)
+            self._omm_mols.set_lambda(
+                lambda_value=lambda_value, update_constraints=update_constraints
+            )
             self._schedule_changed = False
             self._clear_state()
 
@@ -1171,14 +1175,22 @@ class Dynamics:
         """
         return self._d.get_lambda()
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         """
         Set the current value of lambda for this system. This will
         update the forcefield parameters in the context according
         to the data in the LambdaSchedule. This does nothing if
-        this isn't a perturbable system
+        this isn't a perturbable system.
+
+        If `update_constraints` is True, then this will also update
+        the constraint length of any constrained perturbable bonds.
+        These will be set to the r0 value for that bond at this
+        value of lambda. If `update_constraints` is False, then
+        the constraint will not be changed.
         """
-        self._d.set_lambda(lambda_value)
+        self._d.set_lambda(
+            lambda_value=lambda_value, update_constraints=update_constraints
+        )
 
     def ensemble(self):
         """
@@ -1380,13 +1392,13 @@ class Dynamics:
 
             try:
                 for lambda_value in lambda_values:
-                    self.set_lambda(lambda_value)
+                    self.set_lambda(lambda_value, update_constraints=False)
                     nrgs.append(self._d.current_potential_energy())
             except Exception:
-                self.set_lambda(old_lambda)
+                self.set_lambda(old_lambda, update_constraints=False)
                 raise
 
-            self.set_lambda(old_lambda)
+            self.set_lambda(old_lambda, update_constraints=False)
 
             return nrgs
 

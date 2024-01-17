@@ -104,7 +104,8 @@ namespace SireOpenMM
         const char *what() const;
         static const char *typeName();
 
-        double setLambda(OpenMM::Context &context, double lam_val) const;
+        double setLambda(OpenMM::Context &context, double lam_val,
+                         bool update_constraints = true) const;
 
         void setForceIndex(const QString &force, int index);
 
@@ -115,6 +116,8 @@ namespace SireOpenMM
 
         void setExceptionIndicies(int idx, const QString &ff,
                                   const QVector<std::pair<int, int>> &exception_idxs);
+
+        void setConstraintIndicies(int idx, const QVector<int> &constraint_idxs);
 
         void setSchedule(const SireCAS::LambdaSchedule &schedule);
 

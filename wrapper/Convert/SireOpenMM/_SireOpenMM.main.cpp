@@ -65,7 +65,7 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
 
     LambdaLever_exposer_t.def(
         "set_lambda", &LambdaLever::setLambda,
-        (bp::arg("system"), bp::arg("lambda_value")),
+        (bp::arg("system"), bp::arg("lambda_value"), bp::arg("update_constraints")),
         "Update the parameters in the passed context using this lambda lever "
         "so that the parameters represent the system at the specified "
         "lambda value");

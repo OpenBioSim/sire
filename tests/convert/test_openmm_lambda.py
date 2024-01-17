@@ -58,7 +58,9 @@ def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3, platform="C
     map = {
         "platform": platform,
         "schedule": l,
-        "constraint": "bonds-h-angles",
+        "constraint": "h-bonds-not-perturbed",
+        "include_constrained_energies": True,
+        "dynamic_constraints": False,
     }
 
     if use_taylor:
@@ -74,14 +76,14 @@ def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3, platform="C
     omm1 = sr.convert.to(mols1, "openmm", map=map)
     nrg1 = omm1.get_energy().value()
 
+    omm.set_lambda(1.0)
+    assert omm.get_energy().value() == pytest.approx(nrg1, precision)
+
     omm.set_lambda(0.0)
     assert omm.get_energy().value() == pytest.approx(nrg0, precision)
 
     omm.set_lambda(0.5)
     nrg0_5 = omm.get_energy().value()
-
-    omm.set_lambda(1.0)
-    assert omm.get_energy().value() == pytest.approx(nrg1, precision)
 
     omm.set_lambda(0.5)
     assert omm.get_energy().value() == pytest.approx(nrg0_5, precision)

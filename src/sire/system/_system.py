@@ -453,6 +453,14 @@ class System:
             minimisation. This would be CUDA_DEVICE_ID or similar
             if CUDA was used. This can be any valid OpenMM device string
 
+        dynamic_constraints: bool
+            Whether or not to update the length of constraints of
+            perturbable bonds with lambda. This defaults to True,
+            meaning that changing lambda will change any constraint
+            on a perturbable bond to equal to the value of r0 at
+            that lambda value. If this is false, then the constraint
+            is set based on the current length.
+
         map: dict
             A dictionary of additional options. Note that any options
             set in this dictionary that are also specified via one of
@@ -611,6 +619,14 @@ class System:
             Either the number of steps between center-of-mass resets,
             or the time between resets. If this is unset, then
             the center-of-mass is not reset during the simulation.
+
+        dynamic_constraints: bool
+            Whether or not to update the length of constraints of
+            perturbable bonds with lambda. This defaults to True,
+            meaning that changing lambda will change any constraint
+            on a perturbable bond to equal to the value of r0 at
+            that lambda value. If this is false, then the constraint
+            is set based on the current length.
 
         map: dict
             A dictionary of additional options. Note that any options

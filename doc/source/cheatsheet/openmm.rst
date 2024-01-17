@@ -108,6 +108,9 @@ Available keys and allowable values are listed below.
 | dielectric                   | Dielectric value if a reaction field cutoff is used,     |
 |                              | e.g. ``78.0``                                            |
 +------------------------------+----------------------------------------------------------+
+| dynamic_constraints          | Whether or not the constraints applied to perturbable    |
+|                              | bonds should be updated with λ (defaults to ``True``).   |
++------------------------------+----------------------------------------------------------+
 | fixed                        | The atoms in the system that should be fixed (not moved) |
 +------------------------------+----------------------------------------------------------+
 | ignore_perturbations         | Whether or not to ignore any perturbations and only set  |

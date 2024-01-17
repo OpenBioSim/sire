@@ -1325,7 +1325,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// for the molecules to the OpenMM forces
 
     ///
-    /// Stage 6 - Set up the exceptions
+    /// Stage 6 - Set up the exceptions and perturbable constraints
     ///
     /// We now have to add all of the exceptions to the non-bonded
     /// forces (including the ghost forces). Exceptions are overrides
@@ -1334,12 +1334,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// of the entire function, as it involves lots of atom-atom
     /// pair loops and can create a large exception list
     ///
+    /// We will also add all of the perturbable constraints here
+    ///
     for (int i = 0; i < nmols; ++i)
     {
         int start_index = start_indexes[i];
         const auto &mol = openmm_mols_data[i];
 
         QVector<std::pair<int, int>> exception_idxs;
+        QVector<int> constraint_idxs;
 
         const bool is_perturbable = any_perturbable and mol.isPerturbable();
 
@@ -1347,6 +1350,29 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             exception_idxs = QVector<std::pair<int, int>>(mol.exception_params.count(),
                                                           std::make_pair(-1, -1));
+            constraint_idxs = QVector<int>(mol.perturbable_constraints.count(), -1);
+
+            // do all of the perturbable constraints
+            for (int j = 0; j < mol.perturbable_constraints.count(); ++j)
+            {
+                const auto &constraint = mol.perturbable_constraints[j];
+
+                const auto atom0 = std::get<0>(constraint);
+                const auto atom1 = std::get<1>(constraint);
+
+                const auto mass0 = system.getParticleMass(atom0 + start_index);
+                const auto mass1 = system.getParticleMass(atom1 + start_index);
+
+                if (mass0 != 0 and mass1 != 0)
+                {
+                    // add the constraint using the reference state length
+                    auto idx = system.addConstraint(atom0 + start_index,
+                                                    atom1 + start_index,
+                                                    std::get<2>(constraint));
+
+                    constraint_idxs[j] = idx;
+                }
+            }
         }
 
         for (int j = 0; j < mol.exception_params.count(); ++j)
@@ -1438,6 +1464,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
             lambda_lever.setExceptionIndicies(pert_idx,
                                               "clj", exception_idxs);
+
+            lambda_lever.setConstraintIndicies(pert_idx,
+                                               constraint_idxs);
         }
     }
 

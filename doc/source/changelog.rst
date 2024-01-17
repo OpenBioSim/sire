@@ -15,6 +15,18 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
+* Added the ability to customise the lambda schedule applied to a lambda lever
+  so that you can use different equations for different molecules and
+  different forces in the OpenMM context. This gives a lot of control over
+  how forcefield parameters are scaled with lambda. Specifically, this is used
+  to add support for calculating absolute binding free energies.
+
+* Added "not-perturbable" constraints so that bonds and angles that change
+  with lambda are not perturbed. As part of this, have also added a
+  ``dynamic_constraints`` option that lets constrained bonds update with
+  lambda, so that they are set to the length corresponding to r0 at that
+  lambda value.
+
 * Added more automatic conversions, so that string will more readily auto-convert
   to units where possible. Also added a ``sire.v`` function to make it easier to
   create vectors of units, e.g. ``sire.v("1.0A", "2.0A", "3.0A")`` will create

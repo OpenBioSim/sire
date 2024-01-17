@@ -1576,6 +1576,7 @@ def _dynamics(
     device=None,
     precision=None,
     com_reset_frequency=None,
+    dynamic_constraints: bool = True,
     map=None,
 ):
     """
@@ -1726,6 +1727,14 @@ def _dynamics(
         or the time between resets. If this is unset, then
         the center-of-mass is not reset during the simulation.
 
+    dynamic_constraints: bool
+        Whether or not to update the length of constraints of
+        perturbable bonds with lambda. This defaults to True,
+        meaning that changing lambda will change any constraint
+        on a perturbable bond to equal to the value of r0 at
+        that lambda value. If this is false, then the constraint
+        is set based on the current length.
+
     map: dict
         A dictionary of additional options. Note that any options
         set in this dictionary that are also specified via one of
@@ -1832,6 +1841,12 @@ def _dynamics(
     if integrator is not None:
         map.set("integrator", str(integrator))
 
+    if dynamic_constraints is not None:
+        if dynamic_constraints:
+            map.set("dynamic_constraints", True)
+        else:
+            map.set("dynamic_constraints", False)
+
     if com_reset_frequency is not None:
         com_reset_frequency = u(com_reset_frequency)
     elif map.specified("com_reset_frequency"):
@@ -1896,6 +1911,7 @@ def _minimisation(
     precision=None,
     restraints=None,
     fixed=None,
+    dynamic_constraints: bool = True,
     map=None,
 ):
     """
@@ -1996,6 +2012,14 @@ def _minimisation(
         The desired precision for the simulation (e.g. `single`,
         `mixed` or `double`)
 
+    dynamic_constraints: bool
+        Whether or not to update the length of constraints of
+        perturbable bonds with lambda. This defaults to True,
+        meaning that changing lambda will change any constraint
+        on a perturbable bond to equal to the value of r0 at
+        that lambda value. If this is false, then the constraint
+        is set based on the current length.
+
     map: dict
         A dictionary of additional options. Note that any options
         set in this dictionary that are also specified via one of
@@ -2061,6 +2085,12 @@ def _minimisation(
 
     if include_constrained_energies is not None:
         map.set("include_constrained_energies", include_constrained_energies)
+
+    if dynamic_constraints is not None:
+        if dynamic_constraints:
+            map.set("dynamic_constraints", True)
+        else:
+            map.set("dynamic_constraints", False)
 
     if platform is not None:
         map.set("platform", str(platform))

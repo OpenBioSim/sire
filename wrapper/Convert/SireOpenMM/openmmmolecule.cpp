@@ -572,6 +572,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     this->bond_params.clear();
     this->constraints.clear();
+    this->perturbable_constraints.clear();
 
     // initialise all atoms as being unbonded
     this->unbonded_atoms.reserve(nats);
@@ -592,6 +593,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     if (map.specified("include_constrained_energies"))
     {
         include_constrained_energies = map["include_constrained_energies"].value().asABoolean();
+    }
+
+    bool dynamic_constraints = true;
+
+    if (map.specified("dynamic_constraints"))
+    {
+        dynamic_constraints = map["dynamic_constraints"].value().asABoolean();
     }
 
     for (auto it = params.bonds().constBegin();
@@ -632,16 +640,21 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         {
             bool should_constrain_bond = true;
 
-            if (is_perturbable and this_constraint_type & CONSTRAIN_NOT_PERTURBED)
+            double r0_1 = r0;
+
+            if (is_perturbable)
             {
-                // we need to see if this bond is being perturbed - if so, then don't constraint
+                // we need to see if this bond is being perturbed
                 const auto bondparam1 = params1.bonds().value(it.key()).first;
 
                 double k_1 = bondparam1.k() * bond_k_to_openmm;
-                double r0_1 = bondparam1.r0() * bond_r0_to_openmm;
+                r0_1 = bondparam1.r0() * bond_r0_to_openmm;
 
-                if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
+                if ((this_constraint_type & CONSTRAIN_NOT_PERTURBED) and
+                    (std::abs(k_1 - k) > 1e-3 or
+                     std::abs(r0_1 - r0) > 1e-3))
                 {
+                    // don't constrain a perturbing bond
                     should_constrain_bond = false;
                 }
             }
@@ -654,14 +667,22 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                                                    (delta[1] * delta[1]) +
                                                    (delta[2] * delta[2]));
 
-                // use the r0 for the bond if this is close to the measured length and this
-                // is not a perturbable molecule
-                if (not is_perturbable and std::abs(constraint_length - r0) < 0.01)
+                if (dynamic_constraints and (r0 != r0_1))
                 {
-                    constraint_length = r0;
+                    // this is a dynamic constraint that should change with lambda
+                    this->perturbable_constraints.append(std::make_tuple(atom0, atom1, r0, r0_1));
+                }
+                else
+                {
+                    // use the r0 for the bond if this is close to the measured length
+                    if (std::abs(constraint_length - r0) < 0.01)
+                    {
+                        constraint_length = r0;
+                    }
+
+                    this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
                 }
 
-                this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
                 constrained_pairs.insert(to_pair(atom0, atom1));
                 bond_is_not_constrained = false;
             }
@@ -714,48 +735,36 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             if ((this_constraint_type & CONSTRAIN_HANGLES) and is_h_x_h)
             {
                 bool should_constrain_angle = true;
+                double theta0_1 = theta0;
 
-                if (is_perturbable and this_constraint_type & CONSTRAIN_NOT_PERTURBED)
+                if (is_perturbable)
                 {
-                    // we need to see if this bond is being perturbed - if so, then don't constraint
-                    auto cgatom0 = idx_to_cgatomidx_data[atom0];
-                    auto cgatom1 = idx_to_cgatomidx_data[atom1];
-                    auto cgatom2 = idx_to_cgatomidx_data[atom2];
+                    // we need to see if this angle is being perturbed - if so, then don't constraint
+                    auto angparam1 = params1.angles().value(it.key());
 
-                    const auto &masses0 = params.masses();
-                    const auto &masses1 = params1.masses();
+                    double k_1 = angparam.k() * angle_k_to_openmm;
+                    theta0_1 = angparam.theta0();
 
-                    auto mass0_0 = masses0.at(cgatom0);
-                    auto mass1_0 = masses0.at(cgatom1);
-                    auto mass2_0 = masses0.at(cgatom2);
-
-                    auto mass0_1 = masses1.at(cgatom0);
-                    auto mass1_1 = masses1.at(cgatom1);
-                    auto mass2_1 = masses1.at(cgatom2);
-
-                    // do the masses change?
-                    if (std::abs(mass0_0.value() - mass0_1.value()) > 1e-3 or
-                        std::abs(mass1_0.value() - mass1_1.value()) > 1e-3 or
-                        std::abs(mass2_0.value() - mass2_1.value()) > 1e-3)
+                    if ((this_constraint_type & CONSTRAIN_NOT_PERTURBED) and
+                        (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3))
                     {
                         should_constrain_angle = false;
-                    }
-                    else
-                    {
-                        auto angparam1 = params1.angles().value(it.key());
-
-                        double k_1 = angparam.k() * angle_k_to_openmm;
-                        double theta0_1 = angparam.theta0();
-
-                        if (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3)
-                        {
-                            should_constrain_angle = false;
-                        }
                     }
                 }
 
                 if (should_constrain_angle)
                 {
+                    if (dynamic_constraints and (theta0_1 != theta0))
+                    {
+                        throw SireError::incomplete_code(QObject::tr(
+                                                             "Dynamic constraints for angles are not yet implemented. "
+                                                             "Either switch off dynamics constraints, or don't constrain "
+                                                             "angles. If you want dynamic angle constraint support to "
+                                                             "be added to sire then please raise a feature request issue "
+                                                             "following the instructions at https://sire.openbiosim.org"),
+                                                         CODELOC);
+                    }
+
                     const auto delta = coords[atom2] - coords[atom0];
                     auto constraint_length = std::sqrt((delta[0] * delta[0]) +
                                                        (delta[1] * delta[1]) +
@@ -1854,6 +1863,8 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
 
     to_ghost_idxs = mol.to_ghost_idxs;
     from_ghost_idxs = mol.from_ghost_idxs;
+
+    perturbable_constraints = mol.perturbable_constraints;
 }
 
 /** Copy constructor */
@@ -1874,7 +1885,9 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMole
       charge_scl0(other.charge_scl0), charge_scl1(other.charge_scl1),
       lj_scl0(other.lj_scl0), lj_scl1(other.lj_scl1),
       to_ghost_idxs(other.to_ghost_idxs), from_ghost_idxs(other.from_ghost_idxs),
-      exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs)
+      exception_atoms(other.exception_atoms), exception_idxs(other.exception_idxs),
+      perturbable_constraints(other.perturbable_constraints),
+      constraint_idxs(other.constraint_idxs)
 {
 }
 
@@ -1901,7 +1914,8 @@ bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &othe
            charge_scl0 == other.charge_scl0 and charge_scl1 == other.charge_scl1 and
            lj_scl0 == other.lj_scl0 and lj_scl1 == other.lj_scl1 and
            to_ghost_idxs == other.to_ghost_idxs and from_ghost_idxs == other.from_ghost_idxs and
-           exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs;
+           exception_atoms == other.exception_atoms and exception_idxs == other.exception_idxs and
+           perturbable_constraints == other.perturbable_constraints and constraint_idxs == other.constraint_idxs;
 }
 
 /** Comparison operator */
@@ -2129,4 +2143,61 @@ void PerturbableOpenMMMolecule::setExceptionIndicies(const QString &name,
                                             CODELOC);
 
     this->exception_idxs.insert(name, exception_idxs);
+}
+
+/** Set the indexes of perturbable constraints in the System */
+void PerturbableOpenMMMolecule::setConstraintIndicies(const QVector<int> &idxs)
+{
+    if (idxs.count() != perturbable_constraints.count())
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of constraint indicies (%1) does not match the number of constraints (%2)")
+                                                .arg(idxs.count())
+                                                .arg(perturbable_constraints.count()),
+                                            CODELOC);
+
+    this->constraint_idxs = idxs;
+}
+
+/** Return the indicies of the perturbable constraints */
+QVector<int> PerturbableOpenMMMolecule::getConstraintIndicies() const
+{
+    return this->constraint_idxs;
+}
+
+/** Return three arrays containing the constraint indexes, and the
+ *  reference and perturbed values of the constraint lengths
+ */
+std::tuple<QVector<int>, QVector<double>, QVector<double>>
+PerturbableOpenMMMolecule::getPerturbableConstraints() const
+{
+    const int nconstraints = this->constraint_idxs.count();
+
+    if (nconstraints == 0)
+    {
+        return std::make_tuple(QVector<int>(), QVector<double>(), QVector<double>());
+    }
+
+    QVector<double> r0, r1;
+    QVector<int> idxs;
+
+    r0.reserve(nconstraints);
+    r1.reserve(nconstraints);
+    idxs.reserve(nconstraints);
+
+    for (int i = 0; i < nconstraints; ++i)
+    {
+        const auto &idx = this->constraint_idxs[i];
+
+        if (idx >= 0)
+        {
+            idxs.append(idx);
+
+            const auto &constraint = this->perturbable_constraints[i];
+
+            r0.append(std::get<2>(constraint));
+            r1.append(std::get<3>(constraint));
+        }
+    }
+
+    return std::make_tuple(idxs, r0, r1);
 }

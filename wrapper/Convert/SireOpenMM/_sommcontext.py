@@ -66,7 +66,9 @@ class SOMMContext(_Context):
             # place the coordinates and velocities into the context
             _set_openmm_coordinates_and_velocities(self, metadata)
 
-            self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
+            self._lambda_value = self._lambda_lever.set_lambda(
+                self, lambda_value=lambda_value, update_constraints=True
+            )
 
             self._map = map
         else:
@@ -219,15 +221,18 @@ class SOMMContext(_Context):
 
         self._lambda_lever.set_schedule(schedule)
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         """
         Update the parameters in the context to set the lambda value
-        to 'lamval'
+        to 'lamval'. If update_constraints is True then the constraints
+        will be updated to match the new value of lambda
         """
         if self._lambda_lever is None:
             return
 
-        self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
+        self._lambda_value = self._lambda_lever.set_lambda(
+            self, lambda_value=lambda_value, update_constraints=update_constraints
+        )
 
     def set_temperature(self, temperature, rescale_velocities=True):
         """

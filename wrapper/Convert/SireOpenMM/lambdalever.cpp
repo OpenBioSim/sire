@@ -391,7 +391,8 @@ get_exception(int atom0, int atom1, int start_index,
  *  actual value of lambda set.
  */
 double LambdaLever::setLambda(OpenMM::Context &context,
-                              double lambda_value) const
+                              double lambda_value,
+                              bool update_constraints) const
 {
     // go over each forcefield and update the parameters in the forcefield,
     // and then pass those updated parameters to the context
@@ -764,6 +765,41 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                             std::get<0>(p), std::get<1>(p),
                             std::get<2>(p), std::get<3>(p),
                             std::get<4>(p));
+                    }
+                }
+            }
+        }
+
+        // update all of the perturbable constraints
+        if (update_constraints)
+        {
+            auto perturbable_constraints = perturbable_mol.getPerturbableConstraints();
+
+            const auto &idxs = std::get<0>(perturbable_constraints);
+            const auto &r0_0 = std::get<1>(perturbable_constraints);
+            const auto &r0_1 = std::get<2>(perturbable_constraints);
+
+            if (not idxs.isEmpty())
+            {
+                const auto morphed_constraint_length = cache.morph(
+                    schedule,
+                    "bond", "bond_length",
+                    r0_0, r0_1);
+
+                for (int j = 0; j < idxs.count(); ++j)
+                {
+                    const auto idx = idxs[j];
+
+                    const auto constraint_length = morphed_constraint_length[j];
+
+                    int particle1, particle2;
+                    double orig_distance;
+
+                    system.getConstraintParameters(idx, particle1, particle2, orig_distance);
+
+                    if (orig_distance != constraint_length)
+                    {
+                        system.setConstraintParameters(idx, particle1, particle2, constraint_length);
                     }
                 }
             }
@@ -1213,6 +1249,16 @@ void LambdaLever::setExceptionIndicies(int mol_idx,
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 
     this->perturbable_mols[mol_idx].setExceptionIndicies(name, exception_idxs);
+}
+
+/** Set the constraint indicies for the perturbable molecule at
+ *  index 'mol_idx'
+ */
+void LambdaLever::setConstraintIndicies(int mol_idx, const QVector<int> &constraint_idxs)
+{
+    mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
+
+    this->perturbable_mols[mol_idx].setConstraintIndicies(constraint_idxs);
 }
 
 /** Return all of the property maps used to find the perturbable properties

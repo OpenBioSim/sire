@@ -134,6 +134,9 @@ namespace SireOpenMM
         /** All the constraints */
         QVector<std::tuple<int, int, double>> constraints;
 
+        /** All of the perturbable constraints - these include the r0 values */
+        QVector<std::tuple<int, int, double, double>> perturbable_constraints;
+
         /** The molecule perturbed molecule, if this is perturbable */
         std::shared_ptr<OpenMMMolecule> perturbed;
 
@@ -256,6 +259,12 @@ namespace SireOpenMM
         void setExceptionIndicies(const QString &name,
                                   const QVector<std::pair<int, int>> &exception_idxs);
 
+        void setConstraintIndicies(const QVector<int> &constraint_idxs);
+
+        QVector<int> getConstraintIndicies() const;
+
+        std::tuple<QVector<int>, QVector<double>, QVector<double>> getPerturbableConstraints() const;
+
     private:
         /** The array of parameters for the two end states, aligned
          *  so that they can be morphed via the LambdaLever
@@ -291,6 +300,16 @@ namespace SireOpenMM
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
         QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
+
+        /** All of the perturbable constraints - these include the r0 values
+         *  for both end states
+         */
+        QVector<std::tuple<int, int, double, double>> perturbable_constraints;
+
+        /** The indicies of the added constraints - this should be equal
+         *  to the number of perturbable constraints in the molecule
+         */
+        QVector<int> constraint_idxs;
     };
 
 }
