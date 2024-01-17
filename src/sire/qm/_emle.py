@@ -18,8 +18,8 @@ except:
 
 def emle(
     mols,
+    qm_atoms,
     calculator,
-    qm_index,
     cutoff="7.5A",
     neighbourlist_update_frequency=20,
     map=None,
@@ -33,11 +33,13 @@ def emle(
     mols : sire.system.System
         The molecular system.
 
+    qm_atoms : str, int, list, molecule view/collection etc.
+        Any valid search string, atom index, list of atom indicies,
+        or molecule view/container that can be used to select
+        qm_atoms from 'mols'.
+
     calculator : emle.calculator.EMLECalculator
         The EMLECalculator object to use for elecotrostatic embedding calculations.
-
-    qm_index : int
-        The index of the QM molecule in the system.
 
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
@@ -57,6 +59,7 @@ def emle(
         )
 
     from ..base import create_map as _create_map
+    from ..mol import selection_to_atoms as _selection_to_atoms
     from ..system import System as _System
     from ..legacy import Units as _Units
     from ..units import angstrom as _angstrom
@@ -65,16 +68,23 @@ def emle(
     if not isinstance(mols, _System):
         raise TypeError("mols must be a of type 'sire.System'")
 
-    if not isinstance(calculator, _EMLECalculator):
-        raise TypeError("'calculator' must be a of type 'emle.calculator.EMLECalculator'")
-
-    if not isinstance(qm_index, int):
-        raise TypeError("'qm_index' must be of type 'int'")
-
     try:
-        qm_mol = mols[qm_index]
+        qm_atoms = _selection_to_atoms(mols, qm_atoms)
     except:
-        raise ValueError(f"qm_index must be in range [0, {len(mols)})")
+        raise ValueError("Unable to select 'qm_atoms' from 'mols'")
+
+    # Get the molecule containing the qm_atoms.
+    qm_mol = qm_atoms[0].molecule()
+
+    # Make sure all of the atoms are in the same molecule.
+    for atom in qm_atoms[1:]:
+        if not atom.molecule() == qm_mol:
+            raise ValueError("'qm_atoms' must all be in the same molecule")
+
+    if not isinstance(calculator, _EMLECalculator):
+        raise TypeError(
+            "'calculator' must be a of type 'emle.calculator.EMLECalculator'"
+        )
 
     if not isinstance(cutoff, (str, _Units.GeneralUnit)):
         raise TypeError(
@@ -108,13 +118,17 @@ def emle(
         neighbourlist_update_frequency,
     )
 
-    from ._utils import _configure_engine, _create_merged_mol
+    from ._utils import _configure_engine, _create_merged_mol, _get_link_atoms
+
+    # Get dictionary of link atoms for each QM atom (mm1_atoms) and the
+    # dictionary of bonded MM atoms for each link atom (mm2_atoms).
+    mm1_atoms, mm2_atoms = _get_link_atoms(mols, qm_mol, qm_atoms, map)
 
     # Configure the engine.
-    engine = _configure_engine(engine, mols, qm_mol, map)
+    engine = _configure_engine(engine, mols, qm_atoms, mm2_atoms, map)
 
     # Create the merged molecule.
-    qm_mol = _create_merged_mol(qm_mol, map)
+    qm_mol = _create_merged_mol(qm_mol, qm_atoms, map)
 
     # Update the molecule in the system.
     mols.update(qm_mol)

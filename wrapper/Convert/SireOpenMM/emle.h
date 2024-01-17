@@ -39,6 +39,7 @@
 #include "boost/python.hpp"
 #include <boost/tuple/tuple.hpp>
 
+#include <QHash>
 #include <QVector>
 
 #include "sireglobal.h"
@@ -141,45 +142,101 @@ namespace SireOpenMM
         EMLEEngine &operator=(const EMLEEngine &other);
 
         //! Set the callback object.
+        /*! \param callback
+                A Python object that contains the callback function.
+         */
         void setCallback(EMLECallback callback);
 
         //! Get the callback object.
+        /*! \returns
+                A Python object that contains the callback function.
+         */
         EMLECallback getCallback() const;
 
         //! Get the lambda weighting factor.
+        /*! \returns
+                The lambda weighting factor.
+         */
         double getLambda() const;
 
         //! Set the lambda weighting factor.
+        /*! \param lambda
+                The lambda weighting factor.
+         */
         void setLambda(double lambda);
 
         //! Get the QM cutoff distance.
+        /*! \returns
+                The QM cutoff distance.
+         */
         SireUnits::Dimension::Length getCutoff() const;
 
         //! Set the QM cutoff distance.
+        /*! \param cutoff
+                The QM cutoff distance.
+         */
         void setCutoff(SireUnits::Dimension::Length cutoff);
 
         //! Get the neighbour list frequency.
+        /*! \returns
+                The neighbour list frequency.
+         */
         int getNeighbourListFrequency() const;
 
         //! Set the neighbour list frequency.
+        /*! \param neighbour_list_frequency
+                The neighbour list frequency.
+         */
         void setNeighbourListFrequency(int neighbour_list_frequency);
 
         //! Get the indices of the atoms in the QM region.
+        /*! \returns
+                A vector of atom indices for the QM region.
+         */
         QVector<int> getAtoms() const;
 
         //! Set the list of atom indices for the QM region.
+        /*! \param atoms
+                A vector of atom indices for the QM region.
+         */
         void setAtoms(QVector<int> atoms);
 
+        //! Get the link atoms associated with each QM atom.
+        /*! \returns
+                A dictionary of link atom indices (MM1) to a list of MM
+                atom indices to which they are bonded (MM2 atoms).
+        */
+        QHash<int, QVector<int>> getLinkAtoms() const;
+
+        //! Set the link atoms associated with each QM atom.
+        /*! \param link_atoms
+                A dictionary of link atoms indices (MM1) to a list of the MM
+                atoms to which they are bonded (MM2).
+        */
+        void setLinkAtoms(QHash<int, QVector<int>> link_atoms);
+
         //! Get the atomic numbers for the atoms in the QM region.
+        /*! \returns
+                A vector of atomic numbers for the atoms in the QM region.
+         */
         QVector<int> getNumbers() const;
 
         //! Set the atomic numbers for the atoms in the QM region.
+        /*! \param numbers
+                A vector of atomic numbers for the atoms in the QM region.
+         */
         void setNumbers(QVector<int> numbers);
 
         //! Get the atomic charges of all atoms in the system.
+        /*! \returns
+                A vector of atomic charges for all atoms in the system.
+         */
         QVector<double> getCharges() const;
 
         //! Set the atomic charges of all atoms in the system.
+        /*! \param charges
+                A vector of atomic charges for all atoms in the system.
+         */
         void setCharges(QVector<double> charges);
 
         //! Return the C++ name for this class.
@@ -223,6 +280,8 @@ namespace SireOpenMM
         int neighbour_list_frequency;
         double lambda;
         QVector<int> atoms;
+        QHash<int, QVector<int>> link_atoms;
+        QVector<int> mm2_atoms;
         QVector<int> numbers;
         QVector<double> charges;
     };

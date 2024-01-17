@@ -59,7 +59,7 @@ def test_interpolate(ala_mols):
     nrg_mm = d.current_potential_energy()
 
     # Create an EMLE engine bound to the calculator.
-    mols, engine = emle(mols, calculator, 0)
+    mols, engine = emle(mols, mols[0], calculator)
 
     # Create a QM/MM capable dynamics object.
     d = mols.dynamics(

@@ -32,6 +32,9 @@
 #include "OpenMM.h"
 #include "openmm/Force.h"
 
+#include <QHash>
+#include <QVector>
+
 #include "sireglobal.h"
 
 #include "SireBase/property.h"
@@ -64,6 +67,12 @@ namespace SireOpenMM
 
         //! Set the list of atom indices for the QM region.
         virtual void setAtoms(QVector<int>) = 0;
+
+        //! Get the link atoms associated with each QM atom.
+        QHash<int, QVector<int>> getLinkAtoms() const;
+
+        //! Set the link atoms associated with each QM atom.
+        virtual void setLinkAtoms(QHash<int, QVector<int>>) = 0;
 
         //! Get the atomic numbers of the atoms in the QM region.
         virtual QVector<int> getNumbers() const = 0;

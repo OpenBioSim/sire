@@ -108,6 +108,8 @@ EMLEEngine::EMLEEngine(const EMLEEngine &other) :
     neighbour_list_frequency(other.neighbour_list_frequency),
     lambda(other.lambda),
     atoms(other.atoms),
+    link_atoms(other.link_atoms),
+    mm2_atoms(other.mm2_atoms),
     numbers(other.numbers),
     charges(other.charges)
 {
@@ -120,6 +122,8 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     this->neighbour_list_frequency = other.neighbour_list_frequency;
     this->lambda = other.lambda;
     this->atoms = other.atoms;
+    this->link_atoms = other.link_atoms;
+    this->mm2_atoms = other.mm2_atoms;
     this->numbers = other.numbers;
     this->charges = other.charges;
     return *this;
@@ -187,6 +191,23 @@ QVector<int> EMLEEngine::getAtoms() const
 void EMLEEngine::setAtoms(QVector<int> atoms)
 {
     this->atoms = atoms;
+}
+
+QHash<int, QVector<int>> EMLEEngine::getLinkAtoms() const
+{
+    return this->link_atoms;
+}
+
+void EMLEEngine::setLinkAtoms(QHash<int, QVector<int>> link_atoms)
+{
+    this->link_atoms = link_atoms;
+    
+    // Build a vector of all of the MM2 atoms.
+    this->mm2_atoms.clear();
+    for (const auto &mm2 : this->link_atoms.values())
+    {
+        this->mm2_atoms.append(mm2);
+    }
 }
 
 QVector<int> EMLEEngine::getNumbers() const

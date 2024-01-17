@@ -12,9 +12,11 @@
 
 #include "openmmminimise.h"
 
+#include "Helpers/convertdict.hpp"
 #include "Helpers/convertlist.hpp"
 #include "Helpers/tuples.hpp"
 
+#include <QHash>
 #include <QVector>
 
 using namespace SireOpenMM;
@@ -178,6 +180,9 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     // A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
     register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
 
+    // A dictionary mapping link atoms (MM1) to the other MM atoms to which they are bonded (MM2).
+    register_dict<QHash<int, QVector<int>>>();
+
     bp::class_<QMMMForce, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMForce", bp::no_init);
 
     bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMMMForce, SireBase::Property>>("EMLEEngine",
@@ -200,6 +205,8 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
             .def("setNeighbourListFrequency", &EMLEEngine::setNeighbourListFrequency, "Set the neighbour list frequency")
             .def("getAtoms", &EMLEEngine::getAtoms, "Get QM atom indices")
             .def("setAtoms", &EMLEEngine::setAtoms, "Set the QM atom indices")
+            .def("getLinkAtoms", &EMLEEngine::getLinkAtoms, "Get the link atoms")
+            .def("setLinkAtoms", &EMLEEngine::setLinkAtoms, "Set the link atoms")
             .def("getNumbers", &EMLEEngine::getNumbers, "Get QM atomic numbers")
             .def("setNumbers", &EMLEEngine::setNumbers, "Set the QM atomic numbers")
             .def("getCharges", &EMLEEngine::getCharges, "Get the atomic charges")

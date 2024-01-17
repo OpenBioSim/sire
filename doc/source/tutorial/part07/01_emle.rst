@@ -51,22 +51,17 @@ We plan on adding support for other elements in the near future.
 We now need to set up the molecular system for the QM/MM simulation and create
 an engine to perform the calculation:
 
->>> mols, engine = sr.qm.emle(mols, calculator, 0, "7.5A", 20)
+>>> mols, engine = sr.qm.emle(mols, mols[0], calculator, 0, "7.5A", 20)
 
 Here the first argument is the molecules that we are simulating, the second
-is the calculator, and the third is the index of the molecule that we want to
-treat at the QM level. The fourth and fith arguments are optional, and specify
-the QM cutoff distance and the neigbour list update frequency respectively.
-(Shown are the default values.) The function returns a modified version of
-the molecules containing a "merged" dipeptide that can be interpolated between
-QM and MM levels of theory, along with an engine. The engine registers a Python
-callback that uses ``emle-engine`` to perform the QM calculation.
-
-.. note::
-
-   Currently we only support QM/MM where an *entire* molecule is treated
-   at the QM level. We plan to add support for partial molecules via the
-   link atom and charge shifting approach in a future release.
+selection coresponding to the QM region (here this is the first molecule), and
+the third is calculator that was created above. The fourth and fifth arguments
+are optional, and specify the QM cutoff distance and the neigbour list update
+frequency respectively. (Shown are the default values.) The function returns a
+modified version of the molecules containing a "merged" dipeptide that can be
+interpolated between QM and MM levels of theory, along with an engine. The
+engine registers a Python callback that uses ``emle-engine`` to perform the QM
+calculation.
 
 Next we need to create a dynamics object to perform the simulation. For QM/MM
 simulations it is recommended to use a 1 femtosecond timestep and no constraints.
