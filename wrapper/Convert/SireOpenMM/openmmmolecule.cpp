@@ -661,26 +661,15 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
             if (should_constrain_bond)
             {
-                // add the constraint - this constrains the bond to whatever length it has now
-                const auto delta = coords[atom1] - coords[atom0];
-                auto constraint_length = std::sqrt((delta[0] * delta[0]) +
-                                                   (delta[1] * delta[1]) +
-                                                   (delta[2] * delta[2]));
-
-                if (dynamic_constraints and (r0 != r0_1))
+                if (dynamic_constraints and (std::abs(r0 - r0_1) > 1e-4)) // match to somd1
                 {
                     // this is a dynamic constraint that should change with lambda
                     this->perturbable_constraints.append(std::make_tuple(atom0, atom1, r0, r0_1));
                 }
                 else
                 {
-                    // use the r0 for the bond if this is close to the measured length
-                    if (std::abs(constraint_length - r0) < 0.01)
-                    {
-                        constraint_length = r0;
-                    }
-
-                    this->constraints.append(std::make_tuple(atom0, atom1, constraint_length));
+                    // use the r0 for the bond
+                    this->constraints.append(std::make_tuple(atom0, atom1, r0));
                 }
 
                 constrained_pairs.insert(to_pair(atom0, atom1));

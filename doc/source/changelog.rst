@@ -25,7 +25,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   with lambda are not perturbed. As part of this, have also added a
   ``dynamic_constraints`` option that lets constrained bonds update with
   lambda, so that they are set to the length corresponding to r0 at that
-  lambda value.
+  lambda value. Have also changed the constraints so that bonds will be
+  constrained to their r0 value, rather than their current length.
 
 * Added more automatic conversions, so that string will more readily auto-convert
   to units where possible. Also added a ``sire.v`` function to make it easier to

@@ -19,7 +19,9 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     # no constraints
     assert len(constraints) == 0
 
-    d = mols[0].dynamics(constraint="h-bonds", platform=openmm_platform)
+    d = mols[0].dynamics(
+        constraint="h-bonds", dynamic_constraints=False, platform=openmm_platform
+    )
 
     constraints = d.get_constraints()
 
@@ -30,24 +32,13 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
         # check for a single H atom
         assert constraint[0].atom("element H").element().symbol() == "H"
 
-        # check that the constraint distance is close to the
-        # current distance
-        assert sr.measure(constraint[0][0], constraint[0][1]).value() == pytest.approx(
-            constraint[1].value()
-        )
-
-    d = mols[0].dynamics(constraint="bonds", platform=openmm_platform)
+    d = mols[0].dynamics(
+        constraint="bonds", dynamic_constraints=False, platform=openmm_platform
+    )
 
     constraints = d.get_constraints()
 
     assert len(constraints) == len(mols[0].bonds())
-
-    for constraint in constraints:
-        # check that the constraint distance is close to the
-        # current distance
-        assert sr.measure(constraint[0][0], constraint[0][1]).value() == pytest.approx(
-            constraint[1].value()
-        )
 
     d = mols[0].dynamics(
         constraint="bonds", perturbable_constraint="none", platform=openmm_platform
@@ -76,12 +67,6 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     for constraint in constraints:
         # check for a single H atom
         assert constraint[0].atom("element H").element().symbol() == "H"
-
-        # check that the constraint distance is close to the
-        # current distance
-        assert sr.measure(constraint[0][0], constraint[0][1]).value() == pytest.approx(
-            constraint[1].value()
-        )
 
     d = mols[0].dynamics(constraint="bonds-not-perturbed", platform=openmm_platform)
 
