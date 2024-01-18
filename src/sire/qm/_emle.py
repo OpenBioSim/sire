@@ -73,13 +73,14 @@ def emle(
     except:
         raise ValueError("Unable to select 'qm_atoms' from 'mols'")
 
-    # Get the molecule containing the qm_atoms.
-    qm_mol = qm_atoms[0].molecule()
-
-    # Make sure all of the atoms are in the same molecule.
-    for atom in qm_atoms[1:]:
-        if not atom.molecule() == qm_mol:
-            raise ValueError("'qm_atoms' must all be in the same molecule")
+    # Create a dictionary mapping molecule numbers to a list of QM atoms.
+    qm_mol_to_atoms = {}
+    for atom in qm_atoms:
+        mol_num = atom.molecule().number()
+        if mol_num not in qm_mol_to_atoms:
+            qm_mol_to_atoms[mol_num] = [atom]
+        else:
+            qm_mol_to_atoms[mol_num].append(atom)
 
     if not isinstance(calculator, _EMLECalculator):
         raise TypeError(
@@ -118,10 +119,10 @@ def emle(
         neighbourlist_update_frequency,
     )
 
-    from ._utils import _configure_engine, _create_merged_mol, _get_link_atoms
+    from ._utils import _configure_engine, _create_merged_mols, _get_link_atoms
 
     # Get link atom information.
-    mm1_to_qm, mm1_to_mm2, bond_lengths = _get_link_atoms(mols, qm_mol, qm_atoms, map)
+    mm1_to_qm, mm1_to_mm2, bond_lengths = _get_link_atoms(mols, qm_mol_to_atoms, map)
 
     # Configure the engine.
     engine = _configure_engine(
@@ -129,9 +130,9 @@ def emle(
     )
 
     # Create the merged molecule.
-    qm_mol = _create_merged_mol(qm_mol, qm_atoms, map)
+    qm_mols = _create_merged_mols(qm_mol_to_atoms, map)
 
     # Update the molecule in the system.
-    mols.update(qm_mol)
+    mols.update(qm_mols)
 
     return mols, engine

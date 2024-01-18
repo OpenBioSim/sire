@@ -35,7 +35,7 @@ def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_length
     return engine
 
 
-def _create_merged_mol(qm_mol, qm_atoms, map):
+def _create_merged_mols(qm_mol_to_atoms, map):
     """
     Internal helper function to create a merged molecule from the QM molecule.
     """
@@ -44,185 +44,195 @@ def _create_merged_mol(qm_mol, qm_atoms, map):
     from ..legacy import Mol as _Mol
     from ..legacy import MM as _MM
 
-    # Store the indices of the QM atoms.
-    qm_idxs = [atom.index() for atom in qm_atoms]
+    # Initialise a list to store the merged molecules.
+    qm_mols = []
 
-    # Get the user defined names for the properties that we need to
-    # merge.
-    bond_prop = map["bond"]
-    angle_prop = map["angle"]
-    dihedral_prop = map["dihedral"]
-    improper_prop = map["improper"]
-    charge_prop = map["charge"]
-    connectivity_prop = map["connectivity"]
+    # Loop over all molecules containing QM atoms.
+    for mol_num, qm_atoms in qm_mol_to_atoms.items():
+        # Get the molecule.
+        qm_mol = qm_atoms[0].molecule()
 
-    # Get the molecular info object.
-    info = qm_mol.info()
+        # Store the indices of the QM atoms.
+        qm_idxs = [atom.index() for atom in qm_atoms]
 
-    # Make an editable version of the molecule.
-    edit_mol = qm_mol.edit()
+        # Get the user defined names for the properties that we need to
+        # merge.
+        bond_prop = map["bond"]
+        angle_prop = map["angle"]
+        dihedral_prop = map["dihedral"]
+        improper_prop = map["improper"]
+        charge_prop = map["charge"]
+        connectivity_prop = map["connectivity"]
 
-    for prop in qm_mol.property_keys():
-        # For all bonded properties we copy the MM terms to the lambda = 0
-        # (MM) end state, create a null set of terms for the lambda = 1 (QM)
-        # end state for any terms that only involve QM atoms,  then remove
-        # the existing property. Charges also zeroed for the MM end state.
-        # All other properties remain the same in both states.
+        # Get the molecular info object.
+        info = qm_mol.info()
 
-        # Bonds.
-        if prop == bond_prop:
-            edit_mol = edit_mol.set_property(
-                prop + "0", qm_mol.property(prop)
-            ).molecule()
+        # Make an editable version of the molecule.
+        edit_mol = qm_mol.edit()
 
-            bonds = _MM.TwoAtomFunctions(info)
+        for prop in qm_mol.property_keys():
+            # For all bonded properties we copy the MM terms to the lambda = 0
+            # (MM) end state, create a null set of terms for the lambda = 1 (QM)
+            # end state for any terms that only involve QM atoms,  then remove
+            # the existing property. Charges also zeroed for the MM end state.
+            # All other properties remain the same in both states.
 
-            for bond in qm_mol.property(prop).potentials():
-                atom0 = info.atom_idx(bond.atom0())
-                atom1 = info.atom_idx(bond.atom1())
+            # Bonds.
+            if prop == bond_prop:
+                edit_mol = edit_mol.set_property(
+                    prop + "0", qm_mol.property(prop)
+                ).molecule()
 
-                if atom0 in qm_idxs and atom1 in qm_idxs:
-                    r = _CAS.Symbol("r")
-                    amber_bond = _MM.AmberBond(0, r)
-                    bonds.set(atom0, atom1, amber_bond.to_expression(r))
-                else:
-                    bonds.set(atom0, atom1, bond.function())
+                bonds = _MM.TwoAtomFunctions(info)
 
-            edit_mol = edit_mol.set_property(prop + "1", bonds).molecule()
-            edit_mol = edit_mol.remove_property(prop).molecule()
+                for bond in qm_mol.property(prop).potentials():
+                    atom0 = info.atom_idx(bond.atom0())
+                    atom1 = info.atom_idx(bond.atom1())
 
-        # Angles.
-        elif prop == angle_prop:
-            edit_mol = edit_mol.set_property(
-                prop + "0", qm_mol.property(prop)
-            ).molecule()
+                    if atom0 in qm_idxs and atom1 in qm_idxs:
+                        r = _CAS.Symbol("r")
+                        amber_bond = _MM.AmberBond(0, r)
+                        bonds.set(atom0, atom1, amber_bond.to_expression(r))
+                    else:
+                        bonds.set(atom0, atom1, bond.function())
 
-            angles = _MM.ThreeAtomFunctions(info)
+                edit_mol = edit_mol.set_property(prop + "1", bonds).molecule()
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
-            for angle in qm_mol.property(prop).potentials():
-                atom0 = info.atom_idx(angle.atom0())
-                atom1 = info.atom_idx(angle.atom1())
-                atom2 = info.atom_idx(angle.atom2())
+            # Angles.
+            elif prop == angle_prop:
+                edit_mol = edit_mol.set_property(
+                    prop + "0", qm_mol.property(prop)
+                ).molecule()
 
-                if atom0 in qm_idxs and atom1 in qm_idxs and atom2 in qm_idxs:
-                    theta = _CAS.Symbol("theta")
-                    amber_angle = _MM.AmberAngle(0.0, theta)
-                    angles.set(atom0, atom1, atom2, amber_angle.to_expression(theta))
-                else:
-                    angles.set(atom0, atom1, atom2, angle.function())
+                angles = _MM.ThreeAtomFunctions(info)
 
-            edit_mol = edit_mol.set_property(prop + "1", angles).molecule()
-            edit_mol = edit_mol.remove_property(prop).molecule()
+                for angle in qm_mol.property(prop).potentials():
+                    atom0 = info.atom_idx(angle.atom0())
+                    atom1 = info.atom_idx(angle.atom1())
+                    atom2 = info.atom_idx(angle.atom2())
 
-        # Dihedrals.
-        elif prop == dihedral_prop:
-            edit_mol = edit_mol.set_property(
-                prop + "0", qm_mol.property(prop)
-            ).molecule()
+                    if atom0 in qm_idxs and atom1 in qm_idxs and atom2 in qm_idxs:
+                        theta = _CAS.Symbol("theta")
+                        amber_angle = _MM.AmberAngle(0.0, theta)
+                        angles.set(
+                            atom0, atom1, atom2, amber_angle.to_expression(theta)
+                        )
+                    else:
+                        angles.set(atom0, atom1, atom2, angle.function())
 
-            dihedrals = _MM.FourAtomFunctions(info)
+                edit_mol = edit_mol.set_property(prop + "1", angles).molecule()
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
-            for dihedral in qm_mol.property(prop).potentials():
-                atom0 = info.atom_idx(dihedral.atom0())
-                atom1 = info.atom_idx(dihedral.atom1())
-                atom2 = info.atom_idx(dihedral.atom2())
-                atom3 = info.atom_idx(dihedral.atom3())
+            # Dihedrals.
+            elif prop == dihedral_prop:
+                edit_mol = edit_mol.set_property(
+                    prop + "0", qm_mol.property(prop)
+                ).molecule()
 
-                if (
-                    atom0 in qm_idxs
-                    and atom1 in qm_idxs
-                    and atom2 in qm_idxs
-                    and atom3 in qm_idxs
-                ):
-                    phi = _CAS.Symbol("phi")
-                    amber_dihedral = _MM.AmberDihedral(0, phi)
-                    dihedrals.set(
-                        atom0,
-                        atom1,
-                        atom2,
-                        atom3,
-                        amber_dihedral.to_expression(phi),
-                    )
-                else:
-                    dihedrals.set(atom0, atom1, atom2, atom3, dihedral.function())
+                dihedrals = _MM.FourAtomFunctions(info)
 
-            edit_mol = edit_mol.set_property(prop + "1", dihedrals).molecule()
-            edit_mol = edit_mol.remove_property(prop).molecule()
+                for dihedral in qm_mol.property(prop).potentials():
+                    atom0 = info.atom_idx(dihedral.atom0())
+                    atom1 = info.atom_idx(dihedral.atom1())
+                    atom2 = info.atom_idx(dihedral.atom2())
+                    atom3 = info.atom_idx(dihedral.atom3())
 
-        # Impropers.
-        elif prop == improper_prop:
-            edit_mol = edit_mol.set_property(
-                prop + "0", qm_mol.property(prop)
-            ).molecule()
+                    if (
+                        atom0 in qm_idxs
+                        and atom1 in qm_idxs
+                        and atom2 in qm_idxs
+                        and atom3 in qm_idxs
+                    ):
+                        phi = _CAS.Symbol("phi")
+                        amber_dihedral = _MM.AmberDihedral(0, phi)
+                        dihedrals.set(
+                            atom0,
+                            atom1,
+                            atom2,
+                            atom3,
+                            amber_dihedral.to_expression(phi),
+                        )
+                    else:
+                        dihedrals.set(atom0, atom1, atom2, atom3, dihedral.function())
 
-            impropers = _MM.FourAtomFunctions(info)
+                edit_mol = edit_mol.set_property(prop + "1", dihedrals).molecule()
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
-            for improper in qm_mol.property(prop).potentials():
-                atom0 = info.atom_idx(improper.atom0())
-                atom1 = info.atom_idx(improper.atom1())
-                atom2 = info.atom_idx(improper.atom2())
-                atom3 = info.atom_idx(improper.atom3())
+            # Impropers.
+            elif prop == improper_prop:
+                edit_mol = edit_mol.set_property(
+                    prop + "0", qm_mol.property(prop)
+                ).molecule()
 
-                if (
-                    atom0 in qm_idxs
-                    and atom1 in qm_idxs
-                    and atom2 in qm_idxs
-                    and atom3 in qm_idxs
-                ):
-                    psi = _CAS.Symbol("psi")
-                    amber_improper = _MM.AmberDihedral(0, psi)
-                    impropers.set(
-                        atom0,
-                        atom1,
-                        atom2,
-                        atom3,
-                        amber_improper.to_expression(psi),
-                    )
-                else:
-                    impropers.set(atom0, atom1, atom2, atom3, improper.function())
+                impropers = _MM.FourAtomFunctions(info)
 
-            edit_mol = edit_mol.set_property(prop + "1", impropers).molecule()
-            edit_mol = edit_mol.remove_property(prop).molecule()
+                for improper in qm_mol.property(prop).potentials():
+                    atom0 = info.atom_idx(improper.atom0())
+                    atom1 = info.atom_idx(improper.atom1())
+                    atom2 = info.atom_idx(improper.atom2())
+                    atom3 = info.atom_idx(improper.atom3())
 
-        # Charge.
-        elif prop == charge_prop:
-            edit_mol = edit_mol.set_property(
-                prop + "0", qm_mol.property(prop)
-            ).molecule()
+                    if (
+                        atom0 in qm_idxs
+                        and atom1 in qm_idxs
+                        and atom2 in qm_idxs
+                        and atom3 in qm_idxs
+                    ):
+                        psi = _CAS.Symbol("psi")
+                        amber_improper = _MM.AmberDihedral(0, psi)
+                        impropers.set(
+                            atom0,
+                            atom1,
+                            atom2,
+                            atom3,
+                            amber_improper.to_expression(psi),
+                        )
+                    else:
+                        impropers.set(atom0, atom1, atom2, atom3, improper.function())
 
-            charges = _Mol.AtomCharges(info)
-            edit_mol = edit_mol.set_property(prop + "1", charges).molecule()
-            edit_mol = edit_mol.remove_property(prop).molecule()
+                edit_mol = edit_mol.set_property(prop + "1", impropers).molecule()
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
-        # Connectivity.
-        elif prop == connectivity_prop:
-            pass
+            # Charge.
+            elif prop == charge_prop:
+                edit_mol = edit_mol.set_property(
+                    prop + "0", qm_mol.property(prop)
+                ).molecule()
 
-        # All other properties remain the same in both end states.
-        else:
-            edit_mol = edit_mol.set_property(
-                prop + "0", qm_mol.property(prop)
-            ).molecule()
-            edit_mol = edit_mol.set_property(
-                prop + "1", qm_mol.property(prop)
-            ).molecule()
+                charges = _Mol.AtomCharges(info)
+                edit_mol = edit_mol.set_property(prop + "1", charges).molecule()
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
-            edit_mol = edit_mol.remove_property(prop).molecule()
+            # Connectivity.
+            elif prop == connectivity_prop:
+                pass
 
-    # Flag the molecule as perturbable.
-    edit_mol = edit_mol.set_property(map["is_perturbable"], True).molecule()
+            # All other properties remain the same in both end states.
+            else:
+                edit_mol = edit_mol.set_property(
+                    prop + "0", qm_mol.property(prop)
+                ).molecule()
+                edit_mol = edit_mol.set_property(
+                    prop + "1", qm_mol.property(prop)
+                ).molecule()
 
-    # Commit the changes.
-    qm_mol = edit_mol.commit()
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
-    # Link to the perturbation to the reference state.
-    qm_mol = qm_mol.perturbation().link_to_reference().commit()
+        # Flag the molecule as perturbable.
+        edit_mol = edit_mol.set_property(map["is_perturbable"], True).molecule()
+
+        # Commit the changes.
+        qm_mol = edit_mol.commit()
+
+        # Link to the perturbation to the reference state.
+        qm_mol = qm_mol.perturbation().link_to_reference().commit()
 
     # Return the merged molecule.
     return qm_mol
 
 
-def _get_link_atoms(mols, qm_mol, qm_atoms, map):
+def _get_link_atoms(mols, qm_mol_to_atoms, map):
     """
     Internal helper function to get a dictionary with link atoms for each QM atom.
     """
@@ -231,169 +241,192 @@ def _get_link_atoms(mols, qm_mol, qm_atoms, map):
     from ..legacy import Mol as _Mol
     from ..legacy import MM as _MM
 
-    # Store the indices of the QM atoms.
-    qm_idxs = [atom.index() for atom in qm_atoms]
+    # Initialise the dictionaries.
 
-    # Create a connectivity object.
-    connectivity = _Mol.Connectivity(qm_mol, _Mol.CovalentBondHunter(), map)
+    # Link atoms to QM atoms.
+    mm1_to_qm = {}
 
-    mm1_atoms = {}
+    # Link atoms to MM atoms.
+    mm1_to_mm2 = {}
 
-    # Loop over the QM atoms and find any MM atoms that are bonded to them.
-    for atom in qm_atoms:
-        # Store the atom index.
-        idx = atom.index()
+    # Rescaled QM -- link atom bond lengths.
+    scaled_bond_lengths = {}
 
-        # Get the bonds for the atom.
-        bonds = connectivity.get_bonds(idx)
+    # Loop over all molecules containing QM atoms.
+    for mol_num, qm_atoms in qm_mol_to_atoms.items():
+        # Get the molecule.
+        qm_mol = qm_atoms[0].molecule()
 
-        # A list to hold MM atoms involved in the bonds.
-        mm_bonds = []
+        # Store the indices of the QM atoms.
+        qm_idxs = [atom.index() for atom in qm_atoms]
 
-        # A flag to indicate if the atom has a bond to another QM atom.
-        has_qm_bond = False
+        # Create a connectivity object.
+        connectivity = _Mol.Connectivity(qm_mol, _Mol.CovalentBondHunter(), map)
 
-        # Loop over the bonds and find the MM atoms.
-        for bond in bonds:
-            # Get the indices of the two atoms in the bond.
-            idx0 = bond.atom0()
-            idx1 = bond.atom1()
+        mm1_atoms = {}
 
-            # Work out which atom isn't the current QM atom.
-            if idx0 != idx:
-                bond_idx = idx0
-            else:
-                bond_idx = idx1
+        # Loop over the QM atoms and find any MM atoms that are bonded to them.
+        for atom in qm_atoms:
+            # Store the atom index.
+            idx = atom.index()
 
-            # If the atom is not in the QM region, add it to the list.
-            if bond_idx not in qm_idxs:
-                mm_bonds.append(bond_idx)
-            else:
-                has_qm_bond = True
+            # Get the bonds for the atom.
+            bonds = connectivity.get_bonds(idx)
 
-        # If there are no QM bonds for this atom, raise an exception.
-        if not has_qm_bond:
-            raise ValueError(
-                f"Atom {idx} in the QM region has no bonds to other QM atoms!"
-            )
-
-        # Store the list of MM atoms.
-        if len(mm_bonds) > 0:
-            if len(mm_bonds) > 1:
-                raise Exception(f"QM atom {idx} has more than one MM bond!")
-            else:
-                mm1_atoms[idx] = mm_bonds[0]
-
-    # Now work out the MM atoms that are bonded to the link atoms.
-    mm2_atoms = {}
-    for qm_idx, mm1_idx in mm1_atoms.items():
-        if mm1_idx not in mm2_atoms:
-            bonds = connectivity.get_bonds(mm1_idx)
+            # A list to hold MM atoms involved in the bonds.
             mm_bonds = []
+
+            # A flag to indicate if the atom has a bond to another QM atom.
+            has_qm_bond = False
+
+            # Loop over the bonds and find the MM atoms.
             for bond in bonds:
+                # Get the indices of the two atoms in the bond.
                 idx0 = bond.atom0()
                 idx1 = bond.atom1()
-                if idx0 != mm1_idx:
+
+                # Work out which atom isn't the current QM atom.
+                if idx0 != idx:
                     bond_idx = idx0
                 else:
                     bond_idx = idx1
+
+                # If the atom is not in the QM region, add it to the list.
                 if bond_idx not in qm_idxs:
                     mm_bonds.append(bond_idx)
-            mm2_atoms[mm1_idx] = mm_bonds
+                else:
+                    has_qm_bond = True
 
-    # Convert MM1 atoms dictionary to absolute indices.
-    mm1_to_qm = {}
-    for k, v in mm1_atoms.items():
-        qm_idx = mols.atoms().find(qm_mol.atoms()[k])
-        link_idx = mols.atoms().find(qm_mol.atoms()[v])
-        mm1_to_qm[link_idx] = qm_idx
+            # If there are no QM bonds for this atom, raise an exception.
+            if not has_qm_bond:
+                raise ValueError(
+                    f"Atom {idx} in the QM region has no bonds to other QM atoms!"
+                )
 
-    # Convert MM2 atoms dictionary to absolute indices.
-    mm1_to_mm2 = {}
-    for k, v in mm2_atoms.items():
-        link_idx = mols.atoms().find(qm_mol.atoms()[k])
-        mm_idx = [mols.atoms().find(qm_mol.atoms()[x]) for x in v]
-        mm1_to_mm2[link_idx] = mm_idx
+            # Store the list of MM atoms.
+            if len(mm_bonds) > 0:
+                if len(mm_bonds) > 1:
+                    raise Exception(f"QM atom {idx} has more than one MM bond!")
+                else:
+                    mm1_atoms[idx] = mm_bonds[0]
 
-    # Now work out the QM-MM1 bond distances based on the equilibrium
-    # MM bond lengths.
+        # Now work out the MM atoms that are bonded to the link atoms.
+        mm2_atoms = {}
+        for qm_idx, mm1_idx in mm1_atoms.items():
+            if mm1_idx not in mm2_atoms:
+                bonds = connectivity.get_bonds(mm1_idx)
+                mm_bonds = []
+                for bond in bonds:
+                    idx0 = bond.atom0()
+                    idx1 = bond.atom1()
+                    if idx0 != mm1_idx:
+                        bond_idx = idx0
+                    else:
+                        bond_idx = idx1
+                    if bond_idx not in qm_idxs:
+                        mm_bonds.append(bond_idx)
+                mm2_atoms[mm1_idx] = mm_bonds
 
-    # A dictionary to store the bond lengths.
-    bond_lengths = {}
-    link_bond_lengths = {}
+        # Convert MM1 atoms dictionary to absolute indices.
+        mm1_to_qm_local = {}
+        for k, v in mm1_atoms.items():
+            qm_idx = mols.atoms().find(qm_mol.atoms()[k])
+            link_idx = mols.atoms().find(qm_mol.atoms()[v])
+            mm1_to_qm_local[link_idx] = qm_idx
 
-    # Get the MM bond potentials.
-    bonds = qm_mol.property(map["bond"]).potentials()
+        # Convert MM2 atoms dictionary to absolute indices.
+        mm1_to_mm2_local = {}
+        for k, v in mm2_atoms.items():
+            link_idx = mols.atoms().find(qm_mol.atoms()[k])
+            mm_idx = [mols.atoms().find(qm_mol.atoms()[x]) for x in v]
+            mm1_to_mm2_local[link_idx] = mm_idx
 
-    # Store the info for the QM molecule.
-    info = qm_mol.info()
+        # Now work out the QM-MM1 bond distances based on the equilibrium
+        # MM bond lengths.
 
-    # Store the bond potential symbol.
-    r = _CAS.Symbol("r")
+        # A dictionary to store the bond lengths.
+        bond_lengths = {}
+        link_bond_lengths = {}
 
-    # Loop over the link atoms.
-    for qm_idx, mm1_idx in mm1_atoms.items():
-        # Convert to cg_atom_idx objects.
-        cg_qm_idx = info.cg_atom_idx(qm_idx)
-        cg_mm1_idx = info.cg_atom_idx(mm1_idx)
+        # Get the MM bond potentials.
+        bonds = qm_mol.property(map["bond"]).potentials()
 
-        # Store the element of the QM atom.
-        qm_elem = qm_mol[cg_qm_idx].element()
-        hydrogen = _Mol.Element("H")
+        # Store the info for the QM molecule.
+        info = qm_mol.info()
 
-        qm_m1_bond_found = False
-        qm_link_bond_found = False
+        # Store the bond potential symbol.
+        r = _CAS.Symbol("r")
 
-        # Loop over the bonds.
-        for bond in bonds:
-            # Get the indices of the atoms in the bond.
-            bond_idx0 = bond.atom0()
-            bond_idx1 = bond.atom1()
+        # Loop over the link atoms.
+        for qm_idx, mm1_idx in mm1_atoms.items():
+            # Convert to cg_atom_idx objects.
+            cg_qm_idx = info.cg_atom_idx(qm_idx)
+            cg_mm1_idx = info.cg_atom_idx(mm1_idx)
 
-            # If the bond is between the QM atom and the MM atom, store the
-            # bond length.
-            if (
-                not qm_m1_bond_found
-                and cg_qm_idx == bond_idx0
-                and cg_mm1_idx == bond_idx1
-                or cg_qm_idx == bond_idx1
-                and cg_mm1_idx == bond_idx0
-            ):
-                # Cast as an AmberBond.
-                ab = _MM.AmberBond(bond.function(), r)
-                bond_lengths[mm1_idx] = ab.r0()
-                qm_m1_bond_found = True
-                if qm_link_bond_found:
-                    break
-            else:
-                # Check to see if this bond is between a hydrogen and and the
-                # same element as the QM atom.
-                elem0 = qm_mol[bond_idx0].element()
-                elem1 = qm_mol[bond_idx1].element()
+            # Store the element of the QM atom.
+            qm_elem = qm_mol[cg_qm_idx].element()
+            hydrogen = _Mol.Element("H")
 
+            qm_m1_bond_found = False
+            qm_link_bond_found = False
+
+            # Loop over the bonds.
+            for bond in bonds:
+                # Get the indices of the atoms in the bond.
+                bond_idx0 = bond.atom0()
+                bond_idx1 = bond.atom1()
+
+                # If the bond is between the QM atom and the MM atom, store the
+                # bond length.
                 if (
-                    not qm_link_bond_found
-                    and elem0 == hydrogen
-                    and elem1 == qm_elem
-                    or elem0 == qm_elem
-                    and elem1 == hydrogen
+                    not qm_m1_bond_found
+                    and cg_qm_idx == bond_idx0
+                    and cg_mm1_idx == bond_idx1
+                    or cg_qm_idx == bond_idx1
+                    and cg_mm1_idx == bond_idx0
                 ):
                     # Cast as an AmberBond.
                     ab = _MM.AmberBond(bond.function(), r)
-                    link_bond_lengths[mm1_idx] = ab.r0()
-                    qm_link_bond_found = True
-                    if qm_m1_bond_found:
+                    bond_lengths[mm1_idx] = ab.r0()
+                    qm_m1_bond_found = True
+                    if qm_link_bond_found:
                         break
+                else:
+                    # Check to see if this bond is between a hydrogen and and the
+                    # same element as the QM atom.
+                    elem0 = qm_mol[bond_idx0].element()
+                    elem1 = qm_mol[bond_idx1].element()
 
-    # Work out the rescaled bond length: R0(Q-H) / R0(Q-MM1)
-    try:
-        scaled_bond_lengths = {}
-        for idx in bond_lengths:
-            abs_idx = mols.atoms().find(qm_mol.atoms()[idx])
-            scaled_bond_lengths[abs_idx] = link_bond_lengths[idx] / bond_lengths[idx]
-    except:
-        raise Exception(
-            f"Unable to compute the scaled the QM-MM1 bond lengths for MM1 atom {idx}!"
-        )
+                    if (
+                        not qm_link_bond_found
+                        and elem0 == hydrogen
+                        and elem1 == qm_elem
+                        or elem0 == qm_elem
+                        and elem1 == hydrogen
+                    ):
+                        # Cast as an AmberBond.
+                        ab = _MM.AmberBond(bond.function(), r)
+                        link_bond_lengths[mm1_idx] = ab.r0()
+                        qm_link_bond_found = True
+                        if qm_m1_bond_found:
+                            break
+
+        # Work out the rescaled bond length: R0(Q-H) / R0(Q-MM1)
+        try:
+            scaled_bond_lengths_local = {}
+            for idx in bond_lengths:
+                abs_idx = mols.atoms().find(qm_mol.atoms()[idx])
+                scaled_bond_lengths_local[abs_idx] = (
+                    link_bond_lengths[idx] / bond_lengths[idx]
+                )
+        except:
+            raise Exception(
+                f"Unable to compute the scaled the QM-MM1 bond lengths for MM1 atom {idx}!"
+            )
+
+        # Update the dictionaries.
+        mm1_to_qm.update(mm1_to_qm_local)
+        mm1_to_mm2.update(mm1_to_mm2_local)
+        scaled_bond_lengths.update(scaled_bond_lengths_local)
 
     return mm1_to_qm, mm1_to_mm2, scaled_bond_lengths

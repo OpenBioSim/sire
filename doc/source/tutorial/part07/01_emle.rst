@@ -65,11 +65,11 @@ calculation.
 
 The selection syntax for QM atoms is extremely flexible. Any valid search string,
 atom index, list of atom indicies, or molecule view/container that can be used.
-The only constraint is that the atoms are bonded to each other, i.e. they are
-part of the same molecule. Support for modelling partial molecules at the QM
-level is provided via the link atom approach, via the charge shifting method.
-For details of this implementation, see, e.g., the NAMD user guide
-`here <https://www.ks.uiuc.edu/Research/qmmm/>`_.
+Support for modelling partial molecules at the QM level is provided via the link
+atom approach, via the charge shifting method. For details of this implementation,
+see, e.g., the NAMD user guide `here <https://www.ks.uiuc.edu/Research/qmmm/>`_.
+While we support multiple QM regions, we do not currently support multiple
+*independent* QM regions. We plan on adding support for this in the near future.
 
 Next we need to create a dynamics object to perform the simulation. For QM/MM
 simulations it is recommended to use a 1 femtosecond timestep and no constraints.
