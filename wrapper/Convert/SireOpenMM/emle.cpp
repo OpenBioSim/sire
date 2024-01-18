@@ -111,7 +111,7 @@ EMLEEngine::EMLEEngine(const EMLEEngine &other) :
     mm1_to_qm(other.mm1_to_qm),
     mm1_to_mm2(other.mm1_to_mm2),
     mm2_atoms(other.mm2_atoms),
-    bond_lengths(other.bond_lengths),
+    bond_scaling_factors(other.bond_scaling_factors),
     numbers(other.numbers),
     charges(other.charges)
 {
@@ -127,7 +127,7 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     this->mm1_to_qm = other.mm1_to_qm;
     this->mm1_to_mm2 = other.mm1_to_mm2;
     this->mm2_atoms = other.mm2_atoms;
-    this->bond_lengths = other.bond_lengths;
+    this->bond_scaling_factors = other.bond_scaling_factors;
     this->numbers = other.numbers;
     this->charges = other.charges;
     return *this;
@@ -199,17 +199,17 @@ void EMLEEngine::setAtoms(QVector<int> atoms)
 
 boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEEngine::getLinkAtoms() const
 {
-    return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_lengths);
+    return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_scaling_factors);
 }
 
 void EMLEEngine::setLinkAtoms(
     QMap<int, int> mm1_to_qm,
     QMap<int, QVector<int>> mm1_to_mm2,
-    QMap<int, double> bond_lengths)
+    QMap<int, double> bond_scaling_factors)
 {
     this->mm1_to_qm = mm1_to_qm;
     this->mm1_to_mm2 = mm1_to_mm2;
-    this->bond_lengths = bond_lengths;
+    this->bond_scaling_factors = bond_scaling_factors;
 
     // Build a vector of all of the MM2 atoms.
     this->mm2_atoms.clear();
@@ -323,7 +323,7 @@ double EMLEEngineImpl::computeForce(
     const auto link_atoms = this->owner.getLinkAtoms();
     const auto mm1_to_qm = link_atoms.get<0>();
     const auto mm1_to_mm2 = link_atoms.get<1>();
-    const auto bond_lengths = link_atoms.get<2>();
+    const auto bond_scaling_factors = link_atoms.get<2>();
     const auto mm2_atoms = this->owner.getMM2Atoms();
 
     // Initialise a vector to hold the current positions for the QM atoms.
@@ -472,11 +472,8 @@ double EMLEEngineImpl::computeForce(
         mm1_vec = space.getMinimumImage(mm1_vec, center);
         qm_vec = space.getMinimumImage(qm_vec, center);
 
-        // Work out the normal vector between the MM1 and QM atoms.
-        const auto normal = (qm_vec - mm1_vec).normalise();
-
         // Work out the position of the link atom.
-        const auto link_vec = mm1_vec + 10*bond_lengths[idx]*normal;
+        const auto link_vec = qm_vec + bond_scaling_factors[idx]*(qm_vec - mm1_vec);
 
         // Add to the QM positions.
         xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));

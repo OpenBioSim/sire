@@ -208,14 +208,14 @@ namespace SireOpenMM
             mm1_to_qm
                 A dictionary mapping link atom (MM1) indices to the QM atoms to
                 which they are bonded.
-            
+
             mm1_to_mm2
                 A dictionary of link atoms indices (MM1) to a list of the MM
                 atoms to which they are bonded (MM2).
 
-            bond_lengths
+            bond_scaling_factors
                 A dictionary of link atom indices (MM1) to a list of the bond
-                lengths between the MM1 and QM atoms.
+                length scaling factors between the MM1 and QM atoms.
         */
         boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const;
 
@@ -223,17 +223,17 @@ namespace SireOpenMM
         /*! \param mm1_to_qm
                 A dictionary mapping link atom (MM1) indices to the QM atoms to
                 which they are bonded.
-            
+
             \param mm1_to_mm2
                 A dictionary of link atoms indices (MM1) to a list of the MM
                 atoms to which they are bonded (MM2).
 
-            \param bond_lengths
+            \param bond_scaling_factors
                 A dictionary of link atom indices (MM1) to a list of the bond
-                lengths between the MM1 and QM atoms.
+                length scaling factors between the MM1 and QM atoms.
 
         */
-        void setLinkAtoms(QMap<int, int> mm1_to_qm, QMap<int, QVector<int>> mm1_to_mm2, QMap<int, double> bond_lengths);
+        void setLinkAtoms(QMap<int, int> mm1_to_qm, QMap<int, QVector<int>> mm1_to_mm2, QMap<int, double> bond_scaling_factors);
 
         //! Get the vector of MM2 atoms.
         /*! \returns
@@ -308,7 +308,7 @@ namespace SireOpenMM
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;
         QMap<int, QVector<int>> mm1_to_mm2;
-        QMap<int, double> bond_lengths;
+        QMap<int, double> bond_scaling_factors;
         QVector<int> mm2_atoms;
         QVector<int> numbers;
         QVector<double> charges;

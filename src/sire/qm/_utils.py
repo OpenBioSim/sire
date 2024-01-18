@@ -249,8 +249,8 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
     # Link atoms to MM atoms.
     mm1_to_mm2 = {}
 
-    # Rescaled QM -- link atom bond lengths.
-    scaled_bond_lengths = {}
+    # Rescaled QM -- link atom bond length scaling factors.
+    bond_scaling_factors = {}
 
     # Loop over all molecules containing QM atoms.
     for mol_num, qm_atoms in qm_mol_to_atoms.items():
@@ -413,10 +413,10 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
 
         # Work out the rescaled bond length: R0(Q-H) / R0(Q-MM1)
         try:
-            scaled_bond_lengths_local = {}
+            bond_scaling_factors_local = {}
             for idx in bond_lengths:
                 abs_idx = mols.atoms().find(qm_mol.atoms()[idx])
-                scaled_bond_lengths_local[abs_idx] = (
+                bond_scaling_factors_local[abs_idx] = (
                     link_bond_lengths[idx] / bond_lengths[idx]
                 )
         except:
@@ -427,6 +427,6 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         # Update the dictionaries.
         mm1_to_qm.update(mm1_to_qm_local)
         mm1_to_mm2.update(mm1_to_mm2_local)
-        scaled_bond_lengths.update(scaled_bond_lengths_local)
+        bond_scaling_factors.update(bond_scaling_factors_local)
 
-    return mm1_to_qm, mm1_to_mm2, scaled_bond_lengths
+    return mm1_to_qm, mm1_to_mm2, bond_scaling_factors
