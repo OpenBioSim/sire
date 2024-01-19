@@ -120,6 +120,12 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         for k, v in mm1_atoms.items():
             qm_idx = mols.atoms().find(qm_mol.atoms()[k])
             link_idx = mols.atoms().find(qm_mol.atoms()[v])
+            # Make sure that we haven't assigned this link atom already.
+            if link_idx in mm1_to_qm_local or link_idx in mm1_to_qm:
+                raise Exception(
+                    f"Cannot substitue the same MM atom (index {link_idx}) "
+                    "for more than one link atom!"
+                )
             mm1_to_qm_local[link_idx] = qm_idx
 
         # Convert MM1 to MM2 atom dictionary to absolute indices.
