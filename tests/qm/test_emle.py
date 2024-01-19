@@ -81,13 +81,13 @@ def test_link_atoms(ala_mols, selection, expected):
     mols = ala_mols
 
     # Extract the QM atom selection.
-    qm_atoms = mols[selection].atoms()
+    qm_atoms = mols[0][selection].atoms()
 
     # Create the mapping between molecule numbers and QM atoms.
     qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
 
     # Get link atom information.
-    mm1_to_qm, mm1_to_mm2, bond_scale_factors = _get_link_atoms(
+    mm1_to_qm, mm1_to_mm2, bond_scale_factors, mm1_indices = _get_link_atoms(
         mols, qm_mol_to_atoms, _create_map({})
     )
 
