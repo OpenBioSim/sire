@@ -68,7 +68,7 @@ atom index, list of atom indicies, or molecule view/container that can be used.
 Support for modelling partial molecules at the QM level is provided via the link
 atom approach, via the charge shifting method. For details of this implementation,
 see, e.g., the NAMD user guide `here <https://www.ks.uiuc.edu/Research/qmmm/>`_.
-While we support multiple QM regions, we do not currently support multiple
+While we support multiple QM fragments, we do not currently support multiple
 *independent* QM regions. We plan on adding support for this in the near future.
 
 Next we need to create a dynamics object to perform the simulation. For QM/MM

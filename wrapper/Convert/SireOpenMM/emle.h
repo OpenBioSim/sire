@@ -213,9 +213,13 @@ namespace SireOpenMM
                 A dictionary of link atoms indices (MM1) to a list of the MM
                 atoms to which they are bonded (MM2).
 
-            bond_scaling_factors
+            bond_scale_factors
                 A dictionary of link atom indices (MM1) to a list of the bond
-                length scaling factors between the MM1 and QM atoms.
+                length scale factors between the QM and MM1 atoms. The scale
+                factors are the ratio of the equilibrium bond lengths for the
+                QM-L (QM-link) atom and QM-MM1 atom, i.e. R0(QM-L) / R0(QM-MM1),
+                taken from the MM force field parameters for the molecule.
+
         */
         boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const;
 
@@ -228,12 +232,15 @@ namespace SireOpenMM
                 A dictionary of link atoms indices (MM1) to a list of the MM
                 atoms to which they are bonded (MM2).
 
-            \param bond_scaling_factors
+            \param bond_scale_factors
                 A dictionary of link atom indices (MM1) to a list of the bond
-                length scaling factors between the MM1 and QM atoms.
+                length scale factors between the QM and MM1 atoms. The scale
+                factors are the ratio of the equilibrium bond lengths for the
+                QM-L (QM-link) atom and QM-MM1 atom, i.e. R0(QM-L) / R0(QM-MM1),
+                taken from the MM force field parameters for the molecule.
 
         */
-        void setLinkAtoms(QMap<int, int> mm1_to_qm, QMap<int, QVector<int>> mm1_to_mm2, QMap<int, double> bond_scaling_factors);
+        void setLinkAtoms(QMap<int, int> mm1_to_qm, QMap<int, QVector<int>> mm1_to_mm2, QMap<int, double> bond_scale_factors);
 
         //! Get the vector of MM2 atoms.
         /*! \returns
@@ -308,7 +315,7 @@ namespace SireOpenMM
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;
         QMap<int, QVector<int>> mm1_to_mm2;
-        QMap<int, double> bond_scaling_factors;
+        QMap<int, double> bond_scale_factors;
         QVector<int> mm2_atoms;
         QVector<int> numbers;
         QVector<double> charges;
