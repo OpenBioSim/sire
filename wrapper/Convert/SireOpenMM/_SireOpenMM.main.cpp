@@ -198,27 +198,65 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
                     bp::arg("neighbour_list_frequency")=20,
                     bp::arg("lambda")=1.0
                 ),
-                    "Constructor: An engine that can be used to enable electrostatic embedding"
+                    "Constructor: An engine that can be used to enable electrostatic embedding "
                     "of machine learning potentials via emle-engine."
                 )
             )
-            .def("getLambda", &EMLEEngine::getLambda, "Get the lambda value")
-            .def("setLambda", &EMLEEngine::setLambda, "Set the lambda value")
-            .def("getCutoff", &EMLEEngine::getCutoff, "Get the cutoff value")
-            .def("setCutoff", &EMLEEngine::setCutoff, "Set the cutoff value")
-            .def("getNeighbourListFrequency", &EMLEEngine::getNeighbourListFrequency, "Get the neighbour list frequency")
-            .def("setNeighbourListFrequency", &EMLEEngine::setNeighbourListFrequency, "Set the neighbour list frequency")
-            .def("getAtoms", &EMLEEngine::getAtoms, "Get QM atom indices")
-            .def("setAtoms", &EMLEEngine::setAtoms, "Set the QM atom indices")
-            .def("getLinkAtoms", &EMLEEngine::getLinkAtoms, "Get the link atoms")
-            .def("setLinkAtoms", &EMLEEngine::setLinkAtoms, "Set the link atoms")
-            .def("getNumbers", &EMLEEngine::getNumbers, "Get QM atomic numbers")
-            .def("setNumbers", &EMLEEngine::setNumbers, "Set the QM atomic numbers")
-            .def("getCharges", &EMLEEngine::getCharges, "Get the atomic charges")
-            .def("setCharges", &EMLEEngine::setCharges, "Set the atomic charges")
-            .def("what", &EMLEEngine::what, "Call the callback")
-            .def("typeName", &EMLEEngine::typeName, "Call the callback")
-            .def("call", &EMLEEngine::call, "Call the callback")
+            .def("getLambda",
+                 &EMLEEngine::getLambda,
+                 "Get the lambda value")
+            .def("setLambda",
+                 &EMLEEngine::setLambda,
+                 bp::arg("lambda"),
+                 "Set the lambda value")
+            .def("getCutoff",
+                 &EMLEEngine::getCutoff,
+                 "Get the cutoff value")
+            .def("setCutoff",
+                 &EMLEEngine::setCutoff,
+                 bp::arg("cutoff"),
+                 "Set the cutoff value")
+            .def("getNeighbourListFrequency",
+                 &EMLEEngine::getNeighbourListFrequency,
+                 "Get the neighbour list frequency")
+            .def("setNeighbourListFrequency",
+                 &EMLEEngine::setNeighbourListFrequency,
+                 bp::arg("neighbour_list_frequency"),
+                 "Set the neighbour list frequency")
+            .def("getAtoms",
+                 &EMLEEngine::getAtoms,
+                 "Get QM atom indices")
+            .def("setAtoms",
+                 &EMLEEngine::setAtoms,
+                 bp::arg("atoms"),
+                 "Set the QM atom indices")
+            .def("getLinkAtoms",
+                 &EMLEEngine::getLinkAtoms,
+                 "Get the link atoms")
+            .def("setLinkAtoms",
+                 &EMLEEngine::setLinkAtoms,
+                 (bp::arg("mm1_to_qm"), bp::arg("mm1_to_mm2"), bp::arg("bond_scale_factors")),
+                 "Set the link atoms")
+            .def("getNumbers",
+                 &EMLEEngine::getNumbers,
+                 "Get QM atomic numbers")
+            .def("setNumbers",
+                 &EMLEEngine::setNumbers,
+                 bp::arg("numbers"),
+                 "Set the QM atomic numbers")
+            .def("getCharges",
+                 &EMLEEngine::getCharges,
+                 "Get the atomic charges")
+            .def("setCharges",
+                 &EMLEEngine::setCharges,
+                 bp::arg("charges"),
+                 "Set the atomic charges")
+            .def("call",
+                 &EMLEEngine::call,
+                 (bp::arg("numbers_qm"), bp::arg("charges_mm"), bp::arg("xyz_qm"), bp::arg("xyz_mm")),
+                 "Call the callback")
+            .def("what", &EMLEEngine::what, "Return type name")
+            .def("typeName", &EMLEEngine::typeName, "Return type name")
             .def( "__copy__", &__copy__)
             .def( "__deepcopy__", &__copy__)
             .def( "clone", &__copy__);
