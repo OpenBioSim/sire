@@ -249,7 +249,9 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
     # Link atoms to MM atoms.
     mm1_to_mm2 = {}
 
-    # Rescaled QM -- link atom bond length scaling factors.
+    # QM to link atom bond scale factors. These are the ratios of the equilibrium
+    # bond lengths for the QM-L bonds and the QM-MM1 bonds, taken from the MM
+    # bond potentials, i.e. R0(QM-L) / R0(QM-MM1).
     bond_scale_factors = {}
 
     # Loop over all molecules containing QM atoms.
@@ -263,6 +265,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         # Create a connectivity object.
         connectivity = _Mol.Connectivity(qm_mol, _Mol.CovalentBondHunter(), map)
 
+        # Dictionary to store the MM1 atoms.
         mm1_atoms = {}
 
         # Loop over the QM atoms and find any MM atoms that are bonded to them.
@@ -310,7 +313,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                 else:
                     mm1_atoms[idx] = mm_bonds[0]
 
-        # Now work out the MM atoms that are bonded to the link atoms.
+        # Now work out the MM atoms that are bonded to the link atoms. (MM2 atoms.)
         mm2_atoms = {}
         for qm_idx, mm1_idx in mm1_atoms.items():
             if mm1_idx not in mm2_atoms:
@@ -327,14 +330,14 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                         mm_bonds.append(bond_idx)
                 mm2_atoms[mm1_idx] = mm_bonds
 
-        # Convert MM1 atoms dictionary to absolute indices.
+        # Convert MM1 to QM atom dictionary to absolute indices.
         mm1_to_qm_local = {}
         for k, v in mm1_atoms.items():
             qm_idx = mols.atoms().find(qm_mol.atoms()[k])
             link_idx = mols.atoms().find(qm_mol.atoms()[v])
             mm1_to_qm_local[link_idx] = qm_idx
 
-        # Convert MM2 atoms dictionary to absolute indices.
+        # Convert MM1 to MM2 atom dictionary to absolute indices.
         mm1_to_mm2_local = {}
         for k, v in mm2_atoms.items():
             link_idx = mols.atoms().find(qm_mol.atoms()[k])
@@ -395,11 +398,11 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                     if qm_link_bond_found:
                         break
                 else:
-                    # Check to see if this bond is between a hydrogen and and the
-                    # same element as the QM atom.
                     elem0 = qm_mol[bond_idx0].element()
                     elem1 = qm_mol[bond_idx1].element()
 
+                    # Is this bond is between a hydrogen and and the same element
+                    # as the QM atom? If so, store the bond length.
                     if (
                         not qm_link_bond_found
                         and elem0 == hydrogen
