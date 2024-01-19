@@ -73,15 +73,6 @@ def emle(
     except:
         raise ValueError("Unable to select 'qm_atoms' from 'mols'")
 
-    # Create a dictionary mapping molecule numbers to a list of QM atoms.
-    qm_mol_to_atoms = {}
-    for atom in qm_atoms:
-        mol_num = atom.molecule().number()
-        if mol_num not in qm_mol_to_atoms:
-            qm_mol_to_atoms[mol_num] = [atom]
-        else:
-            qm_mol_to_atoms[mol_num].append(atom)
-
     if not isinstance(calculator, _EMLECalculator):
         raise TypeError(
             "'calculator' must be a of type 'emle.calculator.EMLECalculator'"
@@ -119,7 +110,15 @@ def emle(
         neighbourlist_update_frequency,
     )
 
-    from ._utils import _configure_engine, _create_merged_mols, _get_link_atoms
+    from ._utils import (
+        _create_qm_mol_to_atoms,
+        _configure_engine,
+        _create_merged_mols,
+        _get_link_atoms,
+    )
+
+    # Get the mapping between molecule numbers and QM atoms.
+    qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
 
     # Get link atom information.
     mm1_to_qm, mm1_to_mm2, bond_scale_factors = _get_link_atoms(
