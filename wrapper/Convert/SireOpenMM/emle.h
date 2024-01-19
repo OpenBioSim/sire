@@ -272,6 +272,18 @@ namespace SireOpenMM
          */
         void setCharges(QVector<double> charges);
 
+        //! Get the MM atom charge shift when link atoms are present.
+        /*! \returns
+                The MM atom charge shift.
+         */
+        SireUnits::Dimension::Charge getChargeShift() const;
+
+        //! Set the MM atom charge shift when link atoms are present.
+        /*! \param charge_shift
+                The MM atom charge shift.
+         */
+        void setChargeShift(SireUnits::Dimension::Charge charge_shift);
+
         //! Return the C++ name for this class.
         static const char *typeName();
 
@@ -310,6 +322,7 @@ namespace SireOpenMM
     private:
         EMLECallback callback;
         SireUnits::Dimension::Length cutoff;
+        SireUnits::Dimension::Charge charge_shift;
         int neighbour_list_frequency;
         double lambda;
         QVector<int> atoms;

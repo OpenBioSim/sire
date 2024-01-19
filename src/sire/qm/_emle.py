@@ -121,7 +121,7 @@ def emle(
     qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
 
     # Get link atom information.
-    mm1_to_qm, mm1_to_mm2, bond_scale_factors = _get_link_atoms(
+    mm1_to_qm, mm1_to_mm2, bond_scale_factors, mm1_indices = _get_link_atoms(
         mols, qm_mol_to_atoms, map
     )
 
@@ -131,7 +131,7 @@ def emle(
     )
 
     # Create the merged molecule.
-    qm_mols = _create_merged_mols(qm_mol_to_atoms, map)
+    qm_mols = _create_merged_mols(qm_mol_to_atoms, mm1_indices, map)
 
     # Update the molecule in the system.
     mols.update(qm_mols)

@@ -251,6 +251,13 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
                  &EMLEEngine::setCharges,
                  bp::arg("charges"),
                  "Set the atomic charges")
+            .def("getChargeShift",
+                 &EMLEEngine::getChargeShift,
+                 "Get the charge shift")
+            .def("setChargeShift",
+                 &EMLEEngine::setChargeShift,
+                 bp::arg("charge_shift"),
+                 "Set the charge shift")
             .def("call",
                  &EMLEEngine::call,
                  (bp::arg("numbers_qm"), bp::arg("charges_mm"), bp::arg("xyz_qm"), bp::arg("xyz_mm")),

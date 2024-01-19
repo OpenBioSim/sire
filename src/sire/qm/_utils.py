@@ -25,6 +25,9 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
 
     # Initialise the dictionaries.
 
+    # List of MM1 atom indices as sire.legacy.Mol.AtomIdx objects.
+    mm1_indices = []
+
     # Link atoms to QM atoms.
     mm1_to_qm = {}
 
@@ -126,6 +129,9 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
             mm_idx = [mols.atoms().find(qm_mol.atoms()[x]) for x in v]
             mm1_to_mm2_local[link_idx] = mm_idx
 
+        # Store the MM1 atom indices.
+        mm1_indices.append(list(mm1_atoms.values()))
+
         # Now work out the QM-MM1 bond distances based on the equilibrium
         # MM bond lengths.
 
@@ -217,10 +223,44 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         mm1_to_mm2.update(mm1_to_mm2_local)
         bond_scale_factors.update(bond_scale_factors_local)
 
-    return mm1_to_qm, mm1_to_mm2, bond_scale_factors
+    return mm1_to_qm, mm1_to_mm2, bond_scale_factors, mm1_indices
 
 
-def _create_merged_mols(qm_mol_to_atoms, map):
+def _get_charge_shift(mols, qm_atoms, mm1_to_mm2):
+    """
+    Internal helper function to compute the charge shift for MM atoms
+    when link atoms are present.
+    """
+
+    from ..units import e_charge as _e_charge
+
+    # Store the atoms.
+    atoms = mols.atoms()
+
+    # First work out the charge of the QM atoms.
+    qm_charge = 0 * _e_charge
+    for atom in qm_atoms:
+        qm_charge += atom.charge()
+
+    # Now work out the charge of any link atoms.
+    link_charge = 0 * _e_charge
+    num_mm2 = 0
+    for mm1_idx, mm2_idx in mm1_to_mm2.items():
+        link_charge += atoms[mm1_idx].charge()
+        num_mm2 += len(mm2_idx)
+
+    # Compute the charge shift.
+    if qm_charge != link_charge:
+        charge_shift = (link_charge - qm_charge) / (
+            len(atoms) - len(qm_atoms) - len(mm1_to_mm2) - num_mm2
+        )
+    else:
+        charge_shift = 0 * _e_charge
+
+    return charge_shift
+
+
+def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
     """
     Internal helper function to create a merged molecule from the QM molecule.
     """
@@ -233,7 +273,7 @@ def _create_merged_mols(qm_mol_to_atoms, map):
     qm_mols = []
 
     # Loop over all molecules containing QM atoms.
-    for mol_num, qm_atoms in qm_mol_to_atoms.items():
+    for (mol_num, qm_atoms), mm1_idxs in zip(qm_mol_to_atoms.items(), mm1_indices):
         # Get the molecule.
         qm_mol = qm_atoms[0].molecule()
 
@@ -386,6 +426,15 @@ def _create_merged_mols(qm_mol_to_atoms, map):
                 ).molecule()
 
                 charges = _Mol.AtomCharges(info)
+
+                # Set the charge for all non-QM atoms (including link atoms)
+                # to the MM value.
+                for atom in qm_mol.atoms():
+                    idx = info.atom_idx(atom.index())
+                    if idx not in qm_idxs and idx not in mm1_idxs:
+                        idx = info.cg_atom_idx(idx)
+                        charges.set(idx, atom.property(prop))
+
                 edit_mol = edit_mol.set_property(prop + "1", charges).molecule()
                 edit_mol = edit_mol.remove_property(prop).molecule()
 
@@ -413,8 +462,11 @@ def _create_merged_mols(qm_mol_to_atoms, map):
         # Link to the perturbation to the reference state.
         qm_mol = qm_mol.perturbation().link_to_reference().commit()
 
+        # Add the molecule to the list.
+        qm_mols.append(qm_mol)
+
     # Return the merged molecule.
-    return qm_mol
+    return qm_mols
 
 
 def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_lengths, map):
@@ -450,5 +502,12 @@ def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_length
         engine.set_link_atoms(mm1_to_qm, mm1_to_mm2, bond_lengths)
     except:
         raise Exception("Unable to set link atom information.")
+
+    # Set the MM charge shift.
+    try:
+        charge_shift = _get_charge_shift(mols, qm_atoms, mm1_to_mm2)
+        engine.set_charge_shift(_get_charge_shift(mols, qm_atoms, mm1_to_mm2))
+    except:
+        raise Exception("Unable to set the MM charge shift.")
 
     return engine
