@@ -7,7 +7,7 @@ libcblas
 libnetcdf
 openmm
 pandas
-python
+python<3.12
 qt-main
 rich
 tbb

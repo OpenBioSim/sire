@@ -2,7 +2,7 @@
 
 cmake
 git
-python
+python <3.12
 
 make ; sys_platform == "darwin"
 libtool ; sys_platform == "darwin"
