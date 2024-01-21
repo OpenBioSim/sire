@@ -5,6 +5,8 @@ __all__ = [
     "positional",
 ]
 
+from .. import u
+
 
 def _to_atoms(mols, atoms):
     """
@@ -26,9 +28,9 @@ def boresch(
     r0=None,
     theta0=None,
     phi0=None,
-    name: str = None,
+    name=None,
     map=None,
-    temperature=sr.u("298 K"),
+    temperature=u("298 K"),
 ):
     """
     Create a set of Boresch restraints that will restrain the 6
@@ -133,7 +135,6 @@ def boresch(
     )
     ```
     """
-    from .. import u
     from ..base import create_map
     from ..mm import BoreschRestraint, BoreschRestraints
 
@@ -295,13 +296,13 @@ def boresch(
         return BoreschRestraint(name, b)
 
 
-def _check_stability_boresch_restraint(restraint_components, temperature=_u("298 K")):
+def _check_stability_boresch_restraint(restraint_components, temperature=u("298 K")):
     """
     Internal function to check for likely unstable Boresch restraints.
     """
     import warnings as _warnings
 
-    from .. import u
+    from .. import units
 
     # Check for unstable combinations of force constants.
     if restraint_components["distance"]["validated_k"][0].value() == 0:
@@ -335,9 +336,9 @@ def _check_stability_boresch_restraint(restraint_components, temperature=_u("298
         if k_angle.value() != 0:
             # Find the minimum stable angle "distance". We use the squared values as sire units don't support
             # taking the square root.
-            min_stable_dist_sq = (2 * 10 * sr.units.k_boltz * temperature) / k_angle
+            min_stable_dist_sq = (2 * 10 * units.k_boltz * temperature) / k_angle
             min_dist_sq = min(
-                [abs(equil_angle - 0), abs(equil_angle - 180 * sr.units.degrees)]
+                [abs(equil_angle - 0), abs(equil_angle - 180 * units.degrees)]
             ).pow(2)
             if min_dist_sq < min_stable_dist_sq:
                 _warnings.warn(
@@ -348,7 +349,7 @@ def _check_stability_boresch_restraint(restraint_components, temperature=_u("298
                 )
 
 
-def distance(mols, atoms0, atoms1, r0=None, k=None, name: str = None, map=None):
+def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
     """
     Create a set of distance restraints from all of the atoms in 'atoms0'
     to all of the atoms in 'atoms1' where all atoms are
@@ -458,7 +459,7 @@ def bond(*args, **kwargs):
     return distance(*args, **kwargs)
 
 
-def positional(mols, atoms, k=None, r0=None, position=None, name: str = None, map=None):
+def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None):
     """
     Create a set of position restraints for the atoms specified in
     'atoms' that are contained in the container 'mols', using the
