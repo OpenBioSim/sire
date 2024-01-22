@@ -323,8 +323,8 @@ double EMLEEngineImpl::computeForce(
     auto qm_atoms = this->owner.getAtoms();
     auto numbers = this->owner.getNumbers();
 
-    // Store the link atom info. Link atoms are handled using the same approach
-    // as sander, as described here: https://onlinelibrary.wiley.com/doi/10.1002/jcc.20857
+    // Store the link atom info. Link atoms are handled using the Charge Shift
+    // method. See: https://www.ks.uiuc.edu/Research/qmmm
     const auto link_atoms = this->owner.getLinkAtoms();
     const auto mm1_to_qm = link_atoms.get<0>();
     const auto mm1_to_mm2 = link_atoms.get<1>();
@@ -461,6 +461,7 @@ double EMLEEngineImpl::computeForce(
     }
 
     // Handle link atoms via the Charge Shift method.
+    // See: https://www.ks.uiuc.edu/Research/qmmm
     for (const auto &idx: mm1_to_mm2.keys())
     {
         // Get the QM atom to which the current MM atom is bonded.
@@ -475,7 +476,11 @@ double EMLEEngineImpl::computeForce(
         mm1_vec = space.getMinimumImage(mm1_vec, center);
         qm_vec = space.getMinimumImage(qm_vec, center);
 
-        // Work out the position of the link atom.
+        // Work out the position of the link atom. Here we use a bond length
+        // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
+        // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
+        // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
+        // and MM1 elements.
         const auto link_vec = qm_vec + bond_scale_factors[idx]*(mm1_vec - qm_vec);
 
         // Add to the QM positions.
