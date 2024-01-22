@@ -136,7 +136,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                         abs_idx = mols.atoms().find(atom)
                         raise Exception(
                             "Attempting replace a hydrogen with a link atom "
-                            f"(QM atom index {abs_idx})!"
+                            f"(atom index {abs_idx})!"
                         )
 
                     # Warn if the link atom is not for a carbon-carbon bond.
@@ -144,7 +144,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                         abs_idx = mols.atoms().find(atom)
                         _warnings.warn(
                             "Attempting to add a link atom for a non carbon-carbon "
-                            f"bond (QM atom index {abs_idx})!"
+                            f"bond (atom index {abs_idx})!"
                         )
 
                     # Store the link (MM1) atom.
