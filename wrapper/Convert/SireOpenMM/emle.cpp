@@ -36,6 +36,10 @@ using namespace SireMaths;
 using namespace SireOpenMM;
 using namespace SireVol;
 
+// The delta used to place virtual point charges either side of the MM2
+// atoms, in nanometers.
+static const double VIRTUAL_PC_DELTA = 0.01;
+
 class GILLock
 {
 public:
@@ -244,16 +248,6 @@ void EMLEEngine::setCharges(QVector<double> charges)
     this->charges = charges;
 }
 
-SireUnits::Dimension::Charge EMLEEngine::getChargeShift() const
-{
-    return this->charge_shift;
-}
-
-void EMLEEngine::setChargeShift(SireUnits::Dimension::Charge charge_shift)
-{
-    this->charge_shift = charge_shift;
-}
-
 const char *EMLEEngine::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<EMLEEngine>());
@@ -337,9 +331,6 @@ double EMLEEngineImpl::computeForce(
     const auto bond_scale_factors = link_atoms.get<2>();
     const auto mm2_atoms = this->owner.getMM2Atoms();
 
-    // Store the MM charge shift when link atoms are present.
-    const double delta_charge = this->owner.getChargeShift().value();
-
     // Initialise a vector to hold the current positions for the QM atoms.
     QVector<QVector<double>> xyz_qm(qm_atoms.size());
     QVector<Vector> xyz_qm_vec(qm_atoms.size());
@@ -370,10 +361,14 @@ double EMLEEngineImpl::computeForce(
     center /= i;
 
     // Initialise a vector to hold the current positions for the MM atoms.
+    // and virtual point charges.
     QVector<QVector<double>> xyz_mm;
+    QVector<QVector<double>> xyz_virtual;
 
-    // Initialise a vector to hold the charges for the MM atoms.
+    // Initialise a vector to hold the charges for the MM atoms and virtual
+    // point charges.
     QVector<double> charges_mm;
+    QVector<double> charges_virtual;
 
     // Initialise a list to hold the indices of the MM atoms.
     QVector<int> idx_mm;
@@ -393,7 +388,8 @@ double EMLEEngineImpl::computeForce(
         {
             // Exclude QM atoms or link atoms, which are handled later.
             if (not qm_atoms.contains(i) and
-                not mm1_to_mm2.contains(i))
+                not mm1_to_mm2.contains(i) and
+                not mm2_atoms.contains(i))
             {
                 // Store the MM atom position in Sire Vector format.
                 Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
@@ -420,14 +416,7 @@ double EMLEEngineImpl::computeForce(
                         xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
 
                         // Add the charge and index.
-                        if (not mm2_atoms.contains(i))
-                        {
-                            charges_mm.append(this->owner.getCharges()[i]);
-                        }
-                        else
-                        {
-                            charges_mm.append(this->owner.getCharges()[i] + delta_charge);
-                        }
+                        charges_mm.append(this->owner.getCharges()[i]);
                         idx_mm.append(i);
 
                         // Exit the inner loop.
@@ -461,14 +450,7 @@ double EMLEEngineImpl::computeForce(
                     xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
 
                     // Add the charge and index.
-                    if (not mm2_atoms.contains(idx))
-                    {
-                        charges_mm.append(this->owner.getCharges()[idx]);
-                    }
-                    else
-                    {
-                        charges_mm.append(this->owner.getCharges()[idx] + delta_charge);
-                    }
+                    charges_mm.append(this->owner.getCharges()[idx]);
                     idx_mm.append(idx);
 
                     // Exit the inner loop.
@@ -478,7 +460,7 @@ double EMLEEngineImpl::computeForce(
         }
     }
 
-    // Handle link atoms.
+    // Handle link atoms via the Charge Shift method.
     for (const auto &idx: mm1_to_mm2.keys())
     {
         // Get the QM atom to which the current MM atom is bonded.
@@ -499,11 +481,61 @@ double EMLEEngineImpl::computeForce(
         // Add to the QM positions.
         xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
 
-        // Append the index to the qm_atoms vector.
-        qm_atoms.append(idx);
-
         // Append a hydrogen element to the numbers vector.
         numbers.append(1);
+
+        // Store the number of MM2 atoms.
+        const auto num_mm2 = mm1_to_mm2[idx].size();
+
+        // Store the fractional charge contribution to the MM2 atoms and
+        // virtual point charges.
+        const auto frac_charge = this->owner.getCharges()[idx] / num_mm2;
+
+        // Loop over the MM2 atoms and perform charge shifting. Here the  MM1
+        // charge is redistributed over the MM2 atoms and two virtual point
+        // charges are added either side of the MM2 atoms in order to preserve
+        // the MM1-MM2 dipole.
+        for (const auto& mm2_idx : mm1_to_mm2[idx])
+        {
+            // Store the MM2 position in Sire Vector format.
+            Vector mm2_vec(10*positions[mm2_idx][0], 10*positions[mm2_idx][1], 10*positions[mm2_idx][2]);
+
+            // Work out the minimum image position with respect to the reference position.
+            mm2_vec = space.getMinimumImage(mm2_vec, center);
+
+            // Add to the MM positions.
+            xyz_mm.append(QVector<double>({mm2_vec[0], mm2_vec[1], mm2_vec[2]}));
+
+            // Add the charge and index.
+            charges_mm.append(this->owner.getCharges()[mm2_idx] + frac_charge);
+            idx_mm.append(mm2_idx);
+
+            // Now add the virtual point charges.
+
+            // Compute the normal vector from the MM1 to MM2 atom.
+            const auto normal = (mm2_vec - mm1_vec).normalise();
+
+            // Positive direction. (Away from MM1 atom.)
+            auto xyz = mm2_vec + VIRTUAL_PC_DELTA*normal;
+            xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
+            charges_virtual.append(-frac_charge);
+
+            // Negative direction (Towards MM1 atom.)
+            xyz = mm2_vec - VIRTUAL_PC_DELTA*normal;
+            xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
+            charges_virtual.append(frac_charge);
+        }
+    }
+
+    // Store the current number of MM atoms.
+    const auto num_mm = xyz_mm.size();
+
+    // If there are any virtual point charges, then add to the MM positions
+    // and charges.
+    if (xyz_virtual.size() > 0)
+    {
+        xyz_mm.append(xyz_virtual);
+        charges_mm.append(charges_virtual);
     }
 
     // Call the callback.
@@ -556,6 +588,13 @@ double EMLEEngineImpl::computeForce(
 
         // Update the atom index.
         i++;
+
+        // Exit if we have reached the end of the MM atoms, i.e. ignore virtual
+        // point charges.
+        if (i == num_mm)
+        {
+            break;
+        }
     }
 
     // Update the step count.

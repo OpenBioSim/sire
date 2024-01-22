@@ -88,12 +88,6 @@ namespace SireOpenMM
         //! Set the atomic charges of all atoms in the system.
         virtual void setCharges(QVector<double>) = 0;
 
-        //! Get charge shift.
-        virtual SireUnits::Dimension::Charge getChargeShift() const = 0;
-
-        //! Set charge shift.
-        virtual void setChargeShift(SireUnits::Dimension::Charge) = 0;
-
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };

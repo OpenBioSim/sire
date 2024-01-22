@@ -111,11 +111,15 @@ def emle(
     )
 
     from ._utils import (
+        _check_charge,
         _create_qm_mol_to_atoms,
         _configure_engine,
         _create_merged_mols,
         _get_link_atoms,
     )
+
+    # Check that the charge of the QM region is integer valued.
+    _check_charge(qm_atoms, map)
 
     # Get the mapping between molecule numbers and QM atoms.
     qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
@@ -136,4 +140,4 @@ def emle(
     # Update the molecule in the system.
     mols.update(qm_mols)
 
-    return mols, engine
+    return engine
