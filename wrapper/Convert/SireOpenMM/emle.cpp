@@ -486,6 +486,9 @@ double EMLEEngineImpl::computeForce(
         // Add to the QM positions.
         xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
 
+        // Add the MM1 index to the QM atoms vector.
+        qm_atoms.append(qm_idx);
+
         // Append a hydrogen element to the numbers vector.
         numbers.append(1);
 
