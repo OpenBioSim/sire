@@ -44,6 +44,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
 
+* You can now set the background color of a 3D view using the ``bgcolor="..."``
+  keyword. This is documented in the view cheat sheet.
+
 * MacOS/ARM64 now includes AmberTools and Gromacs dependencies when built
   for BioSimSpace (matching MacOS/X64 and Linux).
 

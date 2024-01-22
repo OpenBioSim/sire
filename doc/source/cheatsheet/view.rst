@@ -494,6 +494,22 @@ the ``trajectory`` function when you want to view.
    ``mols.trajectory().view(wrap=False)``, or the easiest
    ``mols.view(wrap=False)``.
 
+Setting the background color
+----------------------------
+
+You can set the background color of the view using the ``bgcolor`` argument.
+This should be a string, using any color that is recognised by NGLView
+via the ``backgroundColor`` stage parameter.
+
+>>> mols[0].view(bgcolor="black")
+
+.. image:: images/view_06.jpg
+   :alt: 3D view of aladip
+
+.. note::
+
+   The default background color is ``black``.
+
 Closer integration with NGLView
 -------------------------------
 
