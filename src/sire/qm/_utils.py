@@ -39,6 +39,8 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
     Internal helper function to get a dictionary with link atoms for each QM atom.
     """
 
+    import warnings as _warnings
+
     from ..legacy import CAS as _CAS
     from ..legacy import Mol as _Mol
     from ..legacy import MM as _MM
@@ -59,7 +61,8 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
     # bond potentials, i.e. R0(QM-L) / R0(QM-MM1).
     bond_scale_factors = {}
 
-    # Store a hydrogen element.
+    # Store carbon and hydrogen elements.
+    carbon = _Mol.Element("C")
     hydrogen = _Mol.Element("H")
 
     # Store the element property.
@@ -83,6 +86,9 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
         for atom in qm_atoms:
             # Store the atom index.
             idx = atom.index()
+
+            # Store the element of the atom.
+            elem = atom.property(elem_prop)
 
             # Get the bonds for the atom.
             bonds = connectivity.get_bonds(idx)
@@ -123,12 +129,22 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                     raise Exception(f"QM atom {idx} has more than one MM bond!")
                 else:
                     # Get the element of the cut atom.
-                    elem = qm_mol[mm_bonds[0]].property(elem_prop)
+                    link_elem = qm_mol[mm_bonds[0]].property(elem_prop)
 
                     # If the element is hydrogen, raise an exception.
                     if elem == hydrogen:
+                        abs_idx = mols.atoms().find(atom)
                         raise Exception(
-                            f"Attempting replace a hydrogen with a link atom (index {mm_bonds[0]})!"
+                            "Attempting replace a hydrogen with a link atom "
+                            f"(QM atom index {abs_idx})!"
+                        )
+
+                    # Warn if the link atom is not for a carbon-carbon bond.
+                    if elem != carbon or link_elem != carbon:
+                        abs_idx = mols.atoms().find(atom)
+                        _warnings.warn(
+                            "Attempting to add a link atom for a non carbon-carbon "
+                            f"bond (QM atom index {abs_idx})!"
                         )
 
                     # Store the link (MM1) atom.
