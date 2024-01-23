@@ -107,7 +107,7 @@ def test_interpolate(ala_mols, selection):
     mols = ala_mols.__copy__()
 
     # Create an EMLE calculator.
-    calculator = EMLECalculator(device="cpu", log=0, save_settings=False)
+    calculator = EMLECalculator(device="cpu")
 
     # Create a dynamics object.
     d = mols.dynamics(timestep="1fs", constraint="none", platform="cpu")
