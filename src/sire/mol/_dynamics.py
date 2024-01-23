@@ -35,6 +35,17 @@ class DynamicsData:
                     mols.atoms().find(selection_to_atoms(mols, fixed_atoms)),
                 )
 
+            # see if there is a QM/MM engine
+            if map.specified("qm_engine"):
+                qm_engine = map["qm_engine"].value()
+
+                from ..legacy.Convert._SireOpenMM import QMForce
+
+                if qm_engine and not isinstance(qm_engine, QMForce):
+                    raise ValueError(
+                        "'qm_engine' must be an instance of QMForce."
+                    )
+
             # see if this is an interpolation simulation
             if map.specified("lambda_interpolate"):
                 if map["lambda_interpolate"].has_value():
