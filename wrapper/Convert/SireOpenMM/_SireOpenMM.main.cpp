@@ -188,9 +188,9 @@ BOOST_PYTHON_MODULE(_SireOpenMM)
     // A tuple for passing link atom information to EMLEEngine.
     register_tuple<boost::tuple<QMap<int, int>, QMap<int, QVector<int>>>>();
 
-    bp::class_<QMMMForce, bp::bases<SireBase::Property>, boost::noncopyable>("QMMMForce", bp::no_init);
+    bp::class_<QMForce, bp::bases<SireBase::Property>, boost::noncopyable>("QMForce", bp::no_init);
 
-    bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMMMForce, SireBase::Property>>("EMLEEngine",
+    bp::class_<EMLEEngine, bp::bases<SireOpenMM::QMForce, SireBase::Property>>("EMLEEngine",
             bp::init<bp::object, SireUnits::Dimension::Length, int, double>(
                 (
                     bp::arg("py_object"),

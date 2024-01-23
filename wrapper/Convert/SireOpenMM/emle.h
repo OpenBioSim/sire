@@ -107,7 +107,7 @@ namespace SireOpenMM
         QString callback;
     };
 
-    class EMLEEngine : public SireBase::ConcreteProperty<EMLEEngine, QMMMForce>
+    class EMLEEngine : public SireBase::ConcreteProperty<EMLEEngine, QMForce>
     {
     public:
         //! Default constructor.

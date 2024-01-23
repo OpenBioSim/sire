@@ -186,9 +186,9 @@ namespace SireOpenMM
     }
 
     template <>
-    inline QString _get_typename<SireOpenMM::QMMMForce>()
+    inline QString _get_typename<SireOpenMM::QMForce>()
     {
-        return "SireOpenMM::QMMMForce";
+        return "SireOpenMM::QMForce";
     }
 
     /** Return the OpenMM::Force (of type T) that is called 'name'

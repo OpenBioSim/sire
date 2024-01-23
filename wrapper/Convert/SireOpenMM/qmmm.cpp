@@ -30,6 +30,6 @@
 
 using namespace SireOpenMM;
 
-QMMMForce::~QMMMForce()
+QMForce::~QMForce()
 {
 }

@@ -363,7 +363,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     OpenMM::System &system = const_cast<OpenMM::System &>(context.getSystem());
 
     // get copies of the forcefields in which the parameters will be changed
-    auto qmff = this->getForce<QMMMForce>("qmff", system);
+    auto qmff = this->getForce<QMForce>("qmff", system);
     auto cljff = this->getForce<OpenMM::NonbondedForce>("clj", system);
     auto ghost_ghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/ghost", system);
     auto ghost_nonghostff = this->getForce<OpenMM::CustomNonbondedForce>("ghost/non-ghost", system);
