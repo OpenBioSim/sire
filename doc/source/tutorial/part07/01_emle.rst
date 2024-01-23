@@ -33,10 +33,9 @@ in water. First, let us load the molecular system:
 Next we will create an ``emle-engine`` calculator to perform the QM (or ML) calculation
 for the dipeptide along with the ML electrostatic embedding. Since this is a small molecule
 it isn't beneficial to perform the calculation on a GPU, so we will use the CPU instead.
-We will also disable logging to file to improve performance.
 
 >>> from emle.calculator import EMLECalculator
->>> calculator = EMLECalculator(device="cpu", log=0)
+>>> calculator = EMLECalculator(device="cpu")
 
 By default, ``emle-engine`` will use `TorchANI <https://aiqm.github.io/torchani/>`_
 as the backend for in vacuo calculation of energies and gradients. However,
