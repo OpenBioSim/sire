@@ -2,10 +2,12 @@ ambertools
 ase
 deepmd-kit
 eigen
+loguru
 pip
 pybind11
 pytorch
 python < 3.11
+pyyaml
 torchani
 xtb-python
 
