@@ -424,6 +424,7 @@ class DynamicsData:
         if not self.is_null():
             self._omm_mols.set_lambda_schedule(schedule)
             self._schedule_changed = True
+            self.set_lambda(self._omm_mols.get_lambda())
 
     def get_lambda(self):
         if self.is_null():
