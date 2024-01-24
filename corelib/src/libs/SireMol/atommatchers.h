@@ -35,6 +35,7 @@ SIRE_BEGIN_HEADER
 
 namespace SireMol
 {
+    class AtomCoordMatcher;
     class AtomIdxMatcher;
     class AtomNameMatcher;
     class AtomIDMatcher;
@@ -45,6 +46,9 @@ namespace SireMol
     class ResIdxAtomMCSMatcher;
     class ResIdxAtomCoordMatcher;
 } // namespace SireMol
+
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomCoordMatcher &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomCoordMatcher &);
 
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomIdxMatcher &);
 SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomIdxMatcher &);
@@ -83,6 +87,48 @@ namespace SireMol
     class MoleculeInfoData;
 
     using SireBase::PropertyMap;
+
+    /** This is a simple atom matcher that matches the atoms based
+        on their coordinates - e.g. matches the atom in molinfo0
+        to those in molinfo1 by their closest coordinates.
+
+        @author Lester Hedges
+    */
+    class SIREMOL_EXPORT AtomCoordMatcher : public SireBase::ConcreteProperty<AtomCoordMatcher, AtomMatcher>
+    {
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomCoordMatcher &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomCoordMatcher &);
+
+    public:
+        AtomCoordMatcher();
+        AtomCoordMatcher(bool zero_com);
+        AtomCoordMatcher(const AtomCoordMatcher &);
+
+        ~AtomCoordMatcher();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return AtomCoordMatcher::typeName();
+        }
+
+        QString toString() const;
+
+        AtomCoordMatcher &operator=(const AtomCoordMatcher &other);
+
+        bool operator==(const AtomCoordMatcher &other) const;
+        bool operator!=(const AtomCoordMatcher &other) const;
+
+    protected:
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const PropertyMap &map0,
+                                          const MoleculeView &molview1, const PropertyMap &map1) const;
+
+    private:
+        /** Whether or not to subtract the centre of mass from the coordinates */
+        bool zero_com;
+    };
 
     /** This is a simple atom matcher that matches the atoms based
         on their index in the molecule - e.g. it matches the first
@@ -519,6 +565,7 @@ namespace SireMol
 
 } // namespace SireMol
 
+Q_DECLARE_METATYPE(SireMol::AtomCoordMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomIdxMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomNameMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomIDMatcher)
@@ -529,6 +576,7 @@ Q_DECLARE_METATYPE(SireMol::ResNumAtomNameMatcher)
 Q_DECLARE_METATYPE(SireMol::ResIdxAtomMCSMatcher)
 Q_DECLARE_METATYPE(SireMol::ResIdxAtomCoordMatcher)
 
+SIRE_EXPOSE_CLASS(SireMol::AtomCoordMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomIdxMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomNameMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomIDMatcher)

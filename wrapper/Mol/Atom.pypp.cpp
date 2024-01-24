@@ -50,10 +50,6 @@ namespace bp = boost::python;
 
 #include "atomljs.h"
 
-#include "atombeads.h"
-
-#include "atomcharges.h"
-
 #include "SireBase/quickcopy.hpp"
 
 #include "SireBase/slice.h"
@@ -70,23 +66,23 @@ namespace bp = boost::python;
 
 #include "atomcoords.h"
 
-#include "atomelements.h"
-
-#include "atomenergies.h"
-
-#include "atomforces.h"
-
-#include "atommasses.h"
-
-#include "atompolarisabilities.h"
-
-#include "atompropertylist.h"
-
-#include "atomradicals.h"
-
 #include "atomradii.h"
 
 #include "atomvelocities.h"
+
+#include "atomcharges.h"
+
+#include "atombeads.h"
+
+#include "atomenergies.h"
+
+#include "atompolarisabilities.h"
+
+#include "atomelements.h"
+
+#include "atommasses.h"
+
+#include "atomforces.h"
 
 #include "SireError/errors.h"
 
@@ -94,7 +90,11 @@ namespace bp = boost::python;
 
 #include <QDebug>
 
+#include "atompropertylist.h"
+
 #include "hybridization.h"
+
+#include "atomradicals.h"
 
 #include "SireBase/propertylist.h"
 
@@ -111,12 +111,26 @@ const SireMM::LJParameter& get_Metadata_SireMM_AtomLJs_function2(const SireMol::
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireMM::LJParameter >(key, metakey); }
 
-const SireMol::BeadNum& get_Metadata_SireMol_AtomBeads_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMol::BeadNum >(metakey); }
+const SireMaths::Vector& get_Metadata_SireMol_AtomCoords_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMaths::Vector >(metakey); }
 
-const SireMol::BeadNum& get_Metadata_SireMol_AtomBeads_function2(const SireMol::Atom &atom,
+const SireMaths::Vector& get_Metadata_SireMol_AtomCoords_function2(const SireMol::Atom &atom,
                                    const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMol::BeadNum >(key, metakey); }
+                                        return atom.metadata< SireMaths::Vector >(key, metakey); }
+
+const SireUnits::Dimension::Length& get_Metadata_SireMol_AtomRadii_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireUnits::Dimension::Length >(metakey); }
+
+const SireUnits::Dimension::Length& get_Metadata_SireMol_AtomRadii_function2(const SireMol::Atom &atom,
+                                   const QString &key, const QString &metakey){
+                                        return atom.metadata< SireUnits::Dimension::Length >(key, metakey); }
+
+const SireMaths::Vector3D<SireUnits::Dimension::Velocity>& get_Metadata_SireMol_AtomVelocities_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Velocity> >(metakey); }
+
+const SireMaths::Vector3D<SireUnits::Dimension::Velocity>& get_Metadata_SireMol_AtomVelocities_function2(const SireMol::Atom &atom,
+                                   const QString &key, const QString &metakey){
+                                        return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Velocity> >(key, metakey); }
 
 const SireUnits::Dimension::Charge& get_Metadata_SireMol_AtomCharges_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< SireUnits::Dimension::Charge >(metakey); }
@@ -125,19 +139,12 @@ const SireUnits::Dimension::Charge& get_Metadata_SireMol_AtomCharges_function2(c
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireUnits::Dimension::Charge >(key, metakey); }
 
-const SireMaths::Vector& get_Metadata_SireMol_AtomCoords_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMaths::Vector >(metakey); }
+const SireMol::BeadNum& get_Metadata_SireMol_AtomBeads_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMol::BeadNum >(metakey); }
 
-const SireMaths::Vector& get_Metadata_SireMol_AtomCoords_function2(const SireMol::Atom &atom,
+const SireMol::BeadNum& get_Metadata_SireMol_AtomBeads_function2(const SireMol::Atom &atom,
                                    const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMaths::Vector >(key, metakey); }
-
-const SireMol::Element& get_Metadata_SireMol_AtomElements_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMol::Element >(metakey); }
-
-const SireMol::Element& get_Metadata_SireMol_AtomElements_function2(const SireMol::Atom &atom,
-                                   const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMol::Element >(key, metakey); }
+                                        return atom.metadata< SireMol::BeadNum >(key, metakey); }
 
 const SireUnits::Dimension::MolarEnergy& get_Metadata_SireMol_AtomEnergies_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< SireUnits::Dimension::MolarEnergy >(metakey); }
@@ -146,12 +153,19 @@ const SireUnits::Dimension::MolarEnergy& get_Metadata_SireMol_AtomEnergies_funct
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireUnits::Dimension::MolarEnergy >(key, metakey); }
 
-const SireMaths::Vector3D<SireUnits::Dimension::Force>& get_Metadata_SireMol_AtomForces_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Force> >(metakey); }
+const SireUnits::Dimension::Volume& get_Metadata_SireMol_AtomPolarisabilities_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireUnits::Dimension::Volume >(metakey); }
 
-const SireMaths::Vector3D<SireUnits::Dimension::Force>& get_Metadata_SireMol_AtomForces_function2(const SireMol::Atom &atom,
+const SireUnits::Dimension::Volume& get_Metadata_SireMol_AtomPolarisabilities_function2(const SireMol::Atom &atom,
                                    const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Force> >(key, metakey); }
+                                        return atom.metadata< SireUnits::Dimension::Volume >(key, metakey); }
+
+const SireMol::Element& get_Metadata_SireMol_AtomElements_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMol::Element >(metakey); }
+
+const SireMol::Element& get_Metadata_SireMol_AtomElements_function2(const SireMol::Atom &atom,
+                                   const QString &key, const QString &metakey){
+                                        return atom.metadata< SireMol::Element >(key, metakey); }
 
 const SireUnits::Dimension::MolarMass& get_Metadata_SireMol_AtomMasses_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< SireUnits::Dimension::MolarMass >(metakey); }
@@ -160,12 +174,19 @@ const SireUnits::Dimension::MolarMass& get_Metadata_SireMol_AtomMasses_function2
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireUnits::Dimension::MolarMass >(key, metakey); }
 
-const SireUnits::Dimension::Volume& get_Metadata_SireMol_AtomPolarisabilities_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireUnits::Dimension::Volume >(metakey); }
+const SireMaths::Vector3D<SireUnits::Dimension::Force>& get_Metadata_SireMol_AtomForces_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Force> >(metakey); }
 
-const SireUnits::Dimension::Volume& get_Metadata_SireMol_AtomPolarisabilities_function2(const SireMol::Atom &atom,
+const SireMaths::Vector3D<SireUnits::Dimension::Force>& get_Metadata_SireMol_AtomForces_function2(const SireMol::Atom &atom,
                                    const QString &key, const QString &metakey){
-                                        return atom.metadata< SireUnits::Dimension::Volume >(key, metakey); }
+                                        return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Force> >(key, metakey); }
+
+const SireMol::Chirality& get_Metadata_SireMol_AtomChiralities_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMol::Chirality >(metakey); }
+
+const SireMol::Chirality& get_Metadata_SireMol_AtomChiralities_function2(const SireMol::Atom &atom,
+                                   const QString &key, const QString &metakey){
+                                        return atom.metadata< SireMol::Chirality >(key, metakey); }
 
 const SireBase::PropertyList& get_Metadata_SireMol_AtomPropertyList_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< SireBase::PropertyList >(metakey); }
@@ -195,40 +216,19 @@ const SireBase::StringArrayProperty& get_Metadata_SireMol_AtomStringArrayPropert
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireBase::StringArrayProperty >(key, metakey); }
 
-const SireMol::Radical& get_Metadata_SireMol_AtomRadicals_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMol::Radical >(metakey); }
-
-const SireMol::Radical& get_Metadata_SireMol_AtomRadicals_function2(const SireMol::Atom &atom,
-                                   const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMol::Radical >(key, metakey); }
-
-const SireUnits::Dimension::Length& get_Metadata_SireMol_AtomRadii_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireUnits::Dimension::Length >(metakey); }
-
-const SireUnits::Dimension::Length& get_Metadata_SireMol_AtomRadii_function2(const SireMol::Atom &atom,
-                                   const QString &key, const QString &metakey){
-                                        return atom.metadata< SireUnits::Dimension::Length >(key, metakey); }
-
-const SireMaths::Vector3D<SireUnits::Dimension::Velocity>& get_Metadata_SireMol_AtomVelocities_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Velocity> >(metakey); }
-
-const SireMaths::Vector3D<SireUnits::Dimension::Velocity>& get_Metadata_SireMol_AtomVelocities_function2(const SireMol::Atom &atom,
-                                   const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMaths::Vector3D<SireUnits::Dimension::Velocity> >(key, metakey); }
-
-const SireMol::Chirality& get_Metadata_SireMol_AtomChiralities_function1(const SireMol::Atom &atom,
-                                   const QString &metakey){ return atom.metadata< SireMol::Chirality >(metakey); }
-
-const SireMol::Chirality& get_Metadata_SireMol_AtomChiralities_function2(const SireMol::Atom &atom,
-                                   const QString &key, const QString &metakey){
-                                        return atom.metadata< SireMol::Chirality >(key, metakey); }
-
 const SireMol::Hybridization& get_Metadata_SireMol_AtomHybridizations_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< SireMol::Hybridization >(metakey); }
 
 const SireMol::Hybridization& get_Metadata_SireMol_AtomHybridizations_function2(const SireMol::Atom &atom,
                                    const QString &key, const QString &metakey){
                                         return atom.metadata< SireMol::Hybridization >(key, metakey); }
+
+const SireMol::Radical& get_Metadata_SireMol_AtomRadicals_function1(const SireMol::Atom &atom,
+                                   const QString &metakey){ return atom.metadata< SireMol::Radical >(metakey); }
+
+const SireMol::Radical& get_Metadata_SireMol_AtomRadicals_function2(const SireMol::Atom &atom,
+                                   const QString &key, const QString &metakey){
+                                        return atom.metadata< SireMol::Radical >(key, metakey); }
 
 const QString& get_Metadata_SireMol_AtomStringProperty_function1(const SireMol::Atom &atom,
                                    const QString &metakey){ return atom.metadata< QString >(metakey); }
@@ -739,30 +739,39 @@ void register_Atom_class(){
         Atom_exposer.def( "_get_property_SireMM_AtomLJs", &SireMol::Atom::property< SireMM::LJParameter >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMM_AtomLJs", get_Metadata_SireMM_AtomLJs_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMM_AtomLJs", &get_Metadata_SireMM_AtomLJs_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomBeads", &SireMol::Atom::property< SireMol::BeadNum >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomBeads", get_Metadata_SireMol_AtomBeads_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomBeads", &get_Metadata_SireMol_AtomBeads_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomCharges", &SireMol::Atom::property< SireUnits::Dimension::Charge >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomCharges", get_Metadata_SireMol_AtomCharges_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomCharges", &get_Metadata_SireMol_AtomCharges_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomCoords", &SireMol::Atom::property< SireMaths::Vector >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomCoords", get_Metadata_SireMol_AtomCoords_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomCoords", &get_Metadata_SireMol_AtomCoords_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomElements", &SireMol::Atom::property< SireMol::Element >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomElements", get_Metadata_SireMol_AtomElements_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomElements", &get_Metadata_SireMol_AtomElements_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomRadii", &SireMol::Atom::property< SireUnits::Dimension::Length >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomRadii", get_Metadata_SireMol_AtomRadii_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomRadii", &get_Metadata_SireMol_AtomRadii_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomVelocities", &SireMol::Atom::property< SireMaths::Vector3D<SireUnits::Dimension::Velocity> >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomVelocities", get_Metadata_SireMol_AtomVelocities_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomVelocities", &get_Metadata_SireMol_AtomVelocities_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomCharges", &SireMol::Atom::property< SireUnits::Dimension::Charge >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomCharges", get_Metadata_SireMol_AtomCharges_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomCharges", &get_Metadata_SireMol_AtomCharges_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomBeads", &SireMol::Atom::property< SireMol::BeadNum >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomBeads", get_Metadata_SireMol_AtomBeads_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomBeads", &get_Metadata_SireMol_AtomBeads_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomEnergies", &SireMol::Atom::property< SireUnits::Dimension::MolarEnergy >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomEnergies", get_Metadata_SireMol_AtomEnergies_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomEnergies", &get_Metadata_SireMol_AtomEnergies_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomForces", &SireMol::Atom::property< SireMaths::Vector3D<SireUnits::Dimension::Force> >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomForces", get_Metadata_SireMol_AtomForces_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomForces", &get_Metadata_SireMol_AtomForces_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomMasses", &SireMol::Atom::property< SireUnits::Dimension::MolarMass >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomMasses", get_Metadata_SireMol_AtomMasses_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomMasses", &get_Metadata_SireMol_AtomMasses_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomPolarisabilities", &SireMol::Atom::property< SireUnits::Dimension::Volume >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomPolarisabilities", get_Metadata_SireMol_AtomPolarisabilities_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomPolarisabilities", &get_Metadata_SireMol_AtomPolarisabilities_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomElements", &SireMol::Atom::property< SireMol::Element >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomElements", get_Metadata_SireMol_AtomElements_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomElements", &get_Metadata_SireMol_AtomElements_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomMasses", &SireMol::Atom::property< SireUnits::Dimension::MolarMass >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomMasses", get_Metadata_SireMol_AtomMasses_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomMasses", &get_Metadata_SireMol_AtomMasses_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomForces", &SireMol::Atom::property< SireMaths::Vector3D<SireUnits::Dimension::Force> >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomForces", get_Metadata_SireMol_AtomForces_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomForces", &get_Metadata_SireMol_AtomForces_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomChiralities", &SireMol::Atom::property< SireMol::Chirality >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomChiralities", get_Metadata_SireMol_AtomChiralities_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomChiralities", &get_Metadata_SireMol_AtomChiralities_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomPropertyList", &SireMol::Atom::property< SireBase::PropertyList >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomPropertyList", get_Metadata_SireMol_AtomPropertyList_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomPropertyList", &get_Metadata_SireMol_AtomPropertyList_function2, bp::return_value_policy<bp::copy_const_reference>());
@@ -775,21 +784,12 @@ void register_Atom_class(){
         Atom_exposer.def( "_get_property_SireMol_AtomStringArrayProperty", &SireMol::Atom::property< SireBase::StringArrayProperty >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomStringArrayProperty", get_Metadata_SireMol_AtomStringArrayProperty_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomStringArrayProperty", &get_Metadata_SireMol_AtomStringArrayProperty_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomRadicals", &SireMol::Atom::property< SireMol::Radical >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomRadicals", get_Metadata_SireMol_AtomRadicals_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomRadicals", &get_Metadata_SireMol_AtomRadicals_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomRadii", &SireMol::Atom::property< SireUnits::Dimension::Length >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomRadii", get_Metadata_SireMol_AtomRadii_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomRadii", &get_Metadata_SireMol_AtomRadii_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomVelocities", &SireMol::Atom::property< SireMaths::Vector3D<SireUnits::Dimension::Velocity> >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomVelocities", get_Metadata_SireMol_AtomVelocities_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomVelocities", &get_Metadata_SireMol_AtomVelocities_function2, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_property_SireMol_AtomChiralities", &SireMol::Atom::property< SireMol::Chirality >, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomChiralities", get_Metadata_SireMol_AtomChiralities_function1, bp::return_value_policy<bp::copy_const_reference>());
-        Atom_exposer.def( "_get_metadata_SireMol_AtomChiralities", &get_Metadata_SireMol_AtomChiralities_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomHybridizations", &SireMol::Atom::property< SireMol::Hybridization >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomHybridizations", get_Metadata_SireMol_AtomHybridizations_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomHybridizations", &get_Metadata_SireMol_AtomHybridizations_function2, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_property_SireMol_AtomRadicals", &SireMol::Atom::property< SireMol::Radical >, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomRadicals", get_Metadata_SireMol_AtomRadicals_function1, bp::return_value_policy<bp::copy_const_reference>());
+        Atom_exposer.def( "_get_metadata_SireMol_AtomRadicals", &get_Metadata_SireMol_AtomRadicals_function2, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_property_SireMol_AtomStringProperty", &SireMol::Atom::property< QString >, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomStringProperty", get_Metadata_SireMol_AtomStringProperty_function1, bp::return_value_policy<bp::copy_const_reference>());
         Atom_exposer.def( "_get_metadata_SireMol_AtomStringProperty", &get_Metadata_SireMol_AtomStringProperty_function2, bp::return_value_policy<bp::copy_const_reference>());
