@@ -218,7 +218,9 @@ def create_quaternion(angle=None, axis=None, matrix=None, quaternion=None):
 
 if not hasattr(EnergyTrajectory, "to_pandas"):
 
-    def _to_pandas(obj, temperature=None, to_alchemlyb: bool = False):
+    def _to_pandas(
+        obj, temperature=None, to_alchemlyb: bool = False, energy_unit: str = None
+    ):
         """
         Return the energy trajectory as a pandas DataFrame
 
@@ -237,18 +239,34 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
             compatible with alchemlyb. This will allow the
             DataFrame to be used as part of an alchemlyb
             free energy calculation.
+
+        energy_unit: str
+            Whichever of the alchemlyb energy units you want the output
+            DataFrame to use. This is in alchemlyb format, e.g.
+            `kcal/mol`, `kJ/mol`, or `kT`. This is only used if
+            `to_alchemlyb` is set to True.
         """
         import pandas as pd
-        from ..units import picosecond, kcal_per_mol
+        from ..units import picosecond, kcal_per_mol, kJ_per_mol
 
         data = {}
+
+        convert_to_kt = False
 
         if to_alchemlyb:
             time_unit = picosecond
             time_unit_string = "ps"
 
-            energy_unit = kcal_per_mol
-            energy_unit_string = "kT"
+            if energy_unit == "kT":
+                energy_unit = kcal_per_mol
+                energy_unit_string = "kT"
+                convert_to_kt = True
+            elif energy_unit == "kJ/mol":
+                energy_unit = kJ_per_mol
+                energy_unit_string = "kJ/mol"
+            else:
+                energy_unit = kcal_per_mol
+                energy_unit_string = "kcal/mol"
 
             if temperature is None:
                 # look for the temperature in the ensemble property
@@ -278,12 +296,10 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
         keys = obj.label_keys()
         keys.sort()
 
-        if to_alchemlyb:
+        if convert_to_kt:
             from ..units import k_boltz
 
             kT = (k_boltz * temperature).to(kcal_per_mol)
-        else:
-            kT = 1
 
         for key in keys:
             if to_alchemlyb and key == "lambda":
@@ -316,7 +332,7 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
 
             nrgs = obj.energies(key, energy_unit)
 
-            if to_alchemlyb:
+            if convert_to_kt:
                 nrgs = [x / kT for x in nrgs]
 
             data[column_header] = nrgs
@@ -337,7 +353,7 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
 
         return df
 
-    def _to_alchemlyb(obj, temperature=None):
+    def _to_alchemlyb(obj, temperature=None, energy_unit: str = "kcal/mol"):
         """
         Return the energy trajectory as an alchemlyb-formatted pandas DataFrame
 
@@ -350,13 +366,20 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
             `ensemble` or `temperature` property will be
             used.
 
+        energy_unit: str
+            Whichever of the alchemlyb energy units you want the output
+            DataFrame to use. This is in alchemlyb format, e.g.
+            `kcal/mol`, `kJ/mol`, or `kT`
+
         Returns
         -------
 
         pandas.DataFrame
             A pandas DataFrame that is compatible with alchemlyb.
         """
-        return obj.to_pandas(temperature=temperature, to_alchemlyb=True)
+        return obj.to_pandas(
+            temperature=temperature, to_alchemlyb=True, energy_unit=energy_unit
+        )
 
     EnergyTrajectory.to_pandas = _to_pandas
     EnergyTrajectory.to_alchemlyb = _to_alchemlyb
