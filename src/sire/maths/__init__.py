@@ -48,9 +48,7 @@ kabasch = _Maths.kabasch
 align = _Maths.align
 
 
-def rotate(
-    point, angle=None, axis=None, matrix=None, quaternion=None, center=None
-):
+def rotate(point, angle=None, axis=None, matrix=None, quaternion=None, center=None):
     """
     Rotate the passed point by the passed angle and axis, or the
     passed matrix, or the passed quaternion, optionally centering
@@ -90,9 +88,7 @@ def rotate(
      Returns: sire.maths.Vector
          The rotated vector
     """
-    q = create_quaternion(
-        angle=angle, axis=axis, matrix=matrix, quaternion=quaternion
-    )
+    q = create_quaternion(angle=angle, axis=axis, matrix=matrix, quaternion=quaternion)
 
     if center is None:
         center = Vector(0, 0, 0)
@@ -252,7 +248,7 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
             time_unit_string = "ps"
 
             energy_unit = kcal_per_mol
-            energy_unit_string = "kcal/mol"
+            energy_unit_string = "kT"
 
             if temperature is None:
                 # look for the temperature in the ensemble property
@@ -281,6 +277,13 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
 
         keys = obj.label_keys()
         keys.sort()
+
+        if to_alchemlyb:
+            from ..units import k_boltz
+
+            kT = (k_boltz * temperature).to(kcal_per_mol)
+        else:
+            kT = 1
 
         for key in keys:
             if to_alchemlyb and key == "lambda":
@@ -311,7 +314,12 @@ if not hasattr(EnergyTrajectory, "to_pandas"):
             except Exception:
                 column_header = key
 
-            data[column_header] = obj.energies(key, energy_unit)
+            nrgs = obj.energies(key, energy_unit)
+
+            if to_alchemlyb:
+                nrgs = [x / kT for x in nrgs]
+
+            data[column_header] = nrgs
 
         if to_alchemlyb:
             df = pd.DataFrame(data).set_index(["time", "fep-lambda"])

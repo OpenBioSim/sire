@@ -75,7 +75,17 @@ def to_alchemlyb(energy_trajectories, temperature=None):
     for lambda_value in lambda_values:
         dfs.extend(dataframes[lambda_value])
 
-    # now concatenate the dataframes
-    import pandas as pd
+    if len(dfs) == 0:
+        return None
+    elif len(dfs) == 1:
+        return dfs[0]
+    else:
+        attrs = dfs[0].attrs
 
-    return pd.concat(dfs)
+        # now concatenate the dataframes
+        import pandas as pd
+
+        combined = pd.concat(dfs)
+        combined.attrs = attrs
+
+        return combined
