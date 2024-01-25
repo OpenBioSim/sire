@@ -486,20 +486,6 @@ void register_AtomPropertyList_class(){
         { //::SireMol::AtomProperty< SireBase::PropertyList >::set
         
             typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;
-            typedef ::SireMol::AtomProperty< SireBase::PropertyList > & ( ::SireMol::AtomProperty< SireBase::PropertyList >::*set_function_type)( int,::SireBase::PropertyList const & ) ;
-            set_function_type set_function_value( &::SireMol::AtomProperty< SireBase::PropertyList >::set );
-            
-            AtomPropertyList_exposer.def( 
-                "set"
-                , set_function_value
-                , ( bp::arg("i"), bp::arg("value") )
-                , bp::return_self< >()
-                , "" );
-        
-        }
-        { //::SireMol::AtomProperty< SireBase::PropertyList >::set
-        
-            typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;
             typedef ::SireMol::AtomProperty< SireBase::PropertyList > & ( ::SireMol::AtomProperty< SireBase::PropertyList >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireBase::PropertyList const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireBase::PropertyList >::set );
             

@@ -487,20 +487,6 @@ void register_AtomBeads_class(){
         { //::SireMol::AtomProperty< SireMol::BeadNum >::set
         
             typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;
-            typedef ::SireMol::AtomProperty< SireMol::BeadNum > & ( ::SireMol::AtomProperty< SireMol::BeadNum >::*set_function_type)( int,::SireMol::BeadNum const & ) ;
-            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::BeadNum >::set );
-            
-            AtomBeads_exposer.def( 
-                "set"
-                , set_function_value
-                , ( bp::arg("i"), bp::arg("value") )
-                , bp::return_self< >()
-                , "" );
-        
-        }
-        { //::SireMol::AtomProperty< SireMol::BeadNum >::set
-        
-            typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;
             typedef ::SireMol::AtomProperty< SireMol::BeadNum > & ( ::SireMol::AtomProperty< SireMol::BeadNum >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireMol::BeadNum const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::BeadNum >::set );
             

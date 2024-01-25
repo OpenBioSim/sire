@@ -514,20 +514,6 @@ void register_AtomStringProperty_class(){
         { //::SireMol::AtomProperty< QString >::set
         
             typedef SireMol::AtomProperty< QString > exported_class_t;
-            typedef ::SireMol::AtomProperty< QString > & ( ::SireMol::AtomProperty< QString >::*set_function_type)( int,::QString const & ) ;
-            set_function_type set_function_value( &::SireMol::AtomProperty< QString >::set );
-            
-            AtomStringProperty_exposer.def( 
-                "set"
-                , set_function_value
-                , ( bp::arg("i"), bp::arg("value") )
-                , bp::return_self< >()
-                , "" );
-        
-        }
-        { //::SireMol::AtomProperty< QString >::set
-        
-            typedef SireMol::AtomProperty< QString > exported_class_t;
             typedef ::SireMol::AtomProperty< QString > & ( ::SireMol::AtomProperty< QString >::*set_function_type)( ::SireMol::CGAtomIdx const &,::QString const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< QString >::set );
             
