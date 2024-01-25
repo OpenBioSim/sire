@@ -486,6 +486,20 @@ void register_AtomRadii_class(){
         { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::set
         
             typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > & ( ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::*set_function_type)( int,::SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::set );
+            
+            AtomRadii_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::set
+        
+            typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > exported_class_t;
             typedef ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > & ( ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::set );
             

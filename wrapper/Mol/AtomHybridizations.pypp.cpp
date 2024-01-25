@@ -494,6 +494,20 @@ void register_AtomHybridizations_class(){
         { //::SireMol::AtomProperty< SireMol::Hybridization >::set
         
             typedef SireMol::AtomProperty< SireMol::Hybridization > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMol::Hybridization > & ( ::SireMol::AtomProperty< SireMol::Hybridization >::*set_function_type)( int,::SireMol::Hybridization const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Hybridization >::set );
+            
+            AtomHybridizations_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMol::Hybridization >::set
+        
+            typedef SireMol::AtomProperty< SireMol::Hybridization > exported_class_t;
             typedef ::SireMol::AtomProperty< SireMol::Hybridization > & ( ::SireMol::AtomProperty< SireMol::Hybridization >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireMol::Hybridization const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Hybridization >::set );
             
