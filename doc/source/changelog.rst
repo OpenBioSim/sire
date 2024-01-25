@@ -17,6 +17,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this changelog when you create your PR
 * Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
+* Fix bug that disabled the ``DEBUG`` log level from the global logger.
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
 --------------------------------------------------------------------------------------------
