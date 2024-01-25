@@ -799,7 +799,11 @@ class System:
         self._molecules = None
 
     def energy_trajectory(
-        self, to_pandas: bool = False, to_alchemlyb: bool = False, map=None
+        self,
+        to_pandas: bool = False,
+        to_alchemlyb: bool = False,
+        energy_unit: str = "kcal/mol",
+        map=None,
     ):
         """
         Return the energy trajectory for this System. This is the history
@@ -816,6 +820,12 @@ class System:
         to_alchemlyb: bool
             Whether or not to return the energy trajectory as a
             pandas DataFrame that is formatted to usable in alchemlyb
+
+        energy_unit: str
+            Whichever of the alchemlyb energy units you want the output
+            DataFrame to use. This is in alchemlyb format, e.g.
+            `kcal/mol`, `kJ/mol`, or `kT`. This is only used if
+            `to_alchemlyb` is True.
         """
         from ..base import create_map
 
@@ -858,7 +868,9 @@ class System:
                     temperature = None
 
                 return traj.to_pandas(
-                    to_alchemlyb=to_alchemlyb, temperature=temperature
+                    to_alchemlyb=to_alchemlyb,
+                    temperature=temperature,
+                    energy_unit=energy_unit,
                 )
         else:
             return traj

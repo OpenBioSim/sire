@@ -1883,23 +1883,22 @@ void OpenMMFrEnergyST::initialise()
                         restrainedAtoms.property(QString("Anchor(%1)").arg(i)).asA<VariantProperty>().toInt();
                     int atomnum =
                         restrainedAtoms.property(QString("Atom(%1)").arg(i)).asA<VariantProperty>().toInt();
-		    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
 
                     int atopenmmindex = AtomNumToOpenMMIndex[atomnum];
                     int anchoropenmmindex = AtomNumToOpenMMIndex[anchornum];
 
                     if (Debug)
                     {
-                        //qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
-                        //         << yref << " z " << zref << " k " << k << " d " << d;
+                        // qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
+                        //          << yref << " z " << zref << " k " << k << " d " << d;
                         qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
                         qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;
-
                     }
 
                     // int posrestrdim = 5;
@@ -1948,7 +1947,6 @@ void OpenMMFrEnergyST::initialise()
         QList<DihedralID> dihedral_pert_list;
         QList<DihedralID> dihedral_pert_swap_list;
         QList<ImproperID> improper_pert_list;
-        QList<ImproperID> improper_pert_swap_list;
 
         /* "Light" atoms are defined to have a mass of HMASS or smaller.  This
            ensures that hydrogens in the HMR scheme will be constraint.  The
@@ -2468,7 +2466,7 @@ void OpenMMFrEnergyST::initialise()
 
                         solute_torsion_perturbation = new OpenMM::CustomTorsionForce(openmm_str);
                         solute_torsion_perturbation->addPerTorsionParameter("KJPerKcal");
-                        solute_torsion_perturbation_params[0] = 4.184;
+                        solute_torsion_perturbation_params[0] = OpenMM::KJPerKcal;
                         solute_torsion_perturbation->addGlobalParameter("lamdih", Alchemical_value);
                         solute_torsion_perturbation->addTorsion(idx0, idx1, idx2, idx3,
                                                                 solute_torsion_perturbation_params);
@@ -2485,8 +2483,6 @@ void OpenMMFrEnergyST::initialise()
                             DihedralID(four.atom3(), four.atom2(), four.atom1(), four.atom0()));
 
                         improper_pert_list.append(ImproperID(four.atom0(), four.atom1(), four.atom2(), four.atom3()));
-                        improper_pert_swap_list.append(
-                            ImproperID(four.atom0(), four.atom1(), four.atom3(), four.atom2()));
 
                         if (Debug)
                         {
@@ -2725,7 +2721,7 @@ void OpenMMFrEnergyST::initialise()
 
             if (solute.contains(molecule))
             { // Solute molecule. Check if the current solute dihedral is in the perturbed improper list
-                if (improper_pert_list.indexOf(improper_ff) != -1 || improper_pert_swap_list.indexOf(improper_ff) != -1)
+                if (improper_pert_list.indexOf(improper_ff) != -1)
                 {
                     if (Debug)
                         qDebug() << "Found Perturbed Improper\n";
