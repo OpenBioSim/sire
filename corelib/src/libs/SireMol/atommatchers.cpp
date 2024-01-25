@@ -2107,59 +2107,63 @@ QHash<AtomIdx, AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mo
             auto atoms0 = mol0.data().info().getAtomsIn(resIdx);
             auto atoms1 = mol1.data().info().getAtomsIn(ResIdx(resIdx.value() - res_idx_offset.value()));
 
-            // A set of matched atom indices.
-            QSet<int> matched;
-
-            // For each atom in atoms0, find the atom in atoms1 that is closest to it.
-            // To account for possible coordinate frame translations, we shift the
-            // coordinates of each atom by the CoM of its respective molecule.
-            for (int i = 0; i < atoms0.count(); ++i)
+            // Make sure the residues contain the same number of atoms.
+            if (atoms0.count() == atoms1.count())
             {
-                // Initialise the minimium difference to a large number.
-                double min_diff = 1e6;
+                // A set of matched atom indices.
+                QSet<int> matched;
 
-                // Initialise the match to an out-of-range number. This way we can tell
-                // when no matches have been found.
-                int match = -1;
-
-                // Get the coordinates of atom0.
-                auto coord0 = mol0.atom(atoms0[i]).property<Vector>(map0["coordinates"]);
-
-                // Shift by the CoM.
-                coord0 -= com0;
-
-                // Loop over all of the atoms to match against.
-                for (int j = 0; j < atoms0.count(); ++j)
+                // For each atom in atoms0, find the atom in atoms1 that is closest to it.
+                // To account for possible coordinate frame translations, we shift the
+                // coordinates of each atom by the CoM of its respective molecule.
+                for (int i = 0; i < atoms0.count(); ++i)
                 {
-                    // Get the coordinates of atom1.
-                    auto coord1 = mol1.atom(atoms1[j]).property<Vector>(map0["coordinates"]);
+                    // Initialise the minimium difference to a large number.
+                    double min_diff = 1e6;
+
+                    // Initialise the match to an out-of-range number. This way we can tell
+                    // when no matches have been found.
+                    int match = -1;
+
+                    // Get the coordinates of atom0.
+                    auto coord0 = mol0.atom(atoms0[i]).property<Vector>(map0["coordinates"]);
 
                     // Shift by the CoM.
-                    coord1 -= com1;
+                    coord0 -= com0;
 
-                    // Compute the separation between the atoms, accounting for
-                    // the CoM. This avoids issues with coordinate frame translations.
-                    double diff = qAbs((coord0 - coord1).magnitude());
-
-                    // Is this the best match to date? If so, update the match and the
-                    // minimum difference.
-                    if (diff < min_diff)
+                    // Loop over all of the atoms to match against.
+                    for (int j = 0; j < atoms0.count(); ++j)
                     {
-                        // Has this atom already been matched?
-                        if (not matched.contains(j))
+                        // Get the coordinates of atom1.
+                        auto coord1 = mol1.atom(atoms1[j]).property<Vector>(map0["coordinates"]);
+
+                        // Shift by the CoM.
+                        coord1 -= com1;
+
+                        // Compute the separation between the atoms, accounting for
+                        // the CoM. This avoids issues with coordinate frame translations.
+                        double diff = qAbs((coord0 - coord1).magnitude());
+
+                        // Is this the best match to date? If so, update the match and the
+                        // minimum difference.
+                        if (diff < min_diff)
                         {
-                            min_diff = diff;
-                            match = j;
+                            // Has this atom already been matched?
+                            if (not matched.contains(j))
+                            {
+                                min_diff = diff;
+                                match = j;
+                            }
                         }
                     }
-                }
 
-                // A match was found, store the best match and append to the list of
-                // matched atoms.
-                if (match != -1)
-                {
-                    matches.insert(atoms0[i], atoms1[match]);
-                    matched.insert(match);
+                    // A match was found, store the best match and append to the list of
+                    // matched atoms.
+                    if (match != -1)
+                    {
+                        matches.insert(atoms0[i], atoms1[match]);
+                        matched.insert(match);
+                    }
                 }
             }
         }
