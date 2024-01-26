@@ -49,10 +49,235 @@
 
 #include "SireStream/datastream.h"
 
+using namespace SireMaths;
 using namespace SireMol;
 using namespace SireUnits;
 using namespace SireBase;
 using namespace SireStream;
+
+/////////
+///////// Implmentation of AtomCoordMatcher
+/////////
+
+static const RegisterMetaType<AtomCoordMatcher> r_coordmatcher;
+
+/** Serialise to a binary datastream */
+QDataStream &operator<<(QDataStream &ds, const AtomCoordMatcher &coordmatcher)
+{
+    writeHeader(ds, r_coordmatcher, 1);
+    ds << static_cast<const AtomMatcher &>(coordmatcher);
+
+    return ds;
+}
+
+/** Extract from a binary datastream */
+QDataStream &operator>>(QDataStream &ds, AtomCoordMatcher &coordmatcher)
+{
+    VersionID v = readHeader(ds, r_coordmatcher);
+
+    if (v == 1)
+    {
+        ds >> static_cast<AtomMatcher &>(coordmatcher);
+    }
+    else
+        throw version_error(v, "1", r_coordmatcher, CODELOC);
+
+    return ds;
+}
+
+/** Constructor */
+AtomCoordMatcher::AtomCoordMatcher() :
+    ConcreteProperty<AtomCoordMatcher, AtomMatcher>(), zero_com(false)
+{
+}
+
+/** Constructor */
+AtomCoordMatcher::AtomCoordMatcher(bool zero_com) :
+    ConcreteProperty<AtomCoordMatcher, AtomMatcher>(), zero_com(zero_com)
+{
+}
+
+/** Copy constructor */
+AtomCoordMatcher::AtomCoordMatcher(const AtomCoordMatcher &other) : ConcreteProperty<AtomCoordMatcher, AtomMatcher>(other)
+{
+    this->zero_com = other.zero_com;
+}
+
+/** Destructor */
+AtomCoordMatcher::~AtomCoordMatcher()
+{
+}
+
+/** Copy assignment operator */
+AtomCoordMatcher &AtomCoordMatcher::operator=(const AtomCoordMatcher &other)
+{
+    this->zero_com = other.zero_com;
+    return *this;
+}
+
+/** Comparison operator */
+bool AtomCoordMatcher::operator==(const AtomCoordMatcher &other) const
+{
+    return this->zero_com == other.zero_com;
+}
+
+/** Comparison operator */
+bool AtomCoordMatcher::operator!=(const AtomCoordMatcher &other) const
+{
+    return not operator==(other);
+}
+
+QString AtomCoordMatcher::toString() const
+{
+    return QObject::tr("AtomCoordMatcher()");
+}
+
+/** Match the atoms in 'mol1' to the atoms in 'mol0' - this
+    returns the AtomIdxs of the atoms in 'mol1' that are in
+    'mol0', indexed by the AtomIdx of the atom in 'mol0'.
+
+     This skips atoms in 'mol1' that are not in 'mol0'
+*/
+QHash<AtomIdx, AtomIdx> AtomCoordMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                    const MoleculeView &mol1, const PropertyMap &map1) const
+{
+    AtomSelection sel0 = mol0.selection();
+    AtomSelection sel1 = mol1.selection();
+
+    // Invert the selection so that the smaller is sel0.
+    bool is_swapped = false;
+    if (sel0.nSelectedAtoms() > sel1.nSelectedAtoms())
+    {
+        sel0 = mol1.selection();
+        sel1 = mol0.selection();
+        is_swapped = true;
+    }
+
+    Vector com0;
+    Vector com1;
+
+    // Work out the centre of mass of each molecule.
+    if (this->zero_com)
+    {
+        if (is_swapped)
+        {
+            foreach (const AtomIdx atom, sel0.selectedAtoms())
+            {
+                const auto coord = mol1.atom(atom).property<Vector>(map1["coordinates"]);
+                com0 += coord;
+            }
+            com0 /= sel0.nSelectedAtoms();
+
+            foreach (const AtomIdx atom, sel1.selectedAtoms())
+            {
+                const auto coord = mol0.atom(atom).property<Vector>(map0["coordinates"]);
+                com1 += coord;
+            }
+            com1 /= sel1.nSelectedAtoms();
+        }
+        else
+        {
+            foreach (const AtomIdx atom, sel0.selectedAtoms())
+            {
+                const auto coord = mol0.atom(atom).property<Vector>(map0["coordinates"]);
+                com0 += coord;
+            }
+            com0 /= sel0.nSelectedAtoms();
+
+            foreach (const AtomIdx atom, sel1.selectedAtoms())
+            {
+                const auto coord = mol1.atom(atom).property<Vector>(map1["coordinates"]);
+                com1 += coord;
+            }
+            com1 /= sel1.nSelectedAtoms();
+        }
+    }
+
+    QHash<AtomIdx, AtomIdx> map;
+
+    // Create a list to hold the unmatched atoms in sel1.
+    QList<AtomIdx> unmatched_atoms;
+    foreach (const AtomIdx atom, sel1.selectedAtoms())
+    {
+        unmatched_atoms.append(atom);
+    }
+
+    // Loop over all atoms in sel0 and find the closest atom in sel1.
+    foreach (const AtomIdx atom0, sel0.selectedAtoms())
+    {
+        // Store the coordinates of the current atom.
+        Vector coord0;
+        if (is_swapped)
+        {
+            coord0 = mol1.atom(atom0).property<Vector>(map1["coordinates"]) - com1;
+        }
+        else
+        {
+            coord0 = mol0.atom(atom0).property<Vector>(map0["coordinates"]) - com0;
+        }
+
+        // Initialise a large distance.
+        double closest_distance = 1e10;
+
+        // Initialise the closest atom to an invalid index.
+        int closest_atom = -1;
+
+        // Current atom index.
+        int i = 0;
+
+        // Loop over unmatched atoms in sel1 and find the closest atom.
+        for (const auto &atom1 : unmatched_atoms)
+        {
+            Vector coord1;
+            if (is_swapped)
+            {
+                coord1 = mol0.atom(atom1).property<Vector>(map0["coordinates"]) - com0;
+            }
+            else
+            {
+                coord1 = mol1.atom(atom1).property<Vector>(map1["coordinates"]) - com1;
+            }
+
+            // Work out the distance between the two atoms.
+            const auto distance = Vector::distance(coord0, coord1);
+
+            // Check if this atom is closer than the current closest atom.
+            if (distance < closest_distance)
+            {
+                closest_distance = distance;
+                closest_atom = i;
+            }
+
+            i++;
+        }
+
+        if (closest_atom != -1)
+        {
+            // Insert the closest match and remove from the list of unmatched atoms.
+            map.insert(atom0, unmatched_atoms[closest_atom]);
+            unmatched_atoms.removeAt(closest_atom);
+        }
+    }
+
+    if (is_swapped)
+    {
+        QHash<AtomIdx, AtomIdx> swapped_map;
+        foreach (const auto &key, map.keys())
+        {
+            swapped_map.insert(map[key], key);
+        }
+        return swapped_map;
+    }
+    else
+    {
+        return map;
+    }
+}
+
+const char *AtomCoordMatcher::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<AtomCoordMatcher>());
+}
 
 /////////
 ///////// Implmentation of AtomIdxMatcher
@@ -1882,59 +2107,63 @@ QHash<AtomIdx, AtomIdx> ResIdxAtomCoordMatcher::pvt_match(const MoleculeView &mo
             auto atoms0 = mol0.data().info().getAtomsIn(resIdx);
             auto atoms1 = mol1.data().info().getAtomsIn(ResIdx(resIdx.value() - res_idx_offset.value()));
 
-            // A set of matched atom indices.
-            QSet<int> matched;
-
-            // For each atom in atoms0, find the atom in atoms1 that is closest to it.
-            // To account for possible coordinate frame translations, we shift the
-            // coordinates of each atom by the CoM of its respective molecule.
-            for (int i = 0; i < atoms0.count(); ++i)
+            // Make sure the residues contain the same number of atoms.
+            if (atoms0.count() == atoms1.count())
             {
-                // Initialise the minimium difference to a large number.
-                double min_diff = 1e6;
+                // A set of matched atom indices.
+                QSet<int> matched;
 
-                // Initialise the match to an out-of-range number. This way we can tell
-                // when no matches have been found.
-                int match = -1;
-
-                // Get the coordinates of atom0.
-                auto coord0 = mol0.atom(atoms0[i]).property<Vector>(map0["coordinates"]);
-
-                // Shift by the CoM.
-                coord0 -= com0;
-
-                // Loop over all of the atoms to match against.
-                for (int j = 0; j < atoms0.count(); ++j)
+                // For each atom in atoms0, find the atom in atoms1 that is closest to it.
+                // To account for possible coordinate frame translations, we shift the
+                // coordinates of each atom by the CoM of its respective molecule.
+                for (int i = 0; i < atoms0.count(); ++i)
                 {
-                    // Get the coordinates of atom1.
-                    auto coord1 = mol1.atom(atoms1[j]).property<Vector>(map0["coordinates"]);
+                    // Initialise the minimium difference to a large number.
+                    double min_diff = 1e6;
+
+                    // Initialise the match to an out-of-range number. This way we can tell
+                    // when no matches have been found.
+                    int match = -1;
+
+                    // Get the coordinates of atom0.
+                    auto coord0 = mol0.atom(atoms0[i]).property<Vector>(map0["coordinates"]);
 
                     // Shift by the CoM.
-                    coord1 -= com1;
+                    coord0 -= com0;
 
-                    // Compute the separation between the atoms, accounting for
-                    // the CoM. This avoids issues with coordinate frame translations.
-                    double diff = qAbs((coord0 - coord1).magnitude());
-
-                    // Is this the best match to date? If so, update the match and the
-                    // minimum difference.
-                    if (diff < min_diff)
+                    // Loop over all of the atoms to match against.
+                    for (int j = 0; j < atoms0.count(); ++j)
                     {
-                        // Has this atom already been matched?
-                        if (not matched.contains(j))
+                        // Get the coordinates of atom1.
+                        auto coord1 = mol1.atom(atoms1[j]).property<Vector>(map0["coordinates"]);
+
+                        // Shift by the CoM.
+                        coord1 -= com1;
+
+                        // Compute the separation between the atoms, accounting for
+                        // the CoM. This avoids issues with coordinate frame translations.
+                        double diff = qAbs((coord0 - coord1).magnitude());
+
+                        // Is this the best match to date? If so, update the match and the
+                        // minimum difference.
+                        if (diff < min_diff)
                         {
-                            min_diff = diff;
-                            match = j;
+                            // Has this atom already been matched?
+                            if (not matched.contains(j))
+                            {
+                                min_diff = diff;
+                                match = j;
+                            }
                         }
                     }
-                }
 
-                // A match was found, store the best match and append to the list of
-                // matched atoms.
-                if (match != -1)
-                {
-                    matches.insert(atoms0[i], atoms1[match]);
-                    matched.insert(match);
+                    // A match was found, store the best match and append to the list of
+                    // matched atoms.
+                    if (match != -1)
+                    {
+                        matches.insert(atoms0[i], atoms1[match]);
+                        matched.insert(match);
+                    }
                 }
             }
         }

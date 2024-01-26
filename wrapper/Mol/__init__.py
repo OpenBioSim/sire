@@ -38,16 +38,10 @@ def __get_metadata__(molview, *args):
     elif len(args) == 2:
         (key, metakey) = args
         if hasattr(molview, "metadata_type"):
-            property_type = molview.metadata_type(key, metakey).replace(
-                "::", "_"
-            )
+            property_type = molview.metadata_type(key, metakey).replace("::", "_")
         else:
-            property_type = molview.metadataType(key, metakey).replace(
-                "::", "_"
-            )
-        return getattr(molview, "_get_metadata_%s" % property_type)(
-            key, metakey
-        )
+            property_type = molview.metadataType(key, metakey).replace("::", "_")
+        return getattr(molview, "_get_metadata_%s" % property_type)(key, metakey)
 
     else:
         raise AttributeError(
@@ -162,9 +156,7 @@ def _set_property(molview, key, property):
 
         # no matching function - see if we have the generic 'PropertyProperty'
         if hasattr(molview, "_set_property_SireBase_PropertyPtr"):
-            return molview._set_property_SireBase_PropertyPtr(
-                key, _Base.wrap(property)
-            )
+            return molview._set_property_SireBase_PropertyPtr(key, _Base.wrap(property))
 
         raise e
 
@@ -187,9 +179,7 @@ def __set_bond_property__(connectivity, bond, key, property):
         return connectivity.__setProperty__(bond, key, property)
     except Exception as e:
         if e.__class__.__name__ == "ArgumentError":
-            return connectivity.__setProperty__(
-                bond, key, _Base.wrap(property)
-            )
+            return connectivity.__setProperty__(bond, key, _Base.wrap(property))
         else:
             raise e
 
@@ -201,18 +191,14 @@ def __set_metadata__(molview, *args):
 
         (typename, property) = __get_typename__(property)
 
-        return getattr(molview, "_set_metadata_%s" % typename)(
-            metakey, property
-        )
+        return getattr(molview, "_set_metadata_%s" % typename)(metakey, property)
 
     elif len(args) == 3:
         (key, metakey, property) = args
 
         (typename, property) = __get_typename__(property)
 
-        return getattr(molview, "_set_metadata_%s" % typename)(
-            key, metakey, property
-        )
+        return getattr(molview, "_set_metadata_%s" % typename)(key, metakey, property)
 
     else:
         raise AttributeError(
