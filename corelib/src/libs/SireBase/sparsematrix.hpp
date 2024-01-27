@@ -33,6 +33,16 @@
 
 #include "sireglobal.h"
 
+#include "SireStream/datastream.h"
+#include "SireStream/shareddatastream.h"
+#include "SireStream/magic_error.h"
+
+#include "SireError/errors.h"
+
+#include "tostring.h"
+
+#include <tuple>
+
 SIRE_BEGIN_HEADER
 
 namespace SireBase
@@ -135,13 +145,15 @@ namespace SireBase
     {
 
         friend SIREBASE_EXPORT QDataStream & ::operator<< <>(QDataStream &, const SparseMatrix<T> &);
-        friend SIREBASE_EXPORT QDataStream & ::operator>><>(QDataStream &, SparseMatrix<T> &);
+        friend SIREBASE_EXPORT QDataStream & ::operator>> <>(QDataStream &, SparseMatrix<T> &);
 
         template <class U>
         friend class SparseMatrix;
 
     public:
-        SparseMatrix(const T &default_value = T(), bool is_symmetric = false);
+        SparseMatrix(const T &default_value = T(),
+                     bool is_symmetric = false,
+                     bool has_default = true);
 
         template <class U>
         SparseMatrix(const SparseMatrix<U> &other);
@@ -163,6 +175,8 @@ namespace SireBase
 
         T &edit(quint32 i, quint32 j);
 
+        bool hasDefault() const;
+
         void commit();
 
         void reserve(int dim_x, int dim_y);
@@ -171,9 +185,22 @@ namespace SireBase
         bool isEmpty() const;
         bool isSymmetric() const;
 
+        bool hasNonDefaultValues() const;
+
+        bool isNonDefault(quint32 i, quint32 j) const;
+
         const T &defaultValue() const;
 
         SparseMatrix<T> transpose() const;
+
+        QString toString() const;
+
+        static const char *typeName();
+        const char *what() const;
+
+        SparseMatrix<T> *clone() const;
+
+        QList<std::tuple<quint32, quint32, T>> nonDefaultElements() const;
 
     private:
         /** Possible state of the sparse matrix */
@@ -192,14 +219,17 @@ namespace SireBase
 
         /** Hash which is used to store all of the elements of the matrix */
         QHash<detail::Index, T> data;
+
+        /** Whether or not there is a default value */
+        bool has_default;
     };
 
 #ifndef SIRE_SKIP_INLINE_FUNCTIONS
 
     /** Construct an empty sparse matrix */
     template <class T>
-    SIRE_OUTOFLINE_TEMPLATE SparseMatrix<T>::SparseMatrix(const T &default_value, bool is_symmetric)
-        : current_state(NORMAL), def(default_value)
+    SIRE_OUTOFLINE_TEMPLATE SparseMatrix<T>::SparseMatrix(const T &default_value, bool is_symmetric, bool _has_default)
+        : current_state(NORMAL), def(default_value), has_default(_has_default)
     {
         if (is_symmetric)
             current_state = SYMMETRIC;
@@ -232,12 +262,15 @@ namespace SireBase
         {
             data.insert(it.key(), T(it.value()));
         }
+
+        has_default = other.has_default;
     }
 
     /** Copy constructor */
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE SparseMatrix<T>::SparseMatrix(const SparseMatrix<T> &other)
-        : current_state(other.current_state), def(other.def), data(other.data)
+        : current_state(other.current_state), def(other.def), data(other.data),
+          has_default(other.has_default)
     {
     }
 
@@ -256,6 +289,7 @@ namespace SireBase
             data = other.data;
             def = other.def;
             current_state = other.current_state;
+            has_default = other.has_default;
         }
 
         return *this;
@@ -265,14 +299,14 @@ namespace SireBase
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE bool SparseMatrix<T>::operator==(const SparseMatrix<T> &other) const
     {
-        return current_state == other.current_state and def == other.def and data == other.data;
+        return current_state == other.current_state and def == other.def and data == other.data and has_default == other.has_default;
     }
 
     /** Comparison operator */
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE bool SparseMatrix<T>::operator!=(const SparseMatrix<T> &other) const
     {
-        return current_state != other.current_state or def != other.def or data != other.data;
+        return not this->operator==(other);
     }
 
     /** Return the element at index (i,j) - this returns the default
@@ -295,8 +329,14 @@ namespace SireBase
 
         if (it != data.constEnd())
             return *it;
-        else
+        else if (has_default)
             return def;
+        else
+            throw SireError::invalid_index(QObject::tr(
+                                               "There is no element at index (%1, %2) of this sparse matrix")
+                                               .arg(i)
+                                               .arg(j),
+                                           CODELOC);
     }
 
     /** Return the value at element (i,j) for editing. Only use this
@@ -346,14 +386,17 @@ namespace SireBase
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE void SparseMatrix<T>::commit()
     {
-        QMutableHashIterator<detail::Index, T> it(data);
-
-        while (it.hasNext())
+        if (has_default)
         {
-            it.next();
+            QMutableHashIterator<detail::Index, T> it(data);
 
-            if (it.value() == def)
-                it.remove();
+            while (it.hasNext())
+            {
+                it.next();
+
+                if (it.value() == def)
+                    it.remove();
+            }
         }
 
         data.squeeze();
@@ -374,7 +417,7 @@ namespace SireBase
             idx = detail::Index(i, j);
         }
 
-        if (value == def)
+        if (has_default and value == def)
             data.remove(idx);
         else
             data.insert(idx, value);
@@ -410,6 +453,13 @@ namespace SireBase
         return def;
     }
 
+    /** Return whether or not this matrix has default values */
+    template <class T>
+    SIRE_INLINE_TEMPLATE bool SparseMatrix<T>::hasDefault() const
+    {
+        return has_default;
+    }
+
     /** Return the transpose of this matrix */
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE SparseMatrix<T> SparseMatrix<T>::transpose() const
@@ -431,7 +481,99 @@ namespace SireBase
         return ret;
     }
 
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool SparseMatrix<T>::hasNonDefaultValues() const
+    {
+        return not data.isEmpty();
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool SparseMatrix<T>::isNonDefault(quint32 i, quint32 j) const
+    {
+        detail::Index idx;
+
+        if (current_state == TRANSPOSE or (current_state == SYMMETRIC and j < i))
+        {
+            idx = detail::Index(j, i);
+        }
+        else
+        {
+            idx = detail::Index(i, j);
+        }
+
+        return data.contains(idx);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QString SparseMatrix<T>::toString() const
+    {
+        if (this->isEmpty())
+        {
+            if (has_default)
+                return QString("SparseMatrix( all == %1 )").arg(Sire::toString(def));
+            else
+                return QString("SparseMatrix::empty");
+        }
+
+        QStringList lines;
+
+        for (auto it = data.constBegin(); it != data.constEnd(); ++it)
+        {
+            lines.append(QString("(%1, %2) = %3").arg(it.key().i).arg(it.key().j).arg(Sire::toString(it.value())));
+
+            if (lines.count() > 10)
+            {
+                lines.append("...");
+                break;
+            }
+        }
+
+        if (has_default)
+            return QString("SparseMatrix( default == %1,\n  %2\n)").arg(Sire::toString(def)).arg(lines.join("\n  "));
+        else
+            return QString("SparseMatrix(\n  %1\n)").arg(lines.join("\n  "));
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const char *SparseMatrix<T>::typeName()
+    {
+        return "SireBase::SparseMatrix";
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE const char *SparseMatrix<T>::what() const
+    {
+        return SparseMatrix<T>::typeName();
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SparseMatrix<T> *SparseMatrix<T>::clone() const
+    {
+        return new SparseMatrix<T>(*this);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE QList<std::tuple<quint32, quint32, T>> SparseMatrix<T>::nonDefaultElements() const
+    {
+        QList<std::tuple<quint32, quint32, T>> ret;
+
+        for (typename QHash<detail::Index, T>::const_iterator it = data.constBegin(); it != data.constEnd(); ++it)
+        {
+            ret.append(std::make_tuple(it.key().i, it.key().j, it.value()));
+        }
+
+        return ret;
+    }
+
 #endif // SIRE_SKIP_INLINE_FUNCTIONS
+
+    namespace detail
+    {
+        SIREBASE_EXPORT void writeSparseMatrixMagic(QDataStream &ds, SireStream::VersionID version);
+        SIREBASE_EXPORT SireStream::VersionID checkSparseMatrixMagic(QDataStream &ds);
+        SIREBASE_EXPORT void throwSparseMatrixMagicError(SireStream::VersionID version,
+                                                         const QString &supported);
+    }
 
 } // end of namespace SireBase
 
@@ -453,7 +595,11 @@ inline QDataStream &operator>>(QDataStream &ds, SireBase::detail::Index &idx)
 template <class T>
 QDataStream &operator<<(QDataStream &ds, const SireBase::SparseMatrix<T> &matrix)
 {
-    ds << qint32(matrix.current_state) << matrix.def << matrix.data;
+    SireBase::detail::writeSparseMatrixMagic(ds, 2);
+
+    SireStream::SharedDataStream sds(ds);
+
+    sds << qint32(matrix.current_state) << matrix.def << matrix.data << matrix.has_default;
 
     return ds;
 }
@@ -462,9 +608,24 @@ QDataStream &operator<<(QDataStream &ds, const SireBase::SparseMatrix<T> &matrix
 template <class T>
 QDataStream &operator>>(QDataStream &ds, SireBase::SparseMatrix<T> &matrix)
 {
-    qint32 typ;
+    auto v = SireBase::detail::checkSparseMatrixMagic(ds);
 
-    ds >> typ >> matrix.def >> matrix.data;
+    qint32 typ = SireBase::SparseMatrix<T>::NORMAL;
+
+    if (v == 2)
+    {
+        SireStream::SharedDataStream sds(ds);
+
+        sds >> typ >> matrix.def >> matrix.data >> matrix.has_default;
+    }
+    else if (v == 1)
+    {
+        ds >> typ >> matrix.def >> matrix.data;
+
+        matrix.has_default = true;
+    }
+    else
+        SireBase::detail::throwSparseMatrixMagicError(v, "1, 2");
 
     switch (typ)
     {
