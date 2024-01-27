@@ -34,16 +34,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   a ``sire.maths.Vector(1, 2, 3)``, while ``sire.v([3, 4, 5], units="A ps-1")``
   will create a ``Velocity3D``. This is documented in the units cheat sheet.
 
-* Added support for LJ 12-6-4 potentials, plus the ability to read and write
-  LJ parameter exceptions to Amber topology files. This fixes issue #125.
-
-* Added peek support to the datastream reader, so that it can recover
-  when it doesn't find the magic value it expects on reading.
-
-* Added functionality to SparseMatrix to make it easier to detect when
-  non-default values have been added, and also to set up a matrix which
-  has a concept of unset values.
-
 * You can now set the background color of a 3D view using the ``bgcolor="..."``
   keyword. This is documented in the view cheat sheet.
 
@@ -55,7 +45,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Added peek support to the datastream reader, so that it can recover
   when it doesn't find the magic value it expects on reading.
- 
+
 * Added functionality to SparseMatrix to make it easier to detect when
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
