@@ -31,7 +31,7 @@ class SOMMContext(_Context):
         """
         if system is not None:
             from ...base import create_map
-            from ._SireOpenMM import _set_openmm_coordinates_and_velocities
+            from ._SireOpenMM import set_openmm_coordinates_and_velocities
 
             map = create_map(map)
 
@@ -64,7 +64,7 @@ class SOMMContext(_Context):
             super().__init__(system, integrator, platform)
 
             # place the coordinates and velocities into the context
-            _set_openmm_coordinates_and_velocities(self, metadata)
+            set_openmm_coordinates_and_velocities(self, metadata)
 
             self._lambda_value = self._lambda_lever.set_lambda(
                 self, lambda_value=lambda_value, update_constraints=True
@@ -177,9 +177,9 @@ class SOMMContext(_Context):
                 f"are [ {keys} ]"
             )
 
-        from ._SireOpenMM import _openmm_set_context_platform_property
+        from ._SireOpenMM import set_context_platform_property
 
-        _openmm_set_context_platform_property(self, key, value)
+        set_context_platform_property(self, key, value)
 
     def get_atom_index(self):
         """
@@ -209,7 +209,7 @@ class SOMMContext(_Context):
         if self._lambda_lever is None:
             return None
 
-        return self._lambda_lever.schedule()
+        return self._lambda_lever.get_schedule()
 
     def set_lambda_schedule(self, schedule):
         """

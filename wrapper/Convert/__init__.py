@@ -68,14 +68,20 @@ except Exception as e:
 
 
 try:
+    from ._SireOpenMM import sire_to_openmm_system as _sire_to_openmm_system
+    from ._SireOpenMM import openmm_system_to_sire as _openmm_system_to_sire
+    from ._SireOpenMM import extract_coordinates as _openmm_extract_coordinates
     from ._SireOpenMM import (
-        _sire_to_openmm_system,
-        _openmm_system_to_sire,
-        _openmm_extract_coordinates,
-        _openmm_extract_coordinates_and_velocities,
-        _openmm_extract_space,
-        _minimise_openmm_context,
+        extract_coordinates_and_velocities as _openmm_extract_coordinates_and_velocities,
     )
+    from ._SireOpenMM import extract_space as _openmm_extract_space
+    from ._SireOpenMM import minimise_openmm_context as _minimise_openmm_context
+
+    from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule
+
+    from ..._pythonize import _pythonize
+
+    _pythonize([LambdaLever, PerturbableOpenMMMolecule], delete_old=True)
 
     _has_openmm = True
 

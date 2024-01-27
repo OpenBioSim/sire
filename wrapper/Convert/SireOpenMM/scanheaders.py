@@ -488,32 +488,8 @@ def scanFiles(
 
 
 if __name__ == "__main__":
-    modules = {
-        "Analysis": "SireAnalysis",
-        "Base": "SireBase",
-        "CAS": "SireCAS",
-        "Cluster": "SireCluster",
-        "FF": "SireFF",
-        "ID": "SireID",
-        "IO": "SireIO",
-        "Maths": "SireMaths",
-        "MM": "SireMM",
-        "Mol": "SireMol",
-        "Move": "SireMove",
-        "Search": "SireSearch",
-        "Squire": "Squire",
-        "Stream": "SireStream",
-        "System": "SireSystem",
-        "Units": "SireUnits",
-        "Vol": "SireVol",
-    }
-
-    if len(sys.argv) < 3:
-        print("USAGE: python scanheaders.py input_path output_path")
-        sys.exit(-1)
-
-    siredir = sys.argv[1]
-    outdir = sys.argv[2]
+    siredir = "."
+    outdir = "."
 
     exposed_classes = {}
 
@@ -524,41 +500,28 @@ if __name__ == "__main__":
     seg_properties = Properties()
     bead_properties = Properties()
 
-    for module in modules:
-        try:
-            os.makedirs("%s/%s" % (outdir, module))
-        except:
-            pass
+    FILE = open("module_info", "w")
 
-        FILE = open("%s/%s/module_info" % (outdir, module), "w")
+    print("Module SireOpenMM", file=FILE)
+    print("Source SireOpenMM", file=FILE)
+    print("Root ../../../corelib/src/libs", file=FILE)
 
-        print("Module %s" % module, file=FILE)
-        print("Source %s" % modules[module], file=FILE)
-        print("Root %s" % siredir, file=FILE)
+    FILE.close()
 
-        FILE.close()
+    module_classes = scanFiles(
+        ".",
+        ".",
+        atom_properties,
+        cg_properties,
+        res_properties,
+        chain_properties,
+        seg_properties,
+        bead_properties,
+    )
 
-        module_classes = scanFiles(
-            "%s/%s" % (siredir, modules[module]),
-            "%s/%s" % (outdir, module),
-            atom_properties,
-            cg_properties,
-            res_properties,
-            chain_properties,
-            seg_properties,
-            bead_properties,
-        )
-
-        for clas in module_classes:
-            exposed_classes[clas] = 1
+    for clas in module_classes:
+        exposed_classes[clas] = 1
 
     # write the set of exposed classes to a data file to be used
     # by other scripts
-    pickle.dump(exposed_classes, open("%s/classdb.data" % outdir, "wb"))
-
-    pickle.dump(atom_properties, open("%s/Mol/atomprops.data" % outdir, "wb"))
-    pickle.dump(cg_properties, open("%s/Mol/cgprops.data" % outdir, "wb"))
-    pickle.dump(res_properties, open("%s/Mol/resprops.data" % outdir, "wb"))
-    pickle.dump(chain_properties, open("%s/Mol/chainprops.data" % outdir, "wb"))
-    pickle.dump(seg_properties, open("%s/Mol/segprops.data" % outdir, "wb"))
-    pickle.dump(bead_properties, open("%s/Mol/beadprops.data" % outdir, "wb"))
+    pickle.dump(exposed_classes, open("classdb.data", "wb"))
