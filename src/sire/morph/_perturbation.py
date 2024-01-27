@@ -18,14 +18,12 @@ class Perturbation:
 
         if not mol.has_property(map["is_perturbable"]):
             raise ValueError(
-                "You can only create a `Perturbation` from a "
-                "perturbable molecule!"
+                "You can only create a `Perturbation` from a " "perturbable molecule!"
             )
 
         if not mol.property(map["is_perturbable"]):
             raise ValueError(
-                "You can only create a `Perturbation` from a "
-                "perturbable molecule!"
+                "You can only create a `Perturbation` from a " "perturbable molecule!"
             )
 
         # construct the perturbation objects that can move the
@@ -139,7 +137,109 @@ class Perturbation:
     def __repr__(self):
         return self.__str__()
 
-    def link_to_reference(self, properties: list[str] = None):
+    def extract_reference(self, properties: list[str] = None, auto_commit: bool = True):
+        """
+        Extract the reference state properties of the molecule
+        and remove the perturbed state.
+
+        If a list of properties is passed then only those properties will
+        be extracted to the reference molecule
+
+        Parameters
+        ----------
+
+        properties: list[str]
+            The list of properties to extract to the reference molecule
+
+        auto_commit: bool
+            If True then the molecule will be committed and returned
+        """
+        if properties is None:
+            properties = []
+
+            for key in self._mol.property_keys():
+                if key.endswith("0"):
+                    properties.append(key[:-1])
+
+        elif type(properties) is str:
+            properties = [properties]
+
+        mol = self._mol.molecule().edit()
+
+        for key in properties:
+            ref_prop = f"{key}0"
+            pert_prop = f"{key}1"
+
+            if mol.has_property(ref_prop):
+                if mol.has_property(key):
+                    mol.remove_property(key)
+
+                mol.set_property(key, mol.property(ref_prop))
+                mol.remove_property(ref_prop)
+
+                if mol.has_property(pert_prop):
+                    mol.remove_property(pert_prop)
+
+        self._mol.update(mol.commit())
+
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
+
+    def extract_perturbed(self, properties: list[str] = None, auto_commit: bool = True):
+        """
+        Extract the perturbed state properties of the molecule
+        and remove the reference state.
+
+        If a list of properties is passed then only those properties will
+        be extracted to the reference molecule
+
+        Parameters
+        ----------
+
+        properties: list[str]
+            The list of properties to extract to the perturbed molecule
+
+        auto_commit: bool
+            If True then the molecule will be committed and returned
+        """
+        if properties is None:
+            properties = []
+
+            for key in self._mol.property_keys():
+                if key.endswith("1"):
+                    properties.append(key[:-1])
+
+        elif type(properties) is str:
+            properties = [properties]
+
+        mol = self._mol.molecule().edit()
+
+        for key in properties:
+            ref_prop = f"{key}0"
+            pert_prop = f"{key}1"
+
+            if mol.has_property(pert_prop):
+                if mol.has_property(key):
+                    mol.remove_property(key)
+
+                mol.set_property(key, mol.property(pert_prop))
+                mol.remove_property(pert_prop)
+
+                if mol.has_property(ref_prop):
+                    mol.remove_property(ref_prop)
+
+        self._mol.update(mol.commit())
+
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
+
+    def link_to_reference(
+        self, properties: list[str] = None, auto_commit: bool = False
+    ):
         """
         Link all of the properties of the molecule to their values in the
         reference molecule (lambda=0).
@@ -152,6 +252,9 @@ class Perturbation:
 
         properties: list[str]
             The list of properties to link to the reference molecule
+
+        auto_commit: bool
+            If True then the molecule will be committed and returned
         """
         if properties is None:
             properties = []
@@ -172,9 +275,15 @@ class Perturbation:
             mol.add_link(key, f"{key}0")
 
         self._mol.update(mol.commit())
-        return self
 
-    def link_to_perturbed(self, properties: list[str] = None):
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
+
+    def link_to_perturbed(
+        self, properties: list[str] = None, auto_commit: bool = False
+    ):
         """
         Link all of the properties of the molecule to their values in the
         perturbed molecule (lambda=1).
@@ -187,6 +296,9 @@ class Perturbation:
 
         properties: list[str]
             The list of properties to link to the perturbed molecule
+
+        auto_commit: bool
+            If True then the molecule will be committed and returned
         """
         if properties is None:
             properties = []
@@ -207,7 +319,11 @@ class Perturbation:
             mol.add_link(key, f"{key}1")
 
         self._mol.update(mol.commit())
-        return self
+
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
 
     def set_lambda(self, lam_val: float):
         """
@@ -265,10 +381,7 @@ class Perturbation:
             # as we will be replacing it with the calculated perturbed
             # coordinates
             mol.update(
-                mol.molecule()
-                .edit()
-                .remove_link(map["coordinates"].source())
-                .commit()
+                mol.molecule().edit().remove_link(map["coordinates"].source()).commit()
             )
 
         if not mol.has_property(map["coordinates"]):

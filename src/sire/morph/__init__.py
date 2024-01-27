@@ -3,6 +3,7 @@ __all__ = [
     "replica_exchange",
     "repartition_hydrogen_masses",
     "to_alchemlyb",
+    "create_from_pertfile",
     "Perturbation",
 ]
 
@@ -15,3 +16,5 @@ from ._repex import replica_exchange
 from ._hmr import repartition_hydrogen_masses
 
 from ._alchemy import to_alchemlyb
+
+from ._pertfile import create_from_pertfile
