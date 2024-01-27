@@ -49,6 +49,7 @@ QDataStream &operator<<(QDataStream &ds, const LJ1264Parameter &ljparam)
     return ds;
 }
 
+
 /** Deserialise from a binary data stream */
 QDataStream &operator>>(QDataStream &ds, LJ1264Parameter &ljparam)
 {
