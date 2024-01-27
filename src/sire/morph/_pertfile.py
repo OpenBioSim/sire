@@ -253,7 +253,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["improper1"] = impropers1
 
     # duplicate the coordinates, mass, and element properties
-    for prop in ["coordinates", "mass", "element"]:
+    for prop in ["coordinates", "mass", "element", "forcefield", "intrascale"]:
         orig_prop = map[prop].source()
         c[prop + "0"] = c[orig_prop]
         c[prop + "1"] = c[orig_prop]

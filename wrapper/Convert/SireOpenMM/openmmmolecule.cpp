@@ -1798,6 +1798,14 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule()
 {
 }
 
+/** Construct from a passed molecule and map */
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
+                                                     const PropertyMap &map)
+    : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
+{
+    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map)));
+}
+
 /** Construct from the passed OpenMMMolecule */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
@@ -2327,4 +2335,38 @@ PerturbableOpenMMMolecule::getPerturbableConstraints() const
     }
 
     return std::make_tuple(idxs, r0, r1);
+}
+
+/** Return the atoms which are perturbed, in the order they are
+ *  set in this perturbation
+ */
+Selector<Atom> PerturbableOpenMMMolecule::atoms() const
+{
+    return perturbed_atoms;
+}
+
+/** Return the bonds which are perturbed, in the order they are
+ *  set in this perturbation
+ */
+SelectorBond PerturbableOpenMMMolecule::bonds() const
+{
+    return perturbed_bonds;
+}
+
+/** Return the angles which are perturbed, in the order they are
+ *  set in this perturbation
+ */
+SelectorAngle PerturbableOpenMMMolecule::angles() const
+{
+    return perturbed_angs;
+}
+
+/** Return the torsions which are perturbed, in the order they are
+ *  set in this perturbation. Note that this include both the
+ *  normal dihedrals and the improper torsions (openmm internally
+ *  treats them the same)
+ */
+SelectorDihedral PerturbableOpenMMMolecule::torsions() const
+{
+    return perturbed_dihs;
 }

@@ -61,6 +61,7 @@ class Perturbation:
             "treechain",
         ]
 
+        self._map = map
         self._map0 = map.add_suffix("0", props)
         self._map1 = map.add_suffix("1", props)
 
@@ -412,3 +413,74 @@ class Perturbation:
         Inspect the perturbation - this returns a report showing
         which parameters are being perturbed
         """
+        from ..legacy.Convert import PerturbableOpenMMMolecule
+
+        p = PerturbableOpenMMMolecule(self._mol, self._map)
+
+        report = {}
+
+        changed_atoms = []
+
+        for atom, q0, s0, e0, q1, s1, e1 in zip(
+            p.atoms(),
+            p.get_charges0(),
+            p.get_sigmas0(),
+            p.get_epsilons0(),
+            p.get_charges1(),
+            p.get_sigmas1(),
+            p.get_epsilons1(),
+        ):
+            if q0 != q1 or s0 != s1 or e0 != e1:
+                changed_atoms.append((atom, q0, s0, e0, q1, s1, e1))
+
+        if len(changed_atoms) > 0:
+            report["atoms"] = changed_atoms
+
+        changed_bonds = []
+
+        for bond, r0, k0, r1, k1 in zip(
+            p.bonds(),
+            p.get_bond_lengths0(),
+            p.get_bond_ks0(),
+            p.get_bond_lengths1(),
+            p.get_bond_ks1(),
+        ):
+            if r0 != r1 or k0 != k1:
+                changed_bonds.append((bond, r0, k0, r1, k1))
+
+        if len(changed_bonds) > 0:
+            report["bonds"] = changed_bonds
+
+        changed_angles = []
+
+        for angle, theta0, k0, theta1, k1 in zip(
+            p.angles(),
+            p.get_angle_sizes0(),
+            p.get_angle_ks0(),
+            p.get_angle_sizes1(),
+            p.get_angle_ks1(),
+        ):
+            if theta0 != theta1 or k0 != k1:
+                changed_angles.append((angle, theta0, k0, theta1, k1))
+
+        if len(changed_angles) > 0:
+            report["angles"] = changed_angles
+
+        changed_torsions = []
+
+        for torsion, k0, p0, ph0, k1, p1, ph1 in zip(
+            p.torsions(),
+            p.get_torsion_ks0(),
+            p.get_torsion_periodicities0(),
+            p.get_torsion_phases0(),
+            p.get_torsion_ks1(),
+            p.get_torsion_periodicities1(),
+            p.get_torsion_phases1(),
+        ):
+            if k0 != k1 or p0 != p1 or ph0 != ph1:
+                changed_torsions.append((torsion, k0, p0, ph0, k1, p1, ph1))
+
+        if len(changed_torsions) > 0:
+            report["torsions"] = changed_torsions
+
+        return report

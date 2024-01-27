@@ -41,10 +41,6 @@ namespace SireOpenMM
         OpenMMMolecule(const SireMol::Molecule &mol,
                        const SireBase::PropertyMap &map);
 
-        OpenMMMolecule(const SireMol::Molecule &mol,
-                       const SireBase::PropertyMap &map0,
-                       const SireBase::PropertyMap &map1);
-
         ~OpenMMMolecule();
 
         bool operator==(const OpenMMMolecule &other) const;
@@ -207,6 +203,10 @@ namespace SireOpenMM
         PerturbableOpenMMMolecule();
 
         PerturbableOpenMMMolecule(const OpenMMMolecule &mol);
+
+        PerturbableOpenMMMolecule(const SireMol::Molecule &mol,
+                                  const SireBase::PropertyMap &map);
+
         PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other);
 
         ~PerturbableOpenMMMolecule();
@@ -277,6 +277,11 @@ namespace SireOpenMM
         QVector<qint32> getConstraintIndicies() const;
 
         std::tuple<QVector<qint32>, QVector<double>, QVector<double>> getPerturbableConstraints() const;
+
+        SireMol::Selector<SireMol::Atom> atoms() const;
+        SireMM::SelectorBond bonds() const;
+        SireMM::SelectorAngle angles() const;
+        SireMM::SelectorDihedral torsions() const;
 
     private:
         /** The atoms that are perturbed, in the order they appear

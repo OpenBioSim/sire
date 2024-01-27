@@ -14,6 +14,10 @@ __all__ = [
     "sire_to_gemmi",
     "gemmi_to_sire",
     "supported_formats",
+    "LambdaLever",
+    "PerturbableOpenMMMolecule",
+    "OpenMMMetaData",
+    "SOMMContext",
 ]
 
 try:
@@ -77,11 +81,15 @@ try:
     from ._SireOpenMM import extract_space as _openmm_extract_space
     from ._SireOpenMM import minimise_openmm_context as _minimise_openmm_context
 
-    from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule
+    from ._sommcontext import SOMMContext
+
+    from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData
 
     from ..._pythonize import _pythonize
 
-    _pythonize([LambdaLever, PerturbableOpenMMMolecule], delete_old=True)
+    _pythonize(
+        [LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData], delete_old=True
+    )
 
     _has_openmm = True
 
@@ -466,6 +474,22 @@ except Exception as e:
         )
 
     _has_openmm = False
+
+    class LambdaLever:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
+
+    class PerturbableOpenMMMolecule:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
+
+    class OpenMMMetaData:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
+
+    class SOMMContext:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
 
     def sire_to_openmm(*args, **kwargs):
         _no_openmm()

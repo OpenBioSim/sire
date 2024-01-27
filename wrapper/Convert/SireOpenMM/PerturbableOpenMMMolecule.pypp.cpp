@@ -224,7 +224,44 @@ void register_PerturbableOpenMMMolecule_class(){
         PerturbableOpenMMMolecule_exposer_t PerturbableOpenMMMolecule_exposer = PerturbableOpenMMMolecule_exposer_t( "PerturbableOpenMMMolecule", "This class holds all of the information of an OpenMM molecule\nthat can be perturbed using a LambdaSchedule. The data is held\nin easy-to-access arrays, with guarantees that the arrays are\ncompatible and the data is aligned.\n", bp::init< >("Null constructor") );
         bp::scope PerturbableOpenMMMolecule_scope( PerturbableOpenMMMolecule_exposer );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::OpenMMMolecule const & >(( bp::arg("mol") ), "Construct from the passed OpenMMMolecule") );
+        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, SireBase::PropertyMap const & >(( bp::arg("mol"), bp::arg("map") ), "") );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::PerturbableOpenMMMolecule const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireOpenMM::PerturbableOpenMMMolecule::angles
+        
+            typedef ::SireMM::SelectorAngle ( ::SireOpenMM::PerturbableOpenMMMolecule::*angles_function_type)(  ) const;
+            angles_function_type angles_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::angles );
+            
+            PerturbableOpenMMMolecule_exposer.def( 
+                "angles"
+                , angles_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::atoms
+        
+            typedef ::SireMol::Selector< SireMol::Atom > ( ::SireOpenMM::PerturbableOpenMMMolecule::*atoms_function_type)(  ) const;
+            atoms_function_type atoms_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::atoms );
+            
+            PerturbableOpenMMMolecule_exposer.def( 
+                "atoms"
+                , atoms_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::bonds
+        
+            typedef ::SireMM::SelectorBond ( ::SireOpenMM::PerturbableOpenMMMolecule::*bonds_function_type)(  ) const;
+            bonds_function_type bonds_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::bonds );
+            
+            PerturbableOpenMMMolecule_exposer.def( 
+                "bonds"
+                , bonds_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getAlphas0
         
             typedef ::QVector< double > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getAlphas0_function_type)(  ) const;
@@ -696,6 +733,18 @@ void register_PerturbableOpenMMMolecule_class(){
             PerturbableOpenMMMolecule_exposer.def( 
                 "toString"
                 , toString_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::torsions
+        
+            typedef ::SireMM::SelectorDihedral ( ::SireOpenMM::PerturbableOpenMMMolecule::*torsions_function_type)(  ) const;
+            torsions_function_type torsions_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::torsions );
+            
+            PerturbableOpenMMMolecule_exposer.def( 
+                "torsions"
+                , torsions_function_value
                 , bp::release_gil_policy()
                 , "" );
         
