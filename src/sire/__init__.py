@@ -797,8 +797,10 @@ _can_lazy_import = False
 if "SIRE_NO_LAZY_IMPORT" not in _os.environ:
     try:
         import lazy_import as _lazy_import
+        import logging as _logging
 
-        _lazy_import.logging.disable(_lazy_import.logging.DEBUG)
+        _logger = _logging.getLogger("lazy_import")
+        _logger.setLevel(_logging.ERROR)
 
         # Previously needed to filter to remove excessive warnings
         # from 'frozen importlib' when lazy loading.

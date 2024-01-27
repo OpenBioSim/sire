@@ -525,36 +525,6 @@ PropertyPtr AtomProperty<Vector>::getAsProperty(const CGAtomIdx &cgatomidx) cons
     return PropertyPtr(VectorProperty(this->get(cgatomidx)));
 }
 
-/** Set the coordinates of the ith atom to 'value' */
-AtomProperty<Vector> &AtomProperty<Vector>::set(int i, const Vector &value)
-{
-    i = Index(i).map(this->nAtoms());
-
-    for (int cgidx = 0; cgidx < coords.nCoordGroups(); ++cgidx)
-    {
-        const auto &cgroup = coords.at(cgidx);
-
-        if (i < cgroup.count())
-        {
-            coords.update(cgidx, cgroup.edit().setCoordinates(i, value));
-            return *this;
-        }
-        else
-        {
-            i -= cgroup.count();
-
-            if (i < 0)
-                throw SireError::invalid_index(QObject::tr("Cannot set the coordinates of the atom at index %1 as "
-                                                           "the index is out of range (0-%2)")
-                                                   .arg(i)
-                                                   .arg(this->nAtoms() - 1),
-                                               CODELOC);
-        }
-    }
-
-    return *this;
-}
-
 /** Set the coordinates of the atom at index 'cgatomidx' to the value 'value' */
 AtomProperty<Vector> &AtomProperty<Vector>::set(const CGAtomIdx &cgatomidx, const Vector &value)
 {

@@ -2518,7 +2518,7 @@ if not hasattr(AtomMapping, "__orig_find__"):
 
 if not hasattr(Molecule, "perturbation"):
 
-    def __molecule_perturbation(mol):
+    def __molecule_perturbation(mol, map=None):
         """
         Return an interface to the perturbable properties of
         this molecule. Note that the molecule must be
@@ -2526,7 +2526,7 @@ if not hasattr(Molecule, "perturbation"):
         """
         from ..morph._perturbation import Perturbation
 
-        return Perturbation(mol)
+        return Perturbation(mol, map=map)
 
     def __molecule_is_perturbable(mol):
         """

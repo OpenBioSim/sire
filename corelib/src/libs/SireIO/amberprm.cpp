@@ -71,7 +71,6 @@
 #include "SireMM/cljnbpairs.h"
 #include "SireMM/internalff.h"
 #include "SireMM/ljparameter.h"
-#include "SireMM/lj1264parameter.h"
 
 #include "SireVol/cartesian.h"
 #include "SireVol/periodicbox.h"
@@ -82,7 +81,6 @@
 
 #include "SireBase/findexe.h"
 #include "SireBase/tempdir.h"
-#include "SireBase/progressbar.h"
 
 #include "SireIO/errors.h"
 
@@ -121,12 +119,11 @@ const RegisterParser<AmberPrm> register_amberparm;
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const AmberPrm &parm)
 {
-    writeHeader(ds, r_parm, 3);
+    writeHeader(ds, r_parm, 2);
 
     SharedDataStream sds(ds);
 
     sds << parm.flag_to_line << parm.int_data << parm.float_data << parm.string_data << parm.ffield
-        << parm.lj_exceptions << parm.warns << parm.comb_rules
         << static_cast<const MoleculeParser &>(parm);
 
     return ds;
@@ -384,11 +381,8 @@ void AmberPrm::rebuildLJParameters()
     lj_data = QVector<LJParameter>(ntypes);
     auto lj_data_array = lj_data.data();
 
-    lj_exceptions.clear();
-
     const auto acoeffs = float_data.value("LENNARD_JONES_ACOEF");
     const auto bcoeffs = float_data.value("LENNARD_JONES_BCOEF");
-    const auto ccoeffs = float_data.value("LENNARD_JONES_CCOEF");
 
     const auto hbond_acoeffs = float_data.value("HBOND_ACOEF");
     const auto hbond_bcoeffs = float_data.value("HBOND_BCOEF");
@@ -430,7 +424,6 @@ void AmberPrm::rebuildLJParameters()
 
     const auto acoeffs_data = acoeffs.constData();
     const auto bcoeffs_data = bcoeffs.constData();
-    const auto ccoeffs_data = ccoeffs.constData();
     const auto hbond_acoeffs_data = hbond_acoeffs.constData();
     const auto hbond_bcoeffs_data = hbond_bcoeffs.constData();
     const auto nb_parm_index_data = nb_parm_index.constData();
@@ -501,8 +494,8 @@ void AmberPrm::rebuildLJParameters()
 
             if (idx < 0)
             {
-                auto a = hbond_acoeffs_data[1 - idx];
-                auto b = hbond_bcoeffs_data[1 - idx];
+                auto a = hbond_acoeffs_data[idx];
+                auto b = hbond_bcoeffs_data[idx];
 
                 if ((a > 1e-6) and (b > 1e-6))
                 {
@@ -513,140 +506,6 @@ void AmberPrm::rebuildLJParameters()
                 }
             }
         }
-    }
-
-    // While most LJ parameters use combining rules to form the i,j pairs,
-    // Amber parm files support custom (exception) LJ parameters for specific
-    // pairs of atoms. This is increasingly used by researchers to control
-    // interactions between molecules, or to support the 12-6-4 potential
-    // (which doesn't use combining rules?). Here, we loop over all pairs
-    // of parameters to find those that don't use combining rules, and
-    // so should be treated as exceptions.
-    const bool has_c_coeffs = not ccoeffs.isEmpty();
-
-    bool use_arithmetic_combining_rules = false;
-    bool use_geometric_combining_rules = false;
-
-    for (int i = 0; i < ntypes; ++i)
-    {
-        const auto &lj_i = lj_data_array[i];
-
-        // include i==j pair as we also need to check for c-coeffs
-        for (int j = i; j < ntypes; ++j)
-        {
-            const auto &lj_j = lj_data_array[j];
-
-            int idx = nb_parm_index_data[ntypes * i + j];
-
-            if (idx > 0)
-            {
-                auto a = acoeffs_data[idx - 1];
-                auto b = bcoeffs_data[idx - 1];
-
-                // convert A and B into sigma and epsilon
-                double sigma = 0;
-                double epsilon = 0;
-
-                // numeric imprecision means that any parameter with acoeff less
-                // than 1e-10 is really equal to 0
-                if (a > 1e-10)
-                {
-                    // convert a_coeff & b_coeff into angstroms and kcal/mol-1
-                    sigma = std::pow(a / b, 1 / 6.);
-                    epsilon = pow_2(b) / (4 * a);
-                }
-
-                auto lj_ij = LJParameter(sigma * angstrom, epsilon * kcal_per_mol);
-
-                auto expect = lj_i.combine(lj_j, LJParameter::ARITHMETIC);
-
-                bool is_exception = false;
-
-                if (std::abs(lj_ij.epsilon().value() - expect.epsilon().value()) <= 1e-6)
-                {
-                    if (std::abs(lj_ij.sigma().value() - expect.sigma().value()) > 1e-6)
-                    {
-                        // not arithmetic combining rules - try geometric
-                        expect = lj_i.combine(lj_j, LJParameter::GEOMETRIC);
-
-                        is_exception = std::abs(lj_ij.sigma().value() - expect.sigma().value()) > 1e-6;
-
-                        if (not is_exception)
-                        {
-                            if (has_c_coeffs)
-                                use_geometric_combining_rules = ccoeffs_data[idx - 1] != 0;
-                            else
-                                use_geometric_combining_rules = true;
-                        }
-                    }
-                    else
-                    {
-                        use_arithmetic_combining_rules = true;
-                    }
-                }
-                else
-                {
-                    is_exception = true;
-                }
-
-                if (has_c_coeffs)
-                {
-                    // we have C coefficients, so we need to check if this is an exception
-                    // or not
-                    if (std::abs(ccoeffs_data[idx - 1]) > 1e-6)
-                    {
-                        // this is an exception
-                        is_exception = true;
-                    }
-                }
-
-                if (is_exception)
-                {
-                    // this is an exception parameter
-                    double a = acoeffs_data[idx - 1];
-                    double b = bcoeffs_data[idx - 1];
-                    double c = 0;
-
-                    if (has_c_coeffs)
-                    {
-                        c = ccoeffs_data[idx - 1];
-                    }
-
-                    // already in internal units (kcal mol-1, Angstroms)
-                    auto lj_exception = LJException(LJ1264Parameter(a, b, c));
-
-                    if (not lj_exceptions.contains(i))
-                    {
-                        lj_exceptions.insert(i, QList<LJException>());
-                    }
-
-                    if (not lj_exceptions.contains(j))
-                    {
-                        lj_exceptions.insert(j, QList<LJException>());
-                    }
-
-                    lj_exceptions[i].append(lj_exception);
-                    lj_exceptions[j].append(lj_exception.getPair());
-                }
-            }
-        }
-    }
-
-    if (use_arithmetic_combining_rules and use_geometric_combining_rules)
-    {
-        warns.append(QObject::tr("The LJ parameters in this Amber Parm file use both arithmetic and geometric "
-                                 "combining rules. Sire will use arithmetic combining rules for all LJ "
-                                 "parameters."));
-        use_geometric_combining_rules = false;
-    }
-
-    if (use_geometric_combining_rules)
-    {
-        this->comb_rules = "geometric";
-    }
-    else
-    {
-        this->comb_rules = "arithmetic";
     }
 }
 
@@ -917,7 +776,7 @@ QDataStream &operator>>(QDataStream &ds, AmberPrm &parm)
 {
     VersionID v = readHeader(ds, r_parm);
 
-    if (v == 1 or v == 2 or v == 3)
+    if (v == 1 or v == 2)
     {
         SharedDataStream sds(ds);
 
@@ -930,20 +789,12 @@ QDataStream &operator>>(QDataStream &ds, AmberPrm &parm)
         else
             parm.ffield = MMDetail();
 
-        parm.lj_exceptions.clear();
-        parm.comb_rules = "arithmetic";
-
-        if (v == 3)
-            sds >> parm.lj_exceptions >> parm.warns >> parm.comb_rules;
-        else
-            parm.lj_exceptions.clear();
-
         sds >> static_cast<MoleculeParser &>(parm);
 
         parm.rebuildAfterReload();
     }
     else
-        throw version_error(v, "1,2,3", r_parm, CODELOC);
+        throw version_error(v, "1,2", r_parm, CODELOC);
 
     return ds;
 }
@@ -1284,20 +1135,11 @@ void AmberPrm::parse(const PropertyMap &map)
                             "molecules using the forcefield\n%1")
                     .arg(ffield.toString()),
                 CODELOC);
-
-        if (ffield.usesGeometricCombiningRules())
-        {
-            comb_rules = "geometric";
-        }
-        else
-        {
-            comb_rules = "arithmetic";
-        }
     }
     else
     {
         // now guess the forcefield based on what we know about the potential
-        ffield = MMDetail::guessFrom(comb_rules, "coulomb", "lj", 1.0 / 1.2, 0.5, "harmonic", "harmonic", "cosine");
+        ffield = MMDetail::guessFrom("arithmetic", "coulomb", "lj", 1.0 / 1.2, 0.5, "harmonic", "harmonic", "cosine");
     }
 
     // finally, make sure that we have been constructed sane
@@ -2070,8 +1912,7 @@ std::tuple<QVector<qint64>, QVector<qint64>, QHash<AmberNBDihPart, qint64>> getD
 
 /** Internal function that converts the passed list of parameters into a list
     of text lines */
-QStringList toLines(const QVector<AmberParams> &params, const Space &space, int num_dummies,
-                    bool use_geometric_rules, bool use_parallel = true,
+QStringList toLines(const QVector<AmberParams> &params, const Space &space, int num_dummies, bool use_parallel = true,
                     QStringList *all_errors = 0)
 {
     if (params.isEmpty())
@@ -2571,19 +2412,14 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     {
         // we need to go through each atom and work out if the atom type
         // is unique
-        QVector<std::pair<LJParameter, QList<LJException>>> ljparams;
+        QVector<LJParameter> ljparams;
         QVector<QVector<qint64>> atom_types(params.count());
         auto atom_types_data = atom_types.data();
-
-        bool has_ccoeff = false;
-        bool has_ljexceptions = false;
 
         for (int i = 0; i < params.count(); ++i)
         {
             const auto info = params_data[i].info();
             const auto ljs = params_data[i].ljs();
-
-            const bool mol_has_lj_exceptions = ljs.hasExceptions();
 
             QVector<qint64> mol_atom_types(info.nAtoms());
             auto mol_atom_types_data = mol_atom_types.data();
@@ -2592,33 +2428,11 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             {
                 const LJParameter lj = ljs[info.cgAtomIdx(AtomIdx(j))];
 
-                QList<LJException> ljexceptions;
-
-                if (mol_has_lj_exceptions)
-                {
-                    has_ljexceptions = true;
-                    ljexceptions = ljs.getExceptions(j);
-
-                    if (not has_ccoeff)
-                    {
-                        for (const auto &ljexception : ljexceptions)
-                        {
-                            if (ljexception.value().hasC())
-                            {
-                                has_ccoeff = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                auto lj_with_exceptions = std::make_pair(lj, ljexceptions);
-
-                int idx = ljparams.indexOf(lj_with_exceptions);
+                int idx = ljparams.indexOf(lj);
 
                 if (idx == -1)
                 {
-                    ljparams.append(lj_with_exceptions);
+                    ljparams.append(lj);
                     mol_atom_types_data[j] = ljparams.count();
                 }
                 else
@@ -2638,12 +2452,6 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         QVector<qint64> ico(ntypes * ntypes);
         QVector<double> cn1((ntypes * (ntypes + 1)) / 2);
         QVector<double> cn2((ntypes * (ntypes + 1)) / 2);
-        QVector<double> cn3;
-
-        if (has_ccoeff)
-        {
-            cn3 = QVector<double>((ntypes * (ntypes + 1)) / 2, 0.0);
-        }
 
         auto ico_data = ico.data();
         auto cn1_data = cn1.data();
@@ -2655,16 +2463,13 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
         for (int i = 0; i < ntypes; ++i)
         {
-            const auto &lj0 = std::get<0>(ljparams_data[i]);
+            const auto &lj0 = ljparams_data[i];
 
             // now we need to (wastefully) save the A/B parameters for
             // all mixed LJ parameters i+j
             for (int j = 0; j < i; ++j)
             {
-                LJParameter lj01 = lj0.combineArithmetic(std::get<0>(ljparams.constData()[j]));
-
-                if (use_geometric_rules)
-                    lj01 = lj0.combineGeometric(std::get<0>(ljparams.constData()[j]));
+                LJParameter lj01 = lj0.combineArithmetic(ljparams.constData()[j]);
 
                 cn1_data[lj_idx] = lj01.A();
                 cn2_data[lj_idx] = lj01.B();
@@ -2684,120 +2489,11 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
             ico_data[i * ntypes + i] = lj_idx;
         }
 
-        if (has_ljexceptions)
-        {
-            int check_lj_idx = lj_idx;
-
-            // go through every pair of parameters and see if they have
-            // an exception - if they do, then update the arrays to have
-            // the exception values
-            int lj_idx = 0;
-
-            for (int i = 0; i < ntypes; ++i)
-            {
-                const auto &lj_exceptions0 = std::get<1>(ljparams_data[i]);
-
-                if (lj_exceptions0.isEmpty())
-                {
-                    lj_idx += (i + 1);
-                    continue;
-                }
-
-                for (int j = 0; j < i; ++j)
-                {
-                    const auto &lj_exceptions1 = std::get<1>(ljparams_data[j]);
-
-                    if (lj_exceptions1.isEmpty())
-                    {
-                        lj_idx += 1;
-                        continue;
-                    }
-
-                    // see if there is a match - use the first match
-                    bool found_match = false;
-
-                    for (const auto &lj_exception0 : lj_exceptions0)
-                    {
-                        for (const auto &lj_exception1 : lj_exceptions1)
-                        {
-                            if (lj_exception0.pairsWith(lj_exception1))
-                            {
-                                // we have a match - update the arrays
-                                found_match = true;
-                                const auto &lj = lj_exception0.value();
-
-                                cn1_data[lj_idx] = lj.A();
-                                cn2_data[lj_idx] = lj.B();
-
-                                if (lj_exception0.value().hasC())
-                                {
-                                    cn3[lj_idx] = lj.C();
-                                }
-
-                                break;
-                            }
-                        }
-
-                        if (found_match)
-                            break;
-                    }
-
-                    lj_idx += 1;
-                }
-
-                // now check for the self-exception
-                bool found_match = false;
-                for (const auto &lj_exception0 : lj_exceptions0)
-                {
-                    for (const auto &lj_exception1 : lj_exceptions0)
-                    {
-                        if (lj_exception0.pairsWith(lj_exception1))
-                        {
-                            // we have a match - update the arrays
-                            found_match = true;
-                            const auto &lj = lj_exception0.value();
-
-                            cn1_data[lj_idx] = lj.A();
-                            cn2_data[lj_idx] = lj.B();
-
-                            if (lj_exception0.value().hasC())
-                            {
-                                cn3[lj_idx] = lj.C();
-                            }
-
-                            break;
-                        }
-                    }
-
-                    if (found_match)
-                        break;
-                }
-
-                lj_idx += 1;
-            }
-
-            if (lj_idx != check_lj_idx)
-            {
-                throw SireError::program_bug(QObject::tr("The number of LJ parameters with exceptions (%1) does not match the number of LJ parameters (%2)")
-                                                 .arg(lj_idx)
-                                                 .arg(check_lj_idx),
-                                             CODELOC);
-            }
-        }
-
-        QStringList cn3_strings;
-
-        if (has_ccoeff)
-        {
-            cn3_strings = writeFloatData(cn3, AmberFormat(AmberPrm::FLOAT, 5, 16, 8));
-        }
-
         // now return all of the arrays
         return std::make_tuple(writeIntData(collapse(atom_types), AmberFormat(AmberPrm::INTEGER, 10, 8)),
                                writeIntData(ico, AmberFormat(AmberPrm::INTEGER, 10, 8)),
                                writeFloatData(cn1, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)),
-                               writeFloatData(cn2, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)),
-                               cn3_strings);
+                               writeFloatData(cn2, AmberFormat(AmberPrm::FLOAT, 5, 16, 8)));
     };
 
     // function used to generate the text for the excluded atoms
@@ -3392,7 +3088,7 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
 
     QStringList name_lines, charge_lines, number_lines, mass_lines, radius_lines, ambtyp_lines, screening_lines,
         treechain_lines;
-    std::tuple<QStringList, QStringList, QStringList, QStringList, QStringList> lj_lines;
+    std::tuple<QStringList, QStringList, QStringList, QStringList> lj_lines;
     std::tuple<QStringList, QStringList, int> excl_lines;
     std::tuple<QStringList, QStringList, int, int> res_lines;
     std::tuple<QStringList, QStringList, QStringList, QStringList, int, int, int, int> bond_lines;
@@ -3548,12 +3244,6 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
     lines.append("%FLAG LENNARD_JONES_BCOEF");
     lines += std::get<3>(lj_lines);
 
-    if (not std::get<4>(lj_lines).isEmpty())
-    {
-        lines.append("%FLAG LENNARD_JONES_CCOEF");
-        lines += std::get<4>(lj_lines);
-    }
-
     lines.append("%FLAG BONDS_INC_HYDROGEN");
     lines += std::get<2>(bond_lines);
 
@@ -3676,11 +3366,6 @@ QStringList toLines(const QVector<AmberParams> &params, const Space &space, int 
         }
     }
 
-    // we currently only support fixed-charge forcefields (IPOL = 0)
-    lines.append("%FLAG IPOL");
-    lines.append("%FORMAT(1I8)");
-    lines.append("       0");
-
     // we don't currently support IFCAP > 0, IFPERT > 0 or IFPOL > 0
 
     return lines;
@@ -3700,24 +3385,6 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
         // no molecules in the system
         this->operator=(AmberPrm());
         return;
-    }
-
-    try
-    {
-        ffield = system.property(map["forcefield"]).asA<MMDetail>();
-    }
-    catch (...)
-    {
-        ffield = MMDetail::guessFrom("arithmetic", "coulomb", "lj", 1.0 / 1.2, 0.5, "harmonic", "harmonic", "cosine");
-    }
-
-    if (ffield.usesGeometricCombiningRules())
-    {
-        comb_rules = "geometric";
-    }
-    else
-    {
-        comb_rules = "arithmetic";
     }
 
     // generate the AmberParams object for each molecule in the system
@@ -3759,7 +3426,6 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
 
     // now convert these into text lines that can be written as the file
     QStringList lines = ::toLines(params, space, num_dummies,
-                                  this->comb_rules == "geometric",
                                   this->usesParallel(), &errors);
 
     if (not errors.isEmpty())
@@ -3788,11 +3454,10 @@ AmberPrm::AmberPrm(const System &system, const PropertyMap &map) : ConcretePrope
 AmberPrm::AmberPrm(const AmberPrm &other)
     : ConcreteProperty<AmberPrm, MoleculeParser>(other), flag_to_line(other.flag_to_line), int_data(other.int_data),
       float_data(other.float_data), string_data(other.string_data), lj_data(other.lj_data),
-      lj_exceptions(other.lj_exceptions),
       bonds_inc_h(other.bonds_inc_h), bonds_exc_h(other.bonds_exc_h), angs_inc_h(other.angs_inc_h),
       angs_exc_h(other.angs_exc_h), dihs_inc_h(other.dihs_inc_h), dihs_exc_h(other.dihs_exc_h),
       excl_atoms(other.excl_atoms), molnum_to_atomnums(other.molnum_to_atomnums), pointers(other.pointers),
-      ffield(other.ffield), warns(other.warns), comb_rules(other.comb_rules)
+      ffield(other.ffield)
 {
 }
 
@@ -3811,7 +3476,6 @@ AmberPrm &AmberPrm::operator=(const AmberPrm &other)
         float_data = other.float_data;
         string_data = other.string_data;
         lj_data = other.lj_data;
-        lj_exceptions = other.lj_exceptions;
         bonds_inc_h = other.bonds_inc_h;
         bonds_exc_h = other.bonds_exc_h;
         angs_inc_h = other.angs_inc_h;
@@ -3822,8 +3486,6 @@ AmberPrm &AmberPrm::operator=(const AmberPrm &other)
         molnum_to_atomnums = other.molnum_to_atomnums;
         pointers = other.pointers;
         ffield = other.ffield;
-        warns = other.warns;
-        comb_rules = other.comb_rules;
         MoleculeParser::operator=(other);
     }
 
@@ -3866,11 +3528,6 @@ QString AmberPrm::toString() const
             .arg(nResidues())
             .arg(nAtoms());
     }
-}
-
-QStringList AmberPrm::warnings() const
-{
-    return warns;
 }
 
 /** Return the title of the parameter file */
@@ -4423,15 +4080,10 @@ AmberParams AmberPrm::getAmberParams(int molidx, const MoleculeInfoData &molinfo
                 element = Element(int(atomic_num_array[atom_idx]));
             }
 
-            auto amber_type = amber_type_array[atom_idx] - 1;
-
             params.add(AtomNum(atom_num), (charge_array[atom_idx] / AMBERCHARGECONV) * mod_electron,
-                       mass_array[atom_idx] * g_per_mol, element, lj_data[amber_type],
+                       mass_array[atom_idx] * g_per_mol, element, lj_data[amber_type_array[atom_idx] - 1],
                        ambertype_array[atom_idx].trimmed(), born_radii_array[atom_idx] * angstrom,
                        born_screening_array[atom_idx], treechains_array[atom_idx]);
-
-            if (lj_exceptions.contains(amber_type))
-                params.set(AtomNum(atom_num), lj_exceptions[amber_type]);
         }
 
         return params;
@@ -4893,8 +4545,8 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     if (nmols == 0)
         return System();
 
-    QVector<MolEditor> mols(nmols);
-    auto *mols_array = mols.data();
+    QVector<Molecule> mols(nmols);
+    Molecule *mols_array = mols.data();
 
     if (usesParallel())
     {
@@ -4919,7 +4571,7 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     for (auto mol : mols)
     {
         if (mol.nAtoms() > 0)
-            molgroup.add(mol.commit());
+            molgroup.add(mol);
     }
 
     System system(this->title());

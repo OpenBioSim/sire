@@ -10,7 +10,7 @@ can be recognised.
 
 * `@chryswoods <https://github.com/chryswoods>`__
 * `@jmichel80 <https://github.com/jmichel80>`__
-* `@nividic <https://github.com/nividic>`__
+* `@nividic73 <mailto:nividic73@googlemail.com>`__
 * `@lohedges <https://github.com/lohedges>`__
 * `@ppxasjsm <https://github.com/ppxasjsm>`__
 * `@halx <https://github.com/halx>`__

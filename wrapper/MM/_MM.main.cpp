@@ -297,13 +297,7 @@
 
 #include "IntraSoftCLJFFBase.pypp.hpp"
 
-#include "LJ1264Parameter.pypp.hpp"
-
 #include "LJComponent.pypp.hpp"
-
-#include "LJException.pypp.hpp"
-
-#include "LJExceptionID.pypp.hpp"
 
 #include "LJNBPairs.pypp.hpp"
 
@@ -760,13 +754,7 @@ BOOST_PYTHON_MODULE(_MM){
 
     register_IntraGroupFF_class();
 
-    register_LJ1264Parameter_class();
-
     register_LJComponent_class();
-
-    register_LJException_class();
-
-    register_LJExceptionID_class();
 
     register_LJNBPairs_class();
 

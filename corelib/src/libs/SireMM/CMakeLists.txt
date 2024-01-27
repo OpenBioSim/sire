@@ -69,7 +69,6 @@ set ( SIREMM_HEADERS
       intragroupff.h
       intraljff.h
       intrasoftcljff.h
-      lj1264parameter.h
       ljfunction.h
       ljpair.h
       ljparameter.h
@@ -161,7 +160,6 @@ set ( SIREMM_SOURCES
       intragroupff.cpp
       intraljff.cpp
       intrasoftcljff.cpp
-      lj1264parameter.cpp
       ljpair.cpp
       ljparameter.cpp
       ljparameterdb.cpp

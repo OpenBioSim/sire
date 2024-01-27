@@ -25,6 +25,8 @@
 
 #include "AtomChiralities.pypp.hpp"
 
+#include "AtomCoordMatcher.pypp.hpp"
+
 #include "AtomCoords.pypp.hpp"
 
 #include "AtomCutting.pypp.hpp"
@@ -690,6 +692,10 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_Atom_class();
 
+    register_AtomMatcher_class();
+
+    register_AtomCoordMatcher_class();
+
     register_CuttingFunction_class();
 
     register_AtomCutting_class();
@@ -697,8 +703,6 @@ BOOST_PYTHON_MODULE(_Mol){
     register_AtomEditorBase_class();
 
     register_AtomEditor_class();
-
-    register_AtomMatcher_class();
 
     register_AtomIDMatcher_class();
 

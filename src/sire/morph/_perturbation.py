@@ -406,3 +406,9 @@ class Perturbation:
             mol.save_frame()
 
         return mol.view(*args, **kwargs)
+
+    def inspect(self):
+        """
+        Inspect the perturbation - this returns a report showing
+        which parameters are being perturbed
+        """

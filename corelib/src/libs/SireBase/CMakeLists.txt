@@ -115,7 +115,6 @@ set ( SIREBASE_SOURCES
       savestate.cpp
       sharedpolypointer.cpp
       slice.cpp
-      sparsematrix.cpp
       stringmangler.cpp
       stringproperty.cpp
       tempdir.cpp

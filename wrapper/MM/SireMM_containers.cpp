@@ -61,43 +61,39 @@ using boost::python::register_tuple;
 
 void register_SireMM_containers()
 {
-    register_PackedArray<SireBase::PackedArray2D<LJParameter>>();
+    register_PackedArray< SireBase::PackedArray2D<LJParameter> >();
 
-    register_tuple<boost::tuple<int, int, LJ1264Parameter>>();
+    register_list< QVector<LJParameter> >();
+    register_list< QList<LJParameter> >();
 
-    register_list<QList<boost::tuple<int, int, LJ1264Parameter>>>();
+    register_list< QVector<TwoAtomFunction> >();
+    register_list< QVector<ThreeAtomFunction> >();
+    register_list< QVector<FourAtomFunction> >();
 
-    register_list<QVector<LJParameter>>();
-    register_list<QList<LJParameter>>();
+    register_list< QVector<CLJAtom> >();
 
-    register_list<QVector<TwoAtomFunction>>();
-    register_list<QVector<ThreeAtomFunction>>();
-    register_list<QVector<FourAtomFunction>>();
+    register_list< QVector<CLJBox> >();
+    register_list< QVector<CLJBoxIndex> >();
 
-    register_list<QVector<CLJAtom>>();
+    register_list< QList<GromacsBond> >();
+    register_list< QList<GromacsAngle> >();
+    register_list< QList<GromacsDihedral> >();
 
-    register_list<QVector<CLJBox>>();
-    register_list<QVector<CLJBoxIndex>>();
+    register_list< QVector<AmberDihPart> >();
 
-    register_list<QList<GromacsBond>>();
-    register_list<QList<GromacsAngle>>();
-    register_list<QList<GromacsDihedral>>();
+    register_dict< QHash<BondID,AmberBond> >();
+    register_dict< QHash<AngleID,AmberAngle> >();
+    register_dict< QHash<DihedralID,AmberDihedral> >();
+    register_dict< QHash<ImproperID,AmberDihedral> >();
+    register_dict< QHash<BondID,AmberNB14> >();
 
-    register_list<QVector<AmberDihPart>>();
+    register_dict< QHash<QString,GromacsAtomType> >();
+    register_dict< QMultiHash<QString,GromacsAtomType> >();
+    register_dict< QMultiHash<QString,GromacsBond> >();
+    register_dict< QMultiHash<QString,GromacsAngle> >();
+    register_dict< QMultiHash<QString,GromacsDihedral> >();
 
-    register_dict<QHash<BondID, AmberBond>>();
-    register_dict<QHash<AngleID, AmberAngle>>();
-    register_dict<QHash<DihedralID, AmberDihedral>>();
-    register_dict<QHash<ImproperID, AmberDihedral>>();
-    register_dict<QHash<BondID, AmberNB14>>();
-
-    register_dict<QHash<QString, GromacsAtomType>>();
-    register_dict<QMultiHash<QString, GromacsAtomType>>();
-    register_dict<QMultiHash<QString, GromacsBond>>();
-    register_dict<QMultiHash<QString, GromacsAngle>>();
-    register_dict<QMultiHash<QString, GromacsDihedral>>();
-
-    register_dict<QMultiHash<SireMol::BondID, GromacsBond>>();
-    register_dict<QMultiHash<SireMol::AngleID, GromacsAngle>>();
-    register_dict<QMultiHash<SireMol::DihedralID, GromacsDihedral>>();
+    register_dict< QMultiHash<SireMol::BondID,GromacsBond> >();
+    register_dict< QMultiHash<SireMol::AngleID,GromacsAngle> >();
+    register_dict< QMultiHash<SireMol::DihedralID,GromacsDihedral> >();
 }

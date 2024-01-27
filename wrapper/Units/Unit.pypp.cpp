@@ -9,8 +9,6 @@ namespace bp = boost::python;
 
 #include "dimensions.h"
 
-#include "generalunit.h"
-
 #include "temperature.h"
 
 #include "dimensions.h"

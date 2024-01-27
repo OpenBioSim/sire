@@ -514,20 +514,6 @@ void register_AtomFloatProperty_class(){
         { //::SireMol::AtomProperty< double >::set
         
             typedef SireMol::AtomProperty< double > exported_class_t;
-            typedef ::SireMol::AtomProperty< double > & ( ::SireMol::AtomProperty< double >::*set_function_type)( int,double const & ) ;
-            set_function_type set_function_value( &::SireMol::AtomProperty< double >::set );
-            
-            AtomFloatProperty_exposer.def( 
-                "set"
-                , set_function_value
-                , ( bp::arg("i"), bp::arg("value") )
-                , bp::return_self< >()
-                , "" );
-        
-        }
-        { //::SireMol::AtomProperty< double >::set
-        
-            typedef SireMol::AtomProperty< double > exported_class_t;
             typedef ::SireMol::AtomProperty< double > & ( ::SireMol::AtomProperty< double >::*set_function_type)( ::SireMol::CGAtomIdx const &,double const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< double >::set );
             

@@ -145,7 +145,6 @@ namespace SireMol
 
         AtomProperty<Vector> &set(CGIdx cgidx, const QVector<Vector> &values);
         AtomProperty<Vector> &set(CGIdx cgidx, const CoordGroup &cgroup);
-        AtomProperty<Vector> &set(int i, const Vector &value);
 
         void translate(const Vector &delta);
         void translate(CGIdx cgidx, const Vector &delta);

@@ -1070,7 +1070,7 @@ void _update_restraint_in_context(OpenMM::CustomCompoundBondForce *ff, double rh
     // is from the first restraint. This is because rho should be the
     // first parameter and have the same value for all restraints
     std::vector<double> custom_params;
-    std::vector<int> particles;
+    std::vector<qint32> particles;
 
     custom_params.resize(nparams);
     particles.resize(ff->getNumParticlesPerBond());
@@ -1254,7 +1254,7 @@ void LambdaLever::setExceptionIndicies(int mol_idx,
 /** Set the constraint indicies for the perturbable molecule at
  *  index 'mol_idx'
  */
-void LambdaLever::setConstraintIndicies(int mol_idx, const QVector<int> &constraint_idxs)
+void LambdaLever::setConstraintIndicies(int mol_idx, const QVector<qint32> &constraint_idxs)
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 

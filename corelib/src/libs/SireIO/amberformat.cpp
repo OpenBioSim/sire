@@ -219,10 +219,9 @@ namespace SireIO
                 else if (errors and nvalues < format.numValues() and i != end - 1)
                 {
                     // one of the data lines has too little data
-                    errors->append(QObject::tr("Too few data values on line %1:\n'%2'\n"
-                                               "Expected %3 values but only saw %4.")
+                    errors->append(QObject::tr("Too few data values on line %1: "
+                                               "Expected %2 values but only saw %3.")
                                        .arg(i + 1)
-                                       .arg(line)
                                        .arg(format.numValues())
                                        .arg(nvalues));
                 }
@@ -366,10 +365,9 @@ namespace SireIO
                 else if (errors and nvalues < format.numValues() and i != end - 1)
                 {
                     // one of the data lines has too little data
-                    errors->append(QObject::tr("Too few data values on line %1:\n'%2'\n"
-                                               "Expected %3 values but only saw %4.")
+                    errors->append(QObject::tr("Too few data values on line %1: "
+                                               "Expected %2 values but only saw %3.")
                                        .arg(i + 1)
-                                       .arg(line)
                                        .arg(format.numValues())
                                        .arg(nvalues));
                 }
@@ -522,10 +520,9 @@ namespace SireIO
                 else if (errors and nvalues < format.numValues() and i != end - 1)
                 {
                     // one of the data lines has too little data
-                    errors->append(QObject::tr("Too few data values on line %1:\n'%2'\n"
-                                               "Expected %3 values but only saw %4.")
+                    errors->append(QObject::tr("Too few data values on line %1: "
+                                               "Expected %2 values but only saw %3.")
                                        .arg(i + 1)
-                                       .arg(line)
                                        .arg(format.numValues())
                                        .arg(nvalues));
                 }

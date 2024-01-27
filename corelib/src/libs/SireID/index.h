@@ -164,30 +164,9 @@ namespace SireID
         return index.hash();
     }
 
-    SIRE_ALWAYS_INLINE IndexBase::IndexBase(qint32 idx) : _idx(idx)
-    {
-    }
-
     template <class T>
-    SIRE_ALWAYS_INLINE Index_T_<T>::Index_T_(qint32 idx) : IndexBase(idx)
+    SIRE_OUTOFLINE_TEMPLATE Index_T_<T>::Index_T_(qint32 idx) : IndexBase(idx)
     {
-    }
-
-    SIRE_ALWAYS_INLINE Index::Index(qint32 idx) : Index_T_<Index>(idx)
-    {
-    }
-
-    SIRE_ALWAYS_INLINE qint32 IndexBase::map(qint32 n) const
-    {
-        if (_idx >= 0 and _idx < n)
-            return _idx;
-        else if (_idx < 0 and _idx >= -n)
-            return n + _idx;
-        else
-        {
-            throwInvalidIndex(n);
-            return 0;
-        }
     }
 
     template <class T>

@@ -54,6 +54,10 @@ QDataStream &operator>>(QDataStream &ds, IndexBase &idx)
     return ds;
 }
 
+IndexBase::IndexBase(qint32 idx) : _idx(idx)
+{
+}
+
 IndexBase::IndexBase(const IndexBase &other) : _idx(other._idx)
 {
 }
@@ -132,6 +136,26 @@ bool IndexBase::canMap(qint32 n) const
     return (_idx >= 0 and _idx < n) or (_idx < 0 and _idx >= -n);
 }
 
+/** Map this index into the container of 'n' elements - this
+    maps the index (with negative indexing, e.g. -1 is the last
+    element), and throws an exception if the index is out
+    of the bounds of the array
+
+    \throw SireError::invalid_index
+*/
+qint32 IndexBase::map(qint32 n) const
+{
+    if (_idx >= 0 and _idx < n)
+        return _idx;
+    else if (_idx < 0 and _idx >= -n)
+        return n + _idx;
+    else
+    {
+        throwInvalidIndex(n);
+        return null();
+    }
+}
+
 ////////
 //////// Implementation of Index
 ////////
@@ -161,6 +185,10 @@ QDataStream &operator>>(QDataStream &ds, Index &index)
         throw version_error(v, "1", r_index, CODELOC);
 
     return ds;
+}
+
+Index::Index(qint32 idx) : Index_T_<Index>(idx)
+{
 }
 
 Index::Index(const Index &other) : Index_T_<Index>(other)

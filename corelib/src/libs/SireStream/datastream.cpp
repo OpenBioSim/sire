@@ -32,8 +32,6 @@
 #include "registeralternativename.h"
 #include "version_error.h"
 
-#include <QtEndian>
-
 #include <QDebug>
 
 namespace SireStream
@@ -115,54 +113,17 @@ namespace SireStream
         }
     }
 
-    MagicID peek_magic(QDataStream &ds, MagicID expected, const char *type_name)
-    {
-        MagicID id;
-
-        if (ds.device() == 0 or ds.device()->atEnd())
-        {
-            throw SireStream::magic_error(0, expected, type_name, CODELOC);
-        }
-
-        // peek the bytes for the MagicID - this way we don't affect
-        // the stream if the magic is wrong
-        if (ds.device()->peek((char *)&id, sizeof(MagicID)) != sizeof(MagicID))
-        {
-            throw SireStream::magic_error(0, expected, type_name, CODELOC);
-        }
-
-        if (ds.byteOrder() == QDataStream::BigEndian)
-        {
-            id = qFromBigEndian(id);
-        }
-        else
-        {
-            id = qFromLittleEndian(id);
-        }
-
-        if (id != expected)
-        {
-            throw SireStream::magic_error(id, expected, type_name, CODELOC);
-        }
-
-        return id;
-    }
-
     /** Read the header of the binary object to check that the type is correct
         and to obtain the binary data version */
     VersionID readHeader(QDataStream &ds, const RegisterMetaTypeBase &r_type)
     {
-        MagicID peek_id = peek_magic(ds, r_type.magicID(), r_type.typeName());
-
         MagicID id;
         VersionID v;
 
         ds >> id >> v;
 
-        if (id != peek_id)
-        {
+        if (not(id == r_type.magicID() or detail::matchesMagic(r_type, id)))
             throw SireStream::magic_error(id, r_type, CODELOC);
-        }
 
         return v;
     }
@@ -171,17 +132,13 @@ namespace SireStream
         and to obtain the binary data version */
     VersionID readHeader(QDataStream &ds, MagicID magicid, const char *type_name)
     {
-        MagicID peek_id = peek_magic(ds, magicid, type_name);
-
         MagicID id;
         VersionID v;
 
         ds >> id >> v;
 
-        if (id != peek_id)
-        {
+        if (id != magicid)
             throw SireStream::magic_error(id, magicid, type_name, CODELOC);
-        }
 
         return v;
     }

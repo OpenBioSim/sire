@@ -30,14 +30,9 @@
 
 #include "moleculeparser.h"
 
-#include "SireBase/sparsematrix.hpp"
-
 #include "SireMM/mmdetail.h"
 
-#include "SireMM/atomljs.h"
 #include "SireMM/ljparameter.h"
-#include "SireMM/lj1264parameter.h"
-
 #include "SireMaths/vector.h"
 
 #include <QHash>
@@ -174,8 +169,6 @@ namespace SireIO
 
         SireMM::MMDetail forcefield() const;
 
-        QStringList warnings() const;
-
     protected:
         SireSystem::System startSystem(const PropertyMap &map) const;
 
@@ -215,9 +208,6 @@ namespace SireIO
         /** All of the LJ parameters, indexed by atom type */
         QVector<SireMM::LJParameter> lj_data;
 
-        /** All of the LJ exceptions, indexed by LJ parameter ID */
-        QHash<quint64, QList<SireMM::LJException>> lj_exceptions;
-
         /** The indicies of the bonds for each molecule */
         QVector<QVector<int>> bonds_inc_h, bonds_exc_h;
 
@@ -238,12 +228,6 @@ namespace SireIO
 
         /** The forcefield for the molecules in this file */
         SireMM::MMDetail ffield;
-
-        /** Warnings when parsing this file */
-        QStringList warns;
-
-        /** The combining rules defined in this file */
-        QString comb_rules;
     };
 
 } // namespace SireIO

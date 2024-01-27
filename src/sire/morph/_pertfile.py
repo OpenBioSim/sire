@@ -99,17 +99,21 @@ def create_from_pertfile(mol, pertfile, map=None):
         atom["ambertype1"] = typ1
 
     # now update all of the internals
+    bond_prop = map["bond"].source()
+    ang_prop = map["angle"].source()
+    dih_prop = map["dihedral"].source()
+    imp_prop = map["improper"].source()
 
-    bonds0 = mol.property(map["bond"])
+    bonds0 = mol.property(bond_prop)
     bonds1 = bonds0.clone()
 
-    angles0 = mol.property(map["angle"])
+    angles0 = mol.property(ang_prop)
     angles1 = angles0.clone()
 
-    dihedrals0 = mol.property(map["dihedral"])
+    dihedrals0 = mol.property(dih_prop)
     dihedrals1 = dihedrals0.clone()
 
-    impropers0 = mol.property(map["improper"])
+    impropers0 = mol.property(imp_prop)
     impropers1 = impropers0.clone()
 
     from ..legacy.MM import AmberBond, AmberAngle, AmberDihedral, AmberDihPart
@@ -248,4 +252,53 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["improper0"] = impropers0
     c["improper1"] = impropers1
 
-    return c.commit()
+    # duplicate the coordinates, mass, and element properties
+    for prop in ["coordinates", "mass", "element"]:
+        orig_prop = map[prop].source()
+        c[prop + "0"] = c[orig_prop]
+        c[prop + "1"] = c[orig_prop]
+        del c[orig_prop]
+
+    # now remove all of the "default" properties
+    del c[chg_prop]
+    del c[lj_prop]
+    del c[typ_prop]
+    del c[bond_prop]
+    del c[ang_prop]
+    del c[dih_prop]
+    del c[imp_prop]
+
+    mol = c.commit()
+
+    # we now need to generat the AmberParameters for the two end states
+    from ..legacy.MM import AmberParams
+
+    map0 = {
+        "charge": "charge0",
+        "LJ": "LJ0",
+        "ambertype": "ambertype0",
+        "bond": "bond0",
+        "angle": "angle0",
+        "dihedral": "dihedral0",
+        "improper": "improper0",
+    }
+
+    params0 = AmberParams(mol, map0)
+
+    map1 = {
+        "charge": "charge1",
+        "LJ": "LJ1",
+        "ambertype": "ambertype1",
+        "bond": "bond1",
+        "angle": "angle1",
+        "dihedral": "dihedral1",
+        "improper": "improper1",
+    }
+
+    params1 = AmberParams(mol, map1)
+
+    c["parameters0"] = params0
+    c["parameters1"] = params1
+
+    # make sure that we link to the reference state
+    return c.commit().perturbation().link_to_reference().commit()

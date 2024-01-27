@@ -50,6 +50,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * MacOS/ARM64 now includes AmberTools and Gromacs dependencies when built
   for BioSimSpace (matching MacOS/X64 and Linux).
 
+* Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
+
+* Fix bug that disabled the ``DEBUG`` log level from the global logger.
+
+* Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
+  that we only compare residues with the same number of atoms.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024

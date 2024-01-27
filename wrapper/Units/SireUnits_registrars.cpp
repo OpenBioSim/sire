@@ -3,15 +3,14 @@
 
 #include "SireUnits_registrars.h"
 
-#include "generalunit.h"
 #include "dimensions.h"
+#include "generalunit.h"
 
 #include "Helpers/objectregistry.hpp"
 
 void register_SireUnits_objects()
 {
 
-    ObjectRegistry::registerConverterFor< SireUnits::Dimension::GeneralUnit >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Dimensionless >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Mass >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::MolarMass >();
@@ -40,13 +39,12 @@ void register_SireUnits_objects()
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Capacitance >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Current >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Potential >();
-    ObjectRegistry::registerConverterFor< SireUnits::Dimension::HarmonicBondConstant >();
-    ObjectRegistry::registerConverterFor< SireUnits::Dimension::HarmonicAngleConstant >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Constant1 >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Constant2 >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Constant3 >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Constant4 >();
     ObjectRegistry::registerConverterFor< SireUnits::Dimension::Constant5 >();
+    ObjectRegistry::registerConverterFor< SireUnits::Dimension::GeneralUnit >();
 
 }
 

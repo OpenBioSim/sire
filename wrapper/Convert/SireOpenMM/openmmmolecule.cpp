@@ -1670,11 +1670,11 @@ QVector<double> OpenMMMolecule::getAngleSizes() const
 /** Return all of the dihedral torsion periodicities in dihedral order
  *  for this molecule
  */
-QVector<int> OpenMMMolecule::getTorsionPeriodicities() const
+QVector<qint8> OpenMMMolecule::getTorsionPeriodicities() const
 {
     const int ndihs = this->dih_params.count();
 
-    QVector<int> dih_periodicities(ndihs);
+    QVector<qint8> dih_periodicities(ndihs);
 
     auto dih_periodicities_data = dih_periodicities.data();
     const auto dih_params_data = this->dih_params.constData();
@@ -1730,11 +1730,11 @@ QVector<double> OpenMMMolecule::getTorsionKs() const
 /** Return the atom indexes of the atoms in the exceptions, in
  *  exception order for this molecule
  */
-QVector<std::pair<int, int>> OpenMMMolecule::getExceptionAtoms() const
+QVector<std::pair<qint32, qint32>> OpenMMMolecule::getExceptionAtoms() const
 {
     const int nexceptions = this->exception_params.count();
 
-    QVector<std::pair<int, int>> exception_atoms(nexceptions);
+    QVector<std::pair<qint32, qint32>> exception_atoms(nexceptions);
 
     auto exception_atoms_data = exception_atoms.data();
     const auto exception_params_data = this->exception_params.constData();
@@ -1794,17 +1794,64 @@ QVector<double> OpenMMMolecule::getLJScales() const
 
 /** Null constructor */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule()
+    : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
 }
 
 /** Construct from the passed OpenMMMolecule */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
+    : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
     if (mol.perturbed.get() == 0)
         throw SireError::incompatible_error(QObject::tr(
                                                 "You cannot construct a PerturbableOpenMMMolecule from an "
                                                 "OpenMMMolecule that has not been perturbed!"),
                                             CODELOC);
+
+    auto molecule = mol.atoms.molecule();
+    perturbed_atoms = mol.atoms;
+
+    QList<SireMol::BondID> bond_ids;
+
+    for (const auto &bond : mol.bond_params)
+    {
+        const auto &atom0 = std::get<0>(bond);
+        const auto &atom1 = std::get<1>(bond);
+        bond_ids.append(SireMol::BondID(perturbed_atoms(atom0).index(),
+                                        perturbed_atoms(atom1).index()));
+    }
+
+    perturbed_bonds = SelectorBond(molecule, bond_ids);
+
+    QList<SireMol::AngleID> ang_ids;
+
+    for (const auto &ang : mol.ang_params)
+    {
+        const auto &atom0 = std::get<0>(ang);
+        const auto &atom1 = std::get<1>(ang);
+        const auto &atom2 = std::get<2>(ang);
+        ang_ids.append(SireMol::AngleID(perturbed_atoms(atom0).index(),
+                                        perturbed_atoms(atom1).index(),
+                                        perturbed_atoms(atom2).index()));
+    }
+
+    perturbed_angs = SelectorAngle(molecule, ang_ids);
+
+    QList<SireMol::DihedralID> dih_ids;
+
+    for (const auto &dih : mol.dih_params)
+    {
+        const auto &atom0 = std::get<0>(dih);
+        const auto &atom1 = std::get<1>(dih);
+        const auto &atom2 = std::get<2>(dih);
+        const auto &atom3 = std::get<3>(dih);
+        dih_ids.append(SireMol::DihedralID(perturbed_atoms(atom0).index(),
+                                           perturbed_atoms(atom1).index(),
+                                           perturbed_atoms(atom2).index(),
+                                           perturbed_atoms(atom3).index()));
+    }
+
+    perturbed_dihs = SelectorDihedral(molecule, dih_ids);
 
     alpha0 = mol.getAlphas();
     alpha1 = mol.perturbed->getAlphas();
@@ -1858,7 +1905,12 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
 
 /** Copy constructor */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other)
-    : alpha0(other.alpha0), alpha1(other.alpha1),
+    : ConcreteProperty<PerturbableOpenMMMolecule, Property>(other),
+      perturbed_atoms(other.perturbed_atoms),
+      perturbed_bonds(other.perturbed_bonds),
+      perturbed_angs(other.perturbed_angs),
+      perturbed_dihs(other.perturbed_dihs),
+      alpha0(other.alpha0), alpha1(other.alpha1),
       kappa0(other.kappa0), kappa1(other.kappa1),
       chg0(other.chg0), chg1(other.chg1),
       sig0(other.sig0), sig1(other.sig1),
@@ -1911,6 +1963,92 @@ bool PerturbableOpenMMMolecule::operator==(const PerturbableOpenMMMolecule &othe
 bool PerturbableOpenMMMolecule::operator!=(const PerturbableOpenMMMolecule &other) const
 {
     return not this->operator==(other);
+}
+
+PerturbableOpenMMMolecule &PerturbableOpenMMMolecule::operator=(const PerturbableOpenMMMolecule &other)
+{
+    if (this != &other)
+    {
+        perturbed_atoms = other.perturbed_atoms;
+        perturbed_bonds = other.perturbed_bonds;
+        perturbed_angs = other.perturbed_angs;
+        perturbed_dihs = other.perturbed_dihs;
+
+        alpha0 = other.alpha0;
+        alpha1 = other.alpha1;
+
+        kappa0 = other.kappa0;
+        kappa1 = other.kappa1;
+
+        chg0 = other.chg0;
+        chg1 = other.chg1;
+
+        sig0 = other.sig0;
+        sig1 = other.sig1;
+
+        eps0 = other.eps0;
+        eps1 = other.eps1;
+
+        bond_k0 = other.bond_k0;
+        bond_k1 = other.bond_k1;
+
+        bond_r0 = other.bond_r0;
+        bond_r1 = other.bond_r1;
+
+        ang_k0 = other.ang_k0;
+        ang_k1 = other.ang_k1;
+
+        ang_t0 = other.ang_t0;
+        ang_t1 = other.ang_t1;
+
+        tors_k0 = other.tors_k0;
+        tors_k1 = other.tors_k1;
+
+        tors_periodicity0 = other.tors_periodicity0;
+        tors_periodicity1 = other.tors_periodicity1;
+
+        tors_phase0 = other.tors_phase0;
+        tors_phase1 = other.tors_phase1;
+
+        charge_scl0 = other.charge_scl0;
+        charge_scl1 = other.charge_scl1;
+
+        lj_scl0 = other.lj_scl0;
+        lj_scl1 = other.lj_scl1;
+
+        to_ghost_idxs = other.to_ghost_idxs;
+        from_ghost_idxs = other.from_ghost_idxs;
+
+        exception_atoms = other.exception_atoms;
+        exception_idxs = other.exception_idxs;
+
+        perturbable_constraints = other.perturbable_constraints;
+        constraint_idxs = other.constraint_idxs;
+
+        Property::operator=(other);
+    }
+
+    return *this;
+}
+
+const char *PerturbableOpenMMMolecule::typeName()
+{
+    return "SireOpenMM::PerturbableOpenMMMolecule";
+}
+
+const char *PerturbableOpenMMMolecule::what() const
+{
+    return PerturbableOpenMMMolecule::typeName();
+}
+
+QString PerturbableOpenMMMolecule::toString() const
+{
+    return QString("PerturbableOpenMMMolecule()");
+}
+
+PerturbableOpenMMMolecule *PerturbableOpenMMMolecule::clone() const
+{
+    return new PerturbableOpenMMMolecule(*this);
 }
 
 /** Return the alpha parameters of the reference state */
@@ -2034,13 +2172,13 @@ QVector<double> PerturbableOpenMMMolecule::getTorsionKs1() const
 }
 
 /** Return the torsion periodicity parameters of the reference state */
-QVector<int> PerturbableOpenMMMolecule::getTorsionPeriodicities0() const
+QVector<qint8> PerturbableOpenMMMolecule::getTorsionPeriodicities0() const
 {
     return this->tors_periodicity0;
 }
 
 /** Return the torsion periodicity parameters of the perturbed state */
-QVector<int> PerturbableOpenMMMolecule::getTorsionPeriodicities1() const
+QVector<qint8> PerturbableOpenMMMolecule::getTorsionPeriodicities1() const
 {
     return this->tors_periodicity1;
 }
@@ -2084,7 +2222,7 @@ QVector<double> PerturbableOpenMMMolecule::getLJScales1() const
 /** Return the indexes of the atoms that are to be ghosted in the
  *  perturbed state
  */
-QSet<int> PerturbableOpenMMMolecule::getToGhostIdxs() const
+QSet<qint32> PerturbableOpenMMMolecule::getToGhostIdxs() const
 {
     return this->to_ghost_idxs;
 }
@@ -2092,7 +2230,7 @@ QSet<int> PerturbableOpenMMMolecule::getToGhostIdxs() const
 /** Return the indexes of the atoms that were ghosts in the
  *  reference state
  */
-QSet<int> PerturbableOpenMMMolecule::getFromGhostIdxs() const
+QSet<qint32> PerturbableOpenMMMolecule::getFromGhostIdxs() const
 {
     return this->from_ghost_idxs;
 }
@@ -2135,7 +2273,7 @@ void PerturbableOpenMMMolecule::setExceptionIndicies(const QString &name,
 }
 
 /** Set the indexes of perturbable constraints in the System */
-void PerturbableOpenMMMolecule::setConstraintIndicies(const QVector<int> &idxs)
+void PerturbableOpenMMMolecule::setConstraintIndicies(const QVector<qint32> &idxs)
 {
     if (idxs.count() != perturbable_constraints.count())
         throw SireError::incompatible_error(QObject::tr(
@@ -2148,7 +2286,7 @@ void PerturbableOpenMMMolecule::setConstraintIndicies(const QVector<int> &idxs)
 }
 
 /** Return the indicies of the perturbable constraints */
-QVector<int> PerturbableOpenMMMolecule::getConstraintIndicies() const
+QVector<qint32> PerturbableOpenMMMolecule::getConstraintIndicies() const
 {
     return this->constraint_idxs;
 }
@@ -2156,18 +2294,18 @@ QVector<int> PerturbableOpenMMMolecule::getConstraintIndicies() const
 /** Return three arrays containing the constraint indexes, and the
  *  reference and perturbed values of the constraint lengths
  */
-std::tuple<QVector<int>, QVector<double>, QVector<double>>
+std::tuple<QVector<qint32>, QVector<double>, QVector<double>>
 PerturbableOpenMMMolecule::getPerturbableConstraints() const
 {
     const int nconstraints = this->constraint_idxs.count();
 
     if (nconstraints == 0)
     {
-        return std::make_tuple(QVector<int>(), QVector<double>(), QVector<double>());
+        return std::make_tuple(QVector<qint32>(), QVector<double>(), QVector<double>());
     }
 
     QVector<double> r0, r1;
-    QVector<int> idxs;
+    QVector<qint32> idxs;
 
     r0.reserve(nconstraints);
     r1.reserve(nconstraints);
