@@ -1,4 +1,64 @@
-__all__ = ["Perturbation"]
+__all__ = [
+    "Perturbation",
+    "link_to_reference",
+    "link_to_perturbed",
+    "extract_reference",
+    "extract_perturbed",
+]
+
+
+def link_to_reference(mols, map=None):
+    """
+    Return the passed molecule(s), where any perturbable molecules
+    are linked to their reference (lambda=0) states
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).link_to_reference(auto_commit=True))
+
+    return mols
+
+
+def link_to_perturbed(mols, map=None):
+    """
+    Return the passed molecule(s), where any perturbable molecules
+    are linked to their perturbed (lambda=1) states
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).link_to_perturbed(auto_commit=True))
+
+    return mols
+
+
+def extract_reference(mols, map=None):
+    """
+    Return the passed molecule(s) where any perturbable molecules
+    have been extracted to their reference (lambda=0) state (i.e. deleting
+    their perturbed state)
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).extract_reference(auto_commit=True))
+
+    return mols
+
+
+def extract_perturbed(mols, map=None):
+    """
+    Return the passed molecule(s) where any perturbable molecules
+    have been extracted to their perturbed (lambda=1) state (i.e. deleting
+    their reference state)
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).extract_perturbed(auto_commit=True))
+
+    return mols
 
 
 class Perturbation:
@@ -181,6 +241,9 @@ class Perturbation:
                 if mol.has_property(pert_prop):
                     mol.remove_property(pert_prop)
 
+        if mol.has_property("is_perturbable"):
+            mol.remove_property("is_perturbable")
+
         self._mol.update(mol.commit())
 
         if auto_commit:
@@ -230,6 +293,9 @@ class Perturbation:
 
                 if mol.has_property(ref_prop):
                     mol.remove_property(ref_prop)
+
+        if mol.has_property("is_perturbable"):
+            mol.remove_property("is_perturbable")
 
         self._mol.update(mol.commit())
 
@@ -408,79 +474,60 @@ class Perturbation:
 
         return mol.view(*args, **kwargs)
 
-    def inspect(self):
+    def to_openmm(
+        self,
+        constraint: str = None,
+        perturbable_constraint: str = None,
+        swap_end_states: bool = None,
+        include_constrained_energies: bool = None,
+        map: dict = None,
+    ):
         """
-        Inspect the perturbation - this returns a report showing
-        which parameters are being perturbed
+        Return the PerturbableOpenMMMolecule that corresponds to
+        this perturbation in the OpenMM simulation. The arguments
+        to this function have the same meaning as the equivalents
+        in the dynamics() and minimisation() functions of a molecule.
+
+        Parameters
+        ----------
+
+        constraint: str
+            The constraint algorithm to use
+
+        perturbable_constraint: str
+            The constraint algorithm to use for perturbable atoms
+
+        swap_end_states: bool
+            If True then the end states will be swapped
+
+        include_constrained_energies: bool
+            If True then the constrained energies will be included
+
+        map: dict
+            The property map to use
+
+
+        Returns
+        -------
+        PerturbableOpenMMMolecule
+            The perturbable OpenMM molecule
         """
-        from ..legacy.Convert import PerturbableOpenMMMolecule
+        from ..base import create_map
 
-        p = PerturbableOpenMMMolecule(self._mol, self._map)
+        map = create_map(self._map, map)
 
-        report = {}
+        if constraint is not None:
+            map["constraint"] = str(constraint)
 
-        changed_atoms = []
+        if perturbable_constraint is not None:
+            map["perturbable_constraint"] = str(perturbable_constraint)
 
-        for atom, q0, s0, e0, q1, s1, e1 in zip(
-            p.atoms(),
-            p.get_charges0(),
-            p.get_sigmas0(),
-            p.get_epsilons0(),
-            p.get_charges1(),
-            p.get_sigmas1(),
-            p.get_epsilons1(),
-        ):
-            if q0 != q1 or s0 != s1 or e0 != e1:
-                changed_atoms.append((atom, q0, s0, e0, q1, s1, e1))
+        if swap_end_states is not None:
+            map["swap_end_states"] = bool(swap_end_states)
 
-        if len(changed_atoms) > 0:
-            report["atoms"] = changed_atoms
+        if include_constrained_energies is not None:
+            map["include_constrained_energies"] = bool(include_constrained_energies)
 
-        changed_bonds = []
+        from ..convert.openmm import PerturbableOpenMMMolecule
 
-        for bond, r0, k0, r1, k1 in zip(
-            p.bonds(),
-            p.get_bond_lengths0(),
-            p.get_bond_ks0(),
-            p.get_bond_lengths1(),
-            p.get_bond_ks1(),
-        ):
-            if r0 != r1 or k0 != k1:
-                changed_bonds.append((bond, r0, k0, r1, k1))
-
-        if len(changed_bonds) > 0:
-            report["bonds"] = changed_bonds
-
-        changed_angles = []
-
-        for angle, theta0, k0, theta1, k1 in zip(
-            p.angles(),
-            p.get_angle_sizes0(),
-            p.get_angle_ks0(),
-            p.get_angle_sizes1(),
-            p.get_angle_ks1(),
-        ):
-            if theta0 != theta1 or k0 != k1:
-                changed_angles.append((angle, theta0, k0, theta1, k1))
-
-        if len(changed_angles) > 0:
-            report["angles"] = changed_angles
-
-        changed_torsions = []
-
-        for torsion, k0, p0, ph0, k1, p1, ph1 in zip(
-            p.torsions(),
-            p.get_torsion_ks0(),
-            p.get_torsion_periodicities0(),
-            p.get_torsion_phases0(),
-            p.get_torsion_ks1(),
-            p.get_torsion_periodicities1(),
-            p.get_torsion_phases1(),
-        ):
-            if k0 != k1 or p0 != p1 or ph0 != ph1:
-                changed_torsions.append((torsion, k0, p0, ph0, k1, p1, ph1))
-
-        if len(changed_torsions) > 0:
-            report["torsions"] = changed_torsions
-
-        return report
+        return PerturbableOpenMMMolecule(self._mol.molecule(), map=map)

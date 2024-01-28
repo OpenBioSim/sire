@@ -300,5 +300,7 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["parameters0"] = params0
     c["parameters1"] = params1
 
+    c["is_perturbable"] = True
+
     # make sure that we link to the reference state
     return c.commit().perturbation().link_to_reference().commit()

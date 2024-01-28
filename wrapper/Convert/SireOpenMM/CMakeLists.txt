@@ -99,7 +99,7 @@ if (${SIRE_USE_OPENMM})
           RUNTIME DESTINATION ${INSTALLDIR}
           )
 
-    install( FILES _sommcontext.py
+    install( FILES _sommcontext.py _perturbablemol.py
          DESTINATION ${INSTALLDIR}
        )
   else()

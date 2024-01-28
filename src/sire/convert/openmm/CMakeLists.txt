@@ -1,6 +1,6 @@
 ########################################
 #
-# sire.convert
+# sire.convert.openmm
 #
 ########################################
 
@@ -10,6 +10,4 @@ set ( SCRIPTS
     )
 
 # installation
-install( FILES ${SCRIPTS} DESTINATION ${SIRE_PYTHON}/sire/convert )
-
-add_subdirectory (openmm)
+install( FILES ${SCRIPTS} DESTINATION ${SIRE_PYTHON}/sire/convert/openmm )

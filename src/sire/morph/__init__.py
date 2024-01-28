@@ -4,10 +4,20 @@ __all__ = [
     "repartition_hydrogen_masses",
     "to_alchemlyb",
     "create_from_pertfile",
+    "extract_reference",
+    "extract_perturbed",
+    "link_to_reference",
+    "link_to_perturbed",
     "Perturbation",
 ]
 
-from ._perturbation import Perturbation
+from ._perturbation import (
+    Perturbation,
+    link_to_reference,
+    link_to_perturbed,
+    extract_reference,
+    extract_perturbed,
+)
 
 from ._ghost_atoms import shrink_ghost_atoms
 

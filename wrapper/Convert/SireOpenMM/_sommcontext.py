@@ -36,7 +36,7 @@ class SOMMContext(_Context):
             map = create_map(map)
 
             self._atom_index = metadata.index()
-            self._lambda_lever = metadata.lambdaLever()
+            self._lambda_lever = metadata.lambda_lever()
 
             # we need to update the constraints in the system
             # to match the current value of lambda, before we

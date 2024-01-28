@@ -82,6 +82,13 @@ try:
     from ._SireOpenMM import minimise_openmm_context as _minimise_openmm_context
 
     from ._sommcontext import SOMMContext
+    from ._perturbablemol import (
+        _changed_atoms,
+        _changed_bonds,
+        _changed_angles,
+        _changed_torsions,
+        _changed_exceptions,
+    )
 
     from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData
 
@@ -90,6 +97,12 @@ try:
     _pythonize(
         [LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData], delete_old=True
     )
+
+    PerturbableOpenMMMolecule.changed_atoms = _changed_atoms
+    PerturbableOpenMMMolecule.changed_bonds = _changed_bonds
+    PerturbableOpenMMMolecule.changed_angles = _changed_angles
+    PerturbableOpenMMMolecule.changed_torsions = _changed_torsions
+    PerturbableOpenMMMolecule.changed_exceptions = _changed_exceptions
 
     _has_openmm = True
 

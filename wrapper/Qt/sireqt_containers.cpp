@@ -62,6 +62,9 @@ void register_SireQt_containers()
     register_list<QVector<qint64>>();
     register_list<QList<qint64>>();
 
+    register_list<QVector<quint8>>();
+    register_list<QVector<qint8>>();
+
     register_list<QVector<float>>();
     register_list<QList<float>>();
 
