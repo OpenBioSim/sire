@@ -304,7 +304,7 @@ QString LambdaLever::getForceType(const QString &name,
     return QString::fromStdString(force.getName());
 }
 
-std::tuple<int, int, double, double, double, double, double>
+boost::tuple<int, int, double, double, double, double, double>
 get_exception(int atom0, int atom1, int start_index,
               double coul_14_scl, double lj_14_scl,
               const QVector<double> &morphed_charges,
@@ -381,10 +381,10 @@ get_exception(int atom0, int atom1, int start_index,
         epsilon = 1e-9;
     }
 
-    return std::make_tuple(atom0 + start_index,
-                           atom1 + start_index,
-                           charge, sigma, epsilon,
-                           alpha, kappa);
+    return boost::make_tuple(atom0 + start_index,
+                             atom1 + start_index,
+                             charge, sigma, epsilon,
+                             alpha, kappa);
 }
 
 /** Set the value of lambda in the passed context. Returns the
@@ -688,8 +688,8 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 {
                     const auto &atoms = exception_atoms[j];
 
-                    const auto atom0 = std::get<0>(atoms);
-                    const auto atom1 = std::get<1>(atoms);
+                    const auto atom0 = boost::get<0>(atoms);
+                    const auto atom1 = boost::get<1>(atoms);
 
                     auto coul_14_scale = morphed_charge_scale[j];
                     auto lj_14_scale = morphed_lj_scale[j];
@@ -706,15 +706,15 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
                         cljff->setExceptionParameters(
-                            std::get<0>(idxs[j]),
-                            std::get<0>(p), std::get<1>(p),
-                            std::get<2>(p), 1e-9, 1e-9);
+                            boost::get<0>(idxs[j]),
+                            boost::get<0>(p), boost::get<1>(p),
+                            boost::get<2>(p), 1e-9, 1e-9);
 
                         if (ghost_14ff != 0)
                         {
                             // this is a 1-4 parameter - need to update
                             // the ghost 1-4 forcefield
-                            int nbidx = std::get<1>(idxs[j]);
+                            int nbidx = boost::get<1>(idxs[j]);
 
                             if (nbidx < 0)
                                 throw SireError::program_bug(QObject::tr(
@@ -734,9 +734,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
                             // parameters are q, sigma, four_epsilon and alpha
                             std::vector<double> params14 =
-                                {std::get<2>(p), std::get<3>(p),
-                                 4.0 * std::get<4>(p), std::get<5>(p),
-                                 std::get<6>(p)};
+                                {boost::get<2>(p), boost::get<3>(p),
+                                 4.0 * boost::get<4>(p), boost::get<5>(p),
+                                 boost::get<6>(p)};
 
                             if (start_change_14 == -1)
                             {
@@ -753,18 +753,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                             }
 
                             ghost_14ff->setBondParameters(nbidx,
-                                                          std::get<0>(p),
-                                                          std::get<1>(p),
+                                                          boost::get<0>(p),
+                                                          boost::get<1>(p),
                                                           params14);
                         }
                     }
                     else
                     {
                         cljff->setExceptionParameters(
-                            std::get<0>(idxs[j]),
-                            std::get<0>(p), std::get<1>(p),
-                            std::get<2>(p), std::get<3>(p),
-                            std::get<4>(p));
+                            boost::get<0>(idxs[j]),
+                            boost::get<0>(p), boost::get<1>(p),
+                            boost::get<2>(p), boost::get<3>(p),
+                            boost::get<4>(p));
                     }
                 }
             }
@@ -775,9 +775,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         {
             auto perturbable_constraints = perturbable_mol.getPerturbableConstraints();
 
-            const auto &idxs = std::get<0>(perturbable_constraints);
-            const auto &r0_0 = std::get<1>(perturbable_constraints);
-            const auto &r0_1 = std::get<2>(perturbable_constraints);
+            const auto &idxs = boost::get<0>(perturbable_constraints);
+            const auto &r0_0 = boost::get<1>(perturbable_constraints);
+            const auto &r0_1 = boost::get<2>(perturbable_constraints);
 
             if (not idxs.isEmpty())
             {
@@ -1244,7 +1244,7 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
  */
 void LambdaLever::setExceptionIndicies(int mol_idx,
                                        const QString &name,
-                                       const QVector<std::pair<int, int>> &exception_idxs)
+                                       const QVector<boost::tuple<int, int>> &exception_idxs)
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 

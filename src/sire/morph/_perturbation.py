@@ -4,6 +4,7 @@ __all__ = [
     "link_to_perturbed",
     "extract_reference",
     "extract_perturbed",
+    "zero_dummy_torsions",
 ]
 
 
@@ -57,6 +58,19 @@ def extract_perturbed(mols, map=None):
 
     for mol in mols.molecules("property is_perturbable"):
         mols.update(mol.perturbation(map=map).extract_perturbed(auto_commit=True))
+
+    return mols
+
+
+def zero_dummy_torsions(mols, map=None):
+    """
+    Zero any torsions (dihedrals or impropers) in the reference or perturbed
+    states where any of the atoms in those states is a ghost atom
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).zero_dummy_torsions(auto_commit=True))
 
     return mols
 
@@ -474,6 +488,79 @@ class Perturbation:
 
         return mol.view(*args, **kwargs)
 
+    def zero_dummy_torsions(self, auto_commit: bool = True):
+        """
+        Zero the torsions (dihedrals and impropers) in the reference and
+        perturbed states where any of the atoms in those states is a ghost atom
+        """
+        p = self.to_openmm()
+
+        zero_in_ref = []
+        zero_in_pert = []
+
+        from_ghosts = []
+        to_ghosts = []
+
+        atoms = p.atoms()
+
+        for idx in p.get_to_ghost_idxs():
+            to_ghosts.append(atoms[idx].index())
+
+        for idx in p.get_from_ghost_idxs():
+            from_ghosts.append(atoms[idx].index())
+
+        for torsion in p.torsions():
+            if (
+                torsion.atom0().index() in from_ghosts
+                or torsion.atom1().index() in from_ghosts
+                or torsion.atom2().index() in from_ghosts
+                or torsion.atom3().index() in from_ghosts
+            ):
+                zero_in_ref.append(torsion)
+
+            if (
+                torsion.atom0().index() in to_ghosts
+                or torsion.atom1().index() in to_ghosts
+                or torsion.atom2().index() in to_ghosts
+                or torsion.atom3().index() in to_ghosts
+            ):
+                zero_in_pert.append(torsion)
+
+        if len(zero_in_ref) == 0 and len(zero_in_pert) == 0:
+            # nothing to do
+            return self
+
+        mol = self._mol.molecule().edit()
+
+        if len(zero_in_ref) > 0:
+            dihs = self._mol.property(self._map["dihedral0"])
+            imps = self._mol.property(self._map["improper0"])
+
+            for torsion in zero_in_ref:
+                dihs.clear(torsion.id())
+                imps.clear(torsion.id())
+
+            mol.set_property(self._map["dihedral0"].source(), dihs)
+            mol.set_property(self._map["improper0"].source(), imps)
+
+        if len(zero_in_pert) > 0:
+            dihs = self._mol.property(self._map["dihedral1"])
+            imps = self._mol.property(self._map["improper1"])
+
+            for torsion in zero_in_pert:
+                dihs.clear(torsion.id())
+                imps.clear(torsion.id())
+
+            mol.set_property(self._map["dihedral1"].source(), dihs)
+            mol.set_property(self._map["improper1"].source(), imps)
+
+        self._mol.update(mol.commit())
+
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
+
     def to_openmm(
         self,
         constraint: str = None,
@@ -517,16 +604,16 @@ class Perturbation:
         map = create_map(self._map, map)
 
         if constraint is not None:
-            map["constraint"] = str(constraint)
+            map.set("constraint", str(constraint))
 
         if perturbable_constraint is not None:
-            map["perturbable_constraint"] = str(perturbable_constraint)
+            map.set("perturbable_constraint", str(perturbable_constraint))
 
         if swap_end_states is not None:
-            map["swap_end_states"] = bool(swap_end_states)
+            map.set("swap_end_states", bool(swap_end_states))
 
         if include_constrained_energies is not None:
-            map["include_constrained_energies"] = bool(include_constrained_energies)
+            map.set("include_constrained_energies", bool(include_constrained_energies))
 
         from ..convert.openmm import PerturbableOpenMMMolecule
 

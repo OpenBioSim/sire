@@ -228,7 +228,7 @@ void register_PerturbableOpenMMMolecule_class(){
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::PerturbableOpenMMMolecule const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireOpenMM::PerturbableOpenMMMolecule::angles
         
-            typedef ::SireMM::SelectorAngle ( ::SireOpenMM::PerturbableOpenMMMolecule::*angles_function_type)(  ) const;
+            typedef ::QList< SireMM::Angle > ( ::SireOpenMM::PerturbableOpenMMMolecule::*angles_function_type)(  ) const;
             angles_function_type angles_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::angles );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -240,7 +240,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::atoms
         
-            typedef ::SireMol::Selector< SireMol::Atom > ( ::SireOpenMM::PerturbableOpenMMMolecule::*atoms_function_type)(  ) const;
+            typedef ::QList< SireMol::Atom > ( ::SireOpenMM::PerturbableOpenMMMolecule::*atoms_function_type)(  ) const;
             atoms_function_type atoms_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::atoms );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -252,7 +252,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::bonds
         
-            typedef ::SireMM::SelectorBond ( ::SireOpenMM::PerturbableOpenMMMolecule::*bonds_function_type)(  ) const;
+            typedef ::QList< SireMM::Bond > ( ::SireOpenMM::PerturbableOpenMMMolecule::*bonds_function_type)(  ) const;
             bonds_function_type bonds_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::bonds );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -468,7 +468,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getExceptionAtoms
         
-            typedef ::QVector< std::pair< int, int > > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getExceptionAtoms_function_type)(  ) const;
+            typedef ::QVector< boost::tuples::tuple< int, int, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getExceptionAtoms_function_type)(  ) const;
             getExceptionAtoms_function_type getExceptionAtoms_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getExceptionAtoms );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -480,7 +480,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getExceptionIndicies
         
-            typedef ::QVector< std::pair< int, int > > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getExceptionIndicies_function_type)( ::QString const & ) const;
+            typedef ::QVector< boost::tuples::tuple< int, int, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getExceptionIndicies_function_type)( ::QString const & ) const;
             getExceptionIndicies_function_type getExceptionIndicies_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getExceptionIndicies );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -553,7 +553,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getPerturbableConstraints
         
-            typedef ::std::tuple< QVector< int >, QVector< double >, QVector< double > > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getPerturbableConstraints_function_type)(  ) const;
+            typedef ::boost::tuples::tuple< QVector< int >, QVector< double >, QVector< double >, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getPerturbableConstraints_function_type)(  ) const;
             getPerturbableConstraints_function_type getPerturbableConstraints_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getPerturbableConstraints );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -561,6 +561,18 @@ void register_PerturbableOpenMMMolecule_class(){
                 , getPerturbableConstraints_function_value
                 , bp::release_gil_policy()
                 , "Return three arrays containing the constraint indexes, and the\n  reference and perturbed values of the constraint lengths\n" );
+        
+        }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::getPerturbableConstraintsWithAtoms
+        
+            typedef ::QVector< boost::tuples::tuple< int, int, double, double, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > ( ::SireOpenMM::PerturbableOpenMMMolecule::*getPerturbableConstraintsWithAtoms_function_type)(  ) const;
+            getPerturbableConstraintsWithAtoms_function_type getPerturbableConstraintsWithAtoms_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::getPerturbableConstraintsWithAtoms );
+            
+            PerturbableOpenMMMolecule_exposer.def( 
+                "getPerturbableConstraintsWithAtoms"
+                , getPerturbableConstraintsWithAtoms_function_value
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getSigmas0
@@ -714,7 +726,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::setExceptionIndicies
         
-            typedef void ( ::SireOpenMM::PerturbableOpenMMMolecule::*setExceptionIndicies_function_type)( ::QString const &,::QVector< std::pair< int, int > > const & ) ;
+            typedef void ( ::SireOpenMM::PerturbableOpenMMMolecule::*setExceptionIndicies_function_type)( ::QString const &,::QVector< boost::tuples::tuple< int, int, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type, boost::tuples::null_type > > const & ) ;
             setExceptionIndicies_function_type setExceptionIndicies_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::setExceptionIndicies );
             
             PerturbableOpenMMMolecule_exposer.def( 
@@ -739,7 +751,7 @@ void register_PerturbableOpenMMMolecule_class(){
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::torsions
         
-            typedef ::SireMM::SelectorDihedral ( ::SireOpenMM::PerturbableOpenMMMolecule::*torsions_function_type)(  ) const;
+            typedef ::QList< SireMM::Dihedral > ( ::SireOpenMM::PerturbableOpenMMMolecule::*torsions_function_type)(  ) const;
             torsions_function_type torsions_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::torsions );
             
             PerturbableOpenMMMolecule_exposer.def( 

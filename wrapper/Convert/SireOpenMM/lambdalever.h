@@ -35,6 +35,8 @@
 
 #include <QReadWriteLock>
 
+#include <boost/tuple/tuple.hpp>
+
 #include <memory>
 
 SIRE_BEGIN_HEADER
@@ -115,7 +117,7 @@ namespace SireOpenMM
                                    const QHash<QString, qint32> &start_indicies);
 
         void setExceptionIndicies(int idx, const QString &ff,
-                                  const QVector<std::pair<int, int>> &exception_idxs);
+                                  const QVector<boost::tuple<int, int>> &exception_idxs);
 
         void setConstraintIndicies(int idx, const QVector<qint32> &constraint_idxs);
 
