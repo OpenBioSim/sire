@@ -133,7 +133,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const AtomProperty<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, AtomProperty<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, AtomProperty<T> &);
 
     public:
         typedef typename PackedArray2D<T>::Array Array;
@@ -191,6 +191,7 @@ namespace SireMol
         QVariant getAsVariant(const CGAtomIdx &cgatomidx) const;
         SireBase::PropertyPtr getAsProperty(const CGAtomIdx &cgatomidx) const;
 
+        AtomProperty<T> &set(int i, const T &value);
         AtomProperty<T> &set(const CGAtomIdx &cgatomidx, const T &value);
 
         AtomProperty<T> &set(CGIdx cgidx, const QVector<T> &values);
@@ -581,6 +582,20 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE SireBase::PropertyPtr AtomProperty<T>::getAsProperty(const CGAtomIdx &cgatomidx) const
     {
         return SireBase::convert_property(this->get(cgatomidx));
+    }
+
+    /** Set the value of the ith atom to 'value'
+     *
+     * \throw SireError::invalid_index
+     */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomProperty<T> &AtomProperty<T>::set(int i, const T &value)
+    {
+        i = SireID::Index(i).map(this->nAtoms());
+
+        props.valueData()[i] = value;
+
+        return *this;
     }
 
     /** Set the value of the property for the atom at index 'cgatomidx'

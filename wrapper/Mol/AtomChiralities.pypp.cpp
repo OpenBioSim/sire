@@ -494,6 +494,20 @@ void register_AtomChiralities_class(){
         { //::SireMol::AtomProperty< SireMol::Chirality >::set
         
             typedef SireMol::AtomProperty< SireMol::Chirality > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMol::Chirality > & ( ::SireMol::AtomProperty< SireMol::Chirality >::*set_function_type)( int,::SireMol::Chirality const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Chirality >::set );
+            
+            AtomChiralities_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMol::Chirality >::set
+        
+            typedef SireMol::AtomProperty< SireMol::Chirality > exported_class_t;
             typedef ::SireMol::AtomProperty< SireMol::Chirality > & ( ::SireMol::AtomProperty< SireMol::Chirality >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireMol::Chirality const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Chirality >::set );
             

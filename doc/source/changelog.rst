@@ -15,7 +15,15 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
-* Please add an item to this changelog when you create your PR
+* Added support for LJ 12-6-4 potentials, plus the ability to read and write
+  LJ parameter exceptions to Amber topology files. This fixes issue #125.
+
+* Added peek support to the datastream reader, so that it can recover
+  when it doesn't find the magic value it expects on reading.
+
+* Added functionality to SparseMatrix to make it easier to detect when
+  non-default values have been added, and also to set up a matrix which
+  has a concept of unset values.
 
 * Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
 
@@ -23,6 +31,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
   that we only compare residues with the same number of atoms.
+
+* Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
 --------------------------------------------------------------------------------------------
