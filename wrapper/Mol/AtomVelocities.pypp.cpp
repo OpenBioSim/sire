@@ -487,6 +487,20 @@ void register_AtomVelocities_class(){
         { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::set
         
             typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > & ( ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::*set_function_type)( int,::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 0, 1, -1, 0, 0, 0, 0 > > const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::set );
+            
+            AtomVelocities_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::set
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > exported_class_t;
             typedef ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > & ( ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 0, 1, -1, 0, 0, 0, 0 > > const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::set );
             

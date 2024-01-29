@@ -21,7 +21,16 @@ def wrap(value):
     elif isinstance(value, int) or isinstance(value, float):
         return NumberProperty(value)
 
-    elif isinstance(value, str):
+    # is this a unit?
+    try:
+        u = _Units.GeneralUnit(value)
+
+        if not u.is_dimensionless():
+            return wrap(u)
+    except Exception:
+        pass
+
+    if isinstance(value, str):
         return StringProperty(value)
 
     elif isinstance(value, list):
@@ -35,6 +44,29 @@ def wrap(value):
             return DoubleArrayProperty(value)
         except Exception:
             pass
+
+        # do the string list
+        is_strings = True
+
+        for item in value:
+            if not isinstance(item, str):
+                is_strings = False
+                break
+            else:
+                try:
+                    u = _Units.GeneralUnit(item)
+
+                    if not u.is_dimensionless():
+                        is_strings = False
+                        break
+                except Exception:
+                    pass
+
+        if is_strings:
+            try:
+                return StringArrayProperty(value)
+            except Exception:
+                pass
 
     elif _Units.TempBase in type(value).mro():
         # this is a temperature

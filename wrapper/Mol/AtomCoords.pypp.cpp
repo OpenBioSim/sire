@@ -626,6 +626,20 @@ void register_AtomCoords_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMaths::Vector >::set
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMaths::Vector > & ( ::SireMol::AtomProperty< SireMaths::Vector >::*set_function_type)( int,::SireMaths::Vector const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMaths::Vector >::set );
+            
+            AtomCoords_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMaths::Vector >::size
         
             typedef SireMol::AtomProperty< SireMaths::Vector > exported_class_t;
