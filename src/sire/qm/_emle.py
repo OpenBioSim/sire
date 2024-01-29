@@ -8,13 +8,6 @@ _use_new_api()
 
 _EMLEEngine = _Convert._SireOpenMM.EMLEEngine
 
-try:
-    from emle.calculator import EMLECalculator as _EMLECalculator
-
-    _has_emle = True
-except:
-    _has_emle = False
-
 
 def emle(
     mols,
@@ -53,7 +46,10 @@ def emle(
     engine : sire.legacy.Convert._SireOpenMM.EMLEEngine
         The EMLEEngine object.
     """
-    if not _has_emle:
+
+    try:
+        from emle.calculator import EMLECalculator as _EMLECalculator
+    except:
         raise ImportError(
             "Could not import emle. Please install emle-engine and try again."
         )
