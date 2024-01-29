@@ -8,7 +8,7 @@ __all__ = [
     "extract_perturbed",
     "link_to_reference",
     "link_to_perturbed",
-    "zero_dummy_torsions",
+    "zero_ghost_torsions",
     "Perturbation",
 ]
 
@@ -18,7 +18,7 @@ from ._perturbation import (
     link_to_perturbed,
     extract_reference,
     extract_perturbed,
-    zero_dummy_torsions,
+    zero_ghost_torsions,
 )
 
 from ._ghost_atoms import shrink_ghost_atoms

@@ -10,20 +10,8 @@ def test_openmm_single_energy_neopentane(neopentane_methane, openmm_platform):
     mol = neopentane_methane[0]
 
     # this function will extract the lambda0 or lambda1 end state
-    def get_end_state(mol, state, remove_state):
-        c = mol.cursor()
-        for key in c.keys():
-            if key.endswith(state):
-                c[key.removesuffix(state)] = c[key]
-                del c[key]
-            elif key.endswith(remove_state):
-                del c[key]
-
-        c["is_perturbable"] = False
-        return c.commit()
-
-    mol0 = get_end_state(mol, "0", "1")
-    mol1 = get_end_state(mol, "1", "0")
+    mol0 = sr.morph.extract_reference(mol)
+    mol1 = sr.morph.extract_perturbed(mol)
 
     map = {
         "space": sr.vol.Cartesian(),
@@ -41,7 +29,7 @@ def test_openmm_single_energy_neopentane(neopentane_methane, openmm_platform):
     energy0 = energy0.value_in_unit(energy0.unit)
 
     assert mol0.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
-        energy0, abs=0.1
+        energy0, abs=1e-3
     )
 
     omm1 = sr.convert.to(mol1, "openmm", map=map)
@@ -53,8 +41,16 @@ def test_openmm_single_energy_neopentane(neopentane_methane, openmm_platform):
     energy1 = energy1.value_in_unit(energy1.unit)
 
     assert mol1.energy(map=map).to(sr.units.kJ_per_mol) == pytest.approx(
-        energy1, abs=0.1
+        energy1, abs=1e-3
     )
+
+    assert mol0.dynamics(map=map, cutoff="none").current_potential_energy().to(
+        sr.units.kJ_per_mol
+    ) == pytest.approx(energy0, abs=1e-3)
+
+    assert mol1.dynamics(map=map, cutoff="none").current_potential_energy().to(
+        sr.units.kJ_per_mol
+    ) == pytest.approx(energy1, abs=1e-3)
 
 
 @pytest.mark.skipif(

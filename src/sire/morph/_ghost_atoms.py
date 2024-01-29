@@ -13,6 +13,8 @@ def shrink_ghost_atoms(mols, length=None, map=None):
     from ..cas import Symbol
     from ..mm import AmberBond
 
+    mols = mols.clone()
+
     if length is None:
         length = 0.6
     else:
@@ -64,13 +66,10 @@ def shrink_ghost_atoms(mols, length=None, map=None):
         for bond in mol.bonds():
             # are either of the atoms in the bond in from_ghosts or to_ghosts
             is_from_ghost = (
-                bond[0].index() in from_ghosts
-                or bond[1].index() in from_ghosts
+                bond[0].index() in from_ghosts or bond[1].index() in from_ghosts
             )
 
-            is_to_ghost = (
-                bond[0].index() in to_ghosts or bond[1].index() in to_ghosts
-            )
+            is_to_ghost = bond[0].index() in to_ghosts or bond[1].index() in to_ghosts
 
             if is_from_ghost and not is_to_ghost:
                 # this is a bond that is turning into a ghost
@@ -97,14 +96,12 @@ def shrink_ghost_atoms(mols, length=None, map=None):
                     changed1 = True
 
         if changed0:
-            mol = (
-                mol.edit().set_property(map0["bond"].source(), bonds0).commit()
-            )
+            mol = mol.edit().set_property(map0["bond"].source(), bonds0).commit()
 
         if changed1:
-            mol = (
-                mol.edit().set_property(map1["bond"].source(), bonds1).commit()
-            )
+            mol = mol.edit().set_property(map1["bond"].source(), bonds1).commit()
 
         if changed0 or changed1:
             mols.update(mol)
+
+    return mols

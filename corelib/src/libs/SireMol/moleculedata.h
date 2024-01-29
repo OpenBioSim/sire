@@ -188,7 +188,8 @@ namespace SireMol
             return props;
         }
 
-        MoleculeData extract(const AtomSelection &selected_atoms) const;
+        MoleculeData extract(const AtomSelection &selected_atoms,
+                             bool to_same_molecule = false) const;
 
         QStringList propertyKeys() const;
 

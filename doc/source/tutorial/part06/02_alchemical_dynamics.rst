@@ -42,8 +42,7 @@ For example, we could minimise our alchemical system at λ=0.5 using
 
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
->>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
+>>> mols = sr.morph.link_to_reference(mols)
 >>> mols = mols.minimisation(lambda_value=0.5).run().commit()
 
 We can then run some dynamics at this λ-value using

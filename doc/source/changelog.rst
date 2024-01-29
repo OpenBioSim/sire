@@ -20,6 +20,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   different forces in the OpenMM context. This gives a lot of control over
   how forcefield parameters are scaled with lambda. Specifically, this is used
   to add support for calculating absolute binding free energies.
+  This is described in the new :doc:`tutorial chapter <tutorial/index_part07>`.
 
 * Added "not-perturbable" constraints so that bonds and angles that change
   with lambda are not perturbed. As part of this, have also added a
@@ -49,6 +50,35 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added functionality to SparseMatrix to make it easier to detect when
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
+
+* Added a ``to_same_molecule`` argument to the ``mol.extract()`` function,
+  so that it is possible to keep the same molecule number for the extracted
+  molecule. As part of this, also relaxed the requirement that the
+  ``mol.update(...)`` function can only be called if the molecule layout
+  is not changed. You can now update even if you have changed the numbers
+  of atoms, residues etc. The ``to_same_molecule`` argument is default False,
+  so as not to change any existing behaviour.
+
+* Added lots of convenience functions to ``sire.morph``, as described in the
+  :doc:`new tutorial <tutorial/index_part07>`. Functions include
+  linking to the reference or perturbed states for all molecules, or extracting
+  all of the reference or perturbed states of all molecules. Also I've added
+  functions for zeroing ghost torsions and creating molecules from pertfiles.
+  As part of this, I added an ``auto_commit`` argument to the
+  Perturbation ``link_to_reference`` and ``link_to_perturbed`` functions,
+  which defaults to True. This is a change in behaviour, but it makes the
+  API much easier to use. If you are affected by this, please let us know.
+  It was a little-used part of the code, with the main use case being the
+  replacement with the easier ``sire.morph.link_to_XXX`` functions.
+
+* Exposed the ``SOMMContext``, ``PerturbableOpenMMMolecule``,
+  ``OpenMMMetaData`` and ``LambdaLever`` classes to Python, as part of the
+  new ``sire.convert.openmm`` module. These are useful if you want more
+  control over OpenMM from Python. In particular, the ``PerturbableOpenMMMolecule``
+  class lets you see all of the parameters that go into the OpenMM forces
+  that involve perturbable molecules. There are useful functions that can
+  be used to get changing parameters as dataframes, which is really useful
+  for debugging. These are described in the :doc:`new tutorial <tutorial/index_part07>`.
 
 * Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
 

@@ -7,10 +7,7 @@ import pytest
     reason="openmm support is not available",
 )
 def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
-    mols = merged_ethane_methanol.clone()
-
-    for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation().link_to_reference().commit())
+    mols = sr.morph.link_to_reference(merged_ethane_methanol)
 
     d = mols[0].dynamics(constraint="none", platform=openmm_platform)
 
@@ -97,14 +94,8 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     reason="openmm support is not available",
 )
 def test_neo_constraints(neopentane_methane, openmm_platform):
-    mols_fwds = neopentane_methane.clone()
-    mols_bwds = neopentane_methane.clone()
-
-    for mol in mols_fwds.molecules("property is_perturbable"):
-        mols_fwds.update(mol.perturbation().link_to_reference().commit())
-
-    for mol in mols_bwds.molecules("property is_perturbable"):
-        mols_bwds.update(mol.perturbation().link_to_perturbed().commit())
+    mols_fwds = sr.morph.link_to_reference(neopentane_methane)
+    mols_bwds = sr.morph.link_to_perturbed(neopentane_methane)
 
     mols_fwds = sr.morph.repartition_hydrogen_masses(mols_fwds)
     mols_bwds = sr.morph.repartition_hydrogen_masses(mols_bwds)

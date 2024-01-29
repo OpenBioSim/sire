@@ -303,4 +303,4 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["is_perturbable"] = True
 
     # make sure that we link to the reference state
-    return c.commit().perturbation().link_to_reference().commit()
+    return c.commit().perturbation().link_to_reference(auto_commit=True)

@@ -476,20 +476,6 @@ void MoleculeView::update(const MoleculeData &moldata)
 {
     if (moldata.number() == this->data().number())
     {
-        if (moldata.info().UID() != this->data().info().UID())
-        {
-            throw SireError::incompatible_error(QObject::tr(
-                                                    "Cannot update molecule %1 because the layout for the new "
-                                                    "version of the molecule (%2) is different. This is likely "
-                                                    "because the molecule has been edited and the layout of "
-                                                    "atoms, residues etc has been changed. To update this molecule "
-                                                    "you will need to replace it in the container.")
-                                                    .arg(this->molecule().toString())
-                                                    .arg(Molecule(moldata).toString()),
-                                                CODELOC);
-        }
-
-        // this is the same molecule with the same molecular layout
         d = moldata;
     }
 }
@@ -1934,7 +1920,7 @@ Selector<Segment> MoleculeView::selectAllSegments() const
     selected atoms. This allows the used to pull out parts of a larger molecule,
     e.g. if they want to have only selected residues in a protein and do not
     want to have to store or manipulate the larger protein molecule */
-Molecule MoleculeView::extract() const
+Molecule MoleculeView::extract(bool to_same_molecule) const
 {
     if (d->info().nAtoms() == 0 or this->isEmpty())
         return Molecule();
@@ -1944,7 +1930,7 @@ Molecule MoleculeView::extract() const
 
     else
     {
-        return Molecule(d->extract(this->selection()));
+        return Molecule(d->extract(this->selection(), to_same_molecule));
     }
 }
 

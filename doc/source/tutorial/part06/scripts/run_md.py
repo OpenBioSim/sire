@@ -16,7 +16,7 @@ lambda_values = [x / 100.0 for x in range(0, 101, 5)]
 mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
 
 for mol in mols.molecules("molecule property is_perturbable"):
-    mol = mol.perturbation().link_to_reference().commit()
+    mol = sr.morph.link_to_reference(mol)
     mol = sr.morph.repartition_hydrogen_masses(mol, mass_factor=1.5)
     mols.update(mol)
 

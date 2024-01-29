@@ -1,4 +1,4 @@
-__all__ = ["LambdaLever", "OpenMMMolecule", "PerturbableOpenMMMetaData", "SOMMContext"]
+__all__ = ["LambdaLever", "OpenMMMetaData", "PerturbableOpenMMMolecule", "SOMMContext"]
 
 from ...legacy.Convert import (
     LambdaLever,

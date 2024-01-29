@@ -7,10 +7,7 @@ import pytest
     reason="openmm support is not available",
 )
 def test_dynamic_constraints(merged_ethane_methanol, openmm_platform):
-    mols = merged_ethane_methanol.clone()
-
-    for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation().link_to_reference().commit())
+    mols = sr.morph.link_to_reference(merged_ethane_methanol)
 
     d = mols[0].dynamics(constraint="bonds", platform=openmm_platform)
 

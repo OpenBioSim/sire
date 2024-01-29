@@ -35,8 +35,7 @@ after loading the molecules and minimising,
 
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
->>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
+>>> mols = sr.morph.link_to_reference(mols)
 >>> mols = mols.minimisation().run().commit()
 
 ...we can turn on constraints of the bonds involving hydrogen atoms by

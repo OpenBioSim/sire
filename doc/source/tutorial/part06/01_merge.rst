@@ -167,7 +167,7 @@ The :class:`~sire.morph.Perturbation` class provides the
 be used to link all of the standard properties to either the reference
 or perturbed values.
 
->>> mol = pert.link_to_reference().commit()
+>>> mol = pert.link_to_reference()
 >>> mol.view()
 
 .. image:: images/06_01_01.jpg
@@ -175,7 +175,7 @@ or perturbed values.
 
 has viewed the reference state (ethane), while
 
->>> mol = pert.link_to_perturbed().commit()
+>>> mol = pert.link_to_perturbed()
 >>> mol["not element Xx"].view()
 
 .. image:: images/06_01_02.jpg
@@ -200,12 +200,12 @@ merged molecule in its environment by updating the system with the result
 of linking the molecule to either the reference or perturbed states,
 e.g.
 
->>> mols = mols.update(pert.link_to_reference().commit())
+>>> mols = mols.update(pert.link_to_reference())
 
 has updated the system with a copy of the merged molecule where all of
 its standard properties are linked to the reference state. While
 
->>> mols = mols.update(pert.link_to_perturbed().commit())
+>>> mols = mols.update(pert.link_to_perturbed())
 
 updates the system with a copy of the merged molecule where all of its
 standard properties are linked to the perturbed state.
@@ -214,12 +214,22 @@ In general, a system could contain many merged molecules. To link all of them
 to the reference state you could use
 
 >>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
+...     mols.update(mol.perturbation().link_to_reference())
 
 or to link all of them to the perturbed state you could use
 
 >>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_perturbed().commit())
+...     mols.update(mol.perturbation().link_to_perturbed())
+
+The :func:`sire.morph.link_to_reference` and
+:func:`sire.morph.link_to_perturbed` convenience function can do this
+for you, e.g.
+
+>>> mols = sr.morph.link_to_reference(mols)
+
+or
+
+>>> mols = sr.morph.link_to_perturbed(mols)
 
 Now you could view and manipulate them as normal, e.g. using
 ``mols.view()`` etc.

@@ -4,7 +4,7 @@ __all__ = [
     "link_to_perturbed",
     "extract_reference",
     "extract_perturbed",
-    "zero_dummy_torsions",
+    "zero_ghost_torsions",
 ]
 
 
@@ -34,7 +34,7 @@ def link_to_perturbed(mols, map=None):
     return mols
 
 
-def extract_reference(mols, map=None):
+def extract_reference(mols, remove_ghosts: bool = True, map=None):
     """
     Return the passed molecule(s) where any perturbable molecules
     have been extracted to their reference (lambda=0) state (i.e. deleting
@@ -43,12 +43,14 @@ def extract_reference(mols, map=None):
     mols = mols.clone()
 
     for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation(map=map).extract_reference(auto_commit=True))
+        mols.update(
+            mol.perturbation(map=map).extract_reference(remove_ghosts=remove_ghosts)
+        )
 
     return mols
 
 
-def extract_perturbed(mols, map=None):
+def extract_perturbed(mols, remove_ghosts: bool = True, map=None):
     """
     Return the passed molecule(s) where any perturbable molecules
     have been extracted to their perturbed (lambda=1) state (i.e. deleting
@@ -57,20 +59,22 @@ def extract_perturbed(mols, map=None):
     mols = mols.clone()
 
     for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation(map=map).extract_perturbed(auto_commit=True))
+        mols.update(
+            mol.perturbation(map=map).extract_perturbed(remove_ghosts=remove_ghosts)
+        )
 
     return mols
 
 
-def zero_dummy_torsions(mols, map=None):
+def zero_ghost_torsions(mols, map=None):
     """
     Zero any torsions (dihedrals or impropers) in the reference or perturbed
-    states where any of the atoms in those states is a ghost atom
+    states where any of the atoms in those states is a ghost (dummy) atom
     """
     mols = mols.clone()
 
     for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation(map=map).zero_dummy_torsions(auto_commit=True))
+        mols.update(mol.perturbation(map=map).zero_ghost_torsions(auto_commit=True))
 
     return mols
 
@@ -212,7 +216,11 @@ class Perturbation:
     def __repr__(self):
         return self.__str__()
 
-    def extract_reference(self, properties: list[str] = None, auto_commit: bool = True):
+    def extract_reference(
+        self,
+        properties: list[str] = None,
+        remove_ghosts: bool = True,
+    ):
         """
         Extract the reference state properties of the molecule
         and remove the perturbed state.
@@ -226,8 +234,8 @@ class Perturbation:
         properties: list[str]
             The list of properties to extract to the reference molecule
 
-        auto_commit: bool
-            If True then the molecule will be committed and returned
+        remove_ghosts: bool
+            If True then any ghost atoms will be removed from the molecule
         """
         if properties is None:
             properties = []
@@ -258,14 +266,18 @@ class Perturbation:
         if mol.has_property("is_perturbable"):
             mol.remove_property("is_perturbable")
 
-        self._mol.update(mol.commit())
+        mol = mol.commit().molecule()
 
-        if auto_commit:
-            return self.commit()
-        else:
-            return self
+        if remove_ghosts:
+            mol = mol["not element Xx"].extract(to_same_molecule=True)
 
-    def extract_perturbed(self, properties: list[str] = None, auto_commit: bool = True):
+        return mol
+
+    def extract_perturbed(
+        self,
+        properties: list[str] = None,
+        remove_ghosts: bool = True,
+    ):
         """
         Extract the perturbed state properties of the molecule
         and remove the reference state.
@@ -279,8 +291,8 @@ class Perturbation:
         properties: list[str]
             The list of properties to extract to the perturbed molecule
 
-        auto_commit: bool
-            If True then the molecule will be committed and returned
+        remove_ghosts: bool
+            If True then any ghost atoms will be removed from the molecule
         """
         if properties is None:
             properties = []
@@ -311,16 +323,14 @@ class Perturbation:
         if mol.has_property("is_perturbable"):
             mol.remove_property("is_perturbable")
 
-        self._mol.update(mol.commit())
+        mol = mol.commit().molecule()
 
-        if auto_commit:
-            return self.commit()
-        else:
-            return self
+        if remove_ghosts:
+            mol = mol["not element Xx"].extract(to_same_molecule=True)
 
-    def link_to_reference(
-        self, properties: list[str] = None, auto_commit: bool = False
-    ):
+        return mol
+
+    def link_to_reference(self, properties: list[str] = None, auto_commit: bool = True):
         """
         Link all of the properties of the molecule to their values in the
         reference molecule (lambda=0).
@@ -362,9 +372,7 @@ class Perturbation:
         else:
             return self
 
-    def link_to_perturbed(
-        self, properties: list[str] = None, auto_commit: bool = False
-    ):
+    def link_to_perturbed(self, properties: list[str] = None, auto_commit: bool = True):
         """
         Link all of the properties of the molecule to their values in the
         perturbed molecule (lambda=1).
@@ -444,7 +452,7 @@ class Perturbation:
         """
         return self._mol.clone()
 
-    def view(self, *args, **kwargs):
+    def view(self, *args, state="perturbed", **kwargs):
         """
         View the perturbation
         """
@@ -454,7 +462,11 @@ class Perturbation:
 
         map = create_map({})
 
-        mol = self._mol.clone()
+        if str(state).lower() == "perturbed":
+            mol = self._mol.clone().perturbation(map=self._map).link_to_perturbed()
+        else:
+            mol = self._mol.clone().perturbation(map=self._map).link_to_reference()
+
         mol.delete_all_frames(map=map)
 
         if mol.is_link(map["coordinates"]):
@@ -486,9 +498,21 @@ class Perturbation:
             mol = self._perturbations.perturb(mol, vals)
             mol.save_frame()
 
-        return mol.view(*args, **kwargs)
+        return mol["not element Xx"].view(*args, **kwargs)
 
-    def zero_dummy_torsions(self, auto_commit: bool = True):
+    def view_reference(self, *args, **kwargs):
+        """
+        View the reference state of the perturbation
+        """
+        return self.view(*args, state="reference", **kwargs)
+
+    def view_perturbed(self, *args, **kwargs):
+        """
+        View the perturbed state of the perturbation
+        """
+        return self.view(*args, state="perturbed", **kwargs)
+
+    def zero_ghost_torsions(self, auto_commit: bool = True):
         """
         Zero the torsions (dihedrals and impropers) in the reference and
         perturbed states where any of the atoms in those states is a ghost atom
@@ -617,4 +641,11 @@ class Perturbation:
 
         from ..convert.openmm import PerturbableOpenMMMolecule
 
-        return PerturbableOpenMMMolecule(self._mol.molecule(), map=map)
+        try:
+            return PerturbableOpenMMMolecule(self._mol.molecule(), map=map)
+        except KeyError:
+            # probably need to choose an end-state - default to reference
+            return PerturbableOpenMMMolecule(
+                self._mol.perturbation().link_to_reference(auto_commit=True).molecule(),
+                map=map,
+            )

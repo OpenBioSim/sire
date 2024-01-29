@@ -202,10 +202,7 @@ def test_openmm_scale_lambda_neopentane_methane(neopentane_methane, openmm_platf
     reason="openmm support is not available",
 )
 def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
-    mols = neopentane_methane.clone()
-
-    for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation().link_to_reference().commit())
+    mols = sr.morph.link_to_reference(neopentane_methane)
 
     mols = sr.morph.repartition_hydrogen_masses(mols)
 
@@ -384,10 +381,7 @@ def test_neopentane_methane_scan(neopentane_methane, openmm_platform):
     reason="openmm support is not available",
 )
 def test_neopentane_methane_scan_no_cutoff(neopentane_methane, openmm_platform):
-    mols = neopentane_methane.clone()
-
-    for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation().link_to_reference().commit())
+    mols = sr.morph.link_to_reference(neopentane_methane)
 
     mols = sr.morph.repartition_hydrogen_masses(mols)
 
@@ -535,10 +529,7 @@ def test_neopentane_methane_scan_no_cutoff(neopentane_methane, openmm_platform):
     reason="openmm support is not available",
 )
 def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
-    mols = neopentane_methane.clone()
-
-    for mol in mols.molecules("property is_perturbable"):
-        mols.update(mol.perturbation().link_to_reference().commit())
+    mols = sr.morph.link_to_reference(neopentane_methane)
 
     mols = sr.morph.repartition_hydrogen_masses(mols)
 
