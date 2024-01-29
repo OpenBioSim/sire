@@ -50,7 +50,7 @@ We plan on adding support for other elements in the near future.
 We now need to set up the molecular system for the QM/MM simulation and create
 an engine to perform the calculation:
 
->>> mols, engine = sr.qm.emle(mols, mols[0], calculator, 0, "7.5A", 20)
+>>> mols, engine = sr.qm.emle(mols, mols[0], calculator, "7.5A", 20)
 
 Here the first argument is the molecules that we are simulating, the second
 selection coresponding to the QM region (here this is the first molecule), and
