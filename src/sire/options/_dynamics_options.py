@@ -48,12 +48,22 @@ class Constraint(_Option):
     HBONDS = "h_bonds", "Constrain bonds involving hydrogens"
     HBONDS_NOT_PERTURBED = (
         "h_bonds_not_perturbed",
-        "Constrain bonds involving hydrogens, but that are not perturbed",
+        "Constrain bonds involving hydrogens, excluding those that are perturbed",
+    )
+    HBONDS_NOT_HEAVY_PERTURBED = (
+        "h_bonds_not_heavy_perturbed",
+        "Constrain bonds involving hydrogens, excluding those that are perturbed "
+        "but do not involve a hydrogen in any end state.",
     )
     BONDS = "bonds", "Constrain all bonds"
     BONDS_NOT_PERTURBED = (
         "bonds_not_perturbed",
-        "Constrain all bonds, but that are not perturbed",
+        "Constrain all bonds, excluding those are perturbed",
+    )
+    BONDS_NOT_HEAVY_PERTURBED = (
+        "bonds_not_heavy_perturbed",
+        "Constrain all bonds, excluding those that are perturbed but do not "
+        "involve a hydrogen in any end state.",
     )
     HBONDS_HANGLES = (
         "h_bonds_h_angles",
@@ -61,7 +71,14 @@ class Constraint(_Option):
     )
     HBONDS_HANGLES_NOT_PERTURBED = (
         "h_bonds_h_angles_not_perturbed",
-        "Constrain bonds and angles involving hydrogens, but that are not perturbed",
+        "Constrain bonds and angles involving hydrogens, "
+        "excluding those that are perturbed.",
+    )
+    HBONDS_HANGLES_NOT_HEAVY_PERTURBED = (
+        "h_bonds_h_angles_not_heavy_perturbed",
+        "Constrain bonds and angles involving hydrogens, "
+        "excluding those that are perturbed "
+        "but do not involve a hydrogen in any end state.",
     )
     BOND_HANGLES = (
         "bonds_h_angles",
@@ -69,7 +86,14 @@ class Constraint(_Option):
     )
     BOND_HANGLES_NOT_PERTURBED = (
         "bonds_h_angles_not_perturbed",
-        "Constrain all bonds, and angles involving hydrogens, but that are not perturbed",
+        "Constrain all bonds, and angles involving hydrogens, "
+        "excluding those that are perturbed",
+    )
+    BONDS_HANGLES_NOT_HEAVY_PERTURBED = (
+        "bonds_h_angles_not_heavy_perturbed",
+        "Constrain all bonds, and angles involving hydrogens, "
+        "excluding those that are perturbed "
+        "but do not involve a hydrogen in any end state.",
     )
 
     @staticmethod

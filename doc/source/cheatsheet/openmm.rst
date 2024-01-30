@@ -76,6 +76,18 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | Key                          | Valid values                                             |
 +==============================+==========================================================+
+| check_for_h_by_ambertype     | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on a H? amber type. |
+|                              | This is the default ``True``.                            |
++------------------------------+----------------------------------------------------------+
+| check_for_h_by_element       | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on the element.     |
+|                              | This is the default ``True``.                            |
++------------------------------+----------------------------------------------------------+
+| check_for_h_by_mass          | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on their mass.      |
+|                              | This is the default ``True``.                            |
++------------------------------+----------------------------------------------------------+
 | com_reset_frequency          | The frequency at which the ``CMMotionRemover`` acts to   |
 |                              | remove center of mass relative motion. If this is not    |
 |                              | set (the default) then center of mass motion is not      |
@@ -83,10 +95,16 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | constraint                   | Type of constraint to use for bonds and/or angles.       |
 |                              | Valid strings are ``none``, ``h-bonds``,                 |
-|                              | ``h-bonds-not-perturbed``, ``bonds``,                    |
-|                              | ``bonds-not-perturbed`` ``h-bonds-h-angles``,            |
-|                              | ``h-bonds-h-angles-not-perturbed``, ``bonds-h-angles``,  |
-|                              | and ``bonds-h-angles-not-perturbed``                     |
+|                              | ``h-bonds-not-perturbed``,                               |
+|                              | ``h-bonds-not-heavy-perturbed``,                         |
+|                              | ``bonds``, ``bonds-not-perturbed``,                      |
+|                              | ``bonds-not-heavy-perturbed``,                           |
+|                              | ``h-bonds-h-angles``,                                    |
+|                              | ``h-bonds-h-angles-not-perturbed``,                      |
+|                              | ``h-bonds-h-angles-not-heavy-perturbed``,                |
+|                              | ``bonds-h-angles``,                                      |
+|                              | ``bonds-h-angles-not-perturbed`` and                     |
+|                              | ``bonds-h-angles-not-heavy-perturbed                     |
 +------------------------------+----------------------------------------------------------+
 | coulomb_power                | The coulomb power parameter used by the softening        |
 |                              | potential used to soften interactions involving          |
@@ -133,6 +151,11 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | lambda                       | The λ-value at which to set up the system (assuming this |
 |                              | contains any perturbable molecules or restraints)        |
++------------------------------+----------------------------------------------------------+
+| perturbable_constraint       | The constraint to use for perturbable molecules. These   |
+|                              | are the same options as ``constraint``, and will         |
+|                              | override that choice for perturbable molecules if this   |
+|                              | is set.                                                  |
 +------------------------------+----------------------------------------------------------+
 | platform                     | Any valid OpenMM platform string, e.g. ``CUDA``,         |
 |                              | ``OpenCL``, ``Metal``, ```CPU``, ``Reference``           |

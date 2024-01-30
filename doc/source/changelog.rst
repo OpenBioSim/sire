@@ -28,6 +28,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   lambda, so that they are set to the length corresponding to r0 at that
   lambda value. Have also changed the constraints so that bonds will be
   constrained to their r0 value, rather than their current length.
+  These constraints are ``X-not-perturbed``, meaning that it constrains 
+  all ``X``, except for bonds or angles involving perturbed atoms. Or
+  ``X-not-heavy-perturbed``, meaning that it constrains all ``X``, except
+  for bonds or angles involving perturbed atoms, unless they involve a
+  hydrogen in any end state. The code to detect hydrogens has been improved,
+  now looking at mass, element and ambertype. There are options to control
+  this, described in the :doc:`OpenMM detailed guide <cheatsheet/openmm>`.
 
 * Added more automatic conversions, so that string will more readily auto-convert
   to units where possible. Also added a ``sire.v`` function to make it easier to

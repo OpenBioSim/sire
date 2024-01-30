@@ -87,52 +87,70 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     if (map.specified("constraint"))
     {
-        const auto c = map["constraint"].source().toLower().simplified();
+        const auto c = map["constraint"].source().toLower().simplified().replace("_", "-");
 
         if (c == "none")
         {
             constraint_type = CONSTRAIN_NONE;
         }
-        else if (c == "h-bonds" or c == "h_bonds")
+        else if (c == "h-bonds")
         {
             constraint_type = CONSTRAIN_HBONDS;
         }
-        else if (c == "h-bonds-not-perturbed" or c == "h_bonds_not_perturbed")
+        else if (c == "h-bonds-not-perturbed")
         {
             constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_NOT_PERTURBED;
+        }
+        else if (c == "h-bonds-not-heavy-perturbed")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_NOT_HEAVY_PERTURBED;
+        }
+        else if (c == "h-bonds-h-angles")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
+        }
+        else if (c == "h-bonds-h-angles-not-perturbed")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
+        }
+        else if (c == "h-bonds-h-angles-not-heavy-perturbed")
+        {
+            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
         else if (c == "bonds")
         {
             constraint_type = CONSTRAIN_BONDS;
         }
-        else if (c == "bonds-not-perturbed" or c == "bonds_not_perturbed")
+        else if (c == "bonds-not-perturbed")
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_PERTURBED;
         }
-        else if (c == "h-bonds-h-angles" or c == "h_bonds_h_angles")
+        else if (c == "bonds-not-heavy-perturbed")
         {
-            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
-        else if (c == "h-bonds-h-angles-not-perturbed" or c == "h_bonds_h_angles_not_perturbed")
-        {
-            constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
-        }
-        else if (c == "bonds-h-angles" or c == "bonds_h_angles")
+        else if (c == "bonds-h-angles")
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
         }
-        else if (c == "bonds-h-angles-not-perturbed" or c == "bonds_h_angles_not_perturbed")
+        else if (c == "bonds-h-angles-not-perturbed")
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
+        }
+        else if (c == "bonds-h-angles-not-heavy-perturbed")
+        {
+            constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
         else
         {
             throw SireError::invalid_key(QObject::tr(
                                              "Unrecognised constraint type '%1'. Valid values are "
-                                             "'none', 'h-bonds', 'h-bonds-not-perturbed', 'bonds', "
-                                             "'bonds-not-perturbed', 'h-bonds-h-angles', "
-                                             "'h-bonds-h-angles-not-perturbed', "
-                                             "'bonds-h-angles', or 'bonds-h-angles-not-perturbed'.")
+                                             "'none', 'h-bonds', "
+                                             "'h-bonds-not-perturbed', 'h-bonds-not-heavy-perturbed', "
+                                             "'h-bonds-h-angles-not-perturbed', 'h-bonds-h-angles-not-heavy-perturbed' "
+                                             "'bonds', 'bonds-not-perturbed', 'bonds-not-heavy-perturbed', "
+                                             "'bonds-h-angles', 'bonds-h-angles-not-perturbed' or "
+                                             "'bonds-h-angles-not-heavy-perturbed'.")
                                              .arg(c),
                                          CODELOC);
         }
@@ -144,52 +162,70 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
 
     if (map.specified("perturbable_constraint"))
     {
-        const auto c = map["perturbable_constraint"].source().toLower().simplified();
+        const auto c = map["perturbable_constraint"].source().toLower().simplified().replace("_", "-");
 
         if (c == "none")
         {
             perturbable_constraint_type = CONSTRAIN_NONE;
         }
-        else if (c == "h-bonds" or c == "h_bonds")
+        else if (c == "h-bonds")
         {
             perturbable_constraint_type = CONSTRAIN_HBONDS;
         }
-        else if (c == "h-bonds-not-perturbed" or c == "h_bonds_not_perturbed")
+        else if (c == "h-bonds-not-perturbed")
         {
             perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_NOT_PERTURBED;
+        }
+        else if (c == "h-bonds-not-heavy-perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_NOT_HEAVY_PERTURBED;
+        }
+        else if (c == "h-bonds-h-angles")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
+        }
+        else if (c == "h-bonds-h-angles-not-perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
+        }
+        else if (c == "h-bonds-h-angles-not-heavy-perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
         else if (c == "bonds")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS;
         }
-        else if (c == "bonds-not-perturbed" or c == "bonds_not_perturbed")
+        else if (c == "bonds-not-perturbed")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_PERTURBED;
         }
-        else if (c == "h-bonds-h-angles" or c == "h_bonds_h_angles")
+        else if (c == "bonds-not-heavy-perturbed")
         {
-            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES;
+            perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
-        else if (c == "h-bonds-h-angles-not-perturbed" or c == "h_bonds_h_angles_not_perturbed")
-        {
-            perturbable_constraint_type = CONSTRAIN_HBONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
-        }
-        else if (c == "bonds-h-angles" or c == "bonds_h_angles")
+        else if (c == "bonds-h-angles")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES;
         }
-        else if (c == "bonds-h-angles-not-perturbed" or c == "bonds_h_angles_not_perturbed")
+        else if (c == "bonds-h-angles-not-perturbed")
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_PERTURBED;
+        }
+        else if (c == "bonds-h-angles-not-heavy-perturbed")
+        {
+            perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
         else
         {
             throw SireError::invalid_key(QObject::tr(
                                              "Unrecognised perturbable constraint type '%1'. Valid values are "
-                                             "'none', 'h-bonds', 'h-bonds-not-perturbed', 'bonds', "
-                                             "'bonds-not-perturbed', 'h-bonds-h-angles', "
-                                             "'h-bonds-h-angles-not-perturbed', "
-                                             "'bonds-h-angles', or 'bonds-h-angles-not-perturbed'.")
+                                             "'none', 'h-bonds', "
+                                             "'h-bonds-not-perturbed', 'h-bonds-not-heavy-perturbed', "
+                                             "'h-bonds-h-angles-not-perturbed', 'h-bonds-h-angles-not-heavy-perturbed' "
+                                             "'bonds', 'bonds-not-perturbed', 'bonds-not-heavy-perturbed', "
+                                             "'bonds-h-angles', 'bonds-h-angles-not-perturbed' or "
+                                             "'bonds-h-angles-not-heavy-perturbed'.")
                                              .arg(c),
                                          CODELOC);
         }
@@ -484,9 +520,36 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     auto masses_data = masses.data();
 
+    const auto &elements = params.elements();
+    const auto &ambertypes = params.amberTypes();
+
+    bool check_for_h_by_mass = true;
+
+    if (map.specified("check_for_h_by_mass"))
+    {
+        check_for_h_by_mass = map["check_for_h_by_mass"].value().asABoolean();
+    }
+
+    bool check_for_h_by_element = true;
+
+    if (map.specified("check_for_h_by_element"))
+    {
+        check_for_h_by_element = map["check_for_h_by_element"].value().asABoolean();
+    }
+
+    bool check_for_h_by_ambertype = true;
+
+    if (map.specified("check_for_h_by_ambertype"))
+    {
+        check_for_h_by_ambertype = map["check_for_h_by_ambertype"].value().asABoolean();
+    }
+
     if (is_perturbable)
     {
         const auto params1_masses = params1.masses();
+
+        const auto &elements1 = params1.elements();
+        const auto &ambertypes1 = params1.amberTypes();
 
         for (int i = 0; i < nats; ++i)
         {
@@ -503,12 +566,28 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 mass = 0.0;
             }
 
-            if (mass < 0.5)
+            if (mass < 1)
             {
-                virtual_sites.insert(i);
+                // this must be a ghost in both end states?
+                light_atoms.insert(i);
             }
-            else if (mass0 < 2.5 or mass1 < 2.5) // either end state is light!
+            else if (check_for_h_by_mass and (mass < 2.5 or mass1 < 2.5))
             {
+                // one of the atoms is H or He
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_element and
+                     (elements.at(cgatomidx).nProtons() == 1 or
+                      elements1.at(cgatomidx).nProtons() == 1))
+            {
+                // one of the atoms is H
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_ambertype and
+                     (ambertypes.at(cgatomidx).toLower().startsWith("h") or
+                      ambertypes1.at(cgatomidx).toLower().startsWith("h")))
+            {
+                // one of the atoms has a H? amber type
                 light_atoms.insert(i);
             }
 
@@ -526,11 +605,20 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 mass = 0.0;
             }
 
-            if (mass < 0.5)
+            if (mass < 1)
             {
-                virtual_sites.insert(i);
+                // this must be a ghost
+                light_atoms.insert(i);
             }
-            else if (mass < 2.5)
+            else if (check_for_h_by_mass and mass < 2.5)
+            {
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_element and elements.at(idx_to_cgatomidx_data[i]).nProtons() == 1)
+            {
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_ambertype and ambertypes.at(idx_to_cgatomidx_data[i]).toLower().startsWith("h"))
             {
                 light_atoms.insert(i);
             }
@@ -652,12 +740,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 double k_1 = bondparam1.k() * bond_k_to_openmm;
                 r0_1 = bondparam1.r0() * bond_r0_to_openmm;
 
-                if ((this_constraint_type & CONSTRAIN_NOT_PERTURBED) and
-                    (std::abs(k_1 - k) > 1e-3 or
-                     std::abs(r0_1 - r0) > 1e-3))
+                if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
                 {
-                    // don't constrain a perturbing bond
-                    should_constrain_bond = false;
+                    // this is a perturbing bond
+                    if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
+                    {
+                        // don't constrain a perturbing bond
+                        should_constrain_bond = false;
+                    }
+                    else if ((this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and has_light_atom)
+                    {
+                        // constrain a perturbing bond involving hydrogen
+                        should_constrain_bond = true;
+                    }
                 }
             }
 
@@ -708,6 +803,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const double theta0 = angparam.theta0(); // already in radians
 
         const bool is_h_x_h = light_atoms.contains(atom0) and light_atoms.contains(atom2);
+        const bool has_light_atom = is_h_x_h or light_atoms.contains(atom1);
 
         const auto key = to_pair(atom0, atom2);
 
@@ -736,10 +832,19 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     double k_1 = angparam.k() * angle_k_to_openmm;
                     theta0_1 = angparam.theta0();
 
-                    if ((this_constraint_type & CONSTRAIN_NOT_PERTURBED) and
-                        (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3))
+                    if (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3)
                     {
-                        should_constrain_angle = false;
+                        // this angle perturbs
+                        if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
+                        {
+                            // don't constrain a perturbing angle
+                            should_constrain_angle = false;
+                        }
+                        else if ((this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and has_light_atom)
+                        {
+                            // constrain a perturbing angle involving hydrogen
+                            should_constrain_angle = true;
+                        }
                     }
                 }
 

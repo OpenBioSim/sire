@@ -140,6 +140,10 @@ def test_neo_constraints(neopentane_methane, openmm_platform):
         assert f[0][0].name() == b[0][0].name()
         assert f[0][1].name() == b[0][1].name()
 
+    # there should be one dynamic constraint, of the C-C/H bond
+    p = mols_fwds[0].perturbation().to_openmm(constraint="h-bonds")
+    assert len(p.changed_constraints(to_pandas=False)) == 1
+
     d_fwds = mols_fwds.dynamics(
         constraint="bonds-not-perturbed", platform=openmm_platform
     )
@@ -151,7 +155,12 @@ def test_neo_constraints(neopentane_methane, openmm_platform):
     c_fwds = d_fwds.get_constraints()
     c_bwds = d_bwds.get_constraints()
 
-    assert len(c_fwds) == len(c_bwds) != len(mols_fwds[0].bonds())
+    # there should be no dynamic constraints
+    p = mols_fwds[0].perturbation().to_openmm(constraint="bonds-not-perturbed")
+    assert len(p.changed_constraints(to_pandas=False)) == 0
+
+    # the perturbing C-C/H bond should not be constrained
+    assert len(c_fwds) == len(c_bwds) == len(mols_fwds[0].bonds()) - 1
 
     for f, b in zip(c_fwds, c_bwds):
         assert f[0][0].name() == b[0][0].name()
@@ -160,12 +169,12 @@ def test_neo_constraints(neopentane_methane, openmm_platform):
     d_fwds = mols_fwds.dynamics(
         constraint="h-bonds-not-perturbed",
         platform=openmm_platform,
-        swap_end_states=True,
     )
 
     d_bwds = mols_bwds.dynamics(
         constraint="h-bonds-not-perturbed",
         platform=openmm_platform,
+        swap_end_states=True,
     )
 
     c_fwds = d_fwds.get_constraints()
@@ -176,3 +185,30 @@ def test_neo_constraints(neopentane_methane, openmm_platform):
     for f, b in zip(c_fwds, c_bwds):
         assert f[0][0].name() == b[0][0].name()
         assert f[0][1].name() == b[0][1].name()
+
+    d_fwds = mols_fwds.dynamics(
+        constraint="h-bonds-not-heavy-perturbed",
+        platform=openmm_platform,
+    )
+
+    d_bwds = mols_bwds.dynamics(
+        constraint="h-bonds-not-heavy-perturbed",
+        platform=openmm_platform,
+        swap_end_states=True,
+    )
+
+    c_fwds = d_fwds.get_constraints()
+    c_bwds = d_bwds.get_constraints()
+
+    # this should have constrained everything, as everything
+    # is either a H bond or a perturbable bond containing H
+    # at either end state
+    assert len(c_fwds) == len(c_bwds) == len(mols_fwds[0].bonds())
+
+    for f, b in zip(c_fwds, c_bwds):
+        assert f[0][0].name() == b[0][0].name()
+        assert f[0][1].name() == b[0][1].name()
+
+    # check that there is only one perturbable constraint
+    p = mols_fwds[0].perturbation().to_openmm(constraint="h-bonds-not-heavy-perturbed")
+    assert (len(p.changed_constraints(to_pandas=False))) == 1

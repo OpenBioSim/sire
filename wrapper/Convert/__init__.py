@@ -279,11 +279,11 @@ try:
                 # choose the constraint based on the timestep
                 if timestep_in_fs > 4:
                     # need constraint on everything
-                    constraint = "bonds-not-perturbed"
+                    constraint = "bonds-not-heavy-perturbed"
 
                 elif timestep_in_fs > 1:
                     # need it just on H bonds and angles
-                    constraint = "h-bonds-not-perturbed"
+                    constraint = "h-bonds-not-heavy-perturbed"
 
                 else:
                     # can get away with no constraints
@@ -300,7 +300,7 @@ try:
 
             if constraint == "auto":
                 # only apply the constraint to non-perturbed hydrogens
-                constraint = "h-bonds-not-perturbed"
+                constraint = "h-bonds-not-heavy-perturbed"
 
             map.set("perturbable_constraint", constraint)
 

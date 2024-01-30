@@ -36,7 +36,8 @@ namespace SireOpenMM
             CONSTRAIN_BONDS = 0x00000001,
             CONSTRAIN_HBONDS = 0x00000010,
             CONSTRAIN_HANGLES = 0x00001000,
-            CONSTRAIN_NOT_PERTURBED = 0x00010000
+            CONSTRAIN_NOT_PERTURBED = 0x00010000,
+            CONSTRAIN_NOT_HEAVY_PERTURBED = 0x00100000,
         };
 
         OpenMMMolecule();
@@ -112,9 +113,6 @@ namespace SireOpenMM
 
         /** Indexes of light atoms */
         QSet<qint32> light_atoms;
-
-        /** Indexes of virtual sites */
-        QSet<qint32> virtual_sites;
 
         /** Charge and LJ parameters (sigma / epsilon) */
         QVector<boost::tuple<double, double, double>> cljs;
