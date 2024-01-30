@@ -8,6 +8,8 @@ __all__ = [
     "extract_perturbed",
     "link_to_reference",
     "link_to_perturbed",
+    "zero_ghost_bonds",
+    "zero_ghost_angles",
     "zero_ghost_torsions",
     "Perturbation",
 ]
@@ -18,6 +20,8 @@ from ._perturbation import (
     link_to_perturbed,
     extract_reference,
     extract_perturbed,
+    zero_ghost_bonds,
+    zero_ghost_angles,
     zero_ghost_torsions,
 )
 

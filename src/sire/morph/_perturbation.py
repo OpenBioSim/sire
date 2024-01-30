@@ -4,6 +4,8 @@ __all__ = [
     "link_to_perturbed",
     "extract_reference",
     "extract_perturbed",
+    "zero_ghost_bonds",
+    "zero_ghost_angles",
     "zero_ghost_torsions",
 ]
 
@@ -62,6 +64,32 @@ def extract_perturbed(mols, remove_ghosts: bool = True, map=None):
         mols.update(
             mol.perturbation(map=map).extract_perturbed(remove_ghosts=remove_ghosts)
         )
+
+    return mols
+
+
+def zero_ghost_bonds(mols, map=None):
+    """
+    Zero any bonds in the reference or perturbed
+    states where any of the atoms in those states is a ghost (dummy) atom
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).zero_ghost_bonds(auto_commit=True))
+
+    return mols
+
+
+def zero_ghost_angles(mols, map=None):
+    """
+    Zero any angles in the reference or perturbed
+    states where any of the atoms in those states is a ghost (dummy) atom
+    """
+    mols = mols.clone()
+
+    for mol in mols.molecules("property is_perturbable"):
+        mols.update(mol.perturbation(map=map).zero_ghost_angles(auto_commit=True))
 
     return mols
 
@@ -512,6 +540,142 @@ class Perturbation:
         """
         return self.view(*args, state="perturbed", **kwargs)
 
+    def zero_ghost_bonds(self, auto_commit: bool = True):
+        """
+        Zero the bonds in the reference and perturbed states where any of
+        the atoms in those states is a ghost atom
+        """
+        p = self.to_openmm()
+
+        zero_in_ref = []
+        zero_in_pert = []
+
+        from_ghosts = []
+        to_ghosts = []
+
+        atoms = p.atoms()
+
+        for idx in p.get_to_ghost_idxs():
+            to_ghosts.append(atoms[idx].index())
+
+        for idx in p.get_from_ghost_idxs():
+            from_ghosts.append(atoms[idx].index())
+
+        for bond in p.bonds():
+            atoms = bond.atoms()
+
+            n_in_from = sum([int(atoms[i].index() in from_ghosts) for i in range(2)])
+            n_in_to = sum([int(atoms[i].index() in to_ghosts) for i in range(2)])
+
+            if n_in_from == 0 and n_in_to == 0:
+                continue
+            elif n_in_from == 0:
+                zero_in_pert.append(bond)
+            elif n_in_to == 0:
+                zero_in_ref.append(bond)
+            else:
+                zero_in_pert.append(bond)
+                zero_in_ref.append(bond)
+
+        if len(zero_in_ref) == 0 and len(zero_in_pert) == 0:
+            # nothing to do
+            return self
+
+        mol = self._mol.molecule().edit()
+
+        if len(zero_in_ref) > 0:
+            bonds = self._mol.property(self._map["bond0"])
+
+            for bond in zero_in_ref:
+                bonds.clear(bond.id())
+
+            mol.set_property(self._map["bond0"].source(), bonds)
+
+        if len(zero_in_pert) > 0:
+            bonds = self._mol.property(self._map["bond1"])
+
+            for bond in zero_in_pert:
+                bonds.clear(bond.id())
+
+            mol.set_property(self._map["bond1"].source(), bonds)
+
+        self._mol.update(mol.commit())
+
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
+
+    def zero_ghost_angles(self, auto_commit: bool = True):
+        """
+        Zero the angles in the reference and perturbed states where any of
+        the atoms in those states is a ghost atom
+        """
+        p = self.to_openmm()
+
+        zero_in_ref = []
+        zero_in_pert = []
+
+        from_ghosts = []
+        to_ghosts = []
+
+        atoms = p.atoms()
+
+        for idx in p.get_to_ghost_idxs():
+            to_ghosts.append(atoms[idx].index())
+
+        for idx in p.get_from_ghost_idxs():
+            from_ghosts.append(atoms[idx].index())
+
+        for angle in p.angles():
+            atoms = angle.atoms()
+
+            n_in_from = sum([int(atoms[i].index() in from_ghosts) for i in range(3)])
+            n_in_to = sum([int(atoms[i].index() in to_ghosts) for i in range(3)])
+
+            if n_in_from == 0 and n_in_to == 0:
+                continue
+            elif n_in_from == 0:
+                # don't zero if all are ghosts
+                if n_in_to < 3:
+                    zero_in_pert.append(angle)
+            elif n_in_to == 0:
+                # don't zero if all are ghosts
+                if n_in_from < 3:
+                    zero_in_ref.append(angle)
+            else:
+                zero_in_pert.append(angle)
+                zero_in_ref.append(angle)
+
+        if len(zero_in_ref) == 0 and len(zero_in_pert) == 0:
+            # nothing to do
+            return self
+
+        mol = self._mol.molecule().edit()
+
+        if len(zero_in_ref) > 0:
+            angs = self._mol.property(self._map["angle0"])
+
+            for angle in zero_in_ref:
+                angs.clear(angle.id())
+
+            mol.set_property(self._map["angle0"].source(), angs)
+
+        if len(zero_in_pert) > 0:
+            angs = self._mol.property(self._map["angle1"])
+
+            for angle in zero_in_pert:
+                angs.clear(angle.id())
+
+            mol.set_property(self._map["angle1"].source(), angs)
+
+        self._mol.update(mol.commit())
+
+        if auto_commit:
+            return self.commit()
+        else:
+            return self
+
     def zero_ghost_torsions(self, auto_commit: bool = True):
         """
         Zero the torsions (dihedrals and impropers) in the reference and
@@ -534,21 +698,24 @@ class Perturbation:
             from_ghosts.append(atoms[idx].index())
 
         for torsion in p.torsions():
-            if (
-                torsion.atom0().index() in from_ghosts
-                or torsion.atom1().index() in from_ghosts
-                or torsion.atom2().index() in from_ghosts
-                or torsion.atom3().index() in from_ghosts
-            ):
-                zero_in_ref.append(torsion)
+            atoms = torsion.atoms()
 
-            if (
-                torsion.atom0().index() in to_ghosts
-                or torsion.atom1().index() in to_ghosts
-                or torsion.atom2().index() in to_ghosts
-                or torsion.atom3().index() in to_ghosts
-            ):
+            n_in_from = sum([int(atoms[i].index() in from_ghosts) for i in range(4)])
+            n_in_to = sum([int(atoms[i].index() in to_ghosts) for i in range(4)])
+
+            if n_in_from == 0 and n_in_to == 0:
+                continue
+            elif n_in_from == 0:
+                # don't zero if all are ghosts
+                if n_in_to < 4:
+                    zero_in_pert.append(torsion)
+            elif n_in_to == 0:
+                # don't zero if all are ghosts
+                if n_in_from < 4:
+                    zero_in_ref.append(torsion)
+            else:
                 zero_in_pert.append(torsion)
+                zero_in_ref.append(torsion)
 
         if len(zero_in_ref) == 0 and len(zero_in_pert) == 0:
             # nothing to do
