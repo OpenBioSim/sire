@@ -234,3 +234,89 @@ def test_extract_and_link(neopentane_methane, openmm_platform):
     nrg_pert = pert_mols.dynamics(map=map).current_potential_energy().value()
 
     assert nrg_1_1 == pytest.approx(nrg_pert, 1e-3)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_extract_and_link_solv(solvated_neopentane_methane, openmm_platform):
+    mols = solvated_neopentane_methane.clone()
+
+    map = {
+        "space": mols.space(),
+        "platform": openmm_platform,
+        "constraint": "none",
+        "cutoff_type": "RF",
+        "cutoff": "7.5A",
+    }
+
+    assert len(mols.molecules("property is_perturbable")) == 1
+
+    ref_mols = sr.morph.extract_reference(mols, remove_ghosts=False)
+    pert_mols = sr.morph.extract_perturbed(mols, remove_ghosts=False)
+
+    with pytest.raises(KeyError):
+        assert len(ref_mols.molecules("property is_perturbable")) == 0
+
+    mols = sr.morph.link_to_reference(mols)
+
+    nrg_0_0 = (
+        mols.dynamics(ignore_perturbations=True, map=map)
+        .current_potential_energy()
+        .value()
+    )
+
+    nrg_1_0 = (
+        mols.dynamics(swap_end_states=True, ignore_perturbations=True, map=map)
+        .current_potential_energy()
+        .value()
+    )
+
+    mols = sr.morph.link_to_perturbed(mols)
+
+    nrg_0_1 = (
+        mols.dynamics(ignore_perturbations=True, map=map)
+        .current_potential_energy()
+        .value()
+    )
+
+    nrg_1_1 = (
+        mols.dynamics(swap_end_states=True, ignore_perturbations=True, map=map)
+        .current_potential_energy()
+        .value()
+    )
+
+    assert nrg_0_0 != nrg_1_0
+    assert nrg_0_1 != nrg_1_1
+
+    mols = sr.morph.link_to_reference(mols)
+
+    assert nrg_0_0 == pytest.approx(
+        mols.dynamics(lambda_value=0.0, map=map).current_potential_energy().value(),
+        1e-3,
+    )
+
+    assert nrg_1_0 == pytest.approx(
+        mols.dynamics(lambda_value=1.0, map=map).current_potential_energy().value(),
+        1e-3,
+    )
+
+    for key in ref_mols[0].property_keys():
+        assert mols[0].property(key) == ref_mols[0].property(key)
+
+    nrg_ref = ref_mols.dynamics(map=map).current_potential_energy().value()
+
+    assert nrg_0_0 == pytest.approx(nrg_ref, 1e-3)
+
+    with pytest.raises(KeyError):
+        assert len(pert_mols.molecules("property is_perturbable")) == 0
+
+    mols = sr.morph.link_to_perturbed(mols)
+
+    for key in ref_mols[0].property_keys():
+        assert mols[0].property(key) == pert_mols[0].property(key)
+
+    nrg_pert = pert_mols.dynamics(map=map).current_potential_energy().value()
+
+    assert nrg_1_1 == pytest.approx(nrg_pert, 1e-3)

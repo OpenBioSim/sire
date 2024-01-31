@@ -3,6 +3,11 @@ import pytest
 
 
 def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3, platform="CPU"):
+    try:
+        space = mols.space()
+    except Exception:
+        space = sr.vol.Cartesian()
+
     c = mols.cursor()
 
     # can only get the same energies if they have the same coordinates
@@ -61,6 +66,7 @@ def _run_test(mols, is_slow=False, use_taylor=False, precision=1e-3, platform="C
         "constraint": "h-bonds-not-perturbed",
         "include_constrained_energies": True,
         "dynamic_constraints": False,
+        "space": space,
     }
 
     if use_taylor:
@@ -195,6 +201,27 @@ def test_openmm_scale_lambda_cyclopentane(pentane_cyclopentane, openmm_platform)
 )
 def test_openmm_scale_lambda_neopentane_methane(neopentane_methane, openmm_platform):
     _run_test(neopentane_methane, False, platform=openmm_platform)
+
+
+@pytest.mark.veryslow
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_big_openmm_scale_lambda_neopentane_methane_solv(
+    solvated_neopentane_methane, openmm_platform
+):
+    _run_test(solvated_neopentane_methane, True, platform=openmm_platform)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_openmm_scale_lambda_neopentane_methane_solv(
+    solvated_neopentane_methane, openmm_platform
+):
+    _run_test(solvated_neopentane_methane, False, platform=openmm_platform)
 
 
 @pytest.mark.skipif(

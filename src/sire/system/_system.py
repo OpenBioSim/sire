@@ -858,7 +858,9 @@ class System:
 
         if to_pandas or to_alchemlyb:
             try:
-                return traj.to_pandas(to_alchemlyb=to_alchemlyb)
+                return traj.to_pandas(
+                    to_alchemlyb=to_alchemlyb, energy_unit=energy_unit
+                )
             except Exception:
                 ensemble = self.ensemble()
 
