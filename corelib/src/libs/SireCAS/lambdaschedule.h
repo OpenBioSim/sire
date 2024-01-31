@@ -98,6 +98,16 @@ namespace SireCAS
 
         QStringList getLevers() const;
 
+        void addForce(const QString &force);
+        void addForces(const QStringList &forces);
+
+        void removeForce(const QString &force);
+        void removeForces(const QStringList &forces);
+
+        int nForces() const;
+
+        QStringList getForces() const;
+
         int nStages() const;
 
         QStringList getStages() const;
@@ -236,6 +246,9 @@ namespace SireCAS
 
         /** The set of all constants used across all stages */
         SireCAS::Values constant_values;
+
+        /** The names of all of the forces */
+        QStringList force_names;
 
         /** The names of all of the levers provided by the forcefields */
         QStringList lever_names;

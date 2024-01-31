@@ -43,11 +43,12 @@ static RegisterMetaType<LambdaSchedule> r_schedule;
 
 QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
 {
-    writeHeader(ds, r_schedule, 2);
+    writeHeader(ds, r_schedule, 3);
 
     SharedDataStream sds(ds);
 
     sds << schedule.constant_values
+        << schedule.force_names
         << schedule.lever_names << schedule.stage_names
         << schedule.default_equations
         << schedule.stage_equations
@@ -68,12 +69,16 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
 {
     VersionID v = readHeader(ds, r_schedule);
 
-    if (v == 1 or v == 2)
+    if (v == 1 or v == 2 or v == 3)
     {
         SharedDataStream sds(ds);
 
-        sds >> schedule.constant_values >>
-            schedule.lever_names >> schedule.stage_names >>
+        sds >> schedule.constant_values;
+
+        if (v == 3)
+            sds >> schedule.force_names;
+
+        sds >> schedule.lever_names >> schedule.stage_names >>
             schedule.default_equations >> schedule.stage_equations;
 
         if (v == 2)
@@ -97,7 +102,7 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
         }
     }
     else
-        throw version_error(v, "1, 2", r_schedule, CODELOC);
+        throw version_error(v, "1, 2, 3", r_schedule, CODELOC);
 
     return ds;
 }
@@ -110,6 +115,7 @@ LambdaSchedule::LambdaSchedule(const LambdaSchedule &other)
     : ConcreteProperty<LambdaSchedule, Property>(other),
       mol_schedules(other.mol_schedules),
       constant_values(other.constant_values),
+      force_names(other.force_names),
       lever_names(other.lever_names), stage_names(other.stage_names),
       default_equations(other.default_equations),
       stage_equations(other.stage_equations)
@@ -126,6 +132,7 @@ LambdaSchedule &LambdaSchedule::operator=(const LambdaSchedule &other)
     {
         mol_schedules = other.mol_schedules;
         constant_values = other.constant_values;
+        force_names = other.force_names;
         lever_names = other.lever_names;
         stage_names = other.stage_names;
         default_equations = other.default_equations;
@@ -139,6 +146,7 @@ LambdaSchedule &LambdaSchedule::operator=(const LambdaSchedule &other)
 bool LambdaSchedule::operator==(const LambdaSchedule &other) const
 {
     return mol_schedules == other.mol_schedules and
+           force_names == other.force_names and
            constant_values == other.constant_values and
            lever_names == other.lever_names and
            stage_names == other.stage_names and
@@ -400,6 +408,76 @@ int LambdaSchedule::nLevers() const
 QStringList LambdaSchedule::getLevers() const
 {
     return this->lever_names;
+}
+
+/** Add a force to a schedule. This is only useful if you want to
+ *  plot how the equations would affect the lever. Forces will be
+ *  automatically added by any perturbation run that needs them,
+ *  so you don't need to add them manually yourself.
+ */
+void LambdaSchedule::addForce(const QString &force)
+{
+    this->force_names.append(force);
+}
+
+/** Add some forces to a schedule. This is only useful if you want to
+ *  plot how the equations would affect the lever. Forces will be
+ *  automatically added by any perturbation run that needs them,
+ *  so you don't need to add them manually yourself.
+ */
+void LambdaSchedule::addForces(const QStringList &forces)
+{
+    for (const auto &force : forces)
+    {
+        if (not this->force_names.contains(force))
+            this->force_names.append(force);
+    }
+}
+
+/** Remove a force from a schedule. This will not impact any
+ *  perturbation runs that use this schedule, as any missing
+ *  forces will be re-added.
+ */
+void LambdaSchedule::removeForce(const QString &force)
+{
+    if (not this->force_names.contains(force))
+        return;
+
+    int idx = this->force_names.indexOf(force);
+
+    this->force_names.removeAt(idx);
+}
+
+/** Remove some forces from a schedule. This will not impact any
+ *  perturbation runs that use this schedule, as any missing
+ *  forces will be re-added.
+ */
+void LambdaSchedule::removeForces(const QStringList &forces)
+{
+    for (const auto &force : forces)
+    {
+        this->removeForce(force);
+    }
+}
+
+/** Return the number of forces that have been explicitly added
+ *  to the schedule. Note that forces will be automatically added
+ *  by any perturbation run that needs them, so you don't normally
+ *  need to manage them manually yourself.
+ */
+int LambdaSchedule::nForces() const
+{
+    return this->force_names.count();
+}
+
+/** Return all of the forces that have been explicitly added
+ *  to the schedule. Note that forces will be automatically added
+ *  by any perturbation run that needs them, so you don't normally
+ *  need to manage them manually yourself.
+ */
+QStringList LambdaSchedule::getForces() const
+{
+    return this->force_names;
 }
 
 /** Return the number of stages in this schedule */

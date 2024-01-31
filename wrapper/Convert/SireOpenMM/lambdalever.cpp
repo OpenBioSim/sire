@@ -1184,6 +1184,7 @@ void LambdaLever::setForceIndex(const QString &force,
                                        CODELOC);
 
     this->name_to_ffidx.insert(force, index);
+    this->lambda_schedule.addForce(force);
 }
 
 /** Add the index of a restraint force called 'restraint' in the

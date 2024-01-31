@@ -21,3 +21,5 @@ calculating free energies that involve breaking rings in ligands.
    :maxdepth: 1
 
    part07/01_perturbation
+   part07/02_levers
+   part07/03_pertfile

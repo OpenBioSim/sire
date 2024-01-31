@@ -27,7 +27,6 @@ then copying in the values from the original two molecules used as input.
 BioSimSpace has great functionality to do this. Would like to have a
 simple function in sire too...
 
-
 Perturbation files (pertfiles)
 ------------------------------
 

@@ -83,6 +83,32 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::addForce
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addForce_function_type)( ::QString const & ) ;
+            addForce_function_type addForce_function_value( &::SireCAS::LambdaSchedule::addForce );
+            
+            LambdaSchedule_exposer.def( 
+                "addForce"
+                , addForce_function_value
+                , ( bp::arg("force") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addForces
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addForces_function_type)( ::QStringList const & ) ;
+            addForces_function_type addForces_function_value( &::SireCAS::LambdaSchedule::addForces );
+            
+            LambdaSchedule_exposer.def( 
+                "addForces"
+                , addForces_function_value
+                , ( bp::arg("forces") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::addLever
         
             typedef void ( ::SireCAS::LambdaSchedule::*addLever_function_type)( ::QString const & ) ;
@@ -295,6 +321,18 @@ void register_LambdaSchedule_class(){
                 "getEquation"
                 , getEquation_function_value
                 , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::getForces
+        
+            typedef ::QStringList ( ::SireCAS::LambdaSchedule::*getForces_function_type)(  ) const;
+            getForces_function_type getForces_function_value( &::SireCAS::LambdaSchedule::getForces );
+            
+            LambdaSchedule_exposer.def( 
+                "getForces"
+                , getForces_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -564,6 +602,18 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::nForces
+        
+            typedef int ( ::SireCAS::LambdaSchedule::*nForces_function_type)(  ) const;
+            nForces_function_type nForces_function_value( &::SireCAS::LambdaSchedule::nForces );
+            
+            LambdaSchedule_exposer.def( 
+                "nForces"
+                , nForces_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::nLevers
         
             typedef int ( ::SireCAS::LambdaSchedule::*nLevers_function_type)(  ) const;
@@ -638,6 +688,32 @@ void register_LambdaSchedule_class(){
                 "removeEquation"
                 , removeEquation_function_value
                 , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::removeForce
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeForce_function_type)( ::QString const & ) ;
+            removeForce_function_type removeForce_function_value( &::SireCAS::LambdaSchedule::removeForce );
+            
+            LambdaSchedule_exposer.def( 
+                "removeForce"
+                , removeForce_function_value
+                , ( bp::arg("force") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::removeForces
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeForces_function_type)( ::QStringList const & ) ;
+            removeForces_function_type removeForces_function_value( &::SireCAS::LambdaSchedule::removeForces );
+            
+            LambdaSchedule_exposer.def( 
+                "removeForces"
+                , removeForces_function_value
+                , ( bp::arg("forces") )
                 , bp::release_gil_policy()
                 , "" );
         
