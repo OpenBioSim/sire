@@ -620,6 +620,11 @@ class System:
             or the time between resets. If this is unset, then
             the center-of-mass is not reset during the simulation.
 
+        barostat_frequency:
+            Either the number of steps between MC moves to apply the
+            barostat, of the time between moves. If this is unset,
+            then the default of every 25 steps is used.
+
         dynamic_constraints: bool
             Whether or not to update the length of constraints of
             perturbable bonds with lambda. This defaults to True,

@@ -55,7 +55,7 @@ Controlling individual levers
 -----------------------------
 
 We can also control how individual parameters in individual forces are
-morphed. We call these individual morphing possibilitie "levers".
+morphed. We call these individual morphing controls "levers".
 So, the bond potential has two levers, its bond length, and its force constant.
 
 We can list the levers that are available in the OpenMM context using the

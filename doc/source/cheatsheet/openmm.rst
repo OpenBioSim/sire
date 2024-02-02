@@ -76,6 +76,10 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | Key                          | Valid values                                             |
 +==============================+==========================================================+
+| barostat_frequency           | The frequency at which the barostat acts to perform      |
+|                              | the MC moves to change the box volume when performing    |
+|                              | constant pressure simulations (default 25).              |
++------------------------------+----------------------------------------------------------+
 | check_for_h_by_ambertype     | Boolean value, e.g. ``True`` or ``False`` as to whether  |
 |                              | hydrogen atoms can be detected based on a H? amber type. |
 |                              | This is the default ``True``.                            |

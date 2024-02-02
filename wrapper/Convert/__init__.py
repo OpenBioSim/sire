@@ -323,8 +323,16 @@ try:
                     "on a system with a non-periodic space."
                 )
 
+            barostat_freq = 25
+
+            if map.specified("barostat_frequency"):
+                barostat_freq = map["barostat_frequency"].value().as_integer()
+
             pressure = ensemble.pressure().to(atm) * openmm.unit.atmosphere
-            system.addForce(openmm.MonteCarloBarostat(pressure, temperature))
+
+            barostat = openmm.MonteCarloBarostat(pressure, temperature, barostat_freq)
+
+            system.addForce(barostat)
 
         platform = None
 

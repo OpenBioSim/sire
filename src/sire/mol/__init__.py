@@ -1576,6 +1576,7 @@ def _dynamics(
     device=None,
     precision=None,
     com_reset_frequency=None,
+    barostat_frequency=None,
     dynamic_constraints: bool = True,
     map=None,
 ):
@@ -1727,6 +1728,11 @@ def _dynamics(
         or the time between resets. If this is unset, then
         the center-of-mass is not reset during the simulation.
 
+    barostat_frequency:
+        Either the number of steps between MC moves to apply the
+        barostat, of the time between moves. If this is unset,
+        then the default of every 25 steps is used.
+
     dynamic_constraints: bool
         Whether or not to update the length of constraints of
         perturbable bonds with lambda. This defaults to True,
@@ -1846,6 +1852,32 @@ def _dynamics(
             map.set("dynamic_constraints", True)
         else:
             map.set("dynamic_constraints", False)
+
+    if barostat_frequency is not None:
+        barostat_frequency = u(barostat_frequency)
+    elif map.specified("barostat_frequency"):
+        barostat_frequency = u(map["barostat_frequency"].value())
+
+    if barostat_frequency is None:
+        map.unset("barostat_frequency")
+    else:
+        if barostat_frequency.is_dimensionless():
+            barostat_frequency = int(barostat_frequency.value())
+
+            if barostat_frequency != 0:
+                map.set("barostat_frequency", barostat_frequency)
+            else:
+                map.unset("barostat_frequency")
+        else:
+            if not barostat_frequency.has_same_units(timestep):
+                raise ValueError("The units of barostat_frequency must match timestep")
+
+            barostat_frequency = int((barostat_frequency / timestep).value())
+
+            if barostat_frequency != 0:
+                map.set("barostat_frequency", barostat_frequency)
+            else:
+                map.unset("barostat_frequency")
 
     if com_reset_frequency is not None:
         com_reset_frequency = u(com_reset_frequency)
