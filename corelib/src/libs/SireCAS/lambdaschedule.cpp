@@ -81,7 +81,7 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
         sds >> schedule.lever_names >> schedule.stage_names >>
             schedule.default_equations >> schedule.stage_equations;
 
-        if (v == 2)
+        if (v == 2 or v == 3)
             sds >> schedule.mol_schedules;
 
         sds >> static_cast<Property &>(schedule);
