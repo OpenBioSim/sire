@@ -28,7 +28,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   lambda, so that they are set to the length corresponding to r0 at that
   lambda value. Have also changed the constraints so that bonds will be
   constrained to their r0 value, rather than their current length.
-  These constraints are ``X-not-perturbed``, meaning that it constrains 
+  These constraints are ``X-not-perturbed``, meaning that it constrains
   all ``X``, except for bonds or angles involving perturbed atoms. Or
   ``X-not-heavy-perturbed``, meaning that it constrains all ``X``, except
   for bonds or angles involving perturbed atoms, unless they involve a
@@ -47,6 +47,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * MacOS/ARM64 now includes AmberTools and Gromacs dependencies when built
   for BioSimSpace (matching MacOS/X64 and Linux).
+
+* Updated the electrostatic softening potential to have an additional
+  ``shift_coulomb`` parameter, so that you can control how much the
+  distance is increased by the alpha softening parameter. This was
+  the equivalent of 10 Å, but has been set as default to 1 Å to match
+  the value used in somd.
 
 * Added support for LJ 12-6-4 potentials, plus the ability to read and write
   LJ parameter exceptions to Amber topology files. This fixes issue #125.

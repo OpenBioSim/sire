@@ -33,6 +33,7 @@
 #include "SireCAS/lambdaschedule.h"
 
 #include "SireMaths/vector.h"
+#include "SireMaths/maths.h"
 
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
@@ -807,6 +808,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         if (shift_delta.value() < 0)
             shift_delta = 0.0 * SireUnits::angstrom;
 
+        // somd uses a default shift_coulomb of 1 A
+        double shift_coulomb = SireMaths::pow_2((1 * SireUnits::angstrom).to(SireUnits::nanometer));
+
+        if (map.specified("shift_coulomb"))
+        {
+            const auto &value = map["shift_coulomb"].value();
+
+            if (value.isA<SireBase::LengthProperty>())
+                shift_coulomb = SireMaths::pow_2(value.asA<SireBase::LengthProperty>().value().to(SireUnits::nanometer));
+            else
+                shift_coulomb = SireMaths::pow_2(
+                    value.asA<SireBase::GeneralUnitProperty>().toUnit<SireUnits::Dimension::Length>().to(SireUnits::nanometer));
+        }
+
         // use a Taylor LJ power of 1
         int taylor_power = 1;
 
@@ -876,10 +891,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(kappa/r));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
                                   "lj_nrg=four_epsilon*((sig6^2)-sig6);"
-                                  "sig6=(sigma^6)/(%2*sigma^6 + r^6);")
+                                  "sig6=(sigma^6)/(%3*sigma^6 + r^6);")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
+                                  .arg(shift_coulomb)
                                   .arg(taylor_power_expression("alpha", taylor_power))
                                   .toStdString();
         }
@@ -887,11 +903,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(kappa/r));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
                                   "lj_nrg=four_epsilon*((sig6^2)-sig6);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
-                                  "delta=%2*alpha;")
+                                  "delta=%3*alpha;")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
+                                  .arg(shift_coulomb)
                                   .arg(shift_delta.to(SireUnits::nanometer))
                                   .toStdString();
         }
@@ -918,7 +935,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
             //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
             //
-            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
+            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //
+            //   delta = shift_coulomb^2 * alpha
             //
             // Note that we supply half_sigma and two_sqrt_epsilon to save some
             // cycles
@@ -930,13 +949,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(max_kappa/r));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
-                                     "sig6=(sigma^6)/(%2*sigma^6 + r^6);"
+                                     "sig6=(sigma^6)/(%3*sigma^6 + r^6);"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
+                                 .arg(shift_coulomb)
                                  .arg(taylor_power_expression("max_alpha", taylor_power))
                                  .toStdString();
         }
@@ -951,7 +971,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //
             //   delta = shift_delta * alpha
             //
-            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
+            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //
+            //   delta = shift_coulomb^2 * alpha
             //
             // Note that we pre-calculate delta as a forcefield parameter,
             // and also supply half_sigma and two_sqrt_epsilon to save some
@@ -964,14 +986,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(max_kappa/r));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
-                                     "delta=%2*max_alpha;"
+                                     "delta=%3*max_alpha;"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
+                                 .arg(shift_coulomb)
                                  .arg(shift_delta.to(SireUnits::nanometer))
                                  .toStdString();
         }

@@ -1569,6 +1569,7 @@ def _dynamics(
     pressure=None,
     vacuum=None,
     shift_delta=None,
+    shift_coulomb=None,
     coulomb_power=None,
     restraints=None,
     fixed=None,
@@ -1690,10 +1691,15 @@ def _dynamics(
         simulation run in vacuum.
 
     shift_delta: length
-        The shift_delta parameter that controls the electrostatic
-        and van der Waals softening potential that smooths the
+        The shift_delta parameter that controls the Lennard-Jones
+        softening potential that smooths the
         creation and deletion of ghost atoms during a potential.
         This defaults to 2.0 A.
+
+    shift_coulomb: length
+        The shift_coulomb parameter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 1.0 A.
 
     coulomb_power: int
         The coulomb power parmeter that controls the electrostatic
@@ -1915,6 +1921,7 @@ def _dynamics(
         schedule=schedule,
         lambda_value=lambda_value,
         shift_delta=shift_delta,
+        shift_coulomb=shift_coulomb,
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
@@ -1937,6 +1944,7 @@ def _minimisation(
     ignore_perturbations=None,
     vacuum=None,
     shift_delta=None,
+    shift_coulomb=None,
     coulomb_power=None,
     platform=None,
     device=None,
@@ -2011,10 +2019,15 @@ def _minimisation(
         simulation run in vacuum.
 
     shift_delta: length
-        The shift_delta parameter that controls the electrostatic
-        and van der Waals softening potential that smooths the
+        The shift_delta parameter that controls the Lennard-Jones
+        softening potential that smooths the
         creation and deletion of ghost atoms during a potential.
         This defaults to 2.0 A.
+
+    shift_coulomb: length
+        The shift_coulomb parameter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 1.0 A.
 
     coulomb_power: int
         The coulomb power parmeter that controls the electrostatic
@@ -2136,6 +2149,7 @@ def _minimisation(
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
         shift_delta=shift_delta,
+        shift_coulomb=shift_coulomb,
         coulomb_power=coulomb_power,
         restraints=restraints,
         fixed=fixed,

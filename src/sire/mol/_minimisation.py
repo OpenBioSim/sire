@@ -20,12 +20,14 @@ class Minimisation:
         swap_end_states=None,
         ignore_perturbations=None,
         shift_delta=None,
+        shift_coulomb=None,
         coulomb_power=None,
         restraints=None,
         fixed=None,
     ):
         from ..base import create_map
         from ._dynamics import DynamicsData, _add_extra
+        from .. import u
 
         extras = {}
 
@@ -35,7 +37,13 @@ class Minimisation:
         _add_extra(extras, "lambda", lambda_value)
         _add_extra(extras, "swap_end_states", swap_end_states)
         _add_extra(extras, "ignore_perturbations", ignore_perturbations)
-        _add_extra(extras, "shift_delta", shift_delta)
+
+        if shift_delta is not None:
+            _add_extra(extras, "shift_delta", u(shift_delta))
+
+        if shift_coulomb is not None:
+            _add_extra(extras, "shift_coulomb", u(shift_coulomb))
+
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
         _add_extra(extras, "fixed", fixed)

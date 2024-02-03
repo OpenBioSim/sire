@@ -968,6 +968,7 @@ class Dynamics:
         swap_end_states=None,
         ignore_perturbations=None,
         shift_delta=None,
+        shift_coulomb=None,
         coulomb_power=None,
         restraints=None,
         fixed=None,
@@ -992,6 +993,9 @@ class Dynamics:
 
         if shift_delta is not None:
             _add_extra(extras, "shift_delta", u(shift_delta))
+
+        if shift_coulomb is not None:
+            _add_extra(extras, "shift_coulomb", u(shift_coulomb))
 
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)

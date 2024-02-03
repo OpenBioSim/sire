@@ -417,6 +417,11 @@ class System:
             is useful if you just want to run standard molecular dynamics
             of the reference or perturbed states.
 
+        shift_coulomb: length
+            The shift_coulomb parameter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 1.0 A.
+
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
@@ -580,6 +585,11 @@ class System:
             set to `True`, then the simulation space automatically be
             replaced by a `sire.vol.Cartesian` space, and the
             simulation run in vacuum.
+
+        shift_coulomb: length
+            The shift_coulomb parameter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 1.0 A.
 
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
