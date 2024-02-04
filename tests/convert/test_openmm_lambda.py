@@ -235,85 +235,61 @@ def test_solvated_neopentane_methane_scan(solvated_neopentane_methane, openmm_pl
 
     mols = sr.morph.zero_ghost_torsions(mols)
 
-    # these were calculated using somd, no constraints
-    expected_none = {
-        0.0: -8329.8,
-        1.0: -8241.74,
+    # these were calculated using somd, no constraints, no cutoff, no space
+    expected = {
+        0.0: -6845.34,
+        1.0: -6759.75,
     }
 
     d = mols.dynamics(
-        constraint="none", cutoff="10 A", cutoff_type="RF", platform=openmm_platform
+        constraint="none",
+        cutoff="none",
+        cutoff_type="RF",
+        platform=openmm_platform,
+        map={"space": sr.vol.Cartesian()},
     )
 
-    calc_none = {}
-
-    for lam_val, nrg in expected_none.items():
+    for lam_val, nrg in expected.items():
         d.set_lambda(lam_val)
-        calc_none[lam_val] = d.current_potential_energy().value()
+        calc_nrg = d.current_potential_energy().value()
+        assert calc_nrg == pytest.approx(nrg, abs=1e-2)
 
-    # should match the no_constraints somd energy at the end points
-    assert calc_none[0.0] == pytest.approx(expected_none[0.0], abs=1.0)
-    assert calc_none[1.0] == pytest.approx(expected_none[1.0], abs=1.0)
-
-    # the difference between the energies at the end points should be
-    # consistent
-    assert calc_none[0.0] - calc_none[1.0] == pytest.approx(
-        expected_none[0.0] - expected_none[1.0], abs=1e-3
-    )
-
-    # these were calculated using hbonds
-    expected_constraints = {0.0: -8331.19, 1.0: -8321.17}
+    # these were calculated using somd, no constraints, 10 A cutoff
+    expected = {
+        0.0: -8330.43,
+        1.0: -8242.37,
+    }
 
     d = mols.dynamics(
-        constraint="h_bonds",
+        constraint="none",
+        cutoff="10 A",
+        cutoff_type="RF",
+        platform=openmm_platform,
+    )
+
+    for lam_val, nrg in expected.items():
+        d.set_lambda(lam_val)
+        calc_nrg = d.current_potential_energy().value()
+        assert calc_nrg == pytest.approx(nrg, abs=1e-2)
+
+    # these were calculated using somd, h-bonds-not-perturbed, 10 A cutoff
+    expected = {
+        0.0: -8331.14,
+        1.0: -8243.08,
+    }
+
+    d = mols.dynamics(
+        constraint="bonds_not_perturbed",
         cutoff="10 A",
         cutoff_type="RF",
         include_constrained_energies=False,
         platform=openmm_platform,
     )
 
-    calc_constraints = {}
-
-    for lam_val, nrg in expected_constraints.items():
+    for lam_val, nrg in expected.items():
         d.set_lambda(lam_val)
-        calc_constraints[lam_val] = d.current_potential_energy().value()
-
-    # should match the no_constraints somd energy at the end points
-    assert calc_constraints[0.0] == pytest.approx(expected_constraints[0.0], abs=1.0)
-    assert calc_constraints[1.0] == pytest.approx(expected_constraints[1.0], abs=1.0)
-
-    # the difference between the energies at the end points should be
-    # consistent
-    assert calc_constraints[0.0] - calc_constraints[1.0] == pytest.approx(
-        expected_constraints[0.0] - expected_constraints[1.0], abs=1e-2
-    )
-
-    # these were calculated using hbonds-notperturbed
-    expected_constraints = {0.0: -8330.51, 1.0: -8242.45}
-
-    d = mols.dynamics(
-        constraint="h_bonds_not_perturbed",
-        cutoff="10 A",
-        cutoff_type="RF",
-        include_constrained_energies=False,
-        platform=openmm_platform,
-    )
-
-    calc_constraints = {}
-
-    for lam_val, nrg in expected_constraints.items():
-        d.set_lambda(lam_val)
-        calc_constraints[lam_val] = d.current_potential_energy().value()
-
-    # should match the no_constraints somd energy at the end points
-    assert calc_constraints[0.0] == pytest.approx(expected_constraints[0.0], abs=1.0)
-    assert calc_constraints[1.0] == pytest.approx(expected_constraints[1.0], abs=1.0)
-
-    # the difference between the energies at the end points should be
-    # consistent
-    assert calc_constraints[0.0] - calc_constraints[1.0] == pytest.approx(
-        expected_constraints[0.0] - expected_constraints[1.0], abs=1e-3
-    )
+        calc_nrg = d.current_potential_energy().value()
+        assert calc_nrg == pytest.approx(nrg, abs=1e-2)
 
 
 @pytest.mark.skipif(
