@@ -116,7 +116,7 @@ Support and Development
 
 Bugs, Comments, Questions
 -------------------------
-For bug reports/sugguestions/complains please file an issue on
+For bug reports/suggestions/complaints please file an issue on
 `GitHub <http://github.com/OpenBioSim/sire/issues>`__.
 
 Developers guide
