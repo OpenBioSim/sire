@@ -892,7 +892,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
                                   "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
-                                  "lj_nrg=four_epsilon*((sig6^2)-sig6);"
+                                  "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(%3*sigma^6 + r^6);")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
                                   .arg(shift_coulomb)
@@ -904,7 +904,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
                                   "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
-                                  "lj_nrg=four_epsilon*((sig6^2)-sig6);"
+                                  "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
                                   "delta=%3*alpha;")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
@@ -950,7 +950,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
                                      "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
-                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(%3*sigma^6 + r^6);"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
@@ -987,7 +987,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
                                      "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
-                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
                                      "delta=%3*max_alpha;"
                                      "max_kappa=max(kappa1, kappa2);"
