@@ -113,11 +113,11 @@ const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
         if (it == cache.constEnd())
         {
             // we're the first - create the values and cache them
-            nonconst_this->cache.insert(force_key,
-                                        schedule.morph(key,
+            nonconst_this->cache.insert(key,
+                                        schedule.morph("*", key,
                                                        initial, final, lam_val));
 
-            it = cache.constFind(force_key);
+            it = cache.constFind(key);
         }
 
         // save this equation for this force for this lever
@@ -1026,7 +1026,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // restraints always morph between 1 and 1 (i.e. they fully
         // follow whatever is set by lambda, e.g. 'initial*lambda'
         // to switch them on, or `final*lambda` to switch them off)
-        const double rho = lambda_schedule.morph(restraint,
+        const double rho = lambda_schedule.morph("*",
+
+                                                 restraint,
                                                  1.0, 1.0,
                                                  lambda_value);
 

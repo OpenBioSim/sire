@@ -681,7 +681,7 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
 
     # Use the schedule to set all charges to zero
     s = d.get_schedule()
-    s.set_equation("morph", "charge", 0.0)
+    s.set_equation(stage="morph", lever="charge", equation=0.0)
     d.set_schedule(s)
 
     for lam_val, nrg in expected_none.items():
@@ -698,7 +698,7 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
 
     # Use the schedule to set all charges to zero
     s = d.get_schedule()
-    s.set_equation("morph", "charge", 0.0)
+    s.set_equation(stage="morph", lever="charge", equation=0.0)
     d.set_schedule(s)
 
     for lam_val, nrg in expected_hbonds.items():
@@ -715,7 +715,7 @@ def test_neopentane_methane_no_charge(neopentane_methane, openmm_platform):
 
     # Use the schedule to set all charges to zero
     s = d.get_schedule()
-    s.set_equation("morph", "charge", 0.0)
+    s.set_equation(stage="morph", lever="charge", equation=0.0)
     d.set_schedule(s)
 
     for lam_val, nrg in expected_hbonds_not_perturbed.items():

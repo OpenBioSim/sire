@@ -76,7 +76,8 @@ in the :meth:`~sire.cas.LambdaSchedule.set_equation` function.
 >>> l = s.lam()
 >>> init = s.initial()
 >>> fin = s.final()
->>> s.set_equation("morph", "bond_length", (1-l**2)*init + l**2*fin)
+>>> s.set_equation(stage="morph", lever="bond_length",
+...                equation=(1-l**2)*init + l**2*fin)
 >>> print(s)
 LambdaSchedule(
   morph: initial * (-λ + 1) + final * λ

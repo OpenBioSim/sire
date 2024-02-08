@@ -237,8 +237,8 @@ In this case the levers are all identical, so would change the parameter
 in the same way. You can choose your own equation for the λ-schedule.
 For example, maybe we want to scale the charge by the square of λ.
 
->>> s.set_equation("morph", "charge",
-...                s.lam()**2 * s.final() + s.initial() * (1 - s.lam()**2))
+>>> s.set_equation(stage="morph", lever="charge",
+...                equation=s.lam()**2 * s.final() + s.initial() * (1 - s.lam()**2))
 >>> print(s)
 LambdaSchedule(
   morph: λ * final + initial * (-λ + 1)
@@ -266,7 +266,8 @@ would append a second stage, called ``scale``, which by default would
 use the ``final`` value of the parameter. We could then add a lever to
 this stage that scales down the charge to 0,
 
->>> s.set_equation("scale", "charge", (1-s.lam()) * s.final())
+>>> s.set_equation(stage="scale", lever="charge",
+...                equation=(1-s.lam()) * s.final())
 >>> print(s)
 LambdaSchedule(
   morph: λ * final + initial * (-λ + 1)

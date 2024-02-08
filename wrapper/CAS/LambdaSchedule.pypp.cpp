@@ -288,40 +288,13 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::getEquation
         
-            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const & ) const;
-            getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
-            
-            LambdaSchedule_exposer.def( 
-                "getEquation"
-                , getEquation_function_value
-                , ( bp::arg("stage") )
-                , bp::release_gil_policy()
-                , "Return the default equation used to control the parameters for\n  the stage `stage`.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::getEquation
-        
-            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const &,::QString const & ) const;
-            getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
-            
-            LambdaSchedule_exposer.def( 
-                "getEquation"
-                , getEquation_function_value
-                , ( bp::arg("stage"), bp::arg("lever") )
-                , bp::release_gil_policy()
-                , "Return the equation used to control the specified `lever`\n  at the specified `stage`. This will be a custom equation\n  if that has been set for this lever, or else the\n  default equation for this stage.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::getEquation
-        
             typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const &,::QString const &,::QString const & ) const;
             getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
             
             LambdaSchedule_exposer.def( 
                 "getEquation"
                 , getEquation_function_value
-                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
-                , bp::release_gil_policy()
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*" )
                 , "" );
         
         }
@@ -457,8 +430,7 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "hasForceSpecificEquation"
                 , hasForceSpecificEquation_function_value
-                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
-                , bp::release_gil_policy()
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*" )
                 , "" );
         
         }
@@ -526,53 +498,13 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::morph
         
-            typedef double ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,double,double,double ) const;
-            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
-            
-            LambdaSchedule_exposer.def( 
-                "morph"
-                , morph_function_value
-                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs a single floating point parameters.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::morph
-        
-            typedef ::QVector< double > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< double > const &,::QVector< double > const &,double ) const;
-            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
-            
-            LambdaSchedule_exposer.def( 
-                "morph"
-                , morph_function_value
-                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs floating point parameters. There is an overload\n  of this function that morphs integer parameters, in which\n  case the result would be rounded to the nearest integer.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::morph
-        
-            typedef ::QVector< int > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< int > const &,::QVector< int > const &,double ) const;
-            morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
-            
-            LambdaSchedule_exposer.def( 
-                "morph"
-                , morph_function_value
-                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This function morphs integer parameters. In this case,\n  the result will be the rounded to the nearest integer.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::morph
-        
             typedef double ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,double,double,double ) const;
             morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
             
             LambdaSchedule_exposer.def( 
                 "morph"
                 , morph_function_value
-                , ( bp::arg("force"), bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
+                , ( bp::arg("force")="*", bp::arg("lever")="*", bp::arg("initial")=0, bp::arg("final")=1, bp::arg("lambda_value")=0 )
                 , "" );
         
         }
@@ -584,8 +516,7 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "morph"
                 , morph_function_value
-                , ( bp::arg("force"), bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
+                , ( bp::arg("force")="*", bp::arg("lever")="*", bp::arg("initial")=::QVector<double>( ), bp::arg("final")=::QVector<double>( ), bp::arg("lambda_value")=0. )
                 , "" );
         
         }
@@ -597,8 +528,7 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "morph"
                 , morph_function_value
-                , ( bp::arg("force"), bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
+                , ( bp::arg("force")="*", bp::arg("lever")="*", bp::arg("initial")=::QVector<int>( ), bp::arg("final")=::QVector<int>( ), bp::arg("lambda_value")=0. )
                 , "" );
         
         }
@@ -668,27 +598,13 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::removeEquation
         
-            typedef void ( ::SireCAS::LambdaSchedule::*removeEquation_function_type)( ::QString const &,::QString const & ) ;
-            removeEquation_function_type removeEquation_function_value( &::SireCAS::LambdaSchedule::removeEquation );
-            
-            LambdaSchedule_exposer.def( 
-                "removeEquation"
-                , removeEquation_function_value
-                , ( bp::arg("stage"), bp::arg("lever") )
-                , bp::release_gil_policy()
-                , "Remove the custom equation for the specified `lever` at the\n  specified `stage`. The lever will now use the default\n  equation at this stage.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::removeEquation
-        
             typedef void ( ::SireCAS::LambdaSchedule::*removeEquation_function_type)( ::QString const &,::QString const &,::QString const & ) ;
             removeEquation_function_type removeEquation_function_value( &::SireCAS::LambdaSchedule::removeEquation );
             
             LambdaSchedule_exposer.def( 
                 "removeEquation"
                 , removeEquation_function_value
-                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever") )
-                , bp::release_gil_policy()
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*" )
                 , "" );
         
         }
@@ -757,6 +673,19 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        { //::SireCAS::LambdaSchedule::removeStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeStage_function_type)( ::QString const & ) ;
+            removeStage_function_type removeStage_function_value( &::SireCAS::LambdaSchedule::removeStage );
+            
+            LambdaSchedule_exposer.def( 
+                "removeStage"
+                , removeStage_function_value
+                , ( bp::arg("stage") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireCAS::LambdaSchedule::setConstant
         
             typedef ::SireCAS::Symbol ( ::SireCAS::LambdaSchedule::*setConstant_function_type)( ::QString const &,double ) ;
@@ -783,30 +712,17 @@ void register_LambdaSchedule_class(){
                 , "Set the value of a constant that may be used in any\n  of the stage equations.\n" );
         
         }
-        { //::SireCAS::LambdaSchedule::setDefaultEquation
+        { //::SireCAS::LambdaSchedule::setDefaultStageEquation
         
-            typedef void ( ::SireCAS::LambdaSchedule::*setDefaultEquation_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
-            setDefaultEquation_function_type setDefaultEquation_function_value( &::SireCAS::LambdaSchedule::setDefaultEquation );
+            typedef void ( ::SireCAS::LambdaSchedule::*setDefaultStageEquation_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
+            setDefaultStageEquation_function_type setDefaultStageEquation_function_value( &::SireCAS::LambdaSchedule::setDefaultStageEquation );
             
             LambdaSchedule_exposer.def( 
-                "setDefaultEquation"
-                , setDefaultEquation_function_value
+                "setDefaultStageEquation"
+                , setDefaultStageEquation_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
-                , "Set the default equation used to control levers for the\n  stage stage to equation. This equation will be used\n  to control any levers in this stage that dont have\n  their own custom equation.\n" );
-        
-        }
-        { //::SireCAS::LambdaSchedule::setEquation
-        
-            typedef void ( ::SireCAS::LambdaSchedule::*setEquation_function_type)( ::QString const &,::QString const &,::SireCAS::Expression const & ) ;
-            setEquation_function_type setEquation_function_value( &::SireCAS::LambdaSchedule::setEquation );
-            
-            LambdaSchedule_exposer.def( 
-                "setEquation"
-                , setEquation_function_value
-                , ( bp::arg("stage"), bp::arg("lever"), bp::arg("equation") )
-                , bp::release_gil_policy()
-                , "Set the custom equation used to control the specified\n  `lever` at the stage `stage` to `equation`. This equation\n  will only be used to control the parameters for the\n  specified lever at the specified stage.\n" );
+                , "" );
         
         }
         { //::SireCAS::LambdaSchedule::setEquation
@@ -817,8 +733,7 @@ void register_LambdaSchedule_class(){
             LambdaSchedule_exposer.def( 
                 "setEquation"
                 , setEquation_function_value
-                , ( bp::arg("stage"), bp::arg("force"), bp::arg("lever"), bp::arg("equation") )
-                , bp::release_gil_policy()
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*", bp::arg("equation")=SireCAS::Expression() )
                 , "" );
         
         }

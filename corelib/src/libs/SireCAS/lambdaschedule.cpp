@@ -39,6 +39,26 @@ using namespace SireCAS;
 using namespace SireBase;
 using namespace SireStream;
 
+QString _get_lever_name(QString force, QString lever)
+{
+    force = force.trimmed().simplified().replace(" ", "_").replace(":", ".");
+    lever = lever.trimmed().simplified().replace(" ", "_").replace(":", ".");
+
+    return force + "::" + lever;
+}
+
+QString _fix_lever_name(const QString &lever)
+{
+    if (lever.contains("::"))
+    {
+        return lever;
+    }
+    else
+    {
+        return "*::" + lever;
+    }
+}
+
 static RegisterMetaType<LambdaSchedule> r_schedule;
 
 QDataStream &operator<<(QDataStream &ds, const LambdaSchedule &schedule)
@@ -83,6 +103,28 @@ QDataStream &operator>>(QDataStream &ds, LambdaSchedule &schedule)
 
         if (v == 2 or v == 3)
             sds >> schedule.mol_schedules;
+
+        if (v < 3)
+        {
+            // need to make sure that the lever names are namespaced
+            auto fixed_lever_names = QStringList();
+
+            for (auto &lever : schedule.lever_names)
+            {
+                fixed_lever_names.append(_fix_lever_name(lever));
+
+                for (auto &stage_equations : schedule.stage_equations)
+                {
+                    if (stage_equations.contains(lever))
+                    {
+                        auto fixed_lever = _fix_lever_name(lever);
+                        stage_equations[fixed_lever] = stage_equations.take(lever);
+                    }
+                }
+            }
+
+            schedule.lever_names = fixed_lever_names;
+        }
 
         sds >> static_cast<Property &>(schedule);
 
@@ -193,10 +235,13 @@ QString LambdaSchedule::toString() const
                          .arg(this->stage_names[i])
                          .arg(this->default_equations[i].toOpenMMString()));
 
-        for (const auto &lever : this->stage_equations[i].keys())
+        auto keys = this->stage_equations[i].keys();
+        std::sort(keys.begin(), keys.end());
+
+        for (auto lever : keys)
         {
             lines.append(QString("    %1: %2")
-                             .arg(lever)
+                             .arg(lever.replace("*::", ""))
                              .arg(this->stage_equations[i][lever].toOpenMMString()));
         }
     }
@@ -342,7 +387,7 @@ SireCAS::Symbol LambdaSchedule::getConstantSymbol(const QString &constant) const
  */
 void LambdaSchedule::addLever(const QString &lever)
 {
-    if (this->lever_names.contains(lever))
+    if (lever == "*" or this->lever_names.contains(lever))
         return;
 
     this->lever_names.append(lever);
@@ -357,7 +402,7 @@ void LambdaSchedule::addLevers(const QStringList &levers)
 {
     for (const auto &lever : levers)
     {
-        if (not this->lever_names.contains(lever))
+        if (not(lever == "*" or this->lever_names.contains(lever)))
             this->lever_names.append(lever);
     }
 }
@@ -417,6 +462,9 @@ QStringList LambdaSchedule::getLevers() const
  */
 void LambdaSchedule::addForce(const QString &force)
 {
+    if (force == "*" or this->force_names.contains(force))
+        return;
+
     this->force_names.append(force);
 }
 
@@ -429,7 +477,7 @@ void LambdaSchedule::addForces(const QStringList &forces)
 {
     for (const auto &force : forces)
     {
-        if (not this->force_names.contains(force))
+        if (not(force == "*" or this->force_names.contains(force)))
             this->force_names.append(force);
     }
 }
@@ -612,16 +660,16 @@ void LambdaSchedule::addChargeScaleStages(const QString &decharge_name,
     // make sure all of the existing stages for the charge lever are scaled
     for (int i = 0; i < this->stage_names.count(); ++i)
     {
-        this->setEquation(this->stage_names[i], "charge",
-                          scl * this->stage_equations[i].value("charge", this->default_equations[i]));
+        this->setEquation(this->stage_names[i], "*", "charge",
+                          scale * this->stage_equations[i].value("charge", this->default_equations[i]));
     }
 
     // now prepend the decharging stage, and append the recharging stage
     this->prependStage(decharge_name, this->initial());
     this->appendStage(recharge_name, this->final());
 
-    this->setEquation(decharge_name, "charge", (1.0 - ((1.0 - scl) * this->lam())) * this->initial());
-    this->setEquation(recharge_name, "charge", (1.0 - ((1.0 - scl) * (1.0 - this->lam()))) * this->final());
+    this->setEquation(decharge_name, "*", "charge", (1.0 - ((1.0 - scl) * this->lam())) * this->initial());
+    this->setEquation(recharge_name, "*", "charge", (1.0 - ((1.0 - scl) * (1.0 - this->lam()))) * this->final());
 }
 
 /** Sandwich the current set of stages with a charge-descaling and
@@ -645,6 +693,11 @@ void LambdaSchedule::addChargeScaleStages(double scale)
 void LambdaSchedule::prependStage(const QString &name,
                                   const SireCAS::Expression &equation)
 {
+    if (name == "*")
+        throw SireError::invalid_key(QObject::tr(
+                                         "The stage name '*' is reserved and cannot be used."),
+                                     CODELOC);
+
     auto e = equation;
 
     if (e == default_morph_equation)
@@ -675,7 +728,12 @@ void LambdaSchedule::prependStage(const QString &name,
 void LambdaSchedule::appendStage(const QString &name,
                                  const SireCAS::Expression &equation)
 {
-    if (this->stage_names.contains(name))
+    if (name == "*")
+        throw SireError::invalid_key(QObject::tr(
+                                         "The stage name '*' is reserved and cannot be used."),
+                                     CODELOC);
+
+    else if (this->stage_names.contains(name))
         throw SireError::invalid_key(QObject::tr(
                                          "Cannot append the stage %1 as it already exists.")
                                          .arg(name),
@@ -700,6 +758,11 @@ void LambdaSchedule::insertStage(int i,
                                  const QString &name,
                                  const SireCAS::Expression &equation)
 {
+    if (name == "*")
+        throw SireError::invalid_key(QObject::tr(
+                                         "The stage name '*' is reserved and cannot be used."),
+                                     CODELOC);
+
     auto e = equation;
 
     if (e == default_morph_equation)
@@ -727,6 +790,19 @@ void LambdaSchedule::insertStage(int i,
     this->stage_equations.insert(i, QHash<QString, Expression>());
 }
 
+/** Remove the stage 'stage' */
+void LambdaSchedule::removeStage(const QString &stage)
+{
+    if (not this->stage_names.contains(stage))
+        return;
+
+    int idx = this->stage_names.indexOf(stage);
+
+    this->stage_names.removeAt(idx);
+    this->default_equations.removeAt(idx);
+    this->stage_equations.removeAt(idx);
+}
+
 /** Append a stage called 'name' which uses the passed 'equation'
  *  to the end of this schedule. The equation will be the default
  *  equation that scales all parameters (levers) that don't have
@@ -735,6 +811,11 @@ void LambdaSchedule::insertStage(int i,
 void LambdaSchedule::addStage(const QString &name,
                               const Expression &equation)
 {
+    if (name == "*")
+        throw SireError::invalid_key(QObject::tr(
+                                         "The stage name '*' is reserved and cannot be used."),
+                                     CODELOC);
+
     this->appendStage(name, equation);
 }
 
@@ -761,8 +842,8 @@ int LambdaSchedule::find_stage(const QString &stage) const
  *  to control any levers in this stage that don't have
  *  their own custom equation.
  */
-void LambdaSchedule::setDefaultEquation(const QString &stage,
-                                        const Expression &equation)
+void LambdaSchedule::setDefaultStageEquation(const QString &stage,
+                                             const Expression &equation)
 {
     auto e = equation;
 
@@ -770,33 +851,6 @@ void LambdaSchedule::setDefaultEquation(const QString &stage,
         e = default_morph_equation;
 
     this->default_equations[this->find_stage(stage)] = e;
-}
-
-/** Set the custom equation used to control the specified
- *  `lever` at the stage `stage` to `equation`. This equation
- *  will only be used to control the parameters for the
- *  specified lever at the specified stage.
- */
-void LambdaSchedule::setEquation(const QString &stage,
-                                 const QString &lever,
-                                 const Expression &equation)
-{
-    auto e = equation;
-
-    if (e == default_morph_equation)
-        e = default_morph_equation;
-
-    auto &lever_expressions = this->stage_equations[this->find_stage(stage)];
-
-    if (not this->lever_names.contains(lever))
-        this->addLever(lever);
-
-    lever_expressions[lever] = e;
-}
-
-QString _create_lever_name(const QString &force, const QString &lever)
-{
-    return force + "::" + lever;
 }
 
 /** Set the custom equation used to control the specified 'lever'
@@ -809,22 +863,31 @@ void LambdaSchedule::setEquation(const QString &stage,
                                  const QString &lever,
                                  const SireCAS::Expression &equation)
 {
-    this->setEquation(stage, _create_lever_name(force, lever), equation);
-}
+    if (stage == "*")
+    {
+        // we do this for all stages
+        for (int i = 0; i < this->nStages(); ++i)
+        {
+            this->setEquation(this->stage_names[i], force, lever, equation);
+        }
 
-/** Remove the custom equation for the specified `lever` at the
- *  specified `stage`. The lever will now use the default
- *  equation at this stage.
- */
-void LambdaSchedule::removeEquation(const QString &stage,
-                                    const QString &lever)
-{
-    if (not(this->lever_names.contains(lever) and this->stage_names.contains(stage)))
         return;
+    }
 
-    int idx = this->stage_names.indexOf(stage);
+    auto e = equation;
 
-    this->stage_equations[idx].remove(lever);
+    if (e == default_morph_equation)
+        e = default_morph_equation;
+
+    auto &lever_expressions = this->stage_equations[this->find_stage(stage)];
+
+    if (lever != "*" and not this->lever_names.contains(lever))
+        this->addLever(lever);
+
+    if (force != "*" and not this->force_names.contains(force))
+        this->addForce(force);
+
+    lever_expressions[_get_lever_name(force, lever)] = e;
 }
 
 /** Remove the custom equation for the specified `lever` in the
@@ -837,54 +900,76 @@ void LambdaSchedule::removeEquation(const QString &stage,
                                     const QString &force,
                                     const QString &lever)
 {
-    this->removeEquation(stage, _create_lever_name(force, lever));
+    if (stage == "*")
+    {
+        // remove from all stages
+        for (int i = 0; i < this->nStages(); ++i)
+        {
+            this->removeEquation(this->stage_names[i], force, lever);
+        }
+
+        return;
+    }
+
+    int idx = this->stage_names.indexOf(stage);
+
+    this->stage_equations[idx].remove(_get_lever_name(force, lever));
 }
 
-/** Return the default equation used to control the parameters for
- *  the stage `stage`.
- */
-Expression LambdaSchedule::getEquation(const QString &stage) const
-{
-    const int idx = this->find_stage(stage);
-
-    return this->default_equations[idx];
-}
-
-/** Return the equation used to control the specified `lever`
- *  at the specified `stage`. This will be a custom equation
- *  if that has been set for this lever, or else the
- *  default equation for this stage.
- */
-Expression LambdaSchedule::getEquation(const QString &stage,
-                                       const QString &lever) const
-{
-    if (not this->lever_names.contains(lever))
-        return this->getEquation(stage);
-
-    const int idx = this->find_stage(stage);
-
-    const auto &lever_expressions = this->stage_equations[idx];
-
-    return lever_expressions.value(lever, this->default_equations[idx]);
-}
-
-/** Return whether the force 'force' has a force-specific equation
- *  for the specified 'lever' at the specified 'stage'
+/** Return whether or not the specified 'lever' in the specified 'force'
+ *  at the specified 'stage' has a custom equation set for it
  */
 bool LambdaSchedule::hasForceSpecificEquation(const QString &stage,
                                               const QString &force,
                                               const QString &lever) const
 {
-    const auto force_lever = _create_lever_name(force, lever);
+    if (stage == "*")
+        throw SireError::invalid_key(QObject::tr(
+                                         "The stage name '*' is reserved and cannot be used "
+                                         "when querying for force-specific equations."),
+                                     CODELOC);
 
-    if (not this->lever_names.contains(force_lever))
+    int idx = this->stage_names.indexOf(stage);
+
+    if (idx < 0)
+        throw SireError::invalid_key(QObject::tr(
+                                         "There is no stage name called '%1'. Valid stages are %2.")
+                                         .arg(stage)
+                                         .arg(this->stage_names.join(", ")),
+                                     CODELOC);
+
+    if (force == "*")
         return false;
+    else
+        return this->stage_equations[idx].contains(_get_lever_name(force, lever));
+}
 
-    const int idx = this->find_stage(stage);
+SireCAS::Expression LambdaSchedule::_getEquation(int stage,
+                                                 const QString &force,
+                                                 const QString &lever) const
+{
+    if (stage < 0 or stage >= this->nStages())
+        throw SireError::invalid_key(QObject::tr(
+                                         "There is no stage number %1. Valid stages are 0-%2.")
+                                         .arg(stage)
+                                         .arg(this->nStages() - 1),
+                                     CODELOC);
 
-    const auto &lever_expressions = this->stage_equations[idx];
+    const auto default_lever = _get_lever_name("*", lever);
 
-    return lever_expressions.contains(force_lever);
+    if (force == "*")
+    {
+        return this->stage_equations[stage].value(
+            default_lever, this->default_equations[stage]);
+    }
+    else
+    {
+        return this->stage_equations[stage].value(
+            _get_lever_name(force, lever),
+            this->stage_equations[stage].value(
+                default_lever,
+                this->default_equations[stage]));
+    }
 }
 
 /** Return the equation used to control the specified 'lever'
@@ -897,14 +982,22 @@ Expression LambdaSchedule::getEquation(const QString &stage,
                                        const QString &force,
                                        const QString &lever) const
 {
-    if (this->hasForceSpecificEquation(stage, force, lever))
-    {
-        return this->getEquation(stage, _create_lever_name(force, lever));
-    }
-    else
-    {
-        return this->getEquation(stage, lever);
-    }
+    if (stage == "*")
+        throw SireError::invalid_key(QObject::tr(
+                                         "The stage name '*' is reserved and cannot be used "
+                                         "when getting individual equations."),
+                                     CODELOC);
+
+    int idx = this->stage_names.indexOf(stage);
+
+    if (idx < 0)
+        throw SireError::invalid_key(QObject::tr(
+                                         "There is no stage name called '%1'. Valid stages are %2.")
+                                         .arg(stage)
+                                         .arg(this->stage_names.join(", ")),
+                                     CODELOC);
+
+    return _getEquation(idx, force, lever);
 }
 
 /** Set 'schedule' as the molecule-specific schedule for the
@@ -1000,8 +1093,8 @@ QVector<double> generate_lambdas(int num_values)
     return lambda_values;
 }
 
-/** Return the list of lever stages that are used for the passed list
- *  of lambda values. The lever names will be returned in the matching
+/** Return the list of stages that are used for the passed list
+ *  of lambda values. The stage names will be returned in the matching
  *  order of the lambda values.
  */
 QStringList LambdaSchedule::getLeverStages(const QVector<double> &lambda_values) const
@@ -1026,7 +1119,7 @@ QStringList LambdaSchedule::getLeverStages(const QVector<double> &lambda_values)
     return stages;
 }
 
-/** Return the lever stages used for the list of `nvalue` lambda values
+/** Return the stages used for the list of `nvalue` lambda values
  *  generated for the global lambda value between 0 and 1 inclusive.
  */
 QStringList LambdaSchedule::getLeverStages(int nvalues) const
@@ -1034,9 +1127,9 @@ QStringList LambdaSchedule::getLeverStages(int nvalues) const
     return this->getLeverStages(generate_lambdas(nvalues));
 }
 
-/** Return the lever name and parameter values for that lever
+/** Return the stage name and parameter values for that lever
  *  for the specified list of lambda values, assuming that a
- *  parameter for that lever has an initial value of
+ *  parameter for that stage has an initial value of
  *  `initial_value` and a final value of `final_value`. This
  *  is mostly useful for testing and graphing how this
  *  schedule would change some hyperthetical forcefield
@@ -1111,39 +1204,6 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
 }
 
 /** Return the parameters for the specified lever called `lever_name`
- *  that have been morphed from the passed list of initial values
- *  (in `initial`) to the passed list of final values (in `final`)
- *  for the specified global value of :lambda: (in `lambda_value`).
- *
- *  The morphed parameters will be returned in the matching
- *  order to `initial` and `final`.
- *
- *  This morphs a single floating point parameters.
- */
-double LambdaSchedule::morph(const QString &lever_name,
-                             double initial, double final,
-                             double lambda_value) const
-{
-    if (this->nStages() == 0)
-        // just return the initial parameters as we don't know how to morph
-        return initial;
-
-    const auto resolved = this->resolve_lambda(lambda_value);
-    const int stage = std::get<0>(resolved);
-
-    const auto equation = this->stage_equations[stage].value(
-        lever_name, this->default_equations[stage]);
-
-    Values input_values = this->constant_values;
-    input_values.set(this->lam(), std::get<1>(resolved));
-
-    input_values.set(this->initial(), initial);
-    input_values.set(this->final(), final);
-
-    return equation(input_values);
-}
-
-/** Return the parameters for the specified lever called `lever_name`
  *  in the force 'force'
  *  that have been morphed from the passed list of initial values
  *  (in `initial`) to the passed list of final values (in `final`)
@@ -1155,7 +1215,7 @@ double LambdaSchedule::morph(const QString &lever_name,
  *  This morphs a single floating point parameters.
  */
 double LambdaSchedule::morph(const QString &force,
-                             const QString &lever_name,
+                             const QString &lever,
                              double initial, double final,
                              double lambda_value) const
 {
@@ -1166,88 +1226,13 @@ double LambdaSchedule::morph(const QString &force,
     const auto resolved = this->resolve_lambda(lambda_value);
     const int stage = std::get<0>(resolved);
 
-    const auto force_lever = _create_lever_name(force, lever_name);
-
-    const auto equation = this->stage_equations[stage].value(
-        force_lever,
-        this->stage_equations[stage].value(
-            lever_name, this->default_equations[stage]));
-
     Values input_values = this->constant_values;
     input_values.set(this->lam(), std::get<1>(resolved));
 
     input_values.set(this->initial(), initial);
     input_values.set(this->final(), final);
 
-    return equation(input_values);
-}
-
-/** Return the parameters for the specified lever called `lever_name`
- *  that have been morphed from the passed list of initial values
- *  (in `initial`) to the passed list of final values (in `final`)
- *  for the specified global value of :lambda: (in `lambda_value`).
- *
- *  The morphed parameters will be returned in the matching
- *  order to `initial` and `final`.
- *
- *  This morphs floating point parameters. There is an overload
- *  of this function that morphs integer parameters, in which
- *  case the result would be rounded to the nearest integer.
- */
-QVector<double> LambdaSchedule::morph(const QString &lever_name,
-                                      const QVector<double> &initial,
-                                      const QVector<double> &final,
-                                      double lambda_value) const
-{
-    const int nparams = initial.count();
-
-    if (final.count() != nparams)
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The number of initial and final parameters for lever %1 is not the same. "
-                                                "%2 versus %3. They need to be the same.")
-                                                .arg(lever_name)
-                                                .arg(initial.count())
-                                                .arg(final.count()),
-                                            CODELOC);
-
-    if (this->nStages() == 0)
-        // just return the initial parameters as we don't know how to morph
-        return initial;
-
-    const auto resolved = this->resolve_lambda(lambda_value);
-    const int stage = std::get<0>(resolved);
-
-    const auto equation = this->stage_equations[stage].value(
-        lever_name, this->default_equations[stage]);
-
-    QVector<double> morphed(nparams);
-    auto morphed_data = morphed.data();
-    const auto initial_data = initial.constData();
-    const auto final_data = final.constData();
-
-    if (equation == default_morph_equation)
-    {
-        for (int i = 0; i < nparams; ++i)
-        {
-            morphed_data[i] = (1.0 - lambda_value) * initial_data[i] +
-                              lambda_value * final_data[i];
-        }
-    }
-    else
-    {
-        Values input_values = this->constant_values;
-        input_values.set(this->lam(), std::get<1>(resolved));
-
-        for (int i = 0; i < nparams; ++i)
-        {
-            input_values.set(this->initial(), initial_data[i]);
-            input_values.set(this->final(), final_data[i]);
-
-            morphed_data[i] = equation(input_values);
-        }
-    }
-
-    return morphed;
+    return this->_getEquation(stage, force, lever)(input_values);
 }
 
 /** Return the parameters for the specified lever called `lever_name`
@@ -1264,7 +1249,7 @@ QVector<double> LambdaSchedule::morph(const QString &lever_name,
  *  case the result would be rounded to the nearest integer.
  */
 QVector<double> LambdaSchedule::morph(const QString &force,
-                                      const QString &lever_name,
+                                      const QString &lever,
                                       const QVector<double> &initial,
                                       const QVector<double> &final,
                                       double lambda_value) const
@@ -1275,7 +1260,7 @@ QVector<double> LambdaSchedule::morph(const QString &force,
         throw SireError::incompatible_error(QObject::tr(
                                                 "The number of initial and final parameters for lever %1 is not the same. "
                                                 "%2 versus %3. They need to be the same.")
-                                                .arg(lever_name)
+                                                .arg(lever)
                                                 .arg(initial.count())
                                                 .arg(final.count()),
                                             CODELOC);
@@ -1287,11 +1272,7 @@ QVector<double> LambdaSchedule::morph(const QString &force,
     const auto resolved = this->resolve_lambda(lambda_value);
     const int stage = std::get<0>(resolved);
 
-    const auto force_lever = _create_lever_name(force, lever_name);
-
-    const auto equation = this->stage_equations[stage].value(
-        force_lever, this->stage_equations[stage].value(
-                         lever_name, this->default_equations[stage]));
+    const auto equation = this->_getEquation(stage, force, lever);
 
     QVector<double> morphed(nparams);
     auto morphed_data = morphed.data();
@@ -1318,65 +1299,6 @@ QVector<double> LambdaSchedule::morph(const QString &force,
 
             morphed_data[i] = equation(input_values);
         }
-    }
-
-    return morphed;
-}
-
-/** Return the parameters for the specified lever called `lever_name`
- *  that have been morphed from the passed list of initial values
- *  (in `initial`) to the passed list of final values (in `final`)
- *  for the specified global value of :lambda: (in `lambda_value`).
- *
- *  The morphed parameters will be returned in the matching
- *  order to `initial` and `final`.
- *
- *  This function morphs integer parameters. In this case,
- *  the result will be the rounded to the nearest integer.
- */
-QVector<int> LambdaSchedule::morph(const QString &lever_name,
-                                   const QVector<int> &initial,
-                                   const QVector<int> &final,
-                                   double lambda_value) const
-{
-    const int nparams = initial.count();
-
-    if (final.count() != nparams)
-        throw SireError::incompatible_error(QObject::tr(
-                                                "The number of initial and final parameters for lever %1 is not the same. "
-                                                "%2 versus %3. They need to be the same.")
-                                                .arg(lever_name)
-                                                .arg(initial.count())
-                                                .arg(final.count()),
-                                            CODELOC);
-
-    if (this->nStages() == 0)
-        // just return the initial parameters as we don't know how to morph
-        return initial;
-
-    const auto resolved = this->resolve_lambda(lambda_value);
-    const int stage = std::get<0>(resolved);
-
-    const auto equation = this->stage_equations[stage].value(
-        lever_name, this->default_equations[stage]);
-
-    Values input_values = this->constant_values;
-    input_values.set(this->lam(), std::get<1>(resolved));
-
-    QVector<int> morphed(nparams);
-
-    auto morphed_data = morphed.data();
-    const auto initial_data = initial.constData();
-    const auto final_data = final.constData();
-
-    for (int i = 0; i < nparams; ++i)
-    {
-        input_values.set(this->initial(), double(initial_data[i]));
-        input_values.set(this->final(), double(final_data[i]));
-
-        // the result is the resulting float rounded to the nearest
-        // integer
-        morphed_data[i] = int(std::floor(equation(input_values) + 0.5));
     }
 
     return morphed;
@@ -1395,7 +1317,7 @@ QVector<int> LambdaSchedule::morph(const QString &lever_name,
  *  the result will be the rounded to the nearest integer.
  */
 QVector<int> LambdaSchedule::morph(const QString &force,
-                                   const QString &lever_name,
+                                   const QString &lever,
                                    const QVector<int> &initial,
                                    const QVector<int> &final,
                                    double lambda_value) const
@@ -1406,7 +1328,7 @@ QVector<int> LambdaSchedule::morph(const QString &force,
         throw SireError::incompatible_error(QObject::tr(
                                                 "The number of initial and final parameters for lever %1 is not the same. "
                                                 "%2 versus %3. They need to be the same.")
-                                                .arg(lever_name)
+                                                .arg(lever)
                                                 .arg(initial.count())
                                                 .arg(final.count()),
                                             CODELOC);
@@ -1415,17 +1337,10 @@ QVector<int> LambdaSchedule::morph(const QString &force,
         // just return the initial parameters as we don't know how to morph
         return initial;
 
-    auto force_lever = _create_lever_name(force, lever_name);
-
     const auto resolved = this->resolve_lambda(lambda_value);
     const int stage = std::get<0>(resolved);
 
-    const auto equation = this->stage_equations[stage].value(
-        force_lever, this->stage_equations[stage].value(
-                         lever_name, this->default_equations[stage]));
-
-    Values input_values = this->constant_values;
-    input_values.set(this->lam(), std::get<1>(resolved));
+    const auto equation = this->_getEquation(stage, force, lever);
 
     QVector<int> morphed(nparams);
 
@@ -1433,14 +1348,26 @@ QVector<int> LambdaSchedule::morph(const QString &force,
     const auto initial_data = initial.constData();
     const auto final_data = final.constData();
 
-    for (int i = 0; i < nparams; ++i)
+    if (equation == default_morph_equation)
     {
-        input_values.set(this->initial(), double(initial_data[i]));
-        input_values.set(this->final(), double(final_data[i]));
+        for (int i = 0; i < nparams; ++i)
+        {
+            morphed_data[i] = int((1.0 - lambda_value) * initial_data[i] +
+                                  lambda_value * final_data[i]);
+        }
+    }
+    else
+    {
+        Values input_values = this->constant_values;
+        input_values.set(this->lam(), std::get<1>(resolved));
 
-        // the result is the resulting float rounded to the nearest
-        // integer
-        morphed_data[i] = int(std::floor(equation(input_values) + 0.5));
+        for (int i = 0; i < nparams; ++i)
+        {
+            input_values.set(this->initial(), double(initial_data[i]));
+            input_values.set(this->final(), double(final_data[i]));
+
+            morphed_data[i] = int(equation(input_values));
+        }
     }
 
     return morphed;

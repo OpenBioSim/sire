@@ -15,6 +15,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
+* BREAKING CHANGE: Updated the API of :class:`sire.cas.LambdaSchedule` so that
+  you have to use named arguments for many of the functions (e.g.
+  :meth:`~sire.cas.LambdaSchedule.set_equation`). This is because the addition
+  of force levers (as described below) made positional arguments ambiguous,
+  and we wanted to make the API more consistent. This is a breaking change,
+
 * Added the ability to customise the lambda schedule applied to a lambda lever
   so that you can use different equations for different molecules and
   different forces in the OpenMM context. This gives a lot of control over

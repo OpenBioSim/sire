@@ -129,6 +129,8 @@ namespace SireCAS
                          const QString &stage,
                          const SireCAS::Expression &equation);
 
+        void removeStage(const QString &stage);
+
         void addMorphStage();
         void addMorphStage(const QString &name);
 
@@ -140,37 +142,25 @@ namespace SireCAS
         void addDecoupleStage(bool perturbed_is_decoupled = true);
         void addDecoupleStage(const QString &name, bool perturbed_is_decoupled = true);
 
-        void setEquation(const QString &stage,
-                         const QString &lever,
-                         const SireCAS::Expression &equation);
+        void setDefaultStageEquation(const QString &stage,
+                                     const SireCAS::Expression &equation);
 
-        void setEquation(const QString &stage,
-                         const QString &force,
-                         const QString &lever,
-                         const SireCAS::Expression &equation);
+        void setEquation(const QString &stage = "*",
+                         const QString &force = "*",
+                         const QString &lever = "*",
+                         const SireCAS::Expression &equation = SireCAS::Expression());
 
-        void setDefaultEquation(const QString &stage,
-                                const SireCAS::Expression &equation);
+        void removeEquation(const QString &stage = "*",
+                            const QString &force = "*",
+                            const QString &lever = "*");
 
-        void removeEquation(const QString &stage,
-                            const QString &lever);
+        bool hasForceSpecificEquation(const QString &stage = "*",
+                                      const QString &force = "*",
+                                      const QString &lever = "*") const;
 
-        void removeEquation(const QString &stage,
-                            const QString &force,
-                            const QString &lever);
-
-        SireCAS::Expression getEquation(const QString &stage) const;
-
-        SireCAS::Expression getEquation(const QString &stage,
-                                        const QString &lever) const;
-
-        SireCAS::Expression getEquation(const QString &stage,
-                                        const QString &force,
-                                        const QString &lever) const;
-
-        bool hasForceSpecificEquation(const QString &stage,
-                                      const QString &force,
-                                      const QString &lever) const;
+        SireCAS::Expression getEquation(const QString &stage = "*",
+                                        const QString &force = "*",
+                                        const QString &lever = "*") const;
 
         void setMoleculeSchedule(int pert_mol_id,
                                  const LambdaSchedule &schedule);
@@ -204,33 +194,20 @@ namespace SireCAS
 
         SireCAS::Symbol getConstantSymbol(const QString &constant) const;
 
-        double morph(const QString &lever,
-                     double initial, double final, double lambda_value) const;
+        double morph(const QString &force = "*", const QString &lever = "*",
+                     double initial = 0, double final = 1, double lambda_value = 0) const;
 
-        QVector<double> morph(const QString &lever,
-                              const QVector<double> &initial,
-                              const QVector<double> &final,
-                              double lambda_value) const;
+        QVector<double> morph(const QString &force = "*",
+                              const QString &lever = "*",
+                              const QVector<double> &initial = QVector<double>(),
+                              const QVector<double> &final = QVector<double>(),
+                              double lambda_value = 0.0) const;
 
-        QVector<int> morph(const QString &lever,
-                           const QVector<int> &initial,
-                           const QVector<int> &final,
-                           double lambda_value) const;
-
-        double morph(const QString &force, const QString &lever,
-                     double initial, double final, double lambda_value) const;
-
-        QVector<double> morph(const QString &force,
-                              const QString &lever,
-                              const QVector<double> &initial,
-                              const QVector<double> &final,
-                              double lambda_value) const;
-
-        QVector<int> morph(const QString &force,
-                           const QString &lever,
-                           const QVector<int> &initial,
-                           const QVector<int> &final,
-                           double lambda_value) const;
+        QVector<int> morph(const QString &force = "*",
+                           const QString &lever = "*",
+                           const QVector<int> &initial = QVector<int>(),
+                           const QVector<int> &final = QVector<int>(),
+                           double lambda_value = 0.0) const;
 
         double clamp(double lambda_value) const;
 
@@ -238,6 +215,8 @@ namespace SireCAS
         int find_stage(const QString &stage) const;
 
         std::tuple<int, double> resolve_lambda(double lambda) const;
+
+        SireCAS::Expression _getEquation(int stage, const QString &force, const QString &lever) const;
 
         /** Additional schedules for extra molecules, i.e. that
          *  run in parallel alongside the default schedule
