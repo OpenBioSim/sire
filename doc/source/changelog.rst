@@ -108,6 +108,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Preserve user atom names when writing to PDB format.
 
+* Fixed compile error using Python 3.12. This fixes issue #147.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
