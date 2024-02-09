@@ -23,10 +23,7 @@ def test_openmm_simple_minimise(ala_mols, openmm_platform):
     reason="openmm support is not available",
 )
 def test_openmm_minimise_lambda(merged_ethane_methanol, openmm_platform):
-    mols = merged_ethane_methanol.clone()
-
-    for mol in mols.molecules("molecule property is_perturbable"):
-        mols.update(mol.perturbation().link_to_reference().commit())
+    mols = sr.morph.link_to_reference(merged_ethane_methanol)
 
     # this blows up because of incompatible exceptions/exclusions
     mol = (

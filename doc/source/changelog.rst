@@ -15,6 +15,51 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
+* BREAKING CHANGE: Updated the API of :class:`sire.cas.LambdaSchedule` so that
+  you have to use named arguments for many of the functions (e.g.
+  :meth:`~sire.cas.LambdaSchedule.set_equation`). This is because the addition
+  of force levers (as described below) made positional arguments ambiguous,
+  and we wanted to make the API more consistent. This is a breaking change,
+
+* Added the ability to customise the lambda schedule applied to a lambda lever
+  so that you can use different equations for different molecules and
+  different forces in the OpenMM context. This gives a lot of control over
+  how forcefield parameters are scaled with lambda. Specifically, this is used
+  to add support for calculating absolute binding free energies.
+  This is described in the new :doc:`tutorial chapter <tutorial/index_part07>`.
+
+* Added "not-perturbable" constraints so that bonds and angles that change
+  with lambda are not perturbed. As part of this, have also added a
+  ``dynamic_constraints`` option that lets constrained bonds update with
+  lambda, so that they are set to the length corresponding to r0 at that
+  lambda value. Have also changed the constraints so that bonds will be
+  constrained to their r0 value, rather than their current length.
+  These constraints are ``X-not-perturbed``, meaning that it constrains
+  all ``X``, except for bonds or angles involving perturbed atoms. Or
+  ``X-not-heavy-perturbed``, meaning that it constrains all ``X``, except
+  for bonds or angles involving perturbed atoms, unless they involve a
+  hydrogen in any end state. The code to detect hydrogens has been improved,
+  now looking at mass, element and ambertype. There are options to control
+  this, described in the :doc:`OpenMM detailed guide <cheatsheet/openmm>`.
+
+* Added more automatic conversions, so that string will more readily auto-convert
+  to units where possible. Also added a ``sire.v`` function to make it easier to
+  create vectors of units, e.g. ``sire.v("1.0A", "2.0A", "3.0A")`` will create
+  a ``sire.maths.Vector(1, 2, 3)``, while ``sire.v([3, 4, 5], units="A ps-1")``
+  will create a ``Velocity3D``. This is documented in the units cheat sheet.
+
+* You can now set the background color of a 3D view using the ``bgcolor="..."``
+  keyword. This is documented in the view cheat sheet.
+
+* MacOS/ARM64 now includes AmberTools and Gromacs dependencies when built
+  for BioSimSpace (matching MacOS/X64 and Linux).
+
+* Updated the electrostatic softening potential to have an additional
+  ``shift_coulomb`` parameter, so that you can control how much the
+  distance is increased by the alpha softening parameter. This was
+  the equivalent of 10 Å, but has been set as default to 1 Å to match
+  the value used in somd.
+
 * Added support for LJ 12-6-4 potentials, plus the ability to read and write
   LJ parameter exceptions to Amber topology files. This fixes issue #125.
 
@@ -24,6 +69,35 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Added functionality to SparseMatrix to make it easier to detect when
   non-default values have been added, and also to set up a matrix which
   has a concept of unset values.
+
+* Added a ``to_same_molecule`` argument to the ``mol.extract()`` function,
+  so that it is possible to keep the same molecule number for the extracted
+  molecule. As part of this, also relaxed the requirement that the
+  ``mol.update(...)`` function can only be called if the molecule layout
+  is not changed. You can now update even if you have changed the numbers
+  of atoms, residues etc. The ``to_same_molecule`` argument is default False,
+  so as not to change any existing behaviour.
+
+* Added lots of convenience functions to ``sire.morph``, as described in the
+  :doc:`new tutorial <tutorial/index_part07>`. Functions include
+  linking to the reference or perturbed states for all molecules, or extracting
+  all of the reference or perturbed states of all molecules. Also I've added
+  functions for zeroing ghost torsions and creating molecules from pertfiles.
+  As part of this, I added an ``auto_commit`` argument to the
+  Perturbation ``link_to_reference`` and ``link_to_perturbed`` functions,
+  which defaults to True. This is a change in behaviour, but it makes the
+  API much easier to use. If you are affected by this, please let us know.
+  It was a little-used part of the code, with the main use case being the
+  replacement with the easier ``sire.morph.link_to_XXX`` functions.
+
+* Exposed the ``SOMMContext``, ``PerturbableOpenMMMolecule``,
+  ``OpenMMMetaData`` and ``LambdaLever`` classes to Python, as part of the
+  new ``sire.convert.openmm`` module. These are useful if you want more
+  control over OpenMM from Python. In particular, the ``PerturbableOpenMMMolecule``
+  class lets you see all of the parameters that go into the OpenMM forces
+  that involve perturbable molecules. There are useful functions that can
+  be used to get changing parameters as dataframes, which is really useful
+  for debugging. These are described in the :doc:`new tutorial <tutorial/index_part07>`.
 
 * Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
 

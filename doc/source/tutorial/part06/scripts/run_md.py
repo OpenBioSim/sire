@@ -1,24 +1,26 @@
 import sire as sr
 
-mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
-
-for mol in mols.molecules("molecule property is_perturbable"):
-    mol = mol.perturbation().link_to_reference().commit()
-    mol = sr.morph.repartition_hydrogen_masses(mol, mass_factor=1.5)
-    mols.update(mol)
-
-mols = mols.minimisation().run().commit()
-
 timestep = "4fs"
-energy_frequency = "0.1ps"
+energy_frequency = "0.4ps"
 
-constraint = "h-bonds"
-perturbable_constraint = None
+constraint = "h-bonds-not-perturbed"
+perturbable_constraint = "h-bonds-not-perturbed"
+
+cutoff_type = "RF"
 
 equil_time = "2ps"
 run_time = "25ps"
 
 lambda_values = [x / 100.0 for x in range(0, 101, 5)]
+
+mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
+
+for mol in mols.molecules("molecule property is_perturbable"):
+    mol = sr.morph.link_to_reference(mol)
+    mol = sr.morph.repartition_hydrogen_masses(mol, mass_factor=1.5)
+    mols.update(mol)
+
+mols = mols.minimisation(cutoff_type=cutoff_type).run().commit()
 
 print("\nWater leg")
 
@@ -27,6 +29,7 @@ for i, lambda_value in enumerate(lambda_values):
     # minimise the system at this lambda value
     min_mols = (
         mols.minimisation(
+            cutoff_type=cutoff_type,
             lambda_value=lambda_value,
             constraint=constraint,
             perturbable_constraint="none",
@@ -39,6 +42,7 @@ for i, lambda_value in enumerate(lambda_values):
     d = min_mols.dynamics(
         timestep=timestep,
         temperature="25oC",
+        cutoff_type=cutoff_type,
         lambda_value=lambda_value,
         constraint=constraint,
         perturbable_constraint=perturbable_constraint,

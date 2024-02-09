@@ -562,7 +562,12 @@ void AmberPrm::rebuildLJParameters()
 
                 bool is_exception = false;
 
-                if (std::abs(lj_ij.epsilon().value() - expect.epsilon().value()) <= 1e-6)
+                if (std::abs(epsilon) < 1e-6 and std::abs(expect.epsilon().value()) < 1e-6)
+                {
+                    // this is a LJ pair that involves a ghost or dummy atom
+                    // It should not impact exceptions or combining rules
+                }
+                else if (std::abs(lj_ij.epsilon().value() - expect.epsilon().value()) <= 1e-6)
                 {
                     if (std::abs(lj_ij.sigma().value() - expect.sigma().value()) > 1e-6)
                     {

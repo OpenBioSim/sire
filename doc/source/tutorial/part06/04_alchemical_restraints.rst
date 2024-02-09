@@ -50,7 +50,7 @@ will always evaluate to 100% of the restraint for all values of λ during
 the ``morph`` stage. You can make sure that the restraint is kept at
 100% during this stage by setting this value explicitly;
 
->>> l.set_equation("morph", "restraint", l.initial())
+>>> l.set_equation(stage="morph", lever="restraint", l.initial())
 >>> print(l)
 LambdaSchedule(
   restraints_on: initial
@@ -119,14 +119,16 @@ their names. We will first scale up the ``distance`` restraint in a
 
 >>> l = sr.cas.LambdaSchedule()
 >>> l.add_stage("distance_restraints", 0)
->>> l.set_equation("distance_restraints", "distance", l.lam() * l.initial())
+>>> l.set_equation(stage="distance_restraints", lever="distance",
+...                equation=l.lam() * l.initial())
 
 and will then scale up the ``positional`` restraint in a
 ``positional_restraints`` stage, while keeping the ``distance`` restraint
 fully on.
 
 >>> l.add_stage("positional_restraints", 1)
->>> l.set_equation("positional_restraints", "positional", l.lam() * l.initial())
+>>> l.set_equation(stage="positional_restraints", lever="positional",
+...                equation=l.lam() * l.initial())
 >>> print(l)
 LambdaSchedule(
   distance_restraints: 0

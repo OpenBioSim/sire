@@ -137,7 +137,9 @@ def test_openmm_alchemical_restraints(ala_mols, openmm_platform):
     l = sr.cas.LambdaSchedule()
 
     l.add_stage("restraints", l.lam() * l.initial())
-    l.set_equation("restraints", "restraint", l.lam() * l.initial())
+    l.set_equation(
+        stage="restraints", lever="restraint", equation=l.lam() * l.initial()
+    )
 
     d = mol.dynamics(timestep="1fs", restraints=restraints, schedule=l, map=map)
 
@@ -203,14 +205,14 @@ def test_openmm_named_restraints(ala_mols, openmm_platform):
     l = sr.cas.LambdaSchedule()
 
     l.add_stage("1", 0)
-    l.set_equation("1", "positional", l.lam() * l.initial())
+    l.set_equation(stage="1", lever="positional", equation=l.lam() * l.initial())
 
     l.add_stage("2", 0)
-    l.set_equation("2", "distance", l.lam() * l.initial())
+    l.set_equation(stage="2", lever="distance", equation=l.lam() * l.initial())
 
     l.add_stage("3", 0)
-    l.set_equation("3", "positional", l.lam() * l.initial())
-    l.set_equation("3", "distance", l.lam() * l.initial())
+    l.set_equation(stage="3", lever="positional", equation=l.lam() * l.initial())
+    l.set_equation(stage="3", lever="distance", equation=l.lam() * l.initial())
 
     d = mol.dynamics(timestep="1fs", restraints=restraints, schedule=l, map=map)
 
