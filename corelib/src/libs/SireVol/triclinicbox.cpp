@@ -249,6 +249,27 @@ void TriclinicBox::rotate(double precision)
         this->is_rotated = false;
     }
 
+    // Some codes assert reduced form by checking that certain box vector
+    // components are exactly zero. As such, we need to convert any that
+    // are sufficiently close to exactly zero.
+
+    // First vector must lie along the x-axis.
+    if (std::abs(this->v0.y()) < 1e-8)
+    {
+        this->v0.setY(0);
+    }
+    if (std::abs(this->v0.z()) < 1e-8)
+    {
+        this->v0.setZ(0);
+    }
+
+    // Second must lie in the x-y plane.
+    if (std::abs(this->v1.z()) < 1e-8)
+    {
+        this->v1.setZ(0);
+    }
+
+
     // Now set the box attributes.
     this->setAttributes();
 }
