@@ -278,7 +278,7 @@ namespace SireMol
 
         virtual bool isSelector() const;
 
-        Molecule extract() const;
+        Molecule extract(bool to_same_molecule = false) const;
 
         void update(const MoleculeData &moldata);
         void update(const MoleculeView &molview);

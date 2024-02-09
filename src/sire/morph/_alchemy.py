@@ -1,7 +1,7 @@
 __all__ = ["to_alchemlyb"]
 
 
-def to_alchemlyb(energy_trajectories, temperature=None):
+def to_alchemlyb(energy_trajectories, temperature=None, energy_unit="kcal/mol"):
     """
     Convert the passed list of energy trajectories into
     a single alchemlyb-compatible DataFrame, ready for
@@ -21,6 +21,11 @@ def to_alchemlyb(energy_trajectories, temperature=None):
         The temperature of the simulation. If not provided,
         the temperature will be taken from the values in
         each EnergyTrajectory
+
+    energy_unit: str
+        Whichever of the alchemlyb energy units you want the output
+        DataFrame to use. This is in alchemlyb format, e.g.
+        `kcal/mol`, `kJ/mol`, or `kT`
 
     Returns
     -------
@@ -48,7 +53,9 @@ def to_alchemlyb(energy_trajectories, temperature=None):
 
             energy_trajectory = load(energy_trajectory)
 
-        df = energy_trajectory.to_alchemlyb(temperature=temperature)
+        df = energy_trajectory.to_alchemlyb(
+            temperature=temperature, energy_unit=energy_unit
+        )
 
         # get the lambda value of the first row
         try:
@@ -75,7 +82,17 @@ def to_alchemlyb(energy_trajectories, temperature=None):
     for lambda_value in lambda_values:
         dfs.extend(dataframes[lambda_value])
 
-    # now concatenate the dataframes
-    import pandas as pd
+    if len(dfs) == 0:
+        return None
+    elif len(dfs) == 1:
+        return dfs[0]
+    else:
+        attrs = dfs[0].attrs
 
-    return pd.concat(dfs)
+        # now concatenate the dataframes
+        import pandas as pd
+
+        combined = pd.concat(dfs)
+        combined.attrs = attrs
+
+        return combined

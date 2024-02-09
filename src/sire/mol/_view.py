@@ -327,6 +327,7 @@ if _has_nglview:
         smooth=False,
         wrap=True,
         mapping=None,
+        bgcolor=None,
         stage_parameters: str = None,
         map=None,
     ):
@@ -405,6 +406,10 @@ if _has_nglview:
         ball_and_stick, base, cartoon etc.
           Set the selection strings for atoms that should be represented
           with these views.
+
+        bgcolor: str
+          The background color of the view. Set to 'None' to use
+          the default background color (black)
 
         stage_parameters: dict
           An optional dictionary that will be passed directly
@@ -607,15 +612,26 @@ if _has_nglview:
         p1 = p.start("stage parameters")
 
         if stage_parameters is None:
+            if bgcolor is None:
+                bgcolor = "black"
+            else:
+                bgcolor = str(bgcolor).lower()
+
             view.stage.set_parameters(
                 clipNear=0,
                 clipFar=100,
                 clipDist=0,
                 fogNear=100,
                 fogFar=1000,
-                backgroundColor="black",
+                backgroundColor=bgcolor,
             )
         else:
+            if bgcolor is not None:
+                from copy import deepcopy
+
+                stage_parameters = deepcopy(stage_parameters)
+                stage_parameters["backgroundColor"] = str(bgcolor).lower()
+
             view.stage.set_parameters(**stage_parameters)
 
         if (rest is None) or (rest is False):
