@@ -63,8 +63,8 @@ namespace SireOpenMM
     class MinimizerData
     {
     public:
-        MinimizerData(OpenMM::Context &c, double tolerance, SireBase::ProgressBar &bar)
-            : context(&c), bar(&bar), k(tolerance), cpu_integrator(1.0), it(0)
+        MinimizerData(OpenMM::Context &c, double tolerance, SireBase::ProgressBar &bar, int start_step)
+            : context(&c), bar(&bar), k(tolerance), cpu_integrator(1.0), it(start_step)
         {
             QString platform_name = QString::fromStdString(context->getPlatform().getName());
             check_large_forces = (platform_name == "CUDA" || platform_name == "OpenCL" || platform_name == "HIP" || platform_name == "Metal");
@@ -308,123 +308,144 @@ namespace SireOpenMM
 
         double k = 100 / working_constraint_tol;
 
-        lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
-
-        if (x == 0)
-            throw SireError::unavailable_resource(
-                QObject::tr("LocalEnergyMinimizer: Failed to allocate memory"),
-                CODELOC);
-
         SireBase::ProgressBar bar("Minimising: initialise");
         bar.setSpeedUnit("steps / s");
 
         bar = bar.enter();
 
-        try
+        int start_step = 0;
+
+        while (start_step < max_iterations)
         {
-            // Initialize the minimizer.
-            lbfgs_parameter_t param;
-            lbfgs_parameter_init(&param);
+            auto energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
 
-            if (!context.getPlatform().supportsDoublePrecision())
-                param.xtol = 1e-7;
+            lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
 
-            param.max_iterations = max_iterations;
-            param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE;
+            if (x == 0)
+                throw SireError::unavailable_resource(
+                    QObject::tr("LocalEnergyMinimizer: Failed to allocate memory"),
+                    CODELOC);
 
-            // Make sure the initial configuration satisfies all constraints.
-            context.applyConstraints(working_constraint_tol);
-
-            // Record the initial positions and determine a normalization constant for scaling the tolerance.
-            std::vector<OpenMM::Vec3> initial_pos = context.getState(OpenMM::State::Positions).getPositions();
-
-            double norm = 0.0;
-            for (int i = 0; i < num_particles; i++)
+            try
             {
-                x[3 * i] = initial_pos[i][0];
-                x[3 * i + 1] = initial_pos[i][1];
-                x[3 * i + 2] = initial_pos[i][2];
-                norm += initial_pos[i].dot(initial_pos[i]);
-            }
+                // Initialize the minimizer.
+                lbfgs_parameter_t param;
+                lbfgs_parameter_init(&param);
 
-            norm /= num_particles;
-            norm = (norm < 1 ? 1 : sqrt(norm));
-            param.epsilon = tolerance / norm;
+                if (!context.getPlatform().supportsDoublePrecision())
+                    param.xtol = 1e-7;
 
-            // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
-            double prev_max_error = 1e10;
-            MinimizerData data(context, k, bar);
+                param.max_iterations = max_iterations - start_step;
+                param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE;
 
-            while (true)
-            {
-                // Perform the minimization.
-                lbfgsfloatval_t fx;
+                // Make sure the initial configuration satisfies all constraints.
+                context.applyConstraints(working_constraint_tol);
 
-                lbfgs(num_particles * 3, x, &fx, evaluate, 0, &data, &param);
+                // Record the initial positions and determine a normalization constant for scaling the tolerance.
+                std::vector<OpenMM::Vec3> initial_pos = context.getState(OpenMM::State::Positions).getPositions();
 
-                // Check whether all constraints are satisfied.
-                std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
-
-                int num_constraints = system.getNumConstraints();
-
-                double max_error = 0.0;
-
-                for (int i = 0; i < num_constraints; ++i)
+                double norm = 0.0;
+                for (int i = 0; i < num_particles; i++)
                 {
-                    int particle1, particle2;
-                    double distance;
-
-                    system.getConstraintParameters(i, particle1, particle2, distance);
-
-                    OpenMM::Vec3 delta = positions[particle2] - positions[particle1];
-
-                    double r = std::sqrt(delta.dot(delta));
-
-                    double error = std::fabs(r - distance) / distance;
-
-                    if (error > max_error)
-                        max_error = error;
+                    x[3 * i] = initial_pos[i][0];
+                    x[3 * i + 1] = initial_pos[i][1];
+                    x[3 * i + 2] = initial_pos[i][2];
+                    norm += initial_pos[i].dot(initial_pos[i]);
                 }
 
-                if (max_error <= working_constraint_tol)
-                    break; // All constraints are satisfied.
+                norm /= num_particles;
+                norm = (norm < 1 ? 1 : sqrt(norm));
+                param.epsilon = tolerance / norm;
 
-                context.setPositions(initial_pos);
+                // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
+                double prev_max_error = 1e10;
+                MinimizerData data(context, k, bar, start_step);
 
-                if (max_error >= prev_max_error)
-                    break; // Further tightening the springs doesn't seem to be helping, so just give up.
-
-                prev_max_error = max_error;
-                data.scaleK(10);
-
-                if (max_error > 100 * working_constraint_tol)
+                while (true)
                 {
-                    // We've gotten far enough from a valid state that we might have trouble getting
-                    // back, so reset to the original positions.
+                    // Perform the minimization.
+                    lbfgsfloatval_t fx;
 
-                    for (int i = 0; i < num_particles; ++i)
+                    lbfgs(num_particles * 3, x, &fx, evaluate, 0, &data, &param);
+
+                    start_step = data.getIteration();
+
+                    // Check whether all constraints are satisfied.
+                    std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
+
+                    int num_constraints = system.getNumConstraints();
+
+                    double max_error = 0.0;
+
+                    for (int i = 0; i < num_constraints; ++i)
                     {
-                        x[3 * i] = initial_pos[i][0];
-                        x[3 * i + 1] = initial_pos[i][1];
-                        x[3 * i + 2] = initial_pos[i][2];
+                        int particle1, particle2;
+                        double distance;
+
+                        system.getConstraintParameters(i, particle1, particle2, distance);
+
+                        OpenMM::Vec3 delta = positions[particle2] - positions[particle1];
+
+                        double r = std::sqrt(delta.dot(delta));
+
+                        double error = std::fabs(r - distance) / distance;
+
+                        if (error > max_error)
+                            max_error = error;
+                    }
+
+                    if (max_error <= working_constraint_tol)
+                        break; // All constraints are satisfied.
+
+                    context.setPositions(initial_pos);
+
+                    if (max_error >= prev_max_error)
+                        break; // Further tightening the springs doesn't seem to be helping, so just give up.
+
+                    prev_max_error = max_error;
+                    data.scaleK(10);
+
+                    if (max_error > 100 * working_constraint_tol)
+                    {
+                        // We've gotten far enough from a valid state that we might have trouble getting
+                        // back, so reset to the original positions.
+                        for (int i = 0; i < num_particles; ++i)
+                        {
+                            x[3 * i] = initial_pos[i][0];
+                            x[3 * i + 1] = initial_pos[i][1];
+                            x[3 * i + 2] = initial_pos[i][2];
+                        }
                     }
                 }
             }
-        }
-        catch (...)
-        {
-            bar.failure();
-            lbfgs_free(x);
-            throw;
-        }
-        lbfgs_free(x);
+            catch (...)
+            {
+                bar.failure();
+                lbfgs_free(x);
+                throw;
+            }
 
-        // If necessary, do a final constraint projection to make sure they are satisfied
-        // to the full precision requested by the user.
-        if (constraint_tol < working_constraint_tol)
-            context.applyConstraints(working_constraint_tol);
+            lbfgs_free(x);
+
+            // If necessary, do a final constraint projection to make sure they are satisfied
+            // to the full precision requested by the user.
+            if (constraint_tol < working_constraint_tol)
+            {
+                context.applyConstraints(working_constraint_tol);
+            }
+
+            auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
+            if (std::abs(energy_after - energy_before) < 50.0)
+            {
+                // only 50 kJ/mol difference, so not much more to
+                // be gained by further minimisation (we don't want to
+                // get stuck in a cycle caused by re-application of the
+                // constraints)
+                break;
+            }
+        }
 
         bar.success();
     }
-
 }
