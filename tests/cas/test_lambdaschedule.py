@@ -10,6 +10,64 @@ def _assert_same_equation(x, eq1, eq2):
         assert eq1.evaluate(val) == pytest.approx(eq2.evaluate(val), 1e-5)
 
 
+def test_charge_scale():
+    l = sr.cas.LambdaSchedule.standard_morph()
+
+    morph_equation = l.get_equation(stage="morph")
+
+    l.add_charge_scale_stages()
+
+    _assert_same_equation(l.lam(), l.get_equation(stage="morph"), morph_equation)
+
+    assert l.get_stages() == ["decharge", "morph", "recharge"]
+
+    assert l.get_levers() == ["charge"]
+
+    assert l.get_constant("γ") == 0.2
+
+    gamma = l.get_constant_symbol("γ")
+
+    scaled_morph = gamma * morph_equation
+
+    _assert_same_equation(
+        l.lam(), l.get_equation(stage="morph", lever="charge"), scaled_morph
+    )
+
+    _assert_same_equation(
+        gamma, l.get_equation(stage="morph", lever="charge"), scaled_morph
+    )
+
+    l.set_equation(stage="recharge", force="ghost/ghost", lever="charge", equation=0.5)
+
+    l.set_equation(stage="*", force="ghost/ghost", lever="*", equation=1.5)
+
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="recharge", force="ghost/ghost", lever="charge"),
+        sr.cas.Expression(0.5),
+    )
+
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="recharge", lever="LJ"),
+        (1.0 - ((1.0 - gamma) * (1.0 - l.lam()))) * l.final(),
+    )
+
+    _assert_same_equation(l.lam(), l.get_equation(stage="recharge"), l.final())
+
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="recharge", force="ghost/non-ghost", lever="LJ"),
+        l.final(),
+    )
+
+    _assert_same_equation(
+        l.lam(),
+        l.get_equation(stage="recharge", force="ghost/ghost", lever="LJ"),
+        sr.cas.Expression(1.5),
+    )
+
+
 def test_lambdaschedule():
     l = sr.cas.LambdaSchedule.standard_morph()
 
