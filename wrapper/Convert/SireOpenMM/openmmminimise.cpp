@@ -63,8 +63,8 @@ namespace SireOpenMM
     class MinimizerData
     {
     public:
-        MinimizerData(OpenMM::Context &c, double tolerance, SireBase::ProgressBar &bar, int start_step)
-            : context(&c), bar(&bar), k(tolerance), cpu_integrator(1.0), it(start_step)
+        MinimizerData(OpenMM::Context &c, double tolerance, SireBase::ProgressBar &bar, int max_iterations)
+            : context(&c), bar(&bar), k(tolerance), cpu_integrator(1.0), it(0), max_its(max_iterations)
         {
             QString platform_name = QString::fromStdString(context->getPlatform().getName());
             check_large_forces = (platform_name == "CUDA" || platform_name == "OpenCL" || platform_name == "HIP" || platform_name == "Metal");
@@ -81,6 +81,8 @@ namespace SireOpenMM
             if (context == 0)
                 throw SireError::program_bug(QObject::tr("MinimizerData: The context has been destroyed"),
                                              CODELOC);
+
+            qDebug() << "GET CPU CONTEXT";
 
             if (cpu_context.get() == 0)
             {
@@ -148,6 +150,11 @@ namespace SireOpenMM
             return it;
         }
 
+        qint64 getMaxIterations() const
+        {
+            return max_its;
+        }
+
         void incrementIteration()
         {
             it++;
@@ -172,6 +179,9 @@ namespace SireOpenMM
 
         /** The current iteration */
         qint64 it;
+
+        /** The maximum number of iterations */
+        qint64 max_its;
 
         /** Whether or not we need to check for large forces on this platform */
         bool check_large_forces;
@@ -213,6 +223,29 @@ namespace SireOpenMM
         return state.getPotentialEnergy();
     }
 
+    static int progress(void *instance, const lbfgsfloatval_t *x,
+                        const lbfgsfloatval_t *g,
+                        const lbfgsfloatval_t fx,
+                        const lbfgsfloatval_t xnorm,
+                        const lbfgsfloatval_t gnorm,
+                        const lbfgsfloatval_t step,
+                        int n, int k, int ls)
+    {
+        MinimizerData *data = reinterpret_cast<MinimizerData *>(instance);
+
+        OpenMM::Context &context = data->getContext();
+
+        data->incrementIteration();
+        auto &bar = data->getProgressBar();
+
+        auto nrg = SireUnits::Dimension::GeneralUnit((fx)*SireUnits::kJ_per_mol);
+
+        bar.tick(QString("Minimising: %1 : %2").arg(data->getIteration()).arg(nrg.toString()));
+
+        // return 0 to keep going, non-zero to stop
+        return data->getIteration() >= data->getMaxIterations();
+    }
+
     static lbfgsfloatval_t evaluate(void *instance, const lbfgsfloatval_t *x,
                                     lbfgsfloatval_t *g, const int n,
                                     const lbfgsfloatval_t step)
@@ -238,7 +271,6 @@ namespace SireOpenMM
             // The CUDA, OpenCL and HIP platforms accumulate forces in fixed point, so they
             // can't handle very large forces.  Check for problematic forces (very large,
             // infinite, or NaN) and if necessary recompute them on the CPU.
-
             for (int i = 0; i < 3 * num_particles; i++)
             {
                 if (!(std::fabs(g[i]) < 2e9))
@@ -283,13 +315,6 @@ namespace SireOpenMM
             }
         }
 
-        data->incrementIteration();
-        auto &bar = data->getProgressBar();
-
-        auto nrg = SireUnits::Dimension::GeneralUnit((energy)*SireUnits::kJ_per_mol);
-
-        bar.tick(QString("Minimising: %1 : %2").arg(data->getIteration()).arg(nrg.toString()));
-
         return energy;
     }
 
@@ -308,23 +333,24 @@ namespace SireOpenMM
 
         double k = 100 / working_constraint_tol;
 
-        SireBase::ProgressBar bar("Minimising: initialise");
+        SireBase::ProgressBar bar("Minimising: initialise", max_iterations);
         bar.setSpeedUnit("steps / s");
 
         bar = bar.enter();
 
-        int start_step = 0;
+        MinimizerData data(context, k, bar, max_iterations);
+        lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
 
-        while (start_step < max_iterations)
+        if (x == 0)
+            throw SireError::unavailable_resource(
+                QObject::tr("LocalEnergyMinimizer: Failed to allocate memory"),
+                CODELOC);
+
+        while (data.getIteration() < data.getMaxIterations())
         {
+            qDebug() << "TRY AGAIN!";
             auto energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
-
-            lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
-
-            if (x == 0)
-                throw SireError::unavailable_resource(
-                    QObject::tr("LocalEnergyMinimizer: Failed to allocate memory"),
-                    CODELOC);
+            bar.tick();
 
             try
             {
@@ -335,7 +361,6 @@ namespace SireOpenMM
                 if (!context.getPlatform().supportsDoublePrecision())
                     param.xtol = 1e-7;
 
-                param.max_iterations = max_iterations - start_step;
                 param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE;
 
                 // Make sure the initial configuration satisfies all constraints.
@@ -359,16 +384,13 @@ namespace SireOpenMM
 
                 // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
                 double prev_max_error = 1e10;
-                MinimizerData data(context, k, bar, start_step);
 
-                while (true)
+                while (data.getIteration() < data.getMaxIterations())
                 {
                     // Perform the minimization.
-                    lbfgsfloatval_t fx;
-
-                    lbfgs(num_particles * 3, x, &fx, evaluate, 0, &data, &param);
-
-                    start_step = data.getIteration();
+                    param.max_iterations = data.getMaxIterations() - data.getIteration();
+                    lbfgsfloatval_t fx; // final energy
+                    lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
 
                     // Check whether all constraints are satisfied.
                     std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
@@ -394,10 +416,10 @@ namespace SireOpenMM
                             max_error = error;
                     }
 
+                    qDebug() << "ERROR" << max_error << "TOL" << working_constraint_tol;
+
                     if (max_error <= working_constraint_tol)
                         break; // All constraints are satisfied.
-
-                    context.setPositions(initial_pos);
 
                     if (max_error >= prev_max_error)
                         break; // Further tightening the springs doesn't seem to be helping, so just give up.
@@ -407,6 +429,8 @@ namespace SireOpenMM
 
                     if (max_error > 100 * working_constraint_tol)
                     {
+                        context.setPositions(initial_pos);
+
                         // We've gotten far enough from a valid state that we might have trouble getting
                         // back, so reset to the original positions.
                         for (int i = 0; i < num_particles; ++i)
@@ -425,8 +449,6 @@ namespace SireOpenMM
                 throw;
             }
 
-            lbfgs_free(x);
-
             // If necessary, do a final constraint projection to make sure they are satisfied
             // to the full precision requested by the user.
             if (constraint_tol < working_constraint_tol)
@@ -435,6 +457,8 @@ namespace SireOpenMM
             }
 
             auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
+            qDebug() << "ENERGY" << energy_before << "=>" << energy_after << "DIFF" << std::abs(energy_after - energy_before);
 
             if (std::abs(energy_after - energy_before) < 50.0)
             {
@@ -445,6 +469,8 @@ namespace SireOpenMM
                 break;
             }
         }
+
+        lbfgs_free(x);
 
         bar.success();
     }
