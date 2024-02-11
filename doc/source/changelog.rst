@@ -141,6 +141,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this changelog when you create your PR
 
+* Added more support for Boresch restraints. Specifically, :func:`sire.restraints.boresch`
+  now supports the specification of equilibrium values, uses different default force
+  constants, and warns the user if the restraints are likely to be unstable. 
+  :func:`sire.restraints.get_standard_state_correction` was implemented for Boresch
+  restraints. Tests were added for restraint creation and for the standard state
+  correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
+
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
 --------------------------------------------------------------------------------------------
 
