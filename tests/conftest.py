@@ -1,5 +1,6 @@
-import sire as sr
 import pytest
+
+import sire as sr
 
 
 def pytest_addoption(parser):
@@ -217,3 +218,8 @@ def openmm_platform():
             pass
 
     return "Reference"
+
+
+@pytest.fixture(scope="session")
+def thrombin_complex():
+    return sr.load_test_files("thrombin.top", "thrombin.rst7")
