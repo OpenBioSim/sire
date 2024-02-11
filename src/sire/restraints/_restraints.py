@@ -293,7 +293,7 @@ def boresch(
     if name is None:
         return BoreschRestraints(b)
     else:
-        return BoreschRestraint(name, b)
+        return BoreschRestraints(name, b)
 
 
 def _check_stability_boresch_restraint(restraint_components, temperature=u("298 K")):
