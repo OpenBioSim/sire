@@ -249,3 +249,21 @@ def test_boresch_restraint_params_unstable(
             phi0=phi0,
             name=name,
         )
+
+
+def test_boresch_creation_with_map(thrombin_complex):
+    """
+    Test that we can provide options through the map.
+    """
+    boresch_restraints = boresch(
+        thrombin_complex,
+        receptor=thrombin_complex["protein"][
+            BORESCH_PARAMS_DEFAULT["receptor_selection"]
+        ],
+        ligand=thrombin_complex["resname LIG"][
+            BORESCH_PARAMS_DEFAULT["ligand_selection"]
+        ],
+        map={"kr": "44 kcal mol-1 A-2"},
+    )
+    boresch_restraint = boresch_restraints[0]
+    assert boresch_restraint.kr().value() == 44.0
