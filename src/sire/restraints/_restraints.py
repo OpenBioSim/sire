@@ -114,7 +114,9 @@ def boresch(
     Returns
     -------
     BoreschRestraints : SireMM::BoreschRestraints
-        The Boresch restraints.
+        A container of Boresch restraints, where the first restraint is
+        the BoreschRestraint created. The Boresch restraint created can be
+        extracted with BoreschRestraints[0].
 
     Examples
     --------
@@ -146,7 +148,11 @@ def boresch(
     if len(receptor) != 3 or len(ligand) != 3:
         # Eventually will choose the best atoms from the receptor
         # and ligand...
-        raise ValueError("You need to provide 3 receptor atoms and 3 ligand atoms")
+        raise ValueError(
+            "You need to provide 3 receptor atoms and 3 ligand atoms"
+            f"but only {len(receptor)} receptor atoms and {len(ligand)} "
+            f"ligand atoms were provided."
+        )
 
     from .. import measure
 
@@ -195,9 +201,11 @@ def boresch(
         # Get the force constants.
         if restraint_components[restraint_component]["input_k"] is None:
             restraint_components[restraint_component]["validated_k"] = n_measures * [
-                default_distance_k
-                if restraint_component == "distance"
-                else default_angle_k
+                (
+                    default_distance_k
+                    if restraint_component == "distance"
+                    else default_angle_k
+                )
             ]
         elif type(restraint_components[restraint_component]["input_k"]) is not list:
             # Populate the list with the single specified value.
@@ -207,20 +215,22 @@ def boresch(
         else:
             if len(restraint_components[restraint_component]["input_k"]) == 0:
                 # Empty list - populate with default values.
-                restraint_components[restraint_component][
-                    "validated_k"
-                ] = n_measures * [
-                    default_distance_k
-                    if restraint_component == "distance"
-                    else default_angle_k
-                ]
+                restraint_components[restraint_component]["validated_k"] = (
+                    n_measures
+                    * [
+                        (
+                            default_distance_k
+                            if restraint_component == "distance"
+                            else default_angle_k
+                        )
+                    ]
+                )
             elif len(restraint_components[restraint_component]["input_k"]) == 1:
                 # List of length 1 - populate with that value.
-                restraint_components[restraint_component][
-                    "validated_k"
-                ] = n_measures * [
-                    u(restraint_components[restraint_component]["input_k"][0])
-                ]
+                restraint_components[restraint_component]["validated_k"] = (
+                    n_measures
+                    * [u(restraint_components[restraint_component]["input_k"][0])]
+                )
             elif (
                 len(restraint_components[restraint_component]["input_k"]) == n_measures
             ):
@@ -244,11 +254,10 @@ def boresch(
         if type(restraint_components[restraint_component]["input_equil"]) is not list:
             # Only allow this if we are dealing with the distance component, as this is the only one that can be a single value.
             if restraint_component == "distance":
-                restraint_components[restraint_component][
-                    "input_equil"
-                ] = n_measures * [
-                    u(restraint_components[restraint_component]["input_equil"])
-                ]
+                restraint_components[restraint_component]["input_equil"] = (
+                    n_measures
+                    * [u(restraint_components[restraint_component]["input_equil"])]
+                )
             else:
                 raise ValueError(
                     f"Input equilibrium values for {restraint_component} must be a list of length {n_measures} of values or Nones"
