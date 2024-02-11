@@ -123,6 +123,7 @@ def boresch(
     Create a set of Boresch restraints for the ligand in the system
     'system', specifying all of the force constants and equilibrium
     values:
+
     >>> my_boresch_restraints = boresch(
     >>>     system,
     >>>     receptor=system["protein"]["atomidx 1538 or atomidx 1518 or atomidx 1540"],
@@ -134,7 +135,7 @@ def boresch(
     >>>     theta0=["1.3031 rad", "1.4777 rad"],
     >>>     phi0=["2.5569 rad", "2.9359 rad", "1.4147 rad"],
     >>> )
-    >>> my_boresch_restraint = my_boresch_restraits[0]
+    >>> my_boresch_restraint = my_boresch_restraints[0]
     """
     from ..base import create_map
     from ..mm import BoreschRestraint, BoreschRestraints
