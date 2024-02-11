@@ -4,10 +4,11 @@ import numpy as _np
 
 import sire as sr
 
+from .. import u as _u
 from .. import units as _units
 
 
-def get_standard_state_correction(restraint, temperature=300.0 * _units.kelvin):
+def get_standard_state_correction(restraint, temperature=_u("300 K")):
     """
     Get the entropic correction for releasing a given restraint to
     the standard state volume at a given temperature.
@@ -16,6 +17,9 @@ def get_standard_state_correction(restraint, temperature=300.0 * _units.kelvin):
     ----------
     restraint : sire.legacy.MM._MM.BoreschRestraint
         The restraint for which to calculate the standard state correction.
+
+    temperature : sire.legacy.Units._Units.GeneralUnit, optional
+        The temperature at which to calculate the standard state correction.
 
     Returns
     -------
