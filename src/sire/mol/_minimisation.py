@@ -80,7 +80,7 @@ class Minimisation:
         """
         return self._d.get_constraints()
 
-    def run(self, max_iterations: int = 10000):
+    def run(self, max_iterations: int = 1500):
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.
@@ -108,7 +108,7 @@ class Minimisation:
         else:
             return None
 
-    def __call__(self, max_iterations: int = 10000):
+    def __call__(self, max_iterations: int = 1500):
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.

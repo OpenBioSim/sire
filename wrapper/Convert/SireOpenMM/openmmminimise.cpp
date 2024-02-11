@@ -64,7 +64,7 @@ namespace SireOpenMM
     {
     public:
         MinimizerData(OpenMM::Context &c, double tolerance, SireBase::ProgressBar &bar, int max_iterations)
-            : context(&c), bar(&bar), k(tolerance), cpu_integrator(1.0), it(0), max_its(max_iterations)
+            : context(&c), bar(&bar), k(tolerance), cpu_integrator(1.0), it(0), max_its(max_iterations), last_fx(1e100), raw_energy(0.0), has_reset(false)
         {
             QString platform_name = QString::fromStdString(context->getPlatform().getName());
             check_large_forces = (platform_name == "CUDA" || platform_name == "OpenCL" || platform_name == "HIP" || platform_name == "Metal");
@@ -153,9 +153,44 @@ namespace SireOpenMM
             return max_its;
         }
 
+        void resetIteration()
+        {
+            it = 0;
+            last_fx = 1e10;
+            has_reset = true;
+        }
+
         void incrementIteration()
         {
             it++;
+        }
+
+        bool hasConverged(double val)
+        {
+            if (std::abs(val - last_fx) < 1e-3)
+            {
+                return true;
+            }
+            else
+            {
+                last_fx = val;
+                return false;
+            }
+        }
+
+        void setRawEnergy(double val)
+        {
+            raw_energy = val;
+        }
+
+        double getRawEnergy() const
+        {
+            return raw_energy;
+        }
+
+        bool hasReset() const
+        {
+            return has_reset;
         }
 
     private:
@@ -175,6 +210,12 @@ namespace SireOpenMM
         /** The tolerance */
         double k;
 
+        /** The last energy value */
+        double last_fx;
+
+        /** The raw energy excluding the fake constraints */
+        double raw_energy;
+
         /** The current iteration */
         qint64 it;
 
@@ -183,6 +224,9 @@ namespace SireOpenMM
 
         /** Whether or not we need to check for large forces on this platform */
         bool check_large_forces;
+
+        /** Whether or not we have been reset */
+        bool has_reset;
     };
 
     /** Calculate the forces and energies for the passed context, given the
@@ -236,12 +280,28 @@ namespace SireOpenMM
         data->incrementIteration();
         auto &bar = data->getProgressBar();
 
-        auto nrg = SireUnits::Dimension::GeneralUnit((fx)*SireUnits::kJ_per_mol);
+        auto nrg = SireUnits::Dimension::GeneralUnit(data->getRawEnergy() * SireUnits::kJ_per_mol);
 
-        bar.tick(QString("Minimising: %1 : %2").arg(data->getIteration()).arg(nrg.toString()));
+        if (data->hasReset())
+        {
+            bar.setProgress(data->getIteration(),
+                            QString("Minimising[Repeat]: %1 : %2").arg(data->getIteration()).arg(nrg.toString()));
+        }
+        else
+        {
+            bar.setProgress(data->getIteration(),
+                            QString("Minimising: %1 : %2").arg(data->getIteration()).arg(nrg.toString()));
+        }
 
-        // return 0 to keep going, non-zero to stop
-        return data->getIteration() >= data->getMaxIterations();
+        if (data->hasConverged(fx))
+        {
+            return 1;
+        }
+        else
+        {
+            // return 0 to keep going, non-zero to stop
+            return data->getIteration() >= data->getMaxIterations();
+        }
     }
 
     static lbfgsfloatval_t evaluate(void *instance, const lbfgsfloatval_t *x,
@@ -278,6 +338,8 @@ namespace SireOpenMM
                 }
             }
         }
+
+        data->setRawEnergy(energy);
 
         // Add harmonic forces for any constraints.
         int num_constraints = system.getNumConstraints();
@@ -329,7 +391,7 @@ namespace SireOpenMM
 
         double working_constraint_tol = std::max(1e-4, constraint_tol);
 
-        double k = 1000 / working_constraint_tol;
+        double k = 100 / working_constraint_tol;
 
         SireBase::ProgressBar bar("Minimising: initialise", max_iterations);
         bar.setSpeedUnit("steps / s");
@@ -343,6 +405,8 @@ namespace SireOpenMM
             throw SireError::unavailable_resource(
                 QObject::tr("LocalEnergyMinimizer: Failed to allocate memory"),
                 CODELOC);
+
+        bool have_reset_before = false;
 
         while (data.getIteration() < data.getMaxIterations())
         {
@@ -379,15 +443,17 @@ namespace SireOpenMM
                 norm = (norm < 1 ? 1 : sqrt(norm));
                 param.epsilon = tolerance / norm;
 
-                // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
+                double last_energy = 1e10;
                 double prev_max_error = 1e10;
 
+                // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
                 while (data.getIteration() < data.getMaxIterations())
                 {
                     // Perform the minimization.
                     param.max_iterations = data.getMaxIterations() - data.getIteration();
                     lbfgsfloatval_t fx; // final energy
                     lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
+                    last_energy = fx;
 
                     // Check whether all constraints are satisfied.
                     std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
@@ -424,15 +490,30 @@ namespace SireOpenMM
 
                     if (max_error > 1000 * working_constraint_tol)
                     {
-                        context.setPositions(initial_pos);
-
-                        // We've gotten far enough from a valid state that we might have trouble getting
-                        // back, so reset to the original positions.
-                        for (int i = 0; i < num_particles; ++i)
+                        // we need to be really sure that this is the right thing to do,
+                        // because it could mean that minimisation exits with a structure
+                        // that is very close to the un-minimised input structure
+                        if (not have_reset_before)
                         {
-                            x[3 * i] = initial_pos[i][0];
-                            x[3 * i + 1] = initial_pos[i][1];
-                            x[3 * i + 2] = initial_pos[i][2];
+                            // restart from scratch...
+                            have_reset_before = true;
+                            data.resetIteration();
+
+                            context.setPositions(initial_pos);
+
+                            // We've gotten far enough from a valid state that we might have trouble getting
+                            // back, so reset to the original positions.
+                            for (int i = 0; i < num_particles; ++i)
+                            {
+                                x[3 * i] = initial_pos[i][0];
+                                x[3 * i + 1] = initial_pos[i][1];
+                                x[3 * i + 2] = initial_pos[i][2];
+                            }
+                        }
+                        else
+                        {
+                            // we've already reset once, so we're not going to do it again
+                            break;
                         }
                     }
                 }
@@ -444,15 +525,15 @@ namespace SireOpenMM
                 throw;
             }
 
+            auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
             // do a final constraint projection to make sure they are satisfied
             // to the full precision requested by the user.
             context.applyConstraints(working_constraint_tol);
 
-            auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
-
-            if (std::abs(energy_after - energy_before) < 50.0)
+            if (std::abs(energy_after - energy_before) < 150.0)
             {
-                // only 50 kJ/mol difference, so not much more to
+                // only 150 kJ/mol difference, so not much more to
                 // be gained by further minimisation (we don't want to
                 // get stuck in a cycle caused by re-application of the
                 // constraints)
