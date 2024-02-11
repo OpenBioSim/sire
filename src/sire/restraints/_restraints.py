@@ -105,7 +105,10 @@ def boresch(
         used. Default is None.
 
     map : dict, optional
-        A property map. Default is None.
+        A dictionary of additional options. Note that any options
+        set in this dictionary that are also specified via one of
+        the arguments above will be overridden by the argument
+        value
 
     temperature : str or SireUnits::Dimension::GeneralUnit, optional
         The temperature to use when checking for unstable restraints. If
@@ -140,7 +143,21 @@ def boresch(
     from ..base import create_map
     from ..mm import BoreschRestraint, BoreschRestraints
 
+    # If an argument is not specified in the function
+    # arguments, but is specified in the map, update
+    # the argument from the map.
     map = create_map(map)
+    map_dict = map.to_dict()
+    kr = kr if kr is not None else map_dict.get("kr", None)
+    ktheta = ktheta if ktheta is not None else map_dict.get("ktheta", None)
+    kphi = kphi if kphi is not None else map_dict.get("kphi", None)
+    r0 = r0 if r0 is not None else map_dict.get("r0", None)
+    theta0 = theta0 if theta0 is not None else map_dict.get("theta0", None)
+    phi0 = phi0 if phi0 is not None else map_dict.get("phi0", None)
+    name = name if name is not None else map_dict.get("name", None)
+    temperature = (
+        temperature if temperature is not None else map_dict.get("temperature", None)
+    )
 
     receptor = _to_atoms(mols, receptor)
     ligand = _to_atoms(mols, ligand)
