@@ -229,6 +229,85 @@ BondRestraints( size=630
    the first atom in the first molecule and the oxygen atoms in all of
    the water molecules.
 
+Boresch Restraints
+---------------------------
+
+The :func:`sire.restraints.boresch` function is used to create Boresch restraints,
+which are commonly used for restraining the relative positions and orientations
+of a receptor and ligand during alchemical absolute binding free energy calculations.
+They restrain the six relative external degrees of freedom of the receptor and ligand
+by restraining one distance, two angles, and three dihedrals angles which are
+defined according to three anchor points in the receptor and three anchor points
+in the ligand. For more detail, please see J. Phys. Chem. B 2003, 107, 35, 9535–9551. 
+
+To create a Boresch restraint, you need to specify the receptor and ligand anchor
+atoms (note that the order of the atoms is important). Like the distance restraints,
+the atoms can be specified using a search string, passing lists of atom indexes, or 
+molecule views holding the atoms. You can also specify the force constants and equilibrium
+values for the restraints. If not supplied, default force constants of 10 kcal mol-1 Å-2
+and 100 kcal mol-1 rad-2 are used for the distance and angle restraints, respectively,
+and the equilibrium values are set to the current values of the distances and angles in
+the system supplied. For example,
+
+>>> boresch_restraints = sr.restraints.boresch(mols, receptor=[1574, 1554, 1576], ligand=[4,3,5])
+>>> boresch_restraint = boresch_restraints[0]
+>>> print(boresch_restraint)
+BoreschRestraint( [1574, 1554, 1576] => [4, 3, 5],
+                  k=[10 kcal mol-1 Å-2, 0.0304617 kcal mol-1 °-2, 0.0304617 kcal mol-1 °-2,
+                   0.0304617 kcal mol-1 °-2, 0.0304617 kcal mol-1 °-2, 0.0304617 kcal mol-1 °-2]
+                  r0=15.1197 Å, theta0=[80.5212°, 59.818°],
+                  phi0=[170.562°Ⱐ128.435°Ⱐ192.21°] )
+
+creates a Boresch restraint where the receptor anchor atoms are r1 = 1574, r2 = 1554, and r3 = 1576,
+and the ligand anchor atoms are l1 = 4, l2 = 3, and l3 = 5. The default force constants have been set
+and the equilibrium values have been set to the current values of the distances and angles in the
+system supplied.
+
+.. note::
+
+   Boresch restraints can be subject to instabilities if any three contiguous anchor points
+   approach collinearity (J. Chem. Theory Comput. 2023, 19, 12, 3686–3704). It is important to
+   prevent this by ensuring the associated angles are sufficiently far from 0 or 180 degrees,
+   and that the `ktheta` force constants are high enough. Sire will raise a warning if the 
+   `theta0` values are too close to 0 or 180 degrees for the given temperature and force constants.
+
+Alternatively, we could have explicitly set the force constants and equilibrium values, e.g.
+
+>>> boresch_restraints = sr.restraints.boresch(mols, receptor=[1574, 1554, 1576], ligand=[4,3,5],
+                                               kr = "6.2012 kcal mol-1 A-2",
+                                               ktheta = ["28.7685 kcal mol-1 rad-2", "24.8204 kcal mol-1 rad-2"],
+                                               kphi = ["59.8626 kcal mol-1 rad-2", "0.7923 kcal mol-1 rad-2", 
+                                                       "55.1775 kcal mol-1 rad-2"],
+                                               r0 = "16 A", 
+                                               theta0 = ["1.2 rad", "1.3 rad"],
+                                               phi0 = ["2.2 rad", "2.5 rad", "1.5 rad"],
+                                               name = "boresch_restraint_1")
+>>> boresch_restraint = boresch_restraints[0]
+>>> print(boresch_restraint)
+BoreschRestraint( [1574, 1554, 1576] => [4, 3, 5],
+                  k=[6.2012 kcal mol-1 Å-2, 0.00876339 kcal mol-1 °-2, 0.00756073 kcal mol-1 °-2, 0.0182352 kcal mol-1 °-2, 0.000241348 kcal mol-1 °-2, 0.016808 kcal mol-1 °-2]
+                  r0=16 Å, theta0=[68.7549°, 74.4845°],
+                  phi0=[126.051°Ⱐ143.239°Ⱐ85.9437°] )
+
+.. note::
+
+   :func:`sire.restraints.boresch` returns a list of Boresch restraints. If you are only
+   interested in a single Boresch restraint, you can extract it with the index, e.g.
+   ``boresch_restraint = boresch_restraints[0]``.
+
+When performing an alchemical absolute binding free energy calculation, it is necessary to 
+calculate the free energy of releasing the decoupled ligand to the standard state volume.
+The analytical Boresch correction is almost always accurate if stable restraints have been
+selected (see 10.26434/chemrxiv-2023-8s9dz-v2). This can be calculated with
+:func:`sire.restraints.standard_state_correction`:
+
+>>> boresch_restraint = boresch_restraints[0]
+>>> from sire import u
+>>> correction = sr.restraints.standard_state_correction(boresch_restraint, temperature=u("298 K"))
+>>> print(correction)
+-6.2399 kcal mol-1
+
+
 Using restraints in minimisation or dynamics
 --------------------------------------------
 
