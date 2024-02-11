@@ -51,6 +51,7 @@ __all__ = [
     "use_mixed_api",
     "use_new_api",
     "use_old_api",
+    "v",
 ]
 
 
@@ -164,6 +165,142 @@ def u(unit):
         )
 
 
+def v(x, y=None, z=None, units=None):
+    """
+    Return a sire vector from the passed expression. If this is a set of
+    numbers or lengths (or a combination) then a sire.maths.Vector will
+    be returned. If this is a value with velocity or force units then
+    a Velocity3D or Force3D will be returned. If there is no
+    vector type for data of this value then a simple python vector object
+    will be returned.
+
+    Args:
+        x: The x-value, or something containing 3 values
+        y: The y-value (cannot be specified if x has more than 1 value)
+        z: The z-value (cannot be specified if x has more than 1 value)
+        units: The units of the passed values (optional - will be guessed
+               if not specified). You should not pass this if x, y or z
+               already have values.
+    """
+    if type(x) is dict:
+        if y is not None or z is not None:
+            raise ValueError("You cannot specify y or z values when passing a dict.")
+
+        y = x["x"]
+        z = x["z"]
+        x = x["x"]
+
+    elif (not isinstance(x, str)) and hasattr(x, "__len__"):
+        if len(x) != 3:
+            raise ValueError(
+                "The passed list or tuple must have three elements to be "
+                f"converted to a Vector - the value '{x}' is not valid."
+            )
+
+        if y is not None or z is not None:
+            raise ValueError(
+                "You cannot specify y or z values when passing a list or tuple."
+            )
+
+        (x, y, z) = (x[0], x[1], x[2])
+
+    else:
+        if y is None:
+            y = 0
+
+        if z is None:
+            z = 0
+
+    if units is not None:
+        u_units = u(units)
+
+        if u_units.temperature() == 0:
+            x *= u_units
+            y *= u_units
+            z *= u_units
+        else:
+            from .units import kelvin
+
+            if u_units.has_same_units(kelvin):
+                x = u(f"{x} {units}")
+                y = u(f"{y} {units}")
+                z = u(f"{z} {units}")
+            else:
+                raise ValueError(
+                    "You can't specify units that include temperature, "
+                    "as this can't be mulitplied easily."
+                )
+
+    x = u(x)
+    y = u(y)
+    z = u(z)
+
+    from .maths import Vector
+
+    # find the units of the passed values
+    if x.is_zero() and y.is_zero() and z.is_zero():
+        return Vector(0)
+
+    units = None
+
+    if not x.is_dimensionless():
+        units = x.units()
+
+    if not y.is_dimensionless():
+        if units is None:
+            units = y.units()
+        elif not units.has_same_units(y):
+            raise ValueError(
+                "The passed y value has units that are aren't compatible with x. "
+                f"{x} versus {y}"
+            )
+
+    if not z.is_dimensionless():
+        if units is None:
+            units = z.units()
+        elif not units.has_same_units(z):
+            raise ValueError(
+                "The passed z value has units that are aren't compatible with x or y. "
+                f"{x} versus {y} versus {z}"
+            )
+
+    if units is None:
+        # all dimensionless - will be a simple vector
+        return Vector(x.value(), y.value(), z.value())
+    else:
+        if x.is_dimensionless():
+            x = x * units
+
+        if y.is_dimensionless():
+            y = y * units
+
+        if z.is_dimensionless():
+            z = z * units
+
+    # we have units - need to create a vector with the right type
+    from .units import angstrom
+
+    if units.has_same_units(angstrom):
+        return Vector(x, y, z)
+
+    from .units import picosecond
+
+    if units.has_same_units(angstrom / picosecond):
+        from .legacy.Mol import Velocity3D
+
+        return Velocity3D(x, y, z)
+
+    from .units import newton
+
+    if units.has_same_units(newton):
+        from .legacy.Mol import Force3D
+
+        return Force3D(x, y, z)
+
+    # no vector type for this - just return a simple vector
+    return (x, y, z)
+
+
 def molid(
     num: int = None,
     name: str = None,
@@ -226,9 +363,7 @@ def molid(
         return ID
 
 
-def atomid(
-    num: int = None, name: str = None, idx: int = None, case_sensitive=True
-):
+def atomid(num: int = None, name: str = None, idx: int = None, case_sensitive=True):
     """Construct an identifer for an Atom from the passed
        name, number and index.
 
@@ -285,9 +420,7 @@ def atomid(
         return ID
 
 
-def resid(
-    num: int = None, name: str = None, idx: int = None, case_sensitive=True
-):
+def resid(num: int = None, name: str = None, idx: int = None, case_sensitive=True):
     """Construct an identifer for a Residue from the passed
        name, number and index.
 
@@ -664,8 +797,10 @@ _can_lazy_import = False
 if "SIRE_NO_LAZY_IMPORT" not in _os.environ:
     try:
         import lazy_import as _lazy_import
+        import logging as _logging
 
-        _lazy_import.logging.disable(_lazy_import.logging.DEBUG)
+        _logger = _logging.getLogger("lazy_import")
+        _logger.setLevel(_logging.ERROR)
 
         # Previously needed to filter to remove excessive warnings
         # from 'frozen importlib' when lazy loading.

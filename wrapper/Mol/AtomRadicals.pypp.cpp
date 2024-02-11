@@ -486,6 +486,20 @@ void register_AtomRadicals_class(){
         { //::SireMol::AtomProperty< SireMol::Radical >::set
         
             typedef SireMol::AtomProperty< SireMol::Radical > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMol::Radical > & ( ::SireMol::AtomProperty< SireMol::Radical >::*set_function_type)( int,::SireMol::Radical const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Radical >::set );
+            
+            AtomRadicals_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMol::Radical >::set
+        
+            typedef SireMol::AtomProperty< SireMol::Radical > exported_class_t;
             typedef ::SireMol::AtomProperty< SireMol::Radical > & ( ::SireMol::AtomProperty< SireMol::Radical >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireMol::Radical const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Radical >::set );
             

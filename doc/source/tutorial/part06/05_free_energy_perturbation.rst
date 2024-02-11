@@ -27,8 +27,7 @@ System( name=BioSimSpace_System num_molecules=4054 num_residues=4054 num_atoms=1
 And lets link the properties to the reference state, so that we start the
 simulation using the reference state coordinates.
 
->>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
+>>> mols = sr.morph.link_to_reference(mols)
 
 Next we will run through 21 evenly-space λ values from 0 to 1. We've picked
 21 because it is a reasonable number that should over-sample the λ-coordinate.
@@ -227,7 +226,7 @@ instead of ``energy_{lambda}.s3``).
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
 >>> mol = mols.molecule("molecule property is_perturbable")
->>> mol.update(mol.perturbation().link_to_reference().commit())
+>>> mol = sr.morph.link_to_reference(mol)
 >>> for l in range(0, 105, 5):
 ...     # turn l into the lambda value by dividing by 100
 ...     lambda_value = l / 100.0

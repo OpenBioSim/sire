@@ -486,6 +486,20 @@ void register_AtomIntegerArrayProperty_class(){
         { //::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::set
         
             typedef SireMol::AtomProperty< SireBase::IntegerArrayProperty > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireBase::IntegerArrayProperty > & ( ::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::*set_function_type)( int,::SireBase::IntegerArrayProperty const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::set );
+            
+            AtomIntegerArrayProperty_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::set
+        
+            typedef SireMol::AtomProperty< SireBase::IntegerArrayProperty > exported_class_t;
             typedef ::SireMol::AtomProperty< SireBase::IntegerArrayProperty > & ( ::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::*set_function_type)( ::SireMol::CGAtomIdx const &,::SireBase::IntegerArrayProperty const & ) ;
             set_function_type set_function_value( &::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::set );
             

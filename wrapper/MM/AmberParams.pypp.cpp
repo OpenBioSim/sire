@@ -692,6 +692,45 @@ void register_AmberParams_class(){
                 , "" );
         
         }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::LJ1264Parameter const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("ljparam") )
+                , bp::release_gil_policy()
+                , "Set the LJ exception between atom0 and atom1 to ljparam" );
+        
+        }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::AmberParams &,::SireMM::LJ1264Parameter const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("params1"), bp::arg("ljparam") )
+                , bp::release_gil_policy()
+                , "Set the LJ exception between atom0 in this set and atom1 in the\n  passed set of parameters to ljparam\n" );
+        
+        }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::QList< SireMM::LJException > const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom"), bp::arg("exceptions") )
+                , bp::release_gil_policy()
+                , "Set the LJ exceptions for the specified atom - this replaces any\n  existing exceptions\n" );
+        
+        }
         { //::SireMM::AmberParams::setExcludedAtoms
         
             typedef void ( ::SireMM::AmberParams::*setExcludedAtoms_function_type)( ::SireMM::CLJNBPairs const & ) ;

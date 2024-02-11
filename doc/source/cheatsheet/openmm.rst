@@ -76,18 +76,43 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | Key                          | Valid values                                             |
 +==============================+==========================================================+
+| barostat_frequency           | The frequency at which the barostat acts to perform      |
+|                              | the MC moves to change the box volume when performing    |
+|                              | constant pressure simulations (default 25).              |
++------------------------------+----------------------------------------------------------+
+| check_for_h_by_ambertype     | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on a H? amber type. |
+|                              | This is the default ``True``.                            |
++------------------------------+----------------------------------------------------------+
+| check_for_h_by_element       | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on the element.     |
+|                              | This is the default ``True``.                            |
++------------------------------+----------------------------------------------------------+
+| check_for_h_by_mass          | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on their mass.      |
+|                              | This is the default ``True``.                            |
++------------------------------+----------------------------------------------------------+
 | com_reset_frequency          | The frequency at which the ``CMMotionRemover`` acts to   |
 |                              | remove center of mass relative motion. If this is not    |
 |                              | set (the default) then center of mass motion is not      |
 |                              | removed.                                                 |
 +------------------------------+----------------------------------------------------------+
 | constraint                   | Type of constraint to use for bonds and/or angles.       |
-|                              | Valid strings are ``none``, ``h-bonds``, ``bonds``,      |
-|                              | ``h-bonds-h-angles`` and ``bonds-h-angles``.             |
+|                              | Valid strings are ``none``, ``h-bonds``,                 |
+|                              | ``h-bonds-not-perturbed``,                               |
+|                              | ``h-bonds-not-heavy-perturbed``,                         |
+|                              | ``bonds``, ``bonds-not-perturbed``,                      |
+|                              | ``bonds-not-heavy-perturbed``,                           |
+|                              | ``h-bonds-h-angles``,                                    |
+|                              | ``h-bonds-h-angles-not-perturbed``,                      |
+|                              | ``h-bonds-h-angles-not-heavy-perturbed``,                |
+|                              | ``bonds-h-angles``,                                      |
+|                              | ``bonds-h-angles-not-perturbed`` and                     |
+|                              | ``bonds-h-angles-not-heavy-perturbed                     |
 +------------------------------+----------------------------------------------------------+
 | coulomb_power                | The coulomb power parameter used by the softening        |
-|                              | potential used to soften interactions involving          |
-|                              | ghost atoms.                                             |
+|                              | potential used to soften electrostatic interactions      |
+|                              | involving ghost atoms. This defaults to 0.               |
 +------------------------------+----------------------------------------------------------+
 | cutoff                       | Size of the non-bonded cutoff, e.g.                      |
 |                              | ``7.5*sr.units.angstrom``                                |
@@ -104,6 +129,9 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | dielectric                   | Dielectric value if a reaction field cutoff is used,     |
 |                              | e.g. ``78.0``                                            |
++------------------------------+----------------------------------------------------------+
+| dynamic_constraints          | Whether or not the constraints applied to perturbable    |
+|                              | bonds should be updated with λ (defaults to ``True``).   |
 +------------------------------+----------------------------------------------------------+
 | fixed                        | The atoms in the system that should be fixed (not moved) |
 +------------------------------+----------------------------------------------------------+
@@ -128,6 +156,11 @@ Available keys and allowable values are listed below.
 | lambda                       | The λ-value at which to set up the system (assuming this |
 |                              | contains any perturbable molecules or restraints)        |
 +------------------------------+----------------------------------------------------------+
+| perturbable_constraint       | The constraint to use for perturbable molecules. These   |
+|                              | are the same options as ``constraint``, and will         |
+|                              | override that choice for perturbable molecules if this   |
+|                              | is set.                                                  |
++------------------------------+----------------------------------------------------------+
 | platform                     | Any valid OpenMM platform string, e.g. ``CUDA``,         |
 |                              | ``OpenCL``, ``Metal``, ```CPU``, ``Reference``           |
 +------------------------------+----------------------------------------------------------+
@@ -143,16 +176,24 @@ Available keys and allowable values are listed below.
 | schedule                     | The :class:`~sire.cas.LambdaSchedule` to use that        |
 |                              | controls how parameters are modified with λ              |
 +------------------------------+----------------------------------------------------------+
+| shift_coulomb                | The coulomb delta parameter used by the softening        |
+|                              | potential used to soften electrostatic interactions      |
+|                              | involving ghost atoms. This defaults to 1.0 Å.           |
++------------------------------+----------------------------------------------------------+
 | shift_delta                  | The shift_delta parameter to use for the softening       |
-|                              | potential used to soften interactions involving          |
-|                              | ghost atoms.                                             |
+|                              | potential used to soften LJ interactions involving       |
+|                              | ghost atoms. This defaults to 2.0 Å.                     |
 +------------------------------+----------------------------------------------------------+
 | space                        | Space in which the simulation should be conducted, e.g.  |
 |                              | `sr.vol.Cartesian`                                       |
 +------------------------------+----------------------------------------------------------+
 | swap_end_states              | Whether to swap the end states of a perturbable molecule |
 |                              | (i.e. treat the perturbed state as the reference state   |
-|                              | and vice versa).                                         |
+|                              | and vice versa). This defaults to False.                 |
++------------------------------+----------------------------------------------------------+
+| taylor_power                 | The taylor power parameter used by the taylor algorithm  |
+|                              | for the softening potential used to soften LJ            |
+|                              | interactions involving ghost atoms. This defaults to 1.  |
 +------------------------------+----------------------------------------------------------+
 | temperature                  | Any temperature value, e.g. ``25*sr.units.celsius``      |
 +------------------------------+----------------------------------------------------------+
@@ -166,6 +207,15 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | use_dispersion_correction    | Whether or not to use the dispersion correction to       |
 |                              | deal with cutoff issues. This is very expensive.         |
++------------------------------+----------------------------------------------------------+
+| use_taylor_softening         | Whether or not to use the taylor algorithm to soften     |
+|                              | interactions involving ghost atoms. This defaults to     |
+|                              | False.                                                   |
++------------------------------+----------------------------------------------------------+
+| use_zacharias_softening      | Whether or not to use the zacharias algorithm to soften  |
+|                              | interactions involving ghost atoms. This defaults to     |
+|                              | True. Note that one of zacharias or taylor softening     |
+|                              | must be True, with zacharias taking precedence.          |
 +------------------------------+----------------------------------------------------------+
 
 Higher level API

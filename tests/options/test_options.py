@@ -15,9 +15,7 @@ def test_options():
 
         @staticmethod
         def options(include_docs: bool = False):
-            return sr.options.Option._options(
-                TestOptions, include_docs=include_docs
-            )
+            return sr.options.Option._options(TestOptions, include_docs=include_docs)
 
     assert TestOptions.A == "a"
     assert TestOptions.B == "b"
@@ -52,6 +50,7 @@ def test_options():
             "  H-bonds-h-ANGLES   ",
             "h_bonds_h_angles",
         ),
+        (sr.options.Constraint, "  H-Bonds_not_Perturbed", "h_bonds_not_perturbed"),
         (sr.options.PerturbableConstraint, "None", "none"),
         (sr.options.Cutoff, "Particle Mesh Ewald", "pme"),
         (sr.options.Cutoff, "REACTION        FIELD", "rf"),

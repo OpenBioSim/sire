@@ -33,6 +33,7 @@
 
 #include "SireMaths/constants.h"
 
+#include <boost/predef.h>
 #include <boost/static_assert.hpp>
 
 SIRE_BEGIN_HEADER
@@ -119,6 +120,38 @@ namespace SireUnits
 
         SIREUNITS_EXPORT QPair<double, QString> getUnitString(int M, int L, int T, int C, int t, int Q, int A);
 
+        namespace detail
+        {
+            template <class T>
+            struct _simple_typename
+            {
+                static const char *typeName()
+                {
+                    static QString typenam = QString("SireUnits::Dimension::PhysUnit<%1-%2-%3-%4-%5-%6-%7>")
+                                                 .arg(T::MASS())
+                                                 .arg(T::LENGTH())
+                                                 .arg(T::TIME())
+                                                 .arg(T::CHARGE())
+                                                 .arg(T::TEMPERATURE())
+                                                 .arg(T::QUANTITY())
+                                                 .arg(T::ANGLE());
+
+                    static auto s = typenam.toStdString();
+
+                    return s.c_str();
+                }
+            };
+
+            template <class T>
+            struct _registered_typename
+            {
+                static const char *typeName()
+                {
+                    return QMetaType::typeName(qMetaTypeId<T>());
+                }
+            };
+        } // namespace detail
+
         /** Construct a physical unit with the specified
             Mass, Length, Time, Charge, temperature,
             Quantity and Angle dimensions
@@ -136,6 +169,8 @@ namespace SireUnits
             explicit PhysUnit(double scale_factor) : Unit(scale_factor)
             {
             }
+
+            PhysUnit(const QString &value);
 
             explicit PhysUnit(const TempBase &temperature) : Unit(temperature)
             {
@@ -156,7 +191,11 @@ namespace SireUnits
 
             static const char *typeName()
             {
-                return QMetaType::typeName(qMetaTypeId<PhysUnit<M, L, T, C, t, Q, A>>());
+                typedef PhysUnit<M, L, T, C, t, Q, A> PhysUnitT;
+
+                return std::conditional<QMetaTypeId2<PhysUnitT>::Defined,
+                                        detail::_registered_typename<PhysUnitT>,
+                                        detail::_simple_typename<PhysUnitT>>::type::typeName();
             }
 
             const char *what() const

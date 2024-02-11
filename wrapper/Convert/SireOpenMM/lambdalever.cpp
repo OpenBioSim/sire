@@ -43,7 +43,8 @@ MolLambdaCache::MolLambdaCache() : lam_val(0)
 {
 }
 
-MolLambdaCache::MolLambdaCache(double lam) : lam_val(lam)
+MolLambdaCache::MolLambdaCache(double lam)
+    : lam_val(lam)
 {
 }
 
@@ -68,15 +69,18 @@ MolLambdaCache &MolLambdaCache::operator=(const MolLambdaCache &other)
 }
 
 const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
+                                             const QString &force,
                                              const QString &key,
                                              const QVector<double> &initial,
                                              const QVector<double> &final) const
 {
     auto nonconst_this = const_cast<MolLambdaCache *>(this);
 
+    QString force_key = force + "::" + key;
+
     QReadLocker lkr(&(nonconst_this->lock));
 
-    auto it = cache.constFind(key);
+    auto it = cache.constFind(force_key);
 
     if (it != cache.constEnd())
         return it.value();
@@ -86,15 +90,41 @@ const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
     QWriteLocker wkr(&(nonconst_this->lock));
 
     // check that someone didn't beat us to create the values
-    it = cache.constFind(key);
+    it = cache.constFind(force_key);
 
     if (it != cache.constEnd())
         return it.value();
 
-    // create the values
-    nonconst_this->cache.insert(key, schedule.morph(key, initial, final, lam_val));
+    const auto stage = schedule.getStage(lam_val);
 
-    return cache.constFind(key).value();
+    if (schedule.hasForceSpecificEquation(stage, force, key))
+    {
+        // create the values specific for this lever for this force
+        nonconst_this->cache.insert(force_key,
+                                    schedule.morph(force, key,
+                                                   initial, final, lam_val));
+    }
+    else
+    {
+        // all forces use the same equation for this lever
+        // Look for the common equation
+        it = cache.constFind(key);
+
+        if (it == cache.constEnd())
+        {
+            // we're the first - create the values and cache them
+            nonconst_this->cache.insert(key,
+                                        schedule.morph("*", key,
+                                                       initial, final, lam_val));
+
+            it = cache.constFind(key);
+        }
+
+        // save this equation for this force for this lever
+        nonconst_this->cache.insert(force_key, it.value());
+    }
+
+    return cache.constFind(force_key).value();
 }
 
 //////
@@ -274,18 +304,20 @@ QString LambdaLever::getForceType(const QString &name,
     return QString::fromStdString(force.getName());
 }
 
-std::tuple<int, int, double, double, double, double>
+boost::tuple<int, int, double, double, double, double, double>
 get_exception(int atom0, int atom1, int start_index,
               double coul_14_scl, double lj_14_scl,
               const QVector<double> &morphed_charges,
               const QVector<double> &morphed_sigmas,
               const QVector<double> &morphed_epsilons,
-              const QVector<double> &morphed_alphas)
+              const QVector<double> &morphed_alphas,
+              const QVector<double> &morphed_kappas)
 {
     double charge = 0.0;
     double sigma = 0.0;
     double epsilon = 0.0;
     double alpha = 0.0;
+    double kappa = 0.0;
 
     if (coul_14_scl != 0 or lj_14_scl != 0)
     {
@@ -325,6 +357,17 @@ get_exception(int atom0, int atom1, int start_index,
             alpha = 0;
         else if (alpha > 1)
             alpha = 1;
+
+        if (not morphed_kappas.isEmpty())
+        {
+            kappa = std::max(morphed_kappas[atom0], morphed_kappas[atom1]);
+        }
+
+        // clamp kappa between 0 and 1
+        if (kappa < 0)
+            kappa = 0;
+        else if (kappa > 1)
+            kappa = 1;
     }
 
     if (charge == 0 and epsilon == 0)
@@ -338,17 +381,18 @@ get_exception(int atom0, int atom1, int start_index,
         epsilon = 1e-9;
     }
 
-    return std::make_tuple(atom0 + start_index,
-                           atom1 + start_index,
-                           charge, sigma, epsilon,
-                           alpha);
+    return boost::make_tuple(atom0 + start_index,
+                             atom1 + start_index,
+                             charge, sigma, epsilon,
+                             alpha, kappa);
 }
 
 /** Set the value of lambda in the passed context. Returns the
  *  actual value of lambda set.
  */
 double LambdaLever::setLambda(OpenMM::Context &context,
-                              double lambda_value) const
+                              double lambda_value,
+                              bool update_constraints) const
 {
     // go over each forcefield and update the parameters in the forcefield,
     // and then pass those updated parameters to the context
@@ -373,7 +417,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
     // we know if we have peturbable ghost atoms if we have the ghost forcefields
     const bool have_ghost_atoms = (ghost_ghostff != 0 or ghost_nonghostff != 0);
 
-    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // record the range of indicies of the atoms, bonds, angles,
     // torsions which change
@@ -395,85 +439,157 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         const auto &start_idxs = this->start_indicies[i];
 
         const auto &cache = this->lambda_cache.get(i, lambda_value);
-
-        // calculate the new parameters for this lambda value
-        const auto morphed_charges = cache.morph(
-            this->lambda_schedule,
-            "charge",
-            perturbable_mol.getCharges0(),
-            perturbable_mol.getCharges1());
-
-        const auto morphed_sigmas = cache.morph(
-            this->lambda_schedule,
-            "sigma",
-            perturbable_mol.getSigmas0(),
-            perturbable_mol.getSigmas1());
-
-        const auto morphed_epsilons = cache.morph(
-            this->lambda_schedule,
-            "epsilon",
-            perturbable_mol.getEpsilons0(),
-            perturbable_mol.getEpsilons1());
-
-        const auto morphed_alphas = cache.morph(
-            this->lambda_schedule,
-            "alpha",
-            perturbable_mol.getAlphas0(),
-            perturbable_mol.getAlphas1());
-
-        const auto morphed_bond_k = cache.morph(
-            this->lambda_schedule,
-            "bond_k",
-            perturbable_mol.getBondKs0(),
-            perturbable_mol.getBondKs1());
-
-        const auto morphed_bond_length = cache.morph(
-            this->lambda_schedule,
-            "bond_length",
-            perturbable_mol.getBondLengths0(),
-            perturbable_mol.getBondLengths1());
-
-        const auto morphed_angle_k = cache.morph(
-            this->lambda_schedule,
-            "angle_k",
-            perturbable_mol.getAngleKs0(),
-            perturbable_mol.getAngleKs1());
-
-        const auto morphed_angle_size = cache.morph(
-            this->lambda_schedule,
-            "angle_size",
-            perturbable_mol.getAngleSizes0(),
-            perturbable_mol.getAngleSizes1());
-
-        const auto morphed_torsion_phase = cache.morph(
-            this->lambda_schedule,
-            "torsion_phase",
-            perturbable_mol.getTorsionPhases0(),
-            perturbable_mol.getTorsionPhases1());
-
-        const auto morphed_torsion_k = cache.morph(
-            this->lambda_schedule,
-            "torsion_k",
-            perturbable_mol.getTorsionKs0(),
-            perturbable_mol.getTorsionKs1());
-
-        const auto morphed_charge_scale = cache.morph(
-            this->lambda_schedule,
-            "charge_scale",
-            perturbable_mol.getChargeScales0(),
-            perturbable_mol.getChargeScales1());
-
-        const auto morphed_lj_scale = cache.morph(
-            this->lambda_schedule,
-            "lj_scale",
-            perturbable_mol.getLJScales0(),
-            perturbable_mol.getLJScales1());
+        const auto &schedule = this->lambda_schedule.getMoleculeSchedule(i);
 
         // now update the forcefields
         int start_index = start_idxs.value("clj", -1);
 
         if (start_index != -1 and cljff != 0)
         {
+            const auto morphed_charges = cache.morph(
+                schedule,
+                "clj", "charge",
+                perturbable_mol.getCharges0(),
+                perturbable_mol.getCharges1());
+
+            const auto morphed_sigmas = cache.morph(
+                schedule,
+                "clj", "sigma",
+                perturbable_mol.getSigmas0(),
+                perturbable_mol.getSigmas1());
+
+            const auto morphed_epsilons = cache.morph(
+                schedule,
+                "clj", "epsilon",
+                perturbable_mol.getEpsilons0(),
+                perturbable_mol.getEpsilons1());
+
+            const auto morphed_alphas = cache.morph(
+                schedule,
+                "clj", "alpha",
+                perturbable_mol.getAlphas0(),
+                perturbable_mol.getAlphas1());
+
+            const auto morphed_kappas = cache.morph(
+                schedule,
+                "clj", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
+            const auto morphed_charge_scale = cache.morph(
+                schedule,
+                "clj", "charge_scale",
+                perturbable_mol.getChargeScales0(),
+                perturbable_mol.getChargeScales1());
+
+            const auto morphed_lj_scale = cache.morph(
+                schedule,
+                "clj", "lj_scale",
+                perturbable_mol.getLJScales0(),
+                perturbable_mol.getLJScales1());
+
+            const auto morphed_ghost_charges = cache.morph(
+                schedule,
+                "ghost/ghost", "charge",
+                perturbable_mol.getCharges0(),
+                perturbable_mol.getCharges1());
+
+            const auto morphed_ghost_sigmas = cache.morph(
+                schedule,
+                "ghost/ghost", "sigma",
+                perturbable_mol.getSigmas0(),
+                perturbable_mol.getSigmas1());
+
+            const auto morphed_ghost_epsilons = cache.morph(
+                schedule,
+                "ghost/ghost", "epsilon",
+                perturbable_mol.getEpsilons0(),
+                perturbable_mol.getEpsilons1());
+
+            const auto morphed_ghost_alphas = cache.morph(
+                schedule,
+                "ghost/ghost", "alpha",
+                perturbable_mol.getAlphas0(),
+                perturbable_mol.getAlphas1());
+
+            const auto morphed_ghost_kappas = cache.morph(
+                schedule,
+                "ghost/ghost", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
+            const auto morphed_nonghost_charges = cache.morph(
+                schedule,
+                "ghost/non-ghost", "charge",
+                perturbable_mol.getCharges0(),
+                perturbable_mol.getCharges1());
+
+            const auto morphed_nonghost_sigmas = cache.morph(
+                schedule,
+                "ghost/non-ghost", "sigma",
+                perturbable_mol.getSigmas0(),
+                perturbable_mol.getSigmas1());
+
+            const auto morphed_nonghost_epsilons = cache.morph(
+                schedule,
+                "ghost/non-ghost", "epsilon",
+                perturbable_mol.getEpsilons0(),
+                perturbable_mol.getEpsilons1());
+
+            const auto morphed_nonghost_alphas = cache.morph(
+                schedule,
+                "ghost/non-ghost", "alpha",
+                perturbable_mol.getAlphas0(),
+                perturbable_mol.getAlphas1());
+
+            const auto morphed_nonghost_kappas = cache.morph(
+                schedule,
+                "ghost/non-ghost", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
+            const auto morphed_ghost14_charges = cache.morph(
+                schedule,
+                "ghost-14", "charge",
+                perturbable_mol.getCharges0(),
+                perturbable_mol.getCharges1());
+
+            const auto morphed_ghost14_sigmas = cache.morph(
+                schedule,
+                "ghost-14", "sigma",
+                perturbable_mol.getSigmas0(),
+                perturbable_mol.getSigmas1());
+
+            const auto morphed_ghost14_epsilons = cache.morph(
+                schedule,
+                "ghost-14", "epsilon",
+                perturbable_mol.getEpsilons0(),
+                perturbable_mol.getEpsilons1());
+
+            const auto morphed_ghost14_alphas = cache.morph(
+                schedule,
+                "ghost-14", "alpha",
+                perturbable_mol.getAlphas0(),
+                perturbable_mol.getAlphas1());
+
+            const auto morphed_ghost14_kappas = cache.morph(
+                schedule,
+                "ghost-14", "kappa",
+                perturbable_mol.getKappas0(),
+                perturbable_mol.getKappas1());
+
+            const auto morphed_ghost14_charge_scale = cache.morph(
+                schedule,
+                "ghost-14", "charge_scale",
+                perturbable_mol.getChargeScales0(),
+                perturbable_mol.getChargeScales1());
+
+            const auto morphed_ghost14_lj_scale = cache.morph(
+                schedule,
+                "ghost-14", "lj_scale",
+                perturbable_mol.getLJScales0(),
+                perturbable_mol.getLJScales1());
+
             const int nparams = morphed_charges.count();
 
             if (start_change_atom == -1)
@@ -494,13 +610,15 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     const bool is_to_ghost = perturbable_mol.getToGhostIdxs().contains(j);
 
                     // reduced charge
-                    custom_params[0] = morphed_charges[j];
+                    custom_params[0] = morphed_ghost_charges[j];
                     // half_sigma
-                    custom_params[1] = 0.5 * morphed_sigmas[j];
+                    custom_params[1] = 0.5 * morphed_ghost_sigmas[j];
                     // two_sqrt_epsilon
-                    custom_params[2] = 2.0 * std::sqrt(morphed_epsilons[j]);
+                    custom_params[2] = 2.0 * std::sqrt(morphed_ghost_epsilons[j]);
                     // alpha
-                    custom_params[3] = morphed_alphas[j];
+                    custom_params[3] = morphed_ghost_alphas[j];
+                    // kappa
+                    custom_params[4] = morphed_ghost_kappas[j];
 
                     // clamp alpha between 0 and 1
                     if (custom_params[3] < 0)
@@ -508,7 +626,37 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                     else if (custom_params[3] > 1)
                         custom_params[3] = 1;
 
+                    // clamp kappa between 0 and 1
+                    if (custom_params[4] < 0)
+                        custom_params[4] = 0;
+                    else if (custom_params[4] > 1)
+                        custom_params[4] = 1;
+
                     ghost_ghostff->setParticleParameters(start_index + j, custom_params);
+
+                    // reduced charge
+                    custom_params[0] = morphed_nonghost_charges[j];
+                    // half_sigma
+                    custom_params[1] = 0.5 * morphed_nonghost_sigmas[j];
+                    // two_sqrt_epsilon
+                    custom_params[2] = 2.0 * std::sqrt(morphed_nonghost_epsilons[j]);
+                    // alpha
+                    custom_params[3] = morphed_nonghost_alphas[j];
+                    // kappa
+                    custom_params[4] = morphed_nonghost_kappas[j];
+
+                    // clamp alpha between 0 and 1
+                    if (custom_params[3] < 0)
+                        custom_params[3] = 0;
+                    else if (custom_params[3] > 1)
+                        custom_params[3] = 1;
+
+                    // clamp kappa between 0 and 1
+                    if (custom_params[4] < 0)
+                        custom_params[4] = 0;
+                    else if (custom_params[4] > 1)
+                        custom_params[4] = 1;
+
                     ghost_nonghostff->setParticleParameters(start_index + j, custom_params);
 
                     if (is_from_ghost or is_to_ghost)
@@ -540,74 +688,118 @@ double LambdaLever::setLambda(OpenMM::Context &context,
                 {
                     const auto &atoms = exception_atoms[j];
 
-                    const auto atom0 = std::get<0>(atoms);
-                    const auto atom1 = std::get<1>(atoms);
+                    const auto atom0 = boost::get<0>(atoms);
+                    const auto atom1 = boost::get<1>(atoms);
 
-                    const auto coul_14_scale = morphed_charge_scale[j];
-                    const auto lj_14_scale = morphed_lj_scale[j];
+                    auto coul_14_scale = morphed_charge_scale[j];
+                    auto lj_14_scale = morphed_lj_scale[j];
 
                     const bool atom0_is_ghost = perturbable_mol.isGhostAtom(atom0);
                     const bool atom1_is_ghost = perturbable_mol.isGhostAtom(atom1);
 
-                    const auto p = get_exception(atom0, atom1,
-                                                 start_index, coul_14_scale, lj_14_scale,
-                                                 morphed_charges, morphed_sigmas, morphed_epsilons,
-                                                 morphed_alphas);
+                    auto p = get_exception(atom0, atom1,
+                                           start_index, coul_14_scale, lj_14_scale,
+                                           morphed_charges, morphed_sigmas, morphed_epsilons,
+                                           morphed_alphas, morphed_kappas);
 
                     // don't set LJ terms for ghost atoms
                     if (atom0_is_ghost or atom1_is_ghost)
                     {
                         cljff->setExceptionParameters(
-                            std::get<0>(idxs[j]),
-                            std::get<0>(p), std::get<1>(p),
-                            std::get<2>(p), 1e-9, 1e-9);
+                            boost::get<0>(idxs[j]),
+                            boost::get<0>(p), boost::get<1>(p),
+                            boost::get<2>(p), 1e-9, 1e-9);
 
-                        if (coul_14_scale != 0 or lj_14_scale != 0)
+                        if (ghost_14ff != 0)
                         {
                             // this is a 1-4 parameter - need to update
                             // the ghost 1-4 forcefield
-                            int nbidx = std::get<1>(idxs[j]);
+                            int nbidx = boost::get<1>(idxs[j]);
 
                             if (nbidx < 0)
                                 throw SireError::program_bug(QObject::tr(
                                                                  "Unset NB14 index for a ghost atom?"),
                                                              CODELOC);
 
-                            if (ghost_14ff != 0)
+                            coul_14_scale = morphed_ghost14_charge_scale[j];
+                            lj_14_scale = morphed_ghost14_lj_scale[j];
+
+                            const auto p = get_exception(atom0, atom1,
+                                                         start_index, coul_14_scale, lj_14_scale,
+                                                         morphed_ghost14_charges,
+                                                         morphed_ghost14_sigmas,
+                                                         morphed_ghost14_epsilons,
+                                                         morphed_ghost14_alphas,
+                                                         morphed_ghost14_kappas);
+
+                            // parameters are q, sigma, four_epsilon and alpha
+                            std::vector<double> params14 =
+                                {boost::get<2>(p), boost::get<3>(p),
+                                 4.0 * boost::get<4>(p), boost::get<5>(p),
+                                 boost::get<6>(p)};
+
+                            if (start_change_14 == -1)
                             {
-                                // parameters are q, sigma, four_epsilon and alpha
-                                std::vector<double> params14 =
-                                    {std::get<2>(p), std::get<3>(p),
-                                     4.0 * std::get<4>(p), std::get<5>(p)};
-
-                                if (start_change_14 == -1)
-                                {
-                                    start_change_14 = nbidx;
-                                    end_change_14 = nbidx + 1;
-                                }
-                                else
-                                {
-                                    if (nbidx < start_change_14)
-                                        start_change_14 = nbidx;
-
-                                    if (nbidx + 1 > end_change_14)
-                                        end_change_14 = nbidx + 1;
-                                }
-
-                                ghost_14ff->setBondParameters(nbidx,
-                                                              std::get<0>(p),
-                                                              std::get<1>(p),
-                                                              params14);
+                                start_change_14 = nbidx;
+                                end_change_14 = nbidx + 1;
                             }
+                            else
+                            {
+                                if (nbidx < start_change_14)
+                                    start_change_14 = nbidx;
+
+                                if (nbidx + 1 > end_change_14)
+                                    end_change_14 = nbidx + 1;
+                            }
+
+                            ghost_14ff->setBondParameters(nbidx,
+                                                          boost::get<0>(p),
+                                                          boost::get<1>(p),
+                                                          params14);
                         }
                     }
                     else
                     {
                         cljff->setExceptionParameters(
-                            std::get<0>(idxs[j]),
-                            std::get<0>(p), std::get<1>(p),
-                            std::get<2>(p), std::get<3>(p),
-                            std::get<4>(p));
+                            boost::get<0>(idxs[j]),
+                            boost::get<0>(p), boost::get<1>(p),
+                            boost::get<2>(p), boost::get<3>(p),
+                            boost::get<4>(p));
+                    }
+                }
+            }
+        }
+
+        // update all of the perturbable constraints
+        if (update_constraints)
+        {
+            auto perturbable_constraints = perturbable_mol.getPerturbableConstraints();
+
+            const auto &idxs = boost::get<0>(perturbable_constraints);
+            const auto &r0_0 = boost::get<1>(perturbable_constraints);
+            const auto &r0_1 = boost::get<2>(perturbable_constraints);
+
+            if (not idxs.isEmpty())
+            {
+                const auto morphed_constraint_length = cache.morph(
+                    schedule,
+                    "bond", "bond_length",
+                    r0_0, r0_1);
+
+                for (int j = 0; j < idxs.count(); ++j)
+                {
+                    const auto idx = idxs[j];
+
+                    const auto constraint_length = morphed_constraint_length[j];
+
+                    int particle1, particle2;
+                    double orig_distance;
+
+                    system.getConstraintParameters(idx, particle1, particle2, orig_distance);
+
+                    if (orig_distance != constraint_length)
+                    {
+                        system.setConstraintParameters(idx, particle1, particle2, constraint_length);
                     }
                 }
             }
@@ -617,6 +809,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         if (start_index != -1 and bondff != 0)
         {
+            const auto morphed_bond_k = cache.morph(
+                schedule,
+                "bond", "bond_k",
+                perturbable_mol.getBondKs0(),
+                perturbable_mol.getBondKs1());
+
+            const auto morphed_bond_length = cache.morph(
+                schedule,
+                "bond", "bond_length",
+                perturbable_mol.getBondLengths0(),
+                perturbable_mol.getBondLengths1());
+
             const int nparams = morphed_bond_k.count();
 
             if (start_change_bond == -1)
@@ -654,6 +858,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         if (start_index != -1 and angff != 0)
         {
+            const auto morphed_angle_k = cache.morph(
+                schedule,
+                "angle", "angle_k",
+                perturbable_mol.getAngleKs0(),
+                perturbable_mol.getAngleKs1());
+
+            const auto morphed_angle_size = cache.morph(
+                schedule,
+                "angle", "angle_size",
+                perturbable_mol.getAngleSizes0(),
+                perturbable_mol.getAngleSizes1());
+
             const int nparams = morphed_angle_k.count();
 
             if (start_change_angle == -1)
@@ -693,6 +909,18 @@ double LambdaLever::setLambda(OpenMM::Context &context,
 
         if (start_index != -1 and dihff != 0)
         {
+            const auto morphed_torsion_phase = cache.morph(
+                schedule,
+                "torsion", "torsion_phase",
+                perturbable_mol.getTorsionPhases0(),
+                perturbable_mol.getTorsionPhases1());
+
+            const auto morphed_torsion_k = cache.morph(
+                schedule,
+                "torsion", "torsion_k",
+                perturbable_mol.getTorsionKs0(),
+                perturbable_mol.getTorsionKs1());
+
             const int nparams = morphed_torsion_k.count();
 
             if (start_change_torsion == -1)
@@ -798,7 +1026,9 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // restraints always morph between 1 and 1 (i.e. they fully
         // follow whatever is set by lambda, e.g. 'initial*lambda'
         // to switch them on, or `final*lambda` to switch them off)
-        const double rho = lambda_schedule.morph(restraint,
+        const double rho = lambda_schedule.morph("*",
+
+                                                 restraint,
                                                  1.0, 1.0,
                                                  lambda_value);
 
@@ -842,7 +1072,7 @@ void _update_restraint_in_context(OpenMM::CustomCompoundBondForce *ff, double rh
     // is from the first restraint. This is because rho should be the
     // first parameter and have the same value for all restraints
     std::vector<double> custom_params;
-    std::vector<int> particles;
+    std::vector<qint32> particles;
 
     custom_params.resize(nparams);
     particles.resize(ff->getNumParticlesPerBond());
@@ -956,6 +1186,7 @@ void LambdaLever::setForceIndex(const QString &force,
                                        CODELOC);
 
     this->name_to_ffidx.insert(force, index);
+    this->lambda_schedule.addForce(force);
 }
 
 /** Add the index of a restraint force called 'restraint' in the
@@ -1016,11 +1247,21 @@ int LambdaLever::addPerturbableMolecule(const OpenMMMolecule &molecule,
  */
 void LambdaLever::setExceptionIndicies(int mol_idx,
                                        const QString &name,
-                                       const QVector<std::pair<int, int>> &exception_idxs)
+                                       const QVector<boost::tuple<int, int>> &exception_idxs)
 {
     mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
 
     this->perturbable_mols[mol_idx].setExceptionIndicies(name, exception_idxs);
+}
+
+/** Set the constraint indicies for the perturbable molecule at
+ *  index 'mol_idx'
+ */
+void LambdaLever::setConstraintIndicies(int mol_idx, const QVector<qint32> &constraint_idxs)
+{
+    mol_idx = SireID::Index(mol_idx).map(this->perturbable_mols.count());
+
+    this->perturbable_mols[mol_idx].setConstraintIndicies(constraint_idxs);
 }
 
 /** Return all of the property maps used to find the perturbable properties

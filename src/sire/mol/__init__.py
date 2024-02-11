@@ -226,9 +226,7 @@ def is_water(mol, map=None):
     if hasattr(type(mol), "molecules"):
         return _Mol.is_water(mol.molecules(), map)
 
-    raise TypeError(
-        f"Cannot convert {mol} to a molecule view or molecule collection."
-    )
+    raise TypeError(f"Cannot convert {mol} to a molecule view or molecule collection.")
 
 
 # Here I will define some functions that make accessing
@@ -280,9 +278,7 @@ def __is_atom_class(obj):
 def __is_residue_class(obj):
     mro = type(obj).mro()
 
-    return (
-        Residue in mro or Selector_Residue_ in mro or SelectorM_Residue_ in mro
-    )
+    return Residue in mro or Selector_Residue_ in mro or SelectorM_Residue_ in mro
 
 
 def __is_chain_class(obj):
@@ -294,28 +290,19 @@ def __is_chain_class(obj):
 def __is_segment_class(obj):
     mro = type(obj).mro()
 
-    return (
-        Segment in mro or Selector_Segment_ in mro or SelectorM_Segment_ in mro
-    )
+    return Segment in mro or Selector_Segment_ in mro or SelectorM_Segment_ in mro
 
 
 def __is_cutgroup_class(obj):
     mro = type(obj).mro()
 
-    return (
-        CutGroup in mro
-        or Selector_CutGroup_ in mro
-        or SelectorM_CutGroup_ in mro
-    )
+    return CutGroup in mro or Selector_CutGroup_ in mro or SelectorM_CutGroup_ in mro
 
 
 def __is_selector_class(obj):
     try:
         t = obj.what()
-        return (
-            t.find("SireMol::Selector") != -1
-            or t.find("SireMM::Selector") != -1
-        )
+        return t.find("SireMol::Selector") != -1 or t.find("SireMM::Selector") != -1
     except Exception:
         return False
 
@@ -963,9 +950,7 @@ def __fixed__bond__(obj, idx=None, idx1=None, map=None):
 
 
 def __fixed__angle__(obj, idx=None, idx1=None, idx2=None, map=None):
-    angles = __fixed__angles__(
-        obj, idx, idx1, idx2, auto_reduce=False, map=map
-    )
+    angles = __fixed__angles__(obj, idx, idx1, idx2, auto_reduce=False, map=map)
 
     if len(angles) == 0:
         raise KeyError("There is no matching angle in this view.")
@@ -977,9 +962,7 @@ def __fixed__angle__(obj, idx=None, idx1=None, idx2=None, map=None):
     return angles[0]
 
 
-def __fixed__dihedral__(
-    obj, idx=None, idx1=None, idx2=None, idx3=None, map=None
-):
+def __fixed__dihedral__(obj, idx=None, idx1=None, idx2=None, idx3=None, map=None):
     dihedrals = __fixed__dihedrals__(
         obj, idx, idx1, idx2, idx3, auto_reduce=False, map=map
     )
@@ -988,16 +971,13 @@ def __fixed__dihedral__(
         raise KeyError("There is no matching dihedral in this view.")
     elif len(dihedrals) > 1:
         raise KeyError(
-            "More than one dihedral matches. Number of "
-            f"matches is {len(dihedrals)}."
+            "More than one dihedral matches. Number of " f"matches is {len(dihedrals)}."
         )
 
     return dihedrals[0]
 
 
-def __fixed__improper__(
-    obj, idx=None, idx1=None, idx2=None, idx3=None, map=None
-):
+def __fixed__improper__(obj, idx=None, idx1=None, idx2=None, idx3=None, map=None):
     impropers = __fixed__impropers__(
         obj, idx, idx1, idx2, idx3, auto_reduce=False, map=map
     )
@@ -1006,8 +986,7 @@ def __fixed__improper__(
         raise KeyError("There is no matching improper in this view.")
     elif len(impropers) > 1:
         raise KeyError(
-            "More than one improper matches. Number of "
-            f"matches is {len(impropers)}."
+            "More than one improper matches. Number of " f"matches is {len(impropers)}."
         )
 
     return impropers[0]
@@ -1361,18 +1340,14 @@ def _apply(objs, func, *args, **kwargs):
 
     if str(func) == func:
         # we calling a named function
-        with ProgressBar(
-            total=len(objs), text="Looping through views"
-        ) as progress:
+        with ProgressBar(total=len(objs), text="Looping through views") as progress:
             for i, obj in enumerate(objs):
                 result.append(getattr(obj, func)(*args, **kwargs))
                 progress.set_progress(i + 1)
 
     else:
         # we have been passed the function to call
-        with ProgressBar(
-            total=len(objs), text="Looping through views"
-        ) as progress:
+        with ProgressBar(total=len(objs), text="Looping through views") as progress:
             for i, obj in enumerate(objs):
                 result.append(func(obj, *args, **kwargs))
                 progress.set_progress(i + 1)
@@ -1594,12 +1569,16 @@ def _dynamics(
     pressure=None,
     vacuum=None,
     shift_delta=None,
+    shift_coulomb=None,
     coulomb_power=None,
     restraints=None,
     fixed=None,
     platform=None,
     device=None,
     precision=None,
+    com_reset_frequency=None,
+    barostat_frequency=None,
+    dynamic_constraints: bool = True,
     map=None,
 ):
     """
@@ -1712,10 +1691,15 @@ def _dynamics(
         simulation run in vacuum.
 
     shift_delta: length
-        The shift_delta parameter that controls the electrostatic
-        and van der Waals softening potential that smooths the
+        The shift_delta parameter that controls the Lennard-Jones
+        softening potential that smooths the
         creation and deletion of ghost atoms during a potential.
         This defaults to 2.0 A.
+
+    shift_coulomb: length
+        The shift_coulomb parameter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 1.0 A.
 
     coulomb_power: int
         The coulomb power parmeter that controls the electrostatic
@@ -1744,6 +1728,24 @@ def _dynamics(
     precision: str
         The desired precision for the simulation (e.g. `single`,
         `mixed` or `double`)
+
+    com_reset_frequency:
+        Either the number of steps between center-of-mass resets,
+        or the time between resets. If this is unset, then
+        the center-of-mass is not reset during the simulation.
+
+    barostat_frequency:
+        Either the number of steps between MC moves to apply the
+        barostat, of the time between moves. If this is unset,
+        then the default of every 25 steps is used.
+
+    dynamic_constraints: bool
+        Whether or not to update the length of constraints of
+        perturbable bonds with lambda. This defaults to True,
+        meaning that changing lambda will change any constraint
+        on a perturbable bond to equal to the value of r0 at
+        that lambda value. If this is false, then the constraint
+        is set based on the current length.
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -1801,8 +1803,10 @@ def _dynamics(
         from ..units import femtosecond
 
         timestep = 1 * femtosecond
-    else:
+    elif timestep is not None:
         timestep = u(timestep)
+    else:
+        timestep = u(map["timestep"].value())
 
     if save_frequency is None and not map.specified("save_frequency"):
         from ..units import picosecond
@@ -1849,6 +1853,64 @@ def _dynamics(
     if integrator is not None:
         map.set("integrator", str(integrator))
 
+    if dynamic_constraints is not None:
+        if dynamic_constraints:
+            map.set("dynamic_constraints", True)
+        else:
+            map.set("dynamic_constraints", False)
+
+    if barostat_frequency is not None:
+        barostat_frequency = u(barostat_frequency)
+    elif map.specified("barostat_frequency"):
+        barostat_frequency = u(map["barostat_frequency"].value())
+
+    if barostat_frequency is None:
+        map.unset("barostat_frequency")
+    else:
+        if barostat_frequency.is_dimensionless():
+            barostat_frequency = int(barostat_frequency.value())
+
+            if barostat_frequency != 0:
+                map.set("barostat_frequency", barostat_frequency)
+            else:
+                map.unset("barostat_frequency")
+        else:
+            if not barostat_frequency.has_same_units(timestep):
+                raise ValueError("The units of barostat_frequency must match timestep")
+
+            barostat_frequency = int((barostat_frequency / timestep).value())
+
+            if barostat_frequency != 0:
+                map.set("barostat_frequency", barostat_frequency)
+            else:
+                map.unset("barostat_frequency")
+
+    if com_reset_frequency is not None:
+        com_reset_frequency = u(com_reset_frequency)
+    elif map.specified("com_reset_frequency"):
+        com_reset_frequency = u(map["com_reset_frequency"].value())
+
+    if com_reset_frequency is None:
+        map.unset("com_reset_frequency")
+    else:
+        if com_reset_frequency.is_dimensionless():
+            com_reset_frequency = int(com_reset_frequency.value())
+
+            if com_reset_frequency != 0:
+                map.set("com_reset_frequency", com_reset_frequency)
+            else:
+                map.unset("com_reset_frequency")
+        else:
+            if not com_reset_frequency.has_same_units(timestep):
+                raise ValueError("The units of com_reset_frequency must match timestep")
+
+            com_reset_frequency = int((com_reset_frequency / timestep).value())
+
+            if com_reset_frequency != 0:
+                map.set("com_reset_frequency", com_reset_frequency)
+            else:
+                map.unset("com_reset_frequency")
+
     return Dynamics(
         view,
         cutoff=cutoff,
@@ -1859,6 +1921,7 @@ def _dynamics(
         schedule=schedule,
         lambda_value=lambda_value,
         shift_delta=shift_delta,
+        shift_coulomb=shift_coulomb,
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
@@ -1881,12 +1944,14 @@ def _minimisation(
     ignore_perturbations=None,
     vacuum=None,
     shift_delta=None,
+    shift_coulomb=None,
     coulomb_power=None,
     platform=None,
     device=None,
     precision=None,
     restraints=None,
     fixed=None,
+    dynamic_constraints: bool = True,
     map=None,
 ):
     """
@@ -1954,10 +2019,15 @@ def _minimisation(
         simulation run in vacuum.
 
     shift_delta: length
-        The shift_delta parameter that controls the electrostatic
-        and van der Waals softening potential that smooths the
+        The shift_delta parameter that controls the Lennard-Jones
+        softening potential that smooths the
         creation and deletion of ghost atoms during a potential.
         This defaults to 2.0 A.
+
+    shift_coulomb: length
+        The shift_coulomb parameter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 1.0 A.
 
     coulomb_power: int
         The coulomb power parmeter that controls the electrostatic
@@ -1986,6 +2056,14 @@ def _minimisation(
     precision: str
         The desired precision for the simulation (e.g. `single`,
         `mixed` or `double`)
+
+    dynamic_constraints: bool
+        Whether or not to update the length of constraints of
+        perturbable bonds with lambda. This defaults to True,
+        meaning that changing lambda will change any constraint
+        on a perturbable bond to equal to the value of r0 at
+        that lambda value. If this is false, then the constraint
+        is set based on the current length.
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -2053,6 +2131,12 @@ def _minimisation(
     if include_constrained_energies is not None:
         map.set("include_constrained_energies", include_constrained_energies)
 
+    if dynamic_constraints is not None:
+        if dynamic_constraints:
+            map.set("dynamic_constraints", True)
+        else:
+            map.set("dynamic_constraints", False)
+
     if platform is not None:
         map.set("platform", str(platform))
 
@@ -2065,6 +2149,7 @@ def _minimisation(
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
         shift_delta=shift_delta,
+        shift_coulomb=shift_coulomb,
         coulomb_power=coulomb_power,
         restraints=restraints,
         fixed=fixed,
@@ -2326,9 +2411,7 @@ def _total_energy(obj, other=None, map=None):
     elif other is None:
         return calculate_energy(mols.molecules(), map=map)
     else:
-        return calculate_energy(
-            mols.molecules(), _to_molecules(other), map=map
-        )
+        return calculate_energy(mols.molecules(), _to_molecules(other), map=map)
 
 
 Atom.energy = _atom_energy
@@ -2481,7 +2564,7 @@ if not hasattr(AtomMapping, "__orig_find__"):
 
 if not hasattr(Molecule, "perturbation"):
 
-    def __molecule_perturbation(mol):
+    def __molecule_perturbation(mol, map=None):
         """
         Return an interface to the perturbable properties of
         this molecule. Note that the molecule must be
@@ -2489,7 +2572,7 @@ if not hasattr(Molecule, "perturbation"):
         """
         from ..morph._perturbation import Perturbation
 
-        return Perturbation(mol)
+        return Perturbation(mol, map=map)
 
     def __molecule_is_perturbable(mol):
         """

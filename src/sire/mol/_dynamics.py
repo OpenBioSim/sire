@@ -94,6 +94,7 @@ class DynamicsData:
             self._elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
             self._is_running = False
+            self._schedule_changed = False
 
             from ..convert import to
 
@@ -235,7 +236,9 @@ class DynamicsData:
             if lambda_windows is not None:
                 for lambda_value in lambda_windows:
                     if lambda_value != sim_lambda_value:
-                        self._omm_mols.set_lambda(lambda_value)
+                        self._omm_mols.set_lambda(
+                            lambda_value, update_constraints=False
+                        )
                         nrgs[str(lambda_value)] = (
                             self._omm_mols.get_potential_energy(
                                 to_sire_units=False
@@ -243,7 +246,7 @@ class DynamicsData:
                             * kcal_per_mol
                         )
 
-                self._omm_mols.set_lambda(sim_lambda_value)
+                self._omm_mols.set_lambda(sim_lambda_value, update_constraints=False)
 
             self._energy_trajectory.set(
                 self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
@@ -400,6 +403,17 @@ class DynamicsData:
         else:
             return self._omm_mols.get_perturbable_constraint()
 
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_constraints()
+
     def get_schedule(self):
         if self.is_null():
             return None
@@ -409,6 +423,8 @@ class DynamicsData:
     def set_schedule(self, schedule):
         if not self.is_null():
             self._omm_mols.set_lambda_schedule(schedule)
+            self._schedule_changed = True
+            self.set_lambda(self._omm_mols.get_lambda())
 
     def get_lambda(self):
         if self.is_null():
@@ -416,7 +432,7 @@ class DynamicsData:
         else:
             return self._omm_mols.get_lambda()
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         if not self.is_null():
             s = self.get_schedule()
 
@@ -425,11 +441,16 @@ class DynamicsData:
 
             lambda_value = s.clamp(lambda_value)
 
-            if lambda_value == self._omm_mols.get_lambda():
+            if (not self._schedule_changed) and (
+                lambda_value == self._omm_mols.get_lambda()
+            ):
                 # nothing to do
                 return
 
-            self._omm_mols.set_lambda(lambda_value)
+            self._omm_mols.set_lambda(
+                lambda_value=lambda_value, update_constraints=update_constraints
+            )
+            self._schedule_changed = False
             self._clear_state()
 
     def integrator(self):
@@ -947,6 +968,7 @@ class Dynamics:
         swap_end_states=None,
         ignore_perturbations=None,
         shift_delta=None,
+        shift_coulomb=None,
         coulomb_power=None,
         restraints=None,
         fixed=None,
@@ -971,6 +993,9 @@ class Dynamics:
 
         if shift_delta is not None:
             _add_extra(extras, "shift_delta", u(shift_delta))
+
+        if shift_coulomb is not None:
+            _add_extra(extras, "shift_coulomb", u(shift_coulomb))
 
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
@@ -1155,14 +1180,22 @@ class Dynamics:
         """
         return self._d.get_lambda()
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         """
         Set the current value of lambda for this system. This will
         update the forcefield parameters in the context according
         to the data in the LambdaSchedule. This does nothing if
-        this isn't a perturbable system
+        this isn't a perturbable system.
+
+        If `update_constraints` is True, then this will also update
+        the constraint length of any constrained perturbable bonds.
+        These will be set to the r0 value for that bond at this
+        value of lambda. If `update_constraints` is False, then
+        the constraint will not be changed.
         """
-        self._d.set_lambda(lambda_value)
+        self._d.set_lambda(
+            lambda_value=lambda_value, update_constraints=update_constraints
+        )
 
     def ensemble(self):
         """
@@ -1228,6 +1261,14 @@ class Dynamics:
         constraining bonds involving hydrogens etc.)
         """
         return self._d.perturbable_constraint()
+
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        return self._d.get_constraints()
 
     def integrator(self):
         """
@@ -1356,13 +1397,13 @@ class Dynamics:
 
             try:
                 for lambda_value in lambda_values:
-                    self.set_lambda(lambda_value)
+                    self.set_lambda(lambda_value, update_constraints=False)
                     nrgs.append(self._d.current_potential_energy())
             except Exception:
-                self.set_lambda(old_lambda)
+                self.set_lambda(old_lambda, update_constraints=False)
                 raise
 
-            self.set_lambda(old_lambda)
+            self.set_lambda(old_lambda, update_constraints=False)
 
             return nrgs
 
