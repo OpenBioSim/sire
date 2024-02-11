@@ -26,27 +26,25 @@ def get_standard_state_correction(restraint, temperature=300.0 * _units.kelvin):
     --------
     To create a Boresch restraint and calculate the standard state correction:
 
-    ```
-    # Create the Boresch restraints object.
-    my_boresch_restraints = boresch(
-        system,
-        receptor=system["protein"]["atomidx 1538 or atomidx 1518 or atomidx 1540"],
-        ligand=system["resname LIG"]["atomidx 4 or atomidx 3 or atomidx 5"],
-        kr="6.2012 kcal mol-1 A-2",
-        ktheta=["28.7685 kcal mol-1 rad-2", "24.8204 kcal mol-1 rad-2"],
-        kphi=["59.8626 kcal mol-1 rad-2", "0.7923 kcal mol-1 rad-2", "55.1775 kcal mol-1 rad-2"],
-        r0="7.687 A",
-        theta0=["1.3031 rad", "1.4777 rad"],
-        phi0=["2.5569 rad", "2.9359 rad", "1.4147 rad"],
-    )
-
-    # Extract the single Boresch restraint from the Boresch restraints.
-    my_boresch_restraint = my_boresch_restraints[0]
-
-    # Calculate the standard state correction for the Boresch restraint.
-    standard_state_correction = get_standard_state_correction(my_boresch_restraint)
-    print(standard_state_correction)
-    ```
+    >>> # Create the Boresch restraints object.
+    >>> my_boresch_restraints = boresch(
+    >>>     system,
+    >>>     receptor=system["protein"]["atomidx 1538 or atomidx 1518 or atomidx 1540"],
+    >>>     ligand=system["resname LIG"]["atomidx 4 or atomidx 3 or atomidx 5"],
+    >>>     kr="6.2012 kcal mol-1 A-2",
+    >>>     ktheta=["28.7685 kcal mol-1 rad-2", "24.8204 kcal mol-1 rad-2"],
+    >>>     kphi=["59.8626 kcal mol-1 rad-2", "0.7923 kcal mol-1 rad-2", "55.1775 kcal mol-1 rad-2"],
+    >>>     r0="7.687 A",
+    >>>     theta0=["1.3031 rad", "1.4777 rad"],
+    >>>     phi0=["2.5569 rad", "2.9359 rad", "1.4147 rad"],
+    >>> )
+    >>>
+    >>> # Extract the single Boresch restraint from the Boresch restraints.
+    >>> my_boresch_restraint = my_boresch_restraints[0]
+    >>>
+    >>> # Calculate the standard state correction for the Boresch restraint.
+    >>> standard_state_correction = get_standard_state_correction(my_boresch_restraint)
+    >>> print(standard_state_correction)
     """
     if isinstance(restraint, sr.legacy.MM._MM.BoreschRestraint):
         return _get_boresch_standard_state_correction(restraint, temperature)
