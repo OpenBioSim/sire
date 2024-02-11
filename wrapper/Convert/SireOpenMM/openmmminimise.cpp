@@ -82,8 +82,6 @@ namespace SireOpenMM
                 throw SireError::program_bug(QObject::tr("MinimizerData: The context has been destroyed"),
                                              CODELOC);
 
-            qDebug() << "GET CPU CONTEXT";
-
             if (cpu_context.get() == 0)
             {
                 OpenMM::Platform *cpu_platform;
@@ -331,7 +329,7 @@ namespace SireOpenMM
 
         double working_constraint_tol = std::max(1e-4, constraint_tol);
 
-        double k = 100 / working_constraint_tol;
+        double k = 1000 / working_constraint_tol;
 
         SireBase::ProgressBar bar("Minimising: initialise", max_iterations);
         bar.setSpeedUnit("steps / s");
@@ -348,9 +346,8 @@ namespace SireOpenMM
 
         while (data.getIteration() < data.getMaxIterations())
         {
-            qDebug() << "TRY AGAIN!";
             auto energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
-            bar.tick();
+            bar.silentTick();
 
             try
             {
@@ -416,8 +413,6 @@ namespace SireOpenMM
                             max_error = error;
                     }
 
-                    qDebug() << "ERROR" << max_error << "TOL" << working_constraint_tol;
-
                     if (max_error <= working_constraint_tol)
                         break; // All constraints are satisfied.
 
@@ -427,7 +422,7 @@ namespace SireOpenMM
                     prev_max_error = max_error;
                     data.scaleK(10);
 
-                    if (max_error > 100 * working_constraint_tol)
+                    if (max_error > 1000 * working_constraint_tol)
                     {
                         context.setPositions(initial_pos);
 
@@ -449,16 +444,11 @@ namespace SireOpenMM
                 throw;
             }
 
-            // If necessary, do a final constraint projection to make sure they are satisfied
+            // do a final constraint projection to make sure they are satisfied
             // to the full precision requested by the user.
-            if (constraint_tol < working_constraint_tol)
-            {
-                context.applyConstraints(working_constraint_tol);
-            }
+            context.applyConstraints(working_constraint_tol);
 
             auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
-
-            qDebug() << "ENERGY" << energy_before << "=>" << energy_after << "DIFF" << std::abs(energy_after - energy_before);
 
             if (std::abs(energy_after - energy_before) < 50.0)
             {
