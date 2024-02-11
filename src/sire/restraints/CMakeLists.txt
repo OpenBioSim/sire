@@ -8,6 +8,7 @@
 set ( SCRIPTS
         __init__.py
         _restraints.py
+        _standard_state_correction.py
     )
 
 # installation
