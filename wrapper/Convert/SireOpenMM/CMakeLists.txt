@@ -66,9 +66,6 @@ if (${SIRE_USE_OPENMM})
     # Create the library that holds all of the class wrappers
     add_library (SireOpenMM ${SIREOPENMM_SOURCES})
 
-    # Add optimised compile flags
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SIRE_CXX_FLAGS_RELEASE}" )
-
     set_target_properties(SireOpenMM
                           PROPERTIES
                           VERSION ${SIRE_VERSION}
