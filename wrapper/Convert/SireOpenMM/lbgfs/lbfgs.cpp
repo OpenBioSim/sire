@@ -69,6 +69,8 @@ licence.
 #include <stdlib.h>
 #include <math.h>
 
+#include <cstdint>
+
 #include "lbfgs.h"
 
 #ifdef _MSC_VER
