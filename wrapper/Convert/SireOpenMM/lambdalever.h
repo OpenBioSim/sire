@@ -36,6 +36,8 @@
 
 #include <QReadWriteLock>
 
+#include <boost/tuple/tuple.hpp>
+
 #include <memory>
 
 SIRE_BEGIN_HEADER
@@ -53,7 +55,7 @@ namespace SireOpenMM
         MolLambdaCache &operator=(const MolLambdaCache &other);
 
         const QVector<double> &morph(const SireCAS::LambdaSchedule &schedule,
-                                     const QString &key,
+                                     const QString &force, const QString &key,
                                      const QVector<double> &initial,
                                      const QVector<double> &final) const;
 
@@ -105,7 +107,8 @@ namespace SireOpenMM
         const char *what() const;
         static const char *typeName();
 
-        double setLambda(OpenMM::Context &context, double lam_val) const;
+        double setLambda(OpenMM::Context &system, double lambda_value,
+                         bool update_constraints = true) const;
 
         void setForceIndex(const QString &force, int index);
 
@@ -114,8 +117,10 @@ namespace SireOpenMM
         int addPerturbableMolecule(const OpenMMMolecule &molecule,
                                    const QHash<QString, qint32> &start_indices);
 
-        void setExceptionIndices(int idx, const QString &ff,
-                                 const QVector<std::pair<int, int>> &exception_idxs);
+        void setExceptionIndicies(int idx, const QString &ff,
+                                  const QVector<boost::tuple<int, int>> &exception_idxs);
+
+        void setConstraintIndicies(int idx, const QVector<qint32> &constraint_idxs);
 
         void setSchedule(const SireCAS::LambdaSchedule &schedule);
 
@@ -142,11 +147,11 @@ namespace SireOpenMM
                                       OpenMM::Context &context) const;
 
         /** Map from a forcefield name to its index in the associated System */
-        QHash<QString, int> name_to_ffidx;
+        QHash<QString, qint32> name_to_ffidx;
 
         /** Map from a restraint name to its index in the associated System.
          *  Note that multiple restraints can have the same name */
-        QMultiHash<QString, int> name_to_restraintidx;
+        QMultiHash<QString, qint32> name_to_restraintidx;
 
         /** The schedule used to set lambda */
         SireCAS::LambdaSchedule lambda_schedule;
@@ -241,6 +246,8 @@ namespace SireOpenMM
 }
 
 Q_DECLARE_METATYPE(SireOpenMM::LambdaLever)
+
+SIRE_EXPOSE_CLASS(SireOpenMM::LambdaLever)
 
 SIRE_END_HEADER
 

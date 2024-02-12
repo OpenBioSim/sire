@@ -2,7 +2,7 @@ import math
 import pytest
 import tempfile
 
-from sire.legacy.Convert._SireOpenMM import EMLECallback, EMLEEngine
+from sire.legacy.Convert import EMLECallback, EMLEEngine
 
 from sire.qm import emle
 

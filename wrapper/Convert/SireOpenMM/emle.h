@@ -102,6 +102,12 @@ namespace SireOpenMM
                 QVector<QVector<double>> xyz_mm
         ) const;
 
+        //! Return the C++ name for this class.
+        static const char *typeName();
+
+        //! Return the C++ name for this class.
+        const char *what() const;
+
     private:
         bp::object py_object;
         QString callback;
@@ -347,7 +353,11 @@ namespace SireOpenMM
 #endif
 }
 
+Q_DECLARE_METATYPE(SireOpenMM::EMLECallback)
 Q_DECLARE_METATYPE(SireOpenMM::EMLEEngine)
+
+SIRE_EXPOSE_CLASS(SireOpenMM::EMLECallback)
+SIRE_EXPOSE_CLASS(SireOpenMM::EMLEEngine)
 
 SIRE_END_HEADER
 

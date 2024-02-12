@@ -417,6 +417,11 @@ class System:
             is useful if you just want to run standard molecular dynamics
             of the reference or perturbed states.
 
+        shift_coulomb: length
+            The shift_coulomb parameter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 1.0 A.
+
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
@@ -452,6 +457,14 @@ class System:
             The ID of the GPU (or accelerator) used to accelerate
             minimisation. This would be CUDA_DEVICE_ID or similar
             if CUDA was used. This can be any valid OpenMM device string
+
+        dynamic_constraints: bool
+            Whether or not to update the length of constraints of
+            perturbable bonds with lambda. This defaults to True,
+            meaning that changing lambda will change any constraint
+            on a perturbable bond to equal to the value of r0 at
+            that lambda value. If this is false, then the constraint
+            is set based on the current length.
 
         map: dict
             A dictionary of additional options. Note that any options
@@ -573,6 +586,11 @@ class System:
             replaced by a `sire.vol.Cartesian` space, and the
             simulation run in vacuum.
 
+        shift_coulomb: length
+            The shift_coulomb parameter that controls the electrostatic
+            softening potential that smooths the creation and deletion
+            of ghost atoms during a potential. This defaults to 1.0 A.
+
         shift_delta: length
             The shift_delta parameter that controls the electrostatic
             and van der Waals softening potential that smooths the
@@ -618,6 +636,24 @@ class System:
         precision: str
             The desired precision for the simulation (e.g. `single`,
             `mixed` or `double`)
+
+        com_reset_frequency:
+            Either the number of steps between center-of-mass resets,
+            or the time between resets. If this is unset, then
+            the center-of-mass is not reset during the simulation.
+
+        barostat_frequency:
+            Either the number of steps between MC moves to apply the
+            barostat, of the time between moves. If this is unset,
+            then the default of every 25 steps is used.
+
+        dynamic_constraints: bool
+            Whether or not to update the length of constraints of
+            perturbable bonds with lambda. This defaults to True,
+            meaning that changing lambda will change any constraint
+            on a perturbable bond to equal to the value of r0 at
+            that lambda value. If this is false, then the constraint
+            is set based on the current length.
 
         map: dict
             A dictionary of additional options. Note that any options
@@ -790,7 +826,11 @@ class System:
         self._molecules = None
 
     def energy_trajectory(
-        self, to_pandas: bool = False, to_alchemlyb: bool = False, map=None
+        self,
+        to_pandas: bool = False,
+        to_alchemlyb: bool = False,
+        energy_unit: str = "kcal/mol",
+        map=None,
     ):
         """
         Return the energy trajectory for this System. This is the history
@@ -807,6 +847,12 @@ class System:
         to_alchemlyb: bool
             Whether or not to return the energy trajectory as a
             pandas DataFrame that is formatted to usable in alchemlyb
+
+        energy_unit: str
+            Whichever of the alchemlyb energy units you want the output
+            DataFrame to use. This is in alchemlyb format, e.g.
+            `kcal/mol`, `kJ/mol`, or `kT`. This is only used if
+            `to_alchemlyb` is True.
         """
         from ..base import create_map
 
@@ -839,7 +885,9 @@ class System:
 
         if to_pandas or to_alchemlyb:
             try:
-                return traj.to_pandas(to_alchemlyb=to_alchemlyb)
+                return traj.to_pandas(
+                    to_alchemlyb=to_alchemlyb, energy_unit=energy_unit
+                )
             except Exception:
                 ensemble = self.ensemble()
 
@@ -849,7 +897,9 @@ class System:
                     temperature = None
 
                 return traj.to_pandas(
-                    to_alchemlyb=to_alchemlyb, temperature=temperature
+                    to_alchemlyb=to_alchemlyb,
+                    temperature=temperature,
+                    energy_unit=energy_unit,
                 )
         else:
             return traj

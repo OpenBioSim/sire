@@ -312,7 +312,7 @@ PDBAtom::PDBAtom(const QString &line, QStringList &errors)
         An array of error messages.
  */
 PDBAtom::PDBAtom(const SireMol::Atom &atom, bool is_ter, const PropertyMap &map, QStringList &errors)
-    : name(atom.name().value().toUpper()), occupancy(1.0), temperature(0.0), element("X"), charge(0), is_het(false),
+    : name(atom.name().value()), occupancy(1.0), temperature(0.0), element("X"), charge(0), is_het(false),
       is_ter(is_ter)
 {
     setSerial(atom.number().value());

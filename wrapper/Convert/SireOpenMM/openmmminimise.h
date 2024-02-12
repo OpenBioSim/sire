@@ -25,6 +25,8 @@ namespace SireOpenMM
 
 }
 
+SIRE_EXPOSE_FUNCTION(SireOpenMM::minimise_openmm_context)
+
 SIRE_END_HEADER
 
 #endif

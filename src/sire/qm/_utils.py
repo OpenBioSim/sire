@@ -292,6 +292,7 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
     from ..legacy import CAS as _CAS
     from ..legacy import Mol as _Mol
     from ..legacy import MM as _MM
+    from ..morph import link_to_reference as _link_to_reference
 
     # Initialise a list to store the merged molecules.
     qm_mols = []
@@ -483,7 +484,7 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
         qm_mol = edit_mol.commit()
 
         # Link to the perturbation to the reference state.
-        qm_mol = qm_mol.perturbation().link_to_reference().commit()
+        qm_mol = _link_to_reference(qm_mol)
 
         # Add the molecule to the list.
         qm_mols.append(qm_mol)

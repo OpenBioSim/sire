@@ -1569,12 +1569,16 @@ def _dynamics(
     pressure=None,
     vacuum=None,
     shift_delta=None,
+    shift_coulomb=None,
     coulomb_power=None,
     restraints=None,
     fixed=None,
     platform=None,
     device=None,
     precision=None,
+    com_reset_frequency=None,
+    barostat_frequency=None,
+    dynamic_constraints: bool = True,
     qm_engine=None,
     lambda_interpolate=None,
     map=None,
@@ -1689,10 +1693,15 @@ def _dynamics(
         simulation run in vacuum.
 
     shift_delta: length
-        The shift_delta parameter that controls the electrostatic
-        and van der Waals softening potential that smooths the
+        The shift_delta parameter that controls the Lennard-Jones
+        softening potential that smooths the
         creation and deletion of ghost atoms during a potential.
         This defaults to 2.0 A.
+
+    shift_coulomb: length
+        The shift_coulomb parameter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 1.0 A.
 
     coulomb_power: int
         The coulomb power parmeter that controls the electrostatic
@@ -1721,6 +1730,24 @@ def _dynamics(
     precision: str
         The desired precision for the simulation (e.g. `single`,
         `mixed` or `double`)
+
+    com_reset_frequency:
+        Either the number of steps between center-of-mass resets,
+        or the time between resets. If this is unset, then
+        the center-of-mass is not reset during the simulation.
+
+    barostat_frequency:
+        Either the number of steps between MC moves to apply the
+        barostat, of the time between moves. If this is unset,
+        then the default of every 25 steps is used.
+
+    dynamic_constraints: bool
+        Whether or not to update the length of constraints of
+        perturbable bonds with lambda. This defaults to True,
+        meaning that changing lambda will change any constraint
+        on a perturbable bond to equal to the value of r0 at
+        that lambda value. If this is false, then the constraint
+        is set based on the current length.
 
     qm_engine:
         A sire.qm.QMMMEngine object to used to compute QM/MM forces
@@ -1790,8 +1817,10 @@ def _dynamics(
         from ..units import femtosecond
 
         timestep = 1 * femtosecond
-    else:
+    elif timestep is not None:
         timestep = u(timestep)
+    else:
+        timestep = u(map["timestep"].value())
 
     if save_frequency is None and not map.specified("save_frequency"):
         from ..units import picosecond
@@ -1838,6 +1867,64 @@ def _dynamics(
     if integrator is not None:
         map.set("integrator", str(integrator))
 
+    if dynamic_constraints is not None:
+        if dynamic_constraints:
+            map.set("dynamic_constraints", True)
+        else:
+            map.set("dynamic_constraints", False)
+
+    if barostat_frequency is not None:
+        barostat_frequency = u(barostat_frequency)
+    elif map.specified("barostat_frequency"):
+        barostat_frequency = u(map["barostat_frequency"].value())
+
+    if barostat_frequency is None:
+        map.unset("barostat_frequency")
+    else:
+        if barostat_frequency.is_dimensionless():
+            barostat_frequency = int(barostat_frequency.value())
+
+            if barostat_frequency != 0:
+                map.set("barostat_frequency", barostat_frequency)
+            else:
+                map.unset("barostat_frequency")
+        else:
+            if not barostat_frequency.has_same_units(timestep):
+                raise ValueError("The units of barostat_frequency must match timestep")
+
+            barostat_frequency = int((barostat_frequency / timestep).value())
+
+            if barostat_frequency != 0:
+                map.set("barostat_frequency", barostat_frequency)
+            else:
+                map.unset("barostat_frequency")
+
+    if com_reset_frequency is not None:
+        com_reset_frequency = u(com_reset_frequency)
+    elif map.specified("com_reset_frequency"):
+        com_reset_frequency = u(map["com_reset_frequency"].value())
+
+    if com_reset_frequency is None:
+        map.unset("com_reset_frequency")
+    else:
+        if com_reset_frequency.is_dimensionless():
+            com_reset_frequency = int(com_reset_frequency.value())
+
+            if com_reset_frequency != 0:
+                map.set("com_reset_frequency", com_reset_frequency)
+            else:
+                map.unset("com_reset_frequency")
+        else:
+            if not com_reset_frequency.has_same_units(timestep):
+                raise ValueError("The units of com_reset_frequency must match timestep")
+
+            com_reset_frequency = int((com_reset_frequency / timestep).value())
+
+            if com_reset_frequency != 0:
+                map.set("com_reset_frequency", com_reset_frequency)
+            else:
+                map.unset("com_reset_frequency")
+
     return Dynamics(
         view,
         cutoff=cutoff,
@@ -1848,6 +1935,7 @@ def _dynamics(
         schedule=schedule,
         lambda_value=lambda_value,
         shift_delta=shift_delta,
+        shift_coulomb=shift_coulomb,
         coulomb_power=coulomb_power,
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
@@ -1872,12 +1960,14 @@ def _minimisation(
     ignore_perturbations=None,
     vacuum=None,
     shift_delta=None,
+    shift_coulomb=None,
     coulomb_power=None,
     platform=None,
     device=None,
     precision=None,
     restraints=None,
     fixed=None,
+    dynamic_constraints: bool = True,
     map=None,
 ):
     """
@@ -1945,10 +2035,15 @@ def _minimisation(
         simulation run in vacuum.
 
     shift_delta: length
-        The shift_delta parameter that controls the electrostatic
-        and van der Waals softening potential that smooths the
+        The shift_delta parameter that controls the Lennard-Jones
+        softening potential that smooths the
         creation and deletion of ghost atoms during a potential.
         This defaults to 2.0 A.
+
+    shift_coulomb: length
+        The shift_coulomb parameter that controls the electrostatic
+        softening potential that smooths the creation and deletion
+        of ghost atoms during a potential. This defaults to 1.0 A.
 
     coulomb_power: int
         The coulomb power parmeter that controls the electrostatic
@@ -1977,6 +2072,14 @@ def _minimisation(
     precision: str
         The desired precision for the simulation (e.g. `single`,
         `mixed` or `double`)
+
+    dynamic_constraints: bool
+        Whether or not to update the length of constraints of
+        perturbable bonds with lambda. This defaults to True,
+        meaning that changing lambda will change any constraint
+        on a perturbable bond to equal to the value of r0 at
+        that lambda value. If this is false, then the constraint
+        is set based on the current length.
 
     map: dict
         A dictionary of additional options. Note that any options
@@ -2044,6 +2147,12 @@ def _minimisation(
     if include_constrained_energies is not None:
         map.set("include_constrained_energies", include_constrained_energies)
 
+    if dynamic_constraints is not None:
+        if dynamic_constraints:
+            map.set("dynamic_constraints", True)
+        else:
+            map.set("dynamic_constraints", False)
+
     if platform is not None:
         map.set("platform", str(platform))
 
@@ -2056,6 +2165,7 @@ def _minimisation(
         swap_end_states=swap_end_states,
         ignore_perturbations=ignore_perturbations,
         shift_delta=shift_delta,
+        shift_coulomb=shift_coulomb,
         coulomb_power=coulomb_power,
         restraints=restraints,
         fixed=fixed,
@@ -2470,7 +2580,7 @@ if not hasattr(AtomMapping, "__orig_find__"):
 
 if not hasattr(Molecule, "perturbation"):
 
-    def __molecule_perturbation(mol):
+    def __molecule_perturbation(mol, map=None):
         """
         Return an interface to the perturbable properties of
         this molecule. Note that the molecule must be
@@ -2478,7 +2588,7 @@ if not hasattr(Molecule, "perturbation"):
         """
         from ..morph._perturbation import Perturbation
 
-        return Perturbation(mol)
+        return Perturbation(mol, map=map)
 
     def __molecule_is_perturbable(mol):
         """

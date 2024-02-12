@@ -523,7 +523,7 @@ void OpenMMFrEnergyST::initialise()
             energybase =
                 ""
                 "(1.0 - isSolvent1 * isSolvent2 * SPOnOff) * (Hcs + Hls);"
-                "Hcs = (lambda^n) * 138.935456 * q_prod/sqrt(diff_cl+r^2);"
+                "Hcs = (lambda^n) * 138.9354558466661 * q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl = (1.0-lambda) * 0.01;"
                 "Hls = 4.0 * eps_avg * (LJ*LJ-LJ);"
                 "LJ=((sigma_avg * sigma_avg)/soft)^3;"
@@ -571,7 +571,7 @@ void OpenMMFrEnergyST::initialise()
 
             intra_14_todummy = ""
                                "Hcs + Hls;"
-                               "Hcs=(lamtd^ntd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                               "Hcs=(lamtd^ntd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                                "diff_cl=(1.0-lamtd)*0.01;"
                                "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                                "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -599,7 +599,7 @@ void OpenMMFrEnergyST::initialise()
             intra_14_fromdummy =
                 ""
                 "Hcs + Hls;"
-                "Hcs=(lamfd^nfd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=(lamfd^nfd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamfd)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -629,7 +629,7 @@ void OpenMMFrEnergyST::initialise()
             intra_14_fromdummy_todummy =
                 ""
                 "Hcs + Hls;"
-                "Hcs=(lamFTD^nftd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=(lamFTD^nftd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamFTD)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -665,7 +665,7 @@ void OpenMMFrEnergyST::initialise()
             energybase =
                 ""
                 "(1.0 - isSolvent1 * isSolvent2 * SPOnOff) * (Hcs + Hls);"
-                "Hcs = 138.935456 * q_prod/sqrt(diff_cl+r^2);"
+                "Hcs = 138.9354558466661 * q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl = (1.0-lambda) * 0.01;"
                 "Hls = 4.0 * eps_avg * (LJ*LJ-LJ);"
                 "LJ=((sigma_avg * sigma_avg)/soft)^3;"
@@ -713,7 +713,7 @@ void OpenMMFrEnergyST::initialise()
 
             intra_14_todummy = ""
                                "Hcs + Hls;"
-                               "Hcs=138.935456*q_prod/sqrt(diff_cl+r^2);"
+                               "Hcs=138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                                "diff_cl=(1.0-lamtd)*0.01;"
                                "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                                "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -741,7 +741,7 @@ void OpenMMFrEnergyST::initialise()
             intra_14_fromdummy =
                 ""
                 "Hcs + Hls;"
-                "Hcs=(lamfd^nfd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=(lamfd^nfd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamfd)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -771,7 +771,7 @@ void OpenMMFrEnergyST::initialise()
             intra_14_fromdummy_todummy =
                 ""
                 "Hcs + Hls;"
-                "Hcs=138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamFTD)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -802,7 +802,7 @@ void OpenMMFrEnergyST::initialise()
         intra_14_clj = ""
                        "Hl+Hc;"
                        "Hl=4*eps_avg*((sigma_avg/r)^12-(sigma_avg/r)^6);"
-                       "Hc=138.935456*q_prod/r;"
+                       "Hc=138.9354558466661*q_prod/r;"
                        "eps_avg = sqrt(lamhd*lamhd*eaend + (1-lamhd)*(1-lamhd)*eastart + lamhd*(1-lamhd)*emix);"
                        "q_prod = lamhd*lamhd*qpend + (1-lamhd)*(1-lamhd)*qpstart + lamhd*(1-lamhd)*qmix;"
                        "";
@@ -845,7 +845,7 @@ void OpenMMFrEnergyST::initialise()
             energybase =
                 ""
                 "(1.0 - isSolvent1 * isSolvent2 * SPOnOff) * (Hls + Hcs);"
-                "Hcs = (lambda^n) * 138.935456 * q_prod*(1/sqrt(diff_cl+r*r) + krflam*(diff_cl+r*r)-crflam);"
+                "Hcs = (lambda^n) * 138.9354558466661 * q_prod*(1/sqrt(diff_cl+r*r) + krflam*(diff_cl+r*r)-crflam);"
                 "crflam = crf * src;"
                 "krflam = krf * src * src * src;"
                 "src = cutoff/sqrt(diff_cl + cutoff*cutoff);"
@@ -912,7 +912,7 @@ void OpenMMFrEnergyST::initialise()
             intra_14_todummy = ""
                                "withinCutoff*(Hcs + Hls);"
                                "withinCutoff=step(cutofftd-r);"
-                               "Hcs=(lamtd^ntd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                               "Hcs=(lamtd^ntd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                                "diff_cl=(1.0-lamtd)*0.01;"
                                "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                                "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -942,7 +942,7 @@ void OpenMMFrEnergyST::initialise()
                 ""
                 "withinCutoff*(Hcs + Hls);"
                 "withinCutoff=step(cutofffd-r);"
-                "Hcs=(lamfd^nfd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=(lamfd^nfd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamfd)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -973,7 +973,7 @@ void OpenMMFrEnergyST::initialise()
                 ""
                 "withinCutoff*(Hcs + Hls);"
                 "withinCutoff=step(cutoffftd-r);"
-                "Hcs=(lamFTD^nftd)*138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=(lamFTD^nftd)*138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamFTD)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -1012,7 +1012,7 @@ void OpenMMFrEnergyST::initialise()
             energybase =
                 ""
                 "(1.0 - isSolvent1 * isSolvent2 * SPOnOff) * (Hls + Hcs);"
-                "Hcs = 138.935456 * q_prod*(1/sqrt(diff_cl+r*r) + krflam*(diff_cl+r*r)-crflam);"
+                "Hcs = 138.9354558466661 * q_prod*(1/sqrt(diff_cl+r*r) + krflam*(diff_cl+r*r)-crflam);"
                 "crflam = crf * src;"
                 "krflam = krf * src * src * src;"
                 "src = cutoff/sqrt(diff_cl + cutoff*cutoff);"
@@ -1079,7 +1079,7 @@ void OpenMMFrEnergyST::initialise()
             intra_14_todummy = ""
                                "withinCutoff*(Hcs + Hls);"
                                "withinCutoff=step(cutofftd-r);"
-                               "Hcs=138.935456*q_prod/sqrt(diff_cl+r^2);"
+                               "Hcs=138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                                "diff_cl=(1.0-lamtd)*0.01;"
                                "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                                "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -1109,7 +1109,7 @@ void OpenMMFrEnergyST::initialise()
                 ""
                 "withinCutoff*(Hcs + Hls);"
                 "withinCutoff=step(cutofffd-r);"
-                "Hcs=138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamfd)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -1141,7 +1141,7 @@ void OpenMMFrEnergyST::initialise()
                 ""
                 "withinCutoff*(Hcs + Hls);"
                 "withinCutoff=step(cutoffftd-r);"
-                "Hcs=138.935456*q_prod/sqrt(diff_cl+r^2);"
+                "Hcs=138.9354558466661*q_prod/sqrt(diff_cl+r^2);"
                 "diff_cl=(1.0-lamFTD)*0.01;"
                 "Hls=4.0*eps_avg*(LJ*LJ-LJ);"
                 "LJ=((sigma_avg*sigma_avg)/soft)^3;"
@@ -1174,7 +1174,7 @@ void OpenMMFrEnergyST::initialise()
                        "withinCutoff*(Hl+Hc);"
                        "withinCutoff=step(cutoffhd-r);"
                        "Hl=4*eps_avg*((sigma_avg/r)^12-(sigma_avg/r)^6);"
-                       "Hc=138.935456*q_prod/r;"
+                       "Hc=138.9354558466661*q_prod/r;"
                        "eps_avg = sqrt(lamhd*lamhd*eaend + (1-lamhd)*(1-lamhd)*eastart + lamhd*(1-lamhd)*emix);"
                        "q_prod = lamhd*lamhd*qpend + (1-lamhd)*(1-lamhd)*qpstart + lamhd*(1-lamhd)*qmix;"
                        "";
@@ -1883,23 +1883,22 @@ void OpenMMFrEnergyST::initialise()
                         restrainedAtoms.property(QString("Anchor(%1)").arg(i)).asA<VariantProperty>().toInt();
                     int atomnum =
                         restrainedAtoms.property(QString("Atom(%1)").arg(i)).asA<VariantProperty>().toInt();
-		    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
-                    //double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double xref = restrainedAtoms.property(QString("x(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double yref = restrainedAtoms.property(QString("y(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double zref = restrainedAtoms.property(QString("z(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double k = restrainedAtoms.property(QString("k(%1)").arg(i)).asA<VariantProperty>().toDouble();
+                    // double d = restrainedAtoms.property(QString("d(%1)").arg(i)).asA<VariantProperty>().toDouble();
 
                     int atopenmmindex = AtomNumToOpenMMIndex[atomnum];
                     int anchoropenmmindex = AtomNumToOpenMMIndex[anchornum];
 
                     if (Debug)
                     {
-                        //qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
-                        //         << yref << " z " << zref << " k " << k << " d " << d;
+                        // qDebug() << "atomnum " << atomnum << " openmmindex " << openmmindex << " x " << xref << " y "
+                        //          << yref << " z " << zref << " k " << k << " d " << d;
                         qDebug() << "atomnum " << atomnum << " atopenmmindex " << atopenmmindex << " k " << k;
                         qDebug() << "anchornum " << anchornum << " anchoropenmmindex " << anchoropenmmindex << " k " << k;
-
                     }
 
                     // int posrestrdim = 5;
@@ -1948,7 +1947,6 @@ void OpenMMFrEnergyST::initialise()
         QList<DihedralID> dihedral_pert_list;
         QList<DihedralID> dihedral_pert_swap_list;
         QList<ImproperID> improper_pert_list;
-        QList<ImproperID> improper_pert_swap_list;
 
         /* "Light" atoms are defined to have a mass of HMASS or smaller.  This
            ensures that hydrogens in the HMR scheme will be constraint.  The
@@ -2468,7 +2466,7 @@ void OpenMMFrEnergyST::initialise()
 
                         solute_torsion_perturbation = new OpenMM::CustomTorsionForce(openmm_str);
                         solute_torsion_perturbation->addPerTorsionParameter("KJPerKcal");
-                        solute_torsion_perturbation_params[0] = 4.184;
+                        solute_torsion_perturbation_params[0] = OpenMM::KJPerKcal;
                         solute_torsion_perturbation->addGlobalParameter("lamdih", Alchemical_value);
                         solute_torsion_perturbation->addTorsion(idx0, idx1, idx2, idx3,
                                                                 solute_torsion_perturbation_params);
@@ -2482,11 +2480,9 @@ void OpenMMFrEnergyST::initialise()
 
                         dihedral_pert_list.append(DihedralID(four.atom0(), four.atom1(), four.atom2(), four.atom3()));
                         dihedral_pert_swap_list.append(
-                            DihedralID(four.atom3(), four.atom1(), four.atom2(), four.atom0()));
+                            DihedralID(four.atom3(), four.atom2(), four.atom1(), four.atom0()));
 
                         improper_pert_list.append(ImproperID(four.atom0(), four.atom1(), four.atom2(), four.atom3()));
-                        improper_pert_swap_list.append(
-                            ImproperID(four.atom0(), four.atom1(), four.atom3(), four.atom2()));
 
                         if (Debug)
                         {
@@ -2725,7 +2721,7 @@ void OpenMMFrEnergyST::initialise()
 
             if (solute.contains(molecule))
             { // Solute molecule. Check if the current solute dihedral is in the perturbed improper list
-                if (improper_pert_list.indexOf(improper_ff) != -1 || improper_pert_swap_list.indexOf(improper_ff) != -1)
+                if (improper_pert_list.indexOf(improper_ff) != -1)
                 {
                     if (Debug)
                         qDebug() << "Found Perturbed Improper\n";

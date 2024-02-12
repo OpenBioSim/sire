@@ -31,12 +31,12 @@ class SOMMContext(_Context):
         """
         if system is not None:
             from ...base import create_map
-            from ._SireOpenMM import _set_openmm_coordinates_and_velocities
+            from ._SireOpenMM import set_openmm_coordinates_and_velocities
 
             map = create_map(map)
 
             self._atom_index = metadata.index()
-            self._lambda_lever = metadata.lambdaLever()
+            self._lambda_lever = metadata.lambda_lever()
 
             # we need to update the constraints in the system
             # to match the current value of lambda, before we
@@ -67,9 +67,11 @@ class SOMMContext(_Context):
             super().__init__(system, integrator, platform)
 
             # place the coordinates and velocities into the context
-            _set_openmm_coordinates_and_velocities(self, metadata)
+            set_openmm_coordinates_and_velocities(self, metadata)
 
-            self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
+            self._lambda_value = self._lambda_lever.set_lambda(
+                self, lambda_value=lambda_value, update_constraints=True
+            )
 
             self._map = map
         else:
@@ -178,9 +180,9 @@ class SOMMContext(_Context):
                 f"are [ {keys} ]"
             )
 
-        from ._SireOpenMM import _openmm_set_context_platform_property
+        from ._SireOpenMM import set_context_platform_property
 
-        _openmm_set_context_platform_property(self, key, value)
+        set_context_platform_property(self, key, value)
 
     def get_atom_index(self):
         """
@@ -210,7 +212,7 @@ class SOMMContext(_Context):
         if self._lambda_lever is None:
             return None
 
-        return self._lambda_lever.schedule()
+        return self._lambda_lever.get_schedule()
 
     def set_lambda_schedule(self, schedule):
         """
@@ -222,15 +224,18 @@ class SOMMContext(_Context):
 
         self._lambda_lever.set_schedule(schedule)
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         """
         Update the parameters in the context to set the lambda value
-        to 'lamval'
+        to 'lamval'. If update_constraints is True then the constraints
+        will be updated to match the new value of lambda
         """
         if self._lambda_lever is None:
             return
 
-        self._lambda_value = self._lambda_lever.set_lambda(self, lambda_value)
+        self._lambda_value = self._lambda_lever.set_lambda(
+            self, lambda_value=lambda_value, update_constraints=update_constraints
+        )
 
     def set_temperature(self, temperature, rescale_velocities=True):
         """
@@ -266,3 +271,29 @@ class SOMMContext(_Context):
         Synonym for self.get_potential_energy()
         """
         return self.get_potential_energy(to_sire_units=to_sire_units)
+
+    def get_constraints(self):
+        """
+        Return all pairs of atoms that are constrained, together with
+        the constraint distance
+        """
+        s = self.getSystem()
+
+        num_constraints = s.getNumConstraints()
+
+        constraints = []
+
+        import openmm
+        from ...units import nanometer
+
+        for i in range(num_constraints):
+            a1, a2, dist = s.getConstraintParameters(i)
+
+            constraints.append(
+                (
+                    self._atom_index[a1] + self._atom_index[a2],
+                    dist.value_in_unit(openmm.unit.nanometer) * nanometer,
+                )
+            )
+
+        return constraints

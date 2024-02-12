@@ -14,6 +14,13 @@ __all__ = [
     "sire_to_gemmi",
     "gemmi_to_sire",
     "supported_formats",
+    "LambdaLever",
+    "PerturbableOpenMMMolecule",
+    "OpenMMMetaData",
+    "SOMMContext",
+    "QMForce",
+    "EMLECallback",
+    "EMLEEngine",
 ]
 
 try:
@@ -68,14 +75,54 @@ except Exception as e:
 
 
 try:
+    from ._SireOpenMM import sire_to_openmm_system as _sire_to_openmm_system
+    from ._SireOpenMM import openmm_system_to_sire as _openmm_system_to_sire
+    from ._SireOpenMM import extract_coordinates as _openmm_extract_coordinates
     from ._SireOpenMM import (
-        _sire_to_openmm_system,
-        _openmm_system_to_sire,
-        _openmm_extract_coordinates,
-        _openmm_extract_coordinates_and_velocities,
-        _openmm_extract_space,
-        _minimise_openmm_context,
+        extract_coordinates_and_velocities as _openmm_extract_coordinates_and_velocities,
     )
+    from ._SireOpenMM import extract_space as _openmm_extract_space
+    from ._SireOpenMM import minimise_openmm_context as _minimise_openmm_context
+
+    from ._sommcontext import SOMMContext
+    from ._perturbablemol import (
+        _changed_atoms,
+        _changed_bonds,
+        _changed_angles,
+        _changed_torsions,
+        _changed_exceptions,
+        _changed_constraints,
+    )
+
+    from ._SireOpenMM import (
+        LambdaLever,
+        PerturbableOpenMMMolecule,
+        OpenMMMetaData,
+        QMForce,
+        EMLECallback,
+        EMLEEngine,
+    )
+
+    from ..._pythonize import _pythonize
+
+    _pythonize(
+        [
+            LambdaLever,
+            PerturbableOpenMMMolecule,
+            OpenMMMetaData,
+            QMForce,
+            EMLECallback,
+            EMLEEngine,
+        ],
+        delete_old=True,
+    )
+
+    PerturbableOpenMMMolecule.changed_atoms = _changed_atoms
+    PerturbableOpenMMMolecule.changed_bonds = _changed_bonds
+    PerturbableOpenMMMolecule.changed_angles = _changed_angles
+    PerturbableOpenMMMolecule.changed_torsions = _changed_torsions
+    PerturbableOpenMMMolecule.changed_exceptions = _changed_exceptions
+    PerturbableOpenMMMolecule.changed_constraints = _changed_constraints
 
     _has_openmm = True
 
@@ -250,11 +297,11 @@ try:
                 # choose the constraint based on the timestep
                 if timestep_in_fs > 4:
                     # need constraint on everything
-                    constraint = "bonds"
+                    constraint = "bonds-not-heavy-perturbed"
 
                 elif timestep_in_fs > 1:
                     # need it just on H bonds and angles
-                    constraint = "h-bonds"
+                    constraint = "h-bonds-not-heavy-perturbed"
 
                 else:
                     # can get away with no constraints
@@ -270,8 +317,8 @@ try:
             )
 
             if constraint == "auto":
-                # we don't apply the constraint to perturbable molecules
-                constraint = "none"
+                # only apply the constraint to non-perturbed hydrogens
+                constraint = "h-bonds-not-heavy-perturbed"
 
             map.set("perturbable_constraint", constraint)
 
@@ -294,8 +341,16 @@ try:
                     "on a system with a non-periodic space."
                 )
 
+            barostat_freq = 25
+
+            if map.specified("barostat_frequency"):
+                barostat_freq = map["barostat_frequency"].value().as_integer()
+
             pressure = ensemble.pressure().to(atm) * openmm.unit.atmosphere
-            system.addForce(openmm.MonteCarloBarostat(pressure, temperature))
+
+            barostat = openmm.MonteCarloBarostat(pressure, temperature, barostat_freq)
+
+            system.addForce(barostat)
 
         platform = None
 
@@ -460,6 +515,22 @@ except Exception as e:
         )
 
     _has_openmm = False
+
+    class LambdaLever:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
+
+    class PerturbableOpenMMMolecule:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
+
+    class OpenMMMetaData:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
+
+    class SOMMContext:
+        def __init__(self, *args, **kwargs):
+            _no_openmm()
 
     def sire_to_openmm(*args, **kwargs):
         _no_openmm()

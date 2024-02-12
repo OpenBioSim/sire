@@ -48,6 +48,11 @@ namespace SireOpenMM
                        const LambdaLever &lever);
         ~OpenMMMetaData();
 
+        static const char *typeName();
+        const char *what() const;
+
+        QString toString() const;
+
         bool hasCoordinates() const;
         bool hasVelocities() const;
         bool hasBoxVectors() const;
@@ -69,7 +74,7 @@ namespace SireOpenMM
         LambdaLever lambda_lever;
     };
 
-    SireMol::SelectorMol openmm_system_to_sire(const OpenMM::System &mols,
+    SireMol::SelectorMol openmm_system_to_sire(const OpenMM::System &system,
                                                const SireBase::PropertyMap &map);
 
     OpenMMMetaData sire_to_openmm_system(OpenMM::System &system,
@@ -107,5 +112,16 @@ namespace SireOpenMM
                                        const QString &key,
                                        const QString &value);
 }
+
+SIRE_EXPOSE_CLASS(SireOpenMM::OpenMMMetaData)
+
+SIRE_EXPOSE_FUNCTION(SireOpenMM::openmm_system_to_sire)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::sire_to_openmm_system)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::set_openmm_coordinates_and_velocities)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::get_potential_energy)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::extract_coordinates)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::extract_coordinates_and_velocities)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::extract_space)
+SIRE_EXPOSE_FUNCTION(SireOpenMM::set_context_platform_property)
 
 #endif

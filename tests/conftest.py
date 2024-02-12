@@ -188,6 +188,11 @@ def neopentane_methane():
 
 
 @pytest.fixture(scope="session")
+def solvated_neopentane_methane():
+    return sr.load_test_files("neo_meth_solv.bss")
+
+
+@pytest.fixture(scope="session")
 def zero_lj_mols():
     return sr.load_test_files("zero_lj.prm7", "zero_lj.rst7")
 

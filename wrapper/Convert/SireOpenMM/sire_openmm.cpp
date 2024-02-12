@@ -77,6 +77,21 @@ namespace SireOpenMM
     {
     }
 
+    const char *OpenMMMetaData::typeName()
+    {
+        return "SireOpenMM::OpenMMMetaData";
+    }
+
+    const char *OpenMMMetaData::what() const
+    {
+        return OpenMMMetaData::typeName();
+    }
+
+    QString OpenMMMetaData::toString() const
+    {
+        return QString("OpenMMMetaData()");
+    }
+
     SireMol::SelectorM<SireMol::Atom> OpenMMMetaData::index() const
     {
         return atom_index;
@@ -897,6 +912,11 @@ namespace SireOpenMM
         }
 
         return SelectorMol(ret);
+    }
+
+    SireUnits::Dimension::MolarEnergy get_potential_energy(OpenMM::Context &context)
+    {
+        return context.getState(OpenMM::State::Energy).getPotentialEnergy() * SireUnits::kJ_per_mol;
     }
 
 } // end of namespace SireOpenMM

@@ -27,4 +27,5 @@ please :doc:`ask for support. <../support>`
    index_part04
    index_part05
    index_part06
+   index_part07
    index_part08

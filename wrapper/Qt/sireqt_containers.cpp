@@ -50,58 +50,60 @@ using boost::python::register_tuple;
 
 void register_SireQt_containers()
 {
-    register_list<QVector<quint32>>();
-    register_list<QList<quint32>>();
+  register_list<QVector<quint32>>();
+  register_list<QList<quint32>>();
 
-    register_list<QVector<qint32>>();
-    register_list<QList<qint32>>();
+  register_list<QVector<qint32>>();
+  register_list<QList<qint32>>();
 
-    register_list<QVector<quint64>>();
-    register_list<QList<quint64>>();
+  register_list<QVector<quint64>>();
+  register_list<QList<quint64>>();
 
-    register_list<QVector<qint64>>();
-    register_list<QList<qint64>>();
+  register_list<QVector<qint64>>();
+  register_list<QList<qint64>>();
 
-    register_list<QVector<float>>();
-    register_list<QList<float>>();
+  register_list<QVector<quint8>>();
+  register_list<QVector<qint8>>();
 
-    register_list<QVector<double>>();
-    register_list<QList<double>>();
+  register_list<QVector<float>>();
+  register_list<QList<float>>();
 
-    register_list<QVector<QVector<double>>>();
-    register_list<QVector<QVector<QVector<double>>>>();
-    register_list<QVector<QVector<QVector<QVector<double>>>>>();
+  register_list<QVector<double>>();
+  register_list<QList<double>>();
 
-    register_list<QVector<bool>>();
-    register_list<QVector<QVector<bool>>>();
+  register_list<QVector<QVector<double>>>();
+  register_list<QVector<QVector<QVector<double>>>>();
+  register_list<QVector<QVector<QVector<QVector<double>>>>>();
 
-    register_list<QVector<QString>>();
-    register_list<QList<QString>>();
-    register_list<QStringList>();
+  register_list<QVector<bool>>();
+  register_list<QVector<QVector<bool>>>();
 
-    register_list<QVector<QByteArray>>();
-    register_list<QList<QByteArray>>();
+  register_list<QVector<QString>>();
+  register_list<QList<QString>>();
+  register_list<QStringList>();
 
-    register_list<QList<QUuid>>();
+  register_list<QVector<QByteArray>>();
+  register_list<QList<QByteArray>>();
 
-    register_tuple<boost::tuple<double, double>>();
-    register_tuple<boost::tuple<double, double, double>>();
+  register_list<QList<QUuid>>();
 
-    register_dict<QHash<QString, QVector<double>>>();
+  register_tuple<boost::tuple<double, double>>();
+  register_tuple<boost::tuple<double, double, double>>();
 
-#if QT_VERSION >= QT_VERSION_CHECK(4, 2, 0)
-    register_set<QSet<QString>>();
+  register_tuple<boost::tuple<qint32, qint32>>();
+  register_tuple<boost::tuple<qint32, qint32, double, double>>();
+  register_tuple<boost::tuple<QVector<qint32>, QVector<double>, QVector<double>>>();
 
-    register_dict<QMap<QString, QVariant>>();
+  register_list<QVector<boost::tuple<qint32, qint32>>>();
+  register_list<QVector<boost::tuple<qint32, qint32, double, double>>>();
 
-    register_dict<QHash<QString, QString>>();
+  register_dict<QHash<QString, QVector<double>>>();
 
-#else
-    register_set<QSet<QString>, QString>();
+  register_set<QSet<QString>>();
 
-    register_dict<QMap<QString, QVariant>, QString, QVariant>();
+  register_dict<QMap<QString, QVariant>>();
 
-    register_dict<QHash<QString, QString>, QString, QString>();
+  register_dict<QHash<QString, QString>>();
 
-#endif
+  register_set<QSet<qint32>>();
 }

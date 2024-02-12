@@ -71,7 +71,7 @@ namespace SireOpenMM
         virtual void setAtoms(QVector<int>) = 0;
 
         //! Get the link atoms associated with each QM atom.
-        boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const;
+        virtual boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const = 0;
 
         //! Set the link atoms associated with each QM atom.
         virtual void setLinkAtoms(QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>) = 0;
@@ -94,6 +94,8 @@ namespace SireOpenMM
 
     typedef SireBase::PropPtr<SireOpenMM::QMForce> QMForcePtr;
 }
+
+SIRE_EXPOSE_CLASS(SireOpenMM::QMForce)
 
 SIRE_END_HEADER
 

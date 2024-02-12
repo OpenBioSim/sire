@@ -65,6 +65,7 @@ EMLECallback::call(
     QVector<QVector<double>> xyz_qm,
     QVector<QVector<double>> xyz_mm) const
 {
+
     // Acquire GIL before calling Python code.
     GILLock lock;
 
@@ -76,6 +77,16 @@ EMLECallback::call(
         xyz_qm,
         xyz_mm
     );
+}
+
+const char *EMLECallback::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<EMLECallback>());
+}
+
+const char *EMLECallback::what() const
+{
+    return EMLECallback::typeName();
 }
 
 EMLEEngine::EMLEEngine()

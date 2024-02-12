@@ -243,8 +243,7 @@ molecule that uses a λ-coordinate to morph between ethane and methanol.
 
 We'll now select the reference state (ethane)...
 
->>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
+>>> mols = sr.morph.link_to_reference(mols)
 
 To calculate a free energy, we would need to run multiple simulations
 across λ, calculating the difference in energy between neighbouring

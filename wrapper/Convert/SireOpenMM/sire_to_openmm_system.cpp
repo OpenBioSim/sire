@@ -33,6 +33,7 @@
 #include "SireCAS/lambdaschedule.h"
 
 #include "SireMaths/vector.h"
+#include "SireMaths/maths.h"
 
 #include "SireBase/parallel.h"
 #include "SireBase/propertylist.h"
@@ -46,7 +47,6 @@
 #include "tostring.h"
 
 #include "openmmmolecule.h"
-#include "customforce.h"
 #include "emle.h"
 
 #include <QDebug>
@@ -666,18 +666,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         }
     }
 
-    // check to see if there are any field molecules
-    bool any_field_mols = false;
-
-    for (int i = 0; i < nmols; ++i)
-    {
-        if (openmm_mols_data[i].hasFieldAtoms())
-        {
-            any_field_mols = true;
-            break;
-        }
-    }
-
     QSet<int> fixed_atoms;
 
     if (map.specified("fixed"))
@@ -731,14 +719,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     OpenMM::HarmonicBondForce *bondff = new OpenMM::HarmonicBondForce();
     OpenMM::HarmonicAngleForce *angff = new OpenMM::HarmonicAngleForce();
     OpenMM::PeriodicTorsionForce *dihff = new OpenMM::PeriodicTorsionForce();
-
-    // now create the grid potential for field atoms
-    GridForce *gridff = 0;
-
-    if (any_field_mols)
-    {
-        gridff = new GridForce();
-    }
 
     // now create the engine for computing QM forces on atoms
     QMForce *qmff = 0;
@@ -811,12 +791,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_k");
 
-    if (gridff != 0)
-    {
-        lambda_lever.setForceIndex("field", system.addForce(gridff));
-        lambda_lever.addLever("field_scale");
-    }
-
     if (qmff != 0)
     {
         lambda_lever.setForceIndex("qmff", system.addForce(qmff));
@@ -839,6 +813,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     if (any_perturbable)
     {
         lambda_lever.addLever("alpha");
+        lambda_lever.addLever("kappa");
 
         // somd uses a default shift_delta of 2.0 A
         SireUnits::Dimension::Length shift_delta = 2.0 * SireUnits::angstrom;
@@ -855,6 +830,20 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
         if (shift_delta.value() < 0)
             shift_delta = 0.0 * SireUnits::angstrom;
+
+        // somd uses a default shift_coulomb of 1 A
+        double shift_coulomb = SireMaths::pow_2((1 * SireUnits::angstrom).to(SireUnits::nanometer));
+
+        if (map.specified("shift_coulomb"))
+        {
+            const auto &value = map["shift_coulomb"].value();
+
+            if (value.isA<SireBase::LengthProperty>())
+                shift_coulomb = SireMaths::pow_2(value.asA<SireBase::LengthProperty>().value().to(SireUnits::nanometer));
+            else
+                shift_coulomb = SireMaths::pow_2(
+                    value.asA<SireBase::GeneralUnitProperty>().toUnit<SireUnits::Dimension::Length>().to(SireUnits::nanometer));
+        }
 
         // use a Taylor LJ power of 1
         int taylor_power = 1;
@@ -925,10 +914,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(1.0/r));"
-                                  "lj_nrg=four_epsilon*((sig6^2)-sig6);"
-                                  "sig6=(sigma^6)/(%2*sigma^6 + r^6);")
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
+                                  "lj_nrg=four_epsilon*sig6*(sig6-1);"
+                                  "sig6=(sigma^6)/(%3*sigma^6 + r^6);")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
+                                  .arg(shift_coulomb)
                                   .arg(taylor_power_expression("alpha", taylor_power))
                                   .toStdString();
         }
@@ -936,11 +926,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt(alpha+r^2))-(1.0/r));"
-                                  "lj_nrg=four_epsilon*((sig6^2)-sig6);"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
+                                  "lj_nrg=four_epsilon*sig6*(sig6-1);"
                                   "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
-                                  "delta=%2*alpha;")
+                                  "delta=%3*alpha;")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
+                                  .arg(shift_coulomb)
                                   .arg(shift_delta.to(SireUnits::nanometer))
                                   .toStdString();
         }
@@ -951,6 +942,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_14ff->addPerBondParameter("sigma");
         ghost_14ff->addPerBondParameter("four_epsilon");
         ghost_14ff->addPerBondParameter("alpha");
+        ghost_14ff->addPerBondParameter("kappa");
 
         // short-range intramolecular term that should not use
         // periodic boundaries or cutoffs
@@ -966,7 +958,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //   V_{LJ}(r) = 4 epsilon [ (sigma^12 / (alpha^m sigma^6 + r^6)^2) -
             //                           (sigma^6  / (alpha^m sigma^6 + r^6) ) ]
             //
-            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
+            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //
+            //   delta = shift_coulomb^2 * alpha
             //
             // Note that we supply half_sigma and two_sqrt_epsilon to save some
             // cycles
@@ -978,12 +972,14 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(1.0/r));"
-                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
-                                     "sig6=(sigma^6)/(%2*sigma^6 + r^6);"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
+                                     "sig6=(sigma^6)/(%3*sigma^6 + r^6);"
+                                     "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
+                                 .arg(shift_coulomb)
                                  .arg(taylor_power_expression("max_alpha", taylor_power))
                                  .toStdString();
         }
@@ -998,7 +994,9 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             //
             //   delta = shift_delta * alpha
             //
-            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (alpha+r^2)^(1/2)
+            //   V_{coul}(r) = (1-alpha)^n q_i q_j / 4 pi eps_0 (delta+r^2)^(1/2)
+            //
+            //   delta = shift_coulomb^2 * alpha
             //
             // Note that we pre-calculate delta as a forcefield parameter,
             // and also supply half_sigma and two_sqrt_epsilon to save some
@@ -1011,13 +1009,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt(max_alpha+r^2))-(1.0/r));"
-                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*((sig6^2)-sig6);"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
+                                     "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
                                      "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
-                                     "delta=%2*max_alpha;"
+                                     "delta=%3*max_alpha;"
+                                     "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
                                  .arg(coulomb_power_expression("max_alpha", coulomb_power))
+                                 .arg(shift_coulomb)
                                  .arg(shift_delta.to(SireUnits::nanometer))
                                  .toStdString();
         }
@@ -1029,11 +1029,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         ghost_ghostff->addPerParticleParameter("half_sigma");
         ghost_ghostff->addPerParticleParameter("two_sqrt_epsilon");
         ghost_ghostff->addPerParticleParameter("alpha");
+        ghost_ghostff->addPerParticleParameter("kappa");
 
         ghost_nonghostff->addPerParticleParameter("q");
         ghost_nonghostff->addPerParticleParameter("half_sigma");
         ghost_nonghostff->addPerParticleParameter("two_sqrt_epsilon");
         ghost_nonghostff->addPerParticleParameter("alpha");
+        ghost_nonghostff->addPerParticleParameter("kappa");
 
         // this will be slow if switched on, as it needs recalculating
         // for every change in parameters
@@ -1100,7 +1102,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
     // just a holder for all of the custom parameters for the
     // ghost forces (prevents us having to continually re-allocate it)
-    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0};
+    std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // the sets of particle indexes for the ghost atoms and non-ghost atoms
     std::set<int> ghost_atoms;
@@ -1181,11 +1183,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         auto masses_data = mol.masses.constData();
         auto cljs_data = mol.cljs.constData();
         auto alphas_data = mol.alphas.constData();
+        auto kappas_data = mol.kappas.constData();
 
         if (any_perturbable and mol.isPerturbable())
         {
             // This is a perturbable molecule and we're modelling perturbations
-            for (int j = 0; j < mol.nAtoms(); ++j)
+            for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
                 const bool is_from_ghost = mol.from_ghost_idxs.contains(j);
                 const bool is_to_ghost = mol.to_ghost_idxs.contains(j);
@@ -1211,13 +1214,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 const auto &clj = cljs_data[j];
 
                 // reduced_q
-                custom_params[0] = std::get<0>(clj);
+                custom_params[0] = boost::get<0>(clj);
                 // half_sigma
-                custom_params[1] = 0.5 * std::get<1>(clj);
+                custom_params[1] = 0.5 * boost::get<1>(clj);
                 // two_sqrt_epsilon
-                custom_params[2] = 2.0 * std::sqrt(std::get<2>(clj));
+                custom_params[2] = 2.0 * std::sqrt(boost::get<2>(clj));
                 // alpha
                 custom_params[3] = alphas_data[j];
+                // kappa
+                custom_params[4] = kappas_data[j];
 
                 // Add the particle to the ghost and nonghost forcefields
                 ghost_ghostff->addParticle(custom_params);
@@ -1235,21 +1240,15 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // calculated using the ghost forcefields
                     // (the ghost forcefields include a coulomb term
                     //  that subtracts from whatever was calculated here)
-                    cljff->addParticle(std::get<0>(clj), 0.0, 0.0);
+                    cljff->addParticle(boost::get<0>(clj), 0.0, 0.0);
                 }
                 else
                 {
                     // this isn't a ghost atom. Record this fact and
                     // just add it to the standard cljff as normal
-                    cljff->addParticle(std::get<0>(clj), std::get<1>(clj),
-                                       std::get<2>(clj));
+                    cljff->addParticle(boost::get<0>(clj), boost::get<1>(clj),
+                                       boost::get<2>(clj));
                     non_ghost_atoms.insert(atom_index);
-                }
-
-                if (gridff != 0)
-                {
-                    gridff->addParticle(std::get<0>(clj), std::get<1>(clj),
-                                        std::get<2>(clj));
                 }
             }
         }
@@ -1257,7 +1256,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             // Code path if this isn't a perturbable molecule or
             // we don't want to model perturbations
-            for (int j = 0; j < mol.nAtoms(); ++j)
+            for (int j = 0; j < mol.molinfo.nAtoms(); ++j)
             {
                 // Add the particle to the system
                 const int atom_index = start_index + j;
@@ -1278,29 +1277,25 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 const auto &clj = cljs_data[j];
 
                 // Add the particle to the standard CLJ forcefield
-                cljff->addParticle(std::get<0>(clj), std::get<1>(clj), std::get<2>(clj));
+                cljff->addParticle(boost::get<0>(clj), boost::get<1>(clj), boost::get<2>(clj));
 
                 // We need to add this molecule to the ghost and ghost
                 // forcefields if there are any perturbable molecules
                 if (any_perturbable)
                 {
                     // reduced charge
-                    custom_params[0] = std::get<0>(clj);
+                    custom_params[0] = boost::get<0>(clj);
                     // half_sigma
-                    custom_params[1] = 0.5 * std::get<1>(clj);
+                    custom_params[1] = 0.5 * boost::get<1>(clj);
                     // two_sqrt_epsilon
-                    custom_params[2] = 2.0 * std::sqrt(std::get<2>(clj));
+                    custom_params[2] = 2.0 * std::sqrt(boost::get<2>(clj));
                     // alpha - is zero for non-ghost atoms
                     custom_params[3] = 0.0;
+                    // kappa - is 0 for non-ghost atoms
+                    custom_params[4] = 0.0;
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
                     non_ghost_atoms.insert(atom_index);
-                }
-
-                if (gridff != 0)
-                {
-                    gridff->addParticle(std::get<0>(clj), std::get<1>(clj),
-                                        std::get<2>(clj));
                 }
             }
         }
@@ -1308,34 +1303,34 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         // now add all of the bond parameters
         for (const auto &bond : mol.bond_params)
         {
-            bondff->addBond(std::get<0>(bond) + start_index,
-                            std::get<1>(bond) + start_index,
-                            std::get<2>(bond), std::get<3>(bond));
+            bondff->addBond(boost::get<0>(bond) + start_index,
+                            boost::get<1>(bond) + start_index,
+                            boost::get<2>(bond), boost::get<3>(bond));
         }
 
         // now add all of the angles
         for (const auto &ang : mol.ang_params)
         {
-            angff->addAngle(std::get<0>(ang) + start_index,
-                            std::get<1>(ang) + start_index,
-                            std::get<2>(ang) + start_index,
-                            std::get<3>(ang), std::get<4>(ang));
+            angff->addAngle(boost::get<0>(ang) + start_index,
+                            boost::get<1>(ang) + start_index,
+                            boost::get<2>(ang) + start_index,
+                            boost::get<3>(ang), boost::get<4>(ang));
         }
 
         // now add all of the dihedrals and impropers
         for (const auto &dih : mol.dih_params)
         {
-            dihff->addTorsion(std::get<0>(dih) + start_index,
-                              std::get<1>(dih) + start_index,
-                              std::get<2>(dih) + start_index,
-                              std::get<3>(dih) + start_index,
-                              std::get<4>(dih), std::get<5>(dih), std::get<6>(dih));
+            dihff->addTorsion(boost::get<0>(dih) + start_index,
+                              boost::get<1>(dih) + start_index,
+                              boost::get<2>(dih) + start_index,
+                              boost::get<3>(dih) + start_index,
+                              boost::get<4>(dih), boost::get<5>(dih), boost::get<6>(dih));
         }
 
         for (const auto &constraint : mol.constraints)
         {
-            const auto atom0 = std::get<0>(constraint);
-            const auto atom1 = std::get<1>(constraint);
+            const auto atom0 = boost::get<0>(constraint);
+            const auto atom1 = boost::get<1>(constraint);
 
             const auto mass0 = system.getParticleMass(atom0 + start_index);
             const auto mass1 = system.getParticleMass(atom1 + start_index);
@@ -1345,16 +1340,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
                 system.addConstraint(atom0 + start_index,
                                      atom1 + start_index,
-                                     std::get<2>(constraint));
+                                     boost::get<2>(constraint));
             }
             // else we will need to think about how to constrain bonds
             // involving fixed atoms. Could we fix the other atom too?
-        }
-
-        // add any field atoms
-        if (gridff != 0 and mol.hasFieldAtoms())
-        {
-            gridff->addFieldAtoms(mol.getFieldAtoms());
         }
 
         start_index += mol.masses.count();
@@ -1389,7 +1378,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// for the molecules to the OpenMM forces
 
     ///
-    /// Stage 6 - Set up the exceptions
+    /// Stage 6 - Set up the exceptions and perturbable constraints
     ///
     /// We now have to add all of the exceptions to the non-bonded
     /// forces (including the ghost forces). Exceptions are overrides
@@ -1398,30 +1387,55 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     /// of the entire function, as it involves lots of atom-atom
     /// pair loops and can create a large exception list
     ///
+    /// We will also add all of the perturbable constraints here
+    ///
     for (int i = 0; i < nmols; ++i)
     {
         int start_index = start_indexes[i];
         const auto &mol = openmm_mols_data[i];
 
-        QVector<std::pair<int, int>> perturbable_exception_idxs;
-        QVector<std::pair<int, int>> qm_exception_idxs;
+        QVector<boost::tuple<int, int>> exception_idxs;
+        QVector<int> constraint_idxs;
 
         const bool is_perturbable = any_perturbable and mol.isPerturbable();
 
         if (is_perturbable)
         {
-            perturbable_exception_idxs = QVector<std::pair<int, int>>(mol.exception_params.count(),
-                                                          std::make_pair(-1, -1));
+            exception_idxs = QVector<boost::tuple<int, int>>(mol.exception_params.count(),
+                                                             boost::make_tuple(-1, -1));
+            constraint_idxs = QVector<int>(mol.perturbable_constraints.count(), -1);
+
+            // do all of the perturbable constraints
+            for (int j = 0; j < mol.perturbable_constraints.count(); ++j)
+            {
+                const auto &constraint = mol.perturbable_constraints[j];
+
+                const auto atom0 = boost::get<0>(constraint);
+                const auto atom1 = boost::get<1>(constraint);
+
+                const auto mass0 = system.getParticleMass(atom0 + start_index);
+                const auto mass1 = system.getParticleMass(atom1 + start_index);
+
+                if (mass0 != 0 and mass1 != 0)
+                {
+                    // add the constraint using the reference state length
+                    auto idx = system.addConstraint(atom0 + start_index,
+                                                    atom1 + start_index,
+                                                    boost::get<2>(constraint));
+
+                    constraint_idxs[j] = idx;
+                }
+            }
         }
 
         for (int j = 0; j < mol.exception_params.count(); ++j)
         {
             const auto &param = mol.exception_params[j];
 
-            const auto atom0 = std::get<0>(param);
-            const auto atom1 = std::get<1>(param);
-            const auto coul_14_scale = std::get<2>(param);
-            const auto lj_14_scale = std::get<3>(param);
+            const auto atom0 = boost::get<0>(param);
+            const auto atom1 = boost::get<1>(param);
+            const auto coul_14_scale = boost::get<2>(param);
+            const auto lj_14_scale = boost::get<3>(param);
 
             auto p = mol.getException(atom0, atom1,
                                       start_index,
@@ -1442,8 +1456,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // elsewhere - note that we need to use 1e-9 to
                     // make sure that OpenMM doesn't eagerly remove
                     // this, and cause "changed excluded atoms" warnings
-                    idx = cljff->addException(std::get<0>(p), std::get<1>(p),
-                                              std::get<2>(p), 1e-9,
+                    idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                              boost::get<2>(p), 1e-9,
                                               1e-9, true);
 
                     if (coul_14_scl != 0 or lj_14_scl != 0)
@@ -1452,10 +1466,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                         // to the ghost-14 forcefield
                         if (ghost_14ff != 0)
                         {
-                            // parameters are q, sigma, four_epsilon and alpha
+                            // parameters are q, sigma, four_epsilon, alpha(0) and kappa(1)
                             std::vector<double> params14 =
-                                {std::get<2>(p), std::get<3>(p),
-                                 4.0 * std::get<4>(p), 0.0};
+                                {boost::get<2>(p), boost::get<3>(p),
+                                 4.0 * boost::get<4>(p), 0.0, 1.0};
 
                             if (params14[0] == 0)
                                 // cannot use zero params in case they are
@@ -1465,44 +1479,46 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                             if (params14[1] == 0)
                                 params14[1] = 1e-9;
 
-                            nbidx = ghost_14ff->addBond(std::get<0>(p),
-                                                        std::get<1>(p),
+                            nbidx = ghost_14ff->addBond(boost::get<0>(p),
+                                                        boost::get<1>(p),
                                                         params14);
                         }
                     }
                 }
                 else
                 {
-                    idx = cljff->addException(std::get<0>(p), std::get<1>(p),
-                                              std::get<2>(p), std::get<3>(p),
-                                              std::get<4>(p), true);
+                    idx = cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                              boost::get<2>(p), boost::get<3>(p),
+                                              boost::get<4>(p), true);
                 }
 
                 // these are the indexes of the exception in the
                 // non-bonded forcefields and also the ghost-14 forcefield
-                perturbable_exception_idxs[j] = std::make_pair(idx, nbidx);
+                exception_idxs[j] = boost::make_tuple(idx, nbidx);
             }
             else
             {
-                cljff->addException(std::get<0>(p), std::get<1>(p),
-                                    std::get<2>(p), std::get<3>(p),
-                                    std::get<4>(p), true);
+                cljff->addException(boost::get<0>(p), boost::get<1>(p),
+                                    boost::get<2>(p), boost::get<3>(p),
+                                    boost::get<4>(p), true);
             }
 
             // we need to make sure that the list of exclusions in
             // the NonbondedForce match those in the CustomNonbondedForces
             if (ghost_ghostff != 0)
             {
-                ghost_ghostff->addExclusion(std::get<0>(p), std::get<1>(p));
-                ghost_nonghostff->addExclusion(std::get<0>(p), std::get<1>(p));
+                ghost_ghostff->addExclusion(boost::get<0>(p), boost::get<1>(p));
+                ghost_nonghostff->addExclusion(boost::get<0>(p), boost::get<1>(p));
             }
         }
 
         if (is_perturbable)
         {
             auto pert_idx = idx_to_pert_idx.value(i, openmm_mols.count() + 1);
-            lambda_lever.setExceptionIndices(pert_idx,
-                                             "clj", perturbable_exception_idxs);
+            lambda_lever.setExceptionIndicies(pert_idx,
+                                             "clj", exception_idxs);
+            lambda_lever.setConstraintIndicies(pert_idx,
+                                               constraint_idxs);
         }
     }
 

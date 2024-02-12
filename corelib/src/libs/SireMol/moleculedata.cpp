@@ -363,7 +363,8 @@ bool MoleculeData::operator!=(const MoleculeData &other) const
 
 /** Return a new MoleculeData that contains only the passed selected
     atoms. This allows parts of the molecule to be pulled out and used independently */
-MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
+MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms,
+                                   bool to_same_molecule) const
 {
     selected_atoms.assertCompatibleWith(*this);
 
@@ -433,7 +434,8 @@ MoleculeData MoleculeData::extract(const AtomSelection &selected_atoms) const
 
     // renumber the molecule to remove confusion as to why
     // extracted molecules cannot be combined
-    editor.renumber();
+    if (not to_same_molecule)
+        editor.renumber();
 
     return editor.commit().data();
 }
