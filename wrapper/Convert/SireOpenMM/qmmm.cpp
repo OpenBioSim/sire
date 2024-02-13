@@ -30,9 +30,6 @@
 
 #include "SireError/errors.h"
 
-#include "SireStream/datastream.h"
-#include "SireStream/shareddatastream.h"
-
 using namespace SireBase;
 using namespace SireOpenMM;
 using namespace SireStream;
@@ -73,33 +70,6 @@ const NullQMEngine &QMEngine::null()
 /////////
 ///////// Implementation of NullQMEngine
 /////////
-
-static const RegisterMetaType<NullQMEngine> r_nullqmengine;
-
-/** Serialise to a binary datastream */
-QDataStream &operator<<(QDataStream &ds, const NullQMEngine &qmengine)
-{
-    writeHeader(ds, r_nullqmengine, 1);
-
-    ds << static_cast<const QMEngine &>(qmengine);
-
-    return ds;
-}
-
-/** Extract from a binary datastream */
-QDataStream &operator>>(QDataStream &ds, NullQMEngine &qmengine)
-{
-    VersionID v = readHeader(ds, r_nullqmengine);
-
-    if (v == 1)
-    {
-        ds >> static_cast<QMEngine &>(qmengine);
-    }
-    else
-        throw version_error(v, "1", r_nullqmengine, CODELOC);
-
-    return ds;
-}
 
 /** Constructor */
 NullQMEngine::NullQMEngine() : ConcreteProperty<NullQMEngine, QMEngine>()
