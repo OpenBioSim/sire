@@ -39,11 +39,11 @@ class DynamicsData:
             if map.specified("qm_engine"):
                 qm_engine = map["qm_engine"].value()
 
-                from ..legacy.Convert import QMForce
+                from ..legacy.Convert import QMEngine
 
-                if qm_engine and not isinstance(qm_engine, QMForce):
+                if qm_engine and not isinstance(qm_engine, QMEngine):
                     raise ValueError(
-                        "'qm_engine' must be an instance of QMForce."
+                        "'qm_engine' must be an instance of 'sire.legacy.Convert.QMEngine'"
                     )
 
             # see if this is an interpolation simulation

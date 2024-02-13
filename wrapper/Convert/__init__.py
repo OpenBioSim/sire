@@ -18,7 +18,7 @@ __all__ = [
     "PerturbableOpenMMMolecule",
     "OpenMMMetaData",
     "SOMMContext",
-    "QMForce",
+    "QMEngine",
     "EMLECallback",
     "EMLEEngine",
 ]
@@ -98,7 +98,7 @@ try:
         LambdaLever,
         PerturbableOpenMMMolecule,
         OpenMMMetaData,
-        QMForce,
+        QMEngine,
         EMLECallback,
         EMLEEngine,
     )
@@ -110,7 +110,7 @@ try:
             LambdaLever,
             PerturbableOpenMMMolecule,
             OpenMMMetaData,
-            QMForce,
+            QMEngine,
             EMLECallback,
             EMLEEngine,
         ],

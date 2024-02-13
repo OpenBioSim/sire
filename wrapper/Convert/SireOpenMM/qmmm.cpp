@@ -62,6 +62,12 @@ QMEngine::~QMEngine()
 {
 }
 
+/** Return a null QM engine */
+const NullQMEngine &QMEngine::null()
+{
+    return *(create_shared_null<NullQMEngine>());
+}
+
 /////////
 ///////// Implementation of NullQMEngine
 /////////
@@ -115,8 +121,8 @@ const char *NullQMEngine::what() const
     return NullQMEngine::typeName();
 }
 
-/** Return a null QM engine */
-const NullQMEngine &QMEngine::null()
+/** Create a QM force object */
+QMForce *NullQMEngine::createForce() const
 {
-    return *(create_shared_null<NullQMEngine>());
+    std::runtime_error("NullQMEngine::createForce() called");
 }

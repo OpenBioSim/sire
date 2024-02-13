@@ -75,11 +75,10 @@ namespace SireOpenMM
         //! Clone the QM engine.
         virtual QMEngine *clone() const = 0;
 
-        //! Get the name of the QM engine.
-        static const char *typeName();
-
-        //! Get the name of the QM engine.
-        const char *what() const;
+        static const char *typeName()
+        {
+            return "SireOpenMM::QMEngine";
+        }
 
         //! Create a QM force object.
         virtual QMForce* createForce() const=0;

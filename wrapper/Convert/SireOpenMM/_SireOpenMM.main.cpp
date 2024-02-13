@@ -11,11 +11,17 @@
 
 #include "EMLEEngine.pypp.hpp"
 
+#include "EMLEForce.pypp.hpp"
+
 #include "LambdaLever.pypp.hpp"
+
+#include "NullQMEngine.pypp.hpp"
 
 #include "OpenMMMetaData.pypp.hpp"
 
 #include "PerturbableOpenMMMolecule.pypp.hpp"
+
+#include "QMEngine.pypp.hpp"
 
 #include "QMForce.pypp.hpp"
 
@@ -27,6 +33,8 @@ namespace bp = boost::python;
 
 #include "SireOpenMM_registrars.h"
 
+#include "SireOpenMM_properties.h"
+
 #include "./register_extras.h"
 
 BOOST_PYTHON_MODULE(_SireOpenMM){
@@ -36,15 +44,23 @@ BOOST_PYTHON_MODULE(_SireOpenMM){
 
     register_EMLECallback_class();
 
-    register_QMForce_class();
+    register_QMEngine_class();
 
     register_EMLEEngine_class();
 
+    register_QMForce_class();
+
+    register_EMLEForce_class();
+
     register_LambdaLever_class();
+
+    register_NullQMEngine_class();
 
     register_OpenMMMetaData_class();
 
     register_PerturbableOpenMMMolecule_class();
+
+    register_SireOpenMM_properties();
 
     SireOpenMM::register_extras();
 
