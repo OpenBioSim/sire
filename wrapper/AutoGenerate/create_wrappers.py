@@ -373,6 +373,8 @@ def call_with_released_gil(c, func_name):
         _call_with_release_gil(f)
 
 
+all_exported_classes = {}
+
 def export_class(
     mb, classname, aliases, includes, special_code, auto_str_function=True
 ):
@@ -380,6 +382,12 @@ def export_class(
     to be exported, using the supplied aliases, and using the
     supplied special code, and adding the header files in 'includes'
     to the generated C++"""
+
+    if classname in all_exported_classes:
+        # don't export twice!
+        return
+
+    all_exported_classes[classname] = 1
 
     # find the class in the declarations
     c = find_class(mb, classname)
