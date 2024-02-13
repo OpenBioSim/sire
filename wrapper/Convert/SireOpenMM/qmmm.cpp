@@ -28,6 +28,8 @@
 
 #include "qmmm.h"
 
+#include "SireError/errors.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -124,5 +126,5 @@ const char *NullQMEngine::what() const
 /** Create a QM force object */
 QMForce *NullQMEngine::createForce() const
 {
-    std::runtime_error("NullQMEngine::createForce() called");
+    throw SireError::invalid_operation(QObject::tr("NullQMEngine::createForce() called"), CODELOC);
 }
