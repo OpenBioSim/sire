@@ -3,18 +3,16 @@
 
 #include "SireOpenMM_registrars.h"
 
-#include "openmmmolecule.h"
 #include "qmmm.h"
 #include "emle.h"
 #include "lambdalever.h"
+#include "openmmmolecule.h"
 
 #include "Helpers/objectregistry.hpp"
 
 void register_SireOpenMM_objects()
 {
 
-    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
     ObjectRegistry::registerConverterFor< SireOpenMM::NullQMEngine >();
     ObjectRegistry::registerConverterFor< SireOpenMM::NullQMEngine >();
     ObjectRegistry::registerConverterFor< SireOpenMM::EMLECallback >();
@@ -25,6 +23,8 @@ void register_SireOpenMM_objects()
     ObjectRegistry::registerConverterFor< SireOpenMM::EMLEEngine >();
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();
 
 }
 

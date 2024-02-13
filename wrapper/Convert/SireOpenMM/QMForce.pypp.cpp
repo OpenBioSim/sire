@@ -7,23 +7,15 @@
 
 namespace bp = boost::python;
 
-#include "SireError/errors.h"
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
 
 #include "qmmm.h"
 
-#include "SireError/errors.h"
+#include "SireStream/datastream.h"
 
-#include "qmmm.h"
-
-const char* pvt_get_name(const SireOpenMM::QMForce&){ return "SireOpenMM::QMForce";}
-
-#include "Helpers/release_gil_policy.hpp"
-
-#include "SireError/errors.h"
-
-#include "qmmm.h"
-
-#include "SireError/errors.h"
+#include "SireStream/shareddatastream.h"
 
 #include "qmmm.h"
 

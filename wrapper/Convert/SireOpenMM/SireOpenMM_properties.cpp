@@ -4,9 +4,11 @@
 #include "Base/convertproperty.hpp"
 #include "SireOpenMM_properties.h"
 
-#include "SireError/errors.h"
+#include "SireStream/datastream.h"
+#include "SireStream/shareddatastream.h"
 #include "qmmm.h"
-#include "SireError/errors.h"
+#include "SireStream/datastream.h"
+#include "SireStream/shareddatastream.h"
 #include "qmmm.h"
 void register_SireOpenMM_properties()
 {

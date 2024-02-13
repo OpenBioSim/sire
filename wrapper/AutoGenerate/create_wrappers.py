@@ -743,7 +743,6 @@ if __name__ == "__main__":
 
     qtdir = "%s/../include/qt" % os.path.abspath(dir)
     boostdir = "%s/../include" % os.path.abspath(dir)
-    pydir = glob("%s/../include/python3*" % os.path.abspath(dir))[0]
     gsldir = boostdir
     openmm_include_dir = boostdir
 
@@ -777,7 +776,7 @@ if __name__ == "__main__":
     qt_include_dirs = []
 
     qt_include_dirs = [qtdir, "%s/QtCore" % qtdir]
-    boost_include_dirs = [boostdir, pydir]
+    boost_include_dirs = [boostdir]
     gsl_include_dirs = [gsldir]
 
     generator_path, generator_name = pygccxml.utils.find_xml_generator()

@@ -29,26 +29,6 @@ const char* pvt_get_name(const SireOpenMM::EMLECallback&){ return "SireOpenMM::E
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "SireError/errors.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "emle.h"
-
-#include "SireError/errors.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "emle.h"
-
-const char* pvt_get_name(const SireOpenMM::EMLECallback&){ return "SireOpenMM::EMLECallback";}
-
-#include "Helpers/release_gil_policy.hpp"
-
 void register_EMLECallback_class(){
 
     { //::SireOpenMM::EMLECallback
