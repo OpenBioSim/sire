@@ -600,7 +600,7 @@ double EMLEForceImpl::computeForce(
 ///////// Implementation of EMLEEngine
 /////////
 
-EMLEEngine::EMLEEngine()
+EMLEEngine::EMLEEngine() : ConcreteProperty<EMLEEngine, QMEngine>()
 {
 }
 
@@ -609,6 +609,7 @@ EMLEEngine::EMLEEngine(
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
     double lambda) :
+    ConcreteProperty<EMLEEngine, QMEngine>(),
     callback(py_object, "_sire_callback"),
     cutoff(cutoff),
     neighbour_list_frequency(neighbour_list_frequency),
