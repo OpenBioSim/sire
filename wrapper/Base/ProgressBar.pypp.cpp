@@ -215,6 +215,18 @@ void register_ProgressBar_class(){
                 , "" );
         
         }
+        { //::SireBase::ProgressBar::silentTick
+        
+            typedef void ( ::SireBase::ProgressBar::*silentTick_function_type)(  ) ;
+            silentTick_function_type silentTick_function_value( &::SireBase::ProgressBar::silentTick );
+            
+            ProgressBar_exposer.def( 
+                "silentTick"
+                , silentTick_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::ProgressBar::speedUnit
         
             typedef ::QString ( ::SireBase::ProgressBar::*speedUnit_function_type)(  ) const;

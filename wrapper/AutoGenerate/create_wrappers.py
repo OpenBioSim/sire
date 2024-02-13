@@ -373,6 +373,8 @@ def call_with_released_gil(c, func_name):
         _call_with_release_gil(f)
 
 
+all_exported_classes = {}
+
 def export_class(
     mb, classname, aliases, includes, special_code, auto_str_function=True
 ):
@@ -380,6 +382,12 @@ def export_class(
     to be exported, using the supplied aliases, and using the
     supplied special code, and adding the header files in 'includes'
     to the generated C++"""
+
+    if classname in all_exported_classes:
+        # don't export twice!
+        return
+
+    all_exported_classes[classname] = 1
 
     # find the class in the declarations
     c = find_class(mb, classname)
@@ -743,6 +751,7 @@ if __name__ == "__main__":
 
     qtdir = "%s/../include/qt" % os.path.abspath(dir)
     boostdir = "%s/../include" % os.path.abspath(dir)
+    pydir = glob("%s/../include/python3*" % os.path.abspath(dir))[0]
     gsldir = boostdir
     openmm_include_dir = boostdir
 
@@ -776,7 +785,7 @@ if __name__ == "__main__":
     qt_include_dirs = []
 
     qt_include_dirs = [qtdir, "%s/QtCore" % qtdir]
-    boost_include_dirs = [boostdir]
+    boost_include_dirs = [boostdir, pydir]
     gsl_include_dirs = [gsldir]
 
     generator_path, generator_name = pygccxml.utils.find_xml_generator()

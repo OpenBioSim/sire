@@ -63,9 +63,11 @@ namespace SireOpenMM
     class MinimizerData
     {
     public:
-        MinimizerData(OpenMM::Context &c, double kval, SireBase::ProgressBar &bar, int max_iterations)
-            : context(&c), bar(&bar), k(kval), cpu_integrator(1.0), it(0), max_its(max_iterations),
-              last_fx(1e100), raw_energy(0.0), num_ratchets(0), num_restarts(0)
+        MinimizerData(OpenMM::Context &c, double kval, SireBase::ProgressBar &bar,
+                      int max_iterations, int ratchet_frequency, double ratchet_scale)
+            : context(&c), bar(&bar), starting_k(kval), k(kval), cpu_integrator(1.0), it(0), max_its(max_iterations),
+              last_fx(1e100), raw_energy(0.0), num_ratchets(0), num_restarts(1), start_it(0),
+              ratchet_scale(ratchet_scale), ratchet_frequency(ratchet_frequency)
         {
             QString platform_name = QString::fromStdString(context->getPlatform().getName());
             check_large_forces = (platform_name == "CUDA" || platform_name == "OpenCL" || platform_name == "HIP" || platform_name == "Metal");
@@ -157,7 +159,12 @@ namespace SireOpenMM
         void ratchet()
         {
             num_ratchets++;
-            scaleK(10.0);
+            scaleK(2.0);
+        }
+
+        void aboutToStart()
+        {
+            start_it = it;
         }
 
         qint64 getIteration() const
@@ -175,17 +182,30 @@ namespace SireOpenMM
             it = 0;
             last_fx = 1e10;
             num_restarts += 1;
+            k = starting_k;
+            num_ratchets = 0;
+
+            for (int i = 0; i < num_restarts - 1; ++i)
+            {
+                this->ratchet();
+            }
         }
 
         void setIteration(int val)
         {
-            it = val;
+            it = start_it + val;
         }
 
         bool hasConverged(double val)
         {
             if (std::abs(val - last_fx) < 1e-3)
             {
+                last_fx = val;
+                return true;
+            }
+            else if ((ratchet_frequency > 0) and (it - start_it > ratchet_frequency))
+            {
+                last_fx = val;
                 return true;
             }
             else
@@ -219,14 +239,20 @@ namespace SireOpenMM
         /** The progress bar */
         SireBase::ProgressBar *bar;
 
-        /** The tolerance */
+        /** The current tolerance */
         double k;
+
+        /** The starting value of the tolerance */
+        double starting_k;
 
         /** The last energy value */
         double last_fx;
 
         /** The raw energy excluding the fake constraints */
         double raw_energy;
+
+        /** The amount to scale k by at each ratchet */
+        double ratchet_scale;
 
         /** The current iteration */
         qint64 it;
@@ -239,6 +265,12 @@ namespace SireOpenMM
 
         /** The number of restarts */
         qint64 num_restarts;
+
+        /** The starting iteration of a cycle */
+        qint64 start_it;
+
+        /** The frequency of automatically ratchetting */
+        qint64 ratchet_frequency;
 
         /** Whether or not we need to check for large forces on this platform */
         bool check_large_forces;
@@ -284,16 +316,8 @@ namespace SireOpenMM
     {
         auto nrg = SireUnits::Dimension::GeneralUnit(data.getRawEnergy() * SireUnits::kJ_per_mol);
 
-        if (data.nRatchets() > 0)
-        {
-            bar.setProgress(data.getIteration(),
-                            QString("Minimising %1.%2: %3 : %4").arg(data.nRestarts()).arg(data.nRatchets()).arg(data.getIteration()).arg(nrg.toString()));
-        }
-        else
-        {
-            bar.setProgress(data.getIteration(),
-                            QString("Minimising: %1 : %2").arg(data.getIteration()).arg(nrg.toString()));
-        }
+        bar.setProgress(data.getIteration(),
+                        QString("Minimising %1.%2: %3 : %4").arg(data.nRestarts()).arg(data.nRatchets()).arg(data.getIteration()).arg(nrg.toString()));
     }
 
     static int progress(void *instance, const lbfgsfloatval_t *x,
@@ -400,8 +424,24 @@ namespace SireOpenMM
         return energy;
     }
 
+    class LBFGSRaii
+    {
+    public:
+        LBFGSRaii(lbfgsfloatval_t *_x) : x(_x) {}
+        ~LBFGSRaii()
+        {
+            lbfgs_free(x);
+        }
+
+    private:
+        lbfgsfloatval_t *x;
+    };
+
     void minimise_openmm_context(OpenMM::Context &context,
-                                 double tolerance, int max_iterations)
+                                 double tolerance, int max_iterations,
+                                 int max_restarts, int max_ratchets,
+                                 int ratchet_frequency,
+                                 double starting_k, double ratchet_scale)
     {
         if (max_iterations < 0)
         {
@@ -419,14 +459,15 @@ namespace SireOpenMM
         double working_constraint_tol = std::max(1e-4, constraint_tol);
 
         // this is about 1e6 - it needs to be large to keep constraints in place
-        double k = 100 / working_constraint_tol;
+        double k = starting_k / working_constraint_tol;
 
         SireBase::ProgressBar bar("Minimising: initialise", max_iterations);
         bar.setSpeedUnit("steps / s");
 
         bar = bar.enter();
 
-        MinimizerData data(context, k, bar, max_iterations);
+        MinimizerData data(context, k, bar, max_iterations, ratchet_frequency,
+                           ratchet_scale);
         lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
 
         if (x == 0)
@@ -434,13 +475,23 @@ namespace SireOpenMM
                 QObject::tr("minimise_openmm_context: Failed to allocate memory"),
                 CODELOC);
 
+        // this will automatically free x when it goes out of scope
+        LBFGSRaii raii(x);
+
+        std::vector<OpenMM::Vec3> initial_pos;
+        double energy_before = 1e10;
+        bool is_success = true;
+
         while (data.getIteration() < data.getMaxIterations())
         {
-            auto energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
-            bar.silentTick();
+            if (not is_success)
+                break;
 
             try
             {
+                energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+                bar.silentTick();
+
                 // Initialize the minimizer.
                 lbfgs_parameter_t param;
                 lbfgs_parameter_init(&param);
@@ -454,7 +505,7 @@ namespace SireOpenMM
                 context.applyConstraints(working_constraint_tol);
 
                 // Record the initial positions and determine a normalization constant for scaling the tolerance.
-                std::vector<OpenMM::Vec3> initial_pos = context.getState(OpenMM::State::Positions).getPositions();
+                initial_pos = context.getState(OpenMM::State::Positions).getPositions();
 
                 double norm = 0.0;
                 for (int i = 0; i < num_particles; i++)
@@ -469,17 +520,33 @@ namespace SireOpenMM
                 norm = (norm < 1 ? 1 : sqrt(norm));
                 param.epsilon = tolerance / norm;
 
-                double last_energy = 1e10;
                 double prev_max_error = 1e10;
 
                 // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
                 while (data.getIteration() < data.getMaxIterations())
                 {
-                    // Perform the minimization.
                     param.max_iterations = data.getMaxIterations() - data.getIteration();
                     lbfgsfloatval_t fx; // final energy
+                    auto last_it = data.getIteration();
+
+                    // Perform the minimization.
+                    data.aboutToStart();
                     lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
-                    last_energy = fx;
+
+                    if (std::isinf(fx) || std::isnan(fx))
+                    {
+                        // we've hit a singularity, so we need to restart
+                        throw std::exception();
+                    }
+                    else if (data.getIteration() == last_it)
+                    {
+                        // we didn't make any progress, so ratchet up
+                        if (data.nRatchets() < max_ratchets)
+                        {
+                            data.ratchet();
+                        }
+                        break;
+                    }
 
                     // Check whether all constraints are satisfied.
                     std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
@@ -508,7 +575,10 @@ namespace SireOpenMM
                     if (max_error <= working_constraint_tol)
                         break; // All constraints are satisfied.
 
-                    data.ratchet();
+                    if (data.nRatchets() < max_ratchets)
+                    {
+                        data.ratchet();
+                    }
 
                     if (max_error > 1000 * working_constraint_tol)
                     {
@@ -516,10 +586,11 @@ namespace SireOpenMM
                         // because it could mean that minimisation exits with a structure
                         // that is very close to the un-minimised input structure
 
-                        if (data.nRestarts() > 5)
+                        if (data.nRestarts() >= max_restarts)
                         {
                             // we've tried too many times to get the constraints to be satisfied
                             // so we should just give up
+                            is_success = false;
                             break;
                         }
 
@@ -546,29 +617,92 @@ namespace SireOpenMM
             }
             catch (...)
             {
-                bar.failure();
-                lbfgs_free(x);
-                throw;
+                // reset to the old coordinates and keep trying
+                if (data.nRestarts() > max_restarts)
+                {
+                    // we've tried too many times to get the constraints to be satisfied
+                    // so we should just give up
+                    is_success = false;
+                    break;
+                }
+
+                // restart from scratch...
+                data.resetIteration();
+
+                context.setPositions(initial_pos);
+
+                // We've gotten far enough from a valid state that we might have trouble getting
+                // back, so reset to the original positions.
+                for (int i = 0; i < num_particles; ++i)
+                {
+                    x[3 * i] = initial_pos[i][0];
+                    x[3 * i + 1] = initial_pos[i][1];
+                    x[3 * i + 2] = initial_pos[i][2];
+                }
             }
 
-            auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
-
-            // do a final constraint projection to make sure they are satisfied
-            // to the full precision requested by the user.
-            context.applyConstraints(working_constraint_tol);
-
-            if (std::abs(energy_after - energy_before) < 150.0)
+            try
             {
-                // only 150 kJ/mol difference, so not much more to
-                // be gained by further minimisation (we don't want to
-                // get stuck in a cycle caused by re-application of the
-                // constraints)
-                break;
+                auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
+                if (std::isinf(energy_after) or std::isnan(energy_after) or energy_after > 1e20)
+                {
+                    // something has gone wrong, so we need to restart
+                    throw std::exception();
+                }
+
+                // do a final constraint projection to make sure they are satisfied
+                // to the full precision requested by the user.
+                context.applyConstraints(working_constraint_tol);
+
+                if (std::abs(energy_after - energy_before) < 100.0)
+                {
+                    // only 100 kJ/mol difference, so not much more to
+                    // be gained by further minimisation (we don't want to
+                    // get stuck in a cycle caused by re-application of the
+                    // constraints)
+                    // (minimisation is only really to remove bad contacts,
+                    //  so looking for big changes in energy)
+                    break;
+                }
+            }
+            catch (...)
+            {
+                // reset to the old coordinates and keep trying
+                if (data.nRestarts() >= max_restarts)
+                {
+                    // we've tried too many times to get the constraints to be satisfied
+                    // so we should just give up
+                    is_success = false;
+                    break;
+                }
+
+                // restart from scratch...
+                data.resetIteration();
+
+                context.setPositions(initial_pos);
+
+                // We've gotten far enough from a valid state that we might have trouble getting
+                // back, so reset to the original positions.
+                for (int i = 0; i < num_particles; ++i)
+                {
+                    x[3 * i] = initial_pos[i][0];
+                    x[3 * i + 1] = initial_pos[i][1];
+                    x[3 * i + 2] = initial_pos[i][2];
+                }
             }
         }
 
-        lbfgs_free(x);
-
-        bar.success();
+        if (is_success)
+            bar.success();
+        else
+        {
+            bar.failure("Minimisation failed! Could not satisfy constraints!");
+            throw SireError::invalid_state(QObject::tr(
+                                               "Despite repeated attempts, the minimiser could not minimise the system "
+                                               "while simultaneously satisfying the constraints."),
+                                           CODELOC);
+        }
     }
-}
+
+} // namespace SireOpenMM

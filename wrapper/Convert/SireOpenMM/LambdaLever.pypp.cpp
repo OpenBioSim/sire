@@ -25,22 +25,6 @@ SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return S
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "SireCAS/values.h"
-
-#include "lambdalever.h"
-
-#include "tostring.h"
-
-#include "SireCAS/values.h"
-
-#include "lambdalever.h"
-
-#include "tostring.h"
-
-#include "Helpers/str.hpp"
-
-#include "Helpers/release_gil_policy.hpp"
-
 void register_LambdaLever_class(){
 
     { //::SireOpenMM::LambdaLever
@@ -270,8 +254,6 @@ void register_LambdaLever_class(){
         LambdaLever_exposer.def( "__copy__", &__copy__);
         LambdaLever_exposer.def( "__deepcopy__", &__copy__);
         LambdaLever_exposer.def( "clone", &__copy__);
-        LambdaLever_exposer.def( "__str__", &__str__< ::SireOpenMM::LambdaLever > );
-        LambdaLever_exposer.def( "__repr__", &__str__< ::SireOpenMM::LambdaLever > );
         LambdaLever_exposer.def( "__str__", &__str__< ::SireOpenMM::LambdaLever > );
         LambdaLever_exposer.def( "__repr__", &__str__< ::SireOpenMM::LambdaLever > );
     }
