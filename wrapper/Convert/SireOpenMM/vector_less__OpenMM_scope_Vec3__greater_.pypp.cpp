@@ -6,8 +6,6 @@
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 #include "vector_less__OpenMM_scope_Vec3__greater_.pypp.hpp"
 
-#include <OpenMM.h>
-
 namespace bp = boost::python;
 
 void register_vector_less__OpenMM_scope_Vec3__greater__class(){

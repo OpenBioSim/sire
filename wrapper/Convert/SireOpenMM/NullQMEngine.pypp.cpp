@@ -7,15 +7,11 @@
 
 namespace bp = boost::python;
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
@@ -23,15 +19,11 @@ namespace bp = boost::python;
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 

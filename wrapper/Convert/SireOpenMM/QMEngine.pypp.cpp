@@ -7,15 +7,11 @@
 
 namespace bp = boost::python;
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
@@ -23,15 +19,11 @@ namespace bp = boost::python;
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
@@ -66,19 +58,7 @@ void register_QMEngine_class(){
                 "typeName"
                 , typeName_function_value
                 , bp::release_gil_policy()
-                , "Get the name of the QM engine." );
-        
-        }
-        { //::SireOpenMM::QMEngine::what
-        
-            typedef char const * ( ::SireOpenMM::QMEngine::*what_function_type)(  ) const;
-            what_function_type what_function_value( &::SireOpenMM::QMEngine::what );
-            
-            QMEngine_exposer.def( 
-                "what"
-                , what_function_value
-                , bp::release_gil_policy()
-                , "Get the name of the QM engine." );
+                , "" );
         
         }
         QMEngine_exposer.staticmethod( "null" );

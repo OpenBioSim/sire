@@ -52,7 +52,7 @@ SireOpenMM::EMLEEngine __copy__(const SireOpenMM::EMLEEngine &other){ return Sir
 void register_EMLEEngine_class(){
 
     { //::SireOpenMM::EMLEEngine
-        typedef bp::class_< SireOpenMM::EMLEEngine, bp::bases< SireBase::Property, SireOpenMM::QMEngine > > EMLEEngine_exposer_t;
+        typedef bp::class_< SireOpenMM::EMLEEngine, bp::bases< SireOpenMM::QMEngine > > EMLEEngine_exposer_t;
         EMLEEngine_exposer_t EMLEEngine_exposer = EMLEEngine_exposer_t( "EMLEEngine", "", bp::init< >("Default constructor.") );
         bp::scope EMLEEngine_scope( EMLEEngine_exposer );
         EMLEEngine_exposer.def( bp::init< bp::api::object, bp::optional< SireUnits::Dimension::Length, int, double > >(( bp::arg("arg0"), bp::arg("cutoff")=7.5 * SireUnits::angstrom, bp::arg("neighbour_list_frequency")=(int)(20), bp::arg("lambda")=1. ), "Constructor\nPar:am py_object\nAn EMLECalculator Python object.\n\nPar:am cutoff\nThe ML cutoff distance.\n\nPar:am neighbour_list_frequency\nThe frequency at which the neighbour list is updated. (Number of steps.)\nIf zero, then no neighbour list is used.\n\nPar:am lambda\nThe lambda weighting factor. This can be used to interpolate between\npotentials for end-state correction calculations.\n") );
