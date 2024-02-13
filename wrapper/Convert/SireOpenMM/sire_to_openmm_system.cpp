@@ -727,8 +727,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         try
         {
-            auto &engine = map["qm_engine"].value().asA<EMLEEngine>();
-            qmff = new EMLEEngine(engine);
+            auto &engine = map["qm_engine"].value().asA<QMEngine>();
+            qmff = engine.createForce();
         }
         catch (...)
         {

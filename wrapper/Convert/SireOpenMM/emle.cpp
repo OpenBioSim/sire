@@ -49,6 +49,10 @@ private:
     PyGILState_STATE state_;
 };
 
+/////////
+///////// Implementation of EMLECallback
+/////////
+
 EMLECallback::EMLECallback()
 {
 }
@@ -89,35 +93,41 @@ const char *EMLECallback::what() const
     return EMLECallback::typeName();
 }
 
-EMLEEngine::EMLEEngine()
+/////////
+///////// Implementation of EMLEForce
+/////////
+
+EMLEForce::EMLEForce()
 {
 }
 
-EMLEEngine::EMLEEngine(
-    bp::object py_object,
+EMLEForce::EMLEForce(
+    EMLECallback callback,
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
-    double lambda) :
-    callback(py_object, "_sire_callback"),
+    double lambda,
+    QVector<int> atoms,
+    QMap<int, int> mm1_to_qm,
+    QMap<int, QVector<int>> mm1_to_mm2,
+    QMap<int, double> bond_scale_factors,
+    QVector<int> mm2_atoms,
+    QVector<int> numbers,
+    QVector<double> charges) :
+    callback(callback),
     cutoff(cutoff),
     neighbour_list_frequency(neighbour_list_frequency),
-    lambda(lambda)
+    lambda(lambda),
+    atoms(atoms),
+    mm1_to_qm(mm1_to_qm),
+    mm1_to_mm2(mm1_to_mm2),
+    bond_scale_factors(bond_scale_factors),
+    mm2_atoms(mm2_atoms),
+    numbers(numbers),
+    charges(charges)
 {
-    if (this->neighbour_list_frequency < 0)
-    {
-        neighbour_list_frequency = 0;
-    }
-    if (this->lambda < 0.0)
-    {
-        this->lambda = 0.0;
-    }
-    else if (this->lambda > 1.0)
-    {
-        this->lambda = 1.0;
-    }
 }
 
-EMLEEngine::EMLEEngine(const EMLEEngine &other) :
+EMLEForce::EMLEForce(const EMLEForce &other) :
     callback(other.callback),
     cutoff(other.cutoff),
     neighbour_list_frequency(other.neighbour_list_frequency),
@@ -132,7 +142,7 @@ EMLEEngine::EMLEEngine(const EMLEEngine &other) :
 {
 }
 
-EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
+EMLEForce &EMLEForce::operator=(const EMLEForce &other)
 {
     this->callback = other.callback;
     this->cutoff = other.cutoff;
@@ -148,17 +158,12 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     return *this;
 }
 
-void EMLEEngine::setCallback(EMLECallback callback)
-{
-    this->callback = callback;
-}
-
-EMLECallback EMLEEngine::getCallback() const
+EMLECallback EMLEForce::getCallback() const
 {
     return this->callback;
 }
 
-void EMLEEngine::setLambda(double lambda)
+void EMLEForce::setLambda(double lambda)
 {
     // Clamp the lambda value.
     if (lambda < 0.0)
@@ -172,132 +177,99 @@ void EMLEEngine::setLambda(double lambda)
     this->lambda = lambda;
 }
 
-double EMLEEngine::getLambda() const
+double EMLEForce::getLambda() const
 {
     return this->lambda;
 }
 
-void EMLEEngine::setCutoff(SireUnits::Dimension::Length cutoff)
-{
-    this->cutoff = cutoff;
-}
-
-SireUnits::Dimension::Length EMLEEngine::getCutoff() const
+SireUnits::Dimension::Length EMLEForce::getCutoff() const
 {
     return this->cutoff;
 }
 
-int EMLEEngine::getNeighbourListFrequency() const
+int EMLEForce::getNeighbourListFrequency() const
 {
     return this->neighbour_list_frequency;
 }
 
-void EMLEEngine::setNeighbourListFrequency(int neighbour_list_frequency)
-{
-    // Assume anything less than zero means no neighbour list.
-    if (neighbour_list_frequency < 0)
-    {
-        neighbour_list_frequency = 0;
-    }
-    this->neighbour_list_frequency = neighbour_list_frequency;
-}
-
-QVector<int> EMLEEngine::getAtoms() const
+QVector<int> EMLEForce::getAtoms() const
 {
     return this->atoms;
 }
 
-void EMLEEngine::setAtoms(QVector<int> atoms)
-{
-    this->atoms = atoms;
-}
-
-boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEEngine::getLinkAtoms() const
+boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEForce::getLinkAtoms() const
 {
     return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_scale_factors);
 }
 
-void EMLEEngine::setLinkAtoms(
-    QMap<int, int> mm1_to_qm,
-    QMap<int, QVector<int>> mm1_to_mm2,
-    QMap<int, double> bond_scale_factors)
-{
-    this->mm1_to_qm = mm1_to_qm;
-    this->mm1_to_mm2 = mm1_to_mm2;
-    this->bond_scale_factors = bond_scale_factors;
-
-    // Build a vector of all of the MM2 atoms.
-    this->mm2_atoms.clear();
-    for (const auto &mm2 : this->mm1_to_mm2.values())
-    {
-        this->mm2_atoms.append(mm2);
-    }
-}
-
-QVector<int> EMLEEngine::getMM2Atoms() const
+QVector<int> EMLEForce::getMM2Atoms() const
 {
     return this->mm2_atoms;
 }
 
-QVector<int> EMLEEngine::getNumbers() const
+QVector<int> EMLEForce::getNumbers() const
 {
     return this->numbers;
 }
 
-void EMLEEngine::setNumbers(QVector<int> numbers)
-{
-    this->numbers = numbers;
-}
-
-QVector<double> EMLEEngine::getCharges() const
+QVector<double> EMLEForce::getCharges() const
 {
     return this->charges;
 }
 
-void EMLEEngine::setCharges(QVector<double> charges)
+const char *EMLEForce::typeName()
 {
-    this->charges = charges;
+    return QMetaType::typeName(qMetaTypeId<EMLEForce>());
 }
 
-const char *EMLEEngine::typeName()
+const char *EMLEForce::what() const
 {
-    return QMetaType::typeName(qMetaTypeId<EMLEEngine>());
+    return EMLEForce::typeName();
 }
 
-const char *EMLEEngine::what() const
+boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
+EMLEForce::call(
+    QVector<int> numbers_qm,
+    QVector<double> charges_mm,
+    QVector<QVector<double>> xyz_qm,
+    QVector<QVector<double>> xyz_mm) const
 {
-    return EMLEEngine::typeName();
+    return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
 }
 
-OpenMM::ForceImpl *EMLEEngine::createImpl() const
+/////////
+///////// Implementation of EMLEForceImpl
+/////////
+
+OpenMM::ForceImpl *EMLEForce::createImpl() const
 {
 #ifdef SIRE_USE_CUSTOMCPPFORCE
-    return new EMLEEngineImpl(*this);
+    return new EMLEForceImpl(*this);
 #else
     throw SireError::unsupported(QObject::tr(
-                                     "Unable to create a EMLEEngine because OpenMM::CustomCPPForceImpl "
+                                     "Unable to create an EMLEForceImpl because OpenMM::CustomCPPForceImpl "
                                      "is not available. You need to use OpenMM 8.1 or later."),
                                  CODELOC);
     return 0;
 #endif
 }
 
-EMLEEngineImpl::EMLEEngineImpl(const EMLEEngine &owner) :
+EMLEForceImpl::EMLEForceImpl(const EMLEForce &owner) :
     OpenMM::CustomCPPForceImpl(owner),
     owner(owner)
 {
 }
 
-EMLEEngineImpl::~EMLEEngineImpl()
+EMLEForceImpl::~EMLEForceImpl()
 {
 }
 
-const EMLEEngine &EMLEEngineImpl::getOwner() const
+const EMLEForce &EMLEForceImpl::getOwner() const
 {
     return this->owner;
 }
 
-double EMLEEngineImpl::computeForce(
+double EMLEForceImpl::computeForce(
     OpenMM::ContextImpl &context,
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
@@ -624,6 +596,190 @@ double EMLEEngineImpl::computeForce(
 #endif
 }
 
+/////////
+///////// Implementation of EMLEEngine
+/////////
+
+EMLEEngine::EMLEEngine()
+{
+}
+
+EMLEEngine::EMLEEngine(
+    bp::object py_object,
+    SireUnits::Dimension::Length cutoff,
+    int neighbour_list_frequency,
+    double lambda) :
+    callback(py_object, "_sire_callback"),
+    cutoff(cutoff),
+    neighbour_list_frequency(neighbour_list_frequency),
+    lambda(lambda)
+{
+    if (this->neighbour_list_frequency < 0)
+    {
+        neighbour_list_frequency = 0;
+    }
+    if (this->lambda < 0.0)
+    {
+        this->lambda = 0.0;
+    }
+    else if (this->lambda > 1.0)
+    {
+        this->lambda = 1.0;
+    }
+}
+
+EMLEEngine::EMLEEngine(const EMLEEngine &other) :
+    callback(other.callback),
+    cutoff(other.cutoff),
+    neighbour_list_frequency(other.neighbour_list_frequency),
+    lambda(other.lambda),
+    atoms(other.atoms),
+    mm1_to_qm(other.mm1_to_qm),
+    mm1_to_mm2(other.mm1_to_mm2),
+    mm2_atoms(other.mm2_atoms),
+    bond_scale_factors(other.bond_scale_factors),
+    numbers(other.numbers),
+    charges(other.charges)
+{
+}
+
+EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
+{
+    this->callback = other.callback;
+    this->cutoff = other.cutoff;
+    this->neighbour_list_frequency = other.neighbour_list_frequency;
+    this->lambda = other.lambda;
+    this->atoms = other.atoms;
+    this->mm1_to_qm = other.mm1_to_qm;
+    this->mm1_to_mm2 = other.mm1_to_mm2;
+    this->mm2_atoms = other.mm2_atoms;
+    this->bond_scale_factors = other.bond_scale_factors;
+    this->numbers = other.numbers;
+    this->charges = other.charges;
+    return *this;
+}
+
+void EMLEEngine::setCallback(EMLECallback callback)
+{
+    this->callback = callback;
+}
+
+EMLECallback EMLEEngine::getCallback() const
+{
+    return this->callback;
+}
+
+void EMLEEngine::setLambda(double lambda)
+{
+    // Clamp the lambda value.
+    if (lambda < 0.0)
+    {
+        lambda = 0.0;
+    }
+    else if (lambda > 1.0)
+    {
+        lambda = 1.0;
+    }
+    this->lambda = lambda;
+}
+
+double EMLEEngine::getLambda() const
+{
+    return this->lambda;
+}
+
+void EMLEEngine::setCutoff(SireUnits::Dimension::Length cutoff)
+{
+    this->cutoff = cutoff;
+}
+
+SireUnits::Dimension::Length EMLEEngine::getCutoff() const
+{
+    return this->cutoff;
+}
+
+int EMLEEngine::getNeighbourListFrequency() const
+{
+    return this->neighbour_list_frequency;
+}
+
+void EMLEEngine::setNeighbourListFrequency(int neighbour_list_frequency)
+{
+    // Assume anything less than zero means no neighbour list.
+    if (neighbour_list_frequency < 0)
+    {
+        neighbour_list_frequency = 0;
+    }
+    this->neighbour_list_frequency = neighbour_list_frequency;
+}
+
+QVector<int> EMLEEngine::getAtoms() const
+{
+    return this->atoms;
+}
+
+void EMLEEngine::setAtoms(QVector<int> atoms)
+{
+    this->atoms = atoms;
+}
+
+boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEEngine::getLinkAtoms() const
+{
+    return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_scale_factors);
+}
+
+void EMLEEngine::setLinkAtoms(
+    QMap<int, int> mm1_to_qm,
+    QMap<int, QVector<int>> mm1_to_mm2,
+    QMap<int, double> bond_scale_factors)
+{
+    this->mm1_to_qm = mm1_to_qm;
+    this->mm1_to_mm2 = mm1_to_mm2;
+    this->bond_scale_factors = bond_scale_factors;
+
+    // Build a vector of all of the MM2 atoms.
+    this->mm2_atoms.clear();
+    for (const auto &mm2 : this->mm1_to_mm2.values())
+    {
+        this->mm2_atoms.append(mm2);
+    }
+}
+
+QVector<int> EMLEEngine::getMM2Atoms() const
+{
+    return this->mm2_atoms;
+}
+
+QVector<int> EMLEEngine::getNumbers() const
+{
+    return this->numbers;
+}
+
+void EMLEEngine::setNumbers(QVector<int> numbers)
+{
+    this->numbers = numbers;
+}
+
+QVector<double> EMLEEngine::getCharges() const
+{
+    return this->charges;
+}
+
+void EMLEEngine::setCharges(QVector<double> charges)
+{
+    this->charges = charges;
+}
+
+const char *EMLEEngine::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<EMLEEngine>());
+}
+
+const char *EMLEEngine::what() const
+{
+    return EMLEEngine::typeName();
+}
+
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
 EMLEEngine::call(
     QVector<int> numbers_qm,
@@ -632,4 +788,21 @@ EMLEEngine::call(
     QVector<QVector<double>> xyz_mm) const
 {
     return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
+}
+
+QMForce* EMLEEngine::createForce() const
+{
+    return new EMLEForce(
+        this->callback,
+        this->cutoff,
+        this->neighbour_list_frequency,
+        this->lambda,
+        this->atoms,
+        this->mm1_to_qm,
+        this->mm1_to_mm2,
+        this->bond_scale_factors,
+        this->mm2_atoms,
+        this->numbers,
+        this->charges
+    );
 }

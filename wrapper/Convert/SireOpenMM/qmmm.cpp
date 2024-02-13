@@ -28,8 +28,95 @@
 
 #include "qmmm.h"
 
+#include "SireStream/datastream.h"
+#include "SireStream/shareddatastream.h"
+
+using namespace SireBase;
 using namespace SireOpenMM;
+using namespace SireStream;
+
+/////////
+///////// Implementation of QMForce
+/////////
+
+/** Constructor */
+QMForce::QMForce() : OpenMM::Force()
+{
+}
 
 QMForce::~QMForce()
 {
+}
+
+/////////
+///////// Implementation of QMEngine
+/////////
+
+/** Constructor */
+QMEngine::QMEngine() : Property()
+{
+}
+
+/** Destructor */
+QMEngine::~QMEngine()
+{
+}
+
+/////////
+///////// Implementation of NullQMEngine
+/////////
+
+static const RegisterMetaType<NullQMEngine> r_nullqmengine;
+
+/** Serialise to a binary datastream */
+QDataStream &operator<<(QDataStream &ds, const NullQMEngine &qmengine)
+{
+    writeHeader(ds, r_nullqmengine, 1);
+
+    ds << static_cast<const QMEngine &>(qmengine);
+
+    return ds;
+}
+
+/** Extract from a binary datastream */
+QDataStream &operator>>(QDataStream &ds, NullQMEngine &qmengine)
+{
+    VersionID v = readHeader(ds, r_nullqmengine);
+
+    if (v == 1)
+    {
+        ds >> static_cast<QMEngine &>(qmengine);
+    }
+    else
+        throw version_error(v, "1", r_nullqmengine, CODELOC);
+
+    return ds;
+}
+
+/** Constructor */
+NullQMEngine::NullQMEngine() : ConcreteProperty<NullQMEngine, QMEngine>()
+{
+}
+
+/** Destructor */
+NullQMEngine::~NullQMEngine()
+{
+}
+
+/** Return the type name */
+const char *NullQMEngine::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<NullQMEngine>());
+}
+
+/** Return the type name */
+const char *NullQMEngine::what() const
+{
+    return NullQMEngine::typeName();
+}
+
+/** Return a null QM engine */
+const NullQMEngine &QMEngine::null()
+{
+    return *(create_shared_null<NullQMEngine>());
 }

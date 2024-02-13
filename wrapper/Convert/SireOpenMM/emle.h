@@ -76,7 +76,7 @@ namespace SireOpenMM
          */
         EMLECallback(bp::object, QString callback="_sire_callback");
 
-        //! Constructor
+        //! Call the callback function.
         /*! \param numbers_qm
                 A vector of atomic numbers for the atoms in the ML region.
 
@@ -113,7 +113,225 @@ namespace SireOpenMM
         QString callback;
     };
 
-    class EMLEEngine : public SireBase::ConcreteProperty<EMLEEngine, QMForce>
+    class EMLEForce : public QMForce
+    {
+    public:
+        //! Default constructor.
+        EMLEForce();
+
+        //! Constructor.
+        /* \param callback
+                The EMLECallback object.
+
+            \param cutoff
+                The ML cutoff distance.
+
+            \param neighbour_list_frequency
+                The frequency at which the neighbour list is updated. (Number of steps.)
+                If zero, then no neighbour list is used.
+
+            \param lambda
+                The lambda weighting factor. This can be used to interpolate between
+                potentials for end-state correction calculations.
+
+            \param atoms
+                A vector of atom indices for the QM region.
+
+            \param mm1_to_qm
+                A dictionary mapping link atom (MM1) indices to the QM atoms to
+                which they are bonded.
+
+            \param mm1_to_mm2
+                A dictionary of link atoms indices (MM1) to a list of the MM
+                atoms to which they are bonded (MM2).
+
+            \param bond_scale_factors
+                A dictionary of link atom indices (MM1) to a list of the bond
+                length scale factors between the QM and MM1 atoms. The scale
+                factors are the ratio of the equilibrium bond lengths for the
+                QM-L (QM-link) atom and QM-MM1 atom, i.e. R0(QM-L) / R0(QM-MM1),
+                taken from the MM force field parameters for the molecule.
+
+            \param mm2_atoms
+                A vector of MM2 atom indices.
+
+            \param numbers
+                A vector of atomic charges for all atoms in the system.
+
+            \param charges
+                A vector of atomic charges for all atoms in the system.
+         */
+        EMLEForce(
+            EMLECallback callback,
+            SireUnits::Dimension::Length cutoff,
+            int neighbour_list_frequency,
+            double lambda,
+            QVector<int> atoms,
+            QMap<int, int> mm1_to_qm,
+            QMap<int, QVector<int>> mm1_to_mm2,
+            QMap<int, double> bond_scale_factors,
+            QVector<int> mm2_atoms,
+            QVector<int> numbers,
+            QVector<double> charges
+        );
+
+        //! Copy constructor.
+        EMLEForce(const EMLEForce &other);
+
+        //! Assignment operator.
+        EMLEForce &operator=(const EMLEForce &other);
+
+        //! Get the callback object.
+        /*! \returns
+                A Python object that contains the callback function.
+         */
+        EMLECallback getCallback() const;
+
+        //! Get the lambda weighting factor.
+        /*! \returns
+                The lambda weighting factor.
+         */
+        double getLambda() const;
+
+        //! Set the lambda weighting factor
+        /* \param lambda
+                The lambda weighting factor.
+         */
+        void setLambda(double lambda);
+
+        //! Get the QM cutoff distance.
+        /*! \returns
+                The QM cutoff distance.
+         */
+        SireUnits::Dimension::Length getCutoff() const;
+
+        //! Get the neighbour list frequency.
+        /*! \returns
+                The neighbour list frequency.
+         */
+        int getNeighbourListFrequency() const;
+
+        //! Get the indices of the atoms in the QM region.
+        /*! \returns
+                A vector of atom indices for the QM region.
+         */
+        QVector<int> getAtoms() const;
+
+        //! Get the link atoms associated with each QM atom.
+        /*! \returns
+                A tuple containing:
+
+            mm1_to_qm
+                A dictionary mapping link atom (MM1) indices to the QM atoms to
+                which they are bonded.
+
+            mm1_to_mm2
+                A dictionary of link atoms indices (MM1) to a list of the MM
+                atoms to which they are bonded (MM2).
+
+            bond_scale_factors
+                A dictionary of link atom indices (MM1) to a list of the bond
+                length scale factors between the QM and MM1 atoms. The scale
+                factors are the ratio of the equilibrium bond lengths for the
+                QM-L (QM-link) atom and QM-MM1 atom, i.e. R0(QM-L) / R0(QM-MM1),
+                taken from the MM force field parameters for the molecule.
+
+        */
+        boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const;
+
+        //! Get the vector of MM2 atoms.
+        /*! \returns
+                A vector of MM2 atom indices.
+         */
+        QVector<int> getMM2Atoms() const;
+
+        //! Get the atomic numbers for the atoms in the QM region.
+        /*! \returns
+                A vector of atomic numbers for the atoms in the QM region.
+         */
+        QVector<int> getNumbers() const;
+
+        //! Get the atomic charges of all atoms in the system.
+        /*! \returns
+                A vector of atomic charges for all atoms in the system.
+         */
+        QVector<double> getCharges() const;
+
+        //! Return the C++ name for this class.
+        static const char *typeName();
+
+        //! Return the C++ name for this class.
+        const char *what() const;
+
+        //! Call the callback function.
+        /*! \param numbers_qm
+                A vector of atomic numbers for the atoms in the ML region.
+
+            \param charges_mm
+                A vector of the charges on the MM atoms in mod electron charge.
+
+            \param xyz_qm
+                A vector of positions for the atoms in the ML region in Angstrom.
+
+            \param xyz_mm
+                A vector of positions for the atoms in the MM region in Angstrom.
+
+            \returns
+                A tuple containing:
+                    - The energy in kJ/mol.
+                    - A vector of forces for the QM atoms in kJ/mol/nm.
+                    - A vector of forces for the MM atoms in kJ/mol/nm.
+         */
+        boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>> call(
+                QVector<int> numbers_qm,
+                QVector<double> charges_mm,
+                QVector<QVector<double>> xyz_qm,
+                QVector<QVector<double>> xyz_mm
+        ) const;
+
+    protected:
+        OpenMM::ForceImpl *createImpl() const;
+
+    private:
+        EMLECallback callback;
+        SireUnits::Dimension::Length cutoff;
+        int neighbour_list_frequency;
+        double lambda;
+        QVector<int> atoms;
+        QMap<int, int> mm1_to_qm;
+        QMap<int, QVector<int>> mm1_to_mm2;
+        QMap<int, double> bond_scale_factors;
+        QVector<int> mm2_atoms;
+        QVector<int> numbers;
+        QVector<double> charges;
+    };
+
+#ifdef SIRE_USE_CUSTOMCPPFORCE
+    class EMLEForceImpl : public OpenMM::CustomCPPForceImpl
+    {
+    public:
+        EMLEForceImpl(const EMLEForce &owner);
+
+        ~EMLEForceImpl();
+
+        double computeForce(OpenMM::ContextImpl &context,
+                            const std::vector<OpenMM::Vec3> &positions,
+                            std::vector<OpenMM::Vec3> &forces);
+
+        const EMLEForce &getOwner() const;
+
+    private:
+        const EMLEForce &owner;
+        unsigned long long step_count=0;
+        double cutoff;
+        bool is_neighbour_list;
+        int neighbour_list_frequency;
+        double neighbour_list_cutoff;
+        QSet<int> neighbour_list;
+    };
+#endif
+
+    class EMLEEngine : public SireBase::ConcreteProperty<EMLEEngine, QMEngine>
     {
     public:
         //! Default constructor.
@@ -284,7 +502,7 @@ namespace SireOpenMM
         //! Return the C++ name for this class.
         const char *what() const;
 
-        //! Constructor
+        //! Call the callback function.
         /*! \param numbers_qm
                 A vector of atomic numbers for the atoms in the ML region.
 
@@ -310,8 +528,8 @@ namespace SireOpenMM
                 QVector<QVector<double>> xyz_mm
         ) const;
 
-    protected:
-        OpenMM::ForceImpl *createImpl() const;
+        //! Create an EMLE force object.
+        QMForce* createForce() const;
 
     private:
         EMLECallback callback;
@@ -326,37 +544,14 @@ namespace SireOpenMM
         QVector<int> numbers;
         QVector<double> charges;
     };
-
-#ifdef SIRE_USE_CUSTOMCPPFORCE
-    class EMLEEngineImpl : public OpenMM::CustomCPPForceImpl
-    {
-    public:
-        EMLEEngineImpl(const EMLEEngine &owner);
-
-        ~EMLEEngineImpl();
-
-        double computeForce(OpenMM::ContextImpl &context,
-                            const std::vector<OpenMM::Vec3> &positions,
-                            std::vector<OpenMM::Vec3> &forces);
-
-        const EMLEEngine &getOwner() const;
-
-    private:
-        const EMLEEngine &owner;
-        unsigned long long step_count=0;
-        double cutoff;
-        bool is_neighbour_list;
-        int neighbour_list_frequency;
-        double neighbour_list_cutoff;
-        QSet<int> neighbour_list;
-    };
-#endif
 }
 
 Q_DECLARE_METATYPE(SireOpenMM::EMLECallback)
+Q_DECLARE_METATYPE(SireOpenMM::EMLEForce)
 Q_DECLARE_METATYPE(SireOpenMM::EMLEEngine)
 
 SIRE_EXPOSE_CLASS(SireOpenMM::EMLECallback)
+SIRE_EXPOSE_CLASS(SireOpenMM::EMLEForce)
 SIRE_EXPOSE_CLASS(SireOpenMM::EMLEEngine)
 
 SIRE_END_HEADER

@@ -47,55 +47,74 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
-    class QMForce : public SireBase::Property, public OpenMM::Force
+    class QMForce;
+    class QMEngine;
+    class NullQMEngine;
+
+    class QMForce : public OpenMM::Force
     {
     public:
-        virtual ~QMForce();
+        QMForce();
 
-        //! Get the lambda weighting factor.
-        virtual double getLambda() const = 0;
+        virtual ~QMForce();
 
         //! Set the lambda weighting factor.
         virtual void setLambda(double lambda) = 0;
-
-        //! Get the QM cutoff distance.
-        virtual SireUnits::Dimension::Length getCutoff() const = 0;
-
-        //! Set the QM cutoff distance.
-        virtual void setCutoff(SireUnits::Dimension::Length cutoff) = 0;
-
-        //! Get the indices of the atoms in the QM region.
-        virtual QVector<int> getAtoms() const = 0;
-
-        //! Set the list of atom indices for the QM region.
-        virtual void setAtoms(QVector<int>) = 0;
-
-        //! Get the link atoms associated with each QM atom.
-        virtual boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> getLinkAtoms() const = 0;
-
-        //! Set the link atoms associated with each QM atom.
-        virtual void setLinkAtoms(QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>) = 0;
-
-        //! Get the atomic numbers of the atoms in the QM region.
-        virtual QVector<int> getNumbers() const = 0;
-
-        //! Set the list of atomic numbers for the QM region.
-        virtual void setNumbers(QVector<int>) = 0;
-
-        //! Get the atomic charges of all atoms in the system.
-        virtual QVector<double> getCharges() const = 0;
-
-        //! Set the atomic charges of all atoms in the system.
-        virtual void setCharges(QVector<double>) = 0;
 
     protected:
         virtual OpenMM::ForceImpl *createImpl() const = 0;
     };
 
-    typedef SireBase::PropPtr<SireOpenMM::QMForce> QMForcePtr;
+    class QMEngine : public SireBase::Property
+    {
+    public:
+        QMEngine();
+
+        virtual ~QMEngine();
+
+        //! Clone the QM engine.
+        virtual QMEngine *clone() const = 0;
+
+        //! Get the name of the QM engine.
+        static const char *typeName();
+
+        //! Get the name of the QM engine.
+        const char *what() const;
+
+        //! Create a QM force object.
+        virtual QMForce* createForce() const=0;
+
+        //! Get a null QM engine.
+        static const NullQMEngine &null();
+    };
+
+    typedef SireBase::PropPtr<SireOpenMM::QMEngine> QMEnginePtr;
+
+    class NullQMEngine : public SireBase::ConcreteProperty<NullQMEngine, QMEngine>
+    {
+    public:
+        NullQMEngine();
+
+        ~NullQMEngine();
+
+        //! Get the name of the QM engine.
+        static const char *typeName();
+
+        //! Get the name of the QM engine.
+        const char *what() const;
+
+        //! Create a QM force object.
+        QMForce* createForce() const;
+    };
 }
 
+Q_DECLARE_METATYPE(SireOpenMM::NullQMEngine)
+
 SIRE_EXPOSE_CLASS(SireOpenMM::QMForce)
+SIRE_EXPOSE_CLASS(SireOpenMM::QMEngine)
+SIRE_EXPOSE_CLASS(SireOpenMM::NullQMEngine)
+
+SIRE_EXPOSE_PROPERTY(SireOpenMM::QMEnginePtr, SireOpenMM::QMEngine)
 
 SIRE_END_HEADER
 
