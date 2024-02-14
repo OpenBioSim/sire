@@ -110,6 +110,20 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Fixed compile error using Python 3.12. This fixes issue #147.
 
+* Optimised the OpenMM minimisation code and making it more robust.
+  This includes vectorising for Apple Silicon and adding more tests for
+  convergence so that we can have more confidence that the structures
+  output are sensible. Also made sure that optimised compilation (-O3) is
+  used for all of the plugins (SireOpenMM, SireGemmi and SireRDKit).
+  They were previously compiled with wrapper options (e.g. -Os).
+  Minimisation now gives better progress updates, using a progress
+  bar to show progress towards the maximum number of iterations.
+  This has been reduced to 1500 by default. Also, if the minimisation
+  fails to create a structure that obeys constraints on the first pass,
+  then the minimisation is repeated, with the maximum number of
+  iterations reset. If it fails again, then this structure, with
+  constraints re-applied, is returned.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024

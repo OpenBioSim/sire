@@ -238,10 +238,12 @@ QString LambdaSchedule::toString() const
         auto keys = this->stage_equations[i].keys();
         std::sort(keys.begin(), keys.end());
 
-        for (auto lever : keys)
+        for (const auto &lever : keys)
         {
+            auto output_name = lever;
+            output_name.replace("*::", "");
             lines.append(QString("    %1: %2")
-                             .arg(lever.replace("*::", ""))
+                             .arg(output_name)
                              .arg(this->stage_equations[i][lever].toOpenMMString()));
         }
     }
@@ -956,20 +958,35 @@ SireCAS::Expression LambdaSchedule::_getEquation(int stage,
                                      CODELOC);
 
     const auto default_lever = _get_lever_name("*", lever);
+    const auto default_force = _get_lever_name(force, "*");
+    const auto lever_name = _get_lever_name(force, lever);
 
-    if (force == "*")
+    const auto equations = this->stage_equations[stage];
+
+    // search from most specific to least specific
+    auto it = equations.find(lever_name);
+
+    if (it != equations.end())
     {
-        return this->stage_equations[stage].value(
-            default_lever, this->default_equations[stage]);
+        return it.value();
     }
-    else
+
+    it = equations.find(default_force);
+
+    if (it != equations.end())
     {
-        return this->stage_equations[stage].value(
-            _get_lever_name(force, lever),
-            this->stage_equations[stage].value(
-                default_lever,
-                this->default_equations[stage]));
+        return it.value();
     }
+
+    it = equations.find(default_lever);
+
+    if (it != equations.end())
+    {
+        return it.value();
+    }
+
+    // we don't have any match, so return the default equation for this stage
+    return this->default_equations[stage];
 }
 
 /** Return the equation used to control the specified 'lever'
@@ -1142,15 +1159,33 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
     QVector<double> values(lambda_values.count(), NAN);
 
     QHash<QString, QVector<double>> lever_values;
-    lever_values.reserve(this->lever_names.count() + 1);
+
+    // get all of the lever / force combinations in use
+    QSet<QString> all_levers;
+
+    for (const auto &equations : this->stage_equations)
+    {
+        for (const auto &lever : equations.keys())
+        {
+            all_levers.insert(lever);
+        }
+    }
+
+    QStringList levers = all_levers.values();
+    std::sort(levers.begin(), levers.end());
+
+    lever_values.reserve(levers.count() + 2);
 
     lever_values.insert("λ", values);
 
     lever_values.insert("default", values);
 
-    for (const auto &lever_name : this->lever_names)
+    for (const auto &lever : levers)
     {
-        lever_values.insert(lever_name, values);
+        if (lever.startsWith("*::"))
+            lever_values.insert(lever.mid(3), values);
+        else
+            lever_values.insert(lever, values);
     }
 
     if (this->nStages() == 0)
@@ -1174,12 +1209,16 @@ QHash<QString, QVector<double>> LambdaSchedule::getLeverValues(
         const auto equation = this->default_equations[stage];
         lever_values["default"][i] = equation(input_values);
 
-        for (const auto &lever_name : lever_names)
+        for (const auto &lever : levers)
         {
-            const auto equation = this->stage_equations[stage].value(
-                lever_name, this->default_equations[stage]);
+            auto parts = lever.split("::");
 
-            lever_values[lever_name][i] = equation(input_values);
+            const auto equation = this->_getEquation(stage, parts[0], parts[1]);
+
+            if (lever.startsWith("*::"))
+                lever_values[lever.mid(3)][i] = equation(input_values);
+            else
+                lever_values[lever][i] = equation(input_values);
         }
     }
 

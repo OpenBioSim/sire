@@ -20,8 +20,13 @@ namespace SireOpenMM
      *     related to exclusions / exceptions not matching
      */
     void minimise_openmm_context(OpenMM::Context &context,
-                                 double tolerance = 10,
-                                 int max_iterations = -1);
+                                 double tolerance = 10.0,
+                                 int max_iterations = -1,
+                                 int max_restarts = 10,
+                                 int max_ratchets = 20,
+                                 int ratchet_frequency = 500,
+                                 double starting_k = 100.0,
+                                 double ratchet_scale = 2.0);
 
 }
 

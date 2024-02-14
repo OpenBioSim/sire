@@ -658,20 +658,63 @@ class DynamicsData:
 
         self._omm_mols.getIntegrator().step(num_steps)
 
-    def run_minimisation(self, max_iterations: int):
+    def run_minimisation(
+        self,
+        max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        ratchet_frequency: int = 500,
+        starting_k: float = 100.0,
+        ratchet_scale: float = 2.0,
+    ):
         """
         Internal method that runs minimisation on the molecules.
+
+        If the system is constrained, then a ratcheting algorithm is used.
+        The constraints are replaced by harmonic restraints with an
+        force constant based on `tolerance` and `starting_k`. Minimisation
+        is performed, with the actual constrained bond lengths checked
+        whenever minimisation converges, or when ratchet_frequency steps
+        have completed (whichever is sooner). The force constant of
+        the restraints is ratcheted up by `ratchet_scale`, and minimisation
+        continues until there is no large change in energy or the maximum
+        number of ratchets has been reached. In addition, at each ratchet,
+        the actual bond lengths of constrained bonds are compared against
+        the constrained values. If these have drifted too far away from
+        the constrained values, then the minimisation is restarted,
+        going back to the starting conformation and starting minimisation
+        at one higher ratchet level. This will repeat a maximum of
+        `max_restarts` times.
+
+        If a stable structure cannot be reached, then an exception
+        will be raised.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - tolerance (float): The tolerance to use for the minimisation
+        - max_restarts (int): The maximum number of restarts before giving up
+        - max_ratchets (int): The maximum number of ratchets before giving up
+        - ratchet_frequency (int): The maximum number of steps between ratchets
+        - starting_k (float): The starting value of k for the minimisation
+        - ratchet_scale (float): The amount to scale k at each ratchet
         """
         from ..legacy.Convert import minimise_openmm_context
 
         if max_iterations <= 0:
             max_iterations = 0
 
-        minimise_openmm_context(self._omm_mols, max_iterations=max_iterations)
+        minimise_openmm_context(
+            self._omm_mols,
+            tolerance=tolerance,
+            max_iterations=max_iterations,
+            max_restarts=max_restarts,
+            max_ratchets=max_ratchets,
+            ratchet_frequency=ratchet_frequency,
+            starting_k=starting_k,
+            ratchet_scale=ratchet_scale,
+        )
 
     def _rebuild_and_minimise(self):
         if self.is_null():
@@ -694,7 +737,7 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        self.run_minimisation(max_iterations=10000)
+        self.run_minimisation()
 
     def run(
         self,
@@ -1145,18 +1188,54 @@ class Dynamics:
     def minimise(
         self,
         max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        ratchet_frequency: int = 500,
+        starting_k: float = 100.0,
+        ratchet_scale: float = 2.0,
     ):
         """
-        Perform minimisation on the molecules, running a maximum
-        of max_iterations iterations.
+        Internal method that runs minimisation on the molecules.
+
+        If the system is constrained, then a ratcheting algorithm is used.
+        The constraints are replaced by harmonic restraints with an
+        force constant based on `tolerance` and `starting_k`. Minimisation
+        is performed, with the actual constrained bond lengths checked
+        whenever minimisation converges, or when ratchet_frequency steps
+        have completed (whichever is sooner). The force constant of
+        the restraints is ratcheted up by `ratchet_scale`, and minimisation
+        continues until there is no large change in energy or the maximum
+        number of ratchets has been reached. In addition, at each ratchet,
+        the actual bond lengths of constrained bonds are compared against
+        the constrained values. If these have drifted too far away from
+        the constrained values, then the minimisation is restarted,
+        going back to the starting conformation and starting minimisation
+        at one higher ratchet level. This will repeat a maximum of
+        `max_restarts` times.
+
+        If a stable structure cannot be reached, then an exception
+        will be raised.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - tolerance (float): The tolerance to use for the minimisation
+        - max_restarts (int): The maximum number of restarts before giving up
+        - max_ratchets (int): The maximum number of ratchets before giving up
+        - ratchet_frequency (int): The maximum number of steps between ratchets
+        - starting_k (float): The starting value of k for the minimisation
+        - ratchet_scale (float): The amount to scale k at each ratchet
         """
         if not self._d.is_null():
             self._d.run_minimisation(
                 max_iterations=max_iterations,
+                tolerance=tolerance,
+                max_restarts=max_restarts,
+                max_ratchets=max_ratchets,
+                ratchet_frequency=ratchet_frequency,
+                starting_k=starting_k,
+                ratchet_scale=ratchet_scale,
             )
 
         return self

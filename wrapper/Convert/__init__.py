@@ -498,9 +498,25 @@ try:
         return _openmm_extract_space(state)
 
     def minimise_openmm_context(
-        context, tolerance: float = 10, max_iterations: int = -1
+        context,
+        max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        ratchet_frequency: int = 500,
+        starting_k: float = 100.0,
+        ratchet_scale: float = 2.0,
     ):
-        return _minimise_openmm_context(context, tolerance, max_iterations)
+        return _minimise_openmm_context(
+            context,
+            max_iterations=max_iterations,
+            tolerance=tolerance,
+            max_restarts=max_restarts,
+            max_ratchets=max_ratchets,
+            ratchet_frequency=ratchet_frequency,
+            starting_k=starting_k,
+            ratchet_scale=ratchet_scale,
+        )
 
 except Exception as e:
     _openmm_import_exception = e
