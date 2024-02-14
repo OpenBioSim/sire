@@ -437,6 +437,114 @@ namespace SireOpenMM
         lbfgsfloatval_t *x;
     };
 
+    void debugMinimisationResult(int value)
+    {
+        switch (value)
+        {
+        case LBFGS_STOP:
+            qDebug() << "LBFGS_STOP";
+            break;
+        case LBFGS_ALREADY_MINIMIZED:
+            qDebug() << "LBFGS_ALREADY_MINIMIZED";
+            break;
+        case LBFGSERR_UNKNOWNERROR:
+            qDebug() << "LBFGSERR_UNKNOWNERROR";
+            break;
+        case LBFGSERR_LOGICERROR:
+            qDebug() << "LBFGSERR_LOGICERROR";
+            break;
+        case LBFGSERR_OUTOFMEMORY:
+            qDebug() << "LBFGSERR_OUTOFMEMORY";
+            break;
+        case LBFGSERR_CANCELED:
+            qDebug() << "LBFGSERR_CANCELED";
+            break;
+        case LBFGSERR_INVALID_N:
+            qDebug() << "LBFGSERR_INVALID_N";
+            break;
+        case LBFGSERR_INVALID_N_SSE:
+            qDebug() << "LBFGSERR_INVALID_N_SSE";
+            break;
+        case LBFGSERR_INVALID_X_SSE:
+            qDebug() << "LBFGSERR_INVALID_X_SSE";
+            break;
+        case LBFGSERR_INVALID_EPSILON:
+            qDebug() << "LBFGSERR_INVALID_EPSILON";
+            break;
+        case LBFGSERR_INVALID_TESTPERIOD:
+            qDebug() << "LBFGSERR_INVALID_TESTPERIOD";
+            break;
+        case LBFGSERR_INVALID_DELTA:
+            qDebug() << "LBFGSERR_INVALID_DELTA";
+            break;
+        case LBFGSERR_INVALID_LINESEARCH:
+            qDebug() << "LBFGSERR_INVALID_LINESEARCH";
+            break;
+        case LBFGSERR_INVALID_MINSTEP:
+            qDebug() << "LBFGSERR_INVALID_MINSTEP";
+            break;
+        case LBFGSERR_INVALID_MAXSTEP:
+            qDebug() << "LBFGSERR_INVALID_MAXSTEP";
+            break;
+        case LBFGSERR_INVALID_FTOL:
+            qDebug() << "LBFGSERR_INVALID_FTOL";
+            break;
+        case LBFGSERR_INVALID_WOLFE:
+            qDebug() << "LBFGSERR_INVALID_WOLFE";
+            break;
+        case LBFGSERR_INVALID_GTOL:
+            qDebug() << "LBFGSERR_INVALID_GTOL";
+            break;
+        case LBFGSERR_INVALID_XTOL:
+            qDebug() << "LBFGSERR_INVALID_XTOL";
+            break;
+        case LBFGSERR_INVALID_MAXLINESEARCH:
+            qDebug() << "LBFGSERR_INVALID_MAXLINESEARCH";
+            break;
+        case LBFGSERR_INVALID_ORTHANTWISE:
+            qDebug() << "LBFGSERR_INVALID_ORTHANTWISE";
+            break;
+        case LBFGSERR_INVALID_ORTHANTWISE_START:
+            qDebug() << "LBFGSERR_INVALID_ORTHANTWISE_START";
+            break;
+        case LBFGSERR_INVALID_ORTHANTWISE_END:
+            qDebug() << "LBFGSERR_INVALID_ORTHANTWISE_END";
+            break;
+        case LBFGSERR_OUTOFINTERVAL:
+            qDebug() << "LBFGSERR_OUTOFINTERVAL";
+            break;
+        case LBFGSERR_INCORRECT_TMINMAX:
+            qDebug() << "LBFGSERR_INCORRECT_TMINMAX";
+            break;
+        case LBFGSERR_ROUNDING_ERROR:
+            qDebug() << "LBFGSERR_ROUNDING_ERROR";
+            break;
+        case LBFGSERR_MINIMUMSTEP:
+            qDebug() << "LBFGSERR_MINIMUMSTEP";
+            break;
+        case LBFGSERR_MAXIMUMSTEP:
+            qDebug() << "LBFGSERR_MAXIMUMSTEP";
+            break;
+        case LBFGSERR_MAXIMUMLINESEARCH:
+            qDebug() << "LBFGSERR_MAXIMUMLINESEARCH";
+            break;
+        case LBFGSERR_MAXIMUMITERATION:
+            qDebug() << "LBFGSERR_MAXIMUMITERATION";
+            break;
+        case LBFGSERR_WIDTHTOOSMALL:
+            qDebug() << "LBFGSERR_WIDTHTOOSMALL";
+            break;
+        case LBFGSERR_INVALIDPARAMETERS:
+            qDebug() << "LBFGSERR_INVALIDPARAMETERS";
+            break;
+        case LBFGSERR_INCREASEGRADIENT:
+            qDebug() << "LBFGSERR_INCREASEGRADIENT";
+            break;
+        default:
+            qDebug() << "Unknown value";
+        }
+    }
+
     void minimise_openmm_context(OpenMM::Context &context,
                                  double tolerance, int max_iterations,
                                  int max_restarts, int max_ratchets,
@@ -482,6 +590,8 @@ namespace SireOpenMM
         double energy_before = 1e10;
         bool is_success = true;
 
+        int max_linesearch = 100;
+
         while (data.getIteration() < data.getMaxIterations())
         {
             if (not is_success)
@@ -519,6 +629,7 @@ namespace SireOpenMM
                 norm /= num_particles;
                 norm = (norm < 1 ? 1 : sqrt(norm));
                 param.epsilon = tolerance / norm;
+                param.max_linesearch = max_linesearch;
 
                 double prev_max_error = 1e10;
 
@@ -531,7 +642,20 @@ namespace SireOpenMM
 
                     // Perform the minimization.
                     data.aboutToStart();
-                    lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
+                    auto result = lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
+
+                    if (result != LBFGS_SUCCESS and result != LBFGS_STOP)
+                    {
+                        if (result == LBFGSERR_MAXIMUMLINESEARCH)
+                        {
+                            // increase the max line search by a factor of 4 and try again
+                            max_linesearch *= 4;
+                        }
+                        else
+                        {
+                            debugMinimisationResult(result);
+                        }
+                    }
 
                     if (std::isinf(fx) || std::isnan(fx))
                     {
