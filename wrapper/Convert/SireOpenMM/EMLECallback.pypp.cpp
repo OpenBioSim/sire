@@ -79,8 +79,6 @@ void register_EMLECallback_class(){
         EMLECallback_exposer.def( "clone", &__copy__);
         EMLECallback_exposer.def( "__str__", &pvt_get_name);
         EMLECallback_exposer.def( "__repr__", &pvt_get_name);
-        EMLECallback_exposer.def( "__str__", &pvt_get_name);
-        EMLECallback_exposer.def( "__repr__", &pvt_get_name);
     }
 
 }

@@ -214,8 +214,6 @@ void register_EMLEForce_class(){
         EMLEForce_exposer.def( "clone", &__copy__);
         EMLEForce_exposer.def( "__str__", &pvt_get_name);
         EMLEForce_exposer.def( "__repr__", &pvt_get_name);
-        EMLEForce_exposer.def( "__str__", &pvt_get_name);
-        EMLEForce_exposer.def( "__repr__", &pvt_get_name);
     }
 
 }

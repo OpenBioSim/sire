@@ -7,15 +7,11 @@
 
 namespace bp = boost::python;
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
@@ -42,8 +38,6 @@ void register_QMForce_class(){
                 , "Set the lambda weighting factor." );
         
         }
-        QMForce_exposer.def( "__str__", &pvt_get_name);
-        QMForce_exposer.def( "__repr__", &pvt_get_name);
         QMForce_exposer.def( "__str__", &pvt_get_name);
         QMForce_exposer.def( "__repr__", &pvt_get_name);
     }

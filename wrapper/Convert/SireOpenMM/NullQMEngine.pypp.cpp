@@ -7,31 +7,11 @@
 
 namespace bp = boost::python;
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "qmmm.h"
-
-#include "Helpers/str.hpp"
-
-#include "Helpers/release_gil_policy.hpp"
-
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "qmmm.h"
-
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
+#include "SireError/errors.h"
 
 #include "qmmm.h"
 
@@ -70,8 +50,6 @@ void register_NullQMEngine_class(){
         
         }
         NullQMEngine_exposer.staticmethod( "typeName" );
-        NullQMEngine_exposer.def( "__str__", &__str__< ::SireOpenMM::NullQMEngine > );
-        NullQMEngine_exposer.def( "__repr__", &__str__< ::SireOpenMM::NullQMEngine > );
         NullQMEngine_exposer.def( "__str__", &__str__< ::SireOpenMM::NullQMEngine > );
         NullQMEngine_exposer.def( "__repr__", &__str__< ::SireOpenMM::NullQMEngine > );
     }

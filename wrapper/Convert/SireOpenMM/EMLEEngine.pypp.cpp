@@ -29,26 +29,6 @@ SireOpenMM::EMLEEngine __copy__(const SireOpenMM::EMLEEngine &other){ return Sir
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "SireError/errors.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "emle.h"
-
-#include "SireError/errors.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "emle.h"
-
-#include "Helpers/str.hpp"
-
-#include "Helpers/release_gil_policy.hpp"
-
 void register_EMLEEngine_class(){
 
     { //::SireOpenMM::EMLEEngine
@@ -323,8 +303,6 @@ void register_EMLEEngine_class(){
         EMLEEngine_exposer.def( "__copy__", &__copy__);
         EMLEEngine_exposer.def( "__deepcopy__", &__copy__);
         EMLEEngine_exposer.def( "clone", &__copy__);
-        EMLEEngine_exposer.def( "__str__", &__str__< ::SireOpenMM::EMLEEngine > );
-        EMLEEngine_exposer.def( "__repr__", &__str__< ::SireOpenMM::EMLEEngine > );
         EMLEEngine_exposer.def( "__str__", &__str__< ::SireOpenMM::EMLEEngine > );
         EMLEEngine_exposer.def( "__repr__", &__str__< ::SireOpenMM::EMLEEngine > );
     }
