@@ -160,6 +160,7 @@ namespace SireOpenMM
         {
             num_ratchets++;
             scaleK(2.0);
+            addLog(QString("Ratcheting k to %1").arg(k));
         }
 
         void aboutToStart()
@@ -184,6 +185,8 @@ namespace SireOpenMM
             num_restarts += 1;
             k = starting_k;
             num_ratchets = 0;
+
+            addLog(QString("Restarting minimisation - %1 of %2").arg(num_restarts).arg(max_its));
 
             for (int i = 0; i < num_restarts - 1; ++i)
             {
@@ -558,11 +561,6 @@ namespace SireOpenMM
         }
     }
 
-    /** Minimise the passed context subject to the passed minimisation
-     *  parameters. Returns a string containing the log of the minimisation
-     *
-     *  This raises an exception if the minimisation fails.
-     */
     QString minimise_openmm_context(OpenMM::Context &context,
                                     double tolerance, int max_iterations,
                                     int max_restarts, int max_ratchets,
@@ -582,15 +580,10 @@ namespace SireOpenMM
 
         double constraint_tol = context.getIntegrator().getConstraintTolerance();
 
-        double working_constraint_tol = std::max(1e-4, constraint_tol);
-
-        data.addLog(QString("Minimising with a tolerance of %1").arg(tolerance));
-        data.addLog(QString("Minimising with constraint tolerance %1").arg(working_constraint_tol));
+        double working_constraint_tol = std::max(1e-3, constraint_tol);
 
         // this is about 1e6 - it needs to be large to keep constraints in place
         double k = starting_k / working_constraint_tol;
-
-        data.addLog(QString("Minimising with k = %1").arg(k));
 
         SireBase::ProgressBar bar("Minimising: initialise", max_iterations);
         bar.setSpeedUnit("steps / s");
@@ -601,6 +594,9 @@ namespace SireOpenMM
                            ratchet_scale);
         lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
 
+        data.addLog(QString("Minimising with a tolerance of %1").arg(tolerance));
+        data.addLog(QString("Minimising with constraint tolerance %1").arg(working_constraint_tol));
+        data.addLog(QString("Minimising with k = %1").arg(k));
         data.addLog(QString("Minimising with %1 particles").arg(num_particles));
         data.addLog(QString("Minimising with a maximum of %1 iterations").arg(max_iterations));
         data.addLog(QString("Minimising with a maximum of %1 restarts").arg(max_restarts));
@@ -620,6 +616,7 @@ namespace SireOpenMM
         bool is_success = true;
 
         int max_linesearch = 100;
+        const int max_linesearch_delta = 100;
 
         while (data.getIteration() < data.getMaxIterations())
         {
@@ -635,6 +632,15 @@ namespace SireOpenMM
             {
                 energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
                 data.addLog(QString("Starting energy: %1 kJ mol-1").arg(energy_before));
+
+                if (std::isinf(energy_before) or std::isnan(energy_before))
+                {
+                    // something has gone wrong, so we need to restart
+                    data.addLog("Infinite or NaN energy detected!");
+                    is_success = false;
+                    throw std::exception();
+                }
+
                 bar.silentTick();
 
                 // Initialize the minimizer.
@@ -686,6 +692,8 @@ namespace SireOpenMM
 
                     data.addLog(QString("...completed %1 iterations").arg(data.getIteration() - last_it));
 
+                    bool should_break = false;
+
                     if (result != LBFGS_SUCCESS and result != LBFGS_STOP)
                     {
                         data.addLog(QString("Minimisation exited with error code %1").arg(result));
@@ -693,9 +701,21 @@ namespace SireOpenMM
 
                         if (result == LBFGSERR_MAXIMUMLINESEARCH)
                         {
-                            // increase the max line search by a factor of 4 and try again
-                            max_linesearch *= 4;
+                            // increase the max line by max_linesearch_delta and try again
+                            max_linesearch += max_linesearch_delta;
                             data.addLog(QString("Increasing the maximum line search to %1").arg(max_linesearch));
+                        }
+                        else if (result == LBFGSERR_INVALIDPARAMETERS)
+                        {
+                            // this is broken
+                            data.addLog("Invalid parameters - exiting");
+                            is_success = false;
+                            should_break = true;
+                        }
+                        else if (result == LBFGSERR_MINIMUMSTEP)
+                        {
+                            // nothing else it can do
+                            should_break = true;
                         }
                     }
 
@@ -706,6 +726,18 @@ namespace SireOpenMM
                         // we've hit a singularity, so we need to restart
                         data.addLog("Infinite or NaN energy detected!");
                         throw std::exception();
+                    }
+
+                    if (fx > energy_before)
+                    {
+                        // the energy has gone up - we should probably stop
+                        data.addLog("Energy has increased!");
+                        should_break = true;
+                    }
+
+                    if (should_break)
+                    {
+                        break;
                     }
                     else if (data.getIteration() == last_it)
                     {
@@ -837,9 +869,13 @@ namespace SireOpenMM
                 // to the full precision requested by the user.
                 context.applyConstraints(working_constraint_tol);
 
-                if (std::abs(energy_after - energy_before) < 100.0)
+                const auto delta_energy = energy_after - energy_before;
+
+                data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
+
+                if (std::abs(energy_after - energy_before) < 1000.0)
                 {
-                    // only 100 kJ/mol difference, so not much more to
+                    // only 1000 kJ/mol difference, so not much more to
                     // be gained by further minimisation (we don't want to
                     // get stuck in a cycle caused by re-application of the
                     // constraints)

@@ -80,6 +80,12 @@ class Minimisation:
         """
         return self._d.get_constraints()
 
+    def get_log(self):
+        """
+        Return the log of the minimisation
+        """
+        return self._d.get_minimisation_log()
+
     def run(
         self,
         max_iterations: int = 10000,

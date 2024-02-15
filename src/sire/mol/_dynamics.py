@@ -564,6 +564,18 @@ class DynamicsData:
 
         self._omm_mols.getIntegrator().step(num_steps)
 
+    def get_minimisation_log(self):
+        """
+        Return the log from the last minimisation
+        """
+        if self.is_null():
+            return None
+        else:
+            try:
+                return self._minimisation_log
+            except Exception:
+                return None
+
     def run_minimisation(
         self,
         max_iterations: int = 10000,
@@ -611,7 +623,7 @@ class DynamicsData:
         if max_iterations <= 0:
             max_iterations = 0
 
-        minimise_openmm_context(
+        self._minimisation_log = minimise_openmm_context(
             self._omm_mols,
             tolerance=tolerance,
             max_iterations=max_iterations,

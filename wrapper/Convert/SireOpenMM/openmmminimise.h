@@ -18,15 +18,21 @@ namespace SireOpenMM
      *  2. Avoid errors caused by OpenMM switching from the desired
      *     context to the CPU context, thus triggering spurious exceptions
      *     related to exclusions / exceptions not matching
+     *
+     *  This exposes more controls from the underlying minimisation
+     *  library, and also logs events and progress, which is returned
+     *  as a string.
+     *
+     *  This raises an exception if minimisation fails.
      */
-    void minimise_openmm_context(OpenMM::Context &context,
-                                 double tolerance = 10.0,
-                                 int max_iterations = -1,
-                                 int max_restarts = 10,
-                                 int max_ratchets = 20,
-                                 int ratchet_frequency = 500,
-                                 double starting_k = 100.0,
-                                 double ratchet_scale = 2.0);
+    QString minimise_openmm_context(OpenMM::Context &context,
+                                    double tolerance = 10.0,
+                                    int max_iterations = -1,
+                                    int max_restarts = 10,
+                                    int max_ratchets = 20,
+                                    int ratchet_frequency = 500,
+                                    double starting_k = 100.0,
+                                    double ratchet_scale = 2.0);
 
 }
 
