@@ -1,6 +1,24 @@
 def _check_charge(qm_atoms, map, tol=1e-6):
     """
     Internal helper function to check that the QM region has integer charge.
+
+    Parameters
+    ----------
+
+    qm_atoms: [sire.legacy.Mol.AtomIdx]
+        A list of QM atoms.
+
+    map: sire.legacy.Base.PropertyMap
+        The property map for the molecule.
+
+    tol: float
+        The tolerance for the charge check.
+
+    Raises
+    ------
+
+    Exception
+        If the charge of the QM region is not an integer.
     """
 
     import math as _math
@@ -22,6 +40,19 @@ def _create_qm_mol_to_atoms(qm_atoms):
     """
     Internal helper function to create a mapping between molecule numbers and
     a list of QM atoms.
+
+    Parameters
+    ----------
+
+    qm_atoms: [sire.legacy.Mol.AtomIdx]
+        A list of QM atoms.
+
+    Returns
+    -------
+
+    qm_mol_to_atoms: {int: [sire.legacy.Mol.AtomIdx]}
+        A dictionary with molecule numbers as keys and a list of QM atoms as
+        values.
     """
     qm_mol_to_atoms = {}
     for atom in qm_atoms:
@@ -34,9 +65,106 @@ def _create_qm_mol_to_atoms(qm_atoms):
     return qm_mol_to_atoms
 
 
+def _check_qm_atom_bonds(mol, atom, qm_idxs, map):
+    """
+    Internal helper function to check the bonding for QM atoms.
+
+    Parameters
+    ----------
+
+    mol: sire.legacy.Mol.Mol
+        The molecule containing the QM atoms.
+
+    atom: sire.legacy.Mol.Atom
+        The QM atom to check the bonding for.
+
+    qm_idxs: [sire.legacy.Mol.AtomIdx]
+        The indices of the QM atoms.
+
+    map: sire.legacy.Base.PropertyMap
+        The property map for the molecule.
+
+    Returns
+    -------
+
+    mm_atoms: [sire.legacy.Mol.AtomIdx]
+        A list of MM atoms that are bonded to the QM atom.
+
+    has_qm_bond: bool
+        A flag to indicate if the QM atom has a bond to another QM atom.
+    """
+
+    # Get the bonds for the molecule.
+    bonds = mol.property(map["bond"]).potentials()
+
+    # Store the info for the molecule.
+    info = mol.info()
+
+    # Store the cut-group atom index pair.
+    cg_atom_idx = info.cg_atom_idx(atom.index())
+
+    # Initialise a list to store the MM atoms.
+    mm_atoms = []
+
+    # A flag to indicate if the atom has a bond to another QM atom.
+    has_qm_bond = False
+
+    # Loop over all of the bonds.
+    for bond in bonds:
+        # Get the indices of the atoms in the bond.
+        idx0 = bond.atom0()
+        idx1 = bond.atom1()
+
+        # Work out which is the other atom in the bond.
+        if idx0 == cg_atom_idx:
+            idx = idx1
+        elif idx1 == cg_atom_idx:
+            idx = idx0
+        else:
+            continue
+
+        # Convert to an atom index.
+        idx = mol.atom(idx).index()
+
+        # The atom is not in the QM region.
+        if idx not in qm_idxs:
+            mm_atoms.append(idx)
+        else:
+            has_qm_bond = True
+
+    return mm_atoms, has_qm_bond
+
+
 def _get_link_atoms(mols, qm_mol_to_atoms, map):
     """
     Internal helper function to get a dictionary with link atoms for each QM atom.
+
+    Parameters
+    ----------
+
+    mols: sire.legacy.System.System
+        The Sire system containing the QM atoms.
+
+    qm_mol_to_atoms: {sire.legacy.Mol.MolNum: [sire.legacy.Mol.AtomIdx]}
+        A dictionary with molecule numbers as keys and a list of QM atoms as
+        values.
+
+    map: sire.legacy.Base.PropertyMap
+        The property map for the system.
+
+    Returns
+
+    mm1_to_qm: {sire.legacy.Mol.AtomIdx: sire.legacy.Mol.AtomIdx}
+        A dictionary with link atoms as keys and QM atoms as values.
+
+    mm1_to_mm2: {sire.legacy.Mol.AtomIdx: [sire.legacy.Mol.AtomIdx]}
+        A dictionary with link atoms as keys and a list of MM atoms as values.
+
+    bond_scale_factors: {sire.legacy.Mol.AtomIdx: float}
+        A dictionary with link atoms as keys and bond scale factors as values.
+
+    mm1_indices: [[sire.legacy.Mol.AtomIdx]]
+        A list of lists of MM1 atom indices.
     """
 
     import warnings as _warnings
@@ -90,32 +218,8 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
             # Store the element of the atom.
             elem = atom.property(elem_prop)
 
-            # Get the bonds for the atom.
-            bonds = connectivity.get_bonds(idx)
-
-            # A list to hold MM atoms involved in the bonds.
-            mm_bonds = []
-
-            # A flag to indicate if the atom has a bond to another QM atom.
-            has_qm_bond = False
-
-            # Loop over the bonds and find the MM atoms.
-            for bond in bonds:
-                # Get the indices of the two atoms in the bond.
-                idx0 = bond.atom0()
-                idx1 = bond.atom1()
-
-                # Work out which atom isn't the current QM atom.
-                if idx0 != idx:
-                    bond_idx = idx0
-                else:
-                    bond_idx = idx1
-
-                # If the atom is not in the QM region, add it to the list.
-                if bond_idx not in qm_idxs:
-                    mm_bonds.append(bond_idx)
-                else:
-                    has_qm_bond = True
+            # Check the bonding for this atom.
+            mm_atoms, has_qm_bond = _check_qm_atom_bonds(qm_mol, atom, qm_idxs, map)
 
             # If there are no QM bonds for this atom, raise an exception.
             if not has_qm_bond:
@@ -124,12 +228,12 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                 )
 
             # Store the list of MM atoms.
-            if len(mm_bonds) > 0:
-                if len(mm_bonds) > 1:
+            if len(mm_atoms) > 0:
+                if len(mm_atoms) > 1:
                     raise Exception(f"QM atom {idx} has more than one MM bond!")
                 else:
                     # Get the element of the cut atom.
-                    link_elem = qm_mol[mm_bonds[0]].property(elem_prop)
+                    link_elem = qm_mol[mm_atoms[0]].property(elem_prop)
 
                     # If the element is hydrogen, raise an exception.
                     if elem == hydrogen:
@@ -148,7 +252,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
                         )
 
                     # Store the link (MM1) atom.
-                    mm1_atoms[idx] = mm_bonds[0]
+                    mm1_atoms[idx] = mm_atoms[0]
 
         # Now work out the MM atoms that are bonded to the link atoms. (MM2 atoms.)
         mm2_atoms = {}
@@ -287,6 +391,25 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
 def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
     """
     Internal helper function to create a merged molecule from the QM molecule.
+
+    Parameters
+    ----------
+
+    qm_mol_to_atoms: {sire.legacy.Mol.MolNum: [sire.legacy.Mol.AtomIdx]}
+        A dictionary with molecule numbers as keys and a list of QM atoms as
+        values.
+
+    mm1_indices: [[sire.legacy.Mol.AtomIdx]]
+        A list of lists of MM1 atom indices.
+
+    map: sire.legacy.Base.PropertyMap
+        The property map for the system.
+
+    Returns
+    -------
+
+    qm_mols: [sire.legacy.Mol.Mol]
+        A list of merged molecules.
     """
 
     from ..legacy import CAS as _CAS
@@ -496,6 +619,30 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
 def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_lengths, map):
     """
     Internal helper function to configure a QM engine ready for dynamics.
+
+    Parameters
+    ----------
+
+    engine: sire.legacy.QM.Engine
+        The QM engine to configure.
+
+    mols: sire.legacy.System.System
+        The Sire system containing the QM atoms.
+
+    qm_atoms: [sire.legacy.Mol.AtomIdx]
+        A list of QM atoms.
+
+    mm1_to_qm: {sire.legacy.Mol.AtomIdx: sire.legacy.Mol.AtomIdx}
+        A dictionary with link atoms as keys and QM atoms as values.
+
+    mm1_to_mm2: {sire.legacy.Mol.AtomIdx: [sire.legacy.Mol.AtomIdx]}
+        A dictionary with link atoms as keys and a list of MM atoms as values.
+
+    bond_lengths: {sire.legacy.Mol.AtomIdx: float}
+        A dictionary with link atoms as keys and bond lengths as values.
+
+    map: sire.legacy.Base.PropertyMap
+        The property map for the system.
     """
 
     # Work out the indices of the QM atoms.
