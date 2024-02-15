@@ -225,6 +225,16 @@ namespace SireOpenMM
             return raw_energy;
         }
 
+        void addLog(const QString &msg)
+        {
+            log.append(msg);
+        }
+
+        QStringList getLog() const
+        {
+            return log;
+        }
+
     private:
         /** This is a pointer to the context being minimised */
         OpenMM::Context *context;
@@ -238,6 +248,9 @@ namespace SireOpenMM
 
         /** The progress bar */
         SireBase::ProgressBar *bar;
+
+        /** Log of events */
+        QStringList log;
 
         /** The current tolerance */
         double k;
@@ -437,119 +450,124 @@ namespace SireOpenMM
         lbfgsfloatval_t *x;
     };
 
-    void debugMinimisationResult(int value)
+    void logMinimisationResult(int value, MinimizerData &data)
     {
         switch (value)
         {
         case LBFGS_STOP:
-            qDebug() << "LBFGS_STOP";
+            data.addLog("LBFGS_STOP");
             break;
         case LBFGS_ALREADY_MINIMIZED:
-            qDebug() << "LBFGS_ALREADY_MINIMIZED";
+            data.addLog("LBFGS_ALREADY_MINIMIZED");
             break;
         case LBFGSERR_UNKNOWNERROR:
-            qDebug() << "LBFGSERR_UNKNOWNERROR";
+            data.addLog("LBFGSERR_UNKNOWNERROR");
             break;
         case LBFGSERR_LOGICERROR:
-            qDebug() << "LBFGSERR_LOGICERROR";
+            data.addLog("LBFGSERR_LOGICERROR");
             break;
         case LBFGSERR_OUTOFMEMORY:
-            qDebug() << "LBFGSERR_OUTOFMEMORY";
+            data.addLog("LBFGSERR_OUTOFMEMORY");
             break;
         case LBFGSERR_CANCELED:
-            qDebug() << "LBFGSERR_CANCELED";
+            data.addLog("LBFGSERR_CANCELED");
             break;
         case LBFGSERR_INVALID_N:
-            qDebug() << "LBFGSERR_INVALID_N";
+            data.addLog("LBFGSERR_INVALID_N");
             break;
         case LBFGSERR_INVALID_N_SSE:
-            qDebug() << "LBFGSERR_INVALID_N_SSE";
+            data.addLog("LBFGSERR_INVALID_N_SSE");
             break;
         case LBFGSERR_INVALID_X_SSE:
-            qDebug() << "LBFGSERR_INVALID_X_SSE";
+            data.addLog("LBFGSERR_INVALID_X_SSE");
             break;
         case LBFGSERR_INVALID_EPSILON:
-            qDebug() << "LBFGSERR_INVALID_EPSILON";
+            data.addLog("LBFGSERR_INVALID_EPSILON");
             break;
         case LBFGSERR_INVALID_TESTPERIOD:
-            qDebug() << "LBFGSERR_INVALID_TESTPERIOD";
+            data.addLog("LBFGSERR_INVALID_TESTPERIOD");
             break;
         case LBFGSERR_INVALID_DELTA:
-            qDebug() << "LBFGSERR_INVALID_DELTA";
+            data.addLog("LBFGSERR_INVALID_DELTA");
             break;
         case LBFGSERR_INVALID_LINESEARCH:
-            qDebug() << "LBFGSERR_INVALID_LINESEARCH";
+            data.addLog("LBFGSERR_INVALID_LINESEARCH");
             break;
         case LBFGSERR_INVALID_MINSTEP:
-            qDebug() << "LBFGSERR_INVALID_MINSTEP";
+            data.addLog("LBFGSERR_INVALID_MINSTEP");
             break;
         case LBFGSERR_INVALID_MAXSTEP:
-            qDebug() << "LBFGSERR_INVALID_MAXSTEP";
+            data.addLog("LBFGSERR_INVALID_MAXSTEP");
             break;
         case LBFGSERR_INVALID_FTOL:
-            qDebug() << "LBFGSERR_INVALID_FTOL";
+            data.addLog("LBFGSERR_INVALID_FTOL");
             break;
         case LBFGSERR_INVALID_WOLFE:
-            qDebug() << "LBFGSERR_INVALID_WOLFE";
+            data.addLog("LBFGSERR_INVALID_WOLFE");
             break;
         case LBFGSERR_INVALID_GTOL:
-            qDebug() << "LBFGSERR_INVALID_GTOL";
+            data.addLog("LBFGSERR_INVALID_GTOL");
             break;
         case LBFGSERR_INVALID_XTOL:
-            qDebug() << "LBFGSERR_INVALID_XTOL";
+            data.addLog("LBFGSERR_INVALID_XTOL");
             break;
         case LBFGSERR_INVALID_MAXLINESEARCH:
-            qDebug() << "LBFGSERR_INVALID_MAXLINESEARCH";
+            data.addLog("LBFGSERR_INVALID_MAXLINESEARCH");
             break;
         case LBFGSERR_INVALID_ORTHANTWISE:
-            qDebug() << "LBFGSERR_INVALID_ORTHANTWISE";
+            data.addLog("LBFGSERR_INVALID_ORTHANTWISE");
             break;
         case LBFGSERR_INVALID_ORTHANTWISE_START:
-            qDebug() << "LBFGSERR_INVALID_ORTHANTWISE_START";
+            data.addLog("LBFGSERR_INVALID_ORTHANTWISE_START");
             break;
         case LBFGSERR_INVALID_ORTHANTWISE_END:
-            qDebug() << "LBFGSERR_INVALID_ORTHANTWISE_END";
+            data.addLog("LBFGSERR_INVALID_ORTHANTWISE_END");
             break;
         case LBFGSERR_OUTOFINTERVAL:
-            qDebug() << "LBFGSERR_OUTOFINTERVAL";
+            data.addLog("LBFGSERR_OUTOFINTERVAL");
             break;
         case LBFGSERR_INCORRECT_TMINMAX:
-            qDebug() << "LBFGSERR_INCORRECT_TMINMAX";
+            data.addLog("LBFGSERR_INCORRECT_TMINMAX");
             break;
         case LBFGSERR_ROUNDING_ERROR:
-            qDebug() << "LBFGSERR_ROUNDING_ERROR";
+            data.addLog("LBFGSERR_ROUNDING_ERROR");
             break;
         case LBFGSERR_MINIMUMSTEP:
-            qDebug() << "LBFGSERR_MINIMUMSTEP";
+            data.addLog("LBFGSERR_MINIMUMSTEP");
             break;
         case LBFGSERR_MAXIMUMSTEP:
-            qDebug() << "LBFGSERR_MAXIMUMSTEP";
+            data.addLog("LBFGSERR_MAXIMUMSTEP");
             break;
         case LBFGSERR_MAXIMUMLINESEARCH:
-            qDebug() << "LBFGSERR_MAXIMUMLINESEARCH";
+            data.addLog("LBFGSERR_MAXIMUMLINESEARCH");
             break;
         case LBFGSERR_MAXIMUMITERATION:
-            qDebug() << "LBFGSERR_MAXIMUMITERATION";
+            data.addLog("LBFGSERR_MAXIMUMITERATION");
             break;
         case LBFGSERR_WIDTHTOOSMALL:
-            qDebug() << "LBFGSERR_WIDTHTOOSMALL";
+            data.addLog("LBFGSERR_WIDTHTOOSMALL");
             break;
         case LBFGSERR_INVALIDPARAMETERS:
-            qDebug() << "LBFGSERR_INVALIDPARAMETERS";
+            data.addLog("LBFGSERR_INVALIDPARAMETERS");
             break;
         case LBFGSERR_INCREASEGRADIENT:
-            qDebug() << "LBFGSERR_INCREASEGRADIENT";
+            data.addLog("LBFGSERR_INCREASEGRADIENT");
             break;
         default:
-            qDebug() << "Unknown value";
+            data.addLog("Unknown error code");
         }
     }
 
-    void minimise_openmm_context(OpenMM::Context &context,
-                                 double tolerance, int max_iterations,
-                                 int max_restarts, int max_ratchets,
-                                 int ratchet_frequency,
-                                 double starting_k, double ratchet_scale)
+    /** Minimise the passed context subject to the passed minimisation
+     *  parameters. Returns a string containing the log of the minimisation
+     *
+     *  This raises an exception if the minimisation fails.
+     */
+    QString minimise_openmm_context(OpenMM::Context &context,
+                                    double tolerance, int max_iterations,
+                                    int max_restarts, int max_ratchets,
+                                    int ratchet_frequency,
+                                    double starting_k, double ratchet_scale)
     {
         if (max_iterations < 0)
         {
@@ -566,8 +584,13 @@ namespace SireOpenMM
 
         double working_constraint_tol = std::max(1e-4, constraint_tol);
 
+        data.addLog(QString("Minimising with a tolerance of %1").arg(tolerance));
+        data.addLog(QString("Minimising with constraint tolerance %1").arg(working_constraint_tol));
+
         // this is about 1e6 - it needs to be large to keep constraints in place
         double k = starting_k / working_constraint_tol;
+
+        data.addLog(QString("Minimising with k = %1").arg(k));
 
         SireBase::ProgressBar bar("Minimising: initialise", max_iterations);
         bar.setSpeedUnit("steps / s");
@@ -577,6 +600,12 @@ namespace SireOpenMM
         MinimizerData data(context, k, bar, max_iterations, ratchet_frequency,
                            ratchet_scale);
         lbfgsfloatval_t *x = lbfgs_malloc(num_particles * 3);
+
+        data.addLog(QString("Minimising with %1 particles").arg(num_particles));
+        data.addLog(QString("Minimising with a maximum of %1 iterations").arg(max_iterations));
+        data.addLog(QString("Minimising with a maximum of %1 restarts").arg(max_restarts));
+        data.addLog(QString("Minimising with a ratchet every %1 steps").arg(ratchet_frequency));
+        data.addLog(QString("Each ratchet will multiply k by %1").arg(ratchet_scale));
 
         if (x == 0)
             throw SireError::unavailable_resource(
@@ -595,11 +624,17 @@ namespace SireOpenMM
         while (data.getIteration() < data.getMaxIterations())
         {
             if (not is_success)
+            {
+                data.addLog("Minimisation failed - exiting");
                 break;
+            }
+
+            data.addLog(QString("Minimisation loop - %1 steps from %2").arg(data.getIteration()).arg(data.getMaxIterations()));
 
             try
             {
                 energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+                data.addLog(QString("Starting energy: %1 kJ mol-1").arg(energy_before));
                 bar.silentTick();
 
                 // Initialize the minimizer.
@@ -631,6 +666,9 @@ namespace SireOpenMM
                 param.epsilon = tolerance / norm;
                 param.max_linesearch = max_linesearch;
 
+                data.addLog(QString("Using a maximum line search of %1").arg(max_linesearch));
+                data.addLog(QString("Using an epsilon of %1").arg(param.epsilon));
+
                 double prev_max_error = 1e10;
 
                 // Repeatedly minimize, steadily increasing the strength of the springs until all constraints are satisfied.
@@ -640,30 +678,39 @@ namespace SireOpenMM
                     lbfgsfloatval_t fx; // final energy
                     auto last_it = data.getIteration();
 
+                    data.addLog(QString("About to minimise - %1 steps from %2...").arg(data.getIteration()).arg(data.getMaxIterations()));
+
                     // Perform the minimization.
                     data.aboutToStart();
                     auto result = lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
 
+                    data.addLog(QString("...completed %1 iterations").arg(data.getIteration() - last_it));
+
                     if (result != LBFGS_SUCCESS and result != LBFGS_STOP)
                     {
+                        data.addLog(QString("Minimisation exited with error code %1").arg(result));
+                        logMinimisationResult(result, data);
+
                         if (result == LBFGSERR_MAXIMUMLINESEARCH)
                         {
                             // increase the max line search by a factor of 4 and try again
                             max_linesearch *= 4;
-                        }
-                        else
-                        {
-                            debugMinimisationResult(result);
+                            data.addLog(QString("Increasing the maximum line search to %1").arg(max_linesearch));
                         }
                     }
+
+                    data.addLog(QString("Energy after: %1 kJ mol-1").arg(fx));
 
                     if (std::isinf(fx) || std::isnan(fx))
                     {
                         // we've hit a singularity, so we need to restart
+                        data.addLog("Infinite or NaN energy detected!");
                         throw std::exception();
                     }
                     else if (data.getIteration() == last_it)
                     {
+                        data.addLog("No progress made in this iteration!");
+
                         // we didn't make any progress, so ratchet up
                         if (data.nRatchets() < max_ratchets)
                         {
@@ -696,8 +743,13 @@ namespace SireOpenMM
                             max_error = error;
                     }
 
+                    data.addLog(QString("Max constraint error: %1").arg(max_error));
+
                     if (max_error <= working_constraint_tol)
+                    {
+                        data.addLog("All constraints satisfied!");
                         break; // All constraints are satisfied.
+                    }
 
                     if (data.nRatchets() < max_ratchets)
                     {
@@ -709,6 +761,7 @@ namespace SireOpenMM
                         // we need to be really sure that this is the right thing to do,
                         // because it could mean that minimisation exits with a structure
                         // that is very close to the un-minimised input structure
+                        data.addLog("Max constraint error is very large - restarting!");
 
                         if (data.nRestarts() >= max_restarts)
                         {
@@ -739,8 +792,10 @@ namespace SireOpenMM
                     prev_max_error = max_error;
                 }
             }
-            catch (...)
+            catch (const std::exception &e)
             {
+                data.addLog(QString("Error occurred during minimisation! %1").arg(e.what()));
+
                 // reset to the old coordinates and keep trying
                 if (data.nRestarts() > max_restarts)
                 {
@@ -769,9 +824,12 @@ namespace SireOpenMM
             {
                 auto energy_after = context.getState(OpenMM::State::Energy).getPotentialEnergy();
 
+                data.addLog(QString("Final energy: %1 kJ mol-1").arg(energy_after));
+
                 if (std::isinf(energy_after) or std::isnan(energy_after) or energy_after > 1e20)
                 {
                     // something has gone wrong, so we need to restart
+                    data.addLog("Infinite or NaN energy detected!");
                     throw std::exception();
                 }
 
@@ -787,11 +845,14 @@ namespace SireOpenMM
                     // constraints)
                     // (minimisation is only really to remove bad contacts,
                     //  so looking for big changes in energy)
+                    data.addLog(QString("Change in energy is small (%1 kJ mol-1) - exiting").arg(energy_after - energy_before));
                     break;
                 }
             }
-            catch (...)
+            catch (const std::exception &e)
             {
+                data.addLog(QString("Error occurred during final energy check! %1").arg(e.what()));
+
                 // reset to the old coordinates and keep trying
                 if (data.nRestarts() >= max_restarts)
                 {
@@ -818,15 +879,22 @@ namespace SireOpenMM
         }
 
         if (is_success)
+        {
+            data.addLog("Minimisation successful!");
             bar.success();
+        }
         else
         {
+            data.addLog("Minimisation failed!");
             bar.failure("Minimisation failed! Could not satisfy constraints!");
+            qDebug() << data.getLog().join("\n");
             throw SireError::invalid_state(QObject::tr(
                                                "Despite repeated attempts, the minimiser could not minimise the system "
                                                "while simultaneously satisfying the constraints."),
                                            CODELOC);
         }
+
+        return data.getLog().join("\n");
     }
 
 } // namespace SireOpenMM
