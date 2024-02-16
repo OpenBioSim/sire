@@ -124,7 +124,7 @@ def _check_qm_atom_bonds(mol, atom, qm_idxs, map):
             continue
 
         # Convert to an atom index.
-        idx = mol.atom(idx).index()
+        idx = info.atom_idx(idx)
 
         # The atom is not in the QM region.
         if idx not in qm_idxs:
