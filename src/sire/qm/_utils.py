@@ -72,7 +72,7 @@ def _check_qm_atom_bonds(mol, atom, qm_idxs, map):
     Parameters
     ----------
 
-    mol: sire.legacy.Mol.Mol
+    mol: sire.legacy.Mol.Molecule
         The molecule containing the QM atoms.
 
     atom: sire.legacy.Mol.Atom
@@ -408,7 +408,7 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
     Returns
     -------
 
-    qm_mols: [sire.legacy.Mol.Mol]
+    qm_mols: [sire.legacy.Mol.Molecule]
         A list of merged molecules.
     """
 
