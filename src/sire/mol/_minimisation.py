@@ -93,8 +93,9 @@ class Minimisation:
         max_restarts: int = 10,
         max_ratchets: int = 20,
         ratchet_frequency: int = 500,
-        starting_k: float = 100.0,
+        starting_k: float = 400.0,
         ratchet_scale: float = 10.0,
+        max_constraint_error: float = 0.001,
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -127,6 +128,7 @@ class Minimisation:
         - ratchet_frequency (int): The maximum number of steps between ratchets
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
+        - max_constraint_error (float): The maximum error in the constraint in nm
         """
         if not self._d.is_null():
             self._d.run_minimisation(
@@ -137,6 +139,7 @@ class Minimisation:
                 ratchet_frequency=ratchet_frequency,
                 starting_k=starting_k,
                 ratchet_scale=ratchet_scale,
+                max_constraint_error=max_constraint_error,
             )
 
         return self

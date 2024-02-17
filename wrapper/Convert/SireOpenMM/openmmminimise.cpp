@@ -40,6 +40,45 @@
  * USE OR OTHER DEALINGS IN THE SOFTWARE.                                     *
  * -------------------------------------------------------------------------- */
 
+// COPIED FROM SO POST - https://stackoverflow.com/questions/570669/checking-if-a-double-or-float-is-nan-in-c
+
+#include <cmath> // std::isnan, std::fpclassify
+#include <iostream>
+#include <iomanip> // std::setw
+#include <limits>
+#include <limits.h> // CHAR_BIT
+#include <sstream>
+#include <stdint.h> // uint64_t
+
+inline auto is_ieee754_nan(double const x)
+    -> bool
+{
+    static constexpr bool is_claimed_ieee754 = std::numeric_limits<double>::is_iec559;
+    static constexpr int n_bits_per_byte = CHAR_BIT;
+    using Byte = unsigned char;
+
+    static_assert(is_claimed_ieee754, "!");
+    static_assert(n_bits_per_byte == 8, "!");
+    static_assert(sizeof(x) == sizeof(uint64_t), "!");
+
+#ifdef _MSC_VER
+    uint64_t const bits = reinterpret_cast<uint64_t const &>(x);
+#else
+    Byte bytes[sizeof(x)];
+    memcpy(bytes, &x, sizeof(x));
+    uint64_t int_value;
+    memcpy(&int_value, bytes, sizeof(x));
+    uint64_t const &bits = int_value;
+#endif
+
+    static constexpr uint64_t sign_mask = 0x8000000000000000;
+    static constexpr uint64_t exp_mask = 0x7FF0000000000000;
+    static constexpr uint64_t mantissa_mask = 0x000FFFFFFFFFFFFF;
+
+    (void)sign_mask;
+    return (bits & exp_mask) == exp_mask and (bits & mantissa_mask) != 0;
+}
+
 #include "openmm/OpenMMException.h"
 #include "openmm/Platform.h"
 #include "openmm/VerletIntegrator.h"
@@ -576,7 +615,8 @@ namespace SireOpenMM
                                     double tolerance, int max_iterations,
                                     int max_restarts, int max_ratchets,
                                     int ratchet_frequency,
-                                    double starting_k, double ratchet_scale)
+                                    double starting_k, double ratchet_scale,
+                                    double max_constraint_error)
     {
         if (max_iterations < 0)
         {
@@ -594,7 +634,7 @@ namespace SireOpenMM
 
         double constraint_tol = context.getIntegrator().getConstraintTolerance();
 
-        double working_constraint_tol = std::max(1e-3, constraint_tol);
+        double working_constraint_tol = std::max(max_constraint_error, constraint_tol);
 
         // this is about 1e6 - it needs to be large to keep constraints in place
         double k = starting_k / working_constraint_tol;
@@ -676,7 +716,7 @@ namespace SireOpenMM
                 energy_before = context.getState(OpenMM::State::Energy).getPotentialEnergy();
                 data.addLog(QString("Starting energy: %1 kJ mol-1").arg(energy_before));
 
-                if (std::isinf(energy_before) or std::isnan(energy_before))
+                if (std::isinf(energy_before) or std::isnan(energy_before) or is_ieee754_nan(energy_before))
                 {
                     // something has gone wrong, so we need to restart
                     data.addLog("Infinite or NaN energy detected!");
@@ -728,6 +768,18 @@ namespace SireOpenMM
 
                     data.addLog(QString("About to minimise - %1 steps from %2...").arg(data.getIteration()).arg(data.getMaxIterations()));
 
+                    fx = context.getState(OpenMM::State::Energy).getPotentialEnergy();
+
+                    data.addLog(QString("Energy before minimisation: %1 kJ mol-1").arg(fx));
+
+                    if (std::isinf(fx) or std::isnan(fx) or is_ieee754_nan(fx))
+                    {
+                        // something has gone wrong, so we need to restart
+                        data.addLog("Infinite or NaN energy detected!");
+                        is_success = false;
+                        throw std::exception();
+                    }
+
                     // Perform the minimization.
                     data.aboutToStart();
                     auto result = lbfgs(num_particles * 3, x, &fx, evaluate, progress, &data, &param);
@@ -776,7 +828,7 @@ namespace SireOpenMM
 
                     data.addLog(QString("Energy after: %1 kJ mol-1").arg(fx));
 
-                    if (std::isinf(fx) || std::isnan(fx))
+                    if (std::isinf(fx) or std::isnan(fx) or is_ieee754_nan(fx))
                     {
                         // we've hit a singularity, so we need to restart
                         data.addLog("Infinite or NaN energy detected!");
@@ -854,7 +906,7 @@ namespace SireOpenMM
                             data.ratchet();
                         }
 
-                        if (max_error > 1000 * working_constraint_tol)
+                        if (max_error > 100 * working_constraint_tol)
                         {
                             // we need to be really sure that this is the right thing to do,
                             // because it could mean that minimisation exits with a structure
@@ -917,6 +969,9 @@ namespace SireOpenMM
                     x[3 * i + 1] = initial_pos[i][1];
                     x[3 * i + 2] = initial_pos[i][2];
                 }
+
+                // try again
+                continue;
             }
 
             try
@@ -925,7 +980,7 @@ namespace SireOpenMM
 
                 data.addLog(QString("Final energy: %1 kJ mol-1").arg(energy_after));
 
-                if (std::isinf(energy_after) or std::isnan(energy_after) or energy_after > 1e20)
+                if (std::isinf(energy_after) or std::isnan(energy_after) or is_ieee754_nan(energy_after) or energy_after > 1e20)
                 {
                     // something has gone wrong, so we need to restart
                     data.addLog("Infinite or NaN energy detected!");

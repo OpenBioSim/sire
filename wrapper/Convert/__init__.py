@@ -488,6 +488,7 @@ try:
         ratchet_frequency: int = 500,
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
+        max_constraint_error: float = 0.01,
     ):
         return _minimise_openmm_context(
             context,
@@ -498,6 +499,7 @@ try:
             ratchet_frequency=ratchet_frequency,
             starting_k=starting_k,
             ratchet_scale=ratchet_scale,
+            max_constraint_error=max_constraint_error,
         )
 
 except Exception as e:

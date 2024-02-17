@@ -585,6 +585,7 @@ class DynamicsData:
         ratchet_frequency: int = 500,
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
+        max_constraint_error: float = 0.001,
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -617,6 +618,7 @@ class DynamicsData:
         - ratchet_frequency (int): The maximum number of steps between ratchets
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
+        - max_constraint_error (float): The maximum error in the constraint in nm
         """
         from ..legacy.Convert import minimise_openmm_context
 
@@ -632,6 +634,7 @@ class DynamicsData:
             ratchet_frequency=ratchet_frequency,
             starting_k=starting_k,
             ratchet_scale=ratchet_scale,
+            max_constraint_error=max_constraint_error,
         )
 
     def _rebuild_and_minimise(self):
@@ -1093,6 +1096,7 @@ class Dynamics:
         ratchet_frequency: int = 500,
         starting_k: float = 100.0,
         ratchet_scale: float = 2.0,
+        max_constraint_error: float = 0.001,
     ):
         """
         Internal method that runs minimisation on the molecules.
@@ -1125,6 +1129,7 @@ class Dynamics:
         - ratchet_frequency (int): The maximum number of steps between ratchets
         - starting_k (float): The starting value of k for the minimisation
         - ratchet_scale (float): The amount to scale k at each ratchet
+        - max_constraint_error (float): The maximum error in the constraints in nm
         """
         if not self._d.is_null():
             self._d.run_minimisation(
@@ -1135,6 +1140,7 @@ class Dynamics:
                 ratchet_frequency=ratchet_frequency,
                 starting_k=starting_k,
                 ratchet_scale=ratchet_scale,
+                max_constraint_error=max_constraint_error,
             )
 
         return self
