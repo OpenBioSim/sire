@@ -178,6 +178,17 @@ namespace SireOpenMM
             return max_its;
         }
 
+        void hardReset()
+        {
+            it = 0;
+            last_fx = 1e10;
+            num_restarts = 1;
+            k = starting_k;
+            num_ratchets = 0;
+
+            addLog("Hard reset of minimisation - trying one more time");
+        }
+
         void resetIteration()
         {
             it = 0;
@@ -578,6 +589,9 @@ namespace SireOpenMM
 
         int num_particles = system.getNumParticles();
 
+        const int num_constraints = system.getNumConstraints();
+        const bool has_constraints = num_constraints > 0;
+
         double constraint_tol = context.getIntegrator().getConstraintTolerance();
 
         double working_constraint_tol = std::max(1e-3, constraint_tol);
@@ -611,6 +625,13 @@ namespace SireOpenMM
         // this will automatically free x when it goes out of scope
         LBFGSRaii raii(x);
 
+        // Get the initial positions before any minimisation, so that
+        // we can reset to these in case anything goes majorly wrong
+        auto starting_pos = context.getState(OpenMM::State::Positions).getPositions();
+
+        // flag for if we've done a hard reset
+        bool have_hard_reset = false;
+
         std::vector<OpenMM::Vec3> initial_pos;
         double energy_before = 1e10;
         bool is_success = true;
@@ -622,8 +643,30 @@ namespace SireOpenMM
         {
             if (not is_success)
             {
-                data.addLog("Minimisation failed - exiting");
-                break;
+                // try one more time with the real starting positions
+                if (not have_hard_reset)
+                {
+                    data.hardReset();
+
+                    context.setPositions(starting_pos);
+
+                    // We've gotten far enough from a valid state that we might have trouble getting
+                    // back, so reset to the original positions.
+                    for (int i = 0; i < num_particles; ++i)
+                    {
+                        x[3 * i] = starting_pos[i][0];
+                        x[3 * i + 1] = starting_pos[i][1];
+                        x[3 * i + 2] = starting_pos[i][2];
+                    }
+
+                    is_success = true;
+                    have_hard_reset = true;
+                }
+                else
+                {
+                    data.addLog("Minimisation failed - exiting");
+                    break;
+                }
             }
 
             data.addLog(QString("Minimisation loop - %1 steps from %2").arg(data.getIteration()).arg(data.getMaxIterations()));
@@ -652,10 +695,9 @@ namespace SireOpenMM
 
                 param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE;
 
-                // Make sure the initial configuration satisfies all constraints.
-                context.applyConstraints(working_constraint_tol);
-
                 // Record the initial positions and determine a normalization constant for scaling the tolerance.
+                // (do this before making any changes to the positions via constraints, so that
+                // we can reset to the original positions if necessary)
                 initial_pos = context.getState(OpenMM::State::Positions).getPositions();
 
                 double norm = 0.0;
@@ -693,6 +735,7 @@ namespace SireOpenMM
                     data.addLog(QString("...completed %1 iterations").arg(data.getIteration() - last_it));
 
                     bool should_break = false;
+                    bool should_continue = false;
 
                     if (result != LBFGS_SUCCESS and result != LBFGS_STOP)
                     {
@@ -704,18 +747,30 @@ namespace SireOpenMM
                             // increase the max line by max_linesearch_delta and try again
                             max_linesearch += max_linesearch_delta;
                             data.addLog(QString("Increasing the maximum line search to %1").arg(max_linesearch));
+                            // immediately try again
+                            should_continue = true;
                         }
                         else if (result == LBFGSERR_INVALIDPARAMETERS)
                         {
                             // this is broken
-                            data.addLog("Invalid parameters - exiting");
-                            is_success = false;
+                            data.addLog("Invalid parameters - resetting");
+                            lbfgs_parameter_init(&param);
+                            param.linesearch = LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE;
+
                             should_break = true;
                         }
                         else if (result == LBFGSERR_MINIMUMSTEP)
                         {
                             // nothing else it can do
                             should_break = true;
+                        }
+                        else if (result == LBFGS_ALREADY_MINIMIZED)
+                        {
+                            if (not has_constraints)
+                            {
+                                // nothing more to do
+                                should_break = true;
+                            }
                         }
                     }
 
@@ -739,89 +794,101 @@ namespace SireOpenMM
                     {
                         break;
                     }
+                    else if (should_continue)
+                    {
+                        // immediately try again
+                        continue;
+                    }
                     else if (data.getIteration() == last_it)
                     {
                         data.addLog("No progress made in this iteration!");
 
-                        // we didn't make any progress, so ratchet up
+                        if (has_constraints)
+                        {
+                            // we didn't make any progress, so ratchet up
+                            if (data.nRatchets() < max_ratchets)
+                            {
+                                data.ratchet();
+                            }
+                        }
+
+                        break;
+                    }
+
+                    if (has_constraints)
+                    {
+                        // Check whether all constraints are satisfied.
+                        std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
+
+                        int num_constraints = system.getNumConstraints();
+
+                        double max_error = 0.0;
+
+                        for (int i = 0; i < num_constraints; ++i)
+                        {
+                            int particle1, particle2;
+                            double distance;
+
+                            system.getConstraintParameters(i, particle1, particle2, distance);
+
+                            OpenMM::Vec3 delta = positions[particle2] - positions[particle1];
+
+                            double r = std::sqrt(delta.dot(delta));
+
+                            double error = std::fabs(r - distance) / distance;
+
+                            if (error > max_error)
+                                max_error = error;
+                        }
+
+                        data.addLog(QString("Max constraint error: %1").arg(max_error));
+
+                        if (max_error <= working_constraint_tol)
+                        {
+                            data.addLog("All constraints satisfied!");
+                            break; // All constraints are satisfied.
+                        }
+
                         if (data.nRatchets() < max_ratchets)
                         {
                             data.ratchet();
                         }
-                        break;
-                    }
 
-                    // Check whether all constraints are satisfied.
-                    std::vector<OpenMM::Vec3> positions = context.getState(OpenMM::State::Positions).getPositions();
-
-                    int num_constraints = system.getNumConstraints();
-
-                    double max_error = 0.0;
-
-                    for (int i = 0; i < num_constraints; ++i)
-                    {
-                        int particle1, particle2;
-                        double distance;
-
-                        system.getConstraintParameters(i, particle1, particle2, distance);
-
-                        OpenMM::Vec3 delta = positions[particle2] - positions[particle1];
-
-                        double r = std::sqrt(delta.dot(delta));
-
-                        double error = std::fabs(r - distance) / distance;
-
-                        if (error > max_error)
-                            max_error = error;
-                    }
-
-                    data.addLog(QString("Max constraint error: %1").arg(max_error));
-
-                    if (max_error <= working_constraint_tol)
-                    {
-                        data.addLog("All constraints satisfied!");
-                        break; // All constraints are satisfied.
-                    }
-
-                    if (data.nRatchets() < max_ratchets)
-                    {
-                        data.ratchet();
-                    }
-
-                    if (max_error > 1000 * working_constraint_tol)
-                    {
-                        // we need to be really sure that this is the right thing to do,
-                        // because it could mean that minimisation exits with a structure
-                        // that is very close to the un-minimised input structure
-                        data.addLog("Max constraint error is very large - restarting!");
-
-                        if (data.nRestarts() >= max_restarts)
+                        if (max_error > 1000 * working_constraint_tol)
                         {
-                            // we've tried too many times to get the constraints to be satisfied
-                            // so we should just give up
-                            is_success = false;
-                            break;
+                            // we need to be really sure that this is the right thing to do,
+                            // because it could mean that minimisation exits with a structure
+                            // that is very close to the un-minimised input structure
+                            data.addLog("Max constraint error is very large - restarting!");
+
+                            if (data.nRestarts() >= max_restarts)
+                            {
+                                // we've tried too many times to get the constraints to be satisfied
+                                // so we should just give up
+                                is_success = false;
+                                break;
+                            }
+
+                            // restart from scratch...
+                            data.resetIteration();
+
+                            context.setPositions(initial_pos);
+
+                            // We've gotten far enough from a valid state that we might have trouble getting
+                            // back, so reset to the original positions.
+                            for (int i = 0; i < num_particles; ++i)
+                            {
+                                x[3 * i] = initial_pos[i][0];
+                                x[3 * i + 1] = initial_pos[i][1];
+                                x[3 * i + 2] = initial_pos[i][2];
+                            }
                         }
 
-                        // restart from scratch...
-                        data.resetIteration();
+                        if (max_error >= prev_max_error)
+                            break; // Further tightening the springs doesn't seem to be helping, so just give up.
 
-                        context.setPositions(initial_pos);
-
-                        // We've gotten far enough from a valid state that we might have trouble getting
-                        // back, so reset to the original positions.
-                        for (int i = 0; i < num_particles; ++i)
-                        {
-                            x[3 * i] = initial_pos[i][0];
-                            x[3 * i + 1] = initial_pos[i][1];
-                            x[3 * i + 2] = initial_pos[i][2];
-                        }
+                        prev_max_error = max_error;
                     }
-
-                    if (max_error >= prev_max_error)
-                        break; // Further tightening the springs doesn't seem to be helping, so just give up.
-
-                    prev_max_error = max_error;
                 }
             }
             catch (const std::exception &e)
@@ -865,24 +932,42 @@ namespace SireOpenMM
                     throw std::exception();
                 }
 
-                // do a final constraint projection to make sure they are satisfied
-                // to the full precision requested by the user.
-                context.applyConstraints(working_constraint_tol);
-
-                const auto delta_energy = energy_after - energy_before;
-
-                data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
-
-                if (std::abs(energy_after - energy_before) < 1000.0)
+                if (has_constraints)
                 {
-                    // only 1000 kJ/mol difference, so not much more to
-                    // be gained by further minimisation (we don't want to
-                    // get stuck in a cycle caused by re-application of the
-                    // constraints)
-                    // (minimisation is only really to remove bad contacts,
-                    //  so looking for big changes in energy)
-                    data.addLog(QString("Change in energy is small (%1 kJ mol-1) - exiting").arg(energy_after - energy_before));
-                    break;
+                    // do a final constraint projection to make sure they are satisfied
+                    // to the full precision requested by the user.
+                    context.applyConstraints(working_constraint_tol);
+
+                    const auto delta_energy = energy_after - energy_before;
+
+                    data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
+
+                    if (std::abs(delta_energy) < 1000.0)
+                    {
+                        // only 1000 kJ/mol difference, so not much more to
+                        // be gained by further minimisation (we don't want to
+                        // get stuck in a cycle caused by re-application of the
+                        // constraints)
+                        // (minimisation is only really to remove bad contacts,
+                        //  so looking for big changes in energy)
+                        data.addLog(QString("Change in energy is small (%1 kJ mol-1) - exiting").arg(energy_after - energy_before));
+                        break;
+                    }
+                }
+                else
+                {
+                    const auto delta_energy = energy_after - energy_before;
+
+                    data.addLog(QString("Change in energy: %1 kJ mol-1").arg(delta_energy));
+
+                    // no constraints, so we can just check the energy
+                    if (std::abs(delta_energy) < 1.0)
+                    {
+                        // only 1 kJ/mol difference, so not much more to
+                        // be gained by further minimisation
+                        data.addLog(QString("Change in energy is small (%1 kJ mol-1) - exiting").arg(energy_after - energy_before));
+                        break;
+                    }
                 }
             }
             catch (const std::exception &e)
