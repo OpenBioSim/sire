@@ -99,6 +99,8 @@ namespace SireMol
 
         bool isEmpty() const;
 
+        bool contains(const Atom &atom) const;
+
         const SelectorM<Atom> &atoms0() const;
         const SelectorM<Atom> &atoms1() const;
 

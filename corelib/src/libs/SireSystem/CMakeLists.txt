@@ -32,6 +32,7 @@ set ( SIRESYSTEM_HEADERS
       geometrycomponent.h
       idassigner.h
       identityconstraint.h
+      merge.h
       moleculeconstraint.h
       monitorcomponent.h
       monitorcomponents.h
@@ -41,6 +42,7 @@ set ( SIRESYSTEM_HEADERS
       monitormonitor.h
       monitorname.h
       monitorproperty.h
+      mutate.h
       perturbationconstraint.h
       polarisecharges.h
       spacewrapper.h
@@ -77,6 +79,7 @@ set ( SIRESYSTEM_SOURCES
       geometrycomponent.cpp
       idassigner.cpp
       identityconstraint.cpp
+      merge.cpp
       moleculeconstraint.cpp
       monitorcomponent.cpp
       monitorcomponents.cpp
@@ -84,6 +87,7 @@ set ( SIRESYSTEM_SOURCES
       monitoridentifier.cpp
       monitormonitor.cpp
       monitorproperty.cpp
+      mutate.cpp
       perturbationconstraint.cpp
       polarisecharges.cpp
       spacewrapper.cpp

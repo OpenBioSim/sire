@@ -10,6 +10,8 @@ set ( SCRIPTS
         _alchemy.py
         _ghost_atoms.py
         _hmr.py
+        _merge.py
+        _mutate.py
         _pertfile.py
         _perturbation.py
         _repex.py

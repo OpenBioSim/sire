@@ -265,6 +265,15 @@ AtomMapping AtomMapping::swap() const
     return AtomMapping(this->atms1, this->atms0);
 }
 
+/** Return whether or not the forward mapping contains the
+ *  passed atom - this returns true if mapping[atom] would
+ *  return a valid atom
+ */
+bool AtomMapping::contains(const Atom &atom) const
+{
+    return this->atms0.contains(atom);
+}
+
 /** Map from 'atom' (which must be in the reference atoms) to
  *  the corresponding atom in the mapped atoms */
 Atom AtomMapping::map(const Atom &atom, bool find_all) const
