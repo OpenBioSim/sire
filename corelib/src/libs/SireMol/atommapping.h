@@ -33,6 +33,8 @@
 #include "atom.h"
 #include "selectorm.hpp"
 
+#include "SireBase/propertymap.h"
+
 SIRE_BEGIN_HEADER
 
 namespace SireMol
@@ -61,13 +63,44 @@ namespace SireMol
     public:
         AtomMapping();
         AtomMapping(const SelectorM<Atom> &atoms0,
-                    const SelectorM<Atom> &atoms1);
+                    const SelectorM<Atom> &atoms1,
+                    const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        AtomMapping(const SelectorM<Atom> &atoms0,
+                    const SelectorM<Atom> &atoms1,
+                    const SireBase::PropertyMap &map0,
+                    const SireBase::PropertyMap &map1);
 
         AtomMapping(const MoleculeView &mol0,
-                    const MoleculeView &mol1);
+                    const MoleculeView &mol1,
+                    const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        AtomMapping(const MoleculeView &mol0,
+                    const MoleculeView &mol1,
+                    const SireBase::PropertyMap &map0,
+                    const SireBase::PropertyMap &map1);
 
         AtomMapping(const SelectorMol &mols0,
-                    const SelectorMol &mols1);
+                    const SelectorMol &mols1,
+                    const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        AtomMapping(const SelectorMol &mols0,
+                    const SelectorMol &mols1,
+                    const SireBase::PropertyMap &map0,
+                    const SireBase::PropertyMap &map1);
+
+        AtomMapping(const SelectorM<Atom> &atoms0,
+                    const SelectorM<Atom> &atoms1,
+                    const SelectorM<Atom> &matched_atoms0,
+                    const SelectorM<Atom> &matched_atoms1,
+                    const SireBase::PropertyMap &map = SireBase::PropertyMap());
+
+        AtomMapping(const SelectorM<Atom> &atoms0,
+                    const SelectorM<Atom> &atoms1,
+                    const SelectorM<Atom> &matched_atoms0,
+                    const SelectorM<Atom> &matched_atoms1,
+                    const SireBase::PropertyMap &map0,
+                    const SireBase::PropertyMap &map1);
 
         AtomMapping(const AtomMapping &other);
 
@@ -103,6 +136,18 @@ namespace SireMol
 
         const SelectorM<Atom> &atoms0() const;
         const SelectorM<Atom> &atoms1() const;
+
+        SelectorM<Atom> mappedAtoms0() const;
+        SelectorM<Atom> mappedAtoms1() const;
+
+        SelectorM<Atom> unmappedAtoms0() const;
+        SelectorM<Atom> unmappedAtoms1() const;
+
+        bool isMapped(const Atom &atom) const;
+
+        bool isSingleMolecule() const;
+
+        void assertSingleMolecule() const;
 
         AtomMapping swap() const;
 
@@ -140,8 +185,33 @@ namespace SireMol
 
         /** The mapped atoms - we map from the reference atoms to these atoms */
         SelectorM<Atom> atms1;
-    };
 
+        /** The original set of reference atoms - this includes the atoms
+         *  in the same order as input, including any unmatched atoms
+         */
+        SelectorM<Atom> orig_atms0;
+
+        /** The original set of mapped atoms - this includes the atoms
+         *  in the same order as input, including any unmatched atoms
+         */
+        SelectorM<Atom> orig_atms1;
+
+        /** The indexes of reference atoms in `orig_atms0` that are not mapped,
+         *  in the order they appear in `orig_atms0`
+         */
+        QList<qint64> unmapped_atms0;
+
+        /** The indexes of mapped atoms in `orig_atms1` that are not mapped,
+         *  in the order they appear in `orig_atms1`
+         */
+        QList<qint64> unmapped_atms1;
+
+        /** Property map for the reference atoms */
+        SireBase::PropertyMap map0;
+
+        /** Property map for the mapped atoms */
+        SireBase::PropertyMap map1;
+    };
 }
 
 Q_DECLARE_METATYPE(SireMol::AtomMapping)

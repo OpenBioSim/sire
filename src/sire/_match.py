@@ -13,9 +13,7 @@ def match_atoms(mol0, mol1, match_light_atoms=False, map0=None, map1=None):
     map0 = create_map(map0)
     map1 = create_map(map1)
 
-    matcher = AtomMCSMatcher(
-        match_light_atoms=match_light_atoms, verbose=False
-    )
+    matcher = AtomMCSMatcher(match_light_atoms=match_light_atoms, verbose=False)
 
     m = matcher.match(mol0, map0, mol1, map1)
 
@@ -27,5 +25,10 @@ def match_atoms(mol0, mol1, match_light_atoms=False, map0=None, map1=None):
         atoms1.append(atom1.value())
 
     return AtomMapping(
-        mol0.molecule().atoms()[atoms0], mol1.molecule().atoms()[atoms1]
+        mol0.atoms(),
+        mol1.atoms(),
+        mol0.molecule().atoms()[atoms0],
+        mol1.molecule().atoms()[atoms1],
+        map0,
+        map1,
     )

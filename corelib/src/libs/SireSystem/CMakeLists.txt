@@ -42,7 +42,6 @@ set ( SIRESYSTEM_HEADERS
       monitormonitor.h
       monitorname.h
       monitorproperty.h
-      mutate.h
       perturbationconstraint.h
       polarisecharges.h
       spacewrapper.h
@@ -87,7 +86,6 @@ set ( SIRESYSTEM_SOURCES
       monitoridentifier.cpp
       monitormonitor.cpp
       monitorproperty.cpp
-      mutate.cpp
       perturbationconstraint.cpp
       polarisecharges.cpp
       spacewrapper.cpp

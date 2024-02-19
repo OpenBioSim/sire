@@ -721,13 +721,11 @@ namespace bp = boost::python;
 
 #include "create_test_molecule.h"
 
-#include "merge.h"
+#include "SireSystem/merge.h"
 
 #include "merge.h"
 
-#include "mutate.h"
-
-#include "mutate.h"
+#include "merge.h"
 
 void register_free_functions(){
 
@@ -985,19 +983,6 @@ void register_free_functions(){
         bp::def( 
             "merge"
             , merge_function_value
-            , ( bp::arg("mols"), bp::arg("as_new_molecule")=(bool)(true), bp::arg("map")=SireBase::PropertyMap() )
-            , "" );
-    
-    }
-
-    { //::SireSystem::mutate
-    
-        typedef ::SireMol::Molecule ( *mutate_function_type )( ::SireMol::AtomMapping const &,bool,::SireBase::PropertyMap const & );
-        mutate_function_type mutate_function_value( &::SireSystem::mutate );
-        
-        bp::def( 
-            "mutate"
-            , mutate_function_value
             , ( bp::arg("mols"), bp::arg("as_new_molecule")=(bool)(true), bp::arg("map")=SireBase::PropertyMap() )
             , "" );
     
