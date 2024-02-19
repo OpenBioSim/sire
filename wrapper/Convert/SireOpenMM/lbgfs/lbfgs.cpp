@@ -69,6 +69,8 @@ licence.
 #include <stdlib.h>
 #include <math.h>
 
+#include <cstdint>
+
 #include "lbfgs.h"
 
 #ifdef _MSC_VER
@@ -86,7 +88,7 @@ typedef unsigned int uint32_t;
 
 #else
 /* No CPU specific optimization. */
-#include "arithmetic_ansi.h"
+#include "arithmetic_optimised.h"
 
 #endif
 

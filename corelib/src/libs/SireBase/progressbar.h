@@ -86,6 +86,7 @@ namespace SireBase
 
         void tick();
         void tick(const QString &text);
+        void silentTick();
 
         void setProgress(quint32 value);
         void setProgress(quint32 value, const QString &text);

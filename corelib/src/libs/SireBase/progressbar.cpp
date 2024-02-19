@@ -1158,6 +1158,11 @@ static void check_raise_interrupt()
     }
 }
 
+void ProgressBar::silentTick()
+{
+    check_raise_interrupt();
+}
+
 void ProgressBar::tick()
 {
     check_raise_interrupt();

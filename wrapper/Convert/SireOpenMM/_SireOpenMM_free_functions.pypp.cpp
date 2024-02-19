@@ -2103,14 +2103,14 @@ void register_free_functions(){
 
     { //::SireOpenMM::minimise_openmm_context
     
-        typedef void ( *minimise_openmm_context_function_type )( ::OpenMM::Context &,double,int );
+        typedef ::QString ( *minimise_openmm_context_function_type )( ::OpenMM::Context &,double,int,int,int,int,double,double,double );
         minimise_openmm_context_function_type minimise_openmm_context_function_value( &::SireOpenMM::minimise_openmm_context );
         
         bp::def( 
             "minimise_openmm_context"
             , minimise_openmm_context_function_value
-            , ( bp::arg("context"), bp::arg("tolerance")=10, bp::arg("max_iterations")=(int)(-1) )
-            , "This is a minimiser heavily inspired by the\nLocalEnergyMinimizer included in OpenMM. This is re-written\nfor sire to;\n\n1. Better integrate minimisation into the sire progress\nmonitoring  interupting framework.\n2. Avoid errors caused by OpenMM switching from the desired\ncontext to the CPU context, thus triggering spurious exceptions\nrelated to exclusions  exceptions not matching\n" );
+            , ( bp::arg("context"), bp::arg("tolerance")=10., bp::arg("max_iterations")=(int)(-1), bp::arg("max_restarts")=(int)(10), bp::arg("max_ratchets")=(int)(20), bp::arg("ratchet_frequency")=(int)(500), bp::arg("starting_k")=100., bp::arg("ratchet_scale")=2., bp::arg("max_constraint_error")=0.01 )
+            , "This is a minimiser heavily inspired by the\nLocalEnergyMinimizer included in OpenMM. This is re-written\nfor sire to;\n\n1. Better integrate minimisation into the sire progress\nmonitoring  interupting framework.\n2. Avoid errors caused by OpenMM switching from the desired\ncontext to the CPU context, thus triggering spurious exceptions\nrelated to exclusions  exceptions not matching\n\nThis exposes more controls from the underlying minimisation\nlibrary, and also logs events and progress, which is returned\nas a string.\n\nThis raises an exception if minimisation fails.\n" );
     
     }
 
