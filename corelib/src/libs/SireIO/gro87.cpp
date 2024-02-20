@@ -684,6 +684,11 @@ bool Gro87::isFrame() const
     return true;
 }
 
+void Gro87::reorderLoadedFrame()
+{
+    throw SireError::incompatible_error(QObject::tr("Cannot reorder a Gro87 file!"));
+}
+
 Frame Gro87::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());

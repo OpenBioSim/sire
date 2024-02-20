@@ -261,6 +261,11 @@ int XTC::size() const
     return this->nFrames();
 }
 
+void XTC::reorderLoadedFrame()
+{
+    current_frame = this->reorderFrame(current_frame);
+}
+
 Frame XTC::getFrame(int frame) const
 {
     frame = SireID::Index(frame).map(this->nFrames());
@@ -278,7 +283,7 @@ Frame XTC::getFrame(int frame) const
                                     CODELOC);
     }
 
-    return f->readFrame(frame, this->usesParallel());
+    return this->reorderFrame(f->readFrame(frame, this->usesParallel()));
 }
 
 XTC XTC::operator[](int i) const
