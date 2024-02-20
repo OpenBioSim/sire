@@ -57,6 +57,8 @@ namespace bp = boost::python;
 
 #include <QSet>
 
+#include <boost/tuple/tuple_comparison.hpp>
+
 #include "SireBase/parallel.h"
 
 #include "SireBase/propertylist.h"
@@ -106,112 +108,10 @@ namespace bp = boost::python;
 #include <QReadWriteLock>
 
 #include <QSet>
+
+#include <boost/tuple/tuple_comparison.hpp>
 
 SireOpenMM::PerturbableOpenMMMolecule __copy__(const SireOpenMM::PerturbableOpenMMMolecule &other){ return SireOpenMM::PerturbableOpenMMMolecule(other); }
-
-#include "Helpers/str.hpp"
-
-#include "Helpers/release_gil_policy.hpp"
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMM/twoatomfunctions.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireUnits/units.h"
-
-#include "openmmmolecule.h"
-
-#include "tostring.h"
-
-#include <QDebug>
-
-#include <QReadWriteLock>
-
-#include <QSet>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMM/twoatomfunctions.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireUnits/units.h"
-
-#include "openmmmolecule.h"
-
-#include "tostring.h"
-
-#include <QDebug>
-
-#include <QReadWriteLock>
-
-#include <QSet>
 
 #include "Helpers/str.hpp"
 
@@ -224,7 +124,7 @@ void register_PerturbableOpenMMMolecule_class(){
         PerturbableOpenMMMolecule_exposer_t PerturbableOpenMMMolecule_exposer = PerturbableOpenMMMolecule_exposer_t( "PerturbableOpenMMMolecule", "This class holds all of the information of an OpenMM molecule\nthat can be perturbed using a LambdaSchedule. The data is held\nin easy-to-access arrays, with guarantees that the arrays are\ncompatible and the data is aligned.\n", bp::init< >("Null constructor") );
         bp::scope PerturbableOpenMMMolecule_scope( PerturbableOpenMMMolecule_exposer );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::OpenMMMolecule const & >(( bp::arg("mol") ), "Construct from the passed OpenMMMolecule") );
-        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, SireBase::PropertyMap const & >(( bp::arg("mol"), bp::arg("map") ), "") );
+        PerturbableOpenMMMolecule_exposer.def( bp::init< SireMol::Molecule const &, SireBase::PropertyMap const & >(( bp::arg("mol"), bp::arg("map") ), "Construct from a passed molecule and map") );
         PerturbableOpenMMMolecule_exposer.def( bp::init< SireOpenMM::PerturbableOpenMMMolecule const & >(( bp::arg("other") ), "Copy constructor") );
         { //::SireOpenMM::PerturbableOpenMMMolecule::angles
         
@@ -235,7 +135,7 @@ void register_PerturbableOpenMMMolecule_class(){
                 "angles"
                 , angles_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the angles which are perturbed, in the order they are\n  set in this perturbation\n" );
         
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::atoms
@@ -247,7 +147,7 @@ void register_PerturbableOpenMMMolecule_class(){
                 "atoms"
                 , atoms_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the atoms which are perturbed, in the order they are\n  set in this perturbation\n" );
         
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::bonds
@@ -259,7 +159,7 @@ void register_PerturbableOpenMMMolecule_class(){
                 "bonds"
                 , bonds_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the bonds which are perturbed, in the order they are\n  set in this perturbation\n" );
         
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getAlphas0
@@ -572,7 +472,7 @@ void register_PerturbableOpenMMMolecule_class(){
                 "getPerturbableConstraintsWithAtoms"
                 , getPerturbableConstraintsWithAtoms_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the atom indexes of all of the constraints, with\n  the constraint lengths at the two end states, in the order\n  they appear in this molecule\n" );
         
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::getSigmas0
@@ -758,7 +658,7 @@ void register_PerturbableOpenMMMolecule_class(){
                 "torsions"
                 , torsions_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the torsions which are perturbed, in the order they are\n  set in this perturbation. Note that this include both the\n  normal dihedrals and the improper torsions (openmm internally\n  treats them the same)\n" );
         
         }
         { //::SireOpenMM::PerturbableOpenMMMolecule::typeName
@@ -789,8 +689,6 @@ void register_PerturbableOpenMMMolecule_class(){
         PerturbableOpenMMMolecule_exposer.def( "__copy__", &__copy__);
         PerturbableOpenMMMolecule_exposer.def( "__deepcopy__", &__copy__);
         PerturbableOpenMMMolecule_exposer.def( "clone", &__copy__);
-        PerturbableOpenMMMolecule_exposer.def( "__str__", &__str__< ::SireOpenMM::PerturbableOpenMMMolecule > );
-        PerturbableOpenMMMolecule_exposer.def( "__repr__", &__str__< ::SireOpenMM::PerturbableOpenMMMolecule > );
         PerturbableOpenMMMolecule_exposer.def( "__str__", &__str__< ::SireOpenMM::PerturbableOpenMMMolecule > );
         PerturbableOpenMMMolecule_exposer.def( "__repr__", &__str__< ::SireOpenMM::PerturbableOpenMMMolecule > );
     }

@@ -331,11 +331,15 @@ message( STATUS "Compiling the python wrappers using a SMALL build." )
 set( CMAKE_C_FLAGS ${SIRE_C_FLAGS_SMALL} )
 set( CMAKE_CXX_FLAGS ${SIRE_CXX_FLAGS_SMALL} )
 
+set ( OPTIMISED_CXX_FLAGS ${SIRE_CXX_FLAGS_RELEASE} )
+
 message( STATUS "SMALL: ${SIRE_CXX_FLAGS_SMALL}")
+message( STATUS "OPTIMISED: ${OPTIMISED_CXX_FLAGS}")
 
 if (SIRE_HAS_CPP_LIB)
   message(STATUS "Using libc++ in place of libstdc++")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+  set(OPTIMISED_CXX_FLAGS "${OPTIMISED_CXX_FLAGS} -stdlib=libc++")
 endif()
 
 set( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${SIRE_SHARE_LINK_FLAGS}" )
@@ -349,16 +353,19 @@ CHECK_CXX_COMPILER_FLAG( "-w" SIRE_HAS_NO_WARNINGS_FLAG )
 if (SIRE_HAS_NO_WARNINGS_FLAG)
   message(STATUS "Inhibiting all compiler warnings, as the wrappers generate a lot!")
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w" )
+  set( OPTIMISED_CXX_FLAGS "${OPTIMISED_CXX_FLAGS} -w")
 else()
   CHECK_CXX_COMPILER_FLAG( "-Wno-unused-variable" SIRE_HAS_NO_UNUSED_VARIABLE )
   CHECK_CXX_COMPILER_FLAG( "-Wno-overloaded-virtual" SIRE_HAS_NO_OVERLOADED_VIRTUAL )
 
   if (SIRE_HAS_NO_UNUSED_VARIABLE)
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+    set( OPTIMISED_CXX_FLAGS "${OPTIMISED_CXX_FLAGS} -Wno-unused-variable")
   endif()
 
   if (SIRE_HAS_NO_OVERLOADED_VIRTUAL)
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual")
+    set( OPTIMISED_CXX_FLAGS "${OPTIMISED_CXX_FLAGS} -Wno-overloaded-virtual")
   endif()
 endif()
 
@@ -393,6 +400,7 @@ if (APPLE)
   # Also on MacOS need to add '-undefined dynamic_lookup' so that we can build
   # modules that can be imported by a python that has statically linked libPython
   set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -undefined dynamic_lookup" )
+  set( OPTIMISED_CXX_FLAGS "${OPTIMISED_CXX_FLAGS} -undefined dynamic_lookup" )
 
   # Need to remove anything other than `-O1` or `-Oz` from Python < 3.9
   # X86 builds on MacOS as these causes crashes with boost_python
@@ -414,6 +422,7 @@ message( STATUS  "CMAKE_C_COMPILER       == ${CMAKE_C_COMPILER}" )
 message( STATUS  "CMAKE_CXX_COMPILER     == ${CMAKE_CXX_COMPILER}" )
 message( STATUS  "C compiler flags       == ${CMAKE_C_FLAGS}" )
 message( STATUS  "C++ compiler flags     == ${CMAKE_CXX_FLAGS}" )
+message( STATUS  "Optimised C++ flags    == ${OPTIMISED_CXX_FLAGS}" )
 message( STATUS  "Shared library flags   == ${CMAKE_SHARED_LINKER_FLAGS}" )
 message( STATUS  "Static library flags   == ${CMAKE_STATIC_LINKER_FLAGS}" )
 message( STATUS  "Executable link flags  == ${CMAKE_EXE_LINKER_FLAGS}" )

@@ -133,130 +133,6 @@ SireOpenMM::OpenMMMetaData __copy__(const SireOpenMM::OpenMMMetaData &other){ re
 
 #include "Helpers/release_gil_policy.hpp"
 
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "SireBase/parallel.h"
-
-#include "SireBase/propertylist.h"
-
-#include "SireCAS/lambdaschedule.h"
-
-#include "SireError/errors.h"
-
-#include "SireMM/amberparams.h"
-
-#include "SireMM/atomljs.h"
-
-#include "SireMM/selectorbond.h"
-
-#include "SireMaths/vector.h"
-
-#include "SireMol/atomcharges.h"
-
-#include "SireMol/atomcoords.h"
-
-#include "SireMol/atomelements.h"
-
-#include "SireMol/atommasses.h"
-
-#include "SireMol/atomproperty.hpp"
-
-#include "SireMol/atomvelocities.h"
-
-#include "SireMol/bondid.h"
-
-#include "SireMol/bondorder.h"
-
-#include "SireMol/connectivity.h"
-
-#include "SireMol/core.h"
-
-#include "SireMol/moleditor.h"
-
-#include "SireStream/datastream.h"
-
-#include "SireStream/shareddatastream.h"
-
-#include "SireSystem/forcefieldinfo.h"
-
-#include "SireUnits/units.h"
-
-#include "SireVol/periodicbox.h"
-
-#include "SireVol/triclinicbox.h"
-
-#include "openmmmolecule.h"
-
-#include "sire_openmm.h"
-
-#include "tostring.h"
-
-#include <OpenMM.h>
-
-#include <QDebug>
-
-#include "Helpers/str.hpp"
-
-#include "Helpers/release_gil_policy.hpp"
-
 void register_OpenMMMetaData_class(){
 
     { //::SireOpenMM::OpenMMMetaData
@@ -400,8 +276,6 @@ void register_OpenMMMetaData_class(){
         OpenMMMetaData_exposer.def( "__copy__", &__copy__);
         OpenMMMetaData_exposer.def( "__deepcopy__", &__copy__);
         OpenMMMetaData_exposer.def( "clone", &__copy__);
-        OpenMMMetaData_exposer.def( "__str__", &__str__< ::SireOpenMM::OpenMMMetaData > );
-        OpenMMMetaData_exposer.def( "__repr__", &__str__< ::SireOpenMM::OpenMMMetaData > );
         OpenMMMetaData_exposer.def( "__str__", &__str__< ::SireOpenMM::OpenMMMetaData > );
         OpenMMMetaData_exposer.def( "__repr__", &__str__< ::SireOpenMM::OpenMMMetaData > );
     }

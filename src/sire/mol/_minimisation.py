@@ -80,17 +80,67 @@ class Minimisation:
         """
         return self._d.get_constraints()
 
-    def run(self, max_iterations: int = 10000):
+    def get_log(self):
         """
-        Perform minimisation on the molecules, running a maximum
-        of max_iterations iterations.
+        Return the log of the minimisation
+        """
+        return self._d.get_minimisation_log()
+
+    def run(
+        self,
+        max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        ratchet_frequency: int = 500,
+        starting_k: float = 400.0,
+        ratchet_scale: float = 10.0,
+        max_constraint_error: float = 0.001,
+    ):
+        """
+        Internal method that runs minimisation on the molecules.
+
+        If the system is constrained, then a ratcheting algorithm is used.
+        The constraints are replaced by harmonic restraints with an
+        force constant based on `tolerance` and `starting_k`. Minimisation
+        is performed, with the actual constrained bond lengths checked
+        whenever minimisation converges, or when ratchet_frequency steps
+        have completed (whichever is sooner). The force constant of
+        the restraints is ratcheted up by `ratchet_scale`, and minimisation
+        continues until there is no large change in energy or the maximum
+        number of ratchets has been reached. In addition, at each ratchet,
+        the actual bond lengths of constrained bonds are compared against
+        the constrained values. If these have drifted too far away from
+        the constrained values, then the minimisation is restarted,
+        going back to the starting conformation and starting minimisation
+        at one higher ratchet level. This will repeat a maximum of
+        `max_restarts` times.
+
+        If a stable structure cannot be reached, then an exception
+        will be raised.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - tolerance (float): The tolerance to use for the minimisation
+        - max_restarts (int): The maximum number of restarts before giving up
+        - max_ratchets (int): The maximum number of ratchets before giving up
+        - ratchet_frequency (int): The maximum number of steps between ratchets
+        - starting_k (float): The starting value of k for the minimisation
+        - ratchet_scale (float): The amount to scale k at each ratchet
+        - max_constraint_error (float): The maximum error in the constraint in nm
         """
         if not self._d.is_null():
-            self._d.run_minimisation(max_iterations=max_iterations)
+            self._d.run_minimisation(
+                max_iterations=max_iterations,
+                tolerance=tolerance,
+                max_restarts=max_restarts,
+                max_ratchets=max_ratchets,
+                ratchet_frequency=ratchet_frequency,
+                starting_k=starting_k,
+                ratchet_scale=ratchet_scale,
+                max_constraint_error=max_constraint_error,
+            )
 
         return self
 
@@ -108,13 +158,17 @@ class Minimisation:
         else:
             return None
 
-    def __call__(self, max_iterations: int = 10000):
+    def __call__(self, *args, **kwargs):
         """
         Perform minimisation on the molecules, running a maximum
         of max_iterations iterations.
 
         Parameters:
 
-        - max_iterations (int): The maximum number of iterations to run
+        max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        starting_k: float = 100.0,
         """
-        return self.run(max_iterations=max_iterations).commit()
+        return self.run(*args, **kwargs).commit()
