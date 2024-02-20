@@ -108,6 +108,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Preserve user atom names when writing to PDB format.
 
+* Updated the :class:`~sire.mol.Cursor` so that it is easier to get and
+  set the expression used for the potential energy (using the
+  ``get_potential`` and ``set_potential`` functions).
+
 * Fixed compile error using Python 3.12. This fixes issue #147.
 
 * Optimised the OpenMM minimisation code and making it more robust.
