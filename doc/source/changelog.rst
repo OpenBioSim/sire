@@ -128,6 +128,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   iterations reset. If it fails again, then this structure, with
   constraints re-applied, is returned.
 
+* Code can now detect when an Amber PRMTOP file has discontiguous molecules,
+  and thus when atoms are reordered after load. This information is passed
+  to subsequent frame file parsers that are loaded at the same time, so
+  that they are able to reorder the frames before being added to the atoms.
+  This happens transparently, so that the user doesn't have to worry about
+  the reordering. This fixes issue #164.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
