@@ -1,9 +1,10 @@
 """Test the Boresch analytical and numerical correction methods."""
 
+import os
 import shlex
 import subprocess
-import os
 import sys
+
 import pytest
 
 try:

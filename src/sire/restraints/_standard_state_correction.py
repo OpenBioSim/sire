@@ -160,7 +160,6 @@ def _get_boresch_standard_state_correction(restraint, temperature):
         * _np.sin(thetaB0)
         * (2 * _np.pi * R * T) ** (n_nonzero_k / 2)
     )
-    breakpoint()
 
     # Use values with units to return a sire.legacy.Units._Units.GeneralUnit object.
     dg = -_units.gasr * temperature * _np.log(numerator / denominator)
