@@ -4928,7 +4928,10 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     bool in_expected_order = true;
     QVector<qint64> loaded_order;
 
-    for (const auto &mol : mols)
+    ProgressBar bar("Checking atom order");
+    bool entered_bar = false;
+
+    for (auto &mol : mols)
     {
         for (int i = 0; i < mol.nAtoms(); ++i)
         {
@@ -4938,11 +4941,32 @@ System AmberPrm::startSystem(const PropertyMap &map) const
 
             if (atomnum.value() != expected_atomnum)
             {
+                if (not entered_bar)
+                {
+                    entered_bar = true;
+                    bar.setSpeedUnit("atoms / s");
+                    bar = bar.enter();
+                }
+
                 in_expected_order = false;
+
+                // we need to renumber this atom so that it has the
+                // expected atom number - they must increase in order
+                // according to molidx/atomidx order
+                bar.tick(QString("Renumbering atom %1 to %2").arg(atomnum.value()).arg(expected_atomnum));
+
+                auto atom = mol.atom(AtomIdx(i));
+                atom.renumber(AtomNum(expected_atomnum));
+                mol = atom.molecule();
             }
 
             expected_atomnum += 1;
         }
+    }
+
+    if (entered_bar)
+    {
+        bar.success();
     }
 
     MoleculeGroup molgroup("all");
