@@ -135,6 +135,17 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   This happens transparently, so that the user doesn't have to worry about
   the reordering. This fixes issue #164.
 
+* Added ``map`` support to writing perturbable Gromacs topology files. This
+  enables the user to specify which perturbable properties to use,
+  e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.
+
+* Added more support for Boresch restraints. Specifically, :func:`sire.restraints.boresch`
+  now supports the specification of equilibrium values, uses different default force
+  constants, and warns the user if the restraints are likely to be unstable.
+  :func:`sire.restraints.get_standard_state_correction` was implemented for Boresch
+  restraints. Tests were added for restraint creation and for the standard state
+  correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024

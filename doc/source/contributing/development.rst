@@ -444,7 +444,7 @@ additional packages as described in the
 
 .. code-block:: bash
 
-   conda install sphinx sphinxcontrib-programoutput sphinx_issues furo
+   conda install sphinx sphinxcontrib-programoutput sphinx-issues furo
 
 Then move to the ``doc`` directory and run:
 
