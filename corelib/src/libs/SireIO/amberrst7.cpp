@@ -173,7 +173,7 @@ QString AmberRst7::formatName() const
 /** Return the suffixes that RST7 files will typically have */
 QStringList AmberRst7::formatSuffix() const
 {
-    static const QStringList suffixes = {"rst7", "rst", "crd7", "crd"};
+    static const QStringList suffixes = {"rst7", "rst", "crd7", "crd", "inpcrd"};
     return suffixes;
 }
 

@@ -46,9 +46,7 @@ class _CursorData:
 
                 try:
                     connectivity = hunter(self.molecule, self.map)
-                    self.molecule.set_property(
-                        self.connectivity_property, connectivity
-                    )
+                    self.molecule.set_property(self.connectivity_property, connectivity)
                     self.connectivity = connectivity.edit()
                 except Exception as e:
                     from ..utils import Console
@@ -373,9 +371,7 @@ class Cursor:
             map = self._d.merge(map)
             return self.view().length(map=map)
 
-        def set_length(
-            value, anchor=None, weighting=None, auto_align=True, map=None
-        ):
+        def set_length(value, anchor=None, weighting=None, auto_align=True, map=None):
             """Set the length of the bond being edited by this cursor to
             'value'. This should be either a length unit, or a float
             (in which case it is converted into a value with default
@@ -481,12 +477,34 @@ class Cursor:
 
             return self
 
+        def get_potential(map=None):
+            """Return the energy expression for this bond"""
+            map = self._d.merge(map)
+            return self._d.molecule.property(map[self.type()]).get(self.id())
+
+        def set_potential(value, map=None):
+            """Set the energy expression for this bond to 'value'"""
+            from ..cas import Expression
+
+            map = self._d.merge(map)
+
+            internals = self._d.molecule.property(map[self.type()])
+            internals.set(self.id(), Expression(value))
+
+            self._d.molecule.set_property(map[self.type()], internals)
+
+            self._update()
+
+            return self
+
         self.length = get_length
         self.set_length = set_length
         self.change_length = change_length
         self.measure = get_length
         self.set_measure = set_length
         self.change_measure = change_length
+        self.get_potential = get_potential
+        self.set_potential = set_potential
 
     def _add_angle_functions(self):
         """Internal function used to add member functions that are
@@ -624,9 +642,7 @@ class Cursor:
             if move_all and self.is_dihedral():
                 from . import BondID
 
-                center_bond = BondID(
-                    self._internal.atom1(), self._internal.atom2()
-                )
+                center_bond = BondID(self._internal.atom1(), self._internal.atom2())
                 moved = view.move().change(center_bond, delta, map)
             else:
                 moved = view.move().change(self._internal, delta, map)
@@ -637,12 +653,35 @@ class Cursor:
             self._d.molecule = moved.commit().molecule().edit()
             self._update()
 
+        def get_potential(map=None):
+            """Return the energy expression for this internal"""
+            map = self._d.merge(map)
+            return self._d.molecule.property(map[self.type()]).get(self.id())
+
+        def set_potential(value, map=None):
+            """Set the energy expression for this internal to 'value'"""
+            from ..cas import Expression
+
+            map = self._d.merge(map)
+            print(map)
+
+            internals = self._d.molecule.property(map[self.type()])
+            internals.set(self.id(), Expression(value))
+
+            self._d.molecule.set_property(map[self.type()], internals)
+
+            self._update()
+
+            return self
+
         self.size = get_size
         self.set_size = set_size
         self.change_size = change_size
         self.measure = get_size
         self.set_measure = set_size
         self.change_measure = change_size
+        self.get_potential = get_potential
+        self.set_potential = set_potential
 
     def _add_extra_functions(self):
         """Internal function that adds additional functions to this
@@ -929,8 +968,7 @@ class Cursor:
                 return c
             except Exception:
                 raise TypeError(
-                    f"There is no residue that contains {self.type()}:"
-                    f"{self.id()}"
+                    f"There is no residue that contains {self.type()}:" f"{self.id()}"
                 )
 
         self._update()
@@ -957,8 +995,7 @@ class Cursor:
                 return c
             except Exception:
                 raise TypeError(
-                    f"There is no chain that contains {self.type()}:"
-                    f"{self.id()}"
+                    f"There is no chain that contains {self.type()}:" f"{self.id()}"
                 )
 
         self._update()
@@ -985,8 +1022,7 @@ class Cursor:
                 return c
             except Exception:
                 raise TypeError(
-                    f"There is no segment that contains {self.type()}:"
-                    f"{self.id()}"
+                    f"There is no segment that contains {self.type()}:" f"{self.id()}"
                 )
 
         self._update()
@@ -1019,6 +1055,12 @@ class Cursor:
         c._internal = bond.id()
         c._add_extra_functions()
 
+        if "map" in kwargs:
+            raise ValueError(
+                "The 'map' parameter is not allowed when creating a "
+                "Cursor for a bond"
+            )
+
         return c
 
     def angle(self, *args, **kwargs):
@@ -1030,6 +1072,12 @@ class Cursor:
         c._view = self._d.molecule
         c._internal = angle.id()
         c._add_extra_functions()
+
+        if "map" in kwargs:
+            raise ValueError(
+                "The 'map' parameter is not allowed when creating a "
+                "Cursor for an angle"
+            )
 
         return c
 
@@ -1043,6 +1091,12 @@ class Cursor:
         c._internal = dihedral.id()
         c._add_extra_functions()
 
+        if "map" in kwargs:
+            raise ValueError(
+                "The 'map' parameter is not allowed when creating a "
+                "Cursor for a dihedral"
+            )
+
         return c
 
     def improper(self, *args, **kwargs):
@@ -1054,6 +1108,12 @@ class Cursor:
         c._view = self._d.molecule
         c._internal = improper.id()
         c._add_extra_functions()
+
+        if "map" in kwargs:
+            raise ValueError(
+                "The 'map' parameter is not allowed when creating a "
+                "Cursor for an improper"
+            )
 
         return c
 
@@ -1115,8 +1175,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have "
-                "a name!"
+                "An internal (bond/angle/dihedral/improper) does not have " "a name!"
             )
 
         return self._view.name().value()
@@ -1127,8 +1186,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have "
-                "a name!"
+                "An internal (bond/angle/dihedral/improper) does not have " "a name!"
             )
 
         # get the type right...
@@ -1151,8 +1209,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have "
-                "a number!"
+                "An internal (bond/angle/dihedral/improper) does not have " "a number!"
             )
 
         try:
@@ -1166,8 +1223,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have "
-                "a number!"
+                "An internal (bond/angle/dihedral/improper) does not have " "a number!"
             )
 
         try:
@@ -1188,8 +1244,7 @@ class Cursor:
 
         if self.is_internal():
             raise TypeError(
-                "An internal (bond/angle/dihedral/improper) does not have "
-                "an index!"
+                "An internal (bond/angle/dihedral/improper) does not have " "an index!"
             )
 
         return self._view.index().value()
@@ -1427,9 +1482,7 @@ class Cursor:
             items = []
 
             for key in keys:
-                items.append(
-                    (key, self._d.connectivity.property(self._internal, key))
-                )
+                items.append((key, self._d.connectivity.property(self._internal, key)))
         else:
             keys = self._view.property_keys()
             items = []
@@ -1503,9 +1556,7 @@ class Cursor:
         else:
             from ..maths import Vector
 
-            view = (
-                view.move().make_whole(center=Vector(center), map=map).commit()
-            )
+            view = view.move().make_whole(center=Vector(center), map=map).commit()
 
         self._d.molecule = view.molecule().edit()
         self._update()
@@ -1654,9 +1705,7 @@ class Cursors:
                 raise TypeError(f"{c} must be a Cursor object!")
 
             if c._d is not parent._d:
-                raise ValueError(
-                    "The list of cursors must be created from the parent!"
-                )
+                raise ValueError("The list of cursors must be created from the parent!")
 
         self._parent = parent
         self._cursors = cursors
@@ -1785,9 +1834,7 @@ class Cursors:
 
             return lengths
 
-        def set_lengths(
-            values, anchor=None, weighting=None, auto_align=True, map=None
-        ):
+        def set_lengths(values, anchor=None, weighting=None, auto_align=True, map=None):
             """
             Set the lengths of the bonds being edited by this cursor to the
             specified
@@ -1858,9 +1905,7 @@ class Cursors:
             self._update()
             return self
 
-        def set_length(
-            value, anchor=None, weighting=None, auto_align=True, map=None
-        ):
+        def set_length(value, anchor=None, weighting=None, auto_align=True, map=None):
             """Set all bonds edited by this cursor to the supplied length.
 
             value: float or length
@@ -2253,9 +2298,7 @@ class Cursors:
                 from . import BondID
 
                 for delta, cursor in zip(deltas, self._cursors):
-                    bond = BondID(
-                        cursor._internal.atom0(), cursor._internal.atom1()
-                    )
+                    bond = BondID(cursor._internal.atom0(), cursor._internal.atom1())
                     moved.change(bond, delta, map)
             else:
                 for delta, cursor in zip(deltas, self._cursors):
@@ -2712,9 +2755,7 @@ class CursorsM:
                 if molnum not in self._molcursors:
                     self._molcursors[molnum] = child_mol.cursor(map=map)
 
-                self._cursors.append(
-                    self._molcursors[molnum]._from_view(child)
-                )
+                self._cursors.append(self._molcursors[molnum]._from_view(child))
 
             self._add_extra_functions()
 
@@ -2732,9 +2773,7 @@ class CursorsM:
 
             return lengths
 
-        def set_lengths(
-            values, anchor=None, weighting=None, auto_align=True, map=None
-        ):
+        def set_lengths(values, anchor=None, weighting=None, auto_align=True, map=None):
             """
             Set the lengths of the bonds being edited by this cursor to the
             specified values. Note that there should be the same number of
@@ -2817,9 +2856,7 @@ class CursorsM:
             self._update()
             return self
 
-        def set_length(
-            value, anchor=None, weighting=None, auto_align=True, map=None
-        ):
+        def set_length(value, anchor=None, weighting=None, auto_align=True, map=None):
             """Set the lengths of all of the bonds edited by this
             cursor to the passed value.
 
@@ -3238,9 +3275,7 @@ class CursorsM:
                     molnum = cursor._d.number()
 
                     if molnum not in movers:
-                        molecule = self._molcursors[
-                            molnum
-                        ]._d.molecule.commit()
+                        molecule = self._molcursors[molnum]._d.molecule.commit()
                         molecules[molnum] = molecule
                         movers[molnum] = molecule.move()
                         maps[molnum] = self._cursors[0]._d.merge(
@@ -3252,18 +3287,14 @@ class CursorsM:
                             )
                         )
 
-                    bond = BondID(
-                        cursor._internal.atom0(), cursor._internal.atom1()
-                    )
+                    bond = BondID(cursor._internal.atom0(), cursor._internal.atom1())
                     movers[molnum].change(bond, delta, maps[molnum])
             else:
                 for delta, cursor in zip(deltas, self._cursors):
                     molnum = cursor._d.number()
 
                     if molnum not in movers:
-                        molecule = self._molcursors[
-                            molnum
-                        ]._d.molecule.commit()
+                        molecule = self._molcursors[molnum]._d.molecule.commit()
                         molecules[molnum] = molecule
                         movers[molnum] = molecule.move()
                         maps[molnum] = self._cursors[0]._d.merge(
@@ -3275,9 +3306,7 @@ class CursorsM:
                             )
                         )
 
-                    movers[molnum].change(
-                        cursor._internal, delta, maps[molnum]
-                    )
+                    movers[molnum].change(cursor._internal, delta, maps[molnum])
 
             for molnum, mover in movers.items():
                 if auto_align and (anchor is None):
