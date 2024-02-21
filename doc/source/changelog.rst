@@ -146,6 +146,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   restraints. Tests were added for restraint creation and for the standard state
   correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
 
+* Fixed a bug where the SDF parser would wrongly try to parse Amber RST7 files that
+  weren't immediately recognised as such. The fix adds ``.inpcrd`` as a recognised
+  extension for Amber RST7 files, and changes the scoring logic of the SDF parser
+  to equal the number of molecules times the number of atoms.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
