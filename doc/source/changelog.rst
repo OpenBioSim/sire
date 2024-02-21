@@ -135,6 +135,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   This happens transparently, so that the user doesn't have to worry about
   the reordering. This fixes issue #164.
 
+* Added ``map`` support to writing perturbable Gromacs topology files. This
+  enables the user to specify which perturbable properties to use,
+  e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024

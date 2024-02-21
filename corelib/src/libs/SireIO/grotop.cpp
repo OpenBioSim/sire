@@ -406,7 +406,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
     // Try to see if this molecule is perturbable.
     try
     {
-        is_perturbable = mol.property("is_perturbable").asABoolean();
+        is_perturbable = mol.property(map["is_perturbable"]).asABoolean();
     }
     catch (...)
     {
@@ -434,7 +434,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
         // get the forcefields for this molecule
         try
         {
-            ffield0 = mol.property("forcefield0").asA<MMDetail>();
+            ffield0 = mol.property(map["forcefield0"]).asA<MMDetail>();
         }
         catch (...)
         {
@@ -442,7 +442,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
         }
         try
         {
-            ffield1 = mol.property("forcefield1").asA<MMDetail>();
+            ffield1 = mol.property(map["forcefield1"]).asA<MMDetail>();
         }
         catch (...)
         {
@@ -477,9 +477,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    masses = mol.property("mass1").asA<AtomMasses>();
+                    masses = mol.property(map["mass1"]).asA<AtomMasses>();
                 else
-                    masses = mol.property("mass0").asA<AtomMasses>();
+                    masses = mol.property(map["mass0"]).asA<AtomMasses>();
                 has_mass = true;
             }
             catch (...)
@@ -491,9 +491,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
                 try
                 {
                     if (is_lambda1)
-                        elements = mol.property("element1").asA<AtomElements>();
+                        elements = mol.property(map["element1"]).asA<AtomElements>();
                     else
-                        elements = mol.property("element0").asA<AtomElements>();
+                        elements = mol.property(map["element0"]).asA<AtomElements>();
                     has_elem = true;
                 }
                 catch (...)
@@ -504,9 +504,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    charges = mol.property("charge1").asA<AtomCharges>();
+                    charges = mol.property(map["charge1"]).asA<AtomCharges>();
                 else
-                    charges = mol.property("charge0").asA<AtomCharges>();
+                    charges = mol.property(map["charge0"]).asA<AtomCharges>();
                 has_chg = true;
             }
             catch (...)
@@ -516,9 +516,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    atomtypes = mol.property("atomtype1").asA<AtomStringProperty>();
+                    atomtypes = mol.property(map["atomtype1"]).asA<AtomStringProperty>();
                 else
-                    atomtypes = mol.property("atomtype0").asA<AtomStringProperty>();
+                    atomtypes = mol.property(map["atomtype0"]).asA<AtomStringProperty>();
                 has_type = true;
             }
             catch (...)
@@ -528,9 +528,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    bondtypes = mol.property("bondtype1").asA<AtomStringProperty>();
+                    bondtypes = mol.property(map["bondtype1"]).asA<AtomStringProperty>();
                 else
-                    bondtypes = mol.property("bondtype0").asA<AtomStringProperty>();
+                    bondtypes = mol.property(map["bondtype0"]).asA<AtomStringProperty>();
                 has_bondtype = true;
             }
             catch (...)
@@ -687,9 +687,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    funcs = mol.property("bond1").asA<TwoAtomFunctions>();
+                    funcs = mol.property(map["bond1"]).asA<TwoAtomFunctions>();
                 else
-                    funcs = mol.property("bond0").asA<TwoAtomFunctions>();
+                    funcs = mol.property(map["bond0"]).asA<TwoAtomFunctions>();
                 has_funcs = true;
             }
             catch (...)
@@ -698,7 +698,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
 
             try
             {
-                conn = mol.property("connectivity").asA<Connectivity>();
+                conn = mol.property(map["connectivity"]).asA<Connectivity>();
                 has_conn = true;
             }
             catch (...)
@@ -762,9 +762,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    funcs = mol.property("angle1").asA<ThreeAtomFunctions>();
+                    funcs = mol.property(map["angle1"]).asA<ThreeAtomFunctions>();
                 else
-                    funcs = mol.property("angle0").asA<ThreeAtomFunctions>();
+                    funcs = mol.property(map["angle0"]).asA<ThreeAtomFunctions>();
                 has_funcs = true;
             }
             catch (...)
@@ -807,9 +807,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    funcs = mol.property("dihedral1").asA<FourAtomFunctions>();
+                    funcs = mol.property(map["dihedral1"]).asA<FourAtomFunctions>();
                 else
-                    funcs = mol.property("dihedral0").asA<FourAtomFunctions>();
+                    funcs = mol.property(map["dihedral0"]).asA<FourAtomFunctions>();
                 has_funcs = true;
             }
             catch (...)
@@ -853,9 +853,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    imps = mol.property("improper1").asA<FourAtomFunctions>();
+                    imps = mol.property(map["improper1"]).asA<FourAtomFunctions>();
                 else
-                    imps = mol.property("improper0").asA<FourAtomFunctions>();
+                    imps = mol.property(map["improper0"]).asA<FourAtomFunctions>();
                 has_imps = true;
             }
             catch (...)
@@ -4356,7 +4356,7 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
             waters =
                 system.search(
                     QString("(not mols with property is_non_searchable_water) and (water and not resname %1")
-                    .arg(xtal_water_resname));
+                        .arg(xtal_water_resname));
         }
     }
     else
