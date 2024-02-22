@@ -313,6 +313,12 @@ namespace SireIO
 
         const SireBase::PropertyMap &propertyMap() const;
 
+        void setLoadedOrder(const QVector<qint64> &loaded_order);
+        const QVector<qint64> &getLoadedOrder() const;
+
+        virtual void reorderLoadedFrame();
+        SireMol::Frame reorderFrame(const SireMol::Frame &frame) const;
+
         QString saveTitle() const;
 
     private:
@@ -329,6 +335,11 @@ namespace SireIO
 
         /** The System being written */
         SireSystem::System saved_system;
+
+        /** The order of atoms read from the file - this is empty
+         *  if the atoms are in their expected atom order
+         */
+        QVector<qint64> loaded_order;
 
         /** The frames of this system to save */
         QList<qint32> frames_to_write;

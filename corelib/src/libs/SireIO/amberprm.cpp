@@ -83,6 +83,7 @@
 #include "SireBase/findexe.h"
 #include "SireBase/tempdir.h"
 #include "SireBase/progressbar.h"
+#include "SireBase/propertylist.h"
 
 #include "SireIO/errors.h"
 
@@ -4919,6 +4920,31 @@ System AmberPrm::startSystem(const PropertyMap &map) const
         }
     }
 
+    // we need to check that the atoms are still in the same order
+    // as they appeared in the prmtop file - the order can change if
+    // molecules are discontiguous (i.e. ions moved to the end but
+    // bonded to earlier chains of a protein)
+    int expected_atomnum = 1;
+    bool in_expected_order = true;
+    QVector<qint64> loaded_order;
+
+    for (const auto &mol : mols)
+    {
+        for (int i = 0; i < mol.nAtoms(); ++i)
+        {
+            const auto atomnum = mol.info().number(AtomIdx(i));
+
+            loaded_order.append(atomnum.value() - 1);
+
+            if (atomnum.value() != expected_atomnum)
+            {
+                in_expected_order = false;
+            }
+
+            expected_atomnum += 1;
+        }
+    }
+
     MoleculeGroup molgroup("all");
 
     for (auto mol : mols)
@@ -4930,6 +4956,11 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     System system(this->title());
     system.add(molgroup);
     system.setProperty(map["fileformat"].source(), StringProperty(this->formatName()));
+
+    if (not in_expected_order)
+    {
+        system.setProperty("loaded_atom_order", IntegerArrayProperty(loaded_order));
+    }
 
     // some top files contains "BOX_DIMENSIONS" information. Add this now, as it
     // now in case it is not replaced by the coordinates file
