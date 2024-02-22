@@ -228,6 +228,12 @@ ResName Residue::name() const
     return d->info().name(residx);
 }
 
+/** Return the alternate name of this residue */
+ResName Residue::alternateName() const
+{
+    return d->getAlternateResName(residx);
+}
+
 /** Return the number of this residue */
 ResNum Residue::number() const
 {
