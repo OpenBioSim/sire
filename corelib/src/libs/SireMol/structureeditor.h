@@ -276,11 +276,11 @@ namespace SireMol
         void renameSegment(quint32 uid, const SegName &name);
         void reindexSegment(quint32 uid, SegIdx index);
 
-        void setAlternateName(quint32 uid, const AtomName &name);
-        void setAlternateName(quint32 uid, const ResName &name);
+        void setAlternateAtomName(quint32 uid, const AtomName &name);
+        void setAlternateResName(quint32 uid, const ResName &name);
 
-        const AtomName &alternateAtomName(quint32 uid) const;
-        const ResName &alternateResName(quint32 uid) const;
+        const AtomName &getAlternateAtomName(quint32 uid) const;
+        const ResName &getAlternateResName(quint32 uid) const;
 
         void removeAtom(quint32 uid);
         void removeCutGroup(quint32 uid);

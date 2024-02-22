@@ -120,6 +120,8 @@ namespace SireMol
         MolEditor &removeLink(const QString &key);
         MolEditor &removeAllLinks();
 
+        MolStructureEditor makeSingleCutGroup() const;
+
         AtomStructureEditor add(const AtomName &atom) const;
         AtomStructureEditor add(const AtomNum &atom) const;
 

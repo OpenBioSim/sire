@@ -205,6 +205,7 @@ def fix_BeadEditorBase(c):
 
 
 def fix_AtomEditor(c):
+    c.decls("setAlternateName").call_policies = call_policies.return_self()
     c.decls("rename").call_policies = call_policies.return_self()
     c.decls("renumber").call_policies = call_policies.return_self()
 
@@ -251,6 +252,7 @@ fix_SegStructureEditor = fix_CGStructureEditor
 
 
 def fix_ResEditor(c):
+    c.decls("setAlternateName").call_policies = call_policies.return_self()
     c.decls("renumber").call_policies = call_policies.return_self()
     c.decls("rename").call_policies = call_policies.return_self()
 
@@ -268,6 +270,7 @@ def fix_ResStructureEditor(c):
 def fix_MolEditor(c, include_links=True):
     c.decls("renumber").call_policies = call_policies.return_self()
     c.decls("rename").call_policies = call_policies.return_self()
+    c.decls("makeSingleCutGroup").call_policies = call_policies.return_self()
 
     if include_links:
         c.decls("addLink").call_policies = call_policies.return_self()

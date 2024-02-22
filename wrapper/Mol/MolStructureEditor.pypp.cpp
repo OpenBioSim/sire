@@ -207,7 +207,7 @@ void register_MolStructureEditor_class(){
             MolStructureEditor_exposer.def( 
                 "makeSingleCutGroup"
                 , makeSingleCutGroup_function_value
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "Move all atoms into a single CutGroup" );
         
         }

@@ -198,8 +198,8 @@ namespace SireMol
         AtomStructureEditor &reparent(SegIdx segidx);
         AtomStructureEditor &reparent(const SegID &segid);
 
-        void setAlternateName(const QString &name);
-        void setAlternateName(const AtomName &name);
+        AtomStructureEditor &setAlternateName(const QString &name);
+        AtomStructureEditor &setAlternateName(const AtomName &name);
 
         const AtomName &alternateName() const;
 

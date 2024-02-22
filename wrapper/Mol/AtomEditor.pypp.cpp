@@ -282,7 +282,7 @@ void register_AtomEditor_class(){
                 "setAlternateName"
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }
@@ -295,7 +295,7 @@ void register_AtomEditor_class(){
                 "setAlternateName"
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }

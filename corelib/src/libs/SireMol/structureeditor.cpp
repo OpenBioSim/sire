@@ -3961,7 +3961,7 @@ void StructureEditor::renumberMolecule(MolNum newnum)
 }
 
 /** Set the alternate atom name */
-void StructureEditor::setAlternateName(quint32 uid, const AtomName &name)
+void StructureEditor::setAlternateAtomName(quint32 uid, const AtomName &name)
 {
     this->assertSane();
 
@@ -3975,7 +3975,7 @@ void StructureEditor::setAlternateName(quint32 uid, const AtomName &name)
 }
 
 /** Set the alternate residue name */
-void StructureEditor::setAlternateName(quint32 uid, const ResName &name)
+void StructureEditor::setAlternateResName(quint32 uid, const ResName &name)
 {
     this->assertSane();
 
@@ -3991,7 +3991,7 @@ void StructureEditor::setAlternateName(quint32 uid, const ResName &name)
 /** Return the alternate atom name - this will be the atom name if
  *  this hasn't been set
  */
-const AtomName &StructureEditor::alternateAtomName(quint32 uid) const
+const AtomName &StructureEditor::getAlternateAtomName(quint32 uid) const
 {
     this->assertSane();
 
@@ -4003,7 +4003,7 @@ const AtomName &StructureEditor::alternateAtomName(quint32 uid) const
         return atom.altname;
 }
 
-const ResName &StructureEditor::alternateResName(quint32 uid) const
+const ResName &StructureEditor::getAlternateResName(quint32 uid) const
 {
     this->assertSane();
 

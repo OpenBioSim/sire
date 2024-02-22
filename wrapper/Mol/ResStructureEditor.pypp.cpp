@@ -400,29 +400,29 @@ void register_ResStructureEditor_class(){
                 , "Is this editor editing the entire molecule?" );
         
         }
-        { //::SireMol::ResStructureEditor::setAlternatename
+        { //::SireMol::ResStructureEditor::setAlternateName
         
-            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*setAlternatename_function_type)( ::SireMol::ResName const & ) ;
-            setAlternatename_function_type setAlternatename_function_value( &::SireMol::ResStructureEditor::setAlternatename );
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*setAlternateName_function_type)( ::SireMol::ResName const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::ResStructureEditor::setAlternateName );
             
             ResStructureEditor_exposer.def( 
-                "setAlternatename"
-                , setAlternatename_function_value
+                "setAlternateName"
+                , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }
-        { //::SireMol::ResStructureEditor::setAlternatename
+        { //::SireMol::ResStructureEditor::setAlternateName
         
-            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*setAlternatename_function_type)( ::QString const & ) ;
-            setAlternatename_function_type setAlternatename_function_value( &::SireMol::ResStructureEditor::setAlternatename );
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*setAlternateName_function_type)( ::QString const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::ResStructureEditor::setAlternateName );
             
             ResStructureEditor_exposer.def( 
-                "setAlternatename"
-                , setAlternatename_function_value
+                "setAlternateName"
+                , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }

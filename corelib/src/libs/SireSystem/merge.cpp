@@ -123,103 +123,71 @@ namespace SireSystem
         const auto mol0 = mols.atoms0().toSingleMolecule().molecule();
         const auto mol1 = mols.atoms1().toSingleMolecule().molecule();
 
-        // first, check that the merge will not change any of the CutGroup assigments...
-        if (mol.nCutGroups() > 1)
-        {
-            bool merge_changes_cutgroups = false;
-
-            QHash<CGIdx, CGIdx> cg_map;
-            cg_map.reserve(mol.nCutGroups());
-
-            for (int i = 0; i < nmapped; ++i)
-            {
-                const auto cg0 = mapped_atoms0[i].cutGroup().index();
-                const auto cg1 = mapped_atoms1[i].cutGroup().index();
-
-                if (cg_map.contains(cg0))
-                {
-                    if (cg_map[cg0] != cg1)
-                    {
-                        merge_changes_cutgroups = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    cg_map[cg0] = cg1;
-                }
-            }
-
-            if (merge_changes_cutgroups)
-            {
-                // it is safest to move all atoms into a single cutgroup
-                mol.makeSingleCutGroup();
-            }
-        }
-
         // copy the properties from the reference state to both states
         QStringList merged_properties = {"charge", "LJ", "atomtype", "intrascale",
                                          "coordinates", "mass", "element",
                                          "bond", "angle", "dihedral",
                                          "improper"};
 
-        for (int i = 0; i < mol.nAtoms(); ++i)
-        {
-            auto atom = mol.atom(AtomIdx(i));
-
-            for (const auto &prop : merged_properties)
-            {
-                if (mol0.hasProperty(map0[prop]))
+        /*
+                for (int i = 0; i < mol.nAtoms(); ++i)
                 {
-                    const auto &val = mol0.property(map0[prop]);
+                    auto atom = mol.atom(AtomIdx(i));
 
-                    atom.setProperty(map[prop + "0"].source(), val);
-                    atom.setProperty(map[prop + "1"].source(), val);
+                    for (const auto &prop : merged_properties)
+                    {
+                        if (mol0.hasProperty(map0[prop]))
+                        {
+                            const auto &val = mol0.property(map0[prop]);
+
+                            atom.setProperty(map[prop + "0"].source(), val);
+                            atom.setProperty(map[prop + "1"].source(), val);
+                        }
+                    }
                 }
-            }
-        }
 
-        QVector<AtomStructureEditor> matched_atoms;
-        matched_atoms.reserve(nmapped);
+                QVector<AtomStructureEditor> matched_atoms;
+                matched_atoms.reserve(nmapped);
 
-        // now go through and update the values of properties for
-        // the atoms that mutate
-        ResStructureEditor last_res;
-        bool changed_res = false;
+                // now go through and update the values of properties for
+                // the atoms that mutate
+                ResStructureEditor last_res;
+                bool changed_res = false;
 
-        for (int i = 0; i < nmapped; ++i)
-        {
-            const auto atom0 = mapped_atoms0[i];
-            const auto atom1 = mapped_atoms1[i];
-
-            matched_atoms.append(mol.atom(atom0.index()));
-            auto &atom = matched_atoms.last();
-
-            // save the perturbed state atom and residue names into new properties, so
-            // that we can use these when extracting the end states
-            atom.setAlternateName(atom1.name());
-
-            try
-            {
-                auto next_res = atom.residue();
-
-                if (next_res != last_res)
+                for (int i = 0; i < nmapped; ++i)
                 {
-                    changed_res = true;
-                    last_res = next_res;
+                    const auto atom0 = mapped_atoms0[i];
+                    const auto atom1 = mapped_atoms1[i];
+
+                    matched_atoms.append(mol.atom(atom0.index()));
+                    auto &atom = matched_atoms.last();
+
+                    // save the perturbed state atom and residue names into new properties, so
+                    // that we can use these when extracting the end states
+                    atom.setAlternateName(atom1.name());
+
+                    try
+                    {
+                        auto next_res = atom.residue();
+
+                        if (next_res != last_res)
+                        {
+                            changed_res = true;
+                            last_res = next_res;
+                        }
+                    }
+                    catch (...)
+                    {
+                    }
+
+                    if (changed_res)
+                    {
+                        last_res.setAlternateName(atom1.residue().name());
+                    }
+
+                    // check if we need to change residue
                 }
-            }
-            catch (...)
-            {
-            }
-
-            if (changed_res)
-            {
-                last_res.setAlternateName(atom1.residue().name());
-            }
-
-            // check if we need to change residue
-        }
+        */
 
         if (as_new_molecule)
         {

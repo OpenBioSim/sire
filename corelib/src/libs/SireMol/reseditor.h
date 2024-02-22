@@ -105,12 +105,12 @@ namespace SireMol
         ResEditor &renumber(int number);
 
         ResStructureEditor reindex(ResIdx index) const;
-        ResStructureEditor &reindex(int index) const;
+        ResStructureEditor reindex(int index) const;
 
-        ResEditor &setAlternatename(const ResName &name);
-        ResEditor &setAlternatename(const QString &name);
+        ResEditor &setAlternateName(const ResName &name);
+        ResEditor &setAlternateName(const QString &name);
 
-        const ResName &alternateName() const;
+        ResName alternateName() const;
 
         MolStructureEditor remove() const;
 
@@ -189,8 +189,8 @@ namespace SireMol
         ResStructureEditor &renumber(int number);
         ResStructureEditor &reindex(int index);
 
-        ResStructureEditor &setAlternatename(const ResName &name);
-        ResStructureEditor &setAlternatename(const QString &name);
+        ResStructureEditor &setAlternateName(const ResName &name);
+        ResStructureEditor &setAlternateName(const QString &name);
 
         const ResName &alternateName() const;
 

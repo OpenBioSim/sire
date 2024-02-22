@@ -173,6 +173,18 @@ void register_MolEditor_class(){
                 , "Commit these changes and return a copy of the\nedited molecule" );
         
         }
+        { //::SireMol::MolEditor::makeSingleCutGroup
+        
+            typedef ::SireMol::MolStructureEditor ( ::SireMol::MolEditor::*makeSingleCutGroup_function_type)(  ) const;
+            makeSingleCutGroup_function_type makeSingleCutGroup_function_value( &::SireMol::MolEditor::makeSingleCutGroup );
+            
+            MolEditor_exposer.def( 
+                "makeSingleCutGroup"
+                , makeSingleCutGroup_function_value
+                , bp::return_self< >()
+                , "" );
+        
+        }
         { //::SireMol::MolEditor::operator=
         
             typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*assign_function_type)( ::SireMol::Molecule const & ) ;

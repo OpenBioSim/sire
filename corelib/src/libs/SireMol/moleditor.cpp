@@ -189,6 +189,15 @@ MolEditor &MolEditor::renumber(const QHash<AtomNum, AtomNum> &atomnums, const QH
     return *this;
 }
 
+/** Return an editor where all atoms have been moved into a
+ *  single cutgroup
+ */
+MolStructureEditor MolEditor::makeSingleCutGroup() const
+{
+    MolStructureEditor editor(*this);
+    return editor.makeSingleCutGroup();
+}
+
 /** Add an atom called 'name' and return an editor that can
     be used to edit it */
 AtomStructureEditor MolEditor::add(const AtomName &name) const

@@ -395,27 +395,27 @@ void register_AtomStructureEditor_class(){
         }
         { //::SireMol::AtomStructureEditor::setAlternateName
         
-            typedef void ( ::SireMol::AtomStructureEditor::*setAlternateName_function_type)( ::QString const & ) ;
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*setAlternateName_function_type)( ::QString const & ) ;
             setAlternateName_function_type setAlternateName_function_value( &::SireMol::AtomStructureEditor::setAlternateName );
             
             AtomStructureEditor_exposer.def( 
                 "setAlternateName"
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }
         { //::SireMol::AtomStructureEditor::setAlternateName
         
-            typedef void ( ::SireMol::AtomStructureEditor::*setAlternateName_function_type)( ::SireMol::AtomName const & ) ;
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*setAlternateName_function_type)( ::SireMol::AtomName const & ) ;
             setAlternateName_function_type setAlternateName_function_value( &::SireMol::AtomStructureEditor::setAlternateName );
             
             AtomStructureEditor_exposer.def( 
                 "setAlternateName"
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }

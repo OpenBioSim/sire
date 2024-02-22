@@ -3,7 +3,6 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
-#include "Helpers/clone_const_reference.hpp"
 #include "ResEditor.pypp.hpp"
 
 namespace bp = boost::python;
@@ -88,13 +87,13 @@ void register_ResEditor_class(){
         }
         { //::SireMol::ResEditor::alternateName
         
-            typedef ::SireMol::ResName const & ( ::SireMol::ResEditor::*alternateName_function_type)(  ) const;
+            typedef ::SireMol::ResName ( ::SireMol::ResEditor::*alternateName_function_type)(  ) const;
             alternateName_function_type alternateName_function_value( &::SireMol::ResEditor::alternateName );
             
             ResEditor_exposer.def( 
                 "alternateName"
                 , alternateName_function_value
-                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , bp::release_gil_policy()
                 , "" );
         
         }
@@ -151,7 +150,7 @@ void register_ResEditor_class(){
         }
         { //::SireMol::ResEditor::reindex
         
-            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResEditor::*reindex_function_type)( int ) const;
+            typedef ::SireMol::ResStructureEditor ( ::SireMol::ResEditor::*reindex_function_type)( int ) const;
             reindex_function_type reindex_function_value( &::SireMol::ResEditor::reindex );
             
             ResEditor_exposer.def( 
@@ -265,29 +264,29 @@ void register_ResEditor_class(){
                 , "Move this residue into the chain with ID chainid\nThrow: SireMol::missing_chain\nThrow: SireMol::duplicate_chain\nThrow: SireError::invalid_index\n" );
         
         }
-        { //::SireMol::ResEditor::setAlternatename
+        { //::SireMol::ResEditor::setAlternateName
         
-            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*setAlternatename_function_type)( ::SireMol::ResName const & ) ;
-            setAlternatename_function_type setAlternatename_function_value( &::SireMol::ResEditor::setAlternatename );
+            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*setAlternateName_function_type)( ::SireMol::ResName const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::ResEditor::setAlternateName );
             
             ResEditor_exposer.def( 
-                "setAlternatename"
-                , setAlternatename_function_value
+                "setAlternateName"
+                , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }
-        { //::SireMol::ResEditor::setAlternatename
+        { //::SireMol::ResEditor::setAlternateName
         
-            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*setAlternatename_function_type)( ::QString const & ) ;
-            setAlternatename_function_type setAlternatename_function_value( &::SireMol::ResEditor::setAlternatename );
+            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*setAlternateName_function_type)( ::QString const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::ResEditor::setAlternateName );
             
             ResEditor_exposer.def( 
-                "setAlternatename"
-                , setAlternatename_function_value
+                "setAlternateName"
+                , setAlternateName_function_value
                 , ( bp::arg("name") )
-                , bp::release_gil_policy()
+                , bp::return_self< >()
                 , "" );
         
         }
