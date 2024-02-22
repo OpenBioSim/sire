@@ -179,6 +179,9 @@ namespace SireMol
                              const SelectorM<Atom> &container,
                              bool find_all = true) const;
 
+        const SireBase::PropertyMap &propertyMap0() const;
+        const SireBase::PropertyMap &propertyMap1() const;
+
     private:
         /** The reference atoms - we map from these to the other atoms */
         SelectorM<Atom> atms0;

@@ -175,17 +175,18 @@ namespace SireMol
         const MoleculeInfoData &info() const;
 
         /// functions used by MoleculeInfoData when committing
-        boost::tuple<AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx> getAtomData(AtomIdx atomidx) const;
+        boost::tuple<AtomName, AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx> getAtomData(AtomIdx atomidx) const;
 
         boost::tuple<CGName, QList<AtomIdx>> getCGData(CGIdx cgidx) const;
 
-        boost::tuple<ResName, ResNum, ChainIdx, QList<AtomIdx>> getResData(ResIdx residx) const;
+        boost::tuple<ResName, ResName, ResNum, ChainIdx, QList<AtomIdx>> getResData(ResIdx residx) const;
 
         boost::tuple<ChainName, QList<ResIdx>> getChainData(ChainIdx chainidx) const;
 
         boost::tuple<SegName, QList<AtomIdx>> getSegData(SegIdx segidx) const;
 
         /// Functions predominantly for StructureEditor derived classes
+        void convertToSingleCutGroupMolecule();
 
         quint32 getUID(AtomIdx atomidx) const;
         quint32 getUID(CGIdx cgidx) const;
@@ -274,6 +275,12 @@ namespace SireMol
 
         void renameSegment(quint32 uid, const SegName &name);
         void reindexSegment(quint32 uid, SegIdx index);
+
+        void setAlternateName(quint32 uid, const AtomName &name);
+        void setAlternateName(quint32 uid, const ResName &name);
+
+        const AtomName &alternateAtomName(quint32 uid) const;
+        const ResName &alternateResName(quint32 uid) const;
 
         void removeAtom(quint32 uid);
         void removeCutGroup(quint32 uid);

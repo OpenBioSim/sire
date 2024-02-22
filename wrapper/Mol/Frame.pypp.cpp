@@ -268,7 +268,7 @@ void register_Frame_class(){
                 , reorder_function_value
                 , ( bp::arg("order") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return a copy of this frame which has been reordered according\n  to order (i.e. atom i is moved to order[i]). This does nothing\n  if the order is empty. It silently ignores invalid orders, and\n  will leave atoms that arent referenced in their original\n  positions\n" );
         
         }
         { //::SireMol::Frame::reverse

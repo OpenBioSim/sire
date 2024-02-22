@@ -109,7 +109,16 @@ namespace SireMol
         AtomEditor &rename(const AtomName &name);
         AtomEditor &renumber(AtomNum number);
 
+        AtomEditor &rename(const QString &name);
+        AtomEditor &renumber(int number);
+
         AtomStructureEditor reindex(AtomIdx atomidx) const;
+        AtomStructureEditor reindex(int atomidx) const;
+
+        AtomEditor &setAlternateName(const QString &name);
+        AtomEditor &setAlternateName(const AtomName &name);
+
+        AtomName alternateName() const;
 
         MolStructureEditor remove() const;
 
@@ -170,6 +179,10 @@ namespace SireMol
         AtomNum number() const;
         AtomIdx index() const;
 
+        AtomStructureEditor &rename(const QString &name);
+        AtomStructureEditor &renumber(int number);
+        AtomStructureEditor &reindex(int idx);
+
         AtomStructureEditor &rename(const AtomName &name);
         AtomStructureEditor &renumber(AtomNum number);
         AtomStructureEditor &reindex(AtomIdx idx);
@@ -184,6 +197,11 @@ namespace SireMol
 
         AtomStructureEditor &reparent(SegIdx segidx);
         AtomStructureEditor &reparent(const SegID &segid);
+
+        void setAlternateName(const QString &name);
+        void setAlternateName(const AtomName &name);
+
+        const AtomName &alternateName() const;
 
         template <class T>
         T property(const QString &key) const;

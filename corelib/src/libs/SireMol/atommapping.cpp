@@ -681,3 +681,19 @@ void AtomMapping::assertSingleMolecule() const
                                             CODELOC);
     }
 }
+
+/** Return the property map used to find properties of the
+ *  reference molecule
+ */
+const PropertyMap &AtomMapping::propertyMap0() const
+{
+    return this->map0;
+}
+
+/** Return the property map used to find properties of the
+ *  mapped molecule
+ */
+const PropertyMap &AtomMapping::propertyMap1() const
+{
+    return this->map1;
+}

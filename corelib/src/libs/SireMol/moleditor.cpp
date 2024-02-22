@@ -633,6 +633,13 @@ MolStructureEditor &MolStructureEditor::rename(const MolName &newname)
     return *this;
 }
 
+/** Move all atoms into a single CutGroup */
+MolStructureEditor &MolStructureEditor::makeSingleCutGroup()
+{
+    StructureEditor::convertToSingleCutGroupMolecule();
+    return *this;
+}
+
 /** Give this molecule a new, unique ID number */
 MolStructureEditor &MolStructureEditor::renumber()
 {

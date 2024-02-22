@@ -40,6 +40,9 @@ namespace SireSystem
 {
     SIRESYSTEM_EXPORT SireMol::Molecule merge(const SireMol::AtomMapping &mols,
                                               bool as_new_molecule = true,
+                                              bool allow_ring_breaking = false,
+                                              bool allow_ring_size_change = false,
+                                              bool force = false,
                                               const SireBase::PropertyMap &map = SireBase::PropertyMap());
 }
 

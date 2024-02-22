@@ -83,6 +83,9 @@ namespace SireMol
             /** The name of this residue */
             ResName name;
 
+            /** The alternate name of this residue */
+            ResName altname;
+
             /** The number of this residue */
             ResNum number;
 
@@ -169,6 +172,9 @@ namespace SireMol
             /** The name of this atom */
             AtomName name;
 
+            /** The alternate name of this atom */
+            AtomName altname;
+
             /** The number of this atom */
             AtomNum number;
 
@@ -206,10 +212,12 @@ QDataStream &operator>>(QDataStream &ds, AtomInfo &atominfo)
 {
     ds >> atominfo.name >> atominfo.number >> atominfo.residx >> atominfo.segidx >> atominfo.cgatomidx;
 
+    atominfo.altname = atominfo.name;
+
     return ds;
 }
 
-AtomInfo::AtomInfo() : name(QString()), number(AtomNum::null()), residx(ResIdx::null()), segidx(SegIdx::null())
+AtomInfo::AtomInfo() : name(QString()), altname(QString()), number(AtomNum::null()), residx(ResIdx::null()), segidx(SegIdx::null())
 {
 }
 
@@ -219,7 +227,8 @@ AtomInfo::~AtomInfo()
 
 bool AtomInfo::operator==(const AtomInfo &other) const
 {
-    return this == &other or (name == other.name and number == other.number and residx == other.residx and
+    return this == &other or (name == other.name and altname == other.altname and
+                              number == other.number and residx == other.residx and
                               segidx == other.segidx and cgatomidx == other.cgatomidx);
 }
 
@@ -271,21 +280,23 @@ bool CGInfo::operator!=(const CGInfo &other) const
 
 QDataStream &operator<<(QDataStream &ds, const ResInfo &resinfo)
 {
-    ds << resinfo.name << resinfo.number << resinfo.chainidx << resinfo.atom_indicies;
+    ds << resinfo.name << resinfo.altname << resinfo.number << resinfo.chainidx << resinfo.atom_indicies;
 
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, ResInfo &resinfo)
 {
-    ds >> resinfo.name >> resinfo.number >> resinfo.chainidx >> resinfo.atom_indicies;
+    ds >> resinfo.name >> resinfo.altname >> resinfo.number >> resinfo.chainidx >> resinfo.atom_indicies;
+
+    resinfo.altname = resinfo.name;
 
     resinfo.cgidx = CGIdx::null();
 
     return ds;
 }
 
-ResInfo::ResInfo() : name(QString()), number(ResNum::null()), chainidx(ChainIdx::null())
+ResInfo::ResInfo() : name(QString()), altname(QString()), number(ResNum::null()), chainidx(ChainIdx::null())
 {
 }
 
@@ -295,7 +306,8 @@ ResInfo::~ResInfo()
 
 bool ResInfo::operator==(const ResInfo &other) const
 {
-    return this == &other or (name == other.name and number == other.number and chainidx == other.chainidx and
+    return this == &other or (name == other.name and altname == other.altname and
+                              number == other.number and chainidx == other.chainidx and
                               atom_indicies == other.atom_indicies);
 }
 
@@ -385,12 +397,30 @@ static const RegisterMetaType<MoleculeInfoData> r_molinfo(NO_ROOT);
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const MoleculeInfoData &molinfo)
 {
-    writeHeader(ds, r_molinfo, 1);
+    writeHeader(ds, r_molinfo, 2);
 
     SharedDataStream sds(ds);
 
     sds << molinfo.uid << molinfo.atoms_by_index << molinfo.res_by_index << molinfo.chains_by_index
         << molinfo.seg_by_index << molinfo.cg_by_index;
+
+    QHash<qint64, QString> alt_atomnames;
+
+    for (int i = 0; i < molinfo.atoms_by_index.count(); ++i)
+    {
+        if (molinfo.atoms_by_index[i].name != molinfo.atoms_by_index[i].altname)
+            alt_atomnames.insert(i, molinfo.atoms_by_index[i].altname.value());
+    }
+
+    QHash<qint64, QString> alt_resnames;
+
+    for (int i = 0; i < molinfo.res_by_index.count(); ++i)
+    {
+        if (molinfo.res_by_index[i].name != molinfo.res_by_index[i].altname)
+            alt_resnames.insert(i, molinfo.res_by_index[i].altname.value());
+    }
+
+    sds << alt_atomnames << alt_resnames;
 
     return ds;
 }
@@ -595,7 +625,38 @@ QDataStream &operator>>(QDataStream &ds, MoleculeInfoData &molinfo)
 {
     VersionID v = readHeader(ds, r_molinfo);
 
-    if (v == 1)
+    if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> molinfo.uid >> molinfo.atoms_by_index >> molinfo.res_by_index >> molinfo.chains_by_index >>
+            molinfo.seg_by_index >> molinfo.cg_by_index;
+
+        QHash<qint64, QString> alt_atomnames;
+        QHash<qint64, QString> alt_resnames;
+
+        sds >> alt_atomnames >> alt_resnames;
+
+        for (auto it = alt_atomnames.constBegin(); it != alt_atomnames.constEnd(); ++it)
+        {
+            if (it.key() >= 0 and it.key() < molinfo.atoms_by_index.count())
+            {
+                molinfo.atoms_by_index[it.key()].altname = AtomName(it.value());
+            }
+        }
+
+        for (auto it = alt_resnames.constBegin(); it != alt_resnames.constEnd(); ++it)
+        {
+            if (it.key() >= 0 and it.key() < molinfo.res_by_index.count())
+            {
+                molinfo.res_by_index[it.key()].altname = ResName(it.value());
+            }
+        }
+
+        // reconstruct the name and number indexes
+        molinfo.rebuildNameAndNumberIndexes();
+    }
+    else if (v == 1)
     {
         SharedDataStream sds(ds);
 
@@ -606,7 +667,7 @@ QDataStream &operator>>(QDataStream &ds, MoleculeInfoData &molinfo)
         molinfo.rebuildNameAndNumberIndexes();
     }
     else
-        throw version_error(v, "1", r_molinfo, CODELOC);
+        throw version_error(v, "1, 2", r_molinfo, CODELOC);
 
     return ds;
 }
@@ -658,6 +719,7 @@ MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
 
     ResInfo res;
     res.name = ResName(resname.simplified());
+    res.altname = res.name;
     res.number = ResNum(resnum);
     res.cgidx = CGIdx(0);
 
@@ -685,6 +747,7 @@ MoleculeInfoData::MoleculeInfoData(const QString &resname, qint64 resnum,
             auto &atom = atoms_by_index_data[i];
 
             atom.name = AtomName(atomnames_data[i].simplified());
+            atom.altname = atom.name;
             atom.number = AtomNum(atomnums_data[i]);
             atom.residx = ResIdx(0);
             atom.cgatomidx = CGAtomIdx(CGIdx(0), Index(i));
@@ -849,13 +912,14 @@ MoleculeInfoData::MoleculeInfoData(const StructureEditor &editor) : RefCountData
         // create the data for atom 'i'
         AtomInfo &atom = atoms_by_index_array[i];
 
-        tuple<AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx> atomdata = editor.getAtomData(i);
+        tuple<AtomName, AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx> atomdata = editor.getAtomData(i);
 
         atom.name = atomdata.get<0>();
-        atom.number = atomdata.get<1>();
-        atom.cgatomidx = atomdata.get<2>();
-        atom.residx = atomdata.get<3>();
-        atom.segidx = atomdata.get<4>();
+        atom.altname = atomdata.get<1>();
+        atom.number = atomdata.get<2>();
+        atom.cgatomidx = atomdata.get<3>();
+        atom.residx = atomdata.get<4>();
+        atom.segidx = atomdata.get<5>();
 
         if (atom.cgatomidx.cutGroup().isNull())
             atoms_missing_cutgroups.append(i);
@@ -902,12 +966,13 @@ MoleculeInfoData::MoleculeInfoData(const StructureEditor &editor) : RefCountData
     {
         ResInfo &residue = res_by_index_array[i];
 
-        tuple<ResName, ResNum, ChainIdx, QList<AtomIdx>> resdata = editor.getResData(i);
+        tuple<ResName, ResName, ResNum, ChainIdx, QList<AtomIdx>> resdata = editor.getResData(i);
 
         residue.name = resdata.get<0>();
-        residue.number = resdata.get<1>();
-        residue.chainidx = resdata.get<2>();
-        residue.atom_indicies = resdata.get<3>();
+        residue.altname = resdata.get<1>();
+        residue.number = resdata.get<2>();
+        residue.chainidx = resdata.get<3>();
+        residue.atom_indicies = resdata.get<4>();
 
         if (residue.atom_indicies.isEmpty())
             empty_residues.append(i);
@@ -1335,6 +1400,62 @@ void remove_from_hash(QMultiHash<Key, T> &hash, const Key &key, const T &value)
     }
 }
 #endif
+
+/** Return the alternate name of the specified atom */
+const AtomName &MoleculeInfoData::alternateName(const AtomID &atomid) const
+{
+    return this->alternateName(this->atomIdx(atomid));
+}
+
+/** Return the alternate name of the specified atom */
+const AtomName &MoleculeInfoData::alternateName(AtomIdx atomidx) const
+{
+    atomidx = atomidx.map(this->nAtoms());
+    return atoms_by_index.at(atomidx).altname;
+}
+
+/** Return the alternate name of the specified residue */
+const ResName &MoleculeInfoData::alternateName(const ResID &resid) const
+{
+    return this->alternateName(this->resIdx(resid));
+}
+
+/** Return the alternate name of the specified residue */
+const ResName &MoleculeInfoData::alternateName(ResIdx residx) const
+{
+    residx = residx.map(this->nResidues());
+    return res_by_index.at(residx).altname;
+}
+
+/** Set the alternate name of the passed atom */
+MoleculeInfoData MoleculeInfoData::setAlternateName(AtomIdx atomidx, const AtomName &altname) const
+{
+    atomidx = atomidx.map(this->nAtoms());
+
+    if (atoms_by_index.at(atomidx).altname == altname)
+        return *this;
+
+    // make the change in a copy of this object
+    MoleculeInfoData newinfo(*this);
+    newinfo.atoms_by_index[atomidx].altname = altname;
+
+    return newinfo;
+}
+
+/* Set the alternate name of the passed residue */
+MoleculeInfoData MoleculeInfoData::setAlternateName(ResIdx residx, const ResName &altname) const
+{
+    residx = residx.map(this->nResidues());
+
+    if (res_by_index.at(residx).altname == altname)
+        return *this;
+
+    // make the change in a copy of this object
+    MoleculeInfoData newinfo(*this);
+    newinfo.res_by_index[residx].altname = altname;
+
+    return newinfo;
+}
 
 /** Rename the atom at index 'atomidx' to have the new name 'newname'.
 

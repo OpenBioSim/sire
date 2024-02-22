@@ -55,6 +55,58 @@ void register_MoleculeInfo_class(){
                 , "Return the unique ID of this layout. Each unique layout has its\nown unique ID. You can use this to quickly check if two molecules\nhave the same layout" );
         
         }
+        { //::SireMol::MoleculeInfo::alternateName
+        
+            typedef ::SireMol::AtomName const & ( ::SireMol::MoleculeInfo::*alternateName_function_type)( ::SireMol::AtomID const & ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::MoleculeInfo::alternateName );
+            
+            MoleculeInfo_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , ( bp::arg("atomid") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the alternate name of the specified atom" );
+        
+        }
+        { //::SireMol::MoleculeInfo::alternateName
+        
+            typedef ::SireMol::AtomName const & ( ::SireMol::MoleculeInfo::*alternateName_function_type)( ::SireMol::AtomIdx ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::MoleculeInfo::alternateName );
+            
+            MoleculeInfo_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , ( bp::arg("atomidx") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the alternate name of the specified atom" );
+        
+        }
+        { //::SireMol::MoleculeInfo::alternateName
+        
+            typedef ::SireMol::ResName const & ( ::SireMol::MoleculeInfo::*alternateName_function_type)( ::SireMol::ResID const & ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::MoleculeInfo::alternateName );
+            
+            MoleculeInfo_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , ( bp::arg("resid") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the alternate name of the specified residue" );
+        
+        }
+        { //::SireMol::MoleculeInfo::alternateName
+        
+            typedef ::SireMol::ResName const & ( ::SireMol::MoleculeInfo::*alternateName_function_type)( ::SireMol::ResIdx ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::MoleculeInfo::alternateName );
+            
+            MoleculeInfo_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , ( bp::arg("residx") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the alternate name of the specified residue" );
+        
+        }
         { //::SireMol::MoleculeInfo::assertCompatibleWith
         
             typedef void ( ::SireMol::MoleculeInfo::*assertCompatibleWith_function_type)( ::SireMol::AtomSelection const & ) const;
@@ -2172,6 +2224,32 @@ void register_MoleculeInfo_class(){
                 , ( bp::arg("segid") )
                 , bp::release_gil_policy()
                 , "Return the index of the identified segment" );
+        
+        }
+        { //::SireMol::MoleculeInfo::setAlternateName
+        
+            typedef ::SireMol::MoleculeInfo ( ::SireMol::MoleculeInfo::*setAlternateName_function_type)( ::SireMol::AtomIdx,::SireMol::AtomName const & ) const;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::MoleculeInfo::setAlternateName );
+            
+            MoleculeInfo_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("atomidx"), bp::arg("name") )
+                , bp::release_gil_policy()
+                , "Set the alternate name of the passed atom" );
+        
+        }
+        { //::SireMol::MoleculeInfo::setAlternateName
+        
+            typedef ::SireMol::MoleculeInfo ( ::SireMol::MoleculeInfo::*setAlternateName_function_type)( ::SireMol::ResIdx,::SireMol::ResName const & ) const;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::MoleculeInfo::setAlternateName );
+            
+            MoleculeInfo_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("residx"), bp::arg("name") )
+                , bp::release_gil_policy()
+                , "Set the alternate name of the passed atom" );
         
         }
         { //::SireMol::MoleculeInfo::squeeze

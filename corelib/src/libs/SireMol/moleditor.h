@@ -191,6 +191,8 @@ namespace SireMol
         int nChains() const;
         int nSegments() const;
 
+        MolStructureEditor &makeSingleCutGroup();
+
         AtomStructureEditor select(const AtomID &atomid);
         CGStructureEditor select(const CGID &cgid);
         ResStructureEditor select(const ResID &resid);

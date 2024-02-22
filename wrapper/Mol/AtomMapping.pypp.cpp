@@ -360,6 +360,30 @@ void register_AtomMapping_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomMapping::propertyMap0
+        
+            typedef ::SireBase::PropertyMap const & ( ::SireMol::AtomMapping::*propertyMap0_function_type)(  ) const;
+            propertyMap0_function_type propertyMap0_function_value( &::SireMol::AtomMapping::propertyMap0 );
+            
+            AtomMapping_exposer.def( 
+                "propertyMap0"
+                , propertyMap0_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "Return the property map used to find properties of the\n  reference molecule\n" );
+        
+        }
+        { //::SireMol::AtomMapping::propertyMap1
+        
+            typedef ::SireBase::PropertyMap const & ( ::SireMol::AtomMapping::*propertyMap1_function_type)(  ) const;
+            propertyMap1_function_type propertyMap1_function_value( &::SireMol::AtomMapping::propertyMap1 );
+            
+            AtomMapping_exposer.def( 
+                "propertyMap1"
+                , propertyMap1_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "Return the property map used to find properties of the\n  mapped molecule\n" );
+        
+        }
         { //::SireMol::AtomMapping::size
         
             typedef int ( ::SireMol::AtomMapping::*size_function_type)(  ) const;

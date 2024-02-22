@@ -199,6 +199,18 @@ void register_MolStructureEditor_class(){
                 , "Return an editor for the CutGroup at ID cgid\nThrow: SireMol::missing_cutgroup\nThrow: SireMol::duplicate_cutgroup\nThrow: SireError::invalid_index\n" );
         
         }
+        { //::SireMol::MolStructureEditor::makeSingleCutGroup
+        
+            typedef ::SireMol::MolStructureEditor & ( ::SireMol::MolStructureEditor::*makeSingleCutGroup_function_type)(  ) ;
+            makeSingleCutGroup_function_type makeSingleCutGroup_function_value( &::SireMol::MolStructureEditor::makeSingleCutGroup );
+            
+            MolStructureEditor_exposer.def( 
+                "makeSingleCutGroup"
+                , makeSingleCutGroup_function_value
+                , bp::release_gil_policy()
+                , "Move all atoms into a single CutGroup" );
+        
+        }
         { //::SireMol::MolStructureEditor::nAtoms
         
             typedef int ( ::SireMol::MolStructureEditor::*nAtoms_function_type)(  ) const;

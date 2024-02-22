@@ -85,6 +85,18 @@ void register_ResStructureEditor_class(){
                 , "Add a new atom with the number number to this residue - this\nreturns an editor that can be used to further edit this atom" );
         
         }
+        { //::SireMol::ResStructureEditor::alternateName
+        
+            typedef ::SireMol::ResName const & ( ::SireMol::ResStructureEditor::*alternateName_function_type)(  ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::ResStructureEditor::alternateName );
+            
+            ResStructureEditor_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "" );
+        
+        }
         { //::SireMol::ResStructureEditor::atom
         
             typedef ::SireMol::AtomStructureEditor ( ::SireMol::ResStructureEditor::*atom_function_type)( int ) ;
@@ -234,6 +246,19 @@ void register_ResStructureEditor_class(){
                 , "Change the index of this residue to newidx. If this\nis larger than the number of residues in the molecule\nthen this residue is moved to the end" );
         
         }
+        { //::SireMol::ResStructureEditor::reindex
+        
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*reindex_function_type)( int ) ;
+            reindex_function_type reindex_function_value( &::SireMol::ResStructureEditor::reindex );
+            
+            ResStructureEditor_exposer.def( 
+                "reindex"
+                , reindex_function_value
+                , ( bp::arg("index") )
+                , bp::return_self< >()
+                , "Change the index of this residue to newidx. If this\nis larger than the number of residues in the molecule\nthen this residue is moved to the end" );
+        
+        }
         { //::SireMol::ResStructureEditor::remove
         
             typedef ::SireMol::MolStructureEditor ( ::SireMol::ResStructureEditor::*remove_function_type)(  ) ;
@@ -285,9 +310,35 @@ void register_ResStructureEditor_class(){
                 , "Rename this residue to newname" );
         
         }
+        { //::SireMol::ResStructureEditor::rename
+        
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*rename_function_type)( ::QString const & ) ;
+            rename_function_type rename_function_value( &::SireMol::ResStructureEditor::rename );
+            
+            ResStructureEditor_exposer.def( 
+                "rename"
+                , rename_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Rename this residue to newname" );
+        
+        }
         { //::SireMol::ResStructureEditor::renumber
         
             typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*renumber_function_type)( ::SireMol::ResNum ) ;
+            renumber_function_type renumber_function_value( &::SireMol::ResStructureEditor::renumber );
+            
+            ResStructureEditor_exposer.def( 
+                "renumber"
+                , renumber_function_value
+                , ( bp::arg("number") )
+                , bp::return_self< >()
+                , "Renumber this residue to newnum" );
+        
+        }
+        { //::SireMol::ResStructureEditor::renumber
+        
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*renumber_function_type)( int ) ;
             renumber_function_type renumber_function_value( &::SireMol::ResStructureEditor::renumber );
             
             ResStructureEditor_exposer.def( 
@@ -347,6 +398,32 @@ void register_ResStructureEditor_class(){
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Is this editor editing the entire molecule?" );
+        
+        }
+        { //::SireMol::ResStructureEditor::setAlternatename
+        
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*setAlternatename_function_type)( ::SireMol::ResName const & ) ;
+            setAlternatename_function_type setAlternatename_function_value( &::SireMol::ResStructureEditor::setAlternatename );
+            
+            ResStructureEditor_exposer.def( 
+                "setAlternatename"
+                , setAlternatename_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::ResStructureEditor::setAlternatename
+        
+            typedef ::SireMol::ResStructureEditor & ( ::SireMol::ResStructureEditor::*setAlternatename_function_type)( ::QString const & ) ;
+            setAlternatename_function_type setAlternatename_function_value( &::SireMol::ResStructureEditor::setAlternatename );
+            
+            ResStructureEditor_exposer.def( 
+                "setAlternatename"
+                , setAlternatename_function_value
+                , ( bp::arg("name") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireMol::ResStructureEditor::toString

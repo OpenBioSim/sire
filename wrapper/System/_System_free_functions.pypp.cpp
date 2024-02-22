@@ -977,13 +977,13 @@ void register_free_functions(){
 
     { //::SireSystem::merge
     
-        typedef ::SireMol::Molecule ( *merge_function_type )( ::SireMol::AtomMapping const &,bool,::SireBase::PropertyMap const & );
+        typedef ::SireMol::Molecule ( *merge_function_type )( ::SireMol::AtomMapping const &,bool,bool,bool,bool,::SireBase::PropertyMap const & );
         merge_function_type merge_function_value( &::SireSystem::merge );
         
         bp::def( 
             "merge"
             , merge_function_value
-            , ( bp::arg("mols"), bp::arg("as_new_molecule")=(bool)(true), bp::arg("map")=SireBase::PropertyMap() )
+            , ( bp::arg("mols"), bp::arg("as_new_molecule")=(bool)(true), bp::arg("allow_ring_breaking")=(bool)(false), bp::arg("allow_ring_size_change")=(bool)(false), bp::arg("force")=(bool)(false), bp::arg("map")=SireBase::PropertyMap() )
             , "" );
     
     }
