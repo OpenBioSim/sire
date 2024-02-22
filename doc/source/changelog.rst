@@ -155,6 +155,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   extension for Amber RST7 files, and changes the scoring logic of the SDF parser
   to equal the number of molecules times the number of atoms.
 
+* Switched to using the SYBL atom type to infer the element of an atom
+  when reading Mol2 files. This is more robust than using the atom name.
+  Fixes issue #166.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
