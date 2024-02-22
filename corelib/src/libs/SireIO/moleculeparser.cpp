@@ -500,11 +500,12 @@ static const RegisterMetaType<MoleculeParser> r_parser(MAGIC_ONLY, MoleculeParse
 
 QDataStream &operator<<(QDataStream &ds, const MoleculeParser &parser)
 {
-    writeHeader(ds, r_parser, 3);
+    writeHeader(ds, r_parser, 4);
 
     SharedDataStream sds(ds);
     sds << parser.fname << parser.lnes
         << parser.saved_system
+        << parser.loaded_order
         << parser.frames_to_write
         << parser.propmap
         << parser.scr << parser.run_parallel << static_cast<const Property &>(parser);
@@ -516,7 +517,14 @@ QDataStream &operator>>(QDataStream &ds, MoleculeParser &parser)
 {
     VersionID v = readHeader(ds, r_parser);
 
-    if (v == 3)
+    parser.loaded_order.clear();
+
+    if (v == 4)
+    {
+        SharedDataStream sds(ds);
+        sds >> parser.fname >> parser.lnes >> parser.saved_system >> parser.loaded_order >> parser.frames_to_write >> parser.propmap >> parser.scr >> parser.run_parallel >> static_cast<Property &>(parser);
+    }
+    else if (v == 3)
     {
         SharedDataStream sds(ds);
         sds >> parser.fname >> parser.lnes >> parser.saved_system >> parser.frames_to_write >> parser.propmap >> parser.scr >> parser.run_parallel >> static_cast<Property &>(parser);
@@ -534,7 +542,7 @@ QDataStream &operator>>(QDataStream &ds, MoleculeParser &parser)
         parser.fname = QString();
     }
     else
-        throw version_error(v, "1", r_parser, CODELOC);
+        throw version_error(v, "1, 2, 3, 4", r_parser, CODELOC);
 
     return ds;
 }
@@ -734,7 +742,8 @@ MoleculeParser::MoleculeParser(const QStringList &lines, const PropertyMap &map)
 /** Copy constructor */
 MoleculeParser::MoleculeParser(const MoleculeParser &other)
     : Property(other), fname(other.fname), lnes(other.lnes),
-      saved_system(other.saved_system), frames_to_write(other.frames_to_write),
+      saved_system(other.saved_system),
+      loaded_order(other.loaded_order), frames_to_write(other.frames_to_write),
       propmap(other.propmap), scr(other.scr), run_parallel(other.run_parallel)
 {
 }
@@ -1343,6 +1352,7 @@ MoleculeParser &MoleculeParser::operator=(const MoleculeParser &other)
         fname = other.fname;
         lnes = other.lnes;
         saved_system = other.saved_system;
+        loaded_order = other.loaded_order;
         frames_to_write = other.frames_to_write;
         propmap = other.propmap;
         scr = other.scr;
@@ -1417,6 +1427,35 @@ bool MoleculeParser::hasWarnings() const
     return not this->warnings().isEmpty();
 }
 
+/** Internal function to set the atom order that was used to load
+ *  the atoms from the topology file - this is only set if the
+ *  atoms are not in their expected order
+ */
+void MoleculeParser::setLoadedOrder(const QVector<qint64> &order)
+{
+    loaded_order = order;
+    this->reorderLoadedFrame();
+}
+
+/** Internal function to get the order in which atoms were loaded.
+ *  This is empty if the atoms were loaded in the expected order
+ */
+const QVector<qint64> &MoleculeParser::getLoadedOrder() const
+{
+    return loaded_order;
+}
+
+/** Internal function used to reorder the passed frame based on the
+ *  loaded order (if this differs to the expected loaded order)
+ */
+Frame MoleculeParser::reorderFrame(const Frame &frame) const
+{
+    if (loaded_order.isEmpty())
+        return frame;
+    else
+        return frame.reorder(loaded_order);
+}
+
 /** Return the number of trajectory frames contained in this parser.
  *  Trajectory frames contain coordinates and/or velocities and/or
  *  forces data. It is possible for a parser to have zero frames,
@@ -1425,6 +1464,13 @@ bool MoleculeParser::hasWarnings() const
 int MoleculeParser::nFrames() const
 {
     return 0;
+}
+
+/** Implement this function to be signalled when you need to
+ *  reorder the loaded frame
+ */
+void MoleculeParser::reorderLoadedFrame()
+{
 }
 
 /** Return the ith trajectory frame from this parser. Note that
@@ -2681,6 +2727,46 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others, const Pr
         }
 
         has_warnings = true;
+    }
+
+    if (system.containsProperty(QString("loaded_atom_order")))
+    {
+        // get the atom order from the topology parser
+        const auto loaded_order = system.property("loaded_atom_order").asA<IntegerArrayProperty>().value();
+        system.removeProperty("loaded_atom_order");
+
+        const int nats = system.nAtoms();
+
+        if (loaded_order.count() != nats)
+        {
+            throw SireError::program_bug(QObject::tr("The loaded atom order does not match the number of atoms in the system!"),
+                                         CODELOC);
+        }
+
+        bool in_expected_order = true;
+
+        for (int i = 0; i < loaded_order.count(); ++i)
+        {
+            if (loaded_order[i] != i)
+            {
+                in_expected_order = false;
+
+                if (loaded_order[i] < 0 or loaded_order[i] >= nats)
+                {
+                    throw SireError::program_bug(QObject::tr("The loaded atom order is not valid!"), CODELOC);
+                }
+            }
+        }
+
+        if (not in_expected_order)
+        {
+            // tell each of the frame parsers that they will need to reorder
+            // their frames for this system
+            for (auto &parser : parsers["frame"])
+            {
+                parser.edit().setLoadedOrder(loaded_order);
+            }
+        }
     }
 
     bool ignore_topology_frame = false;

@@ -345,7 +345,7 @@ Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : Concret
                 bool is_perturbable = false;
                 try
                 {
-                    is_perturbable = atoms.data().property("is_perturbable").asABoolean();
+                    is_perturbable = atoms.data().property(map["is_perturbable"]).asABoolean();
                 }
                 catch (...)
                 {
@@ -354,20 +354,20 @@ Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : Concret
                 if (is_perturbable)
                 {
                     // Allow the user to override the default.
-                    if ((map["coordinates"] == "coordinates0") or (map["coordinates"] == "coordinates1"))
+                    if ((map["coordinates"] == map["coordinates0"]) or (map["coordinates"] == map["coordinates1"]))
                     {
                         coords_property = map["coordinates"];
                     }
                     else
                     {
                         // Default to lambda = 0.
-                        if (atoms.data().hasProperty("coordinates0"))
-                            coords_property = "coordinates0";
-                        else if (atoms.data().hasProperty("coordinates1"))
-                            coords_property = "coordinates1";
+                        if (atoms.data().hasProperty(map["coordinates0"]))
+                            coords_property = map["coordinates0"];
+                        else if (atoms.data().hasProperty(map["coordinates1"]))
+                            coords_property = map["coordinates1"];
                         else
-                            throw SireError::incompatible_error(
-                                QObject::tr("Missing coordinates for perturbable molecule!"));
+                            // use the default coordinates property
+                            coords_property = map["coordinates"];
                     }
                 }
 
@@ -393,7 +393,7 @@ Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : Concret
             bool is_perturbable = false;
             try
             {
-                is_perturbable = atoms.data().property("is_perturbable").asABoolean();
+                is_perturbable = atoms.data().property(map["is_perturbable"]).asABoolean();
             }
             catch (...)
             {
@@ -402,20 +402,20 @@ Gro87::Gro87(const SireSystem::System &system, const PropertyMap &map) : Concret
             if (is_perturbable)
             {
                 // Allow the user to override the default.
-                if ((map["coordinates"] == "coordinates0") or (map["coordinates"] == "coordinates1"))
+                if ((map["coordinates"] == map["coordinates0"]) or (map["coordinates"] == map["coordinates1"]))
                 {
                     coords_property = map["coordinates"];
                 }
                 else
                 {
                     // Default to lambda = 0.
-                    if (atoms.data().hasProperty("coordinates0"))
-                        coords_property = "coordinates0";
-                    else if (atoms.data().hasProperty("coordinates1"))
-                        coords_property = "coordinates1";
+                    if (atoms.data().hasProperty(map["coordinates0"]))
+                        coords_property = map["coordinates0"];
+                    else if (atoms.data().hasProperty(map["coordinates1"]))
+                        coords_property = map["coordinates1"];
                     else
-                        throw SireError::incompatible_error(
-                            QObject::tr("Missing coordinates for perturbable molecule!"));
+                        // use the default coordinates property
+                        coords_property = map["coordinates"];
                 }
             }
 
@@ -682,6 +682,11 @@ bool Gro87::isTopology() const
 bool Gro87::isFrame() const
 {
     return true;
+}
+
+void Gro87::reorderLoadedFrame()
+{
+    throw SireError::incompatible_error(QObject::tr("Cannot reorder a Gro87 file!"));
 }
 
 Frame Gro87::getFrame(int i) const

@@ -228,3 +228,46 @@ def test_lj_1264_load_save(tmpdir, apo_1264):
     assert self_ex[0][2].a() == pytest.approx(expected.a(), 1e-3)
     assert self_ex[0][2].b() == pytest.approx(expected.b(), 1e-3)
     assert self_ex[0][2].c() == pytest.approx(expected.c(), 1e-3)
+
+
+def test_reorder_prmtop(reordered_protein):
+    mols = reordered_protein
+
+    # check that the atoms are in the correct order
+    expected_number = 0
+
+    for atom in mols.atoms():
+        assert atom.number().value() == expected_number + 1
+        expected_number += 1
+
+    # check that the coordinates of the zinc atoms are correct
+    zincs = mols.atoms("element Zn")
+
+    assert len(zincs) == 4
+
+    expected = [
+        sr.v(7.646, 11.878, 28.867),
+        sr.v(-0.332, 20.4, 19.036),
+        sr.v(22.607, 10.037, 28.866),
+        sr.v(32.863, 16.136, 38.415),
+    ]
+
+    for zinc, coord in zip(zincs, expected):
+        z = zinc.coordinates()
+
+        for i in range(3):
+            assert z[i].value() == pytest.approx(coord[i].value(), 1e-3)
+
+    # check that the zinc atoms are bonded to the proteins
+    bonds = mols.bonds("element Zn")
+
+    assert len(bonds) == 16
+
+    zn = sr.mol.Element("Zn")
+
+    for bond in bonds:
+        assert bond[0].element() == zn or bond[1].element() == zn
+        assert bond[0].molecule() == bond[1].molecule()
+
+    assert mols[0]["element Zn"].num_atoms() == 2
+    assert mols[1]["element Zn"].num_atoms() == 2

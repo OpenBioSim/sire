@@ -1606,7 +1606,7 @@ void AmberRst::parse()
             return;
         }
 
-        current_frame = f->readFrame(0, this->usesParallel());
+        current_frame = this->reorderFrame(f->readFrame(0, this->usesParallel()));
         frame_idx = 0;
 
         this->setScore(f->nFrames() * current_frame.nAtoms());
@@ -1731,7 +1731,12 @@ Frame AmberRst::getFrame(int frame) const
                                     CODELOC);
     }
 
-    return f->readFrame(frame, this->usesParallel());
+    return this->reorderFrame(f->readFrame(frame, this->usesParallel()));
+}
+
+void AmberRst::reorderLoadedFrame()
+{
+    current_frame = this->reorderFrame(current_frame);
 }
 
 AmberRst AmberRst::operator[](int i) const

@@ -5,6 +5,8 @@ __all__ = [
     "positional",
 ]
 
+from .. import u
+
 
 def _to_atoms(mols, atoms):
     """
@@ -23,40 +25,139 @@ def boresch(
     kr=None,
     ktheta=None,
     kphi=None,
-    name: str = None,
+    r0=None,
+    theta0=None,
+    phi0=None,
+    name=None,
     map=None,
+    temperature=u("298 K"),
 ):
     """
-    Create a set of Boresch restraints that will hold the passed
-    ligand in a its relative binding mode relative to the
-    passed receptor. All of the atoms in both 'ligand' and
-    'receptor' must be contained in 'mols'.
+    Create a set of Boresch restraints that will restrain the 6
+    external degrees of freedom of the ligand relative to the receptor.
+    All of the atoms in both 'ligand' and 'receptor' must be contained in
+    'mols'.
 
     The BoreschRestraint will be a set of six restraints between
     three identified ligand atoms, and three identified receptor
-    atoms.
+    atoms:
 
-    1. A single distance restraint, with specified kr and r0 parameters
-    2. Two angle restraints, with the specified two ktheta and theta0
-       parameters
-    3. Three torsion restraints, with the specified three kphi and phi0
-       parameters
+    1. A single distance restraint, with specified force constant (kr)
+       and equilibrium distance (r0) parameters.
+    2. Two angle restraints, with specified force constants (ktheta)
+       and equilibrium angles (theta0) parameters.
+    3. Three torsion restraints, with specified force constants (kphi)
+         and equilibrium angles (phi0) parameters.
 
     This will create a single BoreschRestraint, which will be passed
     back in a BoreschRestraints object.
 
-    If the force constants (kr, ktheta and kphi) are None, then they
-    will have default values of 150 kcal mol-1 A-2 and
-    150 kcal mol-1 rad-2
+    Parameters
+    ----------
+    mols : sire.system._system.System
+        The system containing the receptor and ligand.
 
-    The equilibium distances and angles are based on the current coordinates
-    of that atoms
+    receptor : SireMol::Selector<SireMol::Atom>
+        The receptor atoms to restrain.
+
+    ligand : SireMol::Selector<SireMol::Atom>
+        The ligand atoms to restrain.
+
+    kr : str or SireUnits::Dimension::GeneralUnit, optional
+        The force constant for the distance restraint. If None, this will
+        default to 10 kcal mol-1 A-2. Default is None.
+
+    ktheta : str or SireUnits::Dimension::GeneralUnit or list of str or SireUnits::Dimension::GeneralUnit, optional
+        The force constants for the angle restraints, in the order kthetaA,
+        kthetaB If None, this will default to 100 kcal mol-1 rad-2 for
+        both angle restraints.  If a list, then this should be a list of
+        length 2 containing the force constants for the two angle
+        restraints. If a single value, then this will be used for both
+        angle restraints. Default is None.
+
+    kphi : str or SireUnits::Dimension::GeneralUnit or list of str or SireUnits::Dimension::GeneralUnit, optional
+        The force constants for the torsion restraints, in the order kthetaA,
+        kthetaB, kthetaC. If None, this will default to 100 kcal mol-1 rad-2
+        for all three torsion restraints.  If a list, then this should be a
+        list of length 3 containing the force constants for the three
+        torsion restraints. If a single value, then this will be used for
+        all three torsion restraints. Default is None.
+
+    r0 : str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium distance for the distance restraint. If None, this
+        will be measured from the current coordinates of the atoms. Default
+        is None.
+
+    theta0 : list of str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium angles for the angle restraints. If None, these
+        will be measured from the current coordinates of the atoms. If a
+        list, then this should be a list of length 2 containing the
+        equilibrium angles for the two angle restraints. Default is None.
+
+    phi0 : list of str or SireUnits::Dimension::GeneralUnit, optional
+        The equilibrium angles for the torsion restraints. If None, these
+        will be measured from the current coordinates of the atoms. If a
+        list, then this should be a list of length 3 containing the
+        equilibrium angles for the three torsion restraints. Default is None.
+
+    name : str, optional
+        The name of the restraint. If None, then a default name will be
+        used. Default is None.
+
+    map : dict, optional
+        A dictionary of additional options. Note that any options
+        set in this dictionary that are also specified via one of
+        the arguments above will be overridden by the argument
+        value
+
+    temperature : str or SireUnits::Dimension::GeneralUnit, optional
+        The temperature to use when checking for unstable restraints. If
+        None, then this will default to 298 K. Default is None.
+
+    Returns
+    -------
+    BoreschRestraints : SireMM::BoreschRestraints
+        A container of Boresch restraints, where the first restraint is
+        the BoreschRestraint created. The Boresch restraint created can be
+        extracted with BoreschRestraints[0].
+
+    Examples
+    --------
+    Create a set of Boresch restraints for the ligand in the system
+    'system', specifying all of the force constants and equilibrium
+    values:
+
+    >>> my_boresch_restraints = boresch(
+    >>>     system,
+    >>>     receptor=system["protein"]["atomidx 1538 or atomidx 1518 or atomidx 1540"],
+    >>>     ligand=system["resname LIG"]["atomidx 4 or atomidx 3 or atomidx 5"],
+    >>>     kr="6.2012 kcal mol-1 A-2",
+    >>>     ktheta=["28.7685 kcal mol-1 rad-2", "24.8204 kcal mol-1 rad-2"],
+    >>>     kphi=["59.8626 kcal mol-1 rad-2", "0.7923 kcal mol-1 rad-2", "55.1775 kcal mol-1 rad-2"],
+    >>>     r0="7.687 A",
+    >>>     theta0=["1.3031 rad", "1.4777 rad"],
+    >>>     phi0=["2.5569 rad", "2.9359 rad", "1.4147 rad"],
+    >>> )
+    >>> my_boresch_restraint = my_boresch_restraints[0]
     """
-    from .. import u
     from ..base import create_map
     from ..mm import BoreschRestraint, BoreschRestraints
 
+    # If an argument is not specified in the function
+    # arguments, but is specified in the map, update
+    # the argument from the map.
     map = create_map(map)
+    map_dict = map.to_dict()
+    kr = kr if kr is not None else map_dict.get("kr", None)
+    ktheta = ktheta if ktheta is not None else map_dict.get("ktheta", None)
+    kphi = kphi if kphi is not None else map_dict.get("kphi", None)
+    r0 = r0 if r0 is not None else map_dict.get("r0", None)
+    theta0 = theta0 if theta0 is not None else map_dict.get("theta0", None)
+    phi0 = phi0 if phi0 is not None else map_dict.get("phi0", None)
+    name = name if name is not None else map_dict.get("name", None)
+    temperature = (
+        temperature if temperature is not None else map_dict.get("temperature", None)
+    )
 
     receptor = _to_atoms(mols, receptor)
     ligand = _to_atoms(mols, ligand)
@@ -66,82 +167,215 @@ def boresch(
         # and ligand...
         raise ValueError(
             "You need to provide 3 receptor atoms and 3 ligand atoms"
+            f"but only {len(receptor)} receptor atoms and {len(ligand)} "
+            f"ligand atoms were provided."
         )
 
-    if kr is None:
-        kr = u("150 kcal mol-1 A-2")
-    else:
-        kr = u(kr)
-
-    _default_k = u("150 kcal mol-1 rad-2")
-
-    if ktheta is None:
-        ktheta = [_default_k, _default_k]
-    elif type(ktheta) is not list:
-        ktheta = 2 * [u(ktheta)]
-    else:
-        if len(ktheta) == 0:
-            ktheta = [_default_k, _default_k]
-        if len(ktheta) < 2:
-            ktheta = 2 * [u(ktheta[0])]
-        else:
-            ktheta = [u(x) for x in ktheta[0:2]]
-
-    if kphi is None:
-        kphi = [_default_k, _default_k, _default_k]
-    elif type(kphi) is not list:
-        kphi = 3 * [u(kphi)]
-    else:
-        if len(kphi) == 0:
-            kphi = [_default_k, _default_k, _default_k]
-        elif len(kphi) == 1:
-            kphi = 3 * [u(kphi[0])]
-        elif len(kphi) == 2:
-            kphi = [u(kphi[0]), u(kphi[1]), u(kphi[1])]
-        else:
-            kphi = [u(x) for x in kphi[0:3]]
-
-    # r is | Ligand1 - Receptor1 | = distance(P1, P4)
-    # thetaA = angle(R2, R1, L1) = angle(P2, P1, P4)
-    # thetaB = angle(R1, L1, L2) = angle(P1, P4, P5)
-    # phiA = dihedral(R3, R2, R1, L1) = dihedral(P3, P2, P1, P4)
-    # phiB = dihedral(R2, R1, L1, L2) = dihedral(P2, P1, P4, P5)
-    # phiC = dihedral(R1, L1, L2, L3) = dihedral(P1, P4, P5, P6)
     from .. import measure
 
-    r0 = measure(ligand[0], receptor[0])
-    theta0 = [
-        measure(receptor[1], receptor[0], ligand[0]),
-        measure(receptor[0], ligand[0], ligand[1]),
+    default_distance_k = u("10 kcal mol-1 A-2")
+    default_angle_k = u("100 kcal mol-1 rad-2")
+
+    # Use the user-specified equilibrium values if they are provided.
+    distance = [[ligand[0], receptor[0]]]
+    angles = [
+        [receptor[1], receptor[0], ligand[0]],
+        [receptor[0], ligand[0], ligand[1]],
     ]
-    phi0 = [
-        measure(receptor[2], receptor[1], receptor[0], ligand[0]),
-        measure(receptor[1], receptor[0], ligand[0], ligand[1]),
-        measure(receptor[0], ligand[0], ligand[1], ligand[2]),
+    dihedrals = [
+        [receptor[2], receptor[1], receptor[0], ligand[0]],
+        [receptor[1], receptor[0], ligand[0], ligand[1]],
+        [receptor[0], ligand[0], ligand[1], ligand[2]],
     ]
+
+    restraint_components = {
+        "distance": {
+            "input_k": kr,
+            "validated_k": [],
+            "input_equil": r0,
+            "measure": distance,
+            "validated_equil": [],
+        },
+        "angle": {
+            "input_k": ktheta,
+            "validated_k": [],
+            "input_equil": theta0,
+            "measure": angles,
+            "validated_equil": [],
+        },
+        "dihedral": {
+            "input_k": kphi,
+            "validated_k": [],
+            "input_equil": phi0,
+            "measure": dihedrals,
+            "validated_equil": [],
+        },
+    }
+
+    for restraint_component in restraint_components:
+        n_measures = len(restraint_components[restraint_component]["measure"])
+
+        # Get the force constants.
+        if restraint_components[restraint_component]["input_k"] is None:
+            restraint_components[restraint_component]["validated_k"] = n_measures * [
+                (
+                    default_distance_k
+                    if restraint_component == "distance"
+                    else default_angle_k
+                )
+            ]
+        elif type(restraint_components[restraint_component]["input_k"]) is not list:
+            # Populate the list with the single specified value.
+            restraint_components[restraint_component]["validated_k"] = n_measures * [
+                u(restraint_components[restraint_component]["input_k"])
+            ]
+        else:
+            if len(restraint_components[restraint_component]["input_k"]) == 0:
+                # Empty list - populate with default values.
+                restraint_components[restraint_component]["validated_k"] = (
+                    n_measures
+                    * [
+                        (
+                            default_distance_k
+                            if restraint_component == "distance"
+                            else default_angle_k
+                        )
+                    ]
+                )
+            elif len(restraint_components[restraint_component]["input_k"]) == 1:
+                # List of length 1 - populate with that value.
+                restraint_components[restraint_component]["validated_k"] = (
+                    n_measures
+                    * [u(restraint_components[restraint_component]["input_k"][0])]
+                )
+            elif (
+                len(restraint_components[restraint_component]["input_k"]) == n_measures
+            ):
+                # List of the correct length for this restraint component.
+                restraint_components[restraint_component]["validated_k"] = [
+                    u(x) for x in restraint_components[restraint_component]["input_k"]
+                ]
+            else:
+                # List of the wrong length.
+                raise ValueError(
+                    f"Input force constants for {restraint_component} must be a single value or a list of length {n_measures}"
+                )
+
+        # Get the equilibrium values.
+        if restraint_components[restraint_component]["input_equil"] is None:
+            # Set all components to None - these will be measured from the structure later.
+            restraint_components[restraint_component]["input_equil"] = [
+                None for i in range(n_measures)
+            ]
+
+        if type(restraint_components[restraint_component]["input_equil"]) is not list:
+            # Only allow this if we are dealing with the distance component, as this is the only one that can be a single value.
+            if restraint_component == "distance":
+                restraint_components[restraint_component]["input_equil"] = (
+                    n_measures
+                    * [u(restraint_components[restraint_component]["input_equil"])]
+                )
+            else:
+                raise ValueError(
+                    f"Input equilibrium values for {restraint_component} must be a list of length {n_measures} of values or Nones"
+                )
+
+        elif (
+            len(restraint_components[restraint_component]["input_equil"]) != n_measures
+        ):
+            raise ValueError(
+                f"If specified, equilibrium values for {restraint_component} must be a list of length {n_measures} of values or Nones"
+            )
+
+        # Now validate the input equilibrium values, replacing Nones with measured values.
+        for i, equil in enumerate(
+            restraint_components[restraint_component]["input_equil"]
+        ):
+            if equil is not None:
+                restraint_components[restraint_component]["validated_equil"].append(
+                    u(equil)
+                )
+            else:
+                restraint_components[restraint_component]["validated_equil"].append(
+                    measure(*restraint_components[restraint_component]["measure"][i])
+                )
+
+    # Warn the user if the restraint is likely to be unstable.
+    _check_stability_boresch_restraint(restraint_components, temperature)
 
     mols = mols.atoms()
 
     b = BoreschRestraint(
         receptor=mols.find(receptor),
         ligand=mols.find(ligand),
-        r0=r0,
-        theta0=theta0,
-        phi0=phi0,
-        kr=kr,
-        ktheta=ktheta,
-        kphi=kphi,
+        r0=restraint_components["distance"]["validated_equil"][0],
+        theta0=restraint_components["angle"]["validated_equil"],
+        phi0=restraint_components["dihedral"]["validated_equil"],
+        kr=restraint_components["distance"]["validated_k"][0],
+        ktheta=restraint_components["angle"]["validated_k"],
+        kphi=restraint_components["dihedral"]["validated_k"],
     )
 
     if name is None:
         return BoreschRestraints(b)
     else:
-        return BoreschRestraint(name, b)
+        return BoreschRestraints(name, b)
 
 
-def distance(
-    mols, atoms0, atoms1, r0=None, k=None, name: str = None, map=None
-):
+def _check_stability_boresch_restraint(restraint_components, temperature=u("298 K")):
+    """
+    Internal function to check for likely unstable Boresch restraints.
+    """
+    import warnings as _warnings
+
+    from .. import units
+
+    # Check for unstable combinations of force constants.
+    if restraint_components["distance"]["validated_k"][0].value() == 0:
+        raise ValueError('"kr" cannot be zero')
+
+    if restraint_components["angle"]["validated_k"][0].value() == 0:
+        if (
+            restraint_components["dihedral"]["validated_k"][0].value() != 0
+            or restraint_components["dihedral"]["validated_k"][1].value() != 0
+        ):
+            raise ValueError(
+                "Restraining phiA or phiB without restraining thetaA "
+                "will produce unstable Boresch restraints."
+            )
+
+    if restraint_components["angle"]["validated_k"][1].value() == 0:
+        if (
+            restraint_components["dihedral"]["validated_k"][1].value() != 0
+            or restraint_components["dihedral"]["validated_k"][2].value() != 0
+        ):
+            raise ValueError(
+                "Restraining phiB or phiC without restraining thetaB "
+                "will produce unstable Boresch restraints."
+            )
+
+    # Ensure that restrained angles are >= 10 kT from collinear.
+    for equil_angle, k_angle in zip(
+        restraint_components["angle"]["validated_equil"],
+        restraint_components["angle"]["validated_k"],
+    ):
+        if k_angle.value() != 0:
+            # Find the minimum stable angle "distance". We use the squared values as sire units don't support
+            # taking the square root.
+            min_stable_dist_sq = (2 * 10 * units.k_boltz * temperature) / k_angle
+            min_dist_sq = min(
+                [abs(equil_angle - 0), abs(equil_angle - 180 * units.degrees)]
+            ).pow(2)
+            if min_dist_sq < min_stable_dist_sq:
+                _warnings.warn(
+                    f"The equilibrium value angle value of {equil_angle} is within 10 kT of"
+                    "collinearity, which may result in unstable Boresch restraints."
+                    " Consider increasing the force constants or selecting equilibrium"
+                    " values further from 0 or pi radians."
+                )
+
+
+def distance(mols, atoms0, atoms1, r0=None, k=None, name=None, map=None):
     """
     Create a set of distance restraints from all of the atoms in 'atoms0'
     to all of the atoms in 'atoms1' where all atoms are
@@ -251,9 +485,7 @@ def bond(*args, **kwargs):
     return distance(*args, **kwargs)
 
 
-def positional(
-    mols, atoms, k=None, r0=None, position=None, name: str = None, map=None
-):
+def positional(mols, atoms, k=None, r0=None, position=None, name=None, map=None):
     """
     Create a set of position restraints for the atoms specified in
     'atoms' that are contained in the container 'mols', using the
@@ -335,9 +567,7 @@ def positional(
 
         if position is None:
             restraints.add(
-                PositionalRestraint(
-                    idxs[0], atom.property(coords_prop), ik, ir0
-                )
+                PositionalRestraint(idxs[0], atom.property(coords_prop), ik, ir0)
             )
         else:
             restraints.add(PositionalRestraint(idxs[0], position[i], ik, ir0))

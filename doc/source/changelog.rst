@@ -108,6 +108,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Preserve user atom names when writing to PDB format.
 
+* Updated the :class:`~sire.mol.Cursor` so that it is easier to get and
+  set the expression used for the potential energy (using the
+  ``get_potential`` and ``set_potential`` functions).
+
 * Fixed compile error using Python 3.12. This fixes issue #147.
 
 * Optimised the OpenMM minimisation code and making it more robust.
@@ -123,6 +127,29 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   then the minimisation is repeated, with the maximum number of
   iterations reset. If it fails again, then this structure, with
   constraints re-applied, is returned.
+
+* Code can now detect when an Amber PRMTOP file has discontiguous molecules,
+  and thus when atoms are reordered after load. This information is passed
+  to subsequent frame file parsers that are loaded at the same time, so
+  that they are able to reorder the frames before being added to the atoms.
+  This happens transparently, so that the user doesn't have to worry about
+  the reordering. This fixes issue #164.
+
+* Added ``map`` support to writing perturbable Gromacs topology files. This
+  enables the user to specify which perturbable properties to use,
+  e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.
+
+* Added more support for Boresch restraints. Specifically, :func:`sire.restraints.boresch`
+  now supports the specification of equilibrium values, uses different default force
+  constants, and warns the user if the restraints are likely to be unstable.
+  :func:`sire.restraints.get_standard_state_correction` was implemented for Boresch
+  restraints. Tests were added for restraint creation and for the standard state
+  correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
+
+* Fixed a bug where the SDF parser would wrongly try to parse Amber RST7 files that
+  weren't immediately recognised as such. The fix adds ``.inpcrd`` as a recognised
+  extension for Amber RST7 files, and changes the scoring logic of the SDF parser
+  to equal the number of molecules times the number of atoms.
 
 * Please add an item to this changelog when you create your PR
 
