@@ -128,10 +128,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   iterations reset. If it fails again, then this structure, with
   constraints re-applied, is returned.
 
-* Switched to using the SYBL atom type to infer the element of an atom
-  when reading Mol2 files. This is more robust than using the atom name.
-  Fixes issue #166.
-
 * Code can now detect when an Amber PRMTOP file has discontiguous molecules,
   and thus when atoms are reordered after load. This information is passed
   to subsequent frame file parsers that are loaded at the same time, so
