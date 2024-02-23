@@ -155,6 +155,10 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   when reading Mol2 files. This is more robust than using the atom name.
   Fixes issue #166.
 
+* Made it easier to convert from strings to elements. Added the ability to 
+  customise the list of elements that are considered biological. This
+  fixes issue #170.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
