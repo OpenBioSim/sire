@@ -271,6 +271,8 @@ def fix_MolEditor(c, include_links=True):
     c.decls("renumber").call_policies = call_policies.return_self()
     c.decls("rename").call_policies = call_policies.return_self()
     c.decls("makeSingleCutGroup").call_policies = call_policies.return_self()
+    c.decls("switchToAlternateNames").call_policies = call_policies.return_self()
+    c.decls("removeAlternateNames").call_policies = call_policies.return_self()
 
     if include_links:
         c.decls("addLink").call_policies = call_policies.return_self()
@@ -541,6 +543,7 @@ special_code = {
 }
 
 implicitly_convertible = [
+    ("QString", "SireMol::Element"),
     ("SireMol::AtomID", "SireMol::AtomIdentifier"),
     ("SireMol::CGID", "SireMol::CGIdentifier"),
     ("SireMol::ChainID", "SireMol::ChainIdentifier"),
@@ -581,3 +584,4 @@ def fixMB(mb):
     mb.add_declaration_code('#include "SireMol/moleculeinfo.h"')
     mb.add_declaration_code('#include "SireMol/selector.hpp"')
     mb.add_declaration_code('#include "SireMol/selectorm.hpp"')
+    mb.add_declaration_code('#include "SireMol/element.h"')

@@ -282,6 +282,9 @@ namespace SireMol
         const AtomName &getAlternateAtomName(quint32 uid) const;
         const ResName &getAlternateResName(quint32 uid) const;
 
+        void switchToAlternates(bool keep_originals = true);
+        void removeAlternates();
+
         void removeAtom(quint32 uid);
         void removeCutGroup(quint32 uid);
         void removeResidue(quint32 uid);

@@ -301,7 +301,7 @@ void register_Atom_class(){
                 "alternateName"
                 , alternateName_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the alternate name of the atom" );
         
         }
         { //::SireMol::Atom::assertContains

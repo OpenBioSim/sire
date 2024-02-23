@@ -206,6 +206,9 @@ namespace SireMol
         MoleculeInfoData setAlternateName(AtomIdx atomidx, const AtomName &newname) const;
         MoleculeInfoData setAlternateName(ResIdx residx, const ResName &newname) const;
 
+        MoleculeInfoData switchToAlternateNames(bool keep_originals = true) const;
+        MoleculeInfoData removeAlternateNames() const;
+
         MoleculeInfoData rename(AtomIdx atomidx, const AtomName &newname) const;
         MoleculeInfoData renumber(AtomIdx atomidx, const AtomNum &newnum) const;
 

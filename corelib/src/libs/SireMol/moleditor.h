@@ -111,6 +111,9 @@ namespace SireMol
         MolEditor &renumber(const QHash<ResNum, ResNum> &resnums);
         MolEditor &renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums);
 
+        MolEditor &switchToAlternateNames(bool keep_originals = true);
+        MolEditor &removeAlternateNames();
+
         bool updateProperty(const QString &key, const Property &value, bool auto_add = true);
 
         template <class T, class V>
@@ -210,6 +213,9 @@ namespace SireMol
         MolStructureEditor &rename(const MolName &newname);
         MolStructureEditor &renumber(MolNum newnum);
         MolStructureEditor &renumber();
+
+        MolStructureEditor switchToAlternateNames(bool keep_originals = true);
+        MolStructureEditor removeAlternateNames();
 
         AtomStructureEditor add(const AtomName &atom);
         AtomStructureEditor add(const AtomNum &atom);

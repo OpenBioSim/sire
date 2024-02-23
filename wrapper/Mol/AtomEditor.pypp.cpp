@@ -76,7 +76,7 @@ void register_AtomEditor_class(){
                 "alternateName"
                 , alternateName_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the alternate name for this atom" );
         
         }
         { //::SireMol::AtomEditor::operator=
@@ -128,7 +128,7 @@ void register_AtomEditor_class(){
                 , reindex_function_value
                 , ( bp::arg("atomidx") )
                 , bp::release_gil_policy()
-                , "Reindex this atom so that it lies at index newidx. Note\nthat if newidx is greater than the number of atoms, then\nthis will move this atom to be the last in the list" );
+                , "Reindex this atom" );
         
         }
         { //::SireMol::AtomEditor::remove
@@ -166,7 +166,7 @@ void register_AtomEditor_class(){
                 , rename_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "Rename this atom so that it is called newname" );
+                , "Rename this atom" );
         
         }
         { //::SireMol::AtomEditor::renumber
@@ -192,7 +192,7 @@ void register_AtomEditor_class(){
                 , renumber_function_value
                 , ( bp::arg("number") )
                 , bp::return_self< >()
-                , "Renumber this atom so that it has number newnum" );
+                , "Renumber this atom" );
         
         }
         { //::SireMol::AtomEditor::reparent
@@ -283,7 +283,7 @@ void register_AtomEditor_class(){
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "" );
+                , "Set the alternate name for this atom" );
         
         }
         { //::SireMol::AtomEditor::setAlternateName
@@ -296,7 +296,7 @@ void register_AtomEditor_class(){
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "" );
+                , "Set the alternate name for this atom" );
         
         }
         { //::SireMol::AtomEditor::toString

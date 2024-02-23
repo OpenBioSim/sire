@@ -714,6 +714,22 @@ ResName MoleculeData::getAlternateResName(ResIdx residx) const
     return molinfo->alternateName(residx);
 }
 
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+void MoleculeData::switchToAlternateNames(bool keep_originals)
+{
+    molinfo = molinfo->switchToAlternateNames(keep_originals);
+}
+
+/** Remove all alternate names from this molecule */
+void MoleculeData::removeAlternateNames()
+{
+    molinfo = molinfo->removeAlternateNames();
+}
+
 /** Rename the atom at index 'atomidx' to 'newname'
 
     \throw SireError::invalid_index

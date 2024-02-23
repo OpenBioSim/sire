@@ -76,7 +76,7 @@ void register_AtomStructureEditor_class(){
                 "alternateName"
                 , alternateName_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "" );
+                , "Return the alternate name for this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::chain
@@ -199,7 +199,7 @@ void register_AtomStructureEditor_class(){
                 , reindex_function_value
                 , ( bp::arg("idx") )
                 , bp::return_self< >()
-                , "Reindex this atom to newidx - this will move the atom to\nthe end if newidx is greater than the number of atoms\nin the molecule" );
+                , "Reindex this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::reindex
@@ -237,7 +237,7 @@ void register_AtomStructureEditor_class(){
                 , rename_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "Rename this atom to newname" );
+                , "Rename this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::rename
@@ -263,7 +263,7 @@ void register_AtomStructureEditor_class(){
                 , renumber_function_value
                 , ( bp::arg("number") )
                 , bp::return_self< >()
-                , "Renumber this atom to newnum" );
+                , "Renumber this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::renumber
@@ -403,7 +403,7 @@ void register_AtomStructureEditor_class(){
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "" );
+                , "Set the alternate name for this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::setAlternateName
@@ -416,7 +416,7 @@ void register_AtomStructureEditor_class(){
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "" );
+                , "Set the alternate name for this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::toString

@@ -4015,6 +4015,64 @@ const ResName &StructureEditor::getAlternateResName(quint32 uid) const
         return res.altname;
 }
 
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+void StructureEditor::switchToAlternates(bool keep_originals)
+{
+    this->assertSane();
+
+    for (auto it = d->atoms.begin(); it != d->atoms.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            auto newname = it.value().altname;
+
+            if (keep_originals)
+                it.value().altname = it.value().name;
+
+            it.value().name = newname;
+        }
+    }
+
+    for (auto it = d->residues.begin(); it != d->residues.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            auto newname = it.value().altname;
+
+            if (keep_originals)
+                it.value().altname = it.value().name;
+
+            it.value().name = newname;
+        }
+    }
+}
+
+/** Remove all alternate names from this molecule */
+void StructureEditor::removeAlternates()
+{
+    this->assertSane();
+
+    for (auto it = d->atoms.begin(); it != d->atoms.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            it.value().altname = AtomName();
+        }
+    }
+
+    for (auto it = d->residues.begin(); it != d->residues.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            it.value().altname = ResName();
+        }
+    }
+}
+
 /** Rename the atom identified by 'uid' to 'newname'
 
     \throw SireMol::missing_atom

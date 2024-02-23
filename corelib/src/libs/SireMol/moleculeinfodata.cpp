@@ -1457,6 +1457,88 @@ MoleculeInfoData MoleculeInfoData::setAlternateName(ResIdx residx, const ResName
     return newinfo;
 }
 
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MoleculeInfoData MoleculeInfoData::switchToAlternateNames(bool keep_originals) const
+{
+    MoleculeInfoData newinfo(*this);
+
+    bool changed = false;
+
+    for (int i = 0; i < newinfo.atoms_by_index.count(); ++i)
+    {
+        AtomInfo &atom = newinfo.atoms_by_index[i];
+
+        auto newname = atom.altname;
+
+        if (newname.isNull())
+            newname = atom.name;
+
+        if (newname != atom.name)
+        {
+            if (keep_originals)
+                atom.altname = atom.name;
+            else
+                atom.altname = newname;
+
+            atom.name = newname;
+            changed = true;
+        }
+    }
+
+    for (int i = 0; i < newinfo.res_by_index.count(); ++i)
+    {
+        ResInfo &res = newinfo.res_by_index[i];
+
+        auto newname = res.altname;
+
+        if (newname.isNull())
+            newname = res.name;
+
+        if (newname != res.name)
+        {
+            if (keep_originals)
+                res.altname = res.name;
+            else
+                res.altname = newname;
+
+            res.name = newname;
+            changed = true;
+        }
+    }
+
+    if (changed)
+    {
+        newinfo.rebuildNameAndNumberIndexes();
+        newinfo.uid = QUuid::createUuid();
+    }
+
+    return newinfo;
+}
+
+/** Remove all alternate names from this molecule */
+MoleculeInfoData MoleculeInfoData::removeAlternateNames() const
+{
+    MoleculeInfoData newinfo(*this);
+
+    for (int i = 0; i < newinfo.atoms_by_index.count(); ++i)
+    {
+        AtomInfo &atom = newinfo.atoms_by_index[i];
+        atom.altname = atom.name;
+    }
+
+    for (int i = 0; i < newinfo.res_by_index.count(); ++i)
+    {
+        ResInfo &res = newinfo.res_by_index[i];
+        res.altname = res.name;
+    }
+
+    return newinfo;
+}
+
 /** Rename the atom at index 'atomidx' to have the new name 'newname'.
 
     \throw SireError::invalid_index

@@ -137,6 +137,24 @@ MolEditor &MolEditor::rename(const QString &newname)
     return *this;
 }
 
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MolEditor &MolEditor::switchToAlternateNames(bool keep_originals)
+{
+    d->switchToAlternateNames(keep_originals);
+    return *this;
+}
+
+/** Remove all alternate names from this molecule */
+MolEditor &MolEditor::removeAlternateNames()
+{
+    d->removeAlternateNames();
+    return *this;
+}
+
 /** Give this molecule a new, unique ID number */
 MolEditor &MolEditor::renumber()
 {
@@ -639,6 +657,24 @@ int MolStructureEditor::nSegments() const
 MolStructureEditor &MolStructureEditor::rename(const MolName &newname)
 {
     this->renameMolecule(newname);
+    return *this;
+}
+
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MolStructureEditor MolStructureEditor::switchToAlternateNames(bool keep_originals)
+{
+    StructureEditor::switchToAlternates(keep_originals);
+    return *this;
+}
+
+/** Remove all alternate names from this molecule */
+MolStructureEditor MolStructureEditor::removeAlternateNames()
+{
+    StructureEditor::removeAlternates();
     return *this;
 }
 

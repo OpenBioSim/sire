@@ -1172,3 +1172,19 @@ MoleculeInfo MoleculeInfo::setAlternateName(ResIdx residx, const ResName &name) 
 {
     return MoleculeInfo(d->setAlternateName(residx, name));
 }
+
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MoleculeInfo MoleculeInfo::switchToAlternateNames(bool keep_originals) const
+{
+    return MoleculeInfo(d->switchToAlternateNames(keep_originals));
+}
+
+/** Remove all alternate names from this molecule */
+MoleculeInfo MoleculeInfo::removeAlternateNames() const
+{
+    return MoleculeInfo(d->removeAlternateNames());
+}

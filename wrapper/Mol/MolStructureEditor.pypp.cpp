@@ -459,6 +459,18 @@ void register_MolStructureEditor_class(){
                 , "Remove all segments from this molecule" );
         
         }
+        { //::SireMol::MolStructureEditor::removeAlternateNames
+        
+            typedef ::SireMol::MolStructureEditor ( ::SireMol::MolStructureEditor::*removeAlternateNames_function_type)(  ) ;
+            removeAlternateNames_function_type removeAlternateNames_function_value( &::SireMol::MolStructureEditor::removeAlternateNames );
+            
+            MolStructureEditor_exposer.def( 
+                "removeAlternateNames"
+                , removeAlternateNames_function_value
+                , bp::return_self< >()
+                , "Remove all alternate names from this molecule" );
+        
+        }
         { //::SireMol::MolStructureEditor::rename
         
             typedef ::SireMol::MolStructureEditor & ( ::SireMol::MolStructureEditor::*rename_function_type)( ::SireMol::MolName const & ) ;
@@ -598,6 +610,19 @@ void register_MolStructureEditor_class(){
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is a complete molecule" );
+        
+        }
+        { //::SireMol::MolStructureEditor::switchToAlternateNames
+        
+            typedef ::SireMol::MolStructureEditor ( ::SireMol::MolStructureEditor::*switchToAlternateNames_function_type)( bool ) ;
+            switchToAlternateNames_function_type switchToAlternateNames_function_value( &::SireMol::MolStructureEditor::switchToAlternateNames );
+            
+            MolStructureEditor_exposer.def( 
+                "switchToAlternateNames"
+                , switchToAlternateNames_function_value
+                , ( bp::arg("keep_originals")=(bool)(true) )
+                , bp::return_self< >()
+                , "Switch to using the alternate names for all atoms and residues.\n  If keep_originals is true, then the original names will be\n  stored in the alternate names. If keep_originals is false,\n  then the original names will be removed.\n" );
         
         }
         { //::SireMol::MolStructureEditor::toString

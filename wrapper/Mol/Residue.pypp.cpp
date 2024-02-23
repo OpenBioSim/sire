@@ -107,7 +107,7 @@ void register_Residue_class(){
                 "alternateName"
                 , alternateName_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the alternate name of this residue" );
         
         }
         { //::SireMol::Residue::assertContainsMetadata

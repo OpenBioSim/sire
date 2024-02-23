@@ -253,6 +253,9 @@ namespace SireMol
         AtomName getAlternateAtomName(AtomIdx atomidx) const;
         ResName getAlternateResName(ResIdx residx) const;
 
+        void switchToAlternateNames(bool keep_originals = true);
+        void removeAlternateNames();
+
         void setProperty(const QString &key, const Property &value, bool clear_metadata = false);
 
         bool updateProperty(const QString &key, const Property &value, bool auto_add = true);

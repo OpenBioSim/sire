@@ -94,7 +94,7 @@ void register_ResStructureEditor_class(){
                 "alternateName"
                 , alternateName_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "" );
+                , "Return the alternate name for this residue" );
         
         }
         { //::SireMol::ResStructureEditor::atom
@@ -256,7 +256,7 @@ void register_ResStructureEditor_class(){
                 , reindex_function_value
                 , ( bp::arg("index") )
                 , bp::return_self< >()
-                , "Change the index of this residue to newidx. If this\nis larger than the number of residues in the molecule\nthen this residue is moved to the end" );
+                , "Reindex this residue to newidx" );
         
         }
         { //::SireMol::ResStructureEditor::remove
@@ -410,7 +410,7 @@ void register_ResStructureEditor_class(){
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "" );
+                , "Set the alternate residue name for this residue" );
         
         }
         { //::SireMol::ResStructureEditor::setAlternateName
@@ -423,7 +423,7 @@ void register_ResStructureEditor_class(){
                 , setAlternateName_function_value
                 , ( bp::arg("name") )
                 , bp::return_self< >()
-                , "" );
+                , "Set the alternate name for this residue" );
         
         }
         { //::SireMol::ResStructureEditor::toString

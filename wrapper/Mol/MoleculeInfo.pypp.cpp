@@ -2109,6 +2109,18 @@ void register_MoleculeInfo_class(){
                 , "Return the index of the parent segment of the identified atom" );
         
         }
+        { //::SireMol::MoleculeInfo::removeAlternateNames
+        
+            typedef ::SireMol::MoleculeInfo ( ::SireMol::MoleculeInfo::*removeAlternateNames_function_type)(  ) const;
+            removeAlternateNames_function_type removeAlternateNames_function_value( &::SireMol::MoleculeInfo::removeAlternateNames );
+            
+            MoleculeInfo_exposer.def( 
+                "removeAlternateNames"
+                , removeAlternateNames_function_value
+                , bp::release_gil_policy()
+                , "Remove all alternate names from this molecule" );
+        
+        }
         { //::SireMol::MoleculeInfo::rename
         
             typedef ::SireMol::MoleculeInfo ( ::SireMol::MoleculeInfo::*rename_function_type)( ::SireMol::AtomIdx,::SireMol::AtomName const & ) const;
@@ -2263,6 +2275,18 @@ void register_MoleculeInfo_class(){
                 , ( bp::arg("other") )
                 , bp::release_gil_policy()
                 , "Use this function to minimise memory usage - this function\ncompares the shared data in this info with other, and where\nthey are equal it copies the data from other, thereby reducing\nwastage caused by duplicated storage\n" );
+        
+        }
+        { //::SireMol::MoleculeInfo::switchToAlternateNames
+        
+            typedef ::SireMol::MoleculeInfo ( ::SireMol::MoleculeInfo::*switchToAlternateNames_function_type)( bool ) const;
+            switchToAlternateNames_function_type switchToAlternateNames_function_value( &::SireMol::MoleculeInfo::switchToAlternateNames );
+            
+            MoleculeInfo_exposer.def( 
+                "switchToAlternateNames"
+                , switchToAlternateNames_function_value
+                , ( bp::arg("keep_originals")=(bool)(true) )
+                , "Switch to using the alternate names for all atoms and residues.\n  If keep_originals is true, then the original names will be\n  stored in the alternate names. If keep_originals is false,\n  then the original names will be removed.\n" );
         
         }
         { //::SireMol::MoleculeInfo::typeName
