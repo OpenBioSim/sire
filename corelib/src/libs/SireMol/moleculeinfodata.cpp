@@ -280,14 +280,14 @@ bool CGInfo::operator!=(const CGInfo &other) const
 
 QDataStream &operator<<(QDataStream &ds, const ResInfo &resinfo)
 {
-    ds << resinfo.name << resinfo.altname << resinfo.number << resinfo.chainidx << resinfo.atom_indicies;
+    ds << resinfo.name << resinfo.number << resinfo.chainidx << resinfo.atom_indicies;
 
     return ds;
 }
 
 QDataStream &operator>>(QDataStream &ds, ResInfo &resinfo)
 {
-    ds >> resinfo.name >> resinfo.altname >> resinfo.number >> resinfo.chainidx >> resinfo.atom_indicies;
+    ds >> resinfo.name >> resinfo.number >> resinfo.chainidx >> resinfo.atom_indicies;
 
     resinfo.altname = resinfo.name;
 

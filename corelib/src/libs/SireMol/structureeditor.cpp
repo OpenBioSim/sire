@@ -3201,7 +3201,7 @@ const MoleculeInfoData &StructureEditor::commitInfo()
         {
             const auto info = this->getAtomData(AtomIdx(i));
 
-            if (info.get<2>().isNull())
+            if (info.get<3>().isNull())
             {
                 // this atom isn't in a CutGroup
                 // Reparent it into the first CutGroup
