@@ -160,16 +160,6 @@ AtomSelection::AtomSelection(const AtomSelection &other)
 {
 }
 
-AtomSelection *AtomSelection::create() const
-{
-    return new AtomSelection();
-}
-
-AtomSelection *AtomSelection::create(const MoleculeInfoData &molinfo, const PropertyMap &) const
-{
-    return new AtomSelection(molinfo);
-}
-
 /** Destructor */
 AtomSelection::~AtomSelection()
 {
@@ -4237,6 +4227,7 @@ bool AtomSelection::isSegment() const
 
 PropertyList AtomSelection::merge(const MolViewProperty &other,
                                   const AtomIdxMapping &mapping,
+                                  const QString &ghost,
                                   const SireBase::PropertyMap &map) const
 {
     PropertyList ret;

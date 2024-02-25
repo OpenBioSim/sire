@@ -74,11 +74,6 @@ namespace SireMol
             return "SireMol::MolViewProperty";
         }
 
-        virtual MolViewProperty *create() const;
-
-        virtual MolViewProperty *create(const MoleculeInfoData &molinfo,
-                                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const = 0;
-
         virtual bool isCompatibleWith(const MoleculeInfoData &molinfo) const = 0;
         virtual bool isCompatibleWith(const MoleculeInfo &molinfo) const;
 
@@ -93,6 +88,7 @@ namespace SireMol
 
         virtual SireBase::PropertyList merge(const MolViewProperty &other,
                                              const AtomIdxMapping &mapping,
+                                             const QString &ghost = QString(),
                                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const = 0;
 
         void assertCompatibleWith(const MoleculeInfoData &molinfo) const;

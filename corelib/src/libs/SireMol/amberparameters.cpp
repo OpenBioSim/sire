@@ -35,10 +35,13 @@
 #include "SireMol/molecule.h"
 #include "SireMol/partialmolecule.h"
 
+#include "SireError/errors.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
 using namespace SireMol;
+using namespace SireBase;
 using namespace SireStream;
 
 ///////////
@@ -316,4 +319,14 @@ QList<double> AmberParameters::get14PairParams(const BondID &pair)
 QList<BondID> AmberParameters::getAll14Pairs()
 {
     return nb14pairs.keys();
+}
+
+PropertyList AmberParameters::merge(const MolViewProperty &other,
+                                    const AtomIdxMapping &mapping,
+                                    const QString &ghost,
+                                    const SireBase::PropertyMap &map) const
+{
+    throw SireError::incomplete_code(QObject::tr(
+                                         "AmberParameters::merge() is not implemented yet!"),
+                                     CODELOC);
 }

@@ -117,10 +117,6 @@ namespace SireMol
         bool isEmpty() const;
         bool isNull() const;
 
-        AtomSelection *create() const;
-        AtomSelection *create(const MoleculeInfoData &molinfo,
-                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
-
         const MoleculeInfoData &info() const;
 
         int nSelected() const;
@@ -460,6 +456,7 @@ namespace SireMol
 
         SireBase::PropertyList merge(const MolViewProperty &other,
                                      const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
                                      const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:

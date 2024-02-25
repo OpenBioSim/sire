@@ -1031,3 +1031,53 @@ AtomProperty<Vector> *AtomCoords::clone() const
 {
     return new AtomProperty<Vector>(*this);
 }
+
+PropertyList AtomCoords::merge(const MolViewProperty &other,
+                               const AtomIdxMapping &mapping,
+                               const QString &ghost,
+                               const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<AtomCoords>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    const AtomCoords &ref = *this;
+    const AtomCoords &pert = other.asA<AtomCoords>();
+
+    AtomCoords prop0 = ref;
+    AtomCoords prop1 = ref;
+
+    Vector ghost_param(0);
+
+    if (not ghost.isEmpty())
+    {
+        ghost_param = Vector(ghost);
+    }
+
+    for (const auto &index : mapping)
+    {
+        if (index.isUnmappedIn0())
+        {
+            prop0.set(index.cgAtomIdx0(), ghost_param);
+        }
+
+        if (index.isUnmappedIn1())
+        {
+            prop1.set(index.cgAtomIdx0(), ghost_param);
+        }
+        else
+        {
+            prop1.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
+        }
+    }
+
+    SireBase::PropertyList ret;
+    ret.append(prop0);
+    ret.append(prop1);
+
+    return ret;
+}

@@ -89,6 +89,7 @@ set ( SIREMOL_HEADERS
       improperid.h
       iswater.h
       geometryperturbation.h
+      getghostparam.hpp
       getrmsd.h
       groupatomids.h
       groupgroupids.h

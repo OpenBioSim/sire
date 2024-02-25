@@ -36,6 +36,7 @@
 
 #include "moleculeinfodata.h"
 #include "molviewproperty.h"
+#include "getghostparam.hpp"
 
 #include "SireError/errors.h"
 
@@ -105,7 +106,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const CGProperty<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, CGProperty<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, CGProperty<T> &);
 
     public:
         CGProperty();
@@ -168,6 +169,11 @@ namespace SireMol
         void assertCanConvert(const QVariant &value) const;
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+
+        virtual SireBase::PropertyList merge(const MolViewProperty &other,
+                                             const AtomIdxMapping &mapping,
+                                             const QString &ghost = QString(),
+                                             const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         /** The actual CutGroup property values */
@@ -546,6 +552,37 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE bool CGProperty<T>::isCompatibleWith(const MoleculeInfoData &molinfo) const
     {
         return molinfo.nCutGroups() == this->nCutGroups();
+    }
+
+    /** Merge this property with another property */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SireBase::PropertyList CGProperty<T>::merge(const MolViewProperty &other,
+                                                                        const AtomIdxMapping &mapping,
+                                                                        const QString &ghost,
+                                                                        const SireBase::PropertyMap &map) const
+    {
+        if (not other.isA<CGProperty<T>>())
+        {
+            throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                    .arg(this->what())
+                                                    .arg(other.what()),
+                                                CODELOC);
+        }
+
+        const CGProperty<T> &ref = *this;
+        const CGProperty<T> &pert = other.asA<CGProperty<T>>();
+
+        CGProperty<T> prop0 = ref;
+        CGProperty<T> prop1 = ref;
+
+        const T ghost_param = getGhostParam<T>(ghost);
+
+        SireBase::PropertyList ret;
+
+        ret.append(prop0);
+        ret.append(prop1);
+
+        return ret;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

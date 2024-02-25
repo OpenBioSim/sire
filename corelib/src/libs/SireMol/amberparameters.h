@@ -125,6 +125,11 @@ namespace SireMol
         QList<double> get14PairParams(const BondID &pair);
         QList<BondID> getAll14Pairs();
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     private:
         /** The molecule that this flexibility operates on */
         SireBase::SharedDataPointer<SireMol::MoleculeInfoData> molinfo;

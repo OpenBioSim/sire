@@ -406,9 +406,20 @@ namespace SireSystem
 
                 if (prop0.isA<MolViewProperty>())
                 {
-                    // they can be properly merged
+                    // they can be properly merged - get the value of the ghost parameter for this property
+                    QString ghost_param;
+
+                    if (map.specified("ghost_" + prop))
+                    {
+                        ghost_param = map["ghost_" + prop].source();
+                    }
+                    else if (prop == "atomtype" or prop == "ambertype")
+                    {
+                        ghost_param = "Xx";
+                    }
+
                     auto merged = prop0.asA<MolViewProperty>().merge(prop1.asA<MolViewProperty>(),
-                                                                     entries, map);
+                                                                     entries, ghost_param, map);
 
                     if (merged.count() != 2)
                         throw SireError::program_bug(QObject::tr(
