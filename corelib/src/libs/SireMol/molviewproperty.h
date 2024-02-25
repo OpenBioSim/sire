@@ -31,6 +31,7 @@
 #include <QHash>
 
 #include "SireBase/property.h"
+#include "SireBase/propertylist.h"
 
 #include "moleculeinfo.h"
 
@@ -45,10 +46,12 @@ namespace SireMol
 {
 
     class MoleculeInfoData;
+    class MoleculeInfo;
     class MoleculeView;
     class AtomSelection;
     class AtomIdx;
     class AtomMatcher;
+    class AtomIdxMapping;
 
     /** This is the base class of all properties that are specifically
         attached to views of a molecule (e.g. AtomProperty, ResProperty,
@@ -71,6 +74,11 @@ namespace SireMol
             return "SireMol::MolViewProperty";
         }
 
+        virtual MolViewProperty *create() const;
+
+        virtual MolViewProperty *create(const MoleculeInfoData &molinfo,
+                                        const SireBase::PropertyMap &map = SireBase::PropertyMap()) const = 0;
+
         virtual bool isCompatibleWith(const MoleculeInfoData &molinfo) const = 0;
         virtual bool isCompatibleWith(const MoleculeInfo &molinfo) const;
 
@@ -82,6 +90,10 @@ namespace SireMol
         SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol) const;
         SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol, const AtomMatcher &atommatcher) const;
         SireBase::PropertyPtr makeCompatibleWith(const MoleculeView &mol, const QHash<AtomIdx, AtomIdx> &map) const;
+
+        virtual SireBase::PropertyList merge(const MolViewProperty &other,
+                                             const AtomIdxMapping &mapping,
+                                             const SireBase::PropertyMap &map = SireBase::PropertyMap()) const = 0;
 
         void assertCompatibleWith(const MoleculeInfoData &molinfo) const;
         void assertCompatibleWith(const MoleculeInfo &molinfo) const;

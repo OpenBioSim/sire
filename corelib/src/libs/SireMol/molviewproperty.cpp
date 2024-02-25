@@ -144,6 +144,11 @@ PropertyPtr MolViewProperty::makeCompatibleWith(const MoleculeView &molview, con
     return this->makeCompatibleWith(molview.data().info(), map);
 }
 
+MolViewProperty *MolViewProperty::create() const
+{
+    return static_cast<MolViewProperty *>(Property::create());
+}
+
 /////////
 ///////// Implementation of MoleculeProperty
 /////////

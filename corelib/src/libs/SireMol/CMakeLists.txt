@@ -29,6 +29,7 @@ set ( SIREMOL_HEADERS
       atomidcombos.h
       atomidentifier.h
       atomidx.h
+      atomidxmapping.h
       atommapping.h
       atommasses.h
       atommatch.h
@@ -169,10 +170,11 @@ set ( SIREMOL_SOURCES
       angleid.cpp
       atom.cpp
       atomcoords.cpp
+      atomcutting.cpp
       atomeditor.cpp
       atomid.cpp
       atomidentifier.cpp
-      atomcutting.cpp
+      atomidxmapping.cpp
       atommapping.cpp
       atommatch.cpp
       atommatcher.cpp

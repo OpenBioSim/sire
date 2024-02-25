@@ -117,6 +117,10 @@ namespace SireMol
         bool isEmpty() const;
         bool isNull() const;
 
+        AtomSelection *create() const;
+        AtomSelection *create(const MoleculeInfoData &molinfo,
+                              const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
         const MoleculeInfoData &info() const;
 
         int nSelected() const;
@@ -453,6 +457,10 @@ namespace SireMol
 
         template <class T>
         void assertCompatibleWith(const AtomProperty<T> &prop) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         bool _pvt_selected(const CGAtomIdx &cgatomidx) const;

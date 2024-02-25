@@ -39,6 +39,7 @@ SIRE_BEGIN_HEADER
 namespace SireSystem
 {
     SIRESYSTEM_EXPORT SireMol::Molecule merge(const SireMol::AtomMapping &mols,
+                                              const QStringList &properties = QStringList(),
                                               bool as_new_molecule = true,
                                               bool allow_ring_breaking = false,
                                               bool allow_ring_size_change = false,

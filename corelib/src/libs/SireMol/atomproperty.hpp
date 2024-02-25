@@ -34,6 +34,7 @@
 #include "SireBase/qvariant_metatype.h"
 
 #include "atomselection.h"
+#include "atomidxmapping.h"
 #include "moleculeinfo.h"
 #include "moleculeinfodata.h"
 #include "molviewproperty.h"
@@ -110,6 +111,10 @@ namespace SireMol
         virtual PropertyPtr divide(const QVector<AtomSelection> &beads) const = 0;
         virtual PropertyPtr divideByResidue(const MoleculeInfoData &molinfo) const = 0;
 
+        virtual SireBase::PropertyList merge(const MolViewProperty &other,
+                                             const AtomIdxMapping &mapping,
+                                             const SireBase::PropertyMap &map = SireBase::PropertyMap()) const = 0;
+
     protected:
         void throwIncorrectNumberOfAtoms(int nats, int ntotal) const;
         void throwIncorrectNumberOfSelectedAtoms(int nats, int nselected) const;
@@ -161,6 +166,10 @@ namespace SireMol
         static const char *typeName();
 
         AtomProperty<T> *clone() const;
+
+        AtomProperty<T> *create() const;
+        AtomProperty<T> *create(const MoleculeInfoData &molinfo,
+                                const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         bool operator==(const AtomProperty<T> &other) const;
         bool operator!=(const AtomProperty<T> &other) const;
@@ -233,6 +242,10 @@ namespace SireMol
         bool canConvert(const QVariant &value) const;
 
         void assertCanConvert(const QVariant &value) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         /** The actual atomic property values */
@@ -413,6 +426,19 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE AtomProperty<T> *AtomProperty<T>::clone() const
     {
         return new AtomProperty<T>(*this);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomProperty<T> *AtomProperty<T>::create() const
+    {
+        return new AtomProperty<T>();
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE AtomProperty<T> *AtomProperty<T>::create(const MoleculeInfoData &molinfo,
+                                                                     const SireBase::PropertyMap &map) const
+    {
+        return new AtomProperty<T>(molinfo);
     }
 
     template <class T>
@@ -1219,6 +1245,67 @@ namespace SireMol
         }
 
         return AtomProperty<T>(res_vals);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE T _get_zero()
+    {
+        return T();
+    }
+
+    template <>
+    SIRE_OUTOFLINE_TEMPLATE qint64 _get_zero<qint64>()
+    {
+        return 0;
+    }
+
+    template <>
+    SIRE_OUTOFLINE_TEMPLATE double _get_zero<double>()
+    {
+        return 0.0;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SireBase::PropertyList AtomProperty<T>::merge(const MolViewProperty &other,
+                                                                          const AtomIdxMapping &mapping,
+                                                                          const SireBase::PropertyMap &map) const
+    {
+        if (not other.isA<AtomProperty<T>>())
+        {
+            throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                    .arg(this->what())
+                                                    .arg(other.what()),
+                                                CODELOC);
+        }
+
+        const AtomProperty<T> &ref = *this;
+        const AtomProperty<T> &pert = other.asA<AtomProperty<T>>();
+
+        AtomProperty<T> prop0 = ref;
+        AtomProperty<T> prop1 = ref;
+
+        for (const auto &index : mapping)
+        {
+            if (index.isUnmappedIn0())
+            {
+                prop0.set(index.cgAtomIdx0(), _get_zero<T>());
+            }
+
+            if (index.isUnmappedIn1())
+            {
+                prop1.set(index.cgAtomIdx0(), _get_zero<T>());
+            }
+            else
+            {
+                prop1.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
+            }
+        }
+
+        SireBase::PropertyList ret;
+        ret.append(prop0);
+        ret.append(prop1);
+
+        return ret;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

@@ -30,6 +30,9 @@
 
 #include "SireMol/core.h"
 #include "SireMol/moleditor.h"
+#include "SireMol/atomidxmapping.h"
+
+#include "SireMM/mmdetail.h"
 
 using namespace SireMol;
 using namespace SireBase;
@@ -40,6 +43,8 @@ namespace SireSystem
      * @brief Merge function that combines multiple molecules into a single molecule.
      *
      * @param mols The AtomMapping object that contains the molecules to be merged.
+     * @param properties The list of properties to be merged. If this is empty then
+     *                   a default set of properties will be merged.
      * @param as_new_molecule Flag indicating whether the merged molecule should be created as a new molecule.
      * @param allow_ring_breaking Whether to allow the opening/closing of rings during a merge.
      * @param allow_ring_size_change Whether to allow changes in ring size.
@@ -51,9 +56,11 @@ namespace SireSystem
      * @param map The PropertyMap object that contains additional properties for the merged molecule.
      * @return The merged molecule.
      */
-    Molecule merge(const AtomMapping &mols, bool as_new_molecule,
+    Molecule merge(const AtomMapping &mols,
+                   const QStringList &properties,
+                   bool as_new_molecule,
                    bool allow_ring_breaking, bool allow_ring_size_change,
-                   bool force, const PropertyMap &map)
+                   bool force, const PropertyMap &input_map)
     {
         if (not mols.isSingleMolecule())
         {
@@ -62,6 +69,8 @@ namespace SireSystem
                                                     "refers to a single molecule. You cannot use:\n%1")
                                                     .arg(mols.toString()));
         }
+
+        PropertyMap map = input_map;
 
         if (map.specified("as_new_molecule"))
         {
@@ -94,6 +103,31 @@ namespace SireSystem
             allow_ring_size_change = true;
         }
 
+        map.set("as_new_molecule", BooleanProperty(as_new_molecule));
+        map.set("allow_ring_breaking", BooleanProperty(allow_ring_breaking));
+
+        // see which properties to merge
+        QStringList props = properties;
+
+        if (props.isEmpty())
+        {
+            props = QStringList({
+                "angle",
+                "ambertype",
+                "atomtype",
+                "bond",
+                "charge",
+                "connectivity",
+                "coordinates",
+                "dihedral",
+                "element",
+                "improper",
+                "intrascale",
+                "LJ",
+                "mass",
+            });
+        }
+
         // get the forwards and backwards map
         auto forwards_map = mols;
         auto backwards_map = mols.swap();
@@ -119,9 +153,66 @@ namespace SireSystem
         // get the MolEditor that can be used to set properties
         MolEditor editmol = mols.atoms0().toSingleMolecule().molecule().edit();
 
+        // check and set the forcefields
+        SireMM::MMDetail ffield0;
+        SireMM::MMDetail ffield1;
+
+        bool have_ffield0 = false;
+        bool have_ffield1 = false;
+
+        try
+        {
+            ffield0 = mapped_atoms0.data().property(map0["forcefield"]).asA<SireMM::MMDetail>();
+            have_ffield0 = true;
+        }
+        catch (...)
+        {
+        }
+
+        try
+        {
+            ffield1 = mapped_atoms1.data().property(map1["forcefield"]).asA<Sire::MMDetail>();
+            have_ffield1 = true;
+        }
+        catch (...)
+        {
+        }
+
+        if (not(have_ffield0 and have_ffield1))
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "You must specify a forcefield for both the reference and "
+                                                    "perturbed states in order to merge the molecules."),
+                                                CODELOC);
+        }
+        else if (not have_ffield1)
+        {
+            ffield1 = ffield0;
+        }
+        else
+        {
+            ffield0 = ffield1;
+        }
+
+        if (not ffield0.isCompatibleWith(ffield1))
+        {
+            throw SireError::incompatible_error(QObject::tr(
+                                                    "The forcefields for the reference and perturbed states are "
+                                                    "incompatible. You cannot merge the molecules. The forcefields "
+                                                    "are %1 and %2")
+                                                    .arg(ffield0.toString())
+                                                    .arg(ffield1.toString()),
+                                                CODELOC);
+        }
+
         // and a handle on the whole reference and perturbed molecule
         const auto mol0 = mols.atoms0().toSingleMolecule().molecule();
         const auto mol1 = mols.atoms1().toSingleMolecule().molecule();
+
+        // use a property to track which atoms have been mapped -
+        // a value of -1 means that this atom is not mapped
+        editmol.setProperty("_mol0_index", AtomIntProperty(mol0.info(), -1));
+        editmol.setProperty("_mol1_index", AtomIntProperty(mol1.info(), -1));
 
         // get an editable copy of the molecule to be changed
         MolStructureEditor mol(editmol);
@@ -259,9 +350,101 @@ namespace SireSystem
 
         editmol = mol.commit().edit();
 
+        // now we have the merged molecule, we need to work out the mapping
+        // of atoms from the reference to the perturbed state in this
+        // merged molecule
+        QList<AtomIdxMappingEntry> entries;
+
+        const auto &molinfo0 = editmol.info();
+        const auto &molinfo1 = mol1.info();
+
+        for (int i = 0; i < molinfo0.nAtoms(); ++i)
+        {
+            const auto atom = editmol.atom(AtomIdx(i));
+
+            const auto index0 = atom.property<qint64>("_mol0_index");
+            const auto index1 = atom.property<qint64>("_mol1_index");
+
+            if (index0 == -1 and index1 == -1)
+            {
+                // this atom is not involved in the mapping
+                continue;
+            }
+
+            const bool is_unmapped_in_reference = (index0 == -1);
+
+            entries.append(AtomIdxMappingEntry(AtomIdx(i), AtomIdx(index1),
+                                               molinfo0, molinfo1,
+                                               is_unmapped_in_reference));
+        }
+
+        // now go through all of the properties that we want to merge
+        // and merge them using the AtomIdxMapping object - remove
+        // the common property of these
+        for (const auto &prop : props)
+        {
+            if (editmol.hasProperty(map0[prop]) and mol1.hasProperty(map1[prop]))
+            {
+                // we both have the property, so it should be mergeable
+                const auto &prop0 = editmol.property(map0[prop]);
+                const auto &prop1 = mol1.property(map1[prop]);
+
+                if (prop0.what() != prop1.what())
+                {
+                    // the properties are not the same type
+                    throw SireError::incompatible_error(QObject::tr(
+                                                            "Cannot merge the molecule because the property %1 is not the "
+                                                            "same type in both molecules. It is %2=%3 in the reference "
+                                                            "and %4=%5 in the perturbed molecule.")
+                                                            .arg(prop)
+                                                            .arg(map0[prop].source())
+                                                            .arg(prop0.what())
+                                                            .arg(map1[prop].source())
+                                                            .arg(prop1.what()),
+                                                        CODELOC);
+                }
+
+                if (prop0.isA<MolViewProperty>())
+                {
+                    // they can be properly merged
+                    auto merged = prop0.asA<MolViewProperty>().merge(prop1.asA<MolViewProperty>(),
+                                                                     entries, map);
+
+                    if (merged.count() != 2)
+                        throw SireError::program_bug(QObject::tr(
+                                                         "The merge of the property %1 did not return two properties. "
+                                                         "This is a bug!")
+                                                         .arg(prop),
+                                                     CODELOC);
+
+                    editmol.removeProperty(map0[prop]);
+                    editmol.setProperty(map[prop + "0"].source(), merged[0]);
+                    editmol.setProperty(map[prop + "1"].source() + "1", merged[1]);
+                }
+                else
+                {
+                    // they are normal properties - they cannot be merged
+                    // so just add them as the two end states
+                    editmol.removeProperty(map0[prop]);
+                    editmol.setProperty(map[prop + "0"].source(), prop0);
+                    editmol.setProperty(map[prop + "1"].source(), prop1);
+                }
+            }
+        }
+
         // add the reference and perturbed molecules as 'molecule0' and 'molecule1'
         editmol.setProperty(map["molecule0"].source(), mol0);
         editmol.setProperty(map["molecule1"].source(), mol1);
+
+        // add the forcefields for the two molecules
+        editmol.setProperty(map["forcefield0"].source(), ffield0);
+        editmol.setProperty(map["forcefield1"].source(), ffield1);
+
+        // remove any property called "parameters"
+        if (editmol.hasProperty(map["parameters"].source()))
+        {
+            editmol.removeProperty(map["parameters"].source());
+        }
 
         // set the flag that this is a perturbable molecule
         editmol.setProperty(map["is_perturbable"].source(), BooleanProperty(true));
