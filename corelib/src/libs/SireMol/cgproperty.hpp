@@ -33,6 +33,7 @@
 #include "SireBase/convert_property.hpp"
 #include "SireBase/qvariant_metatype.h"
 #include "SireBase/slice.h"
+#include "SireBase/console.h"
 
 #include "moleculeinfodata.h"
 #include "molviewproperty.h"
@@ -569,18 +570,13 @@ namespace SireMol
                                                 CODELOC);
         }
 
-        const CGProperty<T> &ref = *this;
-        const CGProperty<T> &pert = other.asA<CGProperty<T>>();
-
-        CGProperty<T> prop0 = ref;
-        CGProperty<T> prop1 = ref;
-
-        const T ghost_param = getGhostParam<T>(ghost);
+        SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                       .arg(this->what()));
 
         SireBase::PropertyList ret;
 
-        ret.append(prop0);
-        ret.append(prop1);
+        ret.append(*this);
+        ret.append(*this);
 
         return ret;
     }
