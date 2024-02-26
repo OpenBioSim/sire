@@ -58,6 +58,12 @@ namespace SireOpenMM
                                      const QVector<double> &initial,
                                      const QVector<double> &final) const;
 
+        const QVector<double> &morph(const SireCAS::LambdaSchedule &schedule,
+                                     const QString &force, const QString &key,
+                                     const QString &subkey,
+                                     const QVector<double> &initial,
+                                     const QVector<double> &final) const;
+
     private:
         QHash<QString, QVector<double>> cache;
         QReadWriteLock lock;
