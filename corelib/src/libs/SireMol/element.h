@@ -79,10 +79,18 @@ namespace SireMol
         bool operator==(const Element &other) const;
         bool operator!=(const Element &other) const;
 
+        bool operator==(const QString &other) const;
+        bool operator!=(const QString &other) const;
+
         bool operator>(const Element &other) const;
         bool operator<(const Element &other) const;
         bool operator>=(const Element &other) const;
         bool operator<=(const Element &other) const;
+
+        bool operator>(const QString &other) const;
+        bool operator<(const QString &other) const;
+        bool operator>=(const QString &other) const;
+        bool operator<=(const QString &other) const;
 
         const Element &operator=(const Element &element);
 
@@ -122,7 +130,15 @@ namespace SireMol
 
         static Element biologicalElement(const QString &name);
 
+        static void setElementIsBiological(const Element &element);
+        static void setElementIsNotBiological(const Element &element);
+        static void resetBiologicalElements();
+
+        static QList<Element> getBiologicalElements();
+
     private:
+        bool _locked_biological() const;
+
         /** Pointer to the object containing the data for this element */
         ElementData *eldata;
     };

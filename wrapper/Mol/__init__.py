@@ -16,6 +16,12 @@ from ..Search._Search import install_search_parser as _install_search_parser
 
 _install_search_parser()
 
+# initialise the list of biological elements
+try:
+    _Mol.Element.resetBiologicalElements()
+except AttributeError:
+    _Mol.Element.reset_biological_elements()
+
 
 def __get_property__(molview, key):
     if hasattr(molview, "property_type"):

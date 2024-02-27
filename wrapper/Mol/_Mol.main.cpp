@@ -585,6 +585,8 @@ namespace bp = boost::python;
 
 #include "SireMol/selectorm.hpp"
 
+#include "SireMol/element.h"
+
 BOOST_PYTHON_MODULE(_Mol){
     register_SireMol_objects();
 
@@ -1143,6 +1145,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_Within_class();
 
     register_SireMol_properties();
+
+    bp::implicitly_convertible< QString, SireMol::Element >();
 
     bp::implicitly_convertible< SireMol::AtomID, SireMol::AtomIdentifier >();
 

@@ -71,12 +71,18 @@ MolLambdaCache &MolLambdaCache::operator=(const MolLambdaCache &other)
 const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
                                              const QString &force,
                                              const QString &key,
+                                             const QString &subkey,
                                              const QVector<double> &initial,
                                              const QVector<double> &final) const
 {
     auto nonconst_this = const_cast<MolLambdaCache *>(this);
 
-    QString force_key = force + "::" + key;
+    QString cache_key = key;
+
+    if (not subkey.isEmpty())
+        cache_key += ("::" + subkey);
+
+    QString force_key = force + "::" + cache_key;
 
     QReadLocker lkr(&(nonconst_this->lock));
 
@@ -108,16 +114,16 @@ const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
     {
         // all forces use the same equation for this lever
         // Look for the common equation
-        it = cache.constFind(key);
+        it = cache.constFind(cache_key);
 
         if (it == cache.constEnd())
         {
             // we're the first - create the values and cache them
-            nonconst_this->cache.insert(key,
+            nonconst_this->cache.insert(cache_key,
                                         schedule.morph("*", key,
                                                        initial, final, lam_val));
 
-            it = cache.constFind(key);
+            it = cache.constFind(cache_key);
         }
 
         // save this equation for this force for this lever
@@ -125,6 +131,15 @@ const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
     }
 
     return cache.constFind(force_key).value();
+}
+
+const QVector<double> &MolLambdaCache::morph(const LambdaSchedule &schedule,
+                                             const QString &force,
+                                             const QString &key,
+                                             const QVector<double> &initial,
+                                             const QVector<double> &final) const
+{
+    return this->morph(schedule, force, key, QString(), initial, final);
 }
 
 //////
@@ -783,7 +798,7 @@ double LambdaLever::setLambda(OpenMM::Context &context,
             {
                 const auto morphed_constraint_length = cache.morph(
                     schedule,
-                    "bond", "bond_length",
+                    "bond", "bond_length", "constraint",
                     r0_0, r0_1);
 
                 for (int j = 0; j < idxs.count(); ++j)

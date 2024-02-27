@@ -2590,3 +2590,9 @@ if not hasattr(Molecule, "perturbation"):
 
 # Remove some temporary variables
 del C
+
+# also initialise sire.mm (it can sometimes be uninitialised if
+# sire.mol is loaded first)
+from ..mm import _fix_siremm
+
+_fix_siremm()
