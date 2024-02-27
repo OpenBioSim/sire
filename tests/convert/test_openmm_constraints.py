@@ -212,3 +212,69 @@ def test_neo_constraints(neopentane_methane, openmm_platform):
     # check that there is only one perturbable constraint
     p = mols_fwds[0].perturbation().to_openmm(constraint="h-bonds-not-heavy-perturbed")
     assert (len(p.changed_constraints(to_pandas=False))) == 1
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_dynamic_constraints(merged_ethane_methanol, openmm_platform):
+    mols = sr.morph.link_to_reference(merged_ethane_methanol)
+
+    d = mols[0].dynamics(
+        constraint="h-bonds",
+        dynamic_constraints=True,
+        platform=openmm_platform,
+        lambda_value=0.0,
+    )
+
+    constraints = d.get_constraints()
+
+    nrg = d.current_potential_energy().value()
+
+    assert nrg == pytest.approx(1.65783, abs=0.001)
+
+    # there are 6 bonds involving hydrogen - they should all be the same
+    assert len(constraints) == 6
+
+    for constraint in constraints:
+        assert constraint[1].value() == pytest.approx(1.0969)
+
+    d = mols[0].dynamics(
+        constraint="h-bonds",
+        dynamic_constraints=True,
+        platform=openmm_platform,
+        lambda_value=1.0,
+    )
+
+    constraints = d.get_constraints()
+
+    # there are 6 bonds involving hydrogen - they should all be the same
+    assert len(constraints) == 6
+
+    # one of the constraints should be 0.973 A
+    cons = {}
+
+    for constraint in constraints:
+        dist = constraint[1].value()
+
+        if dist not in cons:
+            cons[dist] = 0
+
+        cons[dist] += 1
+
+    assert len(cons) == 2
+
+    for key, value in cons.items():
+        if value == 1:
+            assert key == pytest.approx(0.973)
+        elif value == 5:
+            assert key == pytest.approx(1.0969)
+        else:
+            assert False
+
+    # make sure that the bond parameters are correct - can only do this
+    # via potential energy
+    nrg = d.current_potential_energy()
+
+    assert nrg.value() == pytest.approx(13.8969, abs=0.001)

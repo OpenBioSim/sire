@@ -1,5 +1,6 @@
-import sire as sr
 import pytest
+
+import sire as sr
 
 
 def pytest_addoption(parser):
@@ -145,6 +146,11 @@ def pentane_cyclopentane():
 
 
 @pytest.fixture(scope="session")
+def reordered_protein():
+    return sr.load_test_files("reordered_protein.top", "reordered_protein.crd")
+
+
+@pytest.fixture(scope="session")
 def pdb_3nss():
     return sr.load_test_files("3NSS.pdb")
 
@@ -212,3 +218,8 @@ def openmm_platform():
             pass
 
     return "Reference"
+
+
+@pytest.fixture(scope="session")
+def thrombin_complex():
+    return sr.load_test_files("thrombin.top", "thrombin.rst7")

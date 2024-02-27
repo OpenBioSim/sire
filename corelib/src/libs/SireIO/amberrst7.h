@@ -118,6 +118,7 @@ namespace SireIO
 
     protected:
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
+        void reorderLoadedFrame();
 
     private:
         void parse(const PropertyMap &map);

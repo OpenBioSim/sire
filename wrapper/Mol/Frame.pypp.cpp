@@ -258,6 +258,19 @@ void register_Frame_class(){
                 , "" );
         
         }
+        { //::SireMol::Frame::reorder
+        
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*reorder_function_type)( ::QVector< long long > const & ) const;
+            reorder_function_type reorder_function_value( &::SireMol::Frame::reorder );
+            
+            Frame_exposer.def( 
+                "reorder"
+                , reorder_function_value
+                , ( bp::arg("order") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::Frame::reverse
         
             typedef ::SireMol::Frame ( ::SireMol::Frame::*reverse_function_type)( ::SireMol::FrameTransform const & ) const;

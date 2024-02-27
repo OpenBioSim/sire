@@ -173,7 +173,7 @@ QString AmberRst7::formatName() const
 /** Return the suffixes that RST7 files will typically have */
 QStringList AmberRst7::formatSuffix() const
 {
-    static const QStringList suffixes = {"rst7", "rst", "crd7", "crd"};
+    static const QStringList suffixes = {"rst7", "rst", "crd7", "crd", "inpcrd"};
     return suffixes;
 }
 
@@ -900,6 +900,36 @@ Frame AmberRst7::getFrame(int i) const
     }
 
     return SireMol::Frame(this->coords, velocities, space.read(), current_time * SireUnits::picosecond);
+}
+
+template <class T>
+QVector<T> _reorder(const QVector<T> &orig, const QVector<qint64> &order)
+{
+    if (orig.isEmpty() or order.isEmpty())
+        return orig;
+
+    QVector<T> ret = orig;
+
+    for (int i = 0; i < order.count(); ++i)
+    {
+        int j = order[i];
+
+        if (j >= 0 and j < orig.count())
+            ret[i] = orig[j];
+    }
+
+    return ret;
+}
+
+void AmberRst7::reorderLoadedFrame()
+{
+    const auto &loaded_order = this->getLoadedOrder();
+
+    if (loaded_order.isEmpty())
+        return;
+
+    this->coords = _reorder(this->coords, loaded_order);
+    this->vels = _reorder(this->vels, loaded_order);
 }
 
 QString AmberRst7::toString() const

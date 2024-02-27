@@ -138,6 +138,7 @@ namespace SireIO
     protected:
         SireSystem::System startSystem(const PropertyMap &map) const;
         void addToSystem(SireSystem::System &system, const PropertyMap &map) const;
+        void reorderLoadedFrame();
 
     private:
         void assertSane() const;

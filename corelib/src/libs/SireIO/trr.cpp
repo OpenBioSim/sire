@@ -261,6 +261,11 @@ int TRR::size() const
     return this->nFrames();
 }
 
+void TRR::reorderLoadedFrame()
+{
+    current_frame = this->reorderFrame(current_frame);
+}
+
 Frame TRR::getFrame(int frame) const
 {
     frame = SireID::Index(frame).map(this->nFrames());
@@ -278,7 +283,7 @@ Frame TRR::getFrame(int frame) const
                                     CODELOC);
     }
 
-    return f->readFrame(frame, this->usesParallel());
+    return this->reorderFrame(f->readFrame(frame, this->usesParallel()));
 }
 
 TRR TRR::operator[](int i) const

@@ -83,6 +83,7 @@
 #include "SireBase/findexe.h"
 #include "SireBase/tempdir.h"
 #include "SireBase/progressbar.h"
+#include "SireBase/propertylist.h"
 
 #include "SireIO/errors.h"
 
@@ -4919,6 +4920,55 @@ System AmberPrm::startSystem(const PropertyMap &map) const
         }
     }
 
+    // we need to check that the atoms are still in the same order
+    // as they appeared in the prmtop file - the order can change if
+    // molecules are discontiguous (i.e. ions moved to the end but
+    // bonded to earlier chains of a protein)
+    int expected_atomnum = 1;
+    bool in_expected_order = true;
+    QVector<qint64> loaded_order;
+
+    ProgressBar bar("Checking atom order");
+    bool entered_bar = false;
+
+    for (auto &mol : mols)
+    {
+        for (int i = 0; i < mol.nAtoms(); ++i)
+        {
+            const auto atomnum = mol.info().number(AtomIdx(i));
+
+            loaded_order.append(atomnum.value() - 1);
+
+            if (atomnum.value() != expected_atomnum)
+            {
+                if (not entered_bar)
+                {
+                    entered_bar = true;
+                    bar.setSpeedUnit("atoms / s");
+                    bar = bar.enter();
+                }
+
+                in_expected_order = false;
+
+                // we need to renumber this atom so that it has the
+                // expected atom number - they must increase in order
+                // according to molidx/atomidx order
+                bar.tick(QString("Renumbering atom %1 to %2").arg(atomnum.value()).arg(expected_atomnum));
+
+                auto atom = mol.atom(AtomIdx(i));
+                atom.renumber(AtomNum(expected_atomnum));
+                mol = atom.molecule();
+            }
+
+            expected_atomnum += 1;
+        }
+    }
+
+    if (entered_bar)
+    {
+        bar.success();
+    }
+
     MoleculeGroup molgroup("all");
 
     for (auto mol : mols)
@@ -4930,6 +4980,11 @@ System AmberPrm::startSystem(const PropertyMap &map) const
     System system(this->title());
     system.add(molgroup);
     system.setProperty(map["fileformat"].source(), StringProperty(this->formatName()));
+
+    if (not in_expected_order)
+    {
+        system.setProperty("loaded_atom_order", IntegerArrayProperty(loaded_order));
+    }
 
     // some top files contains "BOX_DIMENSIONS" information. Add this now, as it
     // now in case it is not replaced by the coordinates file
