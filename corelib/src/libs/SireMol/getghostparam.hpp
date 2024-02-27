@@ -143,7 +143,7 @@ namespace SireMol
     }
 
     template <>
-    SireUnits::Dimension::Length getGhostParam(const QString &ghost)
+    inline SireUnits::Dimension::Length getGhostParam(const QString &ghost)
     {
         if (ghost.isEmpty())
             return SireUnits::Dimension::Length(0.0);
@@ -152,7 +152,7 @@ namespace SireMol
     }
 
     template <>
-    SireBase::PropertyPtr getGhostParam(const QString &ghost)
+    inline SireBase::PropertyPtr getGhostParam(const QString &ghost)
     {
         if (ghost.isEmpty())
             return SireBase::PropertyPtr();

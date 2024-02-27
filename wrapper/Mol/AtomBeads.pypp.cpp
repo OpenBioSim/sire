@@ -360,6 +360,19 @@ void register_AtomBeads_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMol::BeadNum >::merge
+        
+            typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMol::BeadNum >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMol::BeadNum >::merge );
+            
+            AtomBeads_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMol::BeadNum >::nAtoms
         
             typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;

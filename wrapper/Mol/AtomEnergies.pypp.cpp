@@ -359,6 +359,19 @@ void register_AtomEnergies_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::merge
+        
+            typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::merge );
+            
+            AtomEnergies_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::nAtoms
         
             typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > > exported_class_t;

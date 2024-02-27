@@ -8,6 +8,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/generalunitproperty.h"
 
 #include "SireBase/lazyevaluator.h"
@@ -179,6 +181,18 @@ void register_Frame_class(){
                 , join_function_value
                 , ( bp::arg("frames"), bp::arg("use_parallel")=(bool)(true) )
                 , "Join the vector of passed frames into a single frame. The\n  frames are joined in order, e.g. from the first atom in\n  the first frame to the last atom in the last frame\n" );
+        
+        }
+        { //::SireMol::Frame::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::Frame::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::Frame::merge );
+            
+            Frame_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMol::Frame::nAtoms

@@ -34,6 +34,7 @@
 
 #include "SireMol/cgatomidx.h"
 #include "SireMol/molviewproperty.h"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireCAS/expression.h"
 #include "SireCAS/identities.h"

@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/incremint.h"
 
+#include "SireBase/propertylist.h"
+
 #include "SireBase/quickcopy.hpp"
 
 #include "SireStream/datastream.h"

@@ -195,6 +195,11 @@ namespace SireMove
         QList<AngleID> flexibleAngles() const;
         QList<DihedralID> flexibleDihedrals() const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     private:
         /** The molecule that this flexibility operates on */
         SireBase::SharedDataPointer<SireMol::MoleculeInfoData> molinfo;

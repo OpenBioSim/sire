@@ -171,7 +171,7 @@ namespace SireSystem
 
         try
         {
-            ffield1 = mapped_atoms1.data().property(map1["forcefield"]).asA<Sire::MMDetail>();
+            ffield1 = mapped_atoms1.data().property(map1["forcefield"]).asA<SireMM::MMDetail>();
             have_ffield1 = true;
         }
         catch (...)

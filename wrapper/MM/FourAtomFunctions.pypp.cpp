@@ -7,7 +7,11 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireCAS/symbols.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/atommatcher.h"
 
@@ -223,6 +227,18 @@ void register_FourAtomFunctions_class(){
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this is empty (has no potentials for any internals)" );
+        
+        }
+        { //::SireMM::FourAtomFunctions::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::FourAtomFunctions::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::FourAtomFunctions::merge );
+            
+            FourAtomFunctions_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMM::FourAtomFunctions::nFunctions

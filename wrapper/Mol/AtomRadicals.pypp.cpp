@@ -359,6 +359,19 @@ void register_AtomRadicals_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMol::Radical >::merge
+        
+            typedef SireMol::AtomProperty< SireMol::Radical > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMol::Radical >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMol::Radical >::merge );
+            
+            AtomRadicals_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMol::Radical >::nAtoms
         
             typedef SireMol::AtomProperty< SireMol::Radical > exported_class_t;

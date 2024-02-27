@@ -227,6 +227,19 @@ void register_CGStringProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::CGProperty< QString >::merge
+        
+            typedef SireMol::CGProperty< QString > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::CGProperty< QString >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::CGProperty< QString >::merge );
+            
+            CGStringProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::CGProperty< QString >::nCutGroups
         
             typedef SireMol::CGProperty< QString > exported_class_t;

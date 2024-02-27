@@ -53,6 +53,10 @@
 
 #include "AtomIdx.pypp.hpp"
 
+#include "AtomIdxMapping.pypp.hpp"
+
+#include "AtomIdxMappingEntry.pypp.hpp"
+
 #include "AtomIdxMatcher.pypp.hpp"
 
 #include "AtomIntProperty.pypp.hpp"
@@ -709,6 +713,10 @@ BOOST_PYTHON_MODULE(_Mol){
     register_AtomIDMatcher_class();
 
     register_AtomIdx_class();
+
+    register_AtomIdxMapping_class();
+
+    register_AtomIdxMappingEntry_class();
 
     register_AtomIdxMatcher_class();
 

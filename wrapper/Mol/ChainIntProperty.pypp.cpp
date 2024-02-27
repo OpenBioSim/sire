@@ -227,6 +227,19 @@ void register_ChainIntProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::ChainProperty< long long >::merge
+        
+            typedef SireMol::ChainProperty< long long > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::ChainProperty< long long >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::ChainProperty< long long >::merge );
+            
+            ChainIntProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::ChainProperty< long long >::nChains
         
             typedef SireMol::ChainProperty< long long > exported_class_t;

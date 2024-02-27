@@ -387,6 +387,19 @@ void register_AtomFloatProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< double >::merge
+        
+            typedef SireMol::AtomProperty< double > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< double >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< double >::merge );
+            
+            AtomFloatProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< double >::nAtoms
         
             typedef SireMol::AtomProperty< double > exported_class_t;

@@ -161,6 +161,18 @@ void register_MolViewProperty_class(){
                 , "Do everything possible to make this property compatible with the\nMoleculeInfoData layout in info - otherwise raise an error\nThrow: SireError::incompatible_error\n" );
         
         }
+        { //::SireMol::MolViewProperty::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::MolViewProperty::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::MolViewProperty::merge );
+            
+            MolViewProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::MolViewProperty::typeName
         
             typedef char const * ( *typeName_function_type )(  );

@@ -202,6 +202,11 @@ namespace SireMM
 
         TwoAtomFunctions includeOnly(const AtomSelection &selection, bool isstrict = true) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     protected:
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
                                                       const AtomMatcher &atommatcher) const;

@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/generalunitproperty.h"
 
 #include "SireBase/lazyevaluator.h"
@@ -184,6 +186,18 @@ void register_Trajectory_class(){
                 , isEmpty_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::Trajectory::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::Trajectory::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::Trajectory::merge );
+            
+            Trajectory_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMol::Trajectory::nAtoms

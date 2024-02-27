@@ -227,6 +227,19 @@ void register_ResIntProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::ResProperty< long long >::merge
+        
+            typedef SireMol::ResProperty< long long > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::ResProperty< long long >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::ResProperty< long long >::merge );
+            
+            ResIntProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::ResProperty< long long >::nResidues
         
             typedef SireMol::ResProperty< long long > exported_class_t;

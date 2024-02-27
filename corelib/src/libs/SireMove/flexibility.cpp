@@ -40,6 +40,8 @@
 #include "SireUnits/convert.h"
 #include "SireUnits/units.h"
 
+#include "SireBase/console.h"
+
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
 #include "SireMove/errors.h"
@@ -49,6 +51,7 @@
 
 using namespace SireMove;
 using namespace SireMol;
+using namespace SireBase;
 using namespace SireUnits;
 using namespace SireUnits::Dimension;
 using namespace SireStream;
@@ -585,4 +588,29 @@ QList<DihedralID> Flexibility::flexibleDihedrals() const
 const char *Flexibility::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Flexibility>());
+}
+
+/** Merge this property with another property */
+PropertyList Flexibility::merge(const MolViewProperty &other,
+                                const AtomIdxMapping &mapping,
+                                const QString &ghost,
+                                const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<Flexibility>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
 }

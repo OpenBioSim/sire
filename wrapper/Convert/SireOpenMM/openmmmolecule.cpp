@@ -561,6 +561,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
             double mass = std::max(mass0, mass1);
 
+            const bool mass0_is_light = (mass0 >= 1 and mass0 < 2.5);
+            const bool mass1_is_light = (mass1 >= 1 and mass1 < 2.5);
+
             if (mass < 0.05)
             {
                 mass = 0.0;
@@ -571,7 +574,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost in both end states?
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_mass and (mass < 2.5 or mass1 < 2.5))
+            else if (check_for_h_by_mass and (mass0_is_light or mass1_is_light))
             {
                 // one of the atoms is H or He
                 light_atoms.insert(i);

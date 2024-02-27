@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireBase/incremint.h"
 
+#include "SireBase/propertylist.h"
+
 #include "SireBase/quickcopy.hpp"
 
 #include "SireStream/datastream.h"
@@ -491,6 +493,19 @@ void register_AtomLJs_class(){
                 , merge_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMM::LJParameter >::merge
+        
+            typedef SireMol::AtomProperty< SireMM::LJParameter > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMM::LJParameter >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMM::LJParameter >::merge );
+            
+            AtomLJs_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

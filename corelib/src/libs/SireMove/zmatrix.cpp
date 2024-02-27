@@ -42,6 +42,8 @@
 #include "SireUnits/convert.h"
 #include "SireUnits/units.h"
 
+#include "SireBase/console.h"
+
 #include "SireError/errors.h"
 #include "SireMol/errors.h"
 #include "SireMove/errors.h"
@@ -1511,6 +1513,31 @@ const char *ZMatrix::typeName()
     return QMetaType::typeName(qMetaTypeId<ZMatrix>());
 }
 
+/** Merge this property with another property */
+PropertyList ZMatrix::merge(const MolViewProperty &other,
+                            const AtomIdxMapping &mapping,
+                            const QString &ghost,
+                            const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<ZMatrix>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
+}
+
 //////////
 ////////// Implementation of ZMatrixCoords
 //////////
@@ -2855,4 +2882,29 @@ ZMatrixCoords ZMatrixCoords::matchToSelection(const AtomSelection &selection) co
 const char *ZMatrixCoords::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<ZMatrixCoords>());
+}
+
+/** Merge this property with another property */
+PropertyList ZMatrixCoords::merge(const MolViewProperty &other,
+                                  const AtomIdxMapping &mapping,
+                                  const QString &ghost,
+                                  const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<ZMatrixCoords>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
 }

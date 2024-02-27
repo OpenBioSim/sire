@@ -199,6 +199,19 @@ void register_BeadVariantProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::BeadProperty< QVariant >::merge
+        
+            typedef SireMol::BeadProperty< QVariant > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::BeadProperty< QVariant >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::BeadProperty< QVariant >::merge );
+            
+            BeadVariantProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::BeadProperty< QVariant >::nBeads
         
             typedef SireMol::BeadProperty< QVariant > exported_class_t;

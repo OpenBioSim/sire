@@ -360,6 +360,19 @@ void register_AtomVelocities_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::merge
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::merge );
+            
+            AtomVelocities_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::nAtoms
         
             typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > exported_class_t;

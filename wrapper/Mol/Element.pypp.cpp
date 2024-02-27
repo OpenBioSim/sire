@@ -88,7 +88,7 @@ void register_Element_class(){
                 , biologicalElement_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
-                , "Return a biological element that has been guessed from the passed name.\nNote that if no biological element was guessed, then the nearest\nnon-biological element match is used. A biological element is one that\nis in the first couple of rows (proton number < 18) and is not a noble gas." );
+                , "Return a biological element that has been guessed from the passed name.\nNote that if no biological element was guessed, then the nearest\nnon-biological element match is used. A biological element is one that\nis in the list of biological elements" );
         
         }
         { //::SireMol::Element::blue
@@ -149,7 +149,7 @@ void register_Element_class(){
                 "getBiologicalElements"
                 , getBiologicalElements_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return a list of all of the elements that are considered\n  to be biological\n" );
         
         }
         { //::SireMol::Element::green
@@ -343,7 +343,7 @@ void register_Element_class(){
                 , setElementIsBiological_function_value
                 , ( bp::arg("element") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set that the passed element should be considered to be biological" );
         
         }
         { //::SireMol::Element::setElementIsNotBiological
@@ -356,7 +356,7 @@ void register_Element_class(){
                 , setElementIsNotBiological_function_value
                 , ( bp::arg("element") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set that the passed element should considered to definitely\n  not be biological\n" );
         
         }
         { //::SireMol::Element::symbol

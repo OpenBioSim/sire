@@ -329,6 +329,11 @@ namespace SireMol
 
         void assertHasProperty(const ImproperID &imp, const SireBase::PropertyName &key) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     protected:
         ConnectivityBase();
         ConnectivityBase(const MoleculeInfo &molinfo);

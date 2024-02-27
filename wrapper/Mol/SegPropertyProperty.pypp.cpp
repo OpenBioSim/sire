@@ -227,6 +227,19 @@ void register_SegPropertyProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::SegProperty< SireBase::PropPtr< SireBase::Property > >::merge
+        
+            typedef SireMol::SegProperty< SireBase::PropPtr< SireBase::Property > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::SegProperty< SireBase::PropPtr< SireBase::Property > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::SegProperty< SireBase::PropPtr< SireBase::Property > >::merge );
+            
+            SegPropertyProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::SegProperty< SireBase::PropPtr< SireBase::Property > >::nSegments
         
             typedef SireMol::SegProperty< SireBase::PropPtr< SireBase::Property > > exported_class_t;

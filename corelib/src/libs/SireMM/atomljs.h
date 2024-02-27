@@ -274,6 +274,11 @@ namespace SireMol
         QList<boost::tuple<int, int, SireMM::LJ1264Parameter>> getExceptions() const;
         QList<boost::tuple<int, int, SireMM::LJ1264Parameter>> getExceptions(const AtomProperty<SireMM::LJParameter> &other) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     private:
         /** The actual atomic property values */
         SireBase::PackedArray2D<SireMM::LJParameter> props;

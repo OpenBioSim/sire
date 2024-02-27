@@ -8,9 +8,13 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/errors.h"
 
@@ -812,6 +816,18 @@ void register_ConnectivityBase_class(){
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::ConnectivityBase::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::ConnectivityBase::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::ConnectivityBase::merge );
+            
+            ConnectivityBase_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMol::ConnectivityBase::nConnections

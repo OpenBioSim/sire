@@ -181,6 +181,19 @@ void register_AtomPairs_CoulombScaleFactor__class(){
                 , "" );
         
         }
+        { //::SireMM::AtomPairs< SireMM::CoulombScaleFactor >::merge
+        
+            typedef SireMM::AtomPairs< SireMM::CoulombScaleFactor > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMM::AtomPairs< SireMM::CoulombScaleFactor >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::AtomPairs< SireMM::CoulombScaleFactor >::merge );
+            
+            AtomPairs_CoulombScaleFactor__exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMM::AtomPairs< SireMM::CoulombScaleFactor >::nAtoms
         
             typedef SireMM::AtomPairs< SireMM::CoulombScaleFactor > exported_class_t;

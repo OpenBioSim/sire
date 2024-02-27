@@ -1373,6 +1373,18 @@ void register_AtomSelection_class(){
                 , "Mask this selection by other\nThrow: SireError::incompatible_error\n" );
         
         }
+        { //::SireMol::AtomSelection::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomSelection::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomSelection::merge );
+            
+            AtomSelection_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomSelection::nAtoms
         
             typedef int ( ::SireMol::AtomSelection::*nAtoms_function_type)(  ) const;

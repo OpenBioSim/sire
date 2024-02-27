@@ -271,6 +271,18 @@ void register_Flexibility_class(){
                 , "" );
         
         }
+        { //::SireMove::Flexibility::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMove::Flexibility::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMove::Flexibility::merge );
+            
+            Flexibility_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         Flexibility_exposer.def( bp::self != bp::self );
         { //::SireMove::Flexibility::operator=
         

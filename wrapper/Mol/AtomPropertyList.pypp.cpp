@@ -359,6 +359,19 @@ void register_AtomPropertyList_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireBase::PropertyList >::merge
+        
+            typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireBase::PropertyList >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireBase::PropertyList >::merge );
+            
+            AtomPropertyList_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireBase::PropertyList >::nAtoms
         
             typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;

@@ -29,11 +29,15 @@
 
 #include "threeatomfunctions.h"
 
+#include "SireBase/console.h"
+
 #include "SireCAS/symbols.h"
 
 #include "SireMol/atommatcher.h"
 #include "SireMol/atomselection.h"
 #include "SireMol/moleculeinfodata.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/errors.h"
 
@@ -791,4 +795,29 @@ PropertyPtr ThreeAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &
 const char *ThreeAtomFunctions::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<ThreeAtomFunctions>());
+}
+
+/** Merge this property with another property */
+PropertyList ThreeAtomFunctions::merge(const MolViewProperty &other,
+                                       const AtomIdxMapping &mapping,
+                                       const QString &ghost,
+                                       const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<ThreeAtomFunctions>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
 }

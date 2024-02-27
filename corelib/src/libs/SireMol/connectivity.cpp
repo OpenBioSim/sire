@@ -46,7 +46,10 @@
 #include "SireMol/errors.h"
 
 #include "SireBase/errors.h"
+#include "SireBase/console.h"
 #include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -3371,6 +3374,31 @@ void ConnectivityBase::assertHasProperty(const ImproperID &improper, const Prope
                                              .arg(improper.toString())
                                              .arg(key.toString()),
                                          CODELOC);
+}
+
+/** Merge this property with another property */
+PropertyList ConnectivityBase::merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost,
+                                     const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<ConnectivityBase>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
 }
 
 /////////
