@@ -772,7 +772,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     else if (not((this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and has_light_atom))
                     {
                         // don't constrain perturbing bonds that don't involve hydrogen
-                        should_constrain_bond = true;
+                        should_constrain_bond = false;
                     }
                 }
             }
