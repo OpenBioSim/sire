@@ -178,6 +178,15 @@ namespace SireMol
         void remove(const AtomIdx &atom);
         void remove(const CGAtomIdx &atom);
 
+        QList<AtomIdx> unmappedIn0() const;
+        QList<AtomIdx> unmappedIn1() const;
+
+        QList<AtomIdx> mappedIn0() const;
+        QList<AtomIdx> mappedIn1() const;
+
+        QHash<AtomIdx, AtomIdx> map0to1() const;
+        QHash<AtomIdx, AtomIdx> map1to0() const;
+
     private:
         void assertSane() const;
 

@@ -429,6 +429,45 @@ void TwoAtomFunctions::clear(AtomIdx atom)
     }
 }
 
+/** Clear all functions that invole any of the atoms in 'atoms'
+ *  - if 'exclusive' is true, then this only removes functions
+ *  that exclusively involve these atoms - if false, then
+ *  if removes functions that involve any of these atoms
+ */
+void TwoAtomFunctions::clear(const QList<AtomIdx> &atoms, bool exclusive)
+{
+    QSet<quint32> atms;
+    atms.reserve(atoms.count());
+
+    for (const auto &atom : atoms)
+    {
+        atms.insert(atom.map(info().nAtoms()));
+    }
+
+    QList<IDPair> keys = potentials_by_atoms.keys();
+
+    if (exclusive)
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) and atms.contains(key.atom1))
+            {
+                TwoAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
+            }
+        }
+    }
+    else
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) or atms.contains(key.atom1))
+            {
+                TwoAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
+            }
+        }
+    }
+}
+
 /** Clear any function that acts on the atoms identified by 'atom'
 
     \throw SireMol::missing_atom
@@ -775,13 +814,35 @@ PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
                                             CODELOC);
     }
 
-    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
-                                   .arg(this->what()));
+    const TwoAtomFunctions &ref = *this;
+    const TwoAtomFunctions &pert = other.asA<TwoAtomFunctions>();
+
+    TwoAtomFunctions prop0 = ref;
+    TwoAtomFunctions prop1 = ref;
+
+    // the prop0 properties are already correct
+
+    // the prop1 properties are made by finding all of the atoms that
+    // are involved in bonds in 'pert' and removing any bonds involving
+    // only those atoms from 'prop1', and then adding back the matching
+    // bonds from 'pert'
+    prop1.clear(mapping.mappedIn1(), true);
+
+    auto map1to0 = mapping.map1to0();
+
+    const auto pert_bonds = pert.potentials(map1to0.keys(), true);
+
+    for (const auto &pert_bond : pert_bonds)
+    {
+        prop1.set(map1to0.value(info().atomIdx(pert_bond.atom0())),
+                  map1to0.value(info().atomIdx(pert_bond.atom1())),
+                  pert_bond.function());
+    }
 
     SireBase::PropertyList ret;
 
-    ret.append(*this);
-    ret.append(*this);
+    ret.append(prop0);
+    ret.append(prop1);
 
     return ret;
 }
