@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireStream/shareddatastream.h"
 
+#include "atomidxmapping.h"
+
 #include "atomselection.h"
 
 #include "moleculedata.h"

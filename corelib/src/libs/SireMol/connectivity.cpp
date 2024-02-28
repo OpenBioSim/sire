@@ -37,6 +37,7 @@
 #include "moleculeinfo.h"
 #include "moleculeinfodata.h"
 #include "moleculeview.h"
+#include "atomidxmapping.h"
 
 #include "angleid.h"
 #include "bondid.h"

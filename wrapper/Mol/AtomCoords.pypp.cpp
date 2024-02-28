@@ -29,6 +29,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 #include "SireMaths/quaternion.h"
 
 #include "SireMaths/matrix.h"

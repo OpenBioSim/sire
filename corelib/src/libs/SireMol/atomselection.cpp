@@ -28,7 +28,7 @@
 #include "atomselection.h"
 #include "moleculedata.h"
 #include "moleculeview.h"
-
+#include "atomidxmapping.h"
 #include "moleculeinfodata.h"
 
 #include "SireError/errors.h"

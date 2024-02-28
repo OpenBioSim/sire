@@ -351,6 +351,7 @@ def fix_Mover(c):
 def fix_MolViewProperty(c):
     c.add_declaration_code('#include "SireMaths/vector.h"')
     c.add_declaration_code('#include "SireMol/moleculeview.h"')
+    c.add_declaration_code('#include "SireMol/atomidxmapping.h"')
     c.decls("set").call_policies = call_policies.return_self()
 
 

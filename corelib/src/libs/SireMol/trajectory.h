@@ -32,6 +32,7 @@
 #include "SireMol/atomforces.h"
 #include "SireMol/atomvelocities.h"
 #include "SireMol/molviewproperty.h"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireVol/space.h"
 

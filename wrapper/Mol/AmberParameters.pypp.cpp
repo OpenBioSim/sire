@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 #include "SireMol/atomidx.h"
 
+#include "SireMol/atomidxmapping.h"
+
 #include "SireMol/bondid.h"
 
 #include "SireMol/dihedralid.h"

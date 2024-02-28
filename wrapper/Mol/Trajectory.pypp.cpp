@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 #include "SireVol/space.h"
 
+#include "atomidxmapping.h"
+
 #include "trajectory.h"
 
 #include "trajectoryaligner.h"

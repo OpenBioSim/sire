@@ -34,6 +34,7 @@
 #include "SireMol/atomidx.h"
 #include "SireMol/molviewproperty.h"
 #include "SireMol/mover.hpp"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireUnits/units.h"
 

@@ -39,6 +39,7 @@
 #include "SireMol/molviewproperty.h"
 #include "SireMol/mover.hpp"
 #include "SireMol/partialmolecule.h"
+#include "SireMol/atomidxmapping.h"
 
 SIRE_BEGIN_HEADER
 

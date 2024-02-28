@@ -36,6 +36,7 @@
 #include "SireMol/molecule.h"
 #include "SireMol/mover.hpp"
 #include "SireMol/partialmolecule.h"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireUnits/convert.h"
 #include "SireUnits/units.h"

@@ -34,6 +34,7 @@
 #include "SireMol/improperid.h"
 #include "SireMol/molecule.h"
 #include "SireMol/partialmolecule.h"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireError/errors.h"
 

@@ -27,6 +27,7 @@
 
 #include "trajectory.h"
 #include "trajectoryaligner.h"
+#include "atomidxmapping.h"
 
 #include "SireID/index.h"
 

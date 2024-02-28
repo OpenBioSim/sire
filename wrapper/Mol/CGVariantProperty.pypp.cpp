@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::CGProperty<QVariant> __copy__(const SireMol::CGProperty<QVariant> &other){ return SireMol::CGProperty<QVariant>(other); }
 
 #include "Qt/qdatastream.hpp"
