@@ -1257,12 +1257,18 @@ namespace SireMol
 
         for (const auto &index : mapping)
         {
-            if (index.isUnmappedIn0())
+            if (index.isUnmappedIn0() and index.isUnmappedIn1())
             {
                 prop0.set(index.cgAtomIdx0(), ghost_param);
+                prop1.set(index.cgAtomIdx0(), ghost_param);
             }
-
-            if (index.isUnmappedIn1())
+            else if (index.isUnmappedIn0())
+            {
+                auto lj1 = pert.get(index.cgAtomIdx1());
+                prop0.set(index.cgAtomIdx0(), ghost_param);
+                prop1.set(index.cgAtomIdx0(), lj1);
+            }
+            else if (index.isUnmappedIn1())
             {
                 prop1.set(index.cgAtomIdx0(), ghost_param);
             }

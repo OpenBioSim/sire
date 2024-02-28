@@ -209,6 +209,29 @@ namespace SireSystem
         const auto mol0 = mols.atoms0().toSingleMolecule().molecule();
         const auto mol1 = mols.atoms1().toSingleMolecule().molecule();
 
+        if (mol0.isEmpty())
+            return mol0;
+
+        // find the largest AtomNum in mol0
+        AtomNum largest_atomnum;
+
+        const auto &molinfo = mol0.info();
+
+        for (int i = 0; i < molinfo.nAtoms(); ++i)
+        {
+            const auto num = molinfo.number(AtomIdx(i));
+
+            if (largest_atomnum.isNull())
+            {
+                largest_atomnum = num;
+            }
+            else if (not num.isNull())
+            {
+                if (num.value() > largest_atomnum.value())
+                    largest_atomnum = num;
+            }
+        }
+
         // use a property to track which atoms have been mapped -
         // a value of -1 means that this atom is not mapped
         editmol.setProperty("_mol0_index", AtomIntProperty(mol0.info(), -1));
@@ -333,6 +356,8 @@ namespace SireSystem
             // add the atom - it has the name "Xxx" as it doesn't exist
             // in the reference state
             auto atom = res.add(AtomName("Xxx"));
+            largest_atomnum = AtomNum(largest_atomnum.value() + 1);
+            atom.renumber(largest_atomnum);
 
             // reparent this atom to the CutGroup for this residue
             atom.reparent(cgidx);
@@ -353,7 +378,7 @@ namespace SireSystem
         // now we have the merged molecule, we need to work out the mapping
         // of atoms from the reference to the perturbed state in this
         // merged molecule
-        QList<AtomIdxMappingEntry> entries;
+        QList<AtomIdxMappingEntry> idx_entries;
 
         const auto &molinfo0 = editmol.info();
         const auto &molinfo1 = mol1.info();
@@ -373,10 +398,22 @@ namespace SireSystem
 
             const bool is_unmapped_in_reference = (index0 == -1);
 
-            entries.append(AtomIdxMappingEntry(AtomIdx(i), AtomIdx(index1),
-                                               molinfo0, molinfo1,
-                                               is_unmapped_in_reference));
+            AtomIdx atomidx1(index1);
+
+            if (index1 == -1)
+            {
+                // this atom is not in the perturbed state, so this
+                // index should be set to null
+                atomidx1 = AtomIdx();
+            }
+
+            idx_entries.append(AtomIdxMappingEntry(AtomIdx(i), atomidx1,
+                                                   molinfo0, molinfo1,
+                                                   is_unmapped_in_reference));
         }
+
+        AtomIdxMapping entries(idx_entries);
+        idx_entries.clear();
 
         // now go through all of the properties that we want to merge
         // and merge them using the AtomIdxMapping object - remove
@@ -430,7 +467,7 @@ namespace SireSystem
 
                     editmol.removeProperty(map0[prop]);
                     editmol.setProperty(map[prop + "0"].source(), merged[0]);
-                    editmol.setProperty(map[prop + "1"].source() + "1", merged[1]);
+                    editmol.setProperty(map[prop + "1"].source(), merged[1]);
                 }
                 else
                 {

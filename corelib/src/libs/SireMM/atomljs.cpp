@@ -30,6 +30,7 @@
 #include "SireBase/quickcopy.hpp"
 #include "SireBase/incremint.h"
 #include "SireBase/propertylist.h"
+#include "SireBase/console.h"
 
 #include "SireStream/magic_error.h"
 #include "SireStream/datastream.h"
@@ -1479,6 +1480,11 @@ PropertyList AtomProperty<LJParameter>::merge(const MolViewProperty &other,
     AtomProperty<LJParameter> prop0 = ref;
     AtomProperty<LJParameter> prop1 = ref;
 
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for LJ parameters is ignored").arg(ghost));
+    }
+
     for (const auto &index : mapping)
     {
         if (index.isUnmappedIn0() and index.isUnmappedIn1())
@@ -1490,6 +1496,7 @@ PropertyList AtomProperty<LJParameter>::merge(const MolViewProperty &other,
         {
             auto lj1 = pert.get(index.cgAtomIdx1());
             prop0.set(index.cgAtomIdx0(), LJParameter(lj1.sigma(), SireUnits::Dimension::MolarEnergy(0)));
+            prop1.set(index.cgAtomIdx0(), lj1);
         }
         else if (index.isUnmappedIn1())
         {
