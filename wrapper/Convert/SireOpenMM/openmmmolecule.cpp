@@ -763,21 +763,22 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
                 if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
                 {
-                    // this is a perturbing bond
+                    // we need to check against the "NOT_PERTURBED"-style constraints
                     if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
                     {
-                        // don't constrain a perturbing bond
+                        // DO NOT CONSTRAIN any perturbing bonds
                         should_constrain_bond = false;
                     }
-                    else if (not(this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and (not has_light_atom))
+                    else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
                     {
-                        // don't constrain perturbing bonds that don't involve hydrogen
-                        should_constrain_bond = false;
+                        // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
+                        should_constrain_bond = has_light_atom;
                     }
-                    else if ((this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and (not has_light_atom))
+                    else
                     {
-                        // don't constrain perturbing bonds that don't involve hydrogen
-                        should_constrain_bond = false;
+                        // DO CONSTRAIN any perturbing bonds - we only don't constrain
+                        // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
+                        should_constrain_bond = true;
                     }
                 }
             }
