@@ -640,6 +640,41 @@ Expression TwoAtomFunctions::force(const BondID &bondid, const Symbol &symbol) c
 }
 
 /** Return the potential energy functions acting between the identified
+    pairs of atoms - if exclusive is true then only return potentials where
+    both atoms are in the bond
+*/
+QVector<TwoAtomFunction> TwoAtomFunctions::potentials(const QList<AtomIdx> &atms, bool exclusive) const
+{
+    QVector<TwoAtomFunction> funcs;
+    funcs.reserve(potentials_by_atoms.count());
+
+    QSet<AtomIdx> atoms(atms.begin(), atms.end());
+
+    for (QHash<IDPair, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
+    {
+        if (exclusive)
+        {
+            if (atoms.contains(AtomIdx(it.key().atom0)) and atoms.contains(AtomIdx(it.key().atom1)))
+            {
+                funcs.append(TwoAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                             info().cgAtomIdx(AtomIdx(it.key().atom1)), it.value()));
+            }
+        }
+        else
+        {
+            if (atoms.contains(AtomIdx(it.key().atom0)) or atoms.contains(AtomIdx(it.key().atom1)))
+            {
+                funcs.append(TwoAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                             info().cgAtomIdx(AtomIdx(it.key().atom1)), it.value()));
+            }
+        }
+    }
+
+    return funcs;
+}
+
+/** Return the potential energy functions acting between the identified
     pairs of atoms */
 QVector<TwoAtomFunction> TwoAtomFunctions::potentials() const
 {
@@ -814,6 +849,11 @@ PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
                                             CODELOC);
     }
 
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for bond parameters is ignored").arg(ghost));
+    }
+
     const TwoAtomFunctions &ref = *this;
     const TwoAtomFunctions &pert = other.asA<TwoAtomFunctions>();
 
@@ -825,11 +865,18 @@ PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
     // the prop1 properties are made by finding all of the atoms that
     // are involved in bonds in 'pert' and removing any bonds involving
     // only those atoms from 'prop1', and then adding back the matching
-    // bonds from 'pert'
+    // bonds from 'pert'. Use 'true' to only remove bonds where both
+    // atoms are in the mapping
     prop1.clear(mapping.mappedIn1(), true);
 
-    auto map1to0 = mapping.map1to0();
+    // get the mapping from the perturbed to reference states, including
+    // atoms that don't exist in the reference state. In all cases,
+    // the values are the indexes in the merged molecule
+    auto map1to0 = mapping.map1to0(true);
 
+    // now find all of the bonds in 'pert' where both atoms in the
+    // bond are in map1to0.keys() - i.e. exist and are mapped from
+    // the perturbed state
     const auto pert_bonds = pert.potentials(map1to0.keys(), true);
 
     for (const auto &pert_bond : pert_bonds)

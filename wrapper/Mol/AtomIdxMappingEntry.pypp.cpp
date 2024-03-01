@@ -87,6 +87,30 @@ void register_AtomIdxMappingEntry_class(){
                 , "Return the atom index in the perturbed state, or a null index if\n  the atom is unmapped in the perturbed state" );
         
         }
+        { //::SireMol::AtomIdxMappingEntry::isMappedIn0
+        
+            typedef bool ( ::SireMol::AtomIdxMappingEntry::*isMappedIn0_function_type)(  ) const;
+            isMappedIn0_function_type isMappedIn0_function_value( &::SireMol::AtomIdxMappingEntry::isMappedIn0 );
+            
+            AtomIdxMappingEntry_exposer.def( 
+                "isMappedIn0"
+                , isMappedIn0_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this atom is mapped in the reference state" );
+        
+        }
+        { //::SireMol::AtomIdxMappingEntry::isMappedIn1
+        
+            typedef bool ( ::SireMol::AtomIdxMappingEntry::*isMappedIn1_function_type)(  ) const;
+            isMappedIn1_function_type isMappedIn1_function_value( &::SireMol::AtomIdxMappingEntry::isMappedIn1 );
+            
+            AtomIdxMappingEntry_exposer.def( 
+                "isMappedIn1"
+                , isMappedIn1_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this atom is mapped in the perturbed state" );
+        
+        }
         { //::SireMol::AtomIdxMappingEntry::isNull
         
             typedef bool ( ::SireMol::AtomIdxMappingEntry::*isNull_function_type)(  ) const;

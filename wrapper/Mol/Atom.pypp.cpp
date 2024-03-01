@@ -48,6 +48,8 @@ namespace bp = boost::python;
 
 #include "atom.h"
 
+#include "SireBase/console.h"
+
 #include "SireBase/incremint.h"
 
 #include "SireBase/propertylist.h"

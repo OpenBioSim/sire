@@ -83,6 +83,9 @@ namespace SireMol
         bool isUnmappedIn0() const;
         bool isUnmappedIn1() const;
 
+        bool isMappedIn0() const;
+        bool isMappedIn1() const;
+
         AtomIdx atomIdx0() const;
         AtomIdx atomIdx1() const;
 
@@ -184,8 +187,8 @@ namespace SireMol
         QList<AtomIdx> mappedIn0() const;
         QList<AtomIdx> mappedIn1() const;
 
-        QHash<AtomIdx, AtomIdx> map0to1() const;
-        QHash<AtomIdx, AtomIdx> map1to0() const;
+        QHash<AtomIdx, AtomIdx> map0to1(bool include_unmapped = false) const;
+        QHash<AtomIdx, AtomIdx> map1to0(bool include_unmapped = false) const;
 
     private:
         void assertSane() const;

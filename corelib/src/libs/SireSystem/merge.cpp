@@ -494,6 +494,9 @@ namespace SireSystem
             editmol.removeProperty(map["parameters"].source());
         }
 
+        // set the connectivity to the merged connectivity (BELOW CODE IS WRONG!!!)
+        editmol.setProperty(map["connectivity"].source(), editmol.property("connectivity0"));
+
         // set the flag that this is a perturbable molecule
         editmol.setProperty(map["is_perturbable"].source(), BooleanProperty(true));
 

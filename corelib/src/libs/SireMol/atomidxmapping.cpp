@@ -205,6 +205,18 @@ bool AtomIdxMappingEntry::isUnmappedIn1() const
     return atomidx1.isNull();
 }
 
+/** Return whether or not this atom is mapped in the reference state */
+bool AtomIdxMappingEntry::isMappedIn0() const
+{
+    return not unmapped0;
+}
+
+/** Return whether or not this atom is mapped in the perturbed state */
+bool AtomIdxMappingEntry::isMappedIn1() const
+{
+    return not atomidx1.isNull();
+}
+
 /** Return the atom index in the reference state. This will always have
  *  a value, even if the atom is unmapped in the reference state
  *  (this signals that any parameter with this index should be zero)
@@ -638,4 +650,162 @@ void AtomIdxMapping::remove(const CGAtomIdx &atom)
     {
         this->remove(std::distance(this->constBegin(), it));
     }
+}
+
+/** Return the indexes, in the merged molecule, of atoms that
+ *  are not mapped in the reference state (i.e. they only exist
+ *  in the perturbed state). Note - these are the indicies of these
+ *  atoms in the merged molecule, not the perturbed molecule.
+ */
+QList<AtomIdx> AtomIdxMapping::unmappedIn0() const
+{
+    QList<AtomIdx> ret;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isUnmappedIn0())
+        {
+            ret.append(entry.atomIdx0());
+        }
+    }
+
+    return ret;
+}
+
+/** Return the indexes, in the merged molecule, of atoms that
+ *  are not mapped in the perturbed state (i.e. they only exist
+ *  in the reference state). Note - these are the indicies of these
+ *  atoms in the merged molecule, not the reference molecule.
+ */
+QList<AtomIdx> AtomIdxMapping::unmappedIn1() const
+{
+    QList<AtomIdx> ret;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isUnmappedIn1())
+        {
+            ret.append(entry.atomIdx0());
+        }
+    }
+
+    return ret;
+}
+
+/** Return the indexes, in the merged molecule, of atoms that
+ *  are mapped in the reference state (i.e. they exist in the
+ *  reference state, regardless of whether or not they exist
+ *  in the perturbed state). Note - these are the indicies of
+ *  these atoms in the merged molecule, not the reference molecule.
+ */
+QList<AtomIdx> AtomIdxMapping::mappedIn0() const
+{
+    QList<AtomIdx> ret;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isMappedIn0())
+        {
+            ret.append(entry.atomIdx0());
+        }
+    }
+
+    return ret;
+}
+
+/** Return the indexes, in the merged molecule, of atoms that
+ *  are mapped in the perturbed state (i.e. they exist in the
+ *  perturbed state, regardless of whether or not they exist
+ *  in the reference state). Note - these are the indicies of
+ *  these atoms in the merged molecule, not the perturbed molecule.
+ */
+QList<AtomIdx> AtomIdxMapping::mappedIn1() const
+{
+    QList<AtomIdx> ret;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isMappedIn1())
+        {
+            ret.append(entry.atomIdx0());
+        }
+    }
+
+    return ret;
+}
+
+/** Return the mapping for the atoms that exist in both the reference
+ *  and perturbed states, from the index of the atom in the merged
+ *  molecule to the index of the atom in the perturbed molecule.
+ *  Note - the reference index is the index in the merged molecule.
+ *
+ *  If 'include_unmapped' is true, then also include atoms that are
+ *  unmapped in either end state. In these cases, the reference index
+ *  will be the index in the merged molecule (so will always be valid)
+ *  but the perturbed index will be null for atoms that are unmapped
+ *  in the perturbed state.
+ */
+QHash<AtomIdx, AtomIdx> AtomIdxMapping::map0to1(bool include_unmapped) const
+{
+    QHash<AtomIdx, AtomIdx> ret;
+    ret.reserve(entries.size());
+
+    if (include_unmapped)
+    {
+        for (const auto &entry : entries)
+        {
+            if (not entry.atomIdx0().isNull())
+                ret.insert(entry.atomIdx0(), entry.atomIdx1());
+        }
+    }
+    else
+    {
+        for (const auto &entry : entries)
+        {
+            if (entry.isMappedIn0() and entry.isMappedIn1())
+            {
+                ret.insert(entry.atomIdx0(), entry.atomIdx1());
+            }
+        }
+    }
+
+    return ret;
+}
+
+/** Return the mapping for the atoms that exist in both the reference
+ *  and perturbed states, from the index of the atom in the perturbed
+ *  molecule to the index of the atom in the merged molecule.
+ *  Note - the reference index is the index in the merged molecule.
+ *
+ *  If 'include_unmapped' is true, then also include atoms that are
+ *  unmapped in either end state. In these cases, the reference index
+ *  will be the index in the merged molecule (so will always be valid)
+ *  and atoms that are unmapped in the perturbed state are not
+ *  included in the returned dictionary.
+ */
+QHash<AtomIdx, AtomIdx> AtomIdxMapping::map1to0(bool include_unmapped) const
+{
+    QHash<AtomIdx, AtomIdx> ret;
+    ret.reserve(entries.size());
+
+    if (include_unmapped)
+    {
+        for (const auto &entry : entries)
+        {
+            if (not entry.atomIdx1().isNull())
+                ret.insert(entry.atomIdx1(), entry.atomIdx0());
+        }
+    }
+    else
+    {
+        for (const auto &entry : entries)
+        {
+            if (entry.isMappedIn0() and entry.isMappedIn1())
+            {
+                ret.insert(entry.atomIdx1(), entry.atomIdx0());
+            }
+        }
+    }
+
+    return ret;
 }

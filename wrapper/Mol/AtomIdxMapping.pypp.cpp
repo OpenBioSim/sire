@@ -105,6 +105,54 @@ void register_AtomIdxMapping_class(){
                 , "Return whether or not the list is empty" );
         
         }
+        { //::SireMol::AtomIdxMapping::map0to1
+        
+            typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*map0to1_function_type)( bool ) const;
+            map0to1_function_type map0to1_function_value( &::SireMol::AtomIdxMapping::map0to1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "map0to1"
+                , map0to1_function_value
+                , ( bp::arg("include_unmapped")=(bool)(false) )
+                , "Return the mapping for the atoms that exist in both the reference\n  and perturbed states, from the index of the atom in the merged\n  molecule to the index of the atom in the perturbed molecule.\n  Note - the reference index is the index in the merged molecule.\n\n  If include_unmapped is true, then also include atoms that are\n  unmapped in either end state. In these cases, the reference index\n  will be the index in the merged molecule (so will always be valid)\n  but the perturbed index will be null for atoms that are unmapped\n  in the perturbed state.\n" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::map1to0
+        
+            typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*map1to0_function_type)( bool ) const;
+            map1to0_function_type map1to0_function_value( &::SireMol::AtomIdxMapping::map1to0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "map1to0"
+                , map1to0_function_value
+                , ( bp::arg("include_unmapped")=(bool)(false) )
+                , "Return the mapping for the atoms that exist in both the reference\n  and perturbed states, from the index of the atom in the perturbed\n  molecule to the index of the atom in the merged molecule.\n  Note - the reference index is the index in the merged molecule.\n\n  If include_unmapped is true, then also include atoms that are\n  unmapped in either end state. In these cases, the reference index\n  will be the index in the merged molecule (so will always be valid)\n  and atoms that are unmapped in the perturbed state are not\n  included in the returned dictionary.\n" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::mappedIn0
+        
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*mappedIn0_function_type)(  ) const;
+            mappedIn0_function_type mappedIn0_function_value( &::SireMol::AtomIdxMapping::mappedIn0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "mappedIn0"
+                , mappedIn0_function_value
+                , bp::release_gil_policy()
+                , "Return the indexes, in the merged molecule, of atoms that\n  are mapped in the reference state (i.e. they exist in the\n  reference state, regardless of whether or not they exist\n  in the perturbed state). Note - these are the indicies of\n  these atoms in the merged molecule, not the reference molecule.\n" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::mappedIn1
+        
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*mappedIn1_function_type)(  ) const;
+            mappedIn1_function_type mappedIn1_function_value( &::SireMol::AtomIdxMapping::mappedIn1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "mappedIn1"
+                , mappedIn1_function_value
+                , bp::release_gil_policy()
+                , "Return the indexes, in the merged molecule, of atoms that\n  are mapped in the perturbed state (i.e. they exist in the\n  perturbed state, regardless of whether or not they exist\n  in the reference state). Note - these are the indicies of\n  these atoms in the merged molecule, not the perturbed molecule.\n" );
+        
+        }
         AtomIdxMapping_exposer.def( bp::self != bp::self );
         AtomIdxMapping_exposer.def( bp::self + bp::self );
         AtomIdxMapping_exposer.def( bp::self + bp::other< SireMol::AtomIdxMappingEntry >() );
@@ -247,6 +295,30 @@ void register_AtomIdxMapping_class(){
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::unmappedIn0
+        
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*unmappedIn0_function_type)(  ) const;
+            unmappedIn0_function_type unmappedIn0_function_value( &::SireMol::AtomIdxMapping::unmappedIn0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "unmappedIn0"
+                , unmappedIn0_function_value
+                , bp::release_gil_policy()
+                , "Return the indexes, in the merged molecule, of atoms that\n  are not mapped in the reference state (i.e. they only exist\n  in the perturbed state). Note - these are the indicies of these\n  atoms in the merged molecule, not the perturbed molecule.\n" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::unmappedIn1
+        
+            typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*unmappedIn1_function_type)(  ) const;
+            unmappedIn1_function_type unmappedIn1_function_value( &::SireMol::AtomIdxMapping::unmappedIn1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "unmappedIn1"
+                , unmappedIn1_function_value
+                , bp::release_gil_policy()
+                , "Return the indexes, in the merged molecule, of atoms that\n  are not mapped in the perturbed state (i.e. they only exist\n  in the reference state). Note - these are the indicies of these\n  atoms in the merged molecule, not the reference molecule.\n" );
         
         }
         { //::SireMol::AtomIdxMapping::what
