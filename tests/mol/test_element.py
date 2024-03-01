@@ -3,8 +3,6 @@ import sire as sr
 
 
 def test_element():
-    sr.use_new_api()
-
     # Create an element
     el = sr.mol.Element("C")
     assert el.symbol() == "C"

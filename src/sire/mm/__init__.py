@@ -24,23 +24,6 @@ __all__ = [
 
 from ..legacy import MM as _MM
 
-from ..mol import (
-    __fix_getitem,
-    _add_evals,
-    _add_property_func,
-    _add_apply_func,
-    _cursor,
-    _cursors,
-    _cursorsm,
-    _dynamics,
-    _minimisation,
-    _selector_to_smiles,
-    _selector_to_smarts,
-    _selector_view2d,
-    _trajectory,
-    _viewfunc,
-)
-
 from .. import use_new_api as _use_new_api
 
 _use_new_api()
