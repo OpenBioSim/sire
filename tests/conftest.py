@@ -1,5 +1,6 @@
-import sire as sr
 import pytest
+
+import sire as sr
 
 
 def pytest_addoption(parser):
@@ -130,6 +131,11 @@ def merged_ethane_methanol():
 
 
 @pytest.fixture(scope="session")
+def merged_ethane_methane():
+    return sr.load_test_files("ethane_methane.bss")
+
+
+@pytest.fixture(scope="session")
 def merged_zan_ose():
     return sr.load_test_files("merged_ligand.s3")
 
@@ -142,6 +148,11 @@ def ethane_12dichloroethane():
 @pytest.fixture(scope="session")
 def pentane_cyclopentane():
     return sr.load_test_files("pentane_cyclopentane.bss")
+
+
+@pytest.fixture(scope="session")
+def reordered_protein():
+    return sr.load_test_files("reordered_protein.top", "reordered_protein.crd")
 
 
 @pytest.fixture(scope="session")
@@ -178,8 +189,18 @@ def testfile_cache_dir():
 
 
 @pytest.fixture(scope="session")
+def apo_1264():
+    return sr.load_test_files("apo_1264.prm7", "apo_1264.rst7")
+
+
+@pytest.fixture(scope="session")
 def neopentane_methane():
     return sr.load_test_files("neo_meth_scratch.bss")
+
+
+@pytest.fixture(scope="session")
+def solvated_neopentane_methane():
+    return sr.load_test_files("neo_meth_solv.bss")
 
 
 @pytest.fixture(scope="session")
@@ -202,3 +223,8 @@ def openmm_platform():
             pass
 
     return "Reference"
+
+
+@pytest.fixture(scope="session")
+def thrombin_complex():
+    return sr.load_test_files("thrombin.top", "thrombin.rst7")

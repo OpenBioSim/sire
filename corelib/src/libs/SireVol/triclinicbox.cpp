@@ -73,9 +73,7 @@ QDataStream &operator>>(QDataStream &ds, TriclinicBox &box)
     }
     else if (v == 2)
     {
-        ds >> box.v0 >> box.v1 >> box.v2 >> box.rotation_matrix >> box.cell_matrix >> box.cell_matrix_inverse
-           >> box.dist_max >> box._alpha >> box._beta >> box._gamma >> box.vol >> box.is_rotated >> box.is_reduced
-           >> box.invlength;
+        ds >> box.v0 >> box.v1 >> box.v2 >> box.rotation_matrix >> box.cell_matrix >> box.cell_matrix_inverse >> box.dist_max >> box._alpha >> box._beta >> box._gamma >> box.vol >> box.is_rotated >> box.is_reduced >> box.invlength;
     }
     else
         throw version_error(v, "1,2", r_box, CODELOC);
@@ -251,6 +249,27 @@ void TriclinicBox::rotate(double precision)
         this->is_rotated = false;
     }
 
+    // Some codes assert reduced form by checking that certain box vector
+    // components are exactly zero. As such, we need to convert any that
+    // are sufficiently close to exactly zero.
+
+    // First vector must lie along the x-axis.
+    if (std::abs(this->v0.y()) < 1e-8)
+    {
+        this->v0.setY(0);
+    }
+    if (std::abs(this->v0.z()) < 1e-8)
+    {
+        this->v0.setZ(0);
+    }
+
+    // Second must lie in the x-y plane.
+    if (std::abs(this->v1.z()) < 1e-8)
+    {
+        this->v1.setZ(0);
+    }
+
+
     // Now set the box attributes.
     this->setAttributes();
 }
@@ -273,9 +292,9 @@ void TriclinicBox::reduce(double bias)
      */
 
     // Perform the reduction.
-    this->v2 = this->v2 - this->v1*std::round(bias + this->v2.y() / this->v1.y());
-    this->v2 = this->v2 - this->v0*std::round(bias + this->v2.x() / this->v0.x());
-    this->v1 = this->v1 - this->v0*std::round(bias + this->v1.x() / this->v0.x());
+    this->v2 = this->v2 - this->v1 * std::round(bias + this->v2.y() / this->v1.y());
+    this->v2 = this->v2 - this->v0 * std::round(bias + this->v2.x() / this->v0.x());
+    this->v1 = this->v1 - this->v0 * std::round(bias + this->v1.x() / this->v0.x());
 
     // Now set the box attributes.
     this->setAttributes();
@@ -385,6 +404,7 @@ TriclinicBox &TriclinicBox::operator=(const TriclinicBox &other)
         v2 = other.v2;
         rotation_matrix = other.rotation_matrix;
         cell_matrix = other.cell_matrix;
+        cell_matrix_inverse = other.cell_matrix_inverse;
         dist_max = other.dist_max;
         max_length = other.max_length;
         _alpha = other._alpha;
@@ -610,24 +630,25 @@ Vector TriclinicBox::wrapDelta(const Vector &v0, const Vector &v1) const
 
     // x
     if (frac_x >= 0.5)
-        int_x += 1.0;
+        int_x += 1;
     else if (frac_x <= -0.5)
-        int_x -= 1.0;
+        int_x -= 1;
 
     // y
     if (frac_y >= 0.5)
-        int_y += 1.0;
+        int_y += 1;
     else if (frac_y <= -0.5)
-        int_y -= 1.0;
+        int_y -= 1;
 
     // z
     if (frac_z >= 0.5)
-        int_z += 1.0;
+        int_z += 1;
     else if (frac_z <= -0.5)
-        int_z -= 1.0;
+        int_z -= 1;
 
     // Return the shifts over the box vectors.
-    return this->cell_matrix * Vector(int_x, int_y, int_z);
+    return this->cell_matrix *
+           Vector(int_x, int_y, int_z);
 }
 
 /** Calculate the distance between two points */

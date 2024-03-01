@@ -46,6 +46,7 @@
 #include "SireMol/cutgroup.h"
 #include "SireMol/residue.h"
 #include "SireMol/chain.h"
+#include "SireMol/element.h"
 #include "SireMol/segment.h"
 #include "SireMol/molecule.h"
 #include "SireMol/atomselection.h"
@@ -98,6 +99,7 @@ void register_SireMol_containers()
   register_list<QList<ResNum>>();
   register_list<QList<ChainName>>();
   register_list<QList<SegName>>();
+  register_list<QList<Element>>();
 
   register_list<QList<BondID>>();
   register_list<QList<AngleID>>();
@@ -155,6 +157,8 @@ void register_SireMol_containers()
 
   register_list<QVector<Velocity3D>>();
   register_list<QVector<Force3D>>();
+
+  register_list<QList<Atom>>();
 
   register_tuple<boost::tuple<AtomIdx, AtomIdx>>();
   register_tuple<boost::tuple<AtomIdx, AtomIdx, AtomIdx>>();

@@ -2,7 +2,6 @@
 
 // (C) Christopher Woods, GPL >= 3 License
 
-
 #include "boost/python.hpp"
 
 #include "Helpers/clone_const_reference.hpp"
@@ -571,6 +570,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/element.h"
+
 #include "SireMol/partialmolecule.h"
 
 #include "SireMol/mover.hpp"
@@ -583,7 +584,8 @@ namespace bp = boost::python;
 
 #include "SireMol/selectorm.hpp"
 
-BOOST_PYTHON_MODULE(_Mol){
+BOOST_PYTHON_MODULE(_Mol)
+{
     register_SireMol_objects();
 
     register_SireMol_containers();
@@ -1140,38 +1142,39 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_SireMol_properties();
 
-    bp::implicitly_convertible< SireMol::AtomID, SireMol::AtomIdentifier >();
+    bp::implicitly_convertible<SireMol::AtomID, SireMol::AtomIdentifier>();
 
-    bp::implicitly_convertible< SireMol::CGID, SireMol::CGIdentifier >();
+    bp::implicitly_convertible<SireMol::CGID, SireMol::CGIdentifier>();
 
-    bp::implicitly_convertible< SireMol::ChainID, SireMol::ChainIdentifier >();
+    bp::implicitly_convertible<SireMol::ChainID, SireMol::ChainIdentifier>();
 
-    bp::implicitly_convertible< SireMol::ResID, SireMol::ResIdentifier >();
+    bp::implicitly_convertible<SireMol::ResID, SireMol::ResIdentifier>();
 
-    bp::implicitly_convertible< SireMol::SegID, SireMol::SegIdentifier >();
+    bp::implicitly_convertible<SireMol::SegID, SireMol::SegIdentifier>();
 
-    bp::implicitly_convertible< SireMol::MolID, SireMol::MolIdentifier >();
+    bp::implicitly_convertible<SireMol::MolID, SireMol::MolIdentifier>();
 
-    bp::implicitly_convertible< SireMol::MGID, SireMol::MGIdentifier >();
+    bp::implicitly_convertible<SireMol::MGID, SireMol::MGIdentifier>();
 
-    bp::implicitly_convertible< SireMol::MoleculeView, SireMol::MoleculeData >();
+    bp::implicitly_convertible<SireMol::MoleculeView, SireMol::MoleculeData>();
 
-    bp::implicitly_convertible< SireMol::MoleculeView, SireMol::PartialMolecule >();
+    bp::implicitly_convertible<SireMol::MoleculeView, SireMol::PartialMolecule>();
 
-    bp::implicitly_convertible< SireMol::MoleculeInfoData, SireMol::MoleculeInfo >();
+    bp::implicitly_convertible<SireMol::MoleculeInfoData, SireMol::MoleculeInfo>();
 
-    bp::implicitly_convertible< SireMol::MoleculeInfo, SireMol::MoleculeInfoData >();
+    bp::implicitly_convertible<SireMol::MoleculeInfo, SireMol::MoleculeInfoData>();
 
-    bp::implicitly_convertible< SireMol::Selector<SireMol::Atom>, SireMol::SelectorM<SireMol::Atom> >();
+    bp::implicitly_convertible<SireMol::Selector<SireMol::Atom>, SireMol::SelectorM<SireMol::Atom>>();
 
-    bp::implicitly_convertible< SireMol::Selector<SireMol::Residue>, SireMol::SelectorM<SireMol::Residue> >();
+    bp::implicitly_convertible<SireMol::Selector<SireMol::Residue>, SireMol::SelectorM<SireMol::Residue>>();
 
-    bp::implicitly_convertible< SireMol::Selector<SireMol::CutGroup>, SireMol::SelectorM<SireMol::CutGroup> >();
+    bp::implicitly_convertible<SireMol::Selector<SireMol::CutGroup>, SireMol::SelectorM<SireMol::CutGroup>>();
 
-    bp::implicitly_convertible< SireMol::Selector<SireMol::Chain>, SireMol::SelectorM<SireMol::Chain> >();
+    bp::implicitly_convertible<SireMol::Selector<SireMol::Chain>, SireMol::SelectorM<SireMol::Chain>>();
 
-    bp::implicitly_convertible< SireMol::Selector<SireMol::Segment>, SireMol::SelectorM<SireMol::Segment> >();
+    bp::implicitly_convertible<SireMol::Selector<SireMol::Segment>, SireMol::SelectorM<SireMol::Segment>>();
+
+    bp::implicitly_convertible<QString, SireMol::Element>();
 
     register_free_functions();
 }
-

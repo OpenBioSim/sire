@@ -99,74 +99,107 @@ try:
 except AttributeError:
     Improper.__len__ = Improper.num_atoms
 
-for C in [
-    Bond,
-    SelectorBond,
-    SelectorMBond,
-    Angle,
-    SelectorAngle,
-    SelectorMAngle,
-    Dihedral,
-    SelectorDihedral,
-    SelectorMDihedral,
-    Improper,
-    SelectorImproper,
-    SelectorMImproper,
-]:
-    __fix_getitem(C)
-    _add_evals(C)
-    _add_property_func(C)
-    _add_apply_func(C)
+_have_fixed_siremm = False
 
-Bond.cursor = _cursor
-SelectorBond.cursor = _cursors
-Angle.cursor = _cursor
-SelectorAngle.cursor = _cursors
-Dihedral.cursor = _cursor
-SelectorDihedral.cursor = _cursors
-Improper.cursor = _cursor
-SelectorImproper.cursor = _cursors
 
-SelectorMBond.cursor = _cursorsm
-SelectorMAngle.cursor = _cursorsm
-SelectorMDihedral.cursor = _cursorsm
-SelectorMImproper.cursor = _cursorsm
+def _fix_siremm():
+    global _have_fixed_siremm
+    if _have_fixed_siremm:
+        return
 
-SelectorMBond.dynamics = _dynamics
-SelectorMAngle.dynamics = _dynamics
-SelectorMDihedral.dynamics = _dynamics
-SelectorMImproper.dynamics = _dynamics
+    from ..mol import (
+        __fix_getitem,
+        _add_evals,
+        _add_property_func,
+        _add_apply_func,
+        _cursor,
+        _cursors,
+        _cursorsm,
+        _dynamics,
+        _minimisation,
+        _selector_to_smiles,
+        _selector_to_smarts,
+        _selector_view2d,
+        _trajectory,
+        _viewfunc,
+    )
 
-SelectorMBond.minimisation = _minimisation
-SelectorMAngle.minimisation = _minimisation
-SelectorMDihedral.minimisation = _minimisation
-SelectorMImproper.minimisation = _minimisation
+    _have_fixed_siremm = True
 
-SelectorMBond.smiles = _selector_to_smiles
-SelectorMAngle.smiles = _selector_to_smiles
-SelectorMDihedral.smiles = _selector_to_smiles
-SelectorMImproper.smiles = _selector_to_smiles
-SelectorMBond.smarts = _selector_to_smarts
-SelectorMAngle.smarts = _selector_to_smarts
-SelectorMDihedral.smarts = _selector_to_smarts
-SelectorMImproper.smarts = _selector_to_smarts
+    for C in [
+        Bond,
+        SelectorBond,
+        SelectorMBond,
+        Angle,
+        SelectorAngle,
+        SelectorMAngle,
+        Dihedral,
+        SelectorDihedral,
+        SelectorMDihedral,
+        Improper,
+        SelectorImproper,
+        SelectorMImproper,
+    ]:
+        __fix_getitem(C)
+        _add_evals(C)
+        _add_property_func(C)
+        _add_apply_func(C)
 
-SelectorMBond.trajectory = _trajectory
-SelectorMAngle.trajectory = _trajectory
-SelectorMDihedral.trajectory = _trajectory
-SelectorMImproper.trajectory = _trajectory
+    Bond.cursor = _cursor
+    SelectorBond.cursor = _cursors
+    Angle.cursor = _cursor
+    SelectorAngle.cursor = _cursors
+    Dihedral.cursor = _cursor
+    SelectorDihedral.cursor = _cursors
+    Improper.cursor = _cursor
+    SelectorImproper.cursor = _cursors
 
-SelectorBond.view = _viewfunc
-SelectorAngle.view = _viewfunc
-SelectorDihedral.view = _viewfunc
-SelectorImproper.view = _viewfunc
+    SelectorMBond.cursor = _cursorsm
+    SelectorMAngle.cursor = _cursorsm
+    SelectorMDihedral.cursor = _cursorsm
+    SelectorMImproper.cursor = _cursorsm
 
-SelectorMBond.view = _viewfunc
-SelectorMAngle.view = _viewfunc
-SelectorMDihedral.view = _viewfunc
-SelectorMImproper.view = _viewfunc
+    SelectorMBond.dynamics = _dynamics
+    SelectorMAngle.dynamics = _dynamics
+    SelectorMDihedral.dynamics = _dynamics
+    SelectorMImproper.dynamics = _dynamics
 
-SelectorMBond.view2d = _selector_view2d
-SelectorMAngle.view2d = _selector_view2d
-SelectorMDihedral.view2d = _selector_view2d
-SelectorMImproper.view2d = _selector_view2d
+    SelectorMBond.minimisation = _minimisation
+    SelectorMAngle.minimisation = _minimisation
+    SelectorMDihedral.minimisation = _minimisation
+    SelectorMImproper.minimisation = _minimisation
+
+    SelectorMBond.smiles = _selector_to_smiles
+    SelectorMAngle.smiles = _selector_to_smiles
+    SelectorMDihedral.smiles = _selector_to_smiles
+    SelectorMImproper.smiles = _selector_to_smiles
+    SelectorMBond.smarts = _selector_to_smarts
+    SelectorMAngle.smarts = _selector_to_smarts
+    SelectorMDihedral.smarts = _selector_to_smarts
+    SelectorMImproper.smarts = _selector_to_smarts
+
+    SelectorMBond.trajectory = _trajectory
+    SelectorMAngle.trajectory = _trajectory
+    SelectorMDihedral.trajectory = _trajectory
+    SelectorMImproper.trajectory = _trajectory
+
+    SelectorBond.view = _viewfunc
+    SelectorAngle.view = _viewfunc
+    SelectorDihedral.view = _viewfunc
+    SelectorImproper.view = _viewfunc
+
+    SelectorMBond.view = _viewfunc
+    SelectorMAngle.view = _viewfunc
+    SelectorMDihedral.view = _viewfunc
+    SelectorMImproper.view = _viewfunc
+
+    SelectorMBond.view2d = _selector_view2d
+    SelectorMAngle.view2d = _selector_view2d
+    SelectorMDihedral.view2d = _selector_view2d
+    SelectorMImproper.view2d = _selector_view2d
+
+
+try:
+    _fix_siremm()
+except ImportError:
+    pass
