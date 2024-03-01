@@ -27,6 +27,7 @@
 
 #include <QDataStream>
 #include <QRegExp>
+#include <QReadWriteLock>
 #include <cmath>
 
 #include <limits>
@@ -122,6 +123,111 @@ ElementDB *ElementDB::db = 0;
 ///////////
 /////////// Implementation of Element
 ///////////
+
+Q_GLOBAL_STATIC(QReadWriteLock, globalLock);
+Q_GLOBAL_STATIC(QSet<int>, biological_elements);
+
+/** Set that the passed element should be considered to be biological */
+void Element::setElementIsBiological(const Element &element)
+{
+    QWriteLocker locker(globalLock());
+    biological_elements->insert(element.nProtons());
+}
+
+/** Set that the passed element should considered to definitely
+ *  not be biological
+ */
+void Element::setElementIsNotBiological(const Element &element)
+{
+    QWriteLocker locker(globalLock());
+    biological_elements->remove(element.nProtons());
+}
+
+void Element::resetBiologicalElements()
+{
+    QWriteLocker locker(globalLock());
+    biological_elements->clear();
+
+    for (int i = 0; i < 80; ++i)
+    {
+        Element el(i);
+
+        if ((el.period() <= 3 and not el.nobleGas()) or el.halogen())
+            biological_elements->insert(i);
+    }
+
+    // also add Fe
+    biological_elements->insert(26);
+}
+
+/** Return a biological element that has been guessed from the passed name.
+    Note that if no biological element was guessed, then the nearest
+    non-biological element match is used. A biological element is one that
+    is in the list of biological elements */
+Element Element::biologicalElement(const QString &name)
+{
+    QReadLocker locker(globalLock());
+
+    // guess an element with this name...
+    Element elmnt(name);
+
+    // is this a biological element? - if so, return it!
+    if (elmnt._locked_biological())
+        return elmnt;
+
+    // try to guess the atom from just the first two letters...
+    Element elmnt2(name.left(2));
+
+    if (elmnt2._locked_biological())
+        return elmnt2;
+
+    // try to guess the atom from just the first letter...
+    Element elmnt3(name.left(1));
+
+    if (elmnt3._locked_biological())
+        return elmnt3;
+
+    // we couldn't find anything - return the original, non-biological guess
+    return elmnt;
+}
+
+/** Return whether or not this is biological
+    (in first three periods and not a noble gas, or a halogen)
+    (this does preclude iron, potassium and calcium, which are
+    rather biological... :-) */
+bool Element::_locked_biological() const
+{
+    return biological_elements->contains(eldata->protnum);
+}
+
+/** Return whether or not this is biological
+    (in first three periods and not a noble gas, or a halogen)
+    (this does preclude iron, potassium and calcium, which are
+    rather biological... :-) */
+bool Element::biological() const
+{
+    QReadLocker locker(globalLock());
+    return this->_locked_biological();
+}
+
+/** Return a list of all of the elements that are considered
+ *  to be biological
+ */
+QList<Element> Element::getBiologicalElements()
+{
+    QReadLocker locker(globalLock());
+    QList<int> prots = biological_elements->values();
+    std::sort(prots.begin(), prots.end());
+
+    QList<Element> elements;
+
+    for (int i = 0; i < prots.size(); ++i)
+    {
+        elements.append(Element(prots[i]));
+    }
+
+    return elements;
+}
 
 /** Construct a dummy element */
 Element::Element()
@@ -364,35 +470,6 @@ ElementData *ElementDB::element(const QString &s) const
     }
 }
 
-/** Return a biological element that has been guessed from the passed name.
-    Note that if no biological element was guessed, then the nearest
-    non-biological element match is used. A biological element is one that
-    is in the first couple of rows (proton number < 18) and is not a noble gas. */
-Element Element::biologicalElement(const QString &name)
-{
-    // guess an element with this name...
-    Element elmnt(name);
-
-    // is this a biological element? - if so, return it!
-    if (elmnt.biological())
-        return elmnt;
-
-    // try to guess the atom from just the first two letters...
-    Element elmnt2(name.left(2));
-
-    if (elmnt2.biological())
-        return elmnt2;
-
-    // try to guess the atom from just the first letter...
-    Element elmnt3(name.left(1));
-
-    if (elmnt3.biological())
-        return elmnt3;
-
-    // we couldn't find anything - return the original, non-biological guess
-    return elmnt;
-}
-
 /** Return whether or not this is a noble gas */
 bool Element::nobleGas() const
 {
@@ -403,15 +480,6 @@ bool Element::nobleGas() const
 bool Element::halogen() const
 {
     return group() == 17;
-}
-
-/** Return whether or not this is biological
-    (in first three periods and not a noble gas, or a halogen)
-    (this does preclude iron, potassium and calcium, which are
-    rather biological... :-) */
-bool Element::biological() const
-{
-    return (period() <= 3 and not nobleGas()) or halogen();
 }
 
 /** Return whether or not this is an alkali metal (group 1 or 2) */
@@ -448,6 +516,36 @@ bool Element::actinide() const
 bool Element::rareEarth() const
 {
     return lanthanide() or actinide();
+}
+
+bool Element::operator==(const QString &other) const
+{
+    return this->operator==(Element(other));
+}
+
+bool Element::operator!=(const QString &other) const
+{
+    return not this->operator==(other);
+}
+
+bool Element::operator>(const QString &other) const
+{
+    return this->operator>(Element(other));
+}
+
+bool Element::operator<(const QString &other) const
+{
+    return this->operator<(Element(other));
+}
+
+bool Element::operator>=(const QString &other) const
+{
+    return this->operator>=(Element(other));
+}
+
+bool Element::operator<=(const QString &other) const
+{
+    return this->operator<=(Element(other));
 }
 
 /** Sorting operators. Elements are compared based on their

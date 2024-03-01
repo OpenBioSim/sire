@@ -16,8 +16,13 @@ Fixes
 -----
 
 * Fix bug that disabled the ``DEBUG`` log level from the global logger.
+
 * Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
   that we only compare residues with the same number of atoms.
+
+* Made it easier to convert from strings to elements. Added the ability to
+  customise the list of elements that are considered biological. This
+  fixes issue #170.
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
 --------------------------------------------------------------------------------------------
