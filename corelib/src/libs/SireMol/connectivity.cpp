@@ -2413,6 +2413,45 @@ QList<BondID> ConnectivityBase::getBonds(const AtomID &atom) const
     return ret;
 }
 
+/** Return all of the connections that involve the passed atoms - if exclusive is true,
+ *  then return only connections where both atoms are present in the list.
+ */
+QList<BondID> ConnectivityBase::getBonds(const QList<AtomIdx> &atoms, bool exclusive) const
+{
+    QList<BondID> ret;
+
+    const QSet<AtomIdx> atoms_set(atoms.begin(), atoms.end());
+
+    if (exclusive)
+    {
+        for (const auto &bond : this->getBonds())
+        {
+            const auto atom0 = this->minfo.atomIdx(bond.atom0());
+            const auto atom1 = this->minfo.atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) and atoms_set.contains(atom1))
+            {
+                ret.append(bond);
+            }
+        }
+    }
+    else
+    {
+        for (const auto &bond : this->getBonds())
+        {
+            const auto atom0 = this->minfo.atomIdx(bond.atom0());
+            const auto atom1 = this->minfo.atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) or atoms_set.contains(atom1))
+            {
+                ret.append(bond);
+            }
+        }
+    }
+
+    return ret;
+}
+
 namespace SireMol
 {
     namespace detail
@@ -3391,13 +3430,47 @@ PropertyList ConnectivityBase::merge(const MolViewProperty &other,
                                             CODELOC);
     }
 
-    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
-                                   .arg(this->what()));
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for bond parameters is ignored").arg(ghost));
+    }
+
+    const ConnectivityBase &ref = *this;
+    const ConnectivityBase &pert = other.asA<ConnectivityBase>();
+
+    auto prop0 = Connectivity(ref);
+    auto prop1 = Connectivity(ref).edit();
+
+    // the prop0 properties are already correct
+
+    // the prop1 properties are made by finding all of the atoms that
+    // are involved in bonds in 'pert' and removing any bonds involving
+    // only those atoms from 'prop1', and then adding back the matching
+    // bonds from 'pert'. Use 'true' to only remove bonds where both
+    // atoms are in the mapping
+    prop1.disconnect(mapping.mappedIn1(), true);
+
+    // get the mapping from the perturbed to reference states, including
+    // atoms that don't exist in the reference state. In all cases,
+    // the values are the indexes in the merged molecule
+    auto map1to0 = mapping.map1to0(true);
+
+    // now find all of the bonds in 'pert' where both atoms in the
+    // bond are in map1to0.keys() - i.e. exist and are mapped from
+    // the perturbed state
+    const auto pert_bonds = pert.getBonds(map1to0.keys(), true);
+
+    // connect those bonds together
+    for (const auto &pert_bond : pert_bonds)
+    {
+        prop1.connect(map1to0.value(info().atomIdx(pert_bond.atom0())),
+                      map1to0.value(info().atomIdx(pert_bond.atom1())));
+    }
 
     SireBase::PropertyList ret;
 
-    ret.append(*this);
-    ret.append(*this);
+    ret.append(prop0);
+    ret.append(prop1.commit());
 
     return ret;
 }
@@ -3658,6 +3731,23 @@ ConnectivityEditor &ConnectivityEditor::connect(const AtomID &atom0, const AtomI
     return this->connect(info().atomIdx(atom0), info().atomIdx(atom1));
 }
 
+/** Create a connection for the passed bond */
+ConnectivityEditor &ConnectivityEditor::connect(const BondID &bond)
+{
+    return this->connect(bond.atom0(), bond.atom1());
+}
+
+/** Create a connection for the passed bonds */
+ConnectivityEditor &ConnectivityEditor::connect(const QList<BondID> &bonds)
+{
+    for (const auto &bond : bonds)
+    {
+        this->connect(bond);
+    }
+
+    return *this;
+}
+
 /** Remove the connection between the atoms at indicies 'atom0'
     and 'atom1' - this does nothing if there isn't already a connection
 
@@ -3700,6 +3790,67 @@ ConnectivityEditor &ConnectivityEditor::disconnect(AtomIdx atom0, AtomIdx atom1)
 ConnectivityEditor &ConnectivityEditor::disconnect(const AtomID &atom0, const AtomID &atom1)
 {
     return this->disconnect(info().atomIdx(atom0), info().atomIdx(atom1));
+}
+
+/** Disconnect the atoms in the passed bond - this does nothing if the
+ *  atoms aren't connected */
+ConnectivityEditor &ConnectivityEditor::disconnect(const BondID &bond)
+{
+    return this->disconnect(bond.atom0(), bond.atom1());
+}
+
+/** Disconnect the atoms in the passed bonds - this does nothing for any
+ *  of the atoms that aren't connected */
+ConnectivityEditor &ConnectivityEditor::disconnect(const QList<BondID> &bonds)
+{
+    for (const auto &bond : bonds)
+    {
+        this->disconnect(bond);
+    }
+
+    return *this;
+}
+
+/** Disconnect any and all bonds involving the passed atoms. If exclusive is true,
+ *  then this only removes connection where both atoms are in 'atoms', otherwise
+ *  it removes connections which have one of more atoms in 'atoms'
+ */
+ConnectivityEditor &ConnectivityEditor::disconnect(const QList<AtomIdx> &atoms, bool exclusive)
+{
+    const QSet<AtomIdx> atoms_set(atoms.begin(), atoms.end());
+
+    if (exclusive)
+    {
+        const auto bonds = this->getBonds();
+
+        for (const auto &bond : bonds)
+        {
+            const auto atom0 = info().atomIdx(bond.atom0());
+            const auto atom1 = info().atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) and atoms_set.contains(atom1))
+            {
+                this->disconnect(atom0, atom1);
+            }
+        }
+    }
+    else
+    {
+        const auto bonds = this->getBonds();
+
+        for (const auto &bond : bonds)
+        {
+            const auto atom0 = info().atomIdx(bond.atom0());
+            const auto atom1 = info().atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) or atoms_set.contains(atom1))
+            {
+                this->disconnect(atom0, atom1);
+            }
+        }
+    }
+
+    return *this;
 }
 
 /** Remove all of the connections to the atom at index 'atomidx'

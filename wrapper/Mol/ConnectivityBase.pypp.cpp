@@ -549,6 +549,18 @@ void register_ConnectivityBase_class(){
                 , "Return the list of bonds in the connectivity containing atom" );
         
         }
+        { //::SireMol::ConnectivityBase::getBonds
+        
+            typedef ::QList< SireMol::BondID > ( ::SireMol::ConnectivityBase::*getBonds_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            getBonds_function_type getBonds_function_value( &::SireMol::ConnectivityBase::getBonds );
+            
+            ConnectivityBase_exposer.def( 
+                "getBonds"
+                , getBonds_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return all of the connections that involve the passed atoms - if exclusive is true,\n  then return only connections where both atoms are present in the list.\n" );
+        
+        }
         { //::SireMol::ConnectivityBase::getDihedrals
         
             typedef ::QList< SireMol::DihedralID > ( ::SireMol::ConnectivityBase::*getDihedrals_function_type)(  ) const;

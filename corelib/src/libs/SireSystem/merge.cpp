@@ -31,6 +31,8 @@
 #include "SireMol/core.h"
 #include "SireMol/moleditor.h"
 #include "SireMol/atomidxmapping.h"
+#include "SireMol/connectivity.h"
+#include "SireMol/bondid.h"
 
 #include "SireMM/mmdetail.h"
 
@@ -468,6 +470,18 @@ namespace SireSystem
                     editmol.removeProperty(map0[prop]);
                     editmol.setProperty(map[prop + "0"].source(), merged[0]);
                     editmol.setProperty(map[prop + "1"].source(), merged[1]);
+
+                    if (prop == "connectivity")
+                    {
+                        // we need to set the connectivity of the merged molecule
+                        auto merged_connectivity = merged[0].asA<SireMol::Connectivity>().edit();
+
+                        // the merged connectivity has the connections of both the
+                        // reference and perturbed states
+                        merged_connectivity.connect(merged[1].asA<SireMol::Connectivity>().getBonds());
+
+                        editmol.setProperty(map["connectivity"].source(), merged_connectivity.commit());
+                    }
                 }
                 else
                 {
@@ -494,7 +508,6 @@ namespace SireSystem
             editmol.removeProperty(map["parameters"].source());
         }
 
-        // set the connectivity to the merged connectivity (BELOW CODE IS WRONG!!!)
         editmol.setProperty(map["connectivity"].source(), editmol.property("connectivity0"));
 
         // set the flag that this is a perturbable molecule
