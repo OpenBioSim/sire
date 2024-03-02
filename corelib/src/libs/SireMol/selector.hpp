@@ -1860,9 +1860,9 @@ namespace SireMol
     {
         if (not this->isSingleMolecule())
         {
-            throw SireMol::duplicate_molecule(QObject::tr(
-                                                  "There are no molecules represented in this object."),
-                                              CODELOC);
+            throw SireMol::missing_molecule(QObject::tr(
+                                                "There are no molecules represented in this object."),
+                                            CODELOC);
         }
     }
 

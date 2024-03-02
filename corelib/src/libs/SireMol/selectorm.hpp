@@ -2890,7 +2890,13 @@ namespace SireMol
     template <class T>
     SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::assertSingleMolecule() const
     {
-        if (not this->isSingleMolecule())
+        if (this->isEmpty())
+        {
+            throw SireMol::missing_molecule(QObject::tr(
+                                                "There are no molecules represented in this object - it is empty."),
+                                            CODELOC);
+        }
+        else if (not this->isSingleMolecule())
         {
             throw SireMol::duplicate_molecule(QObject::tr(
                                                   "There is more than one molecule represented in this object. The molecules are: %1")

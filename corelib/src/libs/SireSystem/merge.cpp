@@ -64,7 +64,18 @@ namespace SireSystem
                    bool allow_ring_breaking, bool allow_ring_size_change,
                    bool force, const PropertyMap &input_map)
     {
-        if (not mols.isSingleMolecule())
+        // and a handle on the whole reference and perturbed molecule
+        if (mols.atoms0().isEmpty())
+        {
+            // notiing to map
+            return Molecule();
+        }
+        else if (mols.atoms1().isEmpty())
+        {
+            // nothing to map to
+            return mols.atoms0().toSingleMolecule().molecule();
+        }
+        else if (not mols.isSingleMolecule())
         {
             throw SireError::incompatible_error(QObject::tr(
                                                     "You can only create a merged molecule from a mapping that "
@@ -134,26 +145,15 @@ namespace SireSystem
         auto forwards_map = mols;
         auto backwards_map = mols.swap();
 
-        // the list of mapped atoms
-        const auto mapped_atoms0 = mols.mappedAtoms0().toSingleMolecule();
-        const auto mapped_atoms1 = mols.mappedAtoms1().toSingleMolecule();
-
-        if (mapped_atoms0.count() != mapped_atoms1.count())
-        {
-            throw SireError::program_bug(QObject::tr(
-                                             "The number of atoms in the forward and backward mappings "
-                                             "are not the same. This is a bug!."),
-                                         CODELOC);
-        }
-
-        const int nmapped = mapped_atoms0.count();
-
         // get the merged maps for the reference and perturbed states
         auto map0 = map.merge(mols.propertyMap0());
         auto map1 = map.merge(mols.propertyMap1());
 
+        const auto mol0 = mols.atoms0().toSingleMolecule().molecule();
+        const auto mol1 = mols.atoms1().toSingleMolecule().molecule();
+
         // get the MolEditor that can be used to set properties
-        MolEditor editmol = mols.atoms0().toSingleMolecule().molecule().edit();
+        MolEditor editmol = mol0.edit();
 
         // check and set the forcefields
         SireMM::MMDetail ffield0;
@@ -164,7 +164,7 @@ namespace SireSystem
 
         try
         {
-            ffield0 = mapped_atoms0.data().property(map0["forcefield"]).asA<SireMM::MMDetail>();
+            ffield0 = mol0.data().property(map0["forcefield"]).asA<SireMM::MMDetail>();
             have_ffield0 = true;
         }
         catch (...)
@@ -173,7 +173,7 @@ namespace SireSystem
 
         try
         {
-            ffield1 = mapped_atoms1.data().property(map1["forcefield"]).asA<SireMM::MMDetail>();
+            ffield1 = mol1.data().property(map1["forcefield"]).asA<SireMM::MMDetail>();
             have_ffield1 = true;
         }
         catch (...)
@@ -207,13 +207,6 @@ namespace SireSystem
                                                 CODELOC);
         }
 
-        // and a handle on the whole reference and perturbed molecule
-        const auto mol0 = mols.atoms0().toSingleMolecule().molecule();
-        const auto mol1 = mols.atoms1().toSingleMolecule().molecule();
-
-        if (mol0.isEmpty())
-            return mol0;
-
         // find the largest AtomNum in mol0
         AtomNum largest_atomnum;
 
@@ -237,7 +230,7 @@ namespace SireSystem
         // use a property to track which atoms have been mapped -
         // a value of -1 means that this atom is not mapped
         editmol.setProperty("_mol0_index", AtomIntProperty(mol0.info(), -1));
-        editmol.setProperty("_mol1_index", AtomIntProperty(mol1.info(), -1));
+        editmol.setProperty("_mol1_index", AtomIntProperty(mol0.info(), -1));
 
         // get an editable copy of the molecule to be changed
         MolStructureEditor mol(editmol);
@@ -249,125 +242,146 @@ namespace SireSystem
         // all of the residue indicies that we have seen
         QHash<ResIdx, CGIdx> residx_to_cgidx;
 
-        // go through all of the common atoms and save their indicies
-        // and set the atom and residue names
-        for (int i = 0; i < nmapped; ++i)
+        if (not mols.mappedAtoms0().isEmpty())
         {
-            const auto atom0 = mapped_atoms0(i);
-            const auto atom1 = mapped_atoms1(i);
+            // the list of mapped atoms
+            const auto mapped_atoms0 = mols.mappedAtoms0().toSingleMolecule();
+            const auto mapped_atoms1 = mols.mappedAtoms1().toSingleMolecule();
 
-            auto atom = mol.atom(atom0.index());
-
-            // save the index of this atom in both mol0 and mol1
-            atom.setProperty<qint64>("_mol0_index", atom0.index().value());
-            atom.setProperty<qint64>("_mol1_index", atom1.index().value());
-
-            // save the perturbed state atom and residue names into new properties, so
-            // that we can use these when extracting the end states
-            atom.setAlternateName(atom1.name());
-
-            ResIdx residx;
-
-            try
+            if (mapped_atoms0.count() != mapped_atoms1.count())
             {
-                residx = atom0.residue().index();
-            }
-            catch (...)
-            {
+                throw SireError::program_bug(QObject::tr(
+                                                 "The number of atoms in the forward and backward mappings "
+                                                 "are not the same. This is a bug!."),
+                                             CODELOC);
             }
 
-            if (not(residx.isNull() or residx_to_cgidx.contains(residx)))
+            // go through all of the common atoms and save their indicies
+            // and set the atom and residue names
+            for (int i = 0; i < mapped_atoms0.count(); ++i)
             {
-                // we haven't seen this residue before - assume that
-                // all residues that are mapped from this residue
-                // exist in the same equivalent residue in the
-                // perturbed molecule (using the cutgroup of the
-                // first atom in this residue)
-                residx_to_cgidx.insert(residx, atom0.cutGroup().index());
+                const auto atom0 = mapped_atoms0(i);
+                const auto atom1 = mapped_atoms1(i);
 
-                // first, get an editor for this residue
-                // and save the alternate residue name for the mapped state
-                auto res = mol.residue(residx);
-                res.setAlternateName(atom1.residue().name());
+                auto atom = mol.atom(atom0.index());
 
-                // now save the mapping from perturbed residue index
-                // to merged residue index
-                pert_to_merge_residx[atom1.residue().index()] = residx;
+                // save the index of this atom in both mol0 and mol1
+                atom.setProperty<qint64>("_mol0_index", atom0.index().value());
+                atom.setProperty<qint64>("_mol1_index", atom1.index().value());
+
+                // save the perturbed state atom and residue names into new properties, so
+                // that we can use these when extracting the end states
+                atom.setAlternateName(atom1.name());
+
+                ResIdx residx;
+
+                try
+                {
+                    residx = atom0.residue().index();
+                }
+                catch (...)
+                {
+                }
+
+                if (not(residx.isNull() or residx_to_cgidx.contains(residx)))
+                {
+                    // we haven't seen this residue before - assume that
+                    // all residues that are mapped from this residue
+                    // exist in the same equivalent residue in the
+                    // perturbed molecule (using the cutgroup of the
+                    // first atom in this residue)
+                    residx_to_cgidx.insert(residx, atom0.cutGroup().index());
+
+                    // first, get an editor for this residue
+                    // and save the alternate residue name for the mapped state
+                    auto res = mol.residue(residx);
+                    res.setAlternateName(atom1.residue().name());
+
+                    // now save the mapping from perturbed residue index
+                    // to merged residue index
+                    pert_to_merge_residx[atom1.residue().index()] = residx;
+                }
             }
         }
 
         // now go through the unmapped atoms of the reference molecule and
         // save their indicies
-        const auto unmapped_atoms0 = mols.unmappedAtoms0().toSingleMolecule();
-
-        for (int i = 0; i < unmapped_atoms0.count(); ++i)
+        if (not mols.unmappedAtoms0().isEmpty())
         {
-            const auto atom0 = unmapped_atoms0(i);
+            const auto unmapped_atoms0 = mols.unmappedAtoms0().toSingleMolecule();
 
-            auto atom = mol.atom(atom0.index());
+            for (int i = 0; i < unmapped_atoms0.count(); ++i)
+            {
+                const auto atom0 = unmapped_atoms0(i);
 
-            // unmapped atoms are called "Xxx"
-            atom.setAlternateName("Xxx");
-            atom.setProperty<qint64>("_mol0_index", atom0.index().value());
-            atom.setProperty<qint64>("_mol1_index", -1);
+                auto atom = mol.atom(atom0.index());
+
+                // unmapped atoms are called "Xxx"
+                atom.setAlternateName("Xxx");
+                atom.setProperty<qint64>("_mol0_index", atom0.index().value());
+                atom.setProperty<qint64>("_mol1_index", -1);
+            }
         }
 
         // now go through the unmapped atoms of the perturbed molecule and
         // add them to the merged molecule, saving their indicies
-        const auto unmapped_atoms1 = mols.unmappedAtoms1().toSingleMolecule();
-
-        for (int i = 0; i < unmapped_atoms1.count(); ++i)
+        if (not mols.unmappedAtoms1().isEmpty())
         {
-            const auto atom1 = unmapped_atoms1(i);
+            const auto unmapped_atoms1 = mols.unmappedAtoms1().toSingleMolecule();
 
-            // we should have seen this residue before...
-            auto residx = pert_to_merge_residx.value(atom1.residue().index());
-
-            if (residx.isNull())
+            for (int i = 0; i < unmapped_atoms1.count(); ++i)
             {
-                // we haven't seen this residue before, so we don't know
-                // really where to add the atoms. The best thing to do
-                // is add this to the last residue that we saw in the
-                // molecule (the one with the highest index)
-                if (residx_to_cgidx.isEmpty())
+                const auto atom1 = unmapped_atoms1(i);
+
+                // we should have seen this residue before...
+                auto residx = pert_to_merge_residx.value(atom1.residue().index());
+
+                if (residx.isNull())
+                {
+                    // we haven't seen this residue before, so we don't know
+                    // really where to add the atoms. The best thing to do
+                    // is add this to the last residue that we saw in the
+                    // molecule (the one with the highest index)
+                    if (residx_to_cgidx.isEmpty())
+                    {
+                        throw SireError::program_bug(QObject::tr(
+                                                         "We have not seen any residues before, so we don't know "
+                                                         "where to add the atoms. This is a bug!"),
+                                                     CODELOC);
+                    }
+
+                    auto residxs = residx_to_cgidx.keys();
+                    std::sort(residxs.begin(), residxs.end());
+
+                    residx = residxs.last();
+                }
+
+                auto cgidx = residx_to_cgidx.value(residx);
+
+                if (cgidx.isNull())
                 {
                     throw SireError::program_bug(QObject::tr(
-                                                     "We have not seen any residues before, so we don't know "
+                                                     "We don't know the CutGroup for the residue, so we don't know "
                                                      "where to add the atoms. This is a bug!"),
                                                  CODELOC);
                 }
 
-                auto residxs = residx_to_cgidx.keys();
-                std::sort(residxs.begin(), residxs.end());
+                auto res = mol.residue(residx);
 
-                residx = residxs.last();
+                // add the atom - it has the name "Xxx" as it doesn't exist
+                // in the reference state
+                auto atom = res.add(AtomName("Xxx"));
+                largest_atomnum = AtomNum(largest_atomnum.value() + 1);
+                atom.renumber(largest_atomnum);
+
+                // reparent this atom to the CutGroup for this residue
+                atom.reparent(cgidx);
+
+                // save the name in the perturbed state
+                atom.setAlternateName(atom1.name());
+                atom.setProperty<qint64>("_mol0_index", -1);
+                atom.setProperty<qint64>("_mol1_index", atom1.index().value());
             }
-
-            auto cgidx = residx_to_cgidx.value(residx);
-
-            if (cgidx.isNull())
-            {
-                throw SireError::program_bug(QObject::tr(
-                                                 "We don't know the CutGroup for the residue, so we don't know "
-                                                 "where to add the atoms. This is a bug!"),
-                                             CODELOC);
-            }
-
-            auto res = mol.residue(residx);
-
-            // add the atom - it has the name "Xxx" as it doesn't exist
-            // in the reference state
-            auto atom = res.add(AtomName("Xxx"));
-            largest_atomnum = AtomNum(largest_atomnum.value() + 1);
-            atom.renumber(largest_atomnum);
-
-            // reparent this atom to the CutGroup for this residue
-            atom.reparent(cgidx);
-
-            // save the name in the perturbed state
-            atom.setAlternateName(atom1.name());
-            atom.setProperty<qint64>("_mol0_index", -1);
-            atom.setProperty<qint64>("_mol1_index", atom1.index().value());
         }
 
         if (as_new_molecule)
@@ -498,9 +512,10 @@ namespace SireSystem
         editmol.setProperty(map["molecule0"].source(), mol0);
         editmol.setProperty(map["molecule1"].source(), mol1);
 
-        // add the forcefields for the two molecules
+        // add the forcefields for the two molecules - need the same,
+        // so choosing ffield0
         editmol.setProperty(map["forcefield0"].source(), ffield0);
-        editmol.setProperty(map["forcefield1"].source(), ffield1);
+        editmol.setProperty(map["forcefield1"].source(), ffield0);
 
         // remove any property called "parameters"
         if (editmol.hasProperty(map["parameters"].source()))
