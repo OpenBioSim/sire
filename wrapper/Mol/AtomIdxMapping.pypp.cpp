@@ -105,6 +105,32 @@ void register_AtomIdxMapping_class(){
                 , "Return whether or not the list is empty" );
         
         }
+        { //::SireMol::AtomIdxMapping::isUnmappedIn0
+        
+            typedef bool ( ::SireMol::AtomIdxMapping::*isUnmappedIn0_function_type)( ::SireMol::AtomIdx const & ) const;
+            isUnmappedIn0_function_type isUnmappedIn0_function_value( &::SireMol::AtomIdxMapping::isUnmappedIn0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "isUnmappedIn0"
+                , isUnmappedIn0_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::isUnmappedIn1
+        
+            typedef bool ( ::SireMol::AtomIdxMapping::*isUnmappedIn1_function_type)( ::SireMol::AtomIdx const & ) const;
+            isUnmappedIn1_function_type isUnmappedIn1_function_value( &::SireMol::AtomIdxMapping::isUnmappedIn1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "isUnmappedIn1"
+                , isUnmappedIn1_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::AtomIdxMapping::map0to1
         
             typedef ::QHash< SireMol::AtomIdx, SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*map0to1_function_type)( bool ) const;

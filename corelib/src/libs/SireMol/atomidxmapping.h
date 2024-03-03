@@ -187,15 +187,79 @@ namespace SireMol
         QList<AtomIdx> mappedIn0() const;
         QList<AtomIdx> mappedIn1() const;
 
+        bool isUnmappedIn0(const AtomIdx &atom) const;
+        bool isUnmappedIn1(const AtomIdx &atom) const;
+
         QHash<AtomIdx, AtomIdx> map0to1(bool include_unmapped = false) const;
         QHash<AtomIdx, AtomIdx> map1to0(bool include_unmapped = false) const;
 
     private:
         void assertSane() const;
+        void rebuild();
 
         /** The list of atom entries */
         QList<AtomIdxMappingEntry> entries;
+
+        /** The set of atoms that are unmapped in the reference state */
+        QSet<AtomIdx> unmapped0_set;
+
+        /** The set of atoms that are unmapped in the perturbed state */
+        QSet<AtomIdx> unmapped1_set;
+
+        /** The list of atoms that are unmapped in the reference state */
+        QList<AtomIdx> unmapped0_list;
+
+        /** The list of atoms that are unmapped in the perturbed state */
+        QList<AtomIdx> unmapped1_list;
+
+        /** The list of atoms that are mapped in the reference state */
+        QList<AtomIdx> mapped0_list;
+
+        /** The list of atoms that are mapped in the perturbed state */
+        QList<AtomIdx> mapped1_list;
+
+        /** The mapping from reference to perturbed atoms,
+         *  which includes the unmapped atoms
+         */
+        QHash<AtomIdx, AtomIdx> map0_to_1_inc;
+
+        /** The mapping from perturbed to reference atoms,
+         *  which includes the unmapped atoms
+         */
+        QHash<AtomIdx, AtomIdx> map1_to_0_inc;
+
+        /** The mapping from reference to perturbed atoms,
+         *  which excludes the unmapped atoms
+         */
+        QHash<AtomIdx, AtomIdx> map0_to_1_exc;
+
+        /** The mapping from perturbed to reference atoms,
+         *  which excludes the unmapped atoms
+         */
+        QHash<AtomIdx, AtomIdx> map1_to_0_exc;
     };
+
+#ifndef SIRE_SKIP_INLINE_FUNCTIONS
+
+    /** Return whether or not the passed atom is unmapped in the
+     *  reference state - the atom index should be for the
+     *  merged molecule
+     */
+    inline bool AtomIdxMapping::isUnmappedIn0(const AtomIdx &atom) const
+    {
+        return unmapped0_set.contains(atom);
+    }
+
+    /** Return whether or not the passed atom is unmapped in the
+     *  perturbed state - the atom index should be for the
+     *  merged molecule
+     */
+    inline bool AtomIdxMapping::isUnmappedIn1(const AtomIdx &atom) const
+    {
+        return unmapped1_set.contains(atom);
+    }
+
+#endif // SIRE_SKIP_INLINE_FUNCTIONS
 
 } // namespace SireMol
 

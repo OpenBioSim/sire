@@ -275,6 +275,8 @@ QDataStream &operator>>(QDataStream &ds, AtomIdxMapping &mapping)
         SharedDataStream sds(ds);
 
         sds >> mapping.entries >> static_cast<Property &>(mapping);
+
+        mapping.rebuild();
     }
     else
         throw SireStream::version_error(v, "1", r_mapping, CODELOC);
@@ -294,13 +296,16 @@ AtomIdxMapping::AtomIdxMapping(const AtomIdxMappingEntry &entry)
 {
     if (not entry.isNull())
         entries.append(entry);
+
+    this->rebuild();
 }
 
 /** Assert that this object is sane */
 void AtomIdxMapping::assertSane() const
 {
-    QHash<qint64, AtomIdxMappingEntry> seen;
-    seen.reserve(entries.size());
+    QHash<qint64, AtomIdxMappingEntry> seen_0, seen_1;
+    seen_0.reserve(entries.size());
+    seen_1.reserve(entries.size());
 
     for (const auto &entry : entries)
     {
@@ -308,16 +313,20 @@ void AtomIdxMapping::assertSane() const
         {
             throw SireError::incompatible_error(QObject::tr("The AtomIdxMapping contains a null entry!"), CODELOC);
         }
-        else if (seen.contains(entry.atomIdx0().value()))
+        else if (seen_0.contains(entry.atomIdx0().value()) or
+                 (entry.isMappedIn1() and seen_1.contains(entry.atomIdx1().value())))
         {
             throw SireError::incompatible_error(QObject::tr("The AtomIdxMapping contains a duplicate entry (%1 vs %2)!")
                                                     .arg(entry.toString())
-                                                    .arg(seen[entry.atomIdx0().value()].toString()),
+                                                    .arg(seen_0[entry.atomIdx0().value()].toString()),
                                                 CODELOC);
         }
         else
         {
-            seen.insert(entry.atomIdx0().value(), entry);
+            seen_0.insert(entry.atomIdx0().value(), entry);
+
+            if (entry.isMappedIn1())
+                seen_1.insert(entry.atomIdx1().value(), entry);
         }
     }
 }
@@ -353,11 +362,18 @@ AtomIdxMapping::AtomIdxMapping(const QList<AtomIdxMappingEntry> &e)
     }
 
     this->assertSane();
+    this->rebuild();
 }
 
 /** Copy constructor */
 AtomIdxMapping::AtomIdxMapping(const AtomIdxMapping &other)
-    : ConcreteProperty<AtomIdxMapping, Property>(other)
+    : ConcreteProperty<AtomIdxMapping, Property>(other),
+      entries(other.entries),
+      unmapped0_set(other.unmapped0_set), unmapped1_set(other.unmapped1_set),
+      unmapped0_list(other.unmapped0_list), unmapped1_list(other.unmapped1_list),
+      mapped0_list(other.mapped0_list), mapped1_list(other.mapped1_list),
+      map0_to_1_inc(other.map0_to_1_inc), map1_to_0_inc(other.map1_to_0_inc),
+      map0_to_1_exc(other.map0_to_1_exc), map1_to_0_exc(other.map1_to_0_exc)
 {
 }
 
@@ -372,6 +388,17 @@ AtomIdxMapping &AtomIdxMapping::operator=(const AtomIdxMapping &other)
     if (this != &other)
     {
         entries = other.entries;
+        unmapped0_set = other.unmapped0_set;
+        unmapped1_set = other.unmapped1_set;
+        unmapped0_list = other.unmapped0_list;
+        unmapped1_list = other.unmapped1_list;
+        mapped0_list = other.mapped0_list;
+        mapped1_list = other.mapped1_list;
+        map0_to_1_inc = other.map0_to_1_inc;
+        map1_to_0_inc = other.map1_to_0_inc;
+        map0_to_1_exc = other.map0_to_1_exc;
+        map1_to_0_exc = other.map1_to_0_exc;
+
         Property::operator=(other);
     }
 
@@ -530,6 +557,7 @@ void AtomIdxMapping::append(const AtomIdxMappingEntry &new_entry)
     }
 
     entries.append(new_entry);
+    this->rebuild();
 }
 
 /** Append all of the passed entries of other onto this list */
@@ -542,6 +570,8 @@ void AtomIdxMapping::append(const AtomIdxMapping &other)
         ret.append(entry);
     }
 
+    ret.rebuild();
+
     *this = ret;
 }
 
@@ -549,6 +579,7 @@ void AtomIdxMapping::append(const AtomIdxMapping &other)
 void AtomIdxMapping::clear()
 {
     entries.clear();
+    this->rebuild();
 }
 
 /** Return whether or not the list is empty */
@@ -580,7 +611,9 @@ const AtomIdxMappingEntry &AtomIdxMapping::operator[](int i) const
 AtomIdxMappingEntry AtomIdxMapping::take(int i)
 {
     i = SireID::Index(i).map(entries.size());
-    return entries.takeAt(i);
+    auto entry = entries.takeAt(i);
+    this->rebuild();
+    return entry;
 }
 
 /** Take the entry for atom 'atom' */
@@ -628,6 +661,7 @@ void AtomIdxMapping::remove(int i)
 {
     i = SireID::Index(i).map(entries.size());
     entries.removeAt(i);
+    this->rebuild();
 }
 
 /** Remove the entry for atom 'atom' */
@@ -652,6 +686,67 @@ void AtomIdxMapping::remove(const CGAtomIdx &atom)
     }
 }
 
+void AtomIdxMapping::rebuild()
+{
+    unmapped0_set.clear();
+    unmapped1_set.clear();
+    unmapped0_list.clear();
+    unmapped1_list.clear();
+    mapped0_list.clear();
+    mapped1_list.clear();
+    map0_to_1_inc.clear();
+    map1_to_0_inc.clear();
+    map0_to_1_exc.clear();
+    map1_to_0_exc.clear();
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isMappedIn0())
+        {
+            mapped0_list.append(entry.atomIdx0());
+        }
+        else
+        {
+            unmapped0_set.insert(entry.atomIdx0());
+            unmapped0_list.append(entry.atomIdx0());
+        }
+
+        if (entry.isMappedIn1())
+        {
+            mapped1_list.append(entry.atomIdx1());
+        }
+        else
+        {
+            unmapped1_set.insert(entry.atomIdx1());
+            unmapped1_list.append(entry.atomIdx1());
+        }
+
+        if (entry.isMappedIn0() and entry.isMappedIn1())
+        {
+            map0_to_1_inc.insert(entry.atomIdx0(), entry.atomIdx1());
+            map1_to_0_inc.insert(entry.atomIdx1(), entry.atomIdx0());
+            map0_to_1_exc.insert(entry.atomIdx0(), entry.atomIdx1());
+            map1_to_0_exc.insert(entry.atomIdx1(), entry.atomIdx0());
+        }
+        else if (entry.isMappedIn0())
+        {
+            if (not entry.atomIdx0().isNull())
+            {
+                map0_to_1_inc.insert(entry.atomIdx0(), entry.atomIdx1());
+                map0_to_1_exc.insert(entry.atomIdx0(), entry.atomIdx1());
+            }
+        }
+        else if (entry.isMappedIn1())
+        {
+            if (not entry.atomIdx1().isNull())
+            {
+                map1_to_0_inc.insert(entry.atomIdx1(), entry.atomIdx0());
+                map1_to_0_exc.insert(entry.atomIdx1(), entry.atomIdx0());
+            }
+        }
+    }
+}
+
 /** Return the indexes, in the merged molecule, of atoms that
  *  are not mapped in the reference state (i.e. they only exist
  *  in the perturbed state). Note - these are the indicies of these
@@ -659,17 +754,7 @@ void AtomIdxMapping::remove(const CGAtomIdx &atom)
  */
 QList<AtomIdx> AtomIdxMapping::unmappedIn0() const
 {
-    QList<AtomIdx> ret;
-
-    for (const auto &entry : entries)
-    {
-        if (entry.isUnmappedIn0())
-        {
-            ret.append(entry.atomIdx0());
-        }
-    }
-
-    return ret;
+    return unmapped0_list;
 }
 
 /** Return the indexes, in the merged molecule, of atoms that
@@ -679,17 +764,7 @@ QList<AtomIdx> AtomIdxMapping::unmappedIn0() const
  */
 QList<AtomIdx> AtomIdxMapping::unmappedIn1() const
 {
-    QList<AtomIdx> ret;
-
-    for (const auto &entry : entries)
-    {
-        if (entry.isUnmappedIn1())
-        {
-            ret.append(entry.atomIdx0());
-        }
-    }
-
-    return ret;
+    return unmapped1_list;
 }
 
 /** Return the indexes, in the merged molecule, of atoms that
@@ -700,17 +775,7 @@ QList<AtomIdx> AtomIdxMapping::unmappedIn1() const
  */
 QList<AtomIdx> AtomIdxMapping::mappedIn0() const
 {
-    QList<AtomIdx> ret;
-
-    for (const auto &entry : entries)
-    {
-        if (entry.isMappedIn0())
-        {
-            ret.append(entry.atomIdx0());
-        }
-    }
-
-    return ret;
+    return mapped0_list;
 }
 
 /** Return the indexes, in the merged molecule, of atoms that
@@ -721,17 +786,7 @@ QList<AtomIdx> AtomIdxMapping::mappedIn0() const
  */
 QList<AtomIdx> AtomIdxMapping::mappedIn1() const
 {
-    QList<AtomIdx> ret;
-
-    for (const auto &entry : entries)
-    {
-        if (entry.isMappedIn1())
-        {
-            ret.append(entry.atomIdx0());
-        }
-    }
-
-    return ret;
+    return mapped1_list;
 }
 
 /** Return the mapping for the atoms that exist in both the reference
@@ -747,29 +802,14 @@ QList<AtomIdx> AtomIdxMapping::mappedIn1() const
  */
 QHash<AtomIdx, AtomIdx> AtomIdxMapping::map0to1(bool include_unmapped) const
 {
-    QHash<AtomIdx, AtomIdx> ret;
-    ret.reserve(entries.size());
-
     if (include_unmapped)
     {
-        for (const auto &entry : entries)
-        {
-            if (not entry.atomIdx0().isNull())
-                ret.insert(entry.atomIdx0(), entry.atomIdx1());
-        }
+        return map0_to_1_inc;
     }
     else
     {
-        for (const auto &entry : entries)
-        {
-            if (entry.isMappedIn0() and entry.isMappedIn1())
-            {
-                ret.insert(entry.atomIdx0(), entry.atomIdx1());
-            }
-        }
+        return map0_to_1_exc;
     }
-
-    return ret;
 }
 
 /** Return the mapping for the atoms that exist in both the reference
@@ -785,27 +825,12 @@ QHash<AtomIdx, AtomIdx> AtomIdxMapping::map0to1(bool include_unmapped) const
  */
 QHash<AtomIdx, AtomIdx> AtomIdxMapping::map1to0(bool include_unmapped) const
 {
-    QHash<AtomIdx, AtomIdx> ret;
-    ret.reserve(entries.size());
-
     if (include_unmapped)
     {
-        for (const auto &entry : entries)
-        {
-            if (not entry.atomIdx1().isNull())
-                ret.insert(entry.atomIdx1(), entry.atomIdx0());
-        }
+        return map1_to_0_inc;
     }
     else
     {
-        for (const auto &entry : entries)
-        {
-            if (entry.isMappedIn0() and entry.isMappedIn1())
-            {
-                ret.insert(entry.atomIdx1(), entry.atomIdx0());
-            }
-        }
+        return map1_to_0_exc;
     }
-
-    return ret;
 }

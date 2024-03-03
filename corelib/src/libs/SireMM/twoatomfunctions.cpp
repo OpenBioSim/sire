@@ -835,6 +835,20 @@ const char *TwoAtomFunctions::typeName()
     return QMetaType::typeName(qMetaTypeId<TwoAtomFunctions>());
 }
 
+template <class T>
+QSet<T> _to_set(const QList<T> &vals)
+{
+    QSet<T> ret;
+    ret.reserve(vals.count());
+
+    for (const auto &val : vals)
+    {
+        ret.insert(val);
+    }
+
+    return ret;
+}
+
 /** Merge this property with another property */
 PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
                                      const AtomIdxMapping &mapping,
@@ -860,8 +874,6 @@ PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
     TwoAtomFunctions prop0 = ref;
     TwoAtomFunctions prop1 = ref;
 
-    // the prop0 properties are already correct
-
     // the prop1 properties are made by finding all of the atoms that
     // are involved in bonds in 'pert' and removing any bonds involving
     // only those atoms from 'prop1', and then adding back the matching
@@ -881,10 +893,24 @@ PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
 
     for (const auto &pert_bond : pert_bonds)
     {
-        prop1.set(map1to0.value(info().atomIdx(pert_bond.atom0())),
-                  map1to0.value(info().atomIdx(pert_bond.atom1())),
-                  pert_bond.function());
+        const auto atom0 = map1to0.value(info().atomIdx(pert_bond.atom0()));
+        const auto atom1 = map1to0.value(info().atomIdx(pert_bond.atom1()));
+
+        prop1.set(atom0, atom1, pert_bond.function());
+
+        if (mapping.isUnmappedIn0(atom0) or mapping.isUnmappedIn0(atom1))
+        {
+            // the prop0 properties are nearly correct - we just need to add
+            // in bonds from 'pert' that involve the atoms that are not mapped
+            // in the reference state - this way, those added atoms are held
+            // by a constant bond potential, so won't fly away in the
+            // simulation of the reference state
+            prop0.set(atom0, atom1, pert_bond.function());
+        }
     }
+
+    // the bonds for atoms that are unmapped in the perturbed state are
+    // already in prop1, as this was copied from prop0
 
     SireBase::PropertyList ret;
 
