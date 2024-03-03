@@ -496,6 +496,45 @@ void FourAtomFunctions::clear(AtomIdx atom)
     }
 }
 
+/** Clear all functions that involve any of the atoms in 'atoms'
+ *  - if 'exclusive' is true, then this only removes functions
+ *  that exclusively involve these atoms - if false, then
+ *  if removes functions that involve any of these atoms
+ */
+void FourAtomFunctions::clear(const QList<AtomIdx> &atoms, bool exclusive)
+{
+    QSet<quint32> atms;
+    atms.reserve(atoms.count());
+
+    for (const auto &atom : atoms)
+    {
+        atms.insert(atom.map(info().nAtoms()));
+    }
+
+    QList<IDQuad> keys = potentials_by_atoms.keys();
+
+    if (exclusive)
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) and atms.contains(key.atom1) and atms.contains(key.atom2) and atms.contains(key.atom3))
+            {
+                FourAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
+            }
+        }
+    }
+    else
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) or atms.contains(key.atom1) or atms.contains(key.atom2) or atms.contains(key.atom3))
+            {
+                FourAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
+            }
+        }
+    }
+}
+
 /** Clear any function that acts on the atoms identified by 'atom'
 
     \throw SireMol::missing_atom
@@ -751,6 +790,47 @@ Expression FourAtomFunctions::force(const ImproperID &improperid, const Symbol &
 }
 
 /** Return the potential energy functions acting between the identified
+    atoms - if exclusive is true then only return potentials where
+    all atoms are in the dihedral or improper
+*/
+QVector<FourAtomFunction> FourAtomFunctions::potentials(const QList<AtomIdx> &atms, bool exclusive) const
+{
+    QVector<FourAtomFunction> funcs;
+    funcs.reserve(potentials_by_atoms.count());
+
+    QSet<AtomIdx> atoms(atms.begin(), atms.end());
+
+    for (QHash<IDQuad, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
+    {
+        if (exclusive)
+        {
+            if (atoms.contains(AtomIdx(it.key().atom0)) and atoms.contains(AtomIdx(it.key().atom1)) and atoms.contains(AtomIdx(it.key().atom2)) and atoms.contains(AtomIdx(it.key().atom3)))
+            {
+                funcs.append(FourAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                              info().cgAtomIdx(AtomIdx(it.key().atom1)),
+                                              info().cgAtomIdx(AtomIdx(it.key().atom2)),
+                                              info().cgAtomIdx(AtomIdx(it.key().atom3)),
+                                              it.value()));
+            }
+        }
+        else
+        {
+            if (atoms.contains(AtomIdx(it.key().atom0)) or atoms.contains(AtomIdx(it.key().atom1)) or atoms.contains(AtomIdx(it.key().atom2)) or atoms.contains(AtomIdx(it.key().atom3)))
+            {
+                funcs.append(FourAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                              info().cgAtomIdx(AtomIdx(it.key().atom1)),
+                                              info().cgAtomIdx(AtomIdx(it.key().atom2)),
+                                              info().cgAtomIdx(AtomIdx(it.key().atom3)),
+                                              it.value()));
+            }
+        }
+    }
+
+    return funcs;
+}
+
+/** Return the potential energy functions acting between the identified
     quads of atoms */
 QVector<FourAtomFunction> FourAtomFunctions::potentials() const
 {
@@ -933,13 +1013,61 @@ PropertyList FourAtomFunctions::merge(const MolViewProperty &other,
                                             CODELOC);
     }
 
-    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
-                                   .arg(this->what()));
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for dihedral/improper parameters is ignored").arg(ghost));
+    }
+
+    const FourAtomFunctions &ref = *this;
+    const FourAtomFunctions &pert = other.asA<FourAtomFunctions>();
+
+    FourAtomFunctions prop0 = ref;
+    FourAtomFunctions prop1 = ref;
+
+    // the prop1 properties are made by finding all of the atoms that
+    // are involved in dihedrals in 'pert' and removing any involving
+    // only those atoms from 'prop1', and then adding back the matching
+    // dihedral from 'pert'. Use 'true' to only remove angles where all
+    // atoms are in the mapping
+    prop1.clear(mapping.mappedIn1(), true);
+
+    // get the mapping from the perturbed to reference states, including
+    // atoms that don't exist in the reference state. In all cases,
+    // the values are the indexes in the merged molecule
+    auto map1to0 = mapping.map1to0(true);
+
+    // now find all of the dihedrals in 'pert' where all atoms in the
+    // dihedral are in map1to0.keys() - i.e. exist and are mapped from
+    // the perturbed state
+    const auto pert_dihs = pert.potentials(map1to0.keys(), true);
+
+    for (const auto &pert_dih : pert_dihs)
+    {
+        const auto atom0 = map1to0.value(info().atomIdx(pert_dih.atom0()));
+        const auto atom1 = map1to0.value(info().atomIdx(pert_dih.atom1()));
+        const auto atom2 = map1to0.value(info().atomIdx(pert_dih.atom2()));
+        const auto atom3 = map1to0.value(info().atomIdx(pert_dih.atom3()));
+
+        prop1.set(atom0, atom1, atom2, atom3, pert_dih.function());
+
+        if (mapping.isUnmappedIn0(atom0) or mapping.isUnmappedIn0(atom1) or mapping.isUnmappedIn0(atom2) or mapping.isUnmappedIn0(atom3))
+        {
+            // the prop0 properties are nearly correct - we just need to add
+            // in dihedrals from 'pert' that involve the atoms that are not mapped
+            // in the reference state - this way, those added atoms are held
+            // by a constant dihedral potential, so won't fly away in the
+            // simulation of the reference state
+            prop0.set(atom0, atom1, atom2, atom3, pert_dih.function());
+        }
+    }
+
+    // the dihedrals for atoms that are unmapped in the perturbed state are
+    // already in prop1, as this was copied from prop0
 
     SireBase::PropertyList ret;
 
-    ret.append(*this);
-    ret.append(*this);
+    ret.append(prop0);
+    ret.append(prop1);
 
     return ret;
 }

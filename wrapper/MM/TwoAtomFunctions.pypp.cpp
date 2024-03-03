@@ -117,6 +117,18 @@ void register_TwoAtomFunctions_class(){
         }
         { //::SireMM::TwoAtomFunctions::clear
         
+            typedef void ( ::SireMM::TwoAtomFunctions::*clear_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) ;
+            clear_function_type clear_function_value( &::SireMM::TwoAtomFunctions::clear );
+            
+            TwoAtomFunctions_exposer.def( 
+                "clear"
+                , clear_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Clear all functions that invole any of the atoms in atoms\n  - if exclusive is true, then this only removes functions\n  that exclusively involve these atoms - if false, then\n  if removes functions that involve any of these atoms\n" );
+        
+        }
+        { //::SireMM::TwoAtomFunctions::clear
+        
             typedef void ( ::SireMM::TwoAtomFunctions::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMM::TwoAtomFunctions::clear );
             
@@ -291,6 +303,18 @@ void register_TwoAtomFunctions_class(){
                 , potentials_function_value
                 , bp::release_gil_policy()
                 , "Return the potential energy functions acting between the identified\npairs of atoms" );
+        
+        }
+        { //::SireMM::TwoAtomFunctions::potentials
+        
+            typedef ::QVector< SireMM::TwoAtomFunction > ( ::SireMM::TwoAtomFunctions::*potentials_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            potentials_function_type potentials_function_value( &::SireMM::TwoAtomFunctions::potentials );
+            
+            TwoAtomFunctions_exposer.def( 
+                "potentials"
+                , potentials_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return the potential energy functions acting between the identified\npairs of atoms - if exclusive is true then only return potentials where\nboth atoms are in the bond\n" );
         
         }
         { //::SireMM::TwoAtomFunctions::set

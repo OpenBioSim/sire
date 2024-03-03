@@ -130,6 +130,18 @@ void register_FourAtomFunctions_class(){
         }
         { //::SireMM::FourAtomFunctions::clear
         
+            typedef void ( ::SireMM::FourAtomFunctions::*clear_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) ;
+            clear_function_type clear_function_value( &::SireMM::FourAtomFunctions::clear );
+            
+            FourAtomFunctions_exposer.def( 
+                "clear"
+                , clear_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Clear all functions that involve any of the atoms in atoms\n  - if exclusive is true, then this only removes functions\n  that exclusively involve these atoms - if false, then\n  if removes functions that involve any of these atoms\n" );
+        
+        }
+        { //::SireMM::FourAtomFunctions::clear
+        
             typedef void ( ::SireMM::FourAtomFunctions::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMM::FourAtomFunctions::clear );
             
@@ -330,6 +342,18 @@ void register_FourAtomFunctions_class(){
                 , potentials_function_value
                 , bp::release_gil_policy()
                 , "Return the potential energy functions acting between the identified\nquads of atoms" );
+        
+        }
+        { //::SireMM::FourAtomFunctions::potentials
+        
+            typedef ::QVector< SireMM::FourAtomFunction > ( ::SireMM::FourAtomFunctions::*potentials_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            potentials_function_type potentials_function_value( &::SireMM::FourAtomFunctions::potentials );
+            
+            FourAtomFunctions_exposer.def( 
+                "potentials"
+                , potentials_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return the potential energy functions acting between the identified\natoms - if exclusive is true then only return potentials where\nall atoms are in the dihedral or improper\n" );
         
         }
         { //::SireMM::FourAtomFunctions::set

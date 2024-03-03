@@ -117,6 +117,18 @@ void register_ThreeAtomFunctions_class(){
         }
         { //::SireMM::ThreeAtomFunctions::clear
         
+            typedef void ( ::SireMM::ThreeAtomFunctions::*clear_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) ;
+            clear_function_type clear_function_value( &::SireMM::ThreeAtomFunctions::clear );
+            
+            ThreeAtomFunctions_exposer.def( 
+                "clear"
+                , clear_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Clear all functions that involve any of the atoms in atoms\n  - if exclusive is true, then this only removes functions\n  that exclusively involve these atoms - if false, then\n  if removes functions that involve any of these atoms\n" );
+        
+        }
+        { //::SireMM::ThreeAtomFunctions::clear
+        
             typedef void ( ::SireMM::ThreeAtomFunctions::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMM::ThreeAtomFunctions::clear );
             
@@ -291,6 +303,18 @@ void register_ThreeAtomFunctions_class(){
                 , potentials_function_value
                 , bp::release_gil_policy()
                 , "Return the potential energy functions acting between the identified\ntriples of atoms" );
+        
+        }
+        { //::SireMM::ThreeAtomFunctions::potentials
+        
+            typedef ::QVector< SireMM::ThreeAtomFunction > ( ::SireMM::ThreeAtomFunctions::*potentials_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            potentials_function_type potentials_function_value( &::SireMM::ThreeAtomFunctions::potentials );
+            
+            ThreeAtomFunctions_exposer.def( 
+                "potentials"
+                , potentials_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return the potential energy functions acting between the identified\natoms - if exclusive is true then only return potentials where\nall atoms are in the angle\n" );
         
         }
         { //::SireMM::ThreeAtomFunctions::set
