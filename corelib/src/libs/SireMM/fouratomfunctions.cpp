@@ -1061,8 +1061,26 @@ PropertyList FourAtomFunctions::merge(const MolViewProperty &other,
         }
     }
 
-    // the dihedrals for atoms that are unmapped in the perturbed state are
-    // already in prop1, as this was copied from prop0
+    // now add in the dihedrals to the perturbed state from the reference
+    // state for any atoms that aren't mapped to the perturbed state.
+    // This way, the removed atoms are held by a constant potential,
+    // so won't fly away in the simulation of the perturbed state
+    auto map0to1 = mapping.map0to1(true);
+
+    const auto ref_dihs = prop0.potentials(map0to1.keys(), true);
+
+    for (const auto &ref_dih : ref_dihs)
+    {
+        const auto atom0 = info().atomIdx(ref_dih.atom0());
+        const auto atom1 = info().atomIdx(ref_dih.atom1());
+        const auto atom2 = info().atomIdx(ref_dih.atom2());
+        const auto atom3 = info().atomIdx(ref_dih.atom3());
+
+        if (mapping.isUnmappedIn1(atom0) or mapping.isUnmappedIn1(atom1) or mapping.isUnmappedIn1(atom2) or mapping.isUnmappedIn1(atom3))
+        {
+            prop1.set(atom0, atom1, atom2, atom3, ref_dih.function());
+        }
+    }
 
     SireBase::PropertyList ret;
 

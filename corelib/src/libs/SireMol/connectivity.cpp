@@ -3478,6 +3478,24 @@ PropertyList ConnectivityBase::merge(const MolViewProperty &other,
         }
     }
 
+    // now add in the connections to the perturbed state from the reference
+    // state for any atoms that aren't mapped to the perturbed state.
+    // This way, the removed atoms are connected to the perturbed atoms
+    auto map0to1 = mapping.map0to1(true);
+
+    const auto ref_bonds = ref.getBonds(map0to1.keys(), true);
+
+    for (const auto &ref_bond : ref_bonds)
+    {
+        const auto atom0 = info().atomIdx(ref_bond.atom0());
+        const auto atom1 = info().atomIdx(ref_bond.atom1());
+
+        if (mapping.isUnmappedIn1(atom0) or mapping.isUnmappedIn1(atom1))
+        {
+            prop1.connect(atom0, atom1);
+        }
+    }
+
     SireBase::PropertyList ret;
 
     ret.append(prop0.commit());

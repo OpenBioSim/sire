@@ -936,8 +936,25 @@ PropertyList ThreeAtomFunctions::merge(const MolViewProperty &other,
         }
     }
 
-    // the angles for atoms that are unmapped in the perturbed state are
-    // already in prop1, as this was copied from prop0
+    // now add in the angles to the perturbed state from the reference
+    // state for any atoms that aren't mapped to the perturbed state.
+    // This way, the removed atoms are held by a constant angle potential,
+    // so won't fly away in the simulation of the perturbed state
+    auto map0to1 = mapping.map0to1(true);
+
+    const auto ref_angs = prop0.potentials(map0to1.keys(), true);
+
+    for (const auto &ref_ang : ref_angs)
+    {
+        const auto atom0 = info().atomIdx(ref_ang.atom0());
+        const auto atom1 = info().atomIdx(ref_ang.atom1());
+        const auto atom2 = info().atomIdx(ref_ang.atom2());
+
+        if (mapping.isUnmappedIn1(atom0) or mapping.isUnmappedIn1(atom1) or mapping.isUnmappedIn1(atom2))
+        {
+            prop1.set(atom0, atom1, atom2, ref_ang.function());
+        }
+    }
 
     SireBase::PropertyList ret;
 

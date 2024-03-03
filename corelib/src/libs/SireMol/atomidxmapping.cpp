@@ -713,12 +713,12 @@ void AtomIdxMapping::rebuild()
 
         if (entry.isMappedIn1())
         {
-            mapped1_list.append(entry.atomIdx1());
+            mapped1_list.append(entry.atomIdx0());
         }
         else
         {
-            unmapped1_set.insert(entry.atomIdx1());
-            unmapped1_list.append(entry.atomIdx1());
+            unmapped1_set.insert(entry.atomIdx0());
+            unmapped1_list.append(entry.atomIdx0());
         }
 
         if (entry.isMappedIn0() and entry.isMappedIn1())
