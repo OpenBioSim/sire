@@ -3438,7 +3438,7 @@ PropertyList ConnectivityBase::merge(const MolViewProperty &other,
     const ConnectivityBase &ref = *this;
     const ConnectivityBase &pert = other.asA<ConnectivityBase>();
 
-    auto prop0 = Connectivity(ref);
+    auto prop0 = Connectivity(ref).edit();
     auto prop1 = Connectivity(ref).edit();
 
     // the prop0 properties are already correct
@@ -3463,13 +3463,24 @@ PropertyList ConnectivityBase::merge(const MolViewProperty &other,
     // connect those bonds together
     for (const auto &pert_bond : pert_bonds)
     {
-        prop1.connect(map1to0.value(info().atomIdx(pert_bond.atom0())),
-                      map1to0.value(info().atomIdx(pert_bond.atom1())));
+        const auto atom0 = map1to0.value(info().atomIdx(pert_bond.atom0()));
+        const auto atom1 = map1to0.value(info().atomIdx(pert_bond.atom1()));
+
+        prop1.connect(atom0, atom1);
+
+        if (mapping.isUnmappedIn0(atom0) or mapping.isUnmappedIn0(atom1))
+        {
+            // the prop0 properties are nearly correct - we just need to add
+            // in a connection from 'pert' that involve the atoms that are not mapped
+            // in the reference state - this way, those added atoms are
+            // connected to the reference atoms
+            prop0.connect(atom0, atom1);
+        }
     }
 
     SireBase::PropertyList ret;
 
-    ret.append(prop0);
+    ret.append(prop0.commit());
     ret.append(prop1.commit());
 
     return ret;
