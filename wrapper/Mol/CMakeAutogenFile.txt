@@ -259,6 +259,7 @@ set ( PYPP_SOURCES
        ChainIntProperty.pypp.cpp
        IDAndSet_CGID_.pypp.cpp
        Specify_SegID_.pypp.cpp
+       AtomNumMatcher.pypp.cpp
        Molecule.pypp.cpp
        Mover_Chain_.pypp.cpp
        ChainStructureEditor.pypp.cpp

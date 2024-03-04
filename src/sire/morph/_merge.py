@@ -13,7 +13,7 @@ def _merge(mapping: _AtomMapping, as_new_molecule: bool = True, map=None):
     return _merge(mapping, as_new_molecule=as_new_molecule, map=map)
 
 
-def merge(mol0, mol1, map=None, map0=None, map1=None):
+def merge(mol0, mol1, match=None, prematch=None, map=None, map0=None, map1=None):
     from ..base import create_map
 
     map = create_map(map)
@@ -28,9 +28,17 @@ def merge(mol0, mol1, map=None, map0=None, map1=None):
     else:
         map1 = create_map(map, map1)
 
-    from . import match
+    from . import match as _match
 
-    mapping = match(mol0=mol0, mol1=mol1, match_light_atoms=True, map0=map0, map1=map1)
+    mapping = _match(
+        mol0=mol0,
+        mol1=mol1,
+        match=match,
+        prematch=prematch,
+        match_light_atoms=True,
+        map0=map0,
+        map1=map1,
+    )
 
     return mapping.merge(as_new_molecule=True, map=map)
 

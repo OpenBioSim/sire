@@ -244,6 +244,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::AtomCoordMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIdxMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomNameMatcher >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomNumMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIDMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMultiMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMCSMatcher >();

@@ -85,6 +85,8 @@
 
 #include "AtomNum.pypp.hpp"
 
+#include "AtomNumMatcher.pypp.hpp"
+
 #include "AtomPolarisabilities.pypp.hpp"
 
 #include "AtomProp.pypp.hpp"
@@ -739,6 +741,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_AtomNameMatcher_class();
 
     register_AtomNum_class();
+
+    register_AtomNumMatcher_class();
 
     register_AtomProp_class();
 
