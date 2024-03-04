@@ -969,3 +969,95 @@ const char *LJNBPairs::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<LJNBPairs>());
 }
+
+/** Merge this property with another property */
+PropertyList CLJNBPairs::merge(const MolViewProperty &other,
+                               const AtomIdxMapping &mapping,
+                               const QString &ghost,
+                               const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<CLJNBPairs>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for CLJNBPairs parameters is ignored").arg(ghost));
+    }
+
+    const CLJNBPairs &ref = *this;
+    const CLJNBPairs &pert = other.asA<CLJNBPairs>();
+
+    CLJNBPairs prop0 = ref;
+    CLJNBPairs prop1 = ref;
+
+    // we now go through all of the atoms that are mapped and set the
+    // CLJ NB pair to the right value for each end state. We copy the
+    // values from the alternate end state for ghost atoms, as we can
+    // assume that the ghost atoms will have the same bonding
+    // arrangement as in their end state
+    for (auto it1 = mapping.begin(); it1 != mapping.end(); ++it1)
+    {
+        const auto &atom_a = *it1;
+
+        for (auto it2 = it1 + 1; it2 != mapping.end(); ++it2)
+        {
+            const auto &atom_b = *it2;
+
+            if (atom_a.isUnmappedIn0() or atom_b.isUnmappedIn0())
+            {
+                // this pair does not exist in the reference state
+                if (atom_a.isUnmappedIn1() or atom_b.isUnmappedIn1())
+                {
+                    // this pair does not exist in the perturbed state either.
+                    // This pair should not interact with each other
+                    prop0.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                }
+                else
+                {
+                    // set both end states to the value in the perturbed state
+                    const auto &scl = pert.get(atom_a.cgAtomIdx1(), atom_b.cgAtomIdx1());
+
+                    prop0.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), scl);
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), scl);
+                }
+            }
+            else if (atom_a.isUnmappedIn1() or atom_b.isUnmappedIn1())
+            {
+                if (atom_a.isUnmappedIn0() or atom_b.isUnmappedIn0())
+                {
+                    // this pair does not exist in the reference state
+                    // This pair should not interact with each other
+                    prop0.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                }
+                else
+                {
+                    // set both end states to the value in the reference state
+                    const auto &scl = ref.get(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0());
+                    // already set in the reference state
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), scl);
+                }
+            }
+            else
+            {
+                // we only need to update the pertubed state to equal the
+                // value from the perturbed parameters
+                prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(),
+                          pert.get(atom_a.cgAtomIdx1(), atom_b.cgAtomIdx1()));
+            }
+        }
+    }
+
+    SireBase::PropertyList ret;
+
+    ret.append(prop0);
+    ret.append(prop1);
+
+    return ret;
+}

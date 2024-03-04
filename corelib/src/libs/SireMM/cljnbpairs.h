@@ -294,6 +294,11 @@ namespace SireMM
         QVector<AtomIdx> excludedAtoms(const AtomID &atomid) const;
 
         QHash<AtomIdx, QVector<AtomIdx>> excludedAtoms(CGIdx cgidx) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
     };
 
 } // namespace SireMM
