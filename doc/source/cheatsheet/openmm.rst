@@ -92,6 +92,10 @@ Available keys and allowable values are listed below.
 |                              | hydrogen atoms can be detected based on their mass.      |
 |                              | This is the default ``True``.                            |
 +------------------------------+----------------------------------------------------------+
+| check_for_h_by_max_mass      | Boolean value, e.g. ``True`` or ``False`` as to whether  |
+|                              | hydrogen atoms can be detected based on the maximum      |
+|                              | mass of the end states. This is the default ``True``.    |
++------------------------------+----------------------------------------------------------+
 | com_reset_frequency          | The frequency at which the ``CMMotionRemover`` acts to   |
 |                              | remove center of mass relative motion. If this is not    |
 |                              | set (the default) then center of mass motion is not      |

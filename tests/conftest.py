@@ -131,6 +131,11 @@ def merged_ethane_methanol():
 
 
 @pytest.fixture(scope="session")
+def merged_ethane_methane():
+    return sr.load_test_files("ethane_methane.bss")
+
+
+@pytest.fixture(scope="session")
 def merged_zan_ose():
     return sr.load_test_files("merged_ligand.s3")
 

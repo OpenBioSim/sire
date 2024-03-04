@@ -6,6 +6,125 @@ import pytest
     "openmm" not in sr.convert.supported_formats(),
     reason="openmm support is not available",
 )
+def test_perturbable_constraints(merged_ethane_methane, openmm_platform):
+    mols = sr.morph.link_to_reference(merged_ethane_methane)
+
+    d = mols[0].dynamics(constraint="none", platform=openmm_platform)
+
+    constraints = d.get_constraints()
+
+    # no constraints
+    assert len(constraints) == 0
+
+    d = mols[0].dynamics(constraint="bonds", platform=openmm_platform)
+
+    constraints = d.get_constraints()
+
+    # all bonds should be constrained
+    assert len(constraints) == len(mols[0].bonds())
+
+    d = mols[0].dynamics(
+        constraint="bonds", perturbable_constraint="none", platform=openmm_platform
+    )
+
+    # should be no constraints
+    assert len(d.get_constraints()) == 0
+
+    d = mols[0].dynamics(
+        constraint="bonds",
+        perturbable_constraint="h-bonds",
+        platform=openmm_platform,
+    )
+
+    constraints = d.get_constraints()
+
+    # there are 7 bonds involving hydrogen (includes the C-C to C-H bond)
+    assert len(constraints) == 7
+
+    d = mols[0].dynamics(constraint="h-bonds", platform=openmm_platform)
+
+    constraints = d.get_constraints()
+
+    # there are 7 bonds involving hydrogen (includes the C-C to C-H bond)
+    assert len(constraints) == 7
+
+    d = mols[0].dynamics(constraint="bonds-not-perturbed", platform=openmm_platform)
+
+    constraints = d.get_constraints()
+
+    # this should be the 6 C-H bonds, as the central C-C to C-H bond is not constrained
+    assert len(constraints) == 6
+
+    d = mols[0].dynamics(constraint="h-bonds-not-perturbed", platform=openmm_platform)
+
+    constraints = d.get_constraints()
+
+    # this should be the 6 C-H bonds, as the central C-C to C-H bond is not constrained
+    assert len(constraints) == 6
+
+    d = mols[0].dynamics(
+        constraint="h-bonds-not-heavy-perturbed", platform=openmm_platform
+    )
+
+    constraints = d.get_constraints()
+
+    # this should be the 6 C-H bonds, plus the C-C to C-H bond, because this is
+    # a non-heavy atom in one of the end states
+    assert len(constraints) == 7
+
+    d = mols[0].dynamics(
+        constraint="bonds-not-heavy-perturbed", platform=openmm_platform
+    )
+
+    constraints = d.get_constraints()
+
+    # this should be the 6 C-H bonds, plus the C-C to C-H bond, because this is
+    # a non-heavy atom in one of the end states
+    assert len(constraints) == 7
+
+    # this was at lambda=0, so check that the constraint lengths are correct
+    for constraint in constraints:
+        dist = constraint[1].value()
+
+        if dist == pytest.approx(1.0969):
+            # this is a C-H bond
+            assert (
+                constraint[0][0].element().num_protons()
+                + constraint[0][1].element().num_protons()
+                == 7
+            )
+        elif dist == pytest.approx(1.5375):
+            # this is a C-C bond
+            assert (
+                constraint[0][0].element().num_protons()
+                + constraint[0][1].element().num_protons()
+                == 12
+            )
+        else:
+            assert False
+
+    d = mols[0].dynamics(
+        constraint="bonds-not-heavy-perturbed",
+        lambda_value=1.0,
+        platform=openmm_platform,
+    )
+
+    constraints = d.get_constraints()
+
+    # this should be the 6 C-H bonds, plus the C-C to C-H bond, because this is
+    # a non-heavy atom in one of the end states
+    assert len(constraints) == 7
+
+    # this was at lambda=1, so check that the constraint lengths are correct
+    # (they should all be C-H bond lengths)
+    for constraint in constraints:
+        assert constraint[1].value() == pytest.approx(1.0969)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
 def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     mols = sr.morph.link_to_reference(merged_ethane_methanol)
 
@@ -16,9 +135,7 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
     # no constraints
     assert len(constraints) == 0
 
-    d = mols[0].dynamics(
-        constraint="h-bonds", dynamic_constraints=False, platform=openmm_platform
-    )
+    d = mols[0].dynamics(constraint="h-bonds", platform=openmm_platform)
 
     constraints = d.get_constraints()
 
@@ -30,7 +147,8 @@ def test_h_bond_constraints(merged_ethane_methanol, openmm_platform):
         assert constraint[0].atom("element H").element().symbol() == "H"
 
     d = mols[0].dynamics(
-        constraint="bonds", dynamic_constraints=False, platform=openmm_platform
+        constraint="bonds",
+        platform=openmm_platform,
     )
 
     constraints = d.get_constraints()
