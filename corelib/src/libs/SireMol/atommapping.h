@@ -151,6 +151,11 @@ namespace SireMol
 
         AtomMapping swap() const;
 
+        AtomMapping align() const;
+
+        AtomMapping alignTo0() const;
+        AtomMapping alignTo1() const;
+
         Atom map(const Atom &atom, bool find_all = true) const;
 
         SelectorM<Atom> map(const MoleculeView &atoms,

@@ -28,6 +28,10 @@
 
 #include "atommapping.h"
 
+#include "SireMaths/align.h"
+
+#include "SireMol/core.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -696,4 +700,74 @@ const PropertyMap &AtomMapping::propertyMap0() const
 const PropertyMap &AtomMapping::propertyMap1() const
 {
     return this->map1;
+}
+
+/** Return the mapping where the perturbed state (1) has been
+ *  aligned against the reference state (0).
+ */
+AtomMapping AtomMapping::align() const
+{
+    return this->alignTo0();
+}
+
+/** Return the mapping where the perturbed state (1) has been
+ *  aligned against the reference state (0).
+ */
+AtomMapping AtomMapping::alignTo0() const
+{
+    if (this->isEmpty())
+        return *this;
+    else if (this->atms0.isEmpty())
+        return *this;
+
+    QVector<Vector> coords0 = this->atms0.property<Vector>(map0["coordinates"]).toVector();
+    QVector<Vector> coords1 = this->atms1.property<Vector>(map1["coordinates"]).toVector();
+
+    // calculate the transform to do a RMSD aligment of the two sets of coordinates
+    auto transform = SireMaths::getAlignment(coords0, coords1, true);
+
+    auto mols1 = this->orig_atms1.molecules();
+
+    AtomMapping ret(*this);
+
+    for (int i = 0; i < mols1.count(); ++i)
+    {
+        auto mol = mols1[i].move().transform(transform, map1).commit();
+
+        ret.atms1.update(mol);
+        ret.orig_atms1.update(mol);
+    }
+
+    return ret;
+}
+
+/** Return the mapping where the perturbed state (1) has been
+ *  aligned against the reference state (0).
+ */
+AtomMapping AtomMapping::alignTo1() const
+{
+    if (this->isEmpty())
+        return *this;
+    else if (this->atms0.isEmpty())
+        return *this;
+
+    QVector<Vector> coords0 = this->atms0.property<Vector>(map0["coordinates"]).toVector();
+    QVector<Vector> coords1 = this->atms1.property<Vector>(map1["coordinates"]).toVector();
+
+    // calculate the transform to do a RMSD aligment of the two sets of coordinates
+    auto transform = SireMaths::getAlignment(coords1, coords0, true);
+
+    auto mols0 = this->orig_atms0.molecules();
+
+    AtomMapping ret(*this);
+
+    for (int i = 0; i < mols0.count(); ++i)
+    {
+        auto mol = mols0[i].move().transform(transform, map0).commit();
+
+        ret.atms0.update(mol);
+        ret.orig_atms0.update(mol);
+    }
+
+    return ret;
 }

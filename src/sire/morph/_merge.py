@@ -5,12 +5,16 @@ from ..mol import AtomMapping as _AtomMapping
 
 
 def _merge(mapping: _AtomMapping, as_new_molecule: bool = True, map=None):
-    from ..legacy.System import merge as _merge
+    from ..legacy.System import merge as _merge_mols
     from ..base import create_map
 
     map = create_map(map)
 
-    return _merge(mapping, as_new_molecule=as_new_molecule, map=map)
+    # now align the perturbed state onto the reference state,
+    # so that any added atoms have roughly the right coordinates
+    aligned_mapping = mapping.align()
+
+    return _merge_mols(aligned_mapping, as_new_molecule=as_new_molecule, map=map)
 
 
 def merge(mol0, mol1, match=None, prematch=None, map=None, map0=None, map1=None):

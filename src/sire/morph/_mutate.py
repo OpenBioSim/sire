@@ -7,7 +7,7 @@ from ..mol import AtomMapping as _AtomMapping
 def _mutate(mapping: _AtomMapping, as_new_molecule: bool = True, map=None):
     return (
         mapping.merge(as_new_molecule=as_new_molecule, map=map)
-        .morph(map=map)
+        .perturbation()
         .extract_perturbed(remove_ghosts=True)
     )
 

@@ -43,6 +43,42 @@ void register_AtomMapping_class(){
         AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("matched_atoms0"), bp::arg("matched_atoms1"), bp::arg("map")=SireBase::PropertyMap() ), "") );
         AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireBase::PropertyMap const &, SireBase::PropertyMap const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("matched_atoms0"), bp::arg("matched_atoms1"), bp::arg("map0"), bp::arg("map1") ), "") );
         AtomMapping_exposer.def( bp::init< SireMol::AtomMapping const & >(( bp::arg("other") ), "") );
+        { //::SireMol::AtomMapping::align
+        
+            typedef ::SireMol::AtomMapping ( ::SireMol::AtomMapping::*align_function_type)(  ) const;
+            align_function_type align_function_value( &::SireMol::AtomMapping::align );
+            
+            AtomMapping_exposer.def( 
+                "align"
+                , align_function_value
+                , bp::release_gil_policy()
+                , "Return the mapping where the perturbed state (1) has been\n  aligned against the reference state (0).\n" );
+        
+        }
+        { //::SireMol::AtomMapping::alignTo0
+        
+            typedef ::SireMol::AtomMapping ( ::SireMol::AtomMapping::*alignTo0_function_type)(  ) const;
+            alignTo0_function_type alignTo0_function_value( &::SireMol::AtomMapping::alignTo0 );
+            
+            AtomMapping_exposer.def( 
+                "alignTo0"
+                , alignTo0_function_value
+                , bp::release_gil_policy()
+                , "Return the mapping where the perturbed state (1) has been\n  aligned against the reference state (0).\n" );
+        
+        }
+        { //::SireMol::AtomMapping::alignTo1
+        
+            typedef ::SireMol::AtomMapping ( ::SireMol::AtomMapping::*alignTo1_function_type)(  ) const;
+            alignTo1_function_type alignTo1_function_value( &::SireMol::AtomMapping::alignTo1 );
+            
+            AtomMapping_exposer.def( 
+                "alignTo1"
+                , alignTo1_function_value
+                , bp::release_gil_policy()
+                , "Return the mapping where the perturbed state (1) has been\n  aligned against the reference state (0).\n" );
+        
+        }
         { //::SireMol::AtomMapping::assertSingleMolecule
         
             typedef void ( ::SireMol::AtomMapping::*assertSingleMolecule_function_type)(  ) const;

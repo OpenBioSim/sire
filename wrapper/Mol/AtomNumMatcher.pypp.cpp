@@ -57,9 +57,9 @@ void register_AtomNumMatcher_class(){
 
     { //::SireMol::AtomNumMatcher
         typedef bp::class_< SireMol::AtomNumMatcher, bp::bases< SireMol::AtomMatcher, SireBase::Property > > AtomNumMatcher_exposer_t;
-        AtomNumMatcher_exposer_t AtomNumMatcher_exposer = AtomNumMatcher_exposer_t( "AtomNumMatcher", "This is a simple atom matcher that matches the atoms based\non their numbers, so the atom with number 1 in molinfo0 will\nbe matched to the atom with number 1 in molinfo1\n", bp::init< >("") );
+        AtomNumMatcher_exposer_t AtomNumMatcher_exposer = AtomNumMatcher_exposer_t( "AtomNumMatcher", "This is a simple atom matcher that matches the atoms based\non their numbers, so the atom with number 1 in molinfo0 will\nbe matched to the atom with number 1 in molinfo1\n", bp::init< >("Constructor") );
         bp::scope AtomNumMatcher_scope( AtomNumMatcher_exposer );
-        AtomNumMatcher_exposer.def( bp::init< SireMol::AtomNumMatcher const & >(( bp::arg("arg0") ), "") );
+        AtomNumMatcher_exposer.def( bp::init< SireMol::AtomNumMatcher const & >(( bp::arg("arg0") ), "Copy constructor") );
         AtomNumMatcher_exposer.def( bp::self != bp::self );
         { //::SireMol::AtomNumMatcher::operator=
         
