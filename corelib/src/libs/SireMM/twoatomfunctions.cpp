@@ -928,6 +928,37 @@ PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
         }
     }
 
+    // check if we are allowed to change the size of a ring or break rings
+    bool allow_ring_breaking = true;
+    bool allow_ring_size_change = true;
+
+    if (map.specified("allow_ring_breaking"))
+    {
+        allow_ring_breaking = map["allow_ring_breaking"].value().asABoolean();
+    }
+
+    if (map.specified("allow_ring_size_change"))
+    {
+        allow_ring_size_change = map["allow_ring_size_change"].value().asABoolean();
+    }
+
+    if (not(allow_ring_breaking or allow_ring_size_change))
+    {
+        if (prop0.nFunctions() != prop1.nFunctions())
+        {
+            // number of bond functions has changed - this indicates
+            // (but not necessarily proves) that a ring has been broken
+            // or a ring size has changed
+            throw SireError::incompatible_error(
+                QObject::tr("The number of bonds in the reference (%1) and "
+                            "perturbed (%2) states is different, indicating that a ring has been broken or a ring size has changed. "
+                            "If you want to allow this perturbation, set 'allow_ring_breaking' or 'allow_ring_size_change' to true.")
+                    .arg(prop0.nFunctions())
+                    .arg(prop1.nFunctions()),
+                CODELOC);
+        }
+    }
+
     SireBase::PropertyList ret;
 
     ret.append(prop0);

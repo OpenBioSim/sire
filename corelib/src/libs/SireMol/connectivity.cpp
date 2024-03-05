@@ -3416,6 +3416,149 @@ void ConnectivityBase::assertHasProperty(const ImproperID &improper, const Prope
                                          CODELOC);
 }
 
+/** Return whether or not this atom is in a ring */
+static bool is_on_ring(const Connectivity &conn, const AtomIdx &atom)
+{
+    if (conn.inRing(atom))
+    {
+        // loop over all atoms connected to this atom
+        for (const auto &neighbour : conn.connectionsTo(atom))
+        {
+            // if the neighbour is in the ring, then this atom is in the ring
+            if (not(conn.inRing(neighbour, atom)))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+/** Return whether or not there is a change in ring between the passed
+ *  two atoms in the passed two connectivities */
+static bool is_ring_size_changed(const Connectivity &conn0,
+                                 const Connectivity &conn1,
+                                 const AtomIdxMappingEntry &atom0,
+                                 const AtomIdxMappingEntry &atom1,
+                                 int max_ring_size = 12)
+{
+    // Have a ring changed size? If so, then the minimum path size between
+    // two atoms will have changed.
+
+    // Work out the paths connecting the atoms in the two end states.
+    auto paths0 = conn0.findPaths(atom0.atomIdx0(), atom1.atomIdx0(), max_ring_size);
+    auto paths1 = conn1.findPaths(atom0.atomIdx1(), atom1.atomIdx1(), max_ring_size);
+
+    // Initialise the ring size in each end state.
+    auto ring0 = -1;
+    auto ring1 = -1;
+
+    // Determine the minimum path in the lambda = 0 state.
+    if (paths0.count() > 1)
+    {
+        QVector<int> path_lengths0;
+
+        for (const auto &path : paths0)
+        {
+            path_lengths0.append(path.count());
+        }
+
+        ring0 = *(std::min_element(path_lengths0.begin(), path_lengths0.end()));
+    }
+
+    if (ring0 == -1)
+        return false;
+
+    // Determine the minimum path in the lambda = 1 state.
+    if (paths1.count() > 1)
+    {
+        QVector<int> path_lengths1;
+
+        for (const auto &path : paths1)
+        {
+            path_lengths1.append(path.count());
+        }
+
+        ring1 = *(std::min_element(path_lengths1.begin(), path_lengths1.end()));
+    }
+
+    // Return whether the ring has changed size.
+    return ring0 != ring1;
+}
+
+/** Return whether any ring that both the atoms are on is broken/formed
+ *  during the merge */
+static bool is_ring_broken(const Connectivity &conn0,
+                           const Connectivity &conn1,
+                           const AtomIdxMappingEntry &atom0,
+                           const AtomIdxMappingEntry &atom1)
+{
+    // Have we opened/closed a ring? This means that both atoms are part of a
+    // ring in one end state (either in it, or on it), whereas at least one
+    // isn't in the other state.
+
+    // Whether each atom is in a ring in both end states.
+    auto in_ring_idx0 = conn0.inRing(atom0.atomIdx0());
+    auto in_ring_idy0 = conn0.inRing(atom1.atomIdx0());
+    auto in_ring_idx1 = conn1.inRing(atom0.atomIdx1());
+    auto in_ring_idy1 = conn1.inRing(atom1.atomIdx1());
+
+    // Whether each atom is on a ring in both end states.
+    auto on_ring_idx0 = is_on_ring(conn0, atom0.atomIdx0());
+    auto on_ring_idy0 = is_on_ring(conn0, atom1.atomIdx0());
+    auto on_ring_idx1 = is_on_ring(conn1, atom0.atomIdx1());
+    auto on_ring_idy1 = is_on_ring(conn1, atom1.atomIdx1());
+
+    # Both atoms are in a ring in one end state and at least one isn't in the other.
+    if (in_ring_idx0 & in_ring_idy0) ^ (in_ring_idx1 & in_ring_idy1):
+        return True
+
+    # Both atoms are on a ring in one end state and at least one isn't in the other.
+    if (on_ring_idx0 & on_ring_idy0 & (conn0.connectionType(idx0, idy0) == 4)) ^ (
+        on_ring_idx1 & on_ring_idy1 & (conn1.connectionType(idx1, idy1) == 4)
+    ):
+        # Make sure that the change isn't a result of ring growth, i.e. one of
+        # the atoms isn't in a ring in one end state, while its "on" ring status
+        # has changed between states.
+        if not (
+            (in_ring_idx0 | in_ring_idx1) & (on_ring_idx0 ^ on_ring_idx1)
+            or (in_ring_idy0 | in_ring_idy1) & (on_ring_idy0 ^ on_ring_idy1)
+        ):
+            return True
+
+    # Both atoms are in or on a ring in one state and at least one isn't in the other.
+    if (
+        (in_ring_idx0 | on_ring_idx0)
+        & (in_ring_idy0 | on_ring_idy0)
+        & (conn0.connectionType(idx0, idy0) == 3)
+    ) ^ (
+        (in_ring_idx1 | on_ring_idx1)
+        & (in_ring_idy1 | on_ring_idy1)
+        & (conn1.connectionType(idx1, idy1) == 3)
+    ):
+        iscn0 = set(conn0.connectionsTo(idx0)).intersection(
+            set(conn0.connectionsTo(idy0))
+        )
+        if len(iscn0) != 1:
+            return True
+        common_idx = iscn0.pop()
+        in_ring_bond0 = conn0.inRing(idx0, common_idx) | conn0.inRing(idy0, common_idx)
+        iscn1 = set(conn1.connectionsTo(idx1)).intersection(
+            set(conn1.connectionsTo(idy1))
+        )
+        if len(iscn1) != 1:
+            return True
+        common_idx = iscn1.pop()
+        in_ring_bond1 = conn1.inRing(idx1, common_idx) | conn1.inRing(idy1, common_idx)
+        if in_ring_bond0 ^ in_ring_bond1:
+            return True
+
+    # If we get this far, then a ring wasn't broken.
+    return False
+    */
+
+    return false;
+}
+
 /** Merge this property with another property */
 PropertyList ConnectivityBase::merge(const MolViewProperty &other,
                                      const AtomIdxMapping &mapping,
@@ -3496,10 +3639,70 @@ PropertyList ConnectivityBase::merge(const MolViewProperty &other,
         }
     }
 
+    // check if we are allowed to change the size of a ring or break rings
+    bool allow_ring_breaking = true;
+    bool allow_ring_size_change = true;
+
+    if (map.specified("allow_ring_breaking"))
+    {
+        allow_ring_breaking = map["allow_ring_breaking"].value().asABoolean();
+    }
+
+    if (map.specified("allow_ring_size_change"))
+    {
+        allow_ring_size_change = map["allow_ring_size_change"].value().asABoolean();
+    }
+
     SireBase::PropertyList ret;
 
     ret.append(prop0.commit());
     ret.append(prop1.commit());
+
+    if (allow_ring_breaking and allow_ring_size_change)
+    {
+        // nothing more to do
+        return ret;
+    }
+
+    // we need to check that the merge doesn't break or change rings - do this
+    // by looping over pairs of atoms mapped in both states and checking,
+    // if they are in a ring, if that ring has changed size or been broken or
+    // formed by the merge
+    for (auto it0 = mapping.constBegin(); it0 != mapping.constEnd(); ++it0)
+    {
+        const auto &atom0 = *it0;
+
+        for (auto it1 = it0 + 1; it1 != mapping.constEnd(); ++it1)
+        {
+            const auto &atom1 = *it1;
+
+            if (not allow_ring_size_change)
+            {
+                if (is_ring_size_changed(ref, pert, atom0, atom1))
+                {
+                    throw SireError::incompatible_error(QObject::tr("The merge has changed the size of a ring. To allow this "
+                                                                    "perturbation, set the 'allow_ring_size_change' option "
+                                                                    "to 'True'. Be aware that this perturbation may not work "
+                                                                    "and a transition through an intermediate state may be "
+                                                                    "preferable."),
+                                                        CODELOC);
+                }
+            }
+
+            if (not allow_ring_breaking)
+            {
+                if (is_ring_broken(ref, pert, atom0, atom1))
+                {
+                    throw SireError::incompatible_error(QObject::tr("The merge has changed the molecular connectivity "
+                                                                    "but a ring didn't open/close or change size. "
+                                                                    "If you want to proceed with this mapping pass "
+                                                                    "'force=True'. You are warned that the resulting "
+                                                                    "perturbation will likely be unstable."),
+                                                        CODELOC);
+                }
+            }
+        }
+    }
 
     return ret;
 }
