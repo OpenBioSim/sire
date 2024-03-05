@@ -436,6 +436,7 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
         improper_prop = map["improper"]
         charge_prop = map["charge"]
         connectivity_prop = map["connectivity"]
+        intrascale_prop = map["intrascale"]
 
         # Get the molecular info object.
         info = qm_mol.info()
@@ -588,6 +589,27 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
             # Connectivity.
             elif prop == connectivity_prop:
                 pass
+
+            # Intrascale.
+            elif prop == intrascale_prop:
+                # We need to remove intramolecular non-bonded exceptions between QM atoms.
+
+                # Get the existing property.
+                intrascale = qm_mol.property(prop)
+
+                # Set as the lambda = 0 (MM) end state.
+                edit_mol = edit_mol.set_property(prop + "0", intrascale).molecule()
+
+                # Zero the scale factors for all QM-QM interactions.
+                for idx in qm_idxs:
+                    for idx2 in qm_idxs:
+                        intrascale.set(idx, idx2, _MM.CLJScaleFactor(0, 0))
+
+                # Set as the lambda = 1 (QM) end state.
+                edit_mol = edit_mol.set_property(prop + "1", intrascale).molecule()
+
+                # Remove the existing property.
+                edit_mol = edit_mol.remove_property(prop).molecule()
 
             # All other properties remain the same in both end states.
             else:
