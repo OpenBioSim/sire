@@ -86,6 +86,9 @@ namespace SireMol
         bool isMappedIn0() const;
         bool isMappedIn1() const;
 
+        bool isMappedInBoth() const;
+        bool isUnmappedInBoth() const;
+
         AtomIdx atomIdx0() const;
         AtomIdx atomIdx1() const;
 
@@ -189,6 +192,12 @@ namespace SireMol
 
         bool isUnmappedIn0(const AtomIdx &atom) const;
         bool isUnmappedIn1(const AtomIdx &atom) const;
+
+        bool isMappedIn0(const AtomIdx &atom) const;
+        bool isMappedIn1(const AtomIdx &atom) const;
+
+        bool isMappedInBoth(const AtomIdx &atom) const;
+        bool isUnmappedInBoth(const AtomIdx &atom) const;
 
         QHash<AtomIdx, AtomIdx> map0to1(bool include_unmapped = false) const;
         QHash<AtomIdx, AtomIdx> map1to0(bool include_unmapped = false) const;

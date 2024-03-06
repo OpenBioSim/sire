@@ -105,6 +105,45 @@ void register_AtomIdxMapping_class(){
                 , "Return whether or not the list is empty" );
         
         }
+        { //::SireMol::AtomIdxMapping::isMappedIn0
+        
+            typedef bool ( ::SireMol::AtomIdxMapping::*isMappedIn0_function_type)( ::SireMol::AtomIdx const & ) const;
+            isMappedIn0_function_type isMappedIn0_function_value( &::SireMol::AtomIdxMapping::isMappedIn0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "isMappedIn0"
+                , isMappedIn0_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "Return whether or not this atom is mapped in the reference state" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::isMappedIn1
+        
+            typedef bool ( ::SireMol::AtomIdxMapping::*isMappedIn1_function_type)( ::SireMol::AtomIdx const & ) const;
+            isMappedIn1_function_type isMappedIn1_function_value( &::SireMol::AtomIdxMapping::isMappedIn1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "isMappedIn1"
+                , isMappedIn1_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "Return whether or not this atom is mapped in the perturbed state" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::isMappedInBoth
+        
+            typedef bool ( ::SireMol::AtomIdxMapping::*isMappedInBoth_function_type)( ::SireMol::AtomIdx const & ) const;
+            isMappedInBoth_function_type isMappedInBoth_function_value( &::SireMol::AtomIdxMapping::isMappedInBoth );
+            
+            AtomIdxMapping_exposer.def( 
+                "isMappedInBoth"
+                , isMappedInBoth_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "Return whether or not this atom is mapped in both end states" );
+        
+        }
         { //::SireMol::AtomIdxMapping::isUnmappedIn0
         
             typedef bool ( ::SireMol::AtomIdxMapping::*isUnmappedIn0_function_type)( ::SireMol::AtomIdx const & ) const;
@@ -129,6 +168,19 @@ void register_AtomIdxMapping_class(){
                 , ( bp::arg("atom") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::isUnmappedInBoth
+        
+            typedef bool ( ::SireMol::AtomIdxMapping::*isUnmappedInBoth_function_type)( ::SireMol::AtomIdx const & ) const;
+            isUnmappedInBoth_function_type isUnmappedInBoth_function_value( &::SireMol::AtomIdxMapping::isUnmappedInBoth );
+            
+            AtomIdxMapping_exposer.def( 
+                "isUnmappedInBoth"
+                , isUnmappedInBoth_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "Return whether or not this atom is unmapped in both end states" );
         
         }
         { //::SireMol::AtomIdxMapping::map0to1

@@ -3417,7 +3417,7 @@ void ConnectivityBase::assertHasProperty(const ImproperID &improper, const Prope
 }
 
 /** Return whether or not this atom is in a ring */
-static bool is_on_ring(const Connectivity &conn, const AtomIdx &atom)
+static bool is_on_ring(const AtomIdx &atom, const Connectivity &conn)
 {
     if (conn.inRing(atom))
     {
@@ -3496,66 +3496,76 @@ static bool is_ring_broken(const Connectivity &conn0,
     // ring in one end state (either in it, or on it), whereas at least one
     // isn't in the other state.
 
+    if (not(atom0.isMappedInBoth() and atom1.isMappedInBoth()))
+        // either atom isn't in both end states, so cannot be part
+        // of a ring that is in both end states...
+        return false;
+
+    const auto idx0 = atom0.atomIdx0();
+    const auto idy0 = atom1.atomIdx0();
+
+    const auto idx1 = atom0.atomIdx1();
+    const auto idy1 = atom1.atomIdx1();
+
     // Whether each atom is in a ring in both end states.
-    auto in_ring_idx0 = conn0.inRing(atom0.atomIdx0());
-    auto in_ring_idy0 = conn0.inRing(atom1.atomIdx0());
-    auto in_ring_idx1 = conn1.inRing(atom0.atomIdx1());
-    auto in_ring_idy1 = conn1.inRing(atom1.atomIdx1());
+    const auto in_ring_idx0 = conn0.inRing(idx0);
+    const auto in_ring_idy0 = conn0.inRing(idy0);
+    const auto in_ring_idx1 = conn1.inRing(idx1);
+    const auto in_ring_idy1 = conn1.inRing(idy1);
 
     // Whether each atom is on a ring in both end states.
-    auto on_ring_idx0 = is_on_ring(conn0, atom0.atomIdx0());
-    auto on_ring_idy0 = is_on_ring(conn0, atom1.atomIdx0());
-    auto on_ring_idx1 = is_on_ring(conn1, atom0.atomIdx1());
-    auto on_ring_idy1 = is_on_ring(conn1, atom1.atomIdx1());
+    const auto on_ring_idx0 = is_on_ring(idx0, conn0);
+    const auto on_ring_idy0 = is_on_ring(idy0, conn0);
+    const auto on_ring_idx1 = is_on_ring(idx1, conn1);
+    const auto on_ring_idy1 = is_on_ring(idy1, conn1);
 
-    # Both atoms are in a ring in one end state and at least one isn't in the other.
-    if (in_ring_idx0 & in_ring_idy0) ^ (in_ring_idx1 & in_ring_idy1):
-        return True
+    // Both atoms are in a ring in one end state and at least one isn't in the other.
+    if ((in_ring_idx0 & in_ring_idy0) ^ (in_ring_idx1 & in_ring_idy1))
+        return true;
 
-    # Both atoms are on a ring in one end state and at least one isn't in the other.
-    if (on_ring_idx0 & on_ring_idy0 & (conn0.connectionType(idx0, idy0) == 4)) ^ (
-        on_ring_idx1 & on_ring_idy1 & (conn1.connectionType(idx1, idy1) == 4)
-    ):
-        # Make sure that the change isn't a result of ring growth, i.e. one of
-        # the atoms isn't in a ring in one end state, while its "on" ring status
-        # has changed between states.
-        if not (
-            (in_ring_idx0 | in_ring_idx1) & (on_ring_idx0 ^ on_ring_idx1)
-            or (in_ring_idy0 | in_ring_idy1) & (on_ring_idy0 ^ on_ring_idy1)
-        ):
-            return True
+    // Both atoms are on a ring in one end state and at least one isn't in the other.
+    if ((on_ring_idx0 & on_ring_idy0 & (conn0.connectionType(idx0, idy0) == 4)) ^ (on_ring_idx1 & on_ring_idy1 & (conn1.connectionType(idx1, idy1) == 4)))
+    {
+        // Make sure that the change isn't a result of ring growth, i.e. one of
+        // the atoms isn't in a ring in one end state, while its "on" ring status
+        // has changed between states.
+        if (not((in_ring_idx0 | in_ring_idx1) & (on_ring_idx0 ^ on_ring_idx1) or (in_ring_idy0 | in_ring_idy1) & (on_ring_idy0 ^ on_ring_idy1)))
+        {
+            return true;
+        }
+    }
 
-    # Both atoms are in or on a ring in one state and at least one isn't in the other.
-    if (
-        (in_ring_idx0 | on_ring_idx0)
-        & (in_ring_idy0 | on_ring_idy0)
-        & (conn0.connectionType(idx0, idy0) == 3)
-    ) ^ (
-        (in_ring_idx1 | on_ring_idx1)
-        & (in_ring_idy1 | on_ring_idy1)
-        & (conn1.connectionType(idx1, idy1) == 3)
-    ):
-        iscn0 = set(conn0.connectionsTo(idx0)).intersection(
-            set(conn0.connectionsTo(idy0))
-        )
-        if len(iscn0) != 1:
-            return True
-        common_idx = iscn0.pop()
-        in_ring_bond0 = conn0.inRing(idx0, common_idx) | conn0.inRing(idy0, common_idx)
-        iscn1 = set(conn1.connectionsTo(idx1)).intersection(
-            set(conn1.connectionsTo(idy1))
-        )
-        if len(iscn1) != 1:
-            return True
-        common_idx = iscn1.pop()
-        in_ring_bond1 = conn1.inRing(idx1, common_idx) | conn1.inRing(idy1, common_idx)
-        if in_ring_bond0 ^ in_ring_bond1:
-            return True
+    // Both atoms are in or on a ring in one state and at least one isn't in the other.
+    if (((in_ring_idx0 | on_ring_idx0) & (in_ring_idy0 | on_ring_idy0) & (conn0.connectionType(idx0, idy0) == 3)) ^
+        ((in_ring_idx1 | on_ring_idx1) & (in_ring_idy1 | on_ring_idy1) & (conn1.connectionType(idx1, idy1) == 3)))
+    {
+        auto iscn0 = conn0.connectionsTo(idx0);
+        iscn0.intersect(conn0.connectionsTo(idy0));
 
-    # If we get this far, then a ring wasn't broken.
-    return False
-    */
+        if (iscn0.count() != 1)
+            return true;
 
+        auto common_idx = *(iscn0.constBegin());
+        iscn0.remove(common_idx);
+
+        const auto in_ring_bond0 = conn0.inRing(idx0, common_idx) or conn0.inRing(idy0, common_idx);
+
+        auto iscn1 = conn1.connectionsTo(idx1);
+        iscn1.intersect(conn1.connectionsTo(idy1));
+
+        if (iscn1.count() != 1)
+            return true;
+
+        common_idx = *(iscn1.constBegin());
+        iscn1.remove(common_idx);
+
+        const auto in_ring_bond1 = conn1.inRing(idx1, common_idx) or conn1.inRing(idy1, common_idx);
+
+        if (in_ring_bond0 ^ in_ring_bond1)
+            return true;
+    }
+
+    // If we get this far, then a ring wasn't broken.
     return false;
 }
 
@@ -3672,9 +3682,17 @@ PropertyList ConnectivityBase::merge(const MolViewProperty &other,
     {
         const auto &atom0 = *it0;
 
+        if (not atom0.isMappedInBoth())
+            // this cannot be part of a ring, as it is not in both states
+            continue;
+
         for (auto it1 = it0 + 1; it1 != mapping.constEnd(); ++it1)
         {
             const auto &atom1 = *it1;
+
+            if (not atom1.isMappedInBoth())
+                // this cannot be part of a ring, as it is not in both states
+                continue;
 
             if (not allow_ring_size_change)
             {

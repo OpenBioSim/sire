@@ -217,6 +217,18 @@ bool AtomIdxMappingEntry::isMappedIn1() const
     return not atomidx1.isNull();
 }
 
+/** Return whether or not this atom is unmapped in both end states */
+bool AtomIdxMappingEntry::isUnmappedInBoth() const
+{
+    return this->isUnmappedIn0() and this->isUnmappedIn1();
+}
+
+/** Return whether or not this atom is mapped in both end states */
+bool AtomIdxMappingEntry::isMappedInBoth() const
+{
+    return this->isMappedIn0() and this->isMappedIn1();
+}
+
 /** Return the atom index in the reference state. This will always have
  *  a value, even if the atom is unmapped in the reference state
  *  (this signals that any parameter with this index should be zero)
@@ -833,4 +845,28 @@ QHash<AtomIdx, AtomIdx> AtomIdxMapping::map1to0(bool include_unmapped) const
     {
         return map1_to_0_exc;
     }
+}
+
+/** Return whether or not this atom is mapped in the reference state */
+bool AtomIdxMapping::isMappedIn0(const AtomIdx &atom) const
+{
+    return not this->isUnmappedIn0(atom);
+}
+
+/** Return whether or not this atom is mapped in the perturbed state */
+bool AtomIdxMapping::isMappedIn1(const AtomIdx &atom) const
+{
+    return not this->isUnmappedIn1(atom);
+}
+
+/** Return whether or not this atom is unmapped in both end states */
+bool AtomIdxMapping::isUnmappedInBoth(const AtomIdx &atom) const
+{
+    return this->isUnmappedIn0(atom) and this->isUnmappedIn1(atom);
+}
+
+/** Return whether or not this atom is mapped in both end states */
+bool AtomIdxMapping::isMappedInBoth(const AtomIdx &atom) const
+{
+    return this->isMappedIn0(atom) and this->isMappedIn1(atom);
 }
