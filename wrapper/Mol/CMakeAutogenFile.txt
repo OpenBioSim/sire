@@ -97,6 +97,7 @@ set ( PYPP_SOURCES
        SelectResultMover.pypp.cpp
        Element.pypp.cpp
        IDOrSet_SegID_.pypp.cpp
+       AtomCoordMatcher.pypp.cpp
        BeadIdx.pypp.cpp
        ChainID.pypp.cpp
        Beads.pypp.cpp

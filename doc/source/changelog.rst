@@ -20,6 +20,8 @@ Fixes
 * Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
   that we only compare residues with the same number of atoms.
 
+* Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
+
 * Added ``map`` support to writing perturbable Gromacs topology files. This
   enables the user to specify which perturbable properties to use,
   e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.

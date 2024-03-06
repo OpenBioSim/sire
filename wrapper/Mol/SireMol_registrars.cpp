@@ -240,6 +240,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireID::IDOrSet<SireMol::MolID> >();
     ObjectRegistry::registerConverterFor< SireMol::MolWithResID >();
     ObjectRegistry::registerConverterFor< SireMol::ChainResID >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomCoordMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIdxMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomNameMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIDMatcher >();
