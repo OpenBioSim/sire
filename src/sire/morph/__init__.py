@@ -8,6 +8,8 @@ __all__ = [
     "extract_perturbed",
     "link_to_reference",
     "link_to_perturbed",
+    "annihilate",
+    "decouple",
     "match",
     "merge",
     "mutate",
@@ -44,3 +46,5 @@ from ._pertfile import create_from_pertfile
 from ._merge import merge
 
 from ._mutate import mutate
+
+from ._decouple import annihilate, decouple
