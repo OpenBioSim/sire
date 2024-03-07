@@ -3158,7 +3158,7 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 
 /** Internal function used to convert a Gromacs Moltyp to a set of lines */
 static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol,
-                                bool uses_parallel, bool fix_null_perturbable_14s = false)
+                                bool uses_parallel)
 {
     QStringList lines;
 
@@ -4059,6 +4059,11 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
             // A set of recorded 1-4 pairs.
             QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
 
+            bool fix_null_perturbable_14s = false;
+
+            if (mol.hasProperty("fix_null_perturbable_14s"))
+                fix_null_perturbable_14s = mol.property("fix_null_perturbable_14s").asA<BooleanProperty>().value();
+
             // Must record every pair that has a non-default scaling factor.
             // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
             for (int i = 0; i < scl0.nGroups(); ++i)
@@ -4290,7 +4295,7 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
     lines of a Gromacs topology file */
 static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &moltyps,
                                  const QMap<QPair<int, QString>, Molecule> &examples, bool uses_parallel,
-                                 bool isSorted = false, bool fix_null_perturbable_14s = false)
+                                 bool isSorted = false)
 {
     QHash<QString, QStringList> typs;
 
@@ -4305,7 +4310,7 @@ static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &mo
             {
                 QStringList typlines =
                     ::writeMolType(keys[i].second, moltyps[keys[i]], examples[keys[i]],
-                                   uses_parallel, fix_null_perturbable_14s);
+                                   uses_parallel);
 
                 QMutexLocker lkr(&mutex);
                 typs.insert(keys[i].second, typlines);
@@ -4317,7 +4322,7 @@ static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &mo
         {
             typs.insert(it.key().second,
                         ::writeMolType(it.key().second, it.value(), examples[it.key()],
-                                       uses_parallel, fix_null_perturbable_14s));
+                                       uses_parallel));
         }
     }
 
@@ -4601,16 +4606,8 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
     // the molecules
     lines += ::writeAtomTypes(idx_name_to_mtyp, idx_name_to_example, ffield, map);
 
-    // now convert these into text lines that can be written as the file
-    bool fix_null_perturbable_14s = false;
-
-    if (map.specified("fix_null_perturbable_14s"))
-    {
-        fix_null_perturbable_14s = map["fix_null_perturbable_14s"].value().asABoolean();
-    }
-
     lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(),
-                             isSorted, fix_null_perturbable_14s);
+                             isSorted);
 
     // now write the system part
     lines += ::writeSystem(system.name(), mol_to_moltype);
