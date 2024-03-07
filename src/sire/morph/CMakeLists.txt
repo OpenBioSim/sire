@@ -8,6 +8,7 @@
 set ( SCRIPTS
         __init__.py
         _alchemy.py
+        _decouple.py
         _ghost_atoms.py
         _hmr.py
         _merge.py

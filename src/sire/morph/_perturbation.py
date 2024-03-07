@@ -351,6 +351,8 @@ class Perturbation:
         if mol.has_property("is_perturbable"):
             mol.remove_property("is_perturbable")
 
+        mol.switch_to_alternate_names()
+
         mol = mol.commit().molecule()
 
         if remove_ghosts:

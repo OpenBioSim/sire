@@ -27,7 +27,7 @@ def annihilate(mol, as_new_molecule: bool = True, map=None):
     Molecule
         The merged molecule representing the annihilation perturbation
     """
-    pass
+    return mol
 
 
 def decouple(mol, as_new_molecule: bool = True, map=None):
@@ -93,7 +93,9 @@ def decouple(mol, as_new_molecule: bool = True, map=None):
         if key in c:
             c_mol[f"{key}0"] = c_mol[key]
             c_mol[f"{key}1"] = c_mol[key]
-            del c_mol[key]
+
+            if key != "connectivity":
+                del c_mol[key]
 
     lj_prop = map["LJ"].source()
     chg_prop = map["charge"].source()
@@ -109,7 +111,21 @@ def decouple(mol, as_new_molecule: bool = True, map=None):
     c_mol["molecule0"] = mol.perturbation().extract_reference(remove_ghosts=True)
     c_mol["molecule1"] = mol.perturbation().extract_perturbed(remove_ghosts=True)
 
+    if "parameters" in c_mol:
+        del c_mol["parameters"]
+
+    if "amberparams" in c_mol:
+        del c_mol["amberparams"]
+
     if as_new_molecule:
         c_mol.renumber()
 
-    return c.commit()
+    # need to add a LambdaSchedule that could be used to decouple
+    # the molecule
+    from ..cas import LambdaSchedule
+
+    c_mol["schedule"] = LambdaSchedule()
+
+    mol = c_mol.commit().perturbation().link_to_reference()
+
+    return mol

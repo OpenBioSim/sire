@@ -33,6 +33,7 @@
 
 #include "SireVol/space.h"
 
+#include "SireBase/console.h"
 #include "SireBase/quickcopy.hpp"
 #include "SireMaths/vectorproperty.h"
 
@@ -1051,26 +1052,27 @@ PropertyList AtomCoords::merge(const MolViewProperty &other,
     AtomCoords prop0 = ref;
     AtomCoords prop1 = ref;
 
-    Vector ghost_param(0);
-
     if (not ghost.isEmpty())
     {
-        ghost_param = Vector(ghost);
+        Console::warning(QObject::tr("The ghost parameter '%1' for LJ parameters is ignored").arg(ghost));
     }
 
     for (const auto &index : mapping)
     {
         if (index.isUnmappedIn0())
         {
-            prop0.set(index.cgAtomIdx0(), ghost_param);
+            // use the coordinates of the perturbed state
+            prop0.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
         }
 
         if (index.isUnmappedIn1())
         {
-            prop1.set(index.cgAtomIdx0(), ghost_param);
+            // use the coordinates of the reference state
+            prop1.set(index.cgAtomIdx0(), prop0.get(index.cgAtomIdx0()));
         }
         else
         {
+            // we can use the coordinates of the perturbed state
             prop1.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
         }
     }
