@@ -530,6 +530,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         check_for_h_by_mass = map["check_for_h_by_mass"].value().asABoolean();
     }
 
+    bool check_for_h_by_max_mass = true;
+
+    if (map.specified("check_for_h_by_max_mass"))
+    {
+        check_for_h_by_max_mass = map["check_for_h_by_max_mass"].value().asABoolean();
+    }
+
     bool check_for_h_by_element = true;
 
     if (map.specified("check_for_h_by_element"))
@@ -559,6 +566,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             const double mass0 = params_masses.at(cgatomidx).to(SireUnits::g_per_mol);
             const double mass1 = params1_masses.at(cgatomidx).to(SireUnits::g_per_mol);
 
+            const bool mass0_is_light = (mass0 >= 1) and (mass0 < 2.5);
+            const bool mass1_is_light = (mass1 >= 1) and (mass1 < 2.5);
+
             double mass = std::max(mass0, mass1);
 
             if (mass < 0.05)
@@ -571,7 +581,12 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost in both end states?
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_mass and (mass < 2.5 or mass1 < 2.5))
+            else if (check_for_h_by_max_mass and mass < 2.5)
+            {
+                // the maximum mass is less than 2.5, so this is a H
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_mass and (mass0_is_light or mass1_is_light))
             {
                 // one of the atoms is H or He
                 light_atoms.insert(i);
@@ -610,8 +625,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_mass and mass < 2.5)
+            else if (check_for_h_by_max_mass and mass < 2.5)
             {
+                // the maximum mass is less than 2.5, so this is a H
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_mass and (mass >= 1 and mass < 2.5))
+            {
+                // one of the atoms is H or He
                 light_atoms.insert(i);
             }
             else if (check_for_h_by_element and elements.at(idx_to_cgatomidx_data[i]).nProtons() == 1)
@@ -742,15 +763,21 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
                 if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
                 {
-                    // this is a perturbing bond
+                    // we need to check against the "NOT_PERTURBED"-style constraints
                     if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
                     {
-                        // don't constrain a perturbing bond
+                        // DO NOT CONSTRAIN any perturbing bonds
                         should_constrain_bond = false;
                     }
-                    else if ((this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and has_light_atom)
+                    else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
                     {
-                        // constrain a perturbing bond involving hydrogen
+                        // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
+                        should_constrain_bond = has_light_atom;
+                    }
+                    else
+                    {
+                        // DO CONSTRAIN any perturbing bonds - we only don't constrain
+                        // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
                         should_constrain_bond = true;
                     }
                 }
