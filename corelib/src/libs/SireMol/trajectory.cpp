@@ -1361,6 +1361,45 @@ bool Frame::isEmpty() const
            vels.isEmpty() and frcs.isEmpty() and props.isEmpty();
 }
 
+template <class T>
+QVector<T> _reorder(const QVector<T> &orig, const QVector<qint64> &order)
+{
+    if (orig.isEmpty() or order.isEmpty())
+        return orig;
+
+    QVector<T> ret = orig;
+
+    for (int i = 0; i < order.count(); ++i)
+    {
+        int j = order[i];
+
+        if (j >= 0 and j < orig.count())
+            ret[i] = orig[j];
+    }
+
+    return ret;
+}
+
+/** Return a copy of this frame which has been reordered according
+ *  to 'order' (i.e. atom i is moved to order[i]). This does nothing
+ *  if the order is empty. It silently ignores invalid orders, and
+ *  will leave atoms that aren't referenced in their original
+ *  positions
+ */
+Frame Frame::reorder(const QVector<qint64> &order) const
+{
+    Frame ret(*this);
+
+    if (order.isEmpty())
+        return ret;
+
+    ret.coords = _reorder(ret.coords, order);
+    ret.vels = _reorder(ret.vels, order);
+    ret.frcs = _reorder(ret.frcs, order);
+
+    return ret;
+}
+
 Frame Frame::extract() const
 {
     if (start_atom == -1)

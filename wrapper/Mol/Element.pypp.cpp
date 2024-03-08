@@ -88,7 +88,7 @@ void register_Element_class(){
                 , biologicalElement_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
-                , "Return a biological element that has been guessed from the passed name.\nNote that if no biological element was guessed, then the nearest\nnon-biological element match is used. A biological element is one that\nis in the first couple of rows (proton number < 18) and is not a noble gas." );
+                , "Return a biological element that has been guessed from the passed name.\nNote that if no biological element was guessed, then the nearest\nnon-biological element match is used. A biological element is one that\nis in the list of biological elements" );
         
         }
         { //::SireMol::Element::blue
@@ -138,6 +138,18 @@ void register_Element_class(){
                 , ( bp::arg("mass") )
                 , bp::release_gil_policy()
                 , "Return an element which has the closest mass to mass (in atomic\nmass units, g mol-1)" );
+        
+        }
+        { //::SireMol::Element::getBiologicalElements
+        
+            typedef ::QList< SireMol::Element > ( *getBiologicalElements_function_type )(  );
+            getBiologicalElements_function_type getBiologicalElements_function_value( &::SireMol::Element::getBiologicalElements );
+            
+            Element_exposer.def( 
+                "getBiologicalElements"
+                , getBiologicalElements_function_value
+                , bp::release_gil_policy()
+                , "Return a list of all of the elements that are considered\n  to be biological\n" );
         
         }
         { //::SireMol::Element::green
@@ -249,8 +261,11 @@ void register_Element_class(){
         
         }
         Element_exposer.def( bp::self != bp::self );
+        Element_exposer.def( bp::self != bp::other< QString >() );
         Element_exposer.def( bp::self < bp::self );
+        Element_exposer.def( bp::self < bp::other< QString >() );
         Element_exposer.def( bp::self <= bp::self );
+        Element_exposer.def( bp::self <= bp::other< QString >() );
         { //::SireMol::Element::operator=
         
             typedef ::SireMol::Element const & ( ::SireMol::Element::*assign_function_type)( ::SireMol::Element const & ) ;
@@ -265,8 +280,11 @@ void register_Element_class(){
         
         }
         Element_exposer.def( bp::self == bp::self );
+        Element_exposer.def( bp::self == bp::other< QString >() );
         Element_exposer.def( bp::self > bp::self );
+        Element_exposer.def( bp::self > bp::other< QString >() );
         Element_exposer.def( bp::self >= bp::self );
+        Element_exposer.def( bp::self >= bp::other< QString >() );
         { //::SireMol::Element::period
         
             typedef int ( ::SireMol::Element::*period_function_type)(  ) const;
@@ -301,6 +319,44 @@ void register_Element_class(){
                 , red_function_value
                 , bp::release_gil_policy()
                 , "Return the red colour components (0.0->1.0) for\nthe colour of this element" );
+        
+        }
+        { //::SireMol::Element::resetBiologicalElements
+        
+            typedef void ( *resetBiologicalElements_function_type )(  );
+            resetBiologicalElements_function_type resetBiologicalElements_function_value( &::SireMol::Element::resetBiologicalElements );
+            
+            Element_exposer.def( 
+                "resetBiologicalElements"
+                , resetBiologicalElements_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::Element::setElementIsBiological
+        
+            typedef void ( *setElementIsBiological_function_type )( ::SireMol::Element const & );
+            setElementIsBiological_function_type setElementIsBiological_function_value( &::SireMol::Element::setElementIsBiological );
+            
+            Element_exposer.def( 
+                "setElementIsBiological"
+                , setElementIsBiological_function_value
+                , ( bp::arg("element") )
+                , bp::release_gil_policy()
+                , "Set that the passed element should be considered to be biological" );
+        
+        }
+        { //::SireMol::Element::setElementIsNotBiological
+        
+            typedef void ( *setElementIsNotBiological_function_type )( ::SireMol::Element const & );
+            setElementIsNotBiological_function_type setElementIsNotBiological_function_value( &::SireMol::Element::setElementIsNotBiological );
+            
+            Element_exposer.def( 
+                "setElementIsNotBiological"
+                , setElementIsNotBiological_function_value
+                , ( bp::arg("element") )
+                , bp::release_gil_policy()
+                , "Set that the passed element should considered to definitely\n  not be biological\n" );
         
         }
         { //::SireMol::Element::symbol
@@ -377,6 +433,10 @@ void register_Element_class(){
         }
         Element_exposer.staticmethod( "biologicalElement" );
         Element_exposer.staticmethod( "elementWithMass" );
+        Element_exposer.staticmethod( "getBiologicalElements" );
+        Element_exposer.staticmethod( "resetBiologicalElements" );
+        Element_exposer.staticmethod( "setElementIsBiological" );
+        Element_exposer.staticmethod( "setElementIsNotBiological" );
         Element_exposer.staticmethod( "typeName" );
         Element_exposer.def( "__copy__", &__copy__);
         Element_exposer.def( "__deepcopy__", &__copy__);

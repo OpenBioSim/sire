@@ -25,6 +25,8 @@
 
 #include "AtomChiralities.pypp.hpp"
 
+#include "AtomCoordMatcher.pypp.hpp"
+
 #include "AtomCoords.pypp.hpp"
 
 #include "AtomCutting.pypp.hpp"
@@ -575,6 +577,8 @@ namespace bp = boost::python;
 
 #include "SireMol/mover.hpp"
 
+#include "SireMol/element.h"
+
 #include "SireMol/mgidentifier.h"
 
 #include "SireMol/moleculeinfo.h"
@@ -690,6 +694,10 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_Atom_class();
 
+    register_AtomMatcher_class();
+
+    register_AtomCoordMatcher_class();
+
     register_CuttingFunction_class();
 
     register_AtomCutting_class();
@@ -697,8 +705,6 @@ BOOST_PYTHON_MODULE(_Mol){
     register_AtomEditorBase_class();
 
     register_AtomEditor_class();
-
-    register_AtomMatcher_class();
 
     register_AtomIDMatcher_class();
 
@@ -1171,6 +1177,8 @@ BOOST_PYTHON_MODULE(_Mol){
     bp::implicitly_convertible< SireMol::Selector<SireMol::Chain>, SireMol::SelectorM<SireMol::Chain> >();
 
     bp::implicitly_convertible< SireMol::Selector<SireMol::Segment>, SireMol::SelectorM<SireMol::Segment> >();
+
+    bp::implicitly_convertible<QString, SireMol::Element>();
 
     register_free_functions();
 }

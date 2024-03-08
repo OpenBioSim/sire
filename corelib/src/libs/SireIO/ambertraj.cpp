@@ -273,7 +273,6 @@ public:
                 int pos = j * 8;
 
                 bool ok = true;
-                double val = 0;
 
                 if (pos + 8 > length)
                 {
@@ -281,7 +280,7 @@ public:
                 }
                 else
                 {
-                    val = line.midRef(pos, 8).toDouble(&ok);
+                    line.midRef(pos, 8).toDouble(&ok);
                 }
 
                 if (not ok)
@@ -936,6 +935,11 @@ int AmberTraj::nFrames() const
     return nframes;
 }
 
+void AmberTraj::reorderLoadedFrame()
+{
+    this->current_frame = this->reorderFrame(this->current_frame);
+}
+
 Frame AmberTraj::getFrame(int frame) const
 {
     frame = SireID::Index(frame).map(this->nFrames());
@@ -953,7 +957,7 @@ Frame AmberTraj::getFrame(int frame) const
                                     CODELOC);
     }
 
-    return f->readFrame(frame, this->usesParallel());
+    return this->reorderFrame(f->readFrame(frame, this->usesParallel()));
 }
 
 AmberTraj AmberTraj::operator[](int i) const

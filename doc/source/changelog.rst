@@ -16,8 +16,35 @@ Fixes
 -----
 
 * Fix bug that disabled the ``DEBUG`` log level from the global logger.
+
 * Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
   that we only compare residues with the same number of atoms.
+
+* Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
+
+* Added ``map`` support to writing perturbable Gromacs topology files. This
+  enables the user to specify which perturbable properties to use,
+  e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.
+
+* Code can now detect when an Amber PRMTOP file has discontiguous molecules,
+  and thus when atoms are reordered after load. This information is passed
+  to subsequent frame file parsers that are loaded at the same time, so
+  that they are able to reorder the frames before being added to the atoms.
+  This happens transparently, so that the user doesn't have to worry about
+  the reordering. This fixes issue #164.
+
+* Fixed a bug where the SDF parser would wrongly try to parse Amber RST7 files that
+  weren't immediately recognised as such. The fix adds ``.inpcrd`` as a recognised
+  extension for Amber RST7 files, and changes the scoring logic of the SDF parser
+  to equal the number of molecules times the number of atoms.
+
+* Switched to using the SYBL atom type to infer the element of an atom
+  when reading Mol2 files. This is more robust than using the atom name.
+  Fixes issue #166.
+
+* Made it easier to convert from strings to elements. Added the ability to
+  customise the list of elements that are considered biological. This
+  fixes issue #170.
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
 --------------------------------------------------------------------------------------------

@@ -406,7 +406,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
     // Try to see if this molecule is perturbable.
     try
     {
-        is_perturbable = mol.property("is_perturbable").asABoolean();
+        is_perturbable = mol.property(map["is_perturbable"]).asABoolean();
     }
     catch (...)
     {
@@ -434,7 +434,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
         // get the forcefields for this molecule
         try
         {
-            ffield0 = mol.property("forcefield0").asA<MMDetail>();
+            ffield0 = mol.property(map["forcefield0"]).asA<MMDetail>();
         }
         catch (...)
         {
@@ -442,7 +442,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
         }
         try
         {
-            ffield1 = mol.property("forcefield1").asA<MMDetail>();
+            ffield1 = mol.property(map["forcefield1"]).asA<MMDetail>();
         }
         catch (...)
         {
@@ -477,9 +477,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    masses = mol.property("mass1").asA<AtomMasses>();
+                    masses = mol.property(map["mass1"]).asA<AtomMasses>();
                 else
-                    masses = mol.property("mass0").asA<AtomMasses>();
+                    masses = mol.property(map["mass0"]).asA<AtomMasses>();
                 has_mass = true;
             }
             catch (...)
@@ -491,9 +491,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
                 try
                 {
                     if (is_lambda1)
-                        elements = mol.property("element1").asA<AtomElements>();
+                        elements = mol.property(map["element1"]).asA<AtomElements>();
                     else
-                        elements = mol.property("element0").asA<AtomElements>();
+                        elements = mol.property(map["element0"]).asA<AtomElements>();
                     has_elem = true;
                 }
                 catch (...)
@@ -504,9 +504,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    charges = mol.property("charge1").asA<AtomCharges>();
+                    charges = mol.property(map["charge1"]).asA<AtomCharges>();
                 else
-                    charges = mol.property("charge0").asA<AtomCharges>();
+                    charges = mol.property(map["charge0"]).asA<AtomCharges>();
                 has_chg = true;
             }
             catch (...)
@@ -516,9 +516,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    atomtypes = mol.property("atomtype1").asA<AtomStringProperty>();
+                    atomtypes = mol.property(map["atomtype1"]).asA<AtomStringProperty>();
                 else
-                    atomtypes = mol.property("atomtype0").asA<AtomStringProperty>();
+                    atomtypes = mol.property(map["atomtype0"]).asA<AtomStringProperty>();
                 has_type = true;
             }
             catch (...)
@@ -528,9 +528,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    bondtypes = mol.property("bondtype1").asA<AtomStringProperty>();
+                    bondtypes = mol.property(map["bondtype1"]).asA<AtomStringProperty>();
                 else
-                    bondtypes = mol.property("bondtype0").asA<AtomStringProperty>();
+                    bondtypes = mol.property(map["bondtype0"]).asA<AtomStringProperty>();
                 has_bondtype = true;
             }
             catch (...)
@@ -687,9 +687,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    funcs = mol.property("bond1").asA<TwoAtomFunctions>();
+                    funcs = mol.property(map["bond1"]).asA<TwoAtomFunctions>();
                 else
-                    funcs = mol.property("bond0").asA<TwoAtomFunctions>();
+                    funcs = mol.property(map["bond0"]).asA<TwoAtomFunctions>();
                 has_funcs = true;
             }
             catch (...)
@@ -698,7 +698,7 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
 
             try
             {
-                conn = mol.property("connectivity").asA<Connectivity>();
+                conn = mol.property(map["connectivity"]).asA<Connectivity>();
                 has_conn = true;
             }
             catch (...)
@@ -762,9 +762,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    funcs = mol.property("angle1").asA<ThreeAtomFunctions>();
+                    funcs = mol.property(map["angle1"]).asA<ThreeAtomFunctions>();
                 else
-                    funcs = mol.property("angle0").asA<ThreeAtomFunctions>();
+                    funcs = mol.property(map["angle0"]).asA<ThreeAtomFunctions>();
                 has_funcs = true;
             }
             catch (...)
@@ -807,9 +807,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    funcs = mol.property("dihedral1").asA<FourAtomFunctions>();
+                    funcs = mol.property(map["dihedral1"]).asA<FourAtomFunctions>();
                 else
-                    funcs = mol.property("dihedral0").asA<FourAtomFunctions>();
+                    funcs = mol.property(map["dihedral0"]).asA<FourAtomFunctions>();
                 has_funcs = true;
             }
             catch (...)
@@ -853,9 +853,9 @@ GroMolType::GroMolType(const SireMol::Molecule &mol, const PropertyMap &map)
             try
             {
                 if (is_lambda1)
-                    imps = mol.property("improper1").asA<FourAtomFunctions>();
+                    imps = mol.property(map["improper1"]).asA<FourAtomFunctions>();
                 else
-                    imps = mol.property("improper0").asA<FourAtomFunctions>();
+                    imps = mol.property(map["improper0"]).asA<FourAtomFunctions>();
                 has_imps = true;
             }
             catch (...)
@@ -3157,7 +3157,8 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 }
 
 /** Internal function used to convert a Gromacs Moltyp to a set of lines */
-static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol, bool uses_parallel)
+static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol,
+                                bool uses_parallel)
 {
     QStringList lines;
 
@@ -4036,8 +4037,32 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                 return;
             }
 
+            AtomLJs ljs0;
+            AtomLJs ljs1;
+
+            try
+            {
+                ljs0 = mol.property("LJ0").asA<AtomLJs>();
+            }
+            catch (...)
+            {
+            }
+
+            try
+            {
+                ljs1 = mol.property("LJ1").asA<AtomLJs>();
+            }
+            catch (...)
+            {
+            }
+
             // A set of recorded 1-4 pairs.
             QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
+
+            bool fix_null_perturbable_14s = false;
+
+            if (mol.hasProperty("fix_null_perturbable_14s"))
+                fix_null_perturbable_14s = mol.property("fix_null_perturbable_14s").asA<BooleanProperty>().value();
 
             // Must record every pair that has a non-default scaling factor.
             // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
@@ -4076,6 +4101,47 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                                              s1.lj() == 1)))
                                     {
                                         // This is a non-default pair.
+                                        if (fix_null_perturbable_14s)
+                                        {
+                                            // get the initial and perturbed charge and LJ parameters
+                                            const auto &lj0_0 = ljs0.get(idx0);
+                                            const auto &lj0_1 = ljs1.get(idx0);
+                                            const auto &lj1_0 = ljs0.get(idx1);
+                                            const auto &lj1_1 = ljs1.get(idx1);
+
+                                            if (lj0_0.epsilon().value() == 0 or lj0_1.epsilon().value() == 0 or
+                                                lj1_0.epsilon().value() == 0 or lj1_1.epsilon().value() == 0)
+                                            {
+                                                // we need to avoid having a null 1-4 LJ parameter, so use the non-dummy state
+                                                LJParameter lj0, lj1;
+
+                                                if (lj0_0.epsilon().value() == 0)
+                                                    lj0 = lj0_1;
+                                                else
+                                                    lj0 = lj0_0;
+
+                                                if (lj1_0.epsilon().value() == 0)
+                                                    lj1 = lj1_1;
+                                                else
+                                                    lj1 = lj1_0;
+
+                                                auto lj = lj0.combineArithmetic(lj1);
+
+                                                double scl = s0.lj();
+
+                                                if (scl == 0)
+                                                    scl = s1.lj();
+
+                                                scllines.append(QString("%1 %2     1  %3  %4  %3  %4")
+                                                                    .arg(idx0 + 1, 6)
+                                                                    .arg(idx1 + 1, 6)
+                                                                    .arg(lj.sigma().to(nanometer), 11, 'f', 5)
+                                                                    .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f', 5));
+
+                                                continue;
+                                            }
+                                        }
+
                                         scllines.append(QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
                                     }
                                 }
@@ -4243,7 +4309,8 @@ static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &mo
             for (int i = r.begin(); i < r.end(); ++i)
             {
                 QStringList typlines =
-                    ::writeMolType(keys[i].second, moltyps[keys[i]], examples[keys[i]], uses_parallel);
+                    ::writeMolType(keys[i].second, moltyps[keys[i]], examples[keys[i]],
+                                   uses_parallel);
 
                 QMutexLocker lkr(&mutex);
                 typs.insert(keys[i].second, typlines);
@@ -4254,7 +4321,8 @@ static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &mo
         for (auto it = moltyps.constBegin(); it != moltyps.constEnd(); ++it)
         {
             typs.insert(it.key().second,
-                        ::writeMolType(it.key().second, it.value(), examples[it.key()], uses_parallel));
+                        ::writeMolType(it.key().second, it.value(), examples[it.key()],
+                                       uses_parallel));
         }
     }
 
@@ -4356,7 +4424,7 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
             waters =
                 system.search(
                     QString("(not mols with property is_non_searchable_water) and (water and not resname %1")
-                    .arg(xtal_water_resname));
+                        .arg(xtal_water_resname));
         }
     }
     else
@@ -4538,8 +4606,8 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
     // the molecules
     lines += ::writeAtomTypes(idx_name_to_mtyp, idx_name_to_example, ffield, map);
 
-    // now convert these into text lines that can be written as the file
-    lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(), isSorted);
+    lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(),
+                             isSorted);
 
     // now write the system part
     lines += ::writeSystem(system.name(), mol_to_moltype);

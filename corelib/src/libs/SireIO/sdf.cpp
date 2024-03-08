@@ -1695,7 +1695,7 @@ void SDF::parseLines(const PropertyMap &map)
         }
     }
 
-    this->setScore(100 * this->molecules.count());
+    this->setScore(this->nMolecules() * this->nAtoms());
 }
 
 /** Use the data contained in this parser to create a new System of molecules,

@@ -258,6 +258,19 @@ void register_Frame_class(){
                 , "" );
         
         }
+        { //::SireMol::Frame::reorder
+        
+            typedef ::SireMol::Frame ( ::SireMol::Frame::*reorder_function_type)( ::QVector< long long > const & ) const;
+            reorder_function_type reorder_function_value( &::SireMol::Frame::reorder );
+            
+            Frame_exposer.def( 
+                "reorder"
+                , reorder_function_value
+                , ( bp::arg("order") )
+                , bp::release_gil_policy()
+                , "Return a copy of this frame which has been reordered according\n  to order (i.e. atom i is moved to order[i]). This does nothing\n  if the order is empty. It silently ignores invalid orders, and\n  will leave atoms that arent referenced in their original\n  positions\n" );
+        
+        }
         { //::SireMol::Frame::reverse
         
             typedef ::SireMol::Frame ( ::SireMol::Frame::*reverse_function_type)( ::SireMol::FrameTransform const & ) const;

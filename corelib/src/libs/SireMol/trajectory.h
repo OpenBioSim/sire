@@ -131,6 +131,8 @@ namespace SireMol
 
         bool hasProperties() const;
 
+        Frame reorder(const QVector<qint64> &order) const;
+
         QVector<Vector> coordinates() const;
         QVector<Velocity3D> velocities() const;
         QVector<Force3D> forces() const;
