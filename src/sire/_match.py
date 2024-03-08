@@ -46,12 +46,74 @@ def match_atoms(
     from .legacy.Mol import AtomMCSMatcher, AtomMatcher
     from .base import create_map
 
+    if mol0.num_molecules() > 1 or mol1.num_molecules() > 1:
+        raise ValueError("You cannot match multiple molecules at once")
+
+    from .system import System
+
+    if System.is_system(mol0):
+        mol0 = mol0[0]
+
+    if System.is_system(mol1):
+        mol1 = mol1[0]
+
     map0 = create_map(map0)
     map1 = create_map(map1)
 
     if match is not None:
+        if prematch is not None:
+            raise ValueError("You cannot provide both a `match` and a `prematch`")
+
         if not isinstance(match, AtomMatcher):
             from .legacy.Mol import AtomIDMatcher
+
+            # create a dictionary of atom identifiers
+            if isinstance(match, dict):
+                from . import atomid
+
+                matches = {}
+
+                for atom0, atom1 in match.items():
+                    if isinstance(atom0, int):
+                        atom0 = atomid(idx=atom0)
+                    elif isinstance(atom0, str):
+                        atom0 = atomid(name=atom0)
+
+                    if isinstance(atom1, int):
+                        atom1 = atomid(idx=atom1)
+                    elif isinstance(atom1, str):
+                        atom1 = atomid(name=atom1)
+
+                    matches[atom0] = atom1
+
+                match = matches
+
+            elif "KartografAtomMapper" in str(match.__class__):
+                # use Kartograf to get the mapping - convert to RDKit then Kartograf
+                from kartograf.atom_aligner import align_mol_shape
+                from kartograf import KartografAtomMapper, SmallMoleculeComponent
+
+                if not isinstance(match, KartografAtomMapper):
+                    raise TypeError("match must be a KartografAtomMapper")
+
+                from .convert import to
+                from . import atomid
+
+                rd_mol0 = to(mol0, "rdkit")
+                rd_mol1 = to(mol1, "rdkit")
+
+                k_mol0, k_mol1 = [
+                    SmallMoleculeComponent.from_rdkit(m) for m in [rd_mol0, rd_mol1]
+                ]
+
+                k_0mol1 = align_mol_shape(k_mol1, ref_mol=k_mol0)
+
+                mapping = next(match.suggest_mappings(k_mol0, k_0mol1))
+
+                match = {}
+
+                for k, v in mapping.componentA_to_componentB.items():
+                    match[atomid(idx=k)] = atomid(idx=v)
 
             matcher = AtomIDMatcher(match)
         else:
