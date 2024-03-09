@@ -324,7 +324,9 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
             // AtomIdx indicies are still valid
             Connectivity ret;
             ret.connected_atoms = connected_atoms;
+            ret.connected_atoms.resize(molinfo.nAtoms());
             ret.connected_res = connected_res;
+            ret.connected_res.resize(molinfo.nResidues());
             ret.bond_props = bond_props;
             ret.minfo = MoleculeInfo(molinfo);
             return ret;
@@ -332,7 +334,31 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
 
         QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
 
-        return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
+        // see if there is any actual change - if not, then we can just return
+        bool same_mapping = true;
+
+        for (auto it = matched_atoms.begin(); it != matched_atoms.end(); ++it)
+        {
+            if (it.key() != it.value())
+            {
+                same_mapping = false;
+                break;
+            }
+        }
+
+        if (same_mapping)
+        {
+            Connectivity ret;
+            ret.connected_atoms = connected_atoms;
+            ret.connected_atoms.resize(molinfo.nAtoms());
+            ret.connected_res = connected_res;
+            ret.connected_res.resize(molinfo.nResidues());
+            ret.bond_props = bond_props;
+            ret.minfo = MoleculeInfo(molinfo);
+            return ret;
+        }
+        else
+            return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
     }
     catch (const SireError::exception &e)
     {

@@ -1061,3 +1061,127 @@ PropertyList CLJNBPairs::merge(const MolViewProperty &other,
 
     return ret;
 }
+
+/** Return a copy of this property that has been made to be compatible
+    with the molecule layout in 'molinfo' - this uses the atom matching
+    functions in 'atommatcher' to match atoms from the current molecule
+    to the atoms in the molecule whose layout is in 'molinfo'
+
+    This will only copy the values of pairs of atoms that are
+    successfully matched - all other pairs will have the default
+    value of this AtomPairs object.
+
+    \throw SireError::incompatible_error
+*/
+SireBase::PropertyPtr CLJNBPairs::_pvt_makeCompatibleWith(
+    const MoleculeInfoData &other_info, const AtomMatcher &atommatcher) const
+{
+    // if the atommatcher doesn't change order and the new molecule info
+    // has the same number of atoms in the same number of cutgroups, then
+    // there is nothing that we need to do
+    if (not atommatcher.changesOrder(this->info(), other_info))
+    {
+        bool same_arrangement = true;
+
+        // ensure that the number of atoms and number of cutgroups are the same
+        if (this->info().nAtoms() == other_info.nAtoms() and this->info().nCutGroups() == other_info.nCutGroups())
+        {
+            for (int i = 0; i < other_info.nCutGroups(); ++i)
+            {
+                if (this->info().nAtoms(CGIdx(i)) != other_info.nAtoms(CGIdx(i)))
+                {
+                    same_arrangement = false;
+                    break;
+                }
+            }
+        }
+
+        if (same_arrangement)
+        {
+            // there is no change in the atom order - this AtomPairs object is still valid,
+            // create a copy of the object and update the molinfo
+            CLJNBPairs ret(*this);
+            ret.molinfo = other_info;
+            return ret;
+        }
+    }
+
+    QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), other_info);
+
+    // check to see if the AtomIdx to AtomIdx map changes - if not, then
+    // we can return a copy of this object with the new molinfo
+    bool same_mapping = true;
+
+    for (auto it = matched_atoms.begin(); it != matched_atoms.end(); ++it)
+    {
+        if (it.key() != it.value())
+        {
+            same_mapping = false;
+            break;
+        }
+    }
+
+    if (same_mapping)
+    {
+        CLJNBPairs ret(*this);
+        ret.molinfo = other_info;
+        return ret;
+    }
+    else
+        return this->_pvt_makeCompatibleWith(other_info, matched_atoms);
+}
+
+/** Return a copy of this property that has been made to be compatible
+    with the molecule layout in 'molinfo' - this uses the atom map in
+    'map' to match atoms from the current molecule to the atoms in the
+    molecule whose layout is in 'molinfo'
+
+    This will only copy the values of pairs of atoms that are
+    successfully matched - all other pairs will have the default
+    value of this AtomPairs object.
+
+    \throw SireError::incompatible_error
+*/
+SireBase::PropertyPtr CLJNBPairs::_pvt_makeCompatibleWith(
+    const MoleculeInfoData &other_info, const QHash<AtomIdx, AtomIdx> &map) const
+{
+    const auto &this_info = this->info();
+
+    // create a map from CGAtomIdx to CGAtomIdx for both states
+    QHash<CGAtomIdx, CGAtomIdx> cg_map;
+    cg_map.reserve(map.count());
+    QVector<CGAtomIdx> changed_atoms;
+
+    for (auto it = map.begin(); it != map.end(); ++it)
+    {
+        const auto &atom0 = this_info.cgAtomIdx(it.key());
+        const auto &atom1 = other_info.cgAtomIdx(it.value());
+
+        if (atom0 != atom1)
+        {
+            // this has changed
+            cg_map.insert(atom0, atom1);
+            changed_atoms.append(atom0);
+        }
+    }
+
+    // create a copy of this object
+    CLJNBPairs ret(*this);
+    ret.molinfo = other_info;
+
+    // now update all the pairs that have changed index
+    for (int i = 0; i < changed_atoms.count(); ++i)
+    {
+        for (int j = i; j < changed_atoms.count(); ++j)
+        {
+            const auto &atom0 = changed_atoms[i];
+            const auto &atom1 = changed_atoms[j];
+
+            const auto &scl = this->get(atom0, atom1);
+
+            ret.set(cg_map.value(atom0), cg_map.value(atom1), scl);
+        }
+    }
+
+    return ret;
+}

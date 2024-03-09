@@ -46,7 +46,7 @@ def match_atoms(
     from .legacy.Mol import AtomMCSMatcher, AtomMatcher
     from .base import create_map
 
-    if mol0.num_molecules() > 1 or mol1.num_molecules() > 1:
+    if len(mol0.molecules()) != 1 or len(mol1.molecules()) != 1:
         raise ValueError("You cannot match multiple molecules at once")
 
     from .system import System

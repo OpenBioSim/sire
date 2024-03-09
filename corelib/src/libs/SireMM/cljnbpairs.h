@@ -299,6 +299,12 @@ namespace SireMM
                                      const SireMol::AtomIdxMapping &mapping,
                                      const QString &ghost = QString(),
                                      const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
+    protected:
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const AtomMatcher &atommatcher) const;
+        SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
+                                                      const QHash<AtomIdx, AtomIdx> &map) const;
     };
 
 } // namespace SireMM
