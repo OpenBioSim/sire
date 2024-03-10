@@ -119,6 +119,8 @@ def test_merge_neopentane_methane(neopentane_methane, openmm_platform):
     neopentane = neopentane_methane[0].perturbation().extract_reference()
     methane = neopentane_methane[0].perturbation().extract_perturbed()
 
+    orig_merged = sr.morph.link_to_reference(neopentane_methane[0])
+
     nrg_neo = neopentane.dynamics(platform=openmm_platform).current_potential_energy()
     nrg_met = methane.dynamics(platform=openmm_platform).current_potential_energy()
 
@@ -145,8 +147,19 @@ def test_merge_neopentane_methane(neopentane_methane, openmm_platform):
         platform=openmm_platform
     ).current_potential_energy()
 
+    nrg_orig_merged_0 = orig_merged.dynamics(
+        lambda_value=0, platform=openmm_platform
+    ).current_potential_energy()
+
+    nrg_orig_merged_1 = orig_merged.dynamics(
+        lambda_value=1, platform=openmm_platform
+    ).current_potential_energy()
+
     assert nrg_neo.value() == pytest.approx(nrg_extracted_neo.value(), abs=1e-3)
     assert nrg_met.value() == pytest.approx(nrg_extracted_met.value(), abs=1e-3)
+
+    assert nrg_merged_0.value() == pytest.approx(nrg_orig_merged_0.value(), abs=1e-3)
+    assert nrg_merged_1.value() == pytest.approx(nrg_orig_merged_1.value(), abs=1e-3)
 
     # These energies aren't correct - extra ghost atom internals?
     assert nrg_neo.value() == pytest.approx(nrg_merged_0.value(), abs=1e-3)
