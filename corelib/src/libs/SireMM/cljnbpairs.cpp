@@ -1148,38 +1148,142 @@ SireBase::PropertyPtr CLJNBPairs::_pvt_makeCompatibleWith(
     const auto &this_info = this->info();
 
     // create a map from CGAtomIdx to CGAtomIdx for both states
+    // Only insert values where they have changed - use a null
+    // value to indicate that the atom does not exist in the new map
     QHash<CGAtomIdx, CGAtomIdx> cg_map;
     cg_map.reserve(map.count());
-    QVector<CGAtomIdx> changed_atoms;
+
+    QSet<CGIdx> changed_cgroups, deleted_cgroups, mapped_cgroups;
+    const int ncg = this_info.nCutGroups();
+    mapped_cgroups.reserve(ncg);
+    changed_cgroups.reserve(ncg);
+    deleted_cgroups.reserve(ncg);
+
+    for (CGIdx i(0); i < ncg; ++i)
+    {
+        deleted_cgroups.insert(i);
+    }
 
     for (auto it = map.begin(); it != map.end(); ++it)
     {
-        const auto &atom0 = this_info.cgAtomIdx(it.key());
-        const auto &atom1 = other_info.cgAtomIdx(it.value());
+        CGAtomIdx atom0 = this_info.cgAtomIdx(it.key());
+        CGAtomIdx atom1;
+
+        if (not it.value().isNull())
+            atom1 = other_info.cgAtomIdx(it.value());
+
+        if (not atom1.isNull())
+        {
+            deleted_cgroups.remove(atom1.cutGroup());
+            mapped_cgroups.insert(atom0.cutGroup());
+        }
 
         if (atom0 != atom1)
         {
             // this has changed
             cg_map.insert(atom0, atom1);
-            changed_atoms.append(atom0);
+            changed_cgroups.insert(atom0.cutGroup());
+
+            if (not atom1.isNull())
+                changed_cgroups.insert(atom1.cutGroup());
         }
     }
 
-    // create a copy of this object
-    CLJNBPairs ret(*this);
-    ret.molinfo = other_info;
-
-    // now update all the pairs that have changed index
-    for (int i = 0; i < changed_atoms.count(); ++i)
+    if (cg_map.isEmpty())
     {
-        for (int j = i; j < changed_atoms.count(); ++j)
+        // nothing has changed - we don't need to do any work
+        CLJNBPairs ret(*this);
+        ret.molinfo = other_info;
+        return ret;
+    }
+
+    // there are some changes - start by creating a completely
+    // empty set of pairs, using a default value of 1,1
+    CLJNBPairs ret(other_info, CLJScaleFactor(1, 1));
+
+    // now go through all of the atom pairs, in CGIdx order, and
+    // copy where we can from this object to the new object, and
+    // if not possible, then copy individual values
+    for (CGIdx i(0); i < ncg; ++i)
+    {
+        bool changed_i = changed_cgroups.contains(i);
+        const int nats_i = this_info.nAtoms(i);
+
+        if (not mapped_cgroups.contains(i))
         {
-            const auto &atom0 = changed_atoms[i];
-            const auto &atom1 = changed_atoms[j];
+            // this CutGroup has been deleted
+            continue;
+        }
 
-            const auto &scl = this->get(atom0, atom1);
+        for (CGIdx j(i); j < ncg; ++j)
+        {
+            if (not mapped_cgroups.contains(j))
+            {
+                // this CutGroup has been deleted
+                continue;
+            }
 
-            ret.set(cg_map.value(atom0), cg_map.value(atom1), scl);
+            bool changed_j = changed_cgroups.contains(j);
+
+            const auto &cgpairs = this->get(i, j);
+
+            if (not(changed_i or changed_j))
+            {
+                // nothing has changed, so copy in the original values (only if the CutGroup
+                // pair hasn't been deleted)
+                if (not(deleted_cgroups.contains(i) or deleted_cgroups.contains(j)))
+                    ret.cgpairs.set(i, j, cgpairs);
+
+                continue;
+            }
+
+            // there's change, so just copy the values for all atom pairs
+            const int nats_j = this_info.nAtoms(j);
+
+            auto new_cgpairs = CGPairs(CLJScaleFactor(1, 1));
+            bool changed_atom_pair = false;
+
+            for (int atom_i = 0; atom_i < nats_i; ++atom_i)
+            {
+                auto new_cgidx_i = cg_map.value(CGAtomIdx(i, Index(atom_i)), CGAtomIdx(i, Index(atom_i)));
+
+                if (new_cgidx_i.isNull())
+                    // this atom isn't mapped, so don't copy any values
+                    continue;
+
+                for (int atom_j = 0; atom_j < nats_j; ++atom_j)
+                {
+                    auto new_cgidx_j = cg_map.value(CGAtomIdx(j, Index(atom_j)), CGAtomIdx(j, Index(atom_j)));
+
+                    if (new_cgidx_j.isNull())
+                    {
+                        // this atom isn't mapped, so don't copy any values
+                        continue;
+                    }
+
+                    // get the current value at the current index
+                    const auto &scl0 = cgpairs.get(atom_i, atom_j);
+
+                    // set the new value at the new index
+                    if (new_cgidx_i.cutGroup() == i and new_cgidx_j.cutGroup() == j)
+                    {
+                        // this is in the current CutGroup pair, so can set directly
+                        new_cgpairs.set(new_cgidx_i.atom().value(), new_cgidx_j.atom().value(), scl0);
+                        changed_atom_pair = true;
+                    }
+                    else
+                    {
+                        // this is in a completely different CutGroup pair!
+                        ret.set(new_cgidx_i, new_cgidx_j, scl0);
+                    }
+                }
+            }
+
+            // save the cgpairs
+            if (changed_atom_pair)
+            {
+                ret.cgpairs.set(i, j, new_cgpairs);
+            }
         }
     }
 

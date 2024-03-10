@@ -75,6 +75,7 @@
 #include "segproperty.hpp"
 
 #include "SireBase/properties.h"
+#include "SireBase/console.h"
 
 #include "tostring.h"
 
@@ -5045,8 +5046,14 @@ Properties StructureEditor::properties() const
             {
                 updated_property = updated_property->asA<MolViewProperty>().makeCompatibleWith(this->info(), mapping);
             }
-            catch (...)
+            catch (const SireError::exception &e)
             {
+                SireBase::Console::warning(QObject::tr("Could not convert the old property at key %1 with type %2 to match "
+                                                       "the new, edited molecule. This property has been deleted.\nError was %3: %4")
+                                               .arg(key)
+                                               .arg(updated_property->what())
+                                               .arg(e.what())
+                                               .arg(e.error()));
                 updated_property = NullProperty();
             }
         }

@@ -207,6 +207,27 @@ namespace SireSystem
                                                 CODELOC);
         }
 
+        // remove the parameters properties
+        if (editmol.hasProperty(map["parameters"]))
+        {
+            editmol.removeProperty(map["parameters"]);
+        }
+
+        if (editmol.hasProperty(map0["parameters"]))
+        {
+            editmol.removeProperty(map0["parameters"]);
+        }
+
+        if (editmol.hasProperty(map["amberparams"]))
+        {
+            editmol.removeProperty(map["amberparams"]);
+        }
+
+        if (editmol.hasProperty(map0["amberparams"]))
+        {
+            editmol.removeProperty(map0["amberparams"]);
+        }
+
         // find the largest AtomNum in mol0
         AtomNum largest_atomnum;
 
@@ -482,8 +503,6 @@ namespace SireSystem
                                                      CODELOC);
 
                     editmol.removeProperty(map0[prop]);
-                    editmol.setProperty(map[prop + "0"].source(), merged[0]);
-                    editmol.setProperty(map[prop + "1"].source(), merged[1]);
 
                     if (prop == "connectivity")
                     {
@@ -496,6 +515,14 @@ namespace SireSystem
 
                         editmol.setProperty(map["connectivity"].source(), merged_connectivity.commit());
                     }
+                    else if (prop == "intrascale")
+                    {
+                        // we need to copy the intrascale parameters involving ghost atoms
+                        // from the state where they are not ghosts
+                    }
+
+                    editmol.setProperty(map[prop + "0"].source(), merged[0]);
+                    editmol.setProperty(map[prop + "1"].source(), merged[1]);
                 }
                 else
                 {
@@ -516,12 +543,6 @@ namespace SireSystem
         // so choosing ffield0
         editmol.setProperty(map["forcefield0"].source(), ffield0);
         editmol.setProperty(map["forcefield1"].source(), ffield0);
-
-        // remove any property called "parameters"
-        if (editmol.hasProperty(map["parameters"].source()))
-        {
-            editmol.removeProperty(map["parameters"].source());
-        }
 
         editmol.setProperty(map["connectivity"].source(), editmol.property("connectivity0"));
 
