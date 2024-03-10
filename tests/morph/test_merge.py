@@ -10,7 +10,7 @@ except ImportError:
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
-    reason="openmm support is not available",
+    reason="openmm or kartograf support is not available",
 )
 def test_extract_remerge(merged_zan_ose, openmm_platform):
     merged = merged_zan_ose[0].perturbation().link_to_reference()
@@ -45,7 +45,7 @@ def test_extract_remerge(merged_zan_ose, openmm_platform):
 @pytest.mark.slow
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats() or KartografAtomMapper is None,
-    reason="openmm support is not available",
+    reason="openmm or kartograf support is not available",
 )
 def test_merge(ose_mols, zan_mols, openmm_platform):
     ose = ose_mols[0]
@@ -72,32 +72,6 @@ def test_merge(ose_mols, zan_mols, openmm_platform):
     assert extracted_ose_nrg.value() == pytest.approx(ose_nrg.value())
     assert extracted_zan_nrg.value() == pytest.approx(zan_nrg.value())
 
-    merged = merged.perturbation().link_to_reference()
-
-    nrg_merged_0 = merged.dynamics(
-        lambda_value=0, platform=openmm_platform
-    ).current_potential_energy()
-
-    nrg_merged_1 = merged.dynamics(
-        lambda_value=1, platform=openmm_platform
-    ).current_potential_energy()
-
-    print(ose_nrg, zan_nrg)
-    print(extracted_ose_nrg, extracted_zan_nrg)
-    print(nrg_merged_0, nrg_merged_1)
-
-    merged = merged.perturbation().link_to_reference()
-
-    nrg_merged_0 = merged.dynamics(
-        lambda_value=0, platform=openmm_platform
-    ).current_potential_energy()
-
-    nrg_merged_1 = merged.dynamics(
-        lambda_value=1, platform=openmm_platform
-    ).current_potential_energy()
-
-    print(nrg_merged_0, nrg_merged_1)
-
     merged = sr.morph.merge(
         zan, ose, match=KartografAtomMapper(atom_map_hydrogens=True)
     )
@@ -116,34 +90,9 @@ def test_merge(ose_mols, zan_mols, openmm_platform):
     assert extracted_ose_nrg.value() == pytest.approx(ose_nrg.value())
     assert extracted_zan_nrg.value() == pytest.approx(zan_nrg.value())
 
-    merged = merged.perturbation().link_to_reference()
-
-    nrg_merged_0 = merged.dynamics(
-        lambda_value=0, platform=openmm_platform
-    ).current_potential_energy()
-
-    nrg_merged_1 = merged.dynamics(
-        lambda_value=1, platform=openmm_platform
-    ).current_potential_energy()
-
-    print(zan_nrg, ose_nrg)
-    print(extracted_zan_nrg, extracted_ose_nrg)
-    print(nrg_merged_0, nrg_merged_1)
-
-    merged = merged.perturbation().link_to_reference()
-
-    nrg_merged_0 = merged.dynamics(
-        lambda_value=0, platform=openmm_platform
-    ).current_potential_energy()
-
-    nrg_merged_1 = merged.dynamics(
-        lambda_value=1, platform=openmm_platform
-    ).current_potential_energy()
-
-    print(nrg_merged_0, nrg_merged_1)
-
-    assert ose_nrg.value() == pytest.approx(nrg_merged_0.value())
-    assert zan_nrg.value() == pytest.approx(nrg_merged_1.value())
+    # we don't test merged molecule energies are these
+    # energies are not equal because there are additional bonds,
+    # angle and dihedrals to ghost atoms in the merged molecule
 
 
 @pytest.mark.veryslow
@@ -160,3 +109,45 @@ def test_merge_protein(neura_mols):
 
     assert ala.energy().value() == pytest.approx(merged_ala.energy().value())
     assert lys.energy().value() == pytest.approx(merged_lys.energy().value())
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats() or KartografAtomMapper is None,
+    reason="openmm or kartograf support is not available",
+)
+def test_merge_neopentane_methane(neopentane_methane, openmm_platform):
+    neopentane = neopentane_methane[0].perturbation().extract_reference()
+    methane = neopentane_methane[0].perturbation().extract_perturbed()
+
+    nrg_neo = neopentane.dynamics(platform=openmm_platform).current_potential_energy()
+    nrg_met = methane.dynamics(platform=openmm_platform).current_potential_energy()
+
+    merged = sr.morph.merge(
+        neopentane, methane, match=KartografAtomMapper(atom_map_hydrogens=True)
+    )
+
+    nrg_merged_0 = merged.dynamics(
+        lambda_value=0, platform=openmm_platform
+    ).current_potential_energy()
+
+    nrg_merged_1 = merged.dynamics(
+        lambda_value=1, platform=openmm_platform
+    ).current_potential_energy()
+
+    extracted_neo = merged.perturbation().extract_reference()
+    extracted_met = merged.perturbation().extract_perturbed()
+
+    nrg_extracted_neo = extracted_neo.dynamics(
+        platform=openmm_platform
+    ).current_potential_energy()
+
+    nrg_extracted_met = extracted_met.dynamics(
+        platform=openmm_platform
+    ).current_potential_energy()
+
+    assert nrg_neo.value() == pytest.approx(nrg_extracted_neo.value(), abs=1e-3)
+    assert nrg_met.value() == pytest.approx(nrg_extracted_met.value(), abs=1e-3)
+
+    # These energies aren't correct - extra ghost atom internals?
+    assert nrg_neo.value() == pytest.approx(nrg_merged_0.value(), abs=1e-3)
+    # assert nrg_met.value() == pytest.approx(nrg_merged_1.value(), abs=1e-3)

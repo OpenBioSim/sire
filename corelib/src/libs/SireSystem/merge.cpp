@@ -581,8 +581,6 @@ namespace SireSystem
         editmol.setProperty(map["forcefield0"].source(), ffield0);
         editmol.setProperty(map["forcefield1"].source(), ffield0);
 
-        editmol.setProperty(map["connectivity"].source(), editmol.property("connectivity0"));
-
         // set the flag that this is a perturbable molecule
         editmol.setProperty(map["is_perturbable"].source(), BooleanProperty(true));
 

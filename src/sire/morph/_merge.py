@@ -39,9 +39,7 @@ def _merge(mapping: _AtomMapping, as_new_molecule: bool = True, map=None):
 
     mol = _merge_mols(aligned_mapping, as_new_molecule=as_new_molecule, map=map)
 
-    mol = mol.perturbation().link_to_reference()
-
-    return mol
+    return mol.perturbation().link_to_reference()
 
 
 def merge(mol0, mol1, match=None, prematch=None, map=None, map0=None, map1=None):
