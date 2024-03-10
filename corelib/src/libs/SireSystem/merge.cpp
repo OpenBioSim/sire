@@ -35,6 +35,7 @@
 #include "SireMol/bondid.h"
 
 #include "SireMM/mmdetail.h"
+#include "SireMM/cljnbpairs.h"
 
 using namespace SireMol;
 using namespace SireBase;
@@ -519,6 +520,42 @@ namespace SireSystem
                     {
                         // we need to copy the intrascale parameters involving ghost atoms
                         // from the state where they are not ghosts
+                        const auto unmapped_in0 = entries.unmappedCGAtomIdxIn0();
+                        const auto unmapped_in1 = entries.unmappedCGAtomIdxIn1();
+
+                        if (not(unmapped_in0.isEmpty() and unmapped_in1.isEmpty()))
+                        {
+                            auto scl0 = merged[0].asA<SireMM::CLJNBPairs>();
+                            auto scl1 = merged[1].asA<SireMM::CLJNBPairs>();
+
+                            merged.clear();
+
+                            const int nats = editmol.nAtoms();
+
+                            for (AtomIdx idx(0); idx < nats; ++idx)
+                            {
+                                const auto i = editmol.info().cgAtomIdx(idx);
+
+                                // set all of the CLJ scale factors for atoms unmapped
+                                // in the reference state to equal the scale factor
+                                // for this pair in the perturbed state
+                                for (const auto &j : unmapped_in0)
+                                {
+                                    scl0.set(i, j, scl1.get(i, j));
+                                }
+
+                                // set all of the CLJ scale factors for atoms unmapped
+                                // in the perturbed state to equal the scale factor
+                                // for this pair in the reference state
+                                for (const auto &j : unmapped_in1)
+                                {
+                                    scl0.set(j, i, scl1.get(j, i));
+                                }
+                            }
+
+                            merged.append(scl0);
+                            merged.append(scl1);
+                        }
                     }
 
                     editmol.setProperty(map[prop + "0"].source(), merged[0]);

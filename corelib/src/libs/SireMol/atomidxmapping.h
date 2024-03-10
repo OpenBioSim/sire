@@ -190,6 +190,12 @@ namespace SireMol
         QList<AtomIdx> mappedIn0() const;
         QList<AtomIdx> mappedIn1() const;
 
+        QList<CGAtomIdx> unmappedCGAtomIdxIn0() const;
+        QList<CGAtomIdx> unmappedCGAtomIdxIn1() const;
+
+        QList<CGAtomIdx> mappedCGAtomIdxIn0() const;
+        QList<CGAtomIdx> mappedCGAtomIdxIn1() const;
+
         bool isUnmappedIn0(const AtomIdx &atom) const;
         bool isUnmappedIn1(const AtomIdx &atom) const;
 

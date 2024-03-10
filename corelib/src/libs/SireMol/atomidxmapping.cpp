@@ -801,6 +801,70 @@ QList<AtomIdx> AtomIdxMapping::mappedIn1() const
     return mapped1_list;
 }
 
+/** Equivalent of unmappedIn0, but return as a CGAtomIdx */
+QList<CGAtomIdx> AtomIdxMapping::unmappedCGAtomIdxIn0() const
+{
+    QList<CGAtomIdx> result;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isUnmappedIn0())
+        {
+            result.append(entry.cgAtomIdx0());
+        }
+    }
+
+    return result;
+}
+
+/** Equivalent of unmappedIn1, but return as a CGAtomIdx */
+QList<CGAtomIdx> AtomIdxMapping::unmappedCGAtomIdxIn1() const
+{
+    QList<CGAtomIdx> result;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isUnmappedIn1())
+        {
+            result.append(entry.cgAtomIdx0());
+        }
+    }
+
+    return result;
+}
+
+/** Equivalent of mappedIn0, but return as a CGAtomIdx */
+QList<CGAtomIdx> AtomIdxMapping::mappedCGAtomIdxIn0() const
+{
+    QList<CGAtomIdx> result;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isMappedIn0())
+        {
+            result.append(entry.cgAtomIdx0());
+        }
+    }
+
+    return result;
+}
+
+/** Equivalent of mappedIn1, but return as a CGAtomIdx */
+QList<CGAtomIdx> AtomIdxMapping::mappedCGAtomIdxIn1() const
+{
+    QList<CGAtomIdx> result;
+
+    for (const auto &entry : entries)
+    {
+        if (entry.isMappedIn1())
+        {
+            result.append(entry.cgAtomIdx0());
+        }
+    }
+
+    return result;
+}
+
 /** Return the mapping for the atoms that exist in both the reference
  *  and perturbed states, from the index of the atom in the merged
  *  molecule to the index of the atom in the perturbed molecule.
