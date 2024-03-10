@@ -86,6 +86,62 @@ def test_merge(ose_mols, zan_mols, openmm_platform):
     print(extracted_ose_nrg, extracted_zan_nrg)
     print(nrg_merged_0, nrg_merged_1)
 
+    merged = merged.perturbation().link_to_reference()
+
+    nrg_merged_0 = merged.dynamics(
+        lambda_value=0, platform=openmm_platform
+    ).current_potential_energy()
+
+    nrg_merged_1 = merged.dynamics(
+        lambda_value=1, platform=openmm_platform
+    ).current_potential_energy()
+
+    print(nrg_merged_0, nrg_merged_1)
+
+    merged = sr.morph.merge(
+        zan, ose, match=KartografAtomMapper(atom_map_hydrogens=True)
+    )
+
+    extracted_zan = merged.perturbation().extract_reference()
+    extracted_ose = merged.perturbation().extract_perturbed()
+
+    extracted_ose_nrg = extracted_ose.dynamics(
+        platform=openmm_platform
+    ).current_potential_energy()
+
+    extracted_zan_nrg = extracted_zan.dynamics(
+        platform=openmm_platform
+    ).current_potential_energy()
+
+    assert extracted_ose_nrg.value() == pytest.approx(ose_nrg.value())
+    assert extracted_zan_nrg.value() == pytest.approx(zan_nrg.value())
+
+    merged = merged.perturbation().link_to_reference()
+
+    nrg_merged_0 = merged.dynamics(
+        lambda_value=0, platform=openmm_platform
+    ).current_potential_energy()
+
+    nrg_merged_1 = merged.dynamics(
+        lambda_value=1, platform=openmm_platform
+    ).current_potential_energy()
+
+    print(zan_nrg, ose_nrg)
+    print(extracted_zan_nrg, extracted_ose_nrg)
+    print(nrg_merged_0, nrg_merged_1)
+
+    merged = merged.perturbation().link_to_reference()
+
+    nrg_merged_0 = merged.dynamics(
+        lambda_value=0, platform=openmm_platform
+    ).current_potential_energy()
+
+    nrg_merged_1 = merged.dynamics(
+        lambda_value=1, platform=openmm_platform
+    ).current_potential_energy()
+
+    print(nrg_merged_0, nrg_merged_1)
+
     assert ose_nrg.value() == pytest.approx(nrg_merged_0.value())
     assert zan_nrg.value() == pytest.approx(nrg_merged_1.value())
 
