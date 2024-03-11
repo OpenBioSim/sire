@@ -461,21 +461,21 @@ namespace SireRDKit
                           return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
                       });
 
-            int min_nue = 0;
-
-            for (const auto n : nue)
-            {
-                if (n > 0)
-                {
-                    if (min_nue == 0 or n < min_nue)
-                        min_nue = n;
-                }
-            }
-
             for (int i = 0; i < neighbors.count(); ++i)
             {
                 const auto na_nue = std::get<0>(neighbors.at(i));
                 auto neighbor = std::get<1>(neighbors.at(i));
+
+                int min_nue = 0;
+
+                for (const auto n : nue)
+                {
+                    if (n > 0)
+                    {
+                        if (min_nue == 0 or n < min_nue)
+                            min_nue = n;
+                    }
+                }
 
                 int min_na_nue = 0;
 
