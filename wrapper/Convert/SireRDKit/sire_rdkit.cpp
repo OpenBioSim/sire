@@ -408,26 +408,66 @@ namespace SireRDKit
 
         for (auto atom : molecule.atoms())
         {
-            atoms.append(std::make_pair(get_nb_unpaired_electrons(*atom),
-                                        atom));
+            if (atom->getAtomicNum() > 1)
+            {
+                atoms.append(std::make_pair(get_nb_unpaired_electrons(*atom),
+                                            atom));
+            }
         }
 
         // sort these atoms so that the ones with most unpaired electrons
         // come first
-        std::sort(atoms.begin(), atoms.end(),
-                  [](const std::pair<QVector<int>, RDKit::Atom *> &atom0,
-                     const std::pair<QVector<int>, RDKit::Atom *> &atom1)
-                  {
-                      return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
-                  });
+        std::stable_sort(atoms.begin(), atoms.end(),
+                         [](const std::pair<QVector<int>, RDKit::Atom *> &atom0,
+                            const std::pair<QVector<int>, RDKit::Atom *> &atom1)
+                         {
+                             return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
+                         });
 
         for (const auto &p : atoms)
         {
-            // number of unpaired electrons
-            auto nue = std::get<0>(p);
-
             // for this atom...
             RDKit::Atom *atom = std::get<1>(p);
+
+            if (atom->getDegree() == 0)
+            {
+                // no neighbors, so no bonds - this could be a monovalent cation
+                switch (atom->getAtomicNum())
+                {
+                case 3:
+                case 11:
+                case 19:
+                case 37:
+                case 47:
+                case 55:
+                    atom->setFormalCharge(1);
+                    break;
+                case 12:
+                case 20:
+                case 29:
+                case 30:
+                case 38:
+                case 56:
+                case 26:
+                    atom->setFormalCharge(2);
+                    break;
+                case 13:
+                    // Fe could also be + 3
+                    atom->setFormalCharge(3);
+                    break;
+                default:
+                    // no, it is an anion - use the negative of the number of
+                    // unpaired electrons
+                    atom->setFormalCharge(-get_nb_unpaired_electrons(*atom)[0]);
+                    break;
+                }
+
+                molecule.updatePropertyCache(false);
+                continue;
+            }
+
+            // number of unpaired electrons
+            auto nue = get_nb_unpaired_electrons(*atom);
 
             // if there's only one possible valence state and the corresponding
             // nue is negative, it means we can only add a positive charge to
@@ -454,18 +494,15 @@ namespace SireRDKit
                                                 n));
             }
 
-            std::sort(neighbors.begin(), neighbors.end(),
-                      [](const std::pair<QVector<int>, RDKit::Atom *> &atom0,
-                         const std::pair<QVector<int>, RDKit::Atom *> &atom1)
-                      {
-                          return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
-                      });
+            std::stable_sort(neighbors.begin(), neighbors.end(),
+                             [](const std::pair<QVector<int>, RDKit::Atom *> &atom0,
+                                const std::pair<QVector<int>, RDKit::Atom *> &atom1)
+                             {
+                                 return std::get<0>(atom0).at(0) > std::get<0>(atom1).at(0);
+                             });
 
             for (int i = 0; i < neighbors.count(); ++i)
             {
-                const auto na_nue = std::get<0>(neighbors.at(i));
-                auto neighbor = std::get<1>(neighbors.at(i));
-
                 int min_nue = 0;
 
                 for (const auto n : nue)
@@ -476,6 +513,9 @@ namespace SireRDKit
                             min_nue = n;
                     }
                 }
+
+                const auto na_nue = std::get<0>(neighbors.at(i));
+                auto neighbor = std::get<1>(neighbors.at(i));
 
                 int min_na_nue = 0;
 
@@ -506,13 +546,30 @@ namespace SireRDKit
                         // recalculate the nue for this atom
                         nue = get_nb_unpaired_electrons(*atom);
                     }
+
+                    for (auto n : nue)
+                    {
+                        if (n == 0)
+                            break;
+                    }
                 }
             }
 
             // recalculate the nue for this atom
             nue = get_nb_unpaired_electrons(*atom);
 
-            if (nue[0] > 0)
+            bool any_equal_zero = false;
+
+            for (auto n : nue)
+            {
+                if (n == 0)
+                {
+                    any_equal_zero = true;
+                    break;
+                }
+            }
+
+            if (not any_equal_zero)
             {
                 // transform it to a negative charge
                 atom->setFormalCharge(-nue[0]);
