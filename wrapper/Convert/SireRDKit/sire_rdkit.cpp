@@ -547,13 +547,24 @@ namespace SireRDKit
                         nue = get_nb_unpaired_electrons(*atom);
                     }
 
+                    bool any_equal_zero = false;
+
                     for (auto n : nue)
                     {
                         if (n == 0)
+                        {
+                            any_equal_zero = true;
                             break;
+                        }
+                    }
+
+                    if (any_equal_zero)
+                    {
+                        // we can stop here
+                        break;
                     }
                 }
-            }
+            } // end of loop over neighbours
 
             // recalculate the nue for this atom
             nue = get_nb_unpaired_electrons(*atom);
