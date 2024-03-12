@@ -12,8 +12,8 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-Fixes
------
+`2023.5.2 <https://github.com/openbiosim/sire/compare/2023.5.1...2023.5.2>`__ - March 2024
+------------------------------------------------------------------------------------------
 
 * Fix bug that disabled the ``DEBUG`` log level from the global logger.
 
