@@ -112,3 +112,26 @@ def test_rdkit_returns_null():
     # this should be the default
     with pytest.raises(ValueError):
         mol = sr.smiles("c3cc[c+]2cc(C1CCCC1)[nH]c2c3")
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_infer_bonds(ejm55_sdf, ejm55_gro):
+    sdf = ejm55_sdf[0].molecule()
+    gro = ejm55_gro["not (protein or water)"].molecule()
+
+    assert sdf.smiles() == gro.smiles()
+
+    match_sdf = sdf["smarts [NX3][CX3](=[OX1])[#6]"]
+    match_gro = gro["smarts [NX3][CX3](=[OX1])[#6]"]
+
+    print(match_sdf)
+    print(match_gro)
+
+    assert len(match_sdf) == 1
+    assert len(match_gro) == 1
+
+    for s, g in zip(match_sdf, match_gro):
+        assert s.number() == g.number()
