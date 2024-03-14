@@ -159,6 +159,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   customise the list of elements that are considered biological. This
   fixes issue #170.
 
+* Fixed a bug in the algorithm used to infer bond order when converting to
+  RDKit format. This fixes issue #177.
+
 * Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
