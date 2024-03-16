@@ -86,7 +86,6 @@ def create_from_pertfile(mol, pertfile, map=None):
             typ0 = template.get_init_type(atomname)
             typ1 = template.get_final_type(atomname)
         except Exception as e:
-            print(e)
             continue
 
         atom["charge0"] = q0
