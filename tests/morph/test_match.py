@@ -1,8 +1,14 @@
 import sire as sr
 
 import pytest
+import sys
 
 
+# skip if we run on windows
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Does not run on Windows because there is no match support",
+)
 def test_match(kigaki_mols):
     mols = kigaki_mols
 

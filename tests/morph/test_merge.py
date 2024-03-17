@@ -1,6 +1,7 @@
 import sire as sr
 
 import pytest
+import sys
 
 try:
     from kartograf import KartografAtomMapper
@@ -10,7 +11,7 @@ except ImportError:
 
 @pytest.mark.skipif(
     "openmm" not in sr.convert.supported_formats(),
-    reason="openmm or kartograf support is not available",
+    reason="openmm support is not available",
 )
 def test_extract_remerge(merged_zan_ose, openmm_platform):
     merged = merged_zan_ose[0].perturbation().link_to_reference()
@@ -30,10 +31,6 @@ def test_extract_remerge(merged_zan_ose, openmm_platform):
         lambda_value=1, platform=openmm_platform
     ).current_potential_energy()
 
-    nrg_merged_05 = merged.dynamics(
-        lambda_value=0.5, platform=openmm_platform
-    ).current_potential_energy()
-
     nrg_remerged_0 = remerged.dynamics(
         lambda_value=0, platform=openmm_platform
     ).current_potential_energy()
@@ -42,15 +39,8 @@ def test_extract_remerge(merged_zan_ose, openmm_platform):
         lambda_value=1, platform=openmm_platform
     ).current_potential_energy()
 
-    nrg_remerged_05 = remerged.dynamics(
-        lambda_value=0.5, platform=openmm_platform
-    ).current_potential_energy()
-
     assert nrg_merged_0.value() == pytest.approx(nrg_remerged_0.value())
     assert nrg_merged_1.value() == pytest.approx(nrg_remerged_1.value())
-
-    # this is different - worth checking why!
-    # assert nrg_merged_05.value() == pytest.approx(nrg_remerged_05.value())
 
 
 @pytest.mark.slow
@@ -107,6 +97,10 @@ def test_merge(ose_mols, zan_mols, openmm_platform):
 
 
 @pytest.mark.veryslow
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Does not run on Windows because there is no match support",
+)
 def test_merge_protein(neura_mols):
     protein = neura_mols["protein"]
 
