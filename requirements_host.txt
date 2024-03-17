@@ -14,4 +14,7 @@ tbb
 tbb-devel
 gemmi >=0.6.4
 rdkit >=2023.0.0
-kartograf >= 1.0.0
+
+# kartograf on Windows pulls in an openfe that has an old / incompatble
+# ambertools
+kartograf >= 1.0.0 ; sys_platform != "win32"

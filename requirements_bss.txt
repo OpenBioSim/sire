@@ -14,6 +14,10 @@ openmmtools >= 0.21.5
 ambertools >= 22 ; sys_platform != "win32"
 gromacs ; sys_platform != "win32"
 
+# kartograf on Windows pulls in an openfe that has an old / incompatble 
+# ambertools
+kartograf >= 1.0.0 ; sys_platform != "win32"
+
 # The following are actual BioSimSpace run-time requirements. Please update
 # this list as new requirements are added.
 configargparse
@@ -30,7 +34,6 @@ pygtail
 pyyaml
 rdkit >=2023.0.0
 gemmi >=0.6.4
-kartograf >= 1.0.0
 
 # The below are packages that aren't available on all
 # platforms/OSs and so need to be conditionally included
