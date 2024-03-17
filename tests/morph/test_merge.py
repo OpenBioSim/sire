@@ -118,6 +118,28 @@ def test_merge_protein(neura_mols):
     merged_ala = merged.perturbation().extract_reference()[ala.number()]
     merged_lys = merged.perturbation().extract_perturbed()[lys.number()]
 
+    scl_ala = ala.property("intrascale")
+    scl_merged_ala = merged_ala.property("intrascale")
+
+    for i in range(ala.num_atoms()):
+        for j in range(ala.num_atoms()):
+            atom0 = sr.atomid(idx=i)
+            atom1 = sr.atomid(idx=j)
+            s_ala = scl_ala.get(atom0, atom1)
+            s_merged_ala = scl_merged_ala.get(atom0, atom1)
+            assert s_ala == s_merged_ala
+
+    scl_lys = lys.property("intrascale")
+    scl_merged_lys = merged_lys.property("intrascale")
+
+    for i in range(lys.num_atoms()):
+        for j in range(lys.num_atoms()):
+            atom0 = sr.atomid(idx=i)
+            atom1 = sr.atomid(idx=j)
+            s_lys = scl_lys.get(atom0, atom1)
+            s_merged_lys = scl_merged_lys.get(atom0, atom1)
+            assert s_lys == s_merged_lys
+
     assert ala.energy().value() == pytest.approx(merged_ala.energy().value())
     assert lys.energy().value() == pytest.approx(merged_lys.energy().value())
 
