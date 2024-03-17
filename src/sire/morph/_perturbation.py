@@ -306,7 +306,15 @@ class Perturbation:
         mol = mol.commit().molecule()
 
         if remove_ghosts:
-            mol = mol["not element Xx"].extract(to_same_molecule=True)
+            try:
+                mol = mol["not element Xx"]
+            except Exception:
+                # there are no non-ghost atoms!
+                from ..mol import Molecule
+
+                return Molecule()
+
+            mol = mol.extract(to_same_molecule=True)
 
         return mol
 
@@ -365,7 +373,17 @@ class Perturbation:
         mol = mol.commit().molecule()
 
         if remove_ghosts:
-            mol = mol["not element Xx"].extract(to_same_molecule=True)
+            try:
+                mol = mol["not element Xx"]
+            except Exception:
+                # there are no non-ghost atoms!
+                from ..mol import Molecule
+
+                return Molecule()
+
+            mol = mol.extract(to_same_molecule=True)
+
+        return mol
 
         return mol
 
