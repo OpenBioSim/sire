@@ -713,8 +713,26 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         dynamic_constraints = map["dynamic_constraints"].value().asABoolean();
     }
 
-    for (auto it = params.bonds().constBegin();
-         it != params.bonds().constEnd();
+    auto bonds = params.bonds();
+
+    if (is_perturbable)
+    {
+        // add in any bonds that exist only in the other state
+        // - use the same r0 but set k to 0
+        for (auto it = params1.bonds().constBegin();
+             it != params1.bonds().constEnd();
+             ++it)
+        {
+            if (not bonds.contains(it.key()))
+            {
+                bonds.insert(it.key(), QPair<AmberBond, bool>(AmberBond(0.0, it.value().first.r0()),
+                                                              it.value().second));
+            }
+        }
+    }
+
+    for (auto it = bonds.constBegin();
+         it != bonds.constEnd();
          ++it)
     {
         const auto bondid = it.key().map(molinfo);
@@ -820,6 +838,24 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     ang_params.clear();
 
+    auto angles = params.angles();
+
+    if (is_perturbable)
+    {
+        // add in any angles that exist only in the other state
+        // - use the same theta0 but set k to 0
+        for (auto it = params1.angles().constBegin();
+             it != params1.angles().constEnd();
+             ++it)
+        {
+            if (not angles.contains(it.key()))
+            {
+                angles.insert(it.key(), QPair<AmberAngle, bool>(AmberAngle(0.0, it.value().first.theta0()),
+                                                                it.value().second));
+            }
+        }
+    }
+
     for (auto it = params.angles().constBegin();
          it != params.angles().constEnd();
          ++it)
@@ -866,6 +902,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
                     double k_1 = angparam.k() * angle_k_to_openmm;
                     theta0_1 = angparam.theta0();
+
+                    if (theta0_1 == 0)
+                    {
+                        // we cannot shrink the angle to 0 - this must be
+                        // an angle that is disappearing - we should simply
+                        // keep it the same angle
+                        theta0_1 = theta0;
+                    }
 
                     if (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3)
                     {
