@@ -103,15 +103,22 @@ def annihilate(mol, as_new_molecule: bool = True, map=None):
 
     # now remove all of the bonds, angles, dihedrals, impropers
     for key in ["bond", "angle", "dihedral", "improper"]:
+        key = map[key].source()
+
         if has_key[key]:
             p = c[f"{key}1"]
             p.clear()
             c[f"{key}1"] = p
 
-    # we will leave the intrascale property as is, as this accounts
-    # for the connectivity of this molecule, and would likely break
-    # things if we scaled it with lambda (the charge and LJ are already
-    # being scaled down)
+    # now scale the nbpairs to zero, as we can't have any
+    # 1-4 interactions when there are no dihedrals...
+    sclkey = map["intrascale"].source()
+    if has_key[sclkey]:
+        from ..legacy.MM import CLJScaleFactor
+
+        nbscl = c[f"{sclkey}1"]
+        nbscl.set_all(CLJScaleFactor(0, 0))
+        c[f"{sclkey}1"] = nbscl
 
     mol = c_mol.commit()
 

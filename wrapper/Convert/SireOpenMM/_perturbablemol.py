@@ -5,6 +5,7 @@ __all__ = [
     "_changed_torsions",
     "_changed_exceptions",
     "_changed_constraints",
+    "_changed_nbscls",
 ]
 
 
@@ -210,6 +211,52 @@ def _changed_torsions(obj, to_pandas: bool = True):
         )
 
     return changed_torsions
+
+
+def _changed_nbscls(obj, to_pandas: bool = True):
+    """
+    Return a list of the non-bonded scaling factors that change
+    parameters in this perturbation
+
+    Parameters
+    ----------
+
+    to_pandas: bool, optional, default=True
+        If True then the list of non-bonded scaling factors will be
+        returned as a pandas DataFrame
+    """
+    changed_nbscls = []
+
+    atoms = obj.atoms()
+
+    for atompair, chg_scl0, chg_scl1, lj_scl0, lj_scl1 in zip(
+        obj.get_exception_atoms(),
+        obj.get_charge_scales0(),
+        obj.get_charge_scales1(),
+        obj.get_lj_scales0(),
+        obj.get_lj_scales1(),
+    ):
+        if chg_scl0 != chg_scl1 or lj_scl0 != lj_scl1:
+            if to_pandas:
+                atompair = f"{_name(atoms[atompair[0]])}-{_name(atoms[atompair[1]])}"
+
+            changed_nbscls.append((atompair, chg_scl0, chg_scl1, lj_scl0, lj_scl1))
+
+    if to_pandas:
+        import pandas as pd
+
+        changed_nbscls = pd.DataFrame(
+            changed_nbscls,
+            columns=[
+                "atompair",
+                "charge_scale0",
+                "charge_scale1",
+                "lj_scale0",
+                "lj_scale1",
+            ],
+        )
+
+    return changed_nbscls
 
 
 def _changed_exceptions(obj, to_pandas: bool = True):

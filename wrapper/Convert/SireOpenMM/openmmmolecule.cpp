@@ -761,6 +761,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 double k_1 = bondparam1.k() * bond_k_to_openmm;
                 r0_1 = bondparam1.r0() * bond_r0_to_openmm;
 
+                if (r0_1 == 0)
+                {
+                    // we cannot shrink the bond to 0 - this must be
+                    // a bond that is disappearing - we should simply
+                    // keep it the same length
+                    r0_1 = r0;
+                }
+
                 if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
                 {
                     // we need to check against the "NOT_PERTURBED"-style constraints
