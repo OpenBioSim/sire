@@ -691,7 +691,15 @@ void LambdaSchedule::addDecoupleStage(bool perturbed_is_decoupled)
  */
 void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_decoupled)
 {
-    Console::warning(QObject::tr("Decouple stages are not yet implemented."));
+    auto state = LambdaSchedule::initial();
+
+    if (not perturbed_is_decoupled)
+        state = LambdaSchedule::final();
+
+    this->addStage(name, state);
+
+    // the only thing we scale with lambda is the ghost/non-ghost force
+    this->setEquation(name, "ghost/non-ghost", "*", default_morph_equation);
 }
 
 /** Add a stage to the schedule that will annihilate the perturbed
@@ -703,13 +711,13 @@ void LambdaSchedule::addAnnihilateStage(bool perturbed_is_annihilated)
     this->addAnnihilateStage("annihilate", perturbed_is_annihilated);
 }
 
-/**  Add a named stage to the schedule that will annihilate the perturbed
+/** Add a named stage to the schedule that will annihilate the perturbed
  *  state if `perturbed_is_annihilated` is true, otherwise the
  *  reference state is annihilated.
  */
 void LambdaSchedule::addAnnihilateStage(const QString &name, bool perturbed_is_annihilated)
 {
-    Console::warning(QObject::tr("Annihilate stages are not yet implemented."));
+    this->addStage(name, default_morph_equation);
 }
 
 /** Sandwich the current set of stages with a charge-descaling and
