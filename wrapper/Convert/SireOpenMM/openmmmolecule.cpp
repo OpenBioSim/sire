@@ -856,8 +856,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
     }
 
-    for (auto it = params.angles().constBegin();
-         it != params.angles().constEnd();
+    for (auto it = angles.constBegin();
+         it != angles.constEnd();
          ++it)
     {
         const auto angid = it.key().map(molinfo);
