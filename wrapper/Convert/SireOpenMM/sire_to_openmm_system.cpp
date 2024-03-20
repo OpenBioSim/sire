@@ -1184,8 +1184,17 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                 // now the reference CLJ parameters
                 const auto &clj = cljs_data[j];
 
+                // make sure that charges are added here - if all are zero,
+                // the NonbondedForce will not include support for charge!
+                double charge = boost::get<0>(clj);
+
+                if (charge == 0.0)
+                {
+                    charge = 1.0e-6;
+                }
+
                 // reduced_q
-                custom_params[0] = boost::get<0>(clj);
+                custom_params[0] = charge;
                 // half_sigma
                 custom_params[1] = 0.5 * boost::get<1>(clj);
                 // two_sqrt_epsilon
@@ -1211,13 +1220,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // calculated using the ghost forcefields
                     // (the ghost forcefields include a coulomb term
                     //  that subtracts from whatever was calculated here)
-                    cljff->addParticle(boost::get<0>(clj), 0.0, 0.0);
+                    cljff->addParticle(charge, 0.0, 0.0);
                 }
                 else
                 {
                     // this isn't a ghost atom. Record this fact and
                     // just add it to the standard cljff as normal
-                    cljff->addParticle(boost::get<0>(clj), boost::get<1>(clj),
+                    cljff->addParticle(charge, boost::get<1>(clj),
                                        boost::get<2>(clj));
                     non_ghost_atoms.insert(atom_index);
                 }

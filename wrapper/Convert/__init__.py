@@ -87,7 +87,6 @@ try:
         _changed_bonds,
         _changed_angles,
         _changed_torsions,
-        _changed_nbscls,
         _changed_exceptions,
         _changed_constraints,
     )
@@ -104,7 +103,6 @@ try:
     PerturbableOpenMMMolecule.changed_bonds = _changed_bonds
     PerturbableOpenMMMolecule.changed_angles = _changed_angles
     PerturbableOpenMMMolecule.changed_torsions = _changed_torsions
-    PerturbableOpenMMMolecule.changed_nbscls = _changed_nbscls
     PerturbableOpenMMMolecule.changed_exceptions = _changed_exceptions
     PerturbableOpenMMMolecule.changed_constraints = _changed_constraints
 
