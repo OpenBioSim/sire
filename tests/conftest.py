@@ -174,6 +174,16 @@ def pdbx_3nss():
 
 
 @pytest.fixture(scope="session")
+def ejm55_sdf():
+    return sr.load_test_files("ejm55.sdf")
+
+
+@pytest.fixture(scope="session")
+def ejm55_gro():
+    return sr.load_test_files("ejm55.gro", "ejm55.top")
+
+
+@pytest.fixture(scope="session")
 def testfile_cache_dir():
     import os
 

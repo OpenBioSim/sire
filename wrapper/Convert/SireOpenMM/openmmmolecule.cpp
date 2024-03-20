@@ -558,6 +558,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &elements1 = params1.elements();
         const auto &ambertypes1 = params1.amberTypes();
 
+        bool ghosts_are_light = false;
+
+        if (map.specified("ghosts_are_light"))
+        {
+            ghosts_are_light = map["ghosts_are_light"].value().asABoolean();
+        }
+
         for (int i = 0; i < nats; ++i)
         {
             const auto cgatomidx = idx_to_cgatomidx_data[i];
@@ -607,6 +614,22 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             }
 
             masses_data[i] = mass;
+
+            // the user wants to treat ghost atoms as light atoms
+            if (ghosts_are_light)
+            {
+                const auto charge0 = params.charges().at(cgatomidx);
+                const auto charge1 = params1.charges().at(cgatomidx);
+                const auto lj0 = params.ljs().at(cgatomidx);
+                const auto lj1 = params1.ljs().at(cgatomidx);
+
+                // this is a ghost atom
+                if ((charge0 == 0 and lj0.epsilon().value() == 0) or
+                    (charge1 == 0 and lj1.epsilon().value() == 0))
+                {
+                    light_atoms.insert(i);
+                }
+            }
         }
     }
     else
@@ -765,7 +788,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         bool bond_is_not_constrained = true;
 
-        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
+                                         (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             bool should_constrain_bond = true;
 
