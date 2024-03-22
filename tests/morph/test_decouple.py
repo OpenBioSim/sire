@@ -143,44 +143,50 @@ def test_annihilate(ala_mols, openmm_platform):
     fwds = omm_fwds.changed_bonds()
     bwds = omm_bwds.changed_bonds()
 
-    assert fwds["length0"].equals(bwds["length1"])
-    assert fwds["length1"].equals(bwds["length0"])
-    assert fwds["k0"].equals(bwds["k1"])
-    assert fwds["k1"].equals(bwds["k0"])
+    joined = fwds.merge(bwds, on="bond", suffixes=("_fwds", "_bwds"))
+
+    assert joined["length0_fwds"].equals(joined["length1_bwds"])
+    assert joined["length1_fwds"].equals(joined["length0_bwds"])
+    assert joined["k0_fwds"].equals(joined["k1_bwds"])
+    assert joined["k1_fwds"].equals(joined["k0_bwds"])
 
     # also check that parameters are being set equal to zero correctly
-    assert (fwds["length1"] != 0.0).all()
-    assert (fwds["k1"] == 0.0).all()
-    assert (bwds["length0"] != 0.0).all()
-    assert (bwds["k0"] == 0.0).all()
+    assert (joined["length1_fwds"] != 0.0).all()
+    assert (joined["k1_fwds"] == 0.0).all()
+    assert (joined["length0_bwds"] != 0.0).all()
+    assert (joined["k0_bwds"] == 0.0).all()
 
     fwds = omm_fwds.changed_angles()
     bwds = omm_bwds.changed_angles()
 
-    assert fwds["size0"].equals(bwds["size1"])
-    assert fwds["size1"].equals(bwds["size0"])
-    assert fwds["k0"].equals(bwds["k1"])
-    assert fwds["k1"].equals(bwds["k0"])
+    joined = fwds.merge(bwds, on="angle", suffixes=("_fwds", "_bwds"))
+
+    assert joined["size0_fwds"].equals(joined["size1_bwds"])
+    assert joined["size1_fwds"].equals(joined["size0_bwds"])
+    assert joined["k0_fwds"].equals(joined["k1_bwds"])
+    assert joined["k1_fwds"].equals(joined["k0_bwds"])
 
     # also check that parameters are being set equal to zero correctly
-    assert (fwds["size1"] != 0.0).all()
-    assert (fwds["k1"] == 0.0).all()
-    assert (bwds["size0"] != 0.0).all()
-    assert (bwds["k0"] == 0.0).all()
+    assert (joined["size1_fwds"] != 0.0).all()
+    assert (joined["k1_fwds"] == 0.0).all()
+    assert (joined["size0_bwds"] != 0.0).all()
+    assert (joined["k0_bwds"] == 0.0).all()
 
     fwds = omm_fwds.changed_torsions()
     bwds = omm_bwds.changed_torsions()
 
-    assert fwds["periodicity0"].equals(bwds["periodicity1"])
-    assert fwds["periodicity1"].equals(bwds["periodicity0"])
-    assert fwds["phase0"].equals(bwds["phase1"])
-    assert fwds["phase1"].equals(bwds["phase0"])
-    assert fwds["k0"].equals(bwds["k1"])
-    assert fwds["k1"].equals(bwds["k0"])
+    joined = fwds.merge(bwds, on="torsion", suffixes=("_fwds", "_bwds"))
+
+    assert joined["periodicity0_fwds"].equals(joined["periodicity1_bwds"])
+    assert joined["periodicity1_fwds"].equals(joined["periodicity0_bwds"])
+    assert joined["phase0_fwds"].equals(joined["phase1_bwds"])
+    assert joined["phase1_fwds"].equals(joined["phase0_bwds"])
+    assert joined["k0_fwds"].equals(joined["k1_bwds"])
+    assert joined["k1_fwds"].equals(joined["k0_bwds"])
 
     # also check that parameters are being set equal to zero correctly
-    assert (fwds["k1"] == 0.0).all()
-    assert (bwds["k0"] == 0.0).all()
+    assert (joined["k1_fwds"] == 0.0).all()
+    assert (joined["k0_bwds"] == 0.0).all()
 
     fwds = omm_fwds.changed_exceptions()
     bwds = omm_bwds.changed_exceptions()
