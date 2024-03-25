@@ -673,7 +673,7 @@ void register_MoleculeView_class(){
                 "extract"
                 , extract_function_value
                 , ( bp::arg("to_same_molecule")=(bool)(false) )
-                , "" );
+                , "Extract a copy of this view which contains only the currently\nselected atoms. This allows the used to pull out parts of a larger molecule,\ne.g. if they want to have only selected residues in a protein and do not\nwant to have to store or manipulate the larger protein molecule" );
         
         }
         { //::SireMol::MoleculeView::getLink

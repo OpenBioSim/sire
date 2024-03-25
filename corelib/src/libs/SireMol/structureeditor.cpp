@@ -75,6 +75,7 @@
 #include "segproperty.hpp"
 
 #include "SireBase/properties.h"
+#include "SireBase/console.h"
 
 #include "tostring.h"
 
@@ -153,6 +154,7 @@ namespace SireMol
             ~EditAtomData();
 
             AtomName name;
+            AtomName altname;
             AtomNum number;
 
             quint32 cg_parent;
@@ -198,6 +200,7 @@ namespace SireMol
             ~EditResData();
 
             ResName name;
+            ResName altname;
             ResNum number;
 
             quint32 chain_parent;
@@ -404,6 +407,8 @@ QDataStream &operator>>(QDataStream &ds, EditAtomData &editatom)
     ds >> editatom.name >> editatom.number >> editatom.cg_parent >> editatom.res_parent >> editatom.seg_parent >>
         editatom.properties >> editatom.molecule_metadata >> editatom.property_metadata;
 
+    editatom.altname = AtomName();
+
     return ds;
 }
 
@@ -484,6 +489,8 @@ QDataStream &operator>>(QDataStream &ds, EditResData &editres)
 {
     ds >> editres.name >> editres.number >> editres.chain_parent >> editres.atoms >> editres.properties >>
         editres.molecule_metadata >> editres.property_metadata;
+
+    editres.altname = ResName();
 
     return ds;
 }
@@ -2889,11 +2896,37 @@ static const RegisterMetaType<StructureEditor> r_editor(MAGIC_ONLY, "SireMol::St
 /** Serialise to a binary datastream */
 QDataStream &operator<<(QDataStream &ds, const StructureEditor &editor)
 {
-    writeHeader(ds, r_editor, 1);
+    writeHeader(ds, r_editor, 2);
 
     SharedDataStream sds(ds);
 
     sds << editor.d;
+
+    QHash<qint64, QString> alt_atomnames;
+
+    for (int i = 0; i < editor.d->atoms.count(); ++i)
+    {
+        const EditAtomData &atom = editor.d->atoms[i];
+
+        if (not atom.altname.isEmpty())
+        {
+            alt_atomnames.insert(i, atom.altname.value());
+        }
+    }
+
+    QHash<qint64, QString> alt_resnames;
+
+    for (int i = 0; i < editor.d->residues.count(); ++i)
+    {
+        const EditResData &res = editor.d->residues[i];
+
+        if (not res.altname.isEmpty())
+        {
+            alt_resnames.insert(i, res.altname.value());
+        }
+    }
+
+    sds << alt_atomnames << alt_resnames;
 
     return ds;
 }
@@ -2903,10 +2936,29 @@ QDataStream &operator>>(QDataStream &ds, StructureEditor &editor)
 {
     VersionID v = readHeader(ds, r_editor);
 
-    if (v == 1)
+    if (v == 1 or v == 2)
     {
         SharedDataStream sds(ds);
         sds >> editor.d;
+
+        if (v == 2)
+        {
+            QHash<qint64, QString> alt_atomnames, alt_resnames;
+
+            sds >> alt_atomnames >> alt_resnames;
+
+            for (auto it = alt_atomnames.constBegin(); it != alt_atomnames.constEnd(); ++it)
+            {
+                if (it.key() >= 0 and it.key() < editor.d->atoms.count())
+                    editor.d->atoms[it.key()].altname = AtomName(it.value());
+            }
+
+            for (auto it = alt_resnames.constBegin(); it != alt_resnames.constEnd(); ++it)
+            {
+                if (it.key() >= 0 and it.key() < editor.d->residues.count())
+                    editor.d->residues[it.key()].altname = ResName(it.value());
+            }
+        }
     }
     else
         throw version_error(v, "1", r_editor, CODELOC);
@@ -3002,15 +3054,15 @@ SegIdx EditMolData::segIdx(const EditAtomData &atom) const
 
     \throw SireError::invalid_index
 */
-tuple<AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx> StructureEditor::getAtomData(AtomIdx atomidx) const
+tuple<AtomName, AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx> StructureEditor::getAtomData(AtomIdx atomidx) const
 {
     this->assertSane();
 
     quint32 atomuid = getUID(atomidx);
     const EditAtomData &atom = d->atom(atomuid);
 
-    return tuple<AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx>(atom.name, atom.number, d->cgAtomIdx(atomuid, atom),
-                                                               d->resIdx(atom), d->segIdx(atom));
+    return tuple<AtomName, AtomName, AtomNum, CGAtomIdx, ResIdx, SegIdx>(atom.name, atom.altname, atom.number, d->cgAtomIdx(atomuid, atom),
+                                                                         d->resIdx(atom), d->segIdx(atom));
 }
 
 /** Return all of the metadata about the CutGroup at index 'cgidx'
@@ -3050,7 +3102,7 @@ ChainIdx EditMolData::chainIdx(const EditResData &residue) const
 
     \throw SireError::invalid_index
 */
-boost::tuple<ResName, ResNum, ChainIdx, QList<AtomIdx>> StructureEditor::getResData(ResIdx residx) const
+boost::tuple<ResName, ResName, ResNum, ChainIdx, QList<AtomIdx>> StructureEditor::getResData(ResIdx residx) const
 {
     this->assertSane();
 
@@ -3063,8 +3115,8 @@ boost::tuple<ResName, ResNum, ChainIdx, QList<AtomIdx>> StructureEditor::getResD
         atomidxs.append(AtomIdx(d->atoms_by_index.indexOf(atom)));
     }
 
-    return tuple<ResName, ResNum, ChainIdx, QList<AtomIdx>>(residue.name, residue.number, d->chainIdx(residue),
-                                                            atomidxs);
+    return tuple<ResName, ResName, ResNum, ChainIdx, QList<AtomIdx>>(residue.name, residue.altname, residue.number, d->chainIdx(residue),
+                                                                     atomidxs);
 }
 
 /** Return the metadata for the chain at index 'chainidx'
@@ -3150,7 +3202,7 @@ const MoleculeInfoData &StructureEditor::commitInfo()
         {
             const auto info = this->getAtomData(AtomIdx(i));
 
-            if (info.get<2>().isNull())
+            if (info.get<3>().isNull())
             {
                 // this atom isn't in a CutGroup
                 // Reparent it into the first CutGroup
@@ -3909,6 +3961,119 @@ void StructureEditor::renumberMolecule(MolNum newnum)
     d->molnum = newnum;
 }
 
+/** Set the alternate atom name */
+void StructureEditor::setAlternateAtomName(quint32 uid, const AtomName &name)
+{
+    this->assertSane();
+
+    EditAtomData &atom = d->atom(uid);
+
+    if (atom.altname != name)
+    {
+        atom.altname = AtomName(cacheName(name));
+        d->cached_molinfo = 0;
+    }
+}
+
+/** Set the alternate residue name */
+void StructureEditor::setAlternateResName(quint32 uid, const ResName &name)
+{
+    this->assertSane();
+
+    EditResData &res = d->residue(uid);
+
+    if (res.altname != name)
+    {
+        res.altname = ResName(cacheName(name));
+        d->cached_molinfo = 0;
+    }
+}
+
+/** Return the alternate atom name - this will be the atom name if
+ *  this hasn't been set
+ */
+const AtomName &StructureEditor::getAlternateAtomName(quint32 uid) const
+{
+    this->assertSane();
+
+    EditAtomData &atom = d->atom(uid);
+
+    if (atom.altname.isNull())
+        return atom.name;
+    else
+        return atom.altname;
+}
+
+const ResName &StructureEditor::getAlternateResName(quint32 uid) const
+{
+    this->assertSane();
+
+    EditResData &res = d->residue(uid);
+
+    if (res.altname.isNull())
+        return res.name;
+    else
+        return res.altname;
+}
+
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+void StructureEditor::switchToAlternates(bool keep_originals)
+{
+    this->assertSane();
+
+    for (auto it = d->atoms.begin(); it != d->atoms.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            auto newname = it.value().altname;
+
+            if (keep_originals)
+                it.value().altname = it.value().name;
+
+            it.value().name = newname;
+        }
+    }
+
+    for (auto it = d->residues.begin(); it != d->residues.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            auto newname = it.value().altname;
+
+            if (keep_originals)
+                it.value().altname = it.value().name;
+
+            it.value().name = newname;
+        }
+    }
+}
+
+/** Remove all alternate names from this molecule */
+void StructureEditor::removeAlternates()
+{
+    this->assertSane();
+
+    for (auto it = d->atoms.begin(); it != d->atoms.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            it.value().altname = AtomName();
+        }
+    }
+
+    for (auto it = d->residues.begin(); it != d->residues.end(); ++it)
+    {
+        if (not it.value().altname.isNull())
+        {
+            it.value().altname = ResName();
+        }
+    }
+}
+
 /** Rename the atom identified by 'uid' to 'newname'
 
     \throw SireMol::missing_atom
@@ -4425,6 +4590,31 @@ void StructureEditor::removeAllAtoms()
     }
 }
 
+/** Move all atoms into a single CutGroup */
+void StructureEditor::convertToSingleCutGroupMolecule()
+{
+    this->assertSane();
+
+    QList<quint32> cg_by_index = d->cg_by_index;
+
+    if (cg_by_index.count() <= 1)
+    {
+        // nothing to do
+        return;
+    }
+
+    for (quint32 i = 0; i < this->nAtomsInMolecule(); ++i)
+    {
+        this->reparentAtom(i, CGIdx(0));
+    }
+
+    // now remove all of the other CutGroups
+    for (int i = cg_by_index.count() - 1; i > 0; --i)
+    {
+        this->removeCutGroup(CGIdx(i));
+    }
+}
+
 /** Remove all CutGroups from this molecule */
 void StructureEditor::removeAllCutGroups()
 {
@@ -4856,8 +5046,14 @@ Properties StructureEditor::properties() const
             {
                 updated_property = updated_property->asA<MolViewProperty>().makeCompatibleWith(this->info(), mapping);
             }
-            catch (...)
+            catch (const SireError::exception &e)
             {
+                SireBase::Console::warning(QObject::tr("Could not convert the old property at key %1 with type %2 to match "
+                                                       "the new, edited molecule. This property has been deleted.\nError was %3: %4")
+                                               .arg(key)
+                                               .arg(updated_property->what())
+                                               .arg(e.what())
+                                               .arg(e.error()));
                 updated_property = NullProperty();
             }
         }

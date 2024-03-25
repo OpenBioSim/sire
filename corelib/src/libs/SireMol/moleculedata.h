@@ -247,6 +247,15 @@ namespace SireMol
         void renumber(const QHash<ResNum, ResNum> &resnums);
         void renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums);
 
+        void setAlternateAtomName(AtomIdx atomidx, const AtomName &newname);
+        void setAlternateResName(ResIdx residx, const ResName &newname);
+
+        AtomName getAlternateAtomName(AtomIdx atomidx) const;
+        ResName getAlternateResName(ResIdx residx) const;
+
+        void switchToAlternateNames(bool keep_originals = true);
+        void removeAlternateNames();
+
         void setProperty(const QString &key, const Property &value, bool clear_metadata = false);
 
         bool updateProperty(const QString &key, const Property &value, bool auto_add = true);

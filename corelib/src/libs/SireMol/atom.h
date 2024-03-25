@@ -130,6 +130,8 @@ namespace SireMol
         AtomIdx index() const;
         const CGAtomIdx &cgAtomIdx() const;
 
+        AtomName alternateName() const;
+
         bool hasProperty(const PropertyName &key) const;
         bool hasMetadata(const PropertyName &metakey) const;
         bool hasMetadata(const PropertyName &key, const PropertyName &metakey) const;

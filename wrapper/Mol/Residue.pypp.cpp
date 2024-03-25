@@ -98,6 +98,18 @@ void register_Residue_class(){
         bp::scope Residue_scope( Residue_exposer );
         Residue_exposer.def( bp::init< SireMol::MoleculeData const &, SireMol::ResID const & >(( bp::arg("moldata"), bp::arg("resid") ), "Construct as a specified residue") );
         Residue_exposer.def( bp::init< SireMol::Residue const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireMol::Residue::alternateName
+        
+            typedef ::SireMol::ResName ( ::SireMol::Residue::*alternateName_function_type)(  ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::Residue::alternateName );
+            
+            Residue_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , bp::release_gil_policy()
+                , "Return the alternate name of this residue" );
+        
+        }
         { //::SireMol::Residue::assertContainsMetadata
         
             typedef void ( ::SireMol::Residue::*assertContainsMetadata_function_type)( ::SireBase::PropertyName const & ) const;

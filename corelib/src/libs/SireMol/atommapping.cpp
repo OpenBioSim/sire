@@ -28,6 +28,10 @@
 
 #include "atommapping.h"
 
+#include "SireMaths/align.h"
+
+#include "SireMol/core.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -41,11 +45,14 @@ static const RegisterMetaType<AtomMapping> r_mapping;
 
 QDataStream &operator<<(QDataStream &ds, const AtomMapping &mapping)
 {
-    writeHeader(ds, r_mapping, 1);
+    writeHeader(ds, r_mapping, 2);
 
     SharedDataStream sds(ds);
 
     sds << mapping.atms0 << mapping.atms1
+        << mapping.orig_atms0 << mapping.orig_atms1
+        << mapping.unmapped_atms0 << mapping.unmapped_atms1
+        << mapping.map0 << mapping.map1
         << static_cast<const Property &>(mapping);
 
     return ds;
@@ -55,14 +62,29 @@ QDataStream &operator>>(QDataStream &ds, AtomMapping &mapping)
 {
     VersionID v = readHeader(ds, r_mapping);
 
-    if (v == 1)
+    if (v == 2)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> mapping.atms0 >> mapping.atms1 >> mapping.orig_atms0 >> mapping.orig_atms1 >> mapping.unmapped_atms0 >> mapping.unmapped_atms1 >> mapping.map0 >> mapping.map1 >> static_cast<Property &>(mapping);
+    }
+    else if (v == 1)
     {
         SharedDataStream sds(ds);
 
         sds >> mapping.atms0 >> mapping.atms1 >> static_cast<Property &>(mapping);
+
+        mapping.map0 = PropertyMap();
+        mapping.map1 = PropertyMap();
+
+        mapping.orig_atms0 = mapping.atms0;
+        mapping.orig_atms1 = mapping.atms1;
+
+        mapping.unmapped_atms0.clear();
+        mapping.unmapped_atms1.clear();
     }
     else
-        throw version_error(v, "1", r_mapping, CODELOC);
+        throw version_error(v, "1,2", r_mapping, CODELOC);
 
     return ds;
 }
@@ -72,9 +94,13 @@ AtomMapping::AtomMapping() : ConcreteProperty<AtomMapping, Property>()
 }
 
 AtomMapping::AtomMapping(const SelectorM<Atom> &atoms0,
-                         const SelectorM<Atom> &atoms1)
+                         const SelectorM<Atom> &atoms1,
+                         const PropertyMap &m0,
+                         const PropertyMap &m1)
     : ConcreteProperty<AtomMapping, Property>(),
-      atms0(atoms0), atms1(atoms1)
+      atms0(atoms0), atms1(atoms1),
+      orig_atms0(atoms0), orig_atms1(atoms1),
+      map0(m0), map1(m1)
 {
     if (atms0.count() != atms1.count())
     {
@@ -88,22 +114,100 @@ AtomMapping::AtomMapping(const SelectorM<Atom> &atoms0,
     }
 }
 
-AtomMapping::AtomMapping(const MoleculeView &mol0, const MoleculeView &mol1)
+AtomMapping::AtomMapping(const SelectorM<Atom> &atoms0,
+                         const SelectorM<Atom> &atoms1,
+                         const PropertyMap &map)
+    : ConcreteProperty<AtomMapping, Property>()
+{
+    this->operator=(AtomMapping(atoms0, atoms1, map, map));
+}
+
+AtomMapping::AtomMapping(const MoleculeView &mol0, const MoleculeView &mol1,
+                         const PropertyMap &map)
     : ConcreteProperty<AtomMapping, Property>()
 {
     this->operator=(AtomMapping(SelectorM<Atom>(mol0.atoms()),
-                                SelectorM<Atom>(mol1.atoms())));
+                                SelectorM<Atom>(mol1.atoms()),
+                                map));
 }
 
-AtomMapping::AtomMapping(const SelectorMol &mols0, const SelectorMol &mols1)
+AtomMapping::AtomMapping(const MoleculeView &mol0, const MoleculeView &mol1,
+                         const PropertyMap &m0, const PropertyMap &m1)
     : ConcreteProperty<AtomMapping, Property>()
 {
-    this->operator=(AtomMapping(mols0.atoms(), mols1.atoms()));
+    this->operator=(AtomMapping(SelectorM<Atom>(mol0.atoms()),
+                                SelectorM<Atom>(mol1.atoms()),
+                                m0, m1));
+}
+
+AtomMapping::AtomMapping(const SelectorMol &mols0, const SelectorMol &mols1,
+                         const PropertyMap &map)
+    : ConcreteProperty<AtomMapping, Property>()
+{
+    this->operator=(AtomMapping(mols0.atoms(), mols1.atoms(), map));
+}
+
+AtomMapping::AtomMapping(const SelectorMol &mols0, const SelectorMol &mols1,
+                         const PropertyMap &m0, const PropertyMap &m1)
+    : ConcreteProperty<AtomMapping, Property>()
+{
+    this->operator=(AtomMapping(mols0.atoms(), mols1.atoms(), m0, m1));
+}
+
+AtomMapping::AtomMapping(const SelectorM<Atom> &atoms0,
+                         const SelectorM<Atom> &atoms1,
+                         const SelectorM<Atom> &matched_atoms0,
+                         const SelectorM<Atom> &matched_atoms1,
+                         const SireBase::PropertyMap &m0,
+                         const SireBase::PropertyMap &m1)
+    : ConcreteProperty<AtomMapping, Property>(),
+      atms0(matched_atoms0), atms1(matched_atoms1),
+      orig_atms0(atoms0), orig_atms1(atoms1),
+      map0(m0), map1(m1)
+{
+    if (atms0.count() != atms1.count())
+    {
+        throw SireError::incompatible_error(QObject::tr(
+                                                "The number of atoms in 'atoms0' (%1) is not equal to the "
+                                                "number of atoms in 'atoms1' (%2). You can only create a "
+                                                "mapping if the number of atoms is the same.")
+                                                .arg(atms0.count())
+                                                .arg(atms1.count()),
+                                            CODELOC);
+    }
+
+    // find the indexes of missing atoms
+    for (int i = 0; i < atoms0.count(); ++i)
+    {
+        if (not atms0.contains(atoms0[i]))
+            this->unmapped_atms0.append(i);
+    }
+
+    for (int i = 0; i < atoms1.count(); ++i)
+    {
+        if (not atms1.contains(atoms1[i]))
+            this->unmapped_atms1.append(i);
+    }
+}
+
+AtomMapping::AtomMapping(const SelectorM<Atom> &atoms0,
+                         const SelectorM<Atom> &atoms1,
+                         const SelectorM<Atom> &matched_atoms0,
+                         const SelectorM<Atom> &matched_atoms1,
+                         const SireBase::PropertyMap &map)
+    : ConcreteProperty<AtomMapping, Property>()
+{
+    this->operator=(AtomMapping(atoms0, atoms1,
+                                matched_atoms0, matched_atoms1,
+                                map, map));
 }
 
 AtomMapping::AtomMapping(const AtomMapping &other)
     : ConcreteProperty<AtomMapping, Property>(other),
-      atms0(other.atms0), atms1(other.atms1)
+      atms0(other.atms0), atms1(other.atms1),
+      orig_atms0(other.orig_atms0), orig_atms1(other.orig_atms1),
+      unmapped_atms0(other.unmapped_atms0), unmapped_atms1(other.unmapped_atms1),
+      map0(other.map0), map1(other.map1)
 {
 }
 
@@ -117,6 +221,13 @@ AtomMapping &AtomMapping::operator=(const AtomMapping &other)
     {
         atms0 = other.atms0;
         atms1 = other.atms1;
+        orig_atms0 = other.orig_atms0;
+        orig_atms1 = other.orig_atms1;
+        unmapped_atms0 = other.unmapped_atms0;
+        unmapped_atms1 = other.unmapped_atms1;
+        map0 = other.map0;
+        map1 = other.map1;
+
         Property::operator=(other);
     }
 
@@ -125,7 +236,9 @@ AtomMapping &AtomMapping::operator=(const AtomMapping &other)
 
 bool AtomMapping::operator==(const AtomMapping &other) const
 {
-    return atms0 == other.atms0 and atms1 == other.atms1;
+    return orig_atms0 == other.orig_atms0 and orig_atms1 == other.orig_atms1 and
+           atms0 == other.atms0 and atms1 == other.atms1 and
+           map0 == other.map0 and map1 == other.map1;
 }
 
 bool AtomMapping::operator!=(const AtomMapping &other) const
@@ -241,28 +354,59 @@ QString AtomMapping::toString() const
             }
         }
 
-        return QObject::tr("AtomMapping( size=%1\n%2\n)").arg(n).arg(parts.join("\n"));
+        return QObject::tr("AtomMapping( size=%1, unmapped0=%2, unmapped1=%3\n%4\n)")
+            .arg(n)
+            .arg(this->unmapped_atms0.count())
+            .arg(this->unmapped_atms1.count())
+            .arg(parts.join("\n"));
     }
 }
 
-/** Return the reference atoms. We map from these atom to
- *  the mapped atoms (atoms1) */
+/** Return the original reference atoms. This is the collection of both
+ *  mapped and unmapped reference atoms
+ */
 const SelectorM<Atom> &AtomMapping::atoms0() const
 {
-    return this->atms0;
+    return this->orig_atms0;
 }
 
-/** Return the mapped atoms. We map from the reference atoms (atoms0)
- *  to these atoms. */
+/** Return the original mapped atoms. This is the collection of both
+ *  mapped and unmapped mapped atoms
+ */
 const SelectorM<Atom> &AtomMapping::atoms1() const
 {
-    return this->atms1;
+    return this->orig_atms1;
 }
 
 /** Return an AtomMapping that swaps the reference and mapped atoms */
 AtomMapping AtomMapping::swap() const
 {
-    return AtomMapping(this->atms1, this->atms0);
+    AtomMapping ret;
+
+    ret.orig_atms0 = this->orig_atms1;
+    ret.orig_atms1 = this->orig_atms0;
+
+    ret.atms0 = this->atms1;
+    ret.atms1 = this->atms0;
+
+    ret.map0 = this->map1;
+    ret.map1 = this->map0;
+
+    ret.unmapped_atms0 = this->unmapped_atms1;
+    ret.unmapped_atms1 = this->unmapped_atms0;
+
+    return ret;
+}
+
+/** Return whether or not the forward mapping contains the
+ *  passed atom - this returns true if the atom is contained
+ *  in the original reference atoms, i.e. it doesn't guarantee
+ *  that the atom is mapped. Use the 'isMapped' method to
+ *  check if the atom is mapped.
+ */
+bool AtomMapping::contains(const Atom &atom) const
+{
+    return this->orig_atms0.contains(atom);
 }
 
 /** Map from 'atom' (which must be in the reference atoms) to
@@ -468,4 +612,162 @@ SelectorM<Atom> AtomMapping::find(const SelectorM<Atom> &atoms,
     filtered.update(container.molecules());
 
     return filtered;
+}
+
+/** Return all of the reference atoms that have been mapped,
+ *  in the same order as the mapped atoms they match with
+ */
+SelectorM<Atom> AtomMapping::mappedAtoms0() const
+{
+    return this->atms0;
+}
+
+/** Return all of the mapped atoms that have been mapped,
+ *  in the same order as the reference atoms they match with
+ */
+SelectorM<Atom> AtomMapping::mappedAtoms1() const
+{
+    return this->atms1;
+}
+
+/** Return all of the reference atoms that haven't been mapped,
+ *  in the same order as they appear in the original reference
+ */
+SelectorM<Atom> AtomMapping::unmappedAtoms0() const
+{
+    if (this->unmapped_atms0.isEmpty())
+    {
+        return SelectorM<Atom>();
+    }
+    else
+    {
+        return this->orig_atms0[this->unmapped_atms0];
+    }
+}
+
+/** Return all of the mapped atoms that haven't been mapped,
+ *  in the same order as they appear in the original mapped atoms
+ */
+SelectorM<Atom> AtomMapping::unmappedAtoms1() const
+{
+    if (this->unmapped_atms1.isEmpty())
+    {
+        return SelectorM<Atom>();
+    }
+    else
+    {
+        return this->orig_atms1[this->unmapped_atms1];
+    }
+}
+
+/** Return whether or not the passed reference atom has been
+ *  mapped to a mapped atom
+ */
+bool AtomMapping::isMapped(const Atom &atom) const
+{
+    return this->atms0.contains(atom);
+}
+
+/** Return whether or not this mapping refers to only a single molecule */
+bool AtomMapping::isSingleMolecule() const
+{
+    return this->orig_atms0.isSingleMolecule() and this->orig_atms1.isSingleMolecule();
+}
+
+/** Assert that this mapping refers only to a single molecule */
+void AtomMapping::assertSingleMolecule() const
+{
+    if (not this->isSingleMolecule())
+    {
+        throw SireError::incompatible_error(QObject::tr(
+                                                "This mapping refers to more than one molecule, and so "
+                                                "cannot be used in this context."),
+                                            CODELOC);
+    }
+}
+
+/** Return the property map used to find properties of the
+ *  reference molecule
+ */
+const PropertyMap &AtomMapping::propertyMap0() const
+{
+    return this->map0;
+}
+
+/** Return the property map used to find properties of the
+ *  mapped molecule
+ */
+const PropertyMap &AtomMapping::propertyMap1() const
+{
+    return this->map1;
+}
+
+/** Return the mapping where the perturbed state (1) has been
+ *  aligned against the reference state (0).
+ */
+AtomMapping AtomMapping::align() const
+{
+    return this->alignTo0();
+}
+
+/** Return the mapping where the perturbed state (1) has been
+ *  aligned against the reference state (0).
+ */
+AtomMapping AtomMapping::alignTo0() const
+{
+    if (this->isEmpty())
+        return *this;
+    else if (this->atms0.isEmpty())
+        return *this;
+
+    QVector<Vector> coords0 = this->atms0.property<Vector>(map0["coordinates"]).toVector();
+    QVector<Vector> coords1 = this->atms1.property<Vector>(map1["coordinates"]).toVector();
+
+    // calculate the transform to do a RMSD aligment of the two sets of coordinates
+    auto transform = SireMaths::getAlignment(coords0, coords1, true);
+
+    auto mols1 = this->orig_atms1.molecules();
+
+    AtomMapping ret(*this);
+
+    for (int i = 0; i < mols1.count(); ++i)
+    {
+        auto mol = mols1[i].move().transform(transform, map1).commit();
+
+        ret.atms1.update(mol);
+        ret.orig_atms1.update(mol);
+    }
+
+    return ret;
+}
+
+/** Return the mapping where the perturbed state (1) has been
+ *  aligned against the reference state (0).
+ */
+AtomMapping AtomMapping::alignTo1() const
+{
+    if (this->isEmpty())
+        return *this;
+    else if (this->atms0.isEmpty())
+        return *this;
+
+    QVector<Vector> coords0 = this->atms0.property<Vector>(map0["coordinates"]).toVector();
+    QVector<Vector> coords1 = this->atms1.property<Vector>(map1["coordinates"]).toVector();
+
+    // calculate the transform to do a RMSD aligment of the two sets of coordinates
+    auto transform = SireMaths::getAlignment(coords1, coords0, true);
+
+    auto mols0 = this->orig_atms0.molecules();
+
+    AtomMapping ret(*this);
+
+    for (int i = 0; i < mols0.count(); ++i)
+    {
+        auto mol = mols0[i].move().transform(transform, map0).commit();
+
+        ret.atms0.update(mol);
+        ret.orig_atms0.update(mol);
+    }
+
+    return ret;
 }

@@ -213,6 +213,12 @@ AtomName Atom::name() const
     return d->info().name(atomidx);
 }
 
+/** Return the alternate name of the atom */
+AtomName Atom::alternateName() const
+{
+    return d->getAlternateAtomName(atomidx);
+}
+
 /** Return the number of the atom */
 AtomNum Atom::number() const
 {

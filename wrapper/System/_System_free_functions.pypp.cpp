@@ -721,6 +721,20 @@ namespace bp = boost::python;
 
 #include "create_test_molecule.h"
 
+#include "SireMM/mmdetail.h"
+
+#include "SireMol/atomidxmapping.h"
+
+#include "SireMol/core.h"
+
+#include "SireMol/moleditor.h"
+
+#include "SireSystem/merge.h"
+
+#include "merge.h"
+
+#include "merge.h"
+
 void register_free_functions(){
 
     { //::SireSystem::calculate_energy
@@ -965,6 +979,19 @@ void register_free_functions(){
         bp::def( 
             "create_test_molecule"
             , create_test_molecule_function_value
+            , "" );
+    
+    }
+
+    { //::SireSystem::merge
+    
+        typedef ::SireMol::Molecule ( *merge_function_type )( ::SireMol::AtomMapping const &,::QStringList const &,bool,bool,bool,bool,::SireBase::PropertyMap const & );
+        merge_function_type merge_function_value( &::SireSystem::merge );
+        
+        bp::def( 
+            "merge"
+            , merge_function_value
+            , ( bp::arg("mols"), bp::arg("properties")=::QStringList( ), bp::arg("as_new_molecule")=(bool)(true), bp::arg("allow_ring_breaking")=(bool)(false), bp::arg("allow_ring_size_change")=(bool)(false), bp::arg("force")=(bool)(false), bp::arg("map")=SireBase::PropertyMap() )
             , "" );
     
     }

@@ -85,6 +85,18 @@ void register_ResEditor_class(){
                 , "Add a new atom with the number number to this residue - this\nreturns an editor that can be used to further edit this atom" );
         
         }
+        { //::SireMol::ResEditor::alternateName
+        
+            typedef ::SireMol::ResName ( ::SireMol::ResEditor::*alternateName_function_type)(  ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::ResEditor::alternateName );
+            
+            ResEditor_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , bp::release_gil_policy()
+                , "Return the alternate name for this residue" );
+        
+        }
         { //::SireMol::ResEditor::commit
         
             typedef ::SireMol::Residue ( ::SireMol::ResEditor::*commit_function_type)(  ) const;
@@ -134,6 +146,19 @@ void register_ResEditor_class(){
                 , ( bp::arg("index") )
                 , bp::release_gil_policy()
                 , "Change the index of this residue to newidx. If this\nis larger than the number of residues in the molecule\nthen this residue is moved to the end" );
+        
+        }
+        { //::SireMol::ResEditor::reindex
+        
+            typedef ::SireMol::ResStructureEditor ( ::SireMol::ResEditor::*reindex_function_type)( int ) const;
+            reindex_function_type reindex_function_value( &::SireMol::ResEditor::reindex );
+            
+            ResEditor_exposer.def( 
+                "reindex"
+                , reindex_function_value
+                , ( bp::arg("index") )
+                , bp::release_gil_policy()
+                , "Reindex this residue to newidx" );
         
         }
         { //::SireMol::ResEditor::remove
@@ -187,9 +212,35 @@ void register_ResEditor_class(){
                 , "Rename this residue to newname" );
         
         }
+        { //::SireMol::ResEditor::rename
+        
+            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*rename_function_type)( ::QString const & ) ;
+            rename_function_type rename_function_value( &::SireMol::ResEditor::rename );
+            
+            ResEditor_exposer.def( 
+                "rename"
+                , rename_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Rename this residue to newname" );
+        
+        }
         { //::SireMol::ResEditor::renumber
         
             typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*renumber_function_type)( ::SireMol::ResNum ) ;
+            renumber_function_type renumber_function_value( &::SireMol::ResEditor::renumber );
+            
+            ResEditor_exposer.def( 
+                "renumber"
+                , renumber_function_value
+                , ( bp::arg("number") )
+                , bp::return_self< >()
+                , "Renumber this residue to newnum" );
+        
+        }
+        { //::SireMol::ResEditor::renumber
+        
+            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*renumber_function_type)( int ) ;
             renumber_function_type renumber_function_value( &::SireMol::ResEditor::renumber );
             
             ResEditor_exposer.def( 
@@ -211,6 +262,32 @@ void register_ResEditor_class(){
                 , ( bp::arg("chainid") )
                 , bp::release_gil_policy()
                 , "Move this residue into the chain with ID chainid\nThrow: SireMol::missing_chain\nThrow: SireMol::duplicate_chain\nThrow: SireError::invalid_index\n" );
+        
+        }
+        { //::SireMol::ResEditor::setAlternateName
+        
+            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*setAlternateName_function_type)( ::SireMol::ResName const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::ResEditor::setAlternateName );
+            
+            ResEditor_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Set the alternate residue name for this residue" );
+        
+        }
+        { //::SireMol::ResEditor::setAlternateName
+        
+            typedef ::SireMol::ResEditor & ( ::SireMol::ResEditor::*setAlternateName_function_type)( ::QString const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::ResEditor::setAlternateName );
+            
+            ResEditor_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Set the alternate name for this residue" );
         
         }
         { //::SireMol::ResEditor::toString

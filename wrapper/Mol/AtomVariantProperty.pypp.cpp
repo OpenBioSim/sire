@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<QVariant> __copy__(const SireMol::AtomProperty<QVariant> &other){ return SireMol::AtomProperty<QVariant>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -384,6 +386,19 @@ void register_AtomVariantProperty_class(){
                 , merge_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< QVariant >::merge
+        
+            typedef SireMol::AtomProperty< QVariant > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< QVariant >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< QVariant >::merge );
+            
+            AtomVariantProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

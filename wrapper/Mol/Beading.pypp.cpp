@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireError/errors.h"
@@ -56,6 +58,18 @@ void register_Beading_class(){
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::Beading::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::Beading::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::Beading::merge );
+            
+            Beading_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMol::Beading::null

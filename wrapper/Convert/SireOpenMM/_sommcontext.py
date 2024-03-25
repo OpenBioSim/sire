@@ -294,3 +294,20 @@ class SOMMContext(_Context):
             )
 
         return constraints
+
+    def to_xml(self, f=None):
+        """
+        Save the current state of the dynamics to XML.
+        This is mostly used for debugging. This will return the
+        XML string if 'f' is None. Otherwise it will write the
+        XML to 'f' (either a filename, or a FILE object)
+        """
+        from openmm.openmm import XmlSerializer as _XmlSerializer
+
+        if f is None:
+            return _XmlSerializer.serialize(self.getSystem())
+        elif isinstance(f, str):
+            with open(f, "w") as handle:
+                handle.write(_XmlSerializer.serialize(self.getSystem()))
+        else:
+            f.write(_XmlSerializer.serialize(self.getSystem()))

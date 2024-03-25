@@ -8,9 +8,13 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/errors.h"
 
@@ -19,6 +23,8 @@ namespace bp = boost::python;
 #include "SireStream/shareddatastream.h"
 
 #include "angleid.h"
+
+#include "atomidxmapping.h"
 
 #include "atommatcher.h"
 
@@ -543,6 +549,18 @@ void register_ConnectivityBase_class(){
                 , "Return the list of bonds in the connectivity containing atom" );
         
         }
+        { //::SireMol::ConnectivityBase::getBonds
+        
+            typedef ::QList< SireMol::BondID > ( ::SireMol::ConnectivityBase::*getBonds_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            getBonds_function_type getBonds_function_value( &::SireMol::ConnectivityBase::getBonds );
+            
+            ConnectivityBase_exposer.def( 
+                "getBonds"
+                , getBonds_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return all of the connections that involve the passed atoms - if exclusive is true,\n  then return only connections where both atoms are present in the list.\n" );
+        
+        }
         { //::SireMol::ConnectivityBase::getDihedrals
         
             typedef ::QList< SireMol::DihedralID > ( ::SireMol::ConnectivityBase::*getDihedrals_function_type)(  ) const;
@@ -812,6 +830,18 @@ void register_ConnectivityBase_class(){
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::ConnectivityBase::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::ConnectivityBase::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::ConnectivityBase::merge );
+            
+            ConnectivityBase_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMol::ConnectivityBase::nConnections

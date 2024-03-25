@@ -17,6 +17,7 @@
 #include "atomid.h"
 #include "atomidentifier.h"
 #include "atomidx.h"
+#include "atomidxmapping.h"
 #include "atommapping.h"
 #include "atommasses.h"
 #include "atommatch.h"

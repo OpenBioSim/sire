@@ -101,7 +101,16 @@ namespace SireMol
         ResEditor &rename(const ResName &name);
         ResEditor &renumber(ResNum number);
 
+        ResEditor &rename(const QString &name);
+        ResEditor &renumber(int number);
+
         ResStructureEditor reindex(ResIdx index) const;
+        ResStructureEditor reindex(int index) const;
+
+        ResEditor &setAlternateName(const ResName &name);
+        ResEditor &setAlternateName(const QString &name);
+
+        ResName alternateName() const;
 
         MolStructureEditor remove() const;
 
@@ -174,8 +183,16 @@ namespace SireMol
 
         ResStructureEditor &rename(const ResName &name);
         ResStructureEditor &renumber(ResNum number);
-
         ResStructureEditor &reindex(ResIdx index);
+
+        ResStructureEditor &rename(const QString &name);
+        ResStructureEditor &renumber(int number);
+        ResStructureEditor &reindex(int index);
+
+        ResStructureEditor &setAlternateName(const ResName &name);
+        ResStructureEditor &setAlternateName(const QString &name);
+
+        const ResName &alternateName() const;
 
         MolStructureEditor remove();
 

@@ -184,8 +184,6 @@ namespace SireMM
 
         QString toString() const;
 
-        int nFunctions() const;
-
         void set(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3, const Expression &expression);
 
         void set(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3,
@@ -203,11 +201,15 @@ namespace SireMM
         void clear(const DihedralID &dihedralid);
         void clear(const ImproperID &improperid);
 
+        void clear(const QList<AtomIdx> &atoms, bool exclusive = true);
+
         void clear();
 
         void substitute(const Identities &identities);
 
         bool isEmpty() const;
+
+        int nFunctions() const;
 
         Expression potential(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2, AtomIdx atom3) const;
         Expression potential(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2, const AtomID &atom3) const;
@@ -225,7 +227,14 @@ namespace SireMM
         QVector<FourAtomFunction> potentials() const;
         QVector<FourAtomFunction> forces(const Symbol &symbol) const;
 
+        QVector<FourAtomFunction> potentials(const QList<AtomIdx> &atoms, bool exclusive = true) const;
+
         FourAtomFunctions includeOnly(const AtomSelection &selected_atoms, bool isstrict = true) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     protected:
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,

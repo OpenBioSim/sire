@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> > __copy__(const SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> > &other){ return SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Velocity> >(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -357,6 +359,19 @@ void register_AtomVelocities_class(){
                 , merge_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::merge
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Velocity > >::merge );
+            
+            AtomVelocities_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

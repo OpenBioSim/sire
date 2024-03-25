@@ -67,6 +67,18 @@ void register_AtomStructureEditor_class(){
         AtomStructureEditor_exposer.def( bp::init< SireMol::Atom const & >(( bp::arg("atom") ), "Construct from an Atom") );
         AtomStructureEditor_exposer.def( bp::init< SireMol::StructureEditor const &, SireMol::AtomIdx >(( bp::arg("data"), bp::arg("atomidx") ), "Construct for the atom at index idx in the molecule whose data\nis being edited in moldata\nThrow: SireError::invalid_index\n") );
         AtomStructureEditor_exposer.def( bp::init< SireMol::AtomStructureEditor const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireMol::AtomStructureEditor::alternateName
+        
+            typedef ::SireMol::AtomName const & ( ::SireMol::AtomStructureEditor::*alternateName_function_type)(  ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::AtomStructureEditor::alternateName );
+            
+            AtomStructureEditor_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the alternate name for this atom" );
+        
+        }
         { //::SireMol::AtomStructureEditor::chain
         
             typedef ::SireMol::ChainStructureEditor ( ::SireMol::AtomStructureEditor::*chain_function_type)(  ) ;
@@ -179,6 +191,19 @@ void register_AtomStructureEditor_class(){
         }
         { //::SireMol::AtomStructureEditor::reindex
         
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*reindex_function_type)( int ) ;
+            reindex_function_type reindex_function_value( &::SireMol::AtomStructureEditor::reindex );
+            
+            AtomStructureEditor_exposer.def( 
+                "reindex"
+                , reindex_function_value
+                , ( bp::arg("idx") )
+                , bp::return_self< >()
+                , "Reindex this atom" );
+        
+        }
+        { //::SireMol::AtomStructureEditor::reindex
+        
             typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*reindex_function_type)( ::SireMol::AtomIdx ) ;
             reindex_function_type reindex_function_value( &::SireMol::AtomStructureEditor::reindex );
             
@@ -204,6 +229,19 @@ void register_AtomStructureEditor_class(){
         }
         { //::SireMol::AtomStructureEditor::rename
         
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*rename_function_type)( ::QString const & ) ;
+            rename_function_type rename_function_value( &::SireMol::AtomStructureEditor::rename );
+            
+            AtomStructureEditor_exposer.def( 
+                "rename"
+                , rename_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Rename this atom" );
+        
+        }
+        { //::SireMol::AtomStructureEditor::rename
+        
             typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*rename_function_type)( ::SireMol::AtomName const & ) ;
             rename_function_type rename_function_value( &::SireMol::AtomStructureEditor::rename );
             
@@ -213,6 +251,19 @@ void register_AtomStructureEditor_class(){
                 , ( bp::arg("name") )
                 , bp::return_self< >()
                 , "Rename this atom to newname" );
+        
+        }
+        { //::SireMol::AtomStructureEditor::renumber
+        
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*renumber_function_type)( int ) ;
+            renumber_function_type renumber_function_value( &::SireMol::AtomStructureEditor::renumber );
+            
+            AtomStructureEditor_exposer.def( 
+                "renumber"
+                , renumber_function_value
+                , ( bp::arg("number") )
+                , bp::return_self< >()
+                , "Renumber this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::renumber
@@ -340,6 +391,32 @@ void register_AtomStructureEditor_class(){
                 , selectedAll_function_value
                 , bp::release_gil_policy()
                 , "Return whether or not this contains the whole molecule" );
+        
+        }
+        { //::SireMol::AtomStructureEditor::setAlternateName
+        
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*setAlternateName_function_type)( ::QString const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::AtomStructureEditor::setAlternateName );
+            
+            AtomStructureEditor_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Set the alternate name for this atom" );
+        
+        }
+        { //::SireMol::AtomStructureEditor::setAlternateName
+        
+            typedef ::SireMol::AtomStructureEditor & ( ::SireMol::AtomStructureEditor::*setAlternateName_function_type)( ::SireMol::AtomName const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::AtomStructureEditor::setAlternateName );
+            
+            AtomStructureEditor_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Set the alternate name for this atom" );
         
         }
         { //::SireMol::AtomStructureEditor::toString

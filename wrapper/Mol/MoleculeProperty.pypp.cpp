@@ -9,6 +9,8 @@ namespace bp = boost::python;
 
 #include "SireError/errors.h"
 
+#include "atomidxmapping.h"
+
 #include "atommatcher.h"
 
 #include "atommatchers.h"

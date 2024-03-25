@@ -61,6 +61,11 @@ def ose_mols():
 
 
 @pytest.fixture(scope="session")
+def zan_mols():
+    return sr.load_test_files("zan.top", "zan.rst")
+
+
+@pytest.fixture(scope="session")
 def h7n9_mols():
     return sr.load_test_files("h7n9.pdb", "h7n9.dcd")
 

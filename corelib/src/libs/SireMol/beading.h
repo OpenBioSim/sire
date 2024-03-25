@@ -109,6 +109,11 @@ namespace SireMol
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     protected:
         Beading &operator=(const Beading &other);
         bool operator==(const Beading &other) const;

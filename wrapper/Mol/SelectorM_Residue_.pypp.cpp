@@ -138,6 +138,19 @@ void register_SelectorM_Residue__class(){
                 , "" );
         
         }
+        { //::SireMol::SelectorM< SireMol::Residue >::assertSingleMolecule
+        
+            typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
+            typedef void ( ::SireMol::SelectorM< SireMol::Residue >::*assertSingleMolecule_function_type)(  ) const;
+            assertSingleMolecule_function_type assertSingleMolecule_function_value( &::SireMol::SelectorM< SireMol::Residue >::assertSingleMolecule );
+            
+            SelectorM_Residue__exposer.def( 
+                "assertSingleMolecule"
+                , assertSingleMolecule_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireMol::SelectorM< SireMol::Residue >::atom
         
             typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
@@ -883,6 +896,19 @@ void register_SelectorM_Residue__class(){
             SelectorM_Residue__exposer.def( 
                 "isSelector"
                 , isSelector_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Residue >::isSingleMolecule
+        
+            typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
+            typedef bool ( ::SireMol::SelectorM< SireMol::Residue >::*isSingleMolecule_function_type)(  ) const;
+            isSingleMolecule_function_type isSingleMolecule_function_value( &::SireMol::SelectorM< SireMol::Residue >::isSingleMolecule );
+            
+            SelectorM_Residue__exposer.def( 
+                "isSingleMolecule"
+                , isSingleMolecule_function_value
                 , bp::release_gil_policy()
                 , "" );
         
@@ -1777,6 +1803,19 @@ void register_SelectorM_Residue__class(){
             SelectorM_Residue__exposer.def( 
                 "toSelectResult"
                 , toSelectResult_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::SelectorM< SireMol::Residue >::toSingleMolecule
+        
+            typedef SireMol::SelectorM< SireMol::Residue > exported_class_t;
+            typedef ::SireMol::Selector< SireMol::Residue > ( ::SireMol::SelectorM< SireMol::Residue >::*toSingleMolecule_function_type)(  ) const;
+            toSingleMolecule_function_type toSingleMolecule_function_value( &::SireMol::SelectorM< SireMol::Residue >::toSingleMolecule );
+            
+            SelectorM_Residue__exposer.def( 
+                "toSingleMolecule"
+                , toSingleMolecule_function_value
                 , bp::release_gil_policy()
                 , "" );
         

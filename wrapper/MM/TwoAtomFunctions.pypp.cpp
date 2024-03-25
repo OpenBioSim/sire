@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireCAS/symbols.h"
 
 #include "SireError/errors.h"
@@ -115,6 +117,18 @@ void register_TwoAtomFunctions_class(){
         }
         { //::SireMM::TwoAtomFunctions::clear
         
+            typedef void ( ::SireMM::TwoAtomFunctions::*clear_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) ;
+            clear_function_type clear_function_value( &::SireMM::TwoAtomFunctions::clear );
+            
+            TwoAtomFunctions_exposer.def( 
+                "clear"
+                , clear_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Clear all functions that invole any of the atoms in atoms\n  - if exclusive is true, then this only removes functions\n  that exclusively involve these atoms - if false, then\n  if removes functions that involve any of these atoms\n" );
+        
+        }
+        { //::SireMM::TwoAtomFunctions::clear
+        
             typedef void ( ::SireMM::TwoAtomFunctions::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMM::TwoAtomFunctions::clear );
             
@@ -201,6 +215,18 @@ void register_TwoAtomFunctions_class(){
                 , "Return whether or not this is empty (has no potentials for any internals)" );
         
         }
+        { //::SireMM::TwoAtomFunctions::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::TwoAtomFunctions::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::TwoAtomFunctions::merge );
+            
+            TwoAtomFunctions_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
+        
+        }
         { //::SireMM::TwoAtomFunctions::nFunctions
         
             typedef int ( ::SireMM::TwoAtomFunctions::*nFunctions_function_type)(  ) const;
@@ -277,6 +303,18 @@ void register_TwoAtomFunctions_class(){
                 , potentials_function_value
                 , bp::release_gil_policy()
                 , "Return the potential energy functions acting between the identified\npairs of atoms" );
+        
+        }
+        { //::SireMM::TwoAtomFunctions::potentials
+        
+            typedef ::QVector< SireMM::TwoAtomFunction > ( ::SireMM::TwoAtomFunctions::*potentials_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            potentials_function_type potentials_function_value( &::SireMM::TwoAtomFunctions::potentials );
+            
+            TwoAtomFunctions_exposer.def( 
+                "potentials"
+                , potentials_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return the potential energy functions acting between the identified\npairs of atoms - if exclusive is true then only return potentials where\nboth atoms are in the bond\n" );
         
         }
         { //::SireMM::TwoAtomFunctions::set

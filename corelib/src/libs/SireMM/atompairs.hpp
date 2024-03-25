@@ -30,12 +30,14 @@
 
 #include "SireBase/property.h"
 #include "SireBase/sparsematrix.hpp"
+#include "SireBase/console.h"
 
 #include "SireMol/atommatcher.h"
 #include "SireMol/cgatomidx.h"
 #include "SireMol/moleculeinfodata.h"
 #include "SireMol/moleculeview.h"
 #include "SireMol/molviewproperty.h"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -87,7 +89,7 @@ namespace SireMM
     {
 
         friend SIREMM_EXPORT QDataStream & ::operator<< <>(QDataStream &, const CGAtomPairs<T> &);
-        friend SIREMM_EXPORT QDataStream & ::operator>><>(QDataStream &, CGAtomPairs<T> &);
+        friend SIREMM_EXPORT QDataStream & ::operator>> <>(QDataStream &, CGAtomPairs<T> &);
 
         template <class U>
         friend class CGAtomPairs;
@@ -139,7 +141,7 @@ namespace SireMM
     {
 
         friend SIREMM_EXPORT QDataStream & ::operator<< <>(QDataStream &, const AtomPairs<T> &);
-        friend SIREMM_EXPORT QDataStream & ::operator>><>(QDataStream &, AtomPairs<T> &);
+        friend SIREMM_EXPORT QDataStream & ::operator>> <>(QDataStream &, AtomPairs<T> &);
 
         template <class U>
         friend class AtomPairs;
@@ -214,6 +216,11 @@ namespace SireMM
         void squeeze();
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     protected:
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
@@ -870,6 +877,32 @@ namespace SireMM
             if (new_i != -1)
                 ret.set(new_i, new_i, this->get(i, i));
         }
+
+        return ret;
+    }
+
+    /** Merge this property with another property */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SireBase::PropertyList AtomPairs<T>::merge(const MolViewProperty &other,
+                                                                       const SireMol::AtomIdxMapping &mapping,
+                                                                       const QString &ghost,
+                                                                       const SireBase::PropertyMap &map) const
+    {
+        if (not other.isA<AtomPairs<T>>())
+        {
+            throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                    .arg(this->what())
+                                                    .arg(other.what()),
+                                                CODELOC);
+        }
+
+        SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                       .arg(this->what()));
+
+        SireBase::PropertyList ret;
+
+        ret.append(SireBase::PropertyPtr(this->clone()));
+        ret.append(SireBase::PropertyPtr(this->clone()));
 
         return ret;
     }

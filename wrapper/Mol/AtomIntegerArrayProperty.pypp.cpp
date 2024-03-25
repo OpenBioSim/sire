@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireBase::IntegerArrayProperty> __copy__(const SireMol::AtomProperty<SireBase::IntegerArrayProperty> &other){ return SireMol::AtomProperty<SireBase::IntegerArrayProperty>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -356,6 +358,19 @@ void register_AtomIntegerArrayProperty_class(){
                 , merge_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::merge
+        
+            typedef SireMol::AtomProperty< SireBase::IntegerArrayProperty > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireBase::IntegerArrayProperty >::merge );
+            
+            AtomIntegerArrayProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

@@ -32,6 +32,7 @@
 #include "SireMol/atomforces.h"
 #include "SireMol/atomvelocities.h"
 #include "SireMol/molviewproperty.h"
+#include "SireMol/atomidxmapping.h"
 
 #include "SireVol/space.h"
 
@@ -164,6 +165,11 @@ namespace SireMol
         Frame subset(int start_atom, int natoms) const;
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         static Frame join(const QVector<Frame> &frames,
                           bool use_parallel = true);
@@ -366,6 +372,11 @@ namespace SireMol
         void deleteFrame(int i);
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         int _getIndexForFrame(int &frame) const;

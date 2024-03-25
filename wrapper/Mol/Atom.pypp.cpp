@@ -48,7 +48,11 @@ namespace bp = boost::python;
 
 #include "atom.h"
 
+#include "SireBase/console.h"
+
 #include "SireBase/incremint.h"
+
+#include "SireBase/propertylist.h"
 
 #include "SireBase/quickcopy.hpp"
 
@@ -103,8 +107,6 @@ namespace bp = boost::python;
 #include "atompropertylist.h"
 
 #include "atomradii.h"
-
-#include "SireBase/propertylist.h"
 
 #include "SireMaths/vector.h"
 
@@ -292,6 +294,18 @@ void register_Atom_class(){
         Atom_exposer.def( bp::init< SireMol::MoleculeView const &, SireMol::AtomID const & >(( bp::arg("molview"), bp::arg("atomid") ), "Construct the atom that that is identified by ID atomid\nin the view molview - this atom must be within this view\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n") );
         Atom_exposer.def( bp::init< SireMol::MoleculeData const &, SireMol::AtomID const & >(( bp::arg("moldata"), bp::arg("atomid") ), "Construct the atom that is identified by ID atomid\nin the molecule whose data is in moldata\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n") );
         Atom_exposer.def( bp::init< SireMol::Atom const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireMol::Atom::alternateName
+        
+            typedef ::SireMol::AtomName ( ::SireMol::Atom::*alternateName_function_type)(  ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::Atom::alternateName );
+            
+            Atom_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , bp::release_gil_policy()
+                , "Return the alternate name of the atom" );
+        
+        }
         { //::SireMol::Atom::assertContains
         
             typedef void ( ::SireMol::Atom::*assertContains_function_type)( ::SireMol::AtomIdx ) const;

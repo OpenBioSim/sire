@@ -77,6 +77,7 @@
 #include "trajectoryaligner.h"
 #include <QDebug>
 #include "moleculeview.h"
+#include "SireBase/console.h"
 #include "SireBase/errors.h"
 #include "SireError/errors.h"
 #include "SireStream/datastream.h"

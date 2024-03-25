@@ -1966,7 +1966,6 @@ tuple<MoleculeGroup, SpacePtr> Amber::readCrdTop(const QString &crdfile, const Q
 
     MoleculeGroup molecules(QString("%1:%2").arg(crdfile, topfile));
 
-    int molnum = 1;
     int resnum = 1;
 
     int total_molecules;
@@ -2147,7 +2146,6 @@ tuple<MoleculeGroup, SpacePtr> Amber::readCrdTop(const QString &crdfile, const Q
         molecule = editmol.commit();
 
         molecules.add(molecule);
-        ++molnum;
     }
 
     // Now the box information

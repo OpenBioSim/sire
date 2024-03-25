@@ -32,6 +32,7 @@ set ( SIRESYSTEM_HEADERS
       geometrycomponent.h
       idassigner.h
       identityconstraint.h
+      merge.h
       moleculeconstraint.h
       monitorcomponent.h
       monitorcomponents.h
@@ -77,6 +78,7 @@ set ( SIRESYSTEM_SOURCES
       geometrycomponent.cpp
       idassigner.cpp
       identityconstraint.cpp
+      merge.cpp
       moleculeconstraint.cpp
       monitorcomponent.cpp
       monitorcomponents.cpp

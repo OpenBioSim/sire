@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::ChainProperty<long long> __copy__(const SireMol::ChainProperty<long long> &other){ return SireMol::ChainProperty<long long>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -224,6 +226,19 @@ void register_ChainIntProperty_class(){
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::ChainProperty< long long >::merge
+        
+            typedef SireMol::ChainProperty< long long > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::ChainProperty< long long >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::ChainProperty< long long >::merge );
+            
+            ChainIntProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

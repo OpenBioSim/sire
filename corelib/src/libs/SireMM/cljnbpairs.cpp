@@ -969,3 +969,323 @@ const char *LJNBPairs::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<LJNBPairs>());
 }
+
+/** Merge this property with another property */
+PropertyList CLJNBPairs::merge(const MolViewProperty &other,
+                               const AtomIdxMapping &mapping,
+                               const QString &ghost,
+                               const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<CLJNBPairs>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for CLJNBPairs parameters is ignored").arg(ghost));
+    }
+
+    const CLJNBPairs &ref = *this;
+    const CLJNBPairs &pert = other.asA<CLJNBPairs>();
+
+    CLJNBPairs prop0 = ref;
+    CLJNBPairs prop1 = ref;
+
+    // we now go through all of the atoms that are mapped and set the
+    // CLJ NB pair to the right value for each end state. We copy the
+    // values from the alternate end state for ghost atoms, as we can
+    // assume that the ghost atoms will have the same bonding
+    // arrangement as in their end state
+    for (auto it1 = mapping.begin(); it1 != mapping.end(); ++it1)
+    {
+        const auto &atom_a = *it1;
+
+        for (auto it2 = it1 + 1; it2 != mapping.end(); ++it2)
+        {
+            const auto &atom_b = *it2;
+
+            if (atom_a.isUnmappedIn0() or atom_b.isUnmappedIn0())
+            {
+                // this pair does not exist in the reference state
+                if (atom_a.isUnmappedIn1() or atom_b.isUnmappedIn1())
+                {
+                    // this pair does not exist in the perturbed state either.
+                    // This pair should not interact with each other
+                    prop0.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                }
+                else
+                {
+                    // set both end states to the value in the perturbed state
+                    const auto &scl = pert.get(atom_a.cgAtomIdx1(), atom_b.cgAtomIdx1());
+
+                    prop0.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), scl);
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), scl);
+                }
+            }
+            else if (atom_a.isUnmappedIn1() or atom_b.isUnmappedIn1())
+            {
+                if (atom_a.isUnmappedIn0() or atom_b.isUnmappedIn0())
+                {
+                    // this pair does not exist in the reference state
+                    // This pair should not interact with each other
+                    prop0.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), CLJScaleFactor(0, 0));
+                }
+                else
+                {
+                    // set both end states to the value in the reference state
+                    const auto &scl = ref.get(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0());
+                    // already set in the reference state
+                    prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(), scl);
+                }
+            }
+            else
+            {
+                // we only need to update the pertubed state to equal the
+                // value from the perturbed parameters
+                prop1.set(atom_a.cgAtomIdx0(), atom_b.cgAtomIdx0(),
+                          pert.get(atom_a.cgAtomIdx1(), atom_b.cgAtomIdx1()));
+            }
+        }
+    }
+
+    SireBase::PropertyList ret;
+
+    ret.append(prop0);
+    ret.append(prop1);
+
+    return ret;
+}
+
+/** Return a copy of this property that has been made to be compatible
+    with the molecule layout in 'molinfo' - this uses the atom matching
+    functions in 'atommatcher' to match atoms from the current molecule
+    to the atoms in the molecule whose layout is in 'molinfo'
+
+    This will only copy the values of pairs of atoms that are
+    successfully matched - all other pairs will have the default
+    value of this AtomPairs object.
+
+    \throw SireError::incompatible_error
+*/
+SireBase::PropertyPtr CLJNBPairs::_pvt_makeCompatibleWith(
+    const MoleculeInfoData &other_info, const AtomMatcher &atommatcher) const
+{
+    // if the atommatcher doesn't change order and the new molecule info
+    // has the same number of atoms in the same number of cutgroups, then
+    // there is nothing that we need to do
+    if (not atommatcher.changesOrder(this->info(), other_info))
+    {
+        bool same_arrangement = true;
+
+        // ensure that the number of atoms and number of cutgroups are the same
+        if (this->info().nAtoms() == other_info.nAtoms() and this->info().nCutGroups() == other_info.nCutGroups())
+        {
+            for (int i = 0; i < other_info.nCutGroups(); ++i)
+            {
+                if (this->info().nAtoms(CGIdx(i)) != other_info.nAtoms(CGIdx(i)))
+                {
+                    same_arrangement = false;
+                    break;
+                }
+            }
+        }
+
+        if (same_arrangement)
+        {
+            // there is no change in the atom order - this AtomPairs object is still valid,
+            // create a copy of the object and update the molinfo
+            CLJNBPairs ret(*this);
+            ret.molinfo = other_info;
+            return ret;
+        }
+    }
+
+    QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), other_info);
+
+    // check to see if the AtomIdx to AtomIdx map changes - if not, then
+    // we can return a copy of this object with the new molinfo
+    bool same_mapping = true;
+
+    for (auto it = matched_atoms.begin(); it != matched_atoms.end(); ++it)
+    {
+        if (it.key() != it.value())
+        {
+            same_mapping = false;
+            break;
+        }
+    }
+
+    if (same_mapping)
+    {
+        CLJNBPairs ret(*this);
+        ret.molinfo = other_info;
+        return ret;
+    }
+    else
+        return this->_pvt_makeCompatibleWith(other_info, matched_atoms);
+}
+
+/** Return a copy of this property that has been made to be compatible
+    with the molecule layout in 'molinfo' - this uses the atom map in
+    'map' to match atoms from the current molecule to the atoms in the
+    molecule whose layout is in 'molinfo'
+
+    This will only copy the values of pairs of atoms that are
+    successfully matched - all other pairs will have the default
+    value of this AtomPairs object.
+
+    \throw SireError::incompatible_error
+*/
+SireBase::PropertyPtr CLJNBPairs::_pvt_makeCompatibleWith(
+    const MoleculeInfoData &other_info, const QHash<AtomIdx, AtomIdx> &map) const
+{
+    const auto &this_info = this->info();
+
+    // create a map from CGAtomIdx to CGAtomIdx for both states
+    // Only insert values where they have changed - use a null
+    // value to indicate that the atom does not exist in the new map
+    QHash<CGAtomIdx, CGAtomIdx> cg_map;
+    cg_map.reserve(map.count());
+
+    QSet<CGIdx> changed_cgroups, deleted_cgroups, mapped_cgroups;
+    const int ncg = this_info.nCutGroups();
+    mapped_cgroups.reserve(ncg);
+    changed_cgroups.reserve(ncg);
+    deleted_cgroups.reserve(ncg);
+
+    for (CGIdx i(0); i < ncg; ++i)
+    {
+        deleted_cgroups.insert(i);
+    }
+
+    for (auto it = map.begin(); it != map.end(); ++it)
+    {
+        CGAtomIdx atom0 = this_info.cgAtomIdx(it.key());
+        CGAtomIdx atom1;
+
+        if (not it.value().isNull())
+            atom1 = other_info.cgAtomIdx(it.value());
+
+        if (not atom1.isNull())
+        {
+            deleted_cgroups.remove(atom1.cutGroup());
+            mapped_cgroups.insert(atom0.cutGroup());
+        }
+
+        if (atom0 != atom1)
+        {
+            // this has changed
+            cg_map.insert(atom0, atom1);
+            changed_cgroups.insert(atom0.cutGroup());
+
+            if (not atom1.isNull())
+                changed_cgroups.insert(atom1.cutGroup());
+        }
+    }
+
+    if (cg_map.isEmpty())
+    {
+        // nothing has changed - we don't need to do any work
+        CLJNBPairs ret(*this);
+        ret.molinfo = other_info;
+        return ret;
+    }
+
+    // there are some changes - start by creating a completely
+    // empty set of pairs, using a default value of 1,1
+    CLJNBPairs ret(other_info, CLJScaleFactor(1, 1));
+
+    // now go through all of the atom pairs, in CGIdx order, and
+    // copy where we can from this object to the new object, and
+    // if not possible, then copy individual values
+    for (CGIdx i(0); i < ncg; ++i)
+    {
+        bool changed_i = changed_cgroups.contains(i);
+        const int nats_i = this_info.nAtoms(i);
+
+        if (not mapped_cgroups.contains(i))
+        {
+            // this CutGroup has been deleted
+            continue;
+        }
+
+        for (CGIdx j(i); j < ncg; ++j)
+        {
+            if (not mapped_cgroups.contains(j))
+            {
+                // this CutGroup has been deleted
+                continue;
+            }
+
+            bool changed_j = changed_cgroups.contains(j);
+
+            const auto &cgpairs = this->get(i, j);
+
+            if (not(changed_i or changed_j))
+            {
+                // nothing has changed, so copy in the original values (only if the CutGroup
+                // pair hasn't been deleted)
+                if (not(deleted_cgroups.contains(i) or deleted_cgroups.contains(j)))
+                    ret.cgpairs.set(i, j, cgpairs);
+
+                continue;
+            }
+
+            // there's change, so just copy the values for all atom pairs
+            const int nats_j = this_info.nAtoms(j);
+
+            auto new_cgpairs = CGPairs(CLJScaleFactor(1, 1));
+            bool changed_atom_pair = false;
+
+            for (int atom_i = 0; atom_i < nats_i; ++atom_i)
+            {
+                auto new_cgidx_i = cg_map.value(CGAtomIdx(i, Index(atom_i)), CGAtomIdx(i, Index(atom_i)));
+
+                if (new_cgidx_i.isNull())
+                    // this atom isn't mapped, so don't copy any values
+                    continue;
+
+                for (int atom_j = 0; atom_j < nats_j; ++atom_j)
+                {
+                    auto new_cgidx_j = cg_map.value(CGAtomIdx(j, Index(atom_j)), CGAtomIdx(j, Index(atom_j)));
+
+                    if (new_cgidx_j.isNull())
+                    {
+                        // this atom isn't mapped, so don't copy any values
+                        continue;
+                    }
+
+                    // get the current value at the current index
+                    const auto &scl0 = cgpairs.get(atom_i, atom_j);
+
+                    // set the new value at the new index
+                    if (new_cgidx_i.cutGroup() == i and new_cgidx_j.cutGroup() == j)
+                    {
+                        // this is in the current CutGroup pair, so can set directly
+                        new_cgpairs.set(new_cgidx_i.atom().value(), new_cgidx_j.atom().value(), scl0);
+                        changed_atom_pair = true;
+                    }
+                    else
+                    {
+                        // this is in a completely different CutGroup pair!
+                        ret.set(new_cgidx_i, new_cgidx_j, scl0);
+                    }
+                }
+            }
+
+            // save the cgpairs
+            if (changed_atom_pair)
+            {
+                ret.cgpairs.set(i, j, new_cgpairs);
+            }
+        }
+    }
+
+    return ret;
+}

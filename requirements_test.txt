@@ -3,3 +3,7 @@
 
 rdkit >=2023.0.0
 gemmi >=0.6.4
+
+# kartograf on Windows pulls in an openfe that has an old / incompatble
+# ambertools
+kartograf >= 1.0.0 ; sys_platform != "win32"

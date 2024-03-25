@@ -49,7 +49,11 @@ namespace bp = boost::python;
 
 #include "atomeditor.h"
 
+#include "SireBase/console.h"
+
 #include "SireBase/incremint.h"
+
+#include "SireBase/propertylist.h"
 
 #include "SireBase/quickcopy.hpp"
 
@@ -104,8 +108,6 @@ namespace bp = boost::python;
 #include "atompropertylist.h"
 
 #include "atomradii.h"
-
-#include "SireBase/propertylist.h"
 
 #include "SireMaths/vector.h"
 

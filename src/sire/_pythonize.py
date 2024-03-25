@@ -193,13 +193,13 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
     # call Pythonize on all of the new modules
     from .legacy import (  # noqa: F401
         Base,
+        Mol,
         Move,
         IO,
         System,
         Squire,
         MM,
         FF,
-        Mol,
         Analysis,
         CAS,
         Cluster,

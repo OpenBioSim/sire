@@ -37,6 +37,7 @@ set ( PYPP_SOURCES
        ResNum.pypp.cpp
        Atom.pypp.cpp
        ResIntProperty.pypp.cpp
+       AtomIdxMappingEntry.pypp.cpp
        Frame.pypp.cpp
        Hybridization.pypp.cpp
        BondID.pypp.cpp
@@ -145,6 +146,7 @@ set ( PYPP_SOURCES
        GeometryPerturbation.pypp.cpp
        VolumeMap.pypp.cpp
        Mover_Beads_.pypp.cpp
+       AtomIdxMapping.pypp.cpp
        MoverBase.pypp.cpp
        AtomPropertyList.pypp.cpp
        IDOrSet_CGID_.pypp.cpp
@@ -257,6 +259,7 @@ set ( PYPP_SOURCES
        ChainIntProperty.pypp.cpp
        IDAndSet_CGID_.pypp.cpp
        Specify_SegID_.pypp.cpp
+       AtomNumMatcher.pypp.cpp
        Molecule.pypp.cpp
        Mover_Chain_.pypp.cpp
        ChainStructureEditor.pypp.cpp

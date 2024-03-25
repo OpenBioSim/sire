@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireBase/parallel.h"
@@ -573,6 +575,18 @@ void register_AmberParams_class(){
                 , masses_function_value
                 , bp::release_gil_policy()
                 , "Return the atom masses" );
+        
+        }
+        { //::SireMM::AmberParams::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::AmberParams::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::AmberParams::merge );
+            
+            AmberParams_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
         
         }
         { //::SireMM::AmberParams::nb14s

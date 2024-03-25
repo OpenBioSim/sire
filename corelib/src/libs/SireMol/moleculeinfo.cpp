@@ -1136,3 +1136,55 @@ void MoleculeInfo::assertEqualTo(const MoleculeInfoData &other) const
 {
     d->assertEqualTo(other);
 }
+
+/** Return the alternate name of the specified atom */
+const AtomName &MoleculeInfo::alternateName(const AtomID &atomid) const
+{
+    return d->alternateName(atomid);
+}
+
+/** Return the alternate name of the specified atom */
+const AtomName &MoleculeInfo::alternateName(AtomIdx atomidx) const
+{
+    return d->alternateName(atomidx);
+}
+
+/** Return the alternate name of the specified residue */
+const ResName &MoleculeInfo::alternateName(const ResID &resid) const
+{
+    return d->alternateName(resid);
+}
+
+/** Return the alternate name of the specified residue */
+const ResName &MoleculeInfo::alternateName(ResIdx residx) const
+{
+    return d->alternateName(residx);
+}
+
+/** Set the alternate name of the passed atom */
+MoleculeInfo MoleculeInfo::setAlternateName(AtomIdx atomidx, const AtomName &name) const
+{
+    return MoleculeInfo(d->setAlternateName(atomidx, name));
+}
+
+/** Set the alternate name of the passed atom */
+MoleculeInfo MoleculeInfo::setAlternateName(ResIdx residx, const ResName &name) const
+{
+    return MoleculeInfo(d->setAlternateName(residx, name));
+}
+
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MoleculeInfo MoleculeInfo::switchToAlternateNames(bool keep_originals) const
+{
+    return MoleculeInfo(d->switchToAlternateNames(keep_originals));
+}
+
+/** Remove all alternate names from this molecule */
+MoleculeInfo MoleculeInfo::removeAlternateNames() const
+{
+    return MoleculeInfo(d->removeAlternateNames());
+}

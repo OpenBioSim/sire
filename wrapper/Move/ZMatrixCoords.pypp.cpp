@@ -608,6 +608,18 @@ void register_ZMatrixCoords_class(){
                 , "Return a z-matrix that only contains lines that involve the atoms\nthat are in selection" );
         
         }
+        { //::SireMove::ZMatrixCoords::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMove::ZMatrixCoords::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMove::ZMatrixCoords::merge );
+            
+            ZMatrixCoords_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMove::ZMatrixCoords::move
         
             typedef void ( ::SireMove::ZMatrixCoords::*move_function_type)( ::SireMol::BondID const &,::SireUnits::Dimension::Length const & ) ;

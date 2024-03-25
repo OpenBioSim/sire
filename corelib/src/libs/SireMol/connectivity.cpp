@@ -37,6 +37,7 @@
 #include "moleculeinfo.h"
 #include "moleculeinfodata.h"
 #include "moleculeview.h"
+#include "atomidxmapping.h"
 
 #include "angleid.h"
 #include "bondid.h"
@@ -46,7 +47,10 @@
 #include "SireMol/errors.h"
 
 #include "SireBase/errors.h"
+#include "SireBase/console.h"
 #include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -320,7 +324,9 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
             // AtomIdx indicies are still valid
             Connectivity ret;
             ret.connected_atoms = connected_atoms;
+            ret.connected_atoms.resize(molinfo.nAtoms());
             ret.connected_res = connected_res;
+            ret.connected_res.resize(molinfo.nResidues());
             ret.bond_props = bond_props;
             ret.minfo = MoleculeInfo(molinfo);
             return ret;
@@ -328,7 +334,93 @@ PropertyPtr ConnectivityBase::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
 
         QHash<AtomIdx, AtomIdx> matched_atoms = atommatcher.match(this->info(), molinfo);
 
-        return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
+        // see if there is any actual change - if not, then we can just return
+        bool same_mapping = true;
+
+        for (auto it = matched_atoms.begin(); it != matched_atoms.end(); ++it)
+        {
+            if (it.key() != it.value())
+            {
+                same_mapping = false;
+                break;
+            }
+        }
+
+        if (same_mapping)
+        {
+            Connectivity ret;
+            ret.connected_atoms = connected_atoms;
+            ret.connected_atoms.resize(molinfo.nAtoms());
+            ret.connected_res = connected_res;
+            ret.connected_res.resize(molinfo.nResidues());
+            ret.bond_props = bond_props;
+            ret.minfo = MoleculeInfo(molinfo);
+
+            if (ret.minfo.nAtoms() < this->minfo.nAtoms())
+            {
+                const int nats = ret.minfo.nAtoms();
+                const int nres = ret.minfo.nResidues();
+
+                // atoms have been removed, so need to remove any references
+                // to atoms that no longer exist
+                for (int i = 0; i < ret.connected_atoms.count(); ++i)
+                {
+                    QSet<AtomIdx> &connected = ret.connected_atoms[i];
+
+                    for (auto it = connected.begin(); it != connected.end();)
+                    {
+                        if (it->value() >= nats)
+                        {
+                            it = connected.erase(it);
+                        }
+                        else
+                        {
+                            ++it;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < ret.connected_res.count(); ++i)
+                {
+                    QSet<ResIdx> &connected = ret.connected_res[i];
+
+                    for (auto it = connected.begin(); it != connected.end();)
+                    {
+                        if (it->value() >= nres)
+                        {
+                            it = connected.erase(it);
+                        }
+                        else
+                        {
+                            ++it;
+                        }
+                    }
+                }
+
+                // remove any bond properties that refer to atoms that no longer exist
+                for (auto it = ret.bond_props.begin(); it != ret.bond_props.end();)
+                {
+                    if (it.key().atom0 >= nats or it.key().atom1 >= nats)
+                    {
+                        it = ret.bond_props.erase(it);
+                    }
+                    else
+                    {
+                        ++it;
+                    }
+                }
+
+                // clear the angle, dihedral and improper properties as
+                // these are too complex to make compatible
+                ret.ang_props.clear();
+                ret.dih_props.clear();
+                ret.imp_props.clear();
+            }
+
+            return ret;
+        }
+        else
+            return this->_pvt_makeCompatibleWith(molinfo, matched_atoms);
     }
     catch (const SireError::exception &e)
     {
@@ -2409,6 +2501,45 @@ QList<BondID> ConnectivityBase::getBonds(const AtomID &atom) const
     return ret;
 }
 
+/** Return all of the connections that involve the passed atoms - if exclusive is true,
+ *  then return only connections where both atoms are present in the list.
+ */
+QList<BondID> ConnectivityBase::getBonds(const QList<AtomIdx> &atoms, bool exclusive) const
+{
+    QList<BondID> ret;
+
+    const QSet<AtomIdx> atoms_set(atoms.begin(), atoms.end());
+
+    if (exclusive)
+    {
+        for (const auto &bond : this->getBonds())
+        {
+            const auto atom0 = this->minfo.atomIdx(bond.atom0());
+            const auto atom1 = this->minfo.atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) and atoms_set.contains(atom1))
+            {
+                ret.append(bond);
+            }
+        }
+    }
+    else
+    {
+        for (const auto &bond : this->getBonds())
+        {
+            const auto atom0 = this->minfo.atomIdx(bond.atom0());
+            const auto atom1 = this->minfo.atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) or atoms_set.contains(atom1))
+            {
+                ret.append(bond);
+            }
+        }
+    }
+
+    return ret;
+}
+
 namespace SireMol
 {
     namespace detail
@@ -3373,6 +3504,315 @@ void ConnectivityBase::assertHasProperty(const ImproperID &improper, const Prope
                                          CODELOC);
 }
 
+/** Return whether or not this atom is in a ring */
+static bool is_on_ring(const AtomIdx &atom, const Connectivity &conn)
+{
+    if (conn.inRing(atom))
+    {
+        // loop over all atoms connected to this atom
+        for (const auto &neighbour : conn.connectionsTo(atom))
+        {
+            // if the neighbour is in the ring, then this atom is in the ring
+            if (not(conn.inRing(neighbour, atom)))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+/** Return whether or not there is a change in ring between the passed
+ *  two atoms in the passed two connectivities */
+static bool is_ring_size_changed(const Connectivity &conn0,
+                                 const Connectivity &conn1,
+                                 const AtomIdxMappingEntry &atom0,
+                                 const AtomIdxMappingEntry &atom1,
+                                 int max_ring_size = 12)
+{
+    // Have a ring changed size? If so, then the minimum path size between
+    // two atoms will have changed.
+
+    // Work out the paths connecting the atoms in the two end states.
+    auto paths0 = conn0.findPaths(atom0.atomIdx0(), atom1.atomIdx0(), max_ring_size);
+    auto paths1 = conn1.findPaths(atom0.atomIdx1(), atom1.atomIdx1(), max_ring_size);
+
+    // Initialise the ring size in each end state.
+    auto ring0 = -1;
+    auto ring1 = -1;
+
+    // Determine the minimum path in the lambda = 0 state.
+    if (paths0.count() > 1)
+    {
+        QVector<int> path_lengths0;
+
+        for (const auto &path : paths0)
+        {
+            path_lengths0.append(path.count());
+        }
+
+        ring0 = *(std::min_element(path_lengths0.begin(), path_lengths0.end()));
+    }
+
+    if (ring0 == -1)
+        return false;
+
+    // Determine the minimum path in the lambda = 1 state.
+    if (paths1.count() > 1)
+    {
+        QVector<int> path_lengths1;
+
+        for (const auto &path : paths1)
+        {
+            path_lengths1.append(path.count());
+        }
+
+        ring1 = *(std::min_element(path_lengths1.begin(), path_lengths1.end()));
+    }
+
+    // Return whether the ring has changed size.
+    return ring0 != ring1;
+}
+
+/** Return whether any ring that both the atoms are on is broken/formed
+ *  during the merge */
+static bool is_ring_broken(const Connectivity &conn0,
+                           const Connectivity &conn1,
+                           const AtomIdxMappingEntry &atom0,
+                           const AtomIdxMappingEntry &atom1)
+{
+    // Have we opened/closed a ring? This means that both atoms are part of a
+    // ring in one end state (either in it, or on it), whereas at least one
+    // isn't in the other state.
+
+    if (not(atom0.isMappedInBoth() and atom1.isMappedInBoth()))
+        // either atom isn't in both end states, so cannot be part
+        // of a ring that is in both end states...
+        return false;
+
+    const auto idx0 = atom0.atomIdx0();
+    const auto idy0 = atom1.atomIdx0();
+
+    const auto idx1 = atom0.atomIdx1();
+    const auto idy1 = atom1.atomIdx1();
+
+    // Whether each atom is in a ring in both end states.
+    const auto in_ring_idx0 = conn0.inRing(idx0);
+    const auto in_ring_idy0 = conn0.inRing(idy0);
+    const auto in_ring_idx1 = conn1.inRing(idx1);
+    const auto in_ring_idy1 = conn1.inRing(idy1);
+
+    // Whether each atom is on a ring in both end states.
+    const auto on_ring_idx0 = is_on_ring(idx0, conn0);
+    const auto on_ring_idy0 = is_on_ring(idy0, conn0);
+    const auto on_ring_idx1 = is_on_ring(idx1, conn1);
+    const auto on_ring_idy1 = is_on_ring(idy1, conn1);
+
+    // Both atoms are in a ring in one end state and at least one isn't in the other.
+    if ((in_ring_idx0 & in_ring_idy0) ^ (in_ring_idx1 & in_ring_idy1))
+        return true;
+
+    // Both atoms are on a ring in one end state and at least one isn't in the other.
+    if ((on_ring_idx0 & on_ring_idy0 & (conn0.connectionType(idx0, idy0) == 4)) ^ (on_ring_idx1 & on_ring_idy1 & (conn1.connectionType(idx1, idy1) == 4)))
+    {
+        // Make sure that the change isn't a result of ring growth, i.e. one of
+        // the atoms isn't in a ring in one end state, while its "on" ring status
+        // has changed between states.
+        if (not((in_ring_idx0 | in_ring_idx1) & (on_ring_idx0 ^ on_ring_idx1) or (in_ring_idy0 | in_ring_idy1) & (on_ring_idy0 ^ on_ring_idy1)))
+        {
+            return true;
+        }
+    }
+
+    // Both atoms are in or on a ring in one state and at least one isn't in the other.
+    if (((in_ring_idx0 | on_ring_idx0) & (in_ring_idy0 | on_ring_idy0) & (conn0.connectionType(idx0, idy0) == 3)) ^
+        ((in_ring_idx1 | on_ring_idx1) & (in_ring_idy1 | on_ring_idy1) & (conn1.connectionType(idx1, idy1) == 3)))
+    {
+        auto iscn0 = conn0.connectionsTo(idx0);
+        iscn0.intersect(conn0.connectionsTo(idy0));
+
+        if (iscn0.count() != 1)
+            return true;
+
+        auto common_idx = *(iscn0.constBegin());
+        iscn0.remove(common_idx);
+
+        const auto in_ring_bond0 = conn0.inRing(idx0, common_idx) or conn0.inRing(idy0, common_idx);
+
+        auto iscn1 = conn1.connectionsTo(idx1);
+        iscn1.intersect(conn1.connectionsTo(idy1));
+
+        if (iscn1.count() != 1)
+            return true;
+
+        common_idx = *(iscn1.constBegin());
+        iscn1.remove(common_idx);
+
+        const auto in_ring_bond1 = conn1.inRing(idx1, common_idx) or conn1.inRing(idy1, common_idx);
+
+        if (in_ring_bond0 ^ in_ring_bond1)
+            return true;
+    }
+
+    // If we get this far, then a ring wasn't broken.
+    return false;
+}
+
+/** Merge this property with another property */
+PropertyList ConnectivityBase::merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost,
+                                     const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<ConnectivityBase>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for bond parameters is ignored").arg(ghost));
+    }
+
+    const ConnectivityBase &ref = *this;
+    const ConnectivityBase &pert = other.asA<ConnectivityBase>();
+
+    auto prop0 = Connectivity(ref).edit();
+    auto prop1 = Connectivity(ref).edit();
+
+    // the prop0 properties are already correct
+
+    // the prop1 properties are made by finding all of the atoms that
+    // are involved in bonds in 'pert' and removing any bonds involving
+    // only those atoms from 'prop1', and then adding back the matching
+    // bonds from 'pert'. Use 'true' to only remove bonds where both
+    // atoms are in the mapping
+    prop1.disconnect(mapping.mappedIn1(), true);
+
+    // get the mapping from the perturbed to reference states, including
+    // atoms that don't exist in the reference state. In all cases,
+    // the values are the indexes in the merged molecule
+    auto map1to0 = mapping.map1to0(true);
+
+    // now find all of the bonds in 'pert' where both atoms in the
+    // bond are in map1to0.keys() - i.e. exist and are mapped from
+    // the perturbed state
+    const auto pert_bonds = pert.getBonds(map1to0.keys(), true);
+
+    // connect those bonds together
+    for (const auto &pert_bond : pert_bonds)
+    {
+        const auto atom0 = map1to0.value(info().atomIdx(pert_bond.atom0()));
+        const auto atom1 = map1to0.value(info().atomIdx(pert_bond.atom1()));
+
+        prop1.connect(atom0, atom1);
+
+        if (mapping.isUnmappedIn0(atom0) or mapping.isUnmappedIn0(atom1))
+        {
+            // the prop0 properties are nearly correct - we just need to add
+            // in a connection from 'pert' that involve the atoms that are not mapped
+            // in the reference state - this way, those added atoms are
+            // connected to the reference atoms
+            prop0.connect(atom0, atom1);
+        }
+    }
+
+    // now add in the connections to the perturbed state from the reference
+    // state for any atoms that aren't mapped to the perturbed state.
+    // This way, the removed atoms are connected to the perturbed atoms
+    auto map0to1 = mapping.map0to1(true);
+
+    const auto ref_bonds = ref.getBonds(map0to1.keys(), true);
+
+    for (const auto &ref_bond : ref_bonds)
+    {
+        const auto atom0 = info().atomIdx(ref_bond.atom0());
+        const auto atom1 = info().atomIdx(ref_bond.atom1());
+
+        if (mapping.isUnmappedIn1(atom0) or mapping.isUnmappedIn1(atom1))
+        {
+            prop1.connect(atom0, atom1);
+        }
+    }
+
+    // check if we are allowed to change the size of a ring or break rings
+    bool allow_ring_breaking = true;
+    bool allow_ring_size_change = true;
+
+    if (map.specified("allow_ring_breaking"))
+    {
+        allow_ring_breaking = map["allow_ring_breaking"].value().asABoolean();
+    }
+
+    if (map.specified("allow_ring_size_change"))
+    {
+        allow_ring_size_change = map["allow_ring_size_change"].value().asABoolean();
+    }
+
+    SireBase::PropertyList ret;
+
+    ret.append(prop0.commit());
+    ret.append(prop1.commit());
+
+    if (allow_ring_breaking and allow_ring_size_change)
+    {
+        // nothing more to do
+        return ret;
+    }
+
+    // we need to check that the merge doesn't break or change rings - do this
+    // by looping over pairs of atoms mapped in both states and checking,
+    // if they are in a ring, if that ring has changed size or been broken or
+    // formed by the merge
+    for (auto it0 = mapping.constBegin(); it0 != mapping.constEnd(); ++it0)
+    {
+        const auto &atom0 = *it0;
+
+        if (not atom0.isMappedInBoth())
+            // this cannot be part of a ring, as it is not in both states
+            continue;
+
+        for (auto it1 = it0 + 1; it1 != mapping.constEnd(); ++it1)
+        {
+            const auto &atom1 = *it1;
+
+            if (not atom1.isMappedInBoth())
+                // this cannot be part of a ring, as it is not in both states
+                continue;
+
+            if (not allow_ring_size_change)
+            {
+                if (is_ring_size_changed(ref, pert, atom0, atom1))
+                {
+                    throw SireError::incompatible_error(QObject::tr("The merge has changed the size of a ring. To allow this "
+                                                                    "perturbation, set the 'allow_ring_size_change' option "
+                                                                    "to 'True'. Be aware that this perturbation may not work "
+                                                                    "and a transition through an intermediate state may be "
+                                                                    "preferable."),
+                                                        CODELOC);
+                }
+            }
+
+            if (not allow_ring_breaking)
+            {
+                if (is_ring_broken(ref, pert, atom0, atom1))
+                {
+                    throw SireError::incompatible_error(QObject::tr("The merge has changed the molecular connectivity "
+                                                                    "but a ring didn't open/close or change size. "
+                                                                    "If you want to proceed with this mapping pass "
+                                                                    "'force=True'. You are warned that the resulting "
+                                                                    "perturbation will likely be unstable."),
+                                                        CODELOC);
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
 /////////
 ///////// Implementation of Connectivity
 /////////
@@ -3629,6 +4069,23 @@ ConnectivityEditor &ConnectivityEditor::connect(const AtomID &atom0, const AtomI
     return this->connect(info().atomIdx(atom0), info().atomIdx(atom1));
 }
 
+/** Create a connection for the passed bond */
+ConnectivityEditor &ConnectivityEditor::connect(const BondID &bond)
+{
+    return this->connect(bond.atom0(), bond.atom1());
+}
+
+/** Create a connection for the passed bonds */
+ConnectivityEditor &ConnectivityEditor::connect(const QList<BondID> &bonds)
+{
+    for (const auto &bond : bonds)
+    {
+        this->connect(bond);
+    }
+
+    return *this;
+}
+
 /** Remove the connection between the atoms at indicies 'atom0'
     and 'atom1' - this does nothing if there isn't already a connection
 
@@ -3671,6 +4128,67 @@ ConnectivityEditor &ConnectivityEditor::disconnect(AtomIdx atom0, AtomIdx atom1)
 ConnectivityEditor &ConnectivityEditor::disconnect(const AtomID &atom0, const AtomID &atom1)
 {
     return this->disconnect(info().atomIdx(atom0), info().atomIdx(atom1));
+}
+
+/** Disconnect the atoms in the passed bond - this does nothing if the
+ *  atoms aren't connected */
+ConnectivityEditor &ConnectivityEditor::disconnect(const BondID &bond)
+{
+    return this->disconnect(bond.atom0(), bond.atom1());
+}
+
+/** Disconnect the atoms in the passed bonds - this does nothing for any
+ *  of the atoms that aren't connected */
+ConnectivityEditor &ConnectivityEditor::disconnect(const QList<BondID> &bonds)
+{
+    for (const auto &bond : bonds)
+    {
+        this->disconnect(bond);
+    }
+
+    return *this;
+}
+
+/** Disconnect any and all bonds involving the passed atoms. If exclusive is true,
+ *  then this only removes connection where both atoms are in 'atoms', otherwise
+ *  it removes connections which have one of more atoms in 'atoms'
+ */
+ConnectivityEditor &ConnectivityEditor::disconnect(const QList<AtomIdx> &atoms, bool exclusive)
+{
+    const QSet<AtomIdx> atoms_set(atoms.begin(), atoms.end());
+
+    if (exclusive)
+    {
+        const auto bonds = this->getBonds();
+
+        for (const auto &bond : bonds)
+        {
+            const auto atom0 = info().atomIdx(bond.atom0());
+            const auto atom1 = info().atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) and atoms_set.contains(atom1))
+            {
+                this->disconnect(atom0, atom1);
+            }
+        }
+    }
+    else
+    {
+        const auto bonds = this->getBonds();
+
+        for (const auto &bond : bonds)
+        {
+            const auto atom0 = info().atomIdx(bond.atom0());
+            const auto atom1 = info().atomIdx(bond.atom1());
+
+            if (atoms_set.contains(atom0) or atoms_set.contains(atom1))
+            {
+                this->disconnect(atom0, atom1);
+            }
+        }
+    }
+
+    return *this;
 }
 
 /** Remove all of the connections to the atom at index 'atomidx'

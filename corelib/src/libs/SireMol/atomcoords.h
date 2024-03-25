@@ -196,6 +196,11 @@ namespace SireMol
 
         void assertCanConvert(const QVariant &value) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     private:
         /** The actual atomic coordinates, arranged into CoordGroups */
         CoordGroupArray coords;
