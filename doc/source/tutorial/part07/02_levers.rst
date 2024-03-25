@@ -28,7 +28,7 @@ system will be morphed in a single stage (called "morph"), using a linear
 interpolation between the initial and final values of the parameters.
 
 As we saw in the :doc:`last section <01_perturbation>`, we can find the exact
-values of all of the perturbable parameters of a perturbable molecle via
+values of all of the perturbable parameters of a perturbable molecule via
 the perturbation object.
 
 >>> p = mols[0].perturbation()
@@ -50,6 +50,11 @@ From this, we can see that the bond between atoms C2 and C4 is perturbable,
 and the above schedule will morph the bond length from 0.15375 nm to 0.10969 nm,
 and the force constant from 251793.12 kJ mol-1 nm-2 to 276646.08 kJ mol-1 nm-2,
 linearly with respect to λ.
+
+.. note::
+
+   The parameters are directly as would be used in an OpenMM force,
+   i.e. in OpenMM default units of nanometers and kilojoules per mole.
 
 Controlling individual levers
 -----------------------------
@@ -95,6 +100,16 @@ interpolated from the initial to final value by λ^2, rather than λ.
 
 All of the other levers continue to use the default equation for this stage,
 which is the linear interpolation between the initial and final values.
+
+You can change the default equation used for a stage using the
+:meth:`~sire.cas.LambdaSchedule.set_default_equation` function, e.g.
+
+>>> s.set_default_equation(stage="morph", equation=(1-l)*init + l*fin)
+>>> print(s)
+LambdaSchedule(
+  morph: initial * (-λ + 1) + final * λ
+    bond_length: initial * (-λ^2 + 1) + final * λ^2
+)
 
 Controlling individual levers in individual forces
 --------------------------------------------------

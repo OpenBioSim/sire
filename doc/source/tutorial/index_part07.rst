@@ -22,3 +22,5 @@ calculating free energies that involve breaking rings in ligands.
 
    part07/01_perturbation
    part07/02_levers
+   part07/03_ghosts
+
