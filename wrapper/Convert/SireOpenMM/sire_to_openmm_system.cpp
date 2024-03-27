@@ -891,9 +891,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
-                                  "sig6=(sigma^6)/(%3*sigma^6 + r^6);")
+                                  "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
+                                  "r_safe=max(r, 0.001);")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
                                   .arg(shift_coulomb)
                                   .arg(taylor_power_expression("alpha", taylor_power))
@@ -903,9 +904,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
         {
             nb14_expression = QString(
                                   "coul_nrg+lj_nrg;"
-                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r^2))-(kappa/r));"
+                                  "coul_nrg=138.9354558466661*q*(((%1)/sqrt((%2*alpha)+r_safe^2))-(kappa/r_safe));"
                                   "lj_nrg=four_epsilon*sig6*(sig6-1);"
-                                  "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
+                                  "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
+                                  "r_safe=max(r, 0.001);"
                                   "delta=%3*alpha;")
                                   .arg(coulomb_power_expression("alpha", coulomb_power))
                                   .arg(shift_coulomb)
@@ -949,9 +951,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
-                                     "sig6=(sigma^6)/(%3*sigma^6 + r^6);"
+                                     "sig6=(sigma^6)/(%3*sigma^6 + r_safe^6);"
+                                     "r_safe=max(r, 0.001);"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
@@ -986,10 +989,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // kJ mol-1 given the units of charge (|e|) and distance (nm)
             //
             clj_expression = QString("coul_nrg+lj_nrg;"
-                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r^2))-(max_kappa/r));"
+                                     "coul_nrg=138.9354558466661*q1*q2*(((%1)/sqrt((%2*max_alpha)+r_safe^2))-(max_kappa/r_safe));"
                                      "lj_nrg=two_sqrt_epsilon1*two_sqrt_epsilon2*sig6*(sig6-1);"
-                                     "sig6=(sigma^6)/(((sigma*delta) + r^2)^3);"
+                                     "sig6=(sigma^6)/(((sigma*delta) + r_safe^2)^3);"
                                      "delta=%3*max_alpha;"
+                                     "r_safe=max(r, 0.001);"
                                      "max_kappa=max(kappa1, kappa2);"
                                      "max_alpha=max(alpha1, alpha2);"
                                      "sigma=half_sigma1+half_sigma2;")
