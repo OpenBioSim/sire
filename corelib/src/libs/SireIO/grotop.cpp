@@ -3157,7 +3157,8 @@ static QStringList writeAtomTypes(QMap<QPair<int, QString>, GroMolType> &moltyps
 }
 
 /** Internal function used to convert a Gromacs Moltyp to a set of lines */
-static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol, bool uses_parallel)
+static QStringList writeMolType(const QString &name, const GroMolType &moltype, const Molecule &mol,
+                                bool uses_parallel)
 {
     QStringList lines;
 
@@ -4036,8 +4037,32 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                 return;
             }
 
+            AtomLJs ljs0;
+            AtomLJs ljs1;
+
+            try
+            {
+                ljs0 = mol.property("LJ0").asA<AtomLJs>();
+            }
+            catch (...)
+            {
+            }
+
+            try
+            {
+                ljs1 = mol.property("LJ1").asA<AtomLJs>();
+            }
+            catch (...)
+            {
+            }
+
             // A set of recorded 1-4 pairs.
             QSet<QPair<AtomIdx, AtomIdx>> recorded_pairs;
+
+            bool fix_null_perturbable_14s = false;
+
+            if (mol.hasProperty("fix_null_perturbable_14s"))
+                fix_null_perturbable_14s = mol.property("fix_null_perturbable_14s").asA<BooleanProperty>().value();
 
             // Must record every pair that has a non-default scaling factor.
             // Loop over intrascale matrix by cut-groups to avoid N^2 loop.
@@ -4076,6 +4101,47 @@ static QStringList writeMolType(const QString &name, const GroMolType &moltype, 
                                              s1.lj() == 1)))
                                     {
                                         // This is a non-default pair.
+                                        if (fix_null_perturbable_14s)
+                                        {
+                                            // get the initial and perturbed charge and LJ parameters
+                                            const auto &lj0_0 = ljs0.get(idx0);
+                                            const auto &lj0_1 = ljs1.get(idx0);
+                                            const auto &lj1_0 = ljs0.get(idx1);
+                                            const auto &lj1_1 = ljs1.get(idx1);
+
+                                            if (lj0_0.epsilon().value() == 0 or lj0_1.epsilon().value() == 0 or
+                                                lj1_0.epsilon().value() == 0 or lj1_1.epsilon().value() == 0)
+                                            {
+                                                // we need to avoid having a null 1-4 LJ parameter, so use the non-dummy state
+                                                LJParameter lj0, lj1;
+
+                                                if (lj0_0.epsilon().value() == 0)
+                                                    lj0 = lj0_1;
+                                                else
+                                                    lj0 = lj0_0;
+
+                                                if (lj1_0.epsilon().value() == 0)
+                                                    lj1 = lj1_1;
+                                                else
+                                                    lj1 = lj1_0;
+
+                                                auto lj = lj0.combineArithmetic(lj1);
+
+                                                double scl = s0.lj();
+
+                                                if (scl == 0)
+                                                    scl = s1.lj();
+
+                                                scllines.append(QString("%1 %2     1  %3  %4  %3  %4")
+                                                                    .arg(idx0 + 1, 6)
+                                                                    .arg(idx1 + 1, 6)
+                                                                    .arg(lj.sigma().to(nanometer), 11, 'f', 5)
+                                                                    .arg(scl * lj.epsilon().to(kJ_per_mol), 11, 'f', 5));
+
+                                                continue;
+                                            }
+                                        }
+
                                         scllines.append(QString("%1 %2     1").arg(idx0 + 1, 6).arg(idx1 + 1, 6));
                                     }
                                 }
@@ -4243,7 +4309,8 @@ static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &mo
             for (int i = r.begin(); i < r.end(); ++i)
             {
                 QStringList typlines =
-                    ::writeMolType(keys[i].second, moltyps[keys[i]], examples[keys[i]], uses_parallel);
+                    ::writeMolType(keys[i].second, moltyps[keys[i]], examples[keys[i]],
+                                   uses_parallel);
 
                 QMutexLocker lkr(&mutex);
                 typs.insert(keys[i].second, typlines);
@@ -4254,7 +4321,8 @@ static QStringList writeMolTypes(const QMap<QPair<int, QString>, GroMolType> &mo
         for (auto it = moltyps.constBegin(); it != moltyps.constEnd(); ++it)
         {
             typs.insert(it.key().second,
-                        ::writeMolType(it.key().second, it.value(), examples[it.key()], uses_parallel));
+                        ::writeMolType(it.key().second, it.value(), examples[it.key()],
+                                       uses_parallel));
         }
     }
 
@@ -4538,8 +4606,8 @@ GroTop::GroTop(const SireSystem::System &system, const PropertyMap &map)
     // the molecules
     lines += ::writeAtomTypes(idx_name_to_mtyp, idx_name_to_example, ffield, map);
 
-    // now convert these into text lines that can be written as the file
-    lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(), isSorted);
+    lines += ::writeMolTypes(idx_name_to_mtyp, idx_name_to_example, usesParallel(),
+                             isSorted);
 
     // now write the system part
     lines += ::writeSystem(system.name(), mol_to_moltype);

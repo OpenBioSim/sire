@@ -131,6 +131,11 @@ def merged_ethane_methanol():
 
 
 @pytest.fixture(scope="session")
+def merged_ethane_methane():
+    return sr.load_test_files("ethane_methane.bss")
+
+
+@pytest.fixture(scope="session")
 def merged_zan_ose():
     return sr.load_test_files("merged_ligand.s3")
 
@@ -161,6 +166,16 @@ def pdbx_3nss():
         return sr.load_test_files("3NSS.cif")
     else:
         return None
+
+
+@pytest.fixture(scope="session")
+def ejm55_sdf():
+    return sr.load_test_files("ejm55.sdf")
+
+
+@pytest.fixture(scope="session")
+def ejm55_gro():
+    return sr.load_test_files("ejm55.gro", "ejm55.top")
 
 
 @pytest.fixture(scope="session")

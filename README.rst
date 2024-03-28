@@ -1,6 +1,6 @@
-****
+======================================
 `Sire <https://sire.openbiosim.org>`__
-****
+======================================
 
 .. image:: https://github.com/openbiosim/sire/workflows/Build/badge.svg
    :target: https://github.com/openbiosim/sire/actions?query=workflow%3ABuild

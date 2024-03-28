@@ -530,6 +530,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         check_for_h_by_mass = map["check_for_h_by_mass"].value().asABoolean();
     }
 
+    bool check_for_h_by_max_mass = true;
+
+    if (map.specified("check_for_h_by_max_mass"))
+    {
+        check_for_h_by_max_mass = map["check_for_h_by_max_mass"].value().asABoolean();
+    }
+
     bool check_for_h_by_element = true;
 
     if (map.specified("check_for_h_by_element"))
@@ -551,6 +558,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &elements1 = params1.elements();
         const auto &ambertypes1 = params1.amberTypes();
 
+        bool ghosts_are_light = false;
+
+        if (map.specified("ghosts_are_light"))
+        {
+            ghosts_are_light = map["ghosts_are_light"].value().asABoolean();
+        }
+
         for (int i = 0; i < nats; ++i)
         {
             const auto cgatomidx = idx_to_cgatomidx_data[i];
@@ -558,6 +572,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             // use the largest mass of the perturbing atoms
             const double mass0 = params_masses.at(cgatomidx).to(SireUnits::g_per_mol);
             const double mass1 = params1_masses.at(cgatomidx).to(SireUnits::g_per_mol);
+
+            const bool mass0_is_light = (mass0 >= 1) and (mass0 < 2.5);
+            const bool mass1_is_light = (mass1 >= 1) and (mass1 < 2.5);
 
             double mass = std::max(mass0, mass1);
 
@@ -571,7 +588,12 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost in both end states?
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_mass and (mass < 2.5 or mass1 < 2.5))
+            else if (check_for_h_by_max_mass and mass < 2.5)
+            {
+                // the maximum mass is less than 2.5, so this is a H
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_mass and (mass0_is_light or mass1_is_light))
             {
                 // one of the atoms is H or He
                 light_atoms.insert(i);
@@ -592,6 +614,22 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
             }
 
             masses_data[i] = mass;
+
+            // the user wants to treat ghost atoms as light atoms
+            if (ghosts_are_light)
+            {
+                const auto charge0 = params.charges().at(cgatomidx);
+                const auto charge1 = params1.charges().at(cgatomidx);
+                const auto lj0 = params.ljs().at(cgatomidx);
+                const auto lj1 = params1.ljs().at(cgatomidx);
+
+                // this is a ghost atom
+                if ((charge0 == 0 and lj0.epsilon().value() == 0) or
+                    (charge1 == 0 and lj1.epsilon().value() == 0))
+                {
+                    light_atoms.insert(i);
+                }
+            }
         }
     }
     else
@@ -610,8 +648,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 // this must be a ghost
                 light_atoms.insert(i);
             }
-            else if (check_for_h_by_mass and mass < 2.5)
+            else if (check_for_h_by_max_mass and mass < 2.5)
             {
+                // the maximum mass is less than 2.5, so this is a H
+                light_atoms.insert(i);
+            }
+            else if (check_for_h_by_mass and (mass >= 1 and mass < 2.5))
+            {
+                // one of the atoms is H or He
                 light_atoms.insert(i);
             }
             else if (check_for_h_by_element and elements.at(idx_to_cgatomidx_data[i]).nProtons() == 1)
@@ -692,8 +736,26 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         dynamic_constraints = map["dynamic_constraints"].value().asABoolean();
     }
 
-    for (auto it = params.bonds().constBegin();
-         it != params.bonds().constEnd();
+    auto bonds = params.bonds();
+
+    if (is_perturbable)
+    {
+        // add in any bonds that exist only in the other state
+        // - use the same r0 but set k to 0
+        for (auto it = params1.bonds().constBegin();
+             it != params1.bonds().constEnd();
+             ++it)
+        {
+            if (not bonds.contains(it.key()))
+            {
+                bonds.insert(it.key(), QPair<AmberBond, bool>(AmberBond(0.0, it.value().first.r0()),
+                                                              it.value().second));
+            }
+        }
+    }
+
+    for (auto it = bonds.constBegin();
+         it != bonds.constEnd();
          ++it)
     {
         const auto bondid = it.key().map(molinfo);
@@ -726,7 +788,8 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         bool bond_is_not_constrained = true;
 
-        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
+                                         (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
         {
             bool should_constrain_bond = true;
 
@@ -740,17 +803,31 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                 double k_1 = bondparam1.k() * bond_k_to_openmm;
                 r0_1 = bondparam1.r0() * bond_r0_to_openmm;
 
+                if (r0_1 == 0)
+                {
+                    // we cannot shrink the bond to 0 - this must be
+                    // a bond that is disappearing - we should simply
+                    // keep it the same length
+                    r0_1 = r0;
+                }
+
                 if (std::abs(k_1 - k) > 1e-3 or std::abs(r0_1 - r0) > 1e-3)
                 {
-                    // this is a perturbing bond
+                    // we need to check against the "NOT_PERTURBED"-style constraints
                     if (this_constraint_type & CONSTRAIN_NOT_PERTURBED)
                     {
-                        // don't constrain a perturbing bond
+                        // DO NOT CONSTRAIN any perturbing bonds
                         should_constrain_bond = false;
                     }
-                    else if ((this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED) and has_light_atom)
+                    else if (this_constraint_type & CONSTRAIN_NOT_HEAVY_PERTURBED)
                     {
-                        // constrain a perturbing bond involving hydrogen
+                        // DO NOT CONSTRAIN any perturbing bonds that DON'T contain hydrogen
+                        should_constrain_bond = has_light_atom;
+                    }
+                    else
+                    {
+                        // DO CONSTRAIN any perturbing bonds - we only don't constrain
+                        // perturbing bonds if we have one of the "NOT_PERTURBED" constraints
                         should_constrain_bond = true;
                     }
                 }
@@ -785,8 +862,26 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
     ang_params.clear();
 
-    for (auto it = params.angles().constBegin();
-         it != params.angles().constEnd();
+    auto angles = params.angles();
+
+    if (is_perturbable)
+    {
+        // add in any angles that exist only in the other state
+        // - use the same theta0 but set k to 0
+        for (auto it = params1.angles().constBegin();
+             it != params1.angles().constEnd();
+             ++it)
+        {
+            if (not angles.contains(it.key()))
+            {
+                angles.insert(it.key(), QPair<AmberAngle, bool>(AmberAngle(0.0, it.value().first.theta0()),
+                                                                it.value().second));
+            }
+        }
+    }
+
+    for (auto it = angles.constBegin();
+         it != angles.constEnd();
          ++it)
     {
         const auto angid = it.key().map(molinfo);
@@ -831,6 +926,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
                     double k_1 = angparam.k() * angle_k_to_openmm;
                     theta0_1 = angparam.theta0();
+
+                    if (theta0_1 == 0)
+                    {
+                        // we cannot shrink the angle to 0 - this must be
+                        // an angle that is disappearing - we should simply
+                        // keep it the same angle
+                        theta0_1 = theta0;
+                    }
 
                     if (std::abs(k_1 - k) > 1e-3 or std::abs(theta0_1 - theta0) > 1e-3)
                     {
