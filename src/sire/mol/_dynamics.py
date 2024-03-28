@@ -40,11 +40,40 @@ class DynamicsData:
                 qm_engine = map["qm_engine"].value()
 
                 from ..legacy.Convert import QMEngine
+                from warnings import warn
 
                 if qm_engine and not isinstance(qm_engine, QMEngine):
                     raise ValueError(
                         "'qm_engine' must be an instance of 'sire.legacy.Convert.QMEngine'"
                     )
+
+                # Check the constraints and raise a warning if the perturbable_constraint
+                # is not "none".
+
+                if map.specified("perturbable_constraint"):
+                    perturbable_constraint = map["perturbable_constraint"].source()
+                    if perturbable_constraint.lower() != "none":
+                        warn(
+                            "Running a QM/MM simulation with constraints on the QM "
+                            "region is not recommended."
+                        )
+                else:
+                    # The perturbable constraint is unset, so will follow the constraint.
+                    # Make sure this is "none".
+                    if map.specified("constraint"):
+                        constraint = map["constraint"].source()
+                        if constraint.lower() != "none":
+                            warn(
+                                "Running a QM/MM simulation with constraints on the QM "
+                                "region is not recommended."
+                            )
+                    # Constraints will be automatically applied, so we can't guarantee that
+                    # the constraint is "none".
+                    else:
+                        warn(
+                            "Running a QM/MM simulation with constraints on the QM "
+                            "region is not recommended."
+                        )
 
             # see if this is an interpolation simulation
             if map.specified("lambda_interpolate"):
