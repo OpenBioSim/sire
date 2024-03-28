@@ -40,7 +40,7 @@ jobs:
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -53,7 +53,7 @@ jobs:
         run: git clone -b feature_emle https://github.com/openbiosim/sire sire
       #
       - name: Setup Conda
-        run: mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
+        run: mamba install -y -c conda-forge boa=0.16 anaconda-client packaging=21 pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py
