@@ -128,3 +128,59 @@ Taylor softening
 This is the second soft-core potential. You can use it by setting the
 map option ``use_taylor_softening`` to True.
 
+It is based on the following electrostatic and Lennard-Jones potentials:
+
+.. math::
+
+   V_{\text{elec}}(r) = q_i q_j \left[ \frac{(1 - \alpha)^n}{\sqrt{r^2 + \delta_\text{coulomb}^2}} - \frac{\kappa}{r} \right]
+
+   V_{\text{LJ}}(r) = 4\epsilon \left[ \frac{\sigma^{12}}{(\delta_\text{LJ} \sigma + r^2)^6} - \frac{\sigma^6}{(\delta_\text{LJ} \sigma + r^2)^3} \right]
+
+where
+
+.. math::
+
+    \delta_\text{coulomb} = \alpha \times \text{shift_coulomb}
+
+    \delta_\text{LJ} = \alpha \times \text{shift_LJ}
+
+and
+
+.. math::
+
+   \alpha = \max(\alpha_i, \alpha_j)
+
+   \kappa = \max(\kappa_i, \kappa_j)
+
+The parameters ``r``, ``q_i``, ``q_j``, ``\epsilon``, and ``\sigma``
+are the standard parameters for the electrostatic and Lennard-Jones
+potentials.
+
+The soft-core parameters are:
+
+* ``α_i`` and ``α_j`` control the amount of "softening" of the
+  electrostatic and LJ interactions. A value of 0 means no softening
+  (fully hard), while a value of 1 means fully soft. Ghost atoms which
+  disappear as a function of λ have a value of α of 0 in the
+  reference state, and 1 in the perturbed state. Ghost atoms which appear
+  as a function of λ have a value of α of 1 in the reference
+  state, and 0 in the perturbed state. These values can be perturbed
+  via the ``alpha`` lever in the λ-schedule.
+
+* ``n`` is the "coulomb power", and is set to 0 by default. It can be
+  any integer between 0 and 4. It is set via ``coulomb_power`` map
+  parameter.
+
+* ``shift_coulomb`` and ``shift_LJ`` are the so-called "shift delta"
+  parameters, which are specified individually for the coulomb and LJ\
+  potentials. They are set via the ``shift_coulomb`` and ``shift_delta``
+  map parameters. They default to 1 Å and 2.5 Å respectively.
+
+* ``κ_i`` and ``κ_j`` are the "hard" electrostatic parameters,
+  which control whether or not to calculate the "hard" electrostatic
+  interaction to subtract from the total energy and force (thus cancelling
+  out the double-counting of this interaction from the NonbondedForce).
+  By default, these are always equal to 1. You can perturb these via the
+  ``kappa`` lever in the λ-schedule, e.g. if you want to decouple the
+  intramolecular electrostatic interactions, when the "hard" interaction
+  would not be calculated in the NonbondedForce.
