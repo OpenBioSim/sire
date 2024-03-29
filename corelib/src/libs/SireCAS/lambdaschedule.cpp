@@ -691,15 +691,26 @@ void LambdaSchedule::addDecoupleStage(bool perturbed_is_decoupled)
  */
 void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_decoupled)
 {
-    auto state = LambdaSchedule::initial();
+    this->addStage(name, default_morph_equation);
 
-    if (not perturbed_is_decoupled)
-        state = LambdaSchedule::final();
+    // we now need to ensure that the ghost/ghost parameters are not
+    // perturbed
+    if (perturbed_is_decoupled)
+    {
+        this->setEquation(name, "ghost/ghost", "*", this->initial());
 
-    this->addStage(name, state);
+        // we also need to scale down kappa as the decoupled state is
+        // not evaluated in the NonbondedForce, so must not be cancelled
+        this->setEquation(name, "ghost/ghost", "kappa", 1.0 - this->lam());
+    }
+    else
+    {
+        this->setEquation(name, "ghost/ghost", "*", this->final());
 
-    // the only thing we scale with lambda is the ghost/non-ghost force
-    this->setEquation(name, "ghost/non-ghost", "*", default_morph_equation);
+        // we also need to scale up kappa as the decoupled state is
+        // not evaluated in the NonbondedForce, so must not be cancelled
+        this->setEquation(name, "ghost/ghost", "kappa", this->lam());
+    }
 }
 
 /** Add a stage to the schedule that will annihilate the perturbed
