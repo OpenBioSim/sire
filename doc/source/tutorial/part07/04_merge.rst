@@ -55,7 +55,21 @@ the hydrogen atoms in methane.
 Merging molecules
 -----------------
 
-We use the :func:`sire.morph.merge`
+We use the :func:`sire.morph.merge` function to create merged molecules.
+This takes in the two molecules you want to merge, and the matching
+dictionary you have created.
+
+>>> merged = sr.morph.merge(mol0=neopentane, mol1=methane, match=matching)
+>>> merged.perturbation().view_reference()
+
+.. image:: images/07_04_03.jpg
+   :alt: A picture of the merged neopentance to methane
+
+.. note::
+
+   The reference state is numbered ``0`` (i.e. ``mol0``) while the
+   perturbed state is numbered ``1`` (i.e. ``mol1``). This is used to
+   remind us what λ-value each state corresponds to.
 
 
 

@@ -231,7 +231,7 @@ class Perturbation:
                         angle=angle.id(),
                         start=theta0_0 * radian,
                         end=theta0_1 * radian,
-                        map=map,
+                        map=self._map,
                     )
                 )
 
@@ -249,9 +249,11 @@ class Perturbation:
                     bond=bond.id(),
                     start=r0_0 * angstrom,
                     end=r0_1 * angstrom,
-                    map=map,
+                    map=self._map,
                 )
             )
+
+        return self._perturbations
 
     def extract_reference(
         self,
