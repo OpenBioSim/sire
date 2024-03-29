@@ -2,7 +2,6 @@
 Creating merge molecules
 ========================
 
-
 Merged molecules are used in free energy calculations to represent the
 perturbation between two molecules; the reference molecule (at λ=0)
 and the perturbed molecule (at λ=1).
@@ -227,3 +226,221 @@ if other tools are available.
 
 Fortunately, because the funtion accepts a python dictionary, it is very
 easy to use other tools to generate the mapping and pass to this function.
+
+Using Kartograf mappings
+------------------------
+
+`Kartograf <https://kartograf.readthedocs.io/en/latest/>`__ is a package
+for generating atom mappings which takes into account 3D geometries.
+This means that mappings can account for stereochemistry. It is also
+extremely fast and robust, with lots of active development. It is a very
+good choice for generating atom mappings.
+
+To use Kartograf, you may need to install it. You can do this with conda.
+
+.. code-block:: bash
+
+   conda install -c conda-forge kartograf
+
+Next, we will import the components of Kartograf that we need.
+
+>>> from kartograf.atom_aligner import align_mol_shape
+>>> from kartograf import KartografAtomMapper, SmallMoleculeComponent
+
+Kartograf can work from RDKit molecules, so we'll now convert our sire
+molecules to RDKit.
+
+>>> rd_neopentane = sr.convert.to(neopentane, "rdkit")
+>>> rd_methane = sr.convert.to(methane, "rdkit")
+
+Next, we will create two Kartograf molecules from these RDKit molecules.
+
+>>> k_neopentane, k_methane = [
+...   SmallMoleculeComponent.from_rdkit(m) for m in [rd_neopentane, rd_methane]
+... ]
+
+Now, we align the molecules based on their shape, aligning methane on top
+of neopentane.
+
+>>> k_aligned_methane = align_mol_shape(k_methane, ref_mol=k_neopentane)
+
+To generate the mappings, we will create a KartografAtomMapper object
+which is allowed to match light atoms.
+
+>>> mapper = KartografAtomMapper(atom_map_hydrogens=True)
+
+This can be used to generate the mappings.
+
+>>> mappings = mapper.suggest_mappings(k_neopentane, k_aligned_methane)
+
+We will now get the first mapping...
+
+>>> mapping = next(mappings)
+>>> print(mapping)
+LigandAtomMapping(componentA=SmallMoleculeComponent(name=NEO),
+                  componentB=SmallMoleculeComponent(name=CH4),
+                  componentA_to_componentB={1: 0, 11: 2, 12: 3, 13: 4, 3: 1},
+                  annotations={})
+
+The mappings are atom indexes. We can collect these and create a
+dictionary that maps from atom index to atom index using this code.
+
+>>> matching = {}
+>>> for atom0, atom1 in mapping.componentA_to_componentB.items():
+...     matching[sr.atomid(idx=atom0)] = sr.atomid(idx=atom1)
+>>> print(matching)
+{AtomIdx(1): AtomIdx(0), AtomIdx(11): AtomIdx(2), AtomIdx(12): AtomIdx(3),
+ AtomIdx(13): AtomIdx(4), AtomIdx(3): AtomIdx(1)}
+
+Finally, we can pass this into the :func:`~sire.morph.match` function
+to create the :class:`~sire.mol.AtomMapping` object.
+
+>>> mapping = sr.morph.match(mol0=neopentane, mol1=methane, match=matching)
+>>> print(mapping)
+AtomMapping( size=5, unmapped0=12, unmapped1=0
+0: MolNum(3) Atom( H12:12 ) <=> MolNum(2) Atom( H3:3 )
+1: MolNum(3) Atom( H14:14 ) <=> MolNum(2) Atom( H5:5 )
+2: MolNum(3) Atom( H13:13 ) <=> MolNum(2) Atom( H4:4 )
+3: MolNum(3) Atom( C1:2 ) <=> MolNum(2) Atom( H2:1 )
+4: MolNum(3) Atom( C4:4 ) <=> MolNum(2) Atom( C1:2 )
+)
+
+Automatic Kartograf mapping
+---------------------------
+
+The above code can be quite tedious to write, so we have created the
+ability to pass in a ``KartografAtomMapper`` object as the ``match``
+argument to the :func:`~sire.morph.match` and :func:`~sire.morph.merge`
+functions, which then does all of the above automatically.
+
+>>> mapper = KartografAtomMapper(atom_map_hydrogens=True)
+>>> mapping = sr.morph.match(mol0=neopentane, mol1=methane, match=mapper)
+>>> print(mapping)
+AtomMapping( size=5, unmapped0=12, unmapped1=0
+0: MolNum(3) Atom( H12:12 ) <=> MolNum(2) Atom( H3:3 )
+1: MolNum(3) Atom( H14:14 ) <=> MolNum(2) Atom( H5:5 )
+2: MolNum(3) Atom( H13:13 ) <=> MolNum(2) Atom( H4:4 )
+3: MolNum(3) Atom( C1:2 ) <=> MolNum(2) Atom( H2:1 )
+4: MolNum(3) Atom( C4:4 ) <=> MolNum(2) Atom( C1:2 )
+)
+>>> merged = sr.morph.merge(mol0=neopentane, mol1=methane, match=mapper)
+>>> print(merged)
+Molecule( NEO:8   num_atoms=17 num_residues=1 )
+>>> m = merged.perturbation().to_openmm()
+>>> print(m.changed_atoms())
+      atom   charge0  charge1    sigma0    sigma1  epsilon0  epsilon1  alpha0  alpha1  kappa0  kappa1
+0     C2:1 -0.085335   0.0000  0.339967  0.339967  0.457730  0.000000     0.0     1.0     1.0     1.0
+1     C1:2 -0.060235   0.0271  0.339967  0.264953  0.457730  0.065689     0.0     0.0     0.0     0.0
+2     C3:3 -0.085335   0.0000  0.339967  0.339967  0.457730  0.000000     0.0     1.0     1.0     1.0
+3     C4:4 -0.085335  -0.1084  0.339967  0.339967  0.457730  0.457730     0.0     0.0     0.0     0.0
+4     C5:5 -0.085335   0.0000  0.339967  0.339967  0.457730  0.000000     0.0     1.0     1.0     1.0
+5     H6:6  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+6     H7:7  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+7     H8:8  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+8     H9:9  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+9   H10:10  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+10  H11:11  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+11  H12:12  0.033465   0.0271  0.264953  0.264953  0.065689  0.065689     0.0     0.0     0.0     0.0
+12  H13:13  0.033465   0.0271  0.264953  0.264953  0.065689  0.065689     0.0     0.0     0.0     0.0
+13  H14:14  0.033465   0.0271  0.264953  0.264953  0.065689  0.065689     0.0     0.0     0.0     0.0
+14  H15:15  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+15  H16:16  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+16  H17:17  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+
+This is a much easier way to create merged molecules!
+
+Extracting the end states
+-------------------------
+
+As with all merged molecules, we can extract the end states via the
+:func:`sire.morph.extract_reference` and :func:`sire.morph.extract_perturbed`
+functions.
+
+>>> neopentane = sr.morph.extract_reference(merged)
+>>> print(neopentane.atoms())
+Selector<SireMol::Atom>( size=17
+0:  Atom( C2:1    [   2.24,    1.01,    0.00] )
+1:  Atom( C1:2    [   1.26,    0.09,   -0.75] )
+2:  Atom( C3:3    [   0.99,    0.66,   -2.15] )
+3:  Atom( C4:4    [  -0.06,   -0.00,    0.04] )
+4:  Atom( C5:5    [   1.88,   -1.32,   -0.88] )
+...
+12:  Atom( H13:13  [  -0.78,   -0.67,   -0.49] )
+13:  Atom( H14:14  [   0.11,   -0.42,    1.05] )
+14:  Atom( H15:15  [   2.83,   -1.27,   -1.44] )
+15:  Atom( H16:16  [   2.08,   -1.75,    0.13] )
+16:  Atom( H17:17  [   1.19,   -2.00,   -1.42] )
+)
+>>> methane = sr.morph.extract_perturbed(merged)
+>>> print(methane.atoms())
+Selector<SireMol::Atom>( size=5
+0:  Atom( H2:2    [  -0.45,    1.01,    0.10] )
+1:  Atom( C1:4    [  -0.00,    0.00,    0.00] )
+2:  Atom( H3:12   [  -0.71,   -0.67,   -0.53] )
+3:  Atom( H4:13   [   0.95,    0.07,   -0.57] )
+4:  Atom( H5:14   [   0.21,   -0.41,    1.01] )
+)
+
+The names of the atoms and residues are preserved in the merged molecule,
+meaning that they are correctly output for each end state. In the merged
+molecule, the atom and residue names default to the reference state names.
+The perturbed state names are held in the "alternate" names.
+
+>>> print(merged.residues()[0].name(), merged.residues()[0].alternate_name())
+ResName('NEO') ResName('CH4')
+>>> print(merged[1].name(), merged[1].alternate_name())
+AtomName('C1') AtomName('H2')
+
+Atoms that are unmapped in an end state are called ``Xxx``, e.g.
+
+>>> print(merged[0].name(), merged[0].alternate_name())
+AtomName('C2') AtomName('Xxx')
+
+You can switch between the standard and alternate names of a molecule
+by calling the :func:`~sire.legacy.Mol.MolEditor.switch_to_alternate_names`
+function.
+
+>>> print(merged.atoms())
+Selector<SireMol::Atom>( size=17
+0:  Atom( C2:1    [   2.24,    1.01,    0.00] )
+1:  Atom( C1:2    [   1.26,    0.09,   -0.75] )
+2:  Atom( C3:3    [   0.99,    0.66,   -2.15] )
+3:  Atom( C4:4    [  -0.06,   -0.00,    0.04] )
+4:  Atom( C5:5    [   1.88,   -1.32,   -0.88] )
+...
+12:  Atom( H13:13  [  -0.78,   -0.67,   -0.49] )
+13:  Atom( H14:14  [   0.11,   -0.42,    1.05] )
+14:  Atom( H15:15  [   2.83,   -1.27,   -1.44] )
+15:  Atom( H16:16  [   2.08,   -1.75,    0.13] )
+16:  Atom( H17:17  [   1.19,   -2.00,   -1.42] )
+)
+>>> merged = merged.edit().switch_to_alternate_names().commit()
+>>> print(merged.atoms())
+Selector<SireMol::Atom>( size=17
+0:  Atom( Xxx:1   [   2.24,    1.01,    0.00] )
+1:  Atom( H2:2    [   1.26,    0.09,   -0.75] )
+2:  Atom( Xxx:3   [   0.99,    0.66,   -2.15] )
+3:  Atom( C1:4    [  -0.06,   -0.00,    0.04] )
+4:  Atom( Xxx:5   [   1.88,   -1.32,   -0.88] )
+...
+12:  Atom( H4:13   [  -0.78,   -0.67,   -0.49] )
+13:  Atom( H5:14   [   0.11,   -0.42,    1.05] )
+14:  Atom( Xxx:15  [   2.83,   -1.27,   -1.44] )
+15:  Atom( Xxx:16  [   2.08,   -1.75,    0.13] )
+16:  Atom( Xxx:17  [   1.19,   -2.00,   -1.42] )
+)
+>>> merged = merged.edit().switch_to_alternate_names().commit()
+>>> print(merged.atoms())
+Selector<SireMol::Atom>( size=17
+0:  Atom( C2:1    [   2.24,    1.01,    0.00] )
+1:  Atom( C1:2    [   1.26,    0.09,   -0.75] )
+2:  Atom( C3:3    [   0.99,    0.66,   -2.15] )
+3:  Atom( C4:4    [  -0.06,   -0.00,    0.04] )
+4:  Atom( C5:5    [   1.88,   -1.32,   -0.88] )
+...
+12:  Atom( H13:13  [  -0.78,   -0.67,   -0.49] )
+13:  Atom( H14:14  [   0.11,   -0.42,    1.05] )
+14:  Atom( H15:15  [   2.83,   -1.27,   -1.44] )
+15:  Atom( H16:16  [   2.08,   -1.75,    0.13] )
+16:  Atom( H17:17  [   1.19,   -2.00,   -1.42] )
+)
