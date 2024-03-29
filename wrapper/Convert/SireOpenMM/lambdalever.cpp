@@ -1042,7 +1042,6 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // follow whatever is set by lambda, e.g. 'initial*lambda'
         // to switch them on, or `final*lambda` to switch them off)
         const double rho = lambda_schedule.morph("*",
-
                                                  restraint,
                                                  1.0, 1.0,
                                                  lambda_value);

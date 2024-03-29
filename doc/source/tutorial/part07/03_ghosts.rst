@@ -1,6 +1,6 @@
-===========
-Ghost Atoms
-===========
+====================================
+Ghost Atoms and Softening Potentials
+====================================
 
 Ghost atoms are used by the sire/OpenMM interface
 to represent atoms that either appear or disappear during a
@@ -186,3 +186,33 @@ The soft-core parameters are:
   ``kappa`` lever in the λ-schedule, e.g. if you want to decouple the
   intramolecular electrostatic interactions, when the "hard" interaction
   would not be calculated in the NonbondedForce.
+
+Good practice
+-------------
+
+Softening potentials can help to avoid singularities and crashes
+when atoms are annihilated or created. However, you still need to be
+careful when using them. For example, it is best when creating or
+destroying an atom to keep the sigma LJ parameter the same for both
+end states. This way, only the epsilon parameter is scaled to zero,
+while the atom keeps its same "size". This avoids the atom shrinking
+as a function of λ, which could result in atoms (and thus charges)
+getting too close to one another.
+
+For complex or large molecules, it may be better to separate out the
+decharging from the decoupling or annihilation, e.g. first set up
+a λ-schedule to have two stages; the first stage decouples the charges,
+while the second stage annihilates or decouples the atoms.
+
+This could be achieved using the following λ-schedule:
+
+>>> import sire as sr
+>>> s = sr.cas.LambdaSchedule.standard_morph()
+>>> s.set_equation(stage="morph", lever="charge", equation=s.final())
+>>> s.prepend_stage("decharge", s.initial())
+>>> s.set_equation(stage="decharge", lever="charge",
+...                equation=l.lam() * s.final() + s.initial() * (1 - s.lam()))
+>>> s.get_lever_values(initial=2.0, final=3.0).plot()
+
+.. image:: images/07_03_01.jpg
+   :alt: How parameters would be changed by the above λ-schedule.

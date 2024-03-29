@@ -176,7 +176,7 @@ class Perturbation:
         from ..legacy.MM import AmberBond, AmberAngle
         from ..cas import Symbol
         from ..units import angstrom, radian
-        from ..legacy.System import (
+        from ..legacy.Mol import (
             GeometryPerturbations,
             BondPerturbation,
             AnglePerturbation,
