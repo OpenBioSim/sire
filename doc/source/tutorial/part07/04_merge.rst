@@ -71,5 +71,159 @@ dictionary you have created.
    perturbed state is numbered ``1`` (i.e. ``mol1``). This is used to
    remind us what λ-value each state corresponds to.
 
+We can see how the underlying OpenMM parameters will be perturbed by
+checking the :class:`~sire.legacy.Convert.PerturbableOpenMMMolecule`
+that would be created from the merged molecule.
 
+>>> p = merged.perturbation().to_openmm()
+>>> print(p.changed_atoms())
+      atom   charge0  charge1    sigma0    sigma1  epsilon0  epsilon1  alpha0  alpha1  kappa0  kappa1
+0     C2:1 -0.085335   0.0271  0.339967  0.264953  0.457730  0.065689     0.0     0.0     0.0     0.0
+1     C1:2 -0.060235  -0.1084  0.339967  0.339967  0.457730  0.457730     0.0     0.0     0.0     0.0
+2     C3:3 -0.085335   0.0271  0.339967  0.264953  0.457730  0.065689     0.0     0.0     0.0     0.0
+3     C4:4 -0.085335   0.0271  0.339967  0.264953  0.457730  0.065689     0.0     0.0     0.0     0.0
+4     C5:5 -0.085335   0.0271  0.339967  0.264953  0.457730  0.065689     0.0     0.0     0.0     0.0
+5     H6:6  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+6     H7:7  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+7     H8:8  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+8     H9:9  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+9   H10:10  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+10  H11:11  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+11  H12:12  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+12  H13:13  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+13  H14:14  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+14  H15:15  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+15  H16:16  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
+16  H17:17  0.033465   0.0000  0.264953  0.264953  0.065689  0.000000     0.0     1.0     1.0     1.0
 
+We can see here that the five carbons in neopentane have their charge
+and LJ parameters perturbed from the neopentane values to the methane
+values.
+
+We can also see that the hydrogens in neopentane are converted to ghost
+atoms, as they have no match in methane. The conversion to ghost atoms
+involves setting their charge to zero, and setting the LJ epsilon parameter
+of the atoms to zero (keeping the sigma parameter the same, as suggested
+as best practice in the :doc:`last tutorial <03_ghosts>`).
+
+Note also how the alpha parameters of the hydrogens changes from 0 to 1
+as those atoms become ghosts.
+
+We can also look at the changes in internal parameters.
+
+>>> print(p.changed_bonds())
+        bond  length0  length1         k0         k1
+0  C2:1-C1:2  0.15375  0.10969  251793.12  276646.08
+1  C1:2-C3:3  0.15375  0.10969  251793.12  276646.08
+2  C1:2-C4:4  0.15375  0.10969  251793.12  276646.08
+3  C1:2-C5:5  0.15375  0.10969  251793.12  276646.08
+>>> print(p.changed_angles())
+            angle     size0     size1        k0        k1
+0  C4:4-C1:2-C5:5  1.946217  1.877626  526.3472  329.6992
+1  C3:3-C1:2-C4:4  1.946217  1.877626  526.3472  329.6992
+2  C3:3-C1:2-C5:5  1.946217  1.877626  526.3472  329.6992
+3  C2:1-C1:2-C3:3  1.946217  1.877626  526.3472  329.6992
+4  C2:1-C1:2-C4:4  1.946217  1.877626  526.3472  329.6992
+5  C2:1-C1:2-C5:5  1.946217  1.877626  526.3472  329.6992
+>>> print(p.changed_torsions())
+Empty DataFrame
+Columns: [torsion, k0, k1, periodicity0, periodicity1, phase0, phase1]
+Index: []
+
+We can see that the bond lengths and angles are perturbed from their values
+in neopentane (representing C-C bonds and C-C-C angles) to their values
+in methane (representing C-H bonds and H-C-H angles). Note that the
+bonds, angles and torsions for the hydrogens in neopentane are not
+perturbed. This is because all of these atoms are converted to ghost atoms,
+and the default is that internals involving ghost atoms keep the parameters
+from the end state where they are not ghosts (i.e. the reference state
+values in this case).
+
+Implementation - AtomMapping
+----------------------------
+
+Under the hood, the above merge was implemented via the
+:class:`sire.mol.AtomMapping` class. This class holds all of the information
+about how atoms are mapped between end states, and an object of this
+class was created automatically by the :func:`~sire.morph.merge` function.
+
+We can create the mapping object directly using the
+:func:`sire.morph.match` function.
+
+>>> m = sr.morph.match(mol0=neopentane, mol1=methane, match=matching)
+>>> print(m)
+AtomMapping( size=5, unmapped0=12, unmapped1=0
+0: MolNum(3) Atom( C1:2 ) <=> MolNum(2) Atom( C1:2 )
+1: MolNum(3) Atom( C2:1 ) <=> MolNum(2) Atom( H2:1 )
+2: MolNum(3) Atom( C4:4 ) <=> MolNum(2) Atom( H4:4 )
+3: MolNum(3) Atom( C3:3 ) <=> MolNum(2) Atom( H3:3 )
+4: MolNum(3) Atom( C5:5 ) <=> MolNum(2) Atom( H5:5 )
+)
+
+This shows how the five carbon atoms in neopentane are mapped to the
+carbon and four hydrogens of methane. It also shows how 12 atoms in the
+reference state are unmapped (``unmapped0=12``) and how no atoms in the
+perturbed state are unmapped (``unmapped1=0``).
+
+This class has some useful functions. One is
+:func:`~sire.mol.AtomMapping.align`, which aligns the perturbed state
+against the reference state, using an algorithm that minimises the
+RMSD of the mapped atoms.
+
+>>> m = m.align()
+
+Another useful function is :func:`~sire.mol.AtomMapping.merge`, which
+actually performs the merge, returning the merged molecule, with
+perturbable properties linked to the reference state.
+
+>>> merged = m.merge()
+>>> print(merged)
+Molecule( NEO:7   num_atoms=17 num_residues=1 )
+
+The :func:`~sire.morph.merge` function is really a wrapper that create
+this :class:`~sire.mol.AtomMapping` object, calls align, and then
+calls the :func:`~sire.mol.AtomMapping.merge` function.
+
+Automatic matching
+------------------
+
+Creating the matching dictionary by hand can be a bit tedious! Fortunately,
+there are lots of tools that can help automate this process.
+
+One such tool is the above :func:`~sire.morph.match` function. If you don't
+pass in a ``match`` argument, then an internal maximum common substructure
+algorithm will be used to try to infer the matching.
+
+>>> m = sr.morph.match(mol0=neopentane, mol1=methane)
+>>> print(m)
+AtomMapping( size=1, unmapped0=16, unmapped1=4
+0: MolNum(3) Atom( C2:1 ) <=> MolNum(2) Atom( C1:2 )
+)
+
+.. warning::
+
+   The maximum common substructure algorithm is not supported on Windows.
+   This will only work on MacOS and Linux.
+
+By default, this algorithm ignores hydrogens. This is why only a single
+atom was matched above. You can change this by passing in the
+``ignore_light_atoms=True`` argument.
+
+>>> m = sr.morph.match(mol0=neopentane, mol1=methane, match_light_atoms=True)
+>>> print(m)
+AtomMapping( size=4, unmapped0=13, unmapped1=1
+0: MolNum(3) Atom( C2:1 ) <=> MolNum(2) Atom( C1:2 )
+1: MolNum(3) Atom( H6:6 ) <=> MolNum(2) Atom( H2:1 )
+2: MolNum(3) Atom( H8:8 ) <=> MolNum(2) Atom( H4:4 )
+3: MolNum(3) Atom( H7:7 ) <=> MolNum(2) Atom( H3:3 )
+)
+
+Note how this has come up with a different mapping than the one we created
+manually.
+
+The internal algorithm is quite slow, especially for large molecules.
+It is also not aware of stereochemistry, and generally not recommended
+if other tools are available.
+
+Fortunately, because the funtion accepts a python dictionary, it is very
+easy to use other tools to generate the mapping and pass to this function.
