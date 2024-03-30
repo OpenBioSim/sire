@@ -46,7 +46,7 @@ jobs:
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v3
+      - uses: conda-incubator/setup-miniconda@v2
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -65,5 +65,5 @@ jobs:
       - name: Prepare build location
         run: mkdir ${{ github.workspace }}/build
       #
-      - name: Build Conda package using mamba build
+      - name: Build Conda package using conda build
         run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
