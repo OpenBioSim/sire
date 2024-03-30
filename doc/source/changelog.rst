@@ -156,6 +156,12 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   restraints. Tests were added for restraint creation and for the standard state
   correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
 
+* Added power support to GeneralUnit in python. You can now raise a unit value
+  to a valid power, e.g. ``sr.u("5A")**2``. You can also square root via a new
+  ``.sqrt()`` function on the unit. There is also a new ``sire.sqrt`` function
+  that will automatically called ``obj.sqrt()`` if that exists, or will fall
+  back to ``math.sqrt`` if not.
+
 * Fixed a bug in the algorithm used to infer bond order when converting to
   RDKit format. This fixes issue #177.
 
