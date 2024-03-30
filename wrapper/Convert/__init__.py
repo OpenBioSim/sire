@@ -89,6 +89,7 @@ try:
         _changed_torsions,
         _changed_exceptions,
         _changed_constraints,
+        _get_lever_values,
     )
 
     from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData
@@ -105,6 +106,7 @@ try:
     PerturbableOpenMMMolecule.changed_torsions = _changed_torsions
     PerturbableOpenMMMolecule.changed_exceptions = _changed_exceptions
     PerturbableOpenMMMolecule.changed_constraints = _changed_constraints
+    PerturbableOpenMMMolecule.get_lever_values = _get_lever_values
 
     _has_openmm = True
 

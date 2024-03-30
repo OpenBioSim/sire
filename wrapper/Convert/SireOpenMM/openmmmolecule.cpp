@@ -2016,6 +2016,14 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
     this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map)));
 }
 
+/** Return whether or not this is null */
+bool PerturbableOpenMMMolecule::isNull() const
+{
+    return perturbed_atoms.isEmpty() and perturbed_bonds.isEmpty() and
+           perturbed_angs.isEmpty() and perturbed_dihs.isEmpty() and
+           perturbable_constraints.isEmpty();
+}
+
 /** Construct from the passed OpenMMMolecule */
 PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()

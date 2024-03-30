@@ -224,6 +224,8 @@ namespace SireOpenMM
 
         PerturbableOpenMMMolecule *clone() const;
 
+        bool isNull() const;
+
         QVector<double> getAlphas0() const;
         QVector<double> getAlphas1() const;
 
