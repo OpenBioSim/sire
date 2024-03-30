@@ -175,18 +175,30 @@ def test_annihilate(ala_mols, openmm_platform):
     fwds = omm_fwds.changed_torsions()
     bwds = omm_bwds.changed_torsions()
 
-    joined = fwds.merge(bwds, on="torsion", suffixes=("_fwds", "_bwds"))
+    # there are multiple torsions, so these need searching for
+    # and matching directly
+    for _, row_fwds in fwds.iterrows():
+        torsion = row_fwds["torsion"]
 
-    assert joined["periodicity0_fwds"].equals(joined["periodicity1_bwds"])
-    assert joined["periodicity1_fwds"].equals(joined["periodicity0_bwds"])
-    assert joined["phase0_fwds"].equals(joined["phase1_bwds"])
-    assert joined["phase1_fwds"].equals(joined["phase0_bwds"])
-    assert joined["k0_fwds"].equals(joined["k1_bwds"])
-    assert joined["k1_fwds"].equals(joined["k0_bwds"])
+        found = False
+
+        for _, row_bwds in bwds[bwds["torsion"] == torsion].iterrows():
+            if (
+                row_fwds["k0"] == row_bwds["k1"]
+                and row_fwds["k1"] == row_bwds["k0"]
+                and row_fwds["periodicity0"] == row_bwds["periodicity1"]
+                and row_fwds["periodicity1"] == row_bwds["periodicity0"]
+                and row_fwds["phase0"] == row_bwds["phase1"]
+                and row_fwds["phase1"] == row_bwds["phase0"]
+            ):
+                found = True
+                break
+
+        assert found
 
     # also check that parameters are being set equal to zero correctly
-    assert (joined["k1_fwds"] == 0.0).all()
-    assert (joined["k0_bwds"] == 0.0).all()
+    assert (fwds["k1"] == 0.0).all()
+    assert (bwds["k0"] == 0.0).all()
 
     fwds = omm_fwds.changed_exceptions()
     bwds = omm_bwds.changed_exceptions()
