@@ -20,7 +20,48 @@ def _get_lever_values(
     Return the value of all of the parameters for this perturbable molecule
     at all of the specified values of lambda, given the passed
     lambda schedule. If no schedule is passed then a default morph
-    will be used.
+    will be used. Return this as a pandas DataFrame if 'to_pandas' is True
+
+    If a pandas DataFrame is returned then note the following two points:
+
+    1. Note that this function will only return the values of parameters
+    that change during the morph. If a parameter does not change then
+    it is not included.
+
+    2. Also note that columns are merged together if they have identical
+    values. You can see which columns have been merged by looking at the
+    "merged" attribute of the returned DataFrame (e.g. 'df.attrs["merged"]')
+
+    Otherwise, the raw data is returned as a set of dictionaries with
+    no additional processing.
+
+    Parameters
+    ----------
+
+    schedule: LambdaSchedule, optional, default=None
+        The lambda schedule to use for the morph. If this is not
+        passed then a default morph will be used
+
+    lambda_values: list[float], optional, default=None
+        A list of lambda values to evaluate. If this is not passed
+        then the lambda values will be auto-generated based on an
+        even spacing between 0 and 1 of 'num_lambda' points
+
+    num_lambda: int, optional, default=101
+        The number of lambda values to evaluate if 'lambda_values'
+        is not passed
+
+    to_pandas: bool, optional, default=True
+        Whether or not to return the result as a pandas DataFrame
+        (defaults to True)
+
+    Returns
+    -------
+
+    pandas.DataFrame or dict
+        A pandas DataFrame containing the values of the parameters
+        at each of the lambda values, or a dictionary containing
+        the values of the parameters at each of the lambda values
     """
     if lambda_values is None:
         import numpy as np
@@ -45,17 +86,54 @@ def _get_lever_values(
         import pandas as pd
 
         colnames = results[0]
+
+        if len(colnames) < 2:
+            return None
+
         columns = results
         columns.pop_front()
 
         results = {}
 
-        results["index"] = list(range(len(columns[0])))
+        merged = {}
 
+        # only add in columns that change values
         for i in range(len(colnames)):
-            results[colnames[i]] = [x for x in columns[i]]
+            column = columns[i]
+
+            if len(column) > 1:
+                changed = False
+
+                for j in range(1, len(column)):
+                    if column[j] != column[j - 1]:
+                        changed = True
+                        break
+
+                if not changed:
+                    continue
+
+            colname = colnames[i].replace("lambda", "λ")
+
+            column = [x for x in column]
+
+            # see if this is a duplicate of existing columns
+            is_duplicate = None
+            for key, value in results.items():
+                if key != "λ" and value == column:
+                    is_duplicate = key
+
+            if is_duplicate is None:
+                if colname != "λ":
+                    merged[colname] = []
+
+                results[colname] = [x for x in column]
+            else:
+                merged[is_duplicate].append(colname)
 
         results = pd.DataFrame(results)
+        results = results.set_index("λ")
+
+        results.attrs["merged"] = merged
 
     return results
 

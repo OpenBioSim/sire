@@ -1406,10 +1406,12 @@ QVector<double> LambdaSchedule::morph(const QString &force,
 
     if (equation == default_morph_equation)
     {
+        double stage_lam = std::get<1>(resolved);
+
         for (int i = 0; i < nparams; ++i)
         {
-            morphed_data[i] = (1.0 - lambda_value) * initial_data[i] +
-                              lambda_value * final_data[i];
+            morphed_data[i] = (1.0 - stage_lam) * initial_data[i] +
+                              stage_lam * final_data[i];
         }
     }
     else
@@ -1475,10 +1477,12 @@ QVector<int> LambdaSchedule::morph(const QString &force,
 
     if (equation == default_morph_equation)
     {
+        double stage_lam = std::get<1>(resolved);
+
         for (int i = 0; i < nparams; ++i)
         {
-            morphed_data[i] = int((1.0 - lambda_value) * initial_data[i] +
-                                  lambda_value * final_data[i]);
+            morphed_data[i] = int((1.0 - stage_lam) * initial_data[i] +
+                                  stage_lam * final_data[i]);
         }
     }
     else

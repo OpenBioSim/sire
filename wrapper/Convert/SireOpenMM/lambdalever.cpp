@@ -424,15 +424,22 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
 
     const auto &schedule = this->lambda_schedule.getMoleculeSchedule(0);
 
-    QVector<QString> force;
-    QVector<QString> lever;
     QVector<QString> column_names;
+
+    column_names.append("lambda");
+
+    QVector<double> lamvals;
+    QVector<QVector<double>> lever_values;
 
     bool is_first = true;
 
     for (auto lambda_value : lambda_values)
     {
+        int idx = 0;
+
         lambda_value = this->lambda_schedule.clamp(lambda_value);
+
+        lamvals.append(lambda_value);
 
         const auto &cache = this->lambda_cache.get(0, lambda_value);
 
@@ -448,8 +455,17 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
 
         if (is_first)
         {
-            force += QVector<QString>(morphed_charges.count(), "clj");
-            lever += QVector<QString>(morphed_charges.count(), "charge");
+            for (int i = 0; i < morphed_charges.count(); ++i)
+            {
+                column_names.append(QString("clj-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : vals)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_sigmas = cache.morph(
@@ -458,12 +474,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getSigmas0(),
             mol.getSigmas1());
 
-        vals += morphed_sigmas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_sigmas.count(), "clj");
-            lever += QVector<QString>(morphed_sigmas.count(), "sigma");
+            for (int i = 0; i < morphed_sigmas.count(); ++i)
+            {
+                column_names.append(QString("clj-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_epsilons = cache.morph(
@@ -472,13 +495,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getEpsilons0(),
             mol.getEpsilons1());
 
-        vals += morphed_epsilons;
-
         if (is_first)
         {
+            for (int i = 0; i < morphed_epsilons.count(); ++i)
+            {
+                column_names.append(QString("clj-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
 
-            force += QVector<QString>(morphed_epsilons.count(), "clj");
-            lever += QVector<QString>(morphed_epsilons.count(), "epsilon");
+        for (const auto &val : morphed_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_alphas = cache.morph(
@@ -487,12 +516,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getAlphas0(),
             mol.getAlphas1());
 
-        vals += morphed_alphas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_alphas.count(), "clj");
-            lever += QVector<QString>(morphed_alphas.count(), "alpha");
+            for (int i = 0; i < morphed_alphas.count(); ++i)
+            {
+                column_names.append(QString("clj-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_kappas = cache.morph(
@@ -501,12 +537,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getKappas0(),
             mol.getKappas1());
 
-        vals += morphed_kappas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_kappas.count(), "clj");
-            lever += QVector<QString>(morphed_kappas.count(), "kappa");
+            for (int i = 0; i < morphed_kappas.count(); ++i)
+            {
+                column_names.append(QString("clj-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_charge_scale = cache.morph(
@@ -515,12 +558,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getChargeScales0(),
             mol.getChargeScales1());
 
-        vals += morphed_charge_scale;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_charge_scale.count(), "clj");
-            lever += QVector<QString>(morphed_charge_scale.count(), "charge_scale");
+            for (int i = 0; i < morphed_charge_scale.count(); ++i)
+            {
+                column_names.append(QString("clj-charge_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_charge_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_lj_scale = cache.morph(
@@ -529,12 +579,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getLJScales0(),
             mol.getLJScales1());
 
-        vals += morphed_lj_scale;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_lj_scale.count(), "clj");
-            lever += QVector<QString>(morphed_lj_scale.count(), "lj_scale");
+            for (int i = 0; i < morphed_lj_scale.count(); ++i)
+            {
+                column_names.append(QString("clj-lj_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_lj_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost_charges = cache.morph(
@@ -543,12 +600,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getCharges0(),
             mol.getCharges1());
 
-        vals += morphed_ghost_charges;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost_charges.count(), "ghost/ghost");
-            lever += QVector<QString>(morphed_ghost_charges.count(), "charge");
+            for (int i = 0; i < morphed_ghost_charges.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_charges)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost_sigmas = cache.morph(
@@ -557,12 +621,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getSigmas0(),
             mol.getSigmas1());
 
-        vals += morphed_ghost_sigmas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost_sigmas.count(), "ghost/ghost");
-            lever += QVector<QString>(morphed_ghost_sigmas.count(), "sigma");
+            for (int i = 0; i < morphed_ghost_sigmas.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost_epsilons = cache.morph(
@@ -571,12 +642,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getEpsilons0(),
             mol.getEpsilons1());
 
-        vals += morphed_ghost_epsilons;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost_epsilons.count(), "ghost/ghost");
-            lever += QVector<QString>(morphed_ghost_epsilons.count(), "epsilon");
+            for (int i = 0; i < morphed_ghost_epsilons.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost_alphas = cache.morph(
@@ -585,12 +663,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getAlphas0(),
             mol.getAlphas1());
 
-        vals += morphed_ghost_alphas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost_alphas.count(), "ghost/ghost");
-            lever += QVector<QString>(morphed_ghost_alphas.count(), "alpha");
+            for (int i = 0; i < morphed_ghost_alphas.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost_kappas = cache.morph(
@@ -599,12 +684,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getKappas0(),
             mol.getKappas1());
 
-        vals += morphed_ghost_kappas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost_kappas.count(), "ghost/ghost");
-            lever += QVector<QString>(morphed_ghost_kappas.count(), "kappa");
+            for (int i = 0; i < morphed_ghost_kappas.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_nonghost_charges = cache.morph(
@@ -613,12 +705,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getCharges0(),
             mol.getCharges1());
 
-        vals += morphed_nonghost_charges;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_nonghost_charges.count(), "ghost/non-ghost");
-            lever += QVector<QString>(morphed_nonghost_charges.count(), "charge");
+            for (int i = 0; i < morphed_nonghost_charges.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_charges)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_nonghost_sigmas = cache.morph(
@@ -627,12 +726,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getSigmas0(),
             mol.getSigmas1());
 
-        vals += morphed_nonghost_sigmas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_nonghost_sigmas.count(), "ghost/non-ghost");
-            lever += QVector<QString>(morphed_nonghost_sigmas.count(), "sigma");
+            for (int i = 0; i < morphed_nonghost_sigmas.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_nonghost_epsilons = cache.morph(
@@ -641,12 +747,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getEpsilons0(),
             mol.getEpsilons1());
 
-        vals += morphed_nonghost_epsilons;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_nonghost_epsilons.count(), "ghost/non-ghost");
-            lever += QVector<QString>(morphed_nonghost_epsilons.count(), "epsilon");
+            for (int i = 0; i < morphed_nonghost_epsilons.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_nonghost_alphas = cache.morph(
@@ -655,12 +768,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getAlphas0(),
             mol.getAlphas1());
 
-        vals += morphed_nonghost_alphas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_nonghost_alphas.count(), "ghost/non-ghost");
-            lever += QVector<QString>(morphed_nonghost_alphas.count(), "alpha");
+            for (int i = 0; i < morphed_nonghost_alphas.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_nonghost_kappas = cache.morph(
@@ -669,12 +789,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getKappas0(),
             mol.getKappas1());
 
-        vals += morphed_nonghost_kappas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_nonghost_kappas.count(), "ghost/non-ghost");
-            lever += QVector<QString>(morphed_nonghost_kappas.count(), "kappa");
+            for (int i = 0; i < morphed_nonghost_kappas.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_charges = cache.morph(
@@ -683,12 +810,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getCharges0(),
             mol.getCharges1());
 
-        vals += morphed_ghost14_charges;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_charges.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_charges.count(), "charge");
+            for (int i = 0; i < morphed_ghost14_charges.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_charges)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_sigmas = cache.morph(
@@ -697,12 +831,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getSigmas0(),
             mol.getSigmas1());
 
-        vals += morphed_ghost14_sigmas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_sigmas.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_sigmas.count(), "sigma");
+            for (int i = 0; i < morphed_ghost14_sigmas.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_epsilons = cache.morph(
@@ -711,12 +852,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getEpsilons0(),
             mol.getEpsilons1());
 
-        vals += morphed_ghost14_epsilons;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_epsilons.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_epsilons.count(), "epsilon");
+            for (int i = 0; i < morphed_ghost14_epsilons.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_alphas = cache.morph(
@@ -725,12 +873,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getAlphas0(),
             mol.getAlphas1());
 
-        vals += morphed_ghost14_alphas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_alphas.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_alphas.count(), "alpha");
+            for (int i = 0; i < morphed_ghost14_alphas.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_kappas = cache.morph(
@@ -739,12 +894,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getKappas0(),
             mol.getKappas1());
 
-        vals += morphed_ghost14_kappas;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_kappas.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_kappas.count(), "kappa");
+            for (int i = 0; i < morphed_ghost14_kappas.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_charge_scale = cache.morph(
@@ -753,12 +915,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getChargeScales0(),
             mol.getChargeScales1());
 
-        vals += morphed_ghost14_charge_scale;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_charge_scale.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_charge_scale.count(), "charge_scale");
+            for (int i = 0; i < morphed_ghost14_charge_scale.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-charge_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_charge_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         const auto morphed_ghost14_lj_scale = cache.morph(
@@ -767,12 +936,19 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             mol.getLJScales0(),
             mol.getLJScales1());
 
-        vals += morphed_ghost14_lj_scale;
-
         if (is_first)
         {
-            force += QVector<QString>(morphed_ghost14_lj_scale.count(), "ghost-14");
-            lever += QVector<QString>(morphed_ghost14_lj_scale.count(), "lj_scale");
+            for (int i = 0; i < morphed_ghost14_lj_scale.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-lj_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_lj_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
         auto perturbable_constraints = mol.getPerturbableConstraints();
@@ -790,11 +966,18 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
 
             if (is_first)
             {
-                force += QVector<QString>(morphed_constraint_length.count(), "constraint");
-                lever += QVector<QString>(morphed_constraint_length.count(), "bond_length");
+                for (int i = 0; i < morphed_constraint_length.count(); ++i)
+                {
+                    column_names.append(QString("bond-constraint-%1").arg(i + 1));
+                    lever_values.append(QVector<double>());
+                }
             }
 
-            vals += morphed_constraint_length;
+            for (const auto &val : morphed_constraint_length)
+            {
+                lever_values[idx].append(val);
+                idx += 1;
+            }
         }
 
         const auto morphed_bond_k = cache.morph(
@@ -802,6 +985,21 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
             "bond", "bond_k",
             mol.getBondKs0(),
             mol.getBondKs1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_bond_k.count(); ++i)
+            {
+                column_names.append(QString("bond-bond_k-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_bond_k)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
 
         const auto morphed_bond_length = cache.morph(
             schedule,
@@ -811,21 +1009,39 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
 
         if (is_first)
         {
-            force += QVector<QString>(morphed_bond_k.count(), "bond");
-            lever += QVector<QString>(morphed_bond_k.count(), "bond_k");
-
-            force += QVector<QString>(morphed_bond_length.count(), "bond");
-            lever += QVector<QString>(morphed_bond_length.count(), "bond_length");
+            for (int i = 0; i < morphed_bond_length.count(); ++i)
+            {
+                column_names.append(QString("bond-bond_length-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
         }
 
-        vals += morphed_bond_k;
-        vals += morphed_bond_length;
+        for (const auto &val : morphed_bond_length)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
 
         const auto morphed_angle_k = cache.morph(
             schedule,
             "angle", "angle_k",
             mol.getAngleKs0(),
             mol.getAngleKs1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_angle_k.count(); ++i)
+            {
+                column_names.append(QString("angle-angle_k-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_angle_k)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
 
         const auto morphed_angle_size = cache.morph(
             schedule,
@@ -835,21 +1051,39 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
 
         if (is_first)
         {
-            force += QVector<QString>(morphed_angle_k.count(), "angle");
-            lever += QVector<QString>(morphed_angle_k.count(), "angle_k");
-
-            force += QVector<QString>(morphed_angle_size.count(), "angle");
-            lever += QVector<QString>(morphed_angle_size.count(), "angle_size");
+            for (int i = 0; i < morphed_angle_size.count(); ++i)
+            {
+                column_names.append(QString("angle-angle_size-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
         }
 
-        vals += morphed_angle_k;
-        vals += morphed_angle_size;
+        for (const auto &val : morphed_angle_size)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
 
         const auto morphed_torsion_phase = cache.morph(
             schedule,
             "torsion", "torsion_phase",
             mol.getTorsionPhases0(),
             mol.getTorsionPhases1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_torsion_phase.count(); ++i)
+            {
+                column_names.append(QString("torsion-torsion_phase-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_torsion_phase)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
 
         const auto morphed_torsion_k = cache.morph(
             schedule,
@@ -859,32 +1093,29 @@ PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
 
         if (is_first)
         {
-            force += QVector<QString>(morphed_torsion_phase.count(), "torsion");
-            lever += QVector<QString>(morphed_torsion_phase.count(), "torsion_phase");
-
-            force += QVector<QString>(morphed_torsion_k.count(), "torsion");
-            lever += QVector<QString>(morphed_torsion_k.count(), "torsion_k");
+            for (int i = 0; i < morphed_torsion_k.count(); ++i)
+            {
+                column_names.append(QString("torsion-torsion_k-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
         }
 
-        vals += morphed_torsion_phase;
-        vals += morphed_torsion_k;
-
-        if (is_first)
+        for (const auto &val : morphed_torsion_k)
         {
-            column_names.append("force");
-            column_names.append("lever");
-
-            ret.append(StringArrayProperty(force));
-            ret.append(StringArrayProperty(lever));
-
-            is_first = false;
+            lever_values[idx].append(val);
+            idx += 1;
         }
 
-        column_names.append(QString::number(lambda_value));
-        ret.append(DoubleArrayProperty(vals));
+        is_first = false;
     }
 
-    ret.prepend(StringArrayProperty(column_names));
+    ret.append(StringArrayProperty(column_names));
+    ret.append(DoubleArrayProperty(lamvals));
+
+    for (const auto &column : lever_values)
+    {
+        ret.append(DoubleArrayProperty(column));
+    }
 
     return ret;
 }
