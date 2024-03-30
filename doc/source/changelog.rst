@@ -12,7 +12,7 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
-`2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.0...2024.1.0>`__ - March 2024
+`2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------
 
 * BREAKING CHANGE: Updated the API of :class:`sire.cas.LambdaSchedule` so that
@@ -27,6 +27,21 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   how forcefield parameters are scaled with lambda. Specifically, this is used
   to add support for calculating absolute binding free energies.
   This is described in the new :doc:`tutorial chapter <tutorial/index_part07>`.
+
+* Exposed the underlying :class:`~sire.legacy.Convert.PerturbableOpenMMMolecule`
+  class, which can be created from a merged molecule via
+  ``mol.perturbation().to_openmm()``. This lets you easily see which parameters
+  are changing between the reference and perturbed states. This is described
+  in the :doc:`tutorial <tutorial/part07/01_perturbation>`.
+
+* Added the ability for the lambda schedule to show how it will actually
+  act to perturb the parameters of the
+  :class:`~sire.legacy.Convert.PerturbableOpenMMMolecule` molecule.
+  This is described in the :doc:`tutorial <tutorial/part07/02_levers>`.
+
+* Added support for reading older somd-style pertfiles, and creating
+  merged molecules from these. This is described in
+  the :doc:`tutorial <tutorial/part07/05_pertfile>`.
 
 * Added "not-perturbable" constraints so that bonds and angles that change
   with lambda are not perturbed. As part of this, have also added a
@@ -90,6 +105,19 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   It was a little-used part of the code, with the main use case being the
   replacement with the easier ``sire.morph.link_to_XXX`` functions.
 
+* Added ability to create merge molecules for relative free energy calculations
+  via :func:`sire.morph.merge` and :func:`sire.morph.match`. This is
+  described in the :doc:`tutorial <tutorial/part07/04_merge>`.
+
+* Added ability to create merge molecules for absolute free energy
+  calculations via :func:`sire.morph.decouple` and
+  :func:`sire.morph.annihilate`. This is described in the
+  :doc:`tutorial <tutorial/part07/06_decouple>`.
+
+* Added support for residue perturbations and also for mutating residues
+  and parts of molecules using a new "copy and paste" algorithm. This is
+  described in the :doc:`tutorial <tutorial/part07/07_residue>`.
+
 * Exposed the ``SOMMContext``, ``PerturbableOpenMMMolecule``,
   ``OpenMMMetaData`` and ``LambdaLever`` classes to Python, as part of the
   new ``sire.convert.openmm`` module. These are useful if you want more
@@ -98,13 +126,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   that involve perturbable molecules. There are useful functions that can
   be used to get changing parameters as dataframes, which is really useful
   for debugging. These are described in the :doc:`new tutorial <tutorial/index_part07>`.
-
-* Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
-
-* Fix bug that disabled the ``DEBUG`` log level from the global logger.
-
-* Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
-  that we only compare residues with the same number of atoms.
 
 * Preserve user atom names when writing to PDB format.
 
@@ -128,23 +149,42 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   iterations reset. If it fails again, then this structure, with
   constraints re-applied, is returned.
 
-* Code can now detect when an Amber PRMTOP file has discontiguous molecules,
-  and thus when atoms are reordered after load. This information is passed
-  to subsequent frame file parsers that are loaded at the same time, so
-  that they are able to reorder the frames before being added to the atoms.
-  This happens transparently, so that the user doesn't have to worry about
-  the reordering. This fixes issue #164.
-
-* Added ``map`` support to writing perturbable Gromacs topology files. This
-  enables the user to specify which perturbable properties to use,
-  e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.
-
 * Added more support for Boresch restraints. Specifically, :func:`sire.restraints.boresch`
   now supports the specification of equilibrium values, uses different default force
   constants, and warns the user if the restraints are likely to be unstable.
   :func:`sire.restraints.get_standard_state_correction` was implemented for Boresch
   restraints. Tests were added for restraint creation and for the standard state
   correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
+
+* Fixed a bug in the algorithm used to infer bond order when converting to
+  RDKit format. This fixes issue #177.
+
+* Fixed a bug in the :class:`~sire.legacy.Convert.LambdaLever` class where
+  it was not using the stage-specific value of lambda when using multiple
+  stages where one or more stages contained a standard morph equation.
+
+* Please add an item to this changelog when you create your PR
+
+`2023.5.2 <https://github.com/openbiosim/sire/compare/2023.5.1...2023.5.2>`__ - March 2024
+------------------------------------------------------------------------------------------
+
+* Fix bug that disabled the ``DEBUG`` log level from the global logger.
+
+* Fixed bug in :class`sire.legacy.Mol.ResIdxAtomCoordMatcher` by ensuring
+  that we only compare residues with the same number of atoms.
+
+* Added an ``AtomCoordMatcher`` to match atoms by coordinates in two selections.
+
+* Added ``map`` support to writing perturbable Gromacs topology files. This
+  enables the user to specify which perturbable properties to use,
+  e.g. ``map={"dihedral0": "dihedral_a", "dihedral1": "dihedral_b"}``.
+
+* Code can now detect when an Amber PRMTOP file has discontiguous molecules,
+  and thus when atoms are reordered after load. This information is passed
+  to subsequent frame file parsers that are loaded at the same time, so
+  that they are able to reorder the frames before being added to the atoms.
+  This happens transparently, so that the user doesn't have to worry about
+  the reordering. This fixes issue #164.
 
 * Fixed a bug where the SDF parser would wrongly try to parse Amber RST7 files that
   weren't immediately recognised as such. The fix adds ``.inpcrd`` as a recognised
@@ -155,14 +195,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   when reading Mol2 files. This is more robust than using the atom name.
   Fixes issue #166.
 
-* Made it easier to convert from strings to elements. Added the ability to 
+* Made it easier to convert from strings to elements. Added the ability to
   customise the list of elements that are considered biological. This
   fixes issue #170.
-
-* Fixed a bug in the algorithm used to infer bond order when converting to
-  RDKit format. This fixes issue #177.
-
-* Please add an item to this changelog when you create your PR
 
 `2023.5.1 <https://github.com/openbiosim/sire/compare/2023.5.0...2023.5.1>`__ - January 2024
 --------------------------------------------------------------------------------------------
