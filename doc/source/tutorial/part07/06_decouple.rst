@@ -94,6 +94,8 @@ property.
 >>> print(schedule)
 LambdaSchedule(
   decouple: (-λ + 1) * initial + λ * final
+    ghost-14::*: initial
+    ghost-14::kappa: -λ + 1
     ghost/ghost::*: initial
     ghost/ghost::kappa: -λ + 1
 )
@@ -105,23 +107,45 @@ all charge and LJ interactions involving benzene.
 
 However, we want to preserve the intramolecular charge and LJ interactions
 of benzene. Since all atoms are ghost atoms, these are
-all evaluated in the ghost/ghost force. We therefore set all levers
-in the ghost/ghost force to use the parameters in the initial state
-(i.e. the full charges and epsilon LJ parameters for benzene).
+all evaluated in the ghost/ghost and ghost-14 forces. We therefore set all
+levers in the ghost/ghost and ghost-14 forces to use the parameters in the
+initial state (i.e. the full charges and epsilon LJ parameters for benzene).
 
 But, because the ghost/ghost force includes a correction to subtract
 a double-counted electrostatic interaction from the NonbondedForce,
 we also need to have a lever that scales kappa with 1-λ. In this way,
 the kappa parameter will ensure that the correction is applied at
 λ=0, when the electrostatic interactions of benzene are evaluated in both
-the NonbondedForce and the ghost/ghost force, while it will scale kappa
-to 0 at λ=1, when the electrostatic interactions of benzene are only
-evaluated in the ghost/ghost force.
+the NonbondedForce and the ghost/ghost and ghost-14 forces, while it will
+scale kappa to 0 at λ=1, when the electrostatic interactions of benzene are
+only evaluated in the ghost/ghost and ghost-14 forces.
 
 We can view exactly how a schedule will perturb the real parameters of
-a merged molecule using the....
+a merged molecule using the
+:meth:`~sire.legacy.Convert.PerturbableOpenMMMolecule.get_lever_values`
+function.
 
-FUNCTION THAT DOES THIS!
+>>> df = p.get_lever_values(schedule=schedule)
+>>> print(df)
+      clj-charge-1  clj-charge-7  clj-epsilon-1  clj-epsilon-7  clj-alpha-1  ghost/ghost-kappa-1
+λ
+0.00       -0.1300        0.1300       0.363503       0.065318         0.00                 1.00
+0.01       -0.1287        0.1287       0.359868       0.064665         0.01                 0.99
+0.02       -0.1274        0.1274       0.356233       0.064012         0.02                 0.98
+0.03       -0.1261        0.1261       0.352598       0.063358         0.03                 0.97
+0.04       -0.1248        0.1248       0.348963       0.062705         0.04                 0.96
+...            ...           ...            ...            ...          ...                  ...
+0.96       -0.0052        0.0052       0.014540       0.002613         0.96                 0.04
+0.97       -0.0039        0.0039       0.010905       0.001960         0.97                 0.03
+0.98       -0.0026        0.0026       0.007270       0.001306         0.98                 0.02
+0.99       -0.0013        0.0013       0.003635       0.000653         0.99                 0.01
+1.00        0.0000        0.0000       0.000000       0.000000         1.00                 0.00
+[101 rows x 6 columns]
+
+>>> ax = df.plot()
+
+.. image:: images/07_06_01.jpg
+   :alt: Graph of the effect of all levers on the decoupled molecule.
 
 Running a decoupling simulation
 -------------------------------
@@ -143,11 +167,11 @@ Next, we will create a simulation object.
 >>> d.run("100ps", lambda_windows=[0.0, 0.5, 1.0])
 >>> print(d.energy_trajectory())
 EnergyTrajectory( size=4
-time    lambda  0.0     0.5     1.0     kinetic potential
-25      1.0     8.04862e+06     -8780.12        -8940.64        1583.16 -8940.64
-50      1.0     7.02803e+10     -8675.02        -8922.59        1637.65 -8922.59
-75      1.0     1.65099e+06     -8568.8         -8812.94        1607.64 -8812.94
-100     1.0     2.34737e+09     -8340.83        -8894.35        1599.82 -8894.35
+time    lambda  0.0             0.5             1.0             kinetic potential
+25      1.0     2.49529e+06     -8686.04        -8895.63        1583.95 -8895.63
+50      1.0     1.54343e+06     -8750.01        -8914.34        1527.78 -8914.34
+75      1.0     2.20708e+08     -8465.13        -8872.06        1624.18 -8872.06
+100     1.0     1.02181e+11     -8534.06        -8949.38        1537.6  -8949.38
 )
 
 .. note::
