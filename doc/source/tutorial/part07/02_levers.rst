@@ -244,3 +244,54 @@ LambdaSchedule(
     ghost/ghost::alpha: 0.5 * (initial * (-λ + 1) + final * λ)
 )
 )
+
+Viewing the effect of levers on a merged molecule
+-------------------------------------------------
+
+You can view the effect of the :class:`~sire.cas.LambdaSchedule` on a
+the :class:`~sire.legacy.Convert.PerturbableOpenMMMolecule` using
+the :meth:`~sire.legacy.Convert.PerturbableOpenMMMolecule.get_lever_values`
+function.
+
+>>> df = p_omm.get_lever_values(schedule=orig_s)
+>>> print(df)
+      clj-charge-1  clj-charge-2  clj-charge-4  ...  bond-bond_length-3  angle-angle_k-19  angle-angle_size-19
+λ                                               ...
+0.00     -0.085335     -0.060235     -0.085335  ...             0.10969        387.438400             1.916372
+0.01     -0.084482     -0.059362     -0.085566  ...             0.10969        386.861008             1.915985
+0.02     -0.083629     -0.058489     -0.085797  ...             0.10969        386.283616             1.915597
+0.03     -0.082775     -0.057615     -0.086027  ...             0.10969        385.706224             1.915210
+0.04     -0.081922     -0.056742     -0.086258  ...             0.10969        385.128832             1.914822
+...            ...           ...           ...  ...                 ...               ...                  ...
+0.96     -0.003413      0.023607     -0.107477  ...             0.10969        332.008768             1.879176
+0.97     -0.002560      0.024480     -0.107708  ...             0.10969        331.431376             1.878788
+0.98     -0.001707      0.025353     -0.107939  ...             0.10969        330.853984             1.878401
+0.99     -0.000853      0.026227     -0.108169  ...             0.10969        330.276592             1.878013
+1.00      0.000000      0.027100     -0.108400  ...             0.10969        329.699200             1.877626
+[101 rows x 19 columns]
+
+It can be useful to plot these, to check that the morphing is as expected.
+
+>>> ax = df.plot()
+>>> ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+.. image:: images/07_02_01.jpg
+   :alt: Graph of the effect of all levers on the perturbable molecule.
+
+.. note::
+
+   The line ``ax.legend(bbox_to_anchor=(1.0, 1.0))`` is used to move the
+   legend outside of the plot area, so that it doesn't obscure the data.
+
+Unfortunately, the large values of the bond force constant make it very
+difficult to see the effect of the :class:`~sire.cas.LambdaSchedule` on the
+other parameters. To fix this, lets filter out any columns that contain
+values that have an absolute value greater than 5.
+
+>>> skip_columns = df.abs().gt(5).apply(lambda x: x.index[x].tolist(), axis=1)[0]
+>>> ax = df.loc[:, ~df.columns.isin(skip_columns)].plot()
+>>> ax.legend(bbox_to_anchor=(1.0, 1.0))
+
+.. image:: images/07_02_02.jpg
+   :alt: Graph of the effect of all levers on the perturbable molecule for
+         levers with parameters with values less than 5.
