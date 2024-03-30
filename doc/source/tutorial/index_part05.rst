@@ -7,7 +7,8 @@ and work with other molecular modelling python packages.
 
 You can also convert molecules between the :mod:`sire` format and
 the format of other popular molecular packages, e.g.
-`rdkit <https://www.rdkit.org>`__, `openmm <https://openmm.org>`_ and
+`rdkit <https://www.rdkit.org>`__, `openmm <https://openmm.org>`_,
+`Gemmi <https://gemmi.readthedocs.io/en/latest/>`__ and
 `BioSimSpace <https://biosimspace.openbiosim.org>`__.
 
 This chapter will teach you how to do the conversion, and also how
