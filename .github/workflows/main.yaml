@@ -40,18 +40,20 @@ jobs:
       REPO: "${{ github.event.pull_request.head.repo.full_name || github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
           activate-environment: sire_build
           miniforge-version: latest
+          miniforge-variant: Mambaforge
+          use-mamba: true
       #
       - name: Clone the main branch (push to main)
         run: git clone -b main https://github.com/openbiosim/sire sire
       #
       - name: Setup Conda
-        run: conda install -y -c conda-forge conda-build anaconda-client packaging=21 pip-requirements-parser
+        run: mamba install -y -c conda-forge "boa==0.16" anaconda-client packaging=21 pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py
@@ -59,8 +61,8 @@ jobs:
       - name: Prepare build location
         run: mkdir ${{ github.workspace }}/build
       #
-      - name: Build Conda package using conda build
-        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      - name: Build Conda package using mamba build
+        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
       #
       - name: Upload Conda package
         # upload to the 'test' channel
