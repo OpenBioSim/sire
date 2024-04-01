@@ -15,6 +15,11 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------
 
+* Dropped official builds and support for Python 3.9, and added official
+  builds and support for Python 3.12. Note that MacOS builds are currently
+  3.10 and 3.11 only, due to missing dependencies. This will be fixed
+  in upcoming point releases.
+
 * BREAKING CHANGE: Updated the API of :class:`sire.cas.LambdaSchedule` so that
   you have to use named arguments for many of the functions (e.g.
   :meth:`~sire.cas.LambdaSchedule.set_equation`). This is because the addition
