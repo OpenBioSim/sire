@@ -33,11 +33,7 @@ pydot
 pygtail
 pyyaml
 rdkit >=2023.0.0
-
-# gemmi::Structure objects
-# can't be resolved on Windows with 0.6.5
-gemmi ==0.6.4 ; sys_platform == "win32"
-gemmi >=0.6.4 ; sys_platform != "win32"
+gemmi >=0.6.4
 
 # The below are packages that aren't available on all
 # platforms/OSs and so need to be conditionally included

@@ -2,11 +2,7 @@
 # enable test to run to validate advanced functionality
 
 rdkit >=2023.0.0
-
-# gemmi::Structure objects
-# can't be resolved on Windows with 0.6.5
-gemmi ==0.6.4 ; sys_platform == "win32"
-gemmi >=0.6.4 ; sys_platform != "win32"
+gemmi >=0.6.4
 
 # kartograf on Windows pulls in an openfe that has an old / incompatble
 # ambertools
