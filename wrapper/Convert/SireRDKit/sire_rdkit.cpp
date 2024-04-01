@@ -9,6 +9,7 @@
 #include <GraphMol/ForceFieldHelpers/UFF/UFF.h>
 #include <GraphMol/DistGeomHelpers/Embedder.h>
 #include <GraphMol/Substruct/SubstructMatch.h>
+#include <GraphMol/MonomerInfo.h>
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -611,6 +612,29 @@ namespace SireRDKit
 
             molecule.addAtom(true);
             auto a = molecule.getActiveAtom();
+
+            // create a AtomPDBResidueInfo object for the atom, and
+            // populate it with the name and residue information
+            auto info = new RDKit::AtomPDBResidueInfo();
+
+            info->setSerialNumber(atom.number().value());
+            info->setName(atom.name().value().toStdString());
+
+            if (atom.isWithinResidue())
+            {
+                auto residue = atom.residue();
+                info->setResidueName(residue.name().value().toStdString());
+                info->setResidueNumber(residue.number().value());
+            }
+
+            if (atom.isWithinChain())
+            {
+                auto chain = atom.chain();
+                info->setChainId(chain.name().value().toStdString());
+            }
+
+            a->setMonomerInfo(info);
+            a->setProp("molFileAlias", info->getName());
 
             const auto element = atom.property<SireMol::Element>(map["element"]);
 
