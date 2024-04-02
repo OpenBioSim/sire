@@ -871,8 +871,6 @@ namespace SireRDKit
         }
 
         auto cg = Molecule().edit().rename(molname).add(SireMol::CGName("0"));
-        auto res = cg.molecule().add(SireMol::ResNum(1));
-        res.rename(SireMol::ResName("LIG"));
 
         int n = 0;
 
@@ -884,12 +882,101 @@ namespace SireRDKit
         {
             atom_to_idx[atom] = n;
             n += 1;
-            auto a = cg.add(SireMol::AtomNum(n));
+
+            // see if there is a PDBResidueInfo object for this atom
+            const auto *info = atom->getMonomerInfo();
+
+            SireMol::AtomName atomname;
+            SireMol::AtomNum atomnum;
+            SireMol::ResName resname;
+            SireMol::ResNum resnum;
+            SireMol::ChainName chainname;
+
+            if (info != 0)
+            {
+                atomname = SireMol::AtomName(QString::fromStdString(info->getName()));
+
+                if (info->getMonomerType() == RDKit::AtomMonomerInfo::PDBRESIDUE)
+                {
+                    auto resinfo = static_cast<const RDKit::AtomPDBResidueInfo *>(info);
+
+                    atomname = SireMol::AtomName(QString::fromStdString(resinfo->getName()));
+                    atomnum = SireMol::AtomNum(resinfo->getSerialNumber());
+                    resname = SireMol::ResName(QString::fromStdString(resinfo->getResidueName()));
+                    resnum = SireMol::ResNum(resinfo->getResidueNumber());
+                    chainname = SireMol::ChainName(QString::fromStdString(resinfo->getChainId()));
+                }
+                else
+                {
+                    atomnum = SireMol::AtomNum(n);
+                }
+            }
+            else
+            {
+                atomnum = SireMol::AtomNum(n);
+            }
+
+            // check the molFileAlias property if the atom name hasn't been set
+            if (atomname.value().isEmpty())
+            {
+                std::string alias;
+
+                if (atom->getPropIfPresent<std::string>("molFileAlias", alias))
+                {
+                    atomname = SireMol::AtomName(QString::fromStdString(alias));
+                }
+            }
+
+            if (atomname.value().isEmpty())
+            {
+                atomname = SireMol::AtomName(QString("%1%2").arg(QString::fromStdString(atom->getSymbol())).arg(n));
+            }
+
+            // place all atoms into the same cutgroup
+            auto a = cg.add(atomnum);
+
+            // now find a residue
+            if (resname.value().isEmpty())
+            {
+                resname = SireMol::ResName("LIG");
+            }
+
+            if (resnum.isNull())
+            {
+                resnum = SireMol::ResNum(1);
+            }
+
+            // find this residue - if it doesn't exist, then create it
+            SireMol::ResStructureEditor res;
+
+            try
+            {
+                res = cg.molecule().select(resnum);
+            }
+            catch (...)
+            {
+                res = cg.molecule().add(resnum);
+                res.rename(resname);
+            }
+
+            if (not chainname.value().isEmpty())
+            {
+                SireMol::ChainStructureEditor chain;
+
+                try
+                {
+                    chain = cg.molecule().select(chainname);
+                }
+                catch (...)
+                {
+                    chain = cg.molecule().add(chainname);
+                }
+
+                res.reparent(chain.name());
+            }
+
             a.reparent(res.number());
-            a.rename(SireMol::AtomName(
-                QString("%1%2")
-                    .arg(QString::fromStdString(atom->getSymbol()))
-                    .arg(n)));
+            a.rename(atomname);
 
             set_prop(a, "element", SireMol::Element(atom->getAtomicNum()), map);
             set_prop(a, "formal_charge", atom->getFormalCharge() * SireUnits::mod_electron, map);

@@ -165,7 +165,16 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   to a valid power, e.g. ``sr.u("5A")**2``. You can also square root via a new
   ``.sqrt()`` function on the unit. There is also a new ``sire.sqrt`` function
   that will automatically called ``obj.sqrt()`` if that exists, or will fall
-  back to ``math.sqrt`` if not.
+  back to ``math.sqrt`` if not. This implements wishlist item #176.
+
+* Conversion to and from RDKit now preserves atoms and residue names and
+  numbers. This makes used of AtomPDBResidueInfo in RDKit to populate metadata
+  when the RDKit molecule is created. On conversion to sire, the atom monomer
+  info will be checked. If it is simple, then only the atom name will be
+  obtained. If it is a AtomPDBResidueInfo, then the atom name and number,
+  and residue name and number (plus any chain information) will be extracted.
+  If no atom name is set, then the value of the property
+  "molFileAlias" will be checked. This implements wishlist item #168.
 
 * Fixed a bug in the algorithm used to infer bond order when converting to
   RDKit format. This fixes issue #177.
