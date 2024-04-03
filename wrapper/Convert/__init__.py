@@ -164,6 +164,7 @@ try:
 
         timestep_in_fs = timestep.to(femtosecond)
         timestep = timestep.to(picosecond) * openmm.unit.picosecond
+        map.set("timestep_in_fs", timestep_in_fs)
 
         ensemble = Ensemble(map=map)
 

@@ -95,6 +95,12 @@ class Constraint(_Option):
         "excluding those that are perturbed "
         "but do not involve a hydrogen in any end state.",
     )
+    AUTO_BONDS = (
+        "auto_bonds",
+        "Choose the constraints automatically, constraining bonds based "
+        "on whether their predicted vibrational periods are less than a "
+        "tenth of the simulaton timestep.",
+    )
 
     @staticmethod
     def create(option: str):

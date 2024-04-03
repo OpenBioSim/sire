@@ -38,6 +38,8 @@ namespace SireOpenMM
             CONSTRAIN_HANGLES = 0x00001000,
             CONSTRAIN_NOT_PERTURBED = 0x00010000,
             CONSTRAIN_NOT_HEAVY_PERTURBED = 0x00100000,
+            CONSTRAIN_AUTO = 0x01000000,
+            CONSTRAIN_AUTO_BONDS = CONSTRAIN_BONDS | CONSTRAIN_AUTO,
         };
 
         OpenMMMolecule();
