@@ -176,6 +176,13 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   If no atom name is set, then the value of the property
   "molFileAlias" will be checked. This implements wishlist item #168.
 
+* Implemented the ``auto-bonds`` constraint, which automatically chooses
+  bonds to constrain by comparing the estimated vibrational frequency
+  against the simulation timestep multiplied by the factor
+  ``auto_bonds_factor`` (defaults to 10).
+  This is described in the :doc:`OpenMM detailed guide <cheatsheet/openmm>`.
+  This implements wishlist item #185.
+
 * Fixed a bug in the algorithm used to infer bond order when converting to
   RDKit format. This fixes issue #177.
 

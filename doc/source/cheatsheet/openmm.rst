@@ -76,6 +76,13 @@ Available keys and allowable values are listed below.
 +------------------------------+----------------------------------------------------------+
 | Key                          | Valid values                                             |
 +==============================+==========================================================+
+| auto_constraints_factor      | The factor by which to multiply the timestep when        |
+|                              | deciding whether or not an auto-constrained bond should  |
+|                              | be constrained. The calculated period of a bond          |
+|                              | vibration is compared to the simulation timestep         |
+|                              | multiplied by this factor. If the period is less than    |
+|                              | this, the bond is constrained. This defaults to 10.      |
++------------------------------+----------------------------------------------------------+
 | barostat_frequency           | The frequency at which the barostat acts to perform      |
 |                              | the MC moves to change the box volume when performing    |
 |                              | constant pressure simulations (default 25).              |
@@ -102,7 +109,8 @@ Available keys and allowable values are listed below.
 |                              | removed.                                                 |
 +------------------------------+----------------------------------------------------------+
 | constraint                   | Type of constraint to use for bonds and/or angles.       |
-|                              | Valid strings are ``none``, ``h-bonds``,                 |
+|                              | Valid strings are ``none``,                              |
+|                              | ``auto-bonds``, ``h-bonds``,                             |
 |                              | ``h-bonds-not-perturbed``,                               |
 |                              | ``h-bonds-not-heavy-perturbed``,                         |
 |                              | ``bonds``, ``bonds-not-perturbed``,                      |

@@ -396,3 +396,58 @@ def test_dynamic_constraints(merged_ethane_methanol, openmm_platform):
     nrg = d.current_potential_energy()
 
     assert nrg.value() == pytest.approx(13.8969, abs=0.001)
+
+
+@pytest.mark.skipif(
+    "openmm" not in sr.convert.supported_formats(),
+    reason="openmm support is not available",
+)
+def test_auto_constraints(ala_mols, openmm_platform):
+    mols = ala_mols
+    mol = mols[0]
+
+    NA = 6.02214076e23
+    CONV = 0.695039
+
+    periods = {}
+
+    for bond in mol.bonds():
+        mass0 = bond.atom0().mass().value() / (1000.0 * NA)
+        mass1 = bond.atom1().mass().value() / (1000.0 * NA)
+        k = sr.mm.AmberBond(bond.potential(), sr.cas.Symbol("r")).k() * CONV
+
+        mu = (mass0 * mass1) / (mass0 + mass1)
+
+        # period in fs
+        period = 1e15 * 2.0 * 3.14159 * (mu / k) ** 0.5
+        periods[bond.id()] = period
+
+    for factor in [5.0, 10.0, 15.0]:
+        for timestep in [sr.u("1fs"), sr.u("2fs"), sr.u("4fs")]:
+            fs = timestep.to("fs")
+
+            constrained = []
+
+            for bond in mol.bonds():
+                period = periods[bond.id()]
+
+                if period < factor * fs:
+                    constrained.append(bond.id())
+
+            d = mol.dynamics(
+                constraint="auto-bonds",
+                platform=openmm_platform,
+                timestep=timestep,
+                temperature="25oC",
+                map={"auto_constraints_factor": factor},
+            )
+
+            constraints = d.get_constraints()
+
+            assert len(constraints) == len(constrained)
+
+            for constraint in constraints:
+                bond = sr.bondid(
+                    constraint[0].atom(0).index(), constraint[0].atom(1).index()
+                )
+                assert bond in constrained
