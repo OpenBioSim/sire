@@ -42,11 +42,11 @@ namespace SireSystem
     class MolSystemTrajectory;
 }
 
-SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &stream, const SireSystem::SystemTrajectory &trajectory);
-SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &stream, SireSystem::SystemTrajectory &trajectory);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::SystemTrajectory &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::SystemTrajectory &);
 
-SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &stream, const SireSystem::MolSystemTrajectory &trajectory);
-SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &stream, SireSystem::MolSystemTrajectory &trajectory);
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &, const SireSystem::MolSystemTrajectory &);
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &, SireSystem::MolSystemTrajectory &);
 
 namespace SireSystem
 {
@@ -61,8 +61,8 @@ namespace SireSystem
      */
     class SIRESYSTEM_EXPORT SystemTrajectory : public SireMol::TrajectoryData
     {
-        friend QDataStream &operator<<(QDataStream &stream, const SystemTrajectory &trajectory);
-        friend QDataStream &operator>>(QDataStream &stream, SystemTrajectory &trajectory);
+        friend QDataStream & ::operator<<(QDataStream &, const SystemTrajectory &);
+        friend QDataStream & ::operator>>(QDataStream &, SystemTrajectory &);
 
         friend class MolSystemTrajectory;
 
@@ -123,6 +123,9 @@ namespace SireSystem
      */
     class SIRESYSTEM_EXPORT MolSystemTrajectory : public SireMol::TrajectoryData
     {
+        friend QDataStream & ::operator<<(QDataStream &, const MolSystemTrajectory &);
+        friend QDataStream & ::operator>>(QDataStream &, MolSystemTrajectory &);
+
     public:
         MolSystemTrajectory();
 

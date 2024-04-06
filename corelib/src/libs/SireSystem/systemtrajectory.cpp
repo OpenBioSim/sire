@@ -30,6 +30,8 @@
 
 #include "SireMol/errors.h"
 
+#include "SireBase/lazyevaluator.h"
+
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
@@ -37,6 +39,56 @@ using namespace SireSystem;
 using namespace SireMol;
 using namespace SireBase;
 using namespace SireStream;
+
+namespace SireSystem
+{
+    class SystemFrames
+    {
+    public:
+        SystemFrames();
+        ~SystemFrames();
+
+        int nFrames() const;
+        int nAtoms() const;
+
+        Frame getFrame(int i);
+        Frame getFrame(int i, const LazyEvaluator &evaluator);
+
+        void saveFrame(const Molecules &mols, const PropertyMap &map);
+    };
+}
+
+SystemFrames::SystemFrames()
+{
+}
+
+SystemFrames::~SystemFrames()
+{
+}
+
+int SystemFrames::nAtoms() const
+{
+    return 0;
+}
+
+int SystemFrames::nFrames() const
+{
+    return 0;
+}
+
+Frame SystemFrames::getFrame(int i)
+{
+    return Frame();
+}
+
+Frame SystemFrames::getFrame(int i, const LazyEvaluator &evaluator)
+{
+    return Frame();
+}
+
+void SystemFrames::saveFrame(const Molecules &mols, const PropertyMap &map)
+{
+}
 
 ////////
 //////// Implementation of MolSystemTrajectory
@@ -174,14 +226,19 @@ Frame MolSystemTrajectory::getFrame(int i) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    return d->getFrame(i, start_atom, natoms);
+    return d->getFrame(i).subset(start_atom, natoms);
 }
 
 Frame MolSystemTrajectory::getFrame(int i, const SireBase::LazyEvaluator &evaluator) const
 {
     i = SireID::Index(i).map(this->nFrames());
 
-    return d->getFrame(i, start_atom, natoms, evaluator);
+    auto key = QString("%1-%2").arg(qintptr(d.get())).arg(i);
+
+    auto frame = evaluator.evaluate(key, [&]()
+                                    { return d->getFrame(i); });
+
+    return frame.read().asA<Frame>().subset(start_atom, natoms);
 }
 
 bool MolSystemTrajectory::isEditable() const
@@ -202,3 +259,204 @@ bool MolSystemTrajectory::_equals(const TrajectoryData &other) const
 ////////
 //////// Implementation of SystemTrajectory
 ////////
+
+static const RegisterMetaType<SystemTrajectory> r_traj;
+
+SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &ds, const SystemTrajectory &traj)
+{
+    writeHeader(ds, r_traj, 1);
+
+    // we don't stream the trajectory as it would be too big
+    ds << static_cast<const TrajectoryData &>(traj);
+
+    return ds;
+}
+
+SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &ds, SystemTrajectory &traj)
+{
+    auto v = readHeader(ds, r_traj);
+
+    if (v == 1)
+    {
+        // we don't stream the trajectory as it would be too big
+        traj.clear();
+        ds >> static_cast<TrajectoryData &>(traj);
+    }
+    else
+        throw version_error(v, "1", r_traj, CODELOC);
+
+    return ds;
+}
+
+SystemTrajectory::SystemTrajectory() : TrajectoryData()
+{
+}
+
+SystemTrajectory::SystemTrajectory(const Molecules &mols, const PropertyMap &map)
+    : TrajectoryData()
+{
+}
+
+SystemTrajectory::SystemTrajectory(const SystemTrajectory &other)
+    : TrajectoryData(other), d(other.d), mol_atoms(other.mol_atoms)
+{
+}
+
+SystemTrajectory::~SystemTrajectory()
+{
+}
+
+SystemTrajectory &SystemTrajectory::operator=(const SystemTrajectory &other)
+{
+    if (this != &other)
+    {
+        TrajectoryData::operator=(other);
+        d = other.d;
+        mol_atoms = other.mol_atoms;
+    }
+
+    return *this;
+}
+
+bool SystemTrajectory::operator==(const SystemTrajectory &other) const
+{
+    return TrajectoryData::operator==(other) &&
+           d.get() == other.d.get() &&
+           mol_atoms == other.mol_atoms;
+}
+
+bool SystemTrajectory::operator!=(const SystemTrajectory &other) const
+{
+    return not this->operator==(other);
+}
+
+const char *SystemTrajectory::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<SystemTrajectory>());
+}
+
+const char *SystemTrajectory::what() const
+{
+    return SystemTrajectory::typeName();
+}
+
+SystemTrajectory *SystemTrajectory::clone() const
+{
+    return new SystemTrajectory(*this);
+}
+
+void SystemTrajectory::clear()
+{
+    d.reset();
+    mol_atoms.clear();
+}
+
+bool SystemTrajectory::isCompatibleWith(const Molecules &mols,
+                                        const PropertyMap &map) const
+{
+    if (d.get() == 0)
+        return false;
+
+    // make sure that all of the molecules exist in the hash
+    // and the number of atoms match
+    for (const auto &mol : mols)
+    {
+        const auto &moldata = mol.data();
+
+        auto it = mol_atoms.constFind(moldata.number());
+
+        if (it == mol_atoms.constEnd())
+            return false;
+
+        if (it.value().second != moldata.info().nAtoms())
+            return false;
+    }
+
+    return true;
+}
+
+void SystemTrajectory::saveFrame(const Molecules &mols,
+                                 const PropertyMap &map)
+{
+    if (d.get() == 0)
+    {
+        // create the data
+        int natoms = 0;
+
+        for (const auto &mol : mols)
+        {
+            const auto &moldata = mol.data();
+
+            mol_atoms.insert(moldata.number(), qMakePair(natoms, moldata.info().nAtoms()));
+
+            natoms += moldata.info().nAtoms();
+        }
+
+        d.reset(new SystemFrames());
+    }
+
+    // save the frame
+    d->saveFrame(mols, map);
+}
+
+TrajectoryDataPtr SystemTrajectory::getTrajectory(MolNum molnum) const
+{
+    return TrajectoryDataPtr(new MolSystemTrajectory(*this, molnum));
+}
+
+int SystemTrajectory::nFrames() const
+{
+    if (d.get() == 0)
+        return 0;
+    else
+        return d->nFrames();
+}
+
+int SystemTrajectory::nAtoms() const
+{
+    if (d.get() == 0)
+    {
+        int natoms = 0;
+
+        for (const auto &mol : mol_atoms)
+            natoms += mol.second;
+
+        return natoms;
+    }
+    else
+    {
+        return d->nAtoms();
+    }
+}
+
+QStringList SystemTrajectory::filenames() const
+{
+    return QStringList();
+}
+
+Frame SystemTrajectory::getFrame(int i) const
+{
+    i = SireID::Index(i).map(this->nFrames());
+    return d->getFrame(i);
+}
+
+Frame SystemTrajectory::getFrame(int i, const LazyEvaluator &evaluator) const
+{
+    i = SireID::Index(i).map(this->nFrames());
+    return d->getFrame(i, evaluator);
+}
+
+bool SystemTrajectory::isEditable() const
+{
+    return false;
+}
+
+bool SystemTrajectory::_equals(const TrajectoryData &other) const
+{
+    const SystemTrajectory *p = dynamic_cast<const SystemTrajectory *>(&other);
+
+    if (p)
+        return this->operator==(*p);
+    else
+        return false;
+}
