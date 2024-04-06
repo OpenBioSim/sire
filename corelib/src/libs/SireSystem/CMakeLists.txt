@@ -52,6 +52,7 @@ set ( SIRESYSTEM_HEADERS
       system.h
       systemmonitor.h
       systemmonitors.h
+      systemtrajectory.h
       volmapmonitor.h
     )
 
@@ -94,6 +95,7 @@ set ( SIRESYSTEM_SOURCES
       system.cpp
       systemmonitor.cpp
       systemmonitors.cpp
+      systemtrajectory.cpp
       volmapmonitor.cpp
 
       ${SIRESYSTEM_HEADERS}

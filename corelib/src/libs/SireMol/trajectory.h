@@ -323,9 +323,11 @@ namespace SireMol
         Trajectory();
 
         Trajectory(const TrajectoryData &trajectory);
+        Trajectory(const TrajectoryDataPtr &trajectory);
         Trajectory(const QList<TrajectoryDataPtr> &trajectories);
 
         Trajectory(const TrajectoryData &trajectory, int start_atom, int natoms);
+        Trajectory(const TrajectoryDataPtr &trajectory, int start_atom, int natoms);
 
         Trajectory(const QList<TrajectoryDataPtr> &trajectories, int start_atom, int natoms);
 
@@ -370,6 +372,9 @@ namespace SireMol
         void appendFrame(const Frame &frame);
         void insertFrame(int i, const Frame &frame);
         void deleteFrame(int i);
+
+        void append(const TrajectoryData &data);
+        void append(const TrajectoryDataPtr &data);
 
         bool isCompatibleWith(const MoleculeInfoData &molinfo) const;
 

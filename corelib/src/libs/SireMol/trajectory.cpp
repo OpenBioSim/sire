@@ -539,14 +539,23 @@ Trajectory::Trajectory() : ConcreteProperty<Trajectory, MoleculeProperty>(), sta
 {
 }
 
+Trajectory::Trajectory(const TrajectoryDataPtr &data)
+    : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(0), natoms(0)
+{
+    if (data.constData() != 0)
+    {
+        start_atom = 0;
+        natoms = data->nAtoms();
+
+        if (data->nFrames() > 0)
+            d.append(data);
+    }
+}
+
 Trajectory::Trajectory(const TrajectoryData &data)
     : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(0), natoms(0)
 {
-    start_atom = 0;
-    natoms = data.nAtoms();
-
-    if (data.nFrames() > 0)
-        d.append(TrajectoryDataPtr(data));
+    this->operator=(Trajectory(TrajectoryDataPtr(data)));
 }
 
 Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data)
@@ -580,21 +589,31 @@ Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data)
     }
 }
 
-Trajectory::Trajectory(const TrajectoryData &data, int s, int n)
+Trajectory::Trajectory(const TrajectoryDataPtr &data, int s, int n)
     : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(s), natoms(n)
 {
-    if (natoms <= 0 or data.nFrames() <= 0)
+    if (natoms <= 0 or data.constData() == 0)
+    {
+        start_atom = 0;
+        natoms = 0;
         return;
+    }
 
-    if (start_atom < 0 or (start_atom + natoms) > data.nAtoms())
+    if (start_atom < 0 or (start_atom + natoms) > data->nAtoms())
         throw SireError::incompatible_error(
             QObject::tr("Cannot use start_atom %1 and natoms %2 for a trajectory with %3 atoms.")
                 .arg(start_atom)
                 .arg(natoms)
-                .arg(data.nAtoms()),
+                .arg(data->nAtoms()),
             CODELOC);
 
-    d.append(TrajectoryDataPtr(data));
+    d.append(data);
+}
+
+Trajectory::Trajectory(const TrajectoryData &data, int s, int n)
+    : ConcreteProperty<Trajectory, MoleculeProperty>(), start_atom(0), natoms(0)
+{
+    this->operator=(Trajectory(TrajectoryDataPtr(data), s, n));
 }
 
 Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data, int s, int n)
@@ -951,6 +970,32 @@ void Trajectory::setFrame(int i, const Frame &frame)
     {
         this->_makeEditable(i).setFrame(i, this->_subset(frame));
     }
+}
+
+void Trajectory::append(const TrajectoryDataPtr &data)
+{
+    if (data.constData() == 0)
+        return;
+
+    // check that the start and number of atoms would be compatible
+    // with this trajectory
+    if (start_atom + natoms > data->nAtoms())
+    {
+        throw SireError::incompatible_error(
+            QObject::tr("Cannot append a trajectory with %1 atoms to a trajectory with %2 atoms "
+                        "and start_atom %3.")
+                .arg(data->nAtoms())
+                .arg(natoms)
+                .arg(start_atom),
+            CODELOC);
+    }
+
+    d.append(data);
+}
+
+void Trajectory::append(const TrajectoryData &data)
+{
+    this->append(TrajectoryDataPtr(data));
 }
 
 void Trajectory::appendFrame(const Frame &frame)

@@ -1664,6 +1664,11 @@ bool MolGroupsBase::isEmpty() const
     Note that this is a potentially very slow operation! */
 Molecules MolGroupsBase::molecules() const
 {
+    if (this->nGroups() == 1)
+    {
+        return this->getGroup(this->mgNums()[0]).molecules();
+    }
+
     Molecules all_mols;
 
     const QHash<MGNum, const MoleculeGroup *> groups = this->getGroups();

@@ -31,6 +31,7 @@
 #include "delta.h"
 #include "monitorname.h"
 #include "system.h"
+#include "systemtrajectory.h"
 
 #include "SireFF/energytable.h"
 #include "SireFF/ff.h"
@@ -279,6 +280,7 @@ System::System(const System &other)
       sysversion(other.sysversion), sysmonitors(other.sysmonitors), cons(other.cons),
       mgroups_by_num(other.mgroups_by_num),
       shared_properties(other.shared_properties),
+      system_trajectory(other.system_trajectory),
       subversion(other.subversion)
 {
     molgroups[0] = other.molgroups[0];
@@ -304,6 +306,7 @@ System &System::operator=(const System &other)
         cons = other.cons;
         mgroups_by_num = other.mgroups_by_num;
         shared_properties = other.shared_properties;
+        system_trajectory = other.system_trajectory;
         subversion = other.subversion;
 
         MolGroupsBase::operator=(other);
@@ -3883,6 +3886,12 @@ void System::loadFrame(int frame, const LazyEvaluator &evaluator,
 
 void System::saveFrame(int frame, const SireBase::PropertyMap &map)
 {
+    if (frame == this->nFrames(map))
+    {
+        this->saveFrame(map);
+        return;
+    }
+
     this->accept();
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::saveFrame(frame, map);
@@ -3890,9 +3899,69 @@ void System::saveFrame(int frame, const SireBase::PropertyMap &map)
 
 void System::saveFrame(const SireBase::PropertyMap &map)
 {
+    auto traj_prop = map["trajectory"];
+
+    if (not traj_prop.hasSource())
+        return;
+
     this->accept();
     this->mustNowRecalculateFromScratch();
-    MolGroupsBase::saveFrame(map);
+
+    // do we have an active SystemTrajectory?
+    bool must_create = false;
+
+    if (system_trajectory.constData() == 0)
+    {
+        must_create = true;
+    }
+
+    auto mols = this->molecules();
+
+    SystemTrajectory *traj = dynamic_cast<SystemTrajectory *>(system_trajectory.data());
+
+    if (traj == 0)
+    {
+        must_create = true;
+    }
+    else
+    {
+        must_create = not traj->isCompatibleWith(mols, map);
+    }
+
+    if (must_create)
+    {
+        system_trajectory = new SystemTrajectory(mols, map);
+
+        // add this trajectory onto all of the molecules...
+        auto mols2 = mols;
+
+        for (auto it = mols.constBegin(); it != mols.constEnd(); ++it)
+        {
+            auto mol = it->molecule().data();
+
+            Trajectory moltraj;
+
+            if (mol.hasProperty(traj_prop))
+            {
+                moltraj = mol.property(traj_prop).asA<Trajectory>();
+                moltraj.append(traj->getTrajectory(mol.number()));
+            }
+            else
+            {
+                moltraj = Trajectory(traj->getTrajectory(mol.number()));
+            }
+
+            mol.setProperty(traj_prop.source(), moltraj);
+            mols2.update(mol);
+        }
+
+        mols = mols2;
+        this->update(mols);
+    }
+
+    // save the frame into the system_trajectory - this will automatically
+    // update all molecules containing this trajectory
+    traj->saveFrame(mols, map);
 }
 
 void System::deleteFrame(int frame, const SireBase::PropertyMap &map)

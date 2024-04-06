@@ -39,6 +39,7 @@
 #include "SireMol/mgnum.h"
 #include "SireMol/moleculegroup.h"
 #include "SireMol/moleculegroups.h"
+#include "SireMol/trajectory.h"
 
 #include "SireFF/forcefields.h"
 
@@ -527,6 +528,11 @@ namespace SireSystem
             will be added and kept up-to-date in contained molecules.
             By default, these are the "space" and "time" properties */
         QStringList shared_properties;
+
+        /** Shared pointer to the current active SystemTrajectory.
+         *  This will either be null or a valid pointer to a
+         *  SystemTrajectory object */
+        SireMol::TrajectoryDataPtr system_trajectory;
 
         /** The subversion of this system - this is incremented when
             delta updates are being applied. A system with non-zero

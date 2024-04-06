@@ -2856,7 +2856,9 @@ System MoleculeParser::toSystem(const QList<MoleculeParserPtr> &others, const Pr
                 }
             }
 
-            system.setProperty("trajectory", SireMol::Trajectory(trajectories));
+            // comment out as we don't use the System trajectory property,
+            // and it is confusing if it isn't updated...
+            // system.setProperty("trajectory", SireMol::Trajectory(trajectories));
 
             // we now have to assume that the trajectories all had the atomic
             // data in the same order and that this matches the atomidx order

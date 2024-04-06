@@ -60,6 +60,8 @@ namespace bp = boost::python;
 
 #include "system.h"
 
+#include "systemtrajectory.h"
+
 #include <QDebug>
 
 #include <QHash>
