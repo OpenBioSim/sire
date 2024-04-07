@@ -45,48 +45,248 @@ namespace SireSystem
     class SystemFrames
     {
     public:
+        enum FrameType
+        {
+            EMPTY = 0x0000,
+            COORDINATES = 0x0001,
+            VELOCITIES = 0x0010,
+            FORCES = 0x0100
+        };
+
         SystemFrames();
+        SystemFrames(const Molecules &mols, const PropertyMap &map);
         ~SystemFrames();
 
         int nFrames() const;
+
         int nAtoms() const;
+        int nAtoms(MolNum molnum) const;
 
-        Frame getFrame(int i);
-        Frame getFrame(int i, const LazyEvaluator &evaluator);
+        bool saveCoordinates() const;
+        bool saveVelocities() const;
+        bool saveForces() const;
 
-        void saveFrame(const Molecules &mols, const PropertyMap &map);
+        Frame getFrame(int i) const;
+        Frame getFrame(int i, const LazyEvaluator &evaluator) const;
+
+        Frame getFrame(MolNum molnum, int i) const;
+        Frame getFrame(MolNum molnum, int i,
+                       const LazyEvaluator &evaluator) const;
+
+        void saveFrame(const Molecules &mols,
+                       const Space &space,
+                       SireUnits::Dimension::Time time,
+                       const Properties &props,
+                       const PropertyMap &map);
+
+        bool isCompatibleWith(const Molecules &mols,
+                              const PropertyMap &map) const;
+
+    private:
+        /** The start index and number of atoms for each molecule
+         *  in the system. This is the same for all frames
+         */
+        QHash<SireMol::MolNum, QPair<int, int>> mol_atoms;
+
+        /** The data for the trajectory */
+        QVector<Frame> frames;
+
+        /** The total number of atoms */
+        int natoms;
+
+        /** What type of frame data - coordinates, velocities, forces */
+        int frame_type;
     };
 }
 
-SystemFrames::SystemFrames()
+SystemFrames::SystemFrames() : natoms(0), frame_type(EMPTY)
 {
+}
+
+SystemFrames::SystemFrames(const Molecules &mols, const PropertyMap &map)
+    : natoms(0), frame_type(EMPTY)
+{
+    for (const auto &mol : mols)
+    {
+        const auto &moldata = mol.data();
+
+        mol_atoms.insert(moldata.number(), qMakePair(natoms, moldata.info().nAtoms()));
+
+        natoms += moldata.info().nAtoms();
+    }
+
+    // should work out if coords, vels and/or forces should be saved
+    // based on the properties in the map
+    frame_type = COORDINATES;
+
+    bool save_coordinates = true;
+    bool save_velocities = false;
+    bool save_forces = false;
+
+    if (map.specified("save_coordinates"))
+    {
+        save_coordinates = map["save_coordinates"].value().asABoolean();
+    }
+
+    if (map.specified("save_velocities"))
+    {
+        save_velocities = map["save_velocities"].value().asABoolean();
+    }
+
+    if (map.specified("save_forces"))
+    {
+        save_forces = map["save_forces"].value().asABoolean();
+    }
+
+    if (save_coordinates)
+        frame_type |= COORDINATES;
+
+    if (save_velocities)
+        frame_type |= VELOCITIES;
+
+    if (save_forces)
+        frame_type |= FORCES;
 }
 
 SystemFrames::~SystemFrames()
 {
 }
 
+bool SystemFrames::saveCoordinates() const
+{
+    return frame_type & COORDINATES;
+}
+
+bool SystemFrames::saveVelocities() const
+{
+    return frame_type & VELOCITIES;
+}
+
+bool SystemFrames::saveForces() const
+{
+    return frame_type & FORCES;
+}
+
 int SystemFrames::nAtoms() const
 {
-    return 0;
+    return natoms;
+}
+
+int SystemFrames::nAtoms(MolNum molnum) const
+{
+    auto it = mol_atoms.constFind(molnum);
+
+    if (it == mol_atoms.constEnd())
+    {
+        throw SireMol::missing_molecule(QObject::tr(
+                                            "There is no molecule with number %1 in the system")
+                                            .arg(molnum.value()),
+                                        CODELOC);
+    }
+
+    return it.value().second;
 }
 
 int SystemFrames::nFrames() const
 {
-    return 0;
+    return frames.count();
 }
 
-Frame SystemFrames::getFrame(int i)
+/** It is only compatible if we have the same molecules with
+ *  the same number of atoms. This is because we cannot cope
+ *  with molecules being added or removed from the system,
+ *  or with the number of atoms changing. These events will
+ *  trigger the creation of a new SystemFrames higher in the
+ *  stack
+ */
+bool SystemFrames::isCompatibleWith(const Molecules &mols,
+                                    const PropertyMap &map) const
 {
-    return Frame();
+    if (mols.nMolecules() != mol_atoms.size())
+        return false;
+
+    // make sure that all of the molecules exist in the hash
+    // and the number of atoms match
+    for (const auto &mol : mols)
+    {
+        const auto &moldata = mol.data();
+
+        auto it = mol_atoms.constFind(moldata.number());
+
+        if (it == mol_atoms.constEnd())
+            return false;
+
+        if (it.value().second != moldata.info().nAtoms())
+            return false;
+    }
+
+    return true;
 }
 
-Frame SystemFrames::getFrame(int i, const LazyEvaluator &evaluator)
+Frame SystemFrames::getFrame(int i) const
 {
-    return Frame();
+    try
+    {
+        i = Index(i).map(this->nFrames());
+    }
+    catch (...)
+    {
+        throw SireError::invalid_index(
+            QObject::tr("Invalid frame index %1. Number of frames is %2.")
+                .arg(i)
+                .arg(this->nFrames()),
+            CODELOC);
+    }
+
+    return this->frames.at(i);
 }
 
-void SystemFrames::saveFrame(const Molecules &mols, const PropertyMap &map)
+Frame SystemFrames::getFrame(int i, const LazyEvaluator &evaluator) const
+{
+    auto key = QString("%1-%2").arg(qintptr(this)).arg(i);
+
+    auto frame = evaluator.evaluate(key, [&]()
+                                    { return this->getFrame(i); });
+
+    return frame.read().asA<Frame>();
+}
+
+Frame SystemFrames::getFrame(MolNum molnum, int i) const
+{
+    auto it = mol_atoms.constFind(molnum);
+
+    if (it == mol_atoms.constEnd())
+    {
+        throw SireMol::missing_molecule(QObject::tr(
+                                            "There is no molecule with number %1 in the system")
+                                            .arg(molnum.value()),
+                                        CODELOC);
+    }
+
+    return this->getFrame(i).subset(it.value().first, it.value().second);
+}
+
+Frame SystemFrames::getFrame(MolNum molnum, int i,
+                             const LazyEvaluator &evaluator) const
+{
+    auto it = mol_atoms.constFind(molnum);
+
+    if (it == mol_atoms.constEnd())
+    {
+        throw SireMol::missing_molecule(QObject::tr(
+                                            "There is no molecule with number %1 in the system")
+                                            .arg(molnum.value()),
+                                        CODELOC);
+    }
+
+    return this->getFrame(i, evaluator).subset(it.value().first, it.value().second);
+}
+
+void SystemFrames::saveFrame(const Molecules &mols,
+                             const Space &space,
+                             SireUnits::Dimension::Time time,
+                             const Properties &props,
+                             const PropertyMap &map)
 {
 }
 
@@ -101,7 +301,8 @@ SIRESYSTEM_EXPORT QDataStream &operator<<(QDataStream &ds, const MolSystemTrajec
     writeHeader(ds, r_moltraj, 1);
 
     // we don't stream the trajectory as it would be too big
-    ds << static_cast<const TrajectoryData &>(traj);
+    ds << traj.molnum
+       << static_cast<const TrajectoryData &>(traj);
 
     return ds;
 }
@@ -114,7 +315,7 @@ SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &ds, MolSystemTrajectory &
     {
         // we don't stream the trajectory as it would be too big
         traj.clear();
-        ds >> static_cast<TrajectoryData &>(traj);
+        ds >> traj.molnum >> static_cast<TrajectoryData &>(traj);
     }
     else
         throw version_error(v, "1", r_moltraj, CODELOC);
@@ -122,33 +323,18 @@ SIRESYSTEM_EXPORT QDataStream &operator>>(QDataStream &ds, MolSystemTrajectory &
     return ds;
 }
 
-MolSystemTrajectory::MolSystemTrajectory()
-    : TrajectoryData(), start_atom(0), natoms(0)
+MolSystemTrajectory::MolSystemTrajectory() : TrajectoryData()
 {
 }
 
 MolSystemTrajectory::MolSystemTrajectory(const SystemTrajectory &trajectory,
-                                         SireMol::MolNum molnum)
-    : TrajectoryData(trajectory), start_atom(0), natoms(0)
+                                         SireMol::MolNum mnum)
+    : TrajectoryData(trajectory), d(trajectory.d), molnum(mnum)
 {
-    d = trajectory.d;
-
-    auto it = trajectory.mol_atoms.constFind(molnum);
-
-    if (it == trajectory.mol_atoms.constEnd())
-    {
-        throw SireMol::missing_molecule(QObject::tr(
-                                            "There is no molecule with number %1 in the system")
-                                            .arg(molnum.value()),
-                                        CODELOC);
-    }
-
-    start_atom = it.value().first;
-    natoms = it.value().second;
 }
 
 MolSystemTrajectory::MolSystemTrajectory(const MolSystemTrajectory &other)
-    : TrajectoryData(other), d(other.d), start_atom(other.start_atom), natoms(other.natoms)
+    : TrajectoryData(other), d(other.d), molnum(other.molnum)
 {
 }
 
@@ -162,8 +348,7 @@ MolSystemTrajectory &MolSystemTrajectory::operator=(const MolSystemTrajectory &o
     {
         TrajectoryData::operator=(other);
         d = other.d;
-        start_atom = other.start_atom;
-        natoms = other.natoms;
+        molnum = other.molnum;
     }
 
     return *this;
@@ -173,8 +358,7 @@ bool MolSystemTrajectory::operator==(const MolSystemTrajectory &other) const
 {
     return TrajectoryData::operator==(other) &&
            d.get() == other.d.get() &&
-           start_atom == other.start_atom &&
-           natoms == other.natoms;
+           molnum == other.molnum;
 }
 
 bool MolSystemTrajectory::operator!=(const MolSystemTrajectory &other) const
@@ -200,13 +384,12 @@ MolSystemTrajectory *MolSystemTrajectory::clone() const
 void MolSystemTrajectory::clear()
 {
     d.reset();
-    start_atom = 0;
-    natoms = 0;
+    molnum = MolNum();
 }
 
 int MolSystemTrajectory::nFrames() const
 {
-    if (d.get() == 0)
+    if (not d)
         return 0;
     else
         return d->nFrames();
@@ -214,7 +397,14 @@ int MolSystemTrajectory::nFrames() const
 
 int MolSystemTrajectory::nAtoms() const
 {
-    return natoms;
+    if (d)
+    {
+        return d->nAtoms(molnum);
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 QStringList MolSystemTrajectory::filenames() const
@@ -224,21 +414,24 @@ QStringList MolSystemTrajectory::filenames() const
 
 Frame MolSystemTrajectory::getFrame(int i) const
 {
-    i = SireID::Index(i).map(this->nFrames());
-
-    return d->getFrame(i).subset(start_atom, natoms);
+    if (d)
+        return d->getFrame(molnum, i);
+    else
+        throw SireError::invalid_index(
+            QObject::tr("Invalid frame index %1. Number of frames is 0.")
+                .arg(i),
+            CODELOC);
 }
 
 Frame MolSystemTrajectory::getFrame(int i, const SireBase::LazyEvaluator &evaluator) const
 {
-    i = SireID::Index(i).map(this->nFrames());
-
-    auto key = QString("%1-%2").arg(qintptr(d.get())).arg(i);
-
-    auto frame = evaluator.evaluate(key, [&]()
-                                    { return d->getFrame(i); });
-
-    return frame.read().asA<Frame>().subset(start_atom, natoms);
+    if (d)
+        return d->getFrame(molnum, i, evaluator);
+    else
+        throw SireError::invalid_index(
+            QObject::tr("Invalid frame index %1. Number of frames is 0.")
+                .arg(i),
+            CODELOC);
 }
 
 bool MolSystemTrajectory::isEditable() const
@@ -293,12 +486,12 @@ SystemTrajectory::SystemTrajectory() : TrajectoryData()
 }
 
 SystemTrajectory::SystemTrajectory(const Molecules &mols, const PropertyMap &map)
-    : TrajectoryData()
+    : TrajectoryData(), d(new SystemFrames(mols, map))
 {
 }
 
 SystemTrajectory::SystemTrajectory(const SystemTrajectory &other)
-    : TrajectoryData(other), d(other.d), mol_atoms(other.mol_atoms)
+    : TrajectoryData(other), d(other.d)
 {
 }
 
@@ -312,7 +505,6 @@ SystemTrajectory &SystemTrajectory::operator=(const SystemTrajectory &other)
     {
         TrajectoryData::operator=(other);
         d = other.d;
-        mol_atoms = other.mol_atoms;
     }
 
     return *this;
@@ -321,8 +513,7 @@ SystemTrajectory &SystemTrajectory::operator=(const SystemTrajectory &other)
 bool SystemTrajectory::operator==(const SystemTrajectory &other) const
 {
     return TrajectoryData::operator==(other) &&
-           d.get() == other.d.get() &&
-           mol_atoms == other.mol_atoms;
+           d.get() == other.d.get();
 }
 
 bool SystemTrajectory::operator!=(const SystemTrajectory &other) const
@@ -348,65 +539,47 @@ SystemTrajectory *SystemTrajectory::clone() const
 void SystemTrajectory::clear()
 {
     d.reset();
-    mol_atoms.clear();
 }
 
 bool SystemTrajectory::isCompatibleWith(const Molecules &mols,
                                         const PropertyMap &map) const
 {
-    if (d.get() == 0)
+    if (d)
+        return d->isCompatibleWith(mols, map);
+    else
         return false;
-
-    // make sure that all of the molecules exist in the hash
-    // and the number of atoms match
-    for (const auto &mol : mols)
-    {
-        const auto &moldata = mol.data();
-
-        auto it = mol_atoms.constFind(moldata.number());
-
-        if (it == mol_atoms.constEnd())
-            return false;
-
-        if (it.value().second != moldata.info().nAtoms())
-            return false;
-    }
-
-    return true;
 }
 
 void SystemTrajectory::saveFrame(const Molecules &mols,
+                                 const Space &space,
+                                 SireUnits::Dimension::Time time,
+                                 const Properties &props,
                                  const PropertyMap &map)
 {
-    if (d.get() == 0)
+    if (not d)
     {
-        // create the data
-        int natoms = 0;
-
-        for (const auto &mol : mols)
-        {
-            const auto &moldata = mol.data();
-
-            mol_atoms.insert(moldata.number(), qMakePair(natoms, moldata.info().nAtoms()));
-
-            natoms += moldata.info().nAtoms();
-        }
-
-        d.reset(new SystemFrames());
+        d.reset(new SystemFrames(mols, map));
     }
 
-    // save the frame
-    d->saveFrame(mols, map);
+    d->saveFrame(mols, space, time, props, map);
 }
 
 TrajectoryDataPtr SystemTrajectory::getTrajectory(MolNum molnum) const
 {
+    if (not d)
+    {
+        throw SireMol::missing_molecule(QObject::tr(
+                                            "There is no molecule with number %1 in the system")
+                                            .arg(molnum.value()),
+                                        CODELOC);
+    }
+
     return TrajectoryDataPtr(new MolSystemTrajectory(*this, molnum));
 }
 
 int SystemTrajectory::nFrames() const
 {
-    if (d.get() == 0)
+    if (not d)
         return 0;
     else
         return d->nFrames();
@@ -414,18 +587,13 @@ int SystemTrajectory::nFrames() const
 
 int SystemTrajectory::nAtoms() const
 {
-    if (d.get() == 0)
+    if (d)
     {
-        int natoms = 0;
-
-        for (const auto &mol : mol_atoms)
-            natoms += mol.second;
-
-        return natoms;
+        return d->nAtoms();
     }
     else
     {
-        return d->nAtoms();
+        return 0;
     }
 }
 
@@ -436,14 +604,24 @@ QStringList SystemTrajectory::filenames() const
 
 Frame SystemTrajectory::getFrame(int i) const
 {
-    i = SireID::Index(i).map(this->nFrames());
-    return d->getFrame(i);
+    if (d)
+        return d->getFrame(i);
+    else
+        throw SireError::invalid_index(
+            QObject::tr("Invalid frame index %1. Number of frames is 0.")
+                .arg(i),
+            CODELOC);
 }
 
 Frame SystemTrajectory::getFrame(int i, const LazyEvaluator &evaluator) const
 {
-    i = SireID::Index(i).map(this->nFrames());
-    return d->getFrame(i, evaluator);
+    if (d)
+        return d->getFrame(i, evaluator);
+    else
+        throw SireError::invalid_index(
+            QObject::tr("Invalid frame index %1. Number of frames is 0.")
+                .arg(i),
+            CODELOC);
 }
 
 bool SystemTrajectory::isEditable() const

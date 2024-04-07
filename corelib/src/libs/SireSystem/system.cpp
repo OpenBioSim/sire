@@ -3895,6 +3895,7 @@ void System::saveFrame(int frame, const SireBase::PropertyMap &map)
     this->accept();
     this->mustNowRecalculateFromScratch();
     MolGroupsBase::saveFrame(frame, map);
+    system_trajectory = 0;
 }
 
 void System::saveFrame(const SireBase::PropertyMap &map)
@@ -3907,6 +3908,118 @@ void System::saveFrame(const SireBase::PropertyMap &map)
     this->accept();
     this->mustNowRecalculateFromScratch();
 
+    // get all of the molecules in the system
+    auto mols = this->molecules();
+
+    // get the space and time values
+    const auto space_property = map["space"];
+    const auto time_property = map["time"];
+
+    QString time_property_source("time");
+    QString space_property_source("space");
+
+    if (time_property.hasSource())
+        time_property_source = QString(time_property.source());
+
+    if (space_property.hasSource())
+        space_property_source = QString(space_property.source());
+
+    // we must get the space property and a time property
+    SpacePtr space;
+    SireUnits::Dimension::Time time;
+    bool found_space = false;
+    bool found_time = false;
+
+    try
+    {
+        space = this->property(space_property_source).asA<Space>();
+        found_space = true;
+    }
+    catch (...)
+    {
+    }
+
+    try
+    {
+        time = get_time_from_property(this->property(time_property_source));
+        found_time = true;
+    }
+    catch (...)
+    {
+    }
+
+    if (not found_space)
+    {
+        if (space_property.hasValue())
+        {
+            try
+            {
+                space = space_property.value().asA<Space>();
+                found_space = true;
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (not found_space)
+        {
+            for (const auto &mol : mols)
+            {
+                try
+                {
+                    space = mol.data().property(space_property_source).asA<Space>();
+                    found_space = true;
+                    break;
+                }
+                catch (...)
+                {
+                }
+            }
+        }
+    }
+
+    if (not found_time)
+    {
+        if (time_property.hasValue())
+        {
+            try
+            {
+                time = get_time_from_property(time_property.value());
+                found_time = true;
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (not found_time)
+        {
+            for (const auto &mol : mols)
+            {
+                try
+                {
+                    time = get_time_from_property(mol.data().property(time_property_source));
+                    found_time = true;
+                    break;
+                }
+                catch (...)
+                {
+                }
+            }
+        }
+    }
+
+    if (not found_space)
+    {
+        space = Cartesian();
+    }
+
+    if (not found_time)
+    {
+        time = SireUnits::Dimension::Time(0);
+    }
+
     // do we have an active SystemTrajectory?
     bool must_create = false;
 
@@ -3914,8 +4027,6 @@ void System::saveFrame(const SireBase::PropertyMap &map)
     {
         must_create = true;
     }
-
-    auto mols = this->molecules();
 
     SystemTrajectory *traj = dynamic_cast<SystemTrajectory *>(system_trajectory.data());
 
@@ -3930,7 +4041,8 @@ void System::saveFrame(const SireBase::PropertyMap &map)
 
     if (must_create)
     {
-        system_trajectory = new SystemTrajectory(mols, map);
+        traj = new SystemTrajectory(mols, map);
+        system_trajectory = traj;
 
         // add this trajectory onto all of the molecules...
         auto mols2 = mols;
@@ -3961,7 +4073,7 @@ void System::saveFrame(const SireBase::PropertyMap &map)
 
     // save the frame into the system_trajectory - this will automatically
     // update all molecules containing this trajectory
-    traj->saveFrame(mols, map);
+    traj->saveFrame(mols, space, time, Properties(), map);
 }
 
 void System::deleteFrame(int frame, const SireBase::PropertyMap &map)

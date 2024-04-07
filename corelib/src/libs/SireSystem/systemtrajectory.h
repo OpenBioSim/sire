@@ -32,6 +32,9 @@
 #include "SireMol/trajectory.h"
 #include "SireMol/molecules.h"
 
+#include "SireVol/space.h"
+#include "SireUnits/dimensions.h"
+
 #include <memory>
 
 SIRE_BEGIN_HEADER
@@ -91,6 +94,9 @@ namespace SireSystem
                               const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         void saveFrame(const SireMol::Molecules &mols,
+                       const SireVol::Space &space,
+                       SireUnits::Dimension::Time time,
+                       const SireBase::Properties &props,
                        const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         SireMol::TrajectoryDataPtr getTrajectory(SireMol::MolNum molnum) const;
@@ -111,11 +117,6 @@ namespace SireSystem
     private:
         /** Shared pointer to the underlying trajectory frames */
         std::shared_ptr<SystemFrames> d;
-
-        /** The start index and number of atoms for each molecule
-         *  in the system
-         */
-        QHash<SireMol::MolNum, QPair<qint64, qint64>> mol_atoms;
     };
 
     /** This is the view of a SystemTrajectory that is used to
@@ -165,11 +166,8 @@ namespace SireSystem
         /** Shared pointer to the underlying trajectory frames */
         std::shared_ptr<SystemFrames> d;
 
-        /** The start index of the atoms in this molecule */
-        qint64 start_atom;
-
-        /** The number of atoms in this molecule */
-        qint64 natoms;
+        /** The Molecule number for the molecule that owns this trajectory */
+        SireMol::MolNum molnum;
     };
 }
 
