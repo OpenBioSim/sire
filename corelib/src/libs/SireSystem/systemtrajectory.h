@@ -71,7 +71,9 @@ namespace SireSystem
 
     public:
         SystemTrajectory();
-        SystemTrajectory(const SireMol::Molecules &mols, const SireBase::PropertyMap &map = SireBase::PropertyMap());
+        SystemTrajectory(const QList<SireMol::MolNum> &molnums,
+                         const SireMol::Molecules &mols,
+                         const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         SystemTrajectory(const SystemTrajectory &other);
 
@@ -88,9 +90,12 @@ namespace SireSystem
 
         SystemTrajectory *clone() const;
 
+        bool isLive() const;
+
         void clear();
 
-        bool isCompatibleWith(const SireMol::Molecules &mols,
+        bool isCompatibleWith(const QList<SireMol::MolNum> &molnums,
+                              const SireMol::Molecules &mols,
                               const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
         void saveFrame(const SireMol::Molecules &mols,

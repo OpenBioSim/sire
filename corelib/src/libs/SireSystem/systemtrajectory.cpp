@@ -31,6 +31,7 @@
 #include "SireMol/errors.h"
 
 #include "SireBase/lazyevaluator.h"
+#include "SireBase/parallel.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
@@ -54,7 +55,8 @@ namespace SireSystem
         };
 
         SystemFrames();
-        SystemFrames(const Molecules &mols, const PropertyMap &map);
+        SystemFrames(const QList<MolNum> &molnums,
+                     const Molecules &mols, const PropertyMap &map);
         ~SystemFrames();
 
         int nFrames() const;
@@ -79,10 +81,14 @@ namespace SireSystem
                        const Properties &props,
                        const PropertyMap &map);
 
-        bool isCompatibleWith(const Molecules &mols,
+        bool isCompatibleWith(const QList<MolNum> &molnums,
+                              const Molecules &mols,
                               const PropertyMap &map) const;
 
     private:
+        /** The order the molecules should appear in the trajectory */
+        QList<MolNum> molnums;
+
         /** The start index and number of atoms for each molecule
          *  in the system. This is the same for all frames
          */
@@ -103,14 +109,23 @@ SystemFrames::SystemFrames() : natoms(0), frame_type(EMPTY)
 {
 }
 
-SystemFrames::SystemFrames(const Molecules &mols, const PropertyMap &map)
-    : natoms(0), frame_type(EMPTY)
+SystemFrames::SystemFrames(const QList<MolNum> &nums,
+                           const Molecules &mols, const PropertyMap &map)
+    : molnums(nums), natoms(0), frame_type(EMPTY)
 {
-    for (const auto &mol : mols)
+    for (const auto &molnum : molnums)
     {
-        const auto &moldata = mol.data();
+        auto it = mols.constFind(molnum);
 
-        mol_atoms.insert(moldata.number(), qMakePair(natoms, moldata.info().nAtoms()));
+        if (it == mols.constEnd())
+            throw SireMol::missing_molecule(QObject::tr(
+                                                "There is no molecule with number %1 in the system")
+                                                .arg(molnum.value()),
+                                            CODELOC);
+
+        const auto &moldata = it.value().data();
+
+        mol_atoms.insert(molnum, qMakePair(natoms, moldata.info().nAtoms()));
 
         natoms += moldata.info().nAtoms();
     }
@@ -199,10 +214,11 @@ int SystemFrames::nFrames() const
  *  trigger the creation of a new SystemFrames higher in the
  *  stack
  */
-bool SystemFrames::isCompatibleWith(const Molecules &mols,
+bool SystemFrames::isCompatibleWith(const QList<MolNum> &nums,
+                                    const Molecules &mols,
                                     const PropertyMap &map) const
 {
-    if (mols.nMolecules() != mol_atoms.size())
+    if (molnums != nums or mols.nMolecules() != mol_atoms.size())
         return false;
 
     // make sure that all of the molecules exist in the hash
@@ -288,6 +304,143 @@ void SystemFrames::saveFrame(const Molecules &mols,
                              const Properties &props,
                              const PropertyMap &map)
 {
+    const bool save_coords = this->saveCoordinates();
+    const bool save_vels = this->saveVelocities();
+    const bool save_forces = this->saveForces();
+
+    if (not save_coords and not save_vels and not save_forces)
+    {
+        return;
+    }
+
+    QVector<Vector> coordinates;
+    QVector<Velocity3D> velocities;
+    QVector<Force3D> forces;
+
+    Vector *coordinates_data = 0;
+    Velocity3D *velocities_data = 0;
+    Force3D *forces_data = 0;
+
+    if (save_coords)
+    {
+        coordinates.resize(natoms);
+        coordinates_data = coordinates.data();
+    }
+
+    if (save_vels)
+    {
+        velocities.resize(natoms);
+        velocities_data = velocities.data();
+    }
+
+    if (save_forces)
+    {
+        forces.resize(natoms);
+        forces_data = forces.data();
+    }
+
+    auto save_frame = [&](MolNum molnum)
+    {
+        auto it = mol_atoms.constFind(molnum);
+
+        if (it == mol_atoms.constEnd())
+        {
+            return;
+        }
+
+        auto it2 = mols.constFind(molnum);
+
+        if (it2 == mols.constEnd())
+        {
+            return;
+        }
+
+        int start_atom = it.value().first;
+        int nats = it.value().second;
+
+        if (start_atom < 0 or nats == 0 or start_atom + nats > natoms)
+        {
+            return;
+        }
+
+        const auto &moldata = it2.value().data();
+
+        if (save_coords)
+        {
+            try
+            {
+                const auto &coords = moldata.property(map["coordinates"]).asA<AtomCoords>();
+
+                if (coords.nAtoms() != nats)
+                {
+                    return;
+                }
+
+                std::memcpy(coordinates_data + start_atom, coords.constData(CGIdx(0)),
+                            nats * sizeof(Vector));
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (save_vels)
+        {
+            try
+            {
+                const auto &vels = moldata.property(map["velocities"]).asA<AtomVelocities>();
+
+                if (vels.nAtoms() != nats)
+                {
+                    return;
+                }
+
+                std::memcpy(velocities_data + start_atom, vels.constData(CGIdx(0)),
+                            nats * sizeof(Velocity3D));
+            }
+            catch (...)
+            {
+            }
+        }
+
+        if (save_forces)
+        {
+            try
+            {
+                const auto &frcs = moldata.property(map["forces"]).asA<AtomForces>();
+
+                if (frcs.nAtoms() != nats)
+                {
+                    return;
+                }
+
+                std::memcpy(forces_data + start_atom, frcs.constData(CGIdx(0)),
+                            nats * sizeof(Force3D));
+            }
+            catch (...)
+            {
+            }
+        }
+    };
+
+    if (should_run_in_parallel(molnums.count(), map))
+    {
+        tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()), [&](const tbb::blocked_range<int> &r)
+                          {
+            for (int i = r.begin(); i < r.end(); ++i)
+            {
+                save_frame(molnums[i]);
+            } });
+    }
+    else
+    {
+        for (const auto &molnum : molnums)
+        {
+            save_frame(molnum);
+        }
+    }
+
+    frames.append(Frame(coordinates, velocities, forces, space, time, props));
 }
 
 ////////
@@ -485,8 +638,10 @@ SystemTrajectory::SystemTrajectory() : TrajectoryData()
 {
 }
 
-SystemTrajectory::SystemTrajectory(const Molecules &mols, const PropertyMap &map)
-    : TrajectoryData(), d(new SystemFrames(mols, map))
+SystemTrajectory::SystemTrajectory(const QList<MolNum> &molnums,
+                                   const Molecules &mols,
+                                   const PropertyMap &map)
+    : TrajectoryData(), d(new SystemFrames(molnums, mols, map))
 {
 }
 
@@ -536,16 +691,22 @@ SystemTrajectory *SystemTrajectory::clone() const
     return new SystemTrajectory(*this);
 }
 
+bool SystemTrajectory::isLive() const
+{
+    return true;
+}
+
 void SystemTrajectory::clear()
 {
     d.reset();
 }
 
-bool SystemTrajectory::isCompatibleWith(const Molecules &mols,
+bool SystemTrajectory::isCompatibleWith(const QList<MolNum> &molnums,
+                                        const Molecules &mols,
                                         const PropertyMap &map) const
 {
     if (d)
-        return d->isCompatibleWith(mols, map);
+        return d->isCompatibleWith(molnums, mols, map);
     else
         return false;
 }
@@ -558,7 +719,9 @@ void SystemTrajectory::saveFrame(const Molecules &mols,
 {
     if (not d)
     {
-        d.reset(new SystemFrames(mols, map));
+        throw SireError::invalid_state(
+            QObject::tr("The trajectory is not initialized"),
+            CODELOC);
     }
 
     d->saveFrame(mols, space, time, props, map);

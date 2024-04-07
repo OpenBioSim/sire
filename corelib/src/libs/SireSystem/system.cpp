@@ -3909,6 +3909,7 @@ void System::saveFrame(const SireBase::PropertyMap &map)
     this->mustNowRecalculateFromScratch();
 
     // get all of the molecules in the system
+    auto molnums = this->molNums();
     auto mols = this->molecules();
 
     // get the space and time values
@@ -4036,12 +4037,12 @@ void System::saveFrame(const SireBase::PropertyMap &map)
     }
     else
     {
-        must_create = not traj->isCompatibleWith(mols, map);
+        must_create = not traj->isCompatibleWith(molnums, mols, map);
     }
 
     if (must_create)
     {
-        traj = new SystemTrajectory(mols, map);
+        traj = new SystemTrajectory(molnums, mols, map);
         system_trajectory = traj;
 
         // add this trajectory onto all of the molecules...

@@ -122,6 +122,15 @@ bool TrajectoryData::isEmpty() const
     return this->nFrames() == 0;
 }
 
+/** Return whether or not this trajectory is live - live trajectories
+ *  are capable of being actively updated during new frame data,
+ *  e.g. during a dynamics simulation.
+ */
+bool TrajectoryData::isLive() const
+{
+    return false;
+}
+
 QList<Frame> TrajectoryData::getFrames() const
 {
     QList<Frame> frames;
@@ -547,7 +556,7 @@ Trajectory::Trajectory(const TrajectoryDataPtr &data)
         start_atom = 0;
         natoms = data->nAtoms();
 
-        if (data->nFrames() > 0)
+        if (data->isLive() or data->nFrames() > 0)
             d.append(data);
     }
 }
@@ -568,7 +577,7 @@ Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data)
     {
         if (ptr.constData() != 0)
         {
-            if (ptr->nFrames() > 0)
+            if (ptr->isLive() or ptr->nFrames() > 0)
             {
                 if (natoms == 0)
                 {
@@ -628,7 +637,7 @@ Trajectory::Trajectory(const QList<TrajectoryDataPtr> &data, int s, int n)
     {
         if (ptr.constData() != 0)
         {
-            if (ptr->nFrames() > 0)
+            if (ptr->isLive() or ptr->nFrames() > 0)
             {
                 if (n == 0)
                 {
@@ -979,7 +988,7 @@ void Trajectory::append(const TrajectoryDataPtr &data)
 
     // check that the start and number of atoms would be compatible
     // with this trajectory
-    if (start_atom + natoms > data->nAtoms())
+    if (natoms != data->nAtoms() and (start_atom + natoms > data->nAtoms()))
     {
         throw SireError::incompatible_error(
             QObject::tr("Cannot append a trajectory with %1 atoms to a trajectory with %2 atoms "

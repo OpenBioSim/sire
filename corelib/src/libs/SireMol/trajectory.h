@@ -226,6 +226,8 @@ namespace SireMol
 
         virtual QStringList filenames() const = 0;
 
+        virtual bool isLive() const;
+
         virtual Frame getFrame(int i) const = 0;
         virtual Frame getFrame(int i, const LazyEvaluator &evaluator) const = 0;
 
