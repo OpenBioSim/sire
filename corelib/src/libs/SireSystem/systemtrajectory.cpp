@@ -36,6 +36,8 @@
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
+#include <tbb/spin_mutex.h>
+
 using namespace SireSystem;
 using namespace SireMol;
 using namespace SireBase;
@@ -86,6 +88,9 @@ namespace SireSystem
                               const PropertyMap &map) const;
 
     private:
+        tbb::spin_mutex &getMutex() const;
+        Frame _lkr_getFrame(int i) const;
+
         /** The order the molecules should appear in the trajectory */
         QList<MolNum> molnums;
 
@@ -95,7 +100,16 @@ namespace SireSystem
         QHash<SireMol::MolNum, QPair<int, int>> mol_atoms;
 
         /** The data for the trajectory */
-        QVector<Frame> frames;
+        QVector<QByteArray> frames;
+
+        /** Mutex to serialize access to the data of this class */
+        tbb::spin_mutex mutex;
+
+        /** The current (unpacked) frame */
+        Frame current_frame;
+
+        /** The index of the current frame */
+        int current_frame_index;
 
         /** The total number of atoms */
         int natoms;
@@ -105,14 +119,22 @@ namespace SireSystem
     };
 }
 
-SystemFrames::SystemFrames() : natoms(0), frame_type(EMPTY)
+tbb::spin_mutex &SystemFrames::getMutex() const
+{
+    return *(const_cast<tbb::spin_mutex *>(&mutex));
+}
+
+SystemFrames::SystemFrames()
+    : current_frame_index(-1), natoms(0), frame_type(EMPTY)
 {
 }
 
 SystemFrames::SystemFrames(const QList<MolNum> &nums,
                            const Molecules &mols, const PropertyMap &map)
-    : molnums(nums), natoms(0), frame_type(EMPTY)
+    : molnums(nums), current_frame_index(-1), natoms(0), frame_type(EMPTY)
 {
+    tbb::spin_mutex::scoped_lock lock(getMutex());
+
     for (const auto &molnum : molnums)
     {
         auto it = mols.constFind(molnum);
@@ -189,6 +211,8 @@ int SystemFrames::nAtoms() const
 
 int SystemFrames::nAtoms(MolNum molnum) const
 {
+    tbb::spin_mutex::scoped_lock lock(getMutex());
+
     auto it = mol_atoms.constFind(molnum);
 
     if (it == mol_atoms.constEnd())
@@ -204,6 +228,7 @@ int SystemFrames::nAtoms(MolNum molnum) const
 
 int SystemFrames::nFrames() const
 {
+    tbb::spin_mutex::scoped_lock lock(getMutex());
     return frames.count();
 }
 
@@ -218,6 +243,8 @@ bool SystemFrames::isCompatibleWith(const QList<MolNum> &nums,
                                     const Molecules &mols,
                                     const PropertyMap &map) const
 {
+    tbb::spin_mutex::scoped_lock lock(getMutex());
+
     if (molnums != nums or mols.nMolecules() != mol_atoms.size())
         return false;
 
@@ -239,22 +266,47 @@ bool SystemFrames::isCompatibleWith(const QList<MolNum> &nums,
     return true;
 }
 
-Frame SystemFrames::getFrame(int i) const
+Frame SystemFrames::_lkr_getFrame(int i) const
 {
     try
     {
-        i = Index(i).map(this->nFrames());
+        i = Index(i).map(frames.count());
     }
     catch (...)
     {
         throw SireError::invalid_index(
             QObject::tr("Invalid frame index %1. Number of frames is %2.")
                 .arg(i)
-                .arg(this->nFrames()),
+                .arg(frames.count()),
             CODELOC);
     }
 
-    return this->frames.at(i);
+    if (i == current_frame_index)
+    {
+        return current_frame;
+    }
+
+    QDataStream ds(frames.at(i));
+
+    Frame frame;
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+    ds >> frame;
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    qDebug() << "Loading frame" << i << "with" << frames.at(i).size() << "bytes" << frame.numBytes();
+    qDebug() << "Deserialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
+
+    const_cast<SystemFrames *>(this)->current_frame = frame;
+    const_cast<SystemFrames *>(this)->current_frame_index = i;
+
+    return current_frame;
+}
+
+Frame SystemFrames::getFrame(int i) const
+{
+    tbb::spin_mutex::scoped_lock lock(getMutex());
+    return this->_lkr_getFrame(i);
 }
 
 Frame SystemFrames::getFrame(int i, const LazyEvaluator &evaluator) const
@@ -269,6 +321,8 @@ Frame SystemFrames::getFrame(int i, const LazyEvaluator &evaluator) const
 
 Frame SystemFrames::getFrame(MolNum molnum, int i) const
 {
+    tbb::spin_mutex::scoped_lock lock(getMutex());
+
     auto it = mol_atoms.constFind(molnum);
 
     if (it == mol_atoms.constEnd())
@@ -279,12 +333,13 @@ Frame SystemFrames::getFrame(MolNum molnum, int i) const
                                         CODELOC);
     }
 
-    return this->getFrame(i).subset(it.value().first, it.value().second);
+    return this->_lkr_getFrame(i).subset(it.value().first, it.value().second);
 }
 
 Frame SystemFrames::getFrame(MolNum molnum, int i,
                              const LazyEvaluator &evaluator) const
 {
+    tbb::spin_mutex::scoped_lock lock(getMutex());
     auto it = mol_atoms.constFind(molnum);
 
     if (it == mol_atoms.constEnd())
@@ -294,6 +349,9 @@ Frame SystemFrames::getFrame(MolNum molnum, int i,
                                             .arg(molnum.value()),
                                         CODELOC);
     }
+
+    // below function call gets the lock, so unlock now
+    lock.release();
 
     return this->getFrame(i, evaluator).subset(it.value().first, it.value().second);
 }
@@ -440,7 +498,31 @@ void SystemFrames::saveFrame(const Molecules &mols,
         }
     }
 
-    frames.append(Frame(coordinates, velocities, forces, space, time, props));
+    Frame frame(coordinates, velocities, forces, space, time, props);
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    QByteArray data;
+    data.reserve(2 * frame.numBytes());
+
+    auto mem_time = std::chrono::high_resolution_clock::now();
+
+    QDataStream ds(&data, QIODevice::WriteOnly);
+    ds << frame;
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    qDebug() << "Saving frame" << frames.count() << "with" << data.size() << "bytes" << frame.numBytes();
+    qDebug() << "Memory time" << std::chrono::duration_cast<std::chrono::microseconds>(mem_time - start_time).count() << "microseconds";
+    qDebug() << "Serialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - mem_time).count() << "microseconds";
+    qDebug() << "Total time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
+
+    // need to hold the write lock, as we are updating global state
+    // for everyone who holds this live trajectory data
+    tbb::spin_mutex::scoped_lock lock(getMutex());
+    frames.append(data);
+    current_frame = frame;
+    current_frame_index = frames.count() - 1;
 }
 
 ////////

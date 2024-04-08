@@ -45,6 +45,7 @@
 #include "select.h"
 
 #include "SireBase/lazyevaluator.h"
+#include "SireBase/parallel.h"
 
 #include "SireMol/errors.h"
 
@@ -1150,9 +1151,25 @@ void Molecules::loadFrame(int frame, const LazyEvaluator &evaluator,
 
     frame = Index(frame).map(n);
 
-    for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
+    if (should_run_in_parallel(mols.count(), map))
     {
-        it->loadFrame(frame, evaluator, map);
+        const auto molnums = this->molNums().values();
+
+        tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()),
+                          [&](const tbb::blocked_range<int> &r)
+                          {
+                              for (int i = r.begin(); i < r.end(); ++i)
+                              {
+                                  mols.find(molnums[i])->loadFrame(frame, evaluator, map);
+                              }
+                          });
+    }
+    else
+    {
+        for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
+        {
+            it->loadFrame(frame, evaluator, map);
+        }
     }
 }
 
