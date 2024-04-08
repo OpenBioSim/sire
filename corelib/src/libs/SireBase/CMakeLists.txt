@@ -27,6 +27,7 @@ set ( SIREBASE_HEADERS
       combineproperties.h
       convert_property.hpp
       countflops.h
+      console.h
       cpuid.h
       errors.h
       findexe.h
@@ -87,6 +88,7 @@ set ( SIREBASE_SOURCES
       chunkedhash.cpp
       chunkedvector.cpp
       combineproperties.cpp
+      console.cpp
       countflops.cpp
       cpuid.cpp
       errors.cpp
@@ -115,6 +117,7 @@ set ( SIREBASE_SOURCES
       savestate.cpp
       sharedpolypointer.cpp
       slice.cpp
+      sparsematrix.cpp
       stringmangler.cpp
       stringproperty.cpp
       tempdir.cpp

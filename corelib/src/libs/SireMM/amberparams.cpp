@@ -52,6 +52,7 @@
 #include "SireCAS/trigfuncs.h"
 #include "SireCAS/values.h"
 
+#include "SireBase/console.h"
 #include "SireBase/parallel.h"
 #include "SireBase/stringproperty.h"
 
@@ -1707,13 +1708,8 @@ AtomStringProperty AmberParams::treeChains() const
     return amber_treechains;
 }
 
-/** Set the atom parameters for the specified atom to the provided values */
-void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, SireUnits::Dimension::MolarMass mass,
-                      const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
-                      SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain)
+void AmberParams::createContainers()
 {
-    CGAtomIdx idx = molinfo.cgAtomIdx(atom);
-
     if (amber_charges.isEmpty())
     {
         // set up the objects to hold these parameters
@@ -1726,6 +1722,16 @@ void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, S
         amber_screens = AtomFloatProperty(molinfo);
         amber_treechains = AtomStringProperty(molinfo);
     }
+}
+
+/** Set the atom parameters for the specified atom to the provided values */
+void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, SireUnits::Dimension::MolarMass mass,
+                      const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
+                      SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain)
+{
+    createContainers();
+
+    CGAtomIdx idx = molinfo.cgAtomIdx(atom);
 
     amber_charges.set(idx, charge);
     amber_ljs.set(idx, ljparam);
@@ -1735,6 +1741,35 @@ void AmberParams::add(const AtomID &atom, SireUnits::Dimension::Charge charge, S
     born_radii.set(idx, born_radius);
     amber_screens.set(idx, screening_parameter);
     amber_treechains.set(idx, treechain);
+}
+
+/** Set the LJ exceptions for the specified atom - this replaces any
+ *  existing exceptions
+ */
+void AmberParams::set(const AtomID &atom, const QList<LJException> &exceptions)
+{
+    createContainers();
+    amber_ljs.set(molinfo.atomIdx(atom).value(), exceptions);
+}
+
+/** Set the LJ exception between atom0 in this set and atom1 in the
+ *  passed set of parameters to 'ljparam'
+ */
+void AmberParams::set(const AtomID &atom0, const AtomID &atom1,
+                      AmberParams &other, const LJ1264Parameter &ljparam)
+{
+    createContainers();
+    other.createContainers();
+
+    amber_ljs.set(molinfo.atomIdx(atom0).value(),
+                  other.molinfo.atomIdx(atom1).value(),
+                  other.amber_ljs, ljparam);
+}
+
+/** Set the LJ exception between atom0 and atom1 to 'ljparam' */
+void AmberParams::set(const AtomID &atom0, const AtomID &atom1, const LJ1264Parameter &ljparam)
+{
+    this->set(atom0, atom1, *this, ljparam);
 }
 
 /** Return the connectivity of the molecule implied by the
@@ -2714,4 +2749,29 @@ PropertyPtr AmberParams::_pvt_makeCompatibleWith(const MoleculeInfoData &newinfo
     }
 
     throw SireError::incomplete_code("Cannot make compatible if atom order has changed!", CODELOC);
+}
+
+/** Merge this property with another property */
+PropertyList AmberParams::merge(const MolViewProperty &other,
+                                const AtomIdxMapping &mapping,
+                                const QString &ghost,
+                                const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<AmberParams>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
 }

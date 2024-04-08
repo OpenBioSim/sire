@@ -238,6 +238,7 @@ class Vector(_Vector):
 
     def __init__(self, *args, **kwargs):
         from ..units import angstrom
+        from .. import u
 
         # get the default unit of length
         length_unit = angstrom.get_default()
@@ -245,17 +246,24 @@ class Vector(_Vector):
         def _is_number(v):
             return isinstance(v, int) or isinstance(v, float)
 
+        def _is_str(v):
+            return isinstance(v, str)
+
         # mix of doubles and lengths?
         new_args = []
 
         for i in range(0, len(args)):
             if _is_number(args[i]):
                 new_args.append((args[i] * length_unit).to(angstrom))
+            elif _is_str(args[i]):
+                new_args.append(u(args[i]).to(angstrom))
             elif hasattr(args[i], "__len__"):
                 new_arg = []
                 for arg in args[i]:
                     if _is_number(arg):
                         new_arg.append((arg * length_unit).to(angstrom))
+                    elif _is_str(arg):
+                        new_arg.append(u(arg).to(angstrom))
                     else:
                         new_arg.append(arg.to(angstrom))
                 new_args.append(new_arg)
@@ -265,6 +273,8 @@ class Vector(_Vector):
         for key in kwargs.keys():
             if _is_number(kwargs[key]):
                 kwargs[key] = (kwargs[key] * length_unit).to(angstrom)
+            elif _is_str(kwargs[key]):
+                kwargs[key] = u(kwargs[key]).to(angstrom)
             else:
                 kwargs[key] = kwargs[key].to(angstrom)
 

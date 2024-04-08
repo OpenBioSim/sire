@@ -66,6 +66,17 @@ def _pythonize(C, delete_old: bool = True) -> None:
         # change 'cutGroup' into 'cutgroup'
         new_attr = new_attr.replace("utGroup", "utgroup")
 
+        # change 'LJ' into 'lj'
+        if new_attr.find("LJ") != -1:
+            if new_attr == "LJ":
+                new_attr = "lj"
+            elif new_attr.startswith("LJ"):
+                new_attr = new_attr.replace("LJ", "lj_")
+            elif new_attr.endswith("LJ"):
+                new_attr = new_attr.replace("LJ", "_lj")
+            else:
+                new_attr = new_attr.replace("LJ", "_lj_")
+
         if new_attr.startswith("asAn"):
             new_attr = new_attr.replace("asAn", "as")
         elif new_attr.startswith("asA"):
@@ -115,6 +126,9 @@ def _pythonize(C, delete_old: bool = True) -> None:
 
         # now change anyCapitalLetter into any_capital_letter
         new_attr = "_".join(_upper_split(new_attr)).lower()
+
+        # remove any accidentally duplicated underscores
+        new_attr = new_attr.replace("__", "_")
 
         if new_attr != attr:
             try:
@@ -179,13 +193,13 @@ def _load_new_api_modules(delete_old: bool = True, is_base: bool = False):
     # call Pythonize on all of the new modules
     from .legacy import (  # noqa: F401
         Base,
+        Mol,
         Move,
         IO,
         System,
         Squire,
         MM,
         FF,
-        Mol,
         Analysis,
         CAS,
         Cluster,
@@ -324,9 +338,7 @@ def use_mixed_api(support_old_module_names: bool = False):
     # First, bring in the old API
     if support_old_module_names:
         print("Loading Sire with support for old module names.")
-        print(
-            "Note that this can cause problems with classes importing twice."
-        )
+        print("Note that this can cause problems with classes importing twice.")
         use_old_api()
     else:
         _is_using_old_api = True

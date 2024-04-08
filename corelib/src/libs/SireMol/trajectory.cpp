@@ -27,6 +27,7 @@
 
 #include "trajectory.h"
 #include "trajectoryaligner.h"
+#include "atomidxmapping.h"
 
 #include "SireID/index.h"
 
@@ -41,6 +42,7 @@
 
 #include "SireBase/generalunitproperty.h"
 #include "SireBase/lazyevaluator.h"
+#include "SireBase/console.h"
 
 #include "SireBase/slice.h"
 
@@ -1010,6 +1012,31 @@ bool Trajectory::isCompatibleWith(const MoleculeInfoData &molinfo) const
     return this->nAtoms() == molinfo.nAtoms();
 }
 
+/** Merge this property with another property */
+PropertyList Trajectory::merge(const MolViewProperty &other,
+                               const AtomIdxMapping &mapping,
+                               const QString &ghost,
+                               const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<Trajectory>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
+}
+
 ///////
 /////// Implementation of Frame
 ///////
@@ -1836,6 +1863,31 @@ Frame Frame::join(const QVector<Frame> &frames,
                             frame.nAtoms() * sizeof(Force3D));
         }
     }
+
+    return ret;
+}
+
+/** Merge this property with another property */
+PropertyList Frame::merge(const MolViewProperty &other,
+                          const AtomIdxMapping &mapping,
+                          const QString &ghost,
+                          const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<Frame>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                   .arg(this->what()));
+
+    SireBase::PropertyList ret;
+
+    ret.append(*this);
+    ret.append(*this);
 
     return ret;
 }

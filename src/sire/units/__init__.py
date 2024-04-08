@@ -382,10 +382,51 @@ def _fix_generalunit():
         else:
             return obj
 
+    def __generalunit__pow__(obj, power):
+        try:
+            power = float(power)
+        except Exception:
+            raise TypeError(
+                "unsupported operand type(s) for ^: '%s' and '%s'"
+                % (obj.__class__.__qualname__, power.__class__.__qualname__)
+            )
+
+        if obj.is_zero():
+            return obj
+
+        elif power == 0:
+            return obj / obj
+
+        value = obj.value() ** power
+
+        dims = obj.dimensions()
+
+        # Compute the new dimensions, rounding floats to 16 decimal places.
+        new_dims = [round(dim * power, 16) for dim in dims]
+
+        # Make sure the new dimensions are integers.
+        def is_integer(dim):
+            return dim == int(dim)
+
+        if not all(is_integer(dim) for dim in new_dims):
+            raise ValueError(
+                "The exponent must be a factor of all the unit dimensions."
+            )
+
+        # Convert to integers.
+        new_dims = [int(dim) for dim in new_dims]
+
+        return GeneralUnit(value, new_dims)
+
+    def __generalunit__sqrt__(obj):
+        return obj**0.5
+
     GeneralUnit.__bool__ = __generalunit__bool__
     GeneralUnit.__float__ = __generalunit__float__
     GeneralUnit.__int__ = __generalunit__int__
     GeneralUnit.__abs__ = __generalunit__abs__
+    GeneralUnit.__pow__ = __generalunit__pow__
+    GeneralUnit.sqrt = __generalunit__sqrt__
 
 
 if not hasattr(GeneralUnit, "to_default"):
@@ -625,6 +666,9 @@ def set_si_units(scaled: bool = True):
                 "kJ mol-1 rad-2",
                 "kJ mol-1 K-1",
                 "kJ mol-1 K-2",
+                "kJ mol-1 nm^6",
+                "kJ mol-1 nm^12",
+                "kJ mol-1 nm^4",
                 "J s",
                 "W",
                 "J mol-1 s",
@@ -652,6 +696,9 @@ def set_si_units(scaled: bool = True):
                 "J mol-1 rad-2",
                 "J mol-1 K-1",
                 "J mol-1 K-2",
+                "J mol-1 nm^6",
+                "J mol-1 nm^12",
+                "J mol-1 nm^4",
                 "J s",
                 "W",
                 "J mol-1 s",
@@ -704,6 +751,9 @@ def set_internal_units():
             "kcal mol-1 s",
             "kcal mol-1 s-1",
             "kcal Å-1",
+            "kcal mol-1 Å^6",
+            "kcal mol-1 Å^12",
+            "kcal mol-1 Å^4",
             "atm",
         ]
     )

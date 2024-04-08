@@ -173,6 +173,18 @@ void register_MolEditor_class(){
                 , "Commit these changes and return a copy of the\nedited molecule" );
         
         }
+        { //::SireMol::MolEditor::makeSingleCutGroup
+        
+            typedef ::SireMol::MolStructureEditor ( ::SireMol::MolEditor::*makeSingleCutGroup_function_type)(  ) const;
+            makeSingleCutGroup_function_type makeSingleCutGroup_function_value( &::SireMol::MolEditor::makeSingleCutGroup );
+            
+            MolEditor_exposer.def( 
+                "makeSingleCutGroup"
+                , makeSingleCutGroup_function_value
+                , bp::return_self< >()
+                , "Return an editor where all atoms have been moved into a\n  single cutgroup\n" );
+        
+        }
         { //::SireMol::MolEditor::operator=
         
             typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*assign_function_type)( ::SireMol::Molecule const & ) ;
@@ -336,6 +348,18 @@ void register_MolEditor_class(){
                 , "Remove all segments from this molecule. This returns an editor that\ncan be used to further edit the structure of this molecule" );
         
         }
+        { //::SireMol::MolEditor::removeAlternateNames
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*removeAlternateNames_function_type)(  ) ;
+            removeAlternateNames_function_type removeAlternateNames_function_value( &::SireMol::MolEditor::removeAlternateNames );
+            
+            MolEditor_exposer.def( 
+                "removeAlternateNames"
+                , removeAlternateNames_function_value
+                , bp::return_self< >()
+                , "Remove all alternate names from this molecule" );
+        
+        }
         { //::SireMol::MolEditor::removeLink
         
             typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*removeLink_function_type)( ::QString const & ) ;
@@ -424,6 +448,19 @@ void register_MolEditor_class(){
                 , ( bp::arg("atomnums"), bp::arg("resnums") )
                 , bp::return_self< >()
                 , "Renumber the atoms and residues in the molecule according to the passed maps" );
+        
+        }
+        { //::SireMol::MolEditor::switchToAlternateNames
+        
+            typedef ::SireMol::MolEditor & ( ::SireMol::MolEditor::*switchToAlternateNames_function_type)( bool ) ;
+            switchToAlternateNames_function_type switchToAlternateNames_function_value( &::SireMol::MolEditor::switchToAlternateNames );
+            
+            MolEditor_exposer.def( 
+                "switchToAlternateNames"
+                , switchToAlternateNames_function_value
+                , ( bp::arg("keep_originals")=(bool)(true) )
+                , bp::return_self< >()
+                , "Switch to using the alternate names for all atoms and residues.\n  If keep_originals is true, then the original names will be\n  stored in the alternate names. If keep_originals is false,\n  then the original names will be removed.\n" );
         
         }
         { //::SireMol::MolEditor::toString

@@ -1,6 +1,6 @@
-****
+======================================
 `Sire <https://sire.openbiosim.org>`__
-****
+======================================
 
 .. image:: https://github.com/openbiosim/sire/workflows/Build/badge.svg
    :target: https://github.com/openbiosim/sire/actions?query=workflow%3ABuild
@@ -43,7 +43,7 @@ To create a new environment:
 
 .. code-block:: bash
 
-    conda create -n openbiosim "python<3.12"
+    conda create -n openbiosim "python<3.13"
     conda activate openbiosim
     conda install -c conda-forge -c openbiosim sire
 
@@ -51,9 +51,44 @@ To install the latest development version you can use:
 
 .. code-block:: bash
 
-    conda create -n openbiosim-dev "python<3.12"
+    conda create -n openbiosim-dev "python<3.13"
     conda activate openbiosim-dev
     conda install -c conda-forge -c openbiosim/label/dev sire
+
+Installing older versions
+-------------------------
+
+You can install a specific version of sire by specifying the version number
+in the conda install command, e.g.
+
+.. code-block:: bash
+
+    conda install -c conda-forge -c openbiosim sire==2024.1.0
+
+Note that limited space means that we can only keep a small number of
+versions of sire on the official openbiosim conda channel. Generally
+these are all point releases of the latest major version, plus the latest
+point release of the last major version.
+
+We do provide an
+`archive channel <https://openbiosim.blob.core.windows.net/archive/index.html>`__
+of all previous releases. You can search this archive channel for the
+release you are interested in using the following command:
+
+.. code-block:: bash
+
+    conda search -c https://openbiosim.blob.core.windows.net/archive sire
+
+This will return a list of all versions of sire available in the archive.
+
+You can install a specific version from the archive using a command like:
+
+.. code-block:: bash
+
+    conda install -c https://openbiosim.blob.core.windows.net/archive sire==2023.2.3
+
+Installation from source
+------------------------
 
 However, as you are here, it is likely you want to download the latest,
 greatest version of the code, which you will need to compile. To compile
@@ -116,7 +151,7 @@ Support and Development
 
 Bugs, Comments, Questions
 -------------------------
-For bug reports/sugguestions/complains please file an issue on
+For bug reports/suggestions/complaints please file an issue on
 `GitHub <http://github.com/OpenBioSim/sire/issues>`__.
 
 Developers guide

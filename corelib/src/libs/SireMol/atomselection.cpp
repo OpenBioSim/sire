@@ -28,7 +28,7 @@
 #include "atomselection.h"
 #include "moleculedata.h"
 #include "moleculeview.h"
-
+#include "atomidxmapping.h"
 #include "moleculeinfodata.h"
 
 #include "SireError/errors.h"
@@ -4223,4 +4223,16 @@ bool AtomSelection::isSegment() const
     }
 
     return false;
+}
+
+PropertyList AtomSelection::merge(const MolViewProperty &other,
+                                  const AtomIdxMapping &mapping,
+                                  const QString &ghost,
+                                  const SireBase::PropertyMap &map) const
+{
+    PropertyList ret;
+    ret.append(*this);
+    ret.append(*this);
+
+    return ret;
 }

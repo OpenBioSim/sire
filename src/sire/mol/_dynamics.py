@@ -94,6 +94,7 @@ class DynamicsData:
             self._elapsed_time = 0 * nanosecond
             self._walltime = 0 * nanosecond
             self._is_running = False
+            self._schedule_changed = False
 
             from ..convert import to
 
@@ -235,7 +236,9 @@ class DynamicsData:
             if lambda_windows is not None:
                 for lambda_value in lambda_windows:
                     if lambda_value != sim_lambda_value:
-                        self._omm_mols.set_lambda(lambda_value)
+                        self._omm_mols.set_lambda(
+                            lambda_value, update_constraints=False
+                        )
                         nrgs[str(lambda_value)] = (
                             self._omm_mols.get_potential_energy(
                                 to_sire_units=False
@@ -243,7 +246,7 @@ class DynamicsData:
                             * kcal_per_mol
                         )
 
-                self._omm_mols.set_lambda(sim_lambda_value)
+                self._omm_mols.set_lambda(sim_lambda_value, update_constraints=False)
 
             self._energy_trajectory.set(
                 self._current_time, nrgs, {"lambda": str(sim_lambda_value)}
@@ -400,6 +403,17 @@ class DynamicsData:
         else:
             return self._omm_mols.get_perturbable_constraint()
 
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        if self.is_null():
+            return None
+        else:
+            return self._omm_mols.get_constraints()
+
     def get_schedule(self):
         if self.is_null():
             return None
@@ -409,6 +423,8 @@ class DynamicsData:
     def set_schedule(self, schedule):
         if not self.is_null():
             self._omm_mols.set_lambda_schedule(schedule)
+            self._schedule_changed = True
+            self.set_lambda(self._omm_mols.get_lambda())
 
     def get_lambda(self):
         if self.is_null():
@@ -416,7 +432,7 @@ class DynamicsData:
         else:
             return self._omm_mols.get_lambda()
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         if not self.is_null():
             s = self.get_schedule()
 
@@ -425,11 +441,16 @@ class DynamicsData:
 
             lambda_value = s.clamp(lambda_value)
 
-            if lambda_value == self._omm_mols.get_lambda():
+            if (not self._schedule_changed) and (
+                lambda_value == self._omm_mols.get_lambda()
+            ):
                 # nothing to do
                 return
 
-            self._omm_mols.set_lambda(lambda_value)
+            self._omm_mols.set_lambda(
+                lambda_value=lambda_value, update_constraints=update_constraints
+            )
+            self._schedule_changed = False
             self._clear_state()
 
     def integrator(self):
@@ -543,20 +564,78 @@ class DynamicsData:
 
         self._omm_mols.getIntegrator().step(num_steps)
 
-    def run_minimisation(self, max_iterations: int):
+    def get_minimisation_log(self):
+        """
+        Return the log from the last minimisation
+        """
+        if self.is_null():
+            return None
+        else:
+            try:
+                return self._minimisation_log
+            except Exception:
+                return None
+
+    def run_minimisation(
+        self,
+        max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        ratchet_frequency: int = 500,
+        starting_k: float = 100.0,
+        ratchet_scale: float = 2.0,
+        max_constraint_error: float = 0.001,
+    ):
         """
         Internal method that runs minimisation on the molecules.
+
+        If the system is constrained, then a ratcheting algorithm is used.
+        The constraints are replaced by harmonic restraints with an
+        force constant based on `tolerance` and `starting_k`. Minimisation
+        is performed, with the actual constrained bond lengths checked
+        whenever minimisation converges, or when ratchet_frequency steps
+        have completed (whichever is sooner). The force constant of
+        the restraints is ratcheted up by `ratchet_scale`, and minimisation
+        continues until there is no large change in energy or the maximum
+        number of ratchets has been reached. In addition, at each ratchet,
+        the actual bond lengths of constrained bonds are compared against
+        the constrained values. If these have drifted too far away from
+        the constrained values, then the minimisation is restarted,
+        going back to the starting conformation and starting minimisation
+        at one higher ratchet level. This will repeat a maximum of
+        `max_restarts` times.
+
+        If a stable structure cannot be reached, then an exception
+        will be raised.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - tolerance (float): The tolerance to use for the minimisation
+        - max_restarts (int): The maximum number of restarts before giving up
+        - max_ratchets (int): The maximum number of ratchets before giving up
+        - ratchet_frequency (int): The maximum number of steps between ratchets
+        - starting_k (float): The starting value of k for the minimisation
+        - ratchet_scale (float): The amount to scale k at each ratchet
+        - max_constraint_error (float): The maximum error in the constraint in nm
         """
         from ..legacy.Convert import minimise_openmm_context
 
         if max_iterations <= 0:
             max_iterations = 0
 
-        minimise_openmm_context(self._omm_mols, max_iterations=max_iterations)
+        self._minimisation_log = minimise_openmm_context(
+            self._omm_mols,
+            tolerance=tolerance,
+            max_iterations=max_iterations,
+            max_restarts=max_restarts,
+            max_ratchets=max_ratchets,
+            ratchet_frequency=ratchet_frequency,
+            starting_k=starting_k,
+            ratchet_scale=ratchet_scale,
+            max_constraint_error=max_constraint_error,
+        )
 
     def _rebuild_and_minimise(self):
         if self.is_null():
@@ -579,7 +658,7 @@ class DynamicsData:
 
         self._omm_mols = to(self._sire_mols, "openmm", map=self._map)
 
-        self.run_minimisation(max_iterations=10000)
+        self.run_minimisation()
 
     def run(
         self,
@@ -890,6 +969,15 @@ class DynamicsData:
             self.run(**orig_args)
             return
 
+    def to_xml(self, f=None):
+        """
+        Save the current state of the dynamics to XML.
+        This is mostly used for debugging. This will return the
+        XML string if 'f' is None. Otherwise it will write the
+        XML to 'f' (either a filename, or a FILE object)
+        """
+        return self._omm_mols.to_xml(f=f)
+
     def commit(self, return_as_system: bool = False):
         if self.is_null():
             return
@@ -947,6 +1035,7 @@ class Dynamics:
         swap_end_states=None,
         ignore_perturbations=None,
         shift_delta=None,
+        shift_coulomb=None,
         coulomb_power=None,
         restraints=None,
         fixed=None,
@@ -971,6 +1060,9 @@ class Dynamics:
 
         if shift_delta is not None:
             _add_extra(extras, "shift_delta", u(shift_delta))
+
+        if shift_coulomb is not None:
+            _add_extra(extras, "shift_coulomb", u(shift_coulomb))
 
         _add_extra(extras, "coulomb_power", coulomb_power)
         _add_extra(extras, "restraints", restraints)
@@ -1007,18 +1099,57 @@ class Dynamics:
     def minimise(
         self,
         max_iterations: int = 10000,
+        tolerance: float = 10.0,
+        max_restarts: int = 10,
+        max_ratchets: int = 20,
+        ratchet_frequency: int = 500,
+        starting_k: float = 100.0,
+        ratchet_scale: float = 2.0,
+        max_constraint_error: float = 0.001,
     ):
         """
-        Perform minimisation on the molecules, running a maximum
-        of max_iterations iterations.
+        Internal method that runs minimisation on the molecules.
+
+        If the system is constrained, then a ratcheting algorithm is used.
+        The constraints are replaced by harmonic restraints with an
+        force constant based on `tolerance` and `starting_k`. Minimisation
+        is performed, with the actual constrained bond lengths checked
+        whenever minimisation converges, or when ratchet_frequency steps
+        have completed (whichever is sooner). The force constant of
+        the restraints is ratcheted up by `ratchet_scale`, and minimisation
+        continues until there is no large change in energy or the maximum
+        number of ratchets has been reached. In addition, at each ratchet,
+        the actual bond lengths of constrained bonds are compared against
+        the constrained values. If these have drifted too far away from
+        the constrained values, then the minimisation is restarted,
+        going back to the starting conformation and starting minimisation
+        at one higher ratchet level. This will repeat a maximum of
+        `max_restarts` times.
+
+        If a stable structure cannot be reached, then an exception
+        will be raised.
 
         Parameters:
 
         - max_iterations (int): The maximum number of iterations to run
+        - tolerance (float): The tolerance to use for the minimisation
+        - max_restarts (int): The maximum number of restarts before giving up
+        - max_ratchets (int): The maximum number of ratchets before giving up
+        - ratchet_frequency (int): The maximum number of steps between ratchets
+        - starting_k (float): The starting value of k for the minimisation
+        - ratchet_scale (float): The amount to scale k at each ratchet
+        - max_constraint_error (float): The maximum error in the constraints in nm
         """
         if not self._d.is_null():
             self._d.run_minimisation(
                 max_iterations=max_iterations,
+                tolerance=tolerance,
+                max_restarts=max_restarts,
+                max_ratchets=max_ratchets,
+                ratchet_frequency=ratchet_frequency,
+                starting_k=starting_k,
+                ratchet_scale=ratchet_scale,
+                max_constraint_error=max_constraint_error,
             )
 
         return self
@@ -1155,14 +1286,22 @@ class Dynamics:
         """
         return self._d.get_lambda()
 
-    def set_lambda(self, lambda_value: float):
+    def set_lambda(self, lambda_value: float, update_constraints: bool = True):
         """
         Set the current value of lambda for this system. This will
         update the forcefield parameters in the context according
         to the data in the LambdaSchedule. This does nothing if
-        this isn't a perturbable system
+        this isn't a perturbable system.
+
+        If `update_constraints` is True, then this will also update
+        the constraint length of any constrained perturbable bonds.
+        These will be set to the r0 value for that bond at this
+        value of lambda. If `update_constraints` is False, then
+        the constraint will not be changed.
         """
-        self._d.set_lambda(lambda_value)
+        self._d.set_lambda(
+            lambda_value=lambda_value, update_constraints=update_constraints
+        )
 
     def ensemble(self):
         """
@@ -1228,6 +1367,14 @@ class Dynamics:
         constraining bonds involving hydrogens etc.)
         """
         return self._d.perturbable_constraint()
+
+    def get_constraints(self):
+        """
+        Return the actual list of constraints that have been applied
+        to this system. This is two lists of atoms, plus a list of
+        distances. The constraint is atom0[i]::atom1[i] with distance[i]
+        """
+        return self._d.get_constraints()
 
     def integrator(self):
         """
@@ -1356,13 +1503,13 @@ class Dynamics:
 
             try:
                 for lambda_value in lambda_values:
-                    self.set_lambda(lambda_value)
+                    self.set_lambda(lambda_value, update_constraints=False)
                     nrgs.append(self._d.current_potential_energy())
             except Exception:
-                self.set_lambda(old_lambda)
+                self.set_lambda(old_lambda, update_constraints=False)
                 raise
 
-            self.set_lambda(old_lambda)
+            self.set_lambda(old_lambda, update_constraints=False)
 
             return nrgs
 
@@ -1389,6 +1536,15 @@ class Dynamics:
             )
         else:
             return t
+
+    def to_xml(self, f=None):
+        """
+        Save the current state of the dynamics to XML.
+        This is mostly used for debugging. This will return the
+        XML string if 'f' is None. Otherwise it will write the
+        XML to 'f' (either a filename, or a FILE object)
+        """
+        return self._d.to_xml(f=f)
 
     def commit(self, return_as_system: bool = False):
         """

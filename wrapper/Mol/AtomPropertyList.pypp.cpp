@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireBase::PropertyList> __copy__(const SireMol::AtomProperty<SireBase::PropertyList> &other){ return SireMol::AtomProperty<SireBase::PropertyList>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -359,6 +361,19 @@ void register_AtomPropertyList_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireBase::PropertyList >::merge
+        
+            typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireBase::PropertyList >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireBase::PropertyList >::merge );
+            
+            AtomPropertyList_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireBase::PropertyList >::nAtoms
         
             typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;
@@ -480,6 +495,20 @@ void register_AtomPropertyList_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireBase::PropertyList >::set
+        
+            typedef SireMol::AtomProperty< SireBase::PropertyList > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireBase::PropertyList > & ( ::SireMol::AtomProperty< SireBase::PropertyList >::*set_function_type)( int,::SireBase::PropertyList const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireBase::PropertyList >::set );
+            
+            AtomPropertyList_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

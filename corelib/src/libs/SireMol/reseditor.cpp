@@ -127,6 +127,30 @@ QString ResEditor::toString() const
     return QObject::tr("Editor{ %1 }").arg(Residue::toString());
 }
 
+/** Return the alternate name for this residue */
+ResName ResEditor::alternateName() const
+{
+    return d->getAlternateResName(this->index());
+}
+
+/** Set the alternate residue name for this residue */
+ResEditor &ResEditor::setAlternateName(const ResName &altname)
+{
+    if (altname == this->alternateName())
+        // nothing to do
+        return *this;
+
+    d->setAlternateResName(this->index(), altname);
+
+    return *this;
+}
+
+/** Set the alternate name for this residue */
+ResEditor &ResEditor::setAlternateName(const QString &altname)
+{
+    return this->setAlternateName(ResName(altname));
+}
+
 /** Rename this residue to 'newname' */
 ResEditor &ResEditor::rename(const ResName &newname)
 {
@@ -137,6 +161,12 @@ ResEditor &ResEditor::rename(const ResName &newname)
     d->rename(this->index(), newname);
 
     return *this;
+}
+
+/** Rename this residue to 'newname' */
+ResEditor &ResEditor::rename(const QString &newname)
+{
+    return this->rename(ResName(newname));
 }
 
 /** Renumber this residue to 'newnum' */
@@ -151,6 +181,12 @@ ResEditor &ResEditor::renumber(ResNum newnum)
     return *this;
 }
 
+/** Renumber this residue to 'newnum' */
+ResEditor &ResEditor::renumber(int newnum)
+{
+    return this->renumber(ResNum(newnum));
+}
+
 /** Change the index of this residue to 'newidx'. If this
     is larger than the number of residues in the molecule
     then this residue is moved to the end */
@@ -160,6 +196,12 @@ ResStructureEditor ResEditor::reindex(ResIdx newidx) const
     editor.reindex(newidx);
 
     return editor;
+}
+
+/** Reindex this residue to 'newidx' */
+ResStructureEditor ResEditor::reindex(int newidx) const
+{
+    return this->reindex(ResIdx(newidx));
 }
 
 /** Completely remove this residue from the molecule - this returns
@@ -447,11 +489,36 @@ AtomStructureEditor ResStructureEditor::select(const AtomID &atomid)
     return AtomStructureEditor(*this, atomIdx(atomid));
 }
 
+/** Return the alternate name for this residue */
+const ResName &ResStructureEditor::alternateName() const
+{
+    return StructureEditor::getAlternateResName(uid);
+}
+
+/** Set the alternate residue name for this residue */
+ResStructureEditor &ResStructureEditor::setAlternateName(const ResName &altname)
+{
+    StructureEditor::setAlternateResName(uid, altname);
+    return *this;
+}
+
+/** Set the alternate name for this residue */
+ResStructureEditor &ResStructureEditor::setAlternateName(const QString &altname)
+{
+    return this->setAlternateName(ResName(altname));
+}
+
 /** Rename this residue to 'newname' */
 ResStructureEditor &ResStructureEditor::rename(const ResName &newname)
 {
     this->renameResidue(uid, newname);
     return *this;
+}
+
+/** Rename this residue to 'newname' */
+ResStructureEditor &ResStructureEditor::rename(const QString &newname)
+{
+    return this->rename(ResName(newname));
 }
 
 /** Renumber this residue to 'newnum' */
@@ -461,6 +528,12 @@ ResStructureEditor &ResStructureEditor::renumber(ResNum newnum)
     return *this;
 }
 
+/** Renumber this residue to 'newnum' */
+ResStructureEditor &ResStructureEditor::renumber(int newnum)
+{
+    return this->renumber(ResNum(newnum));
+}
+
 /** Change the index of this residue to 'newidx'. If this
     is larger than the number of residues in the molecule
     then this residue is moved to the end */
@@ -468,6 +541,12 @@ ResStructureEditor &ResStructureEditor::reindex(ResIdx newidx)
 {
     this->reindexResidue(uid, newidx);
     return *this;
+}
+
+/** Reindex this residue to 'newidx' */
+ResStructureEditor &ResStructureEditor::reindex(int newidx)
+{
+    return this->reindex(ResIdx(newidx));
 }
 
 /** Completely remove this residue from the molecule - this returns

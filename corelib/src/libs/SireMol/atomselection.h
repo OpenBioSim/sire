@@ -454,6 +454,11 @@ namespace SireMol
         template <class T>
         void assertCompatibleWith(const AtomProperty<T> &prop) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     private:
         bool _pvt_selected(const CGAtomIdx &cgatomidx) const;
         bool _pvt_selected(AtomIdx atomidx) const;

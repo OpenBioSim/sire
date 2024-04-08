@@ -3,9 +3,12 @@
 // (C) Christopher Woods, GPL >= 3 License
 
 #include "boost/python.hpp"
+#include "Helpers/clone_const_reference.hpp"
 #include "LambdaSchedule.pypp.hpp"
 
 namespace bp = boost::python;
+
+#include "SireBase/console.h"
 
 #include "SireCAS/values.h"
 
@@ -34,6 +37,30 @@ void register_LambdaSchedule_class(){
         LambdaSchedule_exposer_t LambdaSchedule_exposer = LambdaSchedule_exposer_t( "LambdaSchedule", "This is a schedule that specifies how parameters are changed according\nto a global lambda value. The change can be broken up by sub lever,\nand by stage.\n", bp::init< >("") );
         bp::scope LambdaSchedule_scope( LambdaSchedule_exposer );
         LambdaSchedule_exposer.def( bp::init< SireCAS::LambdaSchedule const & >(( bp::arg("other") ), "") );
+        { //::SireCAS::LambdaSchedule::addAnnihilateStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addAnnihilateStage_function_type)( bool ) ;
+            addAnnihilateStage_function_type addAnnihilateStage_function_value( &::SireCAS::LambdaSchedule::addAnnihilateStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addAnnihilateStage"
+                , addAnnihilateStage_function_value
+                , ( bp::arg("perturbed_is_annihilated")=(bool)(true) )
+                , "Add a stage to the schedule that will annihilate the perturbed\n  state if `perturbed_is_annihilated` is true, otherwise the\n  reference state is annihilated. The stage will be called annihilate.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addAnnihilateStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addAnnihilateStage_function_type)( ::QString const &,bool ) ;
+            addAnnihilateStage_function_type addAnnihilateStage_function_value( &::SireCAS::LambdaSchedule::addAnnihilateStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addAnnihilateStage"
+                , addAnnihilateStage_function_value
+                , ( bp::arg("name"), bp::arg("perturbed_is_annihilated")=(bool)(true) )
+                , "Add a named stage to the schedule that will annihilate the perturbed\n  state if `perturbed_is_annihilated` is true, otherwise the\n  reference state is annihilated.\n" );
+        
+        }
         { //::SireCAS::LambdaSchedule::addChargeScaleStages
         
             typedef void ( ::SireCAS::LambdaSchedule::*addChargeScaleStages_function_type)( double ) ;
@@ -55,7 +82,57 @@ void register_LambdaSchedule_class(){
                 "addChargeScaleStages"
                 , addChargeScaleStages_function_value
                 , ( bp::arg("decharge_name"), bp::arg("recharge_name"), bp::arg("scale")=0.20000000000000001 )
-                , "" );
+                , "Sandwich the current set of stages with a charge-descaling and\n  a charge-scaling stage. This prepends a charge-descaling stage\n  that scales the charge parameter down from `initial` to\n  :gamma:.initial (where :gamma:=`scale`). The charge parameter in all of\n  the exising stages in this schedule are then multiplied\n  by :gamma:. A final charge-rescaling stage is then appended that\n  scales the charge parameter from :gamma:.final to final.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addDecoupleStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addDecoupleStage_function_type)( bool ) ;
+            addDecoupleStage_function_type addDecoupleStage_function_value( &::SireCAS::LambdaSchedule::addDecoupleStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addDecoupleStage"
+                , addDecoupleStage_function_value
+                , ( bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "Add a stage to the schedule that will decouple the perturbed\n  state if `perturbed_is_decoupled` is true, otherwise the\n  reference state is decoupled. The stage will be called decouple.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addDecoupleStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addDecoupleStage_function_type)( ::QString const &,bool ) ;
+            addDecoupleStage_function_type addDecoupleStage_function_value( &::SireCAS::LambdaSchedule::addDecoupleStage );
+            
+            LambdaSchedule_exposer.def( 
+                "addDecoupleStage"
+                , addDecoupleStage_function_value
+                , ( bp::arg("name"), bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "Add a named stage to the schedule that will decouple the perturbed\n  state if `perturbed_is_decoupled` is true, otherwise the\n  reference state is decoupled.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addForce
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addForce_function_type)( ::QString const & ) ;
+            addForce_function_type addForce_function_value( &::SireCAS::LambdaSchedule::addForce );
+            
+            LambdaSchedule_exposer.def( 
+                "addForce"
+                , addForce_function_value
+                , ( bp::arg("force") )
+                , bp::release_gil_policy()
+                , "Add a force to a schedule. This is only useful if you want to\n  plot how the equations would affect the lever. Forces will be\n  automatically added by any perturbation run that needs them,\n  so you dont need to add them manually yourself.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::addForces
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*addForces_function_type)( ::QStringList const & ) ;
+            addForces_function_type addForces_function_value( &::SireCAS::LambdaSchedule::addForces );
+            
+            LambdaSchedule_exposer.def( 
+                "addForces"
+                , addForces_function_value
+                , ( bp::arg("forces") )
+                , bp::release_gil_policy()
+                , "Add some forces to a schedule. This is only useful if you want to\n  plot how the equations would affect the lever. Forces will be\n  automatically added by any perturbation run that needs them,\n  so you dont need to add them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addLever
@@ -106,7 +183,7 @@ void register_LambdaSchedule_class(){
                 , addMorphStage_function_value
                 , ( bp::arg("name") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Append a morph stage onto this schedule. The morph stage is a\n  standard stage that scales each forcefield parameter by\n  (1-:lambda:).initial + :lambda:.final\n" );
         
         }
         { //::SireCAS::LambdaSchedule::addStage
@@ -133,6 +210,30 @@ void register_LambdaSchedule_class(){
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
                 , "Append a stage called name which uses the passed equation\n  to the end of this schedule. The equation will be the default\n  equation that scales all parameters (levers) that dont have\n  a custom lever for this stage.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::charge_scaled_annihilate
+        
+            typedef ::SireCAS::LambdaSchedule ( *charge_scaled_annihilate_function_type )( double,bool );
+            charge_scaled_annihilate_function_type charge_scaled_annihilate_function_value( &::SireCAS::LambdaSchedule::charge_scaled_annihilate );
+            
+            LambdaSchedule_exposer.def( 
+                "charge_scaled_annihilate"
+                , charge_scaled_annihilate_function_value
+                , ( bp::arg("scale")=0.20000000000000001, bp::arg("perturbed_is_annihilated")=(bool)(true) )
+                , "Return a schedule that can be used for a standard double-annihilation\n  free energy perturbation. If `perturbed_is_annihilated` is true, then\n  the perturbed state is annihilated, otherwise the reference state is\n  annihilated. In this case also add states to decharge and recharge\n  the molecule either side of the annihilation stage, where the charges\n  are scaled to scale times their original value.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::charge_scaled_decouple
+        
+            typedef ::SireCAS::LambdaSchedule ( *charge_scaled_decouple_function_type )( double,bool );
+            charge_scaled_decouple_function_type charge_scaled_decouple_function_value( &::SireCAS::LambdaSchedule::charge_scaled_decouple );
+            
+            LambdaSchedule_exposer.def( 
+                "charge_scaled_decouple"
+                , charge_scaled_decouple_function_value
+                , ( bp::arg("scale")=0.20000000000000001, bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "Return a schedule that can be used for a standard double-decoupling\n  free energy perturbation. If `perturbed_is_decoupled` is true, then\n  the perturbed state is decoupled, otherwise the reference state is\n  decoupled. In this case also add states to decharge and recharge\n  the molecule either side of the decoupling stage, where the charges\n  are scaled to scale times their original value.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::charge_scaled_morph
@@ -225,28 +326,26 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::getEquation
         
-            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const & ) const;
+            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const &,::QString const &,::QString const & ) const;
             getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
             
             LambdaSchedule_exposer.def( 
                 "getEquation"
                 , getEquation_function_value
-                , ( bp::arg("stage") )
-                , bp::release_gil_policy()
-                , "Return the default equation used to control the parameters for\n  the stage `stage`.\n" );
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*" )
+                , "Return the equation used to control the specified lever\n  in the specified force at the specified stage. This will\n  be a custom equation if that has been set for this lever in this\n  force, or else it will be a custom equation set for this lever,\n  else it will be the default equation for this stage\n" );
         
         }
-        { //::SireCAS::LambdaSchedule::getEquation
+        { //::SireCAS::LambdaSchedule::getForces
         
-            typedef ::SireCAS::Expression ( ::SireCAS::LambdaSchedule::*getEquation_function_type)( ::QString const &,::QString const & ) const;
-            getEquation_function_type getEquation_function_value( &::SireCAS::LambdaSchedule::getEquation );
+            typedef ::QStringList ( ::SireCAS::LambdaSchedule::*getForces_function_type)(  ) const;
+            getForces_function_type getForces_function_value( &::SireCAS::LambdaSchedule::getForces );
             
             LambdaSchedule_exposer.def( 
-                "getEquation"
-                , getEquation_function_value
-                , ( bp::arg("stage"), bp::arg("lever") )
+                "getForces"
+                , getForces_function_value
                 , bp::release_gil_policy()
-                , "Return the equation used to control the specified `lever`\n  at the specified `stage`. This will be a custom equation\n  if that has been set for this lever, or else the\n  default equation for this stage.\n" );
+                , "Return all of the forces that have been explicitly added\n  to the schedule. Note that forces will be automatically added\n  by any perturbation run that needs them, so you dont normally\n  need to manage them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLambdaInStage
@@ -272,7 +371,7 @@ void register_LambdaSchedule_class(){
                 , getLeverStages_function_value
                 , ( bp::arg("lambda_values") )
                 , bp::release_gil_policy()
-                , "Return the list of lever stages that are used for the passed list\n  of lambda values. The lever names will be returned in the matching\n  order of the lambda values.\n" );
+                , "Return the list of stages that are used for the passed list\n  of lambda values. The stage names will be returned in the matching\n  order of the lambda values.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverStages
@@ -284,7 +383,7 @@ void register_LambdaSchedule_class(){
                 "getLeverStages"
                 , getLeverStages_function_value
                 , ( bp::arg("num_lambda")=(int)(101) )
-                , "Return the lever stages used for the list of `nvalue` lambda values\n  generated for the global lambda value between 0 and 1 inclusive.\n" );
+                , "Return the stages used for the list of `nvalue` lambda values\n  generated for the global lambda value between 0 and 1 inclusive.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverValues
@@ -296,7 +395,7 @@ void register_LambdaSchedule_class(){
                 "getLeverValues"
                 , getLeverValues_function_value
                 , ( bp::arg("lambda_values"), bp::arg("initial")=1., bp::arg("final")=2. )
-                , "Return the lever name and parameter values for that lever\n  for the specified list of lambda values, assuming that a\n  parameter for that lever has an initial value of\n  `initial_value` and a final value of `final_value`. This\n  is mostly useful for testing and graphing how this\n  schedule would change some hyperthetical forcefield\n  parameters for the specified lambda values.\n" );
+                , "Return the stage name and parameter values for that lever\n  for the specified list of lambda values, assuming that a\n  parameter for that stage has an initial value of\n  `initial_value` and a final value of `final_value`. This\n  is mostly useful for testing and graphing how this\n  schedule would change some hyperthetical forcefield\n  parameters for the specified lambda values.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::getLeverValues
@@ -323,6 +422,19 @@ void register_LambdaSchedule_class(){
                 , "Return all of the levers that have been explicitly added\n  to the schedule. Note that levers will be automatically added\n  by any perturbation run that needs them, so you dont normally\n  need to manage them manually yourself.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::getMoleculeSchedule
+        
+            typedef ::SireCAS::LambdaSchedule const & ( ::SireCAS::LambdaSchedule::*getMoleculeSchedule_function_type)( int ) const;
+            getMoleculeSchedule_function_type getMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::getMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "getMoleculeSchedule"
+                , getMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
+                , "Return the schedule used to control perturbations for the\n  perturbable molecule (or part of molecule) that is identified by the\n  passed pert_mol_id. This schedule will be used to control\n  all of the levers for this molecule (or part of molecule).\n\n  This returns this schedule if there is no specified schedule\n  for this molecule\n" );
+        
+        }
         { //::SireCAS::LambdaSchedule::getStage
         
             typedef ::QString ( ::SireCAS::LambdaSchedule::*getStage_function_type)( double ) const;
@@ -346,6 +458,31 @@ void register_LambdaSchedule_class(){
                 , getStages_function_value
                 , bp::release_gil_policy()
                 , "Return the names of all of the stages in this schedule, in\n  the order they will be performed\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::hasForceSpecificEquation
+        
+            typedef bool ( ::SireCAS::LambdaSchedule::*hasForceSpecificEquation_function_type)( ::QString const &,::QString const &,::QString const & ) const;
+            hasForceSpecificEquation_function_type hasForceSpecificEquation_function_value( &::SireCAS::LambdaSchedule::hasForceSpecificEquation );
+            
+            LambdaSchedule_exposer.def( 
+                "hasForceSpecificEquation"
+                , hasForceSpecificEquation_function_value
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*" )
+                , "Return whether or not the specified lever in the specified force\n  at the specified stage has a custom equation set for it\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::hasMoleculeSchedule
+        
+            typedef bool ( ::SireCAS::LambdaSchedule::*hasMoleculeSchedule_function_type)( int ) const;
+            hasMoleculeSchedule_function_type hasMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::hasMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "hasMoleculeSchedule"
+                , hasMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::release_gil_policy()
+                , "Return whether or not the perturbable molecule (or part of molecule)\n  that is identified by passed pert_mol_id has its own schedule" );
         
         }
         { //::SireCAS::LambdaSchedule::initial
@@ -399,41 +536,50 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::morph
         
-            typedef double ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,double,double,double ) const;
+            typedef double ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,double,double,double ) const;
             morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
             
             LambdaSchedule_exposer.def( 
                 "morph"
                 , morph_function_value
-                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs a single floating point parameters.\n" );
+                , ( bp::arg("force")="*", bp::arg("lever")="*", bp::arg("initial")=0, bp::arg("final")=1, bp::arg("lambda_value")=0 )
+                , "Return the parameters for the specified lever called `lever_name`\n  in the force force\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs a single floating point parameters.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::morph
         
-            typedef ::QVector< double > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< double > const &,::QVector< double > const &,double ) const;
+            typedef ::QVector< double > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,::QVector< double > const &,::QVector< double > const &,double ) const;
             morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
             
             LambdaSchedule_exposer.def( 
                 "morph"
                 , morph_function_value
-                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
-                , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs floating point parameters. There is an overload\n  of this function that morphs integer parameters, in which\n  case the result would be rounded to the nearest integer.\n" );
+                , ( bp::arg("force")="*", bp::arg("lever")="*", bp::arg("initial")=::QVector<double>( ), bp::arg("final")=::QVector<double>( ), bp::arg("lambda_value")=0. )
+                , "Return the parameters for the specified lever called `lever_name`\n  in the specified force,\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This morphs floating point parameters. There is an overload\n  of this function that morphs integer parameters, in which\n  case the result would be rounded to the nearest integer.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::morph
         
-            typedef ::QVector< int > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QVector< int > const &,::QVector< int > const &,double ) const;
+            typedef ::QVector< int > ( ::SireCAS::LambdaSchedule::*morph_function_type)( ::QString const &,::QString const &,::QVector< int > const &,::QVector< int > const &,double ) const;
             morph_function_type morph_function_value( &::SireCAS::LambdaSchedule::morph );
             
             LambdaSchedule_exposer.def( 
                 "morph"
                 , morph_function_value
-                , ( bp::arg("lever"), bp::arg("initial"), bp::arg("final"), bp::arg("lambda_value") )
+                , ( bp::arg("force")="*", bp::arg("lever")="*", bp::arg("initial")=::QVector<int>( ), bp::arg("final")=::QVector<int>( ), bp::arg("lambda_value")=0. )
+                , "Return the parameters for the specified lever called `lever_name`\n  for the specified force\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This function morphs integer parameters. In this case,\n  the result will be the rounded to the nearest integer.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::nForces
+        
+            typedef int ( ::SireCAS::LambdaSchedule::*nForces_function_type)(  ) const;
+            nForces_function_type nForces_function_value( &::SireCAS::LambdaSchedule::nForces );
+            
+            LambdaSchedule_exposer.def( 
+                "nForces"
+                , nForces_function_value
                 , bp::release_gil_policy()
-                , "Return the parameters for the specified lever called `lever_name`\n  that have been morphed from the passed list of initial values\n  (in `initial`) to the passed list of final values (in `final`)\n  for the specified global value of :lambda: (in `lambda_value`).\n\n  The morphed parameters will be returned in the matching\n  order to `initial` and `final`.\n\n  This function morphs integer parameters. In this case,\n  the result will be the rounded to the nearest integer.\n" );
+                , "Return the number of forces that have been explicitly added\n  to the schedule. Note that forces will be automatically added\n  by any perturbation run that needs them, so you dont normally\n  need to manage them manually yourself.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::nLevers
@@ -490,15 +636,40 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::removeEquation
         
-            typedef void ( ::SireCAS::LambdaSchedule::*removeEquation_function_type)( ::QString const &,::QString const & ) ;
+            typedef void ( ::SireCAS::LambdaSchedule::*removeEquation_function_type)( ::QString const &,::QString const &,::QString const & ) ;
             removeEquation_function_type removeEquation_function_value( &::SireCAS::LambdaSchedule::removeEquation );
             
             LambdaSchedule_exposer.def( 
                 "removeEquation"
                 , removeEquation_function_value
-                , ( bp::arg("stage"), bp::arg("lever") )
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*" )
+                , "Remove the custom equation for the specified `lever` in the\n  specified force at the specified `stage`.\n  The lever will now use the equation specified for this\n  lever for this stage, or the default lever for the stage\n  if this isnt set\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::removeForce
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeForce_function_type)( ::QString const & ) ;
+            removeForce_function_type removeForce_function_value( &::SireCAS::LambdaSchedule::removeForce );
+            
+            LambdaSchedule_exposer.def( 
+                "removeForce"
+                , removeForce_function_value
+                , ( bp::arg("force") )
                 , bp::release_gil_policy()
-                , "Remove the custom equation for the specified `lever` at the\n  specified `stage`. The lever will now use the default\n  equation at this stage.\n" );
+                , "Remove a force from a schedule. This will not impact any\n  perturbation runs that use this schedule, as any missing\n  forces will be re-added.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::removeForces
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeForces_function_type)( ::QStringList const & ) ;
+            removeForces_function_type removeForces_function_value( &::SireCAS::LambdaSchedule::removeForces );
+            
+            LambdaSchedule_exposer.def( 
+                "removeForces"
+                , removeForces_function_value
+                , ( bp::arg("forces") )
+                , bp::release_gil_policy()
+                , "Remove some forces from a schedule. This will not impact any\n  perturbation runs that use this schedule, as any missing\n  forces will be re-added.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::removeLever
@@ -527,6 +698,32 @@ void register_LambdaSchedule_class(){
                 , "Remove some levers from the schedule. This will not impact any\n  perturbation runs that use this schedule, as any missing\n  levers will be re-added.\n" );
         
         }
+        { //::SireCAS::LambdaSchedule::removeMoleculeSchedule
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeMoleculeSchedule_function_type)( int ) ;
+            removeMoleculeSchedule_function_type removeMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::removeMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "removeMoleculeSchedule"
+                , removeMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::release_gil_policy()
+                , "Remove the perturbable molecule-specific schedule associated\n  with the perturbable molecule (or part of molecule) that is\n  identified by the passed pert_mol_id.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::removeStage
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*removeStage_function_type)( ::QString const & ) ;
+            removeStage_function_type removeStage_function_value( &::SireCAS::LambdaSchedule::removeStage );
+            
+            LambdaSchedule_exposer.def( 
+                "removeStage"
+                , removeStage_function_value
+                , ( bp::arg("stage") )
+                , bp::release_gil_policy()
+                , "Remove the stage stage" );
+        
+        }
         { //::SireCAS::LambdaSchedule::setConstant
         
             typedef ::SireCAS::Symbol ( ::SireCAS::LambdaSchedule::*setConstant_function_type)( ::QString const &,double ) ;
@@ -553,14 +750,14 @@ void register_LambdaSchedule_class(){
                 , "Set the value of a constant that may be used in any\n  of the stage equations.\n" );
         
         }
-        { //::SireCAS::LambdaSchedule::setDefaultEquation
+        { //::SireCAS::LambdaSchedule::setDefaultStageEquation
         
-            typedef void ( ::SireCAS::LambdaSchedule::*setDefaultEquation_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
-            setDefaultEquation_function_type setDefaultEquation_function_value( &::SireCAS::LambdaSchedule::setDefaultEquation );
+            typedef void ( ::SireCAS::LambdaSchedule::*setDefaultStageEquation_function_type)( ::QString const &,::SireCAS::Expression const & ) ;
+            setDefaultStageEquation_function_type setDefaultStageEquation_function_value( &::SireCAS::LambdaSchedule::setDefaultStageEquation );
             
             LambdaSchedule_exposer.def( 
-                "setDefaultEquation"
-                , setDefaultEquation_function_value
+                "setDefaultStageEquation"
+                , setDefaultStageEquation_function_value
                 , ( bp::arg("stage"), bp::arg("equation") )
                 , bp::release_gil_policy()
                 , "Set the default equation used to control levers for the\n  stage stage to equation. This equation will be used\n  to control any levers in this stage that dont have\n  their own custom equation.\n" );
@@ -568,15 +765,51 @@ void register_LambdaSchedule_class(){
         }
         { //::SireCAS::LambdaSchedule::setEquation
         
-            typedef void ( ::SireCAS::LambdaSchedule::*setEquation_function_type)( ::QString const &,::QString const &,::SireCAS::Expression const & ) ;
+            typedef void ( ::SireCAS::LambdaSchedule::*setEquation_function_type)( ::QString const &,::QString const &,::QString const &,::SireCAS::Expression const & ) ;
             setEquation_function_type setEquation_function_value( &::SireCAS::LambdaSchedule::setEquation );
             
             LambdaSchedule_exposer.def( 
                 "setEquation"
                 , setEquation_function_value
-                , ( bp::arg("stage"), bp::arg("lever"), bp::arg("equation") )
+                , ( bp::arg("stage")="*", bp::arg("force")="*", bp::arg("lever")="*", bp::arg("equation")=SireCAS::Expression() )
+                , "Set the custom equation used to control the specified lever\n  for the specified force at the stage stage to equation.\n  This equation will only be used to control the parameters for the\n  specified lever in the specified force at the specified stage\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::setMoleculeSchedule
+        
+            typedef void ( ::SireCAS::LambdaSchedule::*setMoleculeSchedule_function_type)( int,::SireCAS::LambdaSchedule const & ) ;
+            setMoleculeSchedule_function_type setMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::setMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "setMoleculeSchedule"
+                , setMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id"), bp::arg("schedule") )
                 , bp::release_gil_policy()
-                , "Set the custom equation used to control the specified\n  `lever` at the stage `stage` to `equation`. This equation\n  will only be used to control the parameters for the\n  specified lever at the specified stage.\n" );
+                , "Set schedule as the molecule-specific schedule for the\n  perturbable molecule (or part of molecule) that is identified by the\n  passed pert_mol_id. This schedule will be used to control\n  all of the levers for this molecule (or part of molecule),\n  and replaces any levers provided by this schedule\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::standard_annihilate
+        
+            typedef ::SireCAS::LambdaSchedule ( *standard_annihilate_function_type )( bool );
+            standard_annihilate_function_type standard_annihilate_function_value( &::SireCAS::LambdaSchedule::standard_annihilate );
+            
+            LambdaSchedule_exposer.def( 
+                "standard_annihilate"
+                , standard_annihilate_function_value
+                , ( bp::arg("perturbed_is_annihilated")=(bool)(true) )
+                , "Return a schedule that can be used for a standard double-annihilation\n  free energy perturbation. If `perturbed_is_annihilated` is true, then\n  the perturbed state is annihilated, otherwise the reference state is\n  annihilated.\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::standard_decouple
+        
+            typedef ::SireCAS::LambdaSchedule ( *standard_decouple_function_type )( bool );
+            standard_decouple_function_type standard_decouple_function_value( &::SireCAS::LambdaSchedule::standard_decouple );
+            
+            LambdaSchedule_exposer.def( 
+                "standard_decouple"
+                , standard_decouple_function_value
+                , ( bp::arg("perturbed_is_decoupled")=(bool)(true) )
+                , "Return a schedule that can be used for a standard double-decoupling\n  free energy perturbation. If `perturbed_is_decoupled` is true, then\n  the perturbed state is decoupled, otherwise the reference state is\n  decoupled.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::standard_morph
@@ -589,6 +822,19 @@ void register_LambdaSchedule_class(){
                 , standard_morph_function_value
                 , bp::release_gil_policy()
                 , "Return a LambdaSchedule that represents a standard morph,\n  where every forcefield parameter is scaled by\n  (1-:lambda:).initial + :lambda:.final\n" );
+        
+        }
+        { //::SireCAS::LambdaSchedule::takeMoleculeSchedule
+        
+            typedef ::SireCAS::LambdaSchedule ( ::SireCAS::LambdaSchedule::*takeMoleculeSchedule_function_type)( int ) ;
+            takeMoleculeSchedule_function_type takeMoleculeSchedule_function_value( &::SireCAS::LambdaSchedule::takeMoleculeSchedule );
+            
+            LambdaSchedule_exposer.def( 
+                "takeMoleculeSchedule"
+                , takeMoleculeSchedule_function_value
+                , ( bp::arg("pert_mol_id") )
+                , bp::release_gil_policy()
+                , "Remove the perturbable molecule-specific schedule associated\n  with the perturbable molecule (or part of molecule) that is\n  identified by the passed pert_mol_id. This returns the\n  schedule that was removed. If no such schedule exists, then\n  a copy of this schedule is returned.\n" );
         
         }
         { //::SireCAS::LambdaSchedule::toString
@@ -627,10 +873,14 @@ void register_LambdaSchedule_class(){
                 , "" );
         
         }
+        LambdaSchedule_exposer.staticmethod( "charge_scaled_annihilate" );
+        LambdaSchedule_exposer.staticmethod( "charge_scaled_decouple" );
         LambdaSchedule_exposer.staticmethod( "charge_scaled_morph" );
         LambdaSchedule_exposer.staticmethod( "final" );
         LambdaSchedule_exposer.staticmethod( "initial" );
         LambdaSchedule_exposer.staticmethod( "lam" );
+        LambdaSchedule_exposer.staticmethod( "standard_annihilate" );
+        LambdaSchedule_exposer.staticmethod( "standard_decouple" );
         LambdaSchedule_exposer.staticmethod( "standard_morph" );
         LambdaSchedule_exposer.staticmethod( "typeName" );
         LambdaSchedule_exposer.def( "__copy__", &__copy__);

@@ -188,7 +188,8 @@ namespace SireMol
             return props;
         }
 
-        MoleculeData extract(const AtomSelection &selected_atoms) const;
+        MoleculeData extract(const AtomSelection &selected_atoms,
+                             bool to_same_molecule = false) const;
 
         QStringList propertyKeys() const;
 
@@ -245,6 +246,15 @@ namespace SireMol
         void renumber(const QHash<AtomNum, AtomNum> &atomnums);
         void renumber(const QHash<ResNum, ResNum> &resnums);
         void renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums);
+
+        void setAlternateAtomName(AtomIdx atomidx, const AtomName &newname);
+        void setAlternateResName(ResIdx residx, const ResName &newname);
+
+        AtomName getAlternateAtomName(AtomIdx atomidx) const;
+        ResName getAlternateResName(ResIdx residx) const;
+
+        void switchToAlternateNames(bool keep_originals = true);
+        void removeAlternateNames();
 
         void setProperty(const QString &key, const Property &value, bool clear_metadata = false);
 

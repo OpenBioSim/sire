@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Force> > __copy__(const SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Force> > &other){ return SireMol::AtomProperty<SireMaths::Vector3D<SireUnits::Dimension::Force> >(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -360,6 +362,19 @@ void register_AtomForces_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::merge
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::merge );
+            
+            AtomForces_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::nAtoms
         
             typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > > exported_class_t;
@@ -481,6 +496,20 @@ void register_AtomForces_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::set
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > > & ( ::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::*set_function_type)( int,::SireMaths::Vector3D< SireUnits::Dimension::PhysUnit< 1, 1, -2, 0, 0, 0, 0 > > const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMaths::Vector3D< SireUnits::Dimension::Force > >::set );
+            
+            AtomForces_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

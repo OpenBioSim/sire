@@ -53,6 +53,10 @@
 
 #include "AtomIdx.pypp.hpp"
 
+#include "AtomIdxMapping.pypp.hpp"
+
+#include "AtomIdxMappingEntry.pypp.hpp"
+
 #include "AtomIdxMatcher.pypp.hpp"
 
 #include "AtomIntProperty.pypp.hpp"
@@ -80,6 +84,8 @@
 #include "AtomNameMatcher.pypp.hpp"
 
 #include "AtomNum.pypp.hpp"
+
+#include "AtomNumMatcher.pypp.hpp"
 
 #include "AtomPolarisabilities.pypp.hpp"
 
@@ -577,8 +583,6 @@ namespace bp = boost::python;
 
 #include "SireMol/mover.hpp"
 
-#include "SireMol/element.h"
-
 #include "SireMol/mgidentifier.h"
 
 #include "SireMol/moleculeinfo.h"
@@ -586,6 +590,8 @@ namespace bp = boost::python;
 #include "SireMol/selector.hpp"
 
 #include "SireMol/selectorm.hpp"
+
+#include "SireMol/element.h"
 
 BOOST_PYTHON_MODULE(_Mol){
     register_SireMol_objects();
@@ -710,6 +716,10 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_AtomIdx_class();
 
+    register_AtomIdxMapping_class();
+
+    register_AtomIdxMappingEntry_class();
+
     register_AtomIdxMatcher_class();
 
     register_AtomMCSMatcher_class();
@@ -731,6 +741,8 @@ BOOST_PYTHON_MODULE(_Mol){
     register_AtomNameMatcher_class();
 
     register_AtomNum_class();
+
+    register_AtomNumMatcher_class();
 
     register_AtomProp_class();
 
@@ -1146,6 +1158,8 @@ BOOST_PYTHON_MODULE(_Mol){
 
     register_SireMol_properties();
 
+    bp::implicitly_convertible< QString, SireMol::Element >();
+
     bp::implicitly_convertible< SireMol::AtomID, SireMol::AtomIdentifier >();
 
     bp::implicitly_convertible< SireMol::CGID, SireMol::CGIdentifier >();
@@ -1177,8 +1191,6 @@ BOOST_PYTHON_MODULE(_Mol){
     bp::implicitly_convertible< SireMol::Selector<SireMol::Chain>, SireMol::SelectorM<SireMol::Chain> >();
 
     bp::implicitly_convertible< SireMol::Selector<SireMol::Segment>, SireMol::SelectorM<SireMol::Segment> >();
-
-    bp::implicitly_convertible<QString, SireMol::Element>();
 
     register_free_functions();
 }

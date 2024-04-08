@@ -16,6 +16,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireMol::BeadNum> __copy__(const SireMol::AtomProperty<SireMol::BeadNum> &other){ return SireMol::AtomProperty<SireMol::BeadNum>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -360,6 +362,19 @@ void register_AtomBeads_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMol::BeadNum >::merge
+        
+            typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMol::BeadNum >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMol::BeadNum >::merge );
+            
+            AtomBeads_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMol::BeadNum >::nAtoms
         
             typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;
@@ -481,6 +496,20 @@ void register_AtomBeads_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMol::BeadNum >::set
+        
+            typedef SireMol::AtomProperty< SireMol::BeadNum > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMol::BeadNum > & ( ::SireMol::AtomProperty< SireMol::BeadNum >::*set_function_type)( int,::SireMol::BeadNum const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::BeadNum >::set );
+            
+            AtomBeads_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

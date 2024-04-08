@@ -133,6 +133,30 @@ QString AtomEditor::toString() const
     return QObject::tr("Editor{ %1 }").arg(Atom::toString());
 }
 
+/** Return the alternate name for this atom */
+AtomName AtomEditor::alternateName() const
+{
+    return d->getAlternateAtomName(this->index());
+}
+
+/** Set the alternate name for this atom */
+AtomEditor &AtomEditor::setAlternateName(const AtomName &newname)
+{
+    if (newname == this->alternateName())
+        // nothing needs to be done
+        return *this;
+
+    d->setAlternateAtomName(this->index(), newname);
+
+    return *this;
+}
+
+/** Set the alternate name for this atom */
+AtomEditor &AtomEditor::setAlternateName(const QString &newname)
+{
+    return this->setAlternateName(AtomName(newname));
+}
+
 /** Rename this atom so that it is called 'newname' */
 AtomEditor &AtomEditor::rename(const AtomName &newname)
 {
@@ -143,6 +167,12 @@ AtomEditor &AtomEditor::rename(const AtomName &newname)
     d->rename(this->index(), newname);
 
     return *this;
+}
+
+/** Rename this atom */
+AtomEditor &AtomEditor::rename(const QString &newname)
+{
+    return this->rename(AtomName(newname));
 }
 
 /** Renumber this atom so that it has number 'newnum' */
@@ -157,6 +187,12 @@ AtomEditor &AtomEditor::renumber(AtomNum newnum)
     return *this;
 }
 
+/** Renumber this atom */
+AtomEditor &AtomEditor::renumber(int newnum)
+{
+    return this->renumber(AtomNum(newnum));
+}
+
 /** Reindex this atom so that it lies at index 'newidx'. Note
     that if 'newidx' is greater than the number of atoms, then
     this will move this atom to be the last in the list */
@@ -165,6 +201,12 @@ AtomStructureEditor AtomEditor::reindex(AtomIdx newidx) const
     AtomStructureEditor editor(*this);
     editor.reindex(newidx);
     return editor;
+}
+
+/** Reindex this atom */
+AtomStructureEditor AtomEditor::reindex(int newidx) const
+{
+    return this->reindex(AtomIdx(newidx));
 }
 
 /** Remove this atom from the molecule, returning an editor
@@ -412,11 +454,36 @@ MolStructureEditor AtomStructureEditor::molecule()
     return MolStructureEditor(*this);
 }
 
+/** Return the alternate name for this atom */
+const AtomName &AtomStructureEditor::alternateName() const
+{
+    return StructureEditor::getAlternateAtomName(uid);
+}
+
+/** Set the alternate name for this atom */
+AtomStructureEditor &AtomStructureEditor::setAlternateName(const AtomName &newname)
+{
+    StructureEditor::setAlternateAtomName(uid, newname);
+    return *this;
+}
+
+/** Set the alternate name for this atom */
+AtomStructureEditor &AtomStructureEditor::setAlternateName(const QString &newname)
+{
+    return this->setAlternateName(AtomName(newname));
+}
+
 /** Rename this atom to 'newname' */
 AtomStructureEditor &AtomStructureEditor::rename(const AtomName &newname)
 {
     this->renameAtom(uid, newname);
     return *this;
+}
+
+/** Rename this atom */
+AtomStructureEditor &AtomStructureEditor::rename(const QString &newname)
+{
+    return this->rename(AtomName(newname));
 }
 
 /** Renumber this atom to 'newnum' */
@@ -426,6 +493,12 @@ AtomStructureEditor &AtomStructureEditor::renumber(AtomNum newnum)
     return *this;
 }
 
+/** Renumber this atom */
+AtomStructureEditor &AtomStructureEditor::renumber(int newnum)
+{
+    return this->renumber(AtomNum(newnum));
+}
+
 /** Reindex this atom to 'newidx' - this will move the atom to
     the end if 'newidx' is greater than the number of atoms
     in the molecule */
@@ -433,6 +506,12 @@ AtomStructureEditor &AtomStructureEditor::reindex(AtomIdx newidx)
 {
     this->reindexAtom(uid, newidx);
     return *this;
+}
+
+/** Reindex this atom */
+AtomStructureEditor &AtomStructureEditor::reindex(int newidx)
+{
+    return this->reindex(AtomIdx(newidx));
 }
 
 /** Completely remove this atom from the molecule and return

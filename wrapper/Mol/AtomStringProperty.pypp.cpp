@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<QString> __copy__(const SireMol::AtomProperty<QString> &other){ return SireMol::AtomProperty<QString>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -387,6 +389,19 @@ void register_AtomStringProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< QString >::merge
+        
+            typedef SireMol::AtomProperty< QString > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< QString >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< QString >::merge );
+            
+            AtomStringProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< QString >::nAtoms
         
             typedef SireMol::AtomProperty< QString > exported_class_t;
@@ -508,6 +523,20 @@ void register_AtomStringProperty_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< QString >::set
+        
+            typedef SireMol::AtomProperty< QString > exported_class_t;
+            typedef ::SireMol::AtomProperty< QString > & ( ::SireMol::AtomProperty< QString >::*set_function_type)( int,::QString const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< QString >::set );
+            
+            AtomStringProperty_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

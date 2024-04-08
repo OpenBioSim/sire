@@ -39,14 +39,14 @@
 using namespace boost::python;
 
 /** This function converts a QChar to a python (8 bit) str object
-*/
+ */
 struct qchar_to_python_string
 {
-    static PyObject* convert(const QChar &cpp_string)
+    static PyObject *convert(const QChar &cpp_string)
     {
-        //get Qt to encode the string as UTF8, which python can then decode
-        // - this is probably not as efficient as it could be, but Sire
-        //   is not a text processing app ;-)
+        // get Qt to encode the string as UTF8, which python can then decode
+        //  - this is probably not as efficient as it could be, but Sire
+        //    is not a text processing app ;-)
         QByteArray utf8 = QString(cpp_string).toUtf8();
 
         if (utf8.isEmpty())
@@ -59,11 +59,11 @@ struct qchar_to_python_string
 };
 
 /** This function convert a python string or unicode to a QChar */
-void QChar_from_python_str_or_unicode( PyObject* obj_ptr,
-                                       converter::rvalue_from_python_stage1_data* data )
+void QChar_from_python_str_or_unicode(PyObject *obj_ptr,
+                                      converter::rvalue_from_python_stage1_data *data)
 {
     // First, convert the object to a python unicode object
-    PyObject* unicode_object;
+    PyObject *unicode_object;
 
     if (PyUnicode_Check(obj_ptr))
     {
@@ -85,14 +85,14 @@ void QChar_from_python_str_or_unicode( PyObject* obj_ptr,
     }
     else
     {
-        //we should never get here!!!
+        // we should never get here!!!
         return;
     }
 
-    //now convert the Python unicode string to UTF-8
-    PyObject *utf8 = PyUnicode_AsUTF8String( unicode_object );
+    // now convert the Python unicode string to UTF-8
+    PyObject *utf8 = PyUnicode_AsUTF8String(unicode_object);
 
-    //we now don't need to the unicode string anymore
+    // we now don't need to the unicode string anymore
     Py_DECREF(unicode_object);
 
     if (utf8 == 0)
@@ -102,7 +102,7 @@ void QChar_from_python_str_or_unicode( PyObject* obj_ptr,
         boost::python::throw_error_already_set();
     }
 
-    //get the raw buffer from the string
+    // get the raw buffer from the string
     char *utf8_string;
     Py_ssize_t utf8_nchars;
     int ok = PyBytes_AsStringAndSize(utf8, &utf8_string, &utf8_nchars);
@@ -115,7 +115,7 @@ void QChar_from_python_str_or_unicode( PyObject* obj_ptr,
         boost::python::throw_error_already_set();
     }
 
-    //use Qt to convert the UTF8 string to QString unicode
+    // use Qt to convert the UTF8 string to QString unicode
     QString unicode_qstring;
 
     if (utf8_nchars > 0)
@@ -126,9 +126,9 @@ void QChar_from_python_str_or_unicode( PyObject* obj_ptr,
     QChar unicode_qchar;
 
     if (unicode_qstring.count() > 0)
-       unicode_qchar = unicode_qstring[0];
+        unicode_qchar = unicode_qstring[0];
 
-    void* storage = ((converter::rvalue_from_python_storage<QChar>*) data)->storage.bytes;
+    void *storage = ((converter::rvalue_from_python_storage<QChar> *)data)->storage.bytes;
     new (storage) QChar(unicode_qchar);
     data->convertible = storage;
 }
@@ -138,42 +138,54 @@ struct QChar_from_python
 {
     QChar_from_python()
     {
-        converter::registry::push_back(  &convertible,
-                                         &construct,
-                                         type_id<QChar>() );
+        converter::registry::push_back(&convertible,
+                                       &construct,
+                                       type_id<QChar>());
     }
 
     /** Can the python object pointed to by 'obj_ptr' be converted
         to a QChar?
     */
-    static void* convertible(PyObject* obj_ptr)
+    static void *convertible(PyObject *obj_ptr)
     {
-        if ( PyBytes_Check(obj_ptr) )
+        if (PyBytes_Check(obj_ptr))
         {
-             if (PyBytes_GET_SIZE(obj_ptr) == 1){ return obj_ptr; }
-             else{ return 0; }
+            if (PyBytes_GET_SIZE(obj_ptr) == 1)
+            {
+                return obj_ptr;
+            }
+            else
+            {
+                return 0;
+            }
         }
-        else if ( PyUnicode_Check(obj_ptr) )
+        else if (PyUnicode_Check(obj_ptr))
         {
-             if (PyUnicode_GET_SIZE(obj_ptr) == 1){ return obj_ptr; }
-             else{ return 0; }
+            if (PyUnicode_GET_LENGTH(obj_ptr) == 1)
+            {
+                return obj_ptr;
+            }
+            else
+            {
+                return 0;
+            }
         }
         else
             return 0;
     }
 
     /** Perform the actual conversion */
-    static void construct(  PyObject* obj_ptr,
-                            converter::rvalue_from_python_stage1_data* data)
+    static void construct(PyObject *obj_ptr,
+                          converter::rvalue_from_python_stage1_data *data)
     {
-        //use python-qt conversion function
+        // use python-qt conversion function
         QChar_from_python_str_or_unicode(obj_ptr, data);
     }
 };
 
 void autoconvert_QChar()
 {
-    //code to get a QString from a python object
+    // code to get a QString from a python object
     QChar_from_python();
-    to_python_converter< QChar, qchar_to_python_string >();
+    to_python_converter<QChar, qchar_to_python_string>();
 }

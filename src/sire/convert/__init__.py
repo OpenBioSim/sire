@@ -19,6 +19,9 @@ from .. import use_new_api as _use_new_api
 
 _use_new_api()
 
+# Importing the openmm sub-module so that it autocompletes when used
+from . import openmm  # noqa: F401
+
 
 def _to_selectormol(obj):
     from ..mol import SelectorMol

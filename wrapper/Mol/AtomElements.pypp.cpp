@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireMol::Element> __copy__(const SireMol::AtomProperty<SireMol::Element> &other){ return SireMol::AtomProperty<SireMol::Element>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -359,6 +361,19 @@ void register_AtomElements_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMol::Element >::merge
+        
+            typedef SireMol::AtomProperty< SireMol::Element > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMol::Element >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMol::Element >::merge );
+            
+            AtomElements_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMol::Element >::nAtoms
         
             typedef SireMol::AtomProperty< SireMol::Element > exported_class_t;
@@ -480,6 +495,20 @@ void register_AtomElements_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMol::Element >::set
+        
+            typedef SireMol::AtomProperty< SireMol::Element > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMol::Element > & ( ::SireMol::AtomProperty< SireMol::Element >::*set_function_type)( int,::SireMol::Element const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Element >::set );
+            
+            AtomElements_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

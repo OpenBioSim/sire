@@ -111,6 +111,9 @@ namespace SireMol
         MolEditor &renumber(const QHash<ResNum, ResNum> &resnums);
         MolEditor &renumber(const QHash<AtomNum, AtomNum> &atomnums, const QHash<ResNum, ResNum> &resnums);
 
+        MolEditor &switchToAlternateNames(bool keep_originals = true);
+        MolEditor &removeAlternateNames();
+
         bool updateProperty(const QString &key, const Property &value, bool auto_add = true);
 
         template <class T, class V>
@@ -119,6 +122,8 @@ namespace SireMol
         MolEditor &addLink(const QString &key, const QString &linked_property);
         MolEditor &removeLink(const QString &key);
         MolEditor &removeAllLinks();
+
+        MolStructureEditor makeSingleCutGroup() const;
 
         AtomStructureEditor add(const AtomName &atom) const;
         AtomStructureEditor add(const AtomNum &atom) const;
@@ -191,6 +196,8 @@ namespace SireMol
         int nChains() const;
         int nSegments() const;
 
+        MolStructureEditor &makeSingleCutGroup();
+
         AtomStructureEditor select(const AtomID &atomid);
         CGStructureEditor select(const CGID &cgid);
         ResStructureEditor select(const ResID &resid);
@@ -206,6 +213,9 @@ namespace SireMol
         MolStructureEditor &rename(const MolName &newname);
         MolStructureEditor &renumber(MolNum newnum);
         MolStructureEditor &renumber();
+
+        MolStructureEditor switchToAlternateNames(bool keep_originals = true);
+        MolStructureEditor removeAlternateNames();
 
         AtomStructureEditor add(const AtomName &atom);
         AtomStructureEditor add(const AtomNum &atom);

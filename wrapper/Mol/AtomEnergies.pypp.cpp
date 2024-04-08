@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 2, -2, 0, 0, -1, 0> > __copy__(const SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 2, -2, 0, 0, -1, 0> > &other){ return SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<1, 2, -2, 0, 0, -1, 0> >(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -359,6 +361,19 @@ void register_AtomEnergies_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::merge
+        
+            typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::merge );
+            
+            AtomEnergies_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::nAtoms
         
             typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > > exported_class_t;
@@ -480,6 +495,20 @@ void register_AtomEnergies_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::set
+        
+            typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > > & ( ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::*set_function_type)( int,::SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 1, 2, -2, 0, 0, -1, 0 > >::set );
+            
+            AtomEnergies_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

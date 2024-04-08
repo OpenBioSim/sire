@@ -12,6 +12,186 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
+------------------------------------------------------------------------------------------
+
+* Dropped official builds and support for Python 3.9, and added official
+  builds and support for Python 3.12. Note that MacOS builds are currently
+  3.10 and 3.11 only, due to missing dependencies. This will be fixed
+  in upcoming point releases.
+
+* BREAKING CHANGE: Updated the API of :class:`sire.cas.LambdaSchedule` so that
+  you have to use named arguments for many of the functions (e.g.
+  :meth:`~sire.cas.LambdaSchedule.set_equation`). This is because the addition
+  of force levers (as described below) made positional arguments ambiguous,
+  and we wanted to make the API more consistent. This is a breaking change,
+
+* Added the ability to customise the lambda schedule applied to a lambda lever
+  so that you can use different equations for different molecules and
+  different forces in the OpenMM context. This gives a lot of control over
+  how forcefield parameters are scaled with lambda. Specifically, this is used
+  to add support for calculating absolute binding free energies.
+  This is described in the new :doc:`tutorial chapter <tutorial/index_part07>`.
+
+* Exposed the underlying :class:`~sire.legacy.Convert.PerturbableOpenMMMolecule`
+  class, which can be created from a merged molecule via
+  ``mol.perturbation().to_openmm()``. This lets you easily see which parameters
+  are changing between the reference and perturbed states. This is described
+  in the :doc:`tutorial <tutorial/part07/01_perturbation>`.
+
+* Added the ability for the lambda schedule to show how it will actually
+  act to perturb the parameters of the
+  :class:`~sire.legacy.Convert.PerturbableOpenMMMolecule` molecule.
+  This is described in the :doc:`tutorial <tutorial/part07/02_levers>`.
+
+* Added support for reading older somd-style pertfiles, and creating
+  merged molecules from these. This is described in
+  the :doc:`tutorial <tutorial/part07/05_pertfile>`.
+
+* Added "not-perturbable" constraints so that bonds and angles that change
+  with lambda are not perturbed. As part of this, have also added a
+  ``dynamic_constraints`` option that lets constrained bonds update with
+  lambda, so that they are set to the length corresponding to r0 at that
+  lambda value. Have also changed the constraints so that bonds will be
+  constrained to their r0 value, rather than their current length.
+  These constraints are ``X-not-perturbed``, meaning that it constrains
+  all ``X``, except for bonds or angles involving perturbed atoms. Or
+  ``X-not-heavy-perturbed``, meaning that it constrains all ``X``, except
+  for bonds or angles involving perturbed atoms, unless they involve a
+  hydrogen in any end state. The code to detect hydrogens has been improved,
+  now looking at mass, element and ambertype. There are options to control
+  this, described in the :doc:`OpenMM detailed guide <cheatsheet/openmm>`.
+
+* Added more automatic conversions, so that string will more readily auto-convert
+  to units where possible. Also added a ``sire.v`` function to make it easier to
+  create vectors of units, e.g. ``sire.v("1.0A", "2.0A", "3.0A")`` will create
+  a ``sire.maths.Vector(1, 2, 3)``, while ``sire.v([3, 4, 5], units="A ps-1")``
+  will create a ``Velocity3D``. This is documented in the units cheat sheet.
+
+* You can now set the background color of a 3D view using the ``bgcolor="..."``
+  keyword. This is documented in the view cheat sheet.
+
+* MacOS/ARM64 now includes AmberTools and Gromacs dependencies when built
+  for BioSimSpace (matching MacOS/X64 and Linux).
+
+* Updated the electrostatic softening potential to have an additional
+  ``shift_coulomb`` parameter, so that you can control how much the
+  distance is increased by the alpha softening parameter. This was
+  the equivalent of 10 Å, but has been set as default to 1 Å to match
+  the value used in somd.
+
+* Added support for LJ 12-6-4 potentials, plus the ability to read and write
+  LJ parameter exceptions to Amber topology files. This fixes issue #125.
+
+* Added peek support to the datastream reader, so that it can recover
+  when it doesn't find the magic value it expects on reading.
+
+* Added functionality to SparseMatrix to make it easier to detect when
+  non-default values have been added, and also to set up a matrix which
+  has a concept of unset values.
+
+* Added a ``to_same_molecule`` argument to the ``mol.extract()`` function,
+  so that it is possible to keep the same molecule number for the extracted
+  molecule. As part of this, also relaxed the requirement that the
+  ``mol.update(...)`` function can only be called if the molecule layout
+  is not changed. You can now update even if you have changed the numbers
+  of atoms, residues etc. The ``to_same_molecule`` argument is default False,
+  so as not to change any existing behaviour.
+
+* Added lots of convenience functions to ``sire.morph``, as described in the
+  :doc:`new tutorial <tutorial/index_part07>`. Functions include
+  linking to the reference or perturbed states for all molecules, or extracting
+  all of the reference or perturbed states of all molecules. Also I've added
+  functions for zeroing ghost torsions and creating molecules from pertfiles.
+  As part of this, I added an ``auto_commit`` argument to the
+  Perturbation ``link_to_reference`` and ``link_to_perturbed`` functions,
+  which defaults to True. This is a change in behaviour, but it makes the
+  API much easier to use. If you are affected by this, please let us know.
+  It was a little-used part of the code, with the main use case being the
+  replacement with the easier ``sire.morph.link_to_XXX`` functions.
+
+* Added ability to create merge molecules for relative free energy calculations
+  via :func:`sire.morph.merge` and :func:`sire.morph.match`. This is
+  described in the :doc:`tutorial <tutorial/part07/04_merge>`.
+
+* Added ability to create merge molecules for absolute free energy
+  calculations via :func:`sire.morph.decouple` and
+  :func:`sire.morph.annihilate`. This is described in the
+  :doc:`tutorial <tutorial/part07/06_decouple>`.
+
+* Added support for residue perturbations and also for mutating residues
+  and parts of molecules using a new "copy and paste" algorithm. This is
+  described in the :doc:`tutorial <tutorial/part07/07_residue>`.
+
+* Exposed the ``SOMMContext``, ``PerturbableOpenMMMolecule``,
+  ``OpenMMMetaData`` and ``LambdaLever`` classes to Python, as part of the
+  new ``sire.convert.openmm`` module. These are useful if you want more
+  control over OpenMM from Python. In particular, the ``PerturbableOpenMMMolecule``
+  class lets you see all of the parameters that go into the OpenMM forces
+  that involve perturbable molecules. There are useful functions that can
+  be used to get changing parameters as dataframes, which is really useful
+  for debugging. These are described in the :doc:`new tutorial <tutorial/index_part07>`.
+
+* Preserve user atom names when writing to PDB format.
+
+* Updated the :class:`~sire.mol.Cursor` so that it is easier to get and
+  set the expression used for the potential energy (using the
+  ``get_potential`` and ``set_potential`` functions).
+
+* Fixed compile error using Python 3.12. This fixes issue #147.
+
+* Optimised the OpenMM minimisation code and making it more robust.
+  This includes vectorising for Apple Silicon and adding more tests for
+  convergence so that we can have more confidence that the structures
+  output are sensible. Also made sure that optimised compilation (-O3) is
+  used for all of the plugins (SireOpenMM, SireGemmi and SireRDKit).
+  They were previously compiled with wrapper options (e.g. -Os).
+  Minimisation now gives better progress updates, using a progress
+  bar to show progress towards the maximum number of iterations.
+  This has been reduced to 1500 by default. Also, if the minimisation
+  fails to create a structure that obeys constraints on the first pass,
+  then the minimisation is repeated, with the maximum number of
+  iterations reset. If it fails again, then this structure, with
+  constraints re-applied, is returned.
+
+* Added more support for Boresch restraints. Specifically, :func:`sire.restraints.boresch`
+  now supports the specification of equilibrium values, uses different default force
+  constants, and warns the user if the restraints are likely to be unstable.
+  :func:`sire.restraints.get_standard_state_correction` was implemented for Boresch
+  restraints. Tests were added for restraint creation and for the standard state
+  correction. Boresch restraints were added to :doc:`tutorial <tutorial/part06/03_restraints>`.
+
+* Added power support to GeneralUnit in python. You can now raise a unit value
+  to a valid power, e.g. ``sr.u("5A")**2``. You can also square root via a new
+  ``.sqrt()`` function on the unit. There is also a new ``sire.sqrt`` function
+  that will automatically called ``obj.sqrt()`` if that exists, or will fall
+  back to ``math.sqrt`` if not. This implements wishlist item #176.
+
+* Conversion to and from RDKit now preserves atoms and residue names and
+  numbers. This makes used of AtomPDBResidueInfo in RDKit to populate metadata
+  when the RDKit molecule is created. On conversion to sire, the atom monomer
+  info will be checked. If it is simple, then only the atom name will be
+  obtained. If it is a AtomPDBResidueInfo, then the atom name and number,
+  and residue name and number (plus any chain information) will be extracted.
+  If no atom name is set, then the value of the property
+  "molFileAlias" will be checked. This implements wishlist item #168.
+
+* Implemented the ``auto-bonds`` constraint, which automatically chooses
+  bonds to constrain by comparing the estimated vibrational frequency
+  against the simulation timestep multiplied by the factor
+  ``auto_bonds_factor`` (defaults to 10).
+  This is described in the :doc:`OpenMM detailed guide <cheatsheet/openmm>`.
+  This implements wishlist item #185.
+
+* Fixed a bug in the algorithm used to infer bond order when converting to
+  RDKit format. This fixes issue #177.
+
+* Fixed a bug in the :class:`~sire.legacy.Convert.LambdaLever` class where
+  it was not using the stage-specific value of lambda when using multiple
+  stages where one or more stages contained a standard morph equation.
+
+* Please add an item to this changelog when you create your PR
+
 `2023.5.2 <https://github.com/openbiosim/sire/compare/2023.5.1...2023.5.2>`__ - March 2024
 ------------------------------------------------------------------------------------------
 

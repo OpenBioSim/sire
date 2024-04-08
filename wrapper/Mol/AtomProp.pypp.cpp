@@ -155,6 +155,18 @@ void register_AtomProp_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProp::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProp::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProp::merge );
+            
+            AtomProp_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProp::operator=
         
             typedef ::SireMol::AtomProp & ( ::SireMol::AtomProp::*assign_function_type)( ::SireMol::AtomVariantProperty const & ) ;

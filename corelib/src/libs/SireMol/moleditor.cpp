@@ -137,6 +137,24 @@ MolEditor &MolEditor::rename(const QString &newname)
     return *this;
 }
 
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MolEditor &MolEditor::switchToAlternateNames(bool keep_originals)
+{
+    d->switchToAlternateNames(keep_originals);
+    return *this;
+}
+
+/** Remove all alternate names from this molecule */
+MolEditor &MolEditor::removeAlternateNames()
+{
+    d->removeAlternateNames();
+    return *this;
+}
+
 /** Give this molecule a new, unique ID number */
 MolEditor &MolEditor::renumber()
 {
@@ -187,6 +205,15 @@ MolEditor &MolEditor::renumber(const QHash<AtomNum, AtomNum> &atomnums, const QH
     d->renumber(atomnums, resnums);
 
     return *this;
+}
+
+/** Return an editor where all atoms have been moved into a
+ *  single cutgroup
+ */
+MolStructureEditor MolEditor::makeSingleCutGroup() const
+{
+    MolStructureEditor editor(*this);
+    return editor.makeSingleCutGroup();
 }
 
 /** Add an atom called 'name' and return an editor that can
@@ -630,6 +657,31 @@ int MolStructureEditor::nSegments() const
 MolStructureEditor &MolStructureEditor::rename(const MolName &newname)
 {
     this->renameMolecule(newname);
+    return *this;
+}
+
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+MolStructureEditor MolStructureEditor::switchToAlternateNames(bool keep_originals)
+{
+    StructureEditor::switchToAlternates(keep_originals);
+    return *this;
+}
+
+/** Remove all alternate names from this molecule */
+MolStructureEditor MolStructureEditor::removeAlternateNames()
+{
+    StructureEditor::removeAlternates();
+    return *this;
+}
+
+/** Move all atoms into a single CutGroup */
+MolStructureEditor &MolStructureEditor::makeSingleCutGroup()
+{
+    StructureEditor::convertToSingleCutGroupMolecule();
     return *this;
 }
 

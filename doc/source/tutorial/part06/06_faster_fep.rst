@@ -35,8 +35,7 @@ after loading the molecules and minimising,
 
 >>> import sire as sr
 >>> mols = sr.load(sr.expand(sr.tutorial_url, "merged_molecule.s3"))
->>> for mol in mols.molecules("molecule property is_perturbable"):
-...     mols.update(mol.perturbation().link_to_reference().commit())
+>>> mols = sr.morph.link_to_reference(mols)
 >>> mols = mols.minimisation().run().commit()
 
 ...we can turn on constraints of the bonds involving hydrogen atoms by
@@ -304,16 +303,23 @@ still use a large timestep (e.g. 3 fs or 4 fs). This is because
 the hydrogens on the perturbable molecules would become heavier,
 and so the vibrations of those atoms should have a lower frequency.
 
+To aid this, we can use the ``h-bonds-not-perturbed`` constraint. This will
+constrain all bonds involving hydrogen atoms, except for those involving
+atoms that are directly perturbed. This means that all of the non-perturbing
+bonds in the perturbable molecule will be constrained, which should aid
+simulation stability for large timesteps.
+
 >>> mols.update(repartitioned_mol)
 >>> d = mols.dynamics(timestep="4fs", temperature="25oC",
-...                   constraint="h-bonds",
+...                   constraint="h-bonds-not-perturbed",
 ...                   perturbable_constraint="none")
 >>> d.run("5ps")
 >>> print(d)
 Dynamics(completed=5 ps, energy=-31950.1 kcal mol-1, speed=100.8 ns day-1)
 
 This has given us the best of both worlds - a fast simulation with a larger
-timestep, plus no constraints on the perturbable molecules.
+timestep, plus no constraints on the bonds that perturb
+in the perturbable molecules.
 
 Using this protocol, we can now recalculate the relative free energy of
 ethane and methanol.
@@ -324,13 +330,11 @@ ethane and methanol.
 ...     print(f"Simulating lambda={lambda_value:.2f}")
 ...     # minimise the system at this lambda value
 ...     min_mols = mols.minimisation(lambda_value=lambda_value,
-...                                  constraint="h-bonds",
-...                                  perturbable_constraint="none").run().commit()
+...                                  constraint="h-bonds-not-perturbed").run().commit()
 ...     # create a dynamics object for the system
 ...     d = min_mols.dynamics(timestep="4fs", temperature="25oC",
 ...                           lambda_value=lambda_value,
-...                           constraint="h-bonds",
-...                           perturbable_constraint="none")
+...                           constraint="h-bonds-not-perturbed")
 ...     # generate random velocities
 ...     d.randomise_velocities()
 ...     # equilibrate, not saving anything
@@ -376,6 +380,17 @@ a little less time.
    (e.g. 250 ps per λ-window) or by running multiple repeats and taking
    and average.
 
+Switching to Reaction Field from PME
+------------------------------------
+
+By default, the dynamics simulation uses the particle mesh Ewald (PME)
+method to calculate long-range electrostatics. This is a very accurate,
+but comes with a high computational cost. We can switch to the faster
+reaction field method by setting the ``cutoff_type`` option to
+``RF``. This cutoff type works well for perturbations that don't involve
+a change in net charge (as most perturbations). Switching to RF can
+improve the simulation speed by 25-50%.
+
 .. _ExampleFEPScript:
 
 Complete Example Script
@@ -384,8 +399,8 @@ Complete Example Script
 Putting everything together, here is a simple script that does all of the
 work of calculating the relative hydration free energy of ethane
 and methanol. The key parameters (e.g. timestep, constraint, run time,
-λ-values etc) are pulled out as variables at the top. The script then
-runs a dynamics simulation for each λ-window for the water leg, then
+cutoff type, λ-values etc) are pulled out as variables at the top. The script
+then runs a dynamics simulation for each λ-window for the water leg, then
 a dynamics simulation using the same parameters and λ-windows for the
 vacuum leg. The free energies are collected and then calculated using BAR
 from alchemlyb. This is a good starting point for you to adapt for your

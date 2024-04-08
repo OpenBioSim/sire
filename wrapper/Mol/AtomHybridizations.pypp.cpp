@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireMol::Hybridization> __copy__(const SireMol::AtomProperty<SireMol::Hybridization> &other){ return SireMol::AtomProperty<SireMol::Hybridization>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -367,6 +369,19 @@ void register_AtomHybridizations_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMol::Hybridization >::merge
+        
+            typedef SireMol::AtomProperty< SireMol::Hybridization > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMol::Hybridization >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMol::Hybridization >::merge );
+            
+            AtomHybridizations_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMol::Hybridization >::nAtoms
         
             typedef SireMol::AtomProperty< SireMol::Hybridization > exported_class_t;
@@ -488,6 +503,20 @@ void register_AtomHybridizations_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMol::Hybridization >::set
+        
+            typedef SireMol::AtomProperty< SireMol::Hybridization > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMol::Hybridization > & ( ::SireMol::AtomProperty< SireMol::Hybridization >::*set_function_type)( int,::SireMol::Hybridization const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMol::Hybridization >::set );
+            
+            AtomHybridizations_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

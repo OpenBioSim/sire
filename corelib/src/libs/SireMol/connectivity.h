@@ -248,6 +248,9 @@ namespace SireMol
 
         QList<BondID> getBonds() const;
         QList<BondID> getBonds(const AtomID &atom) const;
+
+        QList<BondID> getBonds(const QList<AtomIdx> &atoms, bool exclusive = true) const;
+
         QList<AngleID> getAngles() const;
         QList<AngleID> getAngles(const AtomID &atom0) const;
         QList<AngleID> getAngles(const AtomID &atom0, const AtomID &atom1) const;
@@ -328,6 +331,11 @@ namespace SireMol
                                  const Property &default_value) const;
 
         void assertHasProperty(const ImproperID &imp, const SireBase::PropertyName &key) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     protected:
         ConnectivityBase();
@@ -465,6 +473,14 @@ namespace SireMol
 
         ConnectivityEditor &connect(const AtomID &atom0, const AtomID &atom1);
         ConnectivityEditor &disconnect(const AtomID &atom0, const AtomID &atom1);
+
+        ConnectivityEditor &connect(const BondID &bond);
+        ConnectivityEditor &disconnect(const BondID &bond);
+
+        ConnectivityEditor &connect(const QList<BondID> &bonds);
+        ConnectivityEditor &disconnect(const QList<BondID> &bonds);
+
+        ConnectivityEditor &disconnect(const QList<AtomIdx> &atoms, bool exclusive = true);
 
         ConnectivityEditor &disconnectAll(AtomIdx atomidx);
         ConnectivityEditor &disconnectAll(ResIdx residx);

@@ -8,6 +8,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireCAS/symbols.h"
 
 #include "SireError/errors.h"

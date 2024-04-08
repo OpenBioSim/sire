@@ -182,6 +182,12 @@ namespace SireMol
         const AtomName &name(const AtomID &atomid) const;
         const AtomName &name(AtomIdx atomidx) const;
 
+        const AtomName &alternateName(const AtomID &atomid) const;
+        const AtomName &alternateName(AtomIdx atomidx) const;
+
+        const ResName &alternateName(const ResID &resid) const;
+        const ResName &alternateName(ResIdx residx) const;
+
         SegIdx number(const SegID &segid) const;
         SegIdx number(SegIdx segidx) const;
 
@@ -196,6 +202,12 @@ namespace SireMol
 
         AtomNum number(const AtomID &atomid) const;
         AtomNum number(AtomIdx atomidx) const;
+
+        MoleculeInfoData setAlternateName(AtomIdx atomidx, const AtomName &newname) const;
+        MoleculeInfoData setAlternateName(ResIdx residx, const ResName &newname) const;
+
+        MoleculeInfoData switchToAlternateNames(bool keep_originals = true) const;
+        MoleculeInfoData removeAlternateNames() const;
 
         MoleculeInfoData rename(AtomIdx atomidx, const AtomName &newname) const;
         MoleculeInfoData renumber(AtomIdx atomidx, const AtomNum &newnum) const;

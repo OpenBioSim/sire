@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireBase/parallel.h"
@@ -575,6 +577,18 @@ void register_AmberParams_class(){
                 , "Return the atom masses" );
         
         }
+        { //::SireMM::AmberParams::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::AmberParams::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::AmberParams::merge );
+            
+            AmberParams_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
+        
+        }
         { //::SireMM::AmberParams::nb14s
         
             typedef ::QHash< SireMol::BondID, SireMM::AmberNB14 > ( ::SireMM::AmberParams::*nb14s_function_type)(  ) const;
@@ -690,6 +704,45 @@ void register_AmberParams_class(){
                 , ( bp::arg("pair") )
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::LJ1264Parameter const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("ljparam") )
+                , bp::release_gil_policy()
+                , "Set the LJ exception between atom0 and atom1 to ljparam" );
+        
+        }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::SireMol::AtomID const &,::SireMM::AmberParams &,::SireMM::LJ1264Parameter const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom0"), bp::arg("atom1"), bp::arg("params1"), bp::arg("ljparam") )
+                , bp::release_gil_policy()
+                , "Set the LJ exception between atom0 in this set and atom1 in the\n  passed set of parameters to ljparam\n" );
+        
+        }
+        { //::SireMM::AmberParams::set
+        
+            typedef void ( ::SireMM::AmberParams::*set_function_type)( ::SireMol::AtomID const &,::QList< SireMM::LJException > const & ) ;
+            set_function_type set_function_value( &::SireMM::AmberParams::set );
+            
+            AmberParams_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("atom"), bp::arg("exceptions") )
+                , bp::release_gil_policy()
+                , "Set the LJ exceptions for the specified atom - this replaces any\n  existing exceptions\n" );
         
         }
         { //::SireMM::AmberParams::setExcludedAtoms

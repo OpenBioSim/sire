@@ -666,13 +666,13 @@ void register_MoleculeView_class(){
         }
         { //::SireMol::MoleculeView::extract
         
-            typedef ::SireMol::Molecule ( ::SireMol::MoleculeView::*extract_function_type)(  ) const;
+            typedef ::SireMol::Molecule ( ::SireMol::MoleculeView::*extract_function_type)( bool ) const;
             extract_function_type extract_function_value( &::SireMol::MoleculeView::extract );
             
             MoleculeView_exposer.def( 
                 "extract"
                 , extract_function_value
-                , bp::release_gil_policy()
+                , ( bp::arg("to_same_molecule")=(bool)(false) )
                 , "Extract a copy of this view which contains only the currently\nselected atoms. This allows the used to pull out parts of a larger molecule,\ne.g. if they want to have only selected residues in a protein and do not\nwant to have to store or manipulate the larger protein molecule" );
         
         }

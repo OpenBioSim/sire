@@ -40,6 +40,31 @@ and has a specially-built grammar to combine units together
 >>> print(sr.u("300 nm ps-2"))
 3000 Å ps-2
 
+.. note::
+
+   Most functions that take a unit as an argument will automatically
+   convert strings to units using :func:`sire.u`. This means that you
+   often won't need to call :func:`sire.u` explicitly.
+
+Unit vectors
+------------
+
+In addition to scalars, :mod:`sire` also supports unit vectors for
+lengths, velocities and forces. You can construct these using the
+:func:`sire.v` function. This accepts numbers, strings, lists,
+dictionaries or anything that can be converted via :func:`sire.u`.
+
+>>> print(sr.v(1, 2, 3))
+( 1 Å, 2 Å, 3 Å )
+>>> print(sr.v("1 A", "2 A", "3 A"))
+( 1 Å, 2 Å, 3 Å )
+>>> print(sr.v(3, 4, 5, units="A"))
+( 3 Å, 4 Å, 5 Å )
+>>> print(sr.v(x="1 A ps-1", y="2 A ps-1", z="3 A ps-1"))
+( 1 Å ps-1, 2 Å ps-1, 3 Å ps-1 )
+>>> print(sr.v([3,4,5], units="A ps-1"))
+( 3 Å ps-1, 4 Å ps-1, 5 Å ps-1 )
+
 Converting to other units
 -------------------------
 

@@ -20,6 +20,7 @@ __all__ = [
     "SelectorMDihedral",
     "SelectorMImproper",
     "LJParameter",
+    "LJ1264Parameter",
 ]
 
 from ..legacy import MM as _MM
@@ -45,6 +46,7 @@ AmberDihPart = _MM.AmberDihPart
 AmberDihedral = _MM.AmberDihedral
 
 LJParameter = _MM.LJParameter
+LJ1264Parameter = _MM.LJ1264Parameter
 
 Bond = _MM.Bond
 SelectorBond = _MM.SelectorBond
@@ -81,6 +83,7 @@ try:
     Improper.__len__ = Improper.nAtoms
 except AttributeError:
     Improper.__len__ = Improper.num_atoms
+
 
 _have_fixed_siremm = False
 

@@ -145,6 +145,7 @@ namespace SireMol
 
         AtomProperty<Vector> &set(CGIdx cgidx, const QVector<Vector> &values);
         AtomProperty<Vector> &set(CGIdx cgidx, const CoordGroup &cgroup);
+        AtomProperty<Vector> &set(int i, const Vector &value);
 
         void translate(const Vector &delta);
         void translate(CGIdx cgidx, const Vector &delta);
@@ -194,6 +195,11 @@ namespace SireMol
         PropertyPtr divideByResidue(const MoleculeInfoData &molinfo) const;
 
         void assertCanConvert(const QVariant &value) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         /** The actual atomic coordinates, arranged into CoordGroups */

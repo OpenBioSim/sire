@@ -47,9 +47,9 @@ namespace SireUnits
 
             explicit GeneralUnit(double value);
 
-            explicit GeneralUnit(const QString &value);
+            GeneralUnit(const QString &value);
 
-            explicit GeneralUnit(double value, const QString &unit);
+            GeneralUnit(double value, const QString &unit);
 
             template <int M, int L, int T, int C, int t, int Q, int A>
             explicit GeneralUnit(const PhysUnit<M, L, T, C, t, Q, A> &unit) : Unit(unit)
@@ -271,6 +271,12 @@ namespace SireUnits
         SIRE_OUTOFLINE_TEMPLATE PhysUnit<M, L, T, C, t, Q, A>::PhysUnit(const GeneralUnit &other) : Unit(0)
         {
             this->operator=(other);
+        }
+
+        template <int M, int L, int T, int C, int t, int Q, int A>
+        SIRE_OUTOFLINE_TEMPLATE PhysUnit<M, L, T, C, t, Q, A>::PhysUnit(const QString &value) : Unit(0)
+        {
+            this->operator=(PhysUnit<M, L, T, C, t, Q, A>(GeneralUnit(value)));
         }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

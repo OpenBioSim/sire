@@ -67,6 +67,18 @@ void register_AtomEditor_class(){
         bp::scope AtomEditor_scope( AtomEditor_exposer );
         AtomEditor_exposer.def( bp::init< SireMol::Atom const & >(( bp::arg("atom") ), "Construct an editor that edits a copy of atom") );
         AtomEditor_exposer.def( bp::init< SireMol::AtomEditor const & >(( bp::arg("other") ), "Copy constructor") );
+        { //::SireMol::AtomEditor::alternateName
+        
+            typedef ::SireMol::AtomName ( ::SireMol::AtomEditor::*alternateName_function_type)(  ) const;
+            alternateName_function_type alternateName_function_value( &::SireMol::AtomEditor::alternateName );
+            
+            AtomEditor_exposer.def( 
+                "alternateName"
+                , alternateName_function_value
+                , bp::release_gil_policy()
+                , "Return the alternate name for this atom" );
+        
+        }
         { //::SireMol::AtomEditor::operator=
         
             typedef ::SireMol::AtomEditor & ( ::SireMol::AtomEditor::*assign_function_type)( ::SireMol::Atom const & ) ;
@@ -106,6 +118,19 @@ void register_AtomEditor_class(){
                 , "Reindex this atom so that it lies at index newidx. Note\nthat if newidx is greater than the number of atoms, then\nthis will move this atom to be the last in the list" );
         
         }
+        { //::SireMol::AtomEditor::reindex
+        
+            typedef ::SireMol::AtomStructureEditor ( ::SireMol::AtomEditor::*reindex_function_type)( int ) const;
+            reindex_function_type reindex_function_value( &::SireMol::AtomEditor::reindex );
+            
+            AtomEditor_exposer.def( 
+                "reindex"
+                , reindex_function_value
+                , ( bp::arg("atomidx") )
+                , bp::release_gil_policy()
+                , "Reindex this atom" );
+        
+        }
         { //::SireMol::AtomEditor::remove
         
             typedef ::SireMol::MolStructureEditor ( ::SireMol::AtomEditor::*remove_function_type)(  ) const;
@@ -131,6 +156,19 @@ void register_AtomEditor_class(){
                 , "Rename this atom so that it is called newname" );
         
         }
+        { //::SireMol::AtomEditor::rename
+        
+            typedef ::SireMol::AtomEditor & ( ::SireMol::AtomEditor::*rename_function_type)( ::QString const & ) ;
+            rename_function_type rename_function_value( &::SireMol::AtomEditor::rename );
+            
+            AtomEditor_exposer.def( 
+                "rename"
+                , rename_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Rename this atom" );
+        
+        }
         { //::SireMol::AtomEditor::renumber
         
             typedef ::SireMol::AtomEditor & ( ::SireMol::AtomEditor::*renumber_function_type)( ::SireMol::AtomNum ) ;
@@ -142,6 +180,19 @@ void register_AtomEditor_class(){
                 , ( bp::arg("number") )
                 , bp::return_self< >()
                 , "Renumber this atom so that it has number newnum" );
+        
+        }
+        { //::SireMol::AtomEditor::renumber
+        
+            typedef ::SireMol::AtomEditor & ( ::SireMol::AtomEditor::*renumber_function_type)( int ) ;
+            renumber_function_type renumber_function_value( &::SireMol::AtomEditor::renumber );
+            
+            AtomEditor_exposer.def( 
+                "renumber"
+                , renumber_function_value
+                , ( bp::arg("number") )
+                , bp::return_self< >()
+                , "Renumber this atom" );
         
         }
         { //::SireMol::AtomEditor::reparent
@@ -220,6 +271,32 @@ void register_AtomEditor_class(){
                 , ( bp::arg("segid") )
                 , bp::release_gil_policy()
                 , "Reparent this atom so that it will be placed into the segment\nwith ID segid - this returns the updated atom in\nan AtomStructureEditor, which is optimised for further\nediting of the molecule structure\nThrow: SireMol::missing_segment\nThrow: SireMol::duplicate_segment\nThrow: SireError::invalid_index\n" );
+        
+        }
+        { //::SireMol::AtomEditor::setAlternateName
+        
+            typedef ::SireMol::AtomEditor & ( ::SireMol::AtomEditor::*setAlternateName_function_type)( ::QString const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::AtomEditor::setAlternateName );
+            
+            AtomEditor_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Set the alternate name for this atom" );
+        
+        }
+        { //::SireMol::AtomEditor::setAlternateName
+        
+            typedef ::SireMol::AtomEditor & ( ::SireMol::AtomEditor::*setAlternateName_function_type)( ::SireMol::AtomName const & ) ;
+            setAlternateName_function_type setAlternateName_function_value( &::SireMol::AtomEditor::setAlternateName );
+            
+            AtomEditor_exposer.def( 
+                "setAlternateName"
+                , setAlternateName_function_value
+                , ( bp::arg("name") )
+                , bp::return_self< >()
+                , "Set the alternate name for this atom" );
         
         }
         { //::SireMol::AtomEditor::toString

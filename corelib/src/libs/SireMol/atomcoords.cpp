@@ -33,6 +33,7 @@
 
 #include "SireVol/space.h"
 
+#include "SireBase/console.h"
 #include "SireBase/quickcopy.hpp"
 #include "SireMaths/vectorproperty.h"
 
@@ -525,6 +526,36 @@ PropertyPtr AtomProperty<Vector>::getAsProperty(const CGAtomIdx &cgatomidx) cons
     return PropertyPtr(VectorProperty(this->get(cgatomidx)));
 }
 
+/** Set the coordinates of the ith atom to 'value' */
+AtomProperty<Vector> &AtomProperty<Vector>::set(int i, const Vector &value)
+{
+    i = Index(i).map(this->nAtoms());
+
+    for (int cgidx = 0; cgidx < coords.nCoordGroups(); ++cgidx)
+    {
+        const auto &cgroup = coords.at(cgidx);
+
+        if (i < cgroup.count())
+        {
+            coords.update(cgidx, cgroup.edit().setCoordinates(i, value));
+            return *this;
+        }
+        else
+        {
+            i -= cgroup.count();
+
+            if (i < 0)
+                throw SireError::invalid_index(QObject::tr("Cannot set the coordinates of the atom at index %1 as "
+                                                           "the index is out of range (0-%2)")
+                                                   .arg(i)
+                                                   .arg(this->nAtoms() - 1),
+                                               CODELOC);
+        }
+    }
+
+    return *this;
+}
+
 /** Set the coordinates of the atom at index 'cgatomidx' to the value 'value' */
 AtomProperty<Vector> &AtomProperty<Vector>::set(const CGAtomIdx &cgatomidx, const Vector &value)
 {
@@ -1000,4 +1031,55 @@ const char *AtomCoords::typeName()
 AtomProperty<Vector> *AtomCoords::clone() const
 {
     return new AtomProperty<Vector>(*this);
+}
+
+PropertyList AtomCoords::merge(const MolViewProperty &other,
+                               const AtomIdxMapping &mapping,
+                               const QString &ghost,
+                               const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<AtomCoords>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    const AtomCoords &ref = *this;
+    const AtomCoords &pert = other.asA<AtomCoords>();
+
+    AtomCoords prop0 = ref;
+    AtomCoords prop1 = ref;
+
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for LJ parameters is ignored").arg(ghost));
+    }
+
+    for (const auto &index : mapping)
+    {
+        if (index.isUnmappedIn0())
+        {
+            // use the coordinates of the perturbed state
+            prop0.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
+        }
+
+        if (index.isUnmappedIn1())
+        {
+            // use the coordinates of the reference state
+            prop1.set(index.cgAtomIdx0(), prop0.get(index.cgAtomIdx0()));
+        }
+        else
+        {
+            // we can use the coordinates of the perturbed state
+            prop1.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
+        }
+    }
+
+    SireBase::PropertyList ret;
+    ret.append(prop0);
+    ret.append(prop1);
+
+    return ret;
 }

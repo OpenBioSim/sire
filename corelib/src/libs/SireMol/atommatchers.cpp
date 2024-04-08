@@ -86,14 +86,12 @@ QDataStream &operator>>(QDataStream &ds, AtomCoordMatcher &coordmatcher)
 }
 
 /** Constructor */
-AtomCoordMatcher::AtomCoordMatcher() :
-    ConcreteProperty<AtomCoordMatcher, AtomMatcher>(), zero_com(false)
+AtomCoordMatcher::AtomCoordMatcher() : ConcreteProperty<AtomCoordMatcher, AtomMatcher>(), zero_com(false)
 {
 }
 
 /** Constructor */
-AtomCoordMatcher::AtomCoordMatcher(bool zero_com) :
-    ConcreteProperty<AtomCoordMatcher, AtomMatcher>(), zero_com(zero_com)
+AtomCoordMatcher::AtomCoordMatcher(bool zero_com) : ConcreteProperty<AtomCoordMatcher, AtomMatcher>(), zero_com(zero_com)
 {
 }
 
@@ -500,6 +498,7 @@ QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0, con
                                                    const MoleculeView &mol1, const PropertyMap &map1) const
 {
     QHash<AtomIdx, AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> reverse_map;
 
     const AtomSelection sel0 = mol0.selection();
     const AtomSelection sel1 = mol1.selection();
@@ -512,37 +511,48 @@ QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0, con
 
             const AtomName name = mol0.data().info().name(idx0);
 
-            try
+            auto matches = mol1.data().info().mapNoThrow(name);
+
+            // can only match unique matches
+            if (matches.count() == 1)
             {
-                AtomIdx idx1 = mol1.data().info().atomIdx(name);
-                map.insert(idx0, idx1);
-            }
-            catch (...)
-            {
+                if (reverse_map.contains(matches[0]))
+                {
+                    // remove the duplicate match
+                    map.remove(reverse_map[matches[0]]);
+                }
+                else
+                {
+                    reverse_map.insert(matches[0], idx0);
+                    map.insert(idx0, matches[0]);
+                }
             }
         }
     }
     else
     {
-        foreach (const AtomIdx idx0, sel0.selectedAtoms())
+        for (const AtomIdx &idx0 : sel0.selectedAtoms())
         {
             const AtomName name0 = mol0.data().info().name(idx0);
 
-            // A list of matches.
-            QList<AtomIdx> matches;
-
-            foreach (const AtomIdx idx1, sel1.selectedAtoms())
+            for (const AtomIdx &idx1 : sel1.selectedAtoms())
             {
                 const AtomName name1 = mol1.data().info().name(idx1);
 
-                // Add the match.
                 if (name0 == name1)
-                    matches.append(idx1);
+                {
+                    if (reverse_map.contains(idx1))
+                    {
+                        // remove the duplicate match
+                        map.remove(reverse_map[idx1]);
+                    }
+                    else
+                    {
+                        reverse_map.insert(idx1, idx0);
+                        map.insert(idx0, idx1);
+                    }
+                }
             }
-
-            // Only insert unique matche into the map.
-            if (matches.count() == 1)
-                map.insert(idx0, matches[0]);
         }
     }
 
@@ -558,6 +568,7 @@ QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeView &mol0, con
 QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeInfoData &mol0, const MoleculeInfoData &mol1) const
 {
     QHash<AtomIdx, AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> reverse_map;
 
     for (int i = 0; i < mol0.nAtoms(); ++i)
     {
@@ -565,13 +576,21 @@ QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
 
         const AtomName name = mol0.name(idx0);
 
-        try
+        auto matches = mol1.mapNoThrow(name);
+
+        // can only match unique matches
+        if (matches.count() == 1)
         {
-            AtomIdx idx1 = mol1.atomIdx(name);
-            map.insert(idx0, idx1);
-        }
-        catch (...)
-        {
+            if (reverse_map.contains(matches[0]))
+            {
+                // remove the duplicate match
+                map.remove(reverse_map[matches[0]]);
+            }
+            else
+            {
+                reverse_map.insert(matches[0], idx0);
+                map.insert(idx0, matches[0]);
+            }
         }
     }
 
@@ -581,6 +600,188 @@ QHash<AtomIdx, AtomIdx> AtomNameMatcher::pvt_match(const MoleculeInfoData &mol0,
 const char *AtomNameMatcher::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<AtomNameMatcher>());
+}
+
+/////////
+///////// Implementation of AtomNumMatcher
+/////////
+
+static const RegisterMetaType<AtomNumMatcher> r_nummatcher;
+
+/** Serialise to a binary datastream */
+QDataStream &operator<<(QDataStream &ds, const AtomNumMatcher &nummatcher)
+{
+    writeHeader(ds, r_nummatcher, 1);
+    ds << static_cast<const AtomMatcher &>(nummatcher);
+
+    return ds;
+}
+
+/** Extract from a binary datastream */
+QDataStream &operator>>(QDataStream &ds, AtomNumMatcher &nummatcher)
+{
+    VersionID v = readHeader(ds, r_nummatcher);
+
+    if (v == 1)
+    {
+        ds >> static_cast<AtomMatcher &>(nummatcher);
+    }
+    else
+        throw version_error(v, "1", r_nummatcher, CODELOC);
+
+    return ds;
+}
+
+/** Constructor */
+AtomNumMatcher::AtomNumMatcher() : ConcreteProperty<AtomNumMatcher, AtomMatcher>()
+{
+}
+
+/** Copy constructor */
+AtomNumMatcher::AtomNumMatcher(const AtomNumMatcher &other) : ConcreteProperty<AtomNumMatcher, AtomMatcher>(other)
+{
+}
+
+/** Destructor */
+AtomNumMatcher::~AtomNumMatcher()
+{
+}
+
+/** Copy assignment operator */
+AtomNumMatcher &AtomNumMatcher::operator=(const AtomNumMatcher &other)
+{
+    return *this;
+}
+
+/** Comparison operator */
+bool AtomNumMatcher::operator==(const AtomNumMatcher &other) const
+{
+    return true;
+}
+
+/** Comparison operator */
+bool AtomNumMatcher::operator!=(const AtomNumMatcher &other) const
+{
+    return false;
+}
+
+QString AtomNumMatcher::toString() const
+{
+    return QObject::tr("AtomNumMatcher()");
+}
+
+/** Match the atoms in 'mol1' to the atoms in 'mol0' - this
+    returns the AtomIdxs of the atoms in 'mol1' that are in
+    'mol0', indexed by the AtomIdx of the atom in 'mol0'.
+
+     This skips atoms in 'mol1' that are not in 'mol0'
+*/
+QHash<AtomIdx, AtomIdx> AtomNumMatcher::pvt_match(const MoleculeView &mol0, const PropertyMap &map0,
+                                                  const MoleculeView &mol1, const PropertyMap &map1) const
+{
+    QHash<AtomIdx, AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> reverse_map;
+
+    const AtomSelection sel0 = mol0.selection();
+    const AtomSelection sel1 = mol1.selection();
+
+    if (sel0.selectedAll() and sel1.selectedAll())
+    {
+        for (int i = 0; i < mol0.data().info().nAtoms(); ++i)
+        {
+            const AtomIdx idx0(i);
+
+            const AtomNum num = mol0.data().info().number(idx0);
+
+            auto matches = mol1.data().info().mapNoThrow(num);
+
+            // can only match unique matches
+            if (matches.count() == 1)
+            {
+                if (reverse_map.contains(matches[0]))
+                {
+                    // remove the duplicate match
+                    map.remove(reverse_map[matches[0]]);
+                }
+                else
+                {
+                    reverse_map.insert(matches[0], idx0);
+                    map.insert(idx0, matches[0]);
+                }
+            }
+        }
+    }
+    else
+    {
+        for (const AtomIdx &idx0 : sel0.selectedAtoms())
+        {
+            const AtomNum num0 = mol0.data().info().number(idx0);
+
+            for (const AtomIdx &idx1 : sel1.selectedAtoms())
+            {
+                const AtomNum num1 = mol1.data().info().number(idx1);
+
+                if (num0 == num1)
+                {
+                    if (reverse_map.contains(idx1))
+                    {
+                        // remove the duplicate match
+                        map.remove(reverse_map[idx1]);
+                    }
+                    else
+                    {
+                        reverse_map.insert(idx1, idx0);
+                        map.insert(idx0, idx1);
+                    }
+                }
+            }
+        }
+    }
+
+    return map;
+}
+
+/** Match the atoms in 'mol1' to the atoms in 'mol0' - this
+    returns the AtomIdxs of the atoms in 'mol1' that are in
+    'mol0', indexed by the AtomIdx of the atom in 'mol0'.
+
+     This skips atoms in 'mol1' that are not in 'mol0'
+*/
+QHash<AtomIdx, AtomIdx> AtomNumMatcher::pvt_match(const MoleculeInfoData &mol0, const MoleculeInfoData &mol1) const
+{
+    QHash<AtomIdx, AtomIdx> map;
+    QHash<AtomIdx, AtomIdx> reverse_match;
+
+    for (int i = 0; i < mol0.nAtoms(); ++i)
+    {
+        const AtomIdx idx0(i);
+
+        const AtomNum num = mol0.number(idx0);
+
+        auto matches = mol1.mapNoThrow(num);
+
+        // can only match unique matches
+        if (matches.count() == 1)
+        {
+            if (reverse_match.contains(matches[0]))
+            {
+                // remove the duplicate match
+                map.remove(reverse_match[matches[0]]);
+            }
+            else
+            {
+                reverse_match.insert(matches[0], idx0);
+                map.insert(idx0, matches[0]);
+            }
+        }
+    }
+
+    return map;
+}
+
+const char *AtomNumMatcher::typeName()
+{
+    return QMetaType::typeName(qMetaTypeId<AtomNumMatcher>());
 }
 
 /////////

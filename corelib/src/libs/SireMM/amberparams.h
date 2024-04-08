@@ -436,6 +436,14 @@ namespace SireMM
                  const SireMol::Element &element, const SireMM::LJParameter &ljparam, const QString &amber_type,
                  SireUnits::Dimension::Length born_radius, double screening_parameter, const QString &treechain);
 
+        void set(const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                 const SireMM::LJ1264Parameter &ljparam);
+
+        void set(const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
+                 AmberParams &params1, const SireMM::LJ1264Parameter &ljparam);
+
+        void set(const SireMol::AtomID &atom, const QList<SireMM::LJException> &exceptions);
+
         SireMol::AtomCharges charges() const;
         SireMol::AtomMasses masses() const;
         SireMol::AtomElements elements() const;
@@ -505,6 +513,11 @@ namespace SireMM
         DihedralID convert(const DihedralID &dihedral) const;
         ImproperID convert(const ImproperID &improper) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     protected:
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
                                                       const AtomMatcher &atommatcher) const;
@@ -521,6 +534,8 @@ namespace SireMM
         void getAmberImpropersFrom(const FourAtomFunctions &funcs, const MoleculeData &moldata, const QVector<bool> &hydrogens, const PropertyMap &map);
 
         void getAmberNBsFrom(const CLJNBPairs &nbpairs, const FourAtomFunctions &funcs);
+
+        void createContainers();
 
         /** The molecule that this flexibility operates on */
         SireMol::MoleculeInfo molinfo;

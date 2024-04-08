@@ -11,6 +11,11 @@
 #include "SireMM/mmdetail.h"
 #include "SireMM/excludedpairs.h"
 #include "SireMM/amberparams.h"
+#include "SireMM/bond.h"
+#include "SireMM/angle.h"
+#include "SireMM/dihedral.h"
+
+#include <boost/tuple/tuple.hpp>
 
 SIRE_BEGIN_HEADER
 
@@ -27,19 +32,19 @@ namespace SireOpenMM
     public:
         enum CONSTRAIN_TYPE
         {
-            CONSTRAIN_NONE = 0x0000,
-            CONSTRAIN_BONDS = 0x0001,
-            CONSTRAIN_HBONDS = 0x0010,
-            CONSTRAIN_HANGLES = 0x1000
+            CONSTRAIN_NONE = 0x00000000,
+            CONSTRAIN_BONDS = 0x00000001,
+            CONSTRAIN_HBONDS = 0x00000010,
+            CONSTRAIN_HANGLES = 0x00001000,
+            CONSTRAIN_NOT_PERTURBED = 0x00010000,
+            CONSTRAIN_NOT_HEAVY_PERTURBED = 0x00100000,
+            CONSTRAIN_AUTO = 0x01000000,
+            CONSTRAIN_AUTO_BONDS = CONSTRAIN_BONDS | CONSTRAIN_AUTO,
         };
 
         OpenMMMolecule();
         OpenMMMolecule(const SireMol::Molecule &mol,
                        const SireBase::PropertyMap &map);
-
-        OpenMMMolecule(const SireMol::Molecule &mol,
-                       const SireBase::PropertyMap &map0,
-                       const SireBase::PropertyMap &map1);
 
         ~OpenMMMolecule();
 
@@ -55,6 +60,7 @@ namespace SireOpenMM
         QVector<double> getSigmas() const;
         QVector<double> getEpsilons() const;
         QVector<double> getAlphas() const;
+        QVector<double> getKappas() const;
 
         QVector<double> getBondKs() const;
         QVector<double> getBondLengths() const;
@@ -62,18 +68,18 @@ namespace SireOpenMM
         QVector<double> getAngleKs() const;
         QVector<double> getAngleSizes() const;
 
-        QVector<int> getTorsionPeriodicities() const;
+        QVector<qint8> getTorsionPeriodicities() const;
         QVector<double> getTorsionPhases() const;
         QVector<double> getTorsionKs() const;
 
-        QVector<std::pair<int, int>> getExceptionAtoms() const;
+        QVector<boost::tuple<qint32, qint32>> getExceptionAtoms() const;
 
         QVector<double> getChargeScales() const;
         QVector<double> getLJScales() const;
 
         bool isGhostAtom(int atom) const;
 
-        std::tuple<int, int, double, double, double>
+        boost::tuple<int, int, double, double, double>
         getException(int atom0, int atom1,
                      int start_index,
                      double coul_14_scl,
@@ -108,36 +114,36 @@ namespace SireOpenMM
         QVector<double> masses;
 
         /** Indexes of light atoms */
-        QList<int> light_atoms;
-
-        /** Indexes of virtual sites */
-        QList<int> virtual_sites;
+        QSet<qint32> light_atoms;
 
         /** Charge and LJ parameters (sigma / epsilon) */
-        QVector<std::tuple<double, double, double>> cljs;
+        QVector<boost::tuple<double, double, double>> cljs;
 
         /** Set of 1-4 or excluded pairs
             (with coulomb and LJ scaling factors) */
-        QVector<std::tuple<int, int, double, double>> exception_params;
+        QVector<boost::tuple<qint32, qint32, double, double>> exception_params;
 
         /** All the bond parameters */
-        QVector<std::tuple<int, int, double, double>> bond_params;
+        QVector<boost::tuple<qint32, qint32, double, double>> bond_params;
 
         /** All the angle parameters */
-        QVector<std::tuple<int, int, int, double, double>> ang_params;
+        QVector<boost::tuple<qint32, qint32, qint32, double, double>> ang_params;
 
         /** All the dihedral and improper parameters */
-        QVector<std::tuple<int, int, int, int, int, double, double>> dih_params;
+        QVector<boost::tuple<qint32, qint32, qint32, qint32, qint32, double, double>> dih_params;
 
         /** All the constraints */
-        QVector<std::tuple<int, int, double>> constraints;
+        QVector<boost::tuple<qint32, qint32, double>> constraints;
+
+        /** All of the perturbable constraints - these include the r0 values */
+        QVector<boost::tuple<qint32, qint32, double, double>> perturbable_constraints;
 
         /** The molecule perturbed molecule, if this is perturbable */
         std::shared_ptr<OpenMMMolecule> perturbed;
 
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
-        QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
+        QHash<QString, QVector<boost::tuple<int, int>>> exception_idxs;
 
         /** The property map used to get the perturbable properties -
          *  this is only non-default if the molecule is perturbable
@@ -152,15 +158,20 @@ namespace SireOpenMM
          */
         QVector<double> alphas;
 
+        /** Kappa values for all of the atoms. This is equal to zero for
+         *  non-ghost atoms, and one for ghost atoms
+         */
+        QVector<double> kappas;
+
         /** The indexes of atoms that become ghosts in the
          *  perturbed state
          */
-        QSet<int> to_ghost_idxs;
+        QSet<qint32> to_ghost_idxs;
 
         /** The indexes of atoms that are ghosts in the reference
          *  state and are real in the perturbed state
          */
-        QSet<int> from_ghost_idxs;
+        QSet<qint32> from_ghost_idxs;
 
         /** What type of constraint to use */
         qint32 constraint_type;
@@ -188,12 +199,16 @@ namespace SireOpenMM
      *  in easy-to-access arrays, with guarantees that the arrays are
      *  compatible and the data is aligned.
      */
-    class PerturbableOpenMMMolecule
+    class PerturbableOpenMMMolecule : public SireBase::ConcreteProperty<PerturbableOpenMMMolecule, SireBase::Property>
     {
     public:
         PerturbableOpenMMMolecule();
 
         PerturbableOpenMMMolecule(const OpenMMMolecule &mol);
+
+        PerturbableOpenMMMolecule(const SireMol::Molecule &mol,
+                                  const SireBase::PropertyMap &map);
+
         PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other);
 
         ~PerturbableOpenMMMolecule();
@@ -201,8 +216,23 @@ namespace SireOpenMM
         bool operator==(const PerturbableOpenMMMolecule &other) const;
         bool operator!=(const PerturbableOpenMMMolecule &other) const;
 
+        PerturbableOpenMMMolecule &operator=(const PerturbableOpenMMMolecule &other);
+
+        static const char *typeName();
+
+        const char *what() const;
+
+        QString toString() const;
+
+        PerturbableOpenMMMolecule *clone() const;
+
+        bool isNull() const;
+
         QVector<double> getAlphas0() const;
         QVector<double> getAlphas1() const;
+
+        QVector<double> getKappas0() const;
+        QVector<double> getKappas1() const;
 
         QVector<double> getCharges0() const;
         QVector<double> getCharges1() const;
@@ -224,8 +254,8 @@ namespace SireOpenMM
 
         QVector<double> getTorsionKs0() const;
         QVector<double> getTorsionKs1() const;
-        QVector<int> getTorsionPeriodicities0() const;
-        QVector<int> getTorsionPeriodicities1() const;
+        QVector<qint8> getTorsionPeriodicities0() const;
+        QVector<qint8> getTorsionPeriodicities1() const;
         QVector<double> getTorsionPhases0() const;
         QVector<double> getTorsionPhases1() const;
 
@@ -234,23 +264,57 @@ namespace SireOpenMM
         QVector<double> getLJScales0() const;
         QVector<double> getLJScales1() const;
 
-        QSet<int> getToGhostIdxs() const;
-        QSet<int> getFromGhostIdxs() const;
+        QSet<qint32> getToGhostIdxs() const;
+        QSet<qint32> getFromGhostIdxs() const;
 
         bool isGhostAtom(int atom) const;
 
-        QVector<std::pair<int, int>> getExceptionAtoms() const;
+        QVector<boost::tuple<qint32, qint32>> getExceptionAtoms() const;
 
-        QVector<std::pair<int, int>> getExceptionIndicies(const QString &name) const;
+        QVector<boost::tuple<qint32, qint32>> getExceptionIndicies(const QString &name) const;
 
         void setExceptionIndicies(const QString &name,
-                                  const QVector<std::pair<int, int>> &exception_idxs);
+                                  const QVector<boost::tuple<int, int>> &exception_idxs);
+
+        void setConstraintIndicies(const QVector<qint32> &constraint_idxs);
+
+        QVector<qint32> getConstraintIndicies() const;
+
+        boost::tuple<QVector<qint32>, QVector<double>, QVector<double>> getPerturbableConstraints() const;
+
+        QVector<boost::tuple<qint32, qint32, double, double>> getPerturbableConstraintsWithAtoms() const;
+
+        QList<SireMol::Atom> atoms() const;
+        QList<SireMM::Bond> bonds() const;
+        QList<SireMM::Angle> angles() const;
+        QList<SireMM::Dihedral> torsions() const;
 
     private:
+        /** The atoms that are perturbed, in the order they appear
+         *  in the arrays below
+         */
+        QList<SireMol::Atom> perturbed_atoms;
+
+        /** The bonds that are perturbed, in the order they appear
+         *  in the arrays below
+         */
+        QList<SireMM::Bond> perturbed_bonds;
+
+        /** The angles that are perturbed, in the order they appear
+         *  in the arrays below
+         */
+        QList<SireMM::Angle> perturbed_angs;
+
+        /** The torsions that are perturbed, in the order they appear
+         *  in the arrays below
+         */
+        QList<SireMM::Dihedral> perturbed_dihs;
+
         /** The array of parameters for the two end states, aligned
          *  so that they can be morphed via the LambdaLever
          */
         QVector<double> alpha0, alpha1;
+        QVector<double> kappa0, kappa1;
         QVector<double> chg0, chg1;
         QVector<double> sig0, sig1;
         QVector<double> eps0, eps1;
@@ -259,7 +323,7 @@ namespace SireOpenMM
         QVector<double> ang_k0, ang_k1;
         QVector<double> ang_t0, ang_t1;
         QVector<double> tors_k0, tors_k1;
-        QVector<int> tors_periodicity0, tors_periodicity1;
+        QVector<qint8> tors_periodicity0, tors_periodicity1;
         QVector<double> tors_phase0, tors_phase1;
         QVector<double> charge_scl0, charge_scl1;
         QVector<double> lj_scl0, lj_scl1;
@@ -267,22 +331,36 @@ namespace SireOpenMM
         /** The indexes of atoms that become ghosts in the
          *  perturbed state
          */
-        QSet<int> to_ghost_idxs;
+        QSet<qint32> to_ghost_idxs;
 
         /** The indexes of atoms that are ghosts in the reference
          *  state and are real in the perturbed state
          */
-        QSet<int> from_ghost_idxs;
+        QSet<qint32> from_ghost_idxs;
 
         /** The indicies of the atoms in the exceptions, in exception order */
-        QVector<std::pair<int, int>> exception_atoms;
+        QVector<boost::tuple<qint32, qint32>> exception_atoms;
 
         /** The indicies of the added exceptions - only populated
          *  if this is a peturbable molecule */
-        QHash<QString, QVector<std::pair<int, int>>> exception_idxs;
+        QHash<QString, QVector<boost::tuple<qint32, qint32>>> exception_idxs;
+
+        /** All of the perturbable constraints - these include the r0 values
+         *  for both end states
+         */
+        QVector<boost::tuple<qint32, qint32, double, double>> perturbable_constraints;
+
+        /** The indicies of the added constraints - this should be equal
+         *  to the number of perturbable constraints in the molecule
+         */
+        QVector<qint32> constraint_idxs;
     };
 
 }
+
+Q_DECLARE_METATYPE(SireOpenMM::PerturbableOpenMMMolecule)
+
+SIRE_EXPOSE_CLASS(SireOpenMM::PerturbableOpenMMMolecule)
 
 SIRE_END_HEADER
 

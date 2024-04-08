@@ -38,6 +38,7 @@ namespace SireMol
     class AtomCoordMatcher;
     class AtomIdxMatcher;
     class AtomNameMatcher;
+    class AtomNumMatcher;
     class AtomIDMatcher;
     class AtomMultiMatcher;
     class AtomMCSMatcher;
@@ -55,6 +56,9 @@ SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomIdxMatcher &)
 
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomNameMatcher &);
 SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomNameMatcher &);
+
+SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomNumMatcher &);
+SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomNumMatcher &);
 
 SIREMOL_EXPORT QDataStream &operator<<(QDataStream &, const SireMol::AtomIDMatcher &);
 SIREMOL_EXPORT QDataStream &operator>>(QDataStream &, SireMol::AtomIDMatcher &);
@@ -202,6 +206,43 @@ namespace SireMol
 
         bool operator==(const AtomNameMatcher &other) const;
         bool operator!=(const AtomNameMatcher &other) const;
+
+        QString toString() const;
+
+    protected:
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeInfoData &molinfo0, const MoleculeInfoData &molinfo1) const;
+
+        QHash<AtomIdx, AtomIdx> pvt_match(const MoleculeView &molview0, const PropertyMap &map0,
+                                          const MoleculeView &molview1, const PropertyMap &map1) const;
+    };
+
+    /** This is a simple atom matcher that matches the atoms based
+        on their numbers, so the atom with number '1' in molinfo0 will
+        be matched to the atom with number '1' in molinfo1
+    */
+    class SIREMOL_EXPORT AtomNumMatcher : public SireBase::ConcreteProperty<AtomNumMatcher, AtomMatcher>
+    {
+
+        friend SIREMOL_EXPORT QDataStream & ::operator<<(QDataStream &, const AtomNumMatcher &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>>(QDataStream &, AtomNumMatcher &);
+
+    public:
+        AtomNumMatcher();
+        AtomNumMatcher(const AtomNumMatcher &);
+
+        ~AtomNumMatcher();
+
+        static const char *typeName();
+
+        const char *what() const
+        {
+            return AtomNumMatcher::typeName();
+        }
+
+        AtomNumMatcher &operator=(const AtomNumMatcher &other);
+
+        bool operator==(const AtomNumMatcher &other) const;
+        bool operator!=(const AtomNumMatcher &other) const;
 
         QString toString() const;
 
@@ -568,6 +609,7 @@ namespace SireMol
 Q_DECLARE_METATYPE(SireMol::AtomCoordMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomIdxMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomNameMatcher)
+Q_DECLARE_METATYPE(SireMol::AtomNumMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomIDMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomMultiMatcher)
 Q_DECLARE_METATYPE(SireMol::AtomMCSMatcher)
@@ -579,6 +621,7 @@ Q_DECLARE_METATYPE(SireMol::ResIdxAtomCoordMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomCoordMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomIdxMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomNameMatcher)
+SIRE_EXPOSE_CLASS(SireMol::AtomNumMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomIDMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomMultiMatcher)
 SIRE_EXPOSE_CLASS(SireMol::AtomMCSMatcher)

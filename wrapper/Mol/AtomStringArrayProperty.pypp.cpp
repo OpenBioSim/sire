@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireBase::StringArrayProperty> __copy__(const SireMol::AtomProperty<SireBase::StringArrayProperty> &other){ return SireMol::AtomProperty<SireBase::StringArrayProperty>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -359,6 +361,19 @@ void register_AtomStringArrayProperty_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireBase::StringArrayProperty >::merge
+        
+            typedef SireMol::AtomProperty< SireBase::StringArrayProperty > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireBase::StringArrayProperty >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireBase::StringArrayProperty >::merge );
+            
+            AtomStringArrayProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireBase::StringArrayProperty >::nAtoms
         
             typedef SireMol::AtomProperty< SireBase::StringArrayProperty > exported_class_t;
@@ -480,6 +495,20 @@ void register_AtomStringArrayProperty_class(){
                 "__getitem__"
                 , __getitem___function_value
                 , ( bp::arg("slice") )
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireBase::StringArrayProperty >::set
+        
+            typedef SireMol::AtomProperty< SireBase::StringArrayProperty > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireBase::StringArrayProperty > & ( ::SireMol::AtomProperty< SireBase::StringArrayProperty >::*set_function_type)( int,::SireBase::StringArrayProperty const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireBase::StringArrayProperty >::set );
+            
+            AtomStringArrayProperty_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
+                , bp::return_self< >()
                 , "" );
         
         }

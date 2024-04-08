@@ -29,6 +29,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 #include "SireMaths/quaternion.h"
 
 #include "SireMaths/matrix.h"
@@ -404,6 +406,19 @@ void register_AtomCoords_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomProperty< SireMaths::Vector >::merge
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireMaths::Vector >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireMaths::Vector >::merge );
+            
+            AtomCoords_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMol::AtomProperty< SireMaths::Vector >::nAtoms
         
             typedef SireMol::AtomProperty< SireMaths::Vector > exported_class_t;
@@ -622,6 +637,20 @@ void register_AtomCoords_class(){
                 "set"
                 , set_function_value
                 , ( bp::arg("cgidx"), bp::arg("cgroup") )
+                , bp::return_self< >()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireMaths::Vector >::set
+        
+            typedef SireMol::AtomProperty< SireMaths::Vector > exported_class_t;
+            typedef ::SireMol::AtomProperty< SireMaths::Vector > & ( ::SireMol::AtomProperty< SireMaths::Vector >::*set_function_type)( int,::SireMaths::Vector const & ) ;
+            set_function_type set_function_value( &::SireMol::AtomProperty< SireMaths::Vector >::set );
+            
+            AtomCoords_exposer.def( 
+                "set"
+                , set_function_value
+                , ( bp::arg("i"), bp::arg("value") )
                 , bp::return_self< >()
                 , "" );
         

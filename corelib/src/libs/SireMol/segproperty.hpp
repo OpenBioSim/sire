@@ -33,6 +33,7 @@
 #include "SireBase/convert_property.hpp"
 #include "SireBase/qvariant_metatype.h"
 #include "SireBase/slice.h"
+#include "SireBase/console.h"
 
 #include "moleculeinfodata.h"
 #include "molviewproperty.h"
@@ -104,7 +105,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const SegProperty<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, SegProperty<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, SegProperty<T> &);
 
     public:
         SegProperty();
@@ -167,6 +168,11 @@ namespace SireMol
         bool canConvert(const QVariant &value) const;
 
         void assertCanConvert(const QVariant &value) const;
+
+        virtual SireBase::PropertyList merge(const MolViewProperty &other,
+                                             const AtomIdxMapping &mapping,
+                                             const QString &ghost = QString(),
+                                             const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         /** The actual segment property values */
@@ -545,6 +551,32 @@ namespace SireMol
     SIRE_OUTOFLINE_TEMPLATE bool SegProperty<T>::isCompatibleWith(const MoleculeInfoData &molinfo) const
     {
         return molinfo.nSegments() == this->nSegments();
+    }
+
+    /** Merge this property with another property */
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SireBase::PropertyList SegProperty<T>::merge(const MolViewProperty &other,
+                                                                         const AtomIdxMapping &mapping,
+                                                                         const QString &ghost,
+                                                                         const SireBase::PropertyMap &map) const
+    {
+        if (not other.isA<SegProperty<T>>())
+        {
+            throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                    .arg(this->what())
+                                                    .arg(other.what()),
+                                                CODELOC);
+        }
+
+        SireBase::Console::warning(QObject::tr("Merging %1 properties is not yet implemented. Returning two copies of the original property.")
+                                       .arg(this->what()));
+
+        SireBase::PropertyList ret;
+
+        ret.append(*this);
+        ret.append(*this);
+
+        return ret;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

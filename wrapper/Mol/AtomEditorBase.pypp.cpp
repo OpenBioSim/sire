@@ -49,13 +49,27 @@ namespace bp = boost::python;
 
 #include "atomeditor.h"
 
-#include "atomljs.h"
+#include "SireBase/console.h"
 
-#include "SireError/errors.h"
+#include "SireBase/incremint.h"
+
+#include "SireBase/propertylist.h"
+
+#include "SireBase/quickcopy.hpp"
 
 #include "SireStream/datastream.h"
 
+#include "SireStream/magic_error.h"
+
 #include "SireStream/shareddatastream.h"
+
+#include "atomljs.h"
+
+#include <QMutex>
+
+#include <QUuid>
+
+#include "SireError/errors.h"
 
 #include "chirality.h"
 
@@ -77,8 +91,6 @@ namespace bp = boost::python;
 
 #include "atombeads.h"
 
-#include "SireBase/quickcopy.hpp"
-
 #include "SireBase/slice.h"
 
 #include "SireMaths/align.h"
@@ -96,8 +108,6 @@ namespace bp = boost::python;
 #include "atompropertylist.h"
 
 #include "atomradii.h"
-
-#include "SireBase/propertylist.h"
 
 #include "SireMaths/vector.h"
 

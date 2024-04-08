@@ -39,6 +39,7 @@
 #include "SireMol/molviewproperty.h"
 #include "SireMol/mover.hpp"
 #include "SireMol/partialmolecule.h"
+#include "SireMol/atomidxmapping.h"
 
 SIRE_BEGIN_HEADER
 
@@ -124,6 +125,11 @@ namespace SireMol
         void remove14Pair(const BondID &pair);
         QList<double> get14PairParams(const BondID &pair);
         QList<BondID> getAll14Pairs();
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         /** The molecule that this flexibility operates on */

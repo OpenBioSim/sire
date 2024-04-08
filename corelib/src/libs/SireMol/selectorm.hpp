@@ -65,7 +65,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const SelectorM<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, SelectorM<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, SelectorM<T> &);
 
     public:
         typedef typename QList<Selector<T>>::const_iterator iterator;
@@ -93,7 +93,7 @@ namespace SireMol
         template <class U>
         SelectorM(const SelectorM<U> &other, const QList<qint64> &idxs);
         template <class U>
-        SelectorM(const SelectorM<U> &other, const QString &name);
+        SelectorM(const SelectorM<U> &other, const QString &name, const SireBase::PropertyMap &map = SireBase::PropertyMap());
         template <class U>
         SelectorM(const SelectorM<U> &other, const typename T::ID &id);
 
@@ -316,6 +316,11 @@ namespace SireMol
         QStringList propertyKeys() const;
         QStringList metadataKeys() const;
         QStringList metadataKeys(const PropertyName &key) const;
+
+        bool isSingleMolecule() const;
+        void assertSingleMolecule() const;
+
+        Selector<T> toSingleMolecule() const;
 
         template <class V>
         QList<V> property(const PropertyName &key) const;
@@ -1072,7 +1077,9 @@ namespace SireMol
 
     template <class T>
     template <class U>
-    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other, const QString &name)
+    SIRE_OUTOFLINE_TEMPLATE SelectorM<T>::SelectorM(const SelectorM<U> &other,
+                                                    const QString &name,
+                                                    const SireBase::PropertyMap &map)
         : SireBase::ConcreteProperty<SelectorM<T>, SireBase::Property>()
     {
         for (const auto &view : other)
@@ -1093,7 +1100,7 @@ namespace SireMol
             // try a search
             try
             {
-                this->operator=(SelectorM<T>(other.search(name)));
+                this->operator=(SelectorM<T>(other.search(name, map)));
             }
             catch (...)
             {
@@ -2855,6 +2862,64 @@ namespace SireMol
 
         if (not have_some)
             return vws.at(0).template metadata<V>(key, metakey);
+
+        return ret;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool SelectorM<T>::isSingleMolecule() const
+    {
+        if (this->isEmpty())
+            return false;
+        else if (this->vws.count() == 1)
+            return true;
+        else
+        {
+            MolNum molnum = this->vws.at(0).data().number();
+
+            for (int i = 1; i < this->vws.count(); ++i)
+            {
+                if (this->vws.at(i).data().number() != molnum)
+                    return false;
+            }
+
+            return true;
+        }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void SelectorM<T>::assertSingleMolecule() const
+    {
+        if (this->isEmpty())
+        {
+            throw SireMol::missing_molecule(QObject::tr(
+                                                "There are no molecules represented in this object - it is empty."),
+                                            CODELOC);
+        }
+        else if (not this->isSingleMolecule())
+        {
+            throw SireMol::duplicate_molecule(QObject::tr(
+                                                  "There is more than one molecule represented in this object. The molecules are: %1")
+                                                  .arg(this->molecules().toString()),
+                                              CODELOC);
+        }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> SelectorM<T>::toSingleMolecule() const
+    {
+        this->assertSingleMolecule();
+
+        if (this->vws.count() == 1)
+            return this->vws.at(0);
+
+        // we need to combine the matching views together into a single view
+        Selector<T> ret = this->vws.at(0);
+
+        for (int i = 1; i < this->vws.count(); ++i)
+        {
+            ret += this->vws.at(i);
+        }
 
         return ret;
     }

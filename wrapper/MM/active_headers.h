@@ -55,6 +55,7 @@
 #include "intragroupff.h"
 #include "intraljff.h"
 #include "intrasoftcljff.h"
+#include "lj1264parameter.h"
 #include "ljpair.h"
 #include "ljparameter.h"
 #include "ljperturbation.h"

@@ -135,3 +135,33 @@ def test_rdkit_infer_bonds(ejm55_sdf, ejm55_gro):
 
     for s, g in zip(match_sdf, match_gro):
         assert s.number() == g.number()
+
+
+@pytest.mark.skipif(
+    "rdkit" not in sr.convert.supported_formats(),
+    reason="rdkit support is not available",
+)
+def test_rdkit_preserve_info(ala_mols, ejm55_gro):
+    mol0 = ala_mols[0]
+    mol1 = ejm55_gro["not (protein or water)"].molecule()
+
+    r0 = sr.convert.to(mol0, "rdkit")
+    r1 = sr.convert.to(mol1, "rdkit")
+
+    m0 = sr.convert.to(r0, "sire")
+    m1 = sr.convert.to(r1, "sire")
+
+    for mol, m in [(mol0, m0), (mol1, m1)]:
+        for res0, res1 in zip(mol.residues(), m.residues()):
+            assert res0.name() == res1.name()
+            assert res0.number() == res1.number()
+
+        for atom0, atom1 in zip(mol.atoms(), m.atoms()):
+            assert atom0.name() == atom1.name()
+            assert atom0.number() == atom1.number()
+
+            res0 = atom0.residue()
+            res1 = atom1.residue()
+
+            assert res0.name() == res1.name()
+            assert res0.number() == res1.number()
