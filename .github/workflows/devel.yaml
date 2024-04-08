@@ -15,10 +15,10 @@ jobs:
     name: build (${{ matrix.python-version }}, ${{ matrix.platform.name }})
     runs-on: ${{ matrix.platform.os }}
     strategy:
-      max-parallel: 5
+      max-parallel: 6
       fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
         platform:
           - { name: "windows", os: "windows-latest", shell: "pwsh" }
           - { name: "linux", os: "ubuntu-latest", shell: "bash -l {0}" }
@@ -28,11 +28,11 @@ jobs:
           # but Linux
           - platform:
               { name: "macos", os: "macos-latest", shell: "bash -l {0}" }
-            python-version: "3.9"
-          - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
-            python-version: "3.9"
+            python-version: "3.12"  # MacOS can't run 3.12 yet... We want 3.10 and 3.11
           - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
             python-version: "3.10"
+          - platform: { name: "windows", os: "windows-latest", shell: "pwsh" }
+            python-version: "3.11"
     environment:
       name: sire-build
     defaults:
@@ -44,7 +44,7 @@ jobs:
       REPO: "${{ github.repository }}"
     steps:
       #
-      - uses: conda-incubator/setup-miniconda@v2
+      - uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: ${{ matrix.python-version }}
@@ -57,7 +57,7 @@ jobs:
         run: git clone https://github.com/${{ env.REPO }} sire
       #
       - name: Setup Conda
-        run: mamba install -y -c conda-forge boa anaconda-client packaging=21 pip-requirements-parser
+        run: mamba install -y -c conda-forge boa anaconda-client packaging pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py

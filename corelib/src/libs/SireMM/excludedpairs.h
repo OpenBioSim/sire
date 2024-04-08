@@ -92,6 +92,11 @@ namespace SireMM
         void setExcluded(const SireMol::AtomID &atom0, const SireMol::AtomID &atom1,
                          bool are_excluded);
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     private:
         int getIndex(qint64 atom0, qint64 atom1) const;
 

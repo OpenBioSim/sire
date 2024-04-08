@@ -29,6 +29,8 @@
 
 #include "twoatomfunctions.h"
 
+#include "SireBase/console.h"
+
 #include "SireCAS/symbols.h"
 
 #include "SireMol/atommatcher.h"
@@ -427,6 +429,45 @@ void TwoAtomFunctions::clear(AtomIdx atom)
     }
 }
 
+/** Clear all functions that invole any of the atoms in 'atoms'
+ *  - if 'exclusive' is true, then this only removes functions
+ *  that exclusively involve these atoms - if false, then
+ *  if removes functions that involve any of these atoms
+ */
+void TwoAtomFunctions::clear(const QList<AtomIdx> &atoms, bool exclusive)
+{
+    QSet<quint32> atms;
+    atms.reserve(atoms.count());
+
+    for (const auto &atom : atoms)
+    {
+        atms.insert(atom.map(info().nAtoms()));
+    }
+
+    QList<IDPair> keys = potentials_by_atoms.keys();
+
+    if (exclusive)
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) and atms.contains(key.atom1))
+            {
+                TwoAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
+            }
+        }
+    }
+    else
+    {
+        for (const auto &key : keys)
+        {
+            if (atms.contains(key.atom0) or atms.contains(key.atom1))
+            {
+                TwoAtomFunctions::removeSymbols(potentials_by_atoms.take(key).symbols());
+            }
+        }
+    }
+}
+
 /** Clear any function that acts on the atoms identified by 'atom'
 
     \throw SireMol::missing_atom
@@ -599,6 +640,41 @@ Expression TwoAtomFunctions::force(const BondID &bondid, const Symbol &symbol) c
 }
 
 /** Return the potential energy functions acting between the identified
+    pairs of atoms - if exclusive is true then only return potentials where
+    both atoms are in the bond
+*/
+QVector<TwoAtomFunction> TwoAtomFunctions::potentials(const QList<AtomIdx> &atms, bool exclusive) const
+{
+    QVector<TwoAtomFunction> funcs;
+    funcs.reserve(potentials_by_atoms.count());
+
+    QSet<AtomIdx> atoms(atms.begin(), atms.end());
+
+    for (QHash<IDPair, Expression>::const_iterator it = potentials_by_atoms.constBegin();
+         it != potentials_by_atoms.constEnd(); ++it)
+    {
+        if (exclusive)
+        {
+            if (atoms.contains(AtomIdx(it.key().atom0)) and atoms.contains(AtomIdx(it.key().atom1)))
+            {
+                funcs.append(TwoAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                             info().cgAtomIdx(AtomIdx(it.key().atom1)), it.value()));
+            }
+        }
+        else
+        {
+            if (atoms.contains(AtomIdx(it.key().atom0)) or atoms.contains(AtomIdx(it.key().atom1)))
+            {
+                funcs.append(TwoAtomFunction(info().cgAtomIdx(AtomIdx(it.key().atom0)),
+                                             info().cgAtomIdx(AtomIdx(it.key().atom1)), it.value()));
+            }
+        }
+    }
+
+    return funcs;
+}
+
+/** Return the potential energy functions acting between the identified
     pairs of atoms */
 QVector<TwoAtomFunction> TwoAtomFunctions::potentials() const
 {
@@ -757,4 +833,136 @@ PropertyPtr TwoAtomFunctions::_pvt_makeCompatibleWith(const MoleculeInfoData &mo
 const char *TwoAtomFunctions::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<TwoAtomFunctions>());
+}
+
+template <class T>
+QSet<T> _to_set(const QList<T> &vals)
+{
+    QSet<T> ret;
+    ret.reserve(vals.count());
+
+    for (const auto &val : vals)
+    {
+        ret.insert(val);
+    }
+
+    return ret;
+}
+
+/** Merge this property with another property */
+PropertyList TwoAtomFunctions::merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost,
+                                     const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<TwoAtomFunctions>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for bond parameters is ignored").arg(ghost));
+    }
+
+    const TwoAtomFunctions &ref = *this;
+    const TwoAtomFunctions &pert = other.asA<TwoAtomFunctions>();
+
+    TwoAtomFunctions prop0 = ref;
+    TwoAtomFunctions prop1 = ref;
+
+    // the prop1 properties are made by finding all of the atoms that
+    // are involved in bonds in 'pert' and removing any bonds involving
+    // only those atoms from 'prop1', and then adding back the matching
+    // bonds from 'pert'. Use 'true' to only remove bonds where both
+    // atoms are in the mapping
+    prop1.clear(mapping.mappedIn1(), true);
+
+    // get the mapping from the perturbed to reference states, including
+    // atoms that don't exist in the reference state. In all cases,
+    // the values are the indexes in the merged molecule
+    auto map1to0 = mapping.map1to0(true);
+
+    // now find all of the bonds in 'pert' where both atoms in the
+    // bond are in map1to0.keys() - i.e. exist and are mapped from
+    // the perturbed state
+    const auto pert_bonds = pert.potentials(map1to0.keys(), true);
+
+    for (const auto &pert_bond : pert_bonds)
+    {
+        const auto atom0 = map1to0.value(info().atomIdx(pert_bond.atom0()));
+        const auto atom1 = map1to0.value(info().atomIdx(pert_bond.atom1()));
+
+        prop1.set(atom0, atom1, pert_bond.function());
+
+        if (mapping.isUnmappedIn0(atom0) or mapping.isUnmappedIn0(atom1))
+        {
+            // the prop0 properties are nearly correct - we just need to add
+            // in bonds from 'pert' that involve the atoms that are not mapped
+            // in the reference state - this way, those added atoms are held
+            // by a constant bond potential, so won't fly away in the
+            // simulation of the reference state
+            prop0.set(atom0, atom1, pert_bond.function());
+        }
+    }
+
+    // now add in the bonds to the perturbed state from the reference
+    // state for any atoms that aren't mapped to the perturbed state.
+    // This way, the removed atoms are held by a constant bond potential,
+    // so won't fly away in the simulation of the perturbed state
+    auto map0to1 = mapping.map0to1(true);
+
+    const auto ref_bonds = prop0.potentials(map0to1.keys(), true);
+
+    for (const auto &ref_bond : ref_bonds)
+    {
+        const auto atom0 = info().atomIdx(ref_bond.atom0());
+        const auto atom1 = info().atomIdx(ref_bond.atom1());
+
+        if (mapping.isUnmappedIn1(atom0) or mapping.isUnmappedIn1(atom1))
+        {
+            prop1.set(atom0, atom1, ref_bond.function());
+        }
+    }
+
+    // check if we are allowed to change the size of a ring or break rings
+    bool allow_ring_breaking = true;
+    bool allow_ring_size_change = true;
+
+    if (map.specified("allow_ring_breaking"))
+    {
+        allow_ring_breaking = map["allow_ring_breaking"].value().asABoolean();
+    }
+
+    if (map.specified("allow_ring_size_change"))
+    {
+        allow_ring_size_change = map["allow_ring_size_change"].value().asABoolean();
+    }
+
+    if (not(allow_ring_breaking or allow_ring_size_change))
+    {
+        if (prop0.nFunctions() != prop1.nFunctions())
+        {
+            // number of bond functions has changed - this indicates
+            // (but not necessarily proves) that a ring has been broken
+            // or a ring size has changed
+            throw SireError::incompatible_error(
+                QObject::tr("The number of bonds in the reference (%1) and "
+                            "perturbed (%2) states is different, indicating that a ring has been broken or a ring size has changed. "
+                            "If you want to allow this perturbation, set 'allow_ring_breaking' or 'allow_ring_size_change' to true.")
+                    .arg(prop0.nFunctions())
+                    .arg(prop1.nFunctions()),
+                CODELOC);
+        }
+    }
+
+    SireBase::PropertyList ret;
+
+    ret.append(prop0);
+    ret.append(prop1);
+
+    return ret;
 }

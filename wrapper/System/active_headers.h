@@ -19,6 +19,7 @@
 #include "geometrycomponent.h"
 #include "idassigner.h"
 #include "identityconstraint.h"
+#include "merge.h"
 #include "moleculeconstraint.h"
 #include "monitorcomponent.h"
 #include "monitorcomponents.h"

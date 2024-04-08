@@ -28,12 +28,16 @@
 
 #include "lambdalever.h"
 
+#include "SireBase/propertymap.h"
+#include "SireBase/arrayproperty.hpp"
+
 #include "SireCAS/values.h"
 
 #include "tostring.h"
 
 using namespace SireOpenMM;
 using namespace SireCAS;
+using namespace SireBase;
 
 //////
 ////// Implementation of MolLambdaCache
@@ -400,6 +404,720 @@ get_exception(int atom0, int atom1, int start_index,
                              atom1 + start_index,
                              charge, sigma, epsilon,
                              alpha, kappa);
+}
+
+/** Get all of the lever values that would be set for the passed
+ *  lambda values using the current context. This returns a PropertyList
+ *  of columns, where each column is a PropertyMap with the column name
+ *  and either double or QString array property of values.
+ *
+ *  This is designed to be used by a higher-level python function that
+ *  will convert this output into, e.g. a pandas DataFrame
+ */
+PropertyList LambdaLever::getLeverValues(const QVector<double> &lambda_values,
+                                         const PerturbableOpenMMMolecule &mol) const
+{
+    if (lambda_values.isEmpty() or this->lambda_schedule.isNull() or mol.isNull())
+        return PropertyList();
+
+    PropertyList ret;
+
+    const auto &schedule = this->lambda_schedule.getMoleculeSchedule(0);
+
+    QVector<QString> column_names;
+
+    column_names.append("lambda");
+
+    QVector<double> lamvals;
+    QVector<QVector<double>> lever_values;
+
+    bool is_first = true;
+
+    for (auto lambda_value : lambda_values)
+    {
+        int idx = 0;
+
+        lambda_value = this->lambda_schedule.clamp(lambda_value);
+
+        lamvals.append(lambda_value);
+
+        const auto &cache = this->lambda_cache.get(0, lambda_value);
+
+        QVector<double> vals;
+
+        const auto morphed_charges = cache.morph(
+            schedule,
+            "clj", "charge",
+            mol.getCharges0(),
+            mol.getCharges1());
+
+        vals += morphed_charges;
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_charges.count(); ++i)
+            {
+                column_names.append(QString("clj-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : vals)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_sigmas = cache.morph(
+            schedule,
+            "clj", "sigma",
+            mol.getSigmas0(),
+            mol.getSigmas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_sigmas.count(); ++i)
+            {
+                column_names.append(QString("clj-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_epsilons = cache.morph(
+            schedule,
+            "clj", "epsilon",
+            mol.getEpsilons0(),
+            mol.getEpsilons1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_epsilons.count(); ++i)
+            {
+                column_names.append(QString("clj-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_alphas = cache.morph(
+            schedule,
+            "clj", "alpha",
+            mol.getAlphas0(),
+            mol.getAlphas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_alphas.count(); ++i)
+            {
+                column_names.append(QString("clj-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_kappas = cache.morph(
+            schedule,
+            "clj", "kappa",
+            mol.getKappas0(),
+            mol.getKappas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_kappas.count(); ++i)
+            {
+                column_names.append(QString("clj-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_charge_scale = cache.morph(
+            schedule,
+            "clj", "charge_scale",
+            mol.getChargeScales0(),
+            mol.getChargeScales1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_charge_scale.count(); ++i)
+            {
+                column_names.append(QString("clj-charge_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_charge_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_lj_scale = cache.morph(
+            schedule,
+            "clj", "lj_scale",
+            mol.getLJScales0(),
+            mol.getLJScales1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_lj_scale.count(); ++i)
+            {
+                column_names.append(QString("clj-lj_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_lj_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost_charges = cache.morph(
+            schedule,
+            "ghost/ghost", "charge",
+            mol.getCharges0(),
+            mol.getCharges1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost_charges.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_charges)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost_sigmas = cache.morph(
+            schedule,
+            "ghost/ghost", "sigma",
+            mol.getSigmas0(),
+            mol.getSigmas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost_sigmas.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost_epsilons = cache.morph(
+            schedule,
+            "ghost/ghost", "epsilon",
+            mol.getEpsilons0(),
+            mol.getEpsilons1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost_epsilons.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost_alphas = cache.morph(
+            schedule,
+            "ghost/ghost", "alpha",
+            mol.getAlphas0(),
+            mol.getAlphas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost_alphas.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost_kappas = cache.morph(
+            schedule,
+            "ghost/ghost", "kappa",
+            mol.getKappas0(),
+            mol.getKappas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost_kappas.count(); ++i)
+            {
+                column_names.append(QString("ghost/ghost-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_nonghost_charges = cache.morph(
+            schedule,
+            "ghost/non-ghost", "charge",
+            mol.getCharges0(),
+            mol.getCharges1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_nonghost_charges.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_charges)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_nonghost_sigmas = cache.morph(
+            schedule,
+            "ghost/non-ghost", "sigma",
+            mol.getSigmas0(),
+            mol.getSigmas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_nonghost_sigmas.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_nonghost_epsilons = cache.morph(
+            schedule,
+            "ghost/non-ghost", "epsilon",
+            mol.getEpsilons0(),
+            mol.getEpsilons1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_nonghost_epsilons.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_nonghost_alphas = cache.morph(
+            schedule,
+            "ghost/non-ghost", "alpha",
+            mol.getAlphas0(),
+            mol.getAlphas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_nonghost_alphas.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_nonghost_kappas = cache.morph(
+            schedule,
+            "ghost/non-ghost", "kappa",
+            mol.getKappas0(),
+            mol.getKappas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_nonghost_kappas.count(); ++i)
+            {
+                column_names.append(QString("ghost/non-ghost-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_nonghost_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_charges = cache.morph(
+            schedule,
+            "ghost-14", "charge",
+            mol.getCharges0(),
+            mol.getCharges1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_charges.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-charge-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_charges)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_sigmas = cache.morph(
+            schedule,
+            "ghost-14", "sigma",
+            mol.getSigmas0(),
+            mol.getSigmas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_sigmas.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-sigma-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_sigmas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_epsilons = cache.morph(
+            schedule,
+            "ghost-14", "epsilon",
+            mol.getEpsilons0(),
+            mol.getEpsilons1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_epsilons.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-epsilon-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_epsilons)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_alphas = cache.morph(
+            schedule,
+            "ghost-14", "alpha",
+            mol.getAlphas0(),
+            mol.getAlphas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_alphas.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-alpha-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_alphas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_kappas = cache.morph(
+            schedule,
+            "ghost-14", "kappa",
+            mol.getKappas0(),
+            mol.getKappas1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_kappas.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-kappa-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_kappas)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_charge_scale = cache.morph(
+            schedule,
+            "ghost-14", "charge_scale",
+            mol.getChargeScales0(),
+            mol.getChargeScales1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_charge_scale.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-charge_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_charge_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_ghost14_lj_scale = cache.morph(
+            schedule,
+            "ghost-14", "lj_scale",
+            mol.getLJScales0(),
+            mol.getLJScales1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_ghost14_lj_scale.count(); ++i)
+            {
+                column_names.append(QString("ghost-14-lj_scale-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_ghost14_lj_scale)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        auto perturbable_constraints = mol.getPerturbableConstraints();
+
+        const auto &idxs = boost::get<0>(perturbable_constraints);
+        const auto &r0_0 = boost::get<1>(perturbable_constraints);
+        const auto &r0_1 = boost::get<2>(perturbable_constraints);
+
+        if (not idxs.isEmpty())
+        {
+            const auto morphed_constraint_length = cache.morph(
+                schedule,
+                "bond", "bond_length", "constraint",
+                r0_0, r0_1);
+
+            if (is_first)
+            {
+                for (int i = 0; i < morphed_constraint_length.count(); ++i)
+                {
+                    column_names.append(QString("bond-constraint-%1").arg(i + 1));
+                    lever_values.append(QVector<double>());
+                }
+            }
+
+            for (const auto &val : morphed_constraint_length)
+            {
+                lever_values[idx].append(val);
+                idx += 1;
+            }
+        }
+
+        const auto morphed_bond_k = cache.morph(
+            schedule,
+            "bond", "bond_k",
+            mol.getBondKs0(),
+            mol.getBondKs1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_bond_k.count(); ++i)
+            {
+                column_names.append(QString("bond-bond_k-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_bond_k)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_bond_length = cache.morph(
+            schedule,
+            "bond", "bond_length",
+            mol.getBondLengths0(),
+            mol.getBondLengths1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_bond_length.count(); ++i)
+            {
+                column_names.append(QString("bond-bond_length-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_bond_length)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_angle_k = cache.morph(
+            schedule,
+            "angle", "angle_k",
+            mol.getAngleKs0(),
+            mol.getAngleKs1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_angle_k.count(); ++i)
+            {
+                column_names.append(QString("angle-angle_k-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_angle_k)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_angle_size = cache.morph(
+            schedule,
+            "angle", "angle_size",
+            mol.getAngleSizes0(),
+            mol.getAngleSizes1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_angle_size.count(); ++i)
+            {
+                column_names.append(QString("angle-angle_size-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_angle_size)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_torsion_phase = cache.morph(
+            schedule,
+            "torsion", "torsion_phase",
+            mol.getTorsionPhases0(),
+            mol.getTorsionPhases1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_torsion_phase.count(); ++i)
+            {
+                column_names.append(QString("torsion-torsion_phase-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_torsion_phase)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        const auto morphed_torsion_k = cache.morph(
+            schedule,
+            "torsion", "torsion_k",
+            mol.getTorsionKs0(),
+            mol.getTorsionKs1());
+
+        if (is_first)
+        {
+            for (int i = 0; i < morphed_torsion_k.count(); ++i)
+            {
+                column_names.append(QString("torsion-torsion_k-%1").arg(i + 1));
+                lever_values.append(QVector<double>());
+            }
+        }
+
+        for (const auto &val : morphed_torsion_k)
+        {
+            lever_values[idx].append(val);
+            idx += 1;
+        }
+
+        is_first = false;
+    }
+
+    ret.append(StringArrayProperty(column_names));
+    ret.append(DoubleArrayProperty(lamvals));
+
+    for (const auto &column : lever_values)
+    {
+        ret.append(DoubleArrayProperty(column));
+    }
+
+    return ret;
 }
 
 /** Set the value of lambda in the passed context. Returns the
@@ -1042,7 +1760,6 @@ double LambdaLever::setLambda(OpenMM::Context &context,
         // follow whatever is set by lambda, e.g. 'initial*lambda'
         // to switch them on, or `final*lambda` to switch them off)
         const double rho = lambda_schedule.morph("*",
-
                                                  restraint,
                                                  1.0, 1.0,
                                                  lambda_value);

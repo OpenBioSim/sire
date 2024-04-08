@@ -67,9 +67,7 @@ class TrajectoryIterator:
 
             self._map = create_map(map)
             self._view = view
-            self._values = list(
-                range(0, max(1, self._view.num_frames(self._map)))
-            )
+            self._values = list(range(0, max(1, self._view.num_frames(self._map))))
             self._times = None
             self._iter = None
             self._frame = None
@@ -125,9 +123,7 @@ class TrajectoryIterator:
                     find_all=False,
                 )
 
-                self._aligner = TrajectoryAligner(
-                    align, reference, map=self._map
-                )
+                self._aligner = TrajectoryAligner(align, reference, map=self._map)
             elif wrap or (smooth != 1):
                 self._aligner = TrajectoryAligner(
                     self._view.evaluate().center(),
@@ -401,9 +397,7 @@ class TrajectoryIterator:
 
                 for v in self.first():
                     colnames.append(colname(v))
-                    forcefields.append(
-                        create_forcefield(v, obj1_mols, map=map)
-                    )
+                    forcefields.append(create_forcefield(v, obj1_mols, map=map))
             else:
                 for v in self.first():
                     colnames.append(colname(v))
@@ -427,9 +421,7 @@ class TrajectoryIterator:
 
         components = {}
 
-        ff_nrgs = calculate_trajectory_energies(
-            forcefields, self._values, map=map
-        )
+        ff_nrgs = calculate_trajectory_energies(forcefields, self._values, map=map)
 
         for ff_idx in range(0, len(forcefields)):
             nrg = ff_nrgs[ff_idx][0]
@@ -449,9 +441,7 @@ class TrajectoryIterator:
         for i in range(0, nframes):
             for ff_idx in range(0, len(forcefields)):
                 nrg = ff_nrgs[ff_idx][i]
-                components[colname(colnames[ff_idx], "total")][
-                    i
-                ] = nrg.to_default()
+                components[colname(colnames[ff_idx], "total")][i] = nrg.to_default()
 
                 for key in nrg.components().keys():
                     try:
@@ -649,9 +639,7 @@ class TrajectoryIterator:
                 colnames.append(colname(view))
                 columns.append(np.zeros(nframes, dtype=float))
 
-            with ProgressBar(
-                total=nframes, text="Looping through frames"
-            ) as progress:
+            with ProgressBar(total=nframes, text="Looping through frames") as progress:
                 for idx, frame in enumerate(self.__iter__()):
                     for i, measure in enumerate(frame.measures(map=self._map)):
                         columns[i][idx] = measure.to_default()
@@ -659,9 +647,7 @@ class TrajectoryIterator:
 
                         if measure_unit is None:
                             if not measure.is_zero():
-                                measure_unit = (
-                                    measure.get_default().unit_string()
-                                )
+                                measure_unit = measure.get_default().unit_string()
 
                         if time_unit is None:
                             time = frame.frame_time()
@@ -674,9 +660,7 @@ class TrajectoryIterator:
             colnames.append(colname(self._view))
             column = np.zeros(nframes, dtype=float)
 
-            with ProgressBar(
-                total=nframes, text="Looping through frames"
-            ) as progress:
+            with ProgressBar(total=nframes, text="Looping through frames") as progress:
                 for idx, frame in enumerate(self.__iter__()):
                     measure = frame.measure(map=self._map)
                     column[idx] = measure.to_default()
@@ -761,9 +745,7 @@ class TrajectoryIterator:
 
         from ..base import ProgressBar
 
-        with ProgressBar(
-            total=nframes, text="Looping through frames"
-        ) as progress:
+        with ProgressBar(total=nframes, text="Looping through frames") as progress:
             for idx, frame in enumerate(self.__iter__()):
                 for i, f in enumerate(func.values()):
                     measure = f(frame)
@@ -857,9 +839,7 @@ class TrajectoryIterator:
 
         if str(func) == func:
             # we calling a named function
-            with ProgressBar(
-                total=nframes, text="Looping through frames"
-            ) as progress:
+            with ProgressBar(total=nframes, text="Looping through frames") as progress:
                 for i in range(0, nframes):
                     obj = self.__getitem__(i).current()
                     result.append(getattr(obj, func)(*args, **kwargs))
@@ -867,9 +847,7 @@ class TrajectoryIterator:
 
         else:
             # we have been passed the function to call
-            with ProgressBar(
-                total=nframes, text="Looping through frames"
-            ) as progress:
+            with ProgressBar(total=nframes, text="Looping through frames") as progress:
                 for i in range(0, nframes):
                     obj = self.__getitem__(i).current()
                     result.append(func(obj, *args, **kwargs))
@@ -944,10 +922,7 @@ class TrajectoryIterator:
 
         elif align is None:
             # auto-align only for smaller systems
-            if (
-                hasattr(reference, "molecules")
-                and len(reference.molecules()) > 100
-            ):
+            if hasattr(reference, "molecules") and len(reference.molecules()) > 100:
                 align = False
             else:
                 align = True

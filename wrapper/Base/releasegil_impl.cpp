@@ -2,6 +2,7 @@
 #include "boost/python.hpp"
 
 #include "SireBase/releasegil.h"
+#include "SireBase/console.h"
 
 #include <QMutex>
 
@@ -282,6 +283,169 @@ private:
     PyThreadState *thread_state;
 };
 
+class ConsoleImpl : public SireBase::ConsoleBase
+{
+public:
+    ConsoleImpl() : SireBase::ConsoleBase(), pyconsole(0)
+    {
+    }
+
+    ~ConsoleImpl()
+    {
+        if (pyconsole)
+        {
+            PyGILState_STATE gilstate = PyGILState_Ensure();
+            Py_DECREF(pyconsole);
+            delete pyconsole;
+            pyconsole = 0;
+            PyGILState_Release(gilstate);
+        }
+    }
+
+    void debug(const QString &message) const
+    {
+        const_cast<ConsoleImpl *>(this)->get_pyconsole();
+
+        if (pyconsole)
+        {
+            PyGILState_STATE gilstate = PyGILState_Ensure();
+
+            PyObject *result = PyObject_CallMethod(pyconsole, "debug", "s", message.toUtf8().constData());
+
+            if (result == 0)
+            {
+                qDebug() << "UNABLE TO CALL DEBUG";
+                qDebug() << message;
+            }
+            else
+            {
+                Py_DECREF(result);
+            }
+
+            PyGILState_Release(gilstate);
+        }
+        else
+        {
+            qDebug() << "NO PYCONSOLE";
+            qDebug() << message;
+        }
+    }
+
+    void warning(const QString &message) const
+    {
+        const_cast<ConsoleImpl *>(this)->get_pyconsole();
+
+        if (pyconsole)
+        {
+            PyGILState_STATE gilstate = PyGILState_Ensure();
+
+            PyObject *result = PyObject_CallMethod(pyconsole, "warning", "s", message.toUtf8().constData());
+
+            if (result == 0)
+            {
+                qWarning() << message;
+            }
+            else
+            {
+                Py_DECREF(result);
+            }
+
+            PyGILState_Release(gilstate);
+        }
+        else
+        {
+            qWarning() << message;
+        }
+    }
+
+    void error(const QString &message) const
+    {
+        const_cast<ConsoleImpl *>(this)->get_pyconsole();
+
+        if (pyconsole)
+        {
+            PyGILState_STATE gilstate = PyGILState_Ensure();
+
+            PyObject *result = PyObject_CallMethod(pyconsole, "error", "s", message.toUtf8().constData());
+
+            if (result == 0)
+            {
+                qCritical() << message;
+            }
+            else
+            {
+                Py_DECREF(result);
+            }
+
+            PyGILState_Release(gilstate);
+        }
+        else
+        {
+            qCritical() << message;
+        }
+    }
+
+    void info(const QString &message) const
+    {
+        const_cast<ConsoleImpl *>(this)->get_pyconsole();
+
+        if (pyconsole)
+        {
+            PyGILState_STATE gilstate = PyGILState_Ensure();
+
+            PyObject *result = PyObject_CallMethod(pyconsole, "info", "s", message.toUtf8().constData());
+
+            if (result == 0)
+            {
+                qInfo() << "UNABLE TO CALL INFO";
+                qInfo() << message;
+            }
+            else
+            {
+                Py_DECREF(result);
+            }
+
+            PyGILState_Release(gilstate);
+        }
+        else
+        {
+            qInfo() << "NO PYCONSOLE";
+            qInfo() << message;
+        }
+    }
+
+private:
+    void get_pyconsole()
+    {
+        if (pyconsole)
+            return;
+
+        PyGILState_STATE gilstate = PyGILState_Ensure();
+
+        PyObject *sire_utils = PyImport_ImportModule("sire.utils");
+
+        if (sire_utils == 0)
+        {
+            qWarning() << "COULD NOT IMPORT SIRE.UTILS";
+            PyGILState_Release(gilstate);
+            return;
+        }
+
+        pyconsole = PyObject_GetAttrString(sire_utils, "Console");
+
+        Py_DECREF(sire_utils);
+
+        if (pyconsole == 0)
+        {
+            qWarning() << "Could not import Console from sire.utils";
+            PyGILState_Release(gilstate);
+            return;
+        }
+    }
+
+    PyObject *pyconsole;
+};
+
 QMutex ReleaseGIL::release_mutex;
 
 std::weak_ptr<SireBase::detail::ReleaseGILBase> ReleaseGIL::current_state;
@@ -291,4 +455,6 @@ void register_releasegil()
     ReleaseGIL::register_releasegil();
 
     boost::python::def("set_is_ipython", &set_is_ipython);
+
+    SireBase::Console::setConsole(new ConsoleImpl());
 }

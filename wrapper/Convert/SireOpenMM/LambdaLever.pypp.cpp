@@ -7,11 +7,19 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/arrayproperty.hpp"
+
+#include "SireBase/propertymap.h"
+
 #include "SireCAS/values.h"
 
 #include "lambdalever.h"
 
 #include "tostring.h"
+
+#include "SireBase/arrayproperty.hpp"
+
+#include "SireBase/propertymap.h"
 
 #include "SireCAS/values.h"
 
@@ -95,6 +103,19 @@ void register_LambdaLever_class(){
                 , ( bp::arg("name"), bp::arg("system") )
                 , bp::release_gil_policy()
                 , "Get the C++ type of the force called name. Returns an\n  empty string if there is no such force\n" );
+        
+        }
+        { //::SireOpenMM::LambdaLever::getLeverValues
+        
+            typedef ::SireBase::PropertyList ( ::SireOpenMM::LambdaLever::*getLeverValues_function_type)( ::QVector< double > const &,::SireOpenMM::PerturbableOpenMMMolecule const & ) const;
+            getLeverValues_function_type getLeverValues_function_value( &::SireOpenMM::LambdaLever::getLeverValues );
+            
+            LambdaLever_exposer.def( 
+                "getLeverValues"
+                , getLeverValues_function_value
+                , ( bp::arg("lambda_values"), bp::arg("mol") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireOpenMM::LambdaLever::getPerturbableMoleculeMaps

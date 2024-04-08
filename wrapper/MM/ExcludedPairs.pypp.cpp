@@ -85,6 +85,18 @@ void register_ExcludedPairs_class(){
                 , "" );
         
         }
+        { //::SireMM::ExcludedPairs::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::ExcludedPairs::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::ExcludedPairs::merge );
+            
+            ExcludedPairs_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
+        
+        }
         { //::SireMM::ExcludedPairs::nExcludedPairs
         
             typedef int ( ::SireMM::ExcludedPairs::*nExcludedPairs_function_type)(  ) const;

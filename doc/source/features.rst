@@ -44,6 +44,13 @@ molecular (predominantly biomolecular) systems.
   including across
   :doc:`frames of trajectories <tutorial/part04/02_trajectory>`
   (or subsets of trajectories).
+* Create merged molecules that represent perturbations for
+  :doc:`relative <tutorial/part07/04_merge>` and
+  :doc:`absolute <tutorial/part07/06_decouple>` free energy calculations.
+* Create merged molecules that represnet perturbations of
+  :doc:`residues in proteins <tutorial/part07/07_residue>`.
+* Mutate residues or parts of molecules via
+  :doc:`copy-and-pasting <tutorial/part07/07_residue>` bits of molecules.
 * A powerful :doc:`property system <tutorial/index_part03>` that lets you
   associate nearly any data with nearly any molecular view or sub-view.
   For example, you can assign multiple different coordinate properties

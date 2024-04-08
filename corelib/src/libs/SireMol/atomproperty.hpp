@@ -34,9 +34,11 @@
 #include "SireBase/qvariant_metatype.h"
 
 #include "atomselection.h"
+#include "atomidxmapping.h"
 #include "moleculeinfo.h"
 #include "moleculeinfodata.h"
 #include "molviewproperty.h"
+#include "getghostparam.hpp"
 
 #include "SireBase/packedarray2d.hpp"
 #include "SireBase/quickcopy.hpp"
@@ -109,6 +111,11 @@ namespace SireMol
         virtual PropertyPtr merge(const MoleculeInfoData &molinfo) const = 0;
         virtual PropertyPtr divide(const QVector<AtomSelection> &beads) const = 0;
         virtual PropertyPtr divideByResidue(const MoleculeInfoData &molinfo) const = 0;
+
+        virtual SireBase::PropertyList merge(const MolViewProperty &other,
+                                             const AtomIdxMapping &mapping,
+                                             const QString &ghost = QString(),
+                                             const SireBase::PropertyMap &map = SireBase::PropertyMap()) const = 0;
 
     protected:
         void throwIncorrectNumberOfAtoms(int nats, int ntotal) const;
@@ -233,6 +240,11 @@ namespace SireMol
         bool canConvert(const QVariant &value) const;
 
         void assertCanConvert(const QVariant &value) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         /** The actual atomic property values */
@@ -1219,6 +1231,58 @@ namespace SireMol
         }
 
         return AtomProperty<T>(res_vals);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE SireBase::PropertyList AtomProperty<T>::merge(const MolViewProperty &other,
+                                                                          const AtomIdxMapping &mapping,
+                                                                          const QString &ghost,
+                                                                          const SireBase::PropertyMap &map) const
+    {
+        if (not other.isA<AtomProperty<T>>())
+        {
+            throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                    .arg(this->what())
+                                                    .arg(other.what()),
+                                                CODELOC);
+        }
+
+        const AtomProperty<T> &ref = *this;
+        const AtomProperty<T> &pert = other.asA<AtomProperty<T>>();
+
+        AtomProperty<T> prop0 = ref;
+        AtomProperty<T> prop1 = ref;
+
+        const T ghost_param = getGhostParam<T>(ghost);
+
+        for (const auto &index : mapping)
+        {
+            if (index.isUnmappedIn0() and index.isUnmappedIn1())
+            {
+                prop0.set(index.cgAtomIdx0(), ghost_param);
+                prop1.set(index.cgAtomIdx0(), ghost_param);
+            }
+            else if (index.isUnmappedIn0())
+            {
+                auto lj1 = pert.get(index.cgAtomIdx1());
+                prop0.set(index.cgAtomIdx0(), ghost_param);
+                prop1.set(index.cgAtomIdx0(), lj1);
+            }
+            else if (index.isUnmappedIn1())
+            {
+                prop1.set(index.cgAtomIdx0(), ghost_param);
+            }
+            else
+            {
+                prop1.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
+            }
+        }
+
+        SireBase::PropertyList ret;
+        ret.append(prop0);
+        ret.append(prop1);
+
+        return ret;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

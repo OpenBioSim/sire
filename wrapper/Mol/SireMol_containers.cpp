@@ -40,6 +40,7 @@
 #include "Base/convertpackedarray.hpp"
 
 #include "SireMol/atom.h"
+#include "SireMol/atomidxmapping.h"
 #include "SireMol/beadnum.h"
 #include "SireMol/element.h"
 #include "SireMol/atomidentifier.h"
@@ -86,122 +87,123 @@ using boost::python::register_tuple;
 
 void register_SireMol_containers()
 {
-  register_viewsofmol_list();
+    register_viewsofmol_list();
 
-  register_list<QList<AtomIdx>>();
-  register_list<QList<QList<AtomIdx>>>();
-  register_list<QVector<AtomIdx>>();
+    register_list<QList<AtomIdx>>();
+    register_list<QList<QList<AtomIdx>>>();
+    register_list<QVector<AtomIdx>>();
 
-  register_list<QList<AtomName>>();
-  register_list<QList<AtomNum>>();
+    register_list<QList<AtomName>>();
+    register_list<QList<AtomNum>>();
 
-  register_list<QList<ResName>>();
-  register_list<QList<ResNum>>();
-  register_list<QList<ChainName>>();
-  register_list<QList<SegName>>();
-  register_list<QList<Element>>();
+    register_list<QList<ResName>>();
+    register_list<QList<ResNum>>();
+    register_list<QList<ChainName>>();
+    register_list<QList<SegName>>();
+    register_list<QList<Element>>();
 
-  register_list<QList<BondID>>();
-  register_list<QList<AngleID>>();
-  register_list<QList<DihedralID>>();
-  register_list<QList<ImproperID>>();
-  register_list<QList<CGIdx>>();
-  register_list<QList<ResIdx>>();
-  register_list<QList<ChainIdx>>();
-  register_list<QList<SegIdx>>();
+    register_list<QList<BondID>>();
+    register_list<QList<AngleID>>();
+    register_list<QList<DihedralID>>();
+    register_list<QList<ImproperID>>();
+    register_list<QList<CGIdx>>();
+    register_list<QList<ResIdx>>();
+    register_list<QList<ChainIdx>>();
+    register_list<QList<SegIdx>>();
 
-  register_list<QList<MolIdx>>();
-  register_list<QList<MolName>>();
-  register_list<QList<MolNum>>();
-  register_list<QVector<MolNum>>();
-  register_list<QList<MGNum>>();
-  register_list<QList<MGName>>();
+    register_list<QList<MolIdx>>();
+    register_list<QList<MolName>>();
+    register_list<QList<MolNum>>();
+    register_list<QVector<MolNum>>();
+    register_list<QList<MGNum>>();
+    register_list<QList<MGName>>();
 
-  register_list<QList<AtomSelection>>();
-  register_list<QList<ViewsOfMol>>();
-  register_list<QList<Molecule>>();
-  register_list<QList<MolGroupPtr>>();
+    register_list<QList<AtomSelection>>();
+    register_list<QList<ViewsOfMol>>();
+    register_list<QList<Molecule>>();
+    register_list<QList<MolGroupPtr>>();
 
-  register_list<QList<SelectorMol>>();
-  register_list<QVector<SelectorMol>>();
+    register_list<QList<SelectorMol>>();
+    register_list<QVector<SelectorMol>>();
 
-  register_list<QList<MGIdentifier>>();
-  register_list<QList<MolIdentifier>>();
-  register_list<QList<SegIdentifier>>();
-  register_list<QList<ChainIdentifier>>();
-  register_list<QList<ResIdentifier>>();
-  register_list<QList<CGIdentifier>>();
-  register_list<QList<AtomIdentifier>>();
+    register_list<QList<MGIdentifier>>();
+    register_list<QList<MolIdentifier>>();
+    register_list<QList<SegIdentifier>>();
+    register_list<QList<ChainIdentifier>>();
+    register_list<QList<ResIdentifier>>();
+    register_list<QList<CGIdentifier>>();
+    register_list<QList<AtomIdentifier>>();
 
-  register_list<QList<MolViewPtr>>();
+    register_list<QList<MolViewPtr>>();
 
-  register_list<QList<PerturbationPtr>>();
-  register_list<QList<GeomPertPtr>>();
+    register_list<QList<PerturbationPtr>>();
+    register_list<QList<GeomPertPtr>>();
 
-  register_list<QList<boost::tuple<MolGroupPtr, SireBase::PropertyMap>>>();
-  register_list<QList<boost::tuple<MGIdentifier, SireBase::PropertyMap>>>();
+    register_list<QList<boost::tuple<MolGroupPtr, SireBase::PropertyMap>>>();
+    register_list<QList<boost::tuple<MGIdentifier, SireBase::PropertyMap>>>();
 
-  register_list<QList<boost::tuple<AtomIdentifier, AtomIdentifier>>>();
+    register_list<QList<boost::tuple<AtomIdentifier, AtomIdentifier>>>();
 
-  register_list<QVector<boost::tuple<MolNum, SireID::Index>>>();
+    register_list<QVector<boost::tuple<MolNum, SireID::Index>>>();
 
-  register_list<QList<AtomMatch>>();
-  register_list<QList<Selector<Atom>>>();
+    register_list<QList<AtomMatch>>();
+    register_list<QList<Selector<Atom>>>();
 
-  register_list<QList<MGIDsAndMaps>>();
+    register_list<QList<MGIDsAndMaps>>();
 
-  register_list<QVector<PartialMolecule>>();
-  register_list<QVector<Element>>();
+    register_list<QVector<PartialMolecule>>();
+    register_list<QVector<Element>>();
 
-  register_list<QVector<QHash<AtomIdx, AtomIdx>>>();
+    register_list<QVector<QHash<AtomIdx, AtomIdx>>>();
 
-  register_list<QVector<Velocity3D>>();
-  register_list<QVector<Force3D>>();
+    register_list<QVector<Velocity3D>>();
+    register_list<QVector<Force3D>>();
 
-  register_list<QList<Atom>>();
+    register_list<QList<Atom>>();
 
-  register_tuple<boost::tuple<AtomIdx, AtomIdx>>();
-  register_tuple<boost::tuple<AtomIdx, AtomIdx, AtomIdx>>();
-  register_tuple<boost::tuple<AtomIdx, AtomIdx, AtomIdx, AtomIdx>>();
+    register_tuple<boost::tuple<AtomIdx, AtomIdx>>();
+    register_tuple<boost::tuple<AtomIdx, AtomIdx, AtomIdx>>();
+    register_tuple<boost::tuple<AtomIdx, AtomIdx, AtomIdx, AtomIdx>>();
 
-  register_tuple<boost::tuple<Molecules, SireVol::SpacePtr>>();
-  register_tuple<boost::tuple<MoleculeGroup, SireVol::SpacePtr>>();
+    register_tuple<boost::tuple<Molecules, SireVol::SpacePtr>>();
+    register_tuple<boost::tuple<MoleculeGroup, SireVol::SpacePtr>>();
 
-  register_tuple<boost::tuple<AtomIdentifier, AtomIdentifier>>();
+    register_tuple<boost::tuple<AtomIdentifier, AtomIdentifier>>();
 
-  register_tuple<boost::tuple<AtomSelection, AtomSelection>>();
+    register_tuple<boost::tuple<AtomSelection, AtomSelection>>();
 
-  register_tuple<boost::tuple<PartialMolecule, double>>();
+    register_tuple<boost::tuple<PartialMolecule, double>>();
 
-  register_tuple<boost::tuple<MolNum, SireID::Index>>();
+    register_tuple<boost::tuple<MolNum, SireID::Index>>();
 
-  register_tuple<boost::tuple<MolGroupPtr, SireBase::PropertyMap>>();
-  register_tuple<boost::tuple<MGIdentifier, SireBase::PropertyMap>>();
-  register_tuple<boost::tuple<QList<MGIdentifier>, SireBase::PropertyMap>>();
-  register_tuple<boost::tuple<QList<MolGroupPtr>, SireBase::PropertyMap>>();
+    register_tuple<boost::tuple<MolGroupPtr, SireBase::PropertyMap>>();
+    register_tuple<boost::tuple<MGIdentifier, SireBase::PropertyMap>>();
+    register_tuple<boost::tuple<QList<MGIdentifier>, SireBase::PropertyMap>>();
+    register_tuple<boost::tuple<QList<MolGroupPtr>, SireBase::PropertyMap>>();
 
-  register_PackedArray<SireBase::PackedArray2D<Element>>();
-  register_PackedArray<SireBase::PackedArray2D<BeadNum>>();
+    register_PackedArray<SireBase::PackedArray2D<Element>>();
+    register_PackedArray<SireBase::PackedArray2D<BeadNum>>();
 
-  register_dict<QHash<AtomIdentifier, AtomIdentifier>>();
+    register_dict<QHash<AtomIdentifier, AtomIdentifier>>();
 
-  register_dict<QHash<AtomNum, AtomNum>>();
-  register_dict<QHash<ResNum, ResNum>>();
+    register_dict<QHash<AtomNum, AtomNum>>();
+    register_dict<QHash<ResNum, ResNum>>();
 
-  register_dict<QHash<AtomIdx, QVector<AtomIdx>>>();
+    register_dict<QHash<AtomIdx, QVector<AtomIdx>>>();
 
-  register_dict<QHash<MolNum, Selector<Atom>>>();
-  register_dict<QHash<MolNum, Selector<CutGroup>>>();
-  register_dict<QHash<MolNum, Selector<Residue>>>();
-  register_dict<QHash<MolNum, Selector<Chain>>>();
-  register_dict<QHash<MolNum, Selector<Segment>>>();
-  register_dict<QHash<MolNum, double>>();
-  register_dict<QHash<AtomIdx, AtomIdx>>();
-  register_dict<QHash<MolNum, SireBase::PropertyMap>>();
+    register_dict<QHash<MolNum, Selector<Atom>>>();
+    register_dict<QHash<MolNum, Selector<CutGroup>>>();
+    register_dict<QHash<MolNum, Selector<Residue>>>();
+    register_dict<QHash<MolNum, Selector<Chain>>>();
+    register_dict<QHash<MolNum, Selector<Segment>>>();
+    register_dict<QHash<MolNum, double>>();
+    register_dict<QHash<AtomIdx, AtomIdx>>();
+    register_dict<QHash<AtomIdx, AtomIdxMappingEntry>>();
+    register_dict<QHash<MolNum, SireBase::PropertyMap>>();
 
-  register_set<QSet<AtomIdx>>();
-  register_set<QSet<ResIdx>>();
+    register_set<QSet<AtomIdx>>();
+    register_set<QSet<ResIdx>>();
 
-  register_set<QSet<MolNum>>();
-  register_set<QSet<MolName>>();
+    register_set<QSet<MolNum>>();
+    register_set<QSet<MolName>>();
 }

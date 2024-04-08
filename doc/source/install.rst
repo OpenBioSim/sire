@@ -92,16 +92,16 @@ And then... Install sire into a new environment
 We recommend that :mod:`sire` is installed into a new (clean) environment.
 This minimises the risk of failures caused by incompatible dependencies.
 
-Sire is currently packaged for Python 3.9, 3.10 and Python 3.11. We will start
-by creating a Python 3.11 environment that we will call ``openbiosim``.
+Sire is currently packaged for Python 3.10, 3.11 and Python 3.12. We will start
+by creating a Python 3.12 environment that we will call ``openbiosim``.
 
 .. code-block:: bash
 
-   $ conda create -n openbiosim "python<3.12"
+   $ conda create -n openbiosim "python<3.13"
 
 .. note::
 
-   We use ``python<3.12`` as this will install the most recent 3.11
+   We use ``python<3.13`` as this will install the most recent 3.12
    release of python.
 
 We can now install :mod:`sire` into that environment by typing
@@ -124,6 +124,35 @@ If you want the latest development release, then install by typing
 .. code-block:: bash
 
    $ conda install -n openbiosim -c conda-forge -c "openbiosim/label/dev" sire
+
+You can install a specific version of sire by specifying the version number
+in the conda install command, e.g.
+
+.. code-block:: bash
+
+    conda install -n openbiosim -c conda-forge -c openbiosim sire==2024.1.0
+
+Note that limited space means that we can only keep a small number of
+versions of sire on the official openbiosim conda channel. Generally
+these are all point releases of the latest major version, plus the latest
+point release of the last major version.
+
+We do provide an
+`archive channel <https://openbiosim.blob.core.windows.net/archive/index.html>`__
+of all previous releases. You can search this archive channel for the
+release you are interested in using the following command:
+
+.. code-block:: bash
+
+    conda search -c https://openbiosim.blob.core.windows.net/archive sire
+
+This will return a list of all versions of sire available in the archive.
+
+You can install a specific version from the archive using a command like:
+
+.. code-block:: bash
+
+    conda install -n openbiosim -c https://openbiosim.blob.core.windows.net/archive sire==2023.2.3
 
 You may (optionally) want to install additional tools such as
 ``ipython`` and ``jupyterlab``. To do this, type

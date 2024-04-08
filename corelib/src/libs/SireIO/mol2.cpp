@@ -2624,7 +2624,15 @@ MolEditor Mol2::getMolecule(int imol, const PropertyMap &map) const
         status_bits.set(cgatomidx, atom.getStatusBits());
 
         // Infer the element from the SYBYL atom type.
-        elements.set(cgatomidx, Element::biologicalElement(atom.getType()));
+        if (atom.getType() != "Du")
+        {
+            elements.set(cgatomidx, Element::biologicalElement(atom.getType()));
+        }
+        else
+        {
+            // try to infer the element from the atom name
+            elements.set(cgatomidx, Element::biologicalElement(atom.getName()));
+        }
     }
 
     // Instantiate the residue property objects that we need.

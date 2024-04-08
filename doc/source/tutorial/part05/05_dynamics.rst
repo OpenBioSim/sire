@@ -72,7 +72,7 @@ the amount of time between saved coordinate/velocity snapshots.
 For example, here we will run 10 picoseconds of dynamics, saving a
 frame every 0.5 picoseconds
 
->>> d.run(10*sr.units.picosecond, 0.5*sr.units.picosecond)
+>>> d.run("10ps", "0.5ps")
 Dynamics(completed=10 ps, energy=-8.82722 kcal mol-1, speed=119.2 ns day-1)
 
 .. note::
@@ -95,7 +95,7 @@ of the loaded system. We can perform dynamics on all the molecules by
 calling :func:`~sire.mol.SelectorMol.dynamics` on the complete collection.
 
 >>> d = mols.dynamics()
->>> d.run(10*sr.units.picosecond, 0.5*sr.units.picosecond)
+>>> d.run("10ps", "0.5ps")
 Dynamics(completed=6010 ps, energy=-5974.09 kcal mol-1, speed=80.5 ns day-1)
 >>> mols = d.commit()
 >>> mols.trajectory().energy().pretty_plot()
@@ -121,14 +121,14 @@ intervals to save frames for each run. For example, you could have a long
 "equilibration" run that doesn't save frames at all by setting
 ``save_frequency`` to ``0``.
 
->>> d.run(10*sr.units.picosecond, save_frequency=0)
+>>> d.run("10ps", save_frequency=0)
 Dynamics(completed=6020 ps, energy=-5974.9 kcal mol-1, speed=89.2 ns day-1)
 
 You can run as many blocks as you like, e.g.
 
->>> d.run(1*sr.units.picosecond, save_frequency=0.01*sr.units.picosecond)
+>>> d.run("1ps", save_frequency="0.01ps")
 Dynamics(completed=6021 ps, energy=-5974.61 kcal mol-1, speed=84.4 ns day-1)
->>> d.run(50*sr.units.picosecond, save_frequency=1*sr.units.picosecond)
+>>> d.run("50ps", save_frequency="1ps")
 Dynamics(completed=6071 ps, energy=-5976.05 kcal mol-1, speed=58.3 ns day-1)
 >>> mols = d.commit()
 >>> mols.view()
@@ -164,17 +164,17 @@ the :class:`~sire.mol.Dynamics` object. Available options are;
   25 picoseconds (ps).
 * ``constraint`` - the level of constraints to apply to the molecules,
   e.g. constraining bonds, angles etc. By default this is inferred from
-  the value of ``timestep``. It defaults to no constraints. But timesteps
-  greater than 1 femtoseconds will constrain all bonds involving hydrogen
-  and all angles involving hydrogen. Timesteps greater than 2 femtoseconds will
-  constrain all bonds, and all angles involving hydrogen.
+  the value of ``timestep``. It defaults to no constraints. A good choice
+  for this parameter is ``auto-bonds``, which will automatically constrain
+  bonds based on a comparison between the bonds vibrational frequency
+  and the simulation timestep.
 
 For example
 
 >>> d = mols.dynamics(cutoff_type="reaction_field",
-...                   timestep=4*sr.units.femtosecond,
-...                   save_frequency=1*sr.units.picosecond)
->>> d.run(10*sr.units.picosecond)
+...                   timestep="4fs",
+...                   save_frequency="1ps")
+>>> d.run("10ps")
 Dynamics(completed=6081 ps, energy=-6601.59 kcal mol-1, speed=432.2 ns day-1)
 
 will perform 10 picoseconds of dynamics saving a frame every 1 picosecond.
@@ -196,10 +196,10 @@ that can be re-used between multiple dynamics runs.
 ...      "timestep": 4*sr.units.femtosecond,
 ...      "save_frequency": 1*sr.units.picosecond}
 >>> d = mols.dynamics(map=m)
->>> d.run(10*sr.units.picosecond)
+>>> d.run("10ps")
 Dynamics(completed=6081 ps, energy=-6601.01 kcal mol-1, speed=439.8 ns day-1)
 >>> d2 = mols.dynamics(map=m)
->>> d2.run(10*sr.units.picosecond)
+>>> d2.run("10ps")
 Dynamics(completed=6081 ps, energy=-6601.01 kcal mol-1, speed=440.6 ns day-1)
 
 The parameter map approach can be used to set other properties of the

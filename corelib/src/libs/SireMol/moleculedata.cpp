@@ -672,6 +672,64 @@ void MoleculeData::rename(const MolName &newname)
     }
 }
 
+/** Set the alternate atom name for the specified atom */
+void MoleculeData::setAlternateAtomName(AtomIdx atomidx, const AtomName &newname)
+{
+    MoleculeInfoData newinfo = molinfo->setAlternateName(atomidx, newname);
+
+    if (newinfo.UID() != molinfo.constData()->UID())
+    {
+        SireBase::assert_true(vrsns.get() != 0, CODELOC);
+
+        molinfo = newinfo;
+        updatePropertyMolInfo();
+        vrsn = vrsns->increment();
+    }
+}
+
+/** Set the alternate residue name for the specified residue */
+void MoleculeData::setAlternateResName(ResIdx residx, const ResName &newname)
+{
+    MoleculeInfoData newinfo = molinfo->setAlternateName(residx, newname);
+
+    if (newinfo.UID() != molinfo.constData()->UID())
+    {
+        SireBase::assert_true(vrsns.get() != 0, CODELOC);
+
+        molinfo = newinfo;
+        updatePropertyMolInfo();
+        vrsn = vrsns->increment();
+    }
+}
+
+/** Return the alternate atom name for the specified atom */
+AtomName MoleculeData::getAlternateAtomName(AtomIdx atomidx) const
+{
+    return molinfo->alternateName(atomidx);
+}
+
+/** Return the alternate residue name for the specified residue */
+ResName MoleculeData::getAlternateResName(ResIdx residx) const
+{
+    return molinfo->alternateName(residx);
+}
+
+/** Switch to using the alternate names for all atoms and residues.
+ *  If 'keep_originals' is true, then the original names will be
+ *  stored in the alternate names. If 'keep_originals' is false,
+ *  then the original names will be removed.
+ */
+void MoleculeData::switchToAlternateNames(bool keep_originals)
+{
+    molinfo = molinfo->switchToAlternateNames(keep_originals);
+}
+
+/** Remove all alternate names from this molecule */
+void MoleculeData::removeAlternateNames()
+{
+    molinfo = molinfo->removeAlternateNames();
+}
+
 /** Rename the atom at index 'atomidx' to 'newname'
 
     \throw SireError::invalid_index

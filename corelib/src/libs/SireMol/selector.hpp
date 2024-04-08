@@ -114,7 +114,7 @@ namespace SireMol
     {
 
         friend SIREMOL_EXPORT QDataStream & ::operator<< <>(QDataStream &, const Selector<T> &);
-        friend SIREMOL_EXPORT QDataStream & ::operator>><>(QDataStream &, Selector<T> &);
+        friend SIREMOL_EXPORT QDataStream & ::operator>> <>(QDataStream &, Selector<T> &);
 
     public:
         Selector();
@@ -205,6 +205,12 @@ namespace SireMol
         bool selectedAll() const;
 
         bool isSelector() const;
+
+        void assertSingleMolecule() const;
+
+        bool isSingleMolecule() const;
+
+        Selector<T> toSingleMolecule() const;
 
         Selector<T> add(const Selector<T> &other) const;
         Selector<T> add(const T &view) const;
@@ -1838,6 +1844,33 @@ namespace SireMol
             return QStringList();
         else
             return this->operator()(0).metadataKeys(key);
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE bool Selector<T>::isSingleMolecule() const
+    {
+        if (this->isEmpty())
+            return false;
+        else
+            return true;
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE void Selector<T>::assertSingleMolecule() const
+    {
+        if (not this->isSingleMolecule())
+        {
+            throw SireMol::missing_molecule(QObject::tr(
+                                                "There are no molecules represented in this object."),
+                                            CODELOC);
+        }
+    }
+
+    template <class T>
+    SIRE_OUTOFLINE_TEMPLATE Selector<T> Selector<T>::toSingleMolecule() const
+    {
+        this->assertSingleMolecule();
+        return *this;
     }
 
 #endif // SIRE_SKIP_INLINE_FUNCTIONS

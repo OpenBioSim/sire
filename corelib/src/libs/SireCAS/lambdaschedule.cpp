@@ -30,6 +30,8 @@
 
 #include "SireCAS/values.h"
 
+#include "SireBase/console.h"
+
 #include "SireError/errors.h"
 
 #include "SireStream/datastream.h"
@@ -300,6 +302,11 @@ LambdaSchedule LambdaSchedule::charge_scaled_morph(double scale)
     return l;
 }
 
+/** Return a schedule that can be used for a standard double-decoupling
+ *  free energy perturbation. If `perturbed_is_decoupled` is true, then
+ *  the perturbed state is decoupled, otherwise the reference state is
+ *  decoupled.
+ */
 LambdaSchedule LambdaSchedule::standard_decouple(bool perturbed_is_decoupled)
 {
     LambdaSchedule l;
@@ -308,10 +315,46 @@ LambdaSchedule LambdaSchedule::standard_decouple(bool perturbed_is_decoupled)
     return l;
 }
 
+/** Return a schedule that can be used for a standard double-decoupling
+ *  free energy perturbation. If `perturbed_is_decoupled` is true, then
+ *  the perturbed state is decoupled, otherwise the reference state is
+ *  decoupled. In this case also add states to decharge and recharge
+ *  the molecule either side of the decoupling stage, where the charges
+ *  are scaled to 'scale' times their original value.
+ */
 LambdaSchedule LambdaSchedule::charge_scaled_decouple(double scale, bool perturbed_is_decoupled)
 {
     LambdaSchedule l;
     l.addDecoupleStage(perturbed_is_decoupled);
+    l.addChargeScaleStages(scale);
+
+    return l;
+}
+
+/** Return a schedule that can be used for a standard double-annihilation
+ *  free energy perturbation. If `perturbed_is_annihilated` is true, then
+ *  the perturbed state is annihilated, otherwise the reference state is
+ *  annihilated.
+ */
+LambdaSchedule LambdaSchedule::standard_annihilate(bool perturbed_is_annihilated)
+{
+    LambdaSchedule l;
+    l.addAnnihilateStage(perturbed_is_annihilated);
+
+    return l;
+}
+
+/** Return a schedule that can be used for a standard double-annihilation
+ *  free energy perturbation. If `perturbed_is_annihilated` is true, then
+ *  the perturbed state is annihilated, otherwise the reference state is
+ *  annihilated. In this case also add states to decharge and recharge
+ *  the molecule either side of the annihilation stage, where the charges
+ *  are scaled to 'scale' times their original value.
+ */
+LambdaSchedule LambdaSchedule::charge_scaled_annihilate(double scale, bool perturbed_is_annihilated)
+{
+    LambdaSchedule l;
+    l.addAnnihilateStage(perturbed_is_annihilated);
     l.addChargeScaleStages(scale);
 
     return l;
@@ -633,16 +676,63 @@ void LambdaSchedule::addMorphStage()
     this->addMorphStage("morph");
 }
 
+/** Add a stage to the schedule that will decouple the perturbed
+ *  state if `perturbed_is_decoupled` is true, otherwise the
+ *  reference state is decoupled. The stage will be called 'decouple'.
+ */
 void LambdaSchedule::addDecoupleStage(bool perturbed_is_decoupled)
 {
     this->addDecoupleStage("decouple", perturbed_is_decoupled);
 }
 
+/** Add a named stage to the schedule that will decouple the perturbed
+ *  state if `perturbed_is_decoupled` is true, otherwise the
+ *  reference state is decoupled.
+ */
 void LambdaSchedule::addDecoupleStage(const QString &name, bool perturbed_is_decoupled)
 {
-    throw SireError::incomplete_code(QObject::tr(
-                                         "Decouple stages are not yet implemented."),
-                                     CODELOC);
+    this->addStage(name, default_morph_equation);
+
+    // we now need to ensure that the ghost/ghost and ghost-14 parameters are
+    // not perturbed
+    if (perturbed_is_decoupled)
+    {
+        this->setEquation(name, "ghost/ghost", "*", this->initial());
+        this->setEquation(name, "ghost-14", "*", this->initial());
+
+        // we also need to scale down kappa as the decoupled state is
+        // not evaluated in the NonbondedForce, so must not be cancelled
+        this->setEquation(name, "ghost/ghost", "kappa", 1.0 - this->lam());
+        this->setEquation(name, "ghost-14", "kappa", 1.0 - this->lam());
+    }
+    else
+    {
+        this->setEquation(name, "ghost/ghost", "*", this->final());
+        this->setEquation(name, "ghost-14", "*", this->final());
+
+        // we also need to scale up kappa as the decoupled state is
+        // not evaluated in the NonbondedForce, so must not be cancelled
+        this->setEquation(name, "ghost/ghost", "kappa", this->lam());
+        this->setEquation(name, "ghost-14", "kappa", this->lam());
+    }
+}
+
+/** Add a stage to the schedule that will annihilate the perturbed
+ *  state if `perturbed_is_annihilated` is true, otherwise the
+ *  reference state is annihilated. The stage will be called 'annihilate'.
+ */
+void LambdaSchedule::addAnnihilateStage(bool perturbed_is_annihilated)
+{
+    this->addAnnihilateStage("annihilate", perturbed_is_annihilated);
+}
+
+/** Add a named stage to the schedule that will annihilate the perturbed
+ *  state if `perturbed_is_annihilated` is true, otherwise the
+ *  reference state is annihilated.
+ */
+void LambdaSchedule::addAnnihilateStage(const QString &name, bool perturbed_is_annihilated)
+{
+    this->addStage(name, default_morph_equation);
 }
 
 /** Sandwich the current set of stages with a charge-descaling and
@@ -1320,10 +1410,12 @@ QVector<double> LambdaSchedule::morph(const QString &force,
 
     if (equation == default_morph_equation)
     {
+        double stage_lam = std::get<1>(resolved);
+
         for (int i = 0; i < nparams; ++i)
         {
-            morphed_data[i] = (1.0 - lambda_value) * initial_data[i] +
-                              lambda_value * final_data[i];
+            morphed_data[i] = (1.0 - stage_lam) * initial_data[i] +
+                              stage_lam * final_data[i];
         }
     }
     else
@@ -1389,10 +1481,12 @@ QVector<int> LambdaSchedule::morph(const QString &force,
 
     if (equation == default_morph_equation)
     {
+        double stage_lam = std::get<1>(resolved);
+
         for (int i = 0; i < nparams; ++i)
         {
-            morphed_data[i] = int((1.0 - lambda_value) * initial_data[i] +
-                                  lambda_value * final_data[i]);
+            morphed_data[i] = int((1.0 - stage_lam) * initial_data[i] +
+                                  stage_lam * final_data[i]);
         }
     }
     else

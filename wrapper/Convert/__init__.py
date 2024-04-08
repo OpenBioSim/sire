@@ -89,6 +89,7 @@ try:
         _changed_torsions,
         _changed_exceptions,
         _changed_constraints,
+        _get_lever_values,
     )
 
     from ._SireOpenMM import LambdaLever, PerturbableOpenMMMolecule, OpenMMMetaData
@@ -105,6 +106,7 @@ try:
     PerturbableOpenMMMolecule.changed_torsions = _changed_torsions
     PerturbableOpenMMMolecule.changed_exceptions = _changed_exceptions
     PerturbableOpenMMMolecule.changed_constraints = _changed_constraints
+    PerturbableOpenMMMolecule.get_lever_values = _get_lever_values
 
     _has_openmm = True
 
@@ -162,6 +164,7 @@ try:
 
         timestep_in_fs = timestep.to(femtosecond)
         timestep = timestep.to(picosecond) * openmm.unit.picosecond
+        map.set("timestep_in_fs", timestep_in_fs)
 
         ensemble = Ensemble(map=map)
 
