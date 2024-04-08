@@ -4044,7 +4044,14 @@ void System::saveFrame(const SireBase::PropertyMap &map)
     {
         traj = new SystemTrajectory(molnums, mols, map);
         system_trajectory = traj;
+    }
 
+    // save the frame into the system_trajectory - this will automatically
+    // update all molecules containing this trajectory
+    traj->saveFrame(mols, space, time, Properties(), map);
+
+    if (must_create)
+    {
         // add this trajectory onto all of the molecules...
         auto mols2 = mols;
 
@@ -4068,13 +4075,8 @@ void System::saveFrame(const SireBase::PropertyMap &map)
             mols2.update(mol);
         }
 
-        mols = mols2;
-        this->update(mols);
+        this->update(mols2);
     }
-
-    // save the frame into the system_trajectory - this will automatically
-    // update all molecules containing this trajectory
-    traj->saveFrame(mols, space, time, Properties(), map);
 }
 
 void System::deleteFrame(int frame, const SireBase::PropertyMap &map)
