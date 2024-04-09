@@ -190,8 +190,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   it was not using the stage-specific value of lambda when using multiple
   stages where one or more stages contained a standard morph equation.
 
-* Please add an item to this changelog when you create your PR
-
 `2023.5.2 <https://github.com/openbiosim/sire/compare/2023.5.1...2023.5.2>`__ - March 2024
 ------------------------------------------------------------------------------------------
 
