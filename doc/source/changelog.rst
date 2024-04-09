@@ -12,6 +12,11 @@ Development was migrated into the
 `OpenBioSim <https://github.com/openbiosim>`__
 organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
+`2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
+-----------------------------------------------------------------------------------------
+
+* Please add an item to this changelog when you create your PR
+
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------
 
@@ -189,8 +194,6 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Fixed a bug in the :class:`~sire.legacy.Convert.LambdaLever` class where
   it was not using the stage-specific value of lambda when using multiple
   stages where one or more stages contained a standard morph equation.
-
-* Please add an item to this changelog when you create your PR
 
 `2023.5.2 <https://github.com/openbiosim/sire/compare/2023.5.1...2023.5.2>`__ - March 2024
 ------------------------------------------------------------------------------------------
