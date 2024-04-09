@@ -206,7 +206,7 @@ AtomMapping( size=1, unmapped0=16, unmapped1=4
 
 By default, this algorithm ignores hydrogens. This is why only a single
 atom was matched above. You can change this by passing in the
-``ignore_light_atoms=True`` argument.
+``match_light_atoms=True`` argument.
 
 >>> m = sr.morph.match(mol0=neopentane, mol1=methane, match_light_atoms=True)
 >>> print(m)
