@@ -1,6 +1,6 @@
-==============
-Part 8 - QM/MM
-==============
+===============
+Part XX - QM/MM
+===============
 
 QM/MM is a method that combines the accuracy of quantum mechanics with the
 speed of molecular mechanics. In QM/MM, a small region of the system is treated
@@ -15,4 +15,4 @@ QM/MM simulations using ``sire``.
 .. toctree::
    :maxdepth: 1
 
-   part08/01_emle
+   partXX/01_emle
