@@ -298,6 +298,11 @@ namespace SireMove
 
         bool isCompatibleWith(const SireMol::MoleculeInfoData &molinfo) const;
 
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
+
     protected:
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,
                                                       const AtomMatcher &atommatcher) const;
@@ -479,6 +484,11 @@ namespace SireMove
         Angle dihedralDelta(const AtomID &atom, const AtomID &bond, const AtomID &angle, const AtomID &dihedral) const;
 
         ZMatrixCoords matchToSelection(const AtomSelection &selection) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     private:
         void rebuildInternals();

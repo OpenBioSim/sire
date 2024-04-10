@@ -7,9 +7,13 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/errors.h"
 
@@ -18,6 +22,8 @@ namespace bp = boost::python;
 #include "SireStream/shareddatastream.h"
 
 #include "angleid.h"
+
+#include "atomidxmapping.h"
 
 #include "atommatcher.h"
 

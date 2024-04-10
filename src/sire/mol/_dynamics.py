@@ -1107,6 +1107,15 @@ class DynamicsData:
             self.run(**orig_args)
             return
 
+    def to_xml(self, f=None):
+        """
+        Save the current state of the dynamics to XML.
+        This is mostly used for debugging. This will return the
+        XML string if 'f' is None. Otherwise it will write the
+        XML to 'f' (either a filename, or a FILE object)
+        """
+        return self._omm_mols.to_xml(f=f)
+
     def commit(self, return_as_system: bool = False):
         if self.is_null():
             return
@@ -1669,6 +1678,15 @@ class Dynamics:
             )
         else:
             return t
+
+    def to_xml(self, f=None):
+        """
+        Save the current state of the dynamics to XML.
+        This is mostly used for debugging. This will return the
+        XML string if 'f' is None. Otherwise it will write the
+        XML to 'f' (either a filename, or a FILE object)
+        """
+        return self._d.to_xml(f=f)
 
     def commit(self, return_as_system: bool = False):
         """

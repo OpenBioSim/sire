@@ -134,17 +134,7 @@ class Perturbation:
 
         # construct the perturbation objects that can move the
         # coordinates between the end states
-        from ..legacy.Mol import (
-            BondPerturbation,
-            AnglePerturbation,
-            GeometryPerturbations,
-        )
-
-        from ..legacy.MM import AmberBond, AmberAngle
-        from ..cas import Symbol
-        from ..units import angstrom, radian
-
-        self._perturbations = GeometryPerturbations()
+        self._perturbations = None
 
         props = [
             "LJ",
@@ -170,6 +160,33 @@ class Perturbation:
         self._map = map
         self._map0 = map.add_suffix("0", props)
         self._map1 = map.add_suffix("1", props)
+
+        self._mol = mol.clone()
+
+    def __str__(self):
+        return f"Perturbation( {self._mol} )"
+
+    def __repr__(self):
+        return self.__str__()
+
+    def _get_perturbations(self):
+        """
+        Find all of the perturbations in the molecule
+        """
+        from ..legacy.MM import AmberBond, AmberAngle
+        from ..cas import Symbol
+        from ..units import angstrom, radian
+        from ..legacy.Mol import (
+            GeometryPerturbations,
+            BondPerturbation,
+            AnglePerturbation,
+        )
+
+        if self._perturbations is not None:
+            return self._perturbations
+
+        mol = self._mol
+        self._perturbations = GeometryPerturbations()
 
         # identify all of the ghost atoms
         from_ghosts = []
@@ -214,7 +231,7 @@ class Perturbation:
                         angle=angle.id(),
                         start=theta0_0 * radian,
                         end=theta0_1 * radian,
-                        map=map,
+                        map=self._map,
                     )
                 )
 
@@ -232,17 +249,11 @@ class Perturbation:
                     bond=bond.id(),
                     start=r0_0 * angstrom,
                     end=r0_1 * angstrom,
-                    map=map,
+                    map=self._map,
                 )
             )
 
-        self._mol = mol.clone()
-
-    def __str__(self):
-        return f"Perturbation( {self._mol} )"
-
-    def __repr__(self):
-        return self.__str__()
+        return self._perturbations
 
     def extract_reference(
         self,
@@ -297,7 +308,15 @@ class Perturbation:
         mol = mol.commit().molecule()
 
         if remove_ghosts:
-            mol = mol["not element Xx"].extract(to_same_molecule=True)
+            try:
+                mol = mol["not element Xx"]
+            except Exception:
+                # there are no non-ghost atoms!
+                from ..mol import Molecule
+
+                return Molecule()
+
+            mol = mol.extract(to_same_molecule=True)
 
         return mol
 
@@ -351,10 +370,22 @@ class Perturbation:
         if mol.has_property("is_perturbable"):
             mol.remove_property("is_perturbable")
 
+        mol.switch_to_alternate_names()
+
         mol = mol.commit().molecule()
 
         if remove_ghosts:
-            mol = mol["not element Xx"].extract(to_same_molecule=True)
+            try:
+                mol = mol["not element Xx"]
+            except Exception:
+                # there are no non-ghost atoms!
+                from ..mol import Molecule
+
+                return Molecule()
+
+            mol = mol.extract(to_same_molecule=True)
+
+        return mol
 
         return mol
 
@@ -471,7 +502,7 @@ class Perturbation:
             )
 
         vals = Values({Symbol("lambda"): lam_val})
-        self._mol.update(self._perturbations.perturb(mol, vals))
+        self._mol.update(self._get_perturbations().perturb(mol, vals))
         return self
 
     def commit(self):
@@ -518,12 +549,12 @@ class Perturbation:
 
         for lam in range(0, 11):
             vals = Values({Symbol("lambda"): 0.1 * lam})
-            mol = self._perturbations.perturb(mol, vals)
+            mol = self._get_perturbations().perturb(mol, vals)
             mol.save_frame()
 
         for lam in range(9, 0, -1):
             vals = Values({Symbol("lambda"): 0.1 * lam})
-            mol = self._perturbations.perturb(mol, vals)
+            mol = self._get_perturbations().perturb(mol, vals)
             mol.save_frame()
 
         return mol["not element Xx"].view(*args, **kwargs)

@@ -7,7 +7,11 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireCAS/symbols.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/atommatcher.h"
 
@@ -126,6 +130,18 @@ void register_FourAtomFunctions_class(){
         }
         { //::SireMM::FourAtomFunctions::clear
         
+            typedef void ( ::SireMM::FourAtomFunctions::*clear_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) ;
+            clear_function_type clear_function_value( &::SireMM::FourAtomFunctions::clear );
+            
+            FourAtomFunctions_exposer.def( 
+                "clear"
+                , clear_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Clear all functions that involve any of the atoms in atoms\n  - if exclusive is true, then this only removes functions\n  that exclusively involve these atoms - if false, then\n  if removes functions that involve any of these atoms\n" );
+        
+        }
+        { //::SireMM::FourAtomFunctions::clear
+        
             typedef void ( ::SireMM::FourAtomFunctions::*clear_function_type)(  ) ;
             clear_function_type clear_function_value( &::SireMM::FourAtomFunctions::clear );
             
@@ -225,6 +241,18 @@ void register_FourAtomFunctions_class(){
                 , "Return whether or not this is empty (has no potentials for any internals)" );
         
         }
+        { //::SireMM::FourAtomFunctions::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::FourAtomFunctions::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::FourAtomFunctions::merge );
+            
+            FourAtomFunctions_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
+        
+        }
         { //::SireMM::FourAtomFunctions::nFunctions
         
             typedef int ( ::SireMM::FourAtomFunctions::*nFunctions_function_type)(  ) const;
@@ -314,6 +342,18 @@ void register_FourAtomFunctions_class(){
                 , potentials_function_value
                 , bp::release_gil_policy()
                 , "Return the potential energy functions acting between the identified\nquads of atoms" );
+        
+        }
+        { //::SireMM::FourAtomFunctions::potentials
+        
+            typedef ::QVector< SireMM::FourAtomFunction > ( ::SireMM::FourAtomFunctions::*potentials_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) const;
+            potentials_function_type potentials_function_value( &::SireMM::FourAtomFunctions::potentials );
+            
+            FourAtomFunctions_exposer.def( 
+                "potentials"
+                , potentials_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , "Return the potential energy functions acting between the identified\natoms - if exclusive is true then only return potentials where\nall atoms are in the dihedral or improper\n" );
         
         }
         { //::SireMM::FourAtomFunctions::set

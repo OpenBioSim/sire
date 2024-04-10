@@ -123,6 +123,18 @@ namespace SireMol
         const AtomName &name(const AtomID &atomid) const;
         const AtomName &name(AtomIdx atomidx) const;
 
+        const AtomName &alternateName(const AtomID &atomid) const;
+        const AtomName &alternateName(AtomIdx atomidx) const;
+
+        const ResName &alternateName(const ResID &resid) const;
+        const ResName &alternateName(ResIdx residx) const;
+
+        MoleculeInfo setAlternateName(AtomIdx atomidx, const AtomName &name) const;
+        MoleculeInfo setAlternateName(ResIdx residx, const ResName &name) const;
+
+        MoleculeInfo switchToAlternateNames(bool keep_originals = true) const;
+        MoleculeInfo removeAlternateNames() const;
+
         ResNum number(const ResID &resid) const;
         ResNum number(ResIdx residx) const;
 

@@ -7,9 +7,13 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/errors.h"
 
 #include "SireBase/parallel.h"
+
+#include "SireError/errors.h"
 
 #include "SireMol/errors.h"
 
@@ -18,6 +22,8 @@ namespace bp = boost::python;
 #include "SireStream/shareddatastream.h"
 
 #include "angleid.h"
+
+#include "atomidxmapping.h"
 
 #include "atommatcher.h"
 
@@ -105,6 +111,32 @@ void register_ConnectivityEditor_class(){
                 , "Record a connection between the atom identified by atom0 and\nthe atom identified by atom1\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
         
         }
+        { //::SireMol::ConnectivityEditor::connect
+        
+            typedef ::SireMol::ConnectivityEditor & ( ::SireMol::ConnectivityEditor::*connect_function_type)( ::SireMol::BondID const & ) ;
+            connect_function_type connect_function_value( &::SireMol::ConnectivityEditor::connect );
+            
+            ConnectivityEditor_exposer.def( 
+                "connect"
+                , connect_function_value
+                , ( bp::arg("bond") )
+                , bp::return_self< >()
+                , "Create a connection for the passed bond" );
+        
+        }
+        { //::SireMol::ConnectivityEditor::connect
+        
+            typedef ::SireMol::ConnectivityEditor & ( ::SireMol::ConnectivityEditor::*connect_function_type)( ::QList< SireMol::BondID > const & ) ;
+            connect_function_type connect_function_value( &::SireMol::ConnectivityEditor::connect );
+            
+            ConnectivityEditor_exposer.def( 
+                "connect"
+                , connect_function_value
+                , ( bp::arg("bonds") )
+                , bp::return_self< >()
+                , "Create a connection for the passed bonds" );
+        
+        }
         { //::SireMol::ConnectivityEditor::disconnect
         
             typedef ::SireMol::ConnectivityEditor & ( ::SireMol::ConnectivityEditor::*disconnect_function_type)( ::SireMol::AtomIdx,::SireMol::AtomIdx ) ;
@@ -129,6 +161,45 @@ void register_ConnectivityEditor_class(){
                 , ( bp::arg("atom0"), bp::arg("atom1") )
                 , bp::return_self< >()
                 , "Disconnect the atoms that are identified by atom0 and atom1 -\nthis does nothing if there isnt a connection between these atoms\nThrow: SireMol::missing_atom\nThrow: SireMol::duplicate_atom\nThrow: SireError::invalid_index\n" );
+        
+        }
+        { //::SireMol::ConnectivityEditor::disconnect
+        
+            typedef ::SireMol::ConnectivityEditor & ( ::SireMol::ConnectivityEditor::*disconnect_function_type)( ::SireMol::BondID const & ) ;
+            disconnect_function_type disconnect_function_value( &::SireMol::ConnectivityEditor::disconnect );
+            
+            ConnectivityEditor_exposer.def( 
+                "disconnect"
+                , disconnect_function_value
+                , ( bp::arg("bond") )
+                , bp::return_self< >()
+                , "Disconnect the atoms in the passed bond - this does nothing if the\n  atoms arent connected" );
+        
+        }
+        { //::SireMol::ConnectivityEditor::disconnect
+        
+            typedef ::SireMol::ConnectivityEditor & ( ::SireMol::ConnectivityEditor::*disconnect_function_type)( ::QList< SireMol::BondID > const & ) ;
+            disconnect_function_type disconnect_function_value( &::SireMol::ConnectivityEditor::disconnect );
+            
+            ConnectivityEditor_exposer.def( 
+                "disconnect"
+                , disconnect_function_value
+                , ( bp::arg("bonds") )
+                , bp::return_self< >()
+                , "Disconnect the atoms in the passed bonds - this does nothing for any\n  of the atoms that arent connected" );
+        
+        }
+        { //::SireMol::ConnectivityEditor::disconnect
+        
+            typedef ::SireMol::ConnectivityEditor & ( ::SireMol::ConnectivityEditor::*disconnect_function_type)( ::QList< SireMol::AtomIdx > const &,bool ) ;
+            disconnect_function_type disconnect_function_value( &::SireMol::ConnectivityEditor::disconnect );
+            
+            ConnectivityEditor_exposer.def( 
+                "disconnect"
+                , disconnect_function_value
+                , ( bp::arg("atoms"), bp::arg("exclusive")=(bool)(true) )
+                , bp::return_self< >()
+                , "Disconnect any and all bonds involving the passed atoms. If exclusive is true,\n  then this only removes connection where both atoms are in atoms, otherwise\n  it removes connections which have one of more atoms in atoms\n" );
         
         }
         { //::SireMol::ConnectivityEditor::disconnectAll

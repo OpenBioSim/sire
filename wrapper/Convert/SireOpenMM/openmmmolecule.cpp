@@ -141,11 +141,15 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
+        else if (c == "auto-bonds")
+        {
+            constraint_type = CONSTRAIN_AUTO_BONDS;
+        }
         else
         {
             throw SireError::invalid_key(QObject::tr(
                                              "Unrecognised constraint type '%1'. Valid values are "
-                                             "'none', 'h-bonds', "
+                                             "'none', 'auto-bonds', 'h-bonds', "
                                              "'h-bonds-not-perturbed', 'h-bonds-not-heavy-perturbed', "
                                              "'h-bonds-h-angles-not-perturbed', 'h-bonds-h-angles-not-heavy-perturbed' "
                                              "'bonds', 'bonds-not-perturbed', 'bonds-not-heavy-perturbed', "
@@ -216,11 +220,15 @@ OpenMMMolecule::OpenMMMolecule(const Molecule &mol,
         {
             perturbable_constraint_type = CONSTRAIN_BONDS | CONSTRAIN_HANGLES | CONSTRAIN_NOT_HEAVY_PERTURBED;
         }
+        else if (c == "auto-bonds")
+        {
+            perturbable_constraint_type = CONSTRAIN_AUTO_BONDS;
+        }
         else
         {
             throw SireError::invalid_key(QObject::tr(
                                              "Unrecognised perturbable constraint type '%1'. Valid values are "
-                                             "'none', 'h-bonds', "
+                                             "'none', 'auto-bonds', 'h-bonds', "
                                              "'h-bonds-not-perturbed', 'h-bonds-not-heavy-perturbed', "
                                              "'h-bonds-h-angles-not-perturbed', 'h-bonds-h-angles-not-heavy-perturbed' "
                                              "'bonds', 'bonds-not-perturbed', 'bonds-not-heavy-perturbed', "
@@ -736,6 +744,38 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         dynamic_constraints = map["dynamic_constraints"].value().asABoolean();
     }
 
+    double auto_constraints_factor = 10.0;
+
+    if (map.specified("auto_constraints_factor"))
+    {
+        auto_constraints_factor = map["auto_constraints_factor"].value().asADouble();
+
+        if (auto_constraints_factor < 1)
+        {
+            auto_constraints_factor = 1;
+        }
+        else if (auto_constraints_factor > 1e6)
+        {
+            auto_constraints_factor = 1e6;
+        }
+    }
+
+    double timestep_in_fs = 2.0;
+
+    if (map.specified("timestep_in_fs"))
+    {
+        timestep_in_fs = map["timestep_in_fs"].value().asADouble();
+
+        if (timestep_in_fs < 1.0)
+        {
+            timestep_in_fs = 1.0;
+        }
+        else if (timestep_in_fs > 100)
+        {
+            timestep_in_fs = 100;
+        }
+    }
+
     auto bonds = params.bonds();
 
     if (is_perturbable)
@@ -769,6 +809,7 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
 
         const double k = bondparam.k() * bond_k_to_openmm;
         const double r0 = bondparam.r0() * bond_r0_to_openmm;
+        double r0_1 = r0;
 
         if (k != 0)
         {
@@ -787,13 +828,32 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         }
 
         bool bond_is_not_constrained = true;
+        bool should_constrain_bond = false;
 
-        if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
-                                         (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+        if (this_constraint_type == CONSTRAIN_AUTO_BONDS)
         {
-            bool should_constrain_bond = true;
+            // constrain the bond if its predicted vibrational frequency is less than
+            // 10 times the simulation timestep
+            const double mass0 = masses_data[atom0];
+            const double mass1 = masses_data[atom1];
 
-            double r0_1 = r0;
+            // masses in g mol-1 - this converts the reduced mass to kg
+            const static double mass_to_reduced_mass = 0.001 / SireUnits::mole.value();
+            const double reduced_mass_in_kg = ((mass0 * mass1) / (mass0 + mass1)) * mass_to_reduced_mass;
+
+            // k in kJ mol-1 nm-2 - this converts to J m-2
+            const static double k_to_J_m2 = 4184 * 1e20 / SireUnits::mole.value();
+            const double k_in_J_m2 = bondparam.k() * k_to_J_m2;
+
+            // vibrational period in femtoseconds
+            const double vibrational_period = 2e15 * SireMaths::pi * std::sqrt(reduced_mass_in_kg / k_in_J_m2);
+
+            should_constrain_bond = vibrational_period < auto_constraints_factor * timestep_in_fs;
+        }
+        else if ((not has_massless_atom) and ((this_constraint_type & CONSTRAIN_BONDS) or
+                                              (has_light_atom and (this_constraint_type & CONSTRAIN_HBONDS))))
+        {
+            should_constrain_bond = true;
 
             if (is_perturbable)
             {
@@ -832,23 +892,23 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     }
                 }
             }
+        }
 
-            if (should_constrain_bond)
+        if (should_constrain_bond)
+        {
+            if (dynamic_constraints and (std::abs(r0 - r0_1) > 1e-4)) // match to somd1
             {
-                if (dynamic_constraints and (std::abs(r0 - r0_1) > 1e-4)) // match to somd1
-                {
-                    // this is a dynamic constraint that should change with lambda
-                    this->perturbable_constraints.append(boost::make_tuple(atom0, atom1, r0, r0_1));
-                }
-                else
-                {
-                    // use the r0 for the bond
-                    this->constraints.append(boost::make_tuple(atom0, atom1, r0));
-                }
-
-                constrained_pairs.insert(to_pair(atom0, atom1));
-                bond_is_not_constrained = false;
+                // this is a dynamic constraint that should change with lambda
+                this->perturbable_constraints.append(boost::make_tuple(atom0, atom1, r0, r0_1));
             }
+            else
+            {
+                // use the r0 for the bond
+                this->constraints.append(boost::make_tuple(atom0, atom1, r0));
+            }
+
+            constrained_pairs.insert(to_pair(atom0, atom1));
+            bond_is_not_constrained = false;
         }
 
         if (include_constrained_energies or bond_is_not_constrained)
@@ -2014,6 +2074,14 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
     this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map)));
+}
+
+/** Return whether or not this is null */
+bool PerturbableOpenMMMolecule::isNull() const
+{
+    return perturbed_atoms.isEmpty() and perturbed_bonds.isEmpty() and
+           perturbed_angs.isEmpty() and perturbed_dihs.isEmpty() and
+           perturbable_constraints.isEmpty();
 }
 
 /** Construct from the passed OpenMMMolecule */

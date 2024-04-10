@@ -263,4 +263,4 @@ for channel in env_channels:
 channels = " ".join([f"-c {x}" for x in channels])
 
 print("\nBuild this package using the command")
-print(f"conda mambabuild {channels} {condadir}")
+print(f"conda build {channels} {condadir}")

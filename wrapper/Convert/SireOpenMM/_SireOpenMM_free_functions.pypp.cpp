@@ -1519,7 +1519,17 @@ namespace bp = boost::python;
 
 #include <cmath>
 
+#include <iomanip>
+
+#include <iostream>
+
+#include <limits.h>
+
+#include <limits>
+
 #include <sstream>
+
+#include <stdint.h>
 
 #include <string>
 
@@ -1549,7 +1559,17 @@ namespace bp = boost::python;
 
 #include <cmath>
 
+#include <iomanip>
+
+#include <iostream>
+
+#include <limits.h>
+
+#include <limits>
+
 #include <sstream>
+
+#include <stdint.h>
 
 #include <string>
 
@@ -1579,7 +1599,17 @@ namespace bp = boost::python;
 
 #include <cmath>
 
+#include <iomanip>
+
+#include <iostream>
+
+#include <limits.h>
+
+#include <limits>
+
 #include <sstream>
+
+#include <stdint.h>
 
 #include <string>
 
@@ -1609,7 +1639,17 @@ namespace bp = boost::python;
 
 #include <cmath>
 
+#include <iomanip>
+
+#include <iostream>
+
+#include <limits.h>
+
+#include <limits>
+
 #include <sstream>
+
+#include <stdint.h>
 
 #include <string>
 

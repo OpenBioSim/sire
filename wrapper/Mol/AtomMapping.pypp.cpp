@@ -8,6 +8,10 @@
 
 namespace bp = boost::python;
 
+#include "SireMaths/align.h"
+
+#include "SireMol/core.h"
+
 #include "SireStream/datastream.h"
 
 #include "SireStream/shareddatastream.h"
@@ -34,10 +38,63 @@ void register_AtomMapping_class(){
         typedef bp::class_< SireMol::AtomMapping, bp::bases< SireBase::Property > > AtomMapping_exposer_t;
         AtomMapping_exposer_t AtomMapping_exposer = AtomMapping_exposer_t( "AtomMapping", "This class holds the mapping from one set of atoms to another.\nThis enables you associate, atom by atom, atoms in one set to\natoms in another set. This is useful, e.g. for building perturbations,\nor for specifying mappings for alignments or RMSD calculations etc.\n", bp::init< >("") );
         bp::scope AtomMapping_scope( AtomMapping_exposer );
-        AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const & >(( bp::arg("atoms0"), bp::arg("atoms1") ), "") );
-        AtomMapping_exposer.def( bp::init< SireMol::MoleculeView const &, SireMol::MoleculeView const & >(( bp::arg("mol0"), bp::arg("mol1") ), "") );
-        AtomMapping_exposer.def( bp::init< SireMol::SelectorMol const &, SireMol::SelectorMol const & >(( bp::arg("mols0"), bp::arg("mols1") ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("map")=SireBase::PropertyMap() ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireBase::PropertyMap const &, SireBase::PropertyMap const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("map0"), bp::arg("map1") ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::MoleculeView const &, SireMol::MoleculeView const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mol0"), bp::arg("mol1"), bp::arg("map")=SireBase::PropertyMap() ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::MoleculeView const &, SireMol::MoleculeView const &, SireBase::PropertyMap const &, SireBase::PropertyMap const & >(( bp::arg("mol0"), bp::arg("mol1"), bp::arg("map0"), bp::arg("map1") ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorMol const &, SireMol::SelectorMol const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("mols0"), bp::arg("mols1"), bp::arg("map")=SireBase::PropertyMap() ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorMol const &, SireMol::SelectorMol const &, SireBase::PropertyMap const &, SireBase::PropertyMap const & >(( bp::arg("mols0"), bp::arg("mols1"), bp::arg("map0"), bp::arg("map1") ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, bp::optional< SireBase::PropertyMap const & > >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("matched_atoms0"), bp::arg("matched_atoms1"), bp::arg("map")=SireBase::PropertyMap() ), "") );
+        AtomMapping_exposer.def( bp::init< SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireMol::SelectorM< SireMol::Atom > const &, SireBase::PropertyMap const &, SireBase::PropertyMap const & >(( bp::arg("atoms0"), bp::arg("atoms1"), bp::arg("matched_atoms0"), bp::arg("matched_atoms1"), bp::arg("map0"), bp::arg("map1") ), "") );
         AtomMapping_exposer.def( bp::init< SireMol::AtomMapping const & >(( bp::arg("other") ), "") );
+        { //::SireMol::AtomMapping::align
+        
+            typedef ::SireMol::AtomMapping ( ::SireMol::AtomMapping::*align_function_type)(  ) const;
+            align_function_type align_function_value( &::SireMol::AtomMapping::align );
+            
+            AtomMapping_exposer.def( 
+                "align"
+                , align_function_value
+                , bp::release_gil_policy()
+                , "Return the mapping where the perturbed state (1) has been\n  aligned against the reference state (0).\n" );
+        
+        }
+        { //::SireMol::AtomMapping::alignTo0
+        
+            typedef ::SireMol::AtomMapping ( ::SireMol::AtomMapping::*alignTo0_function_type)(  ) const;
+            alignTo0_function_type alignTo0_function_value( &::SireMol::AtomMapping::alignTo0 );
+            
+            AtomMapping_exposer.def( 
+                "alignTo0"
+                , alignTo0_function_value
+                , bp::release_gil_policy()
+                , "Return the mapping where the perturbed state (1) has been\n  aligned against the reference state (0).\n" );
+        
+        }
+        { //::SireMol::AtomMapping::alignTo1
+        
+            typedef ::SireMol::AtomMapping ( ::SireMol::AtomMapping::*alignTo1_function_type)(  ) const;
+            alignTo1_function_type alignTo1_function_value( &::SireMol::AtomMapping::alignTo1 );
+            
+            AtomMapping_exposer.def( 
+                "alignTo1"
+                , alignTo1_function_value
+                , bp::release_gil_policy()
+                , "Return the mapping where the perturbed state (1) has been\n  aligned against the reference state (0).\n" );
+        
+        }
+        { //::SireMol::AtomMapping::assertSingleMolecule
+        
+            typedef void ( ::SireMol::AtomMapping::*assertSingleMolecule_function_type)(  ) const;
+            assertSingleMolecule_function_type assertSingleMolecule_function_value( &::SireMol::AtomMapping::assertSingleMolecule );
+            
+            AtomMapping_exposer.def( 
+                "assertSingleMolecule"
+                , assertSingleMolecule_function_value
+                , bp::release_gil_policy()
+                , "Assert that this mapping refers only to a single molecule" );
+        
+        }
         { //::SireMol::AtomMapping::atoms0
         
             typedef ::SireMol::SelectorM< SireMol::Atom > const & ( ::SireMol::AtomMapping::*atoms0_function_type)(  ) const;
@@ -47,7 +104,7 @@ void register_AtomMapping_class(){
                 "atoms0"
                 , atoms0_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the reference atoms. We map from these atom to\n  the mapped atoms (atoms1)" );
+                , "Return the original reference atoms. This is the collection of both\n  mapped and unmapped reference atoms\n" );
         
         }
         { //::SireMol::AtomMapping::atoms1
@@ -59,7 +116,20 @@ void register_AtomMapping_class(){
                 "atoms1"
                 , atoms1_function_value
                 , bp::return_value_policy<bp::clone_const_reference, bp::release_gil_policy>()
-                , "Return the mapped atoms. We map from the reference atoms (atoms0)\n  to these atoms." );
+                , "Return the original mapped atoms. This is the collection of both\n  mapped and unmapped mapped atoms\n" );
+        
+        }
+        { //::SireMol::AtomMapping::contains
+        
+            typedef bool ( ::SireMol::AtomMapping::*contains_function_type)( ::SireMol::Atom const & ) const;
+            contains_function_type contains_function_value( &::SireMol::AtomMapping::contains );
+            
+            AtomMapping_exposer.def( 
+                "contains"
+                , contains_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "Return whether or not the forward mapping contains the\n  passed atom - this returns true if the atom is contained\n  in the original reference atoms, i.e. it doesnt guarantee\n  that the atom is mapped. Use the isMapped method to\n  check if the atom is mapped.\n" );
         
         }
         { //::SireMol::AtomMapping::count
@@ -158,6 +228,31 @@ void register_AtomMapping_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomMapping::isMapped
+        
+            typedef bool ( ::SireMol::AtomMapping::*isMapped_function_type)( ::SireMol::Atom const & ) const;
+            isMapped_function_type isMapped_function_value( &::SireMol::AtomMapping::isMapped );
+            
+            AtomMapping_exposer.def( 
+                "isMapped"
+                , isMapped_function_value
+                , ( bp::arg("atom") )
+                , bp::release_gil_policy()
+                , "Return whether or not the passed reference atom has been\n  mapped to a mapped atom\n" );
+        
+        }
+        { //::SireMol::AtomMapping::isSingleMolecule
+        
+            typedef bool ( ::SireMol::AtomMapping::*isSingleMolecule_function_type)(  ) const;
+            isSingleMolecule_function_type isSingleMolecule_function_value( &::SireMol::AtomMapping::isSingleMolecule );
+            
+            AtomMapping_exposer.def( 
+                "isSingleMolecule"
+                , isSingleMolecule_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this mapping refers to only a single molecule" );
+        
+        }
         { //::SireMol::AtomMapping::map
         
             typedef ::SireMol::Atom ( ::SireMol::AtomMapping::*map_function_type)( ::SireMol::Atom const &,bool ) const;
@@ -192,6 +287,30 @@ void register_AtomMapping_class(){
                 , map_function_value
                 , ( bp::arg("atoms"), bp::arg("find_all")=(bool)(true) )
                 , "Map from the passed atoms (which must all be in the reference\n  atoms) to the corresponding atoms in the mapped atoms. The\n  mapped atoms will be returned in the same order as the\n  reference atoms appeared in atoms. If find_all` is false\n  then this will use null atoms in the map when the mapped\n  atom cannot be found" );
+        
+        }
+        { //::SireMol::AtomMapping::mappedAtoms0
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*mappedAtoms0_function_type)(  ) const;
+            mappedAtoms0_function_type mappedAtoms0_function_value( &::SireMol::AtomMapping::mappedAtoms0 );
+            
+            AtomMapping_exposer.def( 
+                "mappedAtoms0"
+                , mappedAtoms0_function_value
+                , bp::release_gil_policy()
+                , "Return all of the reference atoms that have been mapped,\n  in the same order as the mapped atoms they match with\n" );
+        
+        }
+        { //::SireMol::AtomMapping::mappedAtoms1
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*mappedAtoms1_function_type)(  ) const;
+            mappedAtoms1_function_type mappedAtoms1_function_value( &::SireMol::AtomMapping::mappedAtoms1 );
+            
+            AtomMapping_exposer.def( 
+                "mappedAtoms1"
+                , mappedAtoms1_function_value
+                , bp::release_gil_policy()
+                , "Return all of the mapped atoms that have been mapped,\n  in the same order as the reference atoms they match with\n" );
         
         }
         AtomMapping_exposer.def( bp::self != bp::self );
@@ -281,6 +400,30 @@ void register_AtomMapping_class(){
                 , "" );
         
         }
+        { //::SireMol::AtomMapping::propertyMap0
+        
+            typedef ::SireBase::PropertyMap const & ( ::SireMol::AtomMapping::*propertyMap0_function_type)(  ) const;
+            propertyMap0_function_type propertyMap0_function_value( &::SireMol::AtomMapping::propertyMap0 );
+            
+            AtomMapping_exposer.def( 
+                "propertyMap0"
+                , propertyMap0_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "Return the property map used to find properties of the\n  reference molecule\n" );
+        
+        }
+        { //::SireMol::AtomMapping::propertyMap1
+        
+            typedef ::SireBase::PropertyMap const & ( ::SireMol::AtomMapping::*propertyMap1_function_type)(  ) const;
+            propertyMap1_function_type propertyMap1_function_value( &::SireMol::AtomMapping::propertyMap1 );
+            
+            AtomMapping_exposer.def( 
+                "propertyMap1"
+                , propertyMap1_function_value
+                , bp::return_value_policy< bp::copy_const_reference >()
+                , "Return the property map used to find properties of the\n  mapped molecule\n" );
+        
+        }
         { //::SireMol::AtomMapping::size
         
             typedef int ( ::SireMol::AtomMapping::*size_function_type)(  ) const;
@@ -327,6 +470,30 @@ void register_AtomMapping_class(){
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::AtomMapping::unmappedAtoms0
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*unmappedAtoms0_function_type)(  ) const;
+            unmappedAtoms0_function_type unmappedAtoms0_function_value( &::SireMol::AtomMapping::unmappedAtoms0 );
+            
+            AtomMapping_exposer.def( 
+                "unmappedAtoms0"
+                , unmappedAtoms0_function_value
+                , bp::release_gil_policy()
+                , "Return all of the reference atoms that havent been mapped,\n  in the same order as they appear in the original reference\n" );
+        
+        }
+        { //::SireMol::AtomMapping::unmappedAtoms1
+        
+            typedef ::SireMol::SelectorM< SireMol::Atom > ( ::SireMol::AtomMapping::*unmappedAtoms1_function_type)(  ) const;
+            unmappedAtoms1_function_type unmappedAtoms1_function_value( &::SireMol::AtomMapping::unmappedAtoms1 );
+            
+            AtomMapping_exposer.def( 
+                "unmappedAtoms1"
+                , unmappedAtoms1_function_value
+                , bp::release_gil_policy()
+                , "Return all of the mapped atoms that havent been mapped,\n  in the same order as they appear in the original mapped atoms\n" );
         
         }
         { //::SireMol::AtomMapping::what

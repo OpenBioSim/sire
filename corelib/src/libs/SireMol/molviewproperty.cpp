@@ -29,6 +29,7 @@
 #include "atommatcher.h"
 #include "atommatchers.h"
 #include "moleculeinfodata.h"
+#include "atomidxmapping.h"
 
 #include "mover.hpp"
 

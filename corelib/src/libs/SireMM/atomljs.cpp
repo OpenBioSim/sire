@@ -29,6 +29,8 @@
 
 #include "SireBase/quickcopy.hpp"
 #include "SireBase/incremint.h"
+#include "SireBase/propertylist.h"
+#include "SireBase/console.h"
 
 #include "SireStream/magic_error.h"
 #include "SireStream/datastream.h"
@@ -38,6 +40,7 @@
 #include <QMutex>
 
 using namespace SireMM;
+using namespace SireBase;
 using namespace SireMol;
 using namespace SireStream;
 
@@ -1455,4 +1458,62 @@ bool AtomProperty<LJParameter>::hasExceptions(int i) const
 QList<SireMM::LJException> AtomProperty<LJParameter>::getExceptions(int i) const
 {
     return this->lj_exceptions.value(i);
+}
+
+/** Merge this property with another property */
+PropertyList AtomProperty<LJParameter>::merge(const MolViewProperty &other,
+                                              const AtomIdxMapping &mapping,
+                                              const QString &ghost,
+                                              const SireBase::PropertyMap &map) const
+{
+    if (not other.isA<AtomProperty<LJParameter>>())
+    {
+        throw SireError::incompatible_error(QObject::tr("Cannot merge %1 with %2 as they are different types.")
+                                                .arg(this->what())
+                                                .arg(other.what()),
+                                            CODELOC);
+    }
+
+    const AtomProperty<LJParameter> &ref = *this;
+    const AtomProperty<LJParameter> &pert = other.asA<AtomProperty<LJParameter>>();
+
+    AtomProperty<LJParameter> prop0 = ref;
+    AtomProperty<LJParameter> prop1 = ref;
+
+    if (not ghost.isEmpty())
+    {
+        Console::warning(QObject::tr("The ghost parameter '%1' for LJ parameters is ignored").arg(ghost));
+    }
+
+    for (const auto &index : mapping)
+    {
+        if (index.isUnmappedIn0() and index.isUnmappedIn1())
+        {
+            prop0.set(index.cgAtomIdx0(), LJParameter::dummy());
+            prop1.set(index.cgAtomIdx0(), LJParameter::dummy());
+        }
+        else if (index.isUnmappedIn0())
+        {
+            auto lj1 = pert.get(index.cgAtomIdx1());
+            prop0.set(index.cgAtomIdx0(), LJParameter(lj1.sigma(), SireUnits::Dimension::MolarEnergy(0)));
+            prop1.set(index.cgAtomIdx0(), lj1);
+        }
+        else if (index.isUnmappedIn1())
+        {
+            auto lj0 = ref.get(index.cgAtomIdx0());
+            prop1.set(index.cgAtomIdx0(), LJParameter(lj0.sigma(), SireUnits::Dimension::MolarEnergy(0)));
+        }
+        else
+        {
+            prop1.set(index.cgAtomIdx0(), pert.get(index.cgAtomIdx1()));
+        }
+    }
+
+    SireBase::PropertyList ret;
+    ret.append(prop0);
+    ret.append(prop1);
+
+    return ret;
+
+    return ret;
 }

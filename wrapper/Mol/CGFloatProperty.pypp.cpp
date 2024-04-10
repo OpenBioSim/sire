@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::CGProperty<double> __copy__(const SireMol::CGProperty<double> &other){ return SireMol::CGProperty<double>(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -224,6 +226,19 @@ void register_CGFloatProperty_class(){
                 "isEmpty"
                 , isEmpty_function_value
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::CGProperty< double >::merge
+        
+            typedef SireMol::CGProperty< double > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::CGProperty< double >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::CGProperty< double >::merge );
+            
+            CGFloatProperty_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

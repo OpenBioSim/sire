@@ -45,6 +45,7 @@ __all__ = [
     "set_max_num_threads",
     "smiles",
     "smarts",
+    "sqrt",
     "supported_formats",
     "tutorial_url",
     "u",
@@ -119,6 +120,16 @@ def _fix_openmm_path():
 
 
 _fix_openmm_path()
+
+
+def sqrt(x):
+    """Return the square root of the passed value"""
+    if hasattr(x, "sqrt"):
+        return x.sqrt()
+    else:
+        import math
+
+        return math.sqrt(x)
 
 
 def u(unit):

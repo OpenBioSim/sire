@@ -22,10 +22,10 @@ def _fix_lambdaschedule():
 
     try:
         LambdaSchedule.__orig__get_lever_values = LambdaSchedule.getLeverValues
+        LambdaSchedule.set_default_equation = LambdaSchedule.setDefaultStageEquation
     except AttributeError:
-        LambdaSchedule.__orig__get_lever_values = (
-            LambdaSchedule.get_lever_values
-        )
+        LambdaSchedule.__orig__get_lever_values = LambdaSchedule.get_lever_values
+        LambdaSchedule.set_default_equation = LambdaSchedule.set_default_stage_equation
 
     def get_lever_values(
         obj,

@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 #include "SireMol/moleculeview.h"
 
+#include "SireMol/atomidxmapping.h"
+
 SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<0, 1, 0, 0, 0, 0, 0> > __copy__(const SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<0, 1, 0, 0, 0, 0, 0> > &other){ return SireMol::AtomProperty<SireUnits::Dimension::PhysUnit<0, 1, 0, 0, 0, 0, 0> >(other); }
 
 #include "Qt/qdatastream.hpp"
@@ -356,6 +358,19 @@ void register_AtomRadii_class(){
                 , merge_function_value
                 , ( bp::arg("molinfo") )
                 , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::merge
+        
+            typedef SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > > exported_class_t;
+            typedef ::SireBase::PropertyList ( ::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::AtomProperty< SireUnits::Dimension::PhysUnit< 0, 1, 0, 0, 0, 0, 0 > >::merge );
+            
+            AtomRadii_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
                 , "" );
         
         }

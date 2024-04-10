@@ -113,6 +113,9 @@ namespace SireOpenMM
         const char *what() const;
         static const char *typeName();
 
+        SireBase::PropertyList getLeverValues(const QVector<double> &lambda_values,
+                                              const PerturbableOpenMMMolecule &mol) const;
+
         double setLambda(OpenMM::Context &system, double lambda_value,
                          bool update_constraints = true) const;
 

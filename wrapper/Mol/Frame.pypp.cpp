@@ -8,6 +8,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
 #include "SireBase/generalunitproperty.h"
 
 #include "SireBase/lazyevaluator.h"
@@ -31,6 +33,8 @@ namespace bp = boost::python;
 #include "SireUnits/units.h"
 
 #include "SireVol/space.h"
+
+#include "atomidxmapping.h"
 
 #include "trajectory.h"
 
@@ -181,6 +185,18 @@ void register_Frame_class(){
                 , "Join the vector of passed frames into a single frame. The\n  frames are joined in order, e.g. from the first atom in\n  the first frame to the last atom in the last frame\n" );
         
         }
+        { //::SireMol::Frame::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMol::Frame::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMol::Frame::merge );
+            
+            Frame_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "Merge this property with another property" );
+        
+        }
         { //::SireMol::Frame::nAtoms
         
             typedef int ( ::SireMol::Frame::*nAtoms_function_type)(  ) const;
@@ -268,7 +284,7 @@ void register_Frame_class(){
                 , reorder_function_value
                 , ( bp::arg("order") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Return a copy of this frame which has been reordered according\n  to order (i.e. atom i is moved to order[i]). This does nothing\n  if the order is empty. It silently ignores invalid orders, and\n  will leave atoms that arent referenced in their original\n  positions\n" );
         
         }
         { //::SireMol::Frame::reverse

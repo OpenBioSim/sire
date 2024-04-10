@@ -82,6 +82,9 @@ namespace SireCAS
         static LambdaSchedule standard_decouple(bool perturbed_is_decoupled = true);
         static LambdaSchedule charge_scaled_decouple(double scale = 0.2, bool perturbed_is_decoupled = true);
 
+        static LambdaSchedule standard_annihilate(bool perturbed_is_annihilated = true);
+        static LambdaSchedule charge_scaled_annihilate(double scale = 0.2, bool perturbed_is_annihilated = true);
+
         static SireCAS::Symbol lam();
         static SireCAS::Symbol initial();
         static SireCAS::Symbol final();
@@ -141,6 +144,9 @@ namespace SireCAS
 
         void addDecoupleStage(bool perturbed_is_decoupled = true);
         void addDecoupleStage(const QString &name, bool perturbed_is_decoupled = true);
+
+        void addAnnihilateStage(bool perturbed_is_annihilated = true);
+        void addAnnihilateStage(const QString &name, bool perturbed_is_annihilated = true);
 
         void setDefaultStageEquation(const QString &stage,
                                      const SireCAS::Expression &equation);

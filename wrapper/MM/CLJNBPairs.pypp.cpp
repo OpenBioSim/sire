@@ -74,6 +74,18 @@ void register_CLJNBPairs_class(){
                 , "Return all of the excluded atoms for the atoms in the specified\n  CutGroup, returned in a hash indexed by the AtomIdx of those\n  atoms. This is equivalent to calling excludedAtoms individually,\n  but is far more efficient if trying to get all of the\n  excluded atoms in the whole molecule\n" );
         
         }
+        { //::SireMM::CLJNBPairs::merge
+        
+            typedef ::SireBase::PropertyList ( ::SireMM::CLJNBPairs::*merge_function_type)( ::SireMol::MolViewProperty const &,::SireMol::AtomIdxMapping const &,::QString const &,::SireBase::PropertyMap const & ) const;
+            merge_function_type merge_function_value( &::SireMM::CLJNBPairs::merge );
+            
+            CLJNBPairs_exposer.def( 
+                "merge"
+                , merge_function_value
+                , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
+                , "" );
+        
+        }
         { //::SireMM::CLJNBPairs::nExcludedAtoms
         
             typedef int ( ::SireMM::CLJNBPairs::*nExcludedAtoms_function_type)(  ) const;

@@ -189,13 +189,15 @@ namespace SireMM
         void clear(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2);
         void clear(const AngleID &angleid);
 
+        void clear(const QList<AtomIdx> &atoms, bool exclusive = true);
+
         void clear();
 
         void substitute(const Identities &identities);
 
-        int nFunctions() const;
-
         bool isEmpty() const;
+
+        int nFunctions() const;
 
         Expression potential(AtomIdx atom0, AtomIdx atom1, AtomIdx atom2) const;
         Expression potential(const AtomID &atom0, const AtomID &atom1, const AtomID &atom2) const;
@@ -208,7 +210,14 @@ namespace SireMM
         QVector<ThreeAtomFunction> potentials() const;
         QVector<ThreeAtomFunction> forces(const Symbol &symbol) const;
 
+        QVector<ThreeAtomFunction> potentials(const QList<AtomIdx> &atoms, bool exclusive = true) const;
+
         ThreeAtomFunctions includeOnly(const AtomSelection &selected_atoms, bool isstrict = true) const;
+
+        SireBase::PropertyList merge(const MolViewProperty &other,
+                                     const SireMol::AtomIdxMapping &mapping,
+                                     const QString &ghost = QString(),
+                                     const SireBase::PropertyMap &map = SireBase::PropertyMap()) const;
 
     protected:
         SireBase::PropertyPtr _pvt_makeCompatibleWith(const MoleculeInfoData &molinfo,

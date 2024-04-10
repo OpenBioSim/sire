@@ -98,6 +98,7 @@
 #include "hybridization.h"
 #include "atomeditor.h"
 #include "volumemap.h"
+#include "atomidxmapping.h"
 #include "resname.h"
 #include "atompropertylist.h"
 #include "chaineditor.h"
@@ -243,6 +244,7 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::AtomCoordMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIdxMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomNameMatcher >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomNumMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomIDMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMultiMatcher >();
     ObjectRegistry::registerConverterFor< SireMol::AtomMCSMatcher >();
@@ -316,6 +318,8 @@ void register_SireMol_objects()
     ObjectRegistry::registerConverterFor< SireMol::AtomEditor >();
     ObjectRegistry::registerConverterFor< SireMol::AtomStructureEditor >();
     ObjectRegistry::registerConverterFor< SireMol::VolumeMap >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomIdxMappingEntry >();
+    ObjectRegistry::registerConverterFor< SireMol::AtomIdxMapping >();
     ObjectRegistry::registerConverterFor< SireMol::ResName >();
     ObjectRegistry::registerConverterFor< SireMol::AtomPropertyList >();
     ObjectRegistry::registerConverterFor< SireMol::AtomDoubleArrayProperty >();
