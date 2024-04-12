@@ -1153,16 +1153,27 @@ void Molecules::loadFrame(int frame, const LazyEvaluator &evaluator,
 
     if (should_run_in_parallel(mols.count(), map))
     {
-        const auto molnums = this->molNums().values();
+        QVector<Molecule> mols2;
+        const int nmols = mols.count();
+        mols2.reserve(nmols);
 
-        tbb::parallel_for(tbb::blocked_range<int>(0, molnums.count()),
+        for (auto it = this->mols.constBegin(); it != this->mols.constEnd(); ++it)
+        {
+            mols2.append(it.value().molecule());
+        }
+
+        auto mols2_array = mols2.data();
+
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols),
                           [&](const tbb::blocked_range<int> &r)
                           {
                               for (int i = r.begin(); i < r.end(); ++i)
                               {
-                                  mols.find(molnums[i])->loadFrame(frame, evaluator, map);
+                                  mols2_array[i].loadFrame(frame, evaluator, map);
                               }
                           });
+
+        this->update(Molecules(mols2));
     }
     else
     {
