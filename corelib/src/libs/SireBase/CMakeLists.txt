@@ -46,6 +46,7 @@ set ( SIREBASE_HEADERS
       packedarray2d.h
       packedarray2d.hpp
       packedarrays.h
+      pagecache.h
       pairmatrix.hpp
       range.h
       ranges.h
@@ -103,6 +104,7 @@ set ( SIREBASE_SOURCES
       meminfo.cpp
       numberproperty.cpp
       packedarray2d.cpp
+      pagecache.cpp
       parallel.cpp
       process.cpp
       progressbar.cpp

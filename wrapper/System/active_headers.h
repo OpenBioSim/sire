@@ -39,6 +39,7 @@
 #include "system.h"
 #include "systemmonitor.h"
 #include "systemmonitors.h"
+#include "systemtrajectory.h"
 #include "volmapmonitor.h"
 
 #endif

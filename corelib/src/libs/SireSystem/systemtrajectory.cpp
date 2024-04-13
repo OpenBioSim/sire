@@ -290,12 +290,12 @@ Frame SystemFrames::_lkr_getFrame(int i) const
 
     Frame frame;
 
-    auto start_time = std::chrono::high_resolution_clock::now();
+    // auto start_time = std::chrono::high_resolution_clock::now();
     ds >> frame;
-    auto end_time = std::chrono::high_resolution_clock::now();
+    // auto end_time = std::chrono::high_resolution_clock::now();
 
-    qDebug() << "Loading frame" << i << "with" << frames.at(i).size() << "bytes" << frame.numBytes();
-    qDebug() << "Deserialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
+    // qDebug() << "Loading frame" << i << "with" << frames.at(i).size() << "bytes" << frame.numBytes();
+    // qDebug() << "Deserialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
 
     const_cast<SystemFrames *>(this)->current_frame = frame;
     const_cast<SystemFrames *>(this)->current_frame_index = i;
@@ -500,22 +500,22 @@ void SystemFrames::saveFrame(const Molecules &mols,
 
     Frame frame(coordinates, velocities, forces, space, time, props);
 
-    auto start_time = std::chrono::high_resolution_clock::now();
+    // auto start_time = std::chrono::high_resolution_clock::now();
 
     QByteArray data;
     data.reserve(2 * frame.numBytes());
 
-    auto mem_time = std::chrono::high_resolution_clock::now();
+    // auto mem_time = std::chrono::high_resolution_clock::now();
 
     QDataStream ds(&data, QIODevice::WriteOnly);
     ds << frame;
 
-    auto end_time = std::chrono::high_resolution_clock::now();
+    // auto end_time = std::chrono::high_resolution_clock::now();
 
-    qDebug() << "Saving frame" << frames.count() << "with" << data.size() << "bytes" << frame.numBytes();
-    qDebug() << "Memory time" << std::chrono::duration_cast<std::chrono::microseconds>(mem_time - start_time).count() << "microseconds";
-    qDebug() << "Serialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - mem_time).count() << "microseconds";
-    qDebug() << "Total time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
+    // qDebug() << "Saving frame" << frames.count() << "with" << data.size() << "bytes" << frame.numBytes();
+    // qDebug() << "Memory time" << std::chrono::duration_cast<std::chrono::microseconds>(mem_time - start_time).count() << "microseconds";
+    // qDebug() << "Serialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - mem_time).count() << "microseconds";
+    // qDebug() << "Total time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
 
     // need to hold the write lock, as we are updating global state
     // for everyone who holds this live trajectory data
