@@ -69,6 +69,8 @@ namespace SireBase
 
             QString cache_dir;
             int page_size;
+
+            bool exiting;
         };
 
         class PageData : public boost::noncopyable
@@ -151,7 +153,7 @@ using namespace SireBase::detail;
 ///////
 
 CacheData::CacheData(QString c, int p)
-    : cache_dir(c), page_size(p)
+    : cache_dir(c), page_size(p), exiting(false)
 {
     if (c.simplified().isEmpty())
     {
@@ -202,6 +204,16 @@ int CacheData::nBytes() const
 void CacheData::enqueue(const PageCache::Handle &handle)
 {
     QMutexLocker lkr(&mutex);
+
+    if (this->exiting)
+    {
+        // this is the race condition where the current thread loop
+        // is in the process of exiting, but we need to wait for that
+        // to complete
+        this->wait();
+        this->exiting = false;
+    }
+
     queue.enqueue(handle);
 
     if (not this->isRunning())
@@ -212,6 +224,8 @@ void CacheData::enqueue(const PageCache::Handle &handle)
 
 void CacheData::run()
 {
+    int empty_count = 0;
+
     while (true)
     {
         if (this->isInterruptionRequested())
@@ -243,6 +257,7 @@ void CacheData::run()
         if (have_item)
         {
             qDebug() << "CACHE THE ITEM";
+            empty_count = 0;
         }
 
         if (this->isInterruptionRequested())
@@ -258,6 +273,15 @@ void CacheData::run()
             // check to see if there is anything else to process
             QMutexLocker lkr(&mutex);
             is_empty = queue.isEmpty();
+            empty_count += 1;
+
+            if (empty_count > 10)
+            {
+                // we have been idle for a while, so we can stop
+                this->exiting = true;
+                return;
+            }
+
             lkr.unlock();
         }
 
