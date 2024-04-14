@@ -310,6 +310,11 @@ QString PageCache::Page::toString() const
     return QString("PageCache::Page");
 }
 
+PageCache::Page *PageCache::Page::clone() const
+{
+    return new PageCache::Page(*this);
+}
+
 void PageCache::Page::assertValid() const
 {
     if (p == nullptr)
@@ -406,6 +411,11 @@ const char *PageCache::Handle::what() const
 QString PageCache::Handle::toString() const
 {
     return QString("PageCache::Handle");
+}
+
+PageCache::Handle *PageCache::Handle::clone() const
+{
+    return new PageCache::Handle(*this);
 }
 
 void PageCache::Handle::assertValid() const
@@ -513,6 +523,11 @@ const char *PageCache::what() const
 QString PageCache::toString() const
 {
     return QString("PageCache");
+}
+
+PageCache *PageCache::clone() const
+{
+    return new PageCache(*this);
 }
 
 void PageCache::assertValid() const
