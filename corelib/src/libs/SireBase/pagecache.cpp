@@ -58,14 +58,20 @@ namespace SireBase
             int nPages() const;
             int nBytes() const;
 
+            std::weak_ptr<CacheData> self;
+
         protected:
             void run();
 
         private:
-            void enqueue(const PageCache::Handle &handle);
+            void enqueue(const std::shared_ptr<HandleData> &handle);
 
             QMutex mutex;
-            QQueue<PageCache::Handle> queue;
+            QQueue<std::shared_ptr<HandleData>> queue;
+
+            std::weak_ptr<PageData> current_page;
+
+            QList<std::weak_ptr<PageData>> pages;
 
             QString cache_dir;
             int page_size;
@@ -76,7 +82,7 @@ namespace SireBase
         class PageData : public boost::noncopyable
         {
         public:
-            PageData(int max_size);
+            PageData(int max_size, const std::shared_ptr<CacheData> &cache);
             ~PageData();
 
             int maxBytes() const;
@@ -86,16 +92,19 @@ namespace SireBase
             bool isResident() const;
             bool isCached() const;
 
-            PageCache::Handle cache(const QByteArray &data);
+            int cache(const QByteArray &data);
 
             QByteArray fetch(int offset, int n_bytes) const;
 
             PageCache parent() const;
 
         private:
-            std::weak_ptr<CacheData> c;
+            std::shared_ptr<CacheData> c;
+
             int max_bytes;
             int nbytes;
+
+            char *d;
         };
 
         class HandleData : public boost::noncopyable
@@ -104,8 +113,8 @@ namespace SireBase
             enum State
             {
                 EMPTY = 0,
-                PRE_CACHE = 1,
-                POST_CACHE = 2
+                DATA_IN_HANDLE = 1,
+                DATA_ON_PAGE = 2
             };
 
             HandleData(const QByteArray &data);
@@ -121,6 +130,8 @@ namespace SireBase
             bool isNull() const;
 
             PageCache parent() const;
+
+            void setPage(const PageCache::Page &page, int offset);
 
         private:
             /** The page containing this data */
@@ -176,9 +187,9 @@ CacheData::~CacheData()
 
 PageCache::Handle CacheData::cache(const QByteArray &data)
 {
-    auto handle = PageCache::Handle(std::make_shared<HandleData>(data));
+    auto handle = std::make_shared<HandleData>(data);
     this->enqueue(handle);
-    return handle;
+    return PageCache::Handle(handle);
 }
 
 QString CacheData::cacheDir() const
@@ -201,8 +212,13 @@ int CacheData::nBytes() const
     return 0;
 }
 
-void CacheData::enqueue(const PageCache::Handle &handle)
+void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
 {
+    if (handle.get() == nullptr)
+    {
+        return;
+    }
+
     QMutexLocker lkr(&mutex);
 
     if (this->exiting)
@@ -234,7 +250,7 @@ void CacheData::run()
             return;
         }
 
-        PageCache::Handle handle;
+        std::shared_ptr<HandleData> handle;
         bool have_item = false;
 
         // pull an item off the queue
@@ -247,16 +263,64 @@ void CacheData::run()
                 return;
             }
 
-            if (not queue.isEmpty())
+            while (not queue.isEmpty())
             {
                 handle = queue.dequeue();
-                have_item = true;
+
+                if (handle.get() != nullptr)
+                {
+                    have_item = true;
+                    break;
+                }
             }
         }
 
         if (have_item)
         {
-            qDebug() << "CACHE THE ITEM";
+            // get the data
+            QByteArray data = handle->fetch();
+
+            const int n_bytes = data.size();
+
+            if (n_bytes >= page_size)
+            {
+                // this is bigger than a page, so needs to have its
+                // own page!
+                auto page = std::make_shared<PageData>(n_bytes, this->self.lock());
+                this->pages.append(page);
+                auto offset = page->cache(data);
+                handle->setPage(PageCache::Page(page), offset);
+            }
+            else if (n_bytes != 0)
+            {
+                // make sure we have a current page...
+                auto current = current_page.lock();
+
+                if (current.get() == nullptr)
+                {
+                    current = std::make_shared<PageData>(page_size, this->self.lock());
+                    current_page = current;
+                }
+
+                // is there space left on the current page
+                if (current->bytesRemaining() >= n_bytes)
+                {
+                    auto offset = current->cache(data);
+                    handle->setPage(PageCache::Page(current), offset);
+                }
+                else
+                {
+                    // add the current page to the list of old pages
+                    this->pages.append(current_page);
+
+                    // we need to create a new page
+                    current = std::make_shared<PageData>(page_size, this->self.lock());
+                    current_page = current;
+                    auto offset = current->cache(data);
+                    handle->setPage(PageCache::Page(current), offset);
+                }
+            }
+
             empty_count = 0;
         }
 
@@ -303,18 +367,26 @@ void CacheData::run()
 /////// Implementation of detail::PageData
 ///////
 
-PageData::PageData(int max_size)
-    : max_bytes(max_size), nbytes(0)
+PageData::PageData(int max_size, const std::shared_ptr<CacheData> &cache)
+    : c(cache), max_bytes(max_size), nbytes(0), d(0)
 {
     if (max_bytes < 1024)
     {
         throw SireError::invalid_arg(
             QObject::tr("Page size must be greater than 1024!"), CODELOC);
     }
+    else if (max_bytes > 128 * 1024 * 1024)
+    {
+        throw SireError::invalid_arg(
+            QObject::tr("Page size must be less than 128 MB!"), CODELOC);
+    }
+
+    d = new char[max_bytes];
 }
 
 PageData::~PageData()
 {
+    delete[] d;
 }
 
 int PageData::maxBytes() const
@@ -342,19 +414,36 @@ bool PageData::isCached() const
     return false;
 }
 
-PageCache::Handle PageData::cache(const QByteArray &data)
+int PageData::cache(const QByteArray &data)
 {
-    return PageCache::Handle();
+    if (data.size() > this->bytesRemaining())
+    {
+        throw SireError::invalid_arg(
+            QObject::tr("Data is too large to fit on this page!"), CODELOC);
+    }
+
+    std::memcpy(d + nbytes, data.constData(), data.size());
+
+    int offset = nbytes;
+    nbytes += data.size();
+
+    return offset;
 }
 
 QByteArray PageData::fetch(int offset, int n_bytes) const
 {
-    return QByteArray();
+    if (offset + n_bytes > nbytes)
+    {
+        throw SireError::invalid_arg(
+            QObject::tr("Data is too large to fit on this page!"), CODELOC);
+    }
+
+    return QByteArray(d + offset, n_bytes);
 }
 
 PageCache PageData::parent() const
 {
-    return PageCache(c.lock());
+    return PageCache(c);
 }
 
 ///////
@@ -370,7 +459,7 @@ HandleData::HandleData(const QByteArray &data)
     }
     else
     {
-        state = PRE_CACHE;
+        state = DATA_IN_HANDLE;
     }
 }
 
@@ -382,7 +471,7 @@ QByteArray HandleData::fetch() const
 {
     QMutexLocker lkr(const_cast<QMutex *>(&mutex));
 
-    if (state == EMPTY or state == PRE_CACHE)
+    if (state == EMPTY or state == DATA_IN_HANDLE)
     {
         return d;
     }
@@ -390,6 +479,27 @@ QByteArray HandleData::fetch() const
     lkr.unlock();
 
     return p.fetch(offset, nbytes);
+}
+
+void HandleData::setPage(const PageCache::Page &page, int off)
+{
+    QMutexLocker lkr(&mutex);
+
+    if (state == EMPTY)
+    {
+        throw SireError::invalid_state(
+            QObject::tr("Handle is empty"), CODELOC);
+    }
+    else if (state == DATA_ON_PAGE)
+    {
+        throw SireError::invalid_state(
+            QObject::tr("Handle is already on the page!"), CODELOC);
+    }
+
+    p = page;
+    offset = off;
+    state = DATA_ON_PAGE;
+    d = QByteArray();
 }
 
 PageCache::Page HandleData::page() const
@@ -651,11 +761,13 @@ void PageCache::Handle::reset()
 PageCache::PageCache(int page_size)
     : d(new CacheData(QString("."), page_size))
 {
+    d->self = d;
 }
 
 PageCache::PageCache(const QString &cachedir, int page_size)
     : d(new CacheData(cachedir, page_size))
 {
+    d->self = d;
 }
 
 PageCache::PageCache(std::shared_ptr<detail::CacheData> data)
