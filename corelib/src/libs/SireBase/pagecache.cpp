@@ -30,7 +30,12 @@
 
 #include "SireError/errors.h"
 
+#include "SireBase/parallel.h"
+
 #include <QDir>
+#include <QThread>
+#include <QQueue>
+#include <QMutex>
 
 #include <boost/noncopyable.hpp>
 
@@ -38,7 +43,7 @@ namespace SireBase
 {
     namespace detail
     {
-        class CacheData : public boost::noncopyable
+        class CacheData : public QThread
         {
         public:
             CacheData(QString cachedir, int page_size);
@@ -53,7 +58,15 @@ namespace SireBase
             int nPages() const;
             int nBytes() const;
 
+        protected:
+            void run();
+
         private:
+            void enqueue(const PageCache::Handle &handle);
+
+            QMutex mutex;
+            QQueue<PageCache::Handle> queue;
+
             QString cache_dir;
             int page_size;
         };
@@ -86,7 +99,14 @@ namespace SireBase
         class HandleData : public boost::noncopyable
         {
         public:
-            HandleData();
+            enum State
+            {
+                EMPTY = 0,
+                PRE_CACHE = 1,
+                POST_CACHE = 2
+            };
+
+            HandleData(const QByteArray &data);
             ~HandleData();
 
             QByteArray fetch() const;
@@ -103,6 +123,16 @@ namespace SireBase
         private:
             /** The page containing this data */
             PageCache::Page p;
+
+            /** Mutex to lock access to this data */
+            QMutex mutex;
+
+            /** The data being cached - this is stored here until it is
+                property added to the cache */
+            QByteArray d;
+
+            /** The current state of the handle */
+            State state;
 
             /** The offset of this data within the page */
             int offset;
@@ -138,11 +168,15 @@ CacheData::CacheData(QString c, int p)
 
 CacheData::~CacheData()
 {
+    this->requestInterruption();
+    this->wait();
 }
 
 PageCache::Handle CacheData::cache(const QByteArray &data)
 {
-    return PageCache::Handle();
+    auto handle = PageCache::Handle(std::make_shared<HandleData>(data));
+    this->enqueue(handle);
+    return handle;
 }
 
 QString CacheData::cacheDir() const
@@ -163,6 +197,82 @@ int CacheData::nPages() const
 int CacheData::nBytes() const
 {
     return 0;
+}
+
+void CacheData::enqueue(const PageCache::Handle &handle)
+{
+    QMutexLocker lkr(&mutex);
+    queue.enqueue(handle);
+
+    if (not this->isRunning())
+    {
+        this->start();
+    }
+}
+
+void CacheData::run()
+{
+    while (true)
+    {
+        if (this->isInterruptionRequested())
+        {
+            // stop what we are doing
+            return;
+        }
+
+        PageCache::Handle handle;
+        bool have_item = false;
+
+        // pull an item off the queue
+        {
+            QMutexLocker lkr(&mutex);
+
+            if (this->isInterruptionRequested())
+            {
+                // stop what we are doing
+                return;
+            }
+
+            if (not queue.isEmpty())
+            {
+                handle = queue.dequeue();
+                have_item = true;
+            }
+        }
+
+        if (have_item)
+        {
+            qDebug() << "CACHE THE ITEM";
+        }
+
+        if (this->isInterruptionRequested())
+        {
+            // stop what we are doing
+            return;
+        }
+
+        bool is_empty = true;
+
+        if (have_item)
+        {
+            // check to see if there is anything else to process
+            QMutexLocker lkr(&mutex);
+            is_empty = queue.isEmpty();
+            lkr.unlock();
+        }
+
+        if (is_empty)
+        {
+            if (this->isInterruptionRequested())
+            {
+                // stop what we are doing
+                return;
+            }
+
+            // sleep for a bit
+            this->msleep(100);
+        }
+    }
 }
 
 ///////
@@ -227,9 +337,17 @@ PageCache PageData::parent() const
 /////// Implementation of detail::HandleData
 ///////
 
-HandleData::HandleData()
-    : offset(0), nbytes(0)
+HandleData::HandleData(const QByteArray &data)
+    : d(data), offset(0), nbytes(data.size())
 {
+    if (nbytes == 0)
+    {
+        state = EMPTY;
+    }
+    else
+    {
+        state = PRE_CACHE;
+    }
 }
 
 HandleData::~HandleData()
@@ -238,6 +356,15 @@ HandleData::~HandleData()
 
 QByteArray HandleData::fetch() const
 {
+    QMutexLocker lkr(const_cast<QMutex *>(&mutex));
+
+    if (state == EMPTY or state == PRE_CACHE)
+    {
+        return d;
+    }
+
+    lkr.unlock();
+
     return p.fetch(offset, nbytes);
 }
 
@@ -307,7 +434,9 @@ const char *PageCache::Page::what() const
 
 QString PageCache::Page::toString() const
 {
-    return QString("PageCache::Page");
+    return QString("PageCache::Page(%1 KB used from %2 KB)")
+        .arg(this->nBytes() / 1024.0)
+        .arg(this->maxBytes() / 1024.0);
 }
 
 PageCache::Page *PageCache::Page::clone() const
@@ -355,6 +484,12 @@ int PageCache::Page::nBytes() const
 int PageCache::Page::size() const
 {
     return this->nBytes();
+}
+
+int PageCache::Page::maxBytes() const
+{
+    assertValid();
+    return p->maxBytes();
 }
 
 PageCache PageCache::Page::parent() const
@@ -410,7 +545,16 @@ const char *PageCache::Handle::what() const
 
 QString PageCache::Handle::toString() const
 {
-    return QString("PageCache::Handle");
+    const int nbytes = this->nBytes();
+
+    if (nbytes == 0)
+    {
+        return QString("PageCache::Handle::empty");
+    }
+    else
+    {
+        return QString("PageCache::Handle(size = %1 KB)").arg(nbytes / 1024.0);
+    }
 }
 
 PageCache::Handle *PageCache::Handle::clone() const
@@ -522,7 +666,7 @@ const char *PageCache::what() const
 
 QString PageCache::toString() const
 {
-    return QString("PageCache");
+    return QString("PageCache(size = %1 KB)").arg(this->nBytes() / 1024.0);
 }
 
 PageCache *PageCache::clone() const

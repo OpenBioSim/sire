@@ -123,6 +123,8 @@ namespace SireBase
             int nBytes() const;
             int size() const;
 
+            int maxBytes() const;
+
             PageCache parent() const;
 
         protected:

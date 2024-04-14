@@ -29,7 +29,11 @@ def __fetch__(obj):
 
     data = obj.__orig__fetch__()
 
-    data = QByteArray.fromHex(obj)
+    if hasattr(data, "constData"):
+        data = bytes.fromhex(data.constData())
+    else:
+        data = bytes.fromhex(data.const_data())
+
     return loads(data)
 
 
