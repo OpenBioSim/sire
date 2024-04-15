@@ -20,6 +20,8 @@ namespace bp = boost::python;
 
 SireBase::MajorMinorVersion __copy__(const SireBase::MajorMinorVersion &other){ return SireBase::MajorMinorVersion(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireBase::MajorMinorVersion&){ return "SireBase::MajorMinorVersion";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -133,9 +135,9 @@ void register_MajorMinorVersion_class(){
         
         }
         MajorMinorVersion_exposer.staticmethod( "typeName" );
-        MajorMinorVersion_exposer.def( "__copy__", &__copy__);
-        MajorMinorVersion_exposer.def( "__deepcopy__", &__copy__);
-        MajorMinorVersion_exposer.def( "clone", &__copy__);
+        MajorMinorVersion_exposer.def( "__copy__", &__copy__<SireBase::MajorMinorVersion>);
+        MajorMinorVersion_exposer.def( "__deepcopy__", &__copy__<SireBase::MajorMinorVersion>);
+        MajorMinorVersion_exposer.def( "clone", &__copy__<SireBase::MajorMinorVersion>);
         MajorMinorVersion_exposer.def( "__str__", &pvt_get_name);
         MajorMinorVersion_exposer.def( "__repr__", &pvt_get_name);
     }

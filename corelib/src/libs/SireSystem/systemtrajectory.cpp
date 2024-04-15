@@ -32,11 +32,14 @@
 
 #include "SireBase/lazyevaluator.h"
 #include "SireBase/parallel.h"
+#include "SireBase/pagecache.h"
 
 #include "SireStream/datastream.h"
 #include "SireStream/shareddatastream.h"
 
 #include <tbb/spin_mutex.h>
+
+#include <QDir>
 
 using namespace SireSystem;
 using namespace SireMol;
@@ -45,6 +48,34 @@ using namespace SireStream;
 
 namespace SireSystem
 {
+    std::weak_ptr<PageCache> shared_cache;
+
+    /** Return a pointer to the PageCache that is shared by
+     *  all SystemFrames objects
+     */
+    std::shared_ptr<PageCache> getSharedCache()
+    {
+        auto cache = shared_cache.lock();
+
+        static QMutex mutex;
+
+        if (not cache)
+        {
+            QMutexLocker locker(&mutex);
+            cache = shared_cache.lock();
+
+            if (not cache)
+            {
+                QString cache_dir = QDir::current().absoluteFilePath("trajectory_cache_XXXXXX");
+                // use 32 MB pages
+                cache = std::make_shared<PageCache>(cache_dir, 32 * 1024 * 1024);
+                shared_cache = cache;
+            }
+        }
+
+        return cache;
+    }
+
     class SystemFrames
     {
     public:
@@ -100,7 +131,10 @@ namespace SireSystem
         QHash<SireMol::MolNum, QPair<int, int>> mol_atoms;
 
         /** The data for the trajectory */
-        QVector<QByteArray> frames;
+        QVector<PageCache::Handle> frames;
+
+        /** Pointer to the shared pagecache */
+        std::shared_ptr<PageCache> cache;
 
         /** Mutex to serialize access to the data of this class */
         tbb::spin_mutex mutex;
@@ -127,12 +161,15 @@ tbb::spin_mutex &SystemFrames::getMutex() const
 SystemFrames::SystemFrames()
     : current_frame_index(-1), natoms(0), frame_type(EMPTY)
 {
+    cache = getSharedCache();
 }
 
 SystemFrames::SystemFrames(const QList<MolNum> &nums,
                            const Molecules &mols, const PropertyMap &map)
     : molnums(nums), current_frame_index(-1), natoms(0), frame_type(EMPTY)
 {
+    cache = getSharedCache();
+
     tbb::spin_mutex::scoped_lock lock(getMutex());
 
     for (const auto &molnum : molnums)
@@ -286,7 +323,9 @@ Frame SystemFrames::_lkr_getFrame(int i) const
         return current_frame;
     }
 
-    QDataStream ds(frames.at(i));
+    auto data = frames.at(i).fetch();
+
+    QDataStream ds(data);
 
     Frame frame;
 
@@ -500,27 +539,37 @@ void SystemFrames::saveFrame(const Molecules &mols,
 
     Frame frame(coordinates, velocities, forces, space, time, props);
 
-    // auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+    QByteArray data1 = frame.toByteArray();
+
+    auto mem_time1 = std::chrono::high_resolution_clock::now();
 
     QByteArray data;
     data.reserve(2 * frame.numBytes());
 
-    // auto mem_time = std::chrono::high_resolution_clock::now();
+    auto mem_time = std::chrono::high_resolution_clock::now();
 
     QDataStream ds(&data, QIODevice::WriteOnly);
     ds << frame;
 
-    // auto end_time = std::chrono::high_resolution_clock::now();
+    auto cache_time = std::chrono::high_resolution_clock::now();
 
-    // qDebug() << "Saving frame" << frames.count() << "with" << data.size() << "bytes" << frame.numBytes();
-    // qDebug() << "Memory time" << std::chrono::duration_cast<std::chrono::microseconds>(mem_time - start_time).count() << "microseconds";
-    // qDebug() << "Serialization time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - mem_time).count() << "microseconds";
-    // qDebug() << "Total time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
+    auto handle = cache->store(data);
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+
+    qDebug() << "Saving frame" << frames.count() << "with" << data.size() << "bytes" << frame.numBytes();
+    qDebug() << "Memory time" << std::chrono::duration_cast<std::chrono::microseconds>(mem_time - start_time).count() << "microseconds";
+    qDebug() << "Memory time" << std::chrono::duration_cast<std::chrono::microseconds>(mem_time - mem_time1).count() << "microseconds";
+    qDebug() << "Serialization time" << std::chrono::duration_cast<std::chrono::microseconds>(cache_time - mem_time).count() << "microseconds";
+    qDebug() << "Cache time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - cache_time).count() << "microseconds";
+    qDebug() << "Total time" << std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count() << "microseconds";
 
     // need to hold the write lock, as we are updating global state
     // for everyone who holds this live trajectory data
     tbb::spin_mutex::scoped_lock lock(getMutex());
-    frames.append(data);
+    frames.append(handle);
     current_frame = frame;
     current_frame_index = frames.count() - 1;
 }

@@ -180,6 +180,7 @@ namespace SireBase
         };
 
         Handle cache(const QByteArray &data);
+        Handle store(const QByteArray &data);
 
     private:
         std::shared_ptr<detail::CacheData> d;

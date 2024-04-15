@@ -124,6 +124,9 @@ namespace SireMol
 
         QString toString() const;
 
+        QByteArray toByteArray() const;
+        static Frame fromByteArray(const QByteArray &data);
+
         bool isEmpty() const;
 
         bool hasCoordinates() const;

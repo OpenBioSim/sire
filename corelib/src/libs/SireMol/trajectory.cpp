@@ -1352,6 +1352,105 @@ bool Frame::operator!=(const Frame &other) const
     return not operator==(other);
 }
 
+QByteArray Frame::toByteArray() const
+{
+    // calculate the size we need...
+    int nbytes = 0;
+
+    // magic and version
+    nbytes += 2 * sizeof(quint32);
+
+    // coordinates
+    nbytes += sizeof(quint32);
+    nbytes += coords.count() * sizeof(Vector);
+
+    // velocities
+    nbytes += sizeof(quint32);
+    nbytes += vels.count() * sizeof(Velocity3D);
+
+    // forces
+    nbytes += sizeof(quint32);
+    nbytes += frcs.count() * sizeof(Force3D);
+
+    // append the space, time and properties
+    QByteArray extra;
+    QDataStream ds(&extra, QIODevice::WriteOnly);
+
+    ds << spc << t.to(picosecond) << props;
+
+    nbytes += sizeof(quint32);
+    nbytes += extra.count();
+
+    QByteArray data("\0", nbytes);
+
+    auto data_ptr = data.data();
+
+    // magic and version
+    quint32 val = r_frame.magicID();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    val = 1;
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    val = coords.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, coords.constData(), val * sizeof(Vector));
+        data_ptr += val * sizeof(Vector);
+    }
+
+    val = vels.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, vels.constData(), val * sizeof(Velocity3D));
+        data_ptr += val * sizeof(Velocity3D);
+    }
+
+    val = frcs.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, frcs.constData(), val * sizeof(Force3D));
+        data_ptr += val * sizeof(Force3D);
+    }
+
+    val = extra.count();
+    std::memcpy(data_ptr, &val, sizeof(quint32));
+    data_ptr += sizeof(quint32);
+
+    if (val != 0)
+    {
+        std::memcpy(data_ptr, extra.constData(), val);
+        data_ptr += val;
+    }
+
+    if (data_ptr - data.constData() != data.count())
+    {
+        throw SireError::program_bug(QObject::tr(
+                                         "Memory corruption? %1 versus %2")
+                                         .arg(data_ptr - data.constData())
+                                         .arg(data.count()),
+                                     CODELOC);
+    }
+
+    return data;
+}
+
+Frame Frame::fromByteArray(const QByteArray &data)
+{
+    return Frame();
+}
+
 const char *Frame::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<Frame>());

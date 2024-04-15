@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireBase::TimeProperty __copy__(const SireBase::TimeProperty &other){ return SireBase::TimeProperty(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -90,9 +92,9 @@ void register_TimeProperty_class(){
         
         }
         TimeProperty_exposer.staticmethod( "typeName" );
-        TimeProperty_exposer.def( "__copy__", &__copy__);
-        TimeProperty_exposer.def( "__deepcopy__", &__copy__);
-        TimeProperty_exposer.def( "clone", &__copy__);
+        TimeProperty_exposer.def( "__copy__", &__copy__<SireBase::TimeProperty>);
+        TimeProperty_exposer.def( "__deepcopy__", &__copy__<SireBase::TimeProperty>);
+        TimeProperty_exposer.def( "clone", &__copy__<SireBase::TimeProperty>);
         TimeProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::TimeProperty >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         TimeProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::TimeProperty >,

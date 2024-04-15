@@ -27,6 +27,8 @@ namespace bp = boost::python;
 
 SireBase::MemInfo __copy__(const SireBase::MemInfo &other){ return SireBase::MemInfo(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -198,9 +200,9 @@ void register_MemInfo_class(){
         MemInfo_exposer.staticmethod( "startMonitoring" );
         MemInfo_exposer.staticmethod( "stopMonitoring" );
         MemInfo_exposer.staticmethod( "takeMeasurement" );
-        MemInfo_exposer.def( "__copy__", &__copy__);
-        MemInfo_exposer.def( "__deepcopy__", &__copy__);
-        MemInfo_exposer.def( "clone", &__copy__);
+        MemInfo_exposer.def( "__copy__", &__copy__<SireBase::MemInfo>);
+        MemInfo_exposer.def( "__deepcopy__", &__copy__<SireBase::MemInfo>);
+        MemInfo_exposer.def( "clone", &__copy__<SireBase::MemInfo>);
         MemInfo_exposer.def( "__str__", &__str__< ::SireBase::MemInfo > );
         MemInfo_exposer.def( "__repr__", &__str__< ::SireBase::MemInfo > );
     }

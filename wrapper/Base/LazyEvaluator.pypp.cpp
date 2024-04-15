@@ -25,6 +25,8 @@ namespace bp = boost::python;
 
 SireBase::LazyEvaluator __copy__(const SireBase::LazyEvaluator &other){ return SireBase::LazyEvaluator(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireBase::LazyEvaluator&){ return "SireBase::LazyEvaluator";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -49,9 +51,9 @@ void register_LazyEvaluator_class(){
                 , "" );
         
         }
-        LazyEvaluator_exposer.def( "__copy__", &__copy__);
-        LazyEvaluator_exposer.def( "__deepcopy__", &__copy__);
-        LazyEvaluator_exposer.def( "clone", &__copy__);
+        LazyEvaluator_exposer.def( "__copy__", &__copy__<SireBase::LazyEvaluator>);
+        LazyEvaluator_exposer.def( "__deepcopy__", &__copy__<SireBase::LazyEvaluator>);
+        LazyEvaluator_exposer.def( "clone", &__copy__<SireBase::LazyEvaluator>);
         LazyEvaluator_exposer.def( "__str__", &pvt_get_name);
         LazyEvaluator_exposer.def( "__repr__", &pvt_get_name);
     }

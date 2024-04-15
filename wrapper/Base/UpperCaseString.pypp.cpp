@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::UpperCaseString __copy__(const SireBase::UpperCaseString &other){ return SireBase::UpperCaseString(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -73,9 +75,9 @@ void register_UpperCaseString_class(){
         
         }
         UpperCaseString_exposer.staticmethod( "typeName" );
-        UpperCaseString_exposer.def( "__copy__", &__copy__);
-        UpperCaseString_exposer.def( "__deepcopy__", &__copy__);
-        UpperCaseString_exposer.def( "clone", &__copy__);
+        UpperCaseString_exposer.def( "__copy__", &__copy__<SireBase::UpperCaseString>);
+        UpperCaseString_exposer.def( "__deepcopy__", &__copy__<SireBase::UpperCaseString>);
+        UpperCaseString_exposer.def( "clone", &__copy__<SireBase::UpperCaseString>);
         UpperCaseString_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::UpperCaseString >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         UpperCaseString_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::UpperCaseString >,

@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireBase::PackedArray2D<SireBase::StringArrayProperty> __copy__(const SireBase::PackedArray2D<SireBase::StringArrayProperty> &other){ return SireBase::PackedArray2D<SireBase::StringArrayProperty>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -404,9 +406,9 @@ void register_PackedArray2D_StringArrayProperty_class(){
         
         }
         PackedArray2D_StringArrayProperty_exposer.staticmethod( "fromVariant" );
-        PackedArray2D_StringArrayProperty_exposer.def( "__copy__", &__copy__);
-        PackedArray2D_StringArrayProperty_exposer.def( "__deepcopy__", &__copy__);
-        PackedArray2D_StringArrayProperty_exposer.def( "clone", &__copy__);
+        PackedArray2D_StringArrayProperty_exposer.def( "__copy__", &__copy__<SireBase::PackedArray2D<SireBase::StringArrayProperty>>);
+        PackedArray2D_StringArrayProperty_exposer.def( "__deepcopy__", &__copy__<SireBase::PackedArray2D<SireBase::StringArrayProperty>>);
+        PackedArray2D_StringArrayProperty_exposer.def( "clone", &__copy__<SireBase::PackedArray2D<SireBase::StringArrayProperty>>);
         PackedArray2D_StringArrayProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::PackedArray2D<SireBase::StringArrayProperty> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PackedArray2D_StringArrayProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::PackedArray2D<SireBase::StringArrayProperty> >,

@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireBase::NumberProperty __copy__(const SireBase::NumberProperty &other){ return SireBase::NumberProperty(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -212,9 +214,9 @@ void register_NumberProperty_class(){
         
         }
         NumberProperty_exposer.staticmethod( "typeName" );
-        NumberProperty_exposer.def( "__copy__", &__copy__);
-        NumberProperty_exposer.def( "__deepcopy__", &__copy__);
-        NumberProperty_exposer.def( "clone", &__copy__);
+        NumberProperty_exposer.def( "__copy__", &__copy__<SireBase::NumberProperty>);
+        NumberProperty_exposer.def( "__deepcopy__", &__copy__<SireBase::NumberProperty>);
+        NumberProperty_exposer.def( "clone", &__copy__<SireBase::NumberProperty>);
         NumberProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::NumberProperty >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         NumberProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::NumberProperty >,

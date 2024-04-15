@@ -15,6 +15,8 @@ namespace bp = boost::python;
 
 SireBase::ChunkedVector<double, 100> __copy__(const SireBase::ChunkedVector<double, 100> &other){ return SireBase::ChunkedVector<double, 100>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireBase::ChunkedVector<double, 100>&){ return "SireBase::ChunkedVector<double, 100>";}
@@ -406,9 +408,9 @@ void register_ChunkedVector_double__class(){
         ChunkedVector_double__exposer.staticmethod( "fromList" );
         ChunkedVector_double__exposer.staticmethod( "fromStdVector" );
         ChunkedVector_double__exposer.staticmethod( "fromVector" );
-        ChunkedVector_double__exposer.def( "__copy__", &__copy__);
-        ChunkedVector_double__exposer.def( "__deepcopy__", &__copy__);
-        ChunkedVector_double__exposer.def( "clone", &__copy__);
+        ChunkedVector_double__exposer.def( "__copy__", &__copy__<SireBase::ChunkedVector<double, 100>>);
+        ChunkedVector_double__exposer.def( "__deepcopy__", &__copy__<SireBase::ChunkedVector<double, 100>>);
+        ChunkedVector_double__exposer.def( "clone", &__copy__<SireBase::ChunkedVector<double, 100>>);
         ChunkedVector_double__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::ChunkedVector<double, 100> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         ChunkedVector_double__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::ChunkedVector<double, 100> >,

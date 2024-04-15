@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::VariantProperty __copy__(const SireBase::VariantProperty &other){ return SireBase::VariantProperty(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -233,9 +235,9 @@ void register_VariantProperty_class(){
         
         }
         VariantProperty_exposer.staticmethod( "typeName" );
-        VariantProperty_exposer.def( "__copy__", &__copy__);
-        VariantProperty_exposer.def( "__deepcopy__", &__copy__);
-        VariantProperty_exposer.def( "clone", &__copy__);
+        VariantProperty_exposer.def( "__copy__", &__copy__<SireBase::VariantProperty>);
+        VariantProperty_exposer.def( "__deepcopy__", &__copy__<SireBase::VariantProperty>);
+        VariantProperty_exposer.def( "clone", &__copy__<SireBase::VariantProperty>);
         VariantProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::VariantProperty >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         VariantProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::VariantProperty >,

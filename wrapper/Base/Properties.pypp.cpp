@@ -30,6 +30,8 @@ namespace bp = boost::python;
 
 SireBase::Properties __copy__(const SireBase::Properties &other){ return SireBase::Properties(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -605,9 +607,9 @@ void register_Properties_class(){
         
         }
         Properties_exposer.staticmethod( "typeName" );
-        Properties_exposer.def( "__copy__", &__copy__);
-        Properties_exposer.def( "__deepcopy__", &__copy__);
-        Properties_exposer.def( "clone", &__copy__);
+        Properties_exposer.def( "__copy__", &__copy__<SireBase::Properties>);
+        Properties_exposer.def( "__deepcopy__", &__copy__<SireBase::Properties>);
+        Properties_exposer.def( "clone", &__copy__<SireBase::Properties>);
         Properties_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::Properties >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Properties_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::Properties >,

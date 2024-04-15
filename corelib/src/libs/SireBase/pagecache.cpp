@@ -500,6 +500,11 @@ void HandleData::setPage(const PageCache::Page &page, int off)
     offset = off;
     state = DATA_ON_PAGE;
     d = QByteArray();
+
+    lkr.unlock();
+    qDebug() << "DATA MOVED TO PAGE";
+
+    qDebug() << p.toString();
 }
 
 PageCache::Page HandleData::page() const
@@ -862,4 +867,9 @@ PageCache::Handle PageCache::cache(const QByteArray &data)
 {
     assertValid();
     return Handle(d->cache(data));
+}
+
+PageCache::Handle PageCache::store(const QByteArray &data)
+{
+    return this->cache(data);
 }
