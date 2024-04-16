@@ -78,11 +78,10 @@ def create_from_pertfile(mol, pertfile, map=None):
     c["ambertype1"] = c[typ_prop]
 
     c["element0"] = c[elem_prop]
+    c["element1"] = c[elem_prop]
 
     for atom in c.atoms():
         atomname = atom.name
-
-        atom["element1"] = atom["element"]
 
         try:
             q0 = template.get_init_charge(atomname)
