@@ -320,3 +320,21 @@ def test_extract_and_link_solv(solvated_neopentane_methane, openmm_platform):
     nrg_pert = pert_mols.dynamics(map=map).current_potential_energy().value()
 
     assert nrg_1_1 == pytest.approx(nrg_pert, 1e-3)
+
+
+def test_ambertype_to_element(neopentane_methane):
+    from sire.mol import Element
+
+    mols = neopentane_methane.clone()
+
+    mols = sr.morph.link_to_reference(mols)
+
+    mols2 = sr.morph.extract_reference(mols)
+
+    mol = sr.morph.create_from_pertfile(mols2[0], neopentane_methane_pert)
+
+    element1 = mol.property("element1")
+    ambertype1 = mol.property("ambertype1")
+
+    for a, e in zip(ambertype1, element1):
+        assert e == Element.biological_element(a)
