@@ -182,7 +182,9 @@ CacheData::CacheData(QString c, int p)
 CacheData::~CacheData()
 {
     this->requestInterruption();
-    this->wait();
+
+    if (QThread::currentThread() != this)
+        this->wait();
 }
 
 PageCache::Handle CacheData::cache(const QByteArray &data)
@@ -226,7 +228,9 @@ void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
         // this is the race condition where the current thread loop
         // is in the process of exiting, but we need to wait for that
         // to complete
-        this->wait();
+        if (QThread::currentThread() != this)
+            this->wait();
+
         this->exiting = false;
     }
 
@@ -502,9 +506,6 @@ void HandleData::setPage(const PageCache::Page &page, int off)
     d = QByteArray();
 
     lkr.unlock();
-    qDebug() << "DATA MOVED TO PAGE";
-
-    qDebug() << p.toString();
 }
 
 PageCache::Page HandleData::page() const
