@@ -465,6 +465,18 @@ void register_PageCache_class(){
                 , "" );
         
         }
+        { //::SireBase::PageCache::getStatistics
+        
+            typedef ::QString ( *getStatistics_function_type )(  );
+            getStatistics_function_type getStatistics_function_value( &::SireBase::PageCache::getStatistics );
+            
+            PageCache_exposer.def( 
+                "getStatistics"
+                , getStatistics_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::PageCache::isNull
         
             typedef bool ( ::SireBase::PageCache::*isNull_function_type)(  ) const;
@@ -599,6 +611,7 @@ void register_PageCache_class(){
                 , "" );
         
         }
+        PageCache_exposer.staticmethod( "getStatistics" );
         PageCache_exposer.staticmethod( "typeName" );
         PageCache_exposer.def( "__copy__", &__copy__<SireBase::PageCache>);
         PageCache_exposer.def( "__deepcopy__", &__copy__<SireBase::PageCache>);

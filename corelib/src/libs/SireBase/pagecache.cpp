@@ -49,6 +49,8 @@ namespace SireBase
             CacheData(QString cachedir, int page_size);
             ~CacheData();
 
+            static QString getStatistics();
+
             QString cacheDir() const;
 
             PageCache::Handle cache(const QByteArray &data);
@@ -58,7 +60,7 @@ namespace SireBase
             int nPages() const;
             int nBytes() const;
 
-            std::weak_ptr<CacheData> self;
+            void registerCache(const std::shared_ptr<CacheData> &cache);
 
         protected:
             void run();
@@ -66,12 +68,17 @@ namespace SireBase
         private:
             void enqueue(const std::shared_ptr<HandleData> &handle);
 
-            QMutex mutex;
+            static QMutex caches_mutex;
+            static QList<std::weak_ptr<CacheData>> caches;
+
+            QMutex queue_mutex;
             QQueue<std::shared_ptr<HandleData>> queue;
 
+            QMutex page_mutex;
             std::weak_ptr<PageData> current_page;
-
             QList<std::weak_ptr<PageData>> pages;
+
+            std::weak_ptr<CacheData> self;
 
             QString cache_dir;
             int page_size;
@@ -163,6 +170,75 @@ using namespace SireBase::detail;
 /////// Implementation of detail::CacheData
 ///////
 
+QMutex CacheData::caches_mutex;
+QList<std::weak_ptr<CacheData>> CacheData::caches;
+
+void CacheData::registerCache(const std::shared_ptr<CacheData> &cache)
+{
+    QMutexLocker lkr(&caches_mutex);
+    caches.append(cache);
+    self = cache;
+}
+
+QString CacheData::getStatistics()
+{
+    QMutexLocker lkr(&caches_mutex);
+    QList<std::weak_ptr<CacheData>> local_caches = caches;
+    lkr.unlock();
+
+    QString stats;
+
+    for (auto &cache : local_caches)
+    {
+        auto c = cache.lock();
+
+        if (c.get() != nullptr)
+        {
+            stats += QString("Cache: %1\n")
+                         .arg(c->cacheDir());
+
+            QMutexLocker lkr2(&(c->page_mutex));
+
+            auto current = c->current_page.lock();
+
+            int total_bytes = 0;
+
+            if (current.get() != nullptr)
+            {
+                stats += QString("  Current Page: %1 KB : is_resident %2\n")
+                             .arg(current->nBytes() / 1024.0)
+                             .arg(current->isResident());
+
+                total_bytes += current->nBytes();
+            }
+
+            int page_count = 0;
+
+            for (auto &page : c->pages)
+            {
+                auto p = page.lock();
+
+                if (p.get() != nullptr)
+                {
+                    page_count += 1;
+
+                    stats += QString("  Page %1: %2 KB : is_resident %3\n")
+                                 .arg(page_count)
+                                 .arg(p->nBytes() / 1024.0)
+                                 .arg(p->isResident());
+
+                    total_bytes += p->nBytes();
+                }
+            }
+
+            stats += QString("  Total size: %1 KB\n")
+                         .arg(total_bytes / 1024.0);
+        }
+    }
+
+    return stats;
+}
+
 CacheData::CacheData(QString c, int p)
     : cache_dir(c), page_size(p), exiting(false)
 {
@@ -184,7 +260,13 @@ CacheData::~CacheData()
     this->requestInterruption();
 
     if (QThread::currentThread() != this)
+    {
         this->wait();
+    }
+    else
+    {
+        qWarning() << "CacheData is deleting itself!" << this->cacheDir();
+    }
 }
 
 PageCache::Handle CacheData::cache(const QByteArray &data)
@@ -206,12 +288,49 @@ int CacheData::pageSize() const
 
 int CacheData::nPages() const
 {
-    return 0;
+    QMutexLocker lkr(const_cast<QMutex *>(&page_mutex));
+    int npages = 0;
+
+    if (current_page.lock().get() != nullptr)
+    {
+        npages += 1;
+    }
+
+    for (auto &page : pages)
+    {
+        if (page.lock().get() != nullptr)
+        {
+            npages += 1;
+        }
+    }
+
+    return npages;
 }
 
 int CacheData::nBytes() const
 {
-    return 0;
+    QMutexLocker lkr(const_cast<QMutex *>(&page_mutex));
+
+    int nbytes = 0;
+
+    auto current = current_page.lock();
+
+    if (current.get() != nullptr)
+    {
+        nbytes += current->nBytes();
+    }
+
+    for (auto &page : pages)
+    {
+        auto p = page.lock();
+
+        if (p.get() != nullptr)
+        {
+            nbytes += p->nBytes();
+        }
+    }
+
+    return nbytes;
 }
 
 void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
@@ -221,7 +340,7 @@ void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
         return;
     }
 
-    QMutexLocker lkr(&mutex);
+    QMutexLocker lkr(&queue_mutex);
 
     if (this->exiting)
     {
@@ -244,6 +363,10 @@ void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
 
 void CacheData::run()
 {
+    // get hold of a pointer to self, so that we aren't
+    // deleted while we are running
+    auto locked_self = self.lock();
+
     int empty_count = 0;
 
     while (true)
@@ -259,7 +382,7 @@ void CacheData::run()
 
         // pull an item off the queue
         {
-            QMutexLocker lkr(&mutex);
+            QMutexLocker lkr(&queue_mutex);
 
             if (this->isInterruptionRequested())
             {
@@ -291,7 +414,9 @@ void CacheData::run()
                 // this is bigger than a page, so needs to have its
                 // own page!
                 auto page = std::make_shared<PageData>(n_bytes, this->self.lock());
+                QMutexLocker lkr(&page_mutex);
                 this->pages.append(page);
+                lkr.unlock();
                 auto offset = page->cache(data);
                 handle->setPage(PageCache::Page(page), offset);
             }
@@ -303,6 +428,7 @@ void CacheData::run()
                 if (current.get() == nullptr)
                 {
                     current = std::make_shared<PageData>(page_size, this->self.lock());
+                    QMutexLocker lkr(&page_mutex);
                     current_page = current;
                 }
 
@@ -315,11 +441,14 @@ void CacheData::run()
                 else
                 {
                     // add the current page to the list of old pages
+                    QMutexLocker lkr(&page_mutex);
                     this->pages.append(current_page);
 
                     // we need to create a new page
                     current = std::make_shared<PageData>(page_size, this->self.lock());
                     current_page = current;
+                    lkr.unlock();
+
                     auto offset = current->cache(data);
                     handle->setPage(PageCache::Page(current), offset);
                 }
@@ -339,7 +468,7 @@ void CacheData::run()
         if (have_item)
         {
             // check to see if there is anything else to process
-            QMutexLocker lkr(&mutex);
+            QMutexLocker lkr(&queue_mutex);
             is_empty = queue.isEmpty();
             empty_count += 1;
 
@@ -767,13 +896,13 @@ void PageCache::Handle::reset()
 PageCache::PageCache(int page_size)
     : d(new CacheData(QString("."), page_size))
 {
-    d->self = d;
+    d->registerCache(d);
 }
 
 PageCache::PageCache(const QString &cachedir, int page_size)
     : d(new CacheData(cachedir, page_size))
 {
-    d->self = d;
+    d->registerCache(d);
 }
 
 PageCache::PageCache(std::shared_ptr<detail::CacheData> data)
@@ -823,6 +952,11 @@ void PageCache::assertValid() const
         throw SireError::invalid_state(
             QObject::tr("PageCache object is null"), CODELOC);
     }
+}
+
+QString PageCache::getStatistics()
+{
+    return CacheData::getStatistics();
 }
 
 QString PageCache::cacheDir() const

@@ -89,6 +89,8 @@ namespace SireBase
 
         void assertValid() const;
 
+        static QString getStatistics();
+
         /** This is a page in the cache. This can hold multiple
          *  objects - the whole page is either resident in memory
          *  or cached to disk.
