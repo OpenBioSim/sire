@@ -76,7 +76,7 @@ namespace SireBase
             static QList<std::weak_ptr<CacheData>> caches;
 
             QMutex queue_mutex;
-            QQueue<std::shared_ptr<HandleData>> queue;
+            QQueue<std::weak_ptr<HandleData>> queue;
 
             QMutex page_mutex;
             std::weak_ptr<PageData> current_page;
@@ -114,7 +114,7 @@ namespace SireBase
             PageCache parent() const;
 
         private:
-            std::shared_ptr<CacheData> c;
+            std::weak_ptr<CacheData> c;
 
             QMutex mutex;
             QAtomicInt nreaders;
@@ -446,7 +446,7 @@ void CacheData::run()
 
             while (not queue.isEmpty())
             {
-                handle = queue.dequeue();
+                handle = queue.dequeue().lock();
 
                 if (handle.get() != nullptr)
                 {
@@ -517,6 +517,10 @@ void CacheData::run()
             }
 
             empty_count = 0;
+
+            // we've finished with 'handle' - release the shared
+            // pointer so we aren't holding onto it for longer than we need
+            handle.reset();
         }
 
         if (this->isInterruptionRequested())
@@ -598,6 +602,15 @@ PageData::PageData(int max_size, const std::shared_ptr<CacheData> &cache)
 
 PageData::~PageData()
 {
+    if (cache_file.get() != nullptr)
+    {
+        qDebug() << "DELETE PAGE" << cache_file->fileName();
+    }
+    else
+    {
+        qDebug() << "DELETE PAGE";
+    }
+
     delete[] d;
 }
 
@@ -667,9 +680,9 @@ QByteArray PageData::fetch(int offset, int n_bytes) const
     return QByteArray(d + offset, n_bytes);
 }
 
-void PageData::freeze(std::shared_ptr<QTemporaryDir> c)
+void PageData::freeze(std::shared_ptr<QTemporaryDir> dir)
 {
-    if (d == 0 or nbytes == 0 or is_frozen)
+    if (d == 0 or nbytes == 0 or is_frozen or dir.get() == nullptr)
     {
         return;
     }
@@ -682,13 +695,7 @@ void PageData::freeze(std::shared_ptr<QTemporaryDir> c)
         return;
     }
 
-    if (c.get() == nullptr)
-    {
-        throw SireError::invalid_state(
-            QObject::tr("Cache directory is null!"), CODELOC);
-    }
-
-    cache_dir = c;
+    cache_dir = dir;
 
     cache_file = std::make_shared<QTemporaryFile>(cache_dir->filePath("page_XXXXXX"));
 
@@ -708,11 +715,13 @@ void PageData::freeze(std::shared_ptr<QTemporaryDir> c)
     }
 
     is_frozen = true;
+
+    qDebug() << "FROZEN PAGE" << cache_file->fileName();
 }
 
 PageCache PageData::parent() const
 {
-    return PageCache(c);
+    return PageCache(c.lock());
 }
 
 ///////
