@@ -413,18 +413,14 @@ void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
 
 void CacheData::run()
 {
-    qDebug() << "THREAD RUNNING";
-
     // get hold of a pointer to self, so that we aren't
     // deleted while we are running
-    auto locked_self = self.lock();
+    // auto locked_self = self.lock();
 
     int empty_count = 0;
 
     while (true)
     {
-        qDebug() << "LOOP";
-
         if (this->isInterruptionRequested())
         {
             // stop what we are doing
@@ -546,14 +542,6 @@ void CacheData::run()
                 break;
             }
 
-            if (locked_self.unique())
-            {
-                // we are the last reference to this object, so we can
-                // stop processing
-                qDebug() << "UNIQUE";
-                break;
-            }
-
             empty_count += 1;
 
             if (empty_count > 10)
@@ -564,19 +552,9 @@ void CacheData::run()
             }
 
             // sleep for a bit
-            qDebug() << "SLEEP";
             this->msleep(100);
         }
-
-        if (locked_self.unique())
-        {
-            // we are the last reference to this object, so we can
-            // stop processing
-            break;
-        }
     }
-
-    qDebug() << "THREAD EXITING" << this->cacheDir();
 }
 
 ///////
@@ -602,15 +580,6 @@ PageData::PageData(int max_size, const std::shared_ptr<CacheData> &cache)
 
 PageData::~PageData()
 {
-    if (cache_file.get() != nullptr)
-    {
-        qDebug() << "DELETE PAGE" << cache_file->fileName();
-    }
-    else
-    {
-        qDebug() << "DELETE PAGE";
-    }
-
     delete[] d;
 }
 
@@ -715,8 +684,6 @@ void PageData::freeze(std::shared_ptr<QTemporaryDir> dir)
     }
 
     is_frozen = true;
-
-    qDebug() << "FROZEN PAGE" << cache_file->fileName();
 }
 
 PageCache PageData::parent() const
