@@ -36,6 +36,9 @@
 #include <QThread>
 #include <QQueue>
 #include <QMutex>
+#include <QTemporaryFile>
+#include <QTemporaryDir>
+#include <QAtomicInt>
 
 #include <boost/noncopyable.hpp>
 
@@ -67,6 +70,7 @@ namespace SireBase
 
         private:
             void enqueue(const std::shared_ptr<HandleData> &handle);
+            std::shared_ptr<QTemporaryDir> getCacheDir();
 
             static QMutex caches_mutex;
             static QList<std::weak_ptr<CacheData>> caches;
@@ -80,7 +84,9 @@ namespace SireBase
 
             std::weak_ptr<CacheData> self;
 
-            QString cache_dir;
+            std::weak_ptr<QTemporaryDir> cache_dir;
+            QString cache_dir_template;
+
             int page_size;
 
             bool exiting;
@@ -101,6 +107,8 @@ namespace SireBase
 
             int cache(const QByteArray &data);
 
+            void freeze(std::shared_ptr<QTemporaryDir> cache_dir);
+
             QByteArray fetch(int offset, int n_bytes) const;
 
             PageCache parent() const;
@@ -108,10 +116,19 @@ namespace SireBase
         private:
             std::shared_ptr<CacheData> c;
 
+            QMutex mutex;
+            QAtomicInt nreaders;
+            std::shared_ptr<QTemporaryDir> cache_dir;
+            std::shared_ptr<QTemporaryFile> cache_file;
+
             int max_bytes;
             int nbytes;
 
+            quint16 checksum;
+
             char *d;
+
+            bool is_frozen;
         };
 
         class HandleData : public boost::noncopyable
@@ -240,12 +257,12 @@ QString CacheData::getStatistics()
 }
 
 CacheData::CacheData(QString c, int p)
-    : cache_dir(c), page_size(p), exiting(false)
+    : page_size(p), exiting(false)
 {
     if (c.simplified().isEmpty())
     {
         // by default, go into the current directory
-        cache_dir = ".";
+        c = ".cache_XXXXXX";
     }
 
     if (page_size < 1024)
@@ -253,6 +270,8 @@ CacheData::CacheData(QString c, int p)
         throw SireError::invalid_arg(
             QObject::tr("Page size must be greater than 1024!"), CODELOC);
     }
+
+    cache_dir_template = c;
 }
 
 CacheData::~CacheData()
@@ -269,6 +288,28 @@ CacheData::~CacheData()
     }
 }
 
+std::shared_ptr<QTemporaryDir> CacheData::getCacheDir()
+{
+    auto c = cache_dir.lock();
+
+    if (c.get() == nullptr)
+    {
+        c = std::make_shared<QTemporaryDir>(cache_dir_template);
+
+        if (not c->isValid())
+        {
+            throw SireError::io_error(QObject::tr("Failed to create cache directory %1. %2")
+                                          .arg(cache_dir_template)
+                                          .arg(c->errorString()),
+                                      CODELOC);
+        }
+
+        cache_dir = c;
+    }
+
+    return c;
+}
+
 PageCache::Handle CacheData::cache(const QByteArray &data)
 {
     auto handle = std::make_shared<HandleData>(data);
@@ -278,7 +319,16 @@ PageCache::Handle CacheData::cache(const QByteArray &data)
 
 QString CacheData::cacheDir() const
 {
-    return cache_dir;
+    auto c = cache_dir.lock();
+
+    if (c == nullptr)
+    {
+        return cache_dir_template;
+    }
+    else
+    {
+        return c->path();
+    }
 }
 
 int CacheData::pageSize() const
@@ -363,6 +413,8 @@ void CacheData::enqueue(const std::shared_ptr<HandleData> &handle)
 
 void CacheData::run()
 {
+    qDebug() << "THREAD RUNNING";
+
     // get hold of a pointer to self, so that we aren't
     // deleted while we are running
     auto locked_self = self.lock();
@@ -371,10 +423,12 @@ void CacheData::run()
 
     while (true)
     {
+        qDebug() << "LOOP";
+
         if (this->isInterruptionRequested())
         {
             // stop what we are doing
-            return;
+            break;
         }
 
         std::shared_ptr<HandleData> handle;
@@ -387,7 +441,7 @@ void CacheData::run()
             if (this->isInterruptionRequested())
             {
                 // stop what we are doing
-                return;
+                break;
             }
 
             while (not queue.isEmpty())
@@ -418,6 +472,11 @@ void CacheData::run()
                 this->pages.append(page);
                 lkr.unlock();
                 auto offset = page->cache(data);
+
+                // straight write this to disk and prevent any changes
+                page->freeze(this->getCacheDir());
+
+                // return a handle to the new page
                 handle->setPage(PageCache::Page(page), offset);
             }
             else if (n_bytes != 0)
@@ -440,6 +499,9 @@ void CacheData::run()
                 }
                 else
                 {
+                    // freeze this page to prevent any further changes
+                    current->freeze(this->getCacheDir());
+
                     // add the current page to the list of old pages
                     QMutexLocker lkr(&page_mutex);
                     this->pages.append(current_page);
@@ -460,7 +522,7 @@ void CacheData::run()
         if (this->isInterruptionRequested())
         {
             // stop what we are doing
-            return;
+            break;
         }
 
         bool is_empty = true;
@@ -470,16 +532,6 @@ void CacheData::run()
             // check to see if there is anything else to process
             QMutexLocker lkr(&queue_mutex);
             is_empty = queue.isEmpty();
-            empty_count += 1;
-
-            if (empty_count > 10)
-            {
-                // we have been idle for a while, so we can stop
-                this->exiting = true;
-                return;
-            }
-
-            lkr.unlock();
         }
 
         if (is_empty)
@@ -487,13 +539,40 @@ void CacheData::run()
             if (this->isInterruptionRequested())
             {
                 // stop what we are doing
-                return;
+                break;
+            }
+
+            if (locked_self.unique())
+            {
+                // we are the last reference to this object, so we can
+                // stop processing
+                qDebug() << "UNIQUE";
+                break;
+            }
+
+            empty_count += 1;
+
+            if (empty_count > 10)
+            {
+                // we have been idle for a while, so we can stop
+                this->exiting = true;
+                break;
             }
 
             // sleep for a bit
+            qDebug() << "SLEEP";
             this->msleep(100);
         }
+
+        if (locked_self.unique())
+        {
+            // we are the last reference to this object, so we can
+            // stop processing
+            break;
+        }
     }
+
+    qDebug() << "THREAD EXITING" << this->cacheDir();
 }
 
 ///////
@@ -501,7 +580,7 @@ void CacheData::run()
 ///////
 
 PageData::PageData(int max_size, const std::shared_ptr<CacheData> &cache)
-    : c(cache), max_bytes(max_size), nbytes(0), d(0)
+    : c(cache), max_bytes(max_size), nbytes(0), checksum(0), d(0), is_frozen(false)
 {
     if (max_bytes < 1024)
     {
@@ -524,7 +603,14 @@ PageData::~PageData()
 
 int PageData::maxBytes() const
 {
-    return max_bytes;
+    if (is_frozen)
+    {
+        return nbytes;
+    }
+    else
+    {
+        return max_bytes;
+    }
 }
 
 int PageData::nBytes() const
@@ -534,17 +620,24 @@ int PageData::nBytes() const
 
 int PageData::bytesRemaining() const
 {
-    return max_bytes - nbytes;
+    if (is_frozen)
+    {
+        return 0;
+    }
+    else
+    {
+        return max_bytes - nbytes;
+    }
 }
 
 bool PageData::isResident() const
 {
-    return true;
+    return d != 0;
 }
 
 bool PageData::isCached() const
 {
-    return false;
+    return is_frozen;
 }
 
 int PageData::cache(const QByteArray &data)
@@ -572,6 +665,49 @@ QByteArray PageData::fetch(int offset, int n_bytes) const
     }
 
     return QByteArray(d + offset, n_bytes);
+}
+
+void PageData::freeze(std::shared_ptr<QTemporaryDir> c)
+{
+    if (d == 0 or nbytes == 0 or is_frozen)
+    {
+        return;
+    }
+
+    QMutexLocker lkr(&mutex);
+
+    if (cache_file.get() != nullptr)
+    {
+        qWarning() << "Page is already frozen!";
+        return;
+    }
+
+    if (c.get() == nullptr)
+    {
+        throw SireError::invalid_state(
+            QObject::tr("Cache directory is null!"), CODELOC);
+    }
+
+    cache_dir = c;
+
+    cache_file = std::make_shared<QTemporaryFile>(cache_dir->filePath("page_XXXXXX"));
+
+    if (not cache_file->open())
+    {
+        throw SireError::file_error(*cache_file, CODELOC);
+    }
+
+    // compress the data and write it to a temporary file
+    QByteArray compressed_data = qCompress(QByteArray::fromRawData(d, nbytes), 9);
+
+    checksum = qChecksum(compressed_data.constData(), compressed_data.size());
+
+    if (compressed_data.size() != cache_file->write(compressed_data))
+    {
+        throw SireError::file_error(*cache_file, CODELOC);
+    }
+
+    is_frozen = true;
 }
 
 PageCache PageData::parent() const
@@ -894,7 +1030,7 @@ void PageCache::Handle::reset()
 ///////
 
 PageCache::PageCache(int page_size)
-    : d(new CacheData(QString("."), page_size))
+    : d(new CacheData(QString(), page_size))
 {
     d->registerCache(d);
 }
