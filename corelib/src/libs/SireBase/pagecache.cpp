@@ -646,6 +646,44 @@ QByteArray PageData::fetch(int offset, int n_bytes) const
             QObject::tr("Data is too large to fit on this page!"), CODELOC);
     }
 
+    QMutexLocker lkr(const_cast<QMutex *>(&mutex));
+
+    if (d == 0)
+    {
+        // we need to read the data from disk
+        if (cache_file.get() == nullptr)
+        {
+            throw SireError::invalid_state(
+                QObject::tr("Page has not been frozen to disk?"), CODELOC);
+        }
+
+        if (not cache_file->open())
+        {
+            throw SireError::file_error(*cache_file, CODELOC);
+        }
+
+        QByteArray compressed_data = cache_file->readAll();
+
+        cache_file->close();
+
+        if (qChecksum(compressed_data.constData(), compressed_data.size()) != checksum)
+        {
+            throw SireError::invalid_state(
+                QObject::tr("Checksum failed on page data!"), CODELOC);
+        }
+
+        QByteArray decompressed_data = qUncompress(compressed_data);
+
+        if (decompressed_data.size() != nbytes)
+        {
+            throw SireError::invalid_state(
+                QObject::tr("Decompressed data size does not match expected size!"), CODELOC);
+        }
+
+        const_cast<PageData *>(this)->d = new char[nbytes];
+        std::memcpy(d, decompressed_data.constData(), nbytes);
+    }
+
     return QByteArray(d + offset, n_bytes);
 }
 
@@ -682,6 +720,11 @@ void PageData::freeze(std::shared_ptr<QTemporaryDir> dir)
     {
         throw SireError::file_error(*cache_file, CODELOC);
     }
+
+    cache_file->close();
+
+    delete[] d;
+    d = 0;
 
     is_frozen = true;
 }
