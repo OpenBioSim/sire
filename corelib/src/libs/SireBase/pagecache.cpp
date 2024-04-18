@@ -92,6 +92,24 @@ namespace SireBase
             bool exiting;
         };
 
+        class RestoredPage : public boost::noncopyable
+        {
+        public:
+            RestoredPage(const QByteArray &data);
+            ~RestoredPage();
+
+            QByteArray fetch(int offset, int n_bytes) const;
+
+            static std::shared_ptr<RestoredPage> store(const QByteArray &data);
+
+        private:
+            static QMutex mutex;
+            static QList<std::shared_ptr<RestoredPage>> restored_pages;
+
+            QByteArray d;
+            QAtomicInt ttl;
+        };
+
         class PageData : public boost::noncopyable
         {
         public:
@@ -120,6 +138,8 @@ namespace SireBase
             QAtomicInt nreaders;
             std::shared_ptr<QTemporaryDir> cache_dir;
             std::shared_ptr<QTemporaryFile> cache_file;
+
+            std::weak_ptr<RestoredPage> restored_page;
 
             int max_bytes;
             int nbytes;
@@ -558,6 +578,75 @@ void CacheData::run()
 }
 
 ///////
+/////// Implementation of detail::RestoredPage
+///////
+
+RestoredPage::RestoredPage(const QByteArray &data)
+    : d(data), ttl(100)
+{
+}
+
+RestoredPage::~RestoredPage()
+{
+}
+
+QByteArray RestoredPage::fetch(int offset, int n_bytes) const
+{
+    if (offset + n_bytes > d.size())
+    {
+        throw SireError::invalid_arg(
+            QObject::tr("Data is too large to fit on this page!"), CODELOC);
+    }
+
+    const_cast<RestoredPage *>(this)->ttl.storeRelaxed(100);
+
+    return QByteArray(d.constData() + offset, n_bytes);
+}
+
+QMutex RestoredPage::mutex;
+
+QList<std::shared_ptr<RestoredPage>> RestoredPage::restored_pages;
+
+std::shared_ptr<RestoredPage> RestoredPage::store(const QByteArray &data)
+{
+    auto page = std::make_shared<RestoredPage>(data);
+
+    QMutexLocker lkr(&mutex);
+
+    int smallest_index = -1;
+    int smallest_value = -1;
+
+    for (int i = 0; i < restored_pages.size(); i++)
+    {
+        if (restored_pages[i].get() == nullptr)
+        {
+            smallest_index = i;
+        }
+        else
+        {
+            int val = restored_pages[i]->ttl.fetchAndAddRelaxed(-1);
+
+            if (smallest_index == -1 or smallest_value > val)
+            {
+                smallest_index = i;
+                smallest_value = val;
+            }
+        }
+    }
+
+    if (restored_pages.count() < 5)
+    {
+        restored_pages.append(page);
+    }
+    else
+    {
+        restored_pages[smallest_index] = page;
+    }
+
+    return page;
+}
+
+///////
 /////// Implementation of detail::PageData
 ///////
 
@@ -614,7 +703,7 @@ int PageData::bytesRemaining() const
 
 bool PageData::isResident() const
 {
-    return d != 0;
+    return d != 0 or restored_page.lock().get() != nullptr;
 }
 
 bool PageData::isCached() const
@@ -646,10 +735,24 @@ QByteArray PageData::fetch(int offset, int n_bytes) const
             QObject::tr("Data is too large to fit on this page!"), CODELOC);
     }
 
+    auto fetched_page = restored_page.lock();
+
+    if (fetched_page.get() != nullptr)
+    {
+        return fetched_page->fetch(offset, n_bytes);
+    }
+
     QMutexLocker lkr(const_cast<QMutex *>(&mutex));
 
     if (d == 0)
     {
+        auto fetched_page = restored_page.lock();
+
+        if (fetched_page.get() != nullptr)
+        {
+            return fetched_page->fetch(offset, n_bytes);
+        }
+
         // we need to read the data from disk
         if (cache_file.get() == nullptr)
         {
@@ -680,11 +783,16 @@ QByteArray PageData::fetch(int offset, int n_bytes) const
                 QObject::tr("Decompressed data size does not match expected size!"), CODELOC);
         }
 
-        const_cast<PageData *>(this)->d = new char[nbytes];
-        std::memcpy(d, decompressed_data.constData(), nbytes);
-    }
+        fetched_page = RestoredPage::store(decompressed_data);
 
-    return QByteArray(d + offset, n_bytes);
+        const_cast<PageData *>(this)->restored_page = fetched_page;
+
+        return fetched_page->fetch(offset, n_bytes);
+    }
+    else
+    {
+        return QByteArray(d + offset, n_bytes);
+    }
 }
 
 void PageData::freeze(std::shared_ptr<QTemporaryDir> dir)
