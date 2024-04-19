@@ -28,6 +28,9 @@
 
 #include <mutex>
 
+#include <QHash>
+#include <QUuid>
+
 #include "openmm/serialization/SerializationNode.h"
 #include "openmm/serialization/SerializationProxy.h"
 
@@ -320,24 +323,30 @@ EMLEForce::call(
 
 namespace OpenMM
 {
-    // A callback object to store the callback function.
-    EMLECallback callback;
+    // A callback registry;
+    QHash<QUuid, EMLECallback> callback_registry;
 
-    // A mutex to protect the callback.
+    // A mutex to protect the registry.
     std::mutex callback_mutex;
 
-    // Set the callback using a mutex.
-    void setCallback(EMLECallback cb)
+    // Set a callback in the registry using a mutex.
+    void setCallback(EMLECallback cb, QString uuid)
     {
         std::lock_guard<std::mutex> lock(callback_mutex);
-        callback = cb;
-    }
+        callback_registry[uuid] = cb;
+    };
 
-    // Get the callback using a mutex.
-    EMLECallback getCallback()
+    // Get a callback from the registry using a mutex.
+    EMLECallback getCallback(QString uuid)
     {
         std::lock_guard<std::mutex> lock(callback_mutex);
-        return callback;
+
+        if (not callback_registry.contains(uuid))
+        {
+            throw OpenMM::OpenMMException("Unable to find UUID in the EMLEForce callback registry.");
+        }
+
+        return callback_registry[uuid];
     }
 
     class EMLEForceProxy : public SerializationProxy {
@@ -354,22 +363,30 @@ namespace OpenMM
                 EMLEForce emleforce = *static_cast<const EMLEForce*>(object);
                 ds << emleforce;
 
+                // Generate a unique identifier for the callback.
+                auto uuid = QUuid::createUuid().toString();
+
                 // Set the version.
                 node.setIntProperty("version", 0);
 
                 // Set the data by converting the QByteArray to a hexidecimal string.
                 node.setStringProperty("data", data.toHex().data());
 
+                // Set the UID.
+                node.setStringProperty("uuid", uuid.toStdString());
+
                 // Set the callback.
-                setCallback(emleforce.getCallback());
+                setCallback(emleforce.getCallback(), uuid);
             };
 
             void* deserialize(const SerializationNode& node) const
             {
                 // Check the version.
                 int version = node.getIntProperty("version");
-                    if (version != 0)
-                        throw OpenMM::OpenMMException("Unsupported version number");
+                if (version != 0)
+                {
+                    throw OpenMM::OpenMMException("Unsupported version number");
+                }
 
                 // Get the data as a std::string.
                 auto string = node.getStringProperty("data");
@@ -385,11 +402,14 @@ namespace OpenMM
                 EMLEForce emleforce;
                 ds >> emleforce;
 
+                // Get the UID string.
+                auto uuid = QString::fromStdString(node.getStringProperty("uuid"));
+
                 // Create a new EMLEForce object.
                 auto emleforce_ptr = new EMLEForce(emleforce);
 
                 // Set the callback.
-                emleforce_ptr->setCallback(getCallback());
+                emleforce_ptr->setCallback(getCallback(uuid));
 
                 return emleforce_ptr;
             };
