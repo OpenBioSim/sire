@@ -3,9 +3,9 @@ __all__ = ["PageCache"]
 from ..legacy.Base import PageCache
 
 
-def __cache__(obj, data):
+def __store__(obj, data):
     """
-    Add the passed object onto the cache. This will convert the object
+    Store the passed object into the cache. This will convert the object
     into a binary form (pickled, then hex-encoded) and it will store
     it in the cache. This returns a handle to the object in the cache,
     which can be used to restore it.
@@ -17,7 +17,7 @@ def __cache__(obj, data):
 
     # now convert this to a QByteArray
     b = QByteArray(data.hex())
-    return obj.__orig__cache__(b)
+    return obj.__orig__store__(b)
 
 
 def __fetch__(obj):
@@ -37,9 +37,9 @@ def __fetch__(obj):
     return loads(data)
 
 
-if not hasattr(PageCache, "__orig__cache__"):
-    PageCache.__orig__cache__ = PageCache.cache
-    PageCache.cache = __cache__
+if not hasattr(PageCache, "__orig__store__"):
+    PageCache.__orig__store__ = PageCache.store
+    PageCache.store = __store__
 
     if hasattr(PageCache, "handle"):
         PageCache.Handle = PageCache.handle

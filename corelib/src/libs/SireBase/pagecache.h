@@ -60,9 +60,9 @@ namespace SireBase
     class SIREBASE_EXPORT PageCache
     {
     public:
-        PageCache(int page_size = 32 * 1024 * 1024);
+        PageCache(unsigned int page_size = 32 * 1024 * 1024);
         PageCache(const QString &cache_dir,
-                  int page_size = 32 * 1024 * 1024);
+                  unsigned int page_size = 32 * 1024 * 1024);
         PageCache(std::shared_ptr<detail::CacheData> data);
         PageCache(const PageCache &other);
         ~PageCache();
@@ -78,11 +78,11 @@ namespace SireBase
 
         QString cacheDir() const;
 
-        int pageSize() const;
-        int nPages() const;
-        int nBytes() const;
+        unsigned int pageSize() const;
+        unsigned int nPages() const;
+        unsigned int nBytes() const;
 
-        int size() const;
+        unsigned int size() const;
 
         bool isValid() const;
         bool isNull() const;
@@ -122,10 +122,10 @@ namespace SireBase
             bool isResident() const;
             bool isCached() const;
 
-            int nBytes() const;
-            int size() const;
+            unsigned int nBytes() const;
+            unsigned int size() const;
 
-            int maxBytes() const;
+            unsigned int maxBytes() const;
 
             PageCache parent() const;
 
@@ -171,8 +171,8 @@ namespace SireBase
 
             void assertValid() const;
 
-            int size() const;
-            int nBytes() const;
+            unsigned int size() const;
+            unsigned int nBytes() const;
 
             void clear();
             void reset();
@@ -181,7 +181,6 @@ namespace SireBase
             std::shared_ptr<detail::HandleData> h;
         };
 
-        Handle cache(const QByteArray &data);
         Handle store(const QByteArray &data);
 
     private:

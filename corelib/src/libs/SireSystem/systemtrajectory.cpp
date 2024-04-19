@@ -66,9 +66,9 @@ namespace SireSystem
 
             if (not cache)
             {
-                QString cache_dir = QDir::current().absoluteFilePath("trajectory_cache_XXXXXX");
-                // use 32 MB pages (using 32 KB now for debugging)
-                cache = std::make_shared<PageCache>(cache_dir, 32 * 1024);
+                QString cache_dir = QDir::current().absoluteFilePath("temp_traj_XXXXXX");
+                // use 32 MB pages
+                cache = std::make_shared<PageCache>(cache_dir, 32 * 1024 * 1024);
                 shared_cache = cache;
             }
         }

@@ -7,11 +7,27 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/console.h"
+
+#include "SireBase/parallel.h"
+
 #include "SireError/errors.h"
 
 #include "pagecache.h"
 
+#include <QAtomicInt>
+
 #include <QDir>
+
+#include <QMutex>
+
+#include <QQueue>
+
+#include <QTemporaryDir>
+
+#include <QTemporaryFile>
+
+#include <QThread>
 
 #include <boost/noncopyable.hpp>
 
@@ -25,11 +41,27 @@ const char* pvt_get_name(const SireBase::PageCache&){ return "SireBase::PageCach
 
 #include "Helpers/release_gil_policy.hpp"
 
+#include "SireBase/console.h"
+
+#include "SireBase/parallel.h"
+
 #include "SireError/errors.h"
 
 #include "pagecache.h"
 
+#include <QAtomicInt>
+
 #include <QDir>
+
+#include <QMutex>
+
+#include <QQueue>
+
+#include <QTemporaryDir>
+
+#include <QTemporaryFile>
+
+#include <QThread>
 
 #include <boost/noncopyable.hpp>
 
@@ -45,11 +77,27 @@ SireBase::PageCache::Handle __copy__(const SireBase::PageCache::Handle &other){ 
 
 #include "Helpers/len.hpp"
 
+#include "SireBase/console.h"
+
+#include "SireBase/parallel.h"
+
 #include "SireError/errors.h"
 
 #include "pagecache.h"
 
+#include <QAtomicInt>
+
 #include <QDir>
+
+#include <QMutex>
+
+#include <QQueue>
+
+#include <QTemporaryDir>
+
+#include <QTemporaryFile>
+
+#include <QThread>
 
 #include <boost/noncopyable.hpp>
 
@@ -69,14 +117,14 @@ void register_PageCache_class(){
 
     { //::SireBase::PageCache
         typedef bp::class_< SireBase::PageCache > PageCache_exposer_t;
-        PageCache_exposer_t PageCache_exposer = PageCache_exposer_t( "PageCache", "This class manages a swap cache of binary data that can be\npaged to and from disk. The cache can receive binary data\nof any size, and will automatically manage the paging of\nthat data to and from disk as it is accessed.\n\nYou can create different caches, and have control over the maximum\nsize of each cache page.\n\nNote that deleting the cache will delete all data contained\ntherein - including data paged to disk\n", bp::init< bp::optional< int > >(( bp::arg("page_size")=(int)(32 * 1024 * 1024) ), "") );
+        PageCache_exposer_t PageCache_exposer = PageCache_exposer_t( "PageCache", "This class manages a swap cache of binary data that can be\npaged to and from disk. The cache can receive binary data\nof any size, and will automatically manage the paging of\nthat data to and from disk as it is accessed.\n\nYou can create different caches, and have control over the maximum\nsize of each cache page.\n\nNote that deleting the cache will delete all data contained\ntherein - including data paged to disk\n", bp::init< bp::optional< unsigned int > >(( bp::arg("page_size")=(unsigned int)(32 * 1024 * 1024) ), "") );
         bp::scope PageCache_scope( PageCache_exposer );
         { //::SireBase::PageCache::Handle
             typedef bp::class_< SireBase::PageCache::Handle > Handle_exposer_t;
-            Handle_exposer_t Handle_exposer = Handle_exposer_t( "Handle", "This is a handle to a piece of data that has\nbeen added to the cache. This will either contain\nthe actual data, or will hold the information\nnecessary to retrieve that data from disk.\n\nData is removed from the cache when all handles\nto it are deleted\n", bp::init< >("") );
+            Handle_exposer_t Handle_exposer = Handle_exposer_t( "Handle", "This is a handle to a piece of data that has\nbeen added to the cache. This will either contain\nthe actual data, or will hold the information\nnecessary to retrieve that data from disk.\n\nData is removed from the cache when all handles\nto it are deleted\n", bp::init< >("Construct an empty handle") );
             bp::scope Handle_scope( Handle_exposer );
-            Handle_exposer.def( bp::init< std::shared_ptr< SireBase::detail::HandleData > >(( bp::arg("data") ), "") );
-            Handle_exposer.def( bp::init< SireBase::PageCache::Handle const & >(( bp::arg("other") ), "") );
+            Handle_exposer.def( bp::init< std::shared_ptr< SireBase::detail::HandleData > >(( bp::arg("data") ), "Construct a handle from the passed data") );
+            Handle_exposer.def( bp::init< SireBase::PageCache::Handle const & >(( bp::arg("other") ), "Copy constructor") );
             { //::SireBase::PageCache::Handle::assertValid
             
                 typedef void ( ::SireBase::PageCache::Handle::*assertValid_function_type)(  ) const;
@@ -86,7 +134,7 @@ void register_PageCache_class(){
                     "assertValid"
                     , assertValid_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Assert that this object is valid" );
             
             }
             { //::SireBase::PageCache::Handle::clear
@@ -98,7 +146,7 @@ void register_PageCache_class(){
                     "clear"
                     , clear_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Clear the data from this handle" );
             
             }
             { //::SireBase::PageCache::Handle::fetch
@@ -110,7 +158,7 @@ void register_PageCache_class(){
                     "fetch"
                     , fetch_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the data held in this handle" );
             
             }
             { //::SireBase::PageCache::Handle::isNull
@@ -122,7 +170,7 @@ void register_PageCache_class(){
                     "isNull"
                     , isNull_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return whether this handle is null (does not hold data)" );
             
             }
             { //::SireBase::PageCache::Handle::isValid
@@ -134,19 +182,19 @@ void register_PageCache_class(){
                     "isValid"
                     , isValid_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return whether this handle is valid (holds data)" );
             
             }
             { //::SireBase::PageCache::Handle::nBytes
             
-                typedef int ( ::SireBase::PageCache::Handle::*nBytes_function_type)(  ) const;
+                typedef unsigned int ( ::SireBase::PageCache::Handle::*nBytes_function_type)(  ) const;
                 nBytes_function_type nBytes_function_value( &::SireBase::PageCache::Handle::nBytes );
                 
                 Handle_exposer.def( 
                     "nBytes"
                     , nBytes_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the number of bytes in this handle" );
             
             }
             { //::SireBase::PageCache::Handle::operator=
@@ -171,7 +219,7 @@ void register_PageCache_class(){
                     "page"
                     , page_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the page on which the data for this handle is placed.\n  This will be null if the data has not yet been put on a page\n" );
             
             }
             { //::SireBase::PageCache::Handle::parent
@@ -183,7 +231,7 @@ void register_PageCache_class(){
                     "parent"
                     , parent_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the parent cache for this handle" );
             
             }
             { //::SireBase::PageCache::Handle::reset
@@ -195,19 +243,19 @@ void register_PageCache_class(){
                     "reset"
                     , reset_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Clear the data in this handle" );
             
             }
             { //::SireBase::PageCache::Handle::size
             
-                typedef int ( ::SireBase::PageCache::Handle::*size_function_type)(  ) const;
+                typedef unsigned int ( ::SireBase::PageCache::Handle::*size_function_type)(  ) const;
                 size_function_type size_function_value( &::SireBase::PageCache::Handle::size );
                 
                 Handle_exposer.def( 
                     "size"
                     , size_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the number of bytes in this handle" );
             
             }
             { //::SireBase::PageCache::Handle::toString
@@ -219,7 +267,7 @@ void register_PageCache_class(){
                     "toString"
                     , toString_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return a string representation of this object" );
             
             }
             { //::SireBase::PageCache::Handle::typeName
@@ -231,7 +279,7 @@ void register_PageCache_class(){
                     "typeName"
                     , typeName_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the type name for this object" );
             
             }
             { //::SireBase::PageCache::Handle::what
@@ -243,7 +291,7 @@ void register_PageCache_class(){
                     "what"
                     , what_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the type name for this object" );
             
             }
             Handle_exposer.staticmethod( "typeName" );
@@ -256,10 +304,10 @@ void register_PageCache_class(){
         }
         { //::SireBase::PageCache::Page
             typedef bp::class_< SireBase::PageCache::Page > Page_exposer_t;
-            Page_exposer_t Page_exposer = Page_exposer_t( "Page", "This is a page in the cache. This can hold multiple\nobjects - the whole page is either resident in memory\nor cached to disk.\n", bp::init< >("") );
+            Page_exposer_t Page_exposer = Page_exposer_t( "Page", "This is a page in the cache. This can hold multiple\nobjects - the whole page is either resident in memory\nor cached to disk.\n", bp::init< >("Construct an empty page") );
             bp::scope Page_scope( Page_exposer );
-            Page_exposer.def( bp::init< std::shared_ptr< SireBase::detail::PageData > >(( bp::arg("data") ), "") );
-            Page_exposer.def( bp::init< SireBase::PageCache::Page const & >(( bp::arg("other") ), "") );
+            Page_exposer.def( bp::init< std::shared_ptr< SireBase::detail::PageData > >(( bp::arg("data") ), "Construct a page from the passed data") );
+            Page_exposer.def( bp::init< SireBase::PageCache::Page const & >(( bp::arg("other") ), "Copy constructor") );
             { //::SireBase::PageCache::Page::assertValid
             
                 typedef void ( ::SireBase::PageCache::Page::*assertValid_function_type)(  ) const;
@@ -269,7 +317,7 @@ void register_PageCache_class(){
                     "assertValid"
                     , assertValid_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Assert that this object is valid" );
             
             }
             { //::SireBase::PageCache::Page::isCached
@@ -281,7 +329,7 @@ void register_PageCache_class(){
                     "isCached"
                     , isCached_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return whether this page is cached to disk" );
             
             }
             { //::SireBase::PageCache::Page::isNull
@@ -293,7 +341,7 @@ void register_PageCache_class(){
                     "isNull"
                     , isNull_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return whether this page is null (has no size)" );
             
             }
             { //::SireBase::PageCache::Page::isResident
@@ -305,7 +353,7 @@ void register_PageCache_class(){
                     "isResident"
                     , isResident_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return whether this page is resident in memory" );
             
             }
             { //::SireBase::PageCache::Page::isValid
@@ -317,31 +365,31 @@ void register_PageCache_class(){
                     "isValid"
                     , isValid_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return whether this page is valid (has some size)" );
             
             }
             { //::SireBase::PageCache::Page::maxBytes
             
-                typedef int ( ::SireBase::PageCache::Page::*maxBytes_function_type)(  ) const;
+                typedef unsigned int ( ::SireBase::PageCache::Page::*maxBytes_function_type)(  ) const;
                 maxBytes_function_type maxBytes_function_value( &::SireBase::PageCache::Page::maxBytes );
                 
                 Page_exposer.def( 
                     "maxBytes"
                     , maxBytes_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the maximum number of bytes that can be stored in this page" );
             
             }
             { //::SireBase::PageCache::Page::nBytes
             
-                typedef int ( ::SireBase::PageCache::Page::*nBytes_function_type)(  ) const;
+                typedef unsigned int ( ::SireBase::PageCache::Page::*nBytes_function_type)(  ) const;
                 nBytes_function_type nBytes_function_value( &::SireBase::PageCache::Page::nBytes );
                 
                 Page_exposer.def( 
                     "nBytes"
                     , nBytes_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the number of bytes in this page" );
             
             }
             { //::SireBase::PageCache::Page::operator=
@@ -366,19 +414,19 @@ void register_PageCache_class(){
                     "parent"
                     , parent_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the parent cache for this page" );
             
             }
             { //::SireBase::PageCache::Page::size
             
-                typedef int ( ::SireBase::PageCache::Page::*size_function_type)(  ) const;
+                typedef unsigned int ( ::SireBase::PageCache::Page::*size_function_type)(  ) const;
                 size_function_type size_function_value( &::SireBase::PageCache::Page::size );
                 
                 Page_exposer.def( 
                     "size"
                     , size_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the number of bytes in this page" );
             
             }
             { //::SireBase::PageCache::Page::toString
@@ -390,7 +438,7 @@ void register_PageCache_class(){
                     "toString"
                     , toString_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return a string representation of this object" );
             
             }
             { //::SireBase::PageCache::Page::typeName
@@ -402,7 +450,7 @@ void register_PageCache_class(){
                     "typeName"
                     , typeName_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the type name for this object" );
             
             }
             { //::SireBase::PageCache::Page::what
@@ -414,7 +462,7 @@ void register_PageCache_class(){
                     "what"
                     , what_function_value
                     , bp::release_gil_policy()
-                    , "" );
+                    , "Return the type name for this object" );
             
             }
             Page_exposer.staticmethod( "typeName" );
@@ -425,7 +473,7 @@ void register_PageCache_class(){
             Page_exposer.def( "__repr__", &__str__< ::SireBase::PageCache::Page > );
             Page_exposer.def( "__len__", &__len_size< ::SireBase::PageCache::Page > );
         }
-        PageCache_exposer.def( bp::init< QString const &, bp::optional< int > >(( bp::arg("cache_dir"), bp::arg("page_size")=(int)(32 * 1024 * 1024) ), "") );
+        PageCache_exposer.def( bp::init< QString const &, bp::optional< unsigned int > >(( bp::arg("cache_dir"), bp::arg("page_size")=(unsigned int)(32 * 1024 * 1024) ), "") );
         PageCache_exposer.def( bp::init< std::shared_ptr< SireBase::detail::CacheData > >(( bp::arg("data") ), "") );
         PageCache_exposer.def( bp::init< SireBase::PageCache const & >(( bp::arg("other") ), "") );
         { //::SireBase::PageCache::assertValid
@@ -436,19 +484,6 @@ void register_PageCache_class(){
             PageCache_exposer.def( 
                 "assertValid"
                 , assertValid_function_value
-                , bp::release_gil_policy()
-                , "" );
-        
-        }
-        { //::SireBase::PageCache::cache
-        
-            typedef ::SireBase::PageCache::Handle ( ::SireBase::PageCache::*cache_function_type)( ::QByteArray const & ) ;
-            cache_function_type cache_function_value( &::SireBase::PageCache::cache );
-            
-            PageCache_exposer.def( 
-                "cache"
-                , cache_function_value
-                , ( bp::arg("data") )
                 , bp::release_gil_policy()
                 , "" );
         
@@ -503,7 +538,7 @@ void register_PageCache_class(){
         }
         { //::SireBase::PageCache::nBytes
         
-            typedef int ( ::SireBase::PageCache::*nBytes_function_type)(  ) const;
+            typedef unsigned int ( ::SireBase::PageCache::*nBytes_function_type)(  ) const;
             nBytes_function_type nBytes_function_value( &::SireBase::PageCache::nBytes );
             
             PageCache_exposer.def( 
@@ -515,7 +550,7 @@ void register_PageCache_class(){
         }
         { //::SireBase::PageCache::nPages
         
-            typedef int ( ::SireBase::PageCache::*nPages_function_type)(  ) const;
+            typedef unsigned int ( ::SireBase::PageCache::*nPages_function_type)(  ) const;
             nPages_function_type nPages_function_value( &::SireBase::PageCache::nPages );
             
             PageCache_exposer.def( 
@@ -540,7 +575,7 @@ void register_PageCache_class(){
         }
         { //::SireBase::PageCache::pageSize
         
-            typedef int ( ::SireBase::PageCache::*pageSize_function_type)(  ) const;
+            typedef unsigned int ( ::SireBase::PageCache::*pageSize_function_type)(  ) const;
             pageSize_function_type pageSize_function_value( &::SireBase::PageCache::pageSize );
             
             PageCache_exposer.def( 
@@ -552,7 +587,7 @@ void register_PageCache_class(){
         }
         { //::SireBase::PageCache::size
         
-            typedef int ( ::SireBase::PageCache::*size_function_type)(  ) const;
+            typedef unsigned int ( ::SireBase::PageCache::*size_function_type)(  ) const;
             size_function_type size_function_value( &::SireBase::PageCache::size );
             
             PageCache_exposer.def( 
