@@ -59,7 +59,7 @@ namespace SireOpenMM
         register_dict<QMap<int, double>>();
         register_dict<QMap<int, QVector<int>>>();
 
-		// A tuple for returning link atom information from EMLEEngine.
-        bp::register_tuple<boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>>>();
+        // A tuple for passing link atom information to EMLEEngine.
+        bp::register_tuple<boost::tuple<QMap<int, int>, QMap<int, QVector<int>>>>();
     }
 }
