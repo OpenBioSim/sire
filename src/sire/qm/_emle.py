@@ -64,6 +64,9 @@ def emle(
     if not isinstance(mols, _System):
         raise TypeError("mols must be a of type 'sire.System'")
 
+    # Clone the system.
+    mols = mols.clone()
+
     try:
         qm_atoms = _selection_to_atoms(mols, qm_atoms)
     except:
