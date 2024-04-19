@@ -55,10 +55,25 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
+    class EMLECallback;
+    class EMLEForce;
+}
+
+QDataStream &operator<<(QDataStream &, const SireOpenMM::EMLECallback &);
+QDataStream &operator>>(QDataStream &, SireOpenMM::EMLECallback &);
+
+QDataStream &operator<<(QDataStream &, const SireOpenMM::EMLEForce &);
+QDataStream &operator>>(QDataStream &, SireOpenMM::EMLEForce &);
+
+namespace SireOpenMM
+{
     // A callback wrapper class to allow use of electrostatic embedding of
     // machine learning potentials via emle-engine.
     class EMLECallback
     {
+        friend QDataStream & ::operator<<(QDataStream &, const EMLECallback &);
+        friend QDataStream & ::operator>>(QDataStream &, EMLECallback &);
+
     public:
         //! Default constructor.
         EMLECallback();
@@ -115,6 +130,9 @@ namespace SireOpenMM
 
     class EMLEForce : public QMForce
     {
+        friend QDataStream & ::operator<<(QDataStream &, const EMLEForce &);
+        friend QDataStream & ::operator>>(QDataStream &, EMLEForce &);
+
     public:
         //! Default constructor.
         EMLEForce();
@@ -180,6 +198,12 @@ namespace SireOpenMM
 
         //! Assignment operator.
         EMLEForce &operator=(const EMLEForce &other);
+
+        //! Set the callback object.
+        /*! \param callback
+                A Python object that contains the callback function.
+         */
+        void setCallback(EMLECallback callback);
 
         //! Get the callback object.
         /*! \returns
@@ -530,6 +554,9 @@ namespace SireOpenMM
 
         //! Create an EMLE force object.
         QMForce* createForce() const;
+
+        //! Get the EMLE force object.
+        EMLEForce getForce() const;
 
     private:
         EMLECallback callback;

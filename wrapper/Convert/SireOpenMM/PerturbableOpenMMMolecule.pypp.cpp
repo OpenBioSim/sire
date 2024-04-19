@@ -596,6 +596,18 @@ void register_PerturbableOpenMMMolecule_class(){
                 , "Return true if the atom is a ghost atom in the\n  referenece or perturbed states" );
         
         }
+        { //::SireOpenMM::PerturbableOpenMMMolecule::isNull
+        
+            typedef bool ( ::SireOpenMM::PerturbableOpenMMMolecule::*isNull_function_type)(  ) const;
+            isNull_function_type isNull_function_value( &::SireOpenMM::PerturbableOpenMMMolecule::isNull );
+            
+            PerturbableOpenMMMolecule_exposer.def( 
+                "isNull"
+                , isNull_function_value
+                , bp::release_gil_policy()
+                , "Return whether or not this is null" );
+        
+        }
         PerturbableOpenMMMolecule_exposer.def( bp::self != bp::self );
         { //::SireOpenMM::PerturbableOpenMMMolecule::operator=
         

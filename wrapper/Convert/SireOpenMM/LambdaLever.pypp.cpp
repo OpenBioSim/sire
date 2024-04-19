@@ -119,7 +119,7 @@ void register_LambdaLever_class(){
                 , getLeverValues_function_value
                 , ( bp::arg("lambda_values"), bp::arg("mol") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Get all of the lever values that would be set for the passed\n  lambda values using the current context. This returns a PropertyList\n  of columns, where each column is a PropertyMap with the column name\n  and either double or QString array property of values.\n\n  This is designed to be used by a higher-level python function that\n  will convert this output into, e.g. a pandas DataFrame\n" );
         
         }
         { //::SireOpenMM::LambdaLever::getPerturbableMoleculeMaps

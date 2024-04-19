@@ -11,6 +11,10 @@ namespace bp = boost::python;
 
 #include "SireMaths/vector.h"
 
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
 #include "SireVol/triclinicbox.h"
 
 #include "emle.h"
@@ -19,11 +23,17 @@ namespace bp = boost::python;
 
 #include "SireMaths/vector.h"
 
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
 #include "SireVol/triclinicbox.h"
 
 #include "emle.h"
 
 SireOpenMM::EMLECallback __copy__(const SireOpenMM::EMLECallback &other){ return SireOpenMM::EMLECallback(other); }
+
+#include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireOpenMM::EMLECallback&){ return "SireOpenMM::EMLECallback";}
 
@@ -77,6 +87,11 @@ void register_EMLECallback_class(){
         EMLECallback_exposer.def( "__copy__", &__copy__);
         EMLECallback_exposer.def( "__deepcopy__", &__copy__);
         EMLECallback_exposer.def( "clone", &__copy__);
+        EMLECallback_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireOpenMM::EMLECallback >,
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+        EMLECallback_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireOpenMM::EMLECallback >,
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+        EMLECallback_exposer.def_pickle(sire_pickle_suite< ::SireOpenMM::EMLECallback >());
         EMLECallback_exposer.def( "__str__", &pvt_get_name);
         EMLECallback_exposer.def( "__repr__", &pvt_get_name);
     }

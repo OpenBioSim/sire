@@ -11,6 +11,10 @@ namespace bp = boost::python;
 
 #include "SireMaths/vector.h"
 
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
 #include "SireVol/triclinicbox.h"
 
 #include "emle.h"
@@ -19,11 +23,17 @@ namespace bp = boost::python;
 
 #include "SireMaths/vector.h"
 
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
 #include "SireVol/triclinicbox.h"
 
 #include "emle.h"
 
 SireOpenMM::EMLEForce __copy__(const SireOpenMM::EMLEForce &other){ return SireOpenMM::EMLEForce(other); }
+
+#include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireOpenMM::EMLEForce&){ return "SireOpenMM::EMLEForce";}
 
@@ -60,6 +70,19 @@ void register_EMLEForce_class(){
                 , getAtoms_function_value
                 , bp::release_gil_policy()
                 , "Get the indices of the atoms in the QM region.\nReturn:s\nA vector of atom indices for the QM region.\n" );
+        
+        }
+		{ //::SireOpenMM::EMLEForce::setCallback
+        
+            typedef void ( ::SireOpenMM::EMLEForce::*setCallback_function_type)( ::SireOpenMM::EMLECallback ) ;
+            setCallback_function_type setCallback_function_value( &::SireOpenMM::EMLEForce::setCallback );
+            
+            EMLEForce_exposer.def( 
+                "setCallback"
+                , setCallback_function_value
+                , ( bp::arg("callback") )
+                , bp::release_gil_policy()
+                , "Set the callback object.\nPar:am callback\nA Python object that contains the callback function.\n" );
         
         }
         { //::SireOpenMM::EMLEForce::getCallback
@@ -212,6 +235,11 @@ void register_EMLEForce_class(){
         EMLEForce_exposer.def( "__copy__", &__copy__);
         EMLEForce_exposer.def( "__deepcopy__", &__copy__);
         EMLEForce_exposer.def( "clone", &__copy__);
+        EMLEForce_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireOpenMM::EMLEForce >,
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+        EMLEForce_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireOpenMM::EMLEForce >,
+                            bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
+        EMLEForce_exposer.def_pickle(sire_pickle_suite< ::SireOpenMM::EMLEForce >());
         EMLEForce_exposer.def( "__str__", &pvt_get_name);
         EMLEForce_exposer.def( "__repr__", &pvt_get_name);
     }

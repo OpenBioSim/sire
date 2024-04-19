@@ -26,14 +26,22 @@
   *
 \*********************************************/
 
+#include <mutex>
+
+#include "openmm/serialization/SerializationNode.h"
+#include "openmm/serialization/SerializationProxy.h"
+
 #include "SireError/errors.h"
 #include "SireMaths/vector.h"
+#include "SireStream/datastream.h"
+#include "SireStream/shareddatastream.h"
 #include "SireVol/triclinicbox.h"
 
 #include "emle.h"
 
 using namespace SireMaths;
 using namespace SireOpenMM;
+using namespace SireStream;
 using namespace SireVol;
 
 // The delta used to place virtual point charges either side of the MM2
@@ -52,6 +60,35 @@ private:
 /////////
 ///////// Implementation of EMLECallback
 /////////
+
+static const RegisterMetaType<EMLECallback> r_emlecallback(NO_ROOT);
+
+QDataStream &operator<<(QDataStream &ds, const EMLECallback &emlecallback)
+{
+    writeHeader(ds, r_emlecallback, 1);
+
+    SharedDataStream sds(ds);
+
+    sds << emlecallback.callback;
+
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, EMLECallback &emlecallback)
+{
+    VersionID v = readHeader(ds, r_emlecallback);
+
+    if (v == 1)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> emlecallback.callback;
+    }
+    else
+        throw version_error(v, "1", r_emlecallback, CODELOC);
+
+    return ds;
+}
 
 EMLECallback::EMLECallback()
 {
@@ -96,6 +133,41 @@ const char *EMLECallback::what() const
 /////////
 ///////// Implementation of EMLEForce
 /////////
+
+static const RegisterMetaType<EMLEForce> r_emleforce(NO_ROOT);
+
+QDataStream &operator<<(QDataStream &ds, const EMLEForce &emleforce)
+{
+    writeHeader(ds, r_emleforce, 1);
+
+    SharedDataStream sds(ds);
+
+    sds << emleforce.callback << emleforce.cutoff << emleforce.neighbour_list_frequency
+        << emleforce.lambda << emleforce.atoms << emleforce.mm1_to_qm
+        << emleforce.mm1_to_mm2 << emleforce.bond_scale_factors << emleforce.mm2_atoms
+        << emleforce.numbers << emleforce.charges;
+
+    return ds;
+}
+
+QDataStream &operator>>(QDataStream &ds, EMLEForce &emleforce)
+{
+    VersionID v = readHeader(ds, r_emleforce);
+
+    if (v == 1)
+    {
+        SharedDataStream sds(ds);
+
+        sds >> emleforce.callback >> emleforce.cutoff >> emleforce.neighbour_list_frequency
+            >> emleforce.lambda >> emleforce.atoms >> emleforce.mm1_to_qm
+            >> emleforce.mm1_to_mm2 >> emleforce.bond_scale_factors >> emleforce.mm2_atoms
+            >> emleforce.numbers >> emleforce.charges;
+    }
+    else
+        throw version_error(v, "1", r_emleforce, CODELOC);
+
+    return ds;
+}
 
 EMLEForce::EMLEForce()
 {
@@ -156,6 +228,11 @@ EMLEForce &EMLEForce::operator=(const EMLEForce &other)
     this->numbers = other.numbers;
     this->charges = other.charges;
     return *this;
+}
+
+void EMLEForce::setCallback(EMLECallback callback)
+{
+    this->callback = callback;
 }
 
 EMLECallback EMLEForce::getCallback() const
@@ -236,6 +313,93 @@ EMLEForce::call(
 {
     return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
 }
+
+/////////
+///////// OpenMM Serialization
+/////////
+
+namespace OpenMM
+{
+    // A callback object to store the callback function.
+    EMLECallback callback;
+
+    // A mutex to protect the callback.
+    std::mutex callback_mutex;
+
+    // Set the callback using a mutex.
+    void setCallback(EMLECallback cb)
+    {
+        std::lock_guard<std::mutex> lock(callback_mutex);
+        callback = cb;
+    }
+
+    // Get the callback using a mutex.
+    EMLECallback getCallback()
+    {
+        std::lock_guard<std::mutex> lock(callback_mutex);
+        return callback;
+    }
+
+    class EMLEForceProxy : public SerializationProxy {
+        public:
+            EMLEForceProxy() : SerializationProxy("EMLEForce")
+            {
+            };
+
+            void serialize(const void* object, SerializationNode& node) const
+            {
+                // Serialize the object.
+                QByteArray data;
+                QDataStream ds(&data, QIODevice::WriteOnly);
+                EMLEForce emleforce = *static_cast<const EMLEForce*>(object);
+                ds << emleforce;
+
+                // Set the version.
+                node.setIntProperty("version", 0);
+
+                // Set the data by converting the QByteArray to a hexidecimal string.
+                node.setStringProperty("data", data.toHex().data());
+
+                // Set the callback.
+                setCallback(emleforce.getCallback());
+            };
+
+            void* deserialize(const SerializationNode& node) const
+            {
+                // Check the version.
+                int version = node.getIntProperty("version");
+                    if (version != 0)
+                        throw OpenMM::OpenMMException("Unsupported version number");
+
+                // Get the data as a std::string.
+                auto string = node.getStringProperty("data");
+
+                // Convert to hexidecimal.
+                auto hex = QByteArray::fromRawData(string.data(), string.size());
+
+                // Convert to a QByteArray.
+                auto data = QByteArray::fromHex(hex);
+
+                // Deserialize the object.
+                QDataStream ds(data);
+                EMLEForce emleforce;
+                ds >> emleforce;
+
+                // Create a new EMLEForce object.
+                auto emleforce_ptr = new EMLEForce(emleforce);
+
+                // Set the callback.
+                emleforce_ptr->setCallback(getCallback());
+
+                return emleforce_ptr;
+            };
+    };
+
+    // Register the EMLEForce serialization proxy.
+    extern "C" void registerEmleSerializationProxies() {
+        SerializationProxy::registerProxy(typeid(EMLEForce), new EMLEForceProxy());
+    }
+};
 
 /////////
 ///////// Implementation of EMLEForceImpl
@@ -602,6 +766,8 @@ double EMLEForceImpl::computeForce(
 
 EMLEEngine::EMLEEngine() : ConcreteProperty<EMLEEngine, QMEngine>()
 {
+    // Register the serialization proxies.
+    OpenMM::registerEmleSerializationProxies();
 }
 
 EMLEEngine::EMLEEngine(
@@ -615,6 +781,9 @@ EMLEEngine::EMLEEngine(
     neighbour_list_frequency(neighbour_list_frequency),
     lambda(lambda)
 {
+    // Register the serialization proxies.
+    OpenMM::registerEmleSerializationProxies();
+
     if (this->neighbour_list_frequency < 0)
     {
         neighbour_list_frequency = 0;
@@ -794,6 +963,23 @@ EMLEEngine::call(
 QMForce* EMLEEngine::createForce() const
 {
     return new EMLEForce(
+        this->callback,
+        this->cutoff,
+        this->neighbour_list_frequency,
+        this->lambda,
+        this->atoms,
+        this->mm1_to_qm,
+        this->mm1_to_mm2,
+        this->bond_scale_factors,
+        this->mm2_atoms,
+        this->numbers,
+        this->charges
+    );
+}
+
+EMLEForce EMLEEngine::getForce() const
+{
+    return EMLEForce(
         this->callback,
         this->cutoff,
         this->neighbour_list_frequency,

@@ -11,6 +11,10 @@ namespace bp = boost::python;
 
 #include "SireMaths/vector.h"
 
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
+
 #include "SireVol/triclinicbox.h"
 
 #include "emle.h"
@@ -18,6 +22,10 @@ namespace bp = boost::python;
 #include "SireError/errors.h"
 
 #include "SireMaths/vector.h"
+
+#include "SireStream/datastream.h"
+
+#include "SireStream/shareddatastream.h"
 
 #include "SireVol/triclinicbox.h"
 
@@ -96,6 +104,18 @@ void register_EMLEEngine_class(){
                 , getCutoff_function_value
                 , bp::release_gil_policy()
                 , "Get the QM cutoff distance.\nReturn:s\nThe QM cutoff distance.\n" );
+        
+        }
+        { //::SireOpenMM::EMLEEngine::getForce
+        
+            typedef ::SireOpenMM::EMLEForce ( ::SireOpenMM::EMLEEngine::*getForce_function_type)(  ) const;
+            getForce_function_type getForce_function_value( &::SireOpenMM::EMLEEngine::getForce );
+            
+            EMLEEngine_exposer.def( 
+                "getForce"
+                , getForce_function_value
+                , bp::release_gil_policy()
+                , "Get the EMLE force object." );
         
         }
         { //::SireOpenMM::EMLEEngine::getLambda
