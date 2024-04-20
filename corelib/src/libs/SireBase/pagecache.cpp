@@ -77,12 +77,22 @@ namespace SireBase
             PageHandler(QString cache_dir_template);
             ~PageHandler();
 
-            QTemporaryFile *store(const QByteArray &data);
+            QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>> store(const QByteArray &data);
             std::shared_ptr<RestoredPage> restore(QTemporaryFile &pagefile);
 
             QString path() const;
 
+            static void setMaxResidentPages(unsigned int n_pages);
+            static unsigned int maxResidentPages();
+
         private:
+            void addToRestored(std::shared_ptr<RestoredPage> page);
+
+            /** The maximum number of pages left resident in memory
+             *  per cache
+             */
+            static unsigned int max_resident_pages;
+
             /** Mutex to protect access to the data of this class */
             QMutex mutex;
 
@@ -390,11 +400,85 @@ QString PageHandler::path() const
     return cache_dir->path();
 }
 
+// this would be a maximum of 256 MB resident per cache
+unsigned int PageHandler::max_resident_pages = 32;
+
+/** Set the maximum number of pages that can be resident in memory
+ *  at any one time
+ */
+void PageHandler::setMaxResidentPages(unsigned int n_pages)
+{
+    if (n_pages < 1)
+    {
+        Console::warning(QObject::tr("Setting maximum resident pages to the minimum of 1."));
+        n_pages = 1;
+    }
+    else if (n_pages > 256)
+    {
+        Console::warning(QObject::tr("Setting maximum resident pages to the maximum of 256."));
+        n_pages = 256;
+    }
+
+    max_resident_pages = n_pages;
+}
+
+/** Return the current maximum number of pages that can be resident
+ *  in memory at any one time
+ */
+unsigned int PageHandler::maxResidentPages()
+{
+    return max_resident_pages;
+}
+
+/** Add the passed restored page to the cache */
+void PageHandler::addToRestored(std::shared_ptr<RestoredPage> restored)
+{
+    // check to see if we need to replace an old page
+    QMutexLocker lkr(&mutex);
+
+    auto max_resident = max_resident_pages;
+
+    if (restored_pages.count() < max_resident)
+    {
+        restored_pages.append(restored);
+        return;
+    }
+
+    // we need to replace a page...
+    int smallest_index = -1;
+    int smallest_value = -1;
+
+    for (int i = 0; i < restored_pages.size(); i++)
+    {
+        if (restored_pages[i].get() == nullptr)
+        {
+            // this page has already been deleted, so should
+            // be removed first
+            smallest_index = i;
+        }
+        else
+        {
+            // find the oldest page to restore - do this by reducing
+            // the TTL for each page each time we go through this loop,
+            // and then find the first page with the smallest TTL
+            int val = restored_pages[i]->timeToLive();
+
+            if (smallest_index == -1 or smallest_value > val)
+            {
+                smallest_index = i;
+                smallest_value = val;
+            }
+        }
+    }
+
+    restored_pages[smallest_index] = restored;
+}
+
 /** Store the passed page of data to a temporary page cache file.
  *  This returns a pointer to the created temporary file,
  *  which is owned by the caller (in this case, the PageData)
  */
-QTemporaryFile *PageHandler::store(const QByteArray &data)
+QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>> PageHandler::store(const QByteArray &data)
 {
     QTemporaryFile *cache_file = new QTemporaryFile(cache_dir->filePath("page_XXXXXX.bin"));
 
@@ -407,6 +491,9 @@ QTemporaryFile *PageHandler::store(const QByteArray &data)
                                .arg(cache_file->errorString()));
             throw SireError::file_error(*cache_file, CODELOC);
         }
+
+        // create a handle to the restored page
+        auto restored_page = std::make_shared<RestoredPage>(data);
 
         // compress the data and write it to a temporary file
         QByteArray compressed_data = qCompress(data, 9);
@@ -423,7 +510,10 @@ QTemporaryFile *PageHandler::store(const QByteArray &data)
 
         checksums.insert(cache_file, checksum);
 
-        return cache_file;
+        // save this restored page so that it is not immediately deleted
+        this->addToRestored(restored_page);
+
+        return QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>>(cache_file, restored_page);
     }
     catch (...)
     {
@@ -476,43 +566,7 @@ std::shared_ptr<RestoredPage> PageHandler::restore(QTemporaryFile &pagefile)
     auto restored = std::make_shared<RestoredPage>(decompressed_data);
     decompressed_data = QByteArray();
 
-    // now check to see if we need to replace an old page
-    QMutexLocker lkr(&mutex);
-
-    if (restored_pages.count() < 5)
-    {
-        restored_pages.append(restored);
-        return restored;
-    }
-
-    // we need to replace a page...
-    int smallest_index = -1;
-    int smallest_value = -1;
-
-    for (int i = 0; i < restored_pages.size(); i++)
-    {
-        if (restored_pages[i].get() == nullptr)
-        {
-            // this page has already been deleted, so should
-            // be removed first
-            smallest_index = i;
-        }
-        else
-        {
-            // find the oldest page to restore - do this by reducing
-            // the TTL for each page each time we go through this loop,
-            // and then find the first page with the smallest TTL
-            int val = restored_pages[i]->timeToLive();
-
-            if (smallest_index == -1 or smallest_value > val)
-            {
-                smallest_index = i;
-                smallest_value = val;
-            }
-        }
-    }
-
-    restored_pages[smallest_index] = restored;
+    this->addToRestored(restored);
 
     return restored;
 }
@@ -1173,13 +1227,16 @@ void PageData::freeze(std::shared_ptr<PageHandler> handler)
         return;
     }
 
-    cache_file = handler->store(QByteArray::fromRawData(d, nbytes));
+    auto cached = handler->store(QByteArray::fromRawData(d, nbytes));
+
+    cache_file = cached.first;
 
     QMutexLocker lkr(&mutex);
     // need to lock before deleting d because fetch() may be called
     delete[] d;
     d = 0;
     page_handler = handler;
+    restored_page = cached.second;
 }
 
 PageCache PageData::parent() const
@@ -1689,6 +1746,18 @@ void PageCache::setMaxPageSize(unsigned int page_size,
                                bool update_existing)
 {
     CacheData::setMaxPageSize(page_size, update_existing);
+}
+
+/** Set the maximum number of resident pages per cache */
+void PageCache::setMaxResidentPages(unsigned int n_pages)
+{
+    PageHandler::setMaxResidentPages(n_pages);
+}
+
+/** Return the maximum number of resident pages per cache */
+unsigned int PageCache::maxResidentPages()
+{
+    return PageHandler::maxResidentPages();
 }
 
 /** Return the current recommend maximum page size */

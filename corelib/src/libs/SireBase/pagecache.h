@@ -80,6 +80,9 @@ namespace SireBase
         static void setMaxPageSize(unsigned int max_page_size,
                                    bool update_existing = false);
 
+        static void setMaxResidentPages(unsigned int n_pages);
+        static unsigned int maxResidentPages();
+
         PageCache *clone() const;
 
         QString toString() const;

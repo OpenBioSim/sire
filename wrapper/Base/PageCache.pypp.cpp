@@ -556,6 +556,18 @@ void register_PageCache_class(){
                 , "Return the current recommend maximum page size" );
         
         }
+        { //::SireBase::PageCache::maxResidentPages
+        
+            typedef unsigned int ( *maxResidentPages_function_type )(  );
+            maxResidentPages_function_type maxResidentPages_function_value( &::SireBase::PageCache::maxResidentPages );
+            
+            PageCache_exposer.def( 
+                "maxResidentPages"
+                , maxResidentPages_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::PageCache::nBytes
         
             typedef unsigned int ( ::SireBase::PageCache::*nBytes_function_type)(  ) const;
@@ -614,6 +626,19 @@ void register_PageCache_class(){
                 "setMaxPageSize"
                 , setMaxPageSize_function_value
                 , ( bp::arg("max_page_size"), bp::arg("update_existing")=(bool)(false) )
+                , "" );
+        
+        }
+        { //::SireBase::PageCache::setMaxResidentPages
+        
+            typedef void ( *setMaxResidentPages_function_type )( unsigned int );
+            setMaxResidentPages_function_type setMaxResidentPages_function_value( &::SireBase::PageCache::setMaxResidentPages );
+            
+            PageCache_exposer.def( 
+                "setMaxResidentPages"
+                , setMaxResidentPages_function_value
+                , ( bp::arg("n_pages") )
+                , bp::release_gil_policy()
                 , "" );
         
         }
@@ -680,7 +705,9 @@ void register_PageCache_class(){
         }
         PageCache_exposer.staticmethod( "getStatistics" );
         PageCache_exposer.staticmethod( "maxPageSize" );
+        PageCache_exposer.staticmethod( "maxResidentPages" );
         PageCache_exposer.staticmethod( "setMaxPageSize" );
+        PageCache_exposer.staticmethod( "setMaxResidentPages" );
         PageCache_exposer.staticmethod( "typeName" );
         PageCache_exposer.def( "__copy__", &__copy__<SireBase::PageCache>);
         PageCache_exposer.def( "__deepcopy__", &__copy__<SireBase::PageCache>);
