@@ -86,7 +86,7 @@ namespace SireBase
             static unsigned int maxResidentPages();
 
         private:
-            void addToRestored(std::shared_ptr<RestoredPage> page);
+            void _lkr_addToRestored(const std::shared_ptr<RestoredPage> &page);
 
             /** The maximum number of pages left resident in memory
              *  per cache
@@ -431,11 +431,9 @@ unsigned int PageHandler::maxResidentPages()
 }
 
 /** Add the passed restored page to the cache */
-void PageHandler::addToRestored(std::shared_ptr<RestoredPage> restored)
+void PageHandler::_lkr_addToRestored(const std::shared_ptr<RestoredPage> &restored)
 {
     // check to see if we need to replace an old page
-    QMutexLocker lkr(&mutex);
-
     auto max_resident = max_resident_pages;
 
     if (restored_pages.count() < max_resident)
@@ -508,10 +506,12 @@ QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>> PageHandler::store(const 
 
         cache_file->close();
 
+        QMutexLocker lkr(&mutex);
+
         checksums.insert(cache_file, checksum);
 
         // save this restored page so that it is not immediately deleted
-        this->addToRestored(restored_page);
+        this->_lkr_addToRestored(restored_page);
 
         return QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>>(cache_file, restored_page);
     }
@@ -543,6 +543,8 @@ std::shared_ptr<RestoredPage> PageHandler::restore(QTemporaryFile &pagefile)
 
     // make sure that the checksum matches what we calculated when we
     // stored the data to disk
+    QMutexLocker lkr(&mutex);
+
     auto checksum = checksums.value(&pagefile, 0);
     auto readsum = qChecksum(compressed_data.constData(), compressed_data.size());
 
@@ -566,7 +568,7 @@ std::shared_ptr<RestoredPage> PageHandler::restore(QTemporaryFile &pagefile)
     auto restored = std::make_shared<RestoredPage>(decompressed_data);
     decompressed_data = QByteArray();
 
-    this->addToRestored(restored);
+    this->_lkr_addToRestored(restored);
 
     return restored;
 }
@@ -1227,7 +1229,9 @@ void PageData::freeze(std::shared_ptr<PageHandler> handler)
         return;
     }
 
-    auto cached = handler->store(QByteArray::fromRawData(d, nbytes));
+    // make sure that the QByteArray takes a copy of the data in d
+    // so that we don't get any memory corruption
+    auto cached = handler->store(QByteArray(d, nbytes));
 
     cache_file = cached.first;
 
