@@ -60,17 +60,25 @@ namespace SireBase
     class SIREBASE_EXPORT PageCache
     {
     public:
-        PageCache(unsigned int page_size = 32 * 1024 * 1024);
-        PageCache(const QString &cache_dir,
-                  unsigned int page_size = 32 * 1024 * 1024);
+        PageCache();
+        PageCache(const QString &cache_dir);
+
+        PageCache(unsigned int max_page_size);
+        PageCache(const QString &cache_dir, unsigned int max_page_size);
+
         PageCache(std::shared_ptr<detail::CacheData> data);
         PageCache(const PageCache &other);
+
         ~PageCache();
 
         PageCache &operator=(const PageCache &other);
 
         const char *what() const;
         static const char *typeName();
+
+        static unsigned int maxPageSize();
+        static void setMaxPageSize(unsigned int max_page_size,
+                                   bool update_existing = false);
 
         PageCache *clone() const;
 

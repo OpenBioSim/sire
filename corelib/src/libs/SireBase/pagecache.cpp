@@ -110,6 +110,9 @@ namespace SireBase
 
             static QString getStatistics();
 
+            static void setMaxPageSize(unsigned int size, bool update_existing);
+            static unsigned int maxPageSize();
+
             QString cacheDir() const;
 
             PageCache::Handle store(const QByteArray &data);
@@ -135,6 +138,9 @@ namespace SireBase
              *  can be deleted when the last reference is removed
              */
             static QList<std::weak_ptr<CacheData>> caches;
+
+            /** The current default maximum page size */
+            static unsigned int max_page_size;
 
             /** Mutex protected the queue of Handles containing data
              *  that should be pushed to the cache
@@ -517,6 +523,50 @@ std::shared_ptr<RestoredPage> PageHandler::restore(QTemporaryFile &pagefile)
 
 QMutex CacheData::caches_mutex;
 QList<std::weak_ptr<CacheData>> CacheData::caches;
+
+/** Default to 8 MB pages - this seems to be a good balance for
+ *  not having pages so large that they take a noticeable time to
+ *  load from disk
+ */
+unsigned int CacheData::max_page_size = 8 * 1024 * 1024;
+
+/** Set the maximum page size to the passed value */
+void CacheData::setMaxPageSize(unsigned int size, bool update_existing)
+{
+    if (size < 1024)
+    {
+        Console::warning(QObject::tr("Setting page size to the minimum of 1024 bytes."));
+        size = 1024;
+    }
+    else if (size > 128 * 1024 * 1024)
+    {
+        Console::warning(QObject::tr("Setting page size to the maximum of 128 MB."));
+        size = 128 * 1024 * 1024;
+    }
+
+    QMutexLocker lkr(&caches_mutex);
+    max_page_size = size;
+
+    if (update_existing)
+    {
+        for (auto &cache : caches)
+        {
+            auto c = cache.lock();
+
+            if (c.get() != nullptr)
+            {
+                c->page_size = size;
+            }
+        }
+    }
+}
+
+/** Return the current maximum page size */
+unsigned int CacheData::maxPageSize()
+{
+    QMutexLocker lkr(&caches_mutex);
+    return max_page_size;
+}
 
 /** Set the self pointer for this cache */
 void CacheData::setSelf(const std::shared_ptr<CacheData> &cache)
@@ -1552,10 +1602,26 @@ void PageCache::Handle::reset()
 /////// Implementation of PageCache
 ///////
 
+/** Construct a new page cache with the default
+ *  recomended maximum page size */
+PageCache::PageCache()
+    : d(new CacheData(QString(), CacheData::maxPageSize()))
+{
+    d->setSelf(d);
+}
+
 /** Construct a new page cache with the specified
     recomended maximum page size */
 PageCache::PageCache(unsigned int page_size)
     : d(new CacheData(QString(), page_size))
+{
+    d->setSelf(d);
+}
+
+/** Construct a new page cache with specified cache directory
+    and recomended maximum page size */
+PageCache::PageCache(const QString &cachedir)
+    : d(new CacheData(cachedir, CacheData::maxPageSize()))
 {
     d->setSelf(d);
 }
@@ -1615,6 +1681,20 @@ QString PageCache::toString() const
 PageCache *PageCache::clone() const
 {
     return new PageCache(*this);
+}
+
+/** Set the default maximum page cache size for all new created
+ *  caches that don't specify it themselves */
+void PageCache::setMaxPageSize(unsigned int page_size,
+                               bool update_existing)
+{
+    CacheData::setMaxPageSize(page_size, update_existing);
+}
+
+/** Return the current recommend maximum page size */
+unsigned int PageCache::maxPageSize()
+{
+    return CacheData::maxPageSize();
 }
 
 /** Assert that this object is valid */
