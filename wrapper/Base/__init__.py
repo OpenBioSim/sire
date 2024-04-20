@@ -12,11 +12,11 @@ _base_wrap = wrap
 def _cleanup():
     """
     This function is called when Python exits - this will call the
-    cleanup function in the C++ code to ensure that all memory is
+    clean_up() function in the C++ code to ensure that all memory is
     freed up and all temporary files deleted, threads stopped,
     network connections closed etc
     """
-    print("Cleaning up!")
+    clean_up()
 
 
 def wrap(value):

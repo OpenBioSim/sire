@@ -21,6 +21,7 @@ set ( SIREBASE_HEADERS
       array2d.hpp
       array2d.h
       arrayproperty.hpp
+      atexit.h
       booleanproperty.h
       chunkedhash.hpp
       chunkedvector.hpp
@@ -85,6 +86,7 @@ set ( SIREBASE_SOURCES
 
       array2d.cpp
       arrayproperty.cpp
+      atexit.cpp
       booleanproperty.cpp
       chunkedhash.cpp
       chunkedvector.cpp

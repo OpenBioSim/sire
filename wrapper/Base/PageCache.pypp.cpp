@@ -565,7 +565,7 @@ void register_PageCache_class(){
                 "maxResidentPages"
                 , maxResidentPages_function_value
                 , bp::release_gil_policy()
-                , "" );
+                , "Return the maximum number of resident pages per cache" );
         
         }
         { //::SireBase::PageCache::nBytes
@@ -626,7 +626,7 @@ void register_PageCache_class(){
                 "setMaxPageSize"
                 , setMaxPageSize_function_value
                 , ( bp::arg("max_page_size"), bp::arg("update_existing")=(bool)(false) )
-                , "" );
+                , "Set the default maximum page cache size for all new created\n  caches that dont specify it themselves" );
         
         }
         { //::SireBase::PageCache::setMaxResidentPages
@@ -639,7 +639,7 @@ void register_PageCache_class(){
                 , setMaxResidentPages_function_value
                 , ( bp::arg("n_pages") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Set the maximum number of resident pages per cache" );
         
         }
         { //::SireBase::PageCache::size

@@ -7,6 +7,10 @@
 
 namespace bp = boost::python;
 
+#include "atexit.h"
+
+#include "atexit.h"
+
 #include "SireError/errors.h"
 
 #include "findexe.h"
@@ -1032,6 +1036,18 @@ namespace bp = boost::python;
 #include "propertylist.h"
 
 void register_free_functions(){
+
+    { //::SireBase::clean_up
+    
+        typedef void ( *clean_up_function_type )(  );
+        clean_up_function_type clean_up_function_value( &::SireBase::clean_up );
+        
+        bp::def( 
+            "clean_up"
+            , clean_up_function_value
+            , "" );
+    
+    }
 
     { //::SireBase::findExe
     
