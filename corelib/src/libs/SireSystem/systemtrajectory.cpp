@@ -66,7 +66,7 @@ namespace SireSystem
 
             if (not cache)
             {
-                QString cache_dir = QDir::current().absoluteFilePath("temp_traj_XXXXXX");
+                QString cache_dir = QDir(PageCache::rootDirectory()).absoluteFilePath("temp_traj_XXXXXX");
                 cache = std::make_shared<PageCache>(cache_dir);
                 shared_cache = cache;
             }

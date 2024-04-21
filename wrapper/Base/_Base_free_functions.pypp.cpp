@@ -7,7 +7,13 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/atexit.h"
+
 #include "atexit.h"
+
+#include <QDebug>
+
+#include <vector>
 
 #include "atexit.h"
 

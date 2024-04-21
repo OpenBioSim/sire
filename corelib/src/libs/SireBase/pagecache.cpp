@@ -824,7 +824,7 @@ CacheData::CacheData(QString c, unsigned int p)
     if (c.simplified().isEmpty())
     {
         // by default, go into the current directory
-        c = "temp_XXXXXX";
+        c = QDir(PageCache::rootDirectory()).filePath("temp_XXXXXX");
     }
 
     if (page_size < 1024)
@@ -839,6 +839,19 @@ CacheData::CacheData(QString c, unsigned int p)
     }
 
     cache_dir_template = c;
+
+    // make sure that we can actually create a cache directory in this
+    // space - do this by creating a test directory and then deleting it
+    QTemporaryDir test_dir(c);
+
+    if (not test_dir.isValid())
+    {
+        throw SireError::io_error(QObject::tr(
+                                      "Failed to create cache directory %1. %2")
+                                      .arg(c)
+                                      .arg(test_dir.errorString()),
+                                  CODELOC);
+    }
 }
 
 /** Destructor */
@@ -1974,4 +1987,38 @@ PageCache::Handle PageCache::store(const QByteArray &data)
     }
 
     return Handle(d->store(data));
+}
+
+static QString cache_root_dir = QString();
+
+/** Set the root directory that should be used for all new caches,
+ *  when the cache directory is not specified
+ */
+void PageCache::setRootDirectory(const QString &dir)
+{
+    QDir d;
+
+    if (not d.mkpath(QDir(dir).absolutePath()))
+    {
+        throw SireError::io_error(QObject::tr(
+                                      "Failed to create cache root directory %1")
+                                      .arg(dir),
+                                  CODELOC);
+    }
+
+    cache_root_dir = QDir(dir).absolutePath();
+}
+
+/** Get the root directory that should be used for all new caches,
+ *  when the cache directory is not specified
+ */
+QString PageCache::rootDirectory()
+{
+    if (cache_root_dir.isEmpty())
+    {
+        auto env = qEnvironmentVariable("SIRE_PAGECACHE_ROOT", ".");
+        PageCache::setRootDirectory(env);
+    }
+
+    return cache_root_dir;
 }

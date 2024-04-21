@@ -7,6 +7,8 @@
 
 namespace bp = boost::python;
 
+#include "SireBase/atexit.h"
+
 #include "SireBase/console.h"
 
 #include "SireBase/parallel.h"
@@ -42,6 +44,8 @@ SireBase::PageCache __copy__(const SireBase::PageCache &other){ return SireBase:
 const char* pvt_get_name(const SireBase::PageCache&){ return "SireBase::PageCache";}
 
 #include "Helpers/release_gil_policy.hpp"
+
+#include "SireBase/atexit.h"
 
 #include "SireBase/console.h"
 
@@ -80,6 +84,8 @@ SireBase::PageCache::Handle __copy__(const SireBase::PageCache::Handle &other){ 
 #include "Helpers/release_gil_policy.hpp"
 
 #include "Helpers/len.hpp"
+
+#include "SireBase/atexit.h"
 
 #include "SireBase/console.h"
 
@@ -617,6 +623,18 @@ void register_PageCache_class(){
                 , "Return the suggested maximum page size for this cache" );
         
         }
+        { //::SireBase::PageCache::rootDirectory
+        
+            typedef ::QString ( *rootDirectory_function_type )(  );
+            rootDirectory_function_type rootDirectory_function_value( &::SireBase::PageCache::rootDirectory );
+            
+            PageCache_exposer.def( 
+                "rootDirectory"
+                , rootDirectory_function_value
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireBase::PageCache::setMaxPageSize
         
             typedef void ( *setMaxPageSize_function_type )( unsigned int,bool );
@@ -640,6 +658,19 @@ void register_PageCache_class(){
                 , ( bp::arg("n_pages") )
                 , bp::release_gil_policy()
                 , "Set the maximum number of resident pages per cache" );
+        
+        }
+        { //::SireBase::PageCache::setRootDirectory
+        
+            typedef void ( *setRootDirectory_function_type )( ::QString const & );
+            setRootDirectory_function_type setRootDirectory_function_value( &::SireBase::PageCache::setRootDirectory );
+            
+            PageCache_exposer.def( 
+                "setRootDirectory"
+                , setRootDirectory_function_value
+                , ( bp::arg("cache_dir") )
+                , bp::release_gil_policy()
+                , "" );
         
         }
         { //::SireBase::PageCache::size
@@ -706,8 +737,10 @@ void register_PageCache_class(){
         PageCache_exposer.staticmethod( "getStatistics" );
         PageCache_exposer.staticmethod( "maxPageSize" );
         PageCache_exposer.staticmethod( "maxResidentPages" );
+        PageCache_exposer.staticmethod( "rootDirectory" );
         PageCache_exposer.staticmethod( "setMaxPageSize" );
         PageCache_exposer.staticmethod( "setMaxResidentPages" );
+        PageCache_exposer.staticmethod( "setRootDirectory" );
         PageCache_exposer.staticmethod( "typeName" );
         PageCache_exposer.def( "__copy__", &__copy__<SireBase::PageCache>);
         PageCache_exposer.def( "__deepcopy__", &__copy__<SireBase::PageCache>);

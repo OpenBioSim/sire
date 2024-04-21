@@ -1,11 +1,34 @@
 import sire as sr
-import pytest
+import os
 
 
-def test_pagecache(ala_mols):
+def test_pagecache(ala_mols, tmpdir):
     mols = ala_mols
 
     PageCache = sr.base.PageCache
+
+    root_dir = PageCache.root_directory()
+
+    assert os.path.exists(root_dir)
+
+    # should be the current path
+    assert root_dir == os.getcwd()
+
+    d = tmpdir.mkdir("test_pagecache")
+
+    PageCache.set_root_directory(d.strpath)
+
+    root_dir2 = PageCache.root_directory()
+
+    assert os.path.exists(root_dir2)
+
+    # should be the tempdir
+    assert root_dir2 == d.strpath
+
+    # restore to the original root dir
+    PageCache.set_root_directory(root_dir)
+
+    assert PageCache.root_directory() == root_dir
 
     c = PageCache("temp_pagecache_XXXXXX", 32 * 1024)
 
@@ -63,7 +86,5 @@ def test_pagecache(ala_mols):
     cache_dir = c.cache_dir()
 
     assert "temp_pagecache_" in cache_dir
-
-    import os
 
     assert os.path.exists(cache_dir)

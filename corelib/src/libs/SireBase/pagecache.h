@@ -83,6 +83,9 @@ namespace SireBase
         static void setMaxResidentPages(unsigned int n_pages);
         static unsigned int maxResidentPages();
 
+        static void setRootDirectory(const QString &cache_dir);
+        static QString rootDirectory();
+
         PageCache *clone() const;
 
         QString toString() const;
