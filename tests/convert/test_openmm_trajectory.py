@@ -10,9 +10,9 @@ import pytest
 def test_openmm_trajectory(ala_mols, openmm_platform, tmpdir):
     mols = ala_mols
 
-    mols = mols.minimisation().run().commit()
+    mols = mols.minimisation(platform=openmm_platform).run().commit()
 
-    d = mols.dynamics(timestep="1fs", temperature="25oC")
+    d = mols.dynamics(timestep="1fs", temperature="25oC", platform=openmm_platform)
 
     d.run("0.1ps", save_frequency="0.01ps")
 
@@ -24,9 +24,9 @@ def test_openmm_trajectory(ala_mols, openmm_platform, tmpdir):
 
     assert len(rmsd) == 10
 
-    d = tmpdir.mkdir("test_openmm_trajectory")
+    dir = tmpdir.mkdir("test_openmm_trajectory")
 
-    f = sr.save(mols.trajectory(), d.join("test"), format=["PRMTOP", "RST"])
+    f = sr.save(mols.trajectory(), dir.join("test"), format=["PRMTOP", "RST"])
 
     mols2 = sr.load(f)
 

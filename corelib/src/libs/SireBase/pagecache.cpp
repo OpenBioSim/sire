@@ -45,6 +45,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <cstring> // needed for memcpy
+
 namespace SireBase
 {
     namespace detail
@@ -356,7 +358,7 @@ int RestoredPage::timeToLive() const
 /** Fetch 'n_bytes' bytes of data starting at 'offset' */
 QByteArray RestoredPage::fetch(unsigned int offset, unsigned int n_bytes) const
 {
-    if (offset + n_bytes > d.size())
+    if (offset + n_bytes > static_cast<unsigned int>(d.size()))
     {
         throw SireError::invalid_arg(
             QObject::tr("Impossible to fetch %1 bytes starting at "
@@ -453,7 +455,7 @@ void PageHandler::_lkr_addToRestored(const std::shared_ptr<RestoredPage> &restor
     // check to see if we need to replace an old page
     auto max_resident = max_resident_pages;
 
-    if (restored_pages.count() < max_resident)
+    if (static_cast<unsigned int>(restored_pages.count()) < max_resident)
     {
         restored_pages.append(restored);
         return;
@@ -1051,7 +1053,7 @@ void CacheData::run()
                 // get the data
                 QByteArray data = handle->fetch();
 
-                const int n_bytes = data.size();
+                const unsigned int n_bytes = static_cast<unsigned int>(data.size());
 
                 if (n_bytes >= page_size)
                 {
@@ -1268,7 +1270,7 @@ bool PageData::isCached() const
 unsigned int PageData::store(const QByteArray &data)
 {
     // this test will fail if the page is frozen
-    if (data.size() > this->bytesRemaining())
+    if (static_cast<unsigned int>(data.size()) > this->bytesRemaining())
     {
         QString message = QObject::tr("Data is too large to fit on this page!");
         Console::error(message);

@@ -1,34 +1,39 @@
 import sire as sr
-import os
 
 
 def test_pagecache(ala_mols, tmpdir):
+    import pathlib
+
     mols = ala_mols
 
     PageCache = sr.base.PageCache
 
-    root_dir = PageCache.root_directory()
+    root_dir = pathlib.PurePath(PageCache.root_directory()).as_posix()
 
-    assert os.path.exists(root_dir)
+    assert pathlib.Path(root_dir).exists()
 
     # should be the current path
-    assert root_dir == os.getcwd()
+    cwd = pathlib.Path().cwd().as_posix()
+
+    assert root_dir == cwd
 
     d = tmpdir.mkdir("test_pagecache")
 
-    PageCache.set_root_directory(d.strpath)
+    new_root_dir = pathlib.PurePath(d.strpath).as_posix()
 
-    root_dir2 = PageCache.root_directory()
+    PageCache.set_root_directory(new_root_dir)
 
-    assert os.path.exists(root_dir2)
+    root_dir2 = pathlib.PurePath(PageCache.root_directory()).as_posix()
+
+    assert pathlib.Path(root_dir2).exists()
 
     # should be the tempdir
-    assert root_dir2 == d.strpath
+    assert root_dir2 == new_root_dir
 
     # restore to the original root dir
     PageCache.set_root_directory(root_dir)
 
-    assert PageCache.root_directory() == root_dir
+    assert pathlib.PurePath(PageCache.root_directory()).as_posix() == root_dir
 
     c = PageCache("temp_pagecache_XXXXXX", 32 * 1024)
 
@@ -83,8 +88,8 @@ def test_pagecache(ala_mols, tmpdir):
 
     assert c.num_pages() >= 2
 
-    cache_dir = c.cache_dir()
+    cache_dir = pathlib.PurePath(c.cache_dir()).as_posix()
 
     assert "temp_pagecache_" in cache_dir
 
-    assert os.path.exists(cache_dir)
+    assert pathlib.Path(cache_dir).exists()
