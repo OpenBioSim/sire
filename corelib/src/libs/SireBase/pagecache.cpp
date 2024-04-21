@@ -32,6 +32,7 @@
 
 #include "SireBase/parallel.h"
 #include "SireBase/console.h"
+#include "SireBase/atexit.h"
 
 #include <QDir>
 #include <QThread>
@@ -81,6 +82,8 @@ namespace SireBase
             std::shared_ptr<RestoredPage> restore(QTemporaryFile &pagefile);
 
             QString path() const;
+
+            void cleanUpOnExit();
 
             static void setMaxResidentPages(unsigned int n_pages);
             static unsigned int maxResidentPages();
@@ -133,6 +136,8 @@ namespace SireBase
             unsigned int nBytes() const;
 
             void setSelf(const std::shared_ptr<CacheData> &cache);
+
+            static void cleanUpOnExit();
 
         protected:
             void run();
@@ -226,6 +231,8 @@ namespace SireBase
             QByteArray fetch(unsigned int offset, unsigned int n_bytes) const;
 
             PageCache parent() const;
+
+            void cleanUpOnExit();
 
         private:
             /** Weak pointer to the parent cache - weak so that the
@@ -394,6 +401,16 @@ PageHandler::~PageHandler()
     delete cache_dir;
 }
 
+/** Clean up the PageHandler (called on exit) */
+void PageHandler::cleanUpOnExit()
+{
+    QMutexLocker lkr(&mutex);
+    delete cache_dir;
+    cache_dir = 0;
+    checksums.clear();
+    restored_pages.clear();
+}
+
 /** Return the path to the cache directory */
 QString PageHandler::path() const
 {
@@ -478,6 +495,12 @@ void PageHandler::_lkr_addToRestored(const std::shared_ptr<RestoredPage> &restor
  */
 QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>> PageHandler::store(const QByteArray &data)
 {
+    if (cache_dir == 0)
+    {
+        // we are likely being shut down, so return a null pointer
+        return QPair<QTemporaryFile *, std::shared_ptr<RestoredPage>>(0, 0);
+    }
+
     QTemporaryFile *cache_file = new QTemporaryFile(cache_dir->filePath("page_XXXXXX.bin"));
 
     try
@@ -585,6 +608,78 @@ QList<std::weak_ptr<CacheData>> CacheData::caches;
  *  load from disk
  */
 unsigned int CacheData::max_page_size = 8 * 1024 * 1024;
+
+/** Clean-up function that will remove all temporary files etc when
+ *  the program exits, and will interupt all of the background threads
+ *  so that they will (hopefully) exit
+ */
+void CacheData::cleanUpOnExit()
+{
+    QMutexLocker lkr(&caches_mutex);
+
+    for (auto &cache : caches)
+    {
+        auto c = cache.lock();
+
+        if (c.get() != nullptr)
+        {
+            // interupt the thread so that it will stop
+            c->requestInterruption();
+
+            // clean up all of the pages associated with this cache
+            QMutexLocker lkr2(&(c->page_mutex));
+
+            for (auto &page : c->pages)
+            {
+                auto p = page.lock();
+
+                if (p.get() != nullptr)
+                {
+                    p->cleanUpOnExit();
+                }
+            }
+
+            lkr2.unlock();
+
+            auto handler = c->page_handler.lock();
+
+            if (handler.get() != nullptr)
+            {
+                handler->cleanUpOnExit();
+            }
+        }
+    }
+
+    // wait for all of the threads to stop, and if they don't
+    // then kill them
+    for (auto &cache : caches)
+    {
+        auto c = cache.lock();
+
+        if (c.get() != nullptr)
+        {
+            if (QThread::currentThread() != c.get())
+            {
+                if (not c->wait(50))
+                {
+                    // kill it
+                    c->terminate();
+                }
+            }
+        }
+    }
+}
+
+/** This is the clean-up function that is registered with the
+ *  atexit function. It will call the cleanUpOnExit function
+ *  of CacheData
+ */
+void clean_up_pagecache()
+{
+    CacheData::cleanUpOnExit();
+}
+
+static const RegisterExitFunction clean_up_pagecache_instance(clean_up_pagecache);
 
 /** Set the maximum page size to the passed value */
 void CacheData::setMaxPageSize(unsigned int size, bool update_existing)
@@ -1085,6 +1180,27 @@ PageData::~PageData()
 {
     delete cache_file;
     delete[] d;
+}
+
+/** Called when the program is exiting - makes sure that page file is
+ *  deleted
+ */
+void PageData::cleanUpOnExit()
+{
+    QMutexLocker lkr(&mutex);
+
+    if (cache_file != 0)
+    {
+        cache_file->remove();
+        delete cache_file;
+        cache_file = 0;
+    }
+
+    if (d != 0)
+    {
+        delete[] d;
+        d = 0;
+    }
 }
 
 /** Return the maximum number of bytes that can be stored in this page */

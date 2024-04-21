@@ -37,10 +37,40 @@ SIRE_BEGIN_HEADER
 
 namespace SireBase
 {
-
     SIREBASE_EXPORT void clean_up();
 
     SIREBASE_EXPORT void register_clean_up_function(std::function<void()> func);
+
+    /** This class makes it easier to register a function to be called
+     *  when the program exits. This is useful for cleaning up resources
+     *  that are allocated during the program's execution.
+     *
+     *  Simply define your function (should be void func() { ... }) and
+     *  then create a static instance of this class with the function as the
+     *  argument. The constructor will be called at library load
+     *  (static initialisation) and the function will be registered to be
+     *  called at exit.
+     *
+     *  e.g.
+     *
+     *  void my_exit_function()
+     *  {
+     *     // clean up code here
+     *  }
+     *
+     *  static RegisterExitFunction my_exit_function_instance(my_exit_function);
+     *
+     */
+    class SIREBASE_EXPORT RegisterExitFunction
+    {
+    public:
+        RegisterExitFunction(std::function<void()> func)
+        {
+            SireBase::register_clean_up_function(func);
+        }
+
+        ~RegisterExitFunction() {}
+    };
 
 } // namespace SireBase
 

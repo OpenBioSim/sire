@@ -38,14 +38,18 @@ namespace SireBase
 
     void clean_up()
     {
-        qDebug() << "Cleaning up...";
-
         for (auto &func : clean_up_functions)
         {
-            func();
+            try
+            {
+                func();
+            }
+            catch (...)
+            {
+                // we can't raise exceptions now, and shouldn't
+                // print anything, so just fail silently
+            }
         }
-
-        qDebug() << "...goodbye!";
     }
 
     void register_clean_up_function(std::function<void()> func)
