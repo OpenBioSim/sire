@@ -9,6 +9,37 @@ _use_new_api()
 _EMLEEngine = _Convert._SireOpenMM.EMLEEngine
 
 
+# Monkey-patch to get the underlying OpenMM force of the EMLEEngine.
+def _get_openmm_force(self):
+    """
+    Get the OpenMM Force for this engine.
+
+    Returns
+    -------
+
+    force : openmm.Force
+        The OpenMM Force object.
+    """
+
+    # Create a dynamics object for the QM region.
+    d = self._mols["property is_perturbable"].dynamics(
+        timestep="1fs",
+        constraint="none",
+        platform="cpu",
+        qm_engine=self,
+    )
+
+    from copy import deepcopy as _deepcopy
+
+    # Return a copy of the OpenMM EMLEForce.
+    # (For now this is set as the fourth force in the system.)
+    return _deepcopy(d._d._omm_mols.getSystem().getForce(4))
+
+
+# Bind the monkey-patched function to the EMLEEngine.
+_EMLEEngine.get_force = _get_openmm_force
+
+
 def emle(
     mols,
     qm_atoms,
@@ -139,4 +170,7 @@ def emle(
     # Update the molecule in the system.
     mols.update(qm_mols)
 
-    return engine
+    # Bind the system as a private attribute of the engine.
+    engine._mols = mols
+
+    return mols, engine

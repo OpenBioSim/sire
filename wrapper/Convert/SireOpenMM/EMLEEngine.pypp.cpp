@@ -106,18 +106,6 @@ void register_EMLEEngine_class(){
                 , "Get the QM cutoff distance.\nReturn:s\nThe QM cutoff distance.\n" );
         
         }
-        { //::SireOpenMM::EMLEEngine::getForce
-        
-            typedef ::SireOpenMM::EMLEForce ( ::SireOpenMM::EMLEEngine::*getForce_function_type)(  ) const;
-            getForce_function_type getForce_function_value( &::SireOpenMM::EMLEEngine::getForce );
-            
-            EMLEEngine_exposer.def( 
-                "getForce"
-                , getForce_function_value
-                , bp::release_gil_policy()
-                , "Get the EMLE force object." );
-        
-        }
         { //::SireOpenMM::EMLEEngine::getLambda
         
             typedef double ( ::SireOpenMM::EMLEEngine::*getLambda_function_type)(  ) const;

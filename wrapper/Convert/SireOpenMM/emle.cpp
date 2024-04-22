@@ -1006,20 +1006,3 @@ QMForce* EMLEEngine::createForce() const
         this->charges
     );
 }
-
-EMLEForce EMLEEngine::getForce() const
-{
-    return EMLEForce(
-        this->callback,
-        this->cutoff,
-        this->neighbour_list_frequency,
-        this->lambda,
-        this->atoms,
-        this->mm1_to_qm,
-        this->mm1_to_mm2,
-        this->bond_scale_factors,
-        this->mm2_atoms,
-        this->numbers,
-        this->charges
-    );
-}

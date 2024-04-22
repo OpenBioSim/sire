@@ -665,6 +665,13 @@ def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_length
 
     map: sire.legacy.Base.PropertyMap
         The property map for the system.
+
+
+    Returns
+    -------
+
+    engine: sire.legacy.QM.Engine
+        The configured QM engine.
     """
 
     # Work out the indices of the QM atoms.
@@ -696,4 +703,4 @@ def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_length
     except:
         raise Exception("Unable to set link atom information.")
 
-    return mols, engine
+    return engine

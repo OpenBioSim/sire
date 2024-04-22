@@ -555,9 +555,6 @@ namespace SireOpenMM
         //! Create an EMLE force object.
         QMForce* createForce() const;
 
-        //! Get the EMLE force object.
-        EMLEForce getForce() const;
-
     private:
         EMLECallback callback;
         SireUnits::Dimension::Length cutoff;
