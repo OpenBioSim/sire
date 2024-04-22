@@ -758,6 +758,16 @@ double EMLEForceImpl::computeForce(
         }
     }
 
+    // Clamp the lambda value.
+    if (lambda < 0.0)
+    {
+        lambda = 0.0;
+    }
+    else if (lambda > 1.0)
+    {
+        lambda = 1.0;
+    }
+
     // Now update the force vector.
 
     // First the QM atoms.
