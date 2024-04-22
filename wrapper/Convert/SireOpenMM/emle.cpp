@@ -736,8 +736,19 @@ double EMLEForceImpl::computeForce(
     auto forces_qm = result.get<1>();
     auto forces_mm = result.get<2>();
 
-    // Store the current lambda weighting factor.
-    const auto lambda = this->owner.getLambda();
+    // The current interpolation (weighting) parameter.
+    double lambda;
+
+    // Try to get the "lambda_emle" global parameter from the context.
+    try
+    {
+        lambda = context.getParameter("lambda_emle");
+    }
+    // Fall back on the lambda value stored in the EMLEForce object.
+    catch (...)
+    {
+        lambda = this->owner.getLambda();
+    }
 
     // Now update the force vector.
 
