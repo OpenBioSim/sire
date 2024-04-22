@@ -64,6 +64,34 @@ private:
 ///////// Implementation of EMLECallback
 /////////
 
+// A registry to store Python callback objects.
+QHash<QUuid, bp::object> py_object_registry;
+
+// A mutex to protect the registry.
+std::mutex py_object_mutex;
+
+// Set a callback Python object in the registry using a mutex.
+void setPyObject(bp::object cb, QString uuid)
+{
+    std::lock_guard<std::mutex> lock(py_object_mutex);
+    py_object_registry[uuid] = cb;
+};
+
+// Get a callback object from the registry using a mutex.
+bp::object getPythonObject(QString uuid)
+{
+    std::lock_guard<std::mutex> lock(py_object_mutex);
+
+    if (not py_object_registry.contains(uuid))
+    {
+        throw SireError::invalid_key(QObject::tr(
+            "Unable to find UUID %1 in the EMLEForce callback registry.").arg(uuid),
+            CODELOC);
+    }
+
+    return py_object_registry[uuid];
+}
+
 static const RegisterMetaType<EMLECallback> r_emlecallback(NO_ROOT);
 
 QDataStream &operator<<(QDataStream &ds, const EMLECallback &emlecallback)
@@ -72,7 +100,13 @@ QDataStream &operator<<(QDataStream &ds, const EMLECallback &emlecallback)
 
     SharedDataStream sds(ds);
 
-    sds << emlecallback.callback;
+    // Generate a unique identifier for the callback.
+    auto uuid = QUuid::createUuid().toString();
+
+    sds << uuid << emlecallback.callback;
+
+    // Set the Python object in the registry.
+    setPyObject(emlecallback.py_object, uuid);
 
     return ds;
 }
@@ -85,7 +119,13 @@ QDataStream &operator>>(QDataStream &ds, EMLECallback &emlecallback)
     {
         SharedDataStream sds(ds);
 
-        sds >> emlecallback.callback;
+        QString uuid;
+
+        // Get the UUID of the Python object and the callback name.
+        sds >> uuid >> emlecallback.callback;
+
+        // Set the Python object.
+        emlecallback.py_object = getPythonObject(uuid);
     }
     else
         throw version_error(v, "1", r_emlecallback, CODELOC);
@@ -323,31 +363,6 @@ EMLEForce::call(
 
 namespace OpenMM
 {
-    // A callback registry;
-    QHash<QUuid, EMLECallback> callback_registry;
-
-    // A mutex to protect the registry.
-    std::mutex callback_mutex;
-
-    // Set a callback in the registry using a mutex.
-    void setCallback(EMLECallback cb, QString uuid)
-    {
-        std::lock_guard<std::mutex> lock(callback_mutex);
-        callback_registry[uuid] = cb;
-    };
-
-    // Get a callback from the registry using a mutex.
-    EMLECallback getCallback(QString uuid)
-    {
-        std::lock_guard<std::mutex> lock(callback_mutex);
-
-        if (not callback_registry.contains(uuid))
-        {
-            throw OpenMM::OpenMMException("Unable to find UUID in the EMLEForce callback registry.");
-        }
-
-        return callback_registry[uuid];
-    }
 
     class EMLEForceProxy : public SerializationProxy {
         public:
@@ -363,20 +378,11 @@ namespace OpenMM
                 EMLEForce emleforce = *static_cast<const EMLEForce*>(object);
                 ds << emleforce;
 
-                // Generate a unique identifier for the callback.
-                auto uuid = QUuid::createUuid().toString();
-
                 // Set the version.
                 node.setIntProperty("version", 0);
 
                 // Set the data by converting the QByteArray to a hexidecimal string.
                 node.setStringProperty("data", data.toHex().data());
-
-                // Set the UID.
-                node.setStringProperty("uuid", uuid.toStdString());
-
-                // Set the callback.
-                setCallback(emleforce.getCallback(), uuid);
             };
 
             void* deserialize(const SerializationNode& node) const
@@ -400,18 +406,17 @@ namespace OpenMM
                 // Deserialize the object.
                 QDataStream ds(data);
                 EMLEForce emleforce;
-                ds >> emleforce;
 
-                // Get the UID string.
-                auto uuid = QString::fromStdString(node.getStringProperty("uuid"));
+                try
+                {
+                    ds >> emleforce;
+                }
+                catch (...)
+                {
+                    throw OpenMM::OpenMMException("Unable to find UUID in the EMLEForce callback registry.");
+                }
 
-                // Create a new EMLEForce object.
-                auto emleforce_ptr = new EMLEForce(emleforce);
-
-                // Set the callback.
-                emleforce_ptr->setCallback(getCallback(uuid));
-
-                return emleforce_ptr;
+                return new EMLEForce(emleforce);
             };
     };
 
