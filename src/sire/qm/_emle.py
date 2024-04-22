@@ -10,16 +10,19 @@ _EMLEEngine = _Convert._SireOpenMM.EMLEEngine
 
 
 # Monkey-patch to get the underlying OpenMM force of the EMLEEngine.
-def _get_openmm_force(self):
+def _get_openmm_forces(self):
     """
-    Get the OpenMM Force for this engine.
+    Get the OpenMM forces for this engine.
 
     Returns
     -------
 
-    force : openmm.Force
-        The OpenMM Force object.
+    force : [openmm.Force]
+        The OpenMM forces.
     """
+
+    from copy import deepcopy as _deepcopy
+    from openmm import CustomBondForce as _CustomBondForce
 
     # Create a dynamics object for the QM region.
     d = self._mols["property is_perturbable"].dynamics(
@@ -29,15 +32,20 @@ def _get_openmm_force(self):
         qm_engine=self,
     )
 
-    from copy import deepcopy as _deepcopy
+    # Get the OpenMM EMLEForce.
+    emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
 
-    # Return a copy of the OpenMM EMLEForce.
-    # (For now this is set as the fourth force in the system.)
-    return _deepcopy(d._d._omm_mols.getSystem().getForce(4))
+    # Create a null CustomBondForce to add the EMLE interpolation
+    # parameter.
+    cv_force = _CustomBondForce("")
+    cv_force.addGlobalParameter("lambda_emle", 1.0)
+
+    # Return the forces.
+    return [emle_force, cv_force]
 
 
 # Bind the monkey-patched function to the EMLEEngine.
-_EMLEEngine.get_force = _get_openmm_force
+_EMLEEngine.get_forces = _get_openmm_forces
 
 
 def emle(
