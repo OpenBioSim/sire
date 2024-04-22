@@ -12,7 +12,11 @@ _EMLEEngine = _Convert._SireOpenMM.EMLEEngine
 # Monkey-patch to get the underlying OpenMM force of the EMLEEngine.
 def _get_openmm_forces(self):
     """
-    Get the OpenMM forces for this engine.
+    Get the OpenMM forces for this engine. The first force is the actual
+    EMLEForce, which uses a CustomCPPForceImpl to calculate the electrostatic
+    embedding force. The second is a null CustomBondForce that can be used to
+    add a "lambda_emle" global parameter to a context to allow the force to be
+    scaled.
 
     Returns
     -------
