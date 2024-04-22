@@ -763,6 +763,13 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             LambdaSchedule::standard_morph());
     }
 
+    // Add any QM force first so that we can guarantee that it is index zero.
+    if (qmff != 0)
+    {
+        lambda_lever.setForceIndex("qmff", system.addForce(qmff));
+        lambda_lever.addLever("qm_scale");
+    }
+
     // We can now add the standard forces to the OpenMM::System.
     // We do this here, so that we can capture the index of the
     // force and associate it with a name in the lever.
@@ -790,12 +797,6 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     lambda_lever.setForceIndex("torsion", system.addForce(dihff));
     lambda_lever.addLever("torsion_phase");
     lambda_lever.addLever("torsion_k");
-
-    if (qmff != 0)
-    {
-        lambda_lever.setForceIndex("qmff", system.addForce(qmff));
-        lambda_lever.addLever("qm_scale");
-    }
 
     ///
     /// Stage 4 - define the forces for ghost atoms
