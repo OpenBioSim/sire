@@ -744,10 +744,18 @@ double EMLEForceImpl::computeForce(
     {
         lambda = context.getParameter("lambda_emle");
     }
-    // Fall back on the lambda value stored in the EMLEForce object.
     catch (...)
     {
-        lambda = this->owner.getLambda();
+        // Try to get the "lambda_interpolate" global parameter from the context.
+        try
+        {
+            lambda = context.getParameter("lambda_interpolate");
+        }
+        // Fall back on the lambda value stored in the EMLEForce object.
+        catch (...)
+        {
+            lambda = this->owner.getLambda();
+        }
     }
 
     // Now update the force vector.
