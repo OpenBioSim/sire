@@ -17,6 +17,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 
 * Please add an item to this changelog when you create your PR
 * Correctly set the ``element1`` property in ``sire.morph.create_from_pertfile``.
+* Added mising :meth:`~sire.vol.TriclinicBox.maximum_cutoff` method so that
+  the cutoff is set correctly when creating a :obj:`~sire.system.ForceFieldInfo`
+  object.
 
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------

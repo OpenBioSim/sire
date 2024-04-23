@@ -141,3 +141,34 @@ def test_stream():
 
     # Make sure the boxes are the same.
     assert recovered_box == box
+
+
+def test_max_cutoff(ala_mols):
+    """
+    Test that the maximum cutoff is set correctly.
+    """
+
+    # Create a local
+    mols = ala_mols.clone()
+
+    # Create a cubic triclinic space.
+
+    # Set the vectors.
+    v0 = sr.maths.Vector(50, 0, 0)
+    v1 = sr.maths.Vector(0, 50, 0)
+    v2 = sr.maths.Vector(0, 0, 50)
+
+    # Create the space.
+    space = sr.vol.TriclinicBox(v0, v1, v2)
+
+    # Check the maximum cutoff.
+    assert space.maximum_cutoff() == 25 * sr.units.angstroms
+
+    # Now set the space property on the molecules.
+    mols.set_property("space", space)
+
+    # Create a ForceFieldInfo object.
+    ffinfo = sr.system.ForceFieldInfo(mols)
+
+    # Check the cutoff. This is the maximum cutoff minus 1 angstrom.
+    assert ffinfo.cutoff() == 24 * sr.units.angstroms
