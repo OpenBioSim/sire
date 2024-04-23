@@ -148,7 +148,7 @@ def test_max_cutoff(ala_mols):
     Test that the maximum cutoff is set correctly.
     """
 
-    # Create a local
+    # Create a local copy of the molecules.
     mols = ala_mols.clone()
 
     # Create a cubic triclinic space.

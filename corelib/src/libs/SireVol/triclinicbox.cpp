@@ -567,7 +567,7 @@ Matrix TriclinicBox::boxMatrix() const
 
 SireUnits::Dimension::Length TriclinicBox::maximumCutoff() const
 {
-    // If the box is reduced, then use the minumum diagonal element.
+    // If the box is reduced, then use half the minimum diagonal element.
     if (this->isReduced())
     {
         QList<double> diagonals = {this->v0.x(), this->v1.y(), this->v2.z()};
