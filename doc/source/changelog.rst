@@ -16,6 +16,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 -----------------------------------------------------------------------------------------
 
 * Correctly set the ``element1`` property in ``sire.morph.create_from_pertfile``.
+* Added mising :meth:`~sire.vol.TriclinicBox.maximum_cutoff` method so that
+  the cutoff is set correctly when creating a :obj:`~sire.system.ForceFieldInfo`
+  object.
 
 * Added a :class:`sire.base.PageCache` class which can be used to cache and
   restore objects to memory pages which are automatically paged to and from
