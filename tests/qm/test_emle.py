@@ -13,6 +13,13 @@ try:
 except:
     has_emle = False
 
+try:
+    from openmmml import MLPotential
+
+    has_openmm_ml = True
+except:
+    has_openmm_ml = False
+
 
 def test_callback():
     """Makes sure that a callback method works correctly"""
@@ -104,7 +111,7 @@ def test_interpolate(ala_mols, selection):
     """
 
     # Create a local copy of the test system.
-    mols = ala_mols.__copy__()
+    mols = ala_mols.clone()
 
     # Create an EMLE calculator.
     calculator = EMLECalculator(device="cpu")
@@ -141,3 +148,105 @@ def test_interpolate(ala_mols, selection):
     assert math.isclose(
         nrg_interp.value(), 0.5 * (nrg_mm + nrg_emle).value(), rel_tol=1e-4
     )
+
+
+@pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
+@pytest.mark.skipif(not has_openmm_ml, reason="openmm-ml is not installed")
+def test_openmm_ml(ala_mols):
+    """
+    Make sure that the EMLE engine can be used with OpenMM-ML.
+    """
+
+    import openmm
+    import sire as sr
+
+    # Create a local copy of the test system.
+    mols = ala_mols.clone()
+
+    # Create an EMLE calculator.
+    calculator = EMLECalculator(backend="torchani", device="cpu")
+
+    # Create an EMLE engine bound to the calculator.
+    emle_mols, engine = emle(mols, mols[0], calculator)
+
+    # Create a QM/MM capable dynamics object.
+    d = emle_mols.dynamics(
+        timestep="1fs",
+        constraint="none",
+        qm_engine=engine,
+        cutoff_type="pme",
+        platform="cpu",
+    )
+
+    # Get the energy.
+    nrg_sire = d.current_potential_energy().to("kJ_per_mol")
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # Create a new EMLECalculator without a backend.
+        calculator = EMLECalculator(backend=None, device="cpu")
+
+        # Create an EMLE engine bound to the calculator.
+        emle_mols, engine = emle(mols, mols[0], calculator)
+
+        # The first molecule (the dipeptide) is the QM region. This is
+        # perturbable and can be interpolated between MM (the reference state)
+        # and QM (the perturbed state). Here we want the QM state, which has
+        # zeroed charges for the QM region. This means that the entire
+        # intermolecular electrostatic interaction will be computed by
+        # EMLE, rather than using the MM charges for mechanical embedding.
+        qm_mol = sr.morph.link_to_perturbed(emle_mols[0])
+        emle_mols.update(qm_mol)
+
+        # Write the sytem to an AMBER coordinate and topology file.
+        files = sr.expand(tmpdir, ["ala.rst7", "ala.prm7"])
+        for file in files:
+            sr.save(emle_mols, file)
+
+        # Load back the files and create an OpenMM topology.
+        inpcrd = openmm.app.AmberInpcrdFile(f"{tmpdir}/ala.rst7")
+        prmtop = openmm.app.AmberPrmtopFile(f"{tmpdir}/ala.prm7")
+        topology = prmtop.topology
+
+        # Create the MM system.
+        mm_system = prmtop.createSystem(
+            nonbondedMethod=openmm.app.PME,
+            nonbondedCutoff=1 * openmm.unit.nanometer,
+            constraints=openmm.app.HBonds,
+        )
+
+        # Define the ML region.
+        ml_atoms = list(range(mols[0].num_atoms()))
+
+        # Create the mixed ML/MM system.
+        potential = MLPotential("ani2x")
+        ml_system = potential.createMixedSystem(
+            topology, mm_system, ml_atoms, interpolate=False
+        )
+
+        # Get the OpenMM forces from the engine.
+        emle_force, interpolation_force = engine.get_forces()
+
+        # Add the EMLE force to the system.
+        ml_system.addForce(emle_force)
+
+        # Create the integrator.
+        integrator = openmm.LangevinMiddleIntegrator(
+            300 * openmm.unit.kelvin,
+            1.0 / openmm.unit.picosecond,
+            0.002 * openmm.unit.picosecond,
+        )
+
+        # Create the context.
+        context = openmm.Context(ml_system, integrator)
+
+        # Set the positions.
+        context.setPositions(inpcrd.positions)
+
+        # Get the energy.
+        state = context.getState(getEnergy=True)
+        nrg_openmm = state.getPotentialEnergy().value_in_unit(
+            openmm.unit.kilojoules_per_mole
+        )
+
+        # Make sure the energies are close.
+        assert math.isclose(nrg_openmm, nrg_sire, rel_tol=1e-3)
