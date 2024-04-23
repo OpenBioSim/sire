@@ -21,8 +21,13 @@ def _get_openmm_forces(self):
     Returns
     -------
 
-    force : [openmm.Force]
-        The OpenMM forces.
+    emle_force : openmm.Force
+        The EMLEForce object to compute the electrostatic embedding force.
+
+    interpolation_force : openmm.CustomBondForce
+        A null CustomBondForce object that can be used to add a "lambda_emle"
+        global parameter to an OpenMM context. This allows the electrostatic
+        embedding force to be scaled.
     """
 
     from copy import deepcopy as _deepcopy
@@ -41,11 +46,11 @@ def _get_openmm_forces(self):
 
     # Create a null CustomBondForce to add the EMLE interpolation
     # parameter.
-    cv_force = _CustomBondForce("")
-    cv_force.addGlobalParameter("lambda_emle", 1.0)
+    interpolation_force = _CustomBondForce("")
+    interpolation_force.addGlobalParameter("lambda_emle", 1.0)
 
     # Return the forces.
-    return [emle_force, cv_force]
+    return emle_force, interpolation_force
 
 
 # Bind the monkey-patched function to the EMLEEngine.
