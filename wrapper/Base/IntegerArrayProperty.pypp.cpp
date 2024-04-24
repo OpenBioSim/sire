@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireBase::IntegerArrayProperty __copy__(const SireBase::IntegerArrayProperty &other){ return SireBase::IntegerArrayProperty(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -188,9 +190,9 @@ void register_IntegerArrayProperty_class(){
         
         }
         IntegerArrayProperty_exposer.staticmethod( "typeName" );
-        IntegerArrayProperty_exposer.def( "__copy__", &__copy__);
-        IntegerArrayProperty_exposer.def( "__deepcopy__", &__copy__);
-        IntegerArrayProperty_exposer.def( "clone", &__copy__);
+        IntegerArrayProperty_exposer.def( "__copy__", &__copy__<SireBase::IntegerArrayProperty>);
+        IntegerArrayProperty_exposer.def( "__deepcopy__", &__copy__<SireBase::IntegerArrayProperty>);
+        IntegerArrayProperty_exposer.def( "clone", &__copy__<SireBase::IntegerArrayProperty>);
         IntegerArrayProperty_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::IntegerArrayProperty >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IntegerArrayProperty_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::IntegerArrayProperty >,

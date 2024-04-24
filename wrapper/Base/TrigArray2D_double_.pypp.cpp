@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::TrigArray2D<double> __copy__(const SireBase::TrigArray2D<double> &other){ return SireBase::TrigArray2D<double>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -162,9 +164,9 @@ void register_TrigArray2D_double__class(){
                 , "" );
         
         }
-        TrigArray2D_double__exposer.def( "__copy__", &__copy__);
-        TrigArray2D_double__exposer.def( "__deepcopy__", &__copy__);
-        TrigArray2D_double__exposer.def( "clone", &__copy__);
+        TrigArray2D_double__exposer.def( "__copy__", &__copy__<SireBase::TrigArray2D<double>>);
+        TrigArray2D_double__exposer.def( "__deepcopy__", &__copy__<SireBase::TrigArray2D<double>>);
+        TrigArray2D_double__exposer.def( "clone", &__copy__<SireBase::TrigArray2D<double>>);
         TrigArray2D_double__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::TrigArray2D<double> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         TrigArray2D_double__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::TrigArray2D<double> >,

@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireBase::detail::PackedArray2D_Array<QVariant> __copy__(const SireBase::detail::PackedArray2D_Array<QVariant> &other){ return SireBase::detail::PackedArray2D_Array<QVariant>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -195,9 +197,9 @@ void register_PackedArray2D_QVariant_Array_class(){
                 , "" );
         
         }
-        PackedArray2D_QVariant_Array_exposer.def( "__copy__", &__copy__);
-        PackedArray2D_QVariant_Array_exposer.def( "__deepcopy__", &__copy__);
-        PackedArray2D_QVariant_Array_exposer.def( "clone", &__copy__);
+        PackedArray2D_QVariant_Array_exposer.def( "__copy__", &__copy__<SireBase::detail::PackedArray2D_Array<QVariant>>);
+        PackedArray2D_QVariant_Array_exposer.def( "__deepcopy__", &__copy__<SireBase::detail::PackedArray2D_Array<QVariant>>);
+        PackedArray2D_QVariant_Array_exposer.def( "clone", &__copy__<SireBase::detail::PackedArray2D_Array<QVariant>>);
         PackedArray2D_QVariant_Array_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::detail::PackedArray2D_Array<QVariant> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PackedArray2D_QVariant_Array_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::detail::PackedArray2D_Array<QVariant> >,

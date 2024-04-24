@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireBase::PackedArray2D<SireBase::PropertyList> __copy__(const SireBase::PackedArray2D<SireBase::PropertyList> &other){ return SireBase::PackedArray2D<SireBase::PropertyList>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -404,9 +406,9 @@ void register_PackedArray2D_PropertyList_class(){
         
         }
         PackedArray2D_PropertyList_exposer.staticmethod( "fromVariant" );
-        PackedArray2D_PropertyList_exposer.def( "__copy__", &__copy__);
-        PackedArray2D_PropertyList_exposer.def( "__deepcopy__", &__copy__);
-        PackedArray2D_PropertyList_exposer.def( "clone", &__copy__);
+        PackedArray2D_PropertyList_exposer.def( "__copy__", &__copy__<SireBase::PackedArray2D<SireBase::PropertyList>>);
+        PackedArray2D_PropertyList_exposer.def( "__deepcopy__", &__copy__<SireBase::PackedArray2D<SireBase::PropertyList>>);
+        PackedArray2D_PropertyList_exposer.def( "clone", &__copy__<SireBase::PackedArray2D<SireBase::PropertyList>>);
         PackedArray2D_PropertyList_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireBase::PackedArray2D<SireBase::PropertyList> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PackedArray2D_PropertyList_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireBase::PackedArray2D<SireBase::PropertyList> >,

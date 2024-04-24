@@ -207,6 +207,30 @@ void register_AtomIdxMapping_class(){
                 , "Return the mapping for the atoms that exist in both the reference\n  and perturbed states, from the index of the atom in the perturbed\n  molecule to the index of the atom in the merged molecule.\n  Note - the reference index is the index in the merged molecule.\n\n  If include_unmapped is true, then also include atoms that are\n  unmapped in either end state. In these cases, the reference index\n  will be the index in the merged molecule (so will always be valid)\n  and atoms that are unmapped in the perturbed state are not\n  included in the returned dictionary.\n" );
         
         }
+        { //::SireMol::AtomIdxMapping::mappedCGAtomIdxIn0
+        
+            typedef ::QList< SireMol::CGAtomIdx > ( ::SireMol::AtomIdxMapping::*mappedCGAtomIdxIn0_function_type)(  ) const;
+            mappedCGAtomIdxIn0_function_type mappedCGAtomIdxIn0_function_value( &::SireMol::AtomIdxMapping::mappedCGAtomIdxIn0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "mappedCGAtomIdxIn0"
+                , mappedCGAtomIdxIn0_function_value
+                , bp::release_gil_policy()
+                , "Equivalent of mappedIn0, but return as a CGAtomIdx" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::mappedCGAtomIdxIn1
+        
+            typedef ::QList< SireMol::CGAtomIdx > ( ::SireMol::AtomIdxMapping::*mappedCGAtomIdxIn1_function_type)(  ) const;
+            mappedCGAtomIdxIn1_function_type mappedCGAtomIdxIn1_function_value( &::SireMol::AtomIdxMapping::mappedCGAtomIdxIn1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "mappedCGAtomIdxIn1"
+                , mappedCGAtomIdxIn1_function_value
+                , bp::release_gil_policy()
+                , "Equivalent of mappedIn1, but return as a CGAtomIdx" );
+        
+        }
         { //::SireMol::AtomIdxMapping::mappedIn0
         
             typedef ::QList< SireMol::AtomIdx > ( ::SireMol::AtomIdxMapping::*mappedIn0_function_type)(  ) const;
@@ -373,6 +397,30 @@ void register_AtomIdxMapping_class(){
                 , typeName_function_value
                 , bp::release_gil_policy()
                 , "" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::unmappedCGAtomIdxIn0
+        
+            typedef ::QList< SireMol::CGAtomIdx > ( ::SireMol::AtomIdxMapping::*unmappedCGAtomIdxIn0_function_type)(  ) const;
+            unmappedCGAtomIdxIn0_function_type unmappedCGAtomIdxIn0_function_value( &::SireMol::AtomIdxMapping::unmappedCGAtomIdxIn0 );
+            
+            AtomIdxMapping_exposer.def( 
+                "unmappedCGAtomIdxIn0"
+                , unmappedCGAtomIdxIn0_function_value
+                , bp::release_gil_policy()
+                , "Equivalent of unmappedIn0, but return as a CGAtomIdx" );
+        
+        }
+        { //::SireMol::AtomIdxMapping::unmappedCGAtomIdxIn1
+        
+            typedef ::QList< SireMol::CGAtomIdx > ( ::SireMol::AtomIdxMapping::*unmappedCGAtomIdxIn1_function_type)(  ) const;
+            unmappedCGAtomIdxIn1_function_type unmappedCGAtomIdxIn1_function_value( &::SireMol::AtomIdxMapping::unmappedCGAtomIdxIn1 );
+            
+            AtomIdxMapping_exposer.def( 
+                "unmappedCGAtomIdxIn1"
+                , unmappedCGAtomIdxIn1_function_value
+                , bp::release_gil_policy()
+                , "Equivalent of unmappedIn1, but return as a CGAtomIdx" );
         
         }
         { //::SireMol::AtomIdxMapping::unmappedIn0

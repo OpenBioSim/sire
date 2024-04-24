@@ -45,6 +45,7 @@
 #include "select.h"
 
 #include "SireBase/lazyevaluator.h"
+#include "SireBase/parallel.h"
 
 #include "SireMol/errors.h"
 
@@ -1150,9 +1151,36 @@ void Molecules::loadFrame(int frame, const LazyEvaluator &evaluator,
 
     frame = Index(frame).map(n);
 
-    for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
+    if (should_run_in_parallel(mols.count(), map))
     {
-        it->loadFrame(frame, evaluator, map);
+        QVector<Molecule> mols2;
+        const int nmols = mols.count();
+        mols2.reserve(nmols);
+
+        for (auto it = this->mols.constBegin(); it != this->mols.constEnd(); ++it)
+        {
+            mols2.append(it.value().molecule());
+        }
+
+        auto mols2_array = mols2.data();
+
+        tbb::parallel_for(tbb::blocked_range<int>(0, nmols),
+                          [&](const tbb::blocked_range<int> &r)
+                          {
+                              for (int i = r.begin(); i < r.end(); ++i)
+                              {
+                                  mols2_array[i].loadFrame(frame, evaluator, map);
+                              }
+                          });
+
+        this->update(Molecules(mols2));
+    }
+    else
+    {
+        for (auto it = this->mols.begin(); it != this->mols.end(); ++it)
+        {
+            it->loadFrame(frame, evaluator, map);
+        }
     }
 }
 

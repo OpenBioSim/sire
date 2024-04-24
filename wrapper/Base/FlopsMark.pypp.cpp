@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireBase::FlopsMark __copy__(const SireBase::FlopsMark &other){ return SireBase::FlopsMark(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireBase::FlopsMark&){ return "SireBase::FlopsMark";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -145,9 +147,9 @@ void register_FlopsMark_class(){
         FlopsMark_exposer.staticmethod( "benchmarkProduct" );
         FlopsMark_exposer.staticmethod( "benchmarkQuotient" );
         FlopsMark_exposer.staticmethod( "benchmarkSum" );
-        FlopsMark_exposer.def( "__copy__", &__copy__);
-        FlopsMark_exposer.def( "__deepcopy__", &__copy__);
-        FlopsMark_exposer.def( "clone", &__copy__);
+        FlopsMark_exposer.def( "__copy__", &__copy__<SireBase::FlopsMark>);
+        FlopsMark_exposer.def( "__deepcopy__", &__copy__<SireBase::FlopsMark>);
+        FlopsMark_exposer.def( "clone", &__copy__<SireBase::FlopsMark>);
         FlopsMark_exposer.def( "__str__", &pvt_get_name);
         FlopsMark_exposer.def( "__repr__", &pvt_get_name);
     }

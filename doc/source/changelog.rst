@@ -15,11 +15,34 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 `2024.2.0 <https://github.com/openbiosim/sire/compare/2024.1.0...2024.2.0>`__ - June 2024
 -----------------------------------------------------------------------------------------
 
-* Please add an item to this changelog when you create your PR
 * Correctly set the ``element1`` property in ``sire.morph.create_from_pertfile``.
 * Added mising :meth:`~sire.vol.TriclinicBox.maximum_cutoff` method so that
   the cutoff is set correctly when creating a :obj:`~sire.system.ForceFieldInfo`
   object.
+
+* Added a :class:`sire.base.PageCache` class which can be used to cache and
+  restore objects to memory pages which are automatically paged to and from
+  disk as needed. This lets you work on data that can't fit in memory.
+
+* Updated the way that :class:`sire.system.System` objects hold the
+  set of temporary frames in a trajectory. Rather than each molecule holding
+  its own temporary frame, now the :class:`~sire.system.System` object holds
+  a ``SystemTrajectory`` object. This holds the frame data for all molecules
+  in the :class:`~sire.system.System` in a single binary array. The data
+  for this array is paged to disk as needed via the above
+  :class:`sire.base.PageCache` class. This both significantly speeds up
+  processing of these temporary frames, and ensures that long simulations
+  do not fill memory, causing the system to crash. In addition, the
+  ``SystemTrajectory`` object is NOT streamed to a S3 file. This means that
+  the S3 file (used normally for restarts) won't grow unbounded with
+  temporary frames, meaning that it is safe to create restarts of
+  long-running simulations. Note that this does mean that the temporary
+  directory is lost. You **must** save the trajectory to a file at the
+  end of your simulation or it will be lost. You can do this using the
+  standard trajectory save functions, e.g.
+  ``sire.save(mols.trajectory(), "output", format=["PRMTOP", "RST"])``.
+
+* Please add an item to this changelog when you create your PR
 
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
 ------------------------------------------------------------------------------------------

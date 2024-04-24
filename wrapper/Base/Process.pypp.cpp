@@ -13,6 +13,8 @@ namespace bp = boost::python;
 
 SireBase::Process __copy__(const SireBase::Process &other){ return SireBase::Process(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireBase::Process&){ return "SireBase::Process";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -241,9 +243,9 @@ void register_Process_class(){
         Process_exposer.staticmethod( "killAll" );
         Process_exposer.staticmethod( "run" );
         Process_exposer.staticmethod( "typeName" );
-        Process_exposer.def( "__copy__", &__copy__);
-        Process_exposer.def( "__deepcopy__", &__copy__);
-        Process_exposer.def( "clone", &__copy__);
+        Process_exposer.def( "__copy__", &__copy__<SireBase::Process>);
+        Process_exposer.def( "__deepcopy__", &__copy__<SireBase::Process>);
+        Process_exposer.def( "clone", &__copy__<SireBase::Process>);
         Process_exposer.def( "__str__", &pvt_get_name);
         Process_exposer.def( "__repr__", &pvt_get_name);
     }

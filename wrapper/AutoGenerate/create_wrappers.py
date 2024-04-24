@@ -375,6 +375,7 @@ def call_with_released_gil(c, func_name):
 
 all_exported_classes = {}
 
+
 def export_class(
     mb, classname, aliases, includes, special_code, auto_str_function=True
 ):
@@ -508,10 +509,17 @@ def export_class(
                             % (class_name, class_name, class_name)
                         )
 
-                        c.add_registration_code('def( "__copy__", &__copy__)')
+                        c.add_declaration_code('#include "Helpers/copy.hpp"')
+                        c.add_registration_code(
+                            'def( "__copy__", &__copy__<%s>)' % class_name
+                        )
 
-                        c.add_registration_code('def( "__deepcopy__", &__copy__)')
-                        c.add_registration_code('def( "clone", &__copy__)')
+                        c.add_registration_code(
+                            'def( "__deepcopy__", &__copy__<%s>)' % class_name
+                        )
+                        c.add_registration_code(
+                            'def( "clone", &__copy__<%s>)' % class_name
+                        )
 
                         # only do this once for the class
                         break
