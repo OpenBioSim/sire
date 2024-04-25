@@ -178,6 +178,11 @@ will use the ``ani2x``, as was used for the ``EMLECalculator`` above. The
 >>> from openmmml import MLPotential
 >>> potential = MLPotential("ani2x")
 
+.. note::
+
+    ``OpenMM-ML`` isn't installed by default in the ``emle-sire`` environment.
+    To install it, use ``conda install -c conda-forge openmm-ml``.
+
 Since we are now using the ``MLPotential`` for the QM calculation, we need to
 create a new ``EMLECalculator`` object with no backend, i.e. one that only
 computes the electrostatic embedding:
