@@ -16,3 +16,5 @@ QM/MM simulations using ``sire``.
    :maxdepth: 1
 
    partXX/01_emle
+   partXX/02_adp_pmf
+   partXX/03_diels_alder
