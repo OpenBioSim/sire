@@ -83,6 +83,7 @@ for the two dihedral angles. Here we will use simple harmonic biasing potentials
 First the Φ dihedral, which is formed by atom indices 4, 6, 8, and 14:
 
 >>> import openmm
+>>> import openmm.app
 >>> bias_torsion_phi = openmm.CustomTorsionForce(
 ...     "0.5*k_phi*dtheta^2; dtheta = min(tmp, 2*pi-tmp); tmp = abs(theta - phi)"
 ... )
