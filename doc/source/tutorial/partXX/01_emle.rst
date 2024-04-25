@@ -218,8 +218,7 @@ we require the perturbed state, which has zeroed charges for the QM region:
 We now write the modified system to an AMBER format topology and coordinate file
 so that we can load them with ``OpenMM``:
 
->>> sr.save(qm_mols, "ala_qm.prm7")
->>> sr.save(qm_mols, "ala_qm.rst7")
+>>> sr.save(qm_mols, "ala_qm", ["prm7", "rst7"])
 
 We can now read them back in with ``OpenMM``:
 
