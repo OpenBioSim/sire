@@ -5,24 +5,25 @@ Diels-Alder reaction
 In this section we will show how to use the ``sire-emle`` interface to set up
 simulations of the Diels-Alder reaction catalsed by the
 `AbyU <https://en.wikipedia.org/wiki/Spirotetronate_cyclase_AbyU>`_ enzyme.
-This tutorial is intented to show how to set up the simulation in a similar
-manner to how it would be performed in a standard QM/MM code, such as ``sander``
+This tutorial is intended to show how to set up a simulation in a similar
+manner to how it would be performed with a standard QM/MM code, such as ``sander``
 from the `AmberTools <https://ambermd.org/AmberTools.php>`_ suite.
 
 Setting up the system
 ---------------------
 
 Since the system is quite large it is convenient to restrict the simulation to
-simulate solvent within a restricted region around the reaction site. In
-``sander`` this can be performed by creating a solvent sphere and using
-``ibelly`` to keep solvent molecules outside of this sphere fixed. The same
-approach is easy to implement using ``sire`` and ``OpenMM``. First let us
-load the full AbyU system:
+only consider solvent within a restricted region around the reaction site. In
+``sander`` this can be performed by creating a solvent sphere and using an
+``ibelly`` restraint to keep solvent molecules outside of this sphere fixed.
+The same approach is easy to implement using ``sire`` and ``OpenMM``. First
+let us load the full AbyU system:
 
 >>> import sire as sr
 >>> mols = sr.load_test_files("abyu.prm7", "abyu.rst7")
 
-Next we use a ``sire`` selection to create a sphere around the reaction site:
+Next we use a ``sire`` `selection <https://sire.openbiosim.org/versions/devel/cheatsheet/search.html>`_
+to create a sphere around the reaction site:
 
 >>> water_sphere = mols["water within 22A of atomidx 3 in molidx 1"]
 
@@ -80,15 +81,16 @@ calculation:
 
 >>> qm_mols, engine = sr.qm.emle(mols, mols[1], calculator)
 
-Here are specifying that molecule index 1, the enzyme, is the QM region.
+Here are specifying that molecule index 1, i.e. the enzyme, is the QM region.
 
 Creating a context
 ------------------
 
-We can now create a ``dynamics`` that will create an ``OpenMM`` context for us.
-In order to use the solvent sphere we will need to specify the ``fixed`` keyword
-argument. This specifies a selection for the atoms that should be fixed during
-simulation. Here we will fix all atoms more than 20 Å from the reaction site:
+We can now create a dynamics object that will create an ``OpenMM`` context for
+us.  In order to use the solvent sphere we will need to specify the ``fixed``
+keyword argument. This specifies a selection for the atoms that should be
+fixed during simulation. Here we will fix all atoms more than 20 Å from the
+reaction site:
 
 >>> d = mols.dynamics(
 ...     timestep="1fs",
@@ -123,6 +125,9 @@ First we will specify the the atom pairs involved in the bonds, along with the w
 
 >> pairs = ((2125, 2094, 0.7), (2119, 2087, 0.3))
 
+Here the first two values in each tuple are the atom indices of the atoms involved
+in the bond, and the third value is the weight of the bond.
+
 We will now define a force constant for our collective variable and an initial
 equilibrium value:
 
@@ -149,8 +154,8 @@ We will also create two null forces to monitor the individual bond distances:
 >>> bond2 = openmm.CustomBondForce("r")
 >>> bond2.addBond(2119, 2087)
 
-We can now create our restraint force using the collective variable. First let
-us define the energy expression. This is a simple harmonic potential:
+We can now create our restraint force using the collective variables above.
+First let us define the energy expression. This is a simple harmonic potential:
 
 >>> energy_expression = "k*(weighted_distance-r0)^2"
 
@@ -166,8 +171,9 @@ Next we will create the force:
 Setting up a new OpenMM context
 -------------------------------
 
-We can now create a new OpenMM context with the restraint force to the system
-from the original context. First let us extract the original system and integrator:
+We can now create a new OpenMM context with the restraint force added to the
+system from the original context. First let us extract copies of the original
+system and integrator:
 
 >>> from copy import deepcopy
 >>> system = context.getSystem()
@@ -188,8 +194,8 @@ Running the simulation
 
 We can now run the simulation. Here we will run a short umbrella sampling
 simpluation for a single window using 100 cycles of 100 integration steps.
-After each cycle we will save append to a trajectory file and print the
-current values of the collective variables.
+After each cycle we will append to a trajectory file and print the current
+values of the collective variables.
 
 First we will create a trajectory file using the topology saved earlier as
 a reference:
@@ -198,7 +204,7 @@ a reference:
 >>> file_handle = open("traj.dcd", "wb")
 >>> dcd_file = openmm.app.DCDFile(file_handle, prm.topology, dt=integrator.getStepSize())
 
-Next we will run the simulation:
+And now we will run the simulation:
 
 >>> for x in range(100):
 ...     integrator.step(10)

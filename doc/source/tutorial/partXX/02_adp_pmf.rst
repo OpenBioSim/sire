@@ -22,7 +22,7 @@ Creating a context with sire-emle
 ---------------------------------
 
 As in the previous section, we can first use ``sire-emle`` to create
-a QM/MM capabable dynamics object for the alanine-dipeptide example
+a QM/MM capable dynamics object for the alanine-dipeptide example
 system. We can then extract the underlying ``OpenMM`` context from
 this.
 
@@ -35,11 +35,10 @@ the electrostatic embedding interaction.
 
 Next we will load the alanine-dipeptide system using ``sire``:
 
->> import sire as sr
+>>> import sire as sr
 >>> mols = sr.load_test_files("ala.crd", "ala.top")
 
-We can then create an ``EMLEEngine`` that can be be used to perform QM/MM
-with ``sire``:
+We can then create an ``EMLEEngine`` that can be be used to perform QM/MM:
 
 >>> qm_mols, engine = sr.qm.emle(mols, mols[0], calculator)
 
@@ -59,12 +58,14 @@ and can be used to run a simulation:
 >>> d = mols.dynamics(
 ...     timestep="1fs",
 ...     constraint="none",
+...     engine=engine,
+...     platform="cpu",
 ... )
 
 Before extracting the context we will use the dynamics object to minimise the
 alanine-dipeptide system:
 
->> d.minimise()
+>>> d.minimise()
 
 Setting up umbrella sampling with OpenMM
 ----------------------------------------
@@ -170,8 +171,7 @@ The trajectories saved to disk can be post-processed to compute the dihedral
 angles, for example using the approach
 `here <https://fastmbar.readthedocs.io/en/latest/dialanine_PMF.html#compute-and-collect-values-of-both-dialanine-dihedral>`_.
 The free-energy surface can then be compute using MBAR, or UWHAM. Example code
-is provided in the `FastMBAR <https://fastmbar.readthedocs.io/en/latest/dialanine_PMF.html>`_
-tutorial `here https://fastmbar.readthedocs.io/en/latest/dialanine_PMF.html#use-fastmbar-to-solve-mbar-uwham-equations-and-compute-the-pmf>`_.
+is provided in the `FastMBAR tutorial <https://fastmbar.readthedocs.io/en/latest/dialanine_PMF.html#use-fastmbar-to-solve-mbar-uwham-equations-and-compute-the-pmf>`_.
 
 The resulting free-energy surface should look similar to the one shown below:
 
