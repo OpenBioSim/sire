@@ -1,4 +1,4 @@
-import math
+import numpy as np
 import pytest
 import tempfile
 
@@ -115,7 +115,7 @@ def test_charge_redistribution():
     from sire.mol import selection_to_atoms
 
     # A selection for the QM region. This is a subset of a TRP residue.
-    selection = "residx 118 and not atomname CA, C, HA, O, H"
+    selection = "residx 118 and not atomname C, CA, H, HA, N, O"
 
     # The inverse selection.
     not_selection = f"not ({selection})"
@@ -138,10 +138,10 @@ def test_charge_redistribution():
     new_charge1 = mols[not_selection].charge()
 
     # Make sure the QM charge has been redistributed to the nearest integer.
-    assert math.isclose(round(charge0.value()), new_charge0.value(), rel_tol=1e-4)
+    assert np.isclose(round(charge0.value()), new_charge0.value(), rtol=1e-4)
 
     # Make sure the remainder has beeen redistributed to the other atoms.
-    assert math.isclose((charge0 + charge1).value(), new_charge1.value(), rel_tol=1e-4)
+    assert np.isclose((charge0 + charge1).value(), new_charge1.value(), rtol=1e-4)
 
     # Make sure the check fails if we don't redistribute the charge.
     with pytest.raises(Exception):
@@ -183,16 +183,14 @@ def test_interpolate(ala_mols, selection):
     nrg_mm_interp = d.current_potential_energy()
 
     # Make sure this agrees with the standard MM energy.
-    assert math.isclose(nrg_mm_interp.value(), nrg_mm.value(), rel_tol=1e-4)
+    assert np.isclose(nrg_mm_interp.value(), nrg_mm.value(), rtol=1e-4)
 
     # Now get the interpolated energy at lambda = 0.5.
     d.set_lambda(0.5)
     nrg_interp = d.current_potential_energy()
 
     # Make sure the interpolated energy is correct.
-    assert math.isclose(
-        nrg_interp.value(), 0.5 * (nrg_mm + nrg_emle).value(), rel_tol=1e-4
-    )
+    assert np.isclose(nrg_interp.value(), 0.5 * (nrg_mm + nrg_emle).value(), rtol=1e-4)
 
 
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
@@ -295,4 +293,4 @@ def test_openmm_ml(ala_mols):
         )
 
         # Make sure the energies are close.
-        assert math.isclose(nrg_openmm, nrg_sire, rel_tol=1e-3)
+        assert np.isclose(nrg_openmm, nrg_sire, rtol=1e-3)

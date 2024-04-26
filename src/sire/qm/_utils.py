@@ -85,7 +85,9 @@ def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
                 mols.update(mol)
 
         else:
-            raise Exception(f"Charge of the QM region ({qm_charge}) is not an integer!")
+            raise Exception(
+                f"Charge of the QM region ({qm_charge:.5f}) is not an integer!"
+            )
 
 
 def _create_qm_mol_to_atoms(qm_atoms):
