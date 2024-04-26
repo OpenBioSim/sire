@@ -63,6 +63,7 @@ def emle(
     calculator,
     cutoff="7.5A",
     neighbourlist_update_frequency=20,
+    redistribute_charge=False,
     map=None,
 ):
     """
@@ -87,6 +88,11 @@ def emle(
 
     neighbourlist_update_frequency : int, optional, default=20
         The frequency with which to update the neighbourlist.
+
+    redistribute_charge : bool
+        Whether to redistribute charge of the QM atoms to ensure that the total
+        charge of the QM region is an integer. Excess charge is redistributed
+        over the non QM atoms within the residues involved in the QM region.
 
     Returns
     -------
@@ -145,6 +151,9 @@ def emle(
     if neighbourlist_update_frequency < 0:
         raise ValueError("'neighbourlist_update_frequency' must be >= 0")
 
+    if not isinstance(redistribute_charge, bool):
+        raise TypeError("'redistribute_charge' must be of type 'bool'")
+
     if map is not None:
         if not isinstance(map, dict):
             raise TypeError("'map' must be of type 'dict'")
@@ -166,7 +175,7 @@ def emle(
     )
 
     # Check that the charge of the QM region is integer valued.
-    _check_charge(qm_atoms, map)
+    _check_charge(mols, qm_atoms, map, redistribute_charge)
 
     # Get the mapping between molecule numbers and QM atoms.
     qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)

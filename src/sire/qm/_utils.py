@@ -1,12 +1,19 @@
-def _check_charge(qm_atoms, map, tol=1e-6):
+def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
     """
     Internal helper function to check that the QM region has integer charge.
 
     Parameters
     ----------
 
+    mols : sire.system.System
+        The system containing the QM atoms.
+
     qm_atoms: [sire.legacy.Mol.AtomIdx]
         A list of QM atoms.
+
+    redistribute_charge: bool
+        Whether to redistribute charge to ensure that the QM region has an
+        integer charge.
 
     map: sire.legacy.Base.PropertyMap
         The property map for the molecule.
@@ -14,17 +21,24 @@ def _check_charge(qm_atoms, map, tol=1e-6):
     tol: float
         The tolerance for the charge check.
 
+    Returns
+    -------
+
     Raises
     ------
 
     Exception
-        If the charge of the QM region is not an integer.
+        If the charge of the QM region is not an integer and charge redistribution
+        is not allowed.
+
     """
 
     import math as _math
 
+    from sire.units import e_charge as _e_charge
+
     # Get the charge property.
-    charge_prop = map["charge"]
+    charge_prop = map["charge"].source()
 
     # Work out the charge of the QM atoms.
     qm_charge = 0
@@ -32,8 +46,46 @@ def _check_charge(qm_atoms, map, tol=1e-6):
         qm_charge += atom.property(charge_prop).value()
 
     # Check that the charge is an integer.
-    if not _math.isclose(qm_charge, round(qm_charge), abs_tol=tol):
-        raise Exception(f"Charge of the QM region ({qm_charge}) is not an integer!")
+    if _math.isclose(qm_charge, round(qm_charge), abs_tol=tol):
+        return
+    else:
+        if redistribute_charge:
+            # Find the residues containing the QM atoms.
+            residues = qm_atoms.residues()
+
+            # Work out the fractional excess charge to the nearest integer.
+            excess_charge = (round(qm_charge) - qm_charge) * _e_charge
+
+            # Redistribute the charge over the QM atoms.
+            qm_frac = excess_charge / len(qm_atoms)
+
+            # Redistribute the charge over the non QM atoms.
+            rem_frac = excess_charge / (residues.num_atoms() - len(qm_atoms))
+
+            # Loop over the residues.
+            for res in residues:
+                # Get the molecule from the system.
+                mol = mols[res.molecule()]
+
+                # Create a cursor for the molecule.
+                cursor = mol.cursor()
+
+                # Loop over the atoms in the residue.
+                for atom in res:
+                    # Shift the charge.
+                    if atom in qm_atoms:
+                        cursor[atom][charge_prop] -= qm_frac
+                    else:
+                        cursor[atom][charge_prop] += rem_frac
+
+                # Commit the changes.
+                mol = cursor.commit()
+
+                # Update the molecule in the system.
+                mols.update(mol)
+
+        else:
+            raise Exception(f"Charge of the QM region ({qm_charge}) is not an integer!")
 
 
 def _create_qm_mol_to_atoms(qm_atoms):

@@ -103,6 +103,51 @@ def test_link_atoms(ala_mols, selection, expected):
     assert bond_scale_factors == expected[2]
 
 
+def test_charge_redistribution():
+    """
+    Make sure that charge redistribution works correctly.
+    """
+
+    import sire as sr
+
+    from sire.base import create_map
+    from sire.qm._utils import _check_charge
+    from sire.mol import selection_to_atoms
+
+    # A selection for the QM region. This is a subset of a TRP residue.
+    selection = "residx 118 and not atomname CA, C, HA, O, H"
+
+    # The inverse selection.
+    not_selection = f"not ({selection})"
+
+    # Load the AbyU test system.
+    mols = sr.load_test_files("abyu.prm7", "abyu.rst7")
+
+    # Selet the QM atoms.
+    qm_atoms = selection_to_atoms(mols, selection)
+
+    # Get the charges of both regions.
+    charge0 = mols[selection].charge()
+    charge1 = mols[not_selection].charge()
+
+    # Check the charges, redistributing to the nearest integer.
+    _check_charge(mols, qm_atoms, create_map({}), redistribute_charge=True)
+
+    # Get the new charges.
+    new_charge0 = mols[selection].charge()
+    new_charge1 = mols[not_selection].charge()
+
+    # Make sure the QM charge has been redistributed to the nearest integer.
+    assert math.isclose(round(charge0.value()), new_charge0.value(), rel_tol=1e-4)
+
+    # Make sure the remainder has beeen redistributed to the other atoms.
+    assert math.isclose((charge0 + charge1).value(), new_charge1.value(), rel_tol=1e-4)
+
+    # Make sure the check fails if we don't redistribute the charge.
+    with pytest.raises(Exception):
+        _check_charge(mols, qm_atoms, create_map({}), redistribute_charge=False)
+
+
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
 @pytest.mark.parametrize("selection", ["molidx 0", "resname ALA"])
 def test_interpolate(ala_mols, selection):
