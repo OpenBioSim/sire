@@ -676,7 +676,7 @@ double EMLEForceImpl::computeForce(
         // virtual point charges.
         const auto frac_charge = this->owner.getCharges()[idx] / num_mm2;
 
-        // Loop over the MM2 atoms and perform charge shifting. Here the  MM1
+        // Loop over the MM2 atoms and perform charge shifting. Here the MM1
         // charge is redistributed over the MM2 atoms and two virtual point
         // charges are added either side of the MM2 atoms in order to preserve
         // the MM1-MM2 dipole.
