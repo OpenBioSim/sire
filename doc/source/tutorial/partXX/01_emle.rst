@@ -86,7 +86,13 @@ the dipeptide potential between pure MM (λ=0) and QM (λ=1) over the course of
 the simulation, which can be used for end-state correction of binding free
 energy calculations.
 
->>> d = qm_mols.dynamics(timestep="1fs", constraint="none", qm_engine=engine, lambda_interpolate=[0, 1])
+>>> d = qm_mols.dynamics(
+...     timestep="1fs",
+...     constraint="none",
+...     qm_engine=engine,
+...     lambda_interpolate=[0, 1],
+...     platform="cpu",
+... )
 
 We can now run the simulation. The options below specify the run time, the
 frequency at which trajectory frames are saved, and the frequency at which
