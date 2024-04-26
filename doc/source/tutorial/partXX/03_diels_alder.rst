@@ -81,7 +81,7 @@ calculation:
 
 >>> qm_mols, engine = sr.qm.emle(mols, mols[1], calculator)
 
-Here are specifying that molecule index 1, i.e. the enzyme, is the QM region.
+Here are specifying that molecule index 1, i.e. the substrate, is the QM region.
 
 Creating a context
 ------------------
