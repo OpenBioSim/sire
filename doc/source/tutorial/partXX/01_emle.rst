@@ -178,7 +178,7 @@ to install the package:
    $ conda install -c conda-forge openmm-ml
 
 Next, you will need to create an ``MLPotential`` for desired backend. Here we
-will use the ``ani2x``, as was used for the ``EMLECalculator`` above. The
+will use the ANI-2x, as was used for the ``EMLECalculator`` above. The
 
 >>> import openmm
 >>> from openmmml import MLPotential
