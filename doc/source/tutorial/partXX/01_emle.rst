@@ -247,7 +247,7 @@ of atom indices that are to be treated with the ML model.
 We can now create the ML system:
 
 >>> ml_system = potential.createMixedSystem(
-...     topology, mm_system, ml_atoms, interpolate=True
+...     prmtop.topology, mm_system, ml_atoms, interpolate=True
 ... )
 
 By setting ``interpolate=True`` we are telling the ``MLPotential`` to create
@@ -266,7 +266,7 @@ We can now add the ``emle`` forces to the system:
 >>> ml_system.addForce(emle_force)
 >>> ml_system.addForce(interpolation_force)
 
-In oder to run a simulation we need to create an integrator and context. First
+In order to run a simulation we need to create an integrator and context. First
 we create the integrator:
 
 >>> integrator = openmm.LangevinMiddleIntegrator(
