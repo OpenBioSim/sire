@@ -175,6 +175,7 @@ def test_openmm_ml(ala_mols):
         constraint="none",
         qm_engine=engine,
         cutoff_type="pme",
+        cutoff="7.5 A",
         platform="cpu",
     )
 
@@ -210,7 +211,7 @@ def test_openmm_ml(ala_mols):
         # Create the MM system.
         mm_system = prmtop.createSystem(
             nonbondedMethod=openmm.app.PME,
-            nonbondedCutoff=1 * openmm.unit.nanometer,
+            nonbondedCutoff=7.5 * openmm.unit.angstrom,
             constraints=openmm.app.HBonds,
         )
 
