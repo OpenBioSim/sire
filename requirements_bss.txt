@@ -12,7 +12,7 @@ openmmtools >= 0.21.5
 
 # Both ambertools and gromacs aren't available on Windows
 ambertools >= 22 ; sys_platform != "win32"
-gromacs ; sys_platform != "win32"
+#gromacs ; sys_platform != "win32"
 
 # kartograf on Windows pulls in an openfe that has an old / incompatble
 # ambertools
