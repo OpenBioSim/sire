@@ -42,6 +42,9 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   standard trajectory save functions, e.g.
   ``sire.save(mols.trajectory(), "output", format=["PRMTOP", "RST"])``.
 
+* Ignore BioSimSpace format position restraint include directives when
+  parsing GROMACS topology files.
+
 * Please add an item to this changelog when you create your PR
 
 `2024.1.0 <https://github.com/openbiosim/sire/compare/2023.5.2...2024.1.0>`__ - April 2024
