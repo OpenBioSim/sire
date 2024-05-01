@@ -75,33 +75,6 @@ class DynamicsData:
                             "region is not recommended."
                         )
 
-            # see if this is an interpolation simulation
-            if map.specified("lambda_interpolate"):
-                if map["lambda_interpolate"].has_value():
-                    lambda_interpolate = map["lambda_interpolate"].value()
-                else:
-                    lambda_interpolate = map["lambda_interpolate"].source()
-
-                # Single lambda value.
-                try:
-                    lambda_interpolate = float(lambda_interpolate)
-                    map.set("lambda_value", lambda_interpolate)
-                # Two lambda values.
-                except:
-                    try:
-                        if not len(lambda_interpolate) == 2:
-                            raise
-                        lambda_interpolate = [float(x) for x in lambda_interpolate]
-                        map.set("lambda_value", lambda_interpolate[0])
-                    except:
-                        raise ValueError(
-                            "'lambda_interpolate' must be a float or a list of two floats"
-                        )
-                self._is_interpolate = True
-                self._lambda_interpolate = lambda_interpolate
-            else:
-                self._is_interpolate = False
-
             if map.specified("cutoff"):
                 cutoff = map["cutoff"]
 
@@ -134,6 +107,39 @@ class DynamicsData:
                 self._sire_mols = System()
                 self._sire_mols._system.add(mols.molecules().to_molecule_group())
                 self._sire_mols._system.set_property("space", self._ffinfo.space())
+
+            # see if this is an interpolation simulation
+            if map.specified("lambda_interpolate"):
+                if map["lambda_interpolate"].has_value():
+                    lambda_interpolate = map["lambda_interpolate"].value()
+                else:
+                    lambda_interpolate = map["lambda_interpolate"].source()
+
+                # Single lambda value.
+                try:
+                    lambda_interpolate = float(lambda_interpolate)
+                    map.set("lambda_value", lambda_interpolate)
+                # Two lambda values.
+                except:
+                    try:
+                        if not len(lambda_interpolate) == 2:
+                            raise
+                        lambda_interpolate = [float(x) for x in lambda_interpolate]
+                        map.set("lambda_value", lambda_interpolate[0])
+                    except:
+                        raise ValueError(
+                            "'lambda_interpolate' must be a float or a list of two floats"
+                        )
+
+                from ..units import kcal_per_mol
+
+                self._is_interpolate = True
+                self._lambda_interpolate = lambda_interpolate
+                self._work = 0*kcal_per_mol
+                self._nrg_prev = 0*kcal_per_mol
+
+            else:
+                self._is_interpolate = False
 
             # find the existing energy trajectory - we will build on this
             self._energy_trajectory = self._sire_mols.energy_trajectory(
@@ -294,12 +300,7 @@ class DynamicsData:
             # should save energy here
             nrgs = {}
 
-            if self._is_interpolate:
-                ke = "KE"
-            else:
-                ke = "kinetic"
-
-            nrgs[ke] = (
+            nrgs["kinetic"] = (
                 self._omm_state.getKineticEnergy().value_in_unit(
                     openmm.unit.kilocalorie_per_mole
                 )
@@ -315,30 +316,14 @@ class DynamicsData:
 
             sim_lambda_value = self._omm_mols.get_lambda()
 
+            # Store the potential energy and accumulated non-equilibrium work.
             if self._is_interpolate:
-                nrgs["PE(lambda)"] = nrgs["potential"]
-                nrgs.pop("potential")
-                if sim_lambda_value != 0.0:
-                    self._omm_mols.set_lambda(0.0)
-                    nrgs["PE(lambda=0)"] = (
-                        self._omm_mols.get_potential_energy(
-                            to_sire_units=False
-                        ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                        * kcal_per_mol
-                    )
-                else:
-                    nrgs["PE(lambda=0)"] = nrgs["PE(lambda)"]
-                if sim_lambda_value != 1.0:
-                    self._omm_mols.set_lambda(1.0)
-                    nrgs["PE(lambda=1)"] = (
-                        self._omm_mols.get_potential_energy(
-                            to_sire_units=False
-                        ).value_in_unit(openmm.unit.kilocalorie_per_mole)
-                        * kcal_per_mol
-                    )
-                else:
-                    nrgs["PE(lambda=1)"] = nrgs["PE(lambda)"]
+                nrg = nrgs["potential"]
 
+                if sim_lambda_value != 0.0:
+                    self._work += delta_lambda*(nrg - self._nrg_prev)
+                self._nrg_prev = nrg
+                nrgs["work"] = self._work
             else:
                 nrgs[str(sim_lambda_value)] = nrgs["potential"]
 
