@@ -189,7 +189,9 @@ def test_interpolate(ala_mols, selection):
     d.set_lambda(0.5)
     nrg_interp = d.current_potential_energy()
 
-    # Make sure the interpolated energy is correct.
+    # Make sure the interpolated energy is correct. Note that the interpolation
+    # is actually non-linear so the energies are not exactly the average of the
+    # two states.
     assert np.isclose(nrg_interp.value(), 0.5 * (nrg_mm + nrg_emle).value(), rtol=1e-4)
 
 
