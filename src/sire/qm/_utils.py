@@ -1,3 +1,71 @@
+def _zero_charge(mols, qm_atoms, map=None):
+    """
+    Zero the charge for the QM atoms in the system.
+
+    Parameters
+    ----------
+
+    mols : sire.system.System
+        The molecular system.
+
+    qm_atoms : str, int, list, molecule view/collection etc.
+        Any valid search string, atom index, list of atom indicies,
+        or molecule view/container that can be used to select
+        qm_atoms from 'mols'.
+
+    Returns
+    -------
+
+    mols : sire.system.System
+        The molecular system with the QM atom charges zeroed.
+    """
+
+    from ..base import create_map as _create_map
+    from ..mol import selection_to_atoms as _selection_to_atoms
+    from ..morph import extract_reference as _extract_reference
+    from ..units import e_charge as _e_charge
+
+    # Clone the molecules.
+    mols = mols.clone()
+
+    # Try to extract the reference state.
+    try:
+        mols = _extract_reference(mols)
+    # This is a regular molecule, so pass.
+    except:
+        pass
+
+    try:
+        qm_atoms = _selection_to_atoms(mols, qm_atoms)
+    except:
+        raise ValueError("Unable to select 'qm_atoms' from 'mols'")
+
+    if map is not None:
+        if not isinstance(map, dict):
+            raise TypeError("'map' must be of type 'dict'")
+    map = _create_map(map)
+
+    # Create a dictionary mapping molecular numbers to QM atoms.
+    qm_mol_to_atoms = _create_qm_mol_to_atoms(qm_atoms)
+
+    # Get the charge property.
+    charge_prop = map["charge"].source()
+
+    # Loop over the molecules.
+    for mol_num, qm_atoms in qm_mol_to_atoms.items():
+        # Create a cursor for the molecule.
+        cursor = mols[mol_num].cursor()
+
+        # Zero the charges for the QM atoms.
+        for atom in qm_atoms:
+            cursor[atom][charge_prop] = 0.0 * _e_charge
+
+        # Commit the changes.
+        mols.update(cursor.commit())
+
+    return mols
+
+
 def _check_charge(mols, qm_atoms, map, redistribute_charge=False, tol=1e-6):
     """
     Internal helper function to check that the QM region has integer charge.
