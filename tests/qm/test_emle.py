@@ -240,13 +240,12 @@ def test_openmm_ml(ala_mols):
         # zeroed charges for the QM region. This means that the entire
         # intermolecular electrostatic interaction will be computed by
         # EMLE, rather than using the MM charges for mechanical embedding.
-        qm_mol = sr.morph.link_to_perturbed(emle_mols[0])
-        emle_mols.update(qm_mol)
+        omm_mols = sr.qm.zero_charge(mols, mols[0])
 
         # Write the sytem to an AMBER coordinate and topology file.
         files = sr.expand(tmpdir, ["ala.rst7", "ala.prm7"])
         for file in files:
-            sr.save(emle_mols, file)
+            sr.save(omm_mols, file)
 
         # Load back the files and create an OpenMM topology.
         inpcrd = openmm.app.AmberInpcrdFile(f"{tmpdir}/ala.rst7")

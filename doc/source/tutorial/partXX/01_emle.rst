@@ -214,12 +214,10 @@ this is set to 1, but can be set to any value between 0 and 1.)
 Since we want to use electrostatic embedding, we will also need to zero the charges
 on the atoms within the QM region before creating an ``OpenMM`` system. If not,
 then we would also calculate the mechanical embedding interaction. This can be
-done using the ``qm_mols`` object generated above. This system is *perturbable*
-so can be converted between an MM reference state and QM perturbed state. Here
-we require the perturbed state, which has zeroed charges for the QM region:
+done by passing the molecules through the ``sr.qm.zero_charge`` function along with
+the selection for the QM region:
 
->>> qm_mol = sr.morph.link_to_perturbed(qm_mols[0])
->>> qm_mols.update(qm_mol)
+>>> qm_mols = sr.qm.zero_charge(qm_mols, qm_mols[0])
 
 We now write the modified system to an AMBER format topology and coordinate file
 so that we can load them with ``OpenMM``:
