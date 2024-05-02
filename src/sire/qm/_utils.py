@@ -466,7 +466,6 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
         A list of merged molecules.
     """
 
-    from ..legacy import CAS as _CAS
     from ..legacy import Mol as _Mol
     from ..legacy import MM as _MM
     from ..morph import link_to_reference as _link_to_reference
@@ -517,11 +516,8 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
                     atom0 = info.atom_idx(bond.atom0())
                     atom1 = info.atom_idx(bond.atom1())
 
-                    if atom0 in qm_idxs and atom1 in qm_idxs:
-                        r = _CAS.Symbol("r")
-                        amber_bond = _MM.AmberBond(0, r)
-                        bonds.set(atom0, atom1, amber_bond.to_expression(r))
-                    else:
+                    # This bond doesn't only involve QM atoms.
+                    if atom0 not in qm_idxs or atom1 not in qm_idxs:
                         bonds.set(atom0, atom1, bond.function())
 
                 edit_mol = edit_mol.set_property(prop + "1", bonds).molecule()
@@ -540,13 +536,12 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
                     atom1 = info.atom_idx(angle.atom1())
                     atom2 = info.atom_idx(angle.atom2())
 
-                    if atom0 in qm_idxs and atom1 in qm_idxs and atom2 in qm_idxs:
-                        theta = _CAS.Symbol("theta")
-                        amber_angle = _MM.AmberAngle(0.0, theta)
-                        angles.set(
-                            atom0, atom1, atom2, amber_angle.to_expression(theta)
-                        )
-                    else:
+                    # This angle doesn't only involve QM atoms.
+                    if (
+                        atom0 not in qm_idxs
+                        or atom1 not in qm_idxs
+                        or atom2 not in qm_idxs
+                    ):
                         angles.set(atom0, atom1, atom2, angle.function())
 
                 edit_mol = edit_mol.set_property(prop + "1", angles).molecule()
@@ -566,22 +561,13 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
                     atom2 = info.atom_idx(dihedral.atom2())
                     atom3 = info.atom_idx(dihedral.atom3())
 
+                    # This dihedral doesn't only involve QM atoms.
                     if (
-                        atom0 in qm_idxs
-                        and atom1 in qm_idxs
-                        and atom2 in qm_idxs
-                        and atom3 in qm_idxs
+                        atom0 not in qm_idxs
+                        or atom1 not in qm_idxs
+                        or atom2 not in qm_idxs
+                        or atom3 not in qm_idxs
                     ):
-                        phi = _CAS.Symbol("phi")
-                        amber_dihedral = _MM.AmberDihedral(0, phi)
-                        dihedrals.set(
-                            atom0,
-                            atom1,
-                            atom2,
-                            atom3,
-                            amber_dihedral.to_expression(phi),
-                        )
-                    else:
                         dihedrals.set(atom0, atom1, atom2, atom3, dihedral.function())
 
                 edit_mol = edit_mol.set_property(prop + "1", dihedrals).molecule()
@@ -601,22 +587,13 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
                     atom2 = info.atom_idx(improper.atom2())
                     atom3 = info.atom_idx(improper.atom3())
 
+                    # This improper doesn't only involve QM atoms.
                     if (
-                        atom0 in qm_idxs
-                        and atom1 in qm_idxs
-                        and atom2 in qm_idxs
-                        and atom3 in qm_idxs
+                        atom0 not in qm_idxs
+                        or atom1 not in qm_idxs
+                        or atom2 not in qm_idxs
+                        or atom3 not in qm_idxs
                     ):
-                        psi = _CAS.Symbol("psi")
-                        amber_improper = _MM.AmberDihedral(0, psi)
-                        impropers.set(
-                            atom0,
-                            atom1,
-                            atom2,
-                            atom3,
-                            amber_improper.to_expression(psi),
-                        )
-                    else:
                         impropers.set(atom0, atom1, atom2, atom3, improper.function())
 
                 edit_mol = edit_mol.set_property(prop + "1", impropers).molecule()
