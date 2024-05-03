@@ -175,6 +175,6 @@ is provided in the `FastMBAR tutorial <https://fastmbar.readthedocs.io/en/latest
 
 The resulting free-energy surface should look similar to the one shown below:
 
-.. image:: images/pmf.png
-   :target: images/pmf.png
+.. image:: images/pmf_adp.png
+   :target: images/pmf_adp.png
    :alt: Free-energy surface for alanine-dipeptide dihedral angles.
