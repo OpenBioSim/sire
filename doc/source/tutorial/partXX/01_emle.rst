@@ -159,6 +159,16 @@ time
    In the table above, the time doesn't start from zero because the example
    molecular system was loaded from an existing trajectory restart file.
 
+.. note::
+
+   Unlike the ``sander`` interface of ``emle-engine``, the interpolated potential
+   energy is non-linear with respect to λ, i.e. it is not precisely a linear
+   combination of MM and QM energies. This is because the ``sire`` interface
+   performs a *perturbation* of the system parameters from MM to QM as λ is
+   changed, e.g. scaling down the force constants for bonded terms in the QM
+   region and scaling down the charges. Perturbing charges linearly results in
+   an energy change *between* charges that is quadratic in λ.
+
 Interfacing with OpenMM-ML
 --------------------------
 
