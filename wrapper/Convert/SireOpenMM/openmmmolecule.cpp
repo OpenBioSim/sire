@@ -559,6 +559,9 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         check_for_h_by_ambertype = map["check_for_h_by_ambertype"].value().asABoolean();
     }
 
+    // a list to store ghost atom indices
+    QList<int> ghost_atoms;
+
     if (is_perturbable)
     {
         const auto params1_masses = params1.masses();
@@ -638,6 +641,14 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     light_atoms.insert(i);
                 }
             }
+
+            // check for ghost atoms
+            const auto charge0 = params.charges().at(cgatomidx);
+            const auto lj0 = params.ljs().at(cgatomidx);
+            if (charge0 == 0 and lj0.epsilon().value() == 0)
+            {
+                ghost_atoms.append(i);
+            }
         }
     }
     else
@@ -686,6 +697,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     this->cljs = QVector<boost::tuple<double, double, double>>(nats, boost::make_tuple(0.0, 0.0, 0.0));
     auto cljs_data = cljs.data();
 
+    // whether the user doesn't want to perturb the LJ sigma for ghost atoms
+    bool fix_ghost_sigmas = false;
+    if (map.specified("fix_ghost_sigmas"))
+    {
+        fix_ghost_sigmas = map["fix_ghost_sigmas"].value().asABoolean();
+    }
+
     for (int i = 0; i < nats; ++i)
     {
         const auto &cgatomidx = idx_to_cgatomidx_data[i];
@@ -695,6 +713,13 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
         double sig = lj.sigma().to(SireUnits::nanometer);
         double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
+
+        if (fix_ghost_sigmas and ghost_atoms.contains(i))
+        {
+            // use the sigma from the opposite state
+            const auto &lj1 = params1.ljs().at(idx_to_cgatomidx_data[i]);
+            sig = lj1.sigma().to(SireUnits::nanometer);
+        }
 
         if (sig == 0)
         {
