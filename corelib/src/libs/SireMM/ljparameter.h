@@ -141,12 +141,14 @@ namespace SireMM
         return not operator==(other);
     }
 
-    /** Return whether or not this is a dummy LJ parameter */
+    /** Return whether or not this is a dummy LJ parameter. A dummy LJ
+     *  parameter is one with a zero epsilon value (i.e. it will have a
+     *  a zero LJ interaction energy with all other particles, regardless
+     *  of their LJ parameters)
+     */
     SIRE_ALWAYS_INLINE bool LJParameter::isDummy() const
     {
-        // we only need to compare sqrtsig as this will be set to zero if
-        // sqrteps is zero
-        return sqrtsig == 0.0;
+        return sqrteps == 0.0;
     }
 
     /** Return whether or not this parameter has non-zero LJ parameters */

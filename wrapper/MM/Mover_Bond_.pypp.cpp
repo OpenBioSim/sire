@@ -87,6 +87,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::Bond> __copy__(const SireMol::Mover<SireMM::Bond> &other){ return SireMol::Mover<SireMM::Bond>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -478,9 +480,9 @@ void register_Mover_Bond__class(){
         
         }
         Mover_Bond__exposer.staticmethod( "typeName" );
-        Mover_Bond__exposer.def( "__copy__", &__copy__);
-        Mover_Bond__exposer.def( "__deepcopy__", &__copy__);
-        Mover_Bond__exposer.def( "clone", &__copy__);
+        Mover_Bond__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::Bond>>);
+        Mover_Bond__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::Bond>>);
+        Mover_Bond__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::Bond>>);
         Mover_Bond__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::Bond> > );
         Mover_Bond__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::Bond> > );
         Mover_Bond__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::Bond> > );

@@ -25,6 +25,8 @@ namespace bp = boost::python;
 
 SireMM::PositionalRestraint __copy__(const SireMM::PositionalRestraint &other){ return SireMM::PositionalRestraint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -190,9 +192,9 @@ void register_PositionalRestraint_class(){
         
         }
         PositionalRestraint_exposer.staticmethod( "typeName" );
-        PositionalRestraint_exposer.def( "__copy__", &__copy__);
-        PositionalRestraint_exposer.def( "__deepcopy__", &__copy__);
-        PositionalRestraint_exposer.def( "clone", &__copy__);
+        PositionalRestraint_exposer.def( "__copy__", &__copy__<SireMM::PositionalRestraint>);
+        PositionalRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::PositionalRestraint>);
+        PositionalRestraint_exposer.def( "clone", &__copy__<SireMM::PositionalRestraint>);
         PositionalRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::PositionalRestraint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PositionalRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::PositionalRestraint >,

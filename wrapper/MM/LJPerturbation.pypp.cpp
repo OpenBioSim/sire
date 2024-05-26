@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireMM::LJPerturbation __copy__(const SireMM::LJPerturbation &other){ return SireMM::LJPerturbation(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -267,9 +269,9 @@ void register_LJPerturbation_class(){
         
         }
         LJPerturbation_exposer.staticmethod( "typeName" );
-        LJPerturbation_exposer.def( "__copy__", &__copy__);
-        LJPerturbation_exposer.def( "__deepcopy__", &__copy__);
-        LJPerturbation_exposer.def( "clone", &__copy__);
+        LJPerturbation_exposer.def( "__copy__", &__copy__<SireMM::LJPerturbation>);
+        LJPerturbation_exposer.def( "__deepcopy__", &__copy__<SireMM::LJPerturbation>);
+        LJPerturbation_exposer.def( "clone", &__copy__<SireMM::LJPerturbation>);
         LJPerturbation_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::LJPerturbation >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         LJPerturbation_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::LJPerturbation >,

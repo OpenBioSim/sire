@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMM::InternalSymbols __copy__(const SireMM::InternalSymbols &other){ return SireMM::InternalSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::InternalSymbols&){ return "SireMM::InternalSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -151,9 +153,9 @@ void register_InternalSymbols_class(){
                 , "Return all of the symbols used in the Urey-Bradley parameters" );
         
         }
-        InternalSymbols_exposer.def( "__copy__", &__copy__);
-        InternalSymbols_exposer.def( "__deepcopy__", &__copy__);
-        InternalSymbols_exposer.def( "clone", &__copy__);
+        InternalSymbols_exposer.def( "__copy__", &__copy__<SireMM::InternalSymbols>);
+        InternalSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::InternalSymbols>);
+        InternalSymbols_exposer.def( "clone", &__copy__<SireMM::InternalSymbols>);
         InternalSymbols_exposer.def( "__str__", &pvt_get_name);
         InternalSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

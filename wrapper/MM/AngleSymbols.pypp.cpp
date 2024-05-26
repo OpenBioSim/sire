@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::AngleSymbols __copy__(const SireMM::AngleSymbols &other){ return SireMM::AngleSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::AngleSymbols&){ return "SireMM::AngleSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -56,9 +58,9 @@ void register_AngleSymbols_class(){
                 , "Return the symbols representing the angle (theta)" );
         
         }
-        AngleSymbols_exposer.def( "__copy__", &__copy__);
-        AngleSymbols_exposer.def( "__deepcopy__", &__copy__);
-        AngleSymbols_exposer.def( "clone", &__copy__);
+        AngleSymbols_exposer.def( "__copy__", &__copy__<SireMM::AngleSymbols>);
+        AngleSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::AngleSymbols>);
+        AngleSymbols_exposer.def( "clone", &__copy__<SireMM::AngleSymbols>);
         AngleSymbols_exposer.def( "__str__", &pvt_get_name);
         AngleSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

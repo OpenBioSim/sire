@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMM::LJParameterName3D __copy__(const SireMM::LJParameterName3D &other){ return SireMM::LJParameterName3D(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::LJParameterName3D&){ return "SireMM::LJParameterName3D";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -55,9 +57,9 @@ void register_LJParameterName3D_class(){
         typedef bp::class_< SireMM::LJParameterName3D, bp::bases< SireMM::LJParameterName > > LJParameterName3D_exposer_t;
         LJParameterName3D_exposer_t LJParameterName3D_exposer = LJParameterName3D_exposer_t( "LJParameterName3D", "This class provides the default name of the properties\nthat contain the LJ and 3D coordinates properties", bp::init< >("") );
         bp::scope LJParameterName3D_scope( LJParameterName3D_exposer );
-        LJParameterName3D_exposer.def( "__copy__", &__copy__);
-        LJParameterName3D_exposer.def( "__deepcopy__", &__copy__);
-        LJParameterName3D_exposer.def( "clone", &__copy__);
+        LJParameterName3D_exposer.def( "__copy__", &__copy__<SireMM::LJParameterName3D>);
+        LJParameterName3D_exposer.def( "__deepcopy__", &__copy__<SireMM::LJParameterName3D>);
+        LJParameterName3D_exposer.def( "clone", &__copy__<SireMM::LJParameterName3D>);
         LJParameterName3D_exposer.def( "__str__", &pvt_get_name);
         LJParameterName3D_exposer.def( "__repr__", &pvt_get_name);
     }

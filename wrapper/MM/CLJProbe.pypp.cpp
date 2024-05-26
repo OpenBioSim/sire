@@ -17,6 +17,8 @@ namespace bp = boost::python;
 
 SireMM::CLJProbe __copy__(const SireMM::CLJProbe &other){ return SireMM::CLJProbe(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -100,9 +102,9 @@ void register_CLJProbe_class(){
         
         }
         CLJProbe_exposer.staticmethod( "typeName" );
-        CLJProbe_exposer.def( "__copy__", &__copy__);
-        CLJProbe_exposer.def( "__deepcopy__", &__copy__);
-        CLJProbe_exposer.def( "clone", &__copy__);
+        CLJProbe_exposer.def( "__copy__", &__copy__<SireMM::CLJProbe>);
+        CLJProbe_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJProbe>);
+        CLJProbe_exposer.def( "clone", &__copy__<SireMM::CLJProbe>);
         CLJProbe_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJProbe >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJProbe_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJProbe >,

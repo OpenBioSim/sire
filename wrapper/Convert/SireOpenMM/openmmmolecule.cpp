@@ -559,9 +559,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         check_for_h_by_ambertype = map["check_for_h_by_ambertype"].value().asABoolean();
     }
 
-    // a list to store ghost atom indices
-    QList<int> ghost_atoms;
-
     if (is_perturbable)
     {
         const auto params1_masses = params1.masses();
@@ -641,14 +638,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
                     light_atoms.insert(i);
                 }
             }
-
-            // check for ghost atoms
-            const auto charge0 = params.charges().at(cgatomidx);
-            const auto lj0 = params.ljs().at(cgatomidx);
-            if (charge0 == 0 and lj0.epsilon().value() == 0)
-            {
-                ghost_atoms.append(i);
-            }
         }
     }
     else
@@ -697,13 +686,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
     this->cljs = QVector<boost::tuple<double, double, double>>(nats, boost::make_tuple(0.0, 0.0, 0.0));
     auto cljs_data = cljs.data();
 
-    // whether the user doesn't want to perturb the LJ sigma for ghost atoms
-    bool fix_ghost_sigmas = false;
-    if (map.specified("fix_ghost_sigmas"))
-    {
-        fix_ghost_sigmas = map["fix_ghost_sigmas"].value().asABoolean();
-    }
-
     for (int i = 0; i < nats; ++i)
     {
         const auto &cgatomidx = idx_to_cgatomidx_data[i];
@@ -713,13 +695,6 @@ void OpenMMMolecule::constructFromAmber(const Molecule &mol,
         const auto &lj = params_ljs.at(idx_to_cgatomidx_data[i]);
         double sig = lj.sigma().to(SireUnits::nanometer);
         double eps = lj.epsilon().to(SireUnits::kJ_per_mol);
-
-        if (fix_ghost_sigmas and ghost_atoms.contains(i))
-        {
-            // use the sigma from the opposite state
-            const auto &lj1 = params1.ljs().at(idx_to_cgatomidx_data[i]);
-            sig = lj1.sigma().to(SireUnits::nanometer);
-        }
 
         if (sig == 0)
         {
@@ -2098,7 +2073,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
                                                      const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
-    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map)));
+    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map), map));
 }
 
 /** Return whether or not this is null */
@@ -2110,7 +2085,8 @@ bool PerturbableOpenMMMolecule::isNull() const
 }
 
 /** Construct from the passed OpenMMMolecule */
-PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
+                                                     const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
     if (mol.perturbed.get() == 0)
@@ -2200,6 +2176,45 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
     from_ghost_idxs = mol.from_ghost_idxs;
 
     perturbable_constraints = mol.perturbable_constraints;
+
+    bool fix_perturbable_zero_sigmas = false;
+
+    if (map.specified("fix_perturbable_zero_sigmas"))
+    {
+        fix_perturbable_zero_sigmas = map["fix_perturbable_zero_sigmas"].value().asABoolean();
+    }
+
+    if (fix_perturbable_zero_sigmas)
+    {
+        const int nats = sig0.count();
+
+        if (sig1.count() != nats)
+        {
+            throw SireError::program_bug(QObject::tr(
+                                             "The number of atoms in the reference (%1) and perturbed (%2) "
+                                             "states do not match.")
+                                             .arg(nats)
+                                             .arg(sig1.count()),
+                                         CODELOC);
+        }
+
+        const auto *sig0_data = sig0.constData();
+        const auto *sig1_data = sig1.constData();
+
+        for (int i = 0; i < nats; ++i)
+        {
+            if (std::abs(sig0_data[i]) < 1e-9)
+            {
+                sig0[i] = sig1_data[i];
+                sig0_data = sig0.constData();
+            }
+            else if (std::abs(sig1_data[i] < 1e-9))
+            {
+                sig1[i] = sig0_data[i];
+                sig1_data = sig1.constData();
+            }
+        }
+    }
 }
 
 /** Copy constructor */

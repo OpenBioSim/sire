@@ -32,6 +32,8 @@ namespace bp = boost::python;
 
 SireMM::DoubleDistanceRestraint __copy__(const SireMM::DoubleDistanceRestraint &other){ return SireMM::DoubleDistanceRestraint(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -362,9 +364,9 @@ void register_DoubleDistanceRestraint_class(){
         DoubleDistanceRestraint_exposer.staticmethod( "r01" );
         DoubleDistanceRestraint_exposer.staticmethod( "r23" );
         DoubleDistanceRestraint_exposer.staticmethod( "typeName" );
-        DoubleDistanceRestraint_exposer.def( "__copy__", &__copy__);
-        DoubleDistanceRestraint_exposer.def( "__deepcopy__", &__copy__);
-        DoubleDistanceRestraint_exposer.def( "clone", &__copy__);
+        DoubleDistanceRestraint_exposer.def( "__copy__", &__copy__<SireMM::DoubleDistanceRestraint>);
+        DoubleDistanceRestraint_exposer.def( "__deepcopy__", &__copy__<SireMM::DoubleDistanceRestraint>);
+        DoubleDistanceRestraint_exposer.def( "clone", &__copy__<SireMM::DoubleDistanceRestraint>);
         DoubleDistanceRestraint_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::DoubleDistanceRestraint >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         DoubleDistanceRestraint_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::DoubleDistanceRestraint >,

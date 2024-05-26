@@ -18,6 +18,8 @@ namespace bp = boost::python;
 
 SireMM::StretchBendComponent __copy__(const SireMM::StretchBendComponent &other){ return SireMM::StretchBendComponent(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -107,9 +109,9 @@ void register_StretchBendComponent_class(){
         
         }
         StretchBendComponent_exposer.staticmethod( "typeName" );
-        StretchBendComponent_exposer.def( "__copy__", &__copy__);
-        StretchBendComponent_exposer.def( "__deepcopy__", &__copy__);
-        StretchBendComponent_exposer.def( "clone", &__copy__);
+        StretchBendComponent_exposer.def( "__copy__", &__copy__<SireMM::StretchBendComponent>);
+        StretchBendComponent_exposer.def( "__deepcopy__", &__copy__<SireMM::StretchBendComponent>);
+        StretchBendComponent_exposer.def( "clone", &__copy__<SireMM::StretchBendComponent>);
         StretchBendComponent_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::StretchBendComponent >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         StretchBendComponent_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::StretchBendComponent >,

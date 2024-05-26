@@ -31,6 +31,8 @@ namespace bp = boost::python;
 
 SireMM::TestFF __copy__(const SireMM::TestFF &other){ return SireMM::TestFF(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::TestFF&){ return "SireMM::TestFF";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -106,9 +108,9 @@ void register_TestFF_class(){
                 , "" );
         
         }
-        TestFF_exposer.def( "__copy__", &__copy__);
-        TestFF_exposer.def( "__deepcopy__", &__copy__);
-        TestFF_exposer.def( "clone", &__copy__);
+        TestFF_exposer.def( "__copy__", &__copy__<SireMM::TestFF>);
+        TestFF_exposer.def( "__deepcopy__", &__copy__<SireMM::TestFF>);
+        TestFF_exposer.def( "clone", &__copy__<SireMM::TestFF>);
         TestFF_exposer.def( "__str__", &pvt_get_name);
         TestFF_exposer.def( "__repr__", &pvt_get_name);
     }

@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::StretchStretchSymbols __copy__(const SireMM::StretchStretchSymbols &other){ return SireMM::StretchStretchSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::StretchStretchSymbols&){ return "SireMM::StretchStretchSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -80,9 +82,9 @@ void register_StretchStretchSymbols_class(){
                 , "Return the symbol representing the bond length r_\n{21}" );
         
         }
-        StretchStretchSymbols_exposer.def( "__copy__", &__copy__);
-        StretchStretchSymbols_exposer.def( "__deepcopy__", &__copy__);
-        StretchStretchSymbols_exposer.def( "clone", &__copy__);
+        StretchStretchSymbols_exposer.def( "__copy__", &__copy__<SireMM::StretchStretchSymbols>);
+        StretchStretchSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::StretchStretchSymbols>);
+        StretchStretchSymbols_exposer.def( "clone", &__copy__<SireMM::StretchStretchSymbols>);
         StretchStretchSymbols_exposer.def( "__str__", &pvt_get_name);
         StretchStretchSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

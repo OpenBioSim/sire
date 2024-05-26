@@ -37,6 +37,8 @@ namespace bp = boost::python;
 
 SireMM::CLJBoxes __copy__(const SireMM::CLJBoxes &other){ return SireMM::CLJBoxes(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -527,9 +529,9 @@ void register_CLJBoxes_class(){
         }
         CLJBoxes_exposer.staticmethod( "getDistances" );
         CLJBoxes_exposer.staticmethod( "typeName" );
-        CLJBoxes_exposer.def( "__copy__", &__copy__);
-        CLJBoxes_exposer.def( "__deepcopy__", &__copy__);
-        CLJBoxes_exposer.def( "clone", &__copy__);
+        CLJBoxes_exposer.def( "__copy__", &__copy__<SireMM::CLJBoxes>);
+        CLJBoxes_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJBoxes>);
+        CLJBoxes_exposer.def( "clone", &__copy__<SireMM::CLJBoxes>);
         CLJBoxes_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJBoxes >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJBoxes_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJBoxes >,

@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::UreyBradleyParameterName __copy__(const SireMM::UreyBradleyParameterName &other){ return SireMM::UreyBradleyParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::UreyBradleyParameterName&){ return "SireMM::UreyBradleyParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_UreyBradleyParameterName_class(){
                 , "" );
         
         }
-        UreyBradleyParameterName_exposer.def( "__copy__", &__copy__);
-        UreyBradleyParameterName_exposer.def( "__deepcopy__", &__copy__);
-        UreyBradleyParameterName_exposer.def( "clone", &__copy__);
+        UreyBradleyParameterName_exposer.def( "__copy__", &__copy__<SireMM::UreyBradleyParameterName>);
+        UreyBradleyParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::UreyBradleyParameterName>);
+        UreyBradleyParameterName_exposer.def( "clone", &__copy__<SireMM::UreyBradleyParameterName>);
         UreyBradleyParameterName_exposer.def( "__str__", &pvt_get_name);
         UreyBradleyParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

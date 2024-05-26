@@ -85,6 +85,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::SelectorBond> __copy__(const SireMol::Mover<SireMM::SelectorBond> &other){ return SireMol::Mover<SireMM::SelectorBond>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -476,9 +478,9 @@ void register_Mover_SelectorBond__class(){
         
         }
         Mover_SelectorBond__exposer.staticmethod( "typeName" );
-        Mover_SelectorBond__exposer.def( "__copy__", &__copy__);
-        Mover_SelectorBond__exposer.def( "__deepcopy__", &__copy__);
-        Mover_SelectorBond__exposer.def( "clone", &__copy__);
+        Mover_SelectorBond__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::SelectorBond>>);
+        Mover_SelectorBond__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::SelectorBond>>);
+        Mover_SelectorBond__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::SelectorBond>>);
         Mover_SelectorBond__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::SelectorBond> > );
         Mover_SelectorBond__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::SelectorBond> > );
         Mover_SelectorBond__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::SelectorBond> > );

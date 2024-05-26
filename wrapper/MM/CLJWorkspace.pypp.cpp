@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireMM::CLJWorkspace __copy__(const SireMM::CLJWorkspace &other){ return SireMM::CLJWorkspace(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -351,9 +353,9 @@ void register_CLJWorkspace_class(){
         
         }
         CLJWorkspace_exposer.staticmethod( "typeName" );
-        CLJWorkspace_exposer.def( "__copy__", &__copy__);
-        CLJWorkspace_exposer.def( "__deepcopy__", &__copy__);
-        CLJWorkspace_exposer.def( "clone", &__copy__);
+        CLJWorkspace_exposer.def( "__copy__", &__copy__<SireMM::CLJWorkspace>);
+        CLJWorkspace_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJWorkspace>);
+        CLJWorkspace_exposer.def( "clone", &__copy__<SireMM::CLJWorkspace>);
         CLJWorkspace_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJWorkspace >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJWorkspace_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJWorkspace >,

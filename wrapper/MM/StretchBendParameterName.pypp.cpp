@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::StretchBendParameterName __copy__(const SireMM::StretchBendParameterName &other){ return SireMM::StretchBendParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::StretchBendParameterName&){ return "SireMM::StretchBendParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_StretchBendParameterName_class(){
                 , "" );
         
         }
-        StretchBendParameterName_exposer.def( "__copy__", &__copy__);
-        StretchBendParameterName_exposer.def( "__deepcopy__", &__copy__);
-        StretchBendParameterName_exposer.def( "clone", &__copy__);
+        StretchBendParameterName_exposer.def( "__copy__", &__copy__<SireMM::StretchBendParameterName>);
+        StretchBendParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::StretchBendParameterName>);
+        StretchBendParameterName_exposer.def( "clone", &__copy__<SireMM::StretchBendParameterName>);
         StretchBendParameterName_exposer.def( "__str__", &pvt_get_name);
         StretchBendParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

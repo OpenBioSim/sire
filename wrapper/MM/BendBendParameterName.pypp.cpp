@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::BendBendParameterName __copy__(const SireMM::BendBendParameterName &other){ return SireMM::BendBendParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::BendBendParameterName&){ return "SireMM::BendBendParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_BendBendParameterName_class(){
                 , "" );
         
         }
-        BendBendParameterName_exposer.def( "__copy__", &__copy__);
-        BendBendParameterName_exposer.def( "__deepcopy__", &__copy__);
-        BendBendParameterName_exposer.def( "clone", &__copy__);
+        BendBendParameterName_exposer.def( "__copy__", &__copy__<SireMM::BendBendParameterName>);
+        BendBendParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::BendBendParameterName>);
+        BendBendParameterName_exposer.def( "clone", &__copy__<SireMM::BendBendParameterName>);
         BendBendParameterName_exposer.def( "__str__", &pvt_get_name);
         BendBendParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

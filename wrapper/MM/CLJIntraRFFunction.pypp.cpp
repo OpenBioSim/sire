@@ -35,6 +35,8 @@ namespace bp = boost::python;
 
 SireMM::CLJIntraRFFunction __copy__(const SireMM::CLJIntraRFFunction &other){ return SireMM::CLJIntraRFFunction(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -186,9 +188,9 @@ void register_CLJIntraRFFunction_class(){
         }
         CLJIntraRFFunction_exposer.staticmethod( "defaultRFFunction" );
         CLJIntraRFFunction_exposer.staticmethod( "typeName" );
-        CLJIntraRFFunction_exposer.def( "__copy__", &__copy__);
-        CLJIntraRFFunction_exposer.def( "__deepcopy__", &__copy__);
-        CLJIntraRFFunction_exposer.def( "clone", &__copy__);
+        CLJIntraRFFunction_exposer.def( "__copy__", &__copy__<SireMM::CLJIntraRFFunction>);
+        CLJIntraRFFunction_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJIntraRFFunction>);
+        CLJIntraRFFunction_exposer.def( "clone", &__copy__<SireMM::CLJIntraRFFunction>);
         CLJIntraRFFunction_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJIntraRFFunction >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJIntraRFFunction_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJIntraRFFunction >,

@@ -73,6 +73,8 @@ namespace bp = boost::python;
 
 SireMM::AmberDihPart __copy__(const SireMM::AmberDihPart &other){ return SireMM::AmberDihPart(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -215,9 +217,9 @@ void register_AmberDihPart_class(){
         
         }
         AmberDihPart_exposer.staticmethod( "typeName" );
-        AmberDihPart_exposer.def( "__copy__", &__copy__);
-        AmberDihPart_exposer.def( "__deepcopy__", &__copy__);
-        AmberDihPart_exposer.def( "clone", &__copy__);
+        AmberDihPart_exposer.def( "__copy__", &__copy__<SireMM::AmberDihPart>);
+        AmberDihPart_exposer.def( "__deepcopy__", &__copy__<SireMM::AmberDihPart>);
+        AmberDihPart_exposer.def( "clone", &__copy__<SireMM::AmberDihPart>);
         AmberDihPart_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::AmberDihPart >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         AmberDihPart_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::AmberDihPart >,

@@ -204,10 +204,11 @@ namespace SireOpenMM
     public:
         PerturbableOpenMMMolecule();
 
-        PerturbableOpenMMMolecule(const OpenMMMolecule &mol);
+        PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
+                                  const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         PerturbableOpenMMMolecule(const SireMol::Molecule &mol,
-                                  const SireBase::PropertyMap &map);
+                                  const SireBase::PropertyMap &map = SireBase::PropertyMap());
 
         PerturbableOpenMMMolecule(const PerturbableOpenMMMolecule &other);
 

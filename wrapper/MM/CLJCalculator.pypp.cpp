@@ -27,6 +27,8 @@ namespace bp = boost::python;
 
 SireMM::CLJCalculator __copy__(const SireMM::CLJCalculator &other){ return SireMM::CLJCalculator(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -170,9 +172,9 @@ void register_CLJCalculator_class(){
         
         }
         CLJCalculator_exposer.staticmethod( "typeName" );
-        CLJCalculator_exposer.def( "__copy__", &__copy__);
-        CLJCalculator_exposer.def( "__deepcopy__", &__copy__);
-        CLJCalculator_exposer.def( "clone", &__copy__);
+        CLJCalculator_exposer.def( "__copy__", &__copy__<SireMM::CLJCalculator>);
+        CLJCalculator_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJCalculator>);
+        CLJCalculator_exposer.def( "clone", &__copy__<SireMM::CLJCalculator>);
         CLJCalculator_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJCalculator >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJCalculator_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJCalculator >,
