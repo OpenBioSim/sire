@@ -44,6 +44,8 @@ namespace bp = boost::python;
 
 SireMM::Improper __copy__(const SireMM::Improper &other){ return SireMM::Improper(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -535,9 +537,9 @@ void register_Improper_class(){
         
         }
         Improper_exposer.staticmethod( "typeName" );
-        Improper_exposer.def( "__copy__", &__copy__);
-        Improper_exposer.def( "__deepcopy__", &__copy__);
-        Improper_exposer.def( "clone", &__copy__);
+        Improper_exposer.def( "__copy__", &__copy__<SireMM::Improper>);
+        Improper_exposer.def( "__deepcopy__", &__copy__<SireMM::Improper>);
+        Improper_exposer.def( "clone", &__copy__<SireMM::Improper>);
         Improper_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::Improper >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Improper_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::Improper >,

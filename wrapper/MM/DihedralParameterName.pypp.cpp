@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::DihedralParameterName __copy__(const SireMM::DihedralParameterName &other){ return SireMM::DihedralParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::DihedralParameterName&){ return "SireMM::DihedralParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_DihedralParameterName_class(){
                 , "" );
         
         }
-        DihedralParameterName_exposer.def( "__copy__", &__copy__);
-        DihedralParameterName_exposer.def( "__deepcopy__", &__copy__);
-        DihedralParameterName_exposer.def( "clone", &__copy__);
+        DihedralParameterName_exposer.def( "__copy__", &__copy__<SireMM::DihedralParameterName>);
+        DihedralParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::DihedralParameterName>);
+        DihedralParameterName_exposer.def( "clone", &__copy__<SireMM::DihedralParameterName>);
         DihedralParameterName_exposer.def( "__str__", &pvt_get_name);
         DihedralParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

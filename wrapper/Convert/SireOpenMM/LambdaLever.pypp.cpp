@@ -29,6 +29,8 @@ namespace bp = boost::python;
 
 SireOpenMM::LambdaLever __copy__(const SireOpenMM::LambdaLever &other){ return SireOpenMM::LambdaLever(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -55,14 +57,13 @@ void register_LambdaLever_class(){
         }
         { //::SireOpenMM::LambdaLever::addPerturbableMolecule
         
-            typedef int ( ::SireOpenMM::LambdaLever::*addPerturbableMolecule_function_type)( ::SireOpenMM::OpenMMMolecule const &,::QHash< QString, int > const & ) ;
+            typedef int ( ::SireOpenMM::LambdaLever::*addPerturbableMolecule_function_type)( ::SireOpenMM::OpenMMMolecule const &,::QHash< QString, int > const &,::SireBase::PropertyMap const & ) ;
             addPerturbableMolecule_function_type addPerturbableMolecule_function_value( &::SireOpenMM::LambdaLever::addPerturbableMolecule );
             
             LambdaLever_exposer.def( 
                 "addPerturbableMolecule"
                 , addPerturbableMolecule_function_value
-                , ( bp::arg("molecule"), bp::arg("start_indicies") )
-                , bp::release_gil_policy()
+                , ( bp::arg("molecule"), bp::arg("start_indicies"), bp::arg("map")=SireBase::PropertyMap() )
                 , "Add info for the passed perturbable OpenMMMolecule, returning\n  its index in the list of perturbable molecules\n" );
         
         }
@@ -115,7 +116,7 @@ void register_LambdaLever_class(){
                 , getLeverValues_function_value
                 , ( bp::arg("lambda_values"), bp::arg("mol") )
                 , bp::release_gil_policy()
-                , "" );
+                , "Get all of the lever values that would be set for the passed\n  lambda values using the current context. This returns a PropertyList\n  of columns, where each column is a PropertyMap with the column name\n  and either double or QString array property of values.\n\n  This is designed to be used by a higher-level python function that\n  will convert this output into, e.g. a pandas DataFrame\n" );
         
         }
         { //::SireOpenMM::LambdaLever::getPerturbableMoleculeMaps
@@ -272,9 +273,9 @@ void register_LambdaLever_class(){
         
         }
         LambdaLever_exposer.staticmethod( "typeName" );
-        LambdaLever_exposer.def( "__copy__", &__copy__);
-        LambdaLever_exposer.def( "__deepcopy__", &__copy__);
-        LambdaLever_exposer.def( "clone", &__copy__);
+        LambdaLever_exposer.def( "__copy__", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def( "__deepcopy__", &__copy__<SireOpenMM::LambdaLever>);
+        LambdaLever_exposer.def( "clone", &__copy__<SireOpenMM::LambdaLever>);
         LambdaLever_exposer.def( "__str__", &__str__< ::SireOpenMM::LambdaLever > );
         LambdaLever_exposer.def( "__repr__", &__str__< ::SireOpenMM::LambdaLever > );
     }

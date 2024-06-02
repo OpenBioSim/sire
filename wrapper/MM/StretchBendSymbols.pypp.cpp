@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::StretchBendSymbols __copy__(const SireMM::StretchBendSymbols &other){ return SireMM::StretchBendSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::StretchBendSymbols&){ return "SireMM::StretchBendSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -92,9 +94,9 @@ void register_StretchBendSymbols_class(){
                 , "Return the symbol representing the angle, theta" );
         
         }
-        StretchBendSymbols_exposer.def( "__copy__", &__copy__);
-        StretchBendSymbols_exposer.def( "__deepcopy__", &__copy__);
-        StretchBendSymbols_exposer.def( "clone", &__copy__);
+        StretchBendSymbols_exposer.def( "__copy__", &__copy__<SireMM::StretchBendSymbols>);
+        StretchBendSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::StretchBendSymbols>);
+        StretchBendSymbols_exposer.def( "clone", &__copy__<SireMM::StretchBendSymbols>);
         StretchBendSymbols_exposer.def( "__str__", &pvt_get_name);
         StretchBendSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::InternalParameterNames __copy__(const SireMM::InternalParameterNames &other){ return SireMM::InternalParameterNames(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::InternalParameterNames&){ return "SireMM::InternalParameterNames";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -59,9 +61,9 @@ void register_InternalParameterNames_class(){
         typedef bp::class_< SireMM::InternalParameterNames, bp::bases< SireMM::StretchBendTorsionParameterName, SireMM::BendBendParameterName, SireMM::StretchBendParameterName, SireMM::StretchStretchParameterName, SireMM::UreyBradleyParameterName, SireMM::ImproperParameterName, SireMM::DihedralParameterName, SireMM::AngleParameterName, SireMM::BondParameterName > > InternalParameterNames_exposer_t;
         InternalParameterNames_exposer_t InternalParameterNames_exposer = InternalParameterNames_exposer_t( "InternalParameterNames", "This class provides the default name of the properties\nthat contain the bond, angle, dihedral and Urey-Bradley parameters", bp::init< >("") );
         bp::scope InternalParameterNames_scope( InternalParameterNames_exposer );
-        InternalParameterNames_exposer.def( "__copy__", &__copy__);
-        InternalParameterNames_exposer.def( "__deepcopy__", &__copy__);
-        InternalParameterNames_exposer.def( "clone", &__copy__);
+        InternalParameterNames_exposer.def( "__copy__", &__copy__<SireMM::InternalParameterNames>);
+        InternalParameterNames_exposer.def( "__deepcopy__", &__copy__<SireMM::InternalParameterNames>);
+        InternalParameterNames_exposer.def( "clone", &__copy__<SireMM::InternalParameterNames>);
         InternalParameterNames_exposer.def( "__str__", &pvt_get_name);
         InternalParameterNames_exposer.def( "__repr__", &pvt_get_name);
     }

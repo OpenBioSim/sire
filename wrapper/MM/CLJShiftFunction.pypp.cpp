@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMM::CLJShiftFunction __copy__(const SireMM::CLJShiftFunction &other){ return SireMM::CLJShiftFunction(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -132,9 +134,9 @@ void register_CLJShiftFunction_class(){
         }
         CLJShiftFunction_exposer.staticmethod( "defaultShiftFunction" );
         CLJShiftFunction_exposer.staticmethod( "typeName" );
-        CLJShiftFunction_exposer.def( "__copy__", &__copy__);
-        CLJShiftFunction_exposer.def( "__deepcopy__", &__copy__);
-        CLJShiftFunction_exposer.def( "clone", &__copy__);
+        CLJShiftFunction_exposer.def( "__copy__", &__copy__<SireMM::CLJShiftFunction>);
+        CLJShiftFunction_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJShiftFunction>);
+        CLJShiftFunction_exposer.def( "clone", &__copy__<SireMM::CLJShiftFunction>);
         CLJShiftFunction_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJShiftFunction >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJShiftFunction_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJShiftFunction >,

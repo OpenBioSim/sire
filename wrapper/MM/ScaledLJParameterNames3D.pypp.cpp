@@ -45,6 +45,8 @@ namespace bp = boost::python;
 
 SireMM::ScaledLJParameterNames3D __copy__(const SireMM::ScaledLJParameterNames3D &other){ return SireMM::ScaledLJParameterNames3D(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::ScaledLJParameterNames3D&){ return "SireMM::ScaledLJParameterNames3D";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -55,9 +57,9 @@ void register_ScaledLJParameterNames3D_class(){
         typedef bp::class_< SireMM::ScaledLJParameterNames3D, bp::bases< SireMM::LJParameterName3D, SireMM::LJParameterName > > ScaledLJParameterNames3D_exposer_t;
         ScaledLJParameterNames3D_exposer_t ScaledLJParameterNames3D_exposer = ScaledLJParameterNames3D_exposer_t( "ScaledLJParameterNames3D", "This class provides the default name of the properties\nthat contain the LJ, intramolecular NB scale parameters and\n3D coordinates properties", bp::init< >("") );
         bp::scope ScaledLJParameterNames3D_scope( ScaledLJParameterNames3D_exposer );
-        ScaledLJParameterNames3D_exposer.def( "__copy__", &__copy__);
-        ScaledLJParameterNames3D_exposer.def( "__deepcopy__", &__copy__);
-        ScaledLJParameterNames3D_exposer.def( "clone", &__copy__);
+        ScaledLJParameterNames3D_exposer.def( "__copy__", &__copy__<SireMM::ScaledLJParameterNames3D>);
+        ScaledLJParameterNames3D_exposer.def( "__deepcopy__", &__copy__<SireMM::ScaledLJParameterNames3D>);
+        ScaledLJParameterNames3D_exposer.def( "clone", &__copy__<SireMM::ScaledLJParameterNames3D>);
         ScaledLJParameterNames3D_exposer.def( "__str__", &pvt_get_name);
         ScaledLJParameterNames3D_exposer.def( "__repr__", &pvt_get_name);
     }

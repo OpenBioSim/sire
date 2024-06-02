@@ -41,6 +41,8 @@ namespace bp = boost::python;
 
 SireMM::ChargeParameterName __copy__(const SireMM::ChargeParameterName &other){ return SireMM::ChargeParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::ChargeParameterName&){ return "SireMM::ChargeParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -63,9 +65,9 @@ void register_ChargeParameterName_class(){
                 , "" );
         
         }
-        ChargeParameterName_exposer.def( "__copy__", &__copy__);
-        ChargeParameterName_exposer.def( "__deepcopy__", &__copy__);
-        ChargeParameterName_exposer.def( "clone", &__copy__);
+        ChargeParameterName_exposer.def( "__copy__", &__copy__<SireMM::ChargeParameterName>);
+        ChargeParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::ChargeParameterName>);
+        ChargeParameterName_exposer.def( "clone", &__copy__<SireMM::ChargeParameterName>);
         ChargeParameterName_exposer.def( "__str__", &pvt_get_name);
         ChargeParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

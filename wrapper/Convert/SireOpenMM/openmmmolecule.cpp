@@ -2073,7 +2073,7 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const Molecule &mol,
                                                      const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
-    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map)));
+    this->operator=(PerturbableOpenMMMolecule(OpenMMMolecule(mol, map), map));
 }
 
 /** Return whether or not this is null */
@@ -2085,7 +2085,8 @@ bool PerturbableOpenMMMolecule::isNull() const
 }
 
 /** Construct from the passed OpenMMMolecule */
-PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
+PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
+                                                     const PropertyMap &map)
     : ConcreteProperty<PerturbableOpenMMMolecule, Property>()
 {
     if (mol.perturbed.get() == 0)
@@ -2175,6 +2176,45 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol)
     from_ghost_idxs = mol.from_ghost_idxs;
 
     perturbable_constraints = mol.perturbable_constraints;
+
+    bool fix_perturbable_zero_sigmas = false;
+
+    if (map.specified("fix_perturbable_zero_sigmas"))
+    {
+        fix_perturbable_zero_sigmas = map["fix_perturbable_zero_sigmas"].value().asABoolean();
+    }
+
+    if (fix_perturbable_zero_sigmas)
+    {
+        const int nats = sig0.count();
+
+        if (sig1.count() != nats)
+        {
+            throw SireError::program_bug(QObject::tr(
+                                             "The number of atoms in the reference (%1) and perturbed (%2) "
+                                             "states do not match.")
+                                             .arg(nats)
+                                             .arg(sig1.count()),
+                                         CODELOC);
+        }
+
+        const auto *sig0_data = sig0.constData();
+        const auto *sig1_data = sig1.constData();
+
+        for (int i = 0; i < nats; ++i)
+        {
+            if (std::abs(sig0_data[i]) < 1e-9)
+            {
+                sig0[i] = sig1_data[i];
+                sig0_data = sig0.constData();
+            }
+            else if (std::abs(sig1_data[i] < 1e-9))
+            {
+                sig1[i] = sig0_data[i];
+                sig1_data = sig1.constData();
+            }
+        }
+    }
 }
 
 /** Copy constructor */

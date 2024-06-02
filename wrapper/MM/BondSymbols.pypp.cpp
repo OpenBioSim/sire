@@ -34,6 +34,8 @@ namespace bp = boost::python;
 
 SireMM::BondSymbols __copy__(const SireMM::BondSymbols &other){ return SireMM::BondSymbols(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::BondSymbols&){ return "SireMM::BondSymbols";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -56,9 +58,9 @@ void register_BondSymbols_class(){
                 , "Return the symbol representing the vector along the bond (r)" );
         
         }
-        BondSymbols_exposer.def( "__copy__", &__copy__);
-        BondSymbols_exposer.def( "__deepcopy__", &__copy__);
-        BondSymbols_exposer.def( "clone", &__copy__);
+        BondSymbols_exposer.def( "__copy__", &__copy__<SireMM::BondSymbols>);
+        BondSymbols_exposer.def( "__deepcopy__", &__copy__<SireMM::BondSymbols>);
+        BondSymbols_exposer.def( "clone", &__copy__<SireMM::BondSymbols>);
         BondSymbols_exposer.def( "__str__", &pvt_get_name);
         BondSymbols_exposer.def( "__repr__", &pvt_get_name);
     }

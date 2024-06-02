@@ -19,6 +19,8 @@ namespace bp = boost::python;
 
 SireMM::CLJNBPairs __copy__(const SireMM::CLJNBPairs &other){ return SireMM::CLJNBPairs(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -83,7 +85,7 @@ void register_CLJNBPairs_class(){
                 "merge"
                 , merge_function_value
                 , ( bp::arg("other"), bp::arg("mapping"), bp::arg("ghost")=::QString( ), bp::arg("map")=SireBase::PropertyMap() )
-                , "" );
+                , "Merge this property with another property" );
         
         }
         { //::SireMM::CLJNBPairs::nExcludedAtoms
@@ -151,9 +153,9 @@ void register_CLJNBPairs_class(){
         
         }
         CLJNBPairs_exposer.staticmethod( "typeName" );
-        CLJNBPairs_exposer.def( "__copy__", &__copy__);
-        CLJNBPairs_exposer.def( "__deepcopy__", &__copy__);
-        CLJNBPairs_exposer.def( "clone", &__copy__);
+        CLJNBPairs_exposer.def( "__copy__", &__copy__<SireMM::CLJNBPairs>);
+        CLJNBPairs_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJNBPairs>);
+        CLJNBPairs_exposer.def( "clone", &__copy__<SireMM::CLJNBPairs>);
         CLJNBPairs_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJNBPairs >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJNBPairs_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJNBPairs >,

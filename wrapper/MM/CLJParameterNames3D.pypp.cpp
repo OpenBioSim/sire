@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 SireMM::CLJParameterNames3D __copy__(const SireMM::CLJParameterNames3D &other){ return SireMM::CLJParameterNames3D(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::CLJParameterNames3D&){ return "SireMM::CLJParameterNames3D";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -53,9 +55,9 @@ void register_CLJParameterNames3D_class(){
         typedef bp::class_< SireMM::CLJParameterNames3D, bp::bases< SireMM::CLJParameterNames, SireMM::LJParameterName, SireMM::ChargeParameterName > > CLJParameterNames3D_exposer_t;
         CLJParameterNames3D_exposer_t CLJParameterNames3D_exposer = CLJParameterNames3D_exposer_t( "CLJParameterNames3D", "This class provides the default name of the properties\nthat contain the charge, LJ and 3D coordinates properties", bp::init< >("") );
         bp::scope CLJParameterNames3D_scope( CLJParameterNames3D_exposer );
-        CLJParameterNames3D_exposer.def( "__copy__", &__copy__);
-        CLJParameterNames3D_exposer.def( "__deepcopy__", &__copy__);
-        CLJParameterNames3D_exposer.def( "clone", &__copy__);
+        CLJParameterNames3D_exposer.def( "__copy__", &__copy__<SireMM::CLJParameterNames3D>);
+        CLJParameterNames3D_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJParameterNames3D>);
+        CLJParameterNames3D_exposer.def( "clone", &__copy__<SireMM::CLJParameterNames3D>);
         CLJParameterNames3D_exposer.def( "__str__", &pvt_get_name);
         CLJParameterNames3D_exposer.def( "__repr__", &pvt_get_name);
     }

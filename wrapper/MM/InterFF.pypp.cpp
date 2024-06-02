@@ -54,6 +54,8 @@ namespace bp = boost::python;
 
 SireMM::InterFF __copy__(const SireMM::InterFF &other){ return SireMM::InterFF(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -629,9 +631,9 @@ void register_InterFF_class(){
         
         }
         InterFF_exposer.staticmethod( "typeName" );
-        InterFF_exposer.def( "__copy__", &__copy__);
-        InterFF_exposer.def( "__deepcopy__", &__copy__);
-        InterFF_exposer.def( "clone", &__copy__);
+        InterFF_exposer.def( "__copy__", &__copy__<SireMM::InterFF>);
+        InterFF_exposer.def( "__deepcopy__", &__copy__<SireMM::InterFF>);
+        InterFF_exposer.def( "clone", &__copy__<SireMM::InterFF>);
         InterFF_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::InterFF >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         InterFF_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::InterFF >,

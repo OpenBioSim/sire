@@ -49,6 +49,8 @@ namespace bp = boost::python;
 
 SireMM::BondParameterName __copy__(const SireMM::BondParameterName &other){ return SireMM::BondParameterName(other); }
 
+#include "Helpers/copy.hpp"
+
 const char* pvt_get_name(const SireMM::BondParameterName&){ return "SireMM::BondParameterName";}
 
 #include "Helpers/release_gil_policy.hpp"
@@ -71,9 +73,9 @@ void register_BondParameterName_class(){
                 , "" );
         
         }
-        BondParameterName_exposer.def( "__copy__", &__copy__);
-        BondParameterName_exposer.def( "__deepcopy__", &__copy__);
-        BondParameterName_exposer.def( "clone", &__copy__);
+        BondParameterName_exposer.def( "__copy__", &__copy__<SireMM::BondParameterName>);
+        BondParameterName_exposer.def( "__deepcopy__", &__copy__<SireMM::BondParameterName>);
+        BondParameterName_exposer.def( "clone", &__copy__<SireMM::BondParameterName>);
         BondParameterName_exposer.def( "__str__", &pvt_get_name);
         BondParameterName_exposer.def( "__repr__", &pvt_get_name);
     }

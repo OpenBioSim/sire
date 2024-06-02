@@ -39,6 +39,8 @@ namespace bp = boost::python;
 
 SireMM::SelectorBond __copy__(const SireMM::SelectorBond &other){ return SireMM::SelectorBond(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -672,9 +674,9 @@ void register_SelectorBond_class(){
         
         }
         SelectorBond_exposer.staticmethod( "typeName" );
-        SelectorBond_exposer.def( "__copy__", &__copy__);
-        SelectorBond_exposer.def( "__deepcopy__", &__copy__);
-        SelectorBond_exposer.def( "clone", &__copy__);
+        SelectorBond_exposer.def( "__copy__", &__copy__<SireMM::SelectorBond>);
+        SelectorBond_exposer.def( "__deepcopy__", &__copy__<SireMM::SelectorBond>);
+        SelectorBond_exposer.def( "clone", &__copy__<SireMM::SelectorBond>);
         SelectorBond_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::SelectorBond >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SelectorBond_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::SelectorBond >,

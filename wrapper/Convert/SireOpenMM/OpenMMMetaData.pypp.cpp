@@ -129,6 +129,8 @@ namespace bp = boost::python;
 
 SireOpenMM::OpenMMMetaData __copy__(const SireOpenMM::OpenMMMetaData &other){ return SireOpenMM::OpenMMMetaData(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -273,9 +275,9 @@ void register_OpenMMMetaData_class(){
         
         }
         OpenMMMetaData_exposer.staticmethod( "typeName" );
-        OpenMMMetaData_exposer.def( "__copy__", &__copy__);
-        OpenMMMetaData_exposer.def( "__deepcopy__", &__copy__);
-        OpenMMMetaData_exposer.def( "clone", &__copy__);
+        OpenMMMetaData_exposer.def( "__copy__", &__copy__<SireOpenMM::OpenMMMetaData>);
+        OpenMMMetaData_exposer.def( "__deepcopy__", &__copy__<SireOpenMM::OpenMMMetaData>);
+        OpenMMMetaData_exposer.def( "clone", &__copy__<SireOpenMM::OpenMMMetaData>);
         OpenMMMetaData_exposer.def( "__str__", &__str__< ::SireOpenMM::OpenMMMetaData > );
         OpenMMMetaData_exposer.def( "__repr__", &__str__< ::SireOpenMM::OpenMMMetaData > );
     }

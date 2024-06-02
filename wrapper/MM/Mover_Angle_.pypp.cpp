@@ -87,6 +87,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::Angle> __copy__(const SireMol::Mover<SireMM::Angle> &other){ return SireMol::Mover<SireMM::Angle>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -478,9 +480,9 @@ void register_Mover_Angle__class(){
         
         }
         Mover_Angle__exposer.staticmethod( "typeName" );
-        Mover_Angle__exposer.def( "__copy__", &__copy__);
-        Mover_Angle__exposer.def( "__deepcopy__", &__copy__);
-        Mover_Angle__exposer.def( "clone", &__copy__);
+        Mover_Angle__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::Angle>>);
+        Mover_Angle__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::Angle>>);
+        Mover_Angle__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::Angle>>);
         Mover_Angle__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::Angle> > );
         Mover_Angle__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::Angle> > );
         Mover_Angle__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::Angle> > );

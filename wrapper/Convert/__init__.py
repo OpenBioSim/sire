@@ -398,7 +398,7 @@ try:
                     platform = platforms["cpu"]
 
                 elif len(platforms) > 0:
-                    platform = platforms[platforms.keys()[0]]
+                    platform = platforms[list(platforms.keys())[0]]
 
             if platform is None:
                 raise ValueError(

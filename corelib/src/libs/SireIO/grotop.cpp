@@ -5399,6 +5399,12 @@ QVector<QString> GroTop::preprocess(const QVector<QString> &lines, QHash<QString
             }
         }
 
+        // skip BioSimSpace position restraint includes
+        if (line.contains("#include \"posre"))
+        {
+            continue;
+        }
+
         // now look for #include lines
         if (line.startsWith("#include"))
         {

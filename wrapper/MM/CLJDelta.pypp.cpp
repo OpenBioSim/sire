@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireMM::CLJDelta __copy__(const SireMM::CLJDelta &other){ return SireMM::CLJDelta(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -280,9 +282,9 @@ void register_CLJDelta_class(){
         CLJDelta_exposer.staticmethod( "mergeNew" );
         CLJDelta_exposer.staticmethod( "mergeOld" );
         CLJDelta_exposer.staticmethod( "typeName" );
-        CLJDelta_exposer.def( "__copy__", &__copy__);
-        CLJDelta_exposer.def( "__deepcopy__", &__copy__);
-        CLJDelta_exposer.def( "clone", &__copy__);
+        CLJDelta_exposer.def( "__copy__", &__copy__<SireMM::CLJDelta>);
+        CLJDelta_exposer.def( "__deepcopy__", &__copy__<SireMM::CLJDelta>);
+        CLJDelta_exposer.def( "clone", &__copy__<SireMM::CLJDelta>);
         CLJDelta_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::CLJDelta >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         CLJDelta_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::CLJDelta >,

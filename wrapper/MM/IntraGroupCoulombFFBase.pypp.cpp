@@ -18,6 +18,8 @@ namespace bp = boost::python;
 
 SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> > __copy__(const SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> > &other){ return SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -158,9 +160,9 @@ void register_IntraGroupCoulombFFBase_class(){
         
         }
         IntraGroupCoulombFFBase_exposer.staticmethod( "typeName" );
-        IntraGroupCoulombFFBase_exposer.def( "__copy__", &__copy__);
-        IntraGroupCoulombFFBase_exposer.def( "__deepcopy__", &__copy__);
-        IntraGroupCoulombFFBase_exposer.def( "clone", &__copy__);
+        IntraGroupCoulombFFBase_exposer.def( "__copy__", &__copy__<SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >>);
+        IntraGroupCoulombFFBase_exposer.def( "__deepcopy__", &__copy__<SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >>);
+        IntraGroupCoulombFFBase_exposer.def( "clone", &__copy__<SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> >>);
         IntraGroupCoulombFFBase_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> > >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IntraGroupCoulombFFBase_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireFF::Intra2B2GFF<SireMM::CoulombPotentialInterface<SireMM::IntraCoulombPotential> > >,

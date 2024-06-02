@@ -41,6 +41,8 @@ namespace bp = boost::python;
 
 SireMM::GridFF2 __copy__(const SireMM::GridFF2 &other){ return SireMM::GridFF2(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -297,9 +299,9 @@ void register_GridFF2_class(){
         
         }
         GridFF2_exposer.staticmethod( "typeName" );
-        GridFF2_exposer.def( "__copy__", &__copy__);
-        GridFF2_exposer.def( "__deepcopy__", &__copy__);
-        GridFF2_exposer.def( "clone", &__copy__);
+        GridFF2_exposer.def( "__copy__", &__copy__<SireMM::GridFF2>);
+        GridFF2_exposer.def( "__deepcopy__", &__copy__<SireMM::GridFF2>);
+        GridFF2_exposer.def( "clone", &__copy__<SireMM::GridFF2>);
         GridFF2_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::GridFF2 >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GridFF2_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::GridFF2 >,

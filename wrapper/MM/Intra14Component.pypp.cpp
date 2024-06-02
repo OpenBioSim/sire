@@ -18,6 +18,8 @@ namespace bp = boost::python;
 
 SireMM::Intra14Component __copy__(const SireMM::Intra14Component &other){ return SireMM::Intra14Component(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -131,9 +133,9 @@ void register_Intra14Component_class(){
         
         }
         Intra14Component_exposer.staticmethod( "typeName" );
-        Intra14Component_exposer.def( "__copy__", &__copy__);
-        Intra14Component_exposer.def( "__deepcopy__", &__copy__);
-        Intra14Component_exposer.def( "clone", &__copy__);
+        Intra14Component_exposer.def( "__copy__", &__copy__<SireMM::Intra14Component>);
+        Intra14Component_exposer.def( "__deepcopy__", &__copy__<SireMM::Intra14Component>);
+        Intra14Component_exposer.def( "clone", &__copy__<SireMM::Intra14Component>);
         Intra14Component_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::Intra14Component >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Intra14Component_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::Intra14Component >,

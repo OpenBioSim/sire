@@ -33,6 +33,8 @@ namespace bp = boost::python;
 
 SireMM::GroupInternalParameters __copy__(const SireMM::GroupInternalParameters &other){ return SireMM::GroupInternalParameters(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 const char* pvt_get_name(const SireMM::GroupInternalParameters&){ return "SireMM::GroupInternalParameters";}
@@ -643,9 +645,9 @@ void register_GroupInternalParameters_class(){
                 , "Return the Urey-Bradley potentials for this group" );
         
         }
-        GroupInternalParameters_exposer.def( "__copy__", &__copy__);
-        GroupInternalParameters_exposer.def( "__deepcopy__", &__copy__);
-        GroupInternalParameters_exposer.def( "clone", &__copy__);
+        GroupInternalParameters_exposer.def( "__copy__", &__copy__<SireMM::GroupInternalParameters>);
+        GroupInternalParameters_exposer.def( "__deepcopy__", &__copy__<SireMM::GroupInternalParameters>);
+        GroupInternalParameters_exposer.def( "clone", &__copy__<SireMM::GroupInternalParameters>);
         GroupInternalParameters_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireMM::GroupInternalParameters >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         GroupInternalParameters_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireMM::GroupInternalParameters >,

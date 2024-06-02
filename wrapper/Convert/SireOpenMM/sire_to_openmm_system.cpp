@@ -1144,7 +1144,8 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
             // of perturbable molecules (e.g. the first perturbable
             // molecule we find has index 0)
             auto pert_idx = lambda_lever.addPerturbableMolecule(mol,
-                                                                start_indicies);
+                                                                start_indicies,
+                                                                map);
 
             // and we can record the map from the molecule index
             // to the perturbable molecule index

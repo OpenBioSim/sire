@@ -89,6 +89,8 @@ namespace bp = boost::python;
 
 SireMol::Mover<SireMM::Improper> __copy__(const SireMol::Mover<SireMM::Improper> &other){ return SireMol::Mover<SireMM::Improper>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Helpers/str.hpp"
 
 #include "Helpers/release_gil_policy.hpp"
@@ -480,9 +482,9 @@ void register_Mover_Improper__class(){
         
         }
         Mover_Improper__exposer.staticmethod( "typeName" );
-        Mover_Improper__exposer.def( "__copy__", &__copy__);
-        Mover_Improper__exposer.def( "__deepcopy__", &__copy__);
-        Mover_Improper__exposer.def( "clone", &__copy__);
+        Mover_Improper__exposer.def( "__copy__", &__copy__<SireMol::Mover<SireMM::Improper>>);
+        Mover_Improper__exposer.def( "__deepcopy__", &__copy__<SireMol::Mover<SireMM::Improper>>);
+        Mover_Improper__exposer.def( "clone", &__copy__<SireMol::Mover<SireMM::Improper>>);
         Mover_Improper__exposer.def( "__str__", &__str__< ::SireMol::Mover<SireMM::Improper> > );
         Mover_Improper__exposer.def( "__repr__", &__str__< ::SireMol::Mover<SireMM::Improper> > );
         Mover_Improper__exposer.def( "__len__", &__len_size< ::SireMol::Mover<SireMM::Improper> > );
