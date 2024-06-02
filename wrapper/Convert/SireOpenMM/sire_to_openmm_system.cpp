@@ -547,6 +547,31 @@ _set_box_vectors(OpenMM::System &system,
     return boxvecs;
 }
 
+class IndexPair
+{
+public:
+    IndexPair(int atom0 = 0, int atom1 = 0) : _atom0(atom0), _atom1(atom1)
+    {
+        if (atom1 < atom0)
+        {
+            std::swap(_atom0, _atom1);
+        }
+    }
+
+    bool operator==(const IndexPair &other) const
+    {
+        return _atom0 == other._atom0 and _atom1 == other._atom1;
+    }
+
+    int _atom0;
+    int _atom1;
+};
+
+uint qHash(const IndexPair &pair)
+{
+    return qHash(pair._atom0) ^ qHash(pair._atom1);
+}
+
 /**
 
 This is the (monster) function that converts a passed set of Sire
@@ -1082,13 +1107,32 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     std::vector<double> custom_params = {0.0, 0.0, 0.0, 0.0, 0.0};
 
     // the sets of particle indexes for the ghost atoms and non-ghost atoms
-    std::set<int> ghost_atoms;
-    std::set<int> non_ghost_atoms;
+    QVector<int> ghost_atoms;
+    QVector<int> non_ghost_atoms;
+
+    // count the number of atoms and ghost atoms
+    int n_atoms = 0;
+    int n_ghost_atoms = 0;
+
+    for (int i = 0; i < nmols; ++i)
+    {
+        const auto &mol = openmm_mols_data[i];
+        n_atoms += mol.nAtoms();
+        n_ghost_atoms += mol.nGhostAtoms();
+    }
+
+    // there's probably lots of optimisations we can make if the
+    // number of ghost atoms is zero...
+    ghost_atoms.reserve(n_ghost_atoms);
+    non_ghost_atoms.reserve(n_atoms - n_ghost_atoms);
 
     // the set of all ghost atoms, with the value
     // indicating if this is a from-ghost (true) or
     // a to-ghost (false)
-    QHash<int, bool> ghost_is_from;
+    QVector<int> from_ghost_idxs;
+    QVector<int> to_ghost_idxs;
+    from_ghost_idxs.reserve(n_ghost_atoms);
+    to_ghost_idxs.reserve(n_ghost_atoms);
 
     // loop over every molecule and add them one by one
     for (int i = 0; i < nmols; ++i)
@@ -1218,8 +1262,16 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // this is a ghost atom! We need to record this
                     // fact and make sure that we don't calculate
                     // the LJ energy using the standard cljff
-                    ghost_atoms.insert(atom_index);
-                    ghost_is_from.insert(atom_index, is_from_ghost);
+                    ghost_atoms.append(atom_index);
+
+                    if (is_from_ghost)
+                    {
+                        from_ghost_idxs.append(atom_index);
+                    }
+                    else
+                    {
+                        to_ghost_idxs.append(atom_index);
+                    }
 
                     // don't include the LJ energy as this will be
                     // calculated using the ghost forcefields
@@ -1233,7 +1285,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     // just add it to the standard cljff as normal
                     cljff->addParticle(charge, boost::get<1>(clj),
                                        boost::get<2>(clj));
-                    non_ghost_atoms.insert(atom_index);
+                    non_ghost_atoms.append(atom_index);
                 }
             }
         }
@@ -1279,7 +1331,7 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                     custom_params[4] = 0.0;
                     ghost_ghostff->addParticle(custom_params);
                     ghost_nonghostff->addParticle(custom_params);
-                    non_ghost_atoms.insert(atom_index);
+                    non_ghost_atoms.append(atom_index);
                 }
             }
         }
@@ -1340,8 +1392,10 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     {
         // set up the interaction groups - ghost / non-ghost
         //                                 ghost / ghost
-        ghost_ghostff->addInteractionGroup(ghost_atoms, ghost_atoms);
-        ghost_nonghostff->addInteractionGroup(ghost_atoms, non_ghost_atoms);
+        std::set<int> ghost_atoms_set(ghost_atoms.begin(), ghost_atoms.end());
+        std::set<int> non_ghost_atoms_set(non_ghost_atoms.begin(), non_ghost_atoms.end());
+        ghost_ghostff->addInteractionGroup(ghost_atoms_set, ghost_atoms_set);
+        ghost_nonghostff->addInteractionGroup(ghost_atoms_set, non_ghost_atoms_set);
     }
 
     // see if we want to remove COM motion
@@ -1373,6 +1427,11 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
     ///
     /// We will also add all of the perturbable constraints here
     ///
+    /// (we need to remember which ghost-ghost interactions we have
+    ///  excluded, so that we don't double-exclude them later)
+    QSet<IndexPair> excluded_ghost_pairs;
+    excluded_ghost_pairs.reserve((n_ghost_atoms * n_ghost_atoms) / 2);
+
     for (int i = 0; i < nmols; ++i)
     {
         int start_index = start_indexes[i];
@@ -1468,6 +1527,12 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
                                                         params14);
                         }
                     }
+
+                    if (atom0_is_ghost and atom1_is_ghost)
+                    {
+                        // remember that this ghost-ghost interaction is already excluded
+                        excluded_ghost_pairs.insert(IndexPair(boost::get<0>(p), boost::get<1>(p)));
+                    }
                 }
                 else
                 {
@@ -1504,6 +1569,22 @@ OpenMMMetaData SireOpenMM::sire_to_openmm_system(OpenMM::System &system,
 
             lambda_lever.setConstraintIndicies(pert_idx,
                                                constraint_idxs);
+        }
+    }
+
+    // go through all of the ghost atoms and exclude interactions
+    // between from_ghosts and to_ghosts
+    for (const auto &from_ghost_idx : from_ghost_idxs)
+    {
+        for (const auto &to_ghost_idx : to_ghost_idxs)
+        {
+            if (not excluded_ghost_pairs.contains(IndexPair(from_ghost_idx, to_ghost_idx)))
+            {
+                ghost_ghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                ghost_nonghostff->addExclusion(from_ghost_idx, to_ghost_idx);
+                cljff->addException(from_ghost_idx, to_ghost_idx,
+                                    0.0, 1e-9, 1e-9, true);
+            }
         }
     }
 

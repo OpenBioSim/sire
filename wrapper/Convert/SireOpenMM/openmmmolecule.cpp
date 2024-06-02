@@ -1193,15 +1193,22 @@ void OpenMMMolecule::alignInternals(const PropertyMap &map)
         {
             if (is_ghost(clj0))
             {
-                from_ghost_idxs.insert(i);
+                // ghost atoms are only ghosts is they are real in at
+                // least one end state (cannot be both a to_ghost and
+                // a from_ghost atom - this is also implicitly tested
+                // for above in the clj0 != clj1)
+                if (not is_ghost(clj1))
+                {
+                    from_ghost_idxs.insert(i);
 
-                // alpha is 1 for the reference state for ghost atoms
-                // (and will be 0 for the perturbed state)
-                this->alphas[i] = 1.0;
+                    // alpha is 1 for the reference state for ghost atoms
+                    // (and will be 0 for the perturbed state)
+                    this->alphas[i] = 1.0;
 
-                // kappa is 1 for both end states for ghost atoms
-                this->kappas[i] = 1.0;
-                this->perturbed->kappas[i] = 1.0;
+                    // kappa is 1 for both end states for ghost atoms
+                    this->kappas[i] = 1.0;
+                    this->perturbed->kappas[i] = 1.0;
+                }
             }
             else if (is_ghost(clj1))
             {
@@ -1793,6 +1800,18 @@ void OpenMMMolecule::copyInCoordsAndVelocities(OpenMM::Vec3 *c, OpenMM::Vec3 *v)
             v += 1;
         }
     }
+}
+
+/** Return the number of atoms in this molecule */
+int OpenMMMolecule::nAtoms() const
+{
+    return this->coords.count();
+}
+
+/** Return the number of ghost atoms (sum of to_ghosts and from_ghosts) */
+int OpenMMMolecule::nGhostAtoms() const
+{
+    return from_ghost_idxs.count() + to_ghost_idxs.count();
 }
 
 /** Return the alpha parameters of all atoms in atom order for
