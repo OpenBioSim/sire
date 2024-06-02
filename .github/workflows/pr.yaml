@@ -57,7 +57,7 @@ jobs:
         run: git clone -b ${{ github.head_ref }} --single-branch https://github.com/${{ env.REPO }} sire
       #
       - name: Setup Conda
-        run: conda install -y -c conda-forge anaconda-client packaging pip-requirements-parser
+        run: conda install -y -c conda-forge conda-build anaconda-client packaging pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py
