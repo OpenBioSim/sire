@@ -2,18 +2,6 @@
 `Sire <https://sire.openbiosim.org>`__
 ======================================
 
-.. image:: https://github.com/OpenBioSim/sire/actions/workflows/devel.yaml/badge.svg
-   :target: https://github.com/OpenBioSim/sire/actions/workflows/devel.yaml
-   :alt: Build status
-
-.. image:: https://anaconda.org/openbiosim/sire/badges/downloads.svg
-   :target: https://anaconda.org/openbiosim/sire
-   :alt: Downloads
-
-.. image:: https://img.shields.io/badge/License-GPL%20v3-blue.svg
-   :target: https://www.gnu.org/licenses/gpl-3.0.en.html
-   :alt: License
-
 Citation
 ========
 
