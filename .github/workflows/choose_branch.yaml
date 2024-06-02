@@ -55,14 +55,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: sire_build
           miniforge-version: latest
-          miniforge-variant: Mambaforge
-          use-mamba: true
       #
       - name: Clone the desired branch
         run: git clone https://github.com/${{ env.REPO }} -b ${{ github.event.inputs.branch }} sire
       #
       - name: Setup Conda
-        run: mamba install -y -c conda-forge boa anaconda-client packaging pip-requirements-parser
+        run: conda install -y -c conda-forge conda-build boa anaconda-client packaging pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py
@@ -70,8 +68,8 @@ jobs:
       - name: Prepare build location
         run: mkdir ${{ github.workspace }}/build
       #
-      - name: Build Conda package using mamba build
-        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      - name: Build Conda package using conda build
+        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
       #
       - name: Upload Conda package
         # Maybe add the logic here that this is a dev package?

@@ -85,15 +85,7 @@ def _find_conda():
         )
         return None
 
-    if conda.endswith(".exe"):
-        m = os.path.join(os.path.dirname(conda), "mamba.exe")
-    else:
-        m = os.path.join(os.path.dirname(conda), "mamba")
-
-    if os.path.exists(m):
-        return m
-    else:
-        return conda
+    return conda
 
 
 def _install_package(name, package_registry, version=None):
@@ -143,10 +135,7 @@ def _install_package(name, package_registry, version=None):
     except Exception:
         pass
 
-    print(
-        "\nWARNING: Unable to install '%s' from package '%s'\n"
-        % (name, package)
-    )
+    print("\nWARNING: Unable to install '%s' from package '%s'\n" % (name, package))
 
 
 def try_import(name, package_registry=_module_to_package, version=None):
@@ -187,9 +176,7 @@ def try_import(name, package_registry=_module_to_package, version=None):
     raise ImportError("Failed to install module %s" % name)
 
 
-def try_import_from(
-    name, fromlist, package_registry=_module_to_package, version=None
-):
+def try_import_from(name, fromlist, package_registry=_module_to_package, version=None):
     """Try to import from the module called 'name' the passed symbol
     (or list of symbols) contained in 'fromlist', returning
     the symbol (or list of symbols).
@@ -242,8 +229,7 @@ def try_import_from(
             return getattr(mod, fromlist[0])
         except Exception:
             raise ImportError(
-                "Cannot find the symbol '%s' in module '%s'"
-                % (fromlist[0], name)
+                "Cannot find the symbol '%s' in module '%s'" % (fromlist[0], name)
             )
     else:
         ret = []

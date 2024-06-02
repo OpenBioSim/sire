@@ -40,15 +40,7 @@ def _find_conda():
         )
         return None
 
-    if conda.endswith(".exe"):
-        m = os.path.join(os.path.dirname(conda), "mamba.exe")
-    else:
-        m = os.path.join(os.path.dirname(conda), "mamba")
-
-    if os.path.exists(m):
-        return m
-    else:
-        return conda
+    return conda
 
 
 def _install_package(name, package_registry, version=None):
@@ -98,10 +90,7 @@ def _install_package(name, package_registry, version=None):
     except Exception:
         pass
 
-    print(
-        "\nWARNING: Unable to install '%s' from package '%s'\n"
-        % (name, package)
-    )
+    print("\nWARNING: Unable to install '%s' from package '%s'\n" % (name, package))
 
 
 class _ModuleStub:
@@ -109,7 +98,7 @@ class _ModuleStub:
         self._name = name
 
         if install_command is None:
-            self._install_command = f"mamba install {name}"
+            self._install_command = f"conda install {name}"
         else:
             self._install_command = install_command
 
@@ -135,7 +124,7 @@ def try_import(name, package_registry=_module_to_package, version=None):
     the package to install using "package_registry"
     (or if this is not available, using just the name
     of the module). This will then be installed using
-    "mamba", then "conda" (first one that works will return).
+    "conda" (first one that works will return).
 
     For example, use this via
 
@@ -176,9 +165,7 @@ def try_import(name, package_registry=_module_to_package, version=None):
     return _ModuleStub(name)
 
 
-def try_import_from(
-    name, fromlist, package_registry=_module_to_package, version=None
-):
+def try_import_from(name, fromlist, package_registry=_module_to_package, version=None):
     """Try to import from the module called 'name' the passed symbol
     (or list of symbols) contained in 'fromlist', returning
     the symbol (or list of symbols).
@@ -224,15 +211,14 @@ def try_import_from(
             return try_import_from(name, fromlist, package_registry=None)
         else:
             m = " ".join(fromlist)
-            return _ModuleStub(name, f"mamba install {m}")
+            return _ModuleStub(name, f"conda install {m}")
 
     if nsyms == 1:
         try:
             return getattr(mod, fromlist[0])
         except Exception:
             raise ImportError(
-                "Cannot find the symbol '%s' in module '%s'"
-                % (fromlist[0], name)
+                "Cannot find the symbol '%s' in module '%s'" % (fromlist[0], name)
             )
     else:
         ret = []
