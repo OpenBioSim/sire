@@ -52,14 +52,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           activate-environment: sire_build
           miniforge-version: latest
-          miniforge-variant: Mambaforge
-          use-mamba: true
       #
       - name: Clone the feature branch (pull request to devel)
         run: git clone -b ${{ github.head_ref }} --single-branch https://github.com/${{ env.REPO }} sire
       #
       - name: Setup Conda
-        run: mamba install -y -c conda-forge boa anaconda-client packaging pip-requirements-parser
+        run: conda install -y -c conda-forge anaconda-client packaging pip-requirements-parser
       #
       - name: Update Conda recipe
         run: python ${{ github.workspace }}/sire/actions/update_recipe.py
@@ -67,5 +65,5 @@ jobs:
       - name: Prepare build location
         run: mkdir ${{ github.workspace }}/build
       #
-      - name: Build Conda package using mamba build
-        run: conda mambabuild -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
+      - name: Build Conda package using conda build
+        run: conda build -c conda-forge -c openbiosim/label/dev ${{ github.workspace }}/sire/recipes/sire
