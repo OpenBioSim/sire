@@ -631,7 +631,7 @@ elseif (MSVC)
 
     set ( SIRE_SMALL_FLAGS  "/O1" )
     set ( SIRE_WARNALL_FLAGS  "" )
-    set ( SIRE_RELEASE_FLAGS  "/O2 /GL /Gw" )
+    set ( SIRE_RELEASE_FLAGS  "/O2 /GL /Gw /D_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING" )
     set ( SIRE_DEBUG_FLAGS   "/Zi" )
     set ( SIRE_VISIBILITY_FLAGS "/DSIRE_NO_VISIBILITY_AVAILABLE" )
     GET_SIRE_VECTOR_FLAGS( "/openmp:experimental" "/arch:SSE2" "/arch:AVX" "/arch:AVX512" "/arch:NEON" )

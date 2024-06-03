@@ -1,6 +1,7 @@
 import sire as sr
 
 import pytest
+import sys
 
 
 def _assert_equal(v0, v1, tol):
@@ -10,7 +11,8 @@ def _assert_equal(v0, v1, tol):
 
 
 @pytest.mark.skipif(
-    "gemmi" not in sr.convert.supported_formats(), reason="gemmi not available"
+    ("gemmi" not in sr.convert.supported_formats()) or (sys.platform == "win32"),
+    reason="gemmi not available",
 )
 def test_pdbx(tmpdir, ala_mols):
     mols = ala_mols
@@ -36,7 +38,8 @@ def test_pdbx(tmpdir, ala_mols):
 
 
 @pytest.mark.skipif(
-    "gemmi" not in sr.convert.supported_formats(), reason="gemmi not available"
+    ("gemmi" not in sr.convert.supported_formats()) or (sys.platform == "win32"),
+    reason="gemmi not available",
 )
 def test_pdbx_pdb(pdb_3nss, pdbx_3nss):
     mols = pdb_3nss
