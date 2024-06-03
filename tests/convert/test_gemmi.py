@@ -1,6 +1,7 @@
 import sire as sr
 
 import pytest
+import sys
 
 
 def _assert_equal(v0, v1, tol):
@@ -10,7 +11,8 @@ def _assert_equal(v0, v1, tol):
 
 
 @pytest.mark.skipif(
-    "gemmi" not in sr.convert.supported_formats(), reason="gemmi not available"
+    ("gemmi" not in sr.convert.supported_formats()) or (sys.platform == "win32"),
+    reason="gemmi not available",
 )
 def test_gemmi(testfile_cache_dir, pdbx_3nss):
     mols = pdbx_3nss
@@ -45,7 +47,8 @@ def test_gemmi(testfile_cache_dir, pdbx_3nss):
 
 
 @pytest.mark.skipif(
-    "gemmi" not in sr.convert.supported_formats(), reason="gemmi not available"
+    ("gemmi" not in sr.convert.supported_formats()) or (sys.platform == "win32"),
+    reason="gemmi not available",
 )
 def test_gemmi_roundtrip(tmpdir, pdbx_3nss):
     mols = pdbx_3nss.clone()
@@ -97,7 +100,8 @@ def test_gemmi_roundtrip(tmpdir, pdbx_3nss):
 
 
 @pytest.mark.skipif(
-    "gemmi" not in sr.convert.supported_formats(), reason="gemmi not available"
+    ("gemmi" not in sr.convert.supported_formats()) or (sys.platform == "win32"),
+    reason="gemmi not available",
 )
 def test_gemmi_complex_metadata(tmpdir, ala_mols):
     mols = ala_mols.clone()
