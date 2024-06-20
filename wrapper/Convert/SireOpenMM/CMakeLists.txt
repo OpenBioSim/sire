@@ -79,7 +79,7 @@ if (${SIRE_USE_OPENMM})
     # Define the sources in SireOpenMM
     set ( SIREOPENMM_SOURCES
 
-          emle.cpp
+          pyqm.cpp
           lambdalever.cpp
           openmmminimise.cpp
           openmmmolecule.cpp

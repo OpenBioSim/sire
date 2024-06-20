@@ -40,7 +40,7 @@
 #include "SireStream/shareddatastream.h"
 #include "SireVol/triclinicbox.h"
 
-#include "emle.h"
+#include "pyqm.h"
 
 using namespace SireMaths;
 using namespace SireOpenMM;
@@ -61,7 +61,7 @@ private:
 };
 
 /////////
-///////// Implementation of EMLECallback
+///////// Implementation of PyQMCallback
 /////////
 
 // A registry to store Python callback objects.
@@ -85,35 +85,35 @@ bp::object getPythonObject(QString uuid)
     if (not py_object_registry.contains(uuid))
     {
         throw SireError::invalid_key(QObject::tr(
-            "Unable to find UUID %1 in the EMLEForce callback registry.").arg(uuid),
+            "Unable to find UUID %1 in the PyQMForce callback registry.").arg(uuid),
             CODELOC);
     }
 
     return py_object_registry[uuid];
 }
 
-static const RegisterMetaType<EMLECallback> r_emlecallback(NO_ROOT);
+static const RegisterMetaType<PyQMCallback> r_pyqmcallback(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const EMLECallback &emlecallback)
+QDataStream &operator<<(QDataStream &ds, const PyQMCallback &pyqmcallback)
 {
-    writeHeader(ds, r_emlecallback, 1);
+    writeHeader(ds, r_pyqmcallback, 1);
 
     SharedDataStream sds(ds);
 
     // Generate a unique identifier for the callback.
     auto uuid = QUuid::createUuid().toString();
 
-    sds << uuid << emlecallback.callback;
+    sds << uuid << pyqmcallback.name << pyqmcallback.is_method;
 
     // Set the Python object in the registry.
-    setPyObject(emlecallback.py_object, uuid);
+    setPyObject(pyqmcallback.py_object, uuid);
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, EMLECallback &emlecallback)
+QDataStream &operator>>(QDataStream &ds, PyQMCallback &pyqmcallback)
 {
-    VersionID v = readHeader(ds, r_emlecallback);
+    VersionID v = readHeader(ds, r_pyqmcallback);
 
     if (v == 1)
     {
@@ -122,28 +122,33 @@ QDataStream &operator>>(QDataStream &ds, EMLECallback &emlecallback)
         QString uuid;
 
         // Get the UUID of the Python object and the callback name.
-        sds >> uuid >> emlecallback.callback;
+        sds >> uuid >> pyqmcallback.name >> pyqmcallback.is_method;
 
         // Set the Python object.
-        emlecallback.py_object = getPythonObject(uuid);
+        pyqmcallback.py_object = getPythonObject(uuid);
     }
     else
-        throw version_error(v, "1", r_emlecallback, CODELOC);
+        throw version_error(v, "1", r_pyqmcallback, CODELOC);
 
     return ds;
 }
 
-EMLECallback::EMLECallback()
+PyQMCallback::PyQMCallback()
 {
 }
 
-EMLECallback::EMLECallback(bp::object py_object, QString callback) :
-    py_object(py_object), callback(callback)
+PyQMCallback::PyQMCallback(bp::object py_object, QString name) :
+    py_object(py_object), name(name)
 {
+    // Is this a method or free function.
+    if (name.isEmpty())
+    {
+        this->is_method = false;
+    }
 }
 
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
-EMLECallback::call(
+PyQMCallback::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
@@ -153,71 +158,84 @@ EMLECallback::call(
     // Acquire GIL before calling Python code.
     GILLock lock;
 
-    return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
-        this->py_object.ptr(),
-        this->callback.toStdString().c_str(),
-        numbers_qm,
-        charges_mm,
-        xyz_qm,
-        xyz_mm
-    );
+    if (this->is_method)
+    {
+        return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
+            this->py_object.ptr(),
+            this->name.toStdString().c_str(),
+            numbers_qm,
+            charges_mm,
+            xyz_qm,
+            xyz_mm
+        );
+    }
+    else
+    {
+        return bp::call<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
+            this->py_object.ptr(),
+            numbers_qm,
+            charges_mm,
+            xyz_qm,
+            xyz_mm
+        );
+    }
 }
 
-const char *EMLECallback::typeName()
+const char *PyQMCallback::typeName()
 {
-    return QMetaType::typeName(qMetaTypeId<EMLECallback>());
+    return QMetaType::typeName(qMetaTypeId<PyQMCallback>());
 }
 
-const char *EMLECallback::what() const
+const char *PyQMCallback::what() const
 {
-    return EMLECallback::typeName();
+    return PyQMCallback::typeName();
 }
 
 /////////
-///////// Implementation of EMLEForce
+///////// Implementation of PyQMForce
 /////////
 
-static const RegisterMetaType<EMLEForce> r_emleforce(NO_ROOT);
+static const RegisterMetaType<PyQMForce> r_pyqmforce(NO_ROOT);
 
-QDataStream &operator<<(QDataStream &ds, const EMLEForce &emleforce)
+QDataStream &operator<<(QDataStream &ds, const PyQMForce &pyqmforce)
 {
-    writeHeader(ds, r_emleforce, 1);
+    writeHeader(ds, r_pyqmforce, 1);
 
     SharedDataStream sds(ds);
 
-    sds << emleforce.callback << emleforce.cutoff << emleforce.neighbour_list_frequency
-        << emleforce.lambda << emleforce.atoms << emleforce.mm1_to_qm
-        << emleforce.mm1_to_mm2 << emleforce.bond_scale_factors << emleforce.mm2_atoms
-        << emleforce.numbers << emleforce.charges;
+    sds << pyqmforce.callback << pyqmforce.cutoff << pyqmforce.neighbour_list_frequency
+        << pyqmforce.lambda << pyqmforce.atoms << pyqmforce.mm1_to_qm
+        << pyqmforce.mm1_to_mm2 << pyqmforce.bond_scale_factors << pyqmforce.mm2_atoms
+        << pyqmforce.numbers << pyqmforce.charges;
 
     return ds;
 }
 
-QDataStream &operator>>(QDataStream &ds, EMLEForce &emleforce)
+QDataStream &operator>>(QDataStream &ds, PyQMForce &pyqmforce)
 {
-    VersionID v = readHeader(ds, r_emleforce);
+    VersionID v = readHeader(ds, r_pyqmforce);
 
     if (v == 1)
     {
         SharedDataStream sds(ds);
 
-        sds >> emleforce.callback >> emleforce.cutoff >> emleforce.neighbour_list_frequency
-            >> emleforce.lambda >> emleforce.atoms >> emleforce.mm1_to_qm
-            >> emleforce.mm1_to_mm2 >> emleforce.bond_scale_factors >> emleforce.mm2_atoms
-            >> emleforce.numbers >> emleforce.charges;
+        sds >> pyqmforce.callback >> pyqmforce.cutoff >> pyqmforce.neighbour_list_frequency
+            >> pyqmforce.lambda >> pyqmforce.atoms >> pyqmforce.mm1_to_qm
+            >> pyqmforce.mm1_to_mm2 >> pyqmforce.bond_scale_factors >> pyqmforce.mm2_atoms
+            >> pyqmforce.numbers >> pyqmforce.charges;
     }
     else
-        throw version_error(v, "1", r_emleforce, CODELOC);
+        throw version_error(v, "1", r_pyqmforce, CODELOC);
 
     return ds;
 }
 
-EMLEForce::EMLEForce()
+PyQMForce::PyQMForce()
 {
 }
 
-EMLEForce::EMLEForce(
-    EMLECallback callback,
+PyQMForce::PyQMForce(
+    PyQMCallback callback,
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
     double lambda,
@@ -242,7 +260,7 @@ EMLEForce::EMLEForce(
 {
 }
 
-EMLEForce::EMLEForce(const EMLEForce &other) :
+PyQMForce::PyQMForce(const PyQMForce &other) :
     callback(other.callback),
     cutoff(other.cutoff),
     neighbour_list_frequency(other.neighbour_list_frequency),
@@ -257,7 +275,7 @@ EMLEForce::EMLEForce(const EMLEForce &other) :
 {
 }
 
-EMLEForce &EMLEForce::operator=(const EMLEForce &other)
+PyQMForce &PyQMForce::operator=(const PyQMForce &other)
 {
     this->callback = other.callback;
     this->cutoff = other.cutoff;
@@ -273,17 +291,17 @@ EMLEForce &EMLEForce::operator=(const EMLEForce &other)
     return *this;
 }
 
-void EMLEForce::setCallback(EMLECallback callback)
+void PyQMForce::setCallback(PyQMCallback callback)
 {
     this->callback = callback;
 }
 
-EMLECallback EMLEForce::getCallback() const
+PyQMCallback PyQMForce::getCallback() const
 {
     return this->callback;
 }
 
-void EMLEForce::setLambda(double lambda)
+void PyQMForce::setLambda(double lambda)
 {
     // Clamp the lambda value.
     if (lambda < 0.0)
@@ -297,58 +315,58 @@ void EMLEForce::setLambda(double lambda)
     this->lambda = lambda;
 }
 
-double EMLEForce::getLambda() const
+double PyQMForce::getLambda() const
 {
     return this->lambda;
 }
 
-SireUnits::Dimension::Length EMLEForce::getCutoff() const
+SireUnits::Dimension::Length PyQMForce::getCutoff() const
 {
     return this->cutoff;
 }
 
-int EMLEForce::getNeighbourListFrequency() const
+int PyQMForce::getNeighbourListFrequency() const
 {
     return this->neighbour_list_frequency;
 }
 
-QVector<int> EMLEForce::getAtoms() const
+QVector<int> PyQMForce::getAtoms() const
 {
     return this->atoms;
 }
 
-boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEForce::getLinkAtoms() const
+boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> PyQMForce::getLinkAtoms() const
 {
     return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_scale_factors);
 }
 
-QVector<int> EMLEForce::getMM2Atoms() const
+QVector<int> PyQMForce::getMM2Atoms() const
 {
     return this->mm2_atoms;
 }
 
-QVector<int> EMLEForce::getNumbers() const
+QVector<int> PyQMForce::getNumbers() const
 {
     return this->numbers;
 }
 
-QVector<double> EMLEForce::getCharges() const
+QVector<double> PyQMForce::getCharges() const
 {
     return this->charges;
 }
 
-const char *EMLEForce::typeName()
+const char *PyQMForce::typeName()
 {
-    return QMetaType::typeName(qMetaTypeId<EMLEForce>());
+    return QMetaType::typeName(qMetaTypeId<PyQMForce>());
 }
 
-const char *EMLEForce::what() const
+const char *PyQMForce::what() const
 {
-    return EMLEForce::typeName();
+    return PyQMForce::typeName();
 }
 
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
-EMLEForce::call(
+PyQMForce::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
@@ -364,9 +382,9 @@ EMLEForce::call(
 namespace OpenMM
 {
 
-    class EMLEForceProxy : public SerializationProxy {
+    class PyQMForceProxy : public SerializationProxy {
         public:
-            EMLEForceProxy() : SerializationProxy("EMLEForce")
+            PyQMForceProxy() : SerializationProxy("PyQMForce")
             {
             };
 
@@ -375,8 +393,8 @@ namespace OpenMM
                 // Serialize the object.
                 QByteArray data;
                 QDataStream ds(&data, QIODevice::WriteOnly);
-                EMLEForce emleforce = *static_cast<const EMLEForce*>(object);
-                ds << emleforce;
+                PyQMForce pyqmforce = *static_cast<const PyQMForce*>(object);
+                ds << pyqmforce;
 
                 // Set the version.
                 node.setIntProperty("version", 0);
@@ -410,60 +428,60 @@ namespace OpenMM
 
                 // Deserialize the object.
                 QDataStream ds(data);
-                EMLEForce emleforce;
+                PyQMForce pyqmforce;
 
                 try
                 {
-                    ds >> emleforce;
+                    ds >> pyqmforce;
                 }
                 catch (...)
                 {
-                    throw OpenMM::OpenMMException("Unable to find UUID in the EMLEForce callback registry.");
+                    throw OpenMM::OpenMMException("Unable to find UUID in the PyQMForce callback registry.");
                 }
 
-                return new EMLEForce(emleforce);
+                return new PyQMForce(pyqmforce);
             };
     };
 
-    // Register the EMLEForce serialization proxy.
-    extern "C" void registerEmleSerializationProxies() {
-        SerializationProxy::registerProxy(typeid(EMLEForce), new EMLEForceProxy());
+    // Register the PyQMForce serialization proxy.
+    extern "C" void registerPyQMSerializationProxies() {
+        SerializationProxy::registerProxy(typeid(PyQMForce), new PyQMForceProxy());
     }
 };
 
 /////////
-///////// Implementation of EMLEForceImpl
+///////// Implementation of PyQMForceImpl
 /////////
 
-OpenMM::ForceImpl *EMLEForce::createImpl() const
+OpenMM::ForceImpl *PyQMForce::createImpl() const
 {
 #ifdef SIRE_USE_CUSTOMCPPFORCE
-    return new EMLEForceImpl(*this);
+    return new PyQMForceImpl(*this);
 #else
     throw SireError::unsupported(QObject::tr(
-                                     "Unable to create an EMLEForceImpl because OpenMM::CustomCPPForceImpl "
+                                     "Unable to create an PyQMForceImpl because OpenMM::CustomCPPForceImpl "
                                      "is not available. You need to use OpenMM 8.1 or later."),
                                  CODELOC);
     return 0;
 #endif
 }
 
-EMLEForceImpl::EMLEForceImpl(const EMLEForce &owner) :
+PyQMForceImpl::PyQMForceImpl(const PyQMForce &owner) :
     OpenMM::CustomCPPForceImpl(owner),
     owner(owner)
 {
 }
 
-EMLEForceImpl::~EMLEForceImpl()
+PyQMForceImpl::~PyQMForceImpl()
 {
 }
 
-const EMLEForce &EMLEForceImpl::getOwner() const
+const PyQMForce &PyQMForceImpl::getOwner() const
 {
     return this->owner;
 }
 
-double EMLEForceImpl::computeForce(
+double PyQMForceImpl::computeForce(
     OpenMM::ContextImpl &context,
     const std::vector<OpenMM::Vec3> &positions,
     std::vector<OpenMM::Vec3> &forces)
@@ -751,7 +769,7 @@ double EMLEForceImpl::computeForce(
         {
             lambda = context.getParameter("lambda_interpolate");
         }
-        // Fall back on the lambda value stored in the EMLEForce object.
+        // Fall back on the lambda value stored in the PyQMForce object.
         catch (...)
         {
             lambda = this->owner.getLambda();
@@ -820,28 +838,29 @@ double EMLEForceImpl::computeForce(
 }
 
 /////////
-///////// Implementation of EMLEEngine
+///////// Implementation of PyQMEngine
 /////////
 
-EMLEEngine::EMLEEngine() : ConcreteProperty<EMLEEngine, QMEngine>()
+PyQMEngine::PyQMEngine() : ConcreteProperty<PyQMEngine, QMEngine>()
 {
     // Register the serialization proxies.
-    OpenMM::registerEmleSerializationProxies();
+    OpenMM::registerPyQMSerializationProxies();
 }
 
-EMLEEngine::EMLEEngine(
+PyQMEngine::PyQMEngine(
     bp::object py_object,
+    QString name,
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
     double lambda) :
-    ConcreteProperty<EMLEEngine, QMEngine>(),
-    callback(py_object, "_sire_callback"),
+    ConcreteProperty<PyQMEngine, QMEngine>(),
+    callback(py_object, name),
     cutoff(cutoff),
     neighbour_list_frequency(neighbour_list_frequency),
     lambda(lambda)
 {
     // Register the serialization proxies.
-    OpenMM::registerEmleSerializationProxies();
+    OpenMM::registerPyQMSerializationProxies();
 
     if (this->neighbour_list_frequency < 0)
     {
@@ -857,7 +876,7 @@ EMLEEngine::EMLEEngine(
     }
 }
 
-EMLEEngine::EMLEEngine(const EMLEEngine &other) :
+PyQMEngine::PyQMEngine(const PyQMEngine &other) :
     callback(other.callback),
     cutoff(other.cutoff),
     neighbour_list_frequency(other.neighbour_list_frequency),
@@ -872,7 +891,7 @@ EMLEEngine::EMLEEngine(const EMLEEngine &other) :
 {
 }
 
-EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
+PyQMEngine &PyQMEngine::operator=(const PyQMEngine &other)
 {
     this->callback = other.callback;
     this->cutoff = other.cutoff;
@@ -888,17 +907,17 @@ EMLEEngine &EMLEEngine::operator=(const EMLEEngine &other)
     return *this;
 }
 
-void EMLEEngine::setCallback(EMLECallback callback)
+void PyQMEngine::setCallback(PyQMCallback callback)
 {
     this->callback = callback;
 }
 
-EMLECallback EMLEEngine::getCallback() const
+PyQMCallback PyQMEngine::getCallback() const
 {
     return this->callback;
 }
 
-void EMLEEngine::setLambda(double lambda)
+void PyQMEngine::setLambda(double lambda)
 {
     // Clamp the lambda value.
     if (lambda < 0.0)
@@ -912,27 +931,27 @@ void EMLEEngine::setLambda(double lambda)
     this->lambda = lambda;
 }
 
-double EMLEEngine::getLambda() const
+double PyQMEngine::getLambda() const
 {
     return this->lambda;
 }
 
-void EMLEEngine::setCutoff(SireUnits::Dimension::Length cutoff)
+void PyQMEngine::setCutoff(SireUnits::Dimension::Length cutoff)
 {
     this->cutoff = cutoff;
 }
 
-SireUnits::Dimension::Length EMLEEngine::getCutoff() const
+SireUnits::Dimension::Length PyQMEngine::getCutoff() const
 {
     return this->cutoff;
 }
 
-int EMLEEngine::getNeighbourListFrequency() const
+int PyQMEngine::getNeighbourListFrequency() const
 {
     return this->neighbour_list_frequency;
 }
 
-void EMLEEngine::setNeighbourListFrequency(int neighbour_list_frequency)
+void PyQMEngine::setNeighbourListFrequency(int neighbour_list_frequency)
 {
     // Assume anything less than zero means no neighbour list.
     if (neighbour_list_frequency < 0)
@@ -942,22 +961,22 @@ void EMLEEngine::setNeighbourListFrequency(int neighbour_list_frequency)
     this->neighbour_list_frequency = neighbour_list_frequency;
 }
 
-QVector<int> EMLEEngine::getAtoms() const
+QVector<int> PyQMEngine::getAtoms() const
 {
     return this->atoms;
 }
 
-void EMLEEngine::setAtoms(QVector<int> atoms)
+void PyQMEngine::setAtoms(QVector<int> atoms)
 {
     this->atoms = atoms;
 }
 
-boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> EMLEEngine::getLinkAtoms() const
+boost::tuple<QMap<int, int>, QMap<int, QVector<int>>, QMap<int, double>> PyQMEngine::getLinkAtoms() const
 {
     return boost::make_tuple(this->mm1_to_qm, this->mm1_to_mm2, this->bond_scale_factors);
 }
 
-void EMLEEngine::setLinkAtoms(
+void PyQMEngine::setLinkAtoms(
     QMap<int, int> mm1_to_qm,
     QMap<int, QVector<int>> mm1_to_mm2,
     QMap<int, double> bond_scale_factors)
@@ -974,43 +993,43 @@ void EMLEEngine::setLinkAtoms(
     }
 }
 
-QVector<int> EMLEEngine::getMM2Atoms() const
+QVector<int> PyQMEngine::getMM2Atoms() const
 {
     return this->mm2_atoms;
 }
 
-QVector<int> EMLEEngine::getNumbers() const
+QVector<int> PyQMEngine::getNumbers() const
 {
     return this->numbers;
 }
 
-void EMLEEngine::setNumbers(QVector<int> numbers)
+void PyQMEngine::setNumbers(QVector<int> numbers)
 {
     this->numbers = numbers;
 }
 
-QVector<double> EMLEEngine::getCharges() const
+QVector<double> PyQMEngine::getCharges() const
 {
     return this->charges;
 }
 
-void EMLEEngine::setCharges(QVector<double> charges)
+void PyQMEngine::setCharges(QVector<double> charges)
 {
     this->charges = charges;
 }
 
-const char *EMLEEngine::typeName()
+const char *PyQMEngine::typeName()
 {
-    return QMetaType::typeName(qMetaTypeId<EMLEEngine>());
+    return QMetaType::typeName(qMetaTypeId<PyQMEngine>());
 }
 
-const char *EMLEEngine::what() const
+const char *PyQMEngine::what() const
 {
-    return EMLEEngine::typeName();
+    return PyQMEngine::typeName();
 }
 
 boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>
-EMLEEngine::call(
+PyQMEngine::call(
     QVector<int> numbers_qm,
     QVector<double> charges_mm,
     QVector<QVector<double>> xyz_qm,
@@ -1019,9 +1038,9 @@ EMLEEngine::call(
     return this->callback.call(numbers_qm, charges_mm, xyz_qm, xyz_mm);
 }
 
-QMForce* EMLEEngine::createForce() const
+QMForce* PyQMEngine::createForce() const
 {
-    return new EMLEForce(
+    return new PyQMForce(
         this->callback,
         this->cutoff,
         this->neighbour_list_frequency,

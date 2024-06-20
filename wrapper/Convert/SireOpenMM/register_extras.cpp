@@ -51,7 +51,7 @@ namespace SireOpenMM
         bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::State>());
         bp::converter::registry::insert(&extract_swig_wrapped_pointer, bp::type_id<OpenMM::Integrator>());
 
-		// A tuple return type container for EMLECallback. (Energy, QM forces, MM forces)
+		// A tuple return type container for the PyQMCallback. (Energy, QM forces, MM forces)
         bp::register_tuple<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>();
 
 		// Dictionary for mapping link atoms to QM and MM2 atoms.
@@ -59,7 +59,7 @@ namespace SireOpenMM
         register_dict<QMap<int, double>>();
         register_dict<QMap<int, QVector<int>>>();
 
-        // A tuple for passing link atom information to EMLEEngine.
+        // A tuple for passing link atom information to PyQMEngine.
         bp::register_tuple<boost::tuple<QMap<int, int>, QMap<int, QVector<int>>>>();
     }
 }

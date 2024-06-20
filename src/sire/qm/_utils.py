@@ -765,11 +765,10 @@ def _configure_engine(engine, mols, qm_atoms, mm1_to_qm, mm1_to_mm2, bond_length
     map: sire.legacy.Base.PropertyMap
         The property map for the system.
 
-
     Returns
     -------
 
-    engine: sire.legacy.QM.Engine
+    engine: sire.legacy.Convert.PyQMEngine
         The configured QM engine.
     """
 

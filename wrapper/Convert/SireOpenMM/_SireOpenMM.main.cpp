@@ -7,12 +7,6 @@
 
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 
-#include "EMLECallback.pypp.hpp"
-
-#include "EMLEEngine.pypp.hpp"
-
-#include "EMLEForce.pypp.hpp"
-
 #include "LambdaLever.pypp.hpp"
 
 #include "NullQMEngine.pypp.hpp"
@@ -20,6 +14,12 @@
 #include "OpenMMMetaData.pypp.hpp"
 
 #include "PerturbableOpenMMMolecule.pypp.hpp"
+
+#include "PyQMCallback.pypp.hpp"
+
+#include "PyQMEngine.pypp.hpp"
+
+#include "PyQMForce.pypp.hpp"
 
 #include "QMEngine.pypp.hpp"
 
@@ -42,23 +42,23 @@ BOOST_PYTHON_MODULE(_SireOpenMM){
 
     register_vector_less__OpenMM_scope_Vec3__greater__class();
 
-    register_EMLECallback_class();
+    register_LambdaLever_class();
 
     register_QMEngine_class();
-
-    register_EMLEEngine_class();
-
-    register_QMForce_class();
-
-    register_EMLEForce_class();
-
-    register_LambdaLever_class();
 
     register_NullQMEngine_class();
 
     register_OpenMMMetaData_class();
 
     register_PerturbableOpenMMMolecule_class();
+
+    register_PyQMCallback_class();
+
+    register_PyQMEngine_class();
+
+    register_QMForce_class();
+
+    register_PyQMForce_class();
 
     register_SireOpenMM_properties();
 

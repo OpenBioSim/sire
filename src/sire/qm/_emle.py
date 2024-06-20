@@ -6,14 +6,14 @@ from .. import use_new_api as _use_new_api
 
 _use_new_api()
 
-_EMLEEngine = _Convert._SireOpenMM.EMLEEngine
+_PyQMEngine = _Convert._SireOpenMM.PyQMEngine
 
 
-# Monkey-patch to get the underlying OpenMM force of the EMLEEngine.
+# Monkey-patch to get the underlying OpenMM force of the EMLE engine.
 def _get_openmm_forces(self):
     """
     Get the OpenMM forces for this engine. The first force is the actual
-    EMLEForce, which uses a CustomCPPForceImpl to calculate the electrostatic
+    EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
     embedding force. The second is a null CustomBondForce that can be used to
     add a "lambda_emle" global parameter to a context to allow the force to be
     scaled.
@@ -22,7 +22,7 @@ def _get_openmm_forces(self):
     -------
 
     emle_force : openmm.Force
-        The EMLEForce object to compute the electrostatic embedding force.
+        The EMLE force object to compute the electrostatic embedding force.
 
     interpolation_force : openmm.CustomBondForce
         A null CustomBondForce object that can be used to add a "lambda_emle"
@@ -41,7 +41,7 @@ def _get_openmm_forces(self):
         qm_engine=self,
     )
 
-    # Get the OpenMM EMLEForce.
+    # Get the OpenMM EMLE force.
     emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
 
     # Create a null CustomBondForce to add the EMLE interpolation
@@ -53,8 +53,8 @@ def _get_openmm_forces(self):
     return emle_force, interpolation_force
 
 
-# Bind the monkey-patched function to the EMLEEngine.
-_EMLEEngine.get_forces = _get_openmm_forces
+# Bind the monkey-patched function to the PyQMEngine.
+_PyQMEngine.get_forces = _get_openmm_forces
 
 
 def emle(
@@ -67,7 +67,7 @@ def emle(
     map=None,
 ):
     """
-    Create an EMLEEngine object to allow QM/MM simulations using sire.mol.dynamics.
+    Create an EMLE engine object to allow QM/MM simulations using sire.mol.dynamics.
 
     Parameters
     ----------
@@ -97,8 +97,8 @@ def emle(
     Returns
     -------
 
-    engine : sire.legacy.Convert._SireOpenMM.EMLEEngine
-        The EMLEEngine object.
+    engine : sire.legacy.Convert._SireOpenMM.PyQMEngine
+        The EMLE engine object.
     """
 
     try:
@@ -159,9 +159,10 @@ def emle(
             raise TypeError("'map' must be of type 'dict'")
     map = _create_map(map)
 
-    # Create the EMLEEngine.
-    engine = _EMLEEngine(
+    # Create the EMLE engine.
+    engine = _PyQMEngine(
         calculator,
+        "_sire_callback",
         cutoff,
         neighbourlist_update_frequency,
     )

@@ -4,7 +4,7 @@
 #include "SireOpenMM_registrars.h"
 
 #include "qmmm.h"
-#include "emle.h"
+#include "pyqm.h"
 #include "lambdalever.h"
 #include "openmmmolecule.h"
 
@@ -15,12 +15,12 @@ void register_SireOpenMM_objects()
 
     ObjectRegistry::registerConverterFor< SireOpenMM::NullQMEngine >();
     ObjectRegistry::registerConverterFor< SireOpenMM::NullQMEngine >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::EMLECallback >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::EMLEForce >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::EMLEEngine >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::EMLECallback >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::EMLEForce >();
-    ObjectRegistry::registerConverterFor< SireOpenMM::EMLEEngine >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMCallback >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMForce >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMEngine >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMCallback >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMForce >();
+    ObjectRegistry::registerConverterFor< SireOpenMM::PyQMEngine >();
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
     ObjectRegistry::registerConverterFor< SireOpenMM::LambdaLever >();
     ObjectRegistry::registerConverterFor< SireOpenMM::PerturbableOpenMMMolecule >();

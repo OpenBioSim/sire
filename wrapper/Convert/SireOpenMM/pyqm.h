@@ -55,41 +55,42 @@ SIRE_BEGIN_HEADER
 
 namespace SireOpenMM
 {
-    class EMLECallback;
-    class EMLEForce;
+    class PyQMCallback;
+    class PyQMForce;
 }
 
-QDataStream &operator<<(QDataStream &, const SireOpenMM::EMLECallback &);
-QDataStream &operator>>(QDataStream &, SireOpenMM::EMLECallback &);
+QDataStream &operator<<(QDataStream &, const SireOpenMM::PyQMCallback &);
+QDataStream &operator>>(QDataStream &, SireOpenMM::PyQMCallback &);
 
-QDataStream &operator<<(QDataStream &, const SireOpenMM::EMLEForce &);
-QDataStream &operator>>(QDataStream &, SireOpenMM::EMLEForce &);
+QDataStream &operator<<(QDataStream &, const SireOpenMM::PyQMForce &);
+QDataStream &operator>>(QDataStream &, SireOpenMM::PyQMForce &);
 
 namespace SireOpenMM
 {
-    // A callback wrapper class to allow use of electrostatic embedding of
-    // machine learning potentials via emle-engine.
-    class EMLECallback
+    // A callback wrapper class to interface with external QM engines
+    // via the CustomCPPForceImpl.
+    class PyQMCallback
     {
-        friend QDataStream & ::operator<<(QDataStream &, const EMLECallback &);
-        friend QDataStream & ::operator>>(QDataStream &, EMLECallback &);
+        friend QDataStream & ::operator<<(QDataStream &, const PyQMCallback &);
+        friend QDataStream & ::operator>>(QDataStream &, PyQMCallback &);
 
     public:
         //! Default constructor.
-        EMLECallback();
+        PyQMCallback();
 
         //! Constructor
         /*! \param py_object
                 A Python object that contains the callback function.
 
-            \param callback
+            \param name
                 The name of a callback method that take the following arguments:
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
                     - charges_mm: A list of the MM charges in mod electron charge.
                     - xyz_qm: A vector of positions for the atoms in the ML region in Angstrom.
                     - xyz_mm: A vector of positions for the atoms in the MM region in Angstrom.
+                If empty, then the object is assumed to be a callable.
          */
-        EMLECallback(bp::object, QString callback="_sire_callback");
+        PyQMCallback(bp::object, QString name="");
 
         //! Call the callback function.
         /*! \param numbers_qm
@@ -125,21 +126,22 @@ namespace SireOpenMM
 
     private:
         bp::object py_object;
-        QString callback;
+        QString name;
+        bool is_method = true;
     };
 
-    class EMLEForce : public QMForce
+    class PyQMForce : public QMForce
     {
-        friend QDataStream & ::operator<<(QDataStream &, const EMLEForce &);
-        friend QDataStream & ::operator>>(QDataStream &, EMLEForce &);
+        friend QDataStream & ::operator<<(QDataStream &, const PyQMForce &);
+        friend QDataStream & ::operator>>(QDataStream &, PyQMForce &);
 
     public:
         //! Default constructor.
-        EMLEForce();
+        PyQMForce();
 
         //! Constructor.
         /* \param callback
-                The EMLECallback object.
+                The PyQMCallback object.
 
             \param cutoff
                 The ML cutoff distance.
@@ -179,8 +181,8 @@ namespace SireOpenMM
             \param charges
                 A vector of atomic charges for all atoms in the system.
          */
-        EMLEForce(
-            EMLECallback callback,
+        PyQMForce(
+            PyQMCallback callback,
             SireUnits::Dimension::Length cutoff,
             int neighbour_list_frequency,
             double lambda,
@@ -194,22 +196,22 @@ namespace SireOpenMM
         );
 
         //! Copy constructor.
-        EMLEForce(const EMLEForce &other);
+        PyQMForce(const PyQMForce &other);
 
         //! Assignment operator.
-        EMLEForce &operator=(const EMLEForce &other);
+        PyQMForce &operator=(const PyQMForce &other);
 
         //! Set the callback object.
         /*! \param callback
                 A Python object that contains the callback function.
          */
-        void setCallback(EMLECallback callback);
+        void setCallback(PyQMCallback callback);
 
         //! Get the callback object.
         /*! \returns
                 A Python object that contains the callback function.
          */
-        EMLECallback getCallback() const;
+        PyQMCallback getCallback() const;
 
         //! Get the lambda weighting factor.
         /*! \returns
@@ -317,7 +319,7 @@ namespace SireOpenMM
         OpenMM::ForceImpl *createImpl() const;
 
     private:
-        EMLECallback callback;
+        PyQMCallback callback;
         SireUnits::Dimension::Length cutoff;
         int neighbour_list_frequency;
         double lambda;
@@ -331,21 +333,21 @@ namespace SireOpenMM
     };
 
 #ifdef SIRE_USE_CUSTOMCPPFORCE
-    class EMLEForceImpl : public OpenMM::CustomCPPForceImpl
+    class PyQMForceImpl : public OpenMM::CustomCPPForceImpl
     {
     public:
-        EMLEForceImpl(const EMLEForce &owner);
+        PyQMForceImpl(const PyQMForce &owner);
 
-        ~EMLEForceImpl();
+        ~PyQMForceImpl();
 
         double computeForce(OpenMM::ContextImpl &context,
                             const std::vector<OpenMM::Vec3> &positions,
                             std::vector<OpenMM::Vec3> &forces);
 
-        const EMLEForce &getOwner() const;
+        const PyQMForce &getOwner() const;
 
     private:
-        const EMLEForce &owner;
+        const PyQMForce &owner;
         unsigned long long step_count=0;
         double cutoff;
         bool is_neighbour_list;
@@ -355,15 +357,19 @@ namespace SireOpenMM
     };
 #endif
 
-    class EMLEEngine : public SireBase::ConcreteProperty<EMLEEngine, QMEngine>
+    class PyQMEngine : public SireBase::ConcreteProperty<PyQMEngine, QMEngine>
     {
     public:
         //! Default constructor.
-        EMLEEngine();
+        PyQMEngine();
 
         //! Constructor
         /*! \param py_object
-                An EMLECalculator Python object.
+                A Python object.
+
+            \param name
+                The name of the callback method. If empty, then the object is
+                assumed to be a callable.
 
             \param cutoff
                 The ML cutoff distance.
@@ -376,30 +382,31 @@ namespace SireOpenMM
                 The lambda weighting factor. This can be used to interpolate between
                 potentials for end-state correction calculations.
          */
-        EMLEEngine(
+        PyQMEngine(
             bp::object,
+            QString method="",
             SireUnits::Dimension::Length cutoff=7.5*SireUnits::angstrom,
             int neighbour_list_frequency=20,
             double lambda=1.0
         );
 
         //! Copy constructor.
-        EMLEEngine(const EMLEEngine &other);
+        PyQMEngine(const PyQMEngine &other);
 
         //! Assignment operator.
-        EMLEEngine &operator=(const EMLEEngine &other);
+        PyQMEngine &operator=(const PyQMEngine &other);
 
         //! Set the callback object.
         /*! \param callback
                 A Python object that contains the callback function.
          */
-        void setCallback(EMLECallback callback);
+        void setCallback(PyQMCallback callback);
 
         //! Get the callback object.
         /*! \returns
                 A Python object that contains the callback function.
          */
-        EMLECallback getCallback() const;
+        PyQMCallback getCallback() const;
 
         //! Get the lambda weighting factor.
         /*! \returns
@@ -556,7 +563,7 @@ namespace SireOpenMM
         QMForce* createForce() const;
 
     private:
-        EMLECallback callback;
+        PyQMCallback callback;
         SireUnits::Dimension::Length cutoff;
         int neighbour_list_frequency;
         double lambda;
@@ -570,13 +577,13 @@ namespace SireOpenMM
     };
 }
 
-Q_DECLARE_METATYPE(SireOpenMM::EMLECallback)
-Q_DECLARE_METATYPE(SireOpenMM::EMLEForce)
-Q_DECLARE_METATYPE(SireOpenMM::EMLEEngine)
+Q_DECLARE_METATYPE(SireOpenMM::PyQMCallback)
+Q_DECLARE_METATYPE(SireOpenMM::PyQMForce)
+Q_DECLARE_METATYPE(SireOpenMM::PyQMEngine)
 
-SIRE_EXPOSE_CLASS(SireOpenMM::EMLECallback)
-SIRE_EXPOSE_CLASS(SireOpenMM::EMLEForce)
-SIRE_EXPOSE_CLASS(SireOpenMM::EMLEEngine)
+SIRE_EXPOSE_CLASS(SireOpenMM::PyQMCallback)
+SIRE_EXPOSE_CLASS(SireOpenMM::PyQMForce)
+SIRE_EXPOSE_CLASS(SireOpenMM::PyQMEngine)
 
 SIRE_END_HEADER
 

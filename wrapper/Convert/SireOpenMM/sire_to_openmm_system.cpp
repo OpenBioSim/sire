@@ -47,7 +47,7 @@
 #include "tostring.h"
 
 #include "openmmmolecule.h"
-#include "emle.h"
+#include "pyqm.h"
 
 #include <QDebug>
 

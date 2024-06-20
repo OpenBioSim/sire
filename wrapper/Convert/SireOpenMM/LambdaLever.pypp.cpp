@@ -13,9 +13,9 @@ namespace bp = boost::python;
 
 #include "SireCAS/values.h"
 
-#include "emle.h"
-
 #include "lambdalever.h"
+
+#include "pyqm.h"
 
 #include "tostring.h"
 
@@ -25,9 +25,9 @@ namespace bp = boost::python;
 
 #include "SireCAS/values.h"
 
-#include "emle.h"
-
 #include "lambdalever.h"
+
+#include "pyqm.h"
 
 #include "tostring.h"
 

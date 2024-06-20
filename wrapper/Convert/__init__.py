@@ -19,8 +19,8 @@ __all__ = [
     "OpenMMMetaData",
     "SOMMContext",
     "QMEngine",
-    "EMLECallback",
-    "EMLEEngine",
+    "PyQMCallback",
+    "PyQMEngine",
 ]
 
 try:
@@ -100,8 +100,8 @@ try:
         PerturbableOpenMMMolecule,
         OpenMMMetaData,
         QMEngine,
-        EMLECallback,
-        EMLEEngine,
+        PyQMCallback,
+        PyQMEngine,
     )
 
     from ..._pythonize import _pythonize
@@ -112,8 +112,8 @@ try:
             PerturbableOpenMMMolecule,
             OpenMMMetaData,
             QMEngine,
-            EMLECallback,
-            EMLEEngine,
+            PyQMCallback,
+            PyQMEngine,
         ],
         delete_old=True,
     )

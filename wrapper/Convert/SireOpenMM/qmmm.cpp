@@ -32,7 +32,6 @@
 
 using namespace SireBase;
 using namespace SireOpenMM;
-using namespace SireStream;
 
 /////////
 ///////// Implementation of QMForce

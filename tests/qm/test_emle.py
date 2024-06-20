@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import tempfile
 
-from sire.legacy.Convert import EMLECallback, EMLEEngine
+from sire.legacy.Convert import PyQMCallback
 
 from sire.qm import emle
 
@@ -21,7 +21,7 @@ except:
     has_openmm_ml = False
 
 
-def test_callback():
+def test_callback_method():
     """Makes sure that a callback method works correctly"""
 
     class Test:
@@ -32,7 +32,7 @@ def test_callback():
     test = Test()
 
     # Create a callback object.
-    cb = EMLECallback(test, "callback")
+    cb = PyQMCallback(test, "callback")
 
     # Create some lists to hold test data.
     a = [1, 2]
@@ -45,6 +45,28 @@ def test_callback():
 
     # Make sure the result is correct.
     assert result == (42, d, c) == test.callback(a, b, c, d)
+
+
+def test_callback_function():
+    """Makes sure that a callback function works correctly"""
+
+    def callback(a, b, c, d):
+        return (42, d, c)
+
+    # Create a callback object.
+    cb = PyQMCallback(callback, "")
+
+    # Create some lists to hold test data.
+    a = [1, 2]
+    b = [3, 4]
+    c = [a, b]
+    d = [b, a]
+
+    # Call the callback.
+    result = cb.call(a, b, c, d)
+
+    # Make sure the result is correct.
+    assert result == (42, d, c) == callback(a, b, c, d)
 
 
 @pytest.mark.parametrize(

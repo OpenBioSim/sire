@@ -2,10 +2,10 @@
 set ( PYPP_SOURCES
        LambdaLever.pypp.cpp
        PerturbableOpenMMMolecule.pypp.cpp
+       PyQMCallback.pypp.cpp
+       PyQMForce.pypp.cpp
+       PyQMEngine.pypp.cpp
        QMEngine.pypp.cpp
-       EMLEForce.pypp.cpp
-       EMLEEngine.pypp.cpp
-       EMLECallback.pypp.cpp
        _SireOpenMM_free_functions.pypp.cpp
        QMForce.pypp.cpp
        vector_less__OpenMM_scope_Vec3__greater_.pypp.cpp

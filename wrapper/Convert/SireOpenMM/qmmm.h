@@ -32,16 +32,9 @@
 #include "OpenMM.h"
 #include "openmm/Force.h"
 
-#include <boost/tuple/tuple.hpp>
-
-#include <QMap>
-#include <QVector>
-
 #include "sireglobal.h"
 
 #include "SireBase/property.h"
-
-#include "SireUnits/dimensions.h"
 
 SIRE_BEGIN_HEADER
 
