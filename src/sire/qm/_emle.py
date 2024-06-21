@@ -2,10 +2,6 @@ __all__ = ["emle"]
 
 from ..legacy import Convert as _Convert
 
-from .. import use_new_api as _use_new_api
-
-_use_new_api()
-
 
 class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
     """A class to enable use of EMLE as a QM engine."""

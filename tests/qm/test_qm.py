@@ -172,7 +172,7 @@ def test_charge_redistribution():
 
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
 @pytest.mark.parametrize("selection", ["molidx 0", "resname ALA"])
-def test_interpolate(ala_mols, selection):
+def test_emle_interpolate(ala_mols, selection):
     """
     Make sure that lambda interpolation between pure MM and EMLE potentials works.
     """
@@ -219,7 +219,7 @@ def test_interpolate(ala_mols, selection):
 
 @pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
 @pytest.mark.skipif(not has_openmm_ml, reason="openmm-ml is not installed")
-def test_openmm_ml(ala_mols):
+def test_emle_openmm_ml(ala_mols):
     """
     Make sure that the EMLE engine can be used with OpenMM-ML.
     """
@@ -317,3 +317,38 @@ def test_openmm_ml(ala_mols):
 
         # Make sure the energies are close.
         assert np.isclose(nrg_openmm, nrg_sire, rtol=1e-3)
+
+
+@pytest.mark.skipif(not has_emle, reason="emle-engine is not installed")
+def test_emle_indirect(ala_mols):
+    """
+    Make sure that a QM/MM dynamics object can be created using the indirect
+    setup for EMLE engines.
+    """
+
+    import openmm
+    import sire as sr
+
+    # Create a local copy of the test system.
+    mols = ala_mols.clone()
+
+    # Create an EMLE calculator.
+    calculator = EMLECalculator(backend="torchani", device="cpu")
+
+    # Create an EMLE engine bound to the calculator.
+    emle_mols, engine = sr.qm.create_engine(
+        mols, mols[0], calculator, callback="_sire_callback"
+    )
+
+    # Create a QM/MM capable dynamics object.
+    d = emle_mols.dynamics(
+        timestep="1fs",
+        constraint="none",
+        qm_engine=engine,
+        cutoff_type="pme",
+        cutoff="7.5 A",
+        platform="cpu",
+    )
+
+    # Get the potential energy. This will fail if the callback can't be found.
+    d.current_potential_energy()

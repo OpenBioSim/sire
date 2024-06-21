@@ -1,4 +1,10 @@
-__all__ = ["emle"]
+__all__ = ["create_engine", "emle", "zero_charge"]
+
+from .. import use_new_api as _use_new_api
+
+_use_new_api()
+
+from ..legacy import Convert as _Convert
 
 from ._emle import emle
 from ._utils import _zero_charge as zero_charge
@@ -8,14 +14,14 @@ def create_engine(
     mols,
     qm_atoms,
     py_object,
-    name=None,
+    callback=None,
     cutoff="7.5A",
     neighbourlist_update_frequency=20,
     redistribute_charge=False,
     map=None,
 ):
     """
-    Create a QM engine object to allow QM/MM simulations using sire.mol.dynamics.
+    Create a QM engine to that can be used for QM/MM simulations with sire.mol.dynamics.
 
     Parameters
     ----------
@@ -30,10 +36,11 @@ def create_engine(
 
     py_object : object
         The Python object that will contains the callback for the QM calculation.
+        This can be a class instance with a "callback" method, or a callable.
 
-    name : str, optional, default=None
-        The name of the callback method. If None, then the py_object is assumed to
-        be a callable.
+    callback : str, optional, default=None
+        The name of the callback. If None, then the py_object is assumed to
+        be a callable, i.e. it is itself the callback.
 
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
@@ -71,17 +78,13 @@ def create_engine(
     except:
         raise ValueError("Unable to select 'qm_atoms' from 'mols'")
 
-    from inspect import isclass, isfunction
-
-    if isclass(py_object):
-        if name is None:
-            raise ValueError("name must be provided if 'py_object' is a class.")
-        if not hasattr(py_object, name):
-            raise ValueError(f"'py_object' does not have a method called '{name}'.")
-    elif isfunction(py_object):
-        name = ""
+    if callback is not None:
+        if not isinstance(callback, str):
+            raise TypeError("'callback' must be of type 'str'")
+        if not hasattr(py_object, callback):
+            raise ValueError(f"'py_object' does not have a method called '{callback}'.")
     else:
-        raise ValueError("'py_object' must be a class or function.")
+        callback = ""
 
     if not isinstance(cutoff, (str, _Units.GeneralUnit)):
         raise TypeError(
@@ -112,9 +115,9 @@ def create_engine(
     map = _create_map(map)
 
     # Create the EMLE engine.
-    engine = _PyQMEngine(
-        calculator,
-        name,
+    engine = _Convert.PyQMEngine(
+        py_object,
+        callback,
         cutoff,
         neighbourlist_update_frequency,
     )
