@@ -389,7 +389,6 @@ PyQMForce::call(
 
 namespace OpenMM
 {
-
     class PyQMForceProxy : public SerializationProxy {
         public:
             PyQMForceProxy() : SerializationProxy("PyQMForce")
