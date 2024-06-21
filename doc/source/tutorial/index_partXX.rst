@@ -15,6 +15,7 @@ QM/MM simulations using ``sire``.
 .. toctree::
    :maxdepth: 1
 
-   partXX/01_emle
-   partXX/02_adp_pmf
-   partXX/03_diels_alder
+   partXX/01_intro
+   partXX/02_emle
+   partXX/03_adp_pmf
+   partXX/04_diels_alder

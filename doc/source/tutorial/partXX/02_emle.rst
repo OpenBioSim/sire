@@ -2,19 +2,13 @@
 Sire-EMLE
 =========
 
-The ``sire`` QM/MM implementation takes advantage of the new means of writing
-`platform independent force calculations <http://docs.openmm.org/development/developerguide/09_customcppforceimpl.html>`_
-introduced in `OpenMM <http://openmm.org/>`_ 8.1. This allows us to interface
-with any external package to modify atomic forces within the ``OpenMM`` context.
-While OpenMM already directly supports ML/MM simulations via the `OpenMM-ML <https://github.com/openmm/openmm-ml>`_
-package, it is currently limited to specific backends and only supports mechanical
-embedding. The ``sire`` QM/MM implementation performs the QM calculation using
-the `emle-engine <https://github.com/chemle/emle-engine>`_ package, which has
+In this section we will show how to use the `emle-engine <https://github.com/chemle/emle-engine>`_
+package as a QM/MM engine within ``sire``. The ``emle-engine`` package provides
 support for a wide range of backends and embedding models, importantly providing
 a simple and efficient ML model for electrostatic embedding.
 
-In order to use QM/MM functionality within ``sire`` you will first need to
-create the following ``conda`` environment:
+In order to use EMLE you will first need to create the following ``conda``
+environment:
 
 .. code-block:: bash
 
@@ -56,7 +50,13 @@ Creating a QM engine
 We now need to set up the molecular system for the QM/MM simulation and create
 an engine to perform the calculation:
 
->>> qm_mols, engine = sr.qm.emle(mols, mols[0], calculator, "7.5A", 20)
+>>> qm_mols, engine = sr.qm.emle(
+>>> ...     mols,
+>>> ...     mols[0],
+>>> ...     calculator,
+>>> ...     cutoff="7.5A",
+>>> ...     neighbour_list_update_frequency=20
+>>> )
 
 Here the first argument is the molecules that we are simulating, the second
 selection coresponding to the QM region (here this is the first molecule), and
