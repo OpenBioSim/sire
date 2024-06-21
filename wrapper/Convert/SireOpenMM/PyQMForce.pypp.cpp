@@ -65,7 +65,7 @@ void register_PyQMForce_class(){
         typedef bp::class_< SireOpenMM::PyQMForce, bp::bases< SireOpenMM::QMForce > > PyQMForce_exposer_t;
         PyQMForce_exposer_t PyQMForce_exposer = PyQMForce_exposer_t( "PyQMForce", "", bp::init< >("Default constructor.") );
         bp::scope PyQMForce_scope( PyQMForce_exposer );
-        PyQMForce_exposer.def( bp::init< SireOpenMM::PyQMCallback, SireUnits::Dimension::Length, int, double, QVector< int >, QMap< int, int >, QMap< int, QVector< int > >, QMap< int, double >, QVector< int >, QVector< int >, QVector< double > >(( bp::arg("callback"), bp::arg("cutoff"), bp::arg("neighbour_list_frequency"), bp::arg("lambda"), bp::arg("atoms"), bp::arg("mm1_to_qm"), bp::arg("mm1_to_mm2"), bp::arg("bond_scale_factors"), bp::arg("mm2_atoms"), bp::arg("numbers"), bp::arg("charges") ), "Constructor.\nPar:am callback\nThe PyQMCallback object.\n\nPar:am cutoff\nThe ML cutoff distance.\n\nPar:am neighbour_list_frequency\nThe frequency at which the neighbour list is updated. (Number of steps.)\nIf zero, then no neighbour list is used.\n\nPar:am lambda\nThe lambda weighting factor. This can be used to interpolate between\npotentials for end-state correction calculations.\n\nPar:am atoms\nA vector of atom indices for the QM region.\n\nPar:am mm1_to_qm\nA dictionary mapping link atom (MM1) indices to the QM atoms to\nwhich they are bonded.\n\nPar:am mm1_to_mm2\nA dictionary of link atoms indices (MM1) to a list of the MM\natoms to which they are bonded (MM2).\n\nPar:am bond_scale_factors\nA dictionary of link atom indices (MM1) to a list of the bond\nlength scale factors between the QM and MM1 atoms. The scale\nfactors are the ratio of the equilibrium bond lengths for the\nQM-L (QM-link) atom and QM-MM1 atom, i.e. R0(QM-L)  R0(QM-MM1),\ntaken from the MM force field parameters for the molecule.\n\nPar:am mm2_atoms\nA vector of MM2 atom indices.\n\nPar:am numbers\nA vector of atomic charges for all atoms in the system.\n\nPar:am charges\nA vector of atomic charges for all atoms in the system.\n") );
+        PyQMForce_exposer.def( bp::init< SireOpenMM::PyQMCallback, SireUnits::Dimension::Length, int, bool, double, QVector< int >, QMap< int, int >, QMap< int, QVector< int > >, QMap< int, double >, QVector< int >, QVector< int >, QVector< double > >(( bp::arg("callback"), bp::arg("cutoff"), bp::arg("neighbour_list_frequency"), bp::arg("is_mechanical"), bp::arg("lambda"), bp::arg("atoms"), bp::arg("mm1_to_qm"), bp::arg("mm1_to_mm2"), bp::arg("bond_scale_factors"), bp::arg("mm2_atoms"), bp::arg("numbers"), bp::arg("charges") ), "Constructor.\nPar:am callback\nThe PyQMCallback object.\n\nPar:am cutoff\nThe ML cutoff distance.\n\nPar:am neighbour_list_frequency\nThe frequency at which the neighbour list is updated. (Number of steps.)\nIf zero, then no neighbour list is used.\n\nPar:am is_mechanical\nA flag to indicate if mechanical embedding is being used.\n\nPar:am lambda\nThe lambda weighting factor. This can be used to interpolate between\npotentials for end-state correction calculations.\n\nPar:am atoms\nA vector of atom indices for the QM region.\n\nPar:am mm1_to_qm\nA dictionary mapping link atom (MM1) indices to the QM atoms to\nwhich they are bonded.\n\nPar:am mm1_to_mm2\nA dictionary of link atoms indices (MM1) to a list of the MM\natoms to which they are bonded (MM2).\n\nPar:am bond_scale_factors\nA dictionary of link atom indices (MM1) to a list of the bond\nlength scale factors between the QM and MM1 atoms. The scale\nfactors are the ratio of the equilibrium bond lengths for the\nQM-L (QM-link) atom and QM-MM1 atom, i.e. R0(QM-L)  R0(QM-MM1),\ntaken from the MM force field parameters for the molecule.\n\nPar:am mm2_atoms\nA vector of MM2 atom indices.\n\nPar:am numbers\nA vector of atomic charges for all atoms in the system.\n\nPar:am charges\nA vector of atomic charges for all atoms in the system.\n") );
         PyQMForce_exposer.def( bp::init< SireOpenMM::PyQMForce const & >(( bp::arg("other") ), "Copy constructor.") );
         { //::SireOpenMM::PyQMForce::call
         
@@ -126,6 +126,18 @@ void register_PyQMForce_class(){
                 , getCutoff_function_value
                 , bp::release_gil_policy()
                 , "Get the QM cutoff distance.\nReturn:s\nThe QM cutoff distance.\n" );
+        
+        }
+        { //::SireOpenMM::PyQMForce::getIsMechanical
+        
+            typedef bool ( ::SireOpenMM::PyQMForce::*getIsMechanical_function_type)(  ) const;
+            getIsMechanical_function_type getIsMechanical_function_value( &::SireOpenMM::PyQMForce::getIsMechanical );
+            
+            PyQMForce_exposer.def( 
+                "getIsMechanical"
+                , getIsMechanical_function_value
+                , bp::release_gil_policy()
+                , "Get the mechanical embedding flag.\nReturn:s\nA flag to indicate if mechanical embedding is being used.\n" );
         
         }
         { //::SireOpenMM::PyQMForce::getLambda

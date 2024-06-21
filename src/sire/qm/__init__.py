@@ -17,6 +17,7 @@ def create_engine(
     callback=None,
     cutoff="7.5A",
     neighbourlist_update_frequency=20,
+    mechanical_embedding=False,
     redistribute_charge=False,
     map=None,
 ):
@@ -56,6 +57,13 @@ def create_engine(
 
     neighbourlist_update_frequency : int, optional, default=20
         The frequency with which to update the neighbourlist.
+
+    mechanical_embedding: bool, optional, default=False
+        Whether to use mechanical embedding. If True, then electrostatics will
+        be computed at the MM level by OpenMM. Note that the signature of the
+        callback does not change when mechanical embedding is used, i.e. it will
+        take an empty lists for the MM charges and positions and return an empty
+        list of forces for the MM region.
 
     redistribute_charge : bool
         Whether to redistribute charge of the QM atoms to ensure that the total
@@ -115,6 +123,9 @@ def create_engine(
     if neighbourlist_update_frequency < 0:
         raise ValueError("'neighbourlist_update_frequency' must be >= 0")
 
+    if not isinstance(mechanical_embedding, bool):
+        raise TypeError("'mechanical_embedding' must be of type 'bool'")
+
     if not isinstance(redistribute_charge, bool):
         raise TypeError("'redistribute_charge' must be of type 'bool'")
 
@@ -129,6 +140,7 @@ def create_engine(
         callback,
         cutoff,
         neighbourlist_update_frequency,
+        mechanical_embedding,
     )
 
     from ._utils import (
@@ -156,7 +168,9 @@ def create_engine(
     )
 
     # Create the merged molecule.
-    qm_mols = _create_merged_mols(qm_mol_to_atoms, mm1_indices, map)
+    qm_mols = _create_merged_mols(
+        qm_mol_to_atoms, mm1_indices, mechanical_embedding, map
+    )
 
     # Update the molecule in the system.
     mols.update(qm_mols)

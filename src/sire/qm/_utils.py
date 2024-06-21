@@ -510,7 +510,7 @@ def _get_link_atoms(mols, qm_mol_to_atoms, map):
     return mm1_to_qm, mm1_to_mm2, bond_scale_factors, mm1_indices
 
 
-def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
+def _create_merged_mols(qm_mol_to_atoms, mm1_indices, mechanical_embedding, map):
     """
     Internal helper function to create a merged molecule from the QM molecule.
 
@@ -523,6 +523,9 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
 
     mm1_indices: [[sire.legacy.Mol.AtomIdx]]
         A list of lists of MM1 atom indices.
+
+    mechanical_embedding: bool
+        Whether mechanical embedding is being used.
 
     map: sire.legacy.Base.PropertyMap
         The property map for the system.
@@ -668,7 +671,7 @@ def _create_merged_mols(qm_mol_to_atoms, mm1_indices, map):
                 edit_mol = edit_mol.remove_property(prop).molecule()
 
             # Charge.
-            elif prop == charge_prop:
+            elif not mechanical_embedding and prop == charge_prop:
                 edit_mol = edit_mol.set_property(
                     prop + "0", qm_mol.property(prop)
                 ).molecule()

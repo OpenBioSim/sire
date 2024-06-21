@@ -1,9 +1,9 @@
 #ifndef ACTIVE_HEADERS_H
 #define ACTIVE_HEADERS_H
 
-#define QT_NO_SIGNALS_SLOTS_KEYWORDS = 1
-
 #ifdef GCCXML_PARSE
+
+#define QT_NO_SIGNALS_SLOTS_KEYWORDS = 1
 
 #include "lambdalever.h"
 #include "openmmminimise.h"

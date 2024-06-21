@@ -238,6 +238,7 @@ PyQMForce::PyQMForce(
     PyQMCallback callback,
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
+    bool is_mechanical,
     double lambda,
     QVector<int> atoms,
     QMap<int, int> mm1_to_qm,
@@ -249,6 +250,7 @@ PyQMForce::PyQMForce(
     callback(callback),
     cutoff(cutoff),
     neighbour_list_frequency(neighbour_list_frequency),
+    is_mechanical(is_mechanical),
     lambda(lambda),
     atoms(atoms),
     mm1_to_qm(mm1_to_qm),
@@ -264,6 +266,7 @@ PyQMForce::PyQMForce(const PyQMForce &other) :
     callback(other.callback),
     cutoff(other.cutoff),
     neighbour_list_frequency(other.neighbour_list_frequency),
+    is_mechanical(other.is_mechanical),
     lambda(other.lambda),
     atoms(other.atoms),
     mm1_to_qm(other.mm1_to_qm),
@@ -328,6 +331,11 @@ SireUnits::Dimension::Length PyQMForce::getCutoff() const
 int PyQMForce::getNeighbourListFrequency() const
 {
     return this->neighbour_list_frequency;
+}
+
+bool PyQMForce::getIsMechanical() const
+{
+    return this->is_mechanical;;
 }
 
 QVector<int> PyQMForce::getAtoms() const
@@ -555,55 +563,95 @@ double PyQMForceImpl::computeForce(
     }
     center /= i;
 
-    // Initialise a vector to hold the current positions for the MM atoms.
-    // and virtual point charges.
+    // Initialise a vector to hold the current positions and charges for the MM atoms.
     QVector<QVector<double>> xyz_mm;
-    QVector<QVector<double>> xyz_virtual;
-
-    // Initialise a vector to hold the charges for the MM atoms and virtual
-    // point charges.
     QVector<double> charges_mm;
-    QVector<double> charges_virtual;
 
     // Initialise a list to hold the indices of the MM atoms.
     QVector<int> idx_mm;
 
-    // Manually work out the MM point charges and build the neigbour list.
-    if (not this->is_neighbour_list or this->step_count % this->neighbour_list_frequency == 0)
-    {
-        // Clear the neighbour list.
-        if (this->is_neighbour_list)
-        {
-            this->neighbour_list.clear();
-        }
+    // Store the current number of MM atoms.
+    unsigned int num_mm = 0;
 
-        i = 0;
-        // Loop over all of the OpenMM positions.
-        for (const auto &pos : positions)
+    // If we are using electrostatic embedding, the work out the MM point charges and
+    // build the neighbour list.
+    if (not this->owner.getIsMechanical())
+    {
+        // Initialise a vector to hold the current positions and charges for the virtual
+        // point charges.
+        QVector<QVector<double>> xyz_virtual;
+        QVector<double> charges_virtual;
+
+        // Manually work out the MM point charges and build the neigbour list.
+        if (not this->is_neighbour_list or this->step_count % this->neighbour_list_frequency == 0)
         {
-            // Exclude QM atoms or link atoms, which are handled later.
-            if (not qm_atoms.contains(i) and
-                not mm1_to_mm2.contains(i) and
-                not mm2_atoms.contains(i))
+            // Clear the neighbour list.
+            if (this->is_neighbour_list)
+            {
+                this->neighbour_list.clear();
+            }
+
+            i = 0;
+            // Loop over all of the OpenMM positions.
+            for (const auto &pos : positions)
+            {
+                // Exclude QM atoms or link atoms, which are handled later.
+                if (not qm_atoms.contains(i) and
+                    not mm1_to_mm2.contains(i) and
+                    not mm2_atoms.contains(i))
+                {
+                    // Store the MM atom position in Sire Vector format.
+                    Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+
+                    // Loop over all of the QM atoms.
+                    for (const auto &qm_vec : xyz_qm_vec)
+                    {
+                        // Work out the distance between the current MM atom and QM atoms.
+                        const auto dist = space.calcDist(mm_vec, qm_vec);
+
+                        // The current MM atom is within the neighbour list cutoff.
+                        if (this->is_neighbour_list and dist < this->neighbour_list_cutoff)
+                        {
+                            // Insert the MM atom index into the neighbour list.
+                            this->neighbour_list.insert(i);
+                        }
+
+                        // The current MM atom is within the cutoff, add it.
+                        if (dist < cutoff)
+                        {
+                            // Work out the minimum image position with respect to the
+                            // reference position and add to the vector.
+                            mm_vec = space.getMinimumImage(mm_vec, center);
+                            xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
+
+                            // Add the charge and index.
+                            charges_mm.append(this->owner.getCharges()[i]);
+                            idx_mm.append(i);
+
+                            // Exit the inner loop.
+                            break;
+                        }
+                    }
+                }
+
+                // Update the atom index.
+                i++;
+            }
+        }
+        // Use the neighbour list.
+        else
+        {
+            // Loop over the MM atoms in the neighbour list.
+            for (const auto &idx : this->neighbour_list)
             {
                 // Store the MM atom position in Sire Vector format.
-                Vector mm_vec(10*pos[0], 10*pos[1], 10*pos[2]);
+                Vector mm_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
 
                 // Loop over all of the QM atoms.
                 for (const auto &qm_vec : xyz_qm_vec)
                 {
-                    // Work out the distance between the current MM atom and QM atoms.
-                    const auto dist = space.calcDist(mm_vec, qm_vec);
-
-                    // The current MM atom is within the neighbour list cutoff.
-                    if (this->is_neighbour_list and dist < this->neighbour_list_cutoff)
-                    {
-                        // Insert the MM atom index into the neighbour list.
-                        this->neighbour_list.insert(i);
-                    }
-
                     // The current MM atom is within the cutoff, add it.
-                    if (dist < cutoff)
+                    if (space.calcDist(mm_vec, qm_vec) < cutoff)
                     {
                         // Work out the minimum image position with respect to the
                         // reference position and add to the vector.
@@ -611,134 +659,101 @@ double PyQMForceImpl::computeForce(
                         xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
 
                         // Add the charge and index.
-                        charges_mm.append(this->owner.getCharges()[i]);
-                        idx_mm.append(i);
+                        charges_mm.append(this->owner.getCharges()[idx]);
+                        idx_mm.append(idx);
 
                         // Exit the inner loop.
                         break;
                     }
                 }
             }
-
-            // Update the atom index.
-            i++;
         }
-    }
-    // Use the neighbour list.
-    else
-    {
-        // Loop over the MM atoms in the neighbour list.
-        for (const auto &idx : this->neighbour_list)
+
+        // Handle link atoms via the Charge Shift method.
+        // See: https://www.ks.uiuc.edu/Research/qmmm
+        for (const auto &idx: mm1_to_mm2.keys())
         {
-            // Store the MM atom position in Sire Vector format.
-            Vector mm_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
+            // Get the QM atom to which the current MM atom is bonded.
+            const auto qm_idx = mm1_to_qm[idx];
 
-            // Loop over all of the QM atoms.
-            for (const auto &qm_vec : xyz_qm_vec)
+            // Store the MM1 position in Sire Vector format, along with the
+            // position of the QM atom to which it is bonded.
+            Vector mm1_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
+            Vector qm_vec(10*positions[qm_idx][0], 10*positions[qm_idx][1], 10*positions[qm_idx][2]);
+
+            // Work out the minimum image positions with respect to the reference position.
+            mm1_vec = space.getMinimumImage(mm1_vec, center);
+            qm_vec = space.getMinimumImage(qm_vec, center);
+
+            // Work out the position of the link atom. Here we use a bond length
+            // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
+            // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
+            // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
+            // and MM1 elements.
+            const auto link_vec = qm_vec + bond_scale_factors[idx]*(mm1_vec - qm_vec);
+
+            // Add to the QM positions.
+            xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
+
+            // Add the MM1 index to the QM atoms vector.
+            qm_atoms.append(qm_idx);
+
+            // Append a hydrogen element to the numbers vector.
+            numbers.append(1);
+
+            // Store the number of MM2 atoms.
+            const auto num_mm2 = mm1_to_mm2[idx].size();
+
+            // Store the fractional charge contribution to the MM2 atoms and
+            // virtual point charges.
+            const auto frac_charge = this->owner.getCharges()[idx] / num_mm2;
+
+            // Loop over the MM2 atoms and perform charge shifting. Here the MM1
+            // charge is redistributed over the MM2 atoms and two virtual point
+            // charges are added either side of the MM2 atoms in order to preserve
+            // the MM1-MM2 dipole.
+            for (const auto& mm2_idx : mm1_to_mm2[idx])
             {
-                // The current MM atom is within the cutoff, add it.
-                if (space.calcDist(mm_vec, qm_vec) < cutoff)
-                {
-                    // Work out the minimum image position with respect to the
-                    // reference position and add to the vector.
-                    mm_vec = space.getMinimumImage(mm_vec, center);
-                    xyz_mm.append(QVector<double>({mm_vec[0], mm_vec[1], mm_vec[2]}));
+                // Store the MM2 position in Sire Vector format.
+                Vector mm2_vec(10*positions[mm2_idx][0], 10*positions[mm2_idx][1], 10*positions[mm2_idx][2]);
 
-                    // Add the charge and index.
-                    charges_mm.append(this->owner.getCharges()[idx]);
-                    idx_mm.append(idx);
+                // Work out the minimum image position with respect to the reference position.
+                mm2_vec = space.getMinimumImage(mm2_vec, center);
 
-                    // Exit the inner loop.
-                    break;
-                }
+                // Add to the MM positions.
+                xyz_mm.append(QVector<double>({mm2_vec[0], mm2_vec[1], mm2_vec[2]}));
+
+                // Add the charge and index.
+                charges_mm.append(this->owner.getCharges()[mm2_idx] + frac_charge);
+                idx_mm.append(mm2_idx);
+
+                // Now add the virtual point charges.
+
+                // Compute the normal vector from the MM1 to MM2 atom.
+                const auto normal = (mm2_vec - mm1_vec).normalise();
+
+                // Positive direction. (Away from MM1 atom.)
+                auto xyz = mm2_vec + VIRTUAL_PC_DELTA*normal;
+                xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
+                charges_virtual.append(-frac_charge);
+
+                // Negative direction (Towards MM1 atom.)
+                xyz = mm2_vec - VIRTUAL_PC_DELTA*normal;
+                xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
+                charges_virtual.append(frac_charge);
             }
         }
-    }
 
-    // Handle link atoms via the Charge Shift method.
-    // See: https://www.ks.uiuc.edu/Research/qmmm
-    for (const auto &idx: mm1_to_mm2.keys())
-    {
-        // Get the QM atom to which the current MM atom is bonded.
-        const auto qm_idx = mm1_to_qm[idx];
+        // Store the current number of MM atoms.
+        num_mm = xyz_mm.size();
 
-        // Store the MM1 position in Sire Vector format, along with the
-        // position of the QM atom to which it is bonded.
-        Vector mm1_vec(10*positions[idx][0], 10*positions[idx][1], 10*positions[idx][2]);
-        Vector qm_vec(10*positions[qm_idx][0], 10*positions[qm_idx][1], 10*positions[qm_idx][2]);
-
-        // Work out the minimum image positions with respect to the reference position.
-        mm1_vec = space.getMinimumImage(mm1_vec, center);
-        qm_vec = space.getMinimumImage(qm_vec, center);
-
-        // Work out the position of the link atom. Here we use a bond length
-        // scale factor taken from the MM bond potential, i.e. R0(QM-L) / R0(QM-MM1),
-        // where R0(QM-L) is the equilibrium bond length for the QM and link (L)
-        // elements, and R0(QM-MM1) is the equilibrium bond length for the QM
-        // and MM1 elements.
-        const auto link_vec = qm_vec + bond_scale_factors[idx]*(mm1_vec - qm_vec);
-
-        // Add to the QM positions.
-        xyz_qm.append(QVector<double>({link_vec[0], link_vec[1], link_vec[2]}));
-
-        // Add the MM1 index to the QM atoms vector.
-        qm_atoms.append(qm_idx);
-
-        // Append a hydrogen element to the numbers vector.
-        numbers.append(1);
-
-        // Store the number of MM2 atoms.
-        const auto num_mm2 = mm1_to_mm2[idx].size();
-
-        // Store the fractional charge contribution to the MM2 atoms and
-        // virtual point charges.
-        const auto frac_charge = this->owner.getCharges()[idx] / num_mm2;
-
-        // Loop over the MM2 atoms and perform charge shifting. Here the MM1
-        // charge is redistributed over the MM2 atoms and two virtual point
-        // charges are added either side of the MM2 atoms in order to preserve
-        // the MM1-MM2 dipole.
-        for (const auto& mm2_idx : mm1_to_mm2[idx])
+        // If there are any virtual point charges, then add to the MM positions
+        // and charges.
+        if (xyz_virtual.size() > 0)
         {
-            // Store the MM2 position in Sire Vector format.
-            Vector mm2_vec(10*positions[mm2_idx][0], 10*positions[mm2_idx][1], 10*positions[mm2_idx][2]);
-
-            // Work out the minimum image position with respect to the reference position.
-            mm2_vec = space.getMinimumImage(mm2_vec, center);
-
-            // Add to the MM positions.
-            xyz_mm.append(QVector<double>({mm2_vec[0], mm2_vec[1], mm2_vec[2]}));
-
-            // Add the charge and index.
-            charges_mm.append(this->owner.getCharges()[mm2_idx] + frac_charge);
-            idx_mm.append(mm2_idx);
-
-            // Now add the virtual point charges.
-
-            // Compute the normal vector from the MM1 to MM2 atom.
-            const auto normal = (mm2_vec - mm1_vec).normalise();
-
-            // Positive direction. (Away from MM1 atom.)
-            auto xyz = mm2_vec + VIRTUAL_PC_DELTA*normal;
-            xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
-            charges_virtual.append(-frac_charge);
-
-            // Negative direction (Towards MM1 atom.)
-            xyz = mm2_vec - VIRTUAL_PC_DELTA*normal;
-            xyz_virtual.append(QVector<double>({xyz[0], xyz[1], xyz[2]}));
-            charges_virtual.append(frac_charge);
+            xyz_mm.append(xyz_virtual);
+            charges_mm.append(charges_virtual);
         }
-    }
-
-    // Store the current number of MM atoms.
-    const auto num_mm = xyz_mm.size();
-
-    // If there are any virtual point charges, then add to the MM positions
-    // and charges.
-    if (xyz_virtual.size() > 0)
-    {
-        xyz_mm.append(xyz_virtual);
-        charges_mm.append(charges_virtual);
     }
 
     // Call the callback.
@@ -852,11 +867,13 @@ PyQMEngine::PyQMEngine(
     QString name,
     SireUnits::Dimension::Length cutoff,
     int neighbour_list_frequency,
+    bool is_mechanical,
     double lambda) :
     ConcreteProperty<PyQMEngine, QMEngine>(),
     callback(py_object, name),
     cutoff(cutoff),
     neighbour_list_frequency(neighbour_list_frequency),
+    is_mechanical(is_mechanical),
     lambda(lambda)
 {
     // Register the serialization proxies.
@@ -880,6 +897,7 @@ PyQMEngine::PyQMEngine(const PyQMEngine &other) :
     callback(other.callback),
     cutoff(other.cutoff),
     neighbour_list_frequency(other.neighbour_list_frequency),
+    is_mechanical(other.is_mechanical),
     lambda(other.lambda),
     atoms(other.atoms),
     mm1_to_qm(other.mm1_to_qm),
@@ -959,6 +977,16 @@ void PyQMEngine::setNeighbourListFrequency(int neighbour_list_frequency)
         neighbour_list_frequency = 0;
     }
     this->neighbour_list_frequency = neighbour_list_frequency;
+}
+
+bool PyQMEngine::getIsMechanical() const
+{
+    return this->is_mechanical;
+}
+
+void PyQMEngine::setIsMechanical(bool is_mechanical)
+{
+    this->is_mechanical = is_mechanical;
 }
 
 QVector<int> PyQMEngine::getAtoms() const
@@ -1044,6 +1072,7 @@ QMForce* PyQMEngine::createForce() const
         this->callback,
         this->cutoff,
         this->neighbour_list_frequency,
+        this->is_mechanical,
         this->lambda,
         this->atoms,
         this->mm1_to_qm,

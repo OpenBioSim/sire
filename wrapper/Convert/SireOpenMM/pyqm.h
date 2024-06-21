@@ -154,6 +154,9 @@ namespace SireOpenMM
                 The frequency at which the neighbour list is updated. (Number of steps.)
                 If zero, then no neighbour list is used.
 
+            \param is_mechanical
+                A flag to indicate if mechanical embedding is being used.
+
             \param lambda
                 The lambda weighting factor. This can be used to interpolate between
                 potentials for end-state correction calculations.
@@ -189,6 +192,7 @@ namespace SireOpenMM
             PyQMCallback callback,
             SireUnits::Dimension::Length cutoff,
             int neighbour_list_frequency,
+            bool is_mechanical,
             double lambda,
             QVector<int> atoms,
             QMap<int, int> mm1_to_qm,
@@ -240,6 +244,12 @@ namespace SireOpenMM
                 The neighbour list frequency.
          */
         int getNeighbourListFrequency() const;
+
+        //! Get the mechanical embedding flag.
+        /*! \returns
+                A flag to indicate if mechanical embedding is being used.
+         */
+        bool getIsMechanical() const;
 
         //! Get the indices of the atoms in the QM region.
         /*! \returns
@@ -326,6 +336,7 @@ namespace SireOpenMM
         PyQMCallback callback;
         SireUnits::Dimension::Length cutoff;
         int neighbour_list_frequency;
+        bool is_mechanical;
         double lambda;
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;
@@ -382,6 +393,9 @@ namespace SireOpenMM
                 The frequency at which the neighbour list is updated. (Number of steps.)
                 If zero, then no neighbour list is used.
 
+            \param is_mechanical
+                A flag to indicate if mechanical embedding is being used.
+
             \param lambda
                 The lambda weighting factor. This can be used to interpolate between
                 potentials for end-state correction calculations.
@@ -391,6 +405,7 @@ namespace SireOpenMM
             QString method="",
             SireUnits::Dimension::Length cutoff=7.5*SireUnits::angstrom,
             int neighbour_list_frequency=20,
+            bool is_mechanical=false,
             double lambda=1.0
         );
 
@@ -447,6 +462,18 @@ namespace SireOpenMM
                 The neighbour list frequency.
          */
         void setNeighbourListFrequency(int neighbour_list_frequency);
+
+        //! Get the mechanical embedding flag.
+        /*! \returns
+                A flag to indicate if mechanical embedding is being used.
+         */
+        bool getIsMechanical() const;
+
+        //! Set the mechanical embedding flag.
+        /*! \param is_mechanical
+                A flag to indicate if mechanical embedding is being used.
+         */
+        void setIsMechanical(bool is_mechanical);
 
         //! Get the indices of the atoms in the QM region.
         /*! \returns
@@ -570,6 +597,7 @@ namespace SireOpenMM
         PyQMCallback callback;
         SireUnits::Dimension::Length cutoff;
         int neighbour_list_frequency;
+        bool is_mechanical;
         double lambda;
         QVector<int> atoms;
         QMap<int, int> mm1_to_qm;

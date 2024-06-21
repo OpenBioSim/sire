@@ -157,6 +157,7 @@ def emle(
         "_sire_callback",
         cutoff,
         neighbourlist_update_frequency,
+        False,
     )
 
     from ._utils import (
@@ -184,7 +185,7 @@ def emle(
     )
 
     # Create the merged molecule.
-    qm_mols = _create_merged_mols(qm_mol_to_atoms, mm1_indices, map)
+    qm_mols = _create_merged_mols(qm_mol_to_atoms, mm1_indices, False, map)
 
     # Update the molecule in the system.
     mols.update(qm_mols)
