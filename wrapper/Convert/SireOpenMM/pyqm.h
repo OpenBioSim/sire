@@ -86,8 +86,12 @@ namespace SireOpenMM
                 The name of a callback method that take the following arguments:
                     - numbers_qm: A list of atomic numbers for the atoms in the ML region.
                     - charges_mm: A list of the MM charges in mod electron charge.
-                    - xyz_qm: A vector of positions for the atoms in the ML region in Angstrom.
-                    - xyz_mm: A vector of positions for the atoms in the MM region in Angstrom.
+                    - xyz_qm: A list of positions for the atoms in the ML region in Angstrom.
+                    - xyz_mm: A list of positions for the atoms in the MM region in Angstrom.
+                The callback shoul return a tuple containing:
+                    - The energy in kJ/mol.
+                    - A list of forces for the QM atoms in kJ/mol/nm.
+                    - A list of forces for the MM atoms in kJ/mol/nm.
                 If empty, then the object is assumed to be a callable.
          */
         PyQMCallback(bp::object, QString name="");

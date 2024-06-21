@@ -40,7 +40,16 @@ def create_engine(
 
     callback : str, optional, default=None
         The name of the callback. If None, then the py_object is assumed to
-        be a callable, i.e. it is itself the callback.
+        be a callable, i.e. it is itself the callback. The callback should
+        take the following arguments:
+            - numbers_qm: A list of atomic numbers for the atoms in the QM region.
+            - charges_mm: A list of the MM charges in mod electron charge.
+            - xyz_qm: A list of positions for the atoms in the QM region in Angstrom.
+            - xyz_mm: A list of positions for the atoms in the MM region in Angstrom.
+        In addition, it should return a tuple containing the following:
+            - energy: The QM energy in kJ/mol.
+            - forces_qm: A list of forces on the atoms in the QM region in kJ/mol/nm.
+            - forces_mm: A list of forces on the atoms in the MM region in kJ/mol/nm.
 
     cutoff : str or sire.legacy.Units.GeneralUnit, optional, default="7.5A"
         The cutoff to use for the QM/MM calculation.
@@ -114,7 +123,7 @@ def create_engine(
             raise TypeError("'map' must be of type 'dict'")
     map = _create_map(map)
 
-    # Create the EMLE engine.
+    # Create the QM engine.
     engine = _Convert.PyQMEngine(
         py_object,
         callback,
