@@ -6,55 +6,51 @@ from .. import use_new_api as _use_new_api
 
 _use_new_api()
 
-_PyQMEngine = _Convert._SireOpenMM.PyQMEngine
 
+class EMLEEngine(_Convert._SireOpenMM.PyQMEngine):
+    """A class to enable use of EMLE as a QM engine."""
 
-# Monkey-patch to get the underlying OpenMM force of the EMLE engine.
-def _get_openmm_forces(self):
-    """
-    Get the OpenMM forces for this engine. The first force is the actual
-    EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
-    embedding force. The second is a null CustomBondForce that can be used to
-    add a "lambda_emle" global parameter to a context to allow the force to be
-    scaled.
+    def get_forces(self):
+        """
+        Get the OpenMM forces for this engine. The first force is the actual
+        EMLE force, which uses a CustomCPPForceImpl to calculate the electrostatic
+        embedding force. The second is a null CustomBondForce that can be used to
+        add a "lambda_emle" global parameter to a context to allow the force to be
+        scaled.
 
-    Returns
-    -------
+        Returns
+        -------
 
-    emle_force : openmm.Force
-        The EMLE force object to compute the electrostatic embedding force.
+        emle_force : openmm.Force
+            The EMLE force object to compute the electrostatic embedding force.
 
-    interpolation_force : openmm.CustomBondForce
-        A null CustomBondForce object that can be used to add a "lambda_emle"
-        global parameter to an OpenMM context. This allows the electrostatic
-        embedding force to be scaled.
-    """
+        interpolation_force : openmm.CustomBondForce
+            A null CustomBondForce object that can be used to add a "lambda_emle"
+            global parameter to an OpenMM context. This allows the electrostatic
+            embedding force to be scaled.
+        """
 
-    from copy import deepcopy as _deepcopy
-    from openmm import CustomBondForce as _CustomBondForce
+        from copy import deepcopy as _deepcopy
+        from openmm import CustomBondForce as _CustomBondForce
 
-    # Create a dynamics object for the QM region.
-    d = self._mols["property is_perturbable"].dynamics(
-        timestep="1fs",
-        constraint="none",
-        platform="cpu",
-        qm_engine=self,
-    )
+        # Create a dynamics object for the QM region.
+        d = self._mols["property is_perturbable"].dynamics(
+            timestep="1fs",
+            constraint="none",
+            platform="cpu",
+            qm_engine=self,
+        )
 
-    # Get the OpenMM EMLE force.
-    emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
+        # Get the OpenMM EMLE force.
+        emle_force = _deepcopy(d._d._omm_mols.getSystem().getForce(0))
 
-    # Create a null CustomBondForce to add the EMLE interpolation
-    # parameter.
-    interpolation_force = _CustomBondForce("")
-    interpolation_force.addGlobalParameter("lambda_emle", 1.0)
+        # Create a null CustomBondForce to add the EMLE interpolation
+        # parameter.
+        interpolation_force = _CustomBondForce("")
+        interpolation_force.addGlobalParameter("lambda_emle", 1.0)
 
-    # Return the forces.
-    return emle_force, interpolation_force
-
-
-# Bind the monkey-patched function to the PyQMEngine.
-_PyQMEngine.get_forces = _get_openmm_forces
+        # Return the forces.
+        return emle_force, interpolation_force
 
 
 def emle(
@@ -97,7 +93,7 @@ def emle(
     Returns
     -------
 
-    engine : sire.legacy.Convert._SireOpenMM.PyQMEngine
+    engine : sire.qm.EMLEEngine
         The EMLE engine object.
     """
 
@@ -160,7 +156,7 @@ def emle(
     map = _create_map(map)
 
     # Create the EMLE engine.
-    engine = _PyQMEngine(
+    engine = EMLEEngine(
         calculator,
         "_sire_callback",
         cutoff,
