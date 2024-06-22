@@ -828,6 +828,7 @@ if __name__ == "__main__":
             define_symbols=[
                 "GCCXML_PARSE",
                 "__PIC__",
+                "QT_NO_SIGNALS_SLOTS_KEYWORDS=1",
                 "SIRE_ALWAYS_INLINE=inline",
                 "SIRE_SKIP_INLINE_FUNCTIONS",
                 "SIREN_SKIP_INLINE_FUNCTIONS",
@@ -854,6 +855,7 @@ if __name__ == "__main__":
             define_symbols=[
                 "GCCXML_PARSE",
                 "__PIC__",
+                "QT_NO_SIGNALS_SLOTS_KEYWORDS=1",
                 "SIRE_USE_OPENMM",
                 "SIRE_ALWAYS_INLINE=inline",
                 "SIRE_SKIP_INLINE_FUNCTIONS",

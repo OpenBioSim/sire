@@ -16,6 +16,7 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 -----------------------------------------------------------------------------------------
 
 * Correctly set the ``element1`` property in ``sire.morph.create_from_pertfile``.
+
 * Added mising :meth:`~sire.vol.TriclinicBox.maximum_cutoff` method so that
   the cutoff is set correctly when creating a :obj:`~sire.system.ForceFieldInfo`
   object.
@@ -42,11 +43,17 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
   standard trajectory save functions, e.g.
   ``sire.save(mols.trajectory(), "output", format=["PRMTOP", "RST"])``.
 
+* Added code that automatically excludes non-bonded interactions between
+  from_ghost and to_ghost atoms in the OpenMM layer. This is to prevent
+  crashes caused by poor interactions between from_ghost atoms appearing
+  over the top of to_ghost atoms during a perturbation where one group
+  is grown over another.
+
 * Ignore BioSimSpace format position restraint include directives when
   parsing GROMACS topology files.
 
-* Add a map option to prevent perturbation of the Lennard-Jones sigma
-  parameter for ghost atoms during alchemical free energy simulations.
+* Added a map option (fix_perturbable_zero_sigmas) to prevent perturbation of
+  the Lennard-Jones sigma parameter for ghost atoms during alchemical free energy simulations.
 
 * Please add an item to this changelog when you create your PR
 

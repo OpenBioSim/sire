@@ -79,6 +79,9 @@ namespace SireOpenMM
 
         bool isGhostAtom(int atom) const;
 
+        int nAtoms() const;
+        int nGhostAtoms() const;
+
         boost::tuple<int, int, double, double, double>
         getException(int atom0, int atom1,
                      int start_index,
