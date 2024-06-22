@@ -52,8 +52,8 @@ organisation on `GitHub <https://github.com/openbiosim/sire>`__.
 * Ignore BioSimSpace format position restraint include directives when
   parsing GROMACS topology files.
 
-* Add a map option to prevent perturbation of the Lennard-Jones sigma
-  parameter for ghost atoms during alchemical free energy simulations.
+* Added a map option (fix_perturbable_zero_sigmas) to prevent perturbation of
+  the Lennard-Jones sigma parameter for ghost atoms during alchemical free energy simulations.
 
 * Please add an item to this changelog when you create your PR
 

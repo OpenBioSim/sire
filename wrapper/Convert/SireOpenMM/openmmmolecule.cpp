@@ -2222,12 +2222,12 @@ PerturbableOpenMMMolecule::PerturbableOpenMMMolecule(const OpenMMMolecule &mol,
 
         for (int i = 0; i < nats; ++i)
         {
-            if (std::abs(sig0_data[i]) < 1e-9)
+            if (std::abs(sig0_data[i]) <= 1e-9)
             {
                 sig0[i] = sig1_data[i];
                 sig0_data = sig0.constData();
             }
-            else if (std::abs(sig1_data[i] < 1e-9))
+            else if (std::abs(sig1_data[i] <= 1e-9))
             {
                 sig1[i] = sig0_data[i];
                 sig1_data = sig1.constData();
