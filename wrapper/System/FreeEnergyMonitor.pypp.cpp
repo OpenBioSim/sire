@@ -43,6 +43,8 @@ namespace bp = boost::python;
 
 SireSystem::FreeEnergyMonitor __copy__(const SireSystem::FreeEnergyMonitor &other){ return SireSystem::FreeEnergyMonitor(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -446,9 +448,9 @@ void register_FreeEnergyMonitor_class(){
         }
         FreeEnergyMonitor_exposer.staticmethod( "merge" );
         FreeEnergyMonitor_exposer.staticmethod( "typeName" );
-        FreeEnergyMonitor_exposer.def( "__copy__", &__copy__);
-        FreeEnergyMonitor_exposer.def( "__deepcopy__", &__copy__);
-        FreeEnergyMonitor_exposer.def( "clone", &__copy__);
+        FreeEnergyMonitor_exposer.def( "__copy__", &__copy__<SireSystem::FreeEnergyMonitor>);
+        FreeEnergyMonitor_exposer.def( "__deepcopy__", &__copy__<SireSystem::FreeEnergyMonitor>);
+        FreeEnergyMonitor_exposer.def( "clone", &__copy__<SireSystem::FreeEnergyMonitor>);
         FreeEnergyMonitor_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::FreeEnergyMonitor >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         FreeEnergyMonitor_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::FreeEnergyMonitor >,

@@ -76,6 +76,8 @@ namespace bp = boost::python;
 
 SireSystem::System __copy__(const SireSystem::System &other){ return SireSystem::System(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -1370,6 +1372,32 @@ void register_System_class(){
                 , "" );
         
         }
+        { //::SireSystem::System::makeWhole
+        
+            typedef void ( ::SireSystem::System::*makeWhole_function_type)( ::SireMaths::Vector const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireSystem::System::makeWhole );
+            
+            System_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
+        { //::SireSystem::System::makeWhole
+        
+            typedef void ( ::SireSystem::System::*makeWhole_function_type)( ::SireMaths::Vector const &,::SireBase::PropertyMap const & ) ;
+            makeWhole_function_type makeWhole_function_value( &::SireSystem::System::makeWhole );
+            
+            System_exposer.def( 
+                "makeWhole"
+                , makeWhole_function_value
+                , ( bp::arg("center"), bp::arg("map") )
+                , bp::release_gil_policy()
+                , "" );
+        
+        }
         { //::SireSystem::System::monitor
         
             typedef ::SireSystem::SystemMonitor const & ( ::SireSystem::System::*monitor_function_type)( ::SireSystem::MonitorID const & ) const;
@@ -2622,9 +2650,9 @@ void register_System_class(){
         }
         System_exposer.staticmethod( "null" );
         System_exposer.staticmethod( "typeName" );
-        System_exposer.def( "__copy__", &__copy__);
-        System_exposer.def( "__deepcopy__", &__copy__);
-        System_exposer.def( "clone", &__copy__);
+        System_exposer.def( "__copy__", &__copy__<SireSystem::System>);
+        System_exposer.def( "__deepcopy__", &__copy__<SireSystem::System>);
+        System_exposer.def( "clone", &__copy__<SireSystem::System>);
         System_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::System >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         System_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::System >,

@@ -64,6 +64,8 @@ namespace bp = boost::python;
 
 SireSystem::PolariseChargesFF __copy__(const SireSystem::PolariseChargesFF &other){ return SireSystem::PolariseChargesFF(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -184,9 +186,9 @@ void register_PolariseChargesFF_class(){
         
         }
         PolariseChargesFF_exposer.staticmethod( "typeName" );
-        PolariseChargesFF_exposer.def( "__copy__", &__copy__);
-        PolariseChargesFF_exposer.def( "__deepcopy__", &__copy__);
-        PolariseChargesFF_exposer.def( "clone", &__copy__);
+        PolariseChargesFF_exposer.def( "__copy__", &__copy__<SireSystem::PolariseChargesFF>);
+        PolariseChargesFF_exposer.def( "__deepcopy__", &__copy__<SireSystem::PolariseChargesFF>);
+        PolariseChargesFF_exposer.def( "clone", &__copy__<SireSystem::PolariseChargesFF>);
         PolariseChargesFF_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::PolariseChargesFF >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         PolariseChargesFF_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::PolariseChargesFF >,

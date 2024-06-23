@@ -21,6 +21,8 @@ namespace bp = boost::python;
 
 SireID::Specify<SireSystem::SysID> __copy__(const SireID::Specify<SireSystem::SysID> &other){ return SireID::Specify<SireSystem::SysID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -214,9 +216,9 @@ void register_Specify_SysID__class(){
         
         }
         Specify_SysID__exposer.staticmethod( "typeName" );
-        Specify_SysID__exposer.def( "__copy__", &__copy__);
-        Specify_SysID__exposer.def( "__deepcopy__", &__copy__);
-        Specify_SysID__exposer.def( "clone", &__copy__);
+        Specify_SysID__exposer.def( "__copy__", &__copy__<SireID::Specify<SireSystem::SysID>>);
+        Specify_SysID__exposer.def( "__deepcopy__", &__copy__<SireID::Specify<SireSystem::SysID>>);
+        Specify_SysID__exposer.def( "clone", &__copy__<SireID::Specify<SireSystem::SysID>>);
         Specify_SysID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::Specify<SireSystem::SysID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Specify_SysID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::Specify<SireSystem::SysID> >,
