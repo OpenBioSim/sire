@@ -4,7 +4,7 @@ import tempfile
 
 from sire.legacy.Convert import PyQMCallback
 
-from sire.qm import emle
+import sire as sr
 
 try:
     from emle.calculator import EMLECalculator
@@ -190,7 +190,7 @@ def test_emle_interpolate(ala_mols, selection):
     nrg_mm = d.current_potential_energy()
 
     # Create an EMLE engine bound to the calculator.
-    mols, engine = emle(mols, selection, calculator)
+    mols, engine = sr.qm.emle(mols, selection, calculator)
 
     # Create a QM/MM capable dynamics object.
     d = mols.dynamics(
@@ -234,7 +234,7 @@ def test_emle_openmm_ml(ala_mols):
     calculator = EMLECalculator(backend="torchani", device="cpu")
 
     # Create an EMLE engine bound to the calculator.
-    emle_mols, engine = emle(mols, mols[0], calculator)
+    emle_mols, engine = sr.qm.emle(mols, mols[0], calculator)
 
     # Create a QM/MM capable dynamics object.
     d = emle_mols.dynamics(
@@ -254,7 +254,7 @@ def test_emle_openmm_ml(ala_mols):
         calculator = EMLECalculator(backend=None, device="cpu")
 
         # Create an EMLE engine bound to the calculator.
-        emle_mols, engine = emle(mols, mols[0], calculator)
+        emle_mols, engine = sr.qm.emle(mols, mols[0], calculator)
 
         # The first molecule (the dipeptide) is the QM region. This is
         # perturbable and can be interpolated between MM (the reference state)
@@ -326,9 +326,6 @@ def test_emle_indirect(ala_mols):
     setup for EMLE engines.
     """
 
-    import openmm
-    import sire as sr
-
     # Create a local copy of the test system.
     mols = ala_mols.clone()
 
@@ -352,3 +349,42 @@ def test_emle_indirect(ala_mols):
 
     # Get the potential energy. This will fail if the callback can't be found.
     d.current_potential_energy()
+
+
+def test_create_engine(ala_mols):
+    """
+    Make sure that a QM/MM engine can be created and used via a simple callback
+    function.
+    """
+
+    # A test callback function. Returns a known energy and dummy forces.
+    def callback(numbers_qm, charges_mm, xyz_qm, xyz_mm):
+        return (42, xyz_qm, xyz_mm)
+
+    # Create a local copy of the test system.
+    mols = ala_mols.clone()
+
+    # Create a QM engine bound to the callback.
+    qm_mols, engine = sr.qm.create_engine(
+        mols,
+        mols[0],
+        callback,
+        callback=None,
+    )
+
+    # Create a QM/MM capable dynamics object for the QM molecule only.
+    d = qm_mols[0].dynamics(
+        timestep="1fs",
+        constraint="none",
+        qm_engine=engine,
+        cutoff_type="pme",
+        cutoff="7.5 A",
+        platform="cpu",
+    )
+
+    # Get the potential energy. This should equal the value returned by the
+    # callback, i.e. 42.
+    nrg = d.current_potential_energy().to("kJ_per_mol")
+
+    # Make sure the energy is correct.
+    assert nrg == 42
