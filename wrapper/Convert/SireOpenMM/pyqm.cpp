@@ -160,24 +160,44 @@ PyQMCallback::call(
 
     if (this->is_method)
     {
-        return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
-            this->py_object.ptr(),
-            this->name.toStdString().c_str(),
-            numbers_qm,
-            charges_mm,
-            xyz_qm,
-            xyz_mm
-        );
+        try
+        {
+            return bp::call_method<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
+                this->py_object.ptr(),
+                this->name.toStdString().c_str(),
+                numbers_qm,
+                charges_mm,
+                xyz_qm,
+                xyz_mm
+            );
+        }
+        catch (const bp::error_already_set &)
+        {
+            PyErr_Print();
+            throw SireError::process_error(QObject::tr(
+                "An error occurred when calling the QM Python callback method"),
+                CODELOC);
+        }
     }
     else
     {
-        return bp::call<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
-            this->py_object.ptr(),
-            numbers_qm,
-            charges_mm,
-            xyz_qm,
-            xyz_mm
-        );
+        try
+        {
+            return bp::call<boost::tuple<double, QVector<QVector<double>>, QVector<QVector<double>>>>(
+                this->py_object.ptr(),
+                numbers_qm,
+                charges_mm,
+                xyz_qm,
+                xyz_mm
+            );
+        }
+        catch (const bp::error_already_set &)
+        {
+            PyErr_Print();
+            throw SireError::process_error(QObject::tr(
+                "An error occurred when calling the QM Python callback method"),
+                CODELOC);
+        }
     }
 }
 
