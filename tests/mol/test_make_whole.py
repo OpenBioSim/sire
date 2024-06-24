@@ -59,9 +59,7 @@ def test_auto_make_whole_on_load_frame(wrapped_mols):
 
 
 def test_auto_make_whole_on_load():
-    mols = sr.load_test_files(
-        "wrapped.rst7", "wrapped.prm7", map={"make_whole": True}
-    )
+    mols = sr.load_test_files("wrapped.rst7", "wrapped.prm7", map={"make_whole": True})
 
     _assert_correct_com(mols[0].evaluate().center_of_mass())
 
@@ -84,3 +82,19 @@ def test_auto_make_whole_on_load_no_breakage(kigaki_mols):
         kigaki_mols[0].evaluate().center_of_mass()
         == mols[0].evaluate().center_of_mass()
     )
+
+
+def test_make_whole_center_args(ala_mols):
+    mols = ala_mols
+
+    c = mols[0].cursor()
+    c.make_whole(center="origin")
+
+    c = mols.cursor()
+    c.make_whole(center=0)
+
+    c = mols[0].atoms().cursor()
+    c.make_whole(center=(1, 2, 3))
+
+    mols = mols.clone()
+    mols.make_whole(center=("1A", "2A", "3A"))

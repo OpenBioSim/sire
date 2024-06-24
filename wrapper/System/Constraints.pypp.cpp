@@ -36,6 +36,8 @@ namespace bp = boost::python;
 
 SireSystem::Constraints __copy__(const SireSystem::Constraints &other){ return SireSystem::Constraints(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -271,9 +273,9 @@ void register_Constraints_class(){
         
         }
         Constraints_exposer.staticmethod( "typeName" );
-        Constraints_exposer.def( "__copy__", &__copy__);
-        Constraints_exposer.def( "__deepcopy__", &__copy__);
-        Constraints_exposer.def( "clone", &__copy__);
+        Constraints_exposer.def( "__copy__", &__copy__<SireSystem::Constraints>);
+        Constraints_exposer.def( "__deepcopy__", &__copy__<SireSystem::Constraints>);
+        Constraints_exposer.def( "clone", &__copy__<SireSystem::Constraints>);
         Constraints_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::Constraints >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         Constraints_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::Constraints >,

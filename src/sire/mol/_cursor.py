@@ -2624,7 +2624,7 @@ class Cursors:
 
         return self
 
-    def make_whole(self, *args, map=None):
+    def make_whole(self, center=None, map=None):
         """
         Make all of the atoms operated on by this cursor whole
         (they won't be broken across a periodic box boundary)
@@ -2634,7 +2634,7 @@ class Cursors:
         which they should be wrapped.
         """
         for cursor in self._cursors:
-            cursor.make_whole(*args, map=map)
+            cursor.make_whole(center=center, map=map)
 
         return self
 
@@ -3779,7 +3779,7 @@ class CursorsM:
 
         return self
 
-    def make_whole(self, *args, map=None):
+    def make_whole(self, center=None, map=None):
         """
         Make all of the atoms operated on by this cursor whole
         (they won't be broken across a periodic box boundary)
@@ -3789,7 +3789,7 @@ class CursorsM:
         which they should be wrapped.
         """
         for cursor in self._cursors:
-            cursor.make_whole(*args, map=map)
+            cursor.make_whole(center=center, map=map)
 
         return self
 

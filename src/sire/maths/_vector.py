@@ -237,6 +237,13 @@ class Vector(_Vector):
     """
 
     def __init__(self, *args, **kwargs):
+        if len(args) == 1:
+            # check for "zero" or "origin"
+            arg0 = str(args[0]).strip().lower()
+
+            if arg0 == "zero" or arg0 == "origin":
+                args = [0.0, 0.0, 0.0]
+
         from ..units import angstrom
         from .. import u
 

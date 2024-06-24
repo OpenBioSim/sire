@@ -23,6 +23,8 @@ namespace bp = boost::python;
 
 SireID::IDOrSet<SireSystem::MonitorID> __copy__(const SireID::IDOrSet<SireSystem::MonitorID> &other){ return SireID::IDOrSet<SireSystem::MonitorID>(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -167,9 +169,9 @@ void register_IDOrSet_MonitorID__class(){
         
         }
         IDOrSet_MonitorID__exposer.staticmethod( "typeName" );
-        IDOrSet_MonitorID__exposer.def( "__copy__", &__copy__);
-        IDOrSet_MonitorID__exposer.def( "__deepcopy__", &__copy__);
-        IDOrSet_MonitorID__exposer.def( "clone", &__copy__);
+        IDOrSet_MonitorID__exposer.def( "__copy__", &__copy__<SireID::IDOrSet<SireSystem::MonitorID>>);
+        IDOrSet_MonitorID__exposer.def( "__deepcopy__", &__copy__<SireID::IDOrSet<SireSystem::MonitorID>>);
+        IDOrSet_MonitorID__exposer.def( "clone", &__copy__<SireID::IDOrSet<SireSystem::MonitorID>>);
         IDOrSet_MonitorID__exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireID::IDOrSet<SireSystem::MonitorID> >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         IDOrSet_MonitorID__exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireID::IDOrSet<SireSystem::MonitorID> >,

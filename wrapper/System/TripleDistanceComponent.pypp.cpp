@@ -26,6 +26,8 @@ namespace bp = boost::python;
 
 SireSystem::TripleDistanceComponent __copy__(const SireSystem::TripleDistanceComponent &other){ return SireSystem::TripleDistanceComponent(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -217,9 +219,9 @@ void register_TripleDistanceComponent_class(){
         TripleDistanceComponent_exposer.staticmethod( "r23" );
         TripleDistanceComponent_exposer.staticmethod( "r45" );
         TripleDistanceComponent_exposer.staticmethod( "typeName" );
-        TripleDistanceComponent_exposer.def( "__copy__", &__copy__);
-        TripleDistanceComponent_exposer.def( "__deepcopy__", &__copy__);
-        TripleDistanceComponent_exposer.def( "clone", &__copy__);
+        TripleDistanceComponent_exposer.def( "__copy__", &__copy__<SireSystem::TripleDistanceComponent>);
+        TripleDistanceComponent_exposer.def( "__deepcopy__", &__copy__<SireSystem::TripleDistanceComponent>);
+        TripleDistanceComponent_exposer.def( "clone", &__copy__<SireSystem::TripleDistanceComponent>);
         TripleDistanceComponent_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::TripleDistanceComponent >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         TripleDistanceComponent_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::TripleDistanceComponent >,

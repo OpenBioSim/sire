@@ -30,6 +30,8 @@ namespace bp = boost::python;
 
 SireSystem::SpaceWrapper __copy__(const SireSystem::SpaceWrapper &other){ return SireSystem::SpaceWrapper(other); }
 
+#include "Helpers/copy.hpp"
+
 #include "Qt/qdatastream.hpp"
 
 #include "Helpers/str.hpp"
@@ -108,9 +110,9 @@ void register_SpaceWrapper_class(){
         
         }
         SpaceWrapper_exposer.staticmethod( "typeName" );
-        SpaceWrapper_exposer.def( "__copy__", &__copy__);
-        SpaceWrapper_exposer.def( "__deepcopy__", &__copy__);
-        SpaceWrapper_exposer.def( "clone", &__copy__);
+        SpaceWrapper_exposer.def( "__copy__", &__copy__<SireSystem::SpaceWrapper>);
+        SpaceWrapper_exposer.def( "__deepcopy__", &__copy__<SireSystem::SpaceWrapper>);
+        SpaceWrapper_exposer.def( "clone", &__copy__<SireSystem::SpaceWrapper>);
         SpaceWrapper_exposer.def( "__rlshift__", &__rlshift__QDataStream< ::SireSystem::SpaceWrapper >,
                             bp::return_internal_reference<1, bp::with_custodian_and_ward<1,2> >() );
         SpaceWrapper_exposer.def( "__rrshift__", &__rrshift__QDataStream< ::SireSystem::SpaceWrapper >,

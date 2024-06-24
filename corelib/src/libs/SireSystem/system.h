@@ -443,6 +443,10 @@ namespace SireSystem
         void makeWhole();
         void makeWhole(const SireBase::PropertyMap &map);
 
+        void makeWhole(const SireMaths::Vector &center);
+        void makeWhole(const SireMaths::Vector &center,
+                       const SireBase::PropertyMap &map);
+
         static const System &null();
 
     protected:

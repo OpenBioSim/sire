@@ -27,6 +27,7 @@
 #include "distancecomponent.h"
 #include "closemols.h"
 #include "system.h"
+#include "systemtrajectory.h"
 #include "monitorproperty.h"
 #include "volmapmonitor.h"
 #include "monitorname.h"
@@ -74,6 +75,8 @@ void register_SireSystem_objects()
     ObjectRegistry::registerConverterFor< SireSystem::TripleDistanceComponent >();
     ObjectRegistry::registerConverterFor< SireSystem::CloseMols >();
     ObjectRegistry::registerConverterFor< SireSystem::System >();
+    ObjectRegistry::registerConverterFor< SireSystem::SystemTrajectory >();
+    ObjectRegistry::registerConverterFor< SireSystem::MolSystemTrajectory >();
     ObjectRegistry::registerConverterFor< SireSystem::MonitorProperty >();
     ObjectRegistry::registerConverterFor< SireSystem::VolMapMonitor >();
     ObjectRegistry::registerConverterFor< SireSystem::MonitorName >();

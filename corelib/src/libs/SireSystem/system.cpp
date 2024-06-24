@@ -4162,6 +4162,65 @@ void System::makeWhole()
     this->makeWhole(PropertyMap());
 }
 
+void System::makeWhole(const Vector &center, const PropertyMap &map)
+{
+    if (this->needsAccepting())
+    {
+        this->accept();
+    }
+
+    if (not this->containsProperty(map["space"]))
+        return;
+
+    if (not this->property(map["space"]).isA<Space>())
+        return;
+
+    const auto &space = this->property(map["space"]).asA<Space>();
+
+    if (not space.isPeriodic())
+        return;
+
+    PropertyMap m = map;
+    m.set("space", space);
+
+    // get a list of all molecules in the system
+    const SelectorMol mols(*this);
+
+    SelectorMol changed_mols;
+
+    for (const auto &mol : mols)
+    {
+        auto new_mol = mol.move().makeWhole(center, m).commit();
+
+        if (new_mol.data().version() != mol.data().version())
+        {
+            changed_mols.append(new_mol);
+        }
+    }
+
+    if (not changed_mols.isEmpty())
+    {
+        Delta delta(*this, true);
+
+        // this ensures that only a single copy of System is used - prevents
+        // unnecessary copying
+        this->operator=(System());
+        delta.update(changed_mols.toMolecules());
+        this->operator=(delta.apply());
+
+        if (this->needsAccepting())
+        {
+            delta = Delta();
+            this->accept();
+        }
+    }
+}
+
+void System::makeWhole(const Vector &center)
+{
+    this->makeWhole(center, PropertyMap());
+}
+
 const char *System::typeName()
 {
     return QMetaType::typeName(qMetaTypeId<System>());
